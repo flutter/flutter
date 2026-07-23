@@ -103,6 +103,56 @@ typedef EditableTextContextMenuBuilder =
 // [TextPosition] after applying the given [TextBoundary].
 typedef _ApplyTextBoundary = TextPosition Function(TextPosition, bool, TextBoundary);
 
+// Converts a code-unit offset in [text] to the corresponding grapheme-cluster
+// index. Used to map original-text cursor positions to obscured bullet positions.
+int _codeUnitOffsetToGraphemeIndex(String text, int codeUnitOffset) {
+  if (codeUnitOffset < 0) {
+    return codeUnitOffset; // preserve invalid sentinel values (e.g. -1)
+  }
+  if (codeUnitOffset == 0) {
+    return 0;
+  }
+  if (codeUnitOffset >= text.length) {
+    return text.characters.length;
+  }
+  return text.substring(0, codeUnitOffset).characters.length;
+}
+
+// Converts a grapheme-cluster index in [text] to the corresponding code-unit
+// offset. Used to map obscured bullet positions back to original-text offsets.
+int _graphemeIndexToCodeUnitOffset(String text, int graphemeIndex) {
+  if (graphemeIndex <= 0) {
+    return 0;
+  }
+  var offset = 0;
+  final List<String> characters = text.characters.toList();
+  for (var i = 0; i < characters.length; i++) {
+    if (i == graphemeIndex) {
+      return offset;
+    }
+    offset += characters[i].length;
+  }
+  return text.length;
+}
+
+// Maps a TextSelection from original-text code-unit offsets to grapheme-cluster
+// indices for use by RenderEditable when rendering obscured text.
+TextSelection _mapSelectionToObscured(String originalText, TextSelection selection) {
+  return selection.copyWith(
+    baseOffset: _codeUnitOffsetToGraphemeIndex(originalText, selection.baseOffset),
+    extentOffset: _codeUnitOffsetToGraphemeIndex(originalText, selection.extentOffset),
+  );
+}
+
+// Maps a TextSelection from grapheme-cluster indices (as reported by
+// RenderEditable on obscured text) back to original-text code-unit offsets.
+TextSelection _mapSelectionFromObscured(String originalText, TextSelection selection) {
+  return selection.copyWith(
+    baseOffset: _graphemeIndexToCodeUnitOffset(originalText, selection.baseOffset),
+    extentOffset: _graphemeIndexToCodeUnitOffset(originalText, selection.extentOffset),
+  );
+}
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -3708,7 +3758,7 @@ class EditableTextState extends State<EditableText>
           _hasInputConnection &&
           widget.obscureText &&
           WidgetsBinding.instance.platformDispatcher.brieflyShowPassword &&
-          value.text.length == _value.text.length + 1;
+          value.text.characters.length == _value.text.characters.length + 1;
 
       _obscureShowCharTicksPending = revealObscuredInput ? _kObscureShowLatestCharCursorTicks : 0;
       _obscureLatestCharIndex = revealObscuredInput ? _value.selection.baseOffset : null;
@@ -5147,6 +5197,13 @@ class EditableTextState extends State<EditableText>
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
+    // When obscureText is true, RenderEditable reports selections in
+    // grapheme-cluster indices (bullet positions). Convert back to the
+    // code-unit offsets used by the rest of the text editing system.
+    if (widget.obscureText && cause != SelectionChangedCause.keyboard) {
+      value = value.copyWith(selection: _mapSelectionFromObscured(value.text, value.selection));
+    }
+
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
     final shouldShowCaret = widget.readOnly ? _value.selection != value.selection : _value != value;
@@ -5496,8 +5553,7 @@ class EditableTextState extends State<EditableText>
 
   // --------------------------- Text Editing Actions ---------------------------
 
-  TextBoundary _characterBoundary() =>
-      widget.obscureText ? _CodePointBoundary(_value.text) : CharacterBoundary(_value.text);
+  TextBoundary _characterBoundary() => CharacterBoundary(_value.text);
   TextBoundary _nextWordBoundary() =>
       widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() =>
@@ -6028,8 +6084,9 @@ class EditableTextState extends State<EditableText>
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
     if (widget.obscureText) {
-      String text = _value.text;
-      text = widget.obscuringCharacter * text.length;
+      final String originalText = _value.text;
+      // Use characters.length (extended grapheme clusters) instead of string length
+      String text = widget.obscuringCharacter * originalText.characters.length;
       // Reveal the latest character in an obscured field only on mobile.
       const mobilePlatforms = <TargetPlatform>{
         TargetPlatform.android,
@@ -6041,8 +6098,13 @@ class EditableTextState extends State<EditableText>
           mobilePlatforms.contains(defaultTargetPlatform);
       if (brieflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
-        if (o != null && o >= 0 && o < text.length) {
-          text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+        if (o != null && o >= 0) {
+          // Convert the code unit offset to a grapheme cluster index.
+          final int graphemeIndex = originalText.substring(0, o).characters.length;
+          if (graphemeIndex < text.length) {
+            final String revealedChar = originalText.characters.elementAt(graphemeIndex);
+            text = text.replaceRange(graphemeIndex, graphemeIndex + 1, revealedChar);
+          }
         }
       }
       return TextSpan(style: _style, text: text);
@@ -6205,7 +6267,9 @@ class _Editable extends MultiChildRenderObjectWidget {
       textAlign: textAlign,
       textDirection: textDirection,
       locale: locale ?? Localizations.maybeLocaleOf(context),
-      selection: value.selection,
+      selection: obscureText
+          ? _mapSelectionToObscured(value.text, value.selection)
+          : value.selection,
       offset: offset,
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
@@ -6249,7 +6313,9 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..textAlign = textAlign
       ..textDirection = textDirection
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
-      ..selection = value.selection
+      ..selection = obscureText
+          ? _mapSelectionToObscured(value.text, value.selection)
+          : value.selection
       ..offset = offset
       ..ignorePointer = rendererIgnoresPointer
       ..textHeightBehavior = textHeightBehavior
@@ -6450,74 +6516,6 @@ class _ScribblePlaceholder extends WidgetSpan {
     if (hasStyle) {
       builder.pop();
     }
-  }
-}
-
-/// A text boundary that uses code points as logical boundaries.
-///
-/// A code point represents a single character. This may be smaller than what is
-/// represented by a user-perceived character, or grapheme. For example, a
-/// single grapheme (in this case a Unicode extended grapheme cluster) like
-/// "👨‍👩‍👦" consists of five code points: the man emoji, a zero
-/// width joiner, the woman emoji, another zero width joiner, and the boy emoji.
-/// The [String] has a length of eight because each emoji consists of two code
-/// units.
-///
-/// Code units are the units by which Dart's String class is measured, which is
-/// encoded in UTF-16.
-///
-/// See also:
-///
-///  * [String.runes], which deals with code points like this class.
-///  * [Characters], which deals with graphemes.
-///  * [CharacterBoundary], which is a [TextBoundary] like this class, but whose
-///    boundaries are graphemes instead of code points.
-class _CodePointBoundary extends TextBoundary {
-  const _CodePointBoundary(this._text);
-
-  final String _text;
-
-  // Returns true if the given position falls in the center of a surrogate pair.
-  bool _breaksSurrogatePair(int position) {
-    assert(position > 0 && position < _text.length && _text.length > 1);
-    return TextPainter.isHighSurrogate(_text.codeUnitAt(position - 1)) &&
-        TextPainter.isLowSurrogate(_text.codeUnitAt(position));
-  }
-
-  @override
-  int? getLeadingTextBoundaryAt(int position) {
-    if (_text.isEmpty || position < 0) {
-      return null;
-    }
-    if (position == 0) {
-      return 0;
-    }
-    if (position >= _text.length) {
-      return _text.length;
-    }
-    if (_text.length <= 1) {
-      return position;
-    }
-
-    return _breaksSurrogatePair(position) ? position - 1 : position;
-  }
-
-  @override
-  int? getTrailingTextBoundaryAt(int position) {
-    if (_text.isEmpty || position >= _text.length) {
-      return null;
-    }
-    if (position < 0) {
-      return 0;
-    }
-    if (position == _text.length - 1) {
-      return _text.length;
-    }
-    if (_text.length <= 1) {
-      return position;
-    }
-
-    return _breaksSurrogatePair(position + 1) ? position + 2 : position + 1;
   }
 }
 

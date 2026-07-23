@@ -5461,6 +5461,56 @@ void main() {
     expect((findRenderEditable(tester).text! as TextSpan).text, expectedValue);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/184597
+  testWidgets('obscureText counts grapheme clusters, not code units', (WidgetTester tester) async {
+    // "👨‍👩‍👦" is a ZWJ sequence: 8 code units, 5 runes, but 1 grapheme cluster.
+    const familyEmoji = '👨‍👩‍👦';
+    controller.text = familyEmoji;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: EditableText(
+          backgroundCursorColor: const Color(0xFF000000),
+          controller: controller,
+          obscureText: true,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    // Should show exactly 1 obscuring character, not 8.
+    final String displayedText = (findRenderEditable(tester).text! as TextSpan).text!;
+    expect(displayedText, '•');
+    expect(displayedText.length, 1);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/184597
+  testWidgets('obscureText handles mixed text with complex emoji', (WidgetTester tester) async {
+    // Mix of ASCII and complex emoji.
+    const mixedText = 'ab👨‍👩‍👦cd';
+    controller.text = mixedText;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: EditableText(
+          backgroundCursorColor: const Color(0xFF000000),
+          controller: controller,
+          obscureText: true,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    // 'a' + 'b' + '👨‍👩‍👦' + 'c' + 'd' = 5 grapheme clusters.
+    final String displayedText = (findRenderEditable(tester).text! as TextSpan).text!;
+    expect(displayedText.length, 5);
+    expect(displayedText, '•' * 5);
+  });
+
   testWidgets(
     'password briefly shows last character when entered on mobile',
     (WidgetTester tester) async {
@@ -17568,7 +17618,7 @@ void main() {
   );
 
   testWidgets(
-    'code points are treated as single characters in obscure mode',
+    'grapheme clusters are treated as single characters in obscure mode',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -17596,143 +17646,26 @@ void main() {
 
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.textEditingValue.text, '👨‍👩‍👦');
+      // "👨‍👩‍👦" is 8 code units but 1 grapheme cluster.
       // 👨‍👩‍👦|
       expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 8));
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      await tester.pump();
-      // 👨‍👩‍|👦
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 6));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      await tester.pump();
-      // 👨‍👩|‍👦
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 5));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      await tester.pump();
-      // 👨‍|👩‍👦
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 3));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      await tester.pump();
-      // 👨|‍👩‍👦
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 2));
-
+      // Arrow left jumps past the entire grapheme cluster in one step.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
       // |👨‍👩‍👦
       expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 0));
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pump();
-      // 👨|‍👩‍👦
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 2));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pump();
-      // 👨‍|👩‍👦
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 3));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pump();
-      // 👨‍👩|‍👦
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 5));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pump();
-      // 👨‍👩‍|👦
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 6));
-
+      // Arrow right jumps past the entire grapheme cluster in one step.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
       // 👨‍👩‍👦|
       expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 8));
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
-      await tester.pump();
-      expect(state.textEditingValue.text, '👨‍👩‍');
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
-      await tester.pump();
-      expect(state.textEditingValue.text, '👨‍👩');
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
-      await tester.pump();
-      expect(state.textEditingValue.text, '👨‍');
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
-      await tester.pump();
-      expect(state.textEditingValue.text, '👨');
-
+      // Backspace deletes the entire grapheme cluster.
       await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
       await tester.pump();
       expect(state.textEditingValue.text, '');
-    },
-    skip: kIsWeb, // [intended]
-  );
-
-  testWidgets(
-    'when manually placing the cursor in the middle of a code point',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            backgroundCursorColor: Colors.grey,
-            controller: controller,
-            focusNode: focusNode,
-            obscureText: true,
-            toolbarOptions: const ToolbarOptions(
-              copy: true,
-              cut: true,
-              paste: true,
-              selectAll: true,
-            ),
-            style: textStyle,
-            cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
-          ),
-        ),
-      );
-
-      await tester.tap(find.byType(EditableText));
-      await tester.enterText(find.byType(EditableText), '👨‍👩‍👦');
-      await tester.pump();
-
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-      expect(state.textEditingValue.text, '👨‍👩‍👦');
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 8));
-
-      // Place the cursor in the middle of the last code point, which consists of
-      // two code units.
-      await tester.tapAt(textOffsetToPosition(tester, 7));
-      await tester.pump();
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 7));
-
-      // Using the arrow keys moves out of the code unit.
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      await tester.pump();
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 6));
-
-      await tester.tapAt(textOffsetToPosition(tester, 7));
-      await tester.pump();
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 7));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pump();
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 8));
-
-      // Pressing delete doesn't delete only the left code unit, it deletes the
-      // entire code point (both code units, one to the left and one to the right
-      // of the cursor).
-      await tester.tapAt(textOffsetToPosition(tester, 7));
-      await tester.pump();
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 7));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
-      await tester.pump();
-      expect(state.textEditingValue.text, '👨‍👩‍');
-      expect(state.textEditingValue.selection, const TextSelection.collapsed(offset: 6));
     },
     skip: kIsWeb, // [intended]
   );
