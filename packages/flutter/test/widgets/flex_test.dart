@@ -82,6 +82,34 @@ void main() {
     expect(box.size.width, 100.0);
   });
 
+  testWidgets('Flexible does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Row(children: <Widget>[Flexible(child: Placeholder())]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Flexible)), Size.zero);
+  });
+
+  testWidgets('Expanded does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Row(children: <Widget>[Expanded(child: Placeholder())]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Expanded)), Size.zero);
+  });
+
   testWidgets("Doesn't overflow because of floating point accumulated error", (
     WidgetTester tester,
   ) async {
@@ -346,5 +374,19 @@ void main() {
     );
     // 50.0 * 3 (children) + 100.0 * 2 (spacing) = 350.0 > 300.0 (constraints)
     expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Flex does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Flex(direction: Axis.horizontal, children: <Widget>[Placeholder()]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Flex)), Size.zero);
   });
 }
