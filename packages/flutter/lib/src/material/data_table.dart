@@ -496,6 +496,7 @@ class DataTable extends StatelessWidget {
     this.checkboxHorizontalMargin,
     this.border,
     this.clipBehavior = Clip.none,
+    this.sortIconWidget,
   }) : assert(columns.isNotEmpty),
        assert(
          sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length),
@@ -549,6 +550,16 @@ class DataTable extends StatelessWidget {
   ///
   /// Ascending order is represented by an upwards-facing arrow.
   final bool sortAscending;
+
+  /// A widget to use as the sorting indicator icon for the table's header cells.
+  ///
+  /// If null, the default Material design arrow icon ([Icons.arrow_upward]) is
+  /// used with a framework default size of 16.0.
+  ///
+  /// If this widget is an [Icon], the framework will automatically apply the
+  /// default size of 16.0 unless a custom size is explicitly specified on the
+  /// icon itself.
+  final Widget? sortIconWidget;
 
   /// Invoked when the user selects or unselects every row, using the
   /// checkbox in the heading row.
@@ -905,6 +916,7 @@ class DataTable extends StatelessWidget {
               visible: sorted,
               up: sorted ? ascending : null,
               duration: _sortArrowAnimationDuration,
+              sortIconWidget: sortIconWidget,
             ),
             const SizedBox(width: _sortArrowPadding),
           ],
@@ -1327,13 +1339,20 @@ class TableRowInkWell extends InkResponse {
 }
 
 class _SortArrow extends StatefulWidget {
-  const _SortArrow({required this.visible, required this.up, required this.duration});
+  const _SortArrow({
+    required this.visible,
+    required this.up,
+    required this.duration,
+    this.sortIconWidget,
+  });
 
   final bool visible;
 
   final bool? up;
 
   final Duration duration;
+
+  final Widget? sortIconWidget;
 
   @override
   _SortArrowState createState() => _SortArrowState();
@@ -1427,13 +1446,20 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // If the user provided a custom widget, use it.
+    // Otherwise, instantly fall back to the standard Material arrow icon.
+    final Widget iconWidget = widget.sortIconWidget ?? const Icon(Icons.arrow_upward);
+
     return FadeTransition(
       opacity: _opacityAnimation,
       child: Transform(
         transform: Matrix4.rotationZ(_orientationOffset + _orientationAnimation.value)
           ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),
         alignment: Alignment.center,
-        child: const Icon(Icons.arrow_upward, size: _arrowIconSize),
+        child: IconTheme.merge(
+          data: const IconThemeData(size: _arrowIconSize),
+          child: iconWidget,
+        ),
       ),
     );
   }

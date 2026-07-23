@@ -432,6 +432,78 @@ void main() {
     expect(transformOfArrow.transform.getRotation(), equals(Matrix3.rotationZ(math.pi)));
   });
 
+  testWidgets('DataTable custom sortIconWidget test', (WidgetTester tester) async {
+    Widget buildTable({Widget? sortIconWidget}) {
+      return DataTable(
+        sortColumnIndex: 0,
+        sortIconWidget: sortIconWidget,
+        columns: <DataColumn>[
+          DataColumn(
+            label: const Text('Name'),
+            tooltip: 'Name',
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(cells: <DataCell>[DataCell(Text(dessert.name))]);
+        }).toList(),
+      );
+    }
+
+    // By default (null sortIconWidget), the sort indicator is Icons.arrow_upward.
+    await tester.pumpWidget(MaterialApp(home: Material(child: buildTable())));
+    final Finder defaultIconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.byIcon(Icons.arrow_upward),
+    );
+    expect(defaultIconFinder, findsOneWidget);
+    expect(tester.widget<Icon>(defaultIconFinder).size, isNull);
+    expect(IconTheme.of(tester.element(defaultIconFinder)).size, 16.0);
+    expect(tester.getSize(defaultIconFinder), const Size(16.0, 16.0));
+
+    // Using a custom sortIconWidget (an Icon).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: buildTable(sortIconWidget: const Icon(Icons.arrow_downward))),
+      ),
+    );
+    final Finder customIconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.byIcon(Icons.arrow_downward),
+    );
+    expect(customIconFinder, findsOneWidget);
+    expect(tester.widget<Icon>(customIconFinder).size, isNull);
+    expect(IconTheme.of(tester.element(customIconFinder)).size, 16.0);
+    expect(tester.getSize(customIconFinder), const Size(16.0, 16.0));
+
+    // Using a custom sortIconWidget with explicit size.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: buildTable(sortIconWidget: const Icon(Icons.arrow_downward, size: 24.0)),
+        ),
+      ),
+    );
+    final Finder customSizeIconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.byIcon(Icons.arrow_downward),
+    );
+    expect(customSizeIconFinder, findsOneWidget);
+    expect(tester.widget<Icon>(customSizeIconFinder).size, 24.0);
+    expect(tester.getSize(customSizeIconFinder), const Size(24.0, 24.0));
+
+    // Using a custom non-Icon sortIconWidget.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: buildTable(sortIconWidget: const Text('Sort'))),
+      ),
+    );
+    expect(
+      find.descendant(of: find.byType(DataTable), matching: find.text('Sort')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('DataTable sort indicator orientation does not change on state update', (
     WidgetTester tester,
   ) async {
