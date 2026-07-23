@@ -379,6 +379,10 @@ class RegularWindowControllerLinux extends RegularWindowController
 
   @override
   @internal
+  bool get isDestroyed => _destroyed;
+
+  @override
+  @internal
   Size get contentSize => _window.getSize();
 
   @override
@@ -393,6 +397,7 @@ class RegularWindowControllerLinux extends RegularWindowController
     _windowMonitor.unref();
     _destroyed = true;
     _owner.registrar.unregister(rootView.viewId);
+    notifyListeners();
   }
 
   @override
@@ -593,6 +598,10 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
 
   @override
   @internal
+  bool get isDestroyed => _destroyed;
+
+  @override
+  @internal
   Size get contentSize => _window.getSize();
 
   @override
@@ -607,6 +616,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
     _windowMonitor.unref();
     _destroyed = true;
     _owner.registrar.unregister(rootView.viewId);
+    notifyListeners();
   }
 
   @override
@@ -765,6 +775,10 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 
   @override
   @internal
+  bool get isDestroyed => _destroyed;
+
+  @override
+  @internal
   Size get contentSize => _window.getSize();
 
   @override
@@ -779,6 +793,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     _windowMonitor.unref();
     _destroyed = true;
     _owner.registrar.unregister(rootView.viewId);
+    notifyListeners();
   }
 
   @override
@@ -957,6 +972,10 @@ class PopupWindowControllerLinux extends PopupWindowController implements Window
 
   @override
   @internal
+  bool get isDestroyed => _destroyed;
+
+  @override
+  @internal
   Size get contentSize => _window.getSize();
 
   @override
@@ -971,6 +990,7 @@ class PopupWindowControllerLinux extends PopupWindowController implements Window
     _windowMonitor.unref();
     _destroyed = true;
     _owner.registrar.unregister(rootView.viewId);
+    notifyListeners();
   }
 
   @override

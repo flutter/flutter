@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
-import 'widgets_app_tester.dart';
 
 final Matcher _matchesCommit = isMethodCall('TextInput.finishAutofillContext', arguments: true);
 final Matcher _matchesCancel = isMethodCall('TextInput.finishAutofillContext', arguments: false);

@@ -6,6 +6,7 @@ import XCTest
 
 @testable import InternalFlutterSwift
 
+@MainActor
 class DisplayLinkManagerTest: XCTestCase {
 
   func testDisplayLinkManagerCanBeInstantiatedWithMockValues() {
