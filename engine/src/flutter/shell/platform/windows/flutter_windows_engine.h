@@ -327,10 +327,14 @@ class FlutterWindowsEngine {
 
   // Sets the cursor that should be used when the mouse is over the Flutter
   // content. See mouse_cursor.dart for the values and meanings of cursor_name.
-  void UpdateFlutterCursor(const std::string& cursor_name) const;
+  void UpdateFlutterCursor(const std::string& cursor_name);
 
   // Sets the cursor directly from a cursor handle.
-  void SetFlutterCursor(HCURSOR cursor) const;
+  void SetFlutterCursor(HCURSOR cursor);
+
+  // Returns the last cursor set through |UpdateFlutterCursor| or
+  // |SetFlutterCursor|. Defaults to the arrow cursor.
+  HCURSOR GetFlutterCursor() const { return current_cursor_; }
 
   WindowManager* window_manager() { return window_manager_.get(); }
 
@@ -526,6 +530,10 @@ class FlutterWindowsEngine {
   std::shared_ptr<WindowsProcTable> windows_proc_table_;
 
   std::shared_ptr<egl::ProcTable> gl_;
+
+  // The last cursor set by the Flutter framework. Used to restore the cursor
+  // in WM_SETCURSOR when the mouse re-enters the window's client area.
+  HCURSOR current_cursor_ = ::LoadCursor(nullptr, IDC_ARROW);
 
   std::unique_ptr<PlatformViewPlugin> platform_view_plugin_;
 

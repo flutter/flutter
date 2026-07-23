@@ -934,6 +934,26 @@ TEST_F(FlutterWindowsEngineTest, GetExecutableName) {
   EXPECT_EQ(engine->GetExecutableName(), "flutter_windows_unittests.exe");
 }
 
+// The engine should remember the cursor set by the framework so that
+// windows can restore it when handling WM_SETCURSOR.
+TEST_F(FlutterWindowsEngineTest, SetFlutterCursorStoresCursor) {
+  auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
+
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetWindowsProcTable(windows_proc_table);
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+
+  // The default cursor is the arrow cursor.
+  EXPECT_EQ(engine->GetFlutterCursor(), ::LoadCursor(nullptr, IDC_ARROW));
+
+  HCURSOR hand_cursor = ::LoadCursor(nullptr, IDC_HAND);
+  EXPECT_CALL(*windows_proc_table, SetCursor(hand_cursor)).Times(1);
+
+  engine->SetFlutterCursor(hand_cursor);
+
+  EXPECT_EQ(engine->GetFlutterCursor(), hand_cursor);
+}
+
 // Ensure that after setting or resetting the high contrast feature,
 // the corresponding status flag can be retrieved from the engine.
 TEST_F(FlutterWindowsEngineTest, UpdateHighContrastFeature) {

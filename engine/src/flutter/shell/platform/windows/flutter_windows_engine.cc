@@ -1126,12 +1126,12 @@ std::optional<LRESULT> FlutterWindowsEngine::ProcessExternalWindowMessage(
   return std::nullopt;
 }
 
-void FlutterWindowsEngine::UpdateFlutterCursor(
-    const std::string& cursor_name) const {
+void FlutterWindowsEngine::UpdateFlutterCursor(const std::string& cursor_name) {
   SetFlutterCursor(GetCursorByName(cursor_name));
 }
 
-void FlutterWindowsEngine::SetFlutterCursor(HCURSOR cursor) const {
+void FlutterWindowsEngine::SetFlutterCursor(HCURSOR cursor) {
+  current_cursor_ = cursor;
   windows_proc_table_->SetCursor(cursor);
 }
 
