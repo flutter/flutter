@@ -113,11 +113,10 @@ class XcodeValidator extends DoctorValidator {
   /// with Xcode and must be downloaded and installed separately.
   /// iOS applications cannot be run without it.
   Future<ValidationMessage?> _validateSimulatorRuntimeInstalled() async {
-    // Skip this validation if Xcode is not installed, Xcode is a version less
-    // than 15, simctl is not installed, or if the EULA is not signed.
+    // Skip this validation if Xcode is not installed, simctl is not installed,
+    // or if the EULA is not signed.
     if (!_xcode.isInstalled ||
         _xcode.currentVersion == null ||
-        _xcode.currentVersion!.major < 15 ||
         !_xcode.isSimctlInstalled ||
         !_xcode.eulaSigned) {
       return null;
