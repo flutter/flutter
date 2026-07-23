@@ -2704,6 +2704,194 @@ void main() {
     expect(FocusManager.instance.primaryFocus, endFocusNode);
   });
 
+  group('RangeSlider keyboard with NavigationMode.directional', () {
+    // Pumps a RangeSlider in the given navigation mode. Read the live values
+    // back through [sliderKey] with [valuesOf]; [initialValues] is where the
+    // slider starts.
+    Future<void> pumpRangeSlider(
+      WidgetTester tester, {
+      required NavigationMode navigationMode,
+      required GlobalKey sliderKey,
+      required RangeValues initialValues,
+    }) async {
+      var values = initialValues;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return MediaQuery(
+                    data: MediaQueryData(navigationMode: navigationMode),
+                    child: Center(
+                      child: RangeSlider(
+                        key: sliderKey,
+                        values: values,
+                        max: 100,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RangeValues valuesOf(GlobalKey sliderKey) => (sliderKey.currentWidget! as RangeSlider).values;
+
+    FocusNode startFocusNodeOf(WidgetTester tester) =>
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+
+    testWidgets('arrow keys do not change the value when not in editing mode', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey sliderKey = GlobalKey();
+      await pumpRangeSlider(
+        tester,
+        navigationMode: NavigationMode.directional,
+        sliderKey: sliderKey,
+        initialValues: const RangeValues(40, 80),
+      );
+      startFocusNodeOf(tester).requestFocus();
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(
+        valuesOf(sliderKey),
+        const RangeValues(40, 80),
+        reason: 'arrowRight should move focus, not change the value, outside editing mode',
+      );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(
+        valuesOf(sliderKey),
+        const RangeValues(40, 80),
+        reason: 'arrowLeft should move focus, not change the value, outside editing mode',
+      );
+    });
+
+    testWidgets('pressing enter enters editing mode and arrow keys adjust the value', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey sliderKey = GlobalKey();
+      await pumpRangeSlider(
+        tester,
+        navigationMode: NavigationMode.directional,
+        sliderKey: sliderKey,
+        initialValues: const RangeValues(40, 80),
+      );
+      startFocusNodeOf(tester).requestFocus();
+      await tester.pumpAndSettle();
+
+      // Enter editing mode.
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+
+      // In LTR, the right arrow increases the focused (start) thumb...
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      final double increasedStart = valuesOf(sliderKey).start;
+      expect(increasedStart, greaterThan(40));
+      expect(valuesOf(sliderKey).end, 80);
+
+      // ...and the left arrow decreases it.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(valuesOf(sliderKey).start, lessThan(increasedStart));
+      expect(valuesOf(sliderKey).end, 80);
+    });
+
+    testWidgets('pressing enter again exits editing mode', (WidgetTester tester) async {
+      final GlobalKey sliderKey = GlobalKey();
+      await pumpRangeSlider(
+        tester,
+        navigationMode: NavigationMode.directional,
+        sliderKey: sliderKey,
+        initialValues: const RangeValues(40, 80),
+      );
+      startFocusNodeOf(tester).requestFocus();
+      await tester.pumpAndSettle();
+
+      // Enter then exit editing mode.
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+
+      // Arrow keys no longer adjust the value.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(
+        valuesOf(sliderKey),
+        const RangeValues(40, 80),
+        reason: 'arrow keys should not change the value after exiting editing mode',
+      );
+    });
+
+    testWidgets('losing focus exits editing mode', (WidgetTester tester) async {
+      final GlobalKey sliderKey = GlobalKey();
+      await pumpRangeSlider(
+        tester,
+        navigationMode: NavigationMode.directional,
+        sliderKey: sliderKey,
+        initialValues: const RangeValues(40, 80),
+      );
+      final FocusNode startFocusNode = startFocusNodeOf(tester);
+      startFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Enter editing mode.
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+
+      // Losing focus should reset the editing mode.
+      startFocusNode.unfocus();
+      await tester.pumpAndSettle();
+
+      // Re-focus and verify arrow keys no longer adjust the value, proving the
+      // editing mode was reset when focus was lost.
+      startFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(
+        valuesOf(sliderKey),
+        const RangeValues(40, 80),
+        reason: 'editing mode should be reset after the slider lost focus',
+      );
+    });
+
+    testWidgets('arrow keys change the value directly in traditional navigation mode', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey sliderKey = GlobalKey();
+      await pumpRangeSlider(
+        tester,
+        navigationMode: NavigationMode.traditional,
+        sliderKey: sliderKey,
+        initialValues: const RangeValues(40, 80),
+      );
+      startFocusNodeOf(tester).requestFocus();
+      await tester.pumpAndSettle();
+
+      // No need to enter an editing mode in traditional navigation.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(valuesOf(sliderKey).start, greaterThan(40));
+      expect(valuesOf(sliderKey).end, 80);
+    });
+  });
+
   testWidgets('Keyboard focus also changes semantics focus', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
