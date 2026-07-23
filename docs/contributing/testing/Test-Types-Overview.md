@@ -47,7 +47,7 @@ Due to the large number of tests (over 6000 files), they are grouped by category
   - [README.md](../../../dev/devicelab/README.md)
   - [How-to-write-a-memory-test-for-Flutter.md](How-to-write-a-memory-test-for-Flutter.md)
   - [How-to-write-a-render-speed-test-for-Flutter.md](How-to-write-a-render-speed-test-for-Flutter.md)
-- **Run Locally**: Partially. May require a physical device or emulator and specific environment setup (e.g., `ANDROID_SDK_ROOT`).
+- **Run Locally**: Partially. May require a physical device or emulator and specific environment setup (e.g., `ANDROID_HOME`).
 - **Commands**:
   - Run a task: `../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t {NAME_OF_TEST}` (Run from `dev/devicelab`).
   - Example: `../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t complex_layout__start_up`

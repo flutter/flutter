@@ -13,7 +13,7 @@ print_usage () {
   echo "      - VERSION_TAG is the tag of the cipd packages, e.g. 28r6 or 31v1. Must contain"
   echo "                    only lowercase letters and numbers."
   echo "      - PATH_TO_SDK_DIR is the path to the sdk folder. If omitted, this defaults to"
-  echo "                      your ANDROID_SDK_ROOT environment variable."
+  echo "                      your ANDROID_HOME (or ANDROID_SDK_ROOT) environment variable."
   echo "  ./create_cipd_packages.sh list"
   echo "    Lists the available packages for use in 'packages.txt'"
   echo ""
@@ -51,7 +51,7 @@ if [[ `which cipd` == "" ]]; then
   exit 1
 fi
 
-sdk_path=${2:-$ANDROID_SDK_ROOT}
+sdk_path=${2:-${ANDROID_HOME:-$ANDROID_SDK_ROOT}}
 
 # Validate directory contains all SDK packages
 if [[ ! -d "$sdk_path" ]]; then

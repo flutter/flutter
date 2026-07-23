@@ -41,6 +41,8 @@ class UserMessages {
   String androidSdkInstallHelp(Platform platform) =>
       'Try re-installing or updating your Android SDK,\n'
       'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
+  String get androidSdkRootDeprecatedWarning =>
+      'ANDROID_SDK_ROOT is deprecated. Use ANDROID_HOME instead.';
   // Also occurs in AndroidLicenseValidator
   String androidStatusInfo(String version) => 'Android SDK version $version';
 
