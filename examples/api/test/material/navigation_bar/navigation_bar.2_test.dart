@@ -79,6 +79,44 @@ void main() {
     expect(find.text('Teal ListPage - /list'), findsOneWidget);
   });
 
+  testWidgets(
+    'RootPage presents material banners below the destination app bar',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: example.Home()));
+
+      final Finder appBarFinder = find.widgetWithText(
+        AppBar,
+        'Teal RootPage - /',
+      );
+      expect(appBarFinder, findsOneWidget);
+      final BuildContext rootPageContext = tester.element(appBarFinder);
+      ScaffoldMessenger.of(rootPageContext).showMaterialBanner(
+        MaterialBanner(
+          content: const Text('Destination banner'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                ScaffoldMessenger.of(
+                  rootPageContext,
+                ).hideCurrentMaterialBanner();
+              },
+              child: const Text('Dismiss'),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final double appBarBottom = tester
+          .getBottomLeft(find.widgetWithText(AppBar, 'Teal RootPage - /'))
+          .dy;
+      final double bannerTop = tester
+          .getTopLeft(find.byType(MaterialBanner))
+          .dy;
+      expect(bannerTop, greaterThanOrEqualTo(appBarBottom));
+    },
+  );
+
   testWidgets('ListPage', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: example.Home()));
     expect(find.text('Teal RootPage - /'), findsOneWidget);
