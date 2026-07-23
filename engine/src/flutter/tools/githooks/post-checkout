@@ -4,10 +4,11 @@
 # found in the LICENSE file.
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
-NEW_HOOK="$REPO_ROOT/dev/tools/githooks/$(basename "$0")"
-
-if [ -f "$NEW_HOOK" ]; then
-  exec "$NEW_HOOK" "$@"
+DART="$REPO_ROOT/bin/cache/dart-sdk/bin/dart"
+if [ ! -f "$DART" ]; then
+  DART="$REPO_ROOT/engine/src/flutter/third_party/dart/tools/sdks/dart-sdk/bin/dart"
 fi
 
+cd "$REPO_ROOT/dev/tools/githooks"
+"$DART" pub get --offline 2>/dev/null || true
 exit 0
