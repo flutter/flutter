@@ -7,6 +7,7 @@ import 'package:ui/ui.dart' as ui;
 import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../util.dart';
+import '../view_embedder/style_manager.dart';
 import 'semantics.dart';
 
 /// Supplies generic accessibility focus features to semantics nodes that have
@@ -121,6 +122,48 @@ class AccessibilityFocusManager {
 
   AccessibilityFocusManagerEvent _lastEvent = AccessibilityFocusManagerEvent.nothing;
 
+  /// The focus-ring overlay element for this view.
+  ///
+  /// It is appended to `flutter-view` (the parent of `flt-semantics-host`) so
+  /// it is outside the `filter: opacity(0%)` subtree and always remains visible
+  /// to sighted keyboard users. Each [AccessibilityFocusManager] owns its own
+  /// ring so that multi-view setups keep rings in their respective DOM trees.
+  DomElement? _focusRing;
+
+  void _ensureFocusRing() {
+    if (_focusRing != null) {
+      return;
+    }
+    final DomElement? parent = _owner.semanticsHost.parent;
+    if (parent == null) {
+      return;
+    }
+    final DomElement ring = domDocument.createElement('div');
+    ring.className = StyleManager.focusRingClass;
+    ring.style.display = 'none';
+    parent.appendChild(ring);
+    _focusRing = ring;
+  }
+
+  void _showFocusRing(DomElement element) {
+    _ensureFocusRing();
+    final DomElement? ring = _focusRing;
+    if (ring == null) {
+      return;
+    }
+    final DomRect rect = element.getBoundingClientRect();
+    ring.style
+      ..left = '${rect.left}px'
+      ..top = '${rect.top}px'
+      ..width = '${rect.width}px'
+      ..height = '${rect.height}px'
+      ..display = '';
+  }
+
+  void _hideFocusRing() {
+    _focusRing?.style.display = 'none';
+  }
+
   // The last focus value set by this focus manager, used to prevent requesting
   // focus on the same element repeatedly. Requesting focus on DOM elements is
   // not an idempotent operation. If the element is already focused and focus is
@@ -195,6 +238,9 @@ class AccessibilityFocusManager {
 
     target.element.removeEventListener('focus', target.domFocusListener);
     target.element.removeEventListener('blur', target.domBlurListener);
+    if (domDocument.activeElement == target.element) {
+      _hideFocusRing();
+    }
   }
 
   void _didReceiveDomFocus() {
@@ -220,10 +266,12 @@ class AccessibilityFocusManager {
     }
 
     _lastEvent = AccessibilityFocusManagerEvent.receivedDomFocus;
+    _showFocusRing(target.element);
   }
 
   void _didReceiveDomBlur() {
     _lastEvent = AccessibilityFocusManagerEvent.receivedDomBlur;
+    _hideFocusRing();
   }
 
   /// Requests focus or blur on the DOM element.

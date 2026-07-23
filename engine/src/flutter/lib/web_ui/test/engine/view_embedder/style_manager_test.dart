@@ -36,6 +36,25 @@ void doTests() {
       expect(got, expected);
     });
 
+    test('attachGlobalStyles adds visible focus ring for keyboard navigation', () {
+      final DomElement flutterViewElement = createDomElement(DomManager.flutterViewTagName);
+      domDocument.body!.append(flutterViewElement);
+      StyleManager.attachGlobalStyles(
+        node: flutterViewElement,
+        styleId: 'testing-focus-ring',
+        styleNonce: 'testing',
+        cssSelectorPrefix: DomManager.flutterViewTagName,
+      );
+
+      final DomElement focusRing = createDomHTMLDivElement();
+      focusRing.className = StyleManager.focusRingClass;
+      flutterViewElement.appendChild(focusRing);
+
+      final DomCSSStyleDeclaration computed = domWindow.getComputedStyle(focusRing);
+      expect(computed.position, 'fixed');
+      expect(computed.pointerEvents, 'none');
+    });
+
     test('styleSceneHost', () {
       expect(() => StyleManager.styleSceneHost(createDomHTMLDivElement()), throwsAssertionError);
 
