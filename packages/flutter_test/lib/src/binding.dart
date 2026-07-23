@@ -1996,7 +1996,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
       _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
-      _verifyInvariants();
+      if (_verifyInvariantsAfterTestTearDown) {
+        _pendingInvariantVerification = true;
+      } else {
+        _verifyInvariants();
+      }
     }
 
     assert(inTest);
@@ -2004,6 +2008,19 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   late bool _beforeTestCheckIntrinsicSizes;
+
+  bool _verifyInvariantsAfterTestTearDown = false;
+  bool _pendingInvariantVerification = false;
+
+  /// Defers invariant verification until [verifyInvariantsAfterTestTearDown].
+  ///
+  /// This is used by [testWidgets], which can install package:test tearDown
+  /// callbacks around [runTest]. Direct [runTest] callers still verify
+  /// invariants before [postTest].
+  @protected
+  void deferInvariantsUntilAfterTestTearDown() {
+    _verifyInvariantsAfterTestTearDown = true;
+  }
 
   void _verifyInvariants() {
     assert(
@@ -2055,6 +2072,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         'The value of a services debug variable was changed by the test.',
       ),
     );
+  }
+
+  /// Called after user-registered `addTearDown` callbacks have run.
+  @protected
+  void verifyInvariantsAfterTestTearDown() {
+    final bool shouldVerifyInvariants = _pendingInvariantVerification;
+    _verifyInvariantsAfterTestTearDown = false;
+    _pendingInvariantVerification = false;
+    if (!shouldVerifyInvariants) {
+      return;
+    }
+    _verifyInvariants();
   }
 
   void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
