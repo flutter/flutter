@@ -149,4 +149,41 @@ vec3 IPComputeFixedGradientValues(float t, float colors_length) {
   return vec3(lower_index, upper_index, scale);
 }
 
+/// Define a function that returns the lower index of the gradient stop
+/// interval containing `t`, by binary searching the elements of
+/// `STOPS_ARRAY`.
+///
+/// `STOPS_ARRAY` is an array reference whose elements expose a `float
+/// threshold` field, sorted in ascending order. Typical use, for an SSBO
+/// declared as
+///
+///   layout(std140) readonly buffer ColorData {
+///     ColorPoint colors[];
+///   } color_data;
+///
+/// would be
+///
+///   IP_DEFINE_BINARY_SEARCH_COLOR_INDEX(IPBinarySearchColorIndex,
+///                                       color_data.colors)
+/// The total iteration count is `ceil(log2(colors_length - 1))` and depends
+/// only on `colors_length`, which is uniform across the draw. Every fragment
+/// in a warp therefore inspects the same number of stops regardless of `t`.
+#define IP_DEFINE_BINARY_SEARCH_COLOR_INDEX(NAME, STOPS_ARRAY)       \
+  int NAME(float t, int colors_length) {                             \
+    int last_lo = colors_length - 2;                                 \
+                                                                     \
+    int step = 1;                                                    \
+    while ((step << 1) <= last_lo) {                                 \
+      step <<= 1;                                                    \
+    }                                                                \
+                                                                     \
+    int lo = 0;                                                      \
+    while (step > 0) {                                               \
+      int candidate = min(lo + step, last_lo);                       \
+      lo = (t >= STOPS_ARRAY[candidate].threshold) ? candidate : lo; \
+      step >>= 1;                                                    \
+    }                                                                \
+    return lo;                                                       \
+  }
+
 #endif

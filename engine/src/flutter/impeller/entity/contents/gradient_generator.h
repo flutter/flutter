@@ -25,14 +25,20 @@ std::shared_ptr<Texture> CreateGradientTexture(
     const GradientData& gradient_data,
     const std::shared_ptr<impeller::Context>& context);
 
+/// Per-segment data for an SSBO-backed gradient. For an N-stop gradient there
+/// are N entries; entry `i` describes the segment that starts at `threshold`
+/// (== `stops[i]`) and runs up to `stops[i + 1]`. Within that segment the
+/// color is a single per-channel affine: `color = t * scale + bias`. The last
+/// entry (`i == N - 1`) only contributes its `threshold` (used as the upper
+/// bound by the binary search); its `scale` and `bias` are never read.
 struct StopData {
-  Color color;
-  Scalar stop;
-  Scalar inverse_delta;
-  Padding<8> _padding_;
+  Vector4 scale;
+  Vector4 bias;
+  Scalar threshold;
+  Padding<12> _padding_;
 };
 
-static_assert(sizeof(StopData) == 32);
+static_assert(sizeof(StopData) == 48);
 
 /**
  * @brief Populate a vector with the color and stop data for a gradient

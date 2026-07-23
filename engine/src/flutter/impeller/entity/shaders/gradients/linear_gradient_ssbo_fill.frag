@@ -6,19 +6,22 @@ precision mediump float;
 
 #include <impeller/color.glsl>
 #include <impeller/dithering.glsl>
+#include <impeller/gradient.glsl>
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
 struct ColorPoint {
-  vec4 color;
-  float stop;
-  float inverse_delta;
+  vec4 scale;
+  vec4 bias;
+  float threshold;
 };
 
 layout(std140) readonly buffer ColorData {
   ColorPoint colors[];
 }
 color_data;
+
+IP_DEFINE_BINARY_SEARCH_COLOR_INDEX(IPBinarySearchColorIndex, color_data.colors)
 
 uniform FragInfo {
   highp vec2 start_point;
@@ -41,26 +44,18 @@ void main() {
   highp float t = dot(start_to_position, frag_info.start_to_end) *
                   frag_info.inverse_dot_start_to_end;
 
+  f16vec4 color;
   if ((t < 0.0 || t > 1.0) && frag_info.tile_mode == kTileModeDecal) {
-    frag_color = frag_info.decal_border_color;
+    color = f16vec4(frag_info.decal_border_color);
   } else {
     t = IPFloatTile(t, frag_info.tile_mode);
 
-    for (int i = 1; i < frag_info.colors_length; i++) {
-      ColorPoint prev_point = color_data.colors[i - 1];
-      ColorPoint current_point = color_data.colors[i];
-      if (t >= prev_point.stop && t <= current_point.stop) {
-        if (current_point.inverse_delta > 1000.0) {
-          frag_color = current_point.color;
-        } else {
-          float ratio = (t - prev_point.stop) * current_point.inverse_delta;
-          frag_color = mix(prev_point.color, current_point.color, ratio);
-        }
-        break;
-      }
-    }
+    int lo = IPBinarySearchColorIndex(t, frag_info.colors_length);
+    ColorPoint segment = color_data.colors[lo];
+    color = float16_t(t) * f16vec4(segment.scale) + f16vec4(segment.bias);
   }
 
-  frag_color = IPPremultiply(frag_color) * frag_info.alpha;
-  frag_color = IPOrderedDither8x8(frag_color, gl_FragCoord.xy);
+  color = IPHalfPremultiply(color) * float16_t(frag_info.alpha);
+  color = IPHalfOrderedDither8x8(color, gl_FragCoord.xy);
+  frag_color = vec4(color);
 }
