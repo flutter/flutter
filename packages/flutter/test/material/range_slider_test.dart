@@ -4045,6 +4045,61 @@ void main() {
     );
   });
 
+  testWidgets('RangeSlider overlayColor resolves focused state', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    addTearDown(() {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
+    });
+
+    const focusedColor = Color(0xff800080);
+    var values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                    Set<WidgetState> states,
+                  ) {
+                    if (states.contains(WidgetState.focused)) {
+                      return focusedColor;
+                    }
+                    return null;
+                  }),
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: focusedColor)),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    final startFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    expect(startFocusNode.hasFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      paints..circle(color: focusedColor),
+    );
+  });
+
   testWidgets('RangeSlider taps should set focus on start/end thumbs', (WidgetTester tester) async {
     var values = const RangeValues(0.3, 0.7);
 
