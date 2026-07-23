@@ -124,6 +124,45 @@ void main() {
     expect(parentSemantics.childrenCount, 1);
   });
 
+  test('does not crash enqueuing geometry update when child owner is null', () {
+    // Flipping a parent include -> exclude -> include while a child's geometry
+    // is dirty used to throw when re-including the child, because the geometry
+    // enqueue dereferenced a null `owner`.
+    //
+    // The exact null-owner race isn't deterministically reproducible in a
+    // single-threaded test, so this drives the reachable flip that exercises
+    // the same enqueue path and asserts it does not throw.
+    final child = RenderTestLayoutSemanticsBoundary();
+    final middle1 = RenderTestParent(child: child);
+    middle1.isSemanticBoundary = true;
+    middle1.explicitChildNode = true;
+    final middle2 = RenderTestParent(child: middle1);
+    final parent = RenderTestMultiChildParent(children: [middle2]);
+    parent.explicitChildNode = true;
+
+    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
+
+    expect(() {
+      layout(parent, phase: EnginePhase.flushSemantics);
+
+      // Exclude `child` from the semantics tree while its geometry is dirty,
+      // leaving its geometry marked dirty (blocked).
+      middle1.markNeedsLayout();
+      middle2.markNeedsLayout();
+      child.markNeedsLayout();
+      final child2 = RenderBlockSemanticsBoundary();
+      parent.add(child2);
+      pumpFrame(phase: EnginePhase.flushSemantics);
+
+      // Re-include `child` while its geometry is still dirty. This drives the
+      // geometry-update enqueue in `updateChildren`.
+      middle1.markNeedsLayout();
+      child.markNeedsLayout();
+      parent.remove(child2);
+      pumpFrame(phase: EnginePhase.flushSemantics);
+    }, returnsNormally);
+  });
+
   test('Skip update for invisible child being dropped from tree', () {
     final child = RenderTestLayoutSemanticsBoundary();
     child.isSemanticBoundary = true;
