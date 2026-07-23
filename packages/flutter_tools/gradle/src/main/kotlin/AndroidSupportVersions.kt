@@ -119,13 +119,12 @@ internal data class AndroidSupportVersions(
     val gradleVersionForAgp: List<GradleVersionForAgp>
 ) {
     companion object {
-        private val json = Json {
-            ignoreUnknownKeys = true
-            coerceInputValues = true
-        }
+        private val json =
+            Json {
+                ignoreUnknownKeys = true
+                coerceInputValues = true
+            }
 
-        fun fromJson(jsonText: String): AndroidSupportVersions {
-            return json.decodeFromString(jsonText)
-        }
+        fun fromJson(jsonText: String): AndroidSupportVersions = json.decodeFromString(jsonText)
     }
 }
