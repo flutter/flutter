@@ -897,37 +897,32 @@ void main() {
         expect(findFadeInImage(tester).target.opacity, 1);
       });
 
-      testWidgets('ignores a non-zero fadeOutDuration', (WidgetTester tester) async {
-        final placeholderProvider = TestImageProvider(placeholderImage);
-        final imageProvider = TestImageProvider(targetImage);
-
-        await tester.pumpWidget(
-          FadeInImage(
-            placeholder: placeholderProvider,
-            image: imageProvider,
-            // Deliberately non-zero: it must not delay or alter the fade-in.
-            fadeOutDuration: animationDuration * 10,
-            fadeInDuration: animationDuration,
-            fadeInCurve: Curves.linear,
+      testWidgets('asserts when a non-default fadeOutDuration is provided', (
+        WidgetTester tester,
+      ) async {
+        expect(
+          () => FadeInImage(
+            placeholder: TestImageProvider(placeholderImage),
+            image: TestImageProvider(targetImage),
+            fadeOutDuration: const Duration(seconds: 1),
             transition: FadeInImageTransition.fadeInOver,
-            excludeFromSemantics: true,
           ),
+          throwsAssertionError,
         );
+      });
 
-        placeholderProvider.complete();
-        imageProvider.complete();
-        await tester.pump();
-
-        // The placeholder stays opaque and the image fades in over
-        // fadeInDuration alone, unaffected by fadeOutDuration.
-        await tester.pump(animationDuration ~/ 2);
-        final ({FadeInImageElements placeholder, FadeInImageElements target}) images =
-            findFadeInOverImages(tester);
-        expect(images.placeholder.opacity, 1);
-        expect(images.target.opacity, moreOrLessEquals(0.5));
-
-        await tester.pump(animationDuration ~/ 2);
-        expect(findFadeInImage(tester).target.opacity, 1);
+      testWidgets('asserts when a non-default fadeOutCurve is provided', (
+        WidgetTester tester,
+      ) async {
+        expect(
+          () => FadeInImage(
+            placeholder: TestImageProvider(placeholderImage),
+            image: TestImageProvider(targetImage),
+            fadeOutCurve: Curves.bounceIn,
+            transition: FadeInImageTransition.fadeInOver,
+          ),
+          throwsAssertionError,
+        );
       });
     });
   });
