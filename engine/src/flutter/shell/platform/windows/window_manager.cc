@@ -87,19 +87,23 @@ FlutterViewId WindowManager::CreatePopupWindow(
 }
 
 void WindowManager::OnEngineShutdown() {
-  // Don't send any more messages to isolate.
-  on_message_ = nullptr;
   std::vector<HWND> active_handles;
   active_handles.reserve(active_windows_.size());
   for (auto& [hwnd, window] : active_windows_) {
     active_handles.push_back(hwnd);
   }
+  // Destroy the windows before clearing |on_message_| so the WM_DESTROY
+  // round-trip reaches the isolate. Otherwise per-view Dart controllers
+  // never observe destruction and may issue follow-up FFI calls (e.g.
+  // updatePosition) with stale handles after the engine is torn down.
   for (auto hwnd : active_handles) {
     // This will destroy the window, which will in turn remove the
     // HostWindow from map when handling WM_NCDESTROY inside
     // HandleMessage.
     InternalFlutterWindows_WindowManager_OnDestroyWindow(hwnd);
   }
+  // Don't send any more messages to isolate.
+  on_message_ = nullptr;
 }
 
 std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
