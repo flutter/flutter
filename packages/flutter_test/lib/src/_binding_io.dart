@@ -70,6 +70,13 @@ void mockFlutterAssets() {
       return SynchronousFuture<ByteData>(encoded.buffer.asByteData());
     },
   );
+
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    SystemChannels.platform,
+    (MethodCall methodCall) async {
+      return null;
+    },
+  );
 }
 
 /// Provides a default [HttpClient] which always returns empty 400 responses.
