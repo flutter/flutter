@@ -164,12 +164,37 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
     // Only use fallback if there are meaningful launch options.
     return NO;
   }
+
+  // Only send shortcuts and user activities if didFinishLaunching returns YES.
+  // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:performactionfor:completionhandler:)#Discussion
   if (![self application:application
           didFinishLaunchingWithOptions:convertedLaunchOptions
                      isFallbackForScene:YES]) {
     return YES;
   }
-  return NO;
+
+  UIApplicationShortcutItem* shortcutItem = connectionOptions.shortcutItem;
+  BOOL shortcutHandled = shortcutItem && [self application:application
+                                             performActionForShortcutItem:shortcutItem
+                                                        completionHandler:^(BOOL succeeded) {
+                                                          // Do nothing. Plugins respond
+                                                          // synchronously whether they consume the
+                                                          // item.
+                                                        }
+                                                       isFallbackForScene:YES];
+
+  // Based on Apple's sample code it seems we can assume there will be at most one activity.
+  // Example:
+  // https://developer.apple.com/documentation/uikit/supporting-multiple-windows-on-ipad#Add-a-scene-delegate
+  for (NSUserActivity* activity in connectionOptions.userActivities) {
+    if ([self application:application
+            continueUserActivity:activity
+              restorationHandler:nil
+              isFallbackForScene:YES]) {
+      return YES;
+    }
+  }
+  return shortcutHandled;
 }
 
 - (BOOL)application:(UIApplication*)application
