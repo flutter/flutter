@@ -41,7 +41,8 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
 
   std::shared_ptr<DlImageFilter> MakeDlImageFilter(
       std::shared_ptr<std::vector<uint8_t>> float_uniforms,
-      const std::vector<std::shared_ptr<DlColorSource>>& children);
+      const std::vector<std::shared_ptr<DlColorSource>>& children,
+      DlImageSampling input_sampling = DlImageSampling::kNearestNeighbor);
 
  private:
   FragmentProgram();

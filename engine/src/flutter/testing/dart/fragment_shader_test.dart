@@ -1630,6 +1630,14 @@ void main() async {
     expect(filter, filter_2);
     expect(identical(filter, filter_2), false);
 
+    final ImageFilter filterLowQuality = ImageFilter.shader(
+      shader,
+      filterQuality: FilterQuality.low,
+    );
+    expect(filter, isNot(filterLowQuality));
+    expect(filterLowQuality, ImageFilter.shader(shader, filterQuality: FilterQuality.low));
+    expect(identical(filter, filterLowQuality), false);
+
     shader.setFloat(0, 1);
     final filter_3 = ImageFilter.shader(shader);
 
