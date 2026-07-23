@@ -78,6 +78,7 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(CreateDevice);
   DEFINE_PROC(CreateFence);
   DEFINE_PROC(CreateImage);
+  DEFINE_PROC(CreateImageView);
   DEFINE_PROC(CreateInstance);
   DEFINE_PROC(CreateSemaphore);
   DEFINE_PROC(CreateSwapchainKHR);
@@ -86,6 +87,7 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(DestroyDevice);
   DEFINE_PROC(DestroyFence);
   DEFINE_PROC(DestroyImage);
+  DEFINE_PROC(DestroyImageView);
   DEFINE_PROC(DestroyInstance);
   DEFINE_PROC(DestroySemaphore);
   DEFINE_PROC(DestroySurfaceKHR);
@@ -93,8 +95,10 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(DeviceWaitIdle);
   DEFINE_PROC(EndCommandBuffer);
   DEFINE_PROC(EnumerateDeviceLayerProperties);
+  DEFINE_PROC(EnumerateDeviceExtensionProperties);
   DEFINE_PROC(EnumerateInstanceExtensionProperties);
   DEFINE_PROC(EnumerateInstanceLayerProperties);
+  DEFINE_PROC(EnumerateInstanceVersion);
   DEFINE_PROC(EnumeratePhysicalDevices);
   DEFINE_PROC(FreeCommandBuffers);
   DEFINE_PROC(FreeMemory);
@@ -119,6 +123,10 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(CreateBuffer);
   DEFINE_PROC(DestroyBuffer);
   DEFINE_PROC(CmdCopyBuffer);
+  DEFINE_PROC(CmdBlitImage);
+  DEFINE_PROC(CmdCopyImage);
+  DEFINE_PROC(CmdCopyImageToBuffer);
+  DEFINE_PROC(CmdClearColorImage);
 
   DEFINE_PROC(GetPhysicalDeviceMemoryProperties2);
   DEFINE_PROC(GetPhysicalDeviceMemoryProperties2KHR);
@@ -133,15 +141,25 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(BindImageMemory2KHR);
 
 #ifndef TEST_VULKAN_PROCS
-#if FML_OS_ANDROID
+#if FML_OS_ANDROID || FML_OS_LINUX || FML_OS_WIN
+  // Surface and swapchain procs shared by all desktop/mobile platforms.
   DEFINE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
   DEFINE_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
   DEFINE_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
   DEFINE_PROC(GetPhysicalDeviceSurfaceSupportKHR);
   DEFINE_PROC(GetSwapchainImagesKHR);
   DEFINE_PROC(QueuePresentKHR);
+#endif  // FML_OS_ANDROID || FML_OS_LINUX || FML_OS_WIN
+#if FML_OS_ANDROID
   DEFINE_PROC(CreateAndroidSurfaceKHR);
 #endif  // FML_OS_ANDROID
+#if FML_OS_LINUX
+  DEFINE_PROC(CreateXlibSurfaceKHR);
+  DEFINE_PROC(CreateWaylandSurfaceKHR);
+#endif  // FML_OS_LINUX
+#if FML_OS_WIN
+  DEFINE_PROC(CreateWin32SurfaceKHR);
+#endif  // FML_OS_WIN
 #if OS_FUCHSIA
   DEFINE_PROC(ImportSemaphoreZirconHandleFUCHSIA);
   DEFINE_PROC(GetSemaphoreZirconHandleFUCHSIA);

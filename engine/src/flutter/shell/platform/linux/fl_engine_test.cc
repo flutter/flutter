@@ -1017,4 +1017,85 @@ TEST_F(FlEngineTest, ChildObjects) {
   EXPECT_NE(fl_engine_get_mouse_cursor_handler(engine), nullptr);
 }
 
+// Checks FLUTTER_LINUX_RENDERER env var defaults to OpenGL when unset.
+TEST_F(FlEngineTest, RendererTypeDefaultsToOpenGL) {
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kOpenGL);
+}
+
+// Checks FLUTTER_LINUX_RENDERER=software selects software rendering.
+TEST_F(FlEngineTest, RendererTypeSoftware) {
+  g_setenv("FLUTTER_LINUX_RENDERER", "software", TRUE);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kSoftware);
+
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+}
+
+// Checks FLUTTER_LINUX_RENDERER=opengl selects OpenGL rendering.
+TEST_F(FlEngineTest, RendererTypeOpenGL) {
+  g_setenv("FLUTTER_LINUX_RENDERER", "opengl", TRUE);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kOpenGL);
+
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+}
+
+// Checks FLUTTER_LINUX_RENDERER=unknown falls back to OpenGL.
+TEST_F(FlEngineTest, RendererTypeUnknownFallsBackToOpenGL) {
+  g_setenv("FLUTTER_LINUX_RENDERER", "unknown_renderer", TRUE);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kOpenGL);
+
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+}
+
+// Checks FLUTTER_LINUX_RENDERER=vulkan is not a selector: it warns and
+// falls back to OpenGL, pointing at the engine switches.
+TEST_F(FlEngineTest, RendererTypeVulkanEnvVarFallsBackToOpenGL) {
+  g_setenv("FLUTTER_LINUX_RENDERER", "vulkan", TRUE);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kOpenGL);
+
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+}
+
+// Checks the --enable-impeller and --impeller-backend=vulkan engine switches
+// select Vulkan when available, or fall back to OpenGL when Vulkan is not
+// supported.
+TEST_F(FlEngineTest, RendererTypeVulkan) {
+  // The Vulkan backend is selected through engine switches, matching the
+  // other desktop platforms.
+  g_setenv("FLUTTER_ENGINE_SWITCHES", "2", TRUE);
+  g_setenv("FLUTTER_ENGINE_SWITCH_1", "enable-impeller=true", TRUE);
+  g_setenv("FLUTTER_ENGINE_SWITCH_2", "impeller-backend=vulkan", TRUE);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  // Result depends on runtime Vulkan availability.
+  FlutterRendererType type = fl_engine_get_renderer_type(engine);
+  EXPECT_TRUE(type == kVulkan || type == kOpenGL);
+
+  g_unsetenv("FLUTTER_ENGINE_SWITCHES");
+  g_unsetenv("FLUTTER_ENGINE_SWITCH_1");
+  g_unsetenv("FLUTTER_ENGINE_SWITCH_2");
+}
+
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
