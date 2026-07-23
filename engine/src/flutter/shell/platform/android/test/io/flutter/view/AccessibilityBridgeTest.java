@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -3278,6 +3279,62 @@ public class AccessibilityBridgeTest {
     nonHeadingUpdate.sendUpdateToBridge(accessibilityBridge);
     AccessibilityNodeInfo nonHeadingInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
     assertFalse(nonHeadingInfo.isHeading());
+  }
+
+  @Test
+  public void itDoesNotRedundantlyInvalidateRootViewWhenFocusChanges() {
+    BasicMessageChannel mockChannel = mock(BasicMessageChannel.class);
+    AccessibilityChannel accessibilityChannel =
+        new AccessibilityChannel(mockChannel, mock(FlutterJNI.class));
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ mockRootView,
+            /* accessibilityChannel= */ accessibilityChannel,
+            /* accessibilityManager= */ mockManager,
+            /* contentResolver= */ null,
+            /* accessibilityViewEmbedder= */ mockViewEmbedder,
+            /* platformViewsAccessibilityDelegate= */ null);
+
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+
+    // Create two semantics nodes
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    root.label = "root";
+    TestSemanticsNode node1 = new TestSemanticsNode();
+    node1.id = 1;
+    node1.value = "node1";
+    root.children.add(node1);
+    TestSemanticsNode node2 = new TestSemanticsNode();
+    node2.id = 2;
+    node2.value = "node2";
+    root.children.add(node2);
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    // 1. Initial focus on node1 (nothing was focused before).
+    // This should trigger invalidate() on rootAccessibilityView.
+    accessibilityBridge.performAction(1, AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+    verify(mockRootView, times(1)).invalidate();
+
+    // 2. Clear focus on node1, and then focus node2 (focus shifting).
+    // This should NOT trigger invalidate() on rootAccessibilityView because Android
+    // invalidates the view when focus is cleared, making it redundant to invalidate again when
+    // focusing.
+    clearInvocations(mockRootView);
+    accessibilityBridge.performAction(
+        1, AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS, null);
+    accessibilityBridge.performAction(2, AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
+    verify(mockRootView, never()).invalidate();
   }
 
   AccessibilityBridge setUpBridge() {
