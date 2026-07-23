@@ -169,6 +169,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         // new ProjectValidators should be added here for the --suggestions to run
         allProjectValidators: <ProjectValidator>[
           GeneralInfoProjectValidator(),
+          AndroidProjectGradlePluginValidator(),
           VariableDumpMachineProjectValidator(
             logger: globals.logger,
             fileSystem: globals.fs,
