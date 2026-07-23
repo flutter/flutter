@@ -85,7 +85,7 @@ object DependencyVersionChecker {
             "($projectDirectory/app/build.gradle(.kts))."
 
     // The following versions define our support policy for Gradle, Java, AGP, and KGP.
-    // They are loaded from a shared JSON file.
+    // They are loaded from packages/flutter_tools/gradle/src/main/resources/android_support_versions.json.
     // Before updating any "error" version, ensure that you have updated the corresponding
     // "warn" version for a full release to provide advanced warning. See
     // flutter.dev/go/android-dependency-versions for more.

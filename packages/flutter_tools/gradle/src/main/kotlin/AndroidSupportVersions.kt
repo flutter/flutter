@@ -95,6 +95,13 @@ internal data class GradleVersionForAgp(
 )
 
 @Serializable
+internal data class CompatMatrix<T>(
+    val comment: String,
+    val sourceUrls: List<String>,
+    val rules: List<T>
+)
+
+@Serializable
 internal data class AndroidSupportVersions(
     val gradle: VersionRange,
     val java: VersionRange,
@@ -104,12 +111,12 @@ internal data class AndroidSupportVersions(
     val maxKnownVersions: MaxKnownVersions,
     val oldestConsideredVersions: OldestConsideredVersions,
     val oneMajorVersionHigherJavaVersion: String,
-    val gradleAgpCompat: List<GradleAgpCompat>,
-    val javaGradleCompat: List<JavaGradleCompat>,
-    val javaAgpCompat: List<JavaAgpCompat>,
-    val kgpGradleCompat: List<KgpGradleCompat>,
-    val agpKgpCompat: List<AgpKgpCompat>,
-    val gradleVersionForAgp: List<GradleVersionForAgp>
+    val gradleAgpCompat: CompatMatrix<GradleAgpCompat>,
+    val javaGradleCompat: CompatMatrix<JavaGradleCompat>,
+    val javaAgpCompat: CompatMatrix<JavaAgpCompat>,
+    val kgpGradleCompat: CompatMatrix<KgpGradleCompat>,
+    val agpKgpCompat: CompatMatrix<AgpKgpCompat>,
+    val gradleVersionForAgp: CompatMatrix<GradleVersionForAgp>
 ) {
     val warnGradleVersion: Version by lazy { Version.fromString(gradle.warn) }
     val errorGradleVersion: Version by lazy { Version.fromString(gradle.error) }

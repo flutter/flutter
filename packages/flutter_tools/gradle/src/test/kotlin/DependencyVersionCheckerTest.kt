@@ -451,24 +451,60 @@ class DependencyVersionCheckerTest {
                 "javaGradle": "2.0"
               },
               "oneMajorVersionHigherJavaVersion": "26",
-              "gradleAgpCompat": [
-                { "agpMin": "9.1.0", "agpMax": "9.1.99", "gradleMin": "9.3.1", "inclusiveMaxAgp": true }
-              ],
-              "javaGradleCompat": [
-                { "javaMin": "25", "javaMax": "26", "gradleMin": "9.1.0", "gradleMax": "9.2.0" }
-              ],
-              "javaAgpCompat": [
-                { "javaMin": "17", "javaDefault": "17", "agpMin": "8.0", "agpMax": "9.2" }
-              ],
-              "kgpGradleCompat": [
-                { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "gradleMin": "8.5", "gradleMax": "9.5.99", "inclusiveMaxKgp": false, "inclusiveMaxGradle": false }
-              ],
-              "agpKgpCompat": [
-                { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "agpMin": "8.2.2", "agpMax": "9.2.99", "inclusiveMaxKgp": false, "inclusiveMaxAgp": false }
-              ],
-              "gradleVersionForAgp": [
-                { "agpMin": "1.0.0", "agpMax": "1.1.3", "minRequiredGradle": "2.3" }
-              ]
+              "gradleAgpCompat": {
+                "comment": "Gradle-AGP compatibility matrix",
+                "sourceUrls": [
+                  "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle"
+                ],
+                "rules": [
+                  { "agpMin": "9.1.0", "agpMax": "9.1.99", "gradleMin": "9.3.1", "inclusiveMaxAgp": true }
+                ]
+              },
+              "javaGradleCompat": {
+                "comment": "Java-Gradle compatibility matrix",
+                "sourceUrls": [
+                  "https://docs.gradle.org/current/userguide/compatibility.html#java"
+                ],
+                "rules": [
+                  { "javaMin": "25", "javaMax": "26", "gradleMin": "9.1.0", "gradleMax": "9.2.0" }
+                ]
+              },
+              "javaAgpCompat": {
+                "comment": "Java-AGP compatibility matrix",
+                "sourceUrls": [
+                  "https://developer.android.com/studio/releases/gradle-plugin#compatibility"
+                ],
+                "rules": [
+                  { "javaMin": "17", "javaDefault": "17", "agpMin": "8.0", "agpMax": "9.2" }
+                ]
+              },
+              "kgpGradleCompat": {
+                "comment": "Kotlin-Gradle compatibility matrix",
+                "sourceUrls": [
+                  "https://kotlinlang.org/docs/gradle.html#compatibility"
+                ],
+                "rules": [
+                  { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "gradleMin": "8.5", "gradleMax": "9.5.99", "inclusiveMaxKgp": false, "inclusiveMaxGradle": false }
+                ]
+              },
+              "agpKgpCompat": {
+                "comment": "AGP-Kotlin compatibility matrix",
+                "sourceUrls": [
+                  "https://kotlinlang.org/docs/kmp-compatibility-guide.html"
+                ],
+                "rules": [
+                  { "kgpMin": "2.4.0", "kgpMax": "2.4.29", "agpMin": "8.2.2", "agpMax": "9.2.99", "inclusiveMaxKgp": false, "inclusiveMaxAgp": false }
+                ]
+              },
+              "gradleVersionForAgp": {
+                "comment": "Gradle version requirement for AGP",
+                "sourceUrls": [
+                  "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle"
+                ],
+                "rules": [
+                  { "agpMin": "1.0.0", "agpMax": "1.1.3", "minRequiredGradle": "2.3" }
+                ]
+              }
             }
             """.trimIndent()
         val versions = AndroidSupportVersions.fromJson(jsonText)
@@ -498,44 +534,59 @@ class DependencyVersionCheckerTest {
 
         assertEquals("26", versions.oneMajorVersionHigherJavaVersion)
 
-        assertEquals(1, versions.gradleAgpCompat.size)
-        assertEquals("9.1.0", versions.gradleAgpCompat[0].agpMin)
-        assertEquals("9.1.99", versions.gradleAgpCompat[0].agpMax)
-        assertEquals("9.3.1", versions.gradleAgpCompat[0].gradleMin)
-        assertEquals(true, versions.gradleAgpCompat[0].inclusiveMaxAgp)
+        assertEquals("Gradle-AGP compatibility matrix", versions.gradleAgpCompat.comment)
+        assertEquals("https://developer.android.com/studio/releases/gradle-plugin#updating-gradle", versions.gradleAgpCompat.sourceUrls[0])
+        assertEquals(1, versions.gradleAgpCompat.rules.size)
+        assertEquals("9.1.0", versions.gradleAgpCompat.rules[0].agpMin)
+        assertEquals("9.1.99", versions.gradleAgpCompat.rules[0].agpMax)
+        assertEquals("9.3.1", versions.gradleAgpCompat.rules[0].gradleMin)
+        assertEquals(true, versions.gradleAgpCompat.rules[0].inclusiveMaxAgp)
 
-        assertEquals(1, versions.javaGradleCompat.size)
-        assertEquals("25", versions.javaGradleCompat[0].javaMin)
-        assertEquals("26", versions.javaGradleCompat[0].javaMax)
-        assertEquals("9.1.0", versions.javaGradleCompat[0].gradleMin)
-        assertEquals("9.2.0", versions.javaGradleCompat[0].gradleMax)
+        assertEquals("Java-Gradle compatibility matrix", versions.javaGradleCompat.comment)
+        assertEquals("https://docs.gradle.org/current/userguide/compatibility.html#java", versions.javaGradleCompat.sourceUrls[0])
+        assertEquals(1, versions.javaGradleCompat.rules.size)
+        assertEquals("25", versions.javaGradleCompat.rules[0].javaMin)
+        assertEquals("26", versions.javaGradleCompat.rules[0].javaMax)
+        assertEquals("9.1.0", versions.javaGradleCompat.rules[0].gradleMin)
+        assertEquals("9.2.0", versions.javaGradleCompat.rules[0].gradleMax)
 
-        assertEquals(1, versions.javaAgpCompat.size)
-        assertEquals("17", versions.javaAgpCompat[0].javaMin)
-        assertEquals("17", versions.javaAgpCompat[0].javaDefault)
-        assertEquals("8.0", versions.javaAgpCompat[0].agpMin)
-        assertEquals("9.2", versions.javaAgpCompat[0].agpMax)
+        assertEquals("Java-AGP compatibility matrix", versions.javaAgpCompat.comment)
+        assertEquals("https://developer.android.com/studio/releases/gradle-plugin#compatibility", versions.javaAgpCompat.sourceUrls[0])
+        assertEquals(1, versions.javaAgpCompat.rules.size)
+        assertEquals("17", versions.javaAgpCompat.rules[0].javaMin)
+        assertEquals("17", versions.javaAgpCompat.rules[0].javaDefault)
+        assertEquals("8.0", versions.javaAgpCompat.rules[0].agpMin)
+        assertEquals("9.2", versions.javaAgpCompat.rules[0].agpMax)
 
-        assertEquals(1, versions.kgpGradleCompat.size)
-        assertEquals("2.4.0", versions.kgpGradleCompat[0].kgpMin)
-        assertEquals("2.4.29", versions.kgpGradleCompat[0].kgpMax)
-        assertEquals("8.5", versions.kgpGradleCompat[0].gradleMin)
-        assertEquals("9.5.99", versions.kgpGradleCompat[0].gradleMax)
-        assertEquals(false, versions.kgpGradleCompat[0].inclusiveMaxKgp)
-        assertEquals(false, versions.kgpGradleCompat[0].inclusiveMaxGradle)
+        assertEquals("Kotlin-Gradle compatibility matrix", versions.kgpGradleCompat.comment)
+        assertEquals("https://kotlinlang.org/docs/gradle.html#compatibility", versions.kgpGradleCompat.sourceUrls[0])
+        assertEquals(1, versions.kgpGradleCompat.rules.size)
+        assertEquals("2.4.0", versions.kgpGradleCompat.rules[0].kgpMin)
+        assertEquals("2.4.29", versions.kgpGradleCompat.rules[0].kgpMax)
+        assertEquals("8.5", versions.kgpGradleCompat.rules[0].gradleMin)
+        assertEquals("9.5.99", versions.kgpGradleCompat.rules[0].gradleMax)
+        assertEquals(false, versions.kgpGradleCompat.rules[0].inclusiveMaxKgp)
+        assertEquals(false, versions.kgpGradleCompat.rules[0].inclusiveMaxGradle)
 
-        assertEquals(1, versions.agpKgpCompat.size)
-        assertEquals("2.4.0", versions.agpKgpCompat[0].kgpMin)
-        assertEquals("2.4.29", versions.agpKgpCompat[0].kgpMax)
-        assertEquals("8.2.2", versions.agpKgpCompat[0].agpMin)
-        assertEquals("9.2.99", versions.agpKgpCompat[0].agpMax)
-        assertEquals(false, versions.agpKgpCompat[0].inclusiveMaxKgp)
-        assertEquals(false, versions.agpKgpCompat[0].inclusiveMaxAgp)
+        assertEquals("AGP-Kotlin compatibility matrix", versions.agpKgpCompat.comment)
+        assertEquals("https://kotlinlang.org/docs/kmp-compatibility-guide.html", versions.agpKgpCompat.sourceUrls[0])
+        assertEquals(1, versions.agpKgpCompat.rules.size)
+        assertEquals("2.4.0", versions.agpKgpCompat.rules[0].kgpMin)
+        assertEquals("2.4.29", versions.agpKgpCompat.rules[0].kgpMax)
+        assertEquals("8.2.2", versions.agpKgpCompat.rules[0].agpMin)
+        assertEquals("9.2.99", versions.agpKgpCompat.rules[0].agpMax)
+        assertEquals(false, versions.agpKgpCompat.rules[0].inclusiveMaxKgp)
+        assertEquals(false, versions.agpKgpCompat.rules[0].inclusiveMaxAgp)
 
-        assertEquals(1, versions.gradleVersionForAgp.size)
-        assertEquals("1.0.0", versions.gradleVersionForAgp[0].agpMin)
-        assertEquals("1.1.3", versions.gradleVersionForAgp[0].agpMax)
-        assertEquals("2.3", versions.gradleVersionForAgp[0].minRequiredGradle)
+        assertEquals("Gradle version requirement for AGP", versions.gradleVersionForAgp.comment)
+        assertEquals(
+            "https://developer.android.com/studio/releases/gradle-plugin#updating-gradle",
+            versions.gradleVersionForAgp.sourceUrls[0]
+        )
+        assertEquals(1, versions.gradleVersionForAgp.rules.size)
+        assertEquals("1.0.0", versions.gradleVersionForAgp.rules[0].agpMin)
+        assertEquals("1.1.3", versions.gradleVersionForAgp.rules[0].agpMax)
+        assertEquals("2.3", versions.gradleVersionForAgp.rules[0].minRequiredGradle)
     }
 }
 

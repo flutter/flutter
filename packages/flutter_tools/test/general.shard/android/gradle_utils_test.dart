@@ -1307,7 +1307,7 @@ allprojects {
 
       expect(
         getGradleVersionForAndroidPlugin(androidDirectory, testLogger),
-        '6.7', // as per compatibility matrix in gradle_utils.dart
+        '6.7', // as per compatibility matrix in android_support_versions.json
       );
     });
   });

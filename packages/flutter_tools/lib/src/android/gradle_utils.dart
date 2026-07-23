@@ -614,7 +614,7 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
   // Continuous KGP version handling is preferred in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
-  for (final KgpGradleCompat data in _supportVersions.kgpGradleCompat) {
+  for (final KgpGradleCompat data in _supportVersions.kgpGradleCompat.rules) {
     if (isWithinVersionRange(
       kgpV,
       min: data.kgpMin,
@@ -682,7 +682,7 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   // Continuous KGP version handling is preferred in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
-  for (final AgpKgpCompat data in _supportVersions.agpKgpCompat) {
+  for (final AgpKgpCompat data in _supportVersions.agpKgpCompat.rules) {
     if (isWithinVersionRange(
       kgpV,
       min: data.kgpMin,
@@ -704,7 +704,7 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
 
 /// Returns the compatible Gradle version range for a given Kotlin Gradle Plugin (KGP) version.
 String? getCompatibleGradleRangeForKgp(String kgpV) {
-  for (final KgpGradleCompat data in _supportVersions.kgpGradleCompat) {
+  for (final KgpGradleCompat data in _supportVersions.kgpGradleCompat.rules) {
     if (isWithinVersionRange(
       kgpV,
       min: data.kgpMin,
@@ -723,7 +723,7 @@ String? getCompatibleGradleRangeForKgp(String kgpV) {
 String? getCompatibleKgpRangeForGradle(String gradleV) {
   KgpGradleCompat? highestMatch;
   KgpGradleCompat? lowestMatch;
-  for (final KgpGradleCompat data in _supportVersions.kgpGradleCompat) {
+  for (final KgpGradleCompat data in _supportVersions.kgpGradleCompat.rules) {
     final bool compatible = isWithinVersionRange(
       gradleV,
       min: data.gradleMin,
@@ -745,7 +745,7 @@ String? getCompatibleKgpRangeForGradle(String gradleV) {
 
 /// Returns the compatible Android Gradle Plugin (AGP) version range for a given Kotlin Gradle Plugin (KGP) version.
 String? getCompatibleAgpRangeForKgp(String kgpV) {
-  for (final AgpKgpCompat data in _supportVersions.agpKgpCompat) {
+  for (final AgpKgpCompat data in _supportVersions.agpKgpCompat.rules) {
     if (isWithinVersionRange(
       kgpV,
       min: data.kgpMin,
@@ -764,7 +764,7 @@ String? getCompatibleAgpRangeForKgp(String kgpV) {
 String? getCompatibleKgpRangeForAgp(String agpV) {
   AgpKgpCompat? highestMatch;
   AgpKgpCompat? lowestMatch;
-  for (final AgpKgpCompat data in _supportVersions.agpKgpCompat) {
+  for (final AgpKgpCompat data in _supportVersions.agpKgpCompat.rules) {
     final bool compatible = isWithinVersionRange(
       agpV,
       min: data.agpMin,
@@ -837,7 +837,7 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
     return validGradle;
   }
 
-  for (final GradleAgpCompat data in _supportVersions.gradleAgpCompat) {
+  for (final GradleAgpCompat data in _supportVersions.gradleAgpCompat.rules) {
     if (isWithinVersionRange(
       agpV,
       min: data.agpMin,
@@ -914,7 +914,7 @@ bool validateJavaAndGradle(
   }
 
   // Begin known Java <-> Gradle evaluation.
-  for (final JavaGradleCompat data in _supportVersions.javaGradleCompat) {
+  for (final JavaGradleCompat data in _supportVersions.javaGradleCompat.rules) {
     if (isWithinVersionRange(
       javaVersion,
       min: data.javaMin,
@@ -944,7 +944,7 @@ bool validateJavaAndGradle(
 /// this seems like a mistake, the caller may need to update the
 /// android_support_versions.json detailing Java/Gradle compatibility.
 JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(Logger logger, {required String javaV}) {
-  for (final JavaGradleCompat data in _supportVersions.javaGradleCompat) {
+  for (final JavaGradleCompat data in _supportVersions.javaGradleCompat.rules) {
     if (isWithinVersionRange(javaV, min: data.javaMin, max: data.javaMax, inclusiveMax: false)) {
       return data;
     }
@@ -991,7 +991,7 @@ bool validateJavaAndAgp(Logger logger, {required String? javaV, required String?
   }
 
   // Begin known Java <-> AGP evaluation.
-  for (final JavaAgpCompat data in _supportVersions.javaAgpCompat) {
+  for (final JavaAgpCompat data in _supportVersions.javaAgpCompat.rules) {
     if (isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax)) {
       return isWithinVersionRange(javaV, min: data.javaMin, max: '100.100');
     }
@@ -1004,7 +1004,7 @@ bool validateJavaAndAgp(Logger logger, {required String? javaV, required String?
 /// Returns compatibility information concerning the minimum AGP
 /// version for the specified Java version.
 JavaAgpCompat? getMinimumAgpVersionForJavaVersion(Logger logger, {required String javaV}) {
-  for (final JavaAgpCompat data in _supportVersions.javaAgpCompat) {
+  for (final JavaAgpCompat data in _supportVersions.javaAgpCompat.rules) {
     if (isWithinVersionRange(javaV, min: data.javaMin, max: '100.100')) {
       return data;
     }
@@ -1020,7 +1020,7 @@ JavaAgpCompat? getMinimumAgpVersionForJavaVersion(Logger logger, {required Strin
 VersionRange getJavaVersionFor({required String gradleV, required String agpV}) {
   // Find minimum Java version based on AGP compatibility.
   String? minJavaVersion;
-  for (final JavaAgpCompat data in _supportVersions.javaAgpCompat) {
+  for (final JavaAgpCompat data in _supportVersions.javaAgpCompat.rules) {
     if (isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax)) {
       minJavaVersion = data.javaMin;
     }
@@ -1028,7 +1028,7 @@ VersionRange getJavaVersionFor({required String gradleV, required String agpV}) 
 
   // Find maximum Java version based on Gradle compatibility.
   String? maxJavaVersion;
-  for (final JavaGradleCompat data in _supportVersions.javaGradleCompat.reversed) {
+  for (final JavaGradleCompat data in _supportVersions.javaGradleCompat.rules.reversed) {
     if (isWithinVersionRange(
       gradleV,
       min: data.gradleMin,
@@ -1045,7 +1045,7 @@ VersionRange getJavaVersionFor({required String gradleV, required String agpV}) 
 /// by picking the largest compatible version from
 /// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 String getGradleVersionFor(String agpV) {
-  for (final GradleVersionForAgp data in _supportVersions.gradleVersionForAgp) {
+  for (final GradleVersionForAgp data in _supportVersions.gradleVersionForAgp.rules) {
     if (isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax)) {
       return data.minRequiredGradle;
     }

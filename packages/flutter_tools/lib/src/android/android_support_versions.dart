@@ -5,6 +5,7 @@
 // Co-evolve with packages/flutter_tools/gradle/src/main/kotlin/AndroidSupportVersions.kt
 
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import '../base/file_system.dart';
 
@@ -74,12 +75,7 @@ class MaxKnownVersions {
       'agp': final String agp,
       'agpWithKotlin': final String agpWithKotlin,
     }) {
-      return MaxKnownVersions(
-        gradle: gradle,
-        kgp: kgp,
-        agp: agp,
-        agpWithKotlin: agpWithKotlin,
-      );
+      return MaxKnownVersions(gradle: gradle, kgp: kgp, agp: agp, agpWithKotlin: agpWithKotlin);
     }
     throw FormatException('Invalid MaxKnownVersions JSON: $json');
   }
@@ -482,12 +478,12 @@ class AndroidSupportVersions {
       'maxKnownVersions': final Map<String, dynamic> maxKnownVersions,
       'oldestConsideredVersions': final Map<String, dynamic> oldestConsideredVersions,
       'oneMajorVersionHigherJavaVersion': final String oneMajorVersionHigherJavaVersion,
-      'gradleAgpCompat': final List<dynamic> gradleAgpCompat,
-      'javaGradleCompat': final List<dynamic> javaGradleCompat,
-      'javaAgpCompat': final List<dynamic> javaAgpCompat,
-      'kgpGradleCompat': final List<dynamic> kgpGradleCompat,
-      'agpKgpCompat': final List<dynamic> agpKgpCompat,
-      'gradleVersionForAgp': final List<dynamic> gradleVersionForAgp,
+      'gradleAgpCompat': final Map<String, dynamic> gradleAgpCompat,
+      'javaGradleCompat': final Map<String, dynamic> javaGradleCompat,
+      'javaAgpCompat': final Map<String, dynamic> javaAgpCompat,
+      'kgpGradleCompat': final Map<String, dynamic> kgpGradleCompat,
+      'agpKgpCompat': final Map<String, dynamic> agpKgpCompat,
+      'gradleVersionForAgp': final Map<String, dynamic> gradleVersionForAgp,
     }) {
       return AndroidSupportVersions(
         gradle: VersionThresholds.fromJson(gradle),
@@ -498,12 +494,15 @@ class AndroidSupportVersions {
         maxKnownVersions: MaxKnownVersions.fromJson(maxKnownVersions),
         oldestConsideredVersions: OldestConsideredVersions.fromJson(oldestConsideredVersions),
         oneMajorVersionHigherJavaVersion: oneMajorVersionHigherJavaVersion,
-        gradleAgpCompat: gradleAgpCompat.map((e) => GradleAgpCompat.fromJson(e as Map<String, dynamic>)).toList(),
-        javaGradleCompat: javaGradleCompat.map((e) => JavaGradleCompat.fromJson(e as Map<String, dynamic>)).toList(),
-        javaAgpCompat: javaAgpCompat.map((e) => JavaAgpCompat.fromJson(e as Map<String, dynamic>)).toList(),
-        kgpGradleCompat: kgpGradleCompat.map((e) => KgpGradleCompat.fromJson(e as Map<String, dynamic>)).toList(),
-        agpKgpCompat: agpKgpCompat.map((e) => AgpKgpCompat.fromJson(e as Map<String, dynamic>)).toList(),
-        gradleVersionForAgp: gradleVersionForAgp.map((e) => GradleVersionForAgp.fromJson(e as Map<String, dynamic>)).toList(),
+        gradleAgpCompat: CompatMatrix.fromJson(gradleAgpCompat, GradleAgpCompat.fromJson),
+        javaGradleCompat: CompatMatrix.fromJson(javaGradleCompat, JavaGradleCompat.fromJson),
+        javaAgpCompat: CompatMatrix.fromJson(javaAgpCompat, JavaAgpCompat.fromJson),
+        kgpGradleCompat: CompatMatrix.fromJson(kgpGradleCompat, KgpGradleCompat.fromJson),
+        agpKgpCompat: CompatMatrix.fromJson(agpKgpCompat, AgpKgpCompat.fromJson),
+        gradleVersionForAgp: CompatMatrix.fromJson(
+          gradleVersionForAgp,
+          GradleVersionForAgp.fromJson,
+        ),
       );
     }
     throw const FormatException('Invalid AndroidSupportVersions JSON');
@@ -522,10 +521,50 @@ class AndroidSupportVersions {
   final MaxKnownVersions maxKnownVersions;
   final OldestConsideredVersions oldestConsideredVersions;
   final String oneMajorVersionHigherJavaVersion;
-  final List<GradleAgpCompat> gradleAgpCompat;
-  final List<JavaGradleCompat> javaGradleCompat;
-  final List<JavaAgpCompat> javaAgpCompat;
-  final List<KgpGradleCompat> kgpGradleCompat;
-  final List<AgpKgpCompat> agpKgpCompat;
-  final List<GradleVersionForAgp> gradleVersionForAgp;
+  final CompatMatrix<GradleAgpCompat> gradleAgpCompat;
+  final CompatMatrix<JavaGradleCompat> javaGradleCompat;
+  final CompatMatrix<JavaAgpCompat> javaAgpCompat;
+  final CompatMatrix<KgpGradleCompat> kgpGradleCompat;
+  final CompatMatrix<AgpKgpCompat> agpKgpCompat;
+  final CompatMatrix<GradleVersionForAgp> gradleVersionForAgp;
+}
+
+@immutable
+class CompatMatrix<T> {
+  const CompatMatrix({required this.comment, required this.sourceUrls, required this.rules});
+
+  factory CompatMatrix.fromJson(
+    Map<String, dynamic> json,
+    T Function(Map<String, dynamic>) ruleFromJson,
+  ) {
+    if (json case {
+      'comment': final String comment,
+      'sourceUrls': final List<dynamic> sourceUrls,
+      'rules': final List<dynamic> rules,
+    }) {
+      return CompatMatrix<T>(
+        comment: comment,
+        sourceUrls: sourceUrls.cast<String>(),
+        rules: rules.map((e) => ruleFromJson(e as Map<String, dynamic>)).toList(),
+      );
+    }
+    throw FormatException('Invalid CompatMatrix JSON: $json');
+  }
+
+  final String comment;
+  final List<String> sourceUrls;
+  final List<T> rules;
+
+  @override
+  bool operator ==(Object other) =>
+      other is CompatMatrix<T> &&
+      other.comment == comment &&
+      const ListEquality<String>().equals(other.sourceUrls, sourceUrls) &&
+      const ListEquality<dynamic>().equals(other.rules, rules);
+
+  @override
+  int get hashCode => Object.hash(comment, Object.hashAll(sourceUrls), Object.hashAll(rules));
+
+  @override
+  String toString() => 'CompatMatrix(comment: $comment, sourceUrls: $sourceUrls, rules: $rules)';
 }
