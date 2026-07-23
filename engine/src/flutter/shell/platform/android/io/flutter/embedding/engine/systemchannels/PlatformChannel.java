@@ -30,17 +30,34 @@ public class PlatformChannel {
   @NonNull public final MethodChannel channel;
   @Nullable private PlatformMessageHandler platformMessageHandler;
 
+  @Nullable @VisibleForTesting Integer pendingAndroidOrientation;
+  @Nullable @VisibleForTesting AppSwitcherDescription pendingAppSwitcherDescription;
+  @Nullable @VisibleForTesting List<SystemUiOverlay> pendingOverlays;
+  @Nullable @VisibleForTesting SystemUiMode pendingSystemUiMode;
+  @Nullable @VisibleForTesting SystemChromeStyle pendingSystemUiOverlayStyle;
+  @Nullable @VisibleForTesting Boolean pendingFrameworkHandlesBack;
+  @VisibleForTesting boolean pendingSystemUiChangeListener = false;
+
+  /**
+   * Clears all cached system chrome configurations.
+   *
+   * <p>Typically called during a Hot Restart to prevent replaying stale configurations.
+   */
+  public void clearData() {
+    pendingAndroidOrientation = null;
+    pendingAppSwitcherDescription = null;
+    pendingOverlays = null;
+    pendingSystemUiMode = null;
+    pendingSystemUiOverlayStyle = null;
+    pendingFrameworkHandlesBack = null;
+    pendingSystemUiChangeListener = false;
+  }
+
   @NonNull @VisibleForTesting
   final MethodChannel.MethodCallHandler parsingMethodCallHandler =
       new MethodChannel.MethodCallHandler() {
         @Override
         public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          if (platformMessageHandler == null) {
-            // If no explicit PlatformMessageHandler has been registered then we don't
-            // need to forward this call to an API. Return.
-            return;
-          }
-
           String method = call.method;
           Object arguments = call.arguments;
           Log.v(TAG, "Received '" + method + "' message.");
@@ -49,7 +66,9 @@ public class PlatformChannel {
               case "SystemSound.play":
                 try {
                   SoundType soundType = SoundType.fromValue((String) arguments);
-                  platformMessageHandler.playSystemSound(soundType);
+                  if (platformMessageHandler != null) {
+                    platformMessageHandler.playSystemSound(soundType);
+                  }
                   result.success(null);
                 } catch (NoSuchFieldException exception) {
                   // The desired sound type does not exist.
@@ -60,7 +79,9 @@ public class PlatformChannel {
                 try {
                   HapticFeedbackType feedbackType =
                       HapticFeedbackType.fromValue((String) arguments);
-                  platformMessageHandler.vibrateHapticFeedback(feedbackType);
+                  if (platformMessageHandler != null) {
+                    platformMessageHandler.vibrateHapticFeedback(feedbackType);
+                  }
                   result.success(null);
                 } catch (NoSuchFieldException exception) {
                   // The desired feedback type does not exist.
@@ -70,7 +91,10 @@ public class PlatformChannel {
               case "SystemChrome.setPreferredOrientations":
                 try {
                   int androidOrientation = decodeOrientations((JSONArray) arguments);
-                  platformMessageHandler.setPreferredOrientations(androidOrientation);
+                  pendingAndroidOrientation = androidOrientation;
+                  if (platformMessageHandler != null) {
+                    platformMessageHandler.setPreferredOrientations(androidOrientation);
+                  }
                   result.success(null);
                 } catch (JSONException | NoSuchFieldException exception) {
                   // JSONException: One or more expected fields were either omitted or referenced an
@@ -84,7 +108,10 @@ public class PlatformChannel {
                 try {
                   AppSwitcherDescription description =
                       decodeAppSwitcherDescription((JSONObject) arguments);
-                  platformMessageHandler.setApplicationSwitcherDescription(description);
+                  pendingAppSwitcherDescription = description;
+                  if (platformMessageHandler != null) {
+                    platformMessageHandler.setApplicationSwitcherDescription(description);
+                  }
                   result.success(null);
                 } catch (JSONException exception) {
                   // One or more expected fields were either omitted or referenced an invalid type.
@@ -94,7 +121,11 @@ public class PlatformChannel {
               case "SystemChrome.setEnabledSystemUIOverlays":
                 try {
                   List<SystemUiOverlay> overlays = decodeSystemUiOverlays((JSONArray) arguments);
-                  platformMessageHandler.showSystemOverlays(overlays);
+                  pendingOverlays = overlays;
+                  pendingSystemUiMode = null;
+                  if (platformMessageHandler != null) {
+                    platformMessageHandler.showSystemOverlays(overlays);
+                  }
                   result.success(null);
                 } catch (JSONException | NoSuchFieldException exception) {
                   // JSONException: One or more expected fields were either omitted or referenced an
@@ -106,7 +137,11 @@ public class PlatformChannel {
               case "SystemChrome.setEnabledSystemUIMode":
                 try {
                   SystemUiMode mode = decodeSystemUiMode((String) arguments);
-                  platformMessageHandler.showSystemUiMode(mode);
+                  pendingSystemUiMode = mode;
+                  pendingOverlays = null;
+                  if (platformMessageHandler != null) {
+                    platformMessageHandler.showSystemUiMode(mode);
+                  }
                   result.success(null);
                 } catch (JSONException | NoSuchFieldException exception) {
                   // JSONException: One or more expected fields were either omitted or referenced an
@@ -116,18 +151,26 @@ public class PlatformChannel {
                 }
                 break;
               case "SystemChrome.setSystemUIChangeListener":
-                platformMessageHandler.setSystemUiChangeListener();
+                pendingSystemUiChangeListener = true;
+                if (platformMessageHandler != null) {
+                  platformMessageHandler.setSystemUiChangeListener();
+                }
                 result.success(null);
                 break;
               case "SystemChrome.restoreSystemUIOverlays":
-                platformMessageHandler.restoreSystemUiOverlays();
+                if (platformMessageHandler != null) {
+                  platformMessageHandler.restoreSystemUiOverlays();
+                }
                 result.success(null);
                 break;
               case "SystemChrome.setSystemUIOverlayStyle":
                 try {
                   SystemChromeStyle systemChromeStyle =
                       decodeSystemChromeStyle((JSONObject) arguments);
-                  platformMessageHandler.setSystemUiOverlayStyle(systemChromeStyle);
+                  pendingSystemUiOverlayStyle = systemChromeStyle;
+                  if (platformMessageHandler != null) {
+                    platformMessageHandler.setSystemUiOverlayStyle(systemChromeStyle);
+                  }
                   result.success(null);
                 } catch (JSONException | NoSuchFieldException exception) {
                   // JSONException: One or more expected fields were either omitted or referenced an
@@ -139,12 +182,17 @@ public class PlatformChannel {
               case "SystemNavigator.setFrameworkHandlesBack":
                 {
                   boolean frameworkHandlesBack = (boolean) arguments;
-                  platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBack);
+                  pendingFrameworkHandlesBack = frameworkHandlesBack;
+                  if (platformMessageHandler != null) {
+                    platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBack);
+                  }
                   result.success(null);
                   break;
                 }
               case "SystemNavigator.pop":
-                platformMessageHandler.popSystemNavigator();
+                if (platformMessageHandler != null) {
+                  platformMessageHandler.popSystemNavigator();
+                }
                 result.success(null);
                 break;
               case "Clipboard.getData":
@@ -158,15 +206,20 @@ public class PlatformChannel {
                       // An unsupported content format was requested. Return failure.
                       result.error(
                           "error", "No such clipboard content format: " + contentFormatName, null);
+                      return;
                     }
                   }
 
-                  CharSequence clipboardContent =
-                      platformMessageHandler.getClipboardData(clipboardFormat);
-                  if (clipboardContent != null) {
-                    JSONObject response = new JSONObject();
-                    response.put("text", clipboardContent);
-                    result.success(response);
+                  if (platformMessageHandler != null) {
+                    CharSequence clipboardContent =
+                        platformMessageHandler.getClipboardData(clipboardFormat);
+                    if (clipboardContent != null) {
+                      JSONObject response = new JSONObject();
+                      response.put("text", clipboardContent);
+                      result.success(response);
+                    } else {
+                      result.success(null);
+                    }
                   } else {
                     result.success(null);
                   }
@@ -175,21 +228,29 @@ public class PlatformChannel {
               case "Clipboard.setData":
                 {
                   String clipboardContent = ((JSONObject) arguments).getString("text");
-                  platformMessageHandler.setClipboardData(clipboardContent);
+                  if (platformMessageHandler != null) {
+                    platformMessageHandler.setClipboardData(clipboardContent);
+                  }
                   result.success(null);
                   break;
                 }
               case "Clipboard.hasStrings":
                 {
-                  boolean hasStrings = platformMessageHandler.clipboardHasStrings();
-                  JSONObject response = new JSONObject();
-                  response.put("value", hasStrings);
-                  result.success(response);
+                  if (platformMessageHandler != null) {
+                    boolean hasStrings = platformMessageHandler.clipboardHasStrings();
+                    JSONObject response = new JSONObject();
+                    response.put("value", hasStrings);
+                    result.success(response);
+                  } else {
+                    result.success(null);
+                  }
                   break;
                 }
               case "Share.invoke":
                 String text = (String) arguments;
-                platformMessageHandler.share(text);
+                if (platformMessageHandler != null) {
+                  platformMessageHandler.share(text);
+                }
                 result.success(null);
                 break;
               default:
@@ -221,6 +282,32 @@ public class PlatformChannel {
    */
   public void setPlatformMessageHandler(@Nullable PlatformMessageHandler platformMessageHandler) {
     this.platformMessageHandler = platformMessageHandler;
+    if (platformMessageHandler != null) {
+      // Replay any system chrome configurations that were received and cached
+      // before this platform message handler was attached (e.g. during add-to-app
+      // cached engine scenarios).
+      if (pendingAndroidOrientation != null) {
+        platformMessageHandler.setPreferredOrientations(pendingAndroidOrientation);
+      }
+      if (pendingAppSwitcherDescription != null) {
+        platformMessageHandler.setApplicationSwitcherDescription(pendingAppSwitcherDescription);
+      }
+      if (pendingOverlays != null) {
+        platformMessageHandler.showSystemOverlays(pendingOverlays);
+      }
+      if (pendingSystemUiMode != null) {
+        platformMessageHandler.showSystemUiMode(pendingSystemUiMode);
+      }
+      if (pendingSystemUiOverlayStyle != null) {
+        platformMessageHandler.setSystemUiOverlayStyle(pendingSystemUiOverlayStyle);
+      }
+      if (pendingFrameworkHandlesBack != null) {
+        platformMessageHandler.setFrameworkHandlesBack(pendingFrameworkHandlesBack);
+      }
+      if (pendingSystemUiChangeListener) {
+        platformMessageHandler.setSystemUiChangeListener();
+      }
+    }
   }
 
   /** Informs Flutter of a change in the SystemUI overlays. */
