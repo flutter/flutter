@@ -45,6 +45,22 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
 
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+
+  BOOL performedLegacyCallback = NO;
+  if ([self respondsToSelector:@selector(pluginRegistrant)]) {
+    [self.pluginRegistrant registerWithRegistry:self];
+    performedLegacyCallback = YES;
+  }
+
+  BOOL performedImplicitCallback = [[self.launchEngine acquireEngine] performImplicitEngineCallback];
+
+  if (!performedImplicitCallback && !performedLegacyCallback) {
+    // Discard the launch engine if unregistered.
+    // We have to keep the engine if registered, even if FlutterVC is never shown
+    // because some non-UI plugins (e.g. background task schedulers) may not rely on FlutterVC.
+    (void)[self.launchEngine takeEngine];
+  }
+
   return [self.lifeCycleDelegate application:application
               willFinishLaunchingWithOptions:launchOptions];
 }
