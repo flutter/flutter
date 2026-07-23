@@ -13,6 +13,18 @@ import 'navigator_utils.dart';
 const double _kTopGapRatio = 0.08;
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/175198.
+  // CupertinoSheetRoute extends PageRoute and previously surfaced PageRoute's
+  // configurable fullscreenDialog property on the rendered dartdoc page. The
+  // override pins the value to false so a sheet route is never reported as a
+  // full-screen dialog.
+  test('CupertinoSheetRoute.fullscreenDialog is always false', () {
+    final CupertinoSheetRoute<void> route = CupertinoSheetRoute<void>(
+      builder: (BuildContext context) => const SizedBox(),
+    );
+    expect(route.fullscreenDialog, isFalse);
+  });
+
   testWidgets('Sheet route does not cover the whole screen', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
 
