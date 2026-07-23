@@ -8,6 +8,7 @@
 
 #include <EGL/egl.h>
 
+#include "flutter/fml/task_runner_util.h"
 #include "flutter/shell/gpu/gpu_surface_gl_skia.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
 
@@ -61,7 +62,9 @@ ShellTestPlatformViewGL::ShellTestPlatformViewGL(
       return;
     }
     impeller_context_ = impeller::ContextGLES::Create(
-        impeller::Flags{}, std::move(gl), ShaderLibraryMappings(), true);
+        impeller::Flags{}, std::move(gl), ShaderLibraryMappings(), true,
+        std::make_shared<fml::WrapperBasicTaskRunner>(
+            task_runners.GetIOTaskRunner()));
   }
 }
 
