@@ -192,6 +192,47 @@ class AndroidValidator extends DoctorValidator {
     }
   }
 
+  Future<void> _checkEmulatorAcceleration(
+    AndroidSdk androidSdk,
+    List<ValidationMessage> messages,
+  ) async {
+    if (androidSdk.emulatorPath == null) {
+      return;
+    }
+    if (!_processManager.canRun(androidSdk.emulatorPath)) {
+      return;
+    }
+    try {
+      final ProcessResult result = await _processManager.run(<Object>[
+        androidSdk.emulatorPath!,
+        '-accel-check',
+      ]);
+      var accelerated = false;
+      if (result.exitCode == 0) {
+        final List<String> lines = const LineSplitter().convert(result.stdout.toString());
+        final int accelIndex = lines.indexWhere(
+          (String line) => line.trim().toLowerCase() == 'accel:',
+        );
+        if (accelIndex != -1 &&
+            accelIndex + 1 < lines.length &&
+            lines[accelIndex + 1].trim() == '0') {
+          accelerated = true;
+        }
+      }
+      if (!accelerated) {
+        messages.add(
+          const ValidationMessage.hint(
+            'Android emulator VM acceleration is not configured.\n'
+            'Please follow the instructions here to enable VM acceleration:\n'
+            'https://developer.android.com/studio/run/emulator-acceleration.html',
+          ),
+        );
+      }
+    } on Exception catch (error) {
+      _logger.printTrace('Emulator acceleration check failed: $error');
+    }
+  }
+
   String _androidSdkLocation(String directory) => 'Android SDK at $directory';
 
   String _androidSdkPlatformToolsVersion(String platform, String tools) =>
@@ -224,6 +265,7 @@ class AndroidValidator extends DoctorValidator {
         'Emulator version ${await getEmulatorVersion(androidSdk, _processManager) ?? 'unknown'}',
       ),
     );
+    await _checkEmulatorAcceleration(androidSdk, messages);
 
     _task = 'Validating Android SDK command line tools are available';
     if (!androidSdk.cmdlineToolsAvailable) {

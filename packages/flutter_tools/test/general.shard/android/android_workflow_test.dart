@@ -442,6 +442,12 @@ Review licenses that have not been accepted (y/N)?
         stdout: 'INFO    | Android emulator version 35.2.10.0 (build_id 12414864) (CL:N/A)',
       ),
     );
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[sdk.emulatorPath!, '-accel-check'],
+        stdout: 'accel:\n0\nHAXM version 6.0.1 (3) is installed and usable.\naccel',
+      ),
+    );
     final ValidationResult validationResult = await AndroidValidator(
       java: FakeJava(),
       androidSdk: sdk,
@@ -488,8 +494,7 @@ Review licenses that have not been accepted (y/N)?
       ..licensesAvailable = true
       ..platformToolsAvailable = false
       ..cmdlineToolsAvailable = true
-      ..directory = fileSystem.directory('/foo/bar')
-      ..emulatorPath = 'path/to/emulator';
+      ..directory = fileSystem.directory('/foo/bar');
     final ValidationResult validationResult = await AndroidValidator(
       java: FakeJava(),
       androidSdk: sdk,
@@ -523,8 +528,7 @@ Review licenses that have not been accepted (y/N)?
       // Test with invalid SDK and build tools
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager'
-      ..latestVersion = sdkVersion
-      ..emulatorPath = 'path/to/emulator';
+      ..latestVersion = sdkVersion;
 
     final String errorMessage = UserMessages().androidSdkBuildToolsOutdated(
       gradle_utils.compileSdkVersionInt,
@@ -573,8 +577,7 @@ Review licenses that have not been accepted (y/N)?
       ..licensesAvailable = true
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = false
-      ..directory = fileSystem.directory('/foo/bar')
-      ..emulatorPath = 'path/to/emulator';
+      ..directory = fileSystem.directory('/foo/bar');
 
     final androidValidator = AndroidValidator(
       java: FakeJava(),
@@ -623,8 +626,7 @@ Review licenses that have not been accepted (y/N)?
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager'
-      ..emulatorPath = 'path/to/emulator';
+      ..sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.latestVersion = sdkVersion;
 
     const javaVersionText = 'openjdk version "1.7.0_212"';
@@ -721,8 +723,7 @@ Android sdkmanager tool was found, but failed to run
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager'
-      ..emulatorPath = 'path/to/emulator';
+      ..sdkManagerPath = '/foo/bar/sdkmanager';
 
     final ValidationResult validationResult = await AndroidValidator(
       java: FakeJava(),
@@ -761,8 +762,7 @@ Android sdkmanager tool was found, but failed to run
         ..platformToolsAvailable = true
         ..cmdlineToolsAvailable = true
         ..directory = fileSystem.directory('/foo/bar')
-        ..sdkManagerPath = '/foo/bar/sdkmanager'
-        ..emulatorPath = 'path/to/emulator';
+        ..sdkManagerPath = '/foo/bar/sdkmanager';
 
       final ValidationResult validationResult = await AndroidValidator(
         java: FakeJava(javaSource: JavaSource.javaHome),
@@ -800,8 +800,7 @@ Android sdkmanager tool was found, but failed to run
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager'
-      ..emulatorPath = 'path/to/emulator';
+      ..sdkManagerPath = '/foo/bar/sdkmanager';
 
     final ValidationResult validationResult = await AndroidValidator(
       java: FakeJava(javaSource: JavaSource.path),
@@ -837,8 +836,7 @@ Android sdkmanager tool was found, but failed to run
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager'
-      ..emulatorPath = 'path/to/emulator';
+      ..sdkManagerPath = '/foo/bar/sdkmanager';
 
     final ValidationResult validationResult = await AndroidValidator(
       java: FakeJava(javaSource: JavaSource.flutterConfig),
@@ -873,7 +871,6 @@ Android sdkmanager tool was found, but failed to run
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..emulatorPath = 'path/to/emulator'
       ..latestVersion = (FakeAndroidSdkVersion()
         ..sdkLevel = gradle_utils.compileSdkVersionInt
         ..buildToolsVersion = gradle_utils.minBuildToolsVersion)
@@ -912,7 +909,6 @@ Android sdkmanager tool was found, but failed to run
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..emulatorPath = 'path/to/emulator'
       ..latestVersion = (FakeAndroidSdkVersion()
         ..sdkLevel = gradle_utils.compileSdkVersionInt
         ..buildToolsVersion = gradle_utils.minBuildToolsVersion)
