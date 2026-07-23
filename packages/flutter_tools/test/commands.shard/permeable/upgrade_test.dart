@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(https://github.com/flutter/flutter/issues/189919): Remove when the
-// execution order dependency is resolved.
+// TODO(team-tools): Remove when the execution order dependency is resolved.
+// See https://github.com/flutter/flutter/issues/189919
 @Tags(<String>['no-shuffle'])
 library;
 
