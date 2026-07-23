@@ -573,6 +573,9 @@ class PageScrollPhysics extends ScrollPhysics {
     return PageScrollPhysics(parent: buildParent(ancestor));
   }
 
+  @override
+  bool get snapsToPages => true;
+
   double _getPage(ScrollMetrics position) {
     if (position is _PagePosition) {
       return position.page!;
