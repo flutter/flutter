@@ -217,36 +217,41 @@ void main() {
   });
 
   testGesture('Should not recognize two overlapping taps (FIFO)', (GestureTester tester) {
-    final tap = TapGestureRecognizer();
+    try {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final tap = TapGestureRecognizer();
 
-    var tapsRecognized = 0;
-    tap.onTap = () {
-      tapsRecognized++;
-    };
+      var tapsRecognized = 0;
+      tap.onTap = () {
+        tapsRecognized++;
+      };
 
-    tap.addPointer(down1);
-    tester.closeArena(1);
-    expect(tapsRecognized, 0);
-    tester.route(down1);
-    expect(tapsRecognized, 0);
+      tap.addPointer(down1);
+      tester.closeArena(1);
+      expect(tapsRecognized, 0);
+      tester.route(down1);
+      expect(tapsRecognized, 0);
 
-    tap.addPointer(down2);
-    tester.closeArena(2);
-    expect(tapsRecognized, 0);
-    tester.route(down1);
-    expect(tapsRecognized, 0);
+      tap.addPointer(down2);
+      tester.closeArena(2);
+      expect(tapsRecognized, 0);
+      tester.route(down1);
+      expect(tapsRecognized, 0);
 
-    tester.route(up1);
-    expect(tapsRecognized, 1);
-    GestureBinding.instance.gestureArena.sweep(1);
-    expect(tapsRecognized, 1);
+      tester.route(up1);
+      expect(tapsRecognized, 1);
+      GestureBinding.instance.gestureArena.sweep(1);
+      expect(tapsRecognized, 1);
 
-    tester.route(up2);
-    expect(tapsRecognized, 1);
-    GestureBinding.instance.gestureArena.sweep(2);
-    expect(tapsRecognized, 1);
+      tester.route(up2);
+      expect(tapsRecognized, 1);
+      GestureBinding.instance.gestureArena.sweep(2);
+      expect(tapsRecognized, 1);
 
-    tap.dispose();
+      tap.dispose();
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   testGesture('Should not recognize two overlapping taps (FILO)', (GestureTester tester) {
@@ -663,49 +668,54 @@ void main() {
   });
 
   testGesture('non-primary pointers does not trigger timeout', (GestureTester tester) {
-    // Regression test for https://github.com/flutter/flutter/issues/43310
-    // Pointer1 down, pointer2 down, then pointer 1 up, all within the timeout.
-    // In this way, `BaseTapGestureRecognizer.didExceedDeadline` can be triggered
-    // after its `_reset`.
-    final tap = TapGestureRecognizer();
-    addTearDown(tap.dispose);
+    try {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      // Regression test for https://github.com/flutter/flutter/issues/43310
+      // Pointer1 down, pointer2 down, then pointer 1 up, all within the timeout.
+      // In this way, `BaseTapGestureRecognizer.didExceedDeadline` can be triggered
+      // after its `_reset`.
+      final tap = TapGestureRecognizer();
+      addTearDown(tap.dispose);
 
-    final recognized = <String>[];
-    tap.onTapDown = (_) {
-      recognized.add('down');
-    };
-    tap.onTapUp = (_) {
-      recognized.add('up');
-    };
-    tap.onTap = () {
-      recognized.add('tap');
-    };
-    tap.onTapCancel = () {
-      recognized.add('cancel');
-    };
+      final recognized = <String>[];
+      tap.onTapDown = (_) {
+        recognized.add('down');
+      };
+      tap.onTapUp = (_) {
+        recognized.add('up');
+      };
+      tap.onTap = () {
+        recognized.add('tap');
+      };
+      tap.onTapCancel = () {
+        recognized.add('cancel');
+      };
 
-    tap.addPointer(down1);
-    tester.closeArena(down1.pointer);
+      tap.addPointer(down1);
+      tester.closeArena(down1.pointer);
 
-    tap.addPointer(down2);
-    tester.closeArena(down2.pointer);
+      tap.addPointer(down2);
+      tester.closeArena(down2.pointer);
 
-    expect(recognized, isEmpty);
+      expect(recognized, isEmpty);
 
-    tester.route(up1);
-    GestureBinding.instance.gestureArena.sweep(down1.pointer);
-    expect(recognized, <String>['down', 'up', 'tap']);
-    recognized.clear();
+      tester.route(up1);
+      GestureBinding.instance.gestureArena.sweep(down1.pointer);
+      expect(recognized, <String>['down', 'up', 'tap']);
+      recognized.clear();
 
-    // If regression happens, the following step will throw error
-    tester.async.elapse(const Duration(milliseconds: 200));
-    expect(recognized, isEmpty);
+      // If regression happens, the following step will throw error
+      tester.async.elapse(const Duration(milliseconds: 200));
+      expect(recognized, isEmpty);
 
-    tester.route(up2);
-    GestureBinding.instance.gestureArena.sweep(down2.pointer);
-    expect(recognized, isEmpty);
+      tester.route(up2);
+      GestureBinding.instance.gestureArena.sweep(down2.pointer);
+      expect(recognized, isEmpty);
 
-    tap.dispose();
+      tap.dispose();
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   group('Enforce consistent-button restriction:', () {
