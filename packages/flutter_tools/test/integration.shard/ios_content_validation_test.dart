@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 
-import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
+import 'test_utils.dart';
 
 void main() {
   group(
@@ -333,7 +333,7 @@ void main() {
 
       for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
         for (final arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
-          test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
+          testWithoutContext('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
             final String artifactDir;
             switch (buildMode) {
               case BuildMode.debug:
