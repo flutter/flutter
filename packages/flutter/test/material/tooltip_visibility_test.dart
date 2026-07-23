@@ -189,6 +189,43 @@ void main() {
     await tester.pump();
     expect(find.text(tooltipText), findsOneWidget);
   });
+
+  testWidgets(
+    'Tooltip still contributes a semantics tooltip label when in TooltipVisibility with visible = false',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: TooltipVisibility(
+            visible: false,
+            child: Tooltip(message: tooltipText, child: Text('Bar')),
+          ),
+        ),
+      );
+
+      expect(tester.getSemantics(find.text('Bar')).tooltip, tooltipText);
+      handle.dispose();
+    },
+  );
+
+  testWidgets(
+    'Tooltip does not contribute a semantics tooltip label when excludeFromSemantics is true '
+    'and in TooltipVisibility with visible = false',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: TooltipVisibility(
+            visible: false,
+            child: Tooltip(message: tooltipText, excludeFromSemantics: true, child: Text('Bar')),
+          ),
+        ),
+      );
+
+      expect(tester.getSemantics(find.text('Bar')).tooltip, isEmpty);
+      handle.dispose();
+    },
+  );
 }
 
 Future<void> setWidgetForTooltipMode(
