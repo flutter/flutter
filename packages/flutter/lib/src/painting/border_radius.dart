@@ -356,9 +356,7 @@ class BorderRadius extends BorderRadiusGeometry {
     : this.only(topLeft: radius, topRight: radius, bottomLeft: radius, bottomRight: radius);
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
-  ///
-  /// Consider using the `const` [BorderRadius.all] constructor for better performance.
-  BorderRadius.circular(double radius) : this.all(Radius.circular(radius));
+  const BorderRadius.circular(double radius) : this.all(Radius.circular(radius));
 
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
@@ -606,10 +604,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     : this.only(topStart: radius, topEnd: radius, bottomStart: radius, bottomEnd: radius);
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
-  ///
-  /// Consider using the `const` [BorderRadiusDirectional.all] constructor
-  /// for better performance.
-  BorderRadiusDirectional.circular(double radius) : this.all(Radius.circular(radius));
+  const BorderRadiusDirectional.circular(double radius) : this.all(Radius.circular(radius));
 
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
