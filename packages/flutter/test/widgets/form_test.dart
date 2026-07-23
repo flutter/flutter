@@ -1901,6 +1901,52 @@ void main() {
     );
   });
 
+  testWidgets('FormFieldState.build delegates semantics wrapping to wrapWithSemantics', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: _WrappingFormField(semanticsValidationResult: SemanticsValidationResult.invalid),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(_semanticsWrapperKey), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('field')),
+      containsSemantics(validationResult: SemanticsValidationResult.invalid),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('FormFieldState.build delegates onUnfocus wrapping to wrapWithFocus', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            autovalidateMode: AutovalidateMode.onUnfocus,
+            child: _WrappingFormField(focusIncludesSemantics: false),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(_focusWrapperKey), findsOneWidget);
+    final Finder focus = find.descendant(
+      of: find.byKey(_focusWrapperKey),
+      matching: find.byType(Focus),
+    );
+    expect(tester.widget<Focus>(focus).includeSemantics, isFalse);
+  });
+
   testWidgets('Form does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -2148,4 +2194,40 @@ class _PlatformAnnounceScenario {
   _PlatformAnnounceScenario({required this.supportsAnnounce, required this.testName});
   final bool supportsAnnounce;
   final String testName;
+}
+
+const Key _semanticsWrapperKey = Key('semantics wrapper');
+const Key _focusWrapperKey = Key('focus wrapper');
+
+class _WrappingFormField extends FormField<String> {
+  _WrappingFormField({
+    this.semanticsValidationResult = SemanticsValidationResult.valid,
+    this.focusIncludesSemantics = true,
+  }) : super(initialValue: 'value', builder: (FormFieldState<String> state) => const Text('field'));
+
+  final SemanticsValidationResult semanticsValidationResult;
+  final bool focusIncludesSemantics;
+
+  @override
+  FormFieldState<String> createState() => _WrappingFormFieldState();
+}
+
+class _WrappingFormFieldState extends FormFieldState<String> {
+  _WrappingFormField get _widget => widget as _WrappingFormField;
+
+  @override
+  SemanticsValidationResult get semanticsValidationResult => _widget.semanticsValidationResult;
+
+  @override
+  bool get focusIncludesSemantics => _widget.focusIncludesSemantics;
+
+  @override
+  Widget wrapWithSemantics(Widget child) {
+    return KeyedSubtree(key: _semanticsWrapperKey, child: super.wrapWithSemantics(child));
+  }
+
+  @override
+  Widget wrapWithFocus(Widget child) {
+    return KeyedSubtree(key: _focusWrapperKey, child: super.wrapWithFocus(child));
+  }
 }
