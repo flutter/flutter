@@ -1938,14 +1938,9 @@ void main() {
     await tester.pumpWidget(buildWidgetForTest(materialGapSize: 0));
     await tester.pumpAndSettle();
     final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
-    expect(mergeableMaterial.children.length, 3);
-    expect(mergeableMaterial.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial.children.length, 2);
+    expect(mergeableMaterial.children.whereType<MaterialGap>().length, 0);
     expect(mergeableMaterial.children.whereType<MaterialSlice>().length, 2);
-    for (final MergeableMaterialItem e in mergeableMaterial.children) {
-      if (e is MaterialGap) {
-        expect(e.size, 0);
-      }
-    }
 
     await tester.pumpWidget(buildWidgetForTest(materialGapSize: 20));
     await tester.pumpAndSettle();
@@ -1971,6 +1966,58 @@ void main() {
       }
     }
   });
+
+  Future<void> pumpExpansionPanelListAndVerifyGaps(
+    WidgetTester tester, {
+    required double materialGapSize,
+    required int expectedGapCount,
+  }) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            materialGapSize: materialGapSize,
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                isExpanded: true,
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              ),
+              ExpansionPanel(
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial.children.whereType<MaterialGap>().length, expectedGapCount);
+    expect(mergeableMaterial.children.whereType<MaterialSlice>().length, 2);
+  }
+
+  testWidgets(
+    'ExpansionPanelList does not insert MaterialGap when materialGapSize is 0',
+    (WidgetTester tester) async {
+      await pumpExpansionPanelListAndVerifyGaps(tester, materialGapSize: 0, expectedGapCount: 0);
+    },
+  );
+
+  testWidgets(
+    'ExpansionPanelList inserts MaterialGap when materialGapSize is greater than 0',
+    (WidgetTester tester) async {
+      await pumpExpansionPanelListAndVerifyGaps(tester, materialGapSize: 16, expectedGapCount: 1);
+    },
+  );
 
   testWidgets(
     'Ensure IconButton splashColor and highlightColor are correctly set when canTapOnHeader is false',
