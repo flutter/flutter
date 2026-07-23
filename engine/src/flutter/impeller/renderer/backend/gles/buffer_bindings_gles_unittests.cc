@@ -5,16 +5,21 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 #include "impeller/core/shader_types.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
+#include "impeller/renderer/backend/gles/reactor_gles.h"
+#include "impeller/renderer/backend/gles/sampler_library_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
+#include "impeller/renderer/backend/gles/texture_gles.h"
 #include "impeller/renderer/command.h"
 
 namespace impeller {
 namespace testing {
 
 using ::testing::_;
+using ::testing::NiceMock;
 
 TEST(BufferBindingsGLESTest, ToVertexAttribTypeSupportedFormats) {
   EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kFloat32x3),
@@ -263,6 +268,147 @@ TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
   EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
                                             /*binding=*/1, /*vertex_offset=*/0,
                                             /*instance=*/0));
+}
+
+namespace {
+
+class BindTexturesTestWorker : public ReactorGLES::Worker {
+ public:
+  bool CanReactorReactOnCurrentThreadNow(
+      const ReactorGLES& reactor) const override {
+    return true;
+  }
+};
+
+// Owns the reactor, sampler, and metadata behind a set of texture bindings.
+struct BoundTexturesFixture {
+  std::shared_ptr<ReactorGLES> reactor;
+  std::shared_ptr<BindTexturesTestWorker> worker;
+  std::unique_ptr<SamplerLibrary> sampler_library;
+  raw_ptr<const Sampler> sampler;
+  std::vector<std::unique_ptr<ShaderMetadata>> metadata;
+  std::vector<TextureAndSampler> bound_textures;
+  absl::flat_hash_map<std::string, GLint> uniform_bindings;
+
+  explicit BoundTexturesFixture(std::unique_ptr<ProcTableGLES> proc_table) {
+    reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+    worker = std::make_shared<BindTexturesTestWorker>();
+    reactor->AddWorker(worker);
+    sampler_library = std::make_unique<SamplerLibraryGLES>(
+        /*supports_decal_sampler_address_mode=*/false);
+    sampler = sampler_library->GetSampler({});
+  }
+
+  void AddTextures(ShaderStage stage, size_t count) {
+    for (size_t i = 0; i < count; i++) {
+      TextureDescriptor desc;
+      desc.storage_mode = StorageMode::kDevicePrivate;
+      desc.type = TextureType::kTexture2D;
+      desc.format = PixelFormat::kR8G8B8A8UNormInt;
+      desc.size = {1, 1};
+      desc.mip_count = 1u;
+      desc.usage = TextureUsage::kShaderRead;
+      auto texture = std::make_shared<TextureGLES>(reactor, desc);
+      const std::string name = "tex" + std::to_string(metadata.size());
+      const std::string key = "TEX" + std::to_string(metadata.size());
+      uniform_bindings[key] = static_cast<GLint>(100 + metadata.size());
+      auto meta = std::make_unique<ShaderMetadata>();
+      meta->name = name;
+      TextureAndSampler data = {};
+      data.stage = stage;
+      data.texture = TextureResource(meta.get(), std::move(texture));
+      data.sampler = sampler;
+      metadata.push_back(std::move(meta));
+      bound_textures.push_back(std::move(data));
+    }
+  }
+};
+
+// Capabilities of a minimum-spec ES3 driver (16 per stage, 32 combined).
+std::unique_ptr<NiceMock<MockGLESImpl>> MakeSixteenUnitMockImpl() {
+  auto impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  EXPECT_CALL(*impl, GetIntegerv(_, _))
+      .WillRepeatedly([](GLenum name, GLint* value) {
+        switch (name) {
+          case GL_MAX_TEXTURE_IMAGE_UNITS:
+          case GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS:
+            *value = 16;
+            break;
+          case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
+            *value = 32;
+            break;
+          default:
+            break;
+        }
+      });
+  return impl;
+}
+
+}  // namespace
+
+// One vertex texture pushes the last of 16 fragment samplers onto unit 16,
+// which must bind on a 16-per-stage driver since units are combined in GL.
+TEST(BufferBindingsGLESTest, BindsTexturesAcrossThePerStageUnitBoundary) {
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(MakeSixteenUnitMockImpl());
+  BoundTexturesFixture fixture(
+      std::make_unique<ProcTableGLES>(kMockResolverGLES));
+  fixture.AddTextures(ShaderStage::kVertex, 1);
+  fixture.AddTextures(ShaderStage::kFragment, 16);
+  ASSERT_TRUE(fixture.reactor->React());
+
+  BufferBindingsGLES bindings;
+  bindings.SetUniformBindings(std::move(fixture.uniform_bindings));
+  std::vector<BufferResource> bound_buffers;
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+}
+
+// More samplers in one stage than its limit is still rejected.
+TEST(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit) {
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(MakeSixteenUnitMockImpl());
+  BoundTexturesFixture fixture(
+      std::make_unique<ProcTableGLES>(kMockResolverGLES));
+  fixture.AddTextures(ShaderStage::kFragment, 17);
+  ASSERT_TRUE(fixture.reactor->React());
+
+  BufferBindingsGLES bindings;
+  bindings.SetUniformBindings(std::move(fixture.uniform_bindings));
+  std::vector<BufferResource> bound_buffers;
+  EXPECT_FALSE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+}
+
+// Units past the combined limit are rejected even when each stage is within
+// its per-stage limit.
+TEST(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit) {
+  auto impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  EXPECT_CALL(*impl, GetIntegerv(_, _))
+      .WillRepeatedly([](GLenum name, GLint* value) {
+        switch (name) {
+          case GL_MAX_TEXTURE_IMAGE_UNITS:
+          case GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS:
+          case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
+            *value = 8;
+            break;
+          default:
+            break;
+        }
+      });
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(impl));
+  BoundTexturesFixture fixture(
+      std::make_unique<ProcTableGLES>(kMockResolverGLES));
+  fixture.AddTextures(ShaderStage::kVertex, 8);
+  fixture.AddTextures(ShaderStage::kFragment, 8);
+  ASSERT_TRUE(fixture.reactor->React());
+
+  BufferBindingsGLES bindings;
+  bindings.SetUniformBindings(std::move(fixture.uniform_bindings));
+  std::vector<BufferResource> bound_buffers;
+  EXPECT_FALSE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
 }
 
 }  // namespace testing

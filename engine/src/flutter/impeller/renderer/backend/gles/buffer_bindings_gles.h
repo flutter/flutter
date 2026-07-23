@@ -21,6 +21,10 @@ FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindArrayData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType);
+FML_TEST_CLASS(BufferBindingsGLESTest,
+               BindsTexturesAcrossThePerStageUnitBoundary);
+FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit);
+FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit);
 }  // namespace testing
 
 //------------------------------------------------------------------------------
@@ -66,6 +70,12 @@ class BufferBindingsGLES {
                   BindUniformDataVerticesAndMatrices);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   BindUniformFailsWithoutFloatType);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  BindsTexturesAcrossThePerStageUnitBoundary);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  RejectsTexturesBeyondThePerStageLimit);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  RejectsTexturesBeyondTheCombinedLimit);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///
