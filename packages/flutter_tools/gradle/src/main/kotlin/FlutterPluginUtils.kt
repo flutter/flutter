@@ -17,7 +17,6 @@ import com.flutter.gradle.tasks.EnableHcppManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
-import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
