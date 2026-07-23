@@ -1983,7 +1983,7 @@ class _TabBarState extends State<TabBar> {
         heightFactor: 1.0,
         child: Padding(
           padding: _labelPaddings[index],
-          child: KeyedSubtree(key: _tabKeys[index], child: widget.tabs[index]),
+          child: KeyedSubtree(key: _tabKeys[index], child: tab),
         ),
       );
     });
