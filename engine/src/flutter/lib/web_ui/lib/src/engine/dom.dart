@@ -2006,6 +2006,7 @@ extension type DomTouch._(JSObject _) implements JSObject {
   external double? get identifier;
   external double get clientX;
   external double get clientY;
+  external DomEventTarget? get target;
 
   DomPoint get client => DomPoint(clientX, clientY);
 }
