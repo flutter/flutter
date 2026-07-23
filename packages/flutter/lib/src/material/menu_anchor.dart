@@ -3451,11 +3451,21 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       desiredPosition += directionalOffset;
       x = desiredPosition.dx;
       y = desiredPosition.dy;
-      switch (textDirection) {
-        case TextDirection.rtl:
+      if (parentOrientation == orientation) {
+        // For same-axis submenus (e.g. vertical→vertical), the alignment
+        // determines which side the submenu opens on. If the resolved
+        // alignment points to the left side, the submenu should grow
+        // leftward (place its right edge at the anchor point).
+        final Alignment resolvedAlignment = alignment.resolve(textDirection);
+        if (resolvedAlignment.x < 0) {
           x -= childSize.width;
-        case TextDirection.ltr:
-          break;
+        }
+      } else {
+        // For cross-axis menus (e.g. MenuBar→dropdown), use text direction
+        // to determine the growth direction.
+        if (textDirection == TextDirection.rtl) {
+          x -= childSize.width;
+        }
       }
     } else {
       final Offset adjustedPosition = menuPosition! + anchorRect.topLeft;
