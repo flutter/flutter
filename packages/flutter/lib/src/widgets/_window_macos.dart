@@ -87,6 +87,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
       delegate: delegate,
       size: size,
       title: title,
+      resizable: resizable,
     );
     _activeControllers.add(controller);
     return controller;
@@ -107,6 +108,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
       size: size,
       parent: parent,
       title: title,
+      resizable: resizable,
     );
     _activeControllers.add(controller);
     return controller;
@@ -515,6 +517,7 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
     required WindowingOwnerMacOS owner,
     required RegularWindowControllerDelegate delegate,
     required Size? size,
+    required bool resizable,
     BoxConstraints? constraints,
     String? title,
   }) : _delegate = delegate,
@@ -527,6 +530,7 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
       onShouldClose: _onShouldClose.nativeFunction,
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
+      resizable: resizable,
     );
     final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -650,6 +654,7 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
     required WindowingOwnerMacOS owner,
     required DialogWindowControllerDelegate delegate,
     required Size? size,
+    required bool resizable,
     this.parent,
     BoxConstraints? constraints,
     String? title,
@@ -664,6 +669,7 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
       parentViewId: parent?.rootView.viewId,
+      resizable: resizable,
     );
     final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -760,6 +766,9 @@ final class _WindowCreationRequest extends Struct {
   @Bool()
   external bool hasConstraints;
   external _Constraints constraints;
+
+  @Bool()
+  external bool resizable;
 
   @Int64()
   external int parentViewId;
@@ -892,6 +901,7 @@ class _MacOSPlatformInterface {
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
     required Pointer<NativeFunction<Void Function()>> onWillClose,
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
+    required bool resizable,
   }) {
     final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
       ..ref.onShouldClose = onShouldClose
@@ -905,6 +915,10 @@ class _MacOSPlatformInterface {
         ..contentSize.height = size.height;
     }
 
+    if (size == null) {
+      constraints ??= const BoxConstraints();
+    }
+
     if (constraints != null) {
       request.ref
         ..hasConstraints = true
@@ -913,6 +927,7 @@ class _MacOSPlatformInterface {
         ..constraints.maxWidth = constraints.maxWidth
         ..constraints.maxHeight = constraints.maxHeight;
     }
+    request.ref.resizable = resizable;
     final int viewId = _createRegularWindow(
       WidgetsBinding.instance.platformDispatcher.engineId!,
       request,
@@ -929,6 +944,7 @@ class _MacOSPlatformInterface {
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createDialogWindow({
     required Size? size,
+    required bool resizable,
     BoxConstraints? constraints,
     int? parentViewId,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
@@ -956,6 +972,12 @@ class _MacOSPlatformInterface {
         ..constraints.maxWidth = constraints.maxWidth
         ..constraints.maxHeight = constraints.maxHeight;
     }
+    request.ref.resizable = resizable;
+
+    if (size == null) {
+      constraints ??= const BoxConstraints();
+    }
+
     try {
       final int viewId = _createDialogWindow(
         WidgetsBinding.instance.platformDispatcher.engineId!,
