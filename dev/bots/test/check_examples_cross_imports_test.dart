@@ -791,6 +791,93 @@ void main() {
       expect(success, isFalse);
     });
   }
+
+  test('Material API examples in examples/api are ignored explicitly', () async {
+    // The Material examples in examples/api have been moved to packages/material_ui.
+    // The original code is still present in examples/api until it can be finally deleted from there.
+    // For this reason the checker should ignore the Material examples in examples/api,
+    // even if they contain cross imports.
+
+    buildKnownCrossImportExamplesFiles();
+
+    const examplesApiMaterialLibraryName = 'examples/api/lib/material';
+    const examplesApiMaterialTestLibraryName = 'examples/api/test/material';
+    const LibraryCrossImportStatementType importStatement = .cupertino;
+
+    final Directory examplesMaterialLibFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
+      examplesApiMaterialLibraryName,
+      flutterRoot: checker.flutterRoot,
+    );
+
+    final Directory examplesMaterialTestFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
+      examplesApiMaterialTestLibraryName,
+      flutterRoot: checker.flutterRoot,
+    );
+
+    writeImportInFiles(
+      {'examples/api/lib/material/qux.dart', 'examples/api/lib/material/baz/foo.dart'},
+      inDirectory: examplesMaterialLibFilesDirectory,
+      importString: importStatement.importString,
+    );
+
+    writeImportInFiles(
+      {'examples/api/test/material/qux_test.dart', 'examples/api/test/material/baz/foo_test.dart'},
+      inDirectory: examplesMaterialTestFilesDirectory,
+      importString: importStatement.importString,
+    );
+
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    });
+    expect(result, equals(''));
+    expect(success, isTrue);
+  });
+
+  test('Cupertino API examples in examples/api are ignored explicitly', () async {
+    // The Cupertino examples in examples/api have been moved to packages/cupertino_ui.
+    // The original code is still present in examples/api until it can be finally deleted from there.
+    // For this reason the checker should ignore the Cupertino examples in examples/api,
+    // even if they contain cross imports.
+
+    buildKnownCrossImportExamplesFiles();
+
+    const examplesApiCupertinoLibraryName = 'examples/api/lib/cupertino';
+    const examplesApiCupertinoTestLibraryName = 'examples/api/test/cupertino';
+    const LibraryCrossImportStatementType importStatement = .material;
+
+    final Directory examplesCupertinoLibFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
+      examplesApiCupertinoLibraryName,
+      flutterRoot: checker.flutterRoot,
+    );
+
+    final Directory examplesCupertinoTestFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
+      examplesApiCupertinoTestLibraryName,
+      flutterRoot: checker.flutterRoot,
+    );
+
+    writeImportInFiles(
+      {'examples/api/lib/cupertino/qux.dart', 'examples/api/lib/cupertino/baz/foo.dart'},
+      inDirectory: examplesCupertinoLibFilesDirectory,
+      importString: importStatement.importString,
+    );
+
+    writeImportInFiles(
+      {
+        'examples/api/test/cupertino/qux_test.dart',
+        'examples/api/test/cupertino/baz/foo_test.dart',
+      },
+      inDirectory: examplesCupertinoTestFilesDirectory,
+      importString: importStatement.importString,
+    );
+
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    });
+    expect(result, equals(''));
+    expect(success, isTrue);
+  });
 }
 
 /// Get a [LibraryCrossImportStatementType], for the file at the given [filePath],
@@ -920,14 +1007,10 @@ class _CrossImportsExamplesDirectories {
     for (final directory in <Directory>[libDirectory, testDirectory]) {
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('animation')] =
           ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports;
-      exampleSlashApiSubdirectoryMapping[directory.childDirectory('cupertino')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('foundation')] =
           ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('gestures')] =
           ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports;
-      exampleSlashApiSubdirectoryMapping[directory.childDirectory('material')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('painting')] =
           ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('rendering')] =
@@ -1035,10 +1118,8 @@ final crossImportsGenericExamplesTestCases = <(String, String, Set<String>)>[
 final crossImportsExamplesApiTestCases = <(String, String, Set<String>)>[
   // dart format off
   ('examples/api/lib/animation', 'knownExamplesSlashApiAnimationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports),
-  ('examples/api/lib/cupertino', 'knownExamplesSlashApiCupertinoCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports),
   ('examples/api/lib/foundation', 'knownExamplesSlashApiFoundationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports),
   ('examples/api/lib/gestures', 'knownExamplesSlashApiGesturesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports),
-  ('examples/api/lib/material', 'knownExamplesSlashApiMaterialCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports),
   ('examples/api/lib/painting', 'knownExamplesSlashApiPaintingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports),
   ('examples/api/lib/rendering', 'knownExamplesSlashApiRenderingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports),
   ('examples/api/lib/services', 'knownExamplesSlashApiServicesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports),
@@ -1046,10 +1127,8 @@ final crossImportsExamplesApiTestCases = <(String, String, Set<String>)>[
   ('examples/api/lib/widgets', 'knownExamplesSlashApiWidgetsCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports),
 
   ('examples/api/test/animation', 'knownExamplesSlashApiAnimationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports),
-  ('examples/api/test/cupertino', 'knownExamplesSlashApiCupertinoCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports),
   ('examples/api/test/foundation', 'knownExamplesSlashApiFoundationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports),
   ('examples/api/test/gestures', 'knownExamplesSlashApiGesturesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports),
-  ('examples/api/test/material', 'knownExamplesSlashApiMaterialCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports),
   ('examples/api/test/painting', 'knownExamplesSlashApiPaintingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports),
   ('examples/api/test/rendering', 'knownExamplesSlashApiRenderingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports),
   ('examples/api/test/services', 'knownExamplesSlashApiServicesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports),
