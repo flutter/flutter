@@ -361,13 +361,13 @@ import java.util.Set;
     for (String extrasKey : extrasKeys) {
       FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagFromIntentKey(extrasKey);
       if (flag != null) {
-        Log.i(
+        // TODO(camsim99): Remove this warning and support for setting engine flags via Intent after
+        // one stable release: INSERT_ISSUE
+        Log.e(
             TAG,
-            "If you are attempting to set "
+            "Support for setting engine flags on Android via Intent will soon be dropped. To set "
                 + flag.engineArgument
-                + " via Intent extras to launch a Flutter component outside of using the Flutter CLI, note that support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/180686 for more information on this breaking change. To migrate, set "
-                + flag.engineArgument
-                + " or any other flags specified via Intent extras on the command line instead or see https://github.com/flutter/flutter/blob/main/docs/engine/Flutter-Android-Engine-Flags.md for alternative methods.");
+                + ", see INSERT_BREAKING_CHANGE_PAGE_HERE to learn how to migrate.");
         break;
       }
     }
