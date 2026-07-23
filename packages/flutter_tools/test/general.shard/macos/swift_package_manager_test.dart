@@ -421,8 +421,9 @@ let package = Package(
             plugin1ManifestFile
               ..createSync(recursive: true)
               ..writeAsStringSync(plugin1ManifestContents);
-            final File plugin1CopiedManifest = fs.file(
-              '$buildSourcePackagesPath/valid_plugin_1-1.0.0/${platform.name}/valid_plugin_1/Package.swift',
+
+            final File plugin2CopiedManifest = fs.file(
+              '$buildSourcePackagesPath/valid_plugin_2-1.0.0/${platform.name}/valid_plugin_2/Package.swift',
             );
 
             final validPlugin2 = FakePlugin(
@@ -432,6 +433,10 @@ let package = Package(
             fs
                 .file('${validPlugin2.path}/${platform.name}/${validPlugin2.name}/Package.swift')
                 .createSync(recursive: true);
+
+            final File plugin3CopiedManifest = fs.file(
+              '$buildSourcePackagesPath/valid_plugin_3-1.0.0/${platform.name}/valid_plugin_3/Package.swift',
+            );
 
             final validPlugin3 = FakePlugin(
               name: 'valid_plugin_3',
@@ -448,13 +453,26 @@ let package = Package(
                   '-8',
                   '-av',
                   '--delete',
-                  validPlugin1.path,
-                  '$buildSourcePackagesPath/valid_plugin_1-1.0.0',
+                  '--exclude=/example/',
+                  validPlugin2.path,
+                  '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
                 ],
                 onRun: (_) {
-                  plugin1CopiedManifest
-                    ..createSync(recursive: true)
-                    ..writeAsStringSync(plugin1ManifestContents);
+                  plugin2CopiedManifest.createSync(recursive: true);
+                },
+              ),
+              FakeCommand(
+                command: [
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--exclude=/example/',
+                  validPlugin3.path,
+                  '$buildSourcePackagesPath/valid_plugin_3-1.0.0',
+                ],
+                onRun: (_) {
+                  plugin3CopiedManifest.createSync(recursive: true);
                 },
               ),
             ]);
@@ -481,47 +499,25 @@ let package = Package(
             );
             expect(
               project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0').targetSync(),
-              '$buildSourcePackagesPath/valid_plugin_1-1.0.0/${platform.name}/valid_plugin_1',
-            );
-            expect(plugin1CopiedManifest.readAsStringSync(), '''
-// swift-tools-version: 5.9
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
-import PackageDescription
-
-let package = Package(
-    name: "valid_plugin_1",
-    platforms: [
-        .iOS("15.0")
-    ],
-    products: [
-        .library(name: "valid-plugin-1", targets: ["valid-plugin-1"])
-    ],
-    dependencies: [
-        .package(name: "valid_plugin_2", path: "../valid_plugin_2-1.0.0"),
-        .package(name: "FlutterFramework", path: "../FlutterFramework"),
-        .package(name: "valid_plugin_3", path: "../valid_plugin_3-1.0.0")
-    ],
-    targets: [
-        .target(
-            name: "valid-plugin-1",
-            dependencies: [
-                .product(name: "valid-plugin-2", package: "valid_plugin_2"),
-                .product(name: "FlutterFramework", package: "FlutterFramework"),
-                .product(name: "valid-plugin-3", package: "valid_plugin_3")
-            ],
-            path: "../Classes",
-        )
-    ]
-)
-''');
-            expect(
-              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2-1.0.0'),
-              exists,
+              '${validPlugin1.path}/${platform.name}/valid_plugin_1',
             );
             expect(
-              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2-1.0.0').targetSync(),
-              '${validPlugin2.path}/${platform.name}/valid_plugin_2',
+              plugin2CopiedManifest.readAsStringSync(),
+              '\n\n// Basename of original plugin: valid_plugin_2-1.0.0',
+            );
+            expect(
+              plugin3CopiedManifest.readAsStringSync(),
+              '\n\n// Basename of original plugin: valid_plugin_3-1.0.0',
+            );
+            expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2'), exists);
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2').targetSync(),
+              '$buildSourcePackagesPath/valid_plugin_2-1.0.0/${platform.name}/valid_plugin_2',
+            );
+            expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_3'), exists);
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_3').targetSync(),
+              '$buildSourcePackagesPath/valid_plugin_3-1.0.0/${platform.name}/valid_plugin_3',
             );
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -542,8 +538,8 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1-1.0.0"),
-        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2-1.0.0"),
-        .package(name: "valid_plugin_3", path: "../.packages/valid_plugin_3-1.0.0"),
+        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2"),
+        .package(name: "valid_plugin_3", path: "../.packages/valid_plugin_3"),
         .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
@@ -553,6 +549,105 @@ let package = Package(
                 .product(name: "valid-plugin-1", package: "valid_plugin_1"),
                 .product(name: "valid-plugin-2", package: "valid_plugin_2"),
                 .product(name: "valid-plugin-3", package: "valid_plugin_3"),
+                .product(name: "FlutterFramework", package: "FlutterFramework")
+            ]
+        )
+    ]
+)
+''');
+            expect(processManager, hasNoRemainingExpectations);
+          });
+
+          testWithoutContext('generate with plugin whose basename does not match its name', () async {
+            final fs = MemoryFileSystem();
+            final logger = BufferLogger.test();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+            final buildSourcePackagesPath = '/build/${platform.name}/SourcePackages';
+            final File pluginCopiedManifest = fs.file(
+              '$buildSourcePackagesPath/custom_basename/${platform.name}/valid_plugin_1/Package.swift',
+            );
+
+            // The plugin name is valid_plugin_1, but the path ends with custom_basename.
+            // This means basename is custom_basename, which does not match valid_plugin_1,
+            // and does not start with valid_plugin_1-.
+            final validPlugin1 = FakePlugin(
+              name: 'valid_plugin_1',
+              platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              path: '/local/path/to/plugins/custom_basename',
+            );
+            fs
+                .file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                .createSync(recursive: true);
+
+            final processManager = FakeProcessManager.list([
+              FakeCommand(
+                command: [
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--exclude=/example/',
+                  validPlugin1.path,
+                  '$buildSourcePackagesPath/custom_basename',
+                ],
+                onRun: (_) {
+                  pluginCopiedManifest.createSync(recursive: true);
+                },
+              ),
+            ]);
+
+            final spm = SwiftPackageManager(
+              fileSystem: fs,
+              templateRenderer: const MustacheTemplateRenderer(),
+              processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              config: FakeConfig(),
+            );
+            await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
+
+            final supportedPlatform = platform == FlutterDarwinPlatform.ios
+                ? '.iOS("15.0")'
+                : '.macOS("10.15")';
+            expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
+
+            // Since basename did not match the plugin name, the plugin is copied to the
+            // build directory under custom_basename, but the symlink name uses the plugin name.
+            expect(
+              pluginCopiedManifest.readAsStringSync(),
+              '\n\n// Basename of original plugin: custom_basename',
+            );
+            expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1'), exists);
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1').targetSync(),
+              '$buildSourcePackagesPath/custom_basename/${platform.name}/valid_plugin_1',
+            );
+
+            expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterGeneratedPluginSwiftPackage",
+    platforms: [
+        $supportedPlatform
+    ],
+    products: [
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+    ],
+    dependencies: [
+        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1"),
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
+    ],
+    targets: [
+        .target(
+            name: "FlutterGeneratedPluginSwiftPackage",
+            dependencies: [
+                .product(name: "valid-plugin-1", package: "valid_plugin_1"),
                 .product(name: "FlutterFramework", package: "FlutterFramework")
             ]
         )
@@ -787,8 +882,12 @@ class FakeXcodeProject extends Fake implements IosProject {
 }
 
 class FakePlugin extends Fake implements Plugin {
-  FakePlugin({required this.name, required this.platforms, this.hasSwiftPackage = true})
-    : path = '/local/path/to/plugins/$name-1.0.0';
+  FakePlugin({
+    required this.name,
+    required this.platforms,
+    this.hasSwiftPackage = true,
+    String? path,
+  }) : path = path ?? '/local/path/to/plugins/$name-1.0.0';
 
   @override
   final String name;
@@ -818,6 +917,14 @@ class FakePlugin extends Fake implements Plugin {
       return null;
     }
     return '$path/$platform/$name/Package.swift';
+  }
+
+  @override
+  bool supportSwiftPackageManagerForPlatform(FileSystem fileSystem, String platform) {
+    final String? manifestPath = pluginSwiftPackageManifestPath(fileSystem, platform);
+    return platforms[platform] != null &&
+        manifestPath != null &&
+        fileSystem.file(manifestPath).existsSync();
   }
 }
 
