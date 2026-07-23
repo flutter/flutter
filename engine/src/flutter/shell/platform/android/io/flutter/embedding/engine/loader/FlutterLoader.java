@@ -701,6 +701,9 @@ public class FlutterLoader {
 
   @NonNull
   public String findAppBundlePath() {
+    if (flutterApplicationInfo == null) {
+      throw new IllegalStateException("findAppBundlePath must be called after startInitialization");
+    }
     return flutterApplicationInfo.flutterAssetsDir;
   }
 
@@ -713,6 +716,10 @@ public class FlutterLoader {
    */
   @NonNull
   public String getLookupKeyForAsset(@NonNull String asset) {
+    if (flutterApplicationInfo == null) {
+      throw new IllegalStateException(
+          "getLookupKeyForAsset must be called after startInitialization");
+    }
     return fullAssetPathFrom(asset);
   }
 
@@ -733,6 +740,10 @@ public class FlutterLoader {
   /** Returns the configuration on whether flutter engine should automatically register plugins. */
   @NonNull
   public boolean automaticallyRegisterPlugins() {
+    if (flutterApplicationInfo == null) {
+      throw new IllegalStateException(
+          "automaticallyRegisterPlugins must be called after startInitialization");
+    }
     return flutterApplicationInfo.automaticallyRegisterPlugins;
   }
 
