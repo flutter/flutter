@@ -1081,10 +1081,16 @@ public class FlutterActivity extends Activity
   public boolean shouldDestroyEngineWithHost() {
     boolean explicitDestructionRequested =
         getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, false);
-    if (getCachedEngineId() != null || delegate.isFlutterEngineFromHost()) {
+    boolean isEngineFromHost =
+        delegate != null ? delegate.isFlutterEngineFromHost() : getCachedEngineId() != null;
+    if (isEngineFromHost) {
       // Only destroy a cached engine if explicitly requested by app developer.
       return explicitDestructionRequested;
     } else {
+      if (getCachedEngineId() != null) {
+        // Fallback engine. Always destroy it because it's not cached and would otherwise leak.
+        return true;
+      }
       // If this Activity created the FlutterEngine, destroy it by default unless
       // explicitly requested not to.
       return getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, true);

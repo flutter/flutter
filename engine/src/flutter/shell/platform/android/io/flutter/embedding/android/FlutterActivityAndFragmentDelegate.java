@@ -290,13 +290,15 @@ import java.util.Set;
     if (cachedEngineId != null) {
       flutterEngine = FlutterEngineCache.getInstance().get(cachedEngineId);
       isFlutterEngineFromHost = true;
-      if (flutterEngine == null) {
-        throw new IllegalStateException(
-            "The requested cached FlutterEngine did not exist in the FlutterEngineCache: '"
-                + cachedEngineId
-                + "'");
+      if (flutterEngine != null) {
+        return;
       }
-      return;
+      Log.w(
+          TAG,
+          "The requested cached FlutterEngine did not exist in the FlutterEngineCache: '"
+              + cachedEngineId
+              + "'. Falling back to a newly created engine.");
+      isFlutterEngineFromHost = false;
     }
 
     // Second, defer to subclasses for a custom FlutterEngine.
@@ -501,7 +503,7 @@ import java.util.Set;
    */
   private void doInitialFlutterViewRun() {
     // Don't attempt to start a FlutterEngine if we're using a cached FlutterEngine.
-    if (host.getCachedEngineId() != null) {
+    if (host.getCachedEngineId() != null && isFlutterEngineFromHost) {
       return;
     }
 
@@ -810,7 +812,7 @@ import java.util.Set;
     if (host.shouldDestroyEngineWithHost()) {
       flutterEngine.destroy();
 
-      if (host.getCachedEngineId() != null) {
+      if (host.getCachedEngineId() != null && isFlutterEngineFromHost) {
         FlutterEngineCache.getInstance().remove(host.getCachedEngineId());
       }
 

@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.android;
 
-import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -105,19 +104,23 @@ public class FlutterActivityTest {
     FlutterEngine cachedEngine = new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni);
     FlutterEngineCache.getInstance().put("my_cached_engine", cachedEngine);
 
-    ActivityScenario<FlutterActivity> flutterActivityScenario =
-        ActivityScenario.launch(FlutterActivity.class);
+    Intent intent =
+        FlutterActivity.withCachedEngine("my_cached_engine")
+            .destroyEngineWithActivity(false)
+            .build(ctx);
+
+    ActivityScenario<FlutterActivity> flutterActivityScenario = ActivityScenario.launch(intent);
 
     // Set to framework handling and then recreate the activity and check the state is preserved.
     flutterActivityScenario.onActivity(activity -> activity.setFrameworkHandlesBack(true));
-    flutterActivityScenario.onActivity(
-        activity -> activity.getIntent().putExtra(EXTRA_CACHED_ENGINE_ID, "my_cached_engine"));
 
     flutterActivityScenario.recreate();
     flutterActivityScenario.onActivity(activity -> assertTrue(activity.hasRegisteredBackCallback));
 
     // Clean up.
     flutterActivityScenario.close();
+    FlutterEngineCache.getInstance().remove("my_cached_engine");
+    cachedEngine.destroy();
   }
 
   @Test
@@ -412,6 +415,24 @@ public class FlutterActivityTest {
     assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
+    assertTrue(flutterActivity.shouldDestroyEngineWithHost());
+  }
+
+  @Test
+  public void itDestroysFallbackEngine() {
+    Intent intent =
+        FlutterActivity.withCachedEngine("my_cached_engine")
+            .destroyEngineWithActivity(false)
+            .build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    FlutterActivityAndFragmentDelegate mockDelegate =
+        mock(FlutterActivityAndFragmentDelegate.class);
+    when(mockDelegate.isFlutterEngineFromHost()).thenReturn(false);
+    flutterActivity.setDelegate(mockDelegate);
+
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
   }
 
