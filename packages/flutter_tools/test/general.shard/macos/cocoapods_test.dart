@@ -800,7 +800,7 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*.{h,m}'
   s.dependency 'Flutter'
   s.static_framework = true
-  s.osx.deployment_target = '10.15'
+  s.osx.deployment_target = '12.0'
   s.ios.deployment_target = '15.0'
 end''');
 

@@ -52,6 +52,12 @@ absl::StatusOr<std::shared_ptr<DlColorSource>> MakeRuntimeEffect(
 
 // Regression test for https://github.com/flutter/flutter/issues/126701 .
 TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
+  // This test used to be excluded on Vulkan for impeller_golden_tests
+  // but has been running fine so far with the playground-based golden
+  // mechanism, so we will let it run as the underlying problem may
+  // have been fixed since the exclusion was added.
+  // https://github.com/flutter/flutter/blame/ad80825c24d770a19e33f67800fc0338a3b89ec7/engine/src/flutter/impeller/golden_tests/golden_playground_test_mac.cc#L109
+
   struct FragUniforms {
     Vector2 iResolution;
     Scalar iTime;
@@ -223,8 +229,8 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
   bool compare = false;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("xoffset", &xoffset, -50, 50);
       ImGui::SliderFloat("yoffset", &yoffset, -50, 50);
       ImGui::SliderFloat("xscale", &xscale, 0, 1);
@@ -306,8 +312,8 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
   Scalar sigma = 20.0;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::End();
     }
@@ -370,8 +376,8 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
   Scalar sigma = 5.0;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::End();
     }
@@ -436,8 +442,8 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
   Vector2 circle_origin = Vector2(30.f, 30.f);
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::SliderFloat("clip_x", &clip_origin.x, 0, 2048.f);
       ImGui::SliderFloat("clip_y", &clip_origin.y, 0, 1536.f);
@@ -584,8 +590,8 @@ TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
   Scalar rotation = 45;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("rotation", &rotation, 0, 360);
       ImGui::End();
     }

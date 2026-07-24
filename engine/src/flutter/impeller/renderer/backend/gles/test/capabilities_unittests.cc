@@ -72,5 +72,22 @@ TEST(CapabilitiesGLES, SupportsMSAA) {
   EXPECT_FALSE(capabilities->SupportsOffscreenMSAA());
 }
 
+TEST(CapabilitiesGLES, MaxSamplerAnisotropyUnsupportedByDefault) {
+  auto mock_gles = MockGLES::Init();
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxSamplerAnisotropy(), 1u);
+}
+
+TEST(CapabilitiesGLES, MaxSamplerAnisotropyWithExtension) {
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",                       //
+      "GL_EXT_texture_filter_anisotropic",  //
+  };
+  auto mock_gles = MockGLES::Init(extensions);
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  // The extension guarantees a maximum anisotropy of at least 2.
+  EXPECT_GE(capabilities->GetMaxSamplerAnisotropy(), 2u);
+}
+
 }  // namespace testing
 }  // namespace impeller

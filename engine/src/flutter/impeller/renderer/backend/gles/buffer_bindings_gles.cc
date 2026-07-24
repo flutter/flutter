@@ -52,7 +52,7 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
         return false;
       }
       attrib.size = input.vec_size;
-      auto type = ToVertexAttribType(input.type);
+      auto type = ToVertexAttribType(input.GetVertexAttributeFormat());
       if (!type.has_value()) {
         return false;
       }

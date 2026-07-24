@@ -204,6 +204,7 @@ void main() {
   testUsingContext(
     'NativeAssets with an asset',
     overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         // Create the framework dylib.
         FakeCommand(

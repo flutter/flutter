@@ -530,6 +530,11 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
       close(inDispose: true);
     }
 
+    if (isRoot) {
+      _scrollPosition?.isScrollingNotifier.removeListener(_handleScroll);
+      _scrollPosition = null;
+    }
+
     _parent?._removeChild(this);
     _parent = null;
     _anchorChildren.clear();

@@ -788,23 +788,11 @@ class TextSpan extends ParagraphSpan {
     if (intersect.isEmpty) {
       return ui.Rect.zero;
     }
-    // This `selection` is relative to the span, but blocks should be positioned relative to the line.
-    final ui.Rect beforeSelection = _metrics.getSelection(
-      block.textRange.start - start,
-      intersect.start - start,
-    );
     final ui.Rect intersectSelection = _metrics.getSelection(
       intersect.start - start,
       intersect.end - start,
     );
-
-    // We need 2 selections to calculate the distance between the beginning of the line block and the intersection
-    return ui.Rect.fromLTWH(
-      block.shiftFromLineStart + intersectSelection.left - beforeSelection.left,
-      intersectSelection.top,
-      intersectSelection.width,
-      intersectSelection.height,
-    );
+    return intersectSelection.shift(ui.Offset(block.spanShiftFromLineStart, 0));
   }
 
   ui.Rect getBlockBounds(TextBlock block) {
@@ -920,9 +908,11 @@ class WebParagraph implements ui.Paragraph {
       boxHeightStyle,
       boxWidthStyle,
     );
-    WebParagraphDebug.apiTrace(
-      'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): $result ($longestLine, $maxLineWidthWithTrailingSpaces)',
-    );
+    if (WebParagraphDebug.apiLogging || WebParagraphDebug.logging) {
+      WebParagraphDebug.apiTrace(
+        'getBoxesForRange($start, $end, $boxHeightStyle, $boxWidthStyle): ${result.map((r) => r.toString()).toList()}',
+      );
+    }
     return result;
   }
 
@@ -931,26 +921,28 @@ class WebParagraph implements ui.Paragraph {
     final ui.TextPosition result = text.isEmpty
         ? const ui.TextPosition(offset: 0)
         : _layout.getPositionForOffset(offset);
-    WebParagraphDebug.apiTrace('getPositionForOffset("$text", $offset): $result');
+    WebParagraphDebug.apiTrace('getPositionForOffset($offset): $result');
     return result;
   }
 
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
     final ui.TextPosition position = getPositionForOffset(offset);
-    assert(position.offset < text.length || text.isEmpty);
-    final ui.GlyphInfo? result = getGlyphInfoAt(position.offset);
+    assert(position.offset != 0 || position.affinity != ui.TextAffinity.upstream);
+    final ui.GlyphInfo? result = getGlyphInfoAt(
+      position.offset + (position.affinity == ui.TextAffinity.downstream ? 0 : -1),
+    );
     if (result == null) {
       WebParagraphDebug.apiTrace(
-        'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
-        'TextPosition(${position.offset},${position.affinity.toString().replaceFirst('TextAffinity.', '')}) Glyph: null',
+        'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
+        'TextPosition(${position.offset}, ${position.affinity.toString().replaceFirst('TextAffinity.', '')}) Glyph: null',
       );
       return null;
     }
 
     WebParagraphDebug.apiTrace(
-      'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
-      'TextPosition(${position.offset},${position.affinity.toString().replaceFirst('TextAffinity.', '')} '
+      'getClosestGlyphInfoForOffset(${offset.dx}, ${offset.dy}): '
+      'TextPosition(${position.offset}, ${position.affinity.toString().replaceFirst('TextAffinity.', '')} '
       '${result.graphemeClusterLayoutBounds} '
       'TextRange: [${result.graphemeClusterCodeUnitRange.start}:${result.graphemeClusterCodeUnitRange.end}) '
       'TextDirection: ${result.writingDirection.toString().replaceFirst('TextDirection.', '')} ',
@@ -961,11 +953,12 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
-    if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
+    if (codeUnitOffset < 0 || codeUnitOffset > text.length) {
+      WebParagraphDebug.apiTrace('getGlyphInfoAt($codeUnitOffset): null');
       return null;
     }
     final ui.GlyphInfo? result = _layout.getGlyphInfoAt(codeUnitOffset);
-    WebParagraphDebug.apiTrace('getGlyphInfoAt("$text", $codeUnitOffset): $result');
+    WebParagraphDebug.apiTrace('getGlyphInfoAt($codeUnitOffset): $result');
     return result;
   }
 
@@ -982,7 +975,7 @@ class WebParagraph implements ui.Paragraph {
       return ui.TextRange(start: text.length, end: text.length);
     }
     final ui.TextRange result = _layout.getWordBoundary(codepointPosition);
-    WebParagraphDebug.apiTrace('getWordBoundary("$text", $position): $result');
+    WebParagraphDebug.apiTrace('getWordBoundary($position): $result');
     return result;
   }
 
@@ -999,18 +992,15 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
+    WebParagraphDebug.apiTrace('paint("$text", $offset)');
     _painter.paint(canvas, offset);
   }
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final int codepointPosition = switch (position.affinity) {
-      ui.TextAffinity.upstream => position.offset - 1,
-      ui.TextAffinity.downstream => position.offset,
-    };
-
+    final int codepointPosition = position.offset;
     final ui.TextRange result = _layout.getLineBoundary(codepointPosition);
-    WebParagraphDebug.apiTrace('getLineBoundary("$text", $position): $result');
+    WebParagraphDebug.apiTrace('getLineBoundary($position): $result');
     return result;
   }
 
@@ -1020,14 +1010,14 @@ class WebParagraph implements ui.Paragraph {
     for (final TextLine line in _layout.lines) {
       metrics.add(line.getMetrics());
     }
-    WebParagraphDebug.apiTrace('computeLineMetrics("$text": $metrics');
+    WebParagraphDebug.apiTrace('computeLineMetrics($metrics');
     return metrics;
   }
 
   @override
   ui.LineMetrics? getLineMetricsAt(int lineNumber) {
     if (lineNumber < 0 || lineNumber >= _layout.lines.length) {
-      WebParagraphDebug.apiTrace('getLineMetricsAt("$text", $lineNumber): null (out of range)');
+      WebParagraphDebug.apiTrace('getLineMetricsAt(lineNumber): null (out of range)');
       return null;
     }
     WebParagraphDebug.apiTrace(
@@ -1046,29 +1036,24 @@ class WebParagraph implements ui.Paragraph {
     if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
       // When the offset is outside of the paragraph's range, we know it doesn't belong to any of
       // the lines.
-      WebParagraphDebug.apiTrace(
-        'getLineNumberAt("$text", $codeUnitOffset): null (out of text range)',
-      );
+      WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): null (out of text range)');
       return null;
     }
 
     for (final TextLine line in _layout.lines) {
       if (line.allLineTextRange.isBefore(codeUnitOffset)) {
+        // We haven't reached the offset yet, keep going.
         continue;
       }
       if (line.allLineTextRange.isAfter(codeUnitOffset)) {
-        // We haven't reached the offset yet, keep going.
         break;
       }
 
-      WebParagraphDebug.apiTrace('getLineNumberAt("$text", $codeUnitOffset): ${line.lineNumber}');
+      WebParagraphDebug.apiTrace('getLineNumberAt($codeUnitOffset): ${line.lineNumber}');
       return line.lineNumber;
     }
 
-    assert(
-      false,
-      'getLineNumberAt("$text", $codeUnitOffset): null (out of range, should not happen)',
-    );
+    assert(false, 'getLineNumberAt($codeUnitOffset): null (out of range, should not happen)');
     return null;
   }
 

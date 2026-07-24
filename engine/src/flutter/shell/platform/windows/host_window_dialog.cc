@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/host_window_dialog.h"
 
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 
 namespace flutter {
@@ -72,6 +73,13 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
   }
 }
 
+HostWindowDialog::~HostWindowDialog() {
+  // Reset the view while this most-derived object is still fully alive, to stop
+  // the raster thread from sizing it before any subobject is torn down. See the
+  // destructor comment in host_window_sized.h for the rationale.
+  view_controller_.reset();
+}
+
 Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       const WindowSizeRequest& preferred_size,
                                       const BoxConstraints& constraints,
@@ -137,19 +145,7 @@ LRESULT HostWindowDialog::HandleMessage(HWND hwnd,
         return *result;
       }
 
-      if (LOWORD(wparam) != WA_INACTIVE) {
-        // Prevent disabled window from being activated using the task
-        // switcher.
-        if (!IsWindowEnabled(hwnd)) {
-          // Redirect focus and activation to the first enabled descendant.
-          if (HostWindow* enabled_descendant = FindFirstEnabledDescendant()) {
-            SetActiveWindow(enabled_descendant->GetWindowHandle());
-            FocusRootViewOf(this);
-          }
-          return 0;
-        }
-        FocusRootViewOf(this);
-      }
+      HandleWindowActivation(hwnd, wparam);
       return 0;
   }
 

@@ -80,20 +80,22 @@ abstract class UnpackDarwin extends Target {
     ]);
     final lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult = await environment.processManager.run(<String>[
-      'lipo',
-      frameworkBinaryPath,
-      '-verify_arch',
-      ...archList,
-    ]);
+    for (final arch in archList) {
+      final ProcessResult verifyResult = await environment.processManager.run(<String>[
+        'lipo',
+        frameworkBinaryPath,
+        '-verify_arch',
+        arch,
+      ]);
 
-    if (verifyResult.exitCode != 0) {
-      throw Exception(
-        'Binary $frameworkBinaryPath does not contain architectures "$archs".\n'
-        '\n'
-        'lipo -info:\n'
-        '$lipoInfo',
-      );
+      if (verifyResult.exitCode != 0) {
+        throw Exception(
+          'Binary $frameworkBinaryPath does not contain architecture "$arch" (expected "$archs").\n'
+          '\n'
+          'lipo -info:\n'
+          '$lipoInfo',
+        );
+      }
     }
 
     // Skip thinning for non-fat executables.

@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -193,6 +194,32 @@ void main() {
       expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so', productFlavor: 'arm64'), false);
     },
   );
+
+  testWithoutContext(
+    'Argument force-version-code-ignoring-abi ignores split ABI for version code',
+    () async {
+      final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+
+      processManager.runSync(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '--release',
+        '--split-per-abi',
+        '--target-platform',
+        'android-arm64',
+        '--build-number',
+        '2',
+        '-P',
+        'force-version-code-ignoring-abi=true',
+      ], workingDirectory: projectDir.path);
+
+      expect(
+        _apkHasVersionCode(projectDir, 2, abi: 'arm64-v8a'),
+        true,
+      );
+    },
+  );
 }
 
 Directory createProjectWithThirdpartyLib(Directory workingDir) {
@@ -287,4 +314,78 @@ bool _checkLibIsInApk(
   }
 
   return result.stdout.toString().contains(filename);
+}
+
+bool _apkHasVersionCode(
+  Directory appDir,
+  int versionCode, {
+  BuildMode buildMode = BuildMode.release,
+  String productFlavor = '',
+  String abi = '',
+}) {
+  final File localPropertiesFile = appDir.childDirectory('android').childFile('local.properties');
+  if (!localPropertiesFile.existsSync()) {
+    throw StateError('local.properties file not found at ${localPropertiesFile.path}');
+  }
+
+  final String fileContent = localPropertiesFile.readAsStringSync();
+  final regex = RegExp(r'sdk\.dir=(.+)');
+  final Match? match = regex.firstMatch(fileContent);
+  final String sdkPath = match?.group(1) ?? '';
+
+  if (sdkPath.isEmpty) {
+    throw StateError('SDK path not found in local.properties');
+  }
+
+  final FileSystemEntity? toolsDir = fileSystem
+      .directory(sdkPath)
+      .childDirectory('build-tools')
+      .listSync()
+      .firstWhereOrNull((FileSystemEntity entry) =>
+          entry.statSync().type == FileSystemEntityType.directory);
+  if (toolsDir == null) {
+    throw StateError('No build-tools directory found');
+  }
+  final String aapt = fileSystem
+      .directory(toolsDir)
+      .childFile(Platform.isWindows ? 'aapt.exe' : 'aapt')
+      .path;
+
+  var apkName = (productFlavor.isEmpty)
+      ? '${buildMode.cliName}.apk'
+      : '$productFlavor-${buildMode.cliName}.apk';
+  if (abi.isNotEmpty) {
+    apkName = '$abi-$apkName';
+  }
+  apkName = 'app-$apkName';
+
+  final String apkDir = (productFlavor.isEmpty)
+      ? buildMode.cliName
+      : '$productFlavor/${buildMode.cliName}';
+
+  final File apkFile = appDir.childDirectory('build/app/outputs/apk/$apkDir').childFile(apkName);
+
+  if (!apkFile.existsSync()) {
+    throw StateError('APK file not found at ${apkFile.path}');
+  }
+
+  final ProcessResult result = processManager.runSync(<String>[
+    aapt,
+    'dump',
+    'badging',
+    apkFile.path,
+  ]);
+
+  if (result.exitCode != 0) {
+    throw ProcessException(
+      aapt,
+      <String>['dump', 'badging', apkFile.path],
+      'aapt failed with exit code ${result.exitCode}\n${result.stderr}',
+      result.exitCode,
+    );
+  }
+
+  return result.stdout.toString()
+      .contains("versionCode='$versionCode'");
+
 }

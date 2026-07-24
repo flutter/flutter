@@ -1739,6 +1739,17 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
   }) async {
     return true;
   }
+
+  @override
+  Future<bool> launchAppAndStreamLogsWithoutDebugger({
+    required String deviceId,
+    required String bundlePath,
+    required String bundleId,
+    required List<String> launchArguments,
+    required ShutdownHooks shutdownHooks,
+  }) async {
+    return true;
+  }
 }
 
 class FakeExactAnalytics extends Fake implements Analytics {

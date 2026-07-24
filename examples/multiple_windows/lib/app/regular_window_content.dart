@@ -49,9 +49,8 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
     final double dpr = MediaQuery.of(context).devicePixelRatio;
     final Size windowSize = WindowScope.contentSizeOf(context);
 
-    return Overlay.wrap(
-      alwaysSizeToContent: true,
-      child: IntrinsicWidth(
+    return MaterialApp(
+      home: IntrinsicWidth(
         child: Material(
           child: Column(
             mainAxisSize: .min,
@@ -121,7 +120,7 @@ class _WindowCreationButtons extends StatelessWidget {
                 onDestroyed: () => windowRegistry.unregister(entry),
               ),
               title: 'Regular',
-              preferredSize: windowSettings.regularSize,
+              size: windowSettings.regularSize,
             );
 
             entry = WindowEntry(
@@ -142,7 +141,7 @@ class _WindowCreationButtons extends StatelessWidget {
                 onDestroyed: () => windowRegistry.unregister(entry),
               ),
               title: 'Modal Dialog',
-              preferredSize: windowSettings.dialogSize,
+              size: windowSettings.dialogSize,
               parent: regularWindowController,
             );
 

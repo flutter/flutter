@@ -2134,6 +2134,40 @@ void main() {
     expect(closed, equals(<Tag>[Tag.a]));
   });
 
+  testWidgets('Ancestor scroll listener is removed on dispose', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/187853.
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: RawMenuAnchor(
+            controller: MenuController(),
+            overlayBuilder: (context, info) => const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    final ValueNotifier<bool> notifier = scrollController.position.isScrollingNotifier;
+
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isTrue);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(controller: scrollController, child: const SizedBox()),
+      ),
+    );
+
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isFalse);
+  });
+
   // Copied from [MenuAnchor] tests.
   //
   // Regression test for https://github.com/flutter/flutter/issues/157606.

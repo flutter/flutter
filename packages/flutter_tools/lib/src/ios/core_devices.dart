@@ -166,6 +166,33 @@ class IOSCoreDeviceLauncher {
     return attachStatus;
   }
 
+  /// Install and launch the app on the device with `devicectl` ([_coreDeviceControl])
+  /// and stream logs, but do not attach an LLDB debugger.
+  Future<bool> launchAppAndStreamLogsWithoutDebugger({
+    required String deviceId,
+    required String bundlePath,
+    required String bundleId,
+    required List<String> launchArguments,
+    required ShutdownHooks shutdownHooks,
+  }) async {
+    final (bool installStatus, _) = await _coreDeviceControl.installApp(
+      deviceId: deviceId,
+      bundlePath: bundlePath,
+    );
+    if (!installStatus) {
+      return false;
+    }
+
+    // Since we are not attaching a debugger, startStopped should be false.
+    return _coreDeviceControl.launchAppAndStreamLogs(
+      coreDeviceLogForwarder: coreDeviceLogForwarder,
+      deviceId: deviceId,
+      bundleId: bundleId,
+      launchArguments: launchArguments,
+      shutdownHooks: shutdownHooks,
+    );
+  }
+
   /// Install and launch the app on the device through Xcode using Mac Automation ([_xcodeDebug]).
   Future<bool> launchAppWithXcodeDebugger({
     required String deviceId,
@@ -344,7 +371,7 @@ class IOSCoreDeviceControl {
     //   * Don't ignore flutter logs:
     //     2025-09-16 12:50:07.953318-0500 Runner[1279:149305] flutter: ...
     RegExp(
-      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:))(?!(\[UIKit App Config\] `UIScene` lifecycle)).*',
+      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:))(?!(\[UIKit App Config\] `UIScene` lifecycle))(?!.*UIScene life\s?cycle).*',
     ),
     // Ignore iOS execution mode and potential error. This is not meaningful to the developer.
     // Example:

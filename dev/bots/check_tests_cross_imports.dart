@@ -129,10 +129,8 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
     'packages/flutter/test/widgets/page_transitions_builder_test.dart',
-    'packages/flutter/test/widgets/selectable_region_context_menu_test.dart',
     'packages/flutter/test/widgets/navigator_test.dart',
     'packages/flutter/test/widgets/navigator_restoration_test.dart',
-    'packages/flutter/test/widgets/scrollable_semantics_test.dart',
     'packages/flutter/test/widgets/form_test.dart',
     'packages/flutter/test/widgets/text_selection_toolbar_utils.dart',
     'packages/flutter/test/widgets/live_text_utils.dart',
@@ -162,11 +160,6 @@ class TestsCrossImportChecker {
   static final Set<String> knownRenderingCrossImports = <String>{
     'packages/flutter/test/rendering/aligning_shifted_box_baseline_test.dart',
     'packages/flutter/test/rendering/localized_fonts_test.dart',
-    'packages/flutter/test/rendering/box_test.dart',
-    'packages/flutter/test/rendering/pipeline_owner_tree_test.dart',
-    'packages/flutter/test/rendering/proxy_getters_and_setters_test.dart',
-    'packages/flutter/test/rendering/proxy_box_test.dart',
-    'packages/flutter/test/rendering/object_test.dart',
   };
   static final Set<String> knownSchedulerCrossImports = <String>{};
   static final Set<String> knownSemanticsCrossImports = <String>{};
@@ -204,16 +197,11 @@ class TestsCrossImportChecker {
     'packages/flutter_test/test/all_elements_test.dart',
     'packages/flutter_test/test/utils/memory_leak_tests.dart',
     'packages/flutter_test/test/widget_tester_test.dart',
-    'packages/flutter_test/test/display_test.dart',
-    'packages/flutter_test/test/bindings_test.dart',
     'packages/flutter_test/test/live_widget_controller_test.dart',
-    'packages/flutter_test/test/live_binding_test.dart',
     'packages/flutter_test/test/accessibility_test.dart',
     'packages/flutter_test/test/finders_test.dart',
     'packages/flutter_test/test/controller_test.dart',
     'packages/flutter_test/test/recording_canvas_test.dart',
-    'packages/flutter_test/test/test_text_input_test.dart',
-    'packages/flutter_test/test/multi_view_accessibility_test.dart',
   };
 
   static final Set<String> _knownCrossImports = {

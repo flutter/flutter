@@ -63,7 +63,7 @@ Future<void> buildWindows(
   }
 
   final Directory buildDirectory = globals.fs.directory(
-    globals.fs.path.join(projectPath, getWindowsBuildDirectory(targetPlatform)),
+    globals.fs.path.join(projectPath, getWindowsBuildDirectory(targetPlatform, buildInfo.flavor)),
   );
 
   final migrators = <ProjectMigrator>[

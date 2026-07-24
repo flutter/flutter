@@ -91,8 +91,10 @@ static void activate_system_cursor(const gchar* kind, gpointer user_data) {
     populate_system_cursor_table(self->system_cursor_table);
   }
 
-  const gchar* cursor_name = reinterpret_cast<const gchar*>(
-      g_hash_table_lookup(self->system_cursor_table, kind));
+  const gchar* cursor_name =
+      kind != nullptr ? reinterpret_cast<const gchar*>(g_hash_table_lookup(
+                            self->system_cursor_table, kind))
+                      : nullptr;
   if (cursor_name == nullptr) {
     cursor_name = kFallbackCursor;
   }
