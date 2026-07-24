@@ -1,7 +1,7 @@
 ---
 type: Contributor Doc
 title: Git & Git Worktree Workflow Guide for Flutter Development
-description: How-to work on mul
+description: How to efficiently manage multiple concurrent branches and pull requests using Git worktrees.
 resource: A practical guide to leveraging Git worktrees in Flutter development for tracking multiple release channels (master, beta, stable), managing concurrent feature branches, and conducting PR reviews without duplicating repository clones or managing git stashes.
 tags: [git, worktrees, contributing, branches, PR review, feature development]
 timestamp: 2026-07-23T15:26:31-0700
@@ -11,11 +11,11 @@ timestamp: 2026-07-23T15:26:31-0700
 
 Traditional `git` development follows a simple pattern for smaller projects: clone, commit, push, update. Medium projects tend to add branching and release workflows. Flutter is a large project with many moving parts and engineers wearing different hats at different times: framework, engine, infrastructure, release, android, iOS, gardener, sheriff, triage.
 
-This document covers a workflow that should be flexible for all engineers contributing to Flutter, reduce cloned repository size and wasted space, and provide guidance for common tasks.
+This document covers a recommended workflow that should be flexible for all engineers contributing to Flutter, reduce cloned repository size and wasted space, and provide guidance for common tasks.
 
 ## Setup
 
-Having one [flutter development environment](https://github.com/flutter/flutter/blob/master/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment) incurs a cost when changing branches between master, stable, and feature development - triggering a redownload of flutter artifacts, recompiling the flutter tool, and oftentimes requiring stashing of work. Running third party tools (vscode, dart analyzer, or agent) can also run into trouble when the local branch is changed. Having multiple git clones requires duplication of the `.git` folder for the same source code, juggling environment path changes or using OS aliasing techniques to call the correct version of flutter.
+Having one [flutter development environment](https://github.com/flutter/flutter/blob/main/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment) incurs a cost when changing branches between master, stable, and feature development - triggering a redownload of flutter artifacts, recompiling the flutter tool, and oftentimes requiring stashing of work. Running third party tools (vscode, dart analyzer, or agent) can also run into trouble when the local branch is changed. Having multiple git clones requires duplication of the `.git` folder for the same source code, juggling environment path changes or using OS aliasing techniques to call the correct version of flutter.
 
 Instead, we use git worktrees: a way to manage multiple working directories, each with a different branch checked out, all linked to the same Git repository. Using [flutter_worktree](https://github.com/jtmcdole/flutter_worktree#installation) we can end up with a flutter tree setup to track upstream/origin correctly, and have master/stable already checked out.
 
@@ -30,7 +30,7 @@ Instead, we use git worktrees: a way to manage multiple working directories, eac
     └── feature/new-widget/    (Long-running feature work)
 ```
 
-This has the benefit of sharing the `.bare` git repository amongst all trees. The source files for each branch must be *unpacked* from `.bare` and the `<tree>/bin/cached` binaries are downloaded to the tree if you run the flutter tool.  The install script for flutter_worktree will create the `fswitch.sh` file which you can use in your bash/zsh/windows profile to quickly `fswitch <branch>` and update your environment's path without re-downloading.
+This has the benefit of sharing the `.bare` git repository amongst all trees. The source files for each branch must be *unpacked* from `.bare` and the `<tree>/bin/cached` binaries are downloaded to the tree if you run the flutter tool.  The install script for flutter_worktree will create the `fswitch.sh` file which you can use in your bash/zsh/windows profile to quickly `fswitch <branch>` and update your environment's path without re-downloading (on Windows, Linux, and macOS).
 
 With the following directory structure; and with `fswitch.sh` sourced in your profile (e.g. `~/.zshrc`), you can now have multiple terminals open and dedicated to master and stable with a simple `fswitch master` / `fswitch stable`. This updates the current shell session’s OS PATH search to point to `master/bin` or `stable/bin`, allowing for VsCode, Antigravity, and other tooling to find the right version of Flutter for tooling.
 
@@ -57,7 +57,7 @@ With the following directory structure; and with `fswitch.sh` sourced in your pr
 
 #### Code Reviews
 
-Instead of doing code reviews on [github.com](http://github.com) and lacking the feature rich dart analyzer, or being able to use and agent and other advanced tooling; checkout the PR locally.
+Instead of doing code reviews on [github.com](https://github.com) and lacking the feature rich dart analyzer, or being able to use an agent and other advanced tooling; check out the PR locally.
 
 Without the `gh` tool:
 ```shell
@@ -81,7 +81,7 @@ cd pr-189954
 git worktree remove pr-189954
 ```
 
-With the `gh` tool its easier:
+With the `gh` tool it's easier:
 
 ```shell
 git worktree add prreview
@@ -158,7 +158,7 @@ Git commands you should be using (and why).
 git switch -c new-feature
 
 # Just switch
-git switch main
+git switch master
 
 # House keeping
 git branch -d new-feature
@@ -281,7 +281,7 @@ git rebase -i upstream/master
 
 ### Stacked PRs
 
-What's better than one giant PR that might be expensive to review? Multiple small PRs that build on top of each other - each building successfully on their own.  Github doesn't properly support / render stacked PRs like critique / graphite / others; but we can still achieve a happy path.
+What's better than one giant PR that might be expensive to review? Multiple small PRs that build on top of each other - each building successfully on their own.  GitHub doesn't properly support / render stacked PRs like GitLab / Graphite / others; but we can still achieve a happy path.
 
 Let's say you have broken down a feature into two smaller ones, `feature-1a` and `feature-1b`.
 
@@ -294,7 +294,7 @@ GitHub UI: Shows only changes in `feature-1a`
 Merge-Base: `feature-1a`
 Head: `feature-1b`
 GitHub UI: Shows changes in `feature-1b`  - **only for branches on flutter/flutter**
-Clean-diff: [https://github.com/](https://github.com/)\<GITHUB\_USER\>/flutter/compare/\<feature-1a\>...\<feature-1b\>
+Clean-diff: https://github.com/<GITHUB_USER>/flutter/compare/<feature-1a>...<feature-1b>
 
 ```shell
 # 1. Start on latest HEAD
