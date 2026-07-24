@@ -518,9 +518,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
             javaV: javaVersion,
           );
           final gradleRangeCompatSuggestion = compat != null
-              ? 'are ${compat.gradleMin}${compat.gradleMax != null ?  \' to ${compat.gradleMax}\' : \' or newer\'}
-              : 'is unknown'
-          final gradleRangeInfo = 'compatible Gradle versions for Java $javaVersion $gradleRangeCompatSuggestion'
+              ? '${compat.gradleMin}${compat.gradleMax != null ?  \' to ${compat.gradleMax}\' : \' or newer\'}
+              : 'unknown'
+          final gradleRangeInfo = 'compatible Gradle versions for Java $javaVersion are $gradleRangeCompatSuggestion'
           throwToolExit("""
 Gradle build failed due to Java/Gradle incompatibility.
 The Java version used for the build is $javaVersion, which is incompatible with Gradle $gradleVersion.
@@ -531,7 +531,6 @@ Alternatively, you can bypass this check using "--android-skip-build-dependency-
         }
       }
     }
- 
 
     // Assembly work starts here.
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
