@@ -500,7 +500,7 @@ abstract final class Lipo {
   /// Otherwise, `lipo` would fail if the given paths didn't exist.
   static Future<void> create(
     Environment environment,
-    List<DarwinArch> darwinArchs, {
+    List<CpuArch> cpuArchs, {
     required String relativePath,
     required String inputDir,
     bool skipMissingInputs = false,
@@ -511,9 +511,9 @@ abstract final class Lipo {
     );
     environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
 
-    Iterable<String> inputPaths = darwinArchs.map(
-      (DarwinArch iosArch) =>
-          environment.fileSystem.path.join(inputDir, iosArch.name, relativePath),
+    Iterable<String> inputPaths = cpuArchs.map(
+      (CpuArch cpuArch) =>
+          environment.fileSystem.path.join(inputDir, cpuArch.darwinArchName, relativePath),
     );
     if (skipMissingInputs) {
       inputPaths = inputPaths.where(environment.fileSystem.isFileSync);
