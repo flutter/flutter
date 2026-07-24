@@ -34,6 +34,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addIgnoreDeprecationOption();
+    addEnableHcppFlag(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
         'split-per-abi',

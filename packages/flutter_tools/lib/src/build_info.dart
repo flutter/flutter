@@ -48,6 +48,8 @@ class BuildInfo {
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.androidSkipBuildDependencyValidation = false,
+    this.androidEnableHcpp,
+    this.explicitAndroidEnableHcpp,
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
@@ -93,6 +95,8 @@ class BuildInfo {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+      androidEnableHcpp: androidEnableHcpp,
+      explicitAndroidEnableHcpp: explicitAndroidEnableHcpp,
       packageConfig: packageConfig ?? this.packageConfig,
       initializeFromDill: initializeFromDill ?? this.initializeFromDill,
       assumeInitializeFromDillUpToDate: assumeInitializeFromDillUpToDate,
@@ -200,6 +204,23 @@ class BuildInfo {
   /// Whether to skip checking of individual versions of our Android build time
   /// dependencies.
   final bool androidSkipBuildDependencyValidation;
+
+  /// The requested `enable-hcpp` default value (explicit CLI flag, or false
+  /// if not provided), passed to Gradle so the Flutter Gradle Plugin can inject the
+  /// corresponding manifest metadata if absent.
+  ///
+  /// The injection only happens for application projects, and only when the
+  /// merged manifest does not already contain the
+  /// `io.flutter.embedding.android.EnableHcpp` metadata, so an explicit value
+  /// in the app's manifest always takes priority. Module (aar) manifests are
+  /// never injected; the add-to-app host's manifest is the source of truth.
+  /// When null, no property is passed and no injection happens.
+  final bool? androidEnableHcpp;
+
+  /// The explicit `--[no-]enable-hcpp` value passed by the user on the CLI,
+  /// or null if the user did not pass the flag explicitly. Passed to Gradle
+  /// to enable warning when an explicit CLI setting conflicts with the merged manifest.
+  final bool? explicitAndroidEnableHcpp;
 
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`
   /// flag.
@@ -423,6 +444,8 @@ class BuildInfo {
       if (performanceMeasurementFile != null)
         '-Pperformance-measurement-file=$performanceMeasurementFile',
       if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
+      if (androidEnableHcpp != null) '-Penable-hcpp=$androidEnableHcpp',
+      if (explicitAndroidEnableHcpp != null) '-Pexplicit-enable-hcpp=$explicitAndroidEnableHcpp',
       for (final String projectArg in androidProjectArgs) '-P$projectArg',
       if (androidGradleProjectCacheDir != null) '--project-cache-dir=$androidGradleProjectCacheDir',
     ];

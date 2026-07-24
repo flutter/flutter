@@ -35,6 +35,7 @@ void main() {
     late UpgradeCommandRunner realCommandRunner;
     late FakeProcessManager processManager;
     late FakePlatform fakePlatform;
+    String? previousFlutterRoot;
     const gitTagVersion = GitTagVersion(
       x: 1,
       y: 2,
@@ -46,6 +47,13 @@ void main() {
     );
 
     setUp(() {
+      // These tests read Cache.flutterRoot (e.g. to build the path to
+      // bin/flutter) but never set it, so they depend on ambient global state
+      // and fail if a previously-run test left Cache.flutterRoot null (for
+      // example, packages_test sets it to null). Set it explicitly here and
+      // restore it in tearDown so these tests are order-independent.
+      previousFlutterRoot = Cache.flutterRoot;
+      Cache.flutterRoot = getFlutterRoot();
       fakeCommandRunner = FakeUpgradeCommandRunner()..clock = SystemClock.fixed(jan12026);
       realCommandRunner = UpgradeCommandRunner()
         ..workingDirectory = getFlutterRoot()
@@ -57,6 +65,10 @@ void main() {
           'ENV1': 'irrelevant',
           'ENV2': 'irrelevant',
         });
+    });
+
+    tearDown(() {
+      Cache.flutterRoot = previousFlutterRoot;
     });
 
     testUsingContext('throws on unknown tag, official branch,  noforce', () async {

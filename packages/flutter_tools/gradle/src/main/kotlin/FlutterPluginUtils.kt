@@ -13,6 +13,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
+import com.flutter.gradle.tasks.EnableHcppManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
@@ -38,6 +39,8 @@ object FlutterPluginUtils {
     // recommended to use these const values in tests.
     internal const val PROP_SHOULD_SHRINK_RESOURCES = "shrink"
     internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
+    internal const val PROP_ENABLE_HCPP = "enable-hcpp"
+    internal const val PROP_EXPLICIT_ENABLE_HCPP = "explicit-enable-hcpp"
     internal const val PROP_LOCAL_ENGINE_REPO = "local-engine-repo"
     internal const val PROP_IS_VERBOSE = "verbose"
     internal const val PROP_TARGET = "target"
@@ -1154,6 +1157,61 @@ object FlutterPluginUtils {
                     DeepLinkJsonFromManifestTask::manifestFile,
                     DeepLinkJsonFromManifestTask::updatedManifest
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
+        }
+    }
+
+    /**
+     * Adds tasks that inject the `io.flutter.embedding.android.EnableHcpp` meta-data into the
+     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true` (i.e.
+     * when the `--enable-hcpp` flag was passed).
+     *
+     * The meta-data is only added when not already present in the merged manifest, so an
+     * explicit value in the developer's manifest always takes priority over the tool's default.
+     * An explicit `--enable-hcpp`/`--no-enable-hcpp` on `flutter run`/`flutter test` is passed
+     * to the engine at launch instead, which takes priority over the manifest at runtime.
+     *
+     * Only applies to application projects. Injecting into a module (aar) library manifest
+     * would propagate into the host app's merged manifest, and if the host app explicitly sets
+     * the meta-data to a different value the manifest merger fails the host build with an
+     * attribute conflict ("Attribute meta-data#...EnableHcpp@value value=(false) ... is also
+     * present at [library] ... value=(true)") instead of letting the host win. Add-to-app hosts
+     * therefore control HCPP exclusively through their own manifest.
+     */
+    @JvmStatic
+    @JvmName("addTasksForEnableHcppManifest")
+    internal fun addTasksForEnableHcppManifest(project: Project) {
+        if (!isFlutterAppProject(project)) {
+            return
+        }
+        val enableHcpp: Boolean =
+            project.findProperty(PROP_ENABLE_HCPP)?.toString()?.toBoolean() ?: false
+        val explicitEnableHcpp: Boolean? =
+            if (project.hasProperty(PROP_EXPLICIT_ENABLE_HCPP)) {
+                project.findProperty(PROP_EXPLICIT_ENABLE_HCPP)?.toString()?.toBoolean()
+            } else {
+                null
+            }
+        if (!enableHcpp && explicitEnableHcpp == null) {
+            return
+        }
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        androidComponents.onVariants { variant ->
+            val hcppManifestUpdater =
+                project.tasks.register(
+                    "enableHcppInManifest${capitalize(variant.name)}",
+                    EnableHcppManifestTask::class.java
+                ) {
+                    this.requestedEnableHcpp.set(enableHcpp)
+                    if (explicitEnableHcpp != null) {
+                        this.explicitEnableHcpp.set(explicitEnableHcpp)
+                    }
+                }
+            variant.artifacts
+                .use(hcppManifestUpdater)
+                .wiredWithFiles(
+                    EnableHcppManifestTask::manifestFile,
+                    EnableHcppManifestTask::updatedManifest
+                ).toTransform(SingleArtifact.MERGED_MANIFEST)
         }
     }
 }
