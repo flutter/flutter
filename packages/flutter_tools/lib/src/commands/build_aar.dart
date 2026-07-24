@@ -118,9 +118,9 @@ class BuildAarCommand extends BuildSubCommand {
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
-    final Iterable<AndroidArch> targetArchitectures = stringsArg(
+    final Iterable<CpuArch> targetArchitectures = stringsArg(
       'target-platform',
-    ).map<AndroidArch>(getAndroidArchForName);
+    ).map<CpuArch>(getCpuArchForName);
 
     final String? buildNumberArg = stringArg('build-number');
     final String buildNumber =

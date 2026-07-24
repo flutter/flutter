@@ -261,7 +261,7 @@ end
           kTargetPlatform: TargetPlatform.darwin.getName(),
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             globals.artifacts!,
-          ).map((DarwinArch e) => e.name).join(' '),
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,

@@ -138,7 +138,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   required BuildInfo buildInfo,
   String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
-  DarwinArch? activeArch,
+  CpuArch? activeArch,
   bool codesign = true,
   String? deviceID,
   bool configOnly = false,
@@ -411,16 +411,17 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final Directory? workspacePath = app.project.xcodeWorkspace;
   if (workspacePath != null) {
-    buildCommands.addAll(<String>[
-      '-workspace',
-      workspacePath.basename,
-      '-scheme',
-      scheme,
-      if (buildAction !=
-          XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
-        'BUILD_DIR=${globals.fs.path.absolute(buildDirectoryPath)}',
-    ]);
+    buildCommands.addAll(<String>['-workspace', workspacePath.basename]);
+  } else {
+    buildCommands.addAll(<String>['-project', app.project.xcodeProject.basename]);
   }
+  buildCommands.addAll(<String>[
+    '-scheme',
+    scheme,
+    if (buildAction !=
+        XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
+      'BUILD_DIR=${globals.fs.path.absolute(buildDirectoryPath)}',
+  ]);
 
   // Check if the project contains a watchOS companion app.
   final bool hasWatchCompanion = await app.project.containsWatchCompanion(
@@ -462,10 +463,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == getCurrentDarwinArch();
+      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
-      buildCommands.add('ARCHS=${activeArch.name}');
+      buildCommands.add('ARCHS=${activeArch.darwinArchName}');
     }
   }
 
