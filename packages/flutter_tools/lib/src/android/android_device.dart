@@ -549,27 +549,15 @@ class AndroidDevice extends Device {
     final TargetPlatform devicePlatform = await targetPlatform;
 
     var builtPackage = package;
-    AndroidArch androidArch;
-    switch (devicePlatform) {
-      case TargetPlatform.android_arm:
-        androidArch = AndroidArch.armeabi_v7a;
-      case TargetPlatform.android_arm64:
-        androidArch = AndroidArch.arm64_v8a;
-      case TargetPlatform.android_x64:
-        androidArch = AndroidArch.x86_64;
-      case TargetPlatform.android:
-      case TargetPlatform.darwin:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_arm64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.unsupported:
+    final CpuArch cpuArch = await this.cpuArch;
+    switch (cpuArch) {
+      case CpuArch.armv7:
+      case CpuArch.arm64:
+      case CpuArch.x64:
+        break;
+      case CpuArch.x86:
+      case CpuArch.riscv64:
+      case CpuArch.unknown:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
     }
@@ -583,7 +571,7 @@ class AndroidDevice extends Device {
         target: mainPath ?? 'lib/main.dart',
         androidBuildInfo: AndroidBuildInfo(
           debuggingOptions.buildInfo,
-          targetArchs: <AndroidArch>[androidArch],
+          targetArchs: <CpuArch>[cpuArch],
         ),
       );
       // Package has been built, so we can get the updated application ID and
