@@ -25,6 +25,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
+import 'package:flutter_tools/src/base/version.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -3069,6 +3070,201 @@ Gradle Crashed
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+
+    testUsingContext(
+      'build apk throws ToolExit when Java and Gradle versions are incompatible',
+      () async {
+        final builder = AndroidGradleBuilder(
+          java: FakeJava(version: Version.withText(21, 0, 0, '21.0.0')),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+          androidSdk: globals.androidSdk,
+        );
+
+        // Setup incompatible gradle version (e.g. 8.0 for Java 21) in gradle-wrapper.properties
+        fileSystem.file('android/gradle/wrapper/gradle-wrapper.properties')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-all.zip',
+          );
+
+        fileSystem.file('android/gradlew').createSync(recursive: true);
+        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+        fileSystem.file('android/build.gradle').createSync(recursive: true);
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+        await expectLater(
+          () => builder.buildGradleApp(
+            project: project,
+            androidBuildInfo: const AndroidBuildInfo(
+              BuildInfo(
+                BuildMode.release,
+                'dev',
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+            ),
+            target: 'lib/main.dart',
+            isBuildingBundle: false,
+            configOnly: false,
+            localGradleErrors: const <GradleHandledError>[],
+          ),
+          throwsToolExit(
+            message:
+                'Gradle build failed due to Java/Gradle incompatibility.\n'
+                'The Java version used for the build is 21.0.0, which is incompatible with Gradle 8.0.\n'
+                'To fix this, you can either:\n'
+                "  1. Upgrade your project's Gradle version (typically in gradle-wrapper.properties to a version matching the range: compatible Gradle versions for Java 21.0.0 are 8.4 to newer).\n"
+                '  2. Use a different Java version for Flutter by running `flutter config --jdk-dir=<path>`.\n'
+                'Alternatively, you can bypass this check using "--android-skip-build-dependency-validation".',
+          ),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        AndroidSdk: () {
+          fileSystem.directory(sdkPath()).createSync(recursive: true);
+          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
+          fileSystem
+              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
+              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
+              .createSync(recursive: true);
+          fileSystem
+              .directory(ndkPath('29.0.13846066'))
+              .childFile('source.properties')
+              .createSync(recursive: true);
+          fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
+          return AndroidSdk(
+            fileSystem.directory(sdkPath()),
+            java: FakeJava(version: Version.withText(21, 0, 0, '21.0.0')),
+            fileSystem: fileSystem,
+          );
+        },
+        AndroidStudio: () => FakeAndroidStudio(),
+      },
+    );
+
+    testUsingContext(
+      'skips Java and Gradle compatibility check when androidSkipBuildDependencyValidation is true',
+      () async {
+        final builder = AndroidGradleBuilder(
+          java: FakeJava(version: Version.withText(21, 0, 0, '21.0.0')),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+          androidSdk: globals.androidSdk,
+        );
+
+        // Setup incompatible gradle version (e.g. 8.0 for Java 21) in gradle-wrapper.properties
+        // This would normally fail unless skipped.
+        fileSystem.file('android/gradle/wrapper/gradle-wrapper.properties')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-all.zip',
+          );
+
+        fileSystem.file('android/gradlew').createSync(recursive: true);
+        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+        fileSystem.file('android/build.gradle').createSync(recursive: true);
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+        fileSystem
+            .directory('build')
+            .childDirectory('app')
+            .childDirectory('outputs')
+            .childDirectory('flutter-apk')
+            .childFile('app-dev-release.apk')
+            .createSync(recursive: true);
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+        processManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'gradlew',
+              '-q',
+              '-PskipDependencyChecks=true',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              '-Ptarget=lib/main.dart',
+              '-Pbase-application-name=android.app.Application',
+              '-Pdart-obfuscation=false',
+              '-Ptrack-widget-creation=false',
+              '-Ptree-shake-icons=false',
+              '-Pflutter.androidSdkRoot=${sdkPath()}',
+              '-Pflutter.installedNdkVersions=29.0.13846066',
+              '-Pflutter.sdkManagerPath=${sdkManagerPath()}',
+              'assembleDevRelease',
+            ],
+          ),
+        );
+
+        await builder.buildGradleApp(
+          project: project,
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release,
+              'dev',
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+              androidSkipBuildDependencyValidation: true, // Skip validation
+            ),
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          configOnly: false,
+          localGradleErrors: const <GradleHandledError>[],
+        );
+
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        AndroidSdk: () {
+          fileSystem.directory(sdkPath()).createSync(recursive: true);
+          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
+          fileSystem
+              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
+              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
+              .createSync(recursive: true);
+          fileSystem
+              .directory(ndkPath('29.0.13846066'))
+              .childFile('source.properties')
+              .createSync(recursive: true);
+          fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
+          return AndroidSdk(
+            fileSystem.directory(sdkPath()),
+            java: FakeJava(version: Version.withText(21, 0, 0, '21.0.0')),
+            fileSystem: fileSystem,
+          );
+        },
+        AndroidStudio: () => FakeAndroidStudio(),
+      },
+    );
   });
 }
 
