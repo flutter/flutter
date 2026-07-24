@@ -393,6 +393,10 @@ constexpr char kTextPlainFormat[] = "text/plain";
   _publishedValue = value;
 }
 
+- (nullable NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
+  return [_flutterEngine valuePublishedByPlugin:pluginKey];
+}
+
 - (NSString*)lookupKeyForAsset:(NSString*)asset {
   return [FlutterDartProject lookupKeyForAsset:asset];
 }

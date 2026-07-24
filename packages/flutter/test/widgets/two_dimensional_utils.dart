@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart' show CacheExtentStyle, ViewportOffset;
 import 'package:flutter/widgets.dart';
-
-import 'widgets_app_tester.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const Color _kAmber100 = Color(0xFFFFF8E1);
 const Color _kBlueAccent100 = Color(0xFF82B1FF);

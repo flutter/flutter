@@ -20,12 +20,15 @@ IOSSdk getIOSSdk(EnvironmentType environmentType) {
   };
 }
 
-/// Extract the [Architecture] from a [DarwinArch].
-Architecture getNativeIOSArchitecture(DarwinArch darwinArch) {
-  return switch (darwinArch) {
-    DarwinArch.armv7 => Architecture.arm,
-    DarwinArch.arm64 => Architecture.arm64,
-    DarwinArch.x86_64 => Architecture.x64,
+/// Extract the [Architecture] from a [CpuArch].
+Architecture getNativeIOSArchitecture(CpuArch cpuArch) {
+  return switch (cpuArch) {
+    CpuArch.armv7 => Architecture.arm,
+    CpuArch.arm64 => Architecture.arm64,
+    CpuArch.x64 => Architecture.x64,
+    CpuArch.x86 ||
+    CpuArch.riscv64 ||
+    CpuArch.unknown => throw Exception('Unknown iOS CPU arch: $cpuArch.'),
   };
 }
 
