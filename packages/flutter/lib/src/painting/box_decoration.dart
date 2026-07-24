@@ -420,14 +420,14 @@ class _BoxDecorationPainter extends BoxPainter {
       _decoration.shape != BoxShape.circle || _decoration.borderRadius == null,
       'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
     );
-    switch ((_decoration.shape, _decoration.borderRadius)) {
-      case (BoxShape.circle, _):
-        canvas.drawCircle(rect.center, rect.shortestSide / 2.0, paint);
-      case (BoxShape.rectangle, null || BorderRadius.zero):
-        canvas.drawRect(rect, paint);
-      case (BoxShape.rectangle, final BorderRadiusGeometry radius):
-        canvas.drawRRect(radius.resolve(textDirection).toRRect(rect), paint);
-    }
+    return switch ((_decoration.shape, _decoration.borderRadius)) {
+      (BoxShape.circle, _) => canvas.drawCircle(rect.center, rect.shortestSide / 2.0, paint),
+      (BoxShape.rectangle, null || BorderRadius.zero) => canvas.drawRect(rect, paint),
+      (BoxShape.rectangle, final BorderRadiusGeometry radius) => canvas.drawRRect(
+        radius.resolve(textDirection).toRRect(rect),
+        paint,
+      ),
+    };
   }
 
   void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {

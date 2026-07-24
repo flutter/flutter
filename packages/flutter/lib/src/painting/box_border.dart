@@ -654,17 +654,18 @@ class Border extends BoxBorder {
         shape != BoxShape.circle || borderRadius == null,
         'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
       );
-      switch ((top.style, shape, borderRadius)) {
-        case (BorderStyle.none, _, _):
-          return;
-        case (BorderStyle.solid, BoxShape.circle, _):
-          BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
-        case (BorderStyle.solid, BoxShape.rectangle, null || BorderRadius.zero):
-          BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
-        case (BorderStyle.solid, BoxShape.rectangle, final BorderRadius radius):
-          BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, radius);
-      }
-      return;
+      return switch ((top.style, shape, borderRadius)) {
+        (BorderStyle.none, _, _) => null,
+        (BorderStyle.solid, BoxShape.circle, _) => BoxBorder._paintUniformBorderWithCircle(
+          canvas,
+          rect,
+          top,
+        ),
+        (BorderStyle.solid, BoxShape.rectangle, null || BorderRadius.zero) =>
+          BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top),
+        (BorderStyle.solid, BoxShape.rectangle, final BorderRadius radius) =>
+          BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, radius),
+      };
     }
 
     if (_styleIsUniform && top.style == BorderStyle.none) {
@@ -1027,17 +1028,18 @@ class BorderDirectional extends BoxBorder {
         shape != BoxShape.circle || borderRadius == null,
         'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
       );
-      switch ((top.style, shape, borderRadius)) {
-        case (BorderStyle.none, _, _):
-          return;
-        case (BorderStyle.solid, BoxShape.circle, _):
-          BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
-        case (BorderStyle.solid, BoxShape.rectangle, null || BorderRadius.zero):
-          BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
-        case (BorderStyle.solid, BoxShape.rectangle, final BorderRadius radius):
-          BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, radius);
-      }
-      return;
+      return switch ((top.style, shape, borderRadius)) {
+        (BorderStyle.none, _, _) => null,
+        (BorderStyle.solid, BoxShape.circle, _) => BoxBorder._paintUniformBorderWithCircle(
+          canvas,
+          rect,
+          top,
+        ),
+        (BorderStyle.solid, BoxShape.rectangle, null || BorderRadius.zero) =>
+          BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top),
+        (BorderStyle.solid, BoxShape.rectangle, final BorderRadius radius) =>
+          BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, radius),
+      };
     }
 
     if (_styleIsUniform && top.style == BorderStyle.none) {
