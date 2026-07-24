@@ -58,6 +58,7 @@ fml::RefPtr<Shader> Shader::Make(
   shader->uniform_structs_ = std::move(uniform_structs);
   shader->uniform_textures_ = std::move(uniform_textures);
   shader->descriptor_set_layouts_ = std::move(descriptor_set_layouts);
+  shader->RebuildBindingOrder();
   return shader;
 }
 
@@ -110,6 +111,7 @@ void Shader::ResetFrom(Shader& other) {
   uniform_structs_ = std::move(other.uniform_structs_);
   uniform_textures_ = std::move(other.uniform_textures_);
   descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
+  RebuildBindingOrder();
   if (code_changed) {
     is_dirty_ = true;
   }
@@ -191,6 +193,61 @@ const Shader::TextureBinding* Shader::GetUniformTexture(
   return &uniform->second;
 }
 
+int Shader::GetUniformStructIndex(const std::string& name) const {
+  const UniformBinding* binding = GetUniformStruct(name);
+  if (binding == nullptr) {
+    return -1;
+  }
+  for (size_t i = 0; i < uniform_struct_order_.size(); i++) {
+    if (uniform_struct_order_[i] == binding) {
+      return static_cast<int>(i);
+    }
+  }
+  return -1;
+}
+
+const Shader::UniformBinding* Shader::GetUniformStructAt(int index) const {
+  if (index < 0 ||
+      static_cast<size_t>(index) >= uniform_struct_order_.size()) {
+    return nullptr;
+  }
+  return uniform_struct_order_[index];
+}
+
+int Shader::GetUniformTextureIndex(const std::string& name) const {
+  const TextureBinding* binding = GetUniformTexture(name);
+  if (binding == nullptr) {
+    return -1;
+  }
+  for (size_t i = 0; i < uniform_texture_order_.size(); i++) {
+    if (uniform_texture_order_[i] == binding) {
+      return static_cast<int>(i);
+    }
+  }
+  return -1;
+}
+
+const Shader::TextureBinding* Shader::GetUniformTextureAt(int index) const {
+  if (index < 0 ||
+      static_cast<size_t>(index) >= uniform_texture_order_.size()) {
+    return nullptr;
+  }
+  return uniform_texture_order_[index];
+}
+
+void Shader::RebuildBindingOrder() {
+  uniform_struct_order_.clear();
+  uniform_struct_order_.reserve(uniform_structs_.size());
+  for (const auto& entry : uniform_structs_) {
+    uniform_struct_order_.push_back(&entry.second);
+  }
+  uniform_texture_order_.clear();
+  uniform_texture_order_.reserve(uniform_textures_.size());
+  for (const auto& entry : uniform_textures_) {
+    uniform_texture_order_.push_back(&entry.second);
+  }
+}
+
 }  // namespace gpu
 }  // namespace flutter
 
@@ -208,6 +265,20 @@ int InternalFlutterGpu_Shader_GetUniformStructSize(
   }
 
   return uniform->size_in_bytes;
+}
+
+int InternalFlutterGpu_Shader_GetUniformStructIndex(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle struct_name_handle) {
+  auto name = tonic::StdStringFromDart(struct_name_handle);
+  return wrapper->GetUniformStructIndex(name);
+}
+
+int InternalFlutterGpu_Shader_GetUniformTextureIndex(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle texture_name_handle) {
+  auto name = tonic::StdStringFromDart(texture_name_handle);
+  return wrapper->GetUniformTextureIndex(name);
 }
 
 int InternalFlutterGpu_Shader_GetUniformMemberOffset(
