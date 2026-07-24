@@ -7,11 +7,7 @@ import Testing
 @testable import InternalFlutterSwift
 
 @Suite struct VSyncClientTests {
-  private let threadTaskRunner: TaskRunner
-
-  init() {
-    threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
-  }
+  private let threadTaskRunner: TaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
 
   /// Verifies that the vsync client safely synthesizes a target timestamp when the display link's
   /// `targetTimestamp` is invalid (i.e. evaluates to 0.0).
