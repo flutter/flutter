@@ -8,6 +8,7 @@
 #include <cstdint>
 #include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -56,14 +57,14 @@ struct TextureDescriptor {
     return BytesForTextureRegion(format, width, height);
   }
 
-  constexpr size_t GetByteSizeOfBaseMipLevel() const {
+  size_t GetByteSizeOfBaseMipLevel() const {
     if (!IsValid()) {
       return 0u;
     }
     return GetByteSizeForDimensions(size.width, size.height);
   }
 
-  constexpr size_t GetByteSizeOfAllMipLevels() const {
+  size_t GetByteSizeOfAllMipLevels() const {
     if (!IsValid()) {
       return 0u;
     }
@@ -78,7 +79,7 @@ struct TextureDescriptor {
     return result;
   }
 
-  constexpr size_t GetBytesPerRow() const {
+  size_t GetBytesPerRow() const {
     if (!IsValid()) {
       return 0u;
     }
@@ -92,14 +93,11 @@ struct TextureDescriptor {
 
   constexpr bool operator==(const TextureDescriptor& other) const = default;
 
-  constexpr bool IsValid() const {
-    return format != PixelFormat::kUnknown &&  //
-           !size.IsEmpty() &&                  //
-           mip_count >= 1u &&                  //
-           (type != TextureType::kTexture2DArray ||
-            array_layer_count >= 1u) &&  //
-           SamplingOptionsAreValid();
-  }
+  /// @brief Returns why this descriptor cannot describe a real texture, or
+  ///        OkStatus when it can.
+  absl::Status Validate() const;
+
+  bool IsValid() const { return Validate().ok(); }
 };
 
 std::string TextureDescriptorToString(const TextureDescriptor& desc);

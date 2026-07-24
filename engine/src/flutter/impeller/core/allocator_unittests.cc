@@ -9,6 +9,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/testing/mocks.h"
+#include "third_party/abseil-cpp/absl/strings/match.h"
 
 namespace impeller {
 namespace testing {
@@ -102,6 +103,7 @@ TEST(AllocatorTest, TextureDescriptorArrayValidity) {
 
   desc.array_layer_count = 0;
   EXPECT_FALSE(desc.IsValid());
+  EXPECT_TRUE(absl::StrContains(desc.Validate().message(), "layer"));
 }
 
 TEST(AllocatorTest, RangeTest) {
