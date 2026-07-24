@@ -732,20 +732,15 @@ void main() {
       expect(response.data['error'], contains('coldBoot is not a bool'));
     });
 
-    testUsingContext(
-      'emulator.getEmulators should respond with list',
-      () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-        daemonStreams.inputs.add(
-          DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}),
-        );
-        final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-        expect(response.data['id'], 0);
-        expect(response.data['result'], isList);
-      },
-      // TODO(vashworth): https://github.com/flutter/flutter/issues/189876
-      skip: const LocalPlatform().isMacOS,
-    );
+    testUsingContext('emulator.getEmulators should respond with list', () async {
+      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemonStreams.inputs.add(
+        DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}),
+      );
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['result'], isList);
+    });
 
     testUsingContext('daemon can send exposeUrl requests to the client', () async {
       const originalUrl = 'http://localhost:1234/';
