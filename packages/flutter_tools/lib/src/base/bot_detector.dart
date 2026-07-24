@@ -122,7 +122,7 @@ class AzureDetector {
     } on OSError {
       // The HttpClient might be running in a WSL1 environment.
       return _isRunningOnAzure = false;
-    } catch (_) {
+    } on Object  {
       // Metadata detection is best-effort. Unexpected failures (for example,
       // malformed redirect URIs injected by transparent proxies) should not
       // prevent Flutter from starting.
