@@ -99,8 +99,13 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
   @objc public var keyboardSpringAnimation: SpringAnimation?
   @objc public var isKeyboardInOrTransitioningFromBackground: Bool = false
 
-  @objc public init(delegate: FlutterKeyboardInsetManagerDelegate) {
+  private let displayLinkManager: DisplayLinkManager
+
+  @objc public init(
+    delegate: FlutterKeyboardInsetManagerDelegate, displayLinkManager: DisplayLinkManager
+  ) {
     self.delegate = delegate
+    self.displayLinkManager = displayLinkManager
     super.init()
   }
 
@@ -473,8 +478,8 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
 
     keyboardAnimationVSyncClient = VSyncClient(
       taskRunner: taskRunner,
-      isVariableRefreshRateEnabled: DisplayLinkManager.shared.maxRefreshRateEnabledOnIPhone,
-      maxRefreshRate: DisplayLinkManager.shared.displayRefreshRate,
+      isVariableRefreshRateEnabled: displayLinkManager.maxRefreshRateEnabledOnIPhone,
+      maxRefreshRate: displayLinkManager.displayRefreshRate,
       callback: vsyncCallback)
     keyboardAnimationVSyncClient?.allowPauseAfterVsync = false
     keyboardAnimationVSyncClient?.await()
