@@ -54,7 +54,7 @@ void main() {
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
         kTargetPlatform: TargetPlatform.android.getName(),
-        kAndroidArchs: AndroidArch.arm64_v8a.platformName,
+        kAndroidArchs: CpuArch.arm64.androidPlatformName,
       },
       inputs: <String, String>{},
       artifacts: artifacts,

@@ -135,12 +135,6 @@ class GoldenPlaygroundTest
   // support wide gamuts.
   [[nodiscard]] bool EnsureContextSupportsWideGamut() { return true; }
 
-  // See |Playground::EnsureContextSupportsAntialiasLines|
-  // GoldenPlaygroundTest uses testname matching in |Setup| to manage this.
-  // In particular, it will automatically GTEST_SKIP if the platform doesn't
-  // support experimental AA lines.
-  [[nodiscard]] bool EnsureContextSupportsAntialiasLines() { return true; }
-
  private:
 #if FML_OS_MACOSX
   // This must be placed first so that the autorelease pool is not destroyed
