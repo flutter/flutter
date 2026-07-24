@@ -3081,11 +3081,18 @@ Gradle Crashed
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
-          gradleUtils: FakeGradleUtils(gradleVersion: '8.0'),
+          gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
           androidSdk: globals.androidSdk,
         );
+
+        // Setup incompatible gradle version (e.g. 8.0 for Java 21) in gradle-wrapper.properties
+        fileSystem.file('android/gradle/wrapper/gradle-wrapper.properties')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            r'distributionUrl=https://services.gradle.org/distributions/gradle-8.0-all.zip',
+          );
 
         fileSystem.file('android/gradlew').createSync(recursive: true);
         fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
@@ -3162,11 +3169,19 @@ Gradle Crashed
           fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
-          gradleUtils: FakeGradleUtils(gradleVersion: '8.0'),
+          gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
           androidSdk: globals.androidSdk,
         );
+
+        // Setup incompatible gradle version (e.g. 8.0 for Java 21) in gradle-wrapper.properties
+        // This would normally fail unless skipped.
+        fileSystem.file('android/gradle/wrapper/gradle-wrapper.properties')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            r'distributionUrl=https://services.gradle.org/distributions/gradle-8.0-all.zip',
+          );
 
         fileSystem.file('android/gradlew').createSync(recursive: true);
         fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
@@ -3254,18 +3269,9 @@ Gradle Crashed
 }
 
 class FakeGradleUtils extends Fake implements GradleUtils {
-  FakeGradleUtils({this.gradleVersion});
-
-  final String? gradleVersion;
-
   @override
   String getExecutable(FlutterProject project) {
     return 'gradlew';
-  }
-
-  @override
-  Future<String?> getGradleVersion(Directory directory, ProcessManager processManager) async {
-    return gradleVersion;
   }
 }
 

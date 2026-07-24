@@ -502,9 +502,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final String? javaVersion = javaVersionObj != null
           ? '${javaVersionObj.major}.${javaVersionObj.minor}.${javaVersionObj.patch}'
           : null;
-      final String? gradleVersion = await _gradleUtils.getGradleVersion(
+      final String? gradleVersion = await getGradleVersionFromFile(
         project.android.hostAppGradleRoot,
-        globals.processManager,
+        _logger,
       );
       if (javaVersion != null && gradleVersion != null) {
         if (!gradle.validateJavaAndGradle(

@@ -1763,11 +1763,6 @@ class FakeGradleUtils extends Fake implements GradleUtils {
   String getExecutable(FlutterProject project) {
     return 'gradlew';
   }
-
-  @override
-  Future<String?> getGradleVersion(Directory directory, ProcessManager processManager) async {
-    return null;
-  }
 }
 
 /// Simple terminal that returns the specified string when
