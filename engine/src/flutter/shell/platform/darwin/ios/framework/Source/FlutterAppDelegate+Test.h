@@ -9,7 +9,6 @@
 
 @interface FlutterAppDelegate (Test)
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
-@property(nonatomic, assign) BOOL hasBeenActive;
 
 @end
 

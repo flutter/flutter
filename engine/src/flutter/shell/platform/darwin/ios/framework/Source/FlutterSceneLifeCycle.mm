@@ -311,7 +311,7 @@ FLUTTER_ASSERT_ARC
       continue;
     }
     for (UIOpenURLContext* urlContext in URLContexts) {
-      if ([self handleDeeplink:urlContext.URL flutterEngine:engine relayToSystemIfUnhandled:NO]) {
+      if ([self handleDeeplink:urlContext.URL flutterEngine:engine]) {
         break;
       }
     }
@@ -344,7 +344,7 @@ FLUTTER_ASSERT_ARC
     if ([enginesHandledByPlugin containsObject:engine]) {
       continue;
     }
-    [self handleDeeplink:userActivity.webpageURL flutterEngine:engine relayToSystemIfUnhandled:YES];
+    [self handleDeeplink:userActivity.webpageURL flutterEngine:engine];
   }
 }
 
@@ -435,17 +435,9 @@ FLUTTER_ASSERT_ARC
   //  universal link to the scene(_:willConnectTo:options:) delegate method after launch, and to
   //  scene(_:continue:) when the universal link is tapped while your app is running or suspended in
   //  memory.
-  //
-  //  This method is called during scene connection (cold start). Do not relay unhandled links back
-  //  to the system here because the app may not have finished initializing yet. Relaying an
-  //  https URL back to the system during cold start causes iOS to open Safari, which is a
-  //  disruptive user experience. The warm-start path (scene:continueUserActivity:) still relays
-  //  unhandled links.
   //  See: https://github.com/flutter/flutter/issues/170665
   for (NSUserActivity* userActivity in connectionOptions.userActivities) {
-    if ([self handleDeeplink:userActivity.webpageURL
-                       flutterEngine:engine
-            relayToSystemIfUnhandled:NO]) {
+    if ([self handleDeeplink:userActivity.webpageURL flutterEngine:engine]) {
       return;
     }
   }
@@ -454,15 +446,13 @@ FLUTTER_ASSERT_ARC
   //  the scene:willConnectToSession:options: delegate method after launch, and to
   //  scene:openURLContexts: when your app opens a URL while running or suspended in memory.
   for (UIOpenURLContext* urlContext in connectionOptions.URLContexts) {
-    if ([self handleDeeplink:urlContext.URL flutterEngine:engine relayToSystemIfUnhandled:NO]) {
+    if ([self handleDeeplink:urlContext.URL flutterEngine:engine]) {
       return;
     }
   }
 }
 
-- (BOOL)handleDeeplink:(NSURL*)url
-               flutterEngine:(FlutterEngine*)engine
-    relayToSystemIfUnhandled:(BOOL)throwBack {
+- (BOOL)handleDeeplink:(NSURL*)url flutterEngine:(FlutterEngine*)engine {
   if (!url) {
     return NO;
   }
@@ -472,13 +462,7 @@ FLUTTER_ASSERT_ARC
   }
   // if deep linking is enabled, send it to the framework
   [engine sendDeepLinkToFramework:url
-                completionHandler:^(BOOL success) {
-                  if (!success && throwBack) {
-                    // throw it back to iOS
-                    [FlutterSharedApplication.application openURL:url
-                                                          options:@{}
-                                                completionHandler:nil];
-                  }
+                completionHandler:^(BOOL success){
                 }];
   return YES;
 }
