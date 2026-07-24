@@ -109,6 +109,15 @@ class RoundedRectangleBorder extends OutlinedBorder with _RRectLikeBorder {
   }
 
   @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    final BorderRadius resolvedBorderRadius = borderRadius.resolve(textDirection);
+    if (resolvedBorderRadius == BorderRadius.zero) {
+      return rect.contains(position);
+    }
+    return resolvedBorderRadius.toRRect(rect).contains(position);
+  }
+
+  @override
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
     if (borderRadius == BorderRadius.zero) {
       canvas.drawRect(rect, paint);
@@ -181,6 +190,11 @@ class _RoundedRectangleToCircleBorder extends _ShapeToCircleBorder<RoundedRectan
       rrect = rrect.inflate(inflation);
     }
     return Path()..addRRect(rrect);
+  }
+
+  @override
+  bool containsOuterShape(Rect rect, BorderRadius radius, Offset position) {
+    return radius.toRRect(rect).contains(position);
   }
 
   @override
@@ -309,6 +323,15 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
   }
 
   @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    final BorderRadius resolvedBorderRadius = borderRadius.resolve(textDirection);
+    if (resolvedBorderRadius == BorderRadius.zero) {
+      return rect.contains(position);
+    }
+    return resolvedBorderRadius.toRSuperellipse(rect).contains(position);
+  }
+
+  @override
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
     if (borderRadius == BorderRadius.zero) {
       canvas.drawRect(rect, paint);
@@ -386,6 +409,11 @@ class _RoundedSuperellipseToCircleBorder extends _ShapeToCircleBorder<RoundedSup
   }
 
   @override
+  bool containsOuterShape(Rect rect, BorderRadius radius, Offset position) {
+    return radius.toRSuperellipse(rect).contains(position);
+  }
+
+  @override
   _RoundedSuperellipseToCircleBorder copyWith({
     BorderSide? side,
     BorderRadiusGeometry? borderRadius,
@@ -411,6 +439,7 @@ abstract class _ShapeToCircleBorder<T extends _RRectLikeBorder> extends Outlined
 
   void drawShape(Canvas canvas, Rect rect, BorderRadius radius, Paint paint, [double? inflation]);
   Path buildPath(Rect rect, BorderRadius radius, [double? inflation]);
+  bool containsOuterShape(Rect rect, BorderRadius radius, Offset position);
 
   final BorderRadiusGeometry borderRadius;
   final double circularity;
@@ -542,6 +571,16 @@ abstract class _ShapeToCircleBorder<T extends _RRectLikeBorder> extends Outlined
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return buildPath(_adjustRect(rect), _adjustBorderRadius(rect, textDirection));
+  }
+
+  @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    final Rect adjustedRect = _adjustRect(rect);
+    final BorderRadius adjustedBorderRadius = _adjustBorderRadius(rect, textDirection);
+    if (adjustedBorderRadius == BorderRadius.zero) {
+      return adjustedRect.contains(position);
+    }
+    return containsOuterShape(adjustedRect, adjustedBorderRadius, position);
   }
 
   @override
