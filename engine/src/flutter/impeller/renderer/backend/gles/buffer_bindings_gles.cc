@@ -392,6 +392,11 @@ bool BufferBindingsGLES::BindUniformBufferV3(
   }
   size_t length = std::max<size_t>(buffer.GetRange().length,
                                    static_cast<size_t>(ubo_info.data_size));
+  if (buffer.GetRange().offset + length >
+      device_buffer_gles.GetDeviceBufferDescriptor().size) {
+    VALIDATION_LOG << "Uniform buffer range exceeds device buffer size.";
+    return false;
+  }
   gl.BindBufferRange(GL_UNIFORM_BUFFER, ubo_info.binding_point, handle.value(),
                      buffer.GetRange().offset, length);
   return true;
