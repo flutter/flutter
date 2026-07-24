@@ -3545,22 +3545,17 @@ List<RenderObject> _filterInspectorHitCandidatesToModalRouteScope(List<RenderObj
   }
 
   // Ignore widgets that belong to offstage modal routes.
-  final List<RenderObject> onstageHits = hits
-      .where((RenderObject hit) {
-        final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
-        return route == null || !route.offstage;
-      })
-      .toList();
+  final List<RenderObject> onstageHits = hits.where((RenderObject hit) {
+    final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
+    return route == null || !route.offstage;
+  }).toList();
   if (onstageHits.isEmpty) {
     return onstageHits;
   }
 
   final ModalRoute<Object?>? scopeRoute = _inspectorScopeRouteForHits(onstageHits);
   final List<RenderObject> scopedHits = onstageHits
-      .where(
-        (RenderObject hit) =>
-            identical(_modalRouteForRenderObject(hit), scopeRoute),
-      )
+      .where((RenderObject hit) => identical(_modalRouteForRenderObject(hit), scopeRoute))
       .toList();
 
   scopedHits.sort(
@@ -3642,10 +3637,7 @@ class _InspectorOverlayLayer extends Layer {
       if (candidate == selected ||
           !candidate.attached ||
           !_isInInspectorRenderObjectTree(candidate) ||
-          !identical(
-            _modalRouteForRenderObject(candidate),
-            _modalRouteForRenderObject(selected),
-          )) {
+          !identical(_modalRouteForRenderObject(candidate), _modalRouteForRenderObject(selected))) {
         continue;
       }
       candidates.add(_TransformedRect(candidate, rootRenderObject));
