@@ -301,8 +301,9 @@ abstract interface class WindowControllerLinux {
 ///
 /// Rather than being shown as soon as its view renders its first frame, the
 /// window is shown once the view has been allocated the size of that content —
-/// see [_handleFirstFrame] — and is remapped if it is resized afterwards — see
-/// [_handleConfigure].
+/// see [_handleFirstFrame] — so that it is placed correctly for the size it
+/// maps with. On Wayland that first placement is final; on X11 a later resize
+/// is corrected — see [_handleConfigure].
 mixin _SizedToContentWindowMixin on ChangeNotifier {
   /// The native window being shown. Provided by the mixing-in controller.
   _GtkWindow get _window;
@@ -319,8 +320,8 @@ mixin _SizedToContentWindowMixin on ChangeNotifier {
   /// controller.
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
 
-  // The window size when it was (re)mapped; null until [_showFirstTime] has
-  // shown the window. Compared in [_handleConfigure] to detect a resize that
+  // The window size when it was mapped; null until [_showFirstTime] has shown
+  // the window. Compared in [_handleConfigure] to detect a resize that
   // requires repositioning the window.
   Size? _mappedSize;
 
@@ -353,7 +354,7 @@ mixin _SizedToContentWindowMixin on ChangeNotifier {
   void _handleFirstFrame() {
     _firstFrameReceived = true;
     // If the view's allocation fails to converge on the content size, show
-    // anyway; [_handleConfigure] will then correct the placement.
+    // anyway; on X11 [_handleConfigure] will then correct the placement.
     _showFallbackTimer = Timer(const Duration(milliseconds: 250), _showFirstTime);
     _maybeShowFirstTime();
   }
@@ -413,28 +414,24 @@ mixin _SizedToContentWindowMixin on ChangeNotifier {
   /// Handles the window's configure events, repositioning the window when its
   /// size has changed since it was mapped.
   ///
+  /// On X11 move-to-rect is computed client-side and repositions the mapped
+  /// window immediately, so the new size is taken into account as soon as it
+  /// is known.
+  ///
+  /// On Wayland the window is left where it was placed when it was mapped.
   /// GDK3's Wayland backend applies the xdg_positioner parameters only while
   /// mapping the window (the positioner is not reactive and GDK3 has no
-  /// reposition support), so a window that changes size — e.g. a
-  /// sized-to-content popup whose Flutter content grew — keeps a position
-  /// computed for its old size. Remapping the window (hide + show) makes GDK
-  /// create a fresh xdg_popup and re-evaluate the stored move-to-rect
-  /// parameters against the new size. On X11 move-to-rect is computed
-  /// client-side and repositions the mapped window immediately, so no remap
-  /// (and none of its flicker) is needed.
+  /// reposition support), so the only way to re-evaluate them at the new size
+  /// is to remap the window (hide + show) and have GDK create a fresh
+  /// xdg_popup. That makes the window blink on every resize, which for content
+  /// that resizes repeatedly is worse than the stale placement it corrects.
   void _handleConfigure() {
-    if (!isDestroyed && !_repositioning && _mappedSize != null) {
+    if (!_isWaylandDisplay && !isDestroyed && !_repositioning && _mappedSize != null) {
       final Size size = _window.getSize();
       if (size != _mappedSize) {
         _mappedSize = size;
         _repositioning = true;
-        if (_isWaylandDisplay) {
-          _window.hide();
-          updatePosition();
-          _window.show();
-        } else {
-          updatePosition();
-        }
+        updatePosition();
         _repositioning = false;
       }
     }
@@ -971,9 +968,9 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     // not set the
     // [reactive flag](https://wayland.app/protocols/xdg-shell#xdg_positioner:request:set_reactive)
     // on the positioner, so the placement is only [received once](https://wayland.app/protocols/xdg-shell#xdg_popup:event:configure);
-    // a tooltip that is resized after mapping is remapped by
-    // [_handleConfigure] to re-evaluate these parameters at the new size. On
-    // X11 this call repositions the window immediately.
+    // a tooltip that is resized after mapping keeps the placement computed at
+    // the size it was mapped with — see [_handleConfigure]. On X11 this call
+    // repositions the window immediately.
     _window.getWindow().moveToRect(
       x: _anchorRect.left.toInt() + offset.$1,
       y: _anchorRect.top.toInt() + offset.$2,
@@ -1173,8 +1170,8 @@ class PopupWindowControllerLinux extends PopupWindowController
     // not set the
     // [reactive flag](https://wayland.app/protocols/xdg-shell#xdg_positioner:request:set_reactive)
     // on the positioner, so the placement is only [received once](https://wayland.app/protocols/xdg-shell#xdg_popup:event:configure);
-    // a popup that is resized after mapping is remapped by [_handleConfigure]
-    // to re-evaluate these parameters at the new size. On X11 this call
+    // a popup that is resized after mapping keeps the placement computed at
+    // the size it was mapped with — see [_handleConfigure]. On X11 this call
     // repositions the window immediately.
     _window.getWindow().moveToRect(
       x: _anchorRect.left.toInt() + offset.$1,
