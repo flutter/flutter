@@ -99,6 +99,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
   return IOSDevice(
     'test',
     fileSystem: fileSystem,
+    fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: platform),
     logger: logger,
     iosDeploy: IOSDeploy(
       platform: platform,
