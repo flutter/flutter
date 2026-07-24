@@ -205,7 +205,8 @@ extern bool InternalFlutterGpu_RenderPass_BindTexture(
     int mip_filter,
     int width_address_mode,
     int height_address_mode,
-    int max_anisotropy);
+    int max_anisotropy,
+    bool allow_manual_mip_sampling);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_ClearBindings(

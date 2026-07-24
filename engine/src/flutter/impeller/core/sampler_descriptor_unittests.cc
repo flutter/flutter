@@ -41,6 +41,9 @@ TEST(SamplerDescriptorTest, ToKeyIncludesAllFields) {
   EXPECT_NE(SamplerDescriptor::ToKey(a), SamplerDescriptor::ToKey(b));
   b.max_anisotropy = 1;
   EXPECT_EQ(SamplerDescriptor::ToKey(a), SamplerDescriptor::ToKey(b));
+
+  b.allow_manual_mip_sampling = true;
+  EXPECT_NE(SamplerDescriptor::ToKey(a), SamplerDescriptor::ToKey(b));
 }
 
 }  // namespace testing

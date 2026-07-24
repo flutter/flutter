@@ -26,6 +26,10 @@ struct SamplerDescriptor final {
   /// filtering only applies when all filters are linear.
   uint8_t max_anisotropy = 1;
 
+  /// Allows sampling a complete mip chain supplied explicitly by the caller.
+  /// This must remain false for textures that rely on backend mip generation.
+  bool allow_manual_mip_sampling = false;
+
   std::string_view label = "NN Clamp Sampler";
 
   SamplerDescriptor();
@@ -46,7 +50,8 @@ struct SamplerDescriptor final {
            static_cast<uint64_t>(d.width_address_mode) << 24 |
            static_cast<uint64_t>(d.height_address_mode) << 32 |
            static_cast<uint64_t>(d.depth_address_mode) << 40 |
-           static_cast<uint64_t>(d.max_anisotropy) << 48;
+           static_cast<uint64_t>(d.max_anisotropy) << 48 |
+           static_cast<uint64_t>(d.allow_manual_mip_sampling) << 56;
   }
 };
 

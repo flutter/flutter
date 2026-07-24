@@ -171,6 +171,7 @@ base class SamplerOptions {
     this.widthAddressMode = SamplerAddressMode.clampToEdge,
     this.heightAddressMode = SamplerAddressMode.clampToEdge,
     this.maxAnisotropy = 1,
+    this.allowManualMipSampling = false,
   });
 
   MinMagFilter minFilter;
@@ -191,6 +192,10 @@ base class SamplerOptions {
   /// levels (via [Texture.overwrite] or by rendering into them) to get the
   /// full quality benefit.
   int maxAnisotropy;
+
+  /// Allows sampling a complete mip chain supplied explicitly by the caller.
+  /// This does not enable backend mip generation.
+  bool allowManualMipSampling;
 }
 
 base class Scissor {
@@ -520,6 +525,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       sampler.widthAddressMode.index,
       sampler.heightAddressMode.index,
       sampler.maxAnisotropy,
+      sampler.allowManualMipSampling,
     );
     if (!success) {
       throw Exception("Failed to bind texture");
@@ -835,6 +841,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
+      Bool,
     )
   >(symbol: 'InternalFlutterGpu_RenderPass_BindTexture')
   external bool _bindTexture(
@@ -847,6 +854,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     int widthAddressMode,
     int heightAddressMode,
     int maxAnisotropy,
+    bool allowManualMipSampling,
   );
 
   @Native<Void Function(Pointer<Void>)>(
