@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
 
@@ -38,6 +39,7 @@ const kShaCommand = FakeCommand(
 );
 
 void main() {
+  Cache.flutterRoot = getFlutterRoot();
   late FileSystem fileSystem;
   late FakeProcessManager processManager;
   late AndroidSdk androidSdk;
