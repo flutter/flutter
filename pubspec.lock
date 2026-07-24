@@ -294,11 +294,12 @@ packages:
   dwds:
     dependency: transitive
     description:
-      name: dwds
-      sha256: "280ca49e939f3f8a96f3a77bb17dfc284fd92b5004bd144ccafb2ab3ddb3b7f9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "27.1.2"
+      path: dwds
+      ref: expression_eval_dwds
+      resolved-ref: cc98d7532a7b197c69bd68f8748a819ef84c8c22
+      url: "https://github.com/Markzipan/webdev.git"
+    source: git
+    version: "28.0.0"
   extension_discovery:
     dependency: transitive
     description:
@@ -1171,10 +1172,10 @@ packages:
     dependency: "direct main"
     description:
       name: vector_math
-      sha256: "1d774bbdf6b72a0b12122fc1560c9c2d2a67db5a4a4cc2bd8a5c990ab20e3188"
+      sha256: "99b6fb0d1881dd1302cd42e0f53bcce99ea246e0a85c8aeb79fb38b283852e88"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.0"
+    version: "2.4.1"
   video_player:
     dependency: "direct main"
     description:
