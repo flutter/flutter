@@ -1258,12 +1258,8 @@ TEST_F(FlutterEngineTest, HandleLifecycleStates) API_AVAILABLE(macos(10.9)) {
   [engineMock handleDidChangeOcclusionState:didChangeOcclusionState];
   EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
 
-  // Becoming active with an on-screen window resumes the app even though the
-  // occlusion state still reads not-visible at this point. macOS can leave
-  // occlusionState latched stale on an occlusion->visible transition (e.g. a
-  // same-screen Cmd-Tab / Mission Control return) with no notification to correct
-  // it, so relying on it here would leave the app stuck in kHidden with a frozen
-  // UI. Regression test for https://github.com/flutter/flutter/issues/155977.
+  // Becoming active with an on-screen window resumes even though occlusionState still
+  // reads not-visible (the stale-latch case). Regression test for #155977.
   [engineMock handleWillBecomeActive:willBecomeActive];
   EXPECT_EQ(sentState, flutter::AppLifecycleState::kResumed);
 

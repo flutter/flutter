@@ -1658,20 +1658,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
  */
 - (void)handleWillBecomeActive:(NSNotification*)notification {
   _active = YES;
-  // An application that is becoming active is frontmost, so it should resume as long
-  // as it actually has a window on screen. `_visible` is driven solely by
-  // handleDidChangeOcclusionState, but on an occlusion->visible transition macOS
-  // frequently leaves the app's occlusionState latched stale — the visible bit stays
-  // clear even though the window is ordered in and on-screen — and no further
-  // occlusion notification arrives to correct it (e.g. a same-screen Cmd-Tab or
-  // Mission Control return). Re-reading occlusionState here would return that same
-  // stale value, so `_visible` cannot be trusted to decide whether to resume.
-  //
-  // NSWindow.isVisible stays accurate through the stale occlusion state (YES for an
-  // on-screen window, NO for a minimized one), so derive visibility from the windows.
-  // This resumes the frozen-but-shown case without also resuming an app that became
-  // active while all of its windows are minimized (plain Cmd-Tab does not
-  // deminiaturize, and a minimized window fires no occlusion change to recover from).
+  // occlusionState can latch stale on an occlusion->visible transition (same-screen
+  // Cmd-Tab / Mission Control), so `_visible` is unreliable here. Resume from
+  // NSWindow.isVisible instead — NO for a minimized window, so it won't resume hidden.
   // https://github.com/flutter/flutter/issues/155977
   for (NSWindow* window in [NSApplication sharedApplication].windows) {
     if (window.isVisible) {
