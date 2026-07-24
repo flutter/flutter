@@ -328,7 +328,7 @@ void TextInputPlugin::HandleMethodCall(
       return;
     }
     int composing_base = base->value.GetInt();
-    int composing_extent = base->value.GetInt();
+    int composing_extent = extent->value.GetInt();
     if (composing_base == -1 && composing_extent == -1) {
       active_model_->EndComposing();
     } else {

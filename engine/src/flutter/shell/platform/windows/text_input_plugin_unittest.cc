@@ -34,6 +34,10 @@ class TextInputPluginModifier {
 
   bool HasActiveModel() { return text_input_plugin->active_model_ != nullptr; }
 
+  const TextInputModel* GetActiveModel() const {
+    return text_input_plugin->active_model_.get();
+  }
+
  private:
   TextInputPlugin* text_input_plugin;
 
@@ -55,6 +59,7 @@ static constexpr char kChannelName[] = "flutter/textinput";
 static constexpr char kEnableDeltaModel[] = "enableDeltaModel";
 static constexpr char kViewId[] = "viewId";
 static constexpr char kSetClientMethod[] = "TextInput.setClient";
+static constexpr char kSetEditingStateMethod[] = "TextInput.setEditingState";
 static constexpr char kAffinityDownstream[] = "TextAffinity.downstream";
 static constexpr char kTextKey[] = "text";
 static constexpr char kSelectionBaseKey[] = "selectionBase";
@@ -498,6 +503,45 @@ TEST_F(TextInputPluginTest, SetClientRequiresViewIdToBeInteger) {
   EXPECT_EQ(
       reply,
       "[\"Bad Arguments\",\"Could not set client, view ID is null.\",null]");
+}
+
+TEST_F(TextInputPluginTest, SetEditingStatePreservesComposingRange) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger([](const std::string& channel,
+                                   const uint8_t* message, size_t message_size,
+                                   BinaryReply reply) {});
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
+
+  TextInputPlugin handler(&messenger, engine());
+  TextInputPluginModifier modifier(&handler);
+  auto& codec = JsonMethodCodec::GetInstance();
+
+  auto set_client_message = codec.EncodeMethodCall(
+      {kSetClientMethod,
+       EncodedClientConfig("TextInputType.text", "TextInputAction.done")});
+  EXPECT_TRUE(messenger.SimulateEngineMessage(
+      kChannelName, set_client_message->data(), set_client_message->size(),
+      reply_handler));
+  ASSERT_TRUE(modifier.HasActiveModel());
+  handler.ComposeBeginHook();
+
+  auto editing_state =
+      std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
+  auto& allocator = editing_state->GetAllocator();
+  editing_state->AddMember(kTextKey, "abcd", allocator);
+  editing_state->AddMember(kSelectionBaseKey, 2, allocator);
+  editing_state->AddMember(kSelectionExtentKey, 2, allocator);
+  editing_state->AddMember(kComposingBaseKey, 1, allocator);
+  editing_state->AddMember(kComposingExtentKey, 3, allocator);
+  auto set_editing_state_message = codec.EncodeMethodCall(
+      {kSetEditingStateMethod, std::move(editing_state)});
+  EXPECT_TRUE(messenger.SimulateEngineMessage(
+      kChannelName, set_editing_state_message->data(),
+      set_editing_state_message->size(), reply_handler));
+
+  EXPECT_TRUE(modifier.GetActiveModel()->composing());
+  EXPECT_EQ(modifier.GetActiveModel()->composing_range(), TextRange(1, 3));
 }
 
 TEST_F(TextInputPluginTest, TextEditingWorksWithDeltaModel) {
