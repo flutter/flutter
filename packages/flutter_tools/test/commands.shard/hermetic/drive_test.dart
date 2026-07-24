@@ -87,10 +87,12 @@ void main() {
         'chrome',
         '--browser-name=chrome',
         '--chrome-binary=/tmp/custom-chrome',
+        '--web-define=FOO=bar',
       ]);
 
       expect(capturingDriverService.platformArgs, containsPair('no-launch-chrome', true));
       expect(capturingDriverService.platformArgs, isNot(contains('--no-launch-chrome')));
+      expect(capturingDriverService.webDefines, <String, String>{'FOO': 'bar'});
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1045,6 +1047,7 @@ class FakeDriverService extends Fake implements DriverService {
 
 class CapturingDriverService extends Fake implements DriverService {
   Map<String, Object>? platformArgs;
+  Map<String, String>? webDefines;
 
   @override
   Future<void> start(
@@ -1056,8 +1059,10 @@ class CapturingDriverService extends Fake implements DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     this.platformArgs = platformArgs;
+    this.webDefines = webDefines;
   }
 
   @override
