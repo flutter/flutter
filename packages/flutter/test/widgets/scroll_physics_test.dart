@@ -364,4 +364,59 @@ FlutterError
     );
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
+
+  testWidgets('ScrollPhysics updates position when shouldUpdate returns true', (
+    WidgetTester tester,
+  ) async {
+    var physicsValue = 0;
+
+    Widget buildScrollable() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          physics: ReactiveScrollPhysics(value: physicsValue),
+          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+          itemCount: 10,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildScrollable());
+
+    ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition firstPosition = scrollable.position;
+    expect((firstPosition.physics as ReactiveScrollPhysics).value, 0);
+
+    // When the physics is updated with an identical runtimeType and shouldUpdate
+    // returns false, the ScrollPosition is not recreated.
+    await tester.pumpWidget(buildScrollable());
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    expect(scrollable.position, same(firstPosition));
+    expect((scrollable.position.physics as ReactiveScrollPhysics).value, 0);
+
+    // When the physics is updated with an identical runtimeType but shouldUpdate
+    // returns true, the ScrollPosition is recreated with the updated physics.
+    physicsValue = 1;
+    await tester.pumpWidget(buildScrollable());
+
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition secondPosition = scrollable.position;
+    expect(secondPosition, isNot(same(firstPosition)));
+    expect((secondPosition.physics as ReactiveScrollPhysics).value, 1);
+  });
+}
+
+class ReactiveScrollPhysics extends ScrollPhysics {
+  const ReactiveScrollPhysics({required this.value, super.parent});
+  final int value;
+
+  @override
+  ReactiveScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return ReactiveScrollPhysics(value: value, parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldUpdate(covariant ReactiveScrollPhysics old) {
+    return value != old.value;
+  }
 }
