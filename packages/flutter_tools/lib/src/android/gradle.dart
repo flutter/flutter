@@ -517,10 +517,15 @@ class AndroidGradleBuilder implements AndroidBuilder {
             _logger,
             javaV: javaVersion,
           );
+          final gradleRangeMax = 
+              compat != null 
+              && compat.gradleMax != null
+                  ? ' to ${compat.gradleMax}'
+                  : '';
           final gradleRangeCompatSuggestion = compat != null
-              ? '${compat.gradleMin}${compat.gradleMax != null ?  \' to ${compat.gradleMax}\' : \' or newer\'}
-              : 'unknown'
-          final gradleRangeInfo = 'compatible Gradle versions for Java $javaVersion are $gradleRangeCompatSuggestion'
+              ? '${compat.gradleMin}${gradleRangeMax} or newer'
+              : 'unknown';
+          final gradleRangeInfo = 'compatible Gradle versions for Java $javaVersion are $gradleRangeCompatSuggestion';
           throwToolExit("""
 Gradle build failed due to Java/Gradle incompatibility.
 The Java version used for the build is $javaVersion, which is incompatible with Gradle $gradleVersion.
