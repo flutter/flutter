@@ -420,9 +420,14 @@ mixin _SizedToContentWindowMixin on ChangeNotifier {
       final Size size = _window.getSize();
       if (size != _mappedSize) {
         _mappedSize = size;
+        // Guarded so that an overridden [updatePosition] that throws cannot
+        // wedge the flag and disable repositioning for good.
         _repositioning = true;
-        updatePosition();
-        _repositioning = false;
+        try {
+          updatePosition();
+        } finally {
+          _repositioning = false;
+        }
       }
     }
     notifyListeners();
@@ -1361,7 +1366,11 @@ final bool _isWaylandDisplay = () {
   if (display == ffi.nullptr) {
     return false;
   }
-  return _nativeToString(_gTypeNameFromInstance(display).cast<ffi.Uint8>()) == 'GdkWaylandDisplay';
+  final ffi.Pointer<ffi.NativeType> typeName = _gTypeNameFromInstance(display);
+  if (typeName == ffi.nullptr) {
+    return false;
+  }
+  return _nativeToString(typeName.cast<ffi.Uint8>()) == 'GdkWaylandDisplay';
 }();
 
 @ffi.Native<ffi.Pointer<ffi.NativeType> Function()>(symbol: 'gdk_display_get_default')
