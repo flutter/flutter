@@ -48,8 +48,6 @@ jobs:
           check-name: 'Mac mac_host_engine'
 
       - uses: ./.github/actions/composite-flutter-setup
-        with:
-          setup_android: 'false'
 
       - name: Run verify_binaries_pre_codesigned
         run: |

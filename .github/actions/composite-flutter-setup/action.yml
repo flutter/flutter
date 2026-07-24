@@ -10,9 +10,6 @@ inputs:
   ANDROID_BUILDTOOLS:
     description: 'android buildtools version'
     default: '36.1.0'
-  setup_android:
-    description: 'whether to setup android sdk'
-    default: 'true'
 
 runs:
   using: 'composite'
@@ -57,7 +54,7 @@ runs:
 
       # If running locally; install the JDK - Github runners have everything on them
       - name: Set up our JDK environment
-        if: env.ACT || inputs.setup_android == 'true'
+        if: env.ACT
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
         with:
           java-version: '21'
@@ -66,14 +63,14 @@ runs:
       # If running locally; install Android SDK tools - Github runners have everything on them
       - name: Set Android SDK environment variable
         shell: bash
-        if: env.ACT || inputs.setup_android == 'true'
+        if: env.ACT
         run: |
           echo "ANDROID_SDK_ROOT=/opt/android/sdk" >> $GITHUB_ENV
           echo "ANDROID_HOME=/opt/android/sdk" >> $GITHUB_ENV
       - name: Get Android SDK version
         shell: bash
         id: android-sdk-version
-        if: env.ACT || inputs.setup_android == 'true'
+        if: env.ACT
         run: |
           echo "revision=${INPUTS_ANDROID_TOOLS_VERSION};${INPUTS_ANDROID_PLATFORM};build-tools;${INPUTS_ANDROID_BUILDTOOLS}" >> "$GITHUB_OUTPUT"
         env:
@@ -83,12 +80,12 @@ runs:
       - name: Android SDK Cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         id: android-sdk-setup
-        if: env.ACT || inputs.setup_android == 'true'
+        if: env.ACT
         with:
           path: /opt/android/sdk
           key: ${{ runner.os }}-${{ steps.android-sdk-version.outputs.revision }}
       - name: Setup Android SDK (cold cache)
-        if: (env.ACT || inputs.setup_android == 'true') && steps.android-sdk-setup.outputs.cache-hit != 'true'
+        if: env.ACT && steps.android-sdk-setup.outputs.cache-hit != 'true'
         uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
         with:
           packages: 'tools platform-tools platforms;${{inputs.ANDROID_PLATFORM}} build-tools;${{inputs.ANDROID_BUILDTOOLS}}'
@@ -96,14 +93,14 @@ runs:
           cmdline-tools-version: ${{ inputs.ANDROID_TOOLS_VERSION }}
       - name: Setup Android SDK (warm cache) - Tools
         shell: bash
-        if: (env.ACT || inputs.setup_android == 'true') && steps.android-sdk-setup.outputs.cache-hit == 'true'
+        if: env.ACT && steps.android-sdk-setup.outputs.cache-hit == 'true'
         run: echo "/opt/android/sdk/cmdline-tools/${INPUTS_ANDROID_TOOLS_VERSION}/bin" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
         env:
           INPUTS_ANDROID_TOOLS_VERSION: ${{ inputs.ANDROID_TOOLS_VERSION }}
 
       - name: Setup Android SDK (warm cache) - Platform Tools
         shell: bash
-        if: (env.ACT || inputs.setup_android == 'true') && steps.android-sdk-setup.outputs.cache-hit == 'true'
+        if: env.ACT && steps.android-sdk-setup.outputs.cache-hit == 'true'
         run: echo "/opt/android/sdk/platform-tools" >> "$GITHUB_PATH" # zizmor: ignore[github-env]
 
       # ktlint is needed by tree analyze
