@@ -33,9 +33,10 @@ void main() async {
         (json.decode(response) as Map<Object?, Object?>)
             .cast<String, Object?>();
     final replyVariant = reply[keyGoldenVariant] as String?;
-    activeGoldenVariant = (replyVariant != null && replyVariant.isNotEmpty)
-        ? '.$replyVariant'
-        : '';
+    activeGoldenVariant = switch (replyVariant) {
+      String s when s.isNotEmpty => '.$s',
+      _ => '',
+    };
 
     if (isLuci) {
       await enableSkiaGoldComparator(
