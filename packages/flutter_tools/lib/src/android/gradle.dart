@@ -518,7 +518,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
             javaV: javaVersion,
           );
           final gradleRangeInfo = compat != null
-              ? 'compatible Gradle versions for Java $javaVersion are ${compat.gradleMin} to ${compat.gradleMax ?? 'newer'}'
+              ? 'compatible Gradle versions for Java $javaVersion are ${compat.gradleMin}${compat.gradleMax != null ? \' to ${compat.gradleMax}\' : \' or newer\'}'
               : 'compatible Gradle version for Java $javaVersion is unknown';
           throwToolExit("""
 Gradle build failed due to Java/Gradle incompatibility.

@@ -3129,7 +3129,7 @@ Gradle Crashed
                 'Gradle build failed due to Java/Gradle incompatibility.\n'
                 'The Java version used for the build is 21.0.0, which is incompatible with Gradle 8.0.\n'
                 'To fix this, you can either:\n'
-                "  1. Upgrade your project's Gradle version (typically in gradle-wrapper.properties to a version matching the range: compatible Gradle versions for Java 21.0.0 are 8.4 to newer).\n"
+                "  1. Upgrade your project's Gradle version (typically in gradle-wrapper.properties to a version matching the range: compatible Gradle versions for Java 21.0.0 are 8.4 or newer).\n"
                 '  2. Use a different Java version for Flutter by running `flutter config --jdk-dir=<path>`.\n'
                 'Alternatively, you can bypass this check using "--android-skip-build-dependency-validation".',
           ),
