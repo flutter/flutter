@@ -192,7 +192,7 @@ FLUTTER_ASSERT_ARC
   OCMVerifyAll(self.mockNavigationChannel);
 }
 
-- (void)testUseNonDeprecatedOpenURLAPI {
+- (void)testUniversalLinkDoesNotRelayToSystemWhenUnhandled {
   OCMStub([self.mockMainBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"])
       .andReturn(@YES);
   NSUserActivity* userActivity = [[NSUserActivity alloc] initWithActivityType:@"com.example.test"];
@@ -205,13 +205,15 @@ FLUTTER_ASSERT_ARC
       });
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
   BOOL result = [self.appDelegate
                application:[UIApplication sharedApplication]
       continueUserActivity:userActivity
         restorationHandler:^(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects){
         }];
   XCTAssertTrue(result);
-  OCMVerify([mockApplication openURL:[OCMArg any]
+  // openURL should NOT have been called on cold start.
+  OCMReject([mockApplication openURL:[OCMArg any]
                              options:[OCMArg any]
                    completionHandler:[OCMArg any]]);
 }
