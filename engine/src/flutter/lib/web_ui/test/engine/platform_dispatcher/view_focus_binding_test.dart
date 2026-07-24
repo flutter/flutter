@@ -268,6 +268,119 @@ void testMain() {
       expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
       expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
     });
+
+    // On iOS a native caret/selection drag transiently blurs Flutter's active
+    // text-editing element to <body> (relatedTarget == null) while the document
+    // still has focus, and WebKit refocuses it a frame later. The view-unfocused
+    // report is deferred so that refocus cancels it.
+    // Regression test for https://github.com/flutter/flutter/issues/189744
+    test('drops the deferred view-unfocused report when the editing input '
+        'refocuses on iOS', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomElement input = createDomElement('input')
+        ..classList.add(HybridTextEditing.textEditingClass);
+      view.dom.rootElement.append(input);
+      input.focusWithoutScroll();
+      dispatchedViewFocusEvents.clear();
+
+      debugEmulateIosSafari = true;
+      debugViewFocusDocumentHasFocusOverride = true;
+      try {
+        // The null-relatedTarget focusout schedules the deferred report; the
+        // immediate refocus, as WebKit does mid-drag, cancels it.
+        input.blur();
+        input.focusWithoutScroll();
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        expect(dispatchedViewFocusEvents, isEmpty);
+      } finally {
+        debugEmulateIosSafari = false;
+        debugViewFocusDocumentHasFocusOverride = null;
+      }
+    });
+
+    // A genuine blur (Done button, tap-away) never refocuses, so the deferred
+    // report must still fire, carrying the right view and direction.
+    test('reports the view unfocused on iOS when the editing input does not '
+        'refocus', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomElement input = createDomElement('input')
+        ..classList.add(HybridTextEditing.textEditingClass);
+      view.dom.rootElement.append(input);
+      input.focusWithoutScroll();
+      dispatchedViewFocusEvents.clear();
+
+      debugEmulateIosSafari = true;
+      debugViewFocusDocumentHasFocusOverride = true;
+      try {
+        input.blur();
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        final Iterable<ui.ViewFocusEvent> unfocused = dispatchedViewFocusEvents.where(
+          (ui.ViewFocusEvent e) => e.state == ui.ViewFocusState.unfocused,
+        );
+        expect(unfocused, hasLength(1));
+        expect(unfocused.single.viewId, view.viewId);
+        expect(unfocused.single.direction, ui.ViewFocusDirection.undefined);
+      } finally {
+        debugEmulateIosSafari = false;
+        debugViewFocusDocumentHasFocusOverride = null;
+      }
+    });
+
+    // The deferral is scoped to Flutter's text-editing element. A null-target
+    // focusout from any other element must report immediately, so a later
+    // refocus cannot erase a real focus loss.
+    test('reports immediately for a non-text-editing element on iOS', () {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomElement other = createDomElement('input');
+      view.dom.rootElement.append(other);
+      other.focusWithoutScroll();
+      dispatchedViewFocusEvents.clear();
+
+      debugEmulateIosSafari = true;
+      try {
+        other.blur();
+        // Not deferred: the unfocused event is present synchronously.
+        expect(
+          dispatchedViewFocusEvents.where(
+            (ui.ViewFocusEvent e) => e.state == ui.ViewFocusState.unfocused,
+          ),
+          hasLength(1),
+        );
+      } finally {
+        debugEmulateIosSafari = false;
+      }
+    });
+
+    // The deferral requires the document to still have focus. When focus has
+    // left the document, such as a window, iframe, or app switch, the
+    // null-target focusout from the editing element must report immediately so
+    // the framework is not left believing the view is still focused.
+    // Regression test for https://github.com/flutter/flutter/issues/189744
+    test('reports immediately when the document is not focused on iOS', () {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomElement input = createDomElement('input')
+        ..classList.add(HybridTextEditing.textEditingClass);
+      view.dom.rootElement.append(input);
+      input.focusWithoutScroll();
+      dispatchedViewFocusEvents.clear();
+
+      debugEmulateIosSafari = true;
+      debugViewFocusDocumentHasFocusOverride = false;
+      try {
+        input.blur();
+        // Not deferred: with the document unfocused the unfocused event is
+        // present synchronously.
+        expect(
+          dispatchedViewFocusEvents.where(
+            (ui.ViewFocusEvent e) => e.state == ui.ViewFocusState.unfocused,
+          ),
+          hasLength(1),
+        );
+      } finally {
+        debugEmulateIosSafari = false;
+        debugViewFocusDocumentHasFocusOverride = null;
+      }
+    });
   });
 }
 

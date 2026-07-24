@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../browser_detection.dart' show isIosSafari;
 import '../configuration.dart';
 import '../dom.dart';
 import '../mouse/prevent_default.dart';
@@ -1742,6 +1743,32 @@ abstract class DefaultTextEditingStrategy
         });
         return;
       }
+      // On iOS WebKit, a native caret or selection drag transiently blurs the
+      // hidden input mid-gesture with `relatedTarget == null` while the document
+      // still has focus, and WebKit refocuses the input a frame later. Closing
+      // the connection on that blink drops the keyboard; a plain <input> keeps
+      // it. Defer the close and skip it if the input has regained focus by the
+      // time the timer fires. A genuine blur, the Done button or tapping away,
+      // does not refocus, so it still closes. [ViewFocusBinding] defers the
+      // matching `focusout` the same way.
+      // https://github.com/flutter/flutter/issues/189744
+      if (isIosSafari) {
+        _pendingBlurConnectionCloseTimer?.cancel();
+        _pendingBlurConnectionCloseTimer = Timer(const Duration(milliseconds: 100), () {
+          _pendingBlurConnectionCloseTimer = null;
+          if (domDocument.activeElement == activeDomElement) {
+            // The input refocused: this was the transient mid-gesture blur.
+            return;
+          }
+          if (_documentVisibilityState == 'hidden') {
+            // The page was backgrounded (e.g. a tab switch) after the blur was
+            // scheduled; keep the connection alive, matching the branch above.
+            return;
+          }
+          textEditing.sendTextConnectionClosedToFrameworkIfAny();
+        });
+        return;
+      }
       textEditing.sendTextConnectionClosedToFrameworkIfAny();
     } else if (_viewForElement(willGainFocusElement) == activeDomElementView) {
       // If the focus stays within the same FlutterView, ensure the focus stays
@@ -2615,7 +2642,10 @@ class HybridTextEditing {
   late final TextEditingChannel channel = TextEditingChannel(this);
 
   /// A CSS class name used to identify all elements used for text editing.
-  @visibleForTesting
+  ///
+  /// [ViewFocusBinding] also matches on this class to detect blurs originating
+  /// from the text-editing element, so it is a production contract, not just a
+  /// testing hook.
   static const String textEditingClass = 'flt-text-editing';
 
   int? _clientId;
