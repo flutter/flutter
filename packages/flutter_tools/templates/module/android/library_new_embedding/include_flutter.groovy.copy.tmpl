@@ -28,5 +28,5 @@ assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
 gradle.apply from: "$flutterSdkPath/packages/flutter_tools/gradle/module_plugin_loader.gradle"
 
 gradle.pluginManagement{
-    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
+    includeBuild("${file(flutterSdkPath).canonicalPath}/packages/flutter_tools/gradle")
 }
