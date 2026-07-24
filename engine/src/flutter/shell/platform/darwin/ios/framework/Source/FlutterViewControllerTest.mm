@@ -203,7 +203,9 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 
 /// Sometimes we have to use a custom mock to avoid retain cycles in OCMock.
 /// Used for testing low memory notification.
-@interface FlutterEnginePartialMock : FlutterEngine
+@interface FlutterEnginePartialMock : FlutterEngine {
+  flutter::ViewportMetrics _lastViewportMetrics;
+}
 
 @property(nonatomic, strong) FlutterBasicMessageChannel* lifecycleChannel;
 @property(nonatomic, strong) FlutterBasicMessageChannel* keyEventChannel;
@@ -221,6 +223,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 - (nullable FlutterFMLTaskRunner*)uiTaskRunner;
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint;
 - (void)attachView;
+- (const flutter::ViewportMetrics&)lastViewportMetrics;
 @end
 
 @implementation FlutterEnginePartialMock
@@ -254,6 +257,14 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 
 - (void)attachView {
   // Do nothing to avoid crash when platformView is nil on bots.
+}
+
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics {
+  _lastViewportMetrics = viewportMetrics;
+}
+
+- (const flutter::ViewportMetrics&)lastViewportMetrics {
+  return _lastViewportMetrics;
 }
 
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
@@ -328,6 +339,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 @property(nonatomic, assign) BOOL awokenFromNib;
+@property(nonatomic, strong) UIView* displayCornerRadiusProbe API_AVAILABLE(ios(26.0));
 
 - (void)createTouchRateCorrectionVSyncClientIfNeeded;
 - (void)surfaceUpdated:(BOOL)appeared;
@@ -336,6 +348,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
               nextAction:(void (^)())next API_AVAILABLE(ios(13.4));
 - (void)discreteScrollEvent:(UIPanGestureRecognizer*)recognizer;
 - (void)updateViewportMetricsIfNeeded;
+- (void)setViewportMetricsDisplayCornerRadii;
 - (void)updateAutoResizeConstraints;
 - (void)checkAndUpdateAutoResizeConstraints;
 - (void)onUserSettingsChanged:(NSNotification*)notification;
@@ -358,6 +371,33 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification;
+@end
+
+API_AVAILABLE(ios(26.0))
+@interface TestDisplayCornerRadiusProbe : UIView
+@property(nonatomic, assign) CGFloat topLeftRadius;
+@property(nonatomic, assign) CGFloat topRightRadius;
+@property(nonatomic, assign) CGFloat bottomRightRadius;
+@property(nonatomic, assign) CGFloat bottomLeftRadius;
+@end
+
+@implementation TestDisplayCornerRadiusProbe
+
+- (CGFloat)effectiveRadiusForCorner:(UIRectCorner)corner {
+  switch (corner) {
+    case UIRectCornerTopLeft:
+      return self.topLeftRadius;
+    case UIRectCornerTopRight:
+      return self.topRightRadius;
+    case UIRectCornerBottomRight:
+      return self.bottomRightRadius;
+    case UIRectCornerBottomLeft:
+      return self.bottomLeftRadius;
+    default:
+      return 0.0;
+  }
+}
+
 @end
 
 @interface FlutterViewControllerTest : XCTestCase
@@ -1320,6 +1360,109 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMExpect([mockEngine updateViewportMetrics:viewportMetrics]).ignoringNonObjectArgs();
   [viewController updateViewportMetricsIfNeeded];
   OCMVerifyAll(mockEngine);
+}
+
+- (void)testUpdatePropertiesSetsDisplayCornerRadiiInPhysicalPixelsOnIOS26 {
+  if (@available(iOS 26.0, *)) {
+    FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    engine.viewController = viewController;
+
+    CGRect frame = CGRectMake(0, 0, 390, 844);
+    UIWindow* window = [[UIWindow alloc] initWithFrame:frame];
+    UIView* view = [[UIView alloc] initWithFrame:frame];
+    viewController.view = view;
+    [window addSubview:view];
+
+    UIScreen* screen = OCMClassMock([UIScreen class]);
+    OCMStub([screen scale]).andReturn(3.0);
+    FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+    OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(screen);
+
+    TestDisplayCornerRadiusProbe* probe =
+        [[TestDisplayCornerRadiusProbe alloc] initWithFrame:frame];
+    probe.topLeftRadius = 1.0;
+    probe.topRightRadius = 2.0;
+    probe.bottomRightRadius = 3.0;
+    probe.bottomLeftRadius = 4.0;
+    [window insertSubview:probe atIndex:0];
+    viewController.displayCornerRadiusProbe = probe;
+
+    [viewController updateProperties];
+
+    const flutter::ViewportMetrics& viewportMetrics = engine.lastViewportMetrics;
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_top_left, 3.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_top_right, 6.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_bottom_right, 9.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_bottom_left, 12.0);
+  }
+}
+
+- (void)testCreatesNonRenderingDisplayCornerRadiusProbeOnIOS26 {
+  if (@available(iOS 26.0, *)) {
+    FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    engine.viewController = viewController;
+
+    CGRect frame = UIScreen.mainScreen.bounds;
+    UIWindow* window = [[UIWindow alloc] initWithFrame:frame];
+    viewController.view = [[UIView alloc] initWithFrame:frame];
+    [window addSubview:viewController.view];
+
+    UIScreen* screen = OCMClassMock([UIScreen class]);
+    OCMStub([screen scale]).andReturn(3.0);
+    FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+    OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(screen);
+
+    [viewController setViewportMetricsDisplayCornerRadii];
+    [viewController updateViewportMetricsIfNeeded];
+
+    UIView* probe = viewController.displayCornerRadiusProbe;
+    XCTAssertEqual(probe.superview, window);
+    XCTAssertEqual(window.subviews.firstObject, probe);
+    XCTAssertTrue(CGRectEqualToRect(probe.frame, window.bounds));
+    XCTAssertFalse(probe.userInteractionEnabled);
+    XCTAssertFalse(probe.isAccessibilityElement);
+    XCTAssertTrue(probe.accessibilityElementsHidden);
+    XCTAssertNotNil(probe.cornerConfiguration);
+
+    const flutter::ViewportMetrics& viewportMetrics = engine.lastViewportMetrics;
+    XCTAssertGreaterThan(viewportMetrics.physical_display_corner_radius_top_left, 0.0);
+    XCTAssertGreaterThan(viewportMetrics.physical_display_corner_radius_top_right, 0.0);
+    XCTAssertGreaterThan(viewportMetrics.physical_display_corner_radius_bottom_right, 0.0);
+    XCTAssertGreaterThan(viewportMetrics.physical_display_corner_radius_bottom_left, 0.0);
+  }
+}
+
+- (void)testUnsetsDisplayCornerRadiiWhenViewIsDetachedFromWindow {
+  if (@available(iOS 26.0, *)) {
+    FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    engine.viewController = viewController;
+    viewController.view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 390, 844)];
+
+    TestDisplayCornerRadiusProbe* probe = [[TestDisplayCornerRadiusProbe alloc] init];
+    UIWindow* probeWindow = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 390, 844)];
+    [probeWindow addSubview:probe];
+    viewController.displayCornerRadiusProbe = probe;
+
+    [viewController setViewportMetricsDisplayCornerRadii];
+    [viewController updateViewportMetricsIfNeeded];
+
+    const flutter::ViewportMetrics& viewportMetrics = engine.lastViewportMetrics;
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_top_left, -1.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_top_right, -1.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_bottom_right, -1.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_bottom_left, -1.0);
+    XCTAssertNil(viewController.displayCornerRadiusProbe);
+    XCTAssertNil(probe.superview);
+  }
 }
 
 - (void)testUpdatedViewportMetricsDoesResizeFlutterViewWhenAutoResizable {
