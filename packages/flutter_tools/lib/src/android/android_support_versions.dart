@@ -4,11 +4,11 @@
 
 // Co-evolve with packages/flutter_tools/gradle/src/main/kotlin/AndroidSupportVersions.kt
 
-import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import '../base/file_system.dart';
 import '../base/version.dart';
+import '../convert.dart';
 
 @immutable
 class VersionThresholds {
