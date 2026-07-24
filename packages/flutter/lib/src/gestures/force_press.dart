@@ -349,14 +349,6 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     _state = _ForceState.ready;
   }
 
-  @override
-  @mustCallSuper
-  void rejectGesture(int pointer) {
-    stopTrackingPointer(pointer);
-    didStopTrackingLastPointer(pointer);
-    super.rejectGesture(pointer);
-  }
-
   static double _inverseLerp(double min, double max, double t) {
     assert(min <= max);
     double value = (t - min) / (max - min);
