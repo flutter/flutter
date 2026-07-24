@@ -294,6 +294,81 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
+  testWidgets('default text selection width style', (WidgetTester tester) async {
+    const blue = Color(0xFF2196F3);
+    const grey = Color(0xFF9E9E9E);
+    const black = Color(0xFF000000);
+    const selectionColor = Color(0xFFFFFF00);
+    controller.text = 'a b c\na b c d e f g';
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: null,
+            style: const TextStyle(fontFamily: 'Roboto', fontSize: 14.0, color: black),
+            cursorColor: blue,
+            backgroundCursorColor: grey,
+            selectionColor: selectionColor,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    );
+
+    controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(TestWidgetsApp),
+      matchesGoldenFile('editable_text_golden.TextSelectionWidthStyle.1.png'),
+    );
+  }, variant: TargetPlatformVariant.all());
+
+  // Regression test for https://github.com/flutter/flutter/issues/174689.
+  testWidgets('Tight selectionWidthStyle does not expand to a longer next line', (
+    WidgetTester tester,
+  ) async {
+    const backgroundCursorColor = Color(0xFF9E9E9E);
+    const selectionColor = Color(0xFF000000);
+    const fontSize = 10.0;
+    const characterWidth = fontSize; // FlutterTest is a square monospace font.
+    controller.text = 'abc\nabcdefghij';
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: null,
+            selectionWidthStyle: BoxWidthStyle.tight,
+            style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize, height: 1.0),
+            cursorColor: cursorColor,
+            backgroundCursorColor: backgroundCursorColor,
+            selectionColor: selectionColor,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    expect(renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+
+    // Select the first line, including the line feed character. The second line
+    // is longer, but BoxWidthStyle.tight should not expand the highlight to the
+    // second line's width.
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    const expectedSelectionRect = Rect.fromLTRB(0.0, 0.0, 3 * characterWidth, fontSize);
+
+    expect(renderEditable, paints..rect(color: selectionColor, rect: expectedSelectionRect));
+  });
+
   group('Check the passed groupId value', () {
     testWidgets('The value of the passed-in groupId should match the groupId of the EditableText', (
       WidgetTester tester,
