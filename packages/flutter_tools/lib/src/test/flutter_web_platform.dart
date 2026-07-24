@@ -246,7 +246,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(
       _artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
+        platform: const TargetPlatform(.web, .unknown),
       ),
       'lib',
       'dev_compiler',
@@ -260,7 +260,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(
       _artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
+        platform: const TargetPlatform(.web, .unknown),
       ),
       'lib',
       'dev_compiler',
@@ -274,7 +274,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(
       _artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
+        platform: const TargetPlatform(.web, .unknown),
       ),
       'lib',
       'dev_compiler',

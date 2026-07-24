@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter_tools/src/android/android_emulator.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/common.dart';
-
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
 

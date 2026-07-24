@@ -284,7 +284,7 @@ void main() {
           }
           if (flutterTester && !const LocalPlatform().isMacOS) {
             // The [runFlutterSpecificDartBuild] will - when given
-            // `TargetPlatform.tester` - enable `flutter test` mode. That means if
+            // `TargetPlatform(.tester, .unknown)` - enable `flutter test` mode. That means if
             // this test is run on linux, it's going to do a linux build.
             // Though this test is mac-specific, so we skip that.
             //
@@ -333,9 +333,9 @@ void main() {
             kBuildMode: buildMode.cliName,
             kDarwinArchs: 'arm64 x86_64',
           };
-          final TargetPlatform targetPlatform = flutterTester
-              ? TargetPlatform.tester
-              : TargetPlatform.darwin;
+          final targetPlatform = flutterTester
+              ? const TargetPlatform(.tester, .unknown)
+              : const TargetPlatform(.macos, .x64);
           final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,

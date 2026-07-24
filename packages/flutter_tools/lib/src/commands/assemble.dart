@@ -31,8 +31,8 @@ var _kDefaultTargets = <Target>[
   // Shared targets
   const CopyAssets(),
   const KernelSnapshot(),
-  const AotElfProfile(TargetPlatform.android_arm),
-  const AotElfRelease(TargetPlatform.android_arm),
+  const AotElfProfile(TargetPlatform(.android, .armv7)),
+  const AotElfRelease(TargetPlatform(.android, .armv7)),
   const AotAssemblyProfile(),
   const AotAssemblyRelease(),
   // macOS targets
@@ -44,15 +44,15 @@ var _kDefaultTargets = <Target>[
   const ProfileUnpackMacOS(),
   const ReleaseUnpackMacOS(),
   // Linux targets
-  const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
-  const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
-  const DebugBundleLinuxAssets(TargetPlatform.linux_riscv64),
-  const ProfileBundleLinuxAssets(TargetPlatform.linux_x64),
-  const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
-  const ProfileBundleLinuxAssets(TargetPlatform.linux_riscv64),
-  const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
-  const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
-  const ReleaseBundleLinuxAssets(TargetPlatform.linux_riscv64),
+  const DebugBundleLinuxAssets(TargetPlatform(.linux, .x64)),
+  const DebugBundleLinuxAssets(TargetPlatform(.linux, .arm64)),
+  const DebugBundleLinuxAssets(TargetPlatform(.linux, .riscv64)),
+  const ProfileBundleLinuxAssets(TargetPlatform(.linux, .x64)),
+  const ProfileBundleLinuxAssets(TargetPlatform(.linux, .arm64)),
+  const ProfileBundleLinuxAssets(TargetPlatform(.linux, .riscv64)),
+  const ReleaseBundleLinuxAssets(TargetPlatform(.linux, .x64)),
+  const ReleaseBundleLinuxAssets(TargetPlatform(.linux, .arm64)),
+  const ReleaseBundleLinuxAssets(TargetPlatform(.linux, .riscv64)),
   const ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
   const CopyFlutterBundle(),
@@ -81,14 +81,14 @@ var _kDefaultTargets = <Target>[
   const ProfileUnpackIOS(),
   const ReleaseUnpackIOS(),
   // Windows targets
-  const UnpackWindows(TargetPlatform.windows_x64),
-  const UnpackWindows(TargetPlatform.windows_arm64),
-  const DebugBundleWindowsAssets(TargetPlatform.windows_x64),
-  const DebugBundleWindowsAssets(TargetPlatform.windows_arm64),
-  const ProfileBundleWindowsAssets(TargetPlatform.windows_x64),
-  const ProfileBundleWindowsAssets(TargetPlatform.windows_arm64),
-  const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64),
-  const ReleaseBundleWindowsAssets(TargetPlatform.windows_arm64),
+  const UnpackWindows(TargetPlatform(.windows, .x64)),
+  const UnpackWindows(TargetPlatform(.windows, .arm64)),
+  const DebugBundleWindowsAssets(TargetPlatform(.windows, .x64)),
+  const DebugBundleWindowsAssets(TargetPlatform(.windows, .arm64)),
+  const ProfileBundleWindowsAssets(TargetPlatform(.windows, .x64)),
+  const ProfileBundleWindowsAssets(TargetPlatform(.windows, .arm64)),
+  const ReleaseBundleWindowsAssets(TargetPlatform(.windows, .x64)),
+  const ReleaseBundleWindowsAssets(TargetPlatform(.windows, .arm64)),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build

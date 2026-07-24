@@ -35,9 +35,6 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   @override
   String get name => 'Mac Designed for iPad';
 
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
-
   // "Designed for iPad" apps are only supported on Apple Silicon Macs.
   @override
   Future<CpuArch> get cpuArch async => CpuArch.arm64;

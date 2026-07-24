@@ -10,7 +10,6 @@ import 'package:dds/dds_launcher.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
-import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
@@ -267,7 +266,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     if (!(await _waitForExtensionsForDevice(device, method))) {
       return;
     }
-    if (device.targetPlatform == TargetPlatform.web_javascript) {
+    if (device.targetPlatform.type == .web) {
       await device.vmService!.callMethodWrapper(method, args: params);
       return;
     }

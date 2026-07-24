@@ -79,7 +79,7 @@ void main() {
   FakeCommand cmakeGenerationCommand({
     void Function(List<String> command)? onRun,
     String generator = _defaultGenerator,
-    TargetPlatform targetPlatform = TargetPlatform.windows_x64,
+    TargetPlatform targetPlatform = const TargetPlatform(.windows, .x64),
   }) {
     return FakeCommand(
       command: <String>[

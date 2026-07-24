@@ -99,9 +99,9 @@ void main() {
                 : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
           );
           final environmentDefines = <String, String>{kBuildMode: buildMode.cliName};
-          final TargetPlatform targetPlatform = flutterTester
-              ? TargetPlatform.tester
-              : TargetPlatform.windows_x64;
+          final targetPlatform = flutterTester
+              ? const TargetPlatform(.tester, .unknown)
+              : const TargetPlatform(.windows, .x64);
           final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,

@@ -37,7 +37,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   ),
   FakeDeviceJsonData(
     FakeDevice('webby', 'webby')
-      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript)
+      ..targetPlatform = Future<TargetPlatform>.value(const TargetPlatform(.web, .unknown))
       ..cpuArch = Future<CpuArch>.value(CpuArch.unknown)
       ..sdkNameAndVersion = Future<String>.value('Web SDK (1.2.4)'),
     <String, Object>{
@@ -90,7 +90,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         type: PlatformType.ios,
         connectionInterface: DeviceConnectionInterface.wireless,
       )
-      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios)
+      ..targetPlatform = Future<TargetPlatform>.value(const TargetPlatform(.ios, .arm64))
       ..cpuArch = Future<CpuArch>.value(CpuArch.arm64)
       ..sdkNameAndVersion = Future<String>.value('iOS 16'),
     <String, Object>{
@@ -167,7 +167,9 @@ class FakeDevice extends Device {
   Future<void> dispose() async {}
 
   @override
-  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
+  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(
+    const TargetPlatform(.android, .armv7),
+  );
 
   @override
   Future<CpuArch> cpuArch = Future<CpuArch>.value(CpuArch.armv7);

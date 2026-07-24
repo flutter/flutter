@@ -776,14 +776,15 @@ class CustomDevice extends Device {
   }
 
   @override
-  Future<TargetPlatform> get targetPlatform async => _config.platform ?? TargetPlatform.linux_arm64;
+  Future<TargetPlatform> get targetPlatform async =>
+      _config.platform ?? const TargetPlatform(.linux, .arm64);
 
   @override
   Future<CpuArch> get cpuArch async {
     // Custom devices only support Linux target platforms (see
     // CustomDeviceConfig), so the arch is derived from that.
-    return switch (_config.platform) {
-      TargetPlatform.linux_x64 => CpuArch.x64,
+    return switch (_config.platform?.cpuArch) {
+      .x64 => CpuArch.x64,
       _ => CpuArch.arm64,
     };
   }

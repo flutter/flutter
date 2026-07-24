@@ -187,7 +187,10 @@ class Dart2JSTarget extends Dart2WebTarget {
         .getHostArtifact(HostArtifact.webPlatformKernelFolder)
         .path;
     final sharedCommandOptions = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
+      artifacts.getArtifactPath(
+        Artifact.engineDartBinary,
+        platform: const TargetPlatform(.web, .unknown),
+      ),
       'compile',
       'js',
       '--platform-binaries=$platformBinariesPath',
@@ -360,7 +363,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final List<String> dartDefines = computeDartDefines(environment);
 
     final compilationArgs = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
+      artifacts.getArtifactPath(
+        Artifact.engineDartBinary,
+        platform: const TargetPlatform(.web, .unknown),
+      ),
       'compile',
       'wasm',
       '--packages=${findPackageConfigFileOrDefault(environment.projectDir).path}',
@@ -665,7 +671,7 @@ class WebReleaseBundle extends Target {
       environment,
       environment.outputDir.childDirectory('assets'),
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.web_javascript,
+      targetPlatform: const TargetPlatform(.web, .unknown),
       buildMode: buildMode,
     );
     final Depfile bundledDepfile = _bundleLocalRobotoFallback(environment, depfile);

@@ -65,7 +65,7 @@ $fontsSection
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(
       packageConfigPath: '.dart_tool/package_config.json',
-      targetPlatform: TargetPlatform.tester,
+      targetPlatform: const TargetPlatform(.tester, .unknown),
     );
 
     for (final packageName in packages) {
@@ -120,7 +120,7 @@ $fontsSection
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,

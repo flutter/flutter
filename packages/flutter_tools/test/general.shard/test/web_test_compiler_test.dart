@@ -37,8 +37,8 @@ void main() {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <Pattern>[
-          'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-          'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+          'Artifact.engineDartAotRuntime.web-javascript',
+          'Artifact.frontendServerSnapshotForEngineDartSdk.web-javascript',
           '--sdk-root',
           'HostArtifact.flutterWebSdk/',
           '--incremental',
@@ -118,7 +118,7 @@ void main() {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <Pattern>[
-          'Artifact.engineDartBinary.TargetPlatform.web_javascript',
+          'Artifact.engineDartBinary.web-javascript',
           'compile',
           'wasm',
           '--packages=.dart_tool/package_config.json',

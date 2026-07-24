@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';

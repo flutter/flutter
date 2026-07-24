@@ -94,7 +94,7 @@ class FlutterTesterDevice extends Device {
   bool get supportsFlavors => true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.tester, .unknown);
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.unknown;
@@ -152,7 +152,7 @@ class FlutterTesterDevice extends Device {
       buildInfo: buildInfo,
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      platform: TargetPlatform.tester,
+      platform: const TargetPlatform(.tester, .unknown),
       assetDirPath: assetDirectory.path,
     );
 

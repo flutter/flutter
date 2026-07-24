@@ -128,7 +128,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     expect(
@@ -160,7 +160,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     expect(logger.errorText, isEmpty);
@@ -181,7 +181,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     expect(logger.errorText, isEmpty);
@@ -202,7 +202,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     expect(
@@ -230,7 +230,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
     final stdinSink = CompleterIOSink();
     addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
@@ -280,7 +280,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     final stdinSink = CompleterIOSink();
@@ -312,7 +312,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     final stdinSink = CompleterIOSink();
@@ -330,8 +330,8 @@ void main() {
   });
 
   for (final platform in <TargetPlatform>[
-    TargetPlatform.android_arm,
-    TargetPlatform.web_javascript,
+    const TargetPlatform(.android, .armv7),
+    const TargetPlatform(.web, .unknown),
   ]) {
     testWithoutContext('Non-constant instances $platform', () async {
       final Environment environment = createEnvironment(<String, String>{
@@ -382,7 +382,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android_arm64,
+      targetPlatform: const TargetPlatform(.android, .arm64),
     );
 
     addConstFinderInvocation(
@@ -425,7 +425,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.web_javascript,
+      targetPlatform: const TargetPlatform(.web, .unknown),
     );
 
     addConstFinderInvocation(
@@ -469,7 +469,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     final stdinSink = CompleterIOSink();
@@ -501,7 +501,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     final stdinSink = CompleterIOSink(throwOnAdd: true);
@@ -535,7 +535,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
@@ -568,7 +568,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     addConstFinderInvocation(appDill.path, stdout: emptyConstFinderResult);
@@ -611,7 +611,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: artifacts,
-        targetPlatform: TargetPlatform.android,
+        targetPlatform: const TargetPlatform(.android, .unknown),
       );
 
       addConstFinderInvocation(appDill.path, stdout: emptyConstFinderResult);
@@ -652,7 +652,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       artifacts: artifacts,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
     );
 
     addConstFinderInvocation(appDill.path, exitCode: -1);

@@ -1293,7 +1293,7 @@ void main() {
     final residentRunner = FakeResidentRunner(
       FlutterDevice(
         FakeDevice(),
-        targetPlatform: .unsupported,
+        targetPlatform: const TargetPlatform(.unsupported, .unknown),
         buildInfo: BuildInfo.debug,
         generator: FakeResidentCompiler(),
         developmentShaderCompiler: const FakeShaderCompiler(),
@@ -1674,7 +1674,9 @@ TerminalHandler setUpTerminalHandler(
     ),
     generator: FakeResidentCompiler(),
     developmentShaderCompiler: const FakeShaderCompiler(),
-    targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
+    targetPlatform: web
+        ? const TargetPlatform(.web, .unknown)
+        : const TargetPlatform(.android, .armv7),
   );
   device.vmService = nullVmService ? null : FakeVmServiceHost(requests: requests).vmService;
   final residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)

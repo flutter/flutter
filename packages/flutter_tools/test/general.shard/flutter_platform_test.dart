@@ -539,7 +539,8 @@ class _UnstartableDevice extends Fake implements Device {
   Future<void> dispose() => Future<void>.value();
 
   @override
-  Future<TargetPlatform> get targetPlatform => Future<TargetPlatform>.value(TargetPlatform.android);
+  Future<TargetPlatform> get targetPlatform =>
+      Future<TargetPlatform>.value(const TargetPlatform(.android, .unknown));
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
@@ -568,7 +569,8 @@ class _WorkingDevice extends Fake implements Device {
   Future<void> dispose() async {}
 
   @override
-  Future<TargetPlatform> get targetPlatform => Future<TargetPlatform>.value(TargetPlatform.android);
+  Future<TargetPlatform> get targetPlatform =>
+      Future<TargetPlatform>.value(const TargetPlatform(.android, .unknown));
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async => true;

@@ -556,7 +556,7 @@ class RunCommand extends RunCommandBase {
     if (featureFlags.isWebEnabled &&
         devices != null &&
         devices!.length == 1 &&
-        await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
+        (await devices!.single.targetPlatform).type == .web) {
       final WebDevServerConfig webDevServerConfig = await webDevServerConfigCore();
       return webDevServerConfig;
     }
@@ -578,7 +578,7 @@ class RunCommand extends RunCommandBase {
     if (devices!.length > 1) {
       return '$command/all';
     }
-    return '$command/${(await devices![0].targetPlatform).getName()}';
+    return '$command/${(await devices![0].targetPlatform).devicePlatformName}';
   }
 
   @override
@@ -616,12 +616,12 @@ class RunCommand extends RunCommandBase {
     } else if (devices!.length == 1) {
       final Device device = devices![0];
       final TargetPlatform platform = await device.targetPlatform;
-      anyAndroidDevices = platform == TargetPlatform.android;
-      anyIOSDevices = platform == TargetPlatform.ios;
+      anyAndroidDevices = platform.type == .android;
+      anyIOSDevices = platform.type == .ios;
       if (device is IOSDevice && device.isWirelesslyConnected) {
         anyWirelessIOSDevices = true;
       }
-      deviceType = platform.getName();
+      deviceType = platform.devicePlatformName;
       deviceOsVersion = await device.sdkNameAndVersion;
       isEmulator = await device.isLocalEmulator;
     } else {
@@ -630,8 +630,8 @@ class RunCommand extends RunCommandBase {
       isEmulator = false;
       for (final Device device in devices!) {
         final TargetPlatform platform = await device.targetPlatform;
-        anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
-        anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
+        anyAndroidDevices = anyAndroidDevices || (platform.type == .android);
+        anyIOSDevices = anyIOSDevices || (platform.type == .ios);
         if (device is IOSDevice && device.isWirelesslyConnected) {
           anyWirelessIOSDevices = true;
         }
@@ -723,7 +723,7 @@ class RunCommand extends RunCommandBase {
     }
 
     if (userIdentifier != null &&
-        devices!.every((Device device) => device.platformType != PlatformType.android)) {
+        devices!.every((Device device) => device.platformType != .android)) {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.',
       );
@@ -967,7 +967,10 @@ class RunCommand extends RunCommandBase {
       timingLabelParts: <String?>[
         if (hotMode) 'hot' else 'cold',
         getBuildMode().cliName,
-        if (devices!.length == 1) (await devices![0].targetPlatform).getName() else 'multiple',
+        if (devices!.length == 1)
+          (await devices![0].targetPlatform).devicePlatformName
+        else
+          'multiple',
         if (devices!.length == 1 && await devices![0].isLocalEmulator) 'emulator' else null,
       ],
       endTimeOverride: appStartedTime,

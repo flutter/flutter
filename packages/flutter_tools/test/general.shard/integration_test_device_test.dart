@@ -123,7 +123,7 @@ void main() {
         isA<TestDeviceException>().having(
           (Exception e) => e.toString(),
           'description',
-          contains('No application found for TargetPlatform.android_arm'),
+          contains('No application found for android-arm'),
         ),
       ),
     );
