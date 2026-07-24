@@ -7,6 +7,7 @@ library;
 
 import 'dart:async';
 
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -38,6 +39,8 @@ class LLDB {
 
   /// Whether or not the LLDB process has attached and resumed the application process.
   var _isAttached = false;
+
+  var _warnedAboutMissingSymbols = false;
 
   /// The process id of the application running on the iOS device.
   int? get appProcessId => _lldbProcess?.appProcessId;
@@ -80,6 +83,12 @@ class LLDB {
     _stopHookProcessedPattern,
   ];
 
+  /// Pattern of lldb log when libobjc.A.dylib is being read from process memory. This indicates
+  /// that Device Support symbols were not found on the host machine.
+  static final missingSymbolsPattern = RegExp(
+    'warning: libobjc.A.dylib is being read from process memory.',
+  );
+
   /// Breakpoint script required for JIT on iOS.
   ///
   /// This should match the "handle_new_rx_page" function in [IosProject._lldbPythonHelperTemplate].
@@ -114,19 +123,32 @@ return False
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
     required BuildMode mode,
+    required String? deviceModelCode,
+    required String? deviceOperatingSystemVersion,
+    required String? deviceArchitectureString,
+    required Directory? deviceSupportDirectory,
   }) async {
     Timer? timer;
     try {
       timer = Timer(const Duration(minutes: 1), () {
-        _logger.printError(
-          'LLDB is taking longer than expected to start debugging the app. '
-          "LLDB debugging can be disabled for the project by adding the following in the project's pubspec.yaml:\n"
-          'flutter:\n'
-          '  config:\n'
-          '    enable-lldb-debugging: false\n'
-          'Or disable LLDB debugging globally with the following command:\n'
-          '  "flutter config --no-enable-lldb-debugging"',
+        final String? warning = missingSymbolsWarning(
+          deviceSupportDirectory,
+          deviceModelCode,
+          deviceOperatingSystemVersion,
+          deviceArchitectureString,
         );
+        if (warning != null) {
+          _logger.printWarning(
+            'LLDB is taking longer than expected to start debugging the app. $warning',
+          );
+          _warnedAboutMissingSymbols = true;
+        } else {
+          _logger.printError(
+            'LLDB is taking longer than expected to start debugging the app. Try again using '
+            '--verbose and file a bug including the verbose logs '
+            'at https://github.com/flutter/flutter/issues/new?template=01_activation.yml.',
+          );
+        }
       });
 
       final bool start = await _startLLDB(
@@ -137,11 +159,19 @@ return False
         return false;
       }
       await _selectDevice(deviceId);
+      await _addSymbolSearchPaths(
+        deviceSupportDirectory,
+        deviceModelCode,
+        deviceOperatingSystemVersion,
+        deviceArchitectureString,
+      );
+
       if (mode == BuildMode.debug) {
         await _setBreakpoint();
       }
       await _attachToAppProcess(appProcessId);
       await _setupStopHooks();
+      await _printDeviceSupportStatus();
       await _resumeProcess(mode);
       _isAttached = true;
     } on _LLDBError catch (e) {
@@ -232,12 +262,131 @@ return False
     }
     _logCompleter = null;
     _isAttached = false;
+    _warnedAboutMissingSymbols = false;
     return success;
   }
 
   /// Selects a device for LLDB to interact with.
   Future<void> _selectDevice(String deviceId) async {
     await _lldbProcess?.stdinWriteln('device select $deviceId');
+  }
+
+  /// Returns a warning describing the status of Device Support symbols and guided actions to
+  /// resolve issues. Returns `null` if symbols are found.
+  static String? missingSymbolsWarning(
+    Directory? supportDir,
+    String? modelCode,
+    String? operatingSystemVersion,
+    String? deviceArchitectureString,
+  ) {
+    final (Directory? symbolDirectory, Directory? archSymbolDirectory) = _findSymbolDirectories(
+      supportDir,
+      modelCode,
+      operatingSystemVersion,
+      deviceArchitectureString,
+    );
+
+    // Return null if symbols are found
+    if ((symbolDirectory != null && symbolDirectory.existsSync()) ||
+        (archSymbolDirectory != null && archSymbolDirectory.existsSync())) {
+      return null;
+    }
+
+    const unableToFind = 'Xcode Device Support was not found for this device.';
+    const notFoundAction =
+        'To trigger Device Symbols to be copied, connect the device via USB, close and then '
+        're-open Xcode. It may take several minutes for Xcode to copy symbols from the device.';
+
+    const incompleteCopy = 'Xcode has not finished copying Device Support symbols for this device.';
+    const incompleteAction =
+        'Please ensure Xcode is open. It may take several minutes for Xcode to copy symbols from '
+        'the device.';
+
+    const reducePerformance =
+        'This will likely reduce debugging performance and may cause the app to hang on a white '
+        'screen during launch.';
+    const expectedPath =
+        r'Once Device Support symbols are finished being copied, they are expected to be found at';
+    const retryAction = 'Please retry "flutter run" once symbols are finished being copied.';
+
+    // The symbol directory may be null if the home directory could not be determined.
+    if (symbolDirectory == null) {
+      return '$unableToFind $reducePerformance\n$notFoundAction\n$expectedPath '
+          '\$HOME/Library/Developer/Xcode/iOS DeviceSupport\n$retryAction';
+    }
+
+    // If the device's directory exists, it means Xcode has at least started copying symbols.
+    final bool deviceDirExists = symbolDirectory.parent.existsSync();
+    final status = deviceDirExists ? incompleteCopy : unableToFind;
+    final action = deviceDirExists ? incompleteAction : notFoundAction;
+    final archPath = archSymbolDirectory != null ? ' or ${archSymbolDirectory.path}' : '';
+
+    return '$status $reducePerformance\n$action\n$expectedPath ${symbolDirectory.path}$archPath\n'
+        '$retryAction';
+  }
+
+  /// Helper method to find the Device Support Symbols directories for a given device.
+  ///
+  /// Returns a tuple of the symbol directory and the architecture-specific symbol directory.
+  /// If the directories are not found, returns (null, null).
+  static (Directory?, Directory?) _findSymbolDirectories(
+    Directory? supportDir,
+    String? modelCode,
+    String? operatingSystemVersion,
+    String? deviceArchitectureString,
+  ) {
+    if (supportDir == null || modelCode == null || operatingSystemVersion == null) {
+      return (null, null);
+    }
+    final Directory deviceDirectory = supportDir.childDirectory(
+      '$modelCode $operatingSystemVersion',
+    );
+    final Directory symbolDirectory = deviceDirectory.childDirectory('Symbols');
+
+    // iOS 27+ devices seem to store the symbol directory in a sub-directory
+    // /Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPad14,3 27.0 (24A5380h)/arm64e/Symbols
+    final Directory? archSymbolDirectory = deviceArchitectureString != null
+        ? deviceDirectory.childDirectory(deviceArchitectureString).childDirectory('Symbols')
+        : null;
+
+    return (symbolDirectory, archSymbolDirectory);
+  }
+
+  /// Adds the symbol search paths to the LLDB process.
+  Future<void> _addSymbolSearchPaths(
+    Directory? deviceSupportDirectory,
+    String? modelCode,
+    String? operatingSystemVersion,
+    String? deviceArchitectureString,
+  ) async {
+    final (Directory? symbolDirectory, Directory? archSymbolDirectory) = _findSymbolDirectories(
+      deviceSupportDirectory,
+      modelCode,
+      operatingSystemVersion,
+      deviceArchitectureString,
+    );
+    if (symbolDirectory == null) {
+      return;
+    }
+    if (archSymbolDirectory != null && archSymbolDirectory.existsSync()) {
+      await _lldbProcess?.stdinWriteln(
+        'platform select remote-ios --sysroot "${archSymbolDirectory.path}"',
+      );
+    } else if (symbolDirectory.existsSync()) {
+      await _lldbProcess?.stdinWriteln(
+        'platform select remote-ios --sysroot "${symbolDirectory.path}"',
+      );
+    }
+  }
+
+  /// Prints logs of available Device Support
+  Future<void> _printDeviceSupportStatus() async {
+    final Future<String> futureLog = _startWaitingForLog(
+      RegExp('platform status'),
+    ).then((value) => value, onError: _handleAsyncError);
+
+    await _lldbProcess?.stdinWriteln('platform status');
+    await futureLog;
   }
 
   /// Attaches LLDB to the [appProcessId] running on the device.
@@ -346,6 +495,10 @@ return False
   }
 
   bool _ignoreLog(String log) {
+    // We only want to warn about missing symbols once.
+    if (_warnedAboutMissingSymbols && log.contains(missingSymbolsPattern)) {
+      return true;
+    }
     return _ignorePatterns.any((Pattern pattern) => log.contains(pattern));
   }
 }

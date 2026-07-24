@@ -1052,6 +1052,85 @@ void main() {
         },
       );
 
+      testUsingContext(
+        'logs warning when missing symbols pattern is detected in log reader',
+        () async {
+          final IOSDevice iosDevice = setUpIOSDevice(
+            fileSystem: fileSystem,
+            processManager: FakeProcessManager.any(),
+            logger: logger,
+            artifacts: artifacts,
+            isCoreDevice: true,
+            coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcodeDebug: FakeXcodeDebug(
+              expectedProject: XcodeDebugProject(
+                scheme: 'Runner',
+                xcodeWorkspace: fileSystem.directory('/ios/Runner.xcworkspace'),
+                xcodeProject: fileSystem.directory('/ios/Runner.xcodeproj'),
+                hostAppProjectName: 'Runner',
+              ),
+              expectedDeviceId: '123',
+              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+            ),
+          );
+
+          setUpIOSProject(fileSystem);
+          final FlutterProject flutterProject = FlutterProject.fromDirectory(
+            fileSystem.currentDirectory,
+          );
+          final buildableIOSApp = BuildableIOSApp(
+            flutterProject.ios,
+            'flutter',
+            'My Super Awesome App',
+          );
+          fileSystem
+              .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
+              .createSync(recursive: true);
+
+          final deviceLogReader = FakeSharedIOSDeviceLogReader();
+
+          iosDevice.portForwarder = const NoOpDevicePortForwarder();
+          iosDevice.setLogReader(buildableIOSApp, deviceLogReader);
+
+          Timer.run(() {
+            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+            deviceLogReader.addLine('warning: libobjc.A.dylib is being read from process memory.');
+          });
+
+          final LaunchResult launchResult = await iosDevice.startApp(
+            buildableIOSApp,
+            debuggingOptions: DebuggingOptions.enabled(
+              const BuildInfo(
+                BuildMode.debug,
+                null,
+                buildName: '1.2.3',
+                buildNumber: '4',
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+            ),
+            platformArgs: <String, Object>{},
+          );
+
+          expect(launchResult.started, true);
+          expect(
+            logger.warningText,
+            contains('Xcode Device Support was not found for this device.'),
+          );
+        },
+        overrides: <Type, Generator>{
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => const ThrowingPub(),
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          OperatingSystemUtils: () => os,
+          Platform: () => macPlatform,
+          XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
+          Xcode: () => xcode,
+          Artifacts: () => artifacts,
+        },
+      );
+
       group('with flavor', () {
         setUp(() {
           projectInfo = XcodeProjectInfo(
@@ -1475,11 +1554,13 @@ IOSDevice setUpIOSDevice({
   );
 
   logger ??= BufferLogger.test();
+  final FileSystem testFileSystem = fileSystem ?? MemoryFileSystem.test();
   return IOSDevice(
     '123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    fileSystem: testFileSystem,
+    fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: macPlatform),
     platform: macPlatform,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,
@@ -1731,6 +1812,10 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
   @override
   Future<bool> launchAppWithLLDBDebugger({
     required String deviceId,
+    required String? deviceOperatingSystemVersion,
+    required String? deviceModelCode,
+    required String? deviceArchitectureString,
+    required Directory? deviceSupportDirectory,
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
@@ -1777,4 +1862,43 @@ class FakeArtifacts extends Fake implements Artifacts {
 
   @override
   LocalEngineInfo? get localEngineInfo => null;
+}
+
+class FakeSharedIOSDeviceLogReader extends SharedIOSDeviceLogReader {
+  @override
+  String get name => 'FakeLogReader';
+
+  bool disposed = false;
+
+  final _lineQueue = <String>[];
+  late final _linesController = StreamController<String>.broadcast(onListen: _onListen);
+
+  @override
+  Stream<String> get logLines => _linesController.stream;
+
+  @override
+  StreamController<String> get linesController => _linesController;
+
+  void _onListen() {
+    _lineQueue.forEach(addLogToStream);
+    _lineQueue.clear();
+  }
+
+  void addLine(String line) {
+    if (_linesController.hasListener) {
+      addLogToStream(line);
+    } else {
+      _lineQueue.add(line);
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    _lineQueue.clear();
+    await _linesController.close();
+    disposed = true;
+  }
+
+  @override
+  Future<void> provideVmService(Object? connectedVmService) async {}
 }

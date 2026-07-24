@@ -1956,11 +1956,13 @@ IOSDevice setUpIOSDevice({
     processManager: FakeProcessManager.any(),
   );
   logger ??= BufferLogger.test();
+  final FileSystem testFileSystem = fileSystem ?? MemoryFileSystem.test();
   return IOSDevice(
     '123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    fileSystem: testFileSystem,
+    fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: macPlatform),
     platform: macPlatform,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,
@@ -2136,6 +2138,10 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
   @override
   Future<bool> launchAppWithLLDBDebugger({
     required String deviceId,
+    required String? deviceOperatingSystemVersion,
+    required String? deviceModelCode,
+    required String? deviceArchitectureString,
+    required Directory? deviceSupportDirectory,
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,

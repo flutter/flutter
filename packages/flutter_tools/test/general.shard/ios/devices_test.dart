@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -46,6 +45,7 @@ void main() {
     late IOSDeploy iosDeploy;
     late IMobileDevice iMobileDevice;
     late FileSystem fileSystem;
+    late FileSystemUtils fileSystemUtils;
     late IOSCoreDeviceControl coreDeviceControl;
     late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
@@ -55,6 +55,7 @@ void main() {
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
+      fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: macPlatform);
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
         cache: cache,
@@ -78,6 +79,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -98,11 +100,82 @@ void main() {
       expect(await device.isSupported(), isTrue);
     });
 
+    testWithoutContext('deviceSupportDirectory returns Xcode iOS DeviceSupport path', () {
+      final customPlatform = FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{'HOME': '/Users/testuser'},
+      );
+      final customFileSystemUtils = FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: customPlatform,
+      );
+      final device = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        fileSystemUtils: customFileSystemUtils,
+        logger: logger,
+        platform: customPlatform,
+        iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
+        iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
+        xcodeDebug: xcodeDebug,
+        name: 'iPhone 1',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
+        isPaired: true,
+        devModeEnabled: true,
+        isCoreDevice: false,
+      );
+
+      expect(
+        device.deviceSupportDirectory?.path,
+        '/Users/testuser/Library/Developer/Xcode/iOS DeviceSupport',
+      );
+    });
+
+    testWithoutContext('deviceSupportDirectory returns null when homeDirPath is null', () {
+      final customPlatform = FakePlatform(operatingSystem: 'macos');
+      final customFileSystemUtils = FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: customPlatform,
+      );
+      final device = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        fileSystemUtils: customFileSystemUtils,
+        logger: logger,
+        platform: customPlatform,
+        iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
+        iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        coreDeviceLauncher: coreDeviceLauncher,
+        xcodeDebug: xcodeDebug,
+        name: 'iPhone 1',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
+        isPaired: true,
+        devModeEnabled: true,
+        isCoreDevice: false,
+      );
+
+      expect(device.deviceSupportDirectory, isNull);
+    });
+
     testWithoutContext('32-bit devices are unsupported', () async {
       final device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -128,6 +201,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -152,6 +226,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -176,6 +251,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -200,6 +276,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -224,6 +301,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -250,6 +328,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -276,6 +355,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -302,6 +382,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -328,6 +409,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -354,6 +436,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -376,6 +459,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -401,6 +485,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -427,6 +512,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -460,6 +546,7 @@ void main() {
               'device-123',
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
               fileSystem: fileSystem,
+              fileSystemUtils: fileSystemUtils,
               logger: logger,
               analytics: FakeAnalytics(),
               platform: platform,
@@ -551,6 +638,7 @@ void main() {
           '123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -622,6 +710,12 @@ void main() {
       coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
 
+      final testFileSystem = MemoryFileSystem.test();
+      final testFileSystemUtils = FileSystemUtils(
+        fileSystem: testFileSystem,
+        platform: macPlatform,
+      );
+
       device1 = IOSDevice(
         'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
         name: 'Paired iPhone',
@@ -636,7 +730,8 @@ void main() {
         xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
-        fileSystem: MemoryFileSystem.test(),
+        fileSystem: testFileSystem,
+        fileSystemUtils: testFileSystemUtils,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
@@ -658,7 +753,8 @@ void main() {
         xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
-        fileSystem: MemoryFileSystem.test(),
+        fileSystem: testFileSystem,
+        fileSystemUtils: testFileSystemUtils,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
@@ -974,6 +1070,11 @@ void main() {
       coreDeviceControl = FakeIOSCoreDeviceControl();
       coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
+      final testFileSystem = MemoryFileSystem.test();
+      final testFileSystemUtils = FileSystemUtils(
+        fileSystem: testFileSystem,
+        platform: macPlatform,
+      );
       notConnected1 = IOSDevice(
         '00000001-0000000000000000',
         name: 'iPad',
@@ -988,7 +1089,8 @@ void main() {
         xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
-        fileSystem: MemoryFileSystem.test(),
+        fileSystem: testFileSystem,
+        fileSystemUtils: testFileSystemUtils,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: false,
         isPaired: true,

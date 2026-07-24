@@ -225,6 +225,10 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceOperatingSystemVersion: null,
+          deviceModelCode: null,
+          deviceArchitectureString: null,
+          deviceSupportDirectory: null,
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -234,6 +238,66 @@ void main() {
 
         expect(result, isTrue);
         expect(fakeLLDB.attemptedToAttach, isTrue);
+      });
+
+      testWithoutContext('registers shutdown hook to stop app', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'installedApplications': [
+                <String, Object?>{'installationURL': '/asdf'},
+              ],
+            },
+          }),
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 123},
+            },
+          }),
+          runningProcesses: [
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 123,
+              'executable': '/asdf',
+            }),
+          ],
+        );
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        fakeLLDB.setIsRunning(true, 123);
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          lldb: fakeLLDB,
+        );
+        final shutdownHooks = FakeShutdownHooks();
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          deviceOperatingSystemVersion: '17.0',
+          deviceModelCode: 'iPhone15,2',
+          deviceArchitectureString: 'arm64e',
+          deviceSupportDirectory: null,
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+          shutdownHooks: shutdownHooks,
+          mode: BuildMode.debug,
+        );
+
+        expect(result, isTrue);
+        expect(shutdownHooks.registeredHooks, hasLength(1));
+        await shutdownHooks.registeredHooks.first();
+        expect(fakeCoreDeviceControl.terminateProcessCalled, isTrue);
+        expect(fakeCoreDeviceControl.processTerminated, 123);
+        expect(fakeLLDB.exitCalled, isTrue);
       });
 
       testWithoutContext('ignores app extension processes', () async {
@@ -285,6 +349,10 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceOperatingSystemVersion: null,
+          deviceModelCode: null,
+          deviceArchitectureString: null,
+          deviceSupportDirectory: null,
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -338,6 +406,10 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceOperatingSystemVersion: null,
+          deviceModelCode: null,
+          deviceArchitectureString: null,
+          deviceSupportDirectory: null,
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -384,6 +456,10 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceOperatingSystemVersion: null,
+          deviceModelCode: null,
+          deviceArchitectureString: null,
+          deviceSupportDirectory: null,
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -436,6 +512,10 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceOperatingSystemVersion: null,
+          deviceModelCode: null,
+          deviceArchitectureString: null,
+          deviceSupportDirectory: null,
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -482,6 +562,10 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceOperatingSystemVersion: null,
+          deviceModelCode: null,
+          deviceArchitectureString: null,
+          deviceSupportDirectory: null,
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -530,6 +614,10 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceOperatingSystemVersion: null,
+          deviceModelCode: null,
+          deviceArchitectureString: null,
+          deviceSupportDirectory: null,
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -580,6 +668,10 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceOperatingSystemVersion: null,
+          deviceModelCode: null,
+          deviceArchitectureString: null,
+          deviceSupportDirectory: null,
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -4056,6 +4148,10 @@ class FakeLLDB extends Fake implements LLDB {
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
     required BuildMode mode,
+    required String? deviceOperatingSystemVersion,
+    required String? deviceModelCode,
+    required String? deviceArchitectureString,
+    required Directory? deviceSupportDirectory,
   }) async {
     attemptedToAttach = true;
     attachedProcessId = appProcessId;

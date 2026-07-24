@@ -308,14 +308,18 @@ class IOSDevice extends Device {
   IOSDevice(
     super.id, {
     required FileSystem fileSystem,
+    required FileSystemUtils fileSystemUtils,
     required this.name,
     required CpuArch cpuArch,
+    String? cpuArchitectureString,
     required this.connectionInterface,
     required this.isConnected,
     required this.isPaired,
     required this.devModeEnabled,
     required this.isCoreDevice,
     String? sdkVersion,
+    String? modelCode,
+    String? operatingSystemVersion,
     required Platform platform,
     required IOSDeploy iosDeploy,
     required IMobileDevice iMobileDevice,
@@ -327,6 +331,9 @@ class IOSDevice extends Device {
     required Analytics analytics,
   }) : _cpuArch = cpuArch,
        _sdkVersion = sdkVersion,
+       _modelCode = modelCode,
+       _operatingSystemVersion = operatingSystemVersion,
+       _cpuArchitectureString = cpuArchitectureString,
        _iosDeploy = iosDeploy,
        _iMobileDevice = iMobileDevice,
        _coreDeviceControl = coreDeviceControl,
@@ -334,6 +341,7 @@ class IOSDevice extends Device {
        _xcodeDebug = xcodeDebug,
        _iproxy = iProxy,
        _fileSystem = fileSystem,
+       _fileSystemUtils = fileSystemUtils,
        _logger = logger,
        _analytics = analytics,
        _platform = platform,
@@ -345,9 +353,12 @@ class IOSDevice extends Device {
   }
 
   final String? _sdkVersion;
+  final String? _modelCode;
+  final String? _operatingSystemVersion;
   final IOSDeploy _iosDeploy;
   final Analytics _analytics;
   final FileSystem _fileSystem;
+  final FileSystemUtils _fileSystemUtils;
   final Logger _logger;
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
@@ -365,6 +376,15 @@ class IOSDevice extends Device {
     return sdkVersion?.major ?? 0;
   }
 
+  late final Directory? deviceSupportDirectory = _fileSystemUtils.homeDirPath == null
+      ? null
+      : _fileSystem
+            .directory(_fileSystemUtils.homeDirPath)
+            .childDirectory('Library')
+            .childDirectory('Developer')
+            .childDirectory('Xcode')
+            .childDirectory('iOS DeviceSupport');
+
   @override
   final String name;
 
@@ -372,6 +392,8 @@ class IOSDevice extends Device {
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   final CpuArch _cpuArch;
+
+  final String? _cpuArchitectureString;
 
   @override
   Future<CpuArch> get cpuArch async => _cpuArch;
@@ -901,6 +923,24 @@ class IOSDevice extends Device {
       excludeFromStream: false,
     );
     deviceLogReader.addLogInterceptor(appTerminatedInterceptor);
+
+    final missingSymbolsInterceptor = LogInterceptor(
+      identifier: 'missing_symbols',
+      pattern: LLDB.missingSymbolsPattern,
+      action: () {
+        final String? warning = LLDB.missingSymbolsWarning(
+          deviceSupportDirectory,
+          _modelCode,
+          _operatingSystemVersion,
+          _cpuArchitectureString,
+        );
+        if (warning != null) {
+          globals.printWarning(warning);
+        }
+      },
+      excludeFromStream: false,
+    );
+    deviceLogReader.addLogInterceptor(missingSymbolsInterceptor);
   }
 
   /// Find the Dart VM url using ProtocolDiscovery (logs from `idevicesyslog`)
@@ -1090,6 +1130,10 @@ class IOSDevice extends Device {
       if (shouldAttachDebugger) {
         final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
           deviceId: id,
+          deviceSupportDirectory: deviceSupportDirectory,
+          deviceModelCode: _modelCode,
+          deviceOperatingSystemVersion: _operatingSystemVersion,
+          deviceArchitectureString: _cpuArchitectureString,
           bundlePath: package.deviceBundlePath,
           bundleId: package.id,
           launchArguments: launchArguments,

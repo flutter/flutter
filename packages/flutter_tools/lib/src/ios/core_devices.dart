@@ -101,6 +101,10 @@ class IOSCoreDeviceLauncher {
   /// Requires Xcode 16+.
   Future<bool> launchAppWithLLDBDebugger({
     required String deviceId,
+    required String? deviceOperatingSystemVersion,
+    required String? deviceModelCode,
+    required String? deviceArchitectureString,
+    required Directory? deviceSupportDirectory,
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
@@ -150,12 +154,25 @@ class IOSCoreDeviceLauncher {
       return false;
     }
 
+    // Kill LLDB and devicectl if the CLI shuts down so they do not hang in the background.
+    shutdownHooks.addShutdownHook(() async {
+      try {
+        await stopApp(deviceId: deviceId, processId: processId);
+      } finally {
+        // ignore any failures
+      }
+    });
+
     // Start LLDB and attach to the device process.
     final bool attachStatus = await _lldb.attachAndStart(
       deviceId: deviceId,
       appProcessId: processId,
       lldbLogForwarder: lldbLogForwarder,
       mode: mode,
+      deviceSupportDirectory: deviceSupportDirectory,
+      deviceOperatingSystemVersion: deviceOperatingSystemVersion,
+      deviceModelCode: deviceModelCode,
+      deviceArchitectureString: deviceArchitectureString,
     );
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
