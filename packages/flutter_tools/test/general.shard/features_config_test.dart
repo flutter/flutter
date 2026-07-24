@@ -25,7 +25,6 @@ void main() {
     Feature feature, {
     Map<String, String> environment = const <String, String>{},
     Map<String, Object> globalConfig = const <String, Object>{},
-    BufferLogger? logger,
     String? projectManifest,
   }) {
     final globalConfigReader = Config.test();
@@ -33,7 +32,7 @@ void main() {
       globalConfigReader.setValue(key, value);
     }
 
-    logger ??= BufferLogger.test();
+    final logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = projectManifest != null
         ? FlutterManifest.createFromString(projectManifest, logger: logger)
         : FlutterManifest.empty(logger: logger);
@@ -43,7 +42,6 @@ void main() {
 
     final featuresConfig = FlutterFeaturesConfig(
       globalConfig: globalConfigReader,
-      logger: logger,
       platform: FakePlatform(environment: <String, String>{...environment}),
       projectManifest: flutterManifest,
     );
@@ -84,23 +82,6 @@ void main() {
     );
   });
 
-  test('warns when Swift Package Manager is disabled in the local manifest', () {
-    final logger = BufferLogger.test();
-    expect(
-      isEnabled(
-        swiftPackageManager,
-        logger: logger,
-        projectManifest: '''
-        flutter:
-          config:
-            enable-swift-package-manager: false
-        ''',
-      ),
-      isFalse,
-    );
-    expect(logger.warningText, contains(kSwiftPackageManagerDisabledWarning));
-  });
-
   test('local manifest config must be a map', () {
     expect(
       () => isEnabled(
@@ -133,21 +114,6 @@ void main() {
       isEnabled(_configOnlyFeature, globalConfig: <String, Object>{'enable-flag': true}),
       isTrue,
     );
-  });
-
-  test('warns when Swift Package Manager is disabled in the global configuration', () {
-    final logger = BufferLogger.test();
-    final globalConfigReader = Config.test()..setValue('enable-swift-package-manager', false);
-    final featuresConfig = FlutterFeaturesConfig(
-      globalConfig: globalConfigReader,
-      logger: logger,
-      platform: FakePlatform(),
-      projectManifest: FlutterManifest.empty(logger: logger),
-    );
-
-    expect(featuresConfig.isEnabled(swiftPackageManager), isFalse);
-    expect(featuresConfig.isEnabled(swiftPackageManager), isFalse);
-    expect(kSwiftPackageManagerDisabledWarning.allMatches(logger.warningText), hasLength(1));
   });
 
   test('global configuration value must be a boolean', () {

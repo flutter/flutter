@@ -176,9 +176,12 @@ class DarwinDependencyManagement {
     required Logger logger,
     required CocoaPods? cocoapods,
   }) async {
+    final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     final bool projectUsesSwiftPM =
-        xcodeProject.usesSwiftPackageManager &&
-        xcodeProject.flutterPluginSwiftPackageInProjectSettings;
+        usesSwiftPackageManager && xcodeProject.flutterPluginSwiftPackageInProjectSettings;
+    if (!usesSwiftPackageManager && xcodeProject.compatibleWithSwiftPackageManager) {
+      logger.printWarning(kSwiftPackageManagerDisabledWarning);
+    }
 
     final swiftPackageOnlyPlugins = <String>[];
     final cocoapodOnlyPlugins = <String>[];
