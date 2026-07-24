@@ -146,7 +146,7 @@ return False
           _logger.printError(
             'LLDB is taking longer than expected to start debugging the app. Try again using '
             '--verbose and file a bug including the verbose logs '
-            'at https://github.com/flutter/flutter/issues/new?template=01_activation.yml.',
+            'at https://github.com/flutter/flutter/issues/new?template=01_activation.yml',
           );
         }
       });
@@ -345,7 +345,8 @@ return False
 
     // iOS 27+ devices seem to store the symbol directory in a sub-directory
     // /Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPad14,3 27.0 (24A5380h)/arm64e/Symbols
-    final Directory? archSymbolDirectory = deviceArchitectureString != null
+    final Directory? archSymbolDirectory =
+        deviceArchitectureString != null && deviceArchitectureString.isNotEmpty
         ? deviceDirectory.childDirectory(deviceArchitectureString).childDirectory('Symbols')
         : null;
 

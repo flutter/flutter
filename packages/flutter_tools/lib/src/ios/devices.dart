@@ -890,7 +890,7 @@ class IOSDevice extends Device {
           '`UIScene` lifecycle will soon be required|This process does not adopt UIScene lifecycle',
         ),
         action: () {
-          globals.printWarning(uisceneWarning);
+          _logger.printWarning(uisceneWarning);
         },
         excludeFromStream: true,
       );
@@ -935,7 +935,7 @@ class IOSDevice extends Device {
           _cpuArchitectureString,
         );
         if (warning != null) {
-          globals.printWarning(warning);
+          _logger.printWarning(warning);
         }
       },
       excludeFromStream: false,
