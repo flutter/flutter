@@ -19,6 +19,7 @@ import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -300,24 +301,17 @@ abstract interface class WindowControllerLinux {
 /// [PopupWindowControllerLinux].
 ///
 /// Rather than being shown as soon as its view renders its first frame, the
-/// window is shown once the view has been allocated the size of that content —
-/// see [_handleFirstFrame] — so that it is placed correctly for the size it
+/// window is shown once the view has been allocated the size of that content
+/// (see [_handleFirstFrame]) so that it is placed correctly for the size it
 /// maps with. On Wayland that first placement is final; on X11 a later resize
-/// is corrected — see [_handleConfigure].
+/// is corrected (see [_handleConfigure]).
 mixin _SizedToContentWindowMixin on ChangeNotifier {
-  /// The native window being shown. Provided by the mixing-in controller.
+  // Provided by the mixing-in controller: the native window being shown, the
+  // view rendering the Flutter content into it, whether it has been destroyed,
+  // and how to place it against its anchor rectangle.
   _GtkWindow get _window;
-
-  /// The view rendering the Flutter content into [_window]. Provided by the
-  /// mixing-in controller.
   FlutterView get rootView;
-
-  /// Whether [_window] has been destroyed. Provided by the mixing-in
-  /// controller.
   bool get isDestroyed;
-
-  /// Places [_window] against its anchor rectangle. Provided by the mixing-in
-  /// controller.
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
 
   // The window size when it was mapped; null until [_showFirstTime] has shown
@@ -396,13 +390,9 @@ mixin _SizedToContentWindowMixin on ChangeNotifier {
     if (viewSize == null) {
       return false;
     }
-    RenderView? renderView;
-    for (final RenderView view in RendererBinding.instance.renderViews) {
-      if (view.flutterView == rootView) {
-        renderView = view;
-        break;
-      }
-    }
+    final RenderView? renderView = RendererBinding.instance.renderViews.firstWhereOrNull(
+      (RenderView view) => view.flutterView == rootView,
+    );
     if (renderView == null) {
       return true;
     }
@@ -1433,11 +1423,6 @@ class _GtkWidget extends _GObject {
     _gtkWidgetShow(instance);
   }
 
-  /// Hide the widget.
-  void hide() {
-    _gtkWidgetHide(instance);
-  }
-
   /// Get the low level window backing this widget.
   _GdkWindow getWindow() {
     return _GdkWindow(_gtkWidgetGetWindow(instance));
@@ -1474,9 +1459,6 @@ class _GtkWidget extends _GObject {
 
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_show')
   external static void _gtkWidgetShow(ffi.Pointer<ffi.NativeType> widget);
-
-  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_hide')
-  external static void _gtkWidgetHide(ffi.Pointer<ffi.NativeType> widget);
 
   @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
     symbol: 'gtk_widget_get_window',
