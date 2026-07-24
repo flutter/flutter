@@ -23,6 +23,8 @@ runs:
         PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
         PUSH_BEFORE_SHA: ${{ github.event.before }}
+        INPUTS_CHECK_NAME: ${{ inputs.check-name }}
+        INPUTS_CHECK_REGEXP: ${{ inputs.check-regexp }}
       run: |
         # 1. Determine local base tracking SHA
         if [ "$EVENT_NAME" = "pull_request" ]; then
@@ -44,7 +46,7 @@ runs:
 
         # 3. Check if any file matches engine pattern using the helper script:
         if [ "$(printf '%s\n' "$CHANGED_FILES" | .github/scripts/did_engine_change.sh)" = "true" ]; then
-          echo "Engine file changed - forced to wait for check-name: '${{ inputs.check-name }}', check-regexp: '${{ inputs.check-regexp }}'"
+          echo "Engine file changed - forced to wait for check-name: '${INPUTS_CHECK_NAME}', check-regexp: '${INPUTS_CHECK_REGEXP}'"
           echo "changed=true" >> "$GITHUB_OUTPUT"
         else
           echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -59,9 +61,14 @@ runs:
         repo: ${{ github.repository }}
         required-tests: ${{ inputs.check-name }}
 
-    - name: Redirect engine.version
+    - name: Redirect engine.version - Realm
       if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
       shell: bash
-      run: |
-        echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV
-        echo "FLUTTER_PREBUILT_ENGINE_VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+      run: echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV # zizmor: ignore[github-env]
+
+    - name: Redirect engine.version - Prebuilt Engine Version
+      if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      run: echo "FLUTTER_PREBUILT_ENGINE_VERSION=$HEAD_SHA" >> $GITHUB_ENV # zizmor: ignore[github-env]
+      env:
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}

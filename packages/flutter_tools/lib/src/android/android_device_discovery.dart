@@ -115,13 +115,19 @@ class AndroidDevices extends PollingDeviceDiscovery {
   // The regex is structured as:
   // 1. Group 1 (Serial): Lazily matched to allow spaces in the serial (which
   //    can happen during wireless ADB mDNS name conflicts, e.g., "device (2)").
-  // 2. Group 2 (State): Matches "no permissions" explicitly (as it is the only
-  //    known state containing a space) or any other non-whitespace word (\S+).
-  // 3. Group 3 (Extra Info): Anchors the state match by requiring it to be
-  //    followed by either a space and a key:value pair (e.g., "usb:123") or the
-  //    end of the line. This prevents false positives if the serial contains
-  //    state keywords.
-  static final _kDeviceRegex = RegExp(r'^(.*?)\s+(no permissions|\S+)(?:\s+(\w+:.*)|$)');
+  //    The column separator requires at least two spaces or a tab to prevent
+  //    single spaces within a serial from being mis-matched.
+  // 2. Group 2 (State): Matches known ADB device states explicitly, including
+  //    "no permissions" (which contains a space). Explicitly listing states
+  //    prevents false positive state matching on extra device info/attributes
+  //    or serial name components.
+  // 3. Group 3 (Extra Info): Optional trailing details (e.g. key:value pairs
+  //    like "product:mokey model:mokey device:mokey transport_id:1" or "usb:123").
+  static final _kDeviceRegex = RegExp(
+    r'^(.*?)(?:\s{2,}|\t+)'
+    r'(device|offline|unauthorized|no permissions|bootloader|recovery|sideload|rescue|connecting|authorizing|host|unknown)'
+    r'(?:\s+(.*)|$)',
+  );
 
   /// Parse the given `adb devices` output in [text], and fill out the given list
   /// of devices and possible device issue diagnostics. Either argument can be null,

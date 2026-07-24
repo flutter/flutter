@@ -131,11 +131,6 @@ GetActualRenderingAPIForImpeller(
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
           .enable_gpu_tracing = settings.enable_gpu_tracing,
           .enable_surface_control = settings.enable_surface_control,
-          .impeller_flags =
-              {
-                  .antialiased_lines =
-                      settings.impeller_flags.antialiased_lines,
-              },
       });
   if (!vulkan_backend->IsValid()) {
     return nullptr;
@@ -145,9 +140,11 @@ GetActualRenderingAPIForImpeller(
 }  // namespace
 
 AndroidContextDynamicImpeller::AndroidContextDynamicImpeller(
-    const AndroidContext::ContextSettings& settings)
+    const AndroidContext::ContextSettings& settings,
+    std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
     : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
-      settings_(settings) {}
+      settings_(settings),
+      io_task_runner_(std::move(io_task_runner)) {}
 
 AndroidContextDynamicImpeller::~AndroidContextDynamicImpeller() = default;
 
@@ -191,7 +188,7 @@ void AndroidContextDynamicImpeller::SetupImpellerContext() {
   if (!vk_context_) {
     gl_context_ = std::make_shared<AndroidContextGLImpeller>(
         std::make_unique<impeller::egl::Display>(),
-        settings_.enable_gpu_tracing);
+        settings_.enable_gpu_tracing, io_task_runner_);
   }
 }
 

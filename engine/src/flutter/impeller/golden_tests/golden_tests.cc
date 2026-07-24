@@ -15,8 +15,7 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"  // nogncheck
 #include "impeller/golden_tests/golden_digest.h"
-#include "impeller/golden_tests/metal_screenshot.h"
-#include "impeller/golden_tests/metal_screenshotter.h"
+#include "impeller/golden_tests/metal_golden_screenshotter.h"
 #include "impeller/golden_tests/working_directory.h"
 
 namespace impeller {
@@ -59,9 +58,9 @@ PlaygroundSwitches GetPlaygroundSwitches() {
 class GoldenTests : public ::testing::Test {
  public:
   GoldenTests()
-      : screenshotter_(new MetalScreenshotter(GetPlaygroundSwitches())) {}
+      : screenshotter_(new MetalGoldenScreenshotter(GetPlaygroundSwitches())) {}
 
-  MetalScreenshotter& Screenshotter() { return *screenshotter_; }
+  MetalGoldenScreenshotter& Screenshotter() { return *screenshotter_; }
 
   void SetUp() override {
     testing::GoldenDigest::Instance()->AddDimension(
@@ -74,7 +73,7 @@ class GoldenTests : public ::testing::Test {
   // autorelease pool.
   fml::ScopedNSAutoreleasePool autorelease_pool_;
 
-  std::unique_ptr<MetalScreenshotter> screenshotter_;
+  std::unique_ptr<MetalGoldenScreenshotter> screenshotter_;
 };
 
 TEST_F(GoldenTests, ConicalGradient) {
