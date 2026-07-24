@@ -16,16 +16,16 @@ import 'popup_button.dart';
 import 'rotated_wire_cube.dart';
 import 'tooltip_button.dart';
 
-class RegularWindowContent extends StatefulWidget {
-  const RegularWindowContent({super.key, required this.regularWindowController});
+class WindowContent extends StatefulWidget {
+  const WindowContent({super.key, required this.windowController});
 
-  final RegularWindowController regularWindowController;
+  final WindowController windowController;
 
   @override
-  State<RegularWindowContent> createState() => _RegularWindowContentState();
+  State<WindowContent> createState() => _WindowContentState();
 }
 
-class _RegularWindowContentState extends State<RegularWindowContent> {
+class _WindowContentState extends State<WindowContent> {
   late final Color cubeColor;
 
   static Color _generateRandomDarkColor() {
@@ -70,15 +70,15 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
                       mainAxisSize: .min,
                       children: [
                         _WindowCreationButtons(
-                          regularWindowController: widget.regularWindowController,
+                          windowController: widget.windowController,
                         ),
                         const SizedBox(height: 20),
-                        TooltipButton(parentController: widget.regularWindowController),
+                        TooltipButton(parentController: widget.windowController),
                         const SizedBox(height: 20),
-                        PopupButton(parentController: widget.regularWindowController),
+                        PopupButton(parentController: widget.windowController),
                         const SizedBox(height: 20),
                         Text(
-                          'View #${widget.regularWindowController.rootView.viewId}\n'
+                          'View #${widget.windowController.rootView.viewId}\n'
                           'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
                           'Device Pixel Ratio: $dpr',
                           textAlign: TextAlign.center,
@@ -98,11 +98,11 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
 
 /// Extracted widget that depends on [WindowRegistry] so that registry changes
 /// (e.g. opening/closing windows) only rebuild these buttons, not the entire
-/// [RegularWindowContent] tree.
+/// [WindowContent] tree.
 class _WindowCreationButtons extends StatelessWidget {
-  const _WindowCreationButtons({required this.regularWindowController});
+  const _WindowCreationButtons({required this.windowController});
 
-  final RegularWindowController regularWindowController;
+  final WindowController windowController;
 
   @override
   Widget build(BuildContext context) {
@@ -115,8 +115,8 @@ class _WindowCreationButtons extends StatelessWidget {
         ElevatedButton(
           onPressed: () {
             late final WindowEntry entry;
-            final controller = RegularWindowController(
-              delegate: CallbackRegularWindowControllerDelegate(
+            final controller = WindowController(
+              delegate: CallbackWindowControllerDelegate(
                 onDestroyed: () => windowRegistry.unregister(entry),
               ),
               title: 'Regular',
@@ -126,7 +126,7 @@ class _WindowCreationButtons extends StatelessWidget {
             entry = WindowEntry(
               controller: controller,
               builder: (BuildContext context) =>
-                  RegularWindowContent(regularWindowController: controller),
+                  WindowContent(windowController: controller),
             );
             windowRegistry.register(entry);
           },
@@ -142,7 +142,7 @@ class _WindowCreationButtons extends StatelessWidget {
               ),
               title: 'Modal Dialog',
               size: windowSettings.dialogSize,
-              parent: regularWindowController,
+              parent: windowController,
             );
 
             entry = WindowEntry(
@@ -159,8 +159,8 @@ class _WindowCreationButtons extends StatelessWidget {
   }
 }
 
-class CallbackRegularWindowControllerDelegate with RegularWindowControllerDelegate {
-  CallbackRegularWindowControllerDelegate({required this.onDestroyed});
+class CallbackWindowControllerDelegate with WindowControllerDelegate {
+  CallbackWindowControllerDelegate({required this.onDestroyed});
 
   @override
   void onWindowDestroyed() {
