@@ -523,7 +523,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
                   ? ' to ${compat.gradleMax}'
                   : '';
           final gradleRangeCompatSuggestion = compat != null
-              ? '${compat.gradleMin}${gradleRangeMax} or newer'
+              ? '${compat.gradleMin}$gradleRangeMax or newer'
               : 'unknown';
           final gradleRangeInfo = 'compatible Gradle versions for Java $javaVersion are $gradleRangeCompatSuggestion';
           throwToolExit("""

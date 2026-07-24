@@ -19,13 +19,13 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
-import 'package:flutter_tools/src/base/version.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -3075,7 +3075,7 @@ Gradle Crashed
       'build apk throws ToolExit when Java and Gradle versions are incompatible',
       () async {
         final builder = AndroidGradleBuilder(
-          java: FakeJava(version: Version.withText(21, 0, 0, '21.0.0')),
+          java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
           logger: logger,
           processManager: processManager,
           fileSystem: fileSystem,
@@ -3091,7 +3091,7 @@ Gradle Crashed
         fileSystem.file('android/gradle/wrapper/gradle-wrapper.properties')
           ..createSync(recursive: true)
           ..writeAsStringSync(
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-all.zip',
+            r'distributionUrl=https://services.gradle.org/distributions/gradle-8.0-all.zip',
           );
 
         fileSystem.file('android/gradlew').createSync(recursive: true);
@@ -3151,7 +3151,7 @@ Gradle Crashed
           fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
-            java: FakeJava(version: Version.withText(21, 0, 0, '21.0.0')),
+            java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
             fileSystem: fileSystem,
           );
         },
@@ -3163,7 +3163,7 @@ Gradle Crashed
       'skips Java and Gradle compatibility check when androidSkipBuildDependencyValidation is true',
       () async {
         final builder = AndroidGradleBuilder(
-          java: FakeJava(version: Version.withText(21, 0, 0, '21.0.0')),
+          java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
           logger: logger,
           processManager: processManager,
           fileSystem: fileSystem,
@@ -3180,7 +3180,7 @@ Gradle Crashed
         fileSystem.file('android/gradle/wrapper/gradle-wrapper.properties')
           ..createSync(recursive: true)
           ..writeAsStringSync(
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-all.zip',
+            r'distributionUrl=https://services.gradle.org/distributions/gradle-8.0-all.zip',
           );
 
         fileSystem.file('android/gradlew').createSync(recursive: true);
@@ -3258,7 +3258,7 @@ Gradle Crashed
           fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
-            java: FakeJava(version: Version.withText(21, 0, 0, '21.0.0')),
+            java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
             fileSystem: fileSystem,
           );
         },
