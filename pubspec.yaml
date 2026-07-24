@@ -59,6 +59,7 @@ workspace:
   - dev/tools/android_driver_extensions
   - dev/tools/gen_defaults
   - dev/tools/gen_keycodes
+  - dev/tools/githooks
   - dev/tools/vitool
   - dev/tracing_tests
   - examples/api

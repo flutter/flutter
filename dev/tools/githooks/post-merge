@@ -1,0 +1,44 @@
+#!/usr/bin/env vpython3
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+'''
+Runs the post-merge githooks.
+'''
+
+import os
+import subprocess
+import sys
+
+FLUTTER_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
+
+
+def GetDartBin():
+  # The bin/cache/dart-sdk/bin takes precedence because it's more likely to be
+  # up-to-date, unless the PR includes a Dart SDK roll.
+  candidate_paths = [
+    os.path.join(FLUTTER_ROOT, 'bin', 'cache', 'dart-sdk', 'bin'),
+    os.path.join(FLUTTER_ROOT, 'engine', 'src', 'flutter', 'third_party', 'dart', 'tools', 'sdks', 'dart-sdk', 'bin'),
+    os.path.join(FLUTTER_ROOT, 'engine', 'src', 'third_party', 'dart', 'tools', 'sdks', 'dart-sdk', 'bin'),
+  ]
+  return next((p for p in candidate_paths if os.path.exists(p)), candidate_paths[0])
+
+
+def Main(argv):
+  githook_args = [
+    '--flutter',
+    FLUTTER_ROOT,
+  ]
+
+  result = subprocess.run([
+    os.path.join(GetDartBin(), 'dart'),
+    os.path.join(FLUTTER_ROOT, 'dev', 'tools', 'githooks', 'bin', 'main.dart'),
+  ] + githook_args + [
+    'post-merge',
+  ] + argv[1:], cwd=FLUTTER_ROOT)
+  return result.returncode
+
+
+if __name__ == '__main__':
+    sys.exit(Main(sys.argv))

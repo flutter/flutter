@@ -1,13 +1,19 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:io' as io;
 
 import 'package:githooks/githooks.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
+// The path to the flutter checkout. Used to run test against a real checkout.
+final String _flutterRoot = io.Platform.environment['FLUTTER_ROOT']!;
+
 void main() {
+  assert(_flutterRoot.isNotEmpty, 'Use "flutter test" to run this test.');
+
   test('Fails gracefully without a command', () async {
     int? result;
     try {
@@ -65,8 +71,7 @@ void main() {
   test('post-merge runs successfully', () async {
     int? result;
     try {
-      final io.Directory flutterPath = io.File(io.Platform.script.path).parent.parent.parent;
-      result = await run(<String>['post-merge', '--flutter', flutterPath.path]);
+      result = await run(<String>['post-merge', '--flutter', _flutterRoot]);
     } catch (e, st) {
       fail('Unexpected exception: $e\n$st');
     }
@@ -76,8 +81,7 @@ void main() {
   test('pre-rebase runs successfully', () async {
     int? result;
     try {
-      final io.Directory flutterPath = io.File(io.Platform.script.path).parent.parent.parent;
-      result = await run(<String>['pre-rebase', '--flutter', flutterPath.path]);
+      result = await run(<String>['pre-rebase', '--flutter', _flutterRoot]);
     } catch (e, st) {
       fail('Unexpected exception: $e\n$st');
     }
@@ -87,11 +91,27 @@ void main() {
   test('post-checkout runs successfully', () async {
     int? result;
     try {
-      final io.Directory flutterPath = io.File(io.Platform.script.path).parent.parent.parent;
-      result = await run(<String>['post-checkout', '--flutter', flutterPath.path]);
+      result = await run(<String>['post-checkout', '--flutter', _flutterRoot]);
     } catch (e, st) {
       fail('Unexpected exception: $e\n$st');
     }
     expect(result, equals(0));
+  });
+
+  test('Legacy engine/src/flutter/tools/githooks outputs warning', () async {
+    final String oldHooksPath = io.Directory(
+      path.join(_flutterRoot, 'engine', 'src', 'flutter', 'tools', 'githooks'),
+    ).path;
+
+    final io.ProcessResult postCheckoutResult = await io.Process.run(
+      path.join(oldHooksPath, 'post-checkout'),
+      <String>[],
+      workingDirectory: oldHooksPath,
+    );
+    expect(postCheckoutResult.exitCode, equals(0));
+    expect(
+      postCheckoutResult.stdout.toString(),
+      contains('Githooks location has moved to dev/tools/githooks'),
+    );
   });
 }

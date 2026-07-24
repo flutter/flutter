@@ -967,7 +967,7 @@ hooks = [
     'condition': 'setup_githooks',
     'action': [
       'python3',
-      'engine/src/flutter/tools/githooks/setup.py',
+      'dev/tools/githooks/setup.py',
     ]
   },
   {

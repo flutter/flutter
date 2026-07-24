@@ -122,6 +122,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.4"
+  clang_tidy:
+    dependency: "direct overridden"
+    description:
+      path: "engine/src/flutter/tools/clang_tidy"
+      relative: true
+    source: path
+    version: "0.0.0"
   cli_config:
     dependency: "direct main"
     description:
@@ -299,6 +306,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "27.1.2"
+  engine_repo_tools:
+    dependency: "direct overridden"
+    description:
+      path: "engine/src/flutter/tools/pkg/engine_repo_tools"
+      relative: true
+    source: path
+    version: "0.0.0"
   extension_discovery:
     dependency: transitive
     description:
@@ -418,6 +432,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.8.19"
+  git_repo_tools:
+    dependency: "direct overridden"
+    description:
+      path: "engine/src/flutter/tools/pkg/git_repo_tools"
+      relative: true
+    source: path
+    version: "0.0.0"
   glob:
     dependency: "direct main"
     description:
@@ -842,6 +863,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.5"
+  process_fakes:
+    dependency: "direct overridden"
+    description:
+      path: "engine/src/flutter/tools/pkg/process_fakes"
+      relative: true
+    source: path
+    version: "0.0.0"
   process_runner:
     dependency: "direct main"
     description:
