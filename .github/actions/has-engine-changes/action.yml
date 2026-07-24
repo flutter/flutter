@@ -24,7 +24,11 @@ runs:
         elif [ "$EVENT_NAME" = "push" ] && [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "$EMPTY_SHA" ]; then
           BASE_REF="$PUSH_BEFORE_SHA"
         else
-          BASE_REF="origin/master"
+          if git show-ref --verify --quiet refs/remotes/upstream/master; then
+            BASE_REF="upstream/master"
+          else
+            BASE_REF="origin/master"
+          fi
         fi
 
         echo "Comparing against base SHA: $BASE_REF"
