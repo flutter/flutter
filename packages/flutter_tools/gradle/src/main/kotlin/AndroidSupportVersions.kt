@@ -120,7 +120,7 @@ internal data class AndroidSupportVersions(
     val oneMajorVersionHigherJavaVersion: String by lazy {
         javaGradleCompat.rules
             .maxByOrNull { Version.fromString(it.javaMax) }
-            ?.javaMax ?: DEFAULT_CURRENT_MAX; 
+            ?.javaMax ?: DEFAULT_CURRENT_MAX
     }
 
     val warnGradleVersion: Version by lazy { Version.fromString(gradle.warn) }
@@ -140,7 +140,7 @@ internal data class AndroidSupportVersions(
         private const val AGP_MINOR_VERSION_INDEX = 1
         private const val AGP_PATCH_VERSION_INDEX = 2
         private const val AGP_DEFAULT_VERSION_COMPONENT = 0
-        private const val DEFAULT_CURRENT_MAX = "26";
+        private const val DEFAULT_CURRENT_MAX = "26"
 
         private val json =
             Json {
