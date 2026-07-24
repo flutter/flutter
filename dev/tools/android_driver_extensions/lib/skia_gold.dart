@@ -110,7 +110,7 @@ final class _SkiaGoldComparator extends GoldenFileComparator {
     this.namePrefix,
     this.localOutputDir,
     Uri? baseDir,
-  }) : baseDir = baseDir ?? Uri.directory(path.dirname(io.Platform.script.path));
+  }) : baseDir = baseDir ?? Uri.directory(path.dirname(io.Platform.script.toFilePath()));
 
   final Uri baseDir;
   final SkiaGoldClient skiaClient;
@@ -167,8 +167,7 @@ final class _SkiaGoldComparator extends GoldenFileComparator {
   io.File _getGoldenFile(Uri uri) {
     if (localOutputDir != null) {
       final String fileName = uri.pathSegments.last;
-      final String normalizedOutputDir = localOutputDir!.replaceAll(r'\', '/');
-      return io.File.fromUri(baseDir.resolve('$normalizedOutputDir/$fileName'));
+      return io.File(path.join(baseDir.toFilePath(), localOutputDir, fileName));
     }
     return io.File.fromUri(baseDir.resolveUri(uri));
   }
