@@ -110,7 +110,7 @@ final class _SkiaGoldComparator extends GoldenFileComparator {
     this.namePrefix,
     this.localOutputDir,
     Uri? baseDir,
-  }) : baseDir = baseDir ?? Uri.parse(path.dirname(io.Platform.script.path));
+  }) : baseDir = baseDir ?? Uri.directory(path.dirname(io.Platform.script.path));
 
   final Uri baseDir;
   final SkiaGoldClient skiaClient;
