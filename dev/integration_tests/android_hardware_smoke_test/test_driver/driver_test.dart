@@ -34,7 +34,7 @@ void main() async {
             .cast<String, Object?>();
     final replyVariant = reply[keyGoldenVariant] as String?;
     activeGoldenVariant = switch (replyVariant) {
-      String s when s.isNotEmpty => '.$s',
+      final String s when s.isNotEmpty => '.$s',
       _ => '',
     };
 
