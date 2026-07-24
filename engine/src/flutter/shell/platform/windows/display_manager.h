@@ -37,6 +37,15 @@ class DisplayManagerWin32 {
   // Get the display information for all displays
   std::vector<FlutterEngineDisplay> GetDisplays() const;
 
+  // Converts an HMONITOR handle to a display identifier.
+  //
+  // HMONITOR values are 32-bit handles that may have the high bit set.
+  // Casting one directly to a 64-bit display id sign-extends the value
+  // (e.g. 0xE02E16A5 becomes 0xFFFFFFFFE02E16A5), which no longer fits in
+  // the signed 64-bit integer that the id is converted to once it crosses
+  // into Dart. Truncating to the lower 32 bits keeps the id stable and unique.
+  static FlutterEngineDisplayId ToDisplayId(HMONITOR monitor);
+
  private:
   // Called by EnumDisplayMonitors once for each display.
   static BOOL CALLBACK EnumMonitorCallback(HMONITOR monitor,

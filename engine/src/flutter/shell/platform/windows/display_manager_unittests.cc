@@ -30,6 +30,21 @@ using ::testing::StrEq;
 
 class DisplayManagerWin32Test : public WindowsTest {};
 
+// HMONITOR handles are 32-bit values that Windows sign-extends to pointer
+// size in 64-bit processes. The display id must strip the sign extension:
+// ids that exceed the signed 64-bit range cannot be represented once they
+// reach Dart.
+TEST_F(DisplayManagerWin32Test, DisplayIdStripsSignExtension) {
+  // A 32-bit handle value with the high bit set, as observed at runtime;
+  // widening it to pointer size yields the sign-extended 0xFFFFFFFFE02E16A5.
+  constexpr uint32_t kHighBitMonitorHandle = 0xE02E16A5u;
+  HMONITOR const sign_extended_monitor = reinterpret_cast<HMONITOR>(
+      static_cast<intptr_t>(static_cast<int32_t>(kHighBitMonitorHandle)));
+  // The display id must be the original 32-bit value, without sign extension.
+  EXPECT_EQ(DisplayManagerWin32::ToDisplayId(sign_extended_monitor),
+            kHighBitMonitorHandle);
+}
+
 // Test that the display manager correctly handles multiple monitors
 TEST_F(DisplayManagerWin32Test, MultipleMonitors) {
   auto mock_windows_proc_table =

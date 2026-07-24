@@ -6,6 +6,8 @@
 
 #include <windows.h>
 
+#include <cstdint>
+
 #include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
@@ -26,6 +28,11 @@ DisplayManagerWin32::DisplayManagerWin32(FlutterWindowsEngine* engine)
 
 DisplayManagerWin32::~DisplayManagerWin32() = default;
 
+FlutterEngineDisplayId DisplayManagerWin32::ToDisplayId(HMONITOR monitor) {
+  return static_cast<FlutterEngineDisplayId>(
+      static_cast<uint32_t>(reinterpret_cast<uintptr_t>(monitor)));
+}
+
 std::optional<FlutterEngineDisplay> DisplayManagerWin32::FromMonitor(
     HMONITOR monitor) const {
   MONITORINFOEXW monitor_info = {};
@@ -45,7 +52,7 @@ std::optional<FlutterEngineDisplay> DisplayManagerWin32::FromMonitor(
 
   FlutterEngineDisplay display = {};
   display.struct_size = sizeof(FlutterEngineDisplay);
-  display.display_id = reinterpret_cast<FlutterEngineDisplayId>(monitor);
+  display.display_id = ToDisplayId(monitor);
   display.single_display = false;
   display.refresh_rate = dev_mode.dmDisplayFrequency;
   display.width = monitor_info.rcMonitor.right - monitor_info.rcMonitor.left;
