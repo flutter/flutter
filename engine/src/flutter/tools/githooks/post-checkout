@@ -3,5 +3,4 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-echo "ERROR: Githooks have moved to dev/tools/githooks. Please run 'python3 dev/tools/githooks/setup.py' to update your git configuration." >&2
-exit 1
+echo "ERROR: Githooks have moved to dev/tools/githooks. Please run 'python3 dev/tools/githooks/setup.py' to update your git configuration." >&2 || true
