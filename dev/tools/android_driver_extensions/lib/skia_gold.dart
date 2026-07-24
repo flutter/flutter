@@ -37,8 +37,8 @@ const String _kGoldctlPresubmitKey = 'GOLD_TRYJOB';
 /// May optionally provide a [namePrefix] to be used when uploading images.
 ///
 /// If [localOutputDir] is provided, local screenshots downloaded from Skia Gold
-/// will be stored in this directory relative to the script execution path
-/// (e.g. `test_driver/localOutputDir`).
+/// will be stored flat in this directory relative to the script execution path
+/// (nested subdirectories in golden file URIs are not currently supported).
 Future<void> enableSkiaGoldComparator({String? namePrefix, String? localOutputDir}) async {
   assert(
     goldenFileComparator is NaiveLocalFileComparator,
@@ -86,7 +86,8 @@ Future<void> enableSkiaGoldComparator({String? namePrefix, String? localOutputDi
 /// Configures [goldenFileComparator] to use Skia Gold (for unit testing).
 ///
 /// If [localOutputDir] is provided, local screenshots downloaded from Skia Gold
-/// will be stored in this directory relative to the script execution path.
+/// will be stored flat in this directory relative to the script execution path
+/// (nested subdirectories in golden file URIs are not currently supported).
 @visibleForTesting
 Future<void> enableSkiaGoldComparatorForTesting(
   SkiaGoldClient skiaGoldClient, {
