@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -38,6 +39,7 @@ const kStoreShaCommand = FakeCommand(
 );
 
 void main() {
+  Cache.flutterRoot = getFlutterRoot();
   late FileSystem fileSystem;
   late BufferLogger logger;
 
@@ -100,8 +102,8 @@ void main() {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         kAdbVersionCommand,
         kAdbStartServerCommand,
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        FakeCommand(
+          command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.build.version.sdk]: [${gradle_utils.minSdkVersion}]',
         ),
         kInstallCommand,
