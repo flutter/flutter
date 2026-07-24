@@ -382,9 +382,7 @@ mixin _SizedToContentWindowMixin on ChangeNotifier {
   /// Whether the size allocated to the view matches the size of the Flutter
   /// content rendered into it.
   ///
-  /// Both sizes are in logical pixels. The comparison tolerates small
-  /// differences as the renderer computes the view's size request from the
-  /// frame's device pixels with integer division by the scale factor.
+  /// Both sizes are in logical pixels.
   bool _viewMatchesContentSize() {
     final Size? viewSize = _viewSize;
     if (viewSize == null) {
@@ -397,8 +395,7 @@ mixin _SizedToContentWindowMixin on ChangeNotifier {
       return true;
     }
     final Size contentSize = renderView.size;
-    return (viewSize.width - contentSize.width).abs() <= 2 &&
-        (viewSize.height - contentSize.height).abs() <= 2;
+    return viewSize == contentSize;
   }
 
   /// Handles the window's configure events, repositioning the window when its
