@@ -253,6 +253,12 @@ class GradleUtils {
     );
   }
 
+  /// Returns either the gradle-wrapper.properties value from the passed in
+  /// [directory] or if not present the version available in local path.
+  Future<String?> getGradleVersion(Directory directory, ProcessManager processManager) {
+    return _getGradleVersionInternal(directory, _logger, processManager);
+  }
+
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
     copyDirectory(
@@ -337,6 +343,14 @@ String? parseGradleVersionFromDistributionUrl(String? distributionUrl) {
 /// If gradle version is not found null is returned.
 /// [directory] should be an android directory with a build.gradle file.
 Future<String?> getGradleVersion(
+  Directory directory,
+  Logger logger,
+  ProcessManager processManager,
+) {
+  return _getGradleVersionInternal(directory, logger, processManager);
+}
+
+Future<String?> _getGradleVersionInternal(
   Directory directory,
   Logger logger,
   ProcessManager processManager,

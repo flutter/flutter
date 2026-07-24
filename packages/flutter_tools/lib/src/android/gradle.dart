@@ -487,7 +487,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return;
     }
 
-   	// Validate Java and Gradle compatibility before invoking Gradle.
+    // Validate Java and Gradle compatibility before invoking Gradle.
     // This pre-flight check is done in Dart because:
     // 1. If Java and Gradle are incompatible, Gradle can crash during build script
     //    compilation (e.g. Kotlin DSL compilation failing on newer JDKs) before
@@ -502,9 +502,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final String? javaVersion = javaVersionObj != null
           ? '${javaVersionObj.major}.${javaVersionObj.minor}.${javaVersionObj.patch}'
           : null;
-      final String? gradleVersion = await getGradleVersion(
+      final String? gradleVersion = await _gradleUtils.getGradleVersion(
         project.android.hostAppGradleRoot,
-        _logger,
         globals.processManager,
       );
       if (javaVersion != null && gradleVersion != null) {
@@ -517,15 +516,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
             _logger,
             javaV: javaVersion,
           );
-          final gradleRangeMax = 
-              compat != null 
-              && compat.gradleMax != null
-                  ? ' to ${compat.gradleMax}'
-                  : '';
+          final gradleRangeMax = compat != null && compat.gradleMax != null
+              ? ' to ${compat.gradleMax}'
+              : '';
           final gradleRangeCompatSuggestion = compat != null
               ? '${compat.gradleMin}$gradleRangeMax or newer'
               : 'unknown';
-          final gradleRangeInfo = 'compatible Gradle versions for Java $javaVersion are $gradleRangeCompatSuggestion';
+          final gradleRangeInfo =
+              'compatible Gradle versions for Java $javaVersion are $gradleRangeCompatSuggestion';
           throwToolExit("""
 Gradle build failed due to Java/Gradle incompatibility.
 The Java version used for the build is $javaVersion, which is incompatible with Gradle $gradleVersion.
