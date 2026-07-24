@@ -76,6 +76,7 @@ typedef struct MouseState {
 // set up a shell along with its platform view before the view has to appear.
 @property(nonatomic, strong) FlutterView* flutterView;
 @property(nonatomic, strong) void (^flutterViewRenderedCallback)(void);
+@property(nonatomic, strong) UIView* displayCornerRadiusProbe API_AVAILABLE(ios(26.0));
 
 @property(nonatomic, strong) FlutterSplashScreenManager* splashScreenManager;
 
@@ -951,6 +952,9 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
   [self.keyboardInsetManager invalidate];
   [self invalidateTouchRateCorrectionVSyncClient];
+  if (@available(iOS 26.0, *)) {
+    [_displayCornerRadiusProbe removeFromSuperview];
+  }
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/156222
   // Ensure all delegates are weak and remove this.
@@ -1390,6 +1394,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self setViewportMetricsSize];
   [self checkAndUpdateAutoResizeConstraints];
   [self setViewportMetricsPaddings];
+  [self setViewportMetricsDisplayCornerRadii];
   [self updateViewportMetricsIfNeeded];
 
   // There is no guarantee that UIKit will layout subviews when the application/scene is active.
@@ -1415,6 +1420,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                        }
                      }];
   }
+}
+
+- (void)updateProperties API_AVAILABLE(ios(26.0)) {
+  [super updateProperties];
+  // UIKit invalidates controller properties when an effective radius queried here changes.
+  [self setViewportMetricsDisplayCornerRadii];
+  [self updateViewportMetricsIfNeeded];
 }
 
 - (BOOL)isAutoResizable {
@@ -1537,6 +1549,50 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   _viewportMetrics.physical_padding_left = self.view.safeAreaInsets.left * scale;
   _viewportMetrics.physical_padding_right = self.view.safeAreaInsets.right * scale;
   _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
+}
+
+// Set _viewportMetrics physical display corner radii.
+- (void)setViewportMetricsDisplayCornerRadii {
+  _viewportMetrics.physical_display_corner_radius_top_left = -1.0;
+  _viewportMetrics.physical_display_corner_radius_top_right = -1.0;
+  _viewportMetrics.physical_display_corner_radius_bottom_right = -1.0;
+  _viewportMetrics.physical_display_corner_radius_bottom_left = -1.0;
+
+  if (@available(iOS 26.0, *)) {
+    UIWindow* window = self.viewIfLoaded.window;
+    UIScreen* screen = self.flutterScreenIfViewLoaded;
+    if (!window || !screen) {
+      [self.displayCornerRadiusProbe removeFromSuperview];
+      self.displayCornerRadiusProbe = nil;
+      return;
+    }
+
+    if (self.displayCornerRadiusProbe.superview != window) {
+      [self.displayCornerRadiusProbe removeFromSuperview];
+      self.displayCornerRadiusProbe = [[UIView alloc] initWithFrame:window.bounds];
+      self.displayCornerRadiusProbe.userInteractionEnabled = NO;
+      self.displayCornerRadiusProbe.isAccessibilityElement = NO;
+      self.displayCornerRadiusProbe.accessibilityElementsHidden = YES;
+      self.displayCornerRadiusProbe.cornerConfiguration = [UICornerConfiguration
+          configurationWithRadius:[UICornerRadius containerConcentricRadius]];
+      // Keep the transparent probe behind application content so UIKit can resolve its corners
+      // against the window without changing the Flutter view's rendering.
+      [window insertSubview:self.displayCornerRadiusProbe atIndex:0];
+    }
+
+    self.displayCornerRadiusProbe.frame = window.bounds;
+    [self.displayCornerRadiusProbe layoutIfNeeded];
+
+    CGFloat scale = screen.scale;
+    _viewportMetrics.physical_display_corner_radius_top_left =
+        [self.displayCornerRadiusProbe effectiveRadiusForCorner:UIRectCornerTopLeft] * scale;
+    _viewportMetrics.physical_display_corner_radius_top_right =
+        [self.displayCornerRadiusProbe effectiveRadiusForCorner:UIRectCornerTopRight] * scale;
+    _viewportMetrics.physical_display_corner_radius_bottom_right =
+        [self.displayCornerRadiusProbe effectiveRadiusForCorner:UIRectCornerBottomRight] * scale;
+    _viewportMetrics.physical_display_corner_radius_bottom_left =
+        [self.displayCornerRadiusProbe effectiveRadiusForCorner:UIRectCornerBottomLeft] * scale;
+  }
 }
 
 #pragma mark - Keyboard events

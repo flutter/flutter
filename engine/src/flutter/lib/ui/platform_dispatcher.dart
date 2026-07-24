@@ -2790,7 +2790,7 @@ enum DisplayFeatureState {
 ///
 /// If a corner is square (not rounded), the radius is 0.0.
 ///
-/// This is currently populated only on Android API 31+.
+/// This is populated on Android API 31+ and iOS 26+.
 class DisplayCornerRadii {
   /// Creates a [DisplayCornerRadii].
   const DisplayCornerRadii({
