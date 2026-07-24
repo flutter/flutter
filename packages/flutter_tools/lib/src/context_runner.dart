@@ -249,6 +249,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         processManager: globals.processManager,
         xcode: globals.xcode!,
+        operatingSystemUtils: globals.os,
       ),
       IOSWorkflow: () => IOSWorkflow(
         featureFlags: featureFlags,

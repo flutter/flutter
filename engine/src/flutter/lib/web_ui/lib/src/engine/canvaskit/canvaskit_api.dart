@@ -1637,6 +1637,7 @@ extension type SkCanvas(JSObject _) implements JSObject {
     SkPaint paint,
     SkBlendMode blendMode,
     JSUint32Array? colors,
+    CkFilterOptions sampling,
   );
   void drawAtlas(
     SkImage image,
@@ -1645,7 +1646,8 @@ extension type SkCanvas(JSObject _) implements JSObject {
     SkPaint paint,
     SkBlendMode blendMode,
     Uint32List? colors,
-  ) => _drawAtlas(image, rects.toJS, rstTransforms.toJS, paint, blendMode, colors?.toJS);
+    CkFilterOptions sampling,
+  ) => _drawAtlas(image, rects.toJS, rstTransforms.toJS, paint, blendMode, colors?.toJS, sampling);
 
   external void drawCircle(double x, double y, double radius, SkPaint paint);
   external void drawColorInt(double color, SkBlendMode blendMode);

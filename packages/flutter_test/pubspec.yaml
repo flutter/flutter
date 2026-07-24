@@ -40,7 +40,7 @@ dependencies:
   leak_tracker_flutter_testing: ^3.0.10
 
   collection: ^1.19.1
-  meta: ^1.18.3
+  meta: ^1.19.0
   stream_channel: ^2.1.4
 
 dev_dependencies:
@@ -48,4 +48,4 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
 
-# PUBSPEC CHECKSUM: 226o4f
+# PUBSPEC CHECKSUM: lu8vkm
