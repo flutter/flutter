@@ -2026,7 +2026,7 @@ flutter:
           // A (possibly transitive) dependency must not be able to smuggle
           // arbitrary source into the generated GeneratedPluginRegistrant by
           // declaring a pluginClass that is not a plain identifier.
-          const String maliciousYaml = '''
+          const maliciousYaml = '''
 platforms:
   macos:
     pluginClass: "SomePlugin(); evilInjectedCall(); if (false) { SomePlugin"
@@ -2049,7 +2049,7 @@ platforms:
       testUsingContext(
         'Plugin.fromYaml rejects a web plugin whose pluginClass/fileName contain injection',
         () async {
-          const String maliciousYaml = '''
+          const maliciousYaml = '''
 platforms:
   web:
     pluginClass: "P; void pwn() {} //"
@@ -2066,6 +2066,31 @@ platforms:
               isDevDependency: false,
             ),
             throwsToolExit(),
+          );
+        },
+      );
+
+      testUsingContext(
+        'Plugin.fromYaml rejects a dartPluginClass with code-injection characters',
+        () async {
+          // A dart plugin class is also interpolated into generated registrant
+          // source, so it must be a plain identifier like the native one.
+          const maliciousYaml = '''
+platforms:
+  android:
+    dartPluginClass: "Evil(); evilInjectedCall(); class Evil"
+''';
+          expect(
+            () => Plugin.fromYaml(
+              'evil_dart_plugin',
+              '',
+              loadYaml(maliciousYaml) as YamlMap,
+              null,
+              const <String>[],
+              fileSystem: globals.fs,
+              isDevDependency: false,
+            ),
+            throwsToolExit(message: 'Invalid plugin specification evil_dart_plugin'),
           );
         },
       );

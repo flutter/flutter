@@ -17,6 +17,9 @@ const kDartPluginClass = 'dartPluginClass';
 /// Constant for 'dartPluginFile' key in plugin maps.
 const kDartFileName = 'dartFileName';
 
+/// Constant for 'fileName' key in plugin maps.
+const kFileName = 'fileName';
+
 /// Constant for 'ffiPlugin' key in plugin maps.
 const kFfiPlugin = 'ffiPlugin';
 
@@ -34,10 +37,10 @@ final RegExp _pluginIdentifierPattern = RegExp(
   r'^[a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*$',
 );
 
-/// Returns false only when [value] is a String that is not a valid identifier.
-/// Absent or non-String values are left to the existing schema type checks.
-bool _isValidPluginIdentifier(Object? value) =>
-    value is! String || _pluginIdentifierPattern.hasMatch(value);
+/// Whether [value] is a valid native plugin class or dot-separated package
+/// identifier. Callers first confirm the value is a String via the schema type
+/// checks; absent fields are simply not validated here.
+bool _isValidPluginIdentifier(String value) => _pluginIdentifierPattern.hasMatch(value);
 
 /// Matches a safe relative Dart source path (e.g. `src/foo_web.dart`) ending in
 /// `.dart`. Plugin `fileName`/`dartFileName` values are interpolated into an
@@ -45,10 +48,10 @@ bool _isValidPluginIdentifier(Object? value) =>
 /// semicolons, whitespace or parent-directory segments.
 final RegExp pluginDartFileNamePattern = RegExp(r'^[a-zA-Z0-9_][a-zA-Z0-9_./-]*\.dart$');
 
-/// Returns false only when [value] is a String that is not a safe Dart file name.
-bool isValidPluginDartFileName(Object? value) =>
-    value is! String ||
-    (pluginDartFileNamePattern.hasMatch(value) && !value.contains('..'));
+/// Whether [value] is a safe relative Dart source path for a plugin. Callers
+/// first confirm the value is a String via the schema type checks.
+bool isValidPluginDartFileName(String value) =>
+    pluginDartFileNamePattern.hasMatch(value) && !value.contains('..');
 
 /// Constant for 'sharedDarwinSource' key in plugin maps.
 /// Can be set for iOS and macOS plugins.
@@ -158,13 +161,16 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   bool hasDart() => dartPluginClass != null;
 
   static bool validate(YamlMap yaml) {
-    return ((yaml['package'] is String && yaml[kPluginClass] is String) ||
-            yaml[kDartPluginClass] is String ||
+    final Object? package = yaml['package'];
+    final Object? pluginClass = yaml[kPluginClass];
+    final Object? dartPluginClass = yaml[kDartPluginClass];
+    return ((package is String && pluginClass is String) ||
+            dartPluginClass is String ||
             yaml[kFfiPlugin] == true ||
             yaml[kDefaultPackage] is String) &&
-        _isValidPluginIdentifier(yaml['package']) &&
-        _isValidPluginIdentifier(yaml[kPluginClass]) &&
-        _isValidPluginIdentifier(yaml[kDartPluginClass]);
+        (package is! String || _isValidPluginIdentifier(package)) &&
+        (pluginClass is! String || _isValidPluginIdentifier(pluginClass)) &&
+        (dartPluginClass is! String || _isValidPluginIdentifier(dartPluginClass));
   }
 
   static const kConfigKey = 'android';
@@ -318,13 +324,15 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   }
 
   static bool validate(YamlMap yaml) {
-    return (yaml[kPluginClass] is String ||
-            yaml[kDartPluginClass] is String ||
+    final Object? pluginClass = yaml[kPluginClass];
+    final Object? dartPluginClass = yaml[kDartPluginClass];
+    return (pluginClass is String ||
+            dartPluginClass is String ||
             yaml[kFfiPlugin] == true ||
             yaml[kSharedDarwinSource] == true ||
             yaml[kDefaultPackage] is String) &&
-        _isValidPluginIdentifier(yaml[kPluginClass]) &&
-        _isValidPluginIdentifier(yaml[kDartPluginClass]);
+        (pluginClass is! String || _isValidPluginIdentifier(pluginClass)) &&
+        (dartPluginClass is! String || _isValidPluginIdentifier(dartPluginClass));
   }
 
   static const kConfigKey = 'ios';
@@ -413,13 +421,15 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   }
 
   static bool validate(YamlMap yaml) {
-    return (yaml[kPluginClass] is String ||
-            yaml[kDartPluginClass] is String ||
+    final Object? pluginClass = yaml[kPluginClass];
+    final Object? dartPluginClass = yaml[kDartPluginClass];
+    return (pluginClass is String ||
+            dartPluginClass is String ||
             yaml[kFfiPlugin] == true ||
             yaml[kSharedDarwinSource] == true ||
             yaml[kDefaultPackage] is String) &&
-        _isValidPluginIdentifier(yaml[kPluginClass]) &&
-        _isValidPluginIdentifier(yaml[kDartPluginClass]);
+        (pluginClass is! String || _isValidPluginIdentifier(pluginClass)) &&
+        (dartPluginClass is! String || _isValidPluginIdentifier(dartPluginClass));
   }
 
   static const kConfigKey = 'macos';
@@ -522,12 +532,14 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
   }
 
   static bool validate(YamlMap yaml) {
-    return (yaml[kPluginClass] is String ||
-            yaml[kDartPluginClass] is String ||
+    final Object? pluginClass = yaml[kPluginClass];
+    final Object? dartPluginClass = yaml[kDartPluginClass];
+    return (pluginClass is String ||
+            dartPluginClass is String ||
             yaml[kFfiPlugin] == true ||
             yaml[kDefaultPackage] is String) &&
-        _isValidPluginIdentifier(yaml[kPluginClass]) &&
-        _isValidPluginIdentifier(yaml[kDartPluginClass]);
+        (pluginClass is! String || _isValidPluginIdentifier(pluginClass)) &&
+        (dartPluginClass is! String || _isValidPluginIdentifier(dartPluginClass));
   }
 
   static const kConfigKey = 'windows';
@@ -611,12 +623,14 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   }
 
   static bool validate(YamlMap yaml) {
-    return (yaml[kPluginClass] is String ||
-            yaml[kDartPluginClass] is String ||
+    final Object? pluginClass = yaml[kPluginClass];
+    final Object? dartPluginClass = yaml[kDartPluginClass];
+    return (pluginClass is String ||
+            dartPluginClass is String ||
             yaml[kFfiPlugin] == true ||
             yaml[kDefaultPackage] is String) &&
-        _isValidPluginIdentifier(yaml[kPluginClass]) &&
-        _isValidPluginIdentifier(yaml[kDartPluginClass]);
+        (pluginClass is! String || _isValidPluginIdentifier(pluginClass)) &&
+        (dartPluginClass is! String || _isValidPluginIdentifier(dartPluginClass));
   }
 
   static const kConfigKey = 'linux';
@@ -660,25 +674,23 @@ class WebPlugin extends PluginPlatform {
   const WebPlugin({required this.name, required this.pluginClass, required this.fileName});
 
   factory WebPlugin.fromYaml(String name, YamlMap yaml) {
-    if (yaml['pluginClass'] is! String) {
+    final Object? pluginClass = yaml[kPluginClass];
+    if (pluginClass is! String) {
       throwToolExit(
         'The plugin `$name` is missing the required field `pluginClass` in pubspec.yaml',
       );
     }
-    if (yaml['fileName'] is! String) {
+    final Object? fileName = yaml[kFileName];
+    if (fileName is! String) {
       throwToolExit('The plugin `$name` is missing the required field `fileName` in pubspec.yaml');
     }
-    if (!_isValidPluginIdentifier(yaml['pluginClass'])) {
+    if (!_isValidPluginIdentifier(pluginClass)) {
       throwToolExit('The plugin `$name` has an invalid `pluginClass` in its web plugin declaration.');
     }
-    if (!isValidPluginDartFileName(yaml['fileName'])) {
+    if (!isValidPluginDartFileName(fileName)) {
       throwToolExit('The plugin `$name` has an invalid `fileName` in its web plugin declaration.');
     }
-    return WebPlugin(
-      name: name,
-      pluginClass: yaml['pluginClass'] as String,
-      fileName: yaml['fileName'] as String,
-    );
+    return WebPlugin(name: name, pluginClass: pluginClass, fileName: fileName);
   }
 
   static const kConfigKey = 'web';
