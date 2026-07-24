@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
@@ -87,7 +88,9 @@ public class ProcessTextChannel {
   public ProcessTextChannel(
       @NonNull DartExecutor dartExecutor, @NonNull PackageManager packageManager) {
     this.packageManager = packageManager;
-    channel = new MethodChannel(dartExecutor, CHANNEL_NAME, StandardMethodCodec.INSTANCE);
+    BinaryMessenger.TaskQueue taskQueue = dartExecutor.makeBackgroundTaskQueue();
+    channel =
+        new MethodChannel(dartExecutor, CHANNEL_NAME, StandardMethodCodec.INSTANCE, taskQueue);
     channel.setMethodCallHandler(parsingMethodHandler);
   }
 
