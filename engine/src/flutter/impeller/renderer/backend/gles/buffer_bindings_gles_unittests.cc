@@ -301,12 +301,11 @@ void TestBindUniformBufferRange(size_t buffer_view_length,
                                     /*uniformBlockIndex=*/0,
                                     /*bufSize=*/9, /*length=*/_,
                                     /*uniformBlockName=*/_))
-      .WillByDefault(
-          ::testing::Invoke([](GLuint program, GLuint index, GLsizei bufSize,
-                               GLsizei* length, GLchar* name) {
-            *length = 8;
-            std::memcpy(name, "FragInfo", 9);
-          }));
+      .WillByDefault([](GLuint program, GLuint index, GLsizei bufSize,
+                        GLsizei* length, GLchar* name) {
+        *length = 8;
+        std::memcpy(name, "FragInfo", 9);
+      });
   ON_CALL(
       *mock_gles_impl,
       GetUniformBlockIndex(/*program=*/kProgram,
