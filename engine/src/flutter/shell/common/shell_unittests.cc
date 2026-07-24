@@ -186,6 +186,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               (),
               (const, override));
 
+  MOCK_METHOD(std::shared_ptr<fml::BasicTaskRunner>,
+              OnPlatformViewGetShutdownSafeIOTaskRunner,
+              (),
+              (const, override));
+
   MOCK_METHOD(void,
               LoadDartDeferredLibrary,
               (intptr_t loading_unit_id,
