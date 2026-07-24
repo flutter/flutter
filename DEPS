@@ -16,7 +16,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': '6e9c4687c00180d5057b033ee6f099558a2842d6',
+  'skia_revision': 'f2f9b52fe1eea06f72e0e47922da80cd66973aa7',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -637,7 +637,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/android/sdk/all/${{platform}}',
-        'version': 'version:36v9unmodified'
+        'version': 'version:37v2'
        }
      ],
      'condition': 'download_android_deps',
@@ -833,7 +833,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': '9org0yL3yZkp80x5SQQhN-0gAbPYRnhYOzWU3luJdE4C'
+        'version': 'Cdb1RGKCqpcz9z4clTA81sbqT1NH4GfXtp_SKiYYnQsC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
