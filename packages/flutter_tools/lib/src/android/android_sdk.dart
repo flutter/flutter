@@ -335,6 +335,15 @@ class AndroidSdk {
   String? getAvdManagerPath() =>
       getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
+  /// Returns the filesystem path of the Android CLI tool (android/android.bat).
+  ///
+  /// The android CLI is the recommended replacement for the deprecated sdkmanager.
+  /// Returns null if not found.
+  String? getAndroidCommandPath() {
+    final executable = globals.platform.isWindows ? 'android.bat' : 'android';
+    return getCmdlineToolsPath(executable, skipOldTools: true);
+  }
+
   /// From https://developer.android.com/ndk/guides/other_build_systems.
   static const _llvmHostDirectoryName = <String, String>{
     'macos': 'darwin-x86_64',
@@ -529,7 +538,16 @@ class AndroidSdk {
   }
 
   /// Returns the filesystem path of the Android SDK manager tool.
+  ///
+  /// Prefers the Android CLI (android/android.bat) when available, as sdkmanager
+  /// is deprecated. Falls back to sdkmanager if Android CLI is not found.
   String? get sdkManagerPath {
+    // Prefer the new Android CLI tool over the deprecated sdkmanager
+    final androidCommand = getAndroidCommandPath();
+    if (androidCommand != null) {
+      return androidCommand;
+    }
+    
     final executable = globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager';
     return getCmdlineToolsPath(executable, skipOldTools: true);
   }

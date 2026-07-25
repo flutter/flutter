@@ -258,6 +258,135 @@ void main() {
     );
 
     testUsingContext(
+      'prefers Android CLI over sdkmanager when both are available',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, withSdkManager: false);
+        config.setValue('android-sdk', sdkDir.path);
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        // Create both android and sdkmanager in the same directory
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                sdk.directory.path,
+                'cmdline-tools',
+                'latest',
+                'bin',
+                'android',
+              ),
+            )
+            .createSync(recursive: true);
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                sdk.directory.path,
+                'cmdline-tools',
+                'latest',
+                'bin',
+                'sdkmanager',
+              ),
+            )
+            .createSync(recursive: true);
+
+        // Should return the android CLI path, not sdkmanager
+        expect(
+          sdk.sdkManagerPath,
+          fileSystem.path.join(
+            sdk.directory.path,
+            'cmdline-tools',
+            'latest',
+            'bin',
+            'android',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => FakePlatform(),
+        Config: () => config,
+      },
+    );
+
+    testUsingContext(
+      'falls back to sdkmanager when Android CLI is not available',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, withSdkManager: false);
+        config.setValue('android-sdk', sdkDir.path);
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        // Create only sdkmanager
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                sdk.directory.path,
+                'cmdline-tools',
+                'latest',
+                'bin',
+                'sdkmanager',
+              ),
+            )
+            .createSync(recursive: true);
+
+        // Should return the sdkmanager path since android is not available
+        expect(
+          sdk.sdkManagerPath,
+          fileSystem.path.join(
+            sdk.directory.path,
+            'cmdline-tools',
+            'latest',
+            'bin',
+            'sdkmanager',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => FakePlatform(),
+        Config: () => config,
+      },
+    );
+
+    testUsingContext(
+      'getAndroidCommandPath returns Android CLI path when available',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, withSdkManager: false);
+        config.setValue('android-sdk', sdkDir.path);
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                sdk.directory.path,
+                'cmdline-tools',
+                'latest',
+                'bin',
+                'android',
+              ),
+            )
+            .createSync(recursive: true);
+
+        expect(
+          sdk.getAndroidCommandPath(),
+          fileSystem.path.join(
+            sdk.directory.path,
+            'cmdline-tools',
+            'latest',
+            'bin',
+            'android',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => FakePlatform(),
+        Config: () => config,
+      },
+    );
+
+    testUsingContext(
       'returns sdkmanager version',
       () {
         final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);

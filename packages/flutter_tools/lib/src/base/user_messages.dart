@@ -50,13 +50,14 @@ class UserMessages {
       'Run `flutter doctor --android-licenses` to accept the SDK licenses.\n'
       'See ${androidSdkInstallUrl(platform)} for more details.';
   String androidMissingSdkManager(String sdkManagerPath, Platform platform) =>
-      'Android sdkmanager tool not found ($sdkManagerPath).\n'
-      'Try re-installing or updating your Android SDK,\n'
-      'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
+      'Android SDK manager tool not found ($sdkManagerPath).\n'
+      'Try re-installing or updating your Android SDK.\n'
+      'The Android CLI is the recommended tool; ensure cmdline-tools are installed.\n'
+      'Visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidCannotRunSdkManager(String sdkManagerPath, String error, Platform platform) =>
-      'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
-      'Try re-installing or updating your Android SDK,\n'
-      'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
+      'Android SDK manager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
+      'Try re-installing or updating your Android SDK.\n'
+      'Visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkBuildToolsOutdated(
     int sdkMinVersion,
     String buildToolsMinVersion,
