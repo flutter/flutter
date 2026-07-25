@@ -226,6 +226,26 @@ void main() {
       handle.dispose();
     },
   );
+
+  testWidgets(
+    'IconButton.tooltip still contributes a semantics tooltip label when in TooltipVisibility '
+    'with visible = false',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              TooltipVisibility(visible: false, child: child!),
+          home: Scaffold(
+            body: IconButton(icon: const Icon(Icons.add), onPressed: () {}, tooltip: tooltipText),
+          ),
+        ),
+      );
+
+      expect(tester.getSemantics(find.byType(IconButton)).tooltip, tooltipText);
+      handle.dispose();
+    },
+  );
 }
 
 Future<void> setWidgetForTooltipMode(
