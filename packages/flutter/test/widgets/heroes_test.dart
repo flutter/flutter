@@ -3928,6 +3928,9 @@ Future<void> main() async {
       createRectTween: (begin, end) => RectTween(begin: begin, end: end),
     );
 
+    // Dispose the HeroController when the test finishes.
+    addTearDown(heroController.dispose);
+
     final navigatorKey = GlobalKey<NavigatorState>();
     const shuttleKey = ValueKey<String>('hero-shuttle');
 
