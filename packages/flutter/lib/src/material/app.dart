@@ -1223,40 +1223,31 @@ class _MaterialInspectorButton extends InspectorButton {
   }
 
   BorderSide? _borderSide({required Color color}) {
-    switch (variant) {
-      case InspectorButtonVariant.filled:
-      case InspectorButtonVariant.iconOnly:
-        return null;
-      case InspectorButtonVariant.toggle:
-        return toggledOn == false ? BorderSide(color: color) : null;
-    }
+    return switch (variant) {
+      InspectorButtonVariant.filled || InspectorButtonVariant.iconOnly => null,
+      InspectorButtonVariant.toggle => toggledOn == false ? BorderSide(color: color) : null,
+    };
   }
 
   @override
   Color foregroundColor(BuildContext context) {
     final Color primaryColor = _primaryColor(context);
     final Color secondaryColor = _secondaryColor(context);
-    switch (variant) {
-      case InspectorButtonVariant.filled:
-        return primaryColor;
-      case InspectorButtonVariant.iconOnly:
-        return secondaryColor;
-      case InspectorButtonVariant.toggle:
-        return !toggledOn! ? secondaryColor : primaryColor;
-    }
+    return switch (variant) {
+      InspectorButtonVariant.filled => primaryColor,
+      InspectorButtonVariant.iconOnly => secondaryColor,
+      InspectorButtonVariant.toggle => !toggledOn! ? secondaryColor : primaryColor,
+    };
   }
 
   @override
   Color backgroundColor(BuildContext context) {
     final Color secondaryColor = _secondaryColor(context);
-    switch (variant) {
-      case InspectorButtonVariant.filled:
-        return secondaryColor;
-      case InspectorButtonVariant.iconOnly:
-        return Colors.transparent;
-      case InspectorButtonVariant.toggle:
-        return !toggledOn! ? Colors.transparent : secondaryColor;
-    }
+    return switch (variant) {
+      InspectorButtonVariant.filled => secondaryColor,
+      InspectorButtonVariant.iconOnly => Colors.transparent,
+      InspectorButtonVariant.toggle => !toggledOn! ? Colors.transparent : secondaryColor,
+    };
   }
 
   Color _primaryColor(BuildContext context) {

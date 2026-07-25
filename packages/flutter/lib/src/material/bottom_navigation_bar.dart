@@ -957,94 +957,85 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           themeData.unselectedWidgetColor,
     );
 
-    final ColorTween colorTween;
-    switch (_effectiveType) {
-      case BottomNavigationBarType.fixed:
-        colorTween = ColorTween(
-          begin:
-              widget.unselectedItemColor ??
-              bottomTheme.unselectedItemColor ??
-              themeData.unselectedWidgetColor,
-          end:
-              widget.selectedItemColor ??
-              bottomTheme.selectedItemColor ??
-              widget.fixedColor ??
-              themeColor,
-        );
-      case BottomNavigationBarType.shifting:
-        colorTween = ColorTween(
-          begin:
-              widget.unselectedItemColor ??
-              bottomTheme.unselectedItemColor ??
-              themeData.colorScheme.surface,
-          end:
-              widget.selectedItemColor ??
-              bottomTheme.selectedItemColor ??
-              themeData.colorScheme.surface,
-        );
-    }
+    final ColorTween colorTween = switch (_effectiveType) {
+      BottomNavigationBarType.fixed => ColorTween(
+        begin:
+            widget.unselectedItemColor ??
+            bottomTheme.unselectedItemColor ??
+            themeData.unselectedWidgetColor,
+        end:
+            widget.selectedItemColor ??
+            bottomTheme.selectedItemColor ??
+            widget.fixedColor ??
+            themeColor,
+      ),
+      BottomNavigationBarType.shifting => ColorTween(
+        begin:
+            widget.unselectedItemColor ??
+            bottomTheme.unselectedItemColor ??
+            themeData.colorScheme.surface,
+        end:
+            widget.selectedItemColor ??
+            bottomTheme.selectedItemColor ??
+            themeData.colorScheme.surface,
+      ),
+    };
 
-    final ColorTween labelColorTween;
-    switch (_effectiveType) {
-      case BottomNavigationBarType.fixed:
-        labelColorTween = ColorTween(
-          begin:
-              effectiveUnselectedLabelStyle.color ??
-              widget.unselectedItemColor ??
-              bottomTheme.unselectedItemColor ??
-              themeData.unselectedWidgetColor,
-          end:
-              effectiveSelectedLabelStyle.color ??
-              widget.selectedItemColor ??
-              bottomTheme.selectedItemColor ??
-              widget.fixedColor ??
-              themeColor,
-        );
-      case BottomNavigationBarType.shifting:
-        labelColorTween = ColorTween(
-          begin:
-              effectiveUnselectedLabelStyle.color ??
-              widget.unselectedItemColor ??
-              bottomTheme.unselectedItemColor ??
-              themeData.colorScheme.surface,
-          end:
-              effectiveSelectedLabelStyle.color ??
-              widget.selectedItemColor ??
-              bottomTheme.selectedItemColor ??
-              themeColor,
-        );
-    }
+    final ColorTween labelColorTween = switch (_effectiveType) {
+      BottomNavigationBarType.fixed => ColorTween(
+        begin:
+            effectiveUnselectedLabelStyle.color ??
+            widget.unselectedItemColor ??
+            bottomTheme.unselectedItemColor ??
+            themeData.unselectedWidgetColor,
+        end:
+            effectiveSelectedLabelStyle.color ??
+            widget.selectedItemColor ??
+            bottomTheme.selectedItemColor ??
+            widget.fixedColor ??
+            themeColor,
+      ),
+      BottomNavigationBarType.shifting => ColorTween(
+        begin:
+            effectiveUnselectedLabelStyle.color ??
+            widget.unselectedItemColor ??
+            bottomTheme.unselectedItemColor ??
+            themeData.colorScheme.surface,
+        end:
+            effectiveSelectedLabelStyle.color ??
+            widget.selectedItemColor ??
+            bottomTheme.selectedItemColor ??
+            themeColor,
+      ),
+    };
 
-    final ColorTween iconColorTween;
-    switch (_effectiveType) {
-      case BottomNavigationBarType.fixed:
-        iconColorTween = ColorTween(
-          begin:
-              effectiveSelectedIconTheme.color ??
-              widget.unselectedItemColor ??
-              bottomTheme.unselectedItemColor ??
-              themeData.unselectedWidgetColor,
-          end:
-              effectiveUnselectedIconTheme.color ??
-              widget.selectedItemColor ??
-              bottomTheme.selectedItemColor ??
-              widget.fixedColor ??
-              themeColor,
-        );
-      case BottomNavigationBarType.shifting:
-        iconColorTween = ColorTween(
-          begin:
-              effectiveUnselectedIconTheme.color ??
-              widget.unselectedItemColor ??
-              bottomTheme.unselectedItemColor ??
-              themeData.colorScheme.surface,
-          end:
-              effectiveSelectedIconTheme.color ??
-              widget.selectedItemColor ??
-              bottomTheme.selectedItemColor ??
-              themeColor,
-        );
-    }
+    final ColorTween iconColorTween = switch (_effectiveType) {
+      BottomNavigationBarType.fixed => ColorTween(
+        begin:
+            effectiveSelectedIconTheme.color ??
+            widget.unselectedItemColor ??
+            bottomTheme.unselectedItemColor ??
+            themeData.unselectedWidgetColor,
+        end:
+            effectiveUnselectedIconTheme.color ??
+            widget.selectedItemColor ??
+            bottomTheme.selectedItemColor ??
+            widget.fixedColor ??
+            themeColor,
+      ),
+      BottomNavigationBarType.shifting => ColorTween(
+        begin:
+            effectiveUnselectedIconTheme.color ??
+            widget.unselectedItemColor ??
+            bottomTheme.unselectedItemColor ??
+            themeData.colorScheme.surface,
+        end:
+            effectiveSelectedIconTheme.color ??
+            widget.selectedItemColor ??
+            bottomTheme.selectedItemColor ??
+            themeColor,
+      ),
+    };
 
     final tiles = <Widget>[];
     for (var i = 0; i < widget.items.length; i++) {
