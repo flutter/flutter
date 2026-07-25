@@ -146,8 +146,9 @@ import Testing
     #expect(link.isPaused)
   }
 
-  func releasesLinkOnInvalidation() async {
+  @Test func releasesLinkOnInvalidation() async {
     weak var weakClient: VSyncClient?
+    var tempClient: VSyncClient?
 
     await withCheckedContinuation { continuation in
       autoreleasepool {
@@ -159,16 +160,16 @@ import Testing
           continuation.resume()
         }
         weakClient = client
-
+        tempClient = client
         threadTaskRunner.postTask {
-          client?.await()
+          client.await()
         }
       }
     }
 
     autoreleasepool {
-      client?.invalidate()
-      client = nil
+      tempClient!.invalidate()
+      tempClient = nil
     }
 
     await withCheckedContinuation { continuation in
@@ -219,10 +220,6 @@ import Testing
           continuation.resume()
         }
       }
-    }
-
-    autoreleasepool {
-      client = nil
     }
 
     #expect(weakClient == nil)

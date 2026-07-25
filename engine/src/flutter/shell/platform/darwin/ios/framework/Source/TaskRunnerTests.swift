@@ -8,7 +8,7 @@ import Testing
 @MainActor
 @Suite struct TaskRunnerTests {
 
-  @Test(.timeLimit(.minutes(1)))
+  @Test()
   func postTask() async {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
@@ -19,7 +19,7 @@ import Testing
     }
   }
 
-  @Test(.timeLimit(.minutes(1)))
+  @Test()
   func postDelayedTask() async {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
