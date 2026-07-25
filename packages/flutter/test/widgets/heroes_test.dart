@@ -3924,6 +3924,10 @@ Future<void> main() async {
   testWidgets('Hero does not resize when its Navigator resizes during flight', (
     WidgetTester tester,
   ) async {
+    final heroController = HeroController(
+      createRectTween: (begin, end) => RectTween(begin: begin, end: end),
+    );
+
     final navigatorKey = GlobalKey<NavigatorState>();
     const shuttleKey = ValueKey<String>('hero-shuttle');
 
@@ -3944,15 +3948,15 @@ Future<void> main() async {
     }
 
     Widget buildSourcePage() {
-      return Material(child: buildHero(Alignment.topLeft));
+      return buildHero(Alignment.topLeft);
     }
 
     Widget buildDestinationPage() {
-      return Material(child: buildHero(Alignment.topRight));
+      return buildHero(Alignment.topRight);
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             updateHost = setState;
@@ -3963,7 +3967,7 @@ Future<void> main() async {
                 width: 400.0,
                 height: navigatorHeight,
                 child: HeroControllerScope(
-                  controller: MaterialApp.createMaterialHeroController(),
+                  controller: heroController,
                   child: Navigator(
                     key: navigatorKey,
                     onGenerateRoute: (RouteSettings settings) {
