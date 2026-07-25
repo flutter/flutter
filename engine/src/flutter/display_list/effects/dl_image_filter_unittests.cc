@@ -912,9 +912,9 @@ TEST(DisplayListImageFilter, RuntimeEffectEqualityWithInputSampling) {
                                       std::make_shared<std::vector<uint8_t>>());
   DlRuntimeEffectImageFilter filter_b(nullptr, {nullptr},
                                       std::make_shared<std::vector<uint8_t>>());
-  DlRuntimeEffectImageFilter filter_c(
-      nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>(),
-      DlImageSampling::kLinear);
+  DlRuntimeEffectImageFilter filter_c(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>(),
+                                      DlImageSampling::kLinear);
 
   EXPECT_EQ(filter_a.input_sampling(), DlImageSampling::kNearestNeighbor);
   EXPECT_EQ(filter_c.input_sampling(), DlImageSampling::kLinear);
