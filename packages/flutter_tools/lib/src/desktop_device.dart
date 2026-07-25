@@ -368,19 +368,25 @@ class DesktopLogReader extends DeviceLogReader {
   }
 
   /// The lines the process wrote to stdout.
-  Stream<String> get outputLines {
-    return _stdoutController.stream.transform(utf8LineDecoder);
-  }
+  ///
+  /// Decoded once and shared: [outputLines], [errorLines] and [logLines] are
+  /// commonly listened to at the same time, and a broadcast stream can also be
+  /// listened to again after an earlier subscription was cancelled, which
+  /// happens when device log echoing is stopped and restarted.
+  late final Stream<String> outputLines = _stdoutController.stream
+      .transform(utf8LineDecoder)
+      .asBroadcastStream();
 
   /// The lines the process wrote to stderr.
-  Stream<String> get errorLines {
-    return _stderrController.stream.transform(utf8LineDecoder);
-  }
+  late final Stream<String> errorLines = _stderrController.stream
+      .transform(utf8LineDecoder)
+      .asBroadcastStream();
 
   @override
-  Stream<String> get logLines {
-    return StreamGroup.mergeBroadcast(<Stream<String>>[outputLines, errorLines]);
-  }
+  late final Stream<String> logLines = StreamGroup.mergeBroadcast(<Stream<String>>[
+    outputLines,
+    errorLines,
+  ]);
 
   @override
   String get name => 'desktop';

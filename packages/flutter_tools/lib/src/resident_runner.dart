@@ -372,10 +372,10 @@ class FlutterDevice {
           globals.printStatus(line, wrap: false);
         }
       });
+      // The VM service URI is only ever written to stdout, so stderr lines do
+      // not need to be filtered for it.
       _errorLoggingSubscription = logReader.errorLines.listen((String line) {
-        if (!line.contains(globals.kVMServiceMessageRegExp)) {
-          globals.printError(line, wrap: false);
-        }
+        globals.printError(line, wrap: false);
       });
     } else {
       _loggingSubscription = logReader.logLines.listen((String line) {
