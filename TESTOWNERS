@@ -348,7 +348,7 @@
 # Linux android views
 /dev/integration_tests/android_views @gmackall @flutter/android
 # Linux android hardware smoke test
-/dev/integration_tests/android_hardware_smoke_test @andywolff @flutter/engine
+/dev/integration_tests/androidhardwaresmoketest @andywolff @flutter/engine
 # Linux deferred components
 /dev/integration_tests/deferred_components_test @mboetger @flutter/android
 
