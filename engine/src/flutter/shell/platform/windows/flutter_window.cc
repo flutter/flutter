@@ -692,9 +692,18 @@ FlutterWindow::HandleMessage(UINT const message,
         if (wparam & MK_SHIFT) {
           mods |= kShift;
         }
+
+        // Mouse move with buttons pressed but current HWND does not have
+        // capture. This can happen when switching windows mid drag and the
+        // event should be ignored:
+        // https://github.com/flutter/flutter/issues/189583
+        auto buttons = ConvertWinMouseStateToFlutterButtons(wparam);
+        if (buttons != 0 && GetCapture() != window_handle_) {
+          break;
+        }
+
         OnPointerMove(mouse_x_, mouse_y_, device_kind, kDefaultPointerDeviceId,
-                      ConvertWinMouseStateToFlutterButtons(wparam),
-                      /*rotation=*/0, /*pressure=*/0, mods);
+                      buttons, /*rotation=*/0, /*pressure=*/0, mods);
       }
       break;
     case WM_MOUSELEAVE:
