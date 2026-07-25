@@ -1341,9 +1341,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   double _discretize(double value) {
     double result = clampDouble(value, 0.0, 1.0);
     if (isDiscrete) {
-      // Add a small epsilon before rounding to fix IEEE 754 representation
-      // errors where values like 0.35 * 10 produce 3.4999... instead of 3.5.
-      result = clampDouble(((result * divisions!) + 1e-10).round() / divisions!, 0.0, 1.0);
+      // A tap/drag position converted from pixels to a fraction of the track
+      // can land a few ULPs below an exact tie between two divisions due to
+      // float error in that conversion (not because decimals like 0.35 round
+      // wrong). Nudge by a tiny epsilon so exact ties consistently round up,
+      // matching round()'s away-from-zero semantics.
+      result = (result * divisions! + 1e-10).round() / divisions!;
     }
     return result;
   }

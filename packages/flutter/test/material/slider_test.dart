@@ -5743,8 +5743,11 @@ void main() {
   testWidgets(
     'Discrete Slider tapping tick marks snaps to correct value (M3, LTR)',
     (WidgetTester tester) async {
-      // M3 uses GappedSliderTrackShape (isRounded=true, trackHeight=16),
-      // making the coordinate mismatch ~4× larger than M2.
+      // ThemeData(useMaterial3: true) defaults Slider.year2023 to true, which
+      // resolves to _SliderDefaultsM3Year2023 — the same RoundedRectSliderTrackShape
+      // and trackHeight as M2, not the year-2023-opt-out GappedSliderTrackShape.
+      // This test exercises the same geometry as the M2 case above via a
+      // different theme resolution path.
       const divisions = 10;
       double value = 0;
       final tickPositions = <Offset>[];
@@ -5900,11 +5903,15 @@ void main() {
   );
 
   testWidgets(
-    'Discrete Slider _discretize does not under-round at IEEE 754 midpoints',
+    'Discrete Slider tapping the exact midpoint between two ticks snaps up',
     (WidgetTester tester) async {
-      // 0.35 * 10 = 3.4999...9 in IEEE 754, which .round() returns 3 instead
-      // of 4. Tapping at the exact pixel midpoint between ticks 3 and 4 should
-      // produce value 4 with the epsilon guard in _discretize.
+      // Converting a tapped pixel to a track fraction can land a few ULPs
+      // below an exact geometric tie between two divisions, which then rounds
+      // down instead of up. On this slider's default M2 geometry that happens
+      // at the midpoints between ticks 0-1 and 5-6 (not 3-4, which a prior
+      // version of this test checked and which is NOT epsilon-sensitive here
+      // — the affected pair depends on track geometry, so this loops over
+      // every midpoint rather than hardcoding one).
       const divisions = 10;
       double value = 0;
       final tickPositions = <Offset>[];
@@ -5935,15 +5942,21 @@ void main() {
       );
 
       final List<Offset> tickCenters = tickPositions.take(divisions + 1).toList();
+      expect(tickCenters.length, equals(divisions + 1));
 
-      // Pixel midpoint between ticks 3 and 4 → normalised value ≈ 0.35.
-      final midpoint = Offset(
-        (tickCenters[3].dx + tickCenters[4].dx) / 2,
-        tickCenters[3].dy,
-      );
-      await tester.tapAt(midpoint);
-      await tester.pump();
-      expect(value, equals(4.0));
+      for (var k = 0; k < divisions; k++) {
+        final midpoint = Offset(
+          (tickCenters[k].dx + tickCenters[k + 1].dx) / 2,
+          tickCenters[k].dy,
+        );
+        await tester.tapAt(midpoint);
+        await tester.pump();
+        expect(
+          value,
+          equals((k + 1).toDouble()),
+          reason: 'Midpoint between ticks $k and ${k + 1} should snap to ${k + 1}',
+        );
+      }
     },
   );
 }
