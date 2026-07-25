@@ -584,12 +584,8 @@ class _HeroFlight {
       child: shuttle,
       builder: (BuildContext context, Widget? child) {
         final Rect rect = heroRectTween.evaluate(_proxyAnimation)!;
-        final offsets = RelativeRect.fromSize(rect, manifest.navigatorSize);
-        return Positioned(
-          top: offsets.top,
-          right: offsets.right,
-          bottom: offsets.bottom,
-          left: offsets.left,
+        return Positioned.fromRect(
+          rect: rect,
           child: IgnorePointer(
             child: FadeTransition(opacity: _heroOpacity, child: child),
           ),
