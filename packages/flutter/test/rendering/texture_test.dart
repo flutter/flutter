@@ -21,7 +21,7 @@ void main() {
     final flutterView = FakeFlutterView(viewId: _nextViewId++);
     final renderView = RenderView(view: flutterView);
     final owner = PipelineOwner(
-      onFlushPaint: (bool isDirty) {
+      onFlushedPaint: (bool isDirty) {
         if (isDirty) {
           renderView.markNeedsCompositeFrame();
         }
