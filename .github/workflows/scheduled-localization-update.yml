@@ -28,7 +28,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TITLE: '[Automated Task] Quarterly Localizations Update (flutter_localizations)'
           ASSIGNEES: QuncCccccc
-          LABELS: automated task,a: internationalization,team-framework
+          LABELS: 'automated task,a: internationalization,team-framework'
           BODY: |
             ### Quarterly Localization Update
 
