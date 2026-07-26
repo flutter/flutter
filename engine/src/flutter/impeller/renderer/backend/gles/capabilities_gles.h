@@ -97,7 +97,8 @@ class CapabilitiesGLES final
   ///        available below them through GL_EXT_texture_array (desktop GL 2.x)
   ///        or GL_NV_texture_array (OpenGL ES 2.0). When absent, callers must
   ///        fall back to a texture atlas.
-  bool SupportsTextureArray() const;
+  // |Capabilities|
+  bool SupportsTextureArrays() const override;
 
   // |Capabilities|
   bool SupportsOffscreenMSAA() const override;

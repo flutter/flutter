@@ -249,7 +249,7 @@ bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
   return supports_texture_max_level_;
 }
 
-bool CapabilitiesGLES::SupportsTextureArray() const {
+bool CapabilitiesGLES::SupportsTextureArrays() const {
   return supports_texture_array_;
 }
 

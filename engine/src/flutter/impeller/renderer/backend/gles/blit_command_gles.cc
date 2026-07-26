@@ -182,11 +182,14 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
       texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice;
       break;
     case TextureType::kTexture2DArray:
-      // TODO(bdero): Upload into 2D array layers via glTexSubImage3D from the
-      // blit path. Direct uploads via Texture::SetContents are supported.
-      VALIDATION_LOG << "Blitting into a 2D array texture is not yet supported "
-                        "on the OpenGLES backend.";
-      return false;
+      if (!reactor.GetProcTable().GetCapabilities()->SupportsTextureArrays()) {
+        VALIDATION_LOG
+            << "2D array textures are not supported on this context.";
+        return false;
+      }
+      texture_type = GL_TEXTURE_2D_ARRAY;
+      texture_target = GL_TEXTURE_2D_ARRAY;
+      break;
     case TextureType::kTextureExternalOES:
       texture_type = GL_TEXTURE_EXTERNAL_OES;
       texture_target = GL_TEXTURE_EXTERNAL_OES;
@@ -218,6 +221,14 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   // sub-image; glCompressedTexImage2D redefines the entire mip level. Require
   // the upload to cover the full mip level starting at the origin.
   if (gles_format->is_compressed) {
+    if (tex_descriptor.type == TextureType::kTexture2DArray) {
+      // TODO(bdero): Support compressed 2D array uploads. The level must be
+      // allocated with glCompressedTexImage3D covering every layer and filled
+      // per layer with glCompressedTexSubImage3D.
+      VALIDATION_LOG << "Compressed 2D array textures are not yet supported "
+                        "on the OpenGLES backend.";
+      return false;
+    }
     const auto mip_width =
         std::max<int32_t>(1, tex_descriptor.size.width >> mip_level);
     const auto mip_height =
@@ -239,6 +250,44 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
                             source.GetRange().length,      // image size
                             tex_data);                     // data
     texture_gles.MarkSliceMipLevelInitialized(slice, mip_level);
+    return true;
+  }
+
+  if (tex_descriptor.type == TextureType::kTexture2DArray) {
+    // glTexImage3D allocates this mip level for every layer at once, so the
+    // level's storage is tracked with a single entry (slice 0).
+    if (!texture_gles.IsSliceMipLevelInitialized(0, mip_level)) {
+      const auto level_width =
+          std::max<int32_t>(1, tex_descriptor.size.width >> mip_level);
+      const auto level_height =
+          std::max<int32_t>(1, tex_descriptor.size.height >> mip_level);
+      gl.TexImage3D(
+          /*target=*/texture_target,                         //
+          /*level=*/mip_level,                               //
+          /*internal_format=*/gles_format->internal_format,  //
+          /*width=*/level_width,                             //
+          /*height=*/level_height,                           //
+          /*depth=*/tex_descriptor.array_layer_count,        //
+          /*border=*/0u,                                     //
+          /*format=*/gles_format->external_format,           //
+          /*type=*/gles_format->type,                        //
+          /*data=*/nullptr                                   //
+      );
+      texture_gles.MarkSliceMipLevelInitialized(0, mip_level);
+    }
+    gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    gl.TexSubImage3D(
+        /*target=*/texture_target,                  //
+        /*level=*/mip_level,                        //
+        /*xoffset=*/destination_region.GetX(),      //
+        /*yoffset=*/destination_region.GetY(),      //
+        /*zoffset=*/static_cast<GLint>(slice),      //
+        /*width=*/destination_region.GetWidth(),    //
+        /*height=*/destination_region.GetHeight(),  //
+        /*depth=*/1,                                //
+        /*format=*/gles_format->external_format,    //
+        /*type=*/gles_format->type,                 //
+        /*data=*/tex_data);                         //
     return true;
   }
 
