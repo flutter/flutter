@@ -975,8 +975,9 @@ class _LocalSemanticsHandle implements SemanticsHandle {
   }
 }
 
-/// Signature for a function that is called whenever the pipeline owner flushes paint.
-typedef OnFlushViewCallback = void Function(bool isDirty);
+/// Signature for a function that is called when the pipeline owner and child owner
+/// finished the paint phase.
+typedef OnFlushedPaintCallback = void Function(bool isDirty);
 
 /// The pipeline owner manages the rendering pipeline.
 ///
@@ -1032,7 +1033,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     this.onSemanticsOwnerCreated,
     this.onSemanticsUpdate,
     this.onSemanticsOwnerDisposed,
-    this.onFlushPaint,
+    this.onFlushedPaint,
   }) {
     assert(debugMaybeDispatchCreated('rendering', 'PipelineOwner', this));
   }
@@ -1067,10 +1068,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// Typical implementations will tear down the semantics tree.
   final VoidCallback? onSemanticsOwnerDisposed;
 
-  /// Called whenever this pipeline owner flushes paint.
+  /// Called when this pipeline owner and child owner have finished the paint phase.
   ///
-  /// isDirty is true if the pipeline owner has dirty render objects that need to be painted.
-  final OnFlushViewCallback? onFlushPaint;
+  /// isDirty is true if the pipeline owner has dirty render objects that needed to be painted.
+  final OnFlushedPaintCallback? onFlushedPaint;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
   ///
@@ -1324,7 +1325,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         return true;
       }());
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
-      onFlushPaint?.call(dirtyNodes.isNotEmpty);
       _nodesNeedingPaint = <RenderObject>[];
 
       // Sort the dirty nodes in reverse order (deepest first).
@@ -1346,6 +1346,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       for (final PipelineOwner child in _children) {
         child.flushPaint();
       }
+      onFlushedPaint?.call(dirtyNodes.isNotEmpty);
       assert(
         _nodesNeedingPaint.isEmpty,
         'Child PipelineOwners must not dirty nodes in their parent.',
