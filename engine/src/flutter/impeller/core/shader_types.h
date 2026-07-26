@@ -139,7 +139,7 @@ struct ShaderMetadata {
 /// value has no argument-table index. It must be skipped, never bound: Metal's
 /// `setFragment/VertexTexture:atIndex:` has no bounds check and crashes on an
 /// out-of-range index. The GLES backend already skips optimized-out bindings.
-inline constexpr size_t kOptimizedOutBinding =
+inline constexpr uint32_t kOptimizedOutBinding =
     std::numeric_limits<uint32_t>::max();
 
 /// @brief Metadata required to bind a buffer.

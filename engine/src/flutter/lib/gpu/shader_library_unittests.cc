@@ -5,7 +5,6 @@
 #include "flutter/lib/gpu/shader_library.h"
 
 #include <cstdint>
-#include <limits>
 #include <memory>
 #include <string>
 #include <utility>
@@ -14,6 +13,7 @@
 #include "flutter/lib/gpu/shader.h"
 #include "fml/mapping.h"
 #include "gtest/gtest.h"
+#include "impeller/core/shader_types.h"
 #include "impeller/renderer/context.h"
 // Pulls in flatbuffers/flatbuffers.h (FlatBufferBuilder, Verifier) and the
 // generated impeller::fb::shaderbundle:: symbols.
@@ -217,7 +217,7 @@ static std::shared_ptr<std::vector<uint8_t>> BuildFragmentBundle(
 // registered as a bindable uniform texture (binding an out-of-range index
 // crashes the Metal backend), while a live sampler alongside it survives.
 TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferSkipsOptimizedOutTexture) {
-  const uint64_t sentinel = std::numeric_limits<uint32_t>::max();
+  const uint64_t sentinel = impeller::kOptimizedOutBinding;
   auto bundle = BuildFragmentBundle(
       /*textures=*/{{"u_live", 0}, {"u_dced", sentinel}}, /*structs=*/{});
   auto library = ShaderLibrary::MakeFromFlatbuffer(
@@ -232,7 +232,7 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferSkipsOptimizedOutTexture) {
 
 // The same skip applies to a dead-code-eliminated uniform block.
 TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferSkipsOptimizedOutStruct) {
-  const uint64_t sentinel = std::numeric_limits<uint32_t>::max();
+  const uint64_t sentinel = impeller::kOptimizedOutBinding;
   auto bundle = BuildFragmentBundle(
       /*textures=*/{}, /*structs=*/{{"Live", 0}, {"Dced", sentinel}});
   auto library = ShaderLibrary::MakeFromFlatbuffer(
