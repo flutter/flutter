@@ -48,6 +48,45 @@ void TextInputManager::SetWindowHandle(HWND window_handle) {
   window_handle_ = window_handle;
 }
 
+void TextInputManager::SetImeEnabled(bool enabled) {
+  if (window_handle_ == nullptr) {
+    return;
+  }
+
+  HIMC previous_context = ::ImmGetContext(window_handle_);
+  if (previous_context != nullptr) {
+    ime_open_status_ = ::ImmGetOpenStatus(previous_context) != FALSE;
+    ::ImmReleaseContext(window_handle_, previous_context);
+  }
+
+  if (!enabled) {
+    ::ImmAssociateContextEx(window_handle_, nullptr, 0);
+    return;
+  }
+
+  // Reassociate rather than reusing the current context. Windows can rebuild
+  // the TSF document for a window while leaving its legacy IMM32 context
+  // association stale after the window regains focus.
+  ::ImmAssociateContextEx(window_handle_, nullptr, 0);
+  if (::ImmAssociateContextEx(window_handle_, nullptr, IACE_DEFAULT) == FALSE) {
+    if (previous_context != nullptr) {
+      ::ImmAssociateContext(window_handle_, previous_context);
+    }
+    return;
+  }
+
+  ImmContext restored_context(window_handle_);
+  if (!restored_context.IsValid()) {
+    if (previous_context != nullptr) {
+      ::ImmAssociateContext(window_handle_, previous_context);
+    }
+    return;
+  }
+  if (ime_open_status_.has_value()) {
+    ::ImmSetOpenStatus(restored_context.get(), ime_open_status_.value());
+  }
+}
+
 void TextInputManager::CreateImeWindow() {
   if (window_handle_ == nullptr) {
     return;

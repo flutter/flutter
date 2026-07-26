@@ -34,6 +34,12 @@ class TextInputManager {
   // Sets the window handle with which the IME is associated.
   void SetWindowHandle(HWND window_handle);
 
+  // Enables or disables IME input for the associated window.
+  //
+  // Enabling restores the window's default input context. The previous open
+  // status is preserved across disabling and re-enabling the context.
+  virtual void SetImeEnabled(bool enabled);
+
   // Creates a new IME window and system caret.
   //
   // This method should be invoked in response to the WM_IME_SETCONTEXT and
@@ -95,6 +101,10 @@ class TextInputManager {
 
   // True if IME-based composing is active.
   bool ime_active_ = false;
+
+  // The last known open status of the input context. This is retained while
+  // the context is disassociated from the window.
+  std::optional<bool> ime_open_status_;
 
   // The system caret rect.
   Rect caret_rect_ = {{0, 0}, {0, 0}};

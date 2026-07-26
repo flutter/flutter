@@ -21,6 +21,8 @@ class MockTextInputManager : public TextInputManager {
   MockTextInputManager();
   virtual ~MockTextInputManager();
 
+  MOCK_METHOD(void, SetImeEnabled, (bool enabled), (override));
+
   MOCK_METHOD(std::optional<std::u16string>,
               GetComposingString,
               (),
