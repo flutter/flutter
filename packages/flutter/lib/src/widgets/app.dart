@@ -1733,10 +1733,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       result = routing!;
     }
 
-    if (isWindowingEnabled) {
-      result = WindowManager(child: result);
-    }
-
     if (widget.textStyle != null) {
       result = DefaultTextStyle(style: widget.textStyle!, child: result);
     }
