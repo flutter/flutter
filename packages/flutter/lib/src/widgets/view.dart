@@ -497,7 +497,7 @@ class _RawViewElement extends RenderTreeRootElement {
     onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
     onSemanticsUpdate: _handleSemanticsUpdate,
     onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
-    onFlushPaint: _handleFlushPaint,
+    onFlushedPaint: _handleFlushPaint,
   );
 
   PipelineOwner get _effectivePipelineOwner =>
