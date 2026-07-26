@@ -5,9 +5,13 @@
 #include "flutter/lib/gpu/shader_library.h"
 
 #include <cstdint>
+#include <limits>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
+#include "flutter/lib/gpu/shader.h"
 #include "fml/mapping.h"
 #include "gtest/gtest.h"
 #include "impeller/renderer/context.h"
@@ -160,6 +164,85 @@ TEST(FlutterGpuShaderLibraryTest,
       impeller::Context::BackendType::kMetal, CreateMappingFromVector(valid),
       "test_bundle");
   EXPECT_FALSE(library);
+}
+
+// Serializes a single-fragment-shader bundle (Metal desktop variant) carrying
+// the given reflected textures and uniform structs, each as a
+// (name, ext_res_0) pair. A texture/struct whose ext_res_0 is the optimized-out
+// sentinel stands in for a resource the shader compiler dead-code-eliminated.
+static std::shared_ptr<std::vector<uint8_t>> BuildFragmentBundle(
+    const std::vector<std::pair<std::string, uint64_t>>& textures,
+    const std::vector<std::pair<std::string, uint64_t>>& structs) {
+  namespace fbs = impeller::fb::shaderbundle;
+
+  auto metal = std::make_unique<fbs::BackendShaderT>();
+  metal->stage = fbs::ShaderStage::kFragment;
+  metal->entrypoint = "main";
+  // The bytes are ignored at parse time (no GPU compile), but the field must be
+  // present and non-empty for the loader to build a code mapping.
+  metal->shader = {0};
+  for (const auto& [name, ext_res_0] : textures) {
+    auto texture = std::make_unique<fbs::ShaderUniformTextureT>();
+    texture->name = name;
+    texture->ext_res_0 = ext_res_0;
+    metal->uniform_textures.push_back(std::move(texture));
+  }
+  for (const auto& [name, ext_res_0] : structs) {
+    auto uniform = std::make_unique<fbs::ShaderUniformStructT>();
+    uniform->name = name;
+    uniform->ext_res_0 = ext_res_0;
+    uniform->size_in_bytes = 16;
+    metal->uniform_structs.push_back(std::move(uniform));
+  }
+
+  auto shader = std::make_unique<fbs::ShaderT>();
+  shader->name = "test";
+  shader->metal_desktop = std::move(metal);
+
+  fbs::ShaderBundleT bundle;
+  bundle.format_version =
+      static_cast<uint32_t>(fbs::ShaderBundleFormatVersion::kVersion);
+  bundle.shaders.push_back(std::move(shader));
+
+  flatbuffers::FlatBufferBuilder builder;
+  builder.Finish(fbs::ShaderBundle::Pack(builder, &bundle),
+                 fbs::ShaderBundleIdentifier());
+  return std::make_shared<std::vector<uint8_t>>(
+      builder.GetBufferPointer(),
+      builder.GetBufferPointer() + builder.GetSize());
+}
+
+// A sampler the shader compiler dead-code-eliminated is still listed in
+// reflection but carries the out-of-range binding sentinel. It must not be
+// registered as a bindable uniform texture (binding an out-of-range index
+// crashes the Metal backend), while a live sampler alongside it survives.
+TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferSkipsOptimizedOutTexture) {
+  const uint64_t sentinel = std::numeric_limits<uint32_t>::max();
+  auto bundle = BuildFragmentBundle(
+      /*textures=*/{{"u_live", 0}, {"u_dced", sentinel}}, /*structs=*/{});
+  auto library = ShaderLibrary::MakeFromFlatbuffer(
+      impeller::Context::BackendType::kMetal, CreateMappingFromVector(bundle),
+      "test_bundle");
+  ASSERT_TRUE(library);
+  auto shader = library->FindShaderForTesting("test");
+  ASSERT_TRUE(shader);
+  EXPECT_NE(shader->GetUniformTexture("u_live"), nullptr);
+  EXPECT_EQ(shader->GetUniformTexture("u_dced"), nullptr);
+}
+
+// The same skip applies to a dead-code-eliminated uniform block.
+TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferSkipsOptimizedOutStruct) {
+  const uint64_t sentinel = std::numeric_limits<uint32_t>::max();
+  auto bundle = BuildFragmentBundle(
+      /*textures=*/{}, /*structs=*/{{"Live", 0}, {"Dced", sentinel}});
+  auto library = ShaderLibrary::MakeFromFlatbuffer(
+      impeller::Context::BackendType::kMetal, CreateMappingFromVector(bundle),
+      "test_bundle");
+  ASSERT_TRUE(library);
+  auto shader = library->FindShaderForTesting("test");
+  ASSERT_TRUE(shader);
+  EXPECT_NE(shader->GetUniformStruct("Live"), nullptr);
+  EXPECT_EQ(shader->GetUniformStruct("Dced"), nullptr);
 }
 
 }  // namespace testing
