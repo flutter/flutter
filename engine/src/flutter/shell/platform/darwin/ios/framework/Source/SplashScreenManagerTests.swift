@@ -75,8 +75,7 @@ struct SplashScreenManagerTests {
   }
 
   /// Verifies `removeSplashScreen` calls the completion block after fading out.
-  @Test()
-  func removeSplashScreenCallsCompletion() async {
+  @Test() func removeSplashScreenCallsCompletion() async {
     let manager = SplashScreenManager()
     let view = UIView()
     manager.splashScreenView = view
