@@ -384,11 +384,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         }
         return true;
       }());
+      _needsCompositeFrame = false;
     } finally {
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
-      _needsCompositeFrame = false;
     }
   }
 
