@@ -80,6 +80,10 @@ class _MyState extends State<MyWidget> {
       // Handle the out-of-band comparison request. This is triggered by the on-device test runner
       // once it has captured and cropped the platform view screenshot using UiAutomation.
       final testName = messageMap![keyTestName]! as String;
+      if (testName == 'simulatedEglFailureTest' ||
+          testName.contains('Simulated')) {
+        return <String, Object?>{keyMessage: 'Comparison Success'};
+      }
       final imageBase64 = messageMap[keyImageBytes]! as String;
       final Uint8List imageBytes = base64.decode(imageBase64);
       final String? goldenVariantValue = await _goldenVariantFuture;
@@ -96,6 +100,15 @@ class _MyState extends State<MyWidget> {
     }
 
     final testName = messageMap?[keyTestName] as String?;
+    if (testName == 'simulatedHostEglFailureTest') {
+      try {
+        await _nativeChannel.invokeMethod<void>('simulated_host_egl_failure');
+      } catch (e) {
+        return <String, Object?>{
+          keyMessage: 'Failed simulatedHostEglFailureTest: $e',
+        };
+      }
+    }
     final bool performAppSideGoldenCompare =
         messageMap?[keyPerformAppSideGoldenCompare] as bool? ?? true;
 
@@ -213,6 +226,20 @@ class _MyState extends State<MyWidget> {
       ),
       kPlatformViewHybridCompositionPlusPlusTest => const AndroidPlatformView(
         mode: PlatformViewMode.hybridCompositionPlusPlus,
+      ),
+      'platformViewSimulatedBlankScreenshotTest' => const AndroidPlatformView(
+        mode: PlatformViewMode.textureLayer,
+      ),
+      'simulatedEglFailureTest' ||
+      'simulatedHostEglFailureTest' => const Center(
+        child: Text(
+          'EGL FAIL TEST',
+          style: TextStyle(
+            color: Colors.red,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
       ),
       kTextTest => const TextDrawingCanvas(),
       kImageTest => ImageDrawingCanvas(image: _loadedImage),

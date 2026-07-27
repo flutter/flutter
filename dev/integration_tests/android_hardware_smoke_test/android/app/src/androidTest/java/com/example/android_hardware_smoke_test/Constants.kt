@@ -60,4 +60,10 @@ object Constants {
     const val PLATFORM_VIEW_HYBRID_COMPOSITION_TEST = "${PLATFORM_VIEW_PREFIX}HybridCompositionTest"
     const val PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST =
         "${PLATFORM_VIEW_PREFIX}HybridCompositionPlusPlusTest"
+
+    // =============================================================================
+    // 3. Error Substrings
+    // =============================================================================
+
+    const val ERROR_BLANK_SCREENSHOT = "blank/empty"
 }
