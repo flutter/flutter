@@ -15,6 +15,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
@@ -32,6 +33,8 @@ FLUTTER_ASSERT_ARC
 
 using namespace flutter::testing;
 
+typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
+
 @interface FlutterKeyboardInsetManager (Test)
 - (void)setUpKeyboardAnimationVsyncClient:
     (FlutterKeyboardAnimationCallback)keyboardAnimationCallback;
@@ -42,7 +45,8 @@ using namespace flutter::testing;
 @property(nonatomic, assign) BOOL isKeyboardInOrTransitioningFromBackground;
 - (void)handleKeyboardNotification:(NSNotification*)notification;
 - (BOOL)isKeyboardNotificationForDifferentView:(NSNotification*)notification;
-- (CGFloat)calculateKeyboardInset:(CGRect)keyboardFrame keyboardMode:(int)keyboardMode;
+- (CGFloat)calculateKeyboardInset:(CGRect)keyboardFrame
+                     keyboardMode:(FlutterKeyboardMode)keyboardMode;
 - (BOOL)shouldIgnoreKeyboardNotification:(NSNotification*)notification;
 - (FlutterKeyboardMode)calculateKeyboardAttachMode:(NSNotification*)notification;
 - (CGFloat)calculateMultitaskingAdjustment:(CGRect)screenRect keyboardFrame:(CGRect)keyboardFrame;
@@ -55,15 +59,86 @@ using namespace flutter::testing;
 - (void)invalidateKeyboardAnimationVSyncClient;
 @end
 
-@interface FlutterKeyboardInsetManagerMock : FlutterKeyboardInsetManager
-@property(nonatomic, assign) BOOL didCallStartKeyboardAnimation;
+// A fake keyboard inset manager.
+//
+// Used to verify that FlutterViewController drives the manager through the
+// FlutterKeyboardInsetManagerProtocol (e.g. on viewDidDisappear), while
+// avoiding the need to set up and perform real animations.
+@interface FakeFlutterKeyboardInsetManager : NSObject <FlutterKeyboardInsetManagerProtocol>
+@property(nonatomic, assign) CGFloat targetViewInsetBottom;
+@property(nonatomic, assign) BOOL isKeyboardInOrTransitioningFromBackground;
+@property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
+@property(nonatomic, assign) BOOL didCallEnsureViewportMetricsIsCorrect;
+@property(nonatomic, assign) BOOL didCallInvalidateKeyboardAnimationVSyncClient;
+
+- (instancetype)initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)delegate;
 @end
 
-@implementation FlutterKeyboardInsetManagerMock
-- (void)startKeyBoardAnimation:(NSTimeInterval)duration {
-  [super startKeyBoardAnimation:duration];
-  self.didCallStartKeyboardAnimation = YES;
+@implementation FakeFlutterKeyboardInsetManager {
+  __weak id<FlutterKeyboardInsetManagerDelegate> _delegate;
 }
+
+- (instancetype)initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)delegate {
+  self = [super init];
+  if (self) {
+    _delegate = delegate;
+  }
+  return self;
+}
+
+- (void)setDelegate:(id<FlutterKeyboardInsetManagerDelegate>)delegate {
+  _delegate = delegate;
+}
+
+- (id<FlutterKeyboardInsetManagerDelegate>)delegate {
+  return _delegate;
+}
+
+- (void)startKeyBoardAnimation:(NSTimeInterval)duration {
+}
+
+- (void)handleKeyboardNotification:(NSNotification*)notification {
+}
+
+- (void)setUpKeyboardAnimationVsyncClient:(FlutterKeyboardAnimationCallback)animationCallback {
+  self.keyboardAnimationVSyncClient = nil;
+}
+
+- (void)invalidate {
+}
+
+- (void)setUpKeyboardSpringAnimationIfNeeded:(CAAnimation*)keyboardAnimation {
+}
+
+- (BOOL)shouldIgnoreKeyboardNotification:(NSNotification*)notification {
+  return NO;
+}
+
+- (FlutterKeyboardMode)calculateKeyboardAttachMode:(NSNotification*)notification {
+  return FlutterKeyboardModeHidden;
+}
+
+- (void)ensureViewportMetricsIsCorrect {
+  self.didCallEnsureViewportMetricsIsCorrect = YES;
+}
+
+- (void)invalidateKeyboardAnimationVSyncClient {
+  self.didCallInvalidateKeyboardAnimationVSyncClient = YES;
+}
+
+- (void)hideKeyboardImmediately {
+  [self ensureViewportMetricsIsCorrect];
+  [self invalidateKeyboardAnimationVSyncClient];
+}
+
+- (SpringAnimation*)keyboardSpringAnimation {
+  return nullptr;
+}
+
+- (UIView*)keyboardAnimationView {
+  return nullptr;
+}
+
 @end
 
 @interface TestKeyboardInsetDelegate : NSObject <FlutterKeyboardInsetManagerDelegate>
@@ -75,33 +150,55 @@ using namespace flutter::testing;
 @property(nonatomic, assign) BOOL isViewLoaded;
 @property(nonatomic, assign) BOOL mockIsPadInSlideOverOrStageManagerMode;
 @property(nonatomic, assign) CGRect mockConvertedViewRect;
+@property(nonatomic, strong) FlutterFMLTaskRunner* mockTaskRunner;
 @end
 
 @implementation TestKeyboardInsetDelegate
+
+- (instancetype)init {
+  if (self = [super init]) {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    _mockTaskRunner = [[FlutterFMLTaskRunner alloc]
+        initWithTaskRunner:fml::MessageLoop::GetCurrent().GetTaskRunner()];
+  }
+  return self;
+}
+
+- (FlutterFMLTaskRunner*)uiTaskRunner {
+  return self.mockTaskRunner;
+}
+
 - (void)updateViewportMetricsWithInset:(CGFloat)inset {
   self.currentInset = inset;
   if (self.updateViewportMetricsBlock) {
     self.updateViewportMetricsBlock(inset);
   }
 }
+
 - (CGFloat)physicalViewInsetBottom {
   return self.currentInset;
 }
+
 - (UIView*)view {
   return self.mockView;
 }
+
 - (FlutterEngine*)engine {
   return self.mockEngine;
 }
+
 - (UIScreen*)flutterScreenIfViewLoaded {
   return self.mockScreen;
 }
+
 - (BOOL)isPadInSlideOverOrStageManagerMode {
   return self.mockIsPadInSlideOverOrStageManagerMode;
 }
+
 - (CGRect)convertViewRectToScreen:(CGRect)rect {
   return self.mockConvertedViewRect;
 }
+
 @end
 
 /// Sometimes we have to use a custom mock to avoid retain cycles in OCMock.
@@ -340,34 +437,48 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   OCMStub([viewControllerMock isViewLoaded]).andReturn(YES);
-  [viewControllerMock view];
+  __unused UIView* dummyView = [viewControllerMock view];
   viewController.keyboardInsetManager.delegate =
       (id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock;
 
   engine.viewController = viewControllerMock;
 
-  id managerMock = OCMPartialMock(viewController.keyboardInsetManager);
-  viewController.keyboardInsetManager = managerMock;
+  FlutterKeyboardInsetManager* manager =
+      (FlutterKeyboardInsetManager*)viewController.keyboardInsetManager;
 
   id viewClassMock = OCMClassMock([UIView class]);
   OCMStub([viewClassMock animateWithDuration:0.25 animations:[OCMArg any] completion:[OCMArg any]])
       .andDo(^(NSInvocation* invocation) {
-        void (^animations)(void);
+        // -getArgument:atIndex: does a raw memcpy without retaining; declare the block locals
+        // __unsafe_unretained so ARC doesn't over-release the invocation-owned blocks.
+        __unsafe_unretained void (^animations)(void);
         [invocation getArgument:&animations atIndex:3];
         if (animations) {
           animations();
         }
-        void (^completion)(BOOL finished);
+        __unsafe_unretained void (^completion)(BOOL finished);
         [invocation getArgument:&completion atIndex:4];
         if (completion) {
           completion(YES);
         }
       });
 
-  viewController.keyboardInsetManager.targetViewInsetBottom = 320;
-  [managerMock startKeyBoardAnimation:0.25];
+  // Pre-seed a spring animation. startKeyBoardAnimation: must call
+  // setUpKeyboardSpringAnimationIfNeeded:, which clears it back to nil since the UIView animation
+  // is mocked out and therefore produces no real "position" CASpringAnimation to derive one from.
+  manager.targetViewInsetBottom = 320;
+  manager.keyboardSpringAnimation = [[SpringAnimation alloc] initWithStiffness:100
+                                                                       damping:10
+                                                                          mass:1
+                                                               initialVelocity:0
+                                                                     fromValue:0
+                                                                       toValue:320];
+  XCTAssertNotNil(manager.keyboardSpringAnimation);
 
-  OCMVerify([managerMock setUpKeyboardSpringAnimationIfNeeded:[OCMArg any]]);
+  [manager startKeyBoardAnimation:0.25];
+
+  XCTAssertNil(manager.keyboardSpringAnimation);
+  [viewClassMock stopMocking];
 }
 
 - (void)testSetupKeyboardSpringAnimationIfNeeded {
@@ -386,7 +497,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // Null check.
   [viewController.keyboardInsetManager setUpKeyboardSpringAnimationIfNeeded:nil];
   SpringAnimation* keyboardSpringAnimation =
-      [viewController.keyboardInsetManager keyboardSpringAnimation];
+      viewController.keyboardInsetManager.keyboardSpringAnimation;
   XCTAssertTrue(keyboardSpringAnimation == nil);
 
   // CAAnimation that is not a CASpringAnimation.
@@ -396,7 +507,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   nonSpringAnimation.toValue = [NSNumber numberWithFloat:1.0];
   nonSpringAnimation.keyPath = @"position";
   [viewController.keyboardInsetManager setUpKeyboardSpringAnimationIfNeeded:nonSpringAnimation];
-  keyboardSpringAnimation = [viewController.keyboardInsetManager keyboardSpringAnimation];
+  keyboardSpringAnimation = viewController.keyboardInsetManager.keyboardSpringAnimation;
 
   XCTAssertTrue(keyboardSpringAnimation == nil);
 
@@ -409,7 +520,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   springAnimation.fromValue = [NSValue valueWithCGPoint:CGPointMake(0, 0)];
   springAnimation.toValue = [NSValue valueWithCGPoint:CGPointMake(100, 100)];
   [viewController.keyboardInsetManager setUpKeyboardSpringAnimationIfNeeded:springAnimation];
-  keyboardSpringAnimation = [viewController.keyboardInsetManager keyboardSpringAnimation];
+  keyboardSpringAnimation = viewController.keyboardInsetManager.keyboardSpringAnimation;
   XCTAssertTrue(keyboardSpringAnimation != nil);
 }
 
@@ -429,17 +540,20 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   TestKeyboardInsetDelegate* delegate = [[TestKeyboardInsetDelegate alloc] init];
   delegate.isViewLoaded = YES;
   delegate.mockScreen = screen;
-
+  delegate.mockView = [[UIView alloc] init];
   delegate.mockConvertedViewRect = viewFrame;
 
   FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
   delegate.mockEngine = engine;
 
-  FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+  // Set the delegate as the engine's current view controller so the notifications are not
+  // treated as coming from a different view (i.e. shouldIgnoreKeyboardNotification: returns NO).
+  engine.viewController = (FlutterViewController*)delegate;
 
-  id managerMock = OCMPartialMock(manager);
-  OCMStub([managerMock shouldIgnoreKeyboardNotification:[OCMArg any]]).andReturn(NO);
+  FlutterKeyboardInsetManager* manager =
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
+
   BOOL isLocal = YES;
 
   // Start show keyboard animation.
@@ -455,7 +569,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                     @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
                   }];
   manager.targetViewInsetBottom = 0;
-  [managerMock handleKeyboardNotification:fakeNotification];
+  [manager handleKeyboardNotification:fakeNotification];
   BOOL isShowingAnimation1 = manager.keyboardAnimationIsShowing;
   XCTAssertTrue(isShowingAnimation1);
 
@@ -472,7 +586,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                     @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
                   }];
 
-  [managerMock handleKeyboardNotification:fakeNotification];
+  [manager handleKeyboardNotification:fakeNotification];
   BOOL isShowingAnimation2 = manager.keyboardAnimationIsShowing;
   XCTAssertTrue(isShowingAnimation2);
   XCTAssertTrue(isShowingAnimation1 == isShowingAnimation2);
@@ -490,7 +604,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                     @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
                   }];
 
-  [managerMock handleKeyboardNotification:fakeNotification];
+  [manager handleKeyboardNotification:fakeNotification];
   BOOL isShowingAnimation3 = manager.keyboardAnimationIsShowing;
   XCTAssertFalse(isShowingAnimation3);
   XCTAssertTrue(isShowingAnimation2 != isShowingAnimation3);
@@ -508,10 +622,12 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                     @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
                   }];
 
-  [managerMock handleKeyboardNotification:fakeNotification];
+  [manager handleKeyboardNotification:fakeNotification];
   BOOL isShowingAnimation4 = manager.keyboardAnimationIsShowing;
   XCTAssertFalse(isShowingAnimation4);
   XCTAssertTrue(isShowingAnimation3 == isShowingAnimation4);
+
+  [manager invalidate];
 }
 
 - (void)testShouldIgnoreKeyboardNotification {
@@ -522,9 +638,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // isKeyboardNotificationForDifferentView
   OCMStub([self.mockEngine viewController]).andReturn(viewControllerMock);
 
-  // Use custom mock for manager to avoid OCMock andDo block issues with C++ interop
-  FlutterKeyboardInsetManagerMock* managerMock = [[FlutterKeyboardInsetManagerMock alloc]
-      initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock];
+  // Exercise the real shouldIgnoreKeyboardNotification: implementation.
+  FlutterKeyboardInsetManager* managerMock = [[FlutterKeyboardInsetManager alloc]
+        initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock
+      displayLinkManager:FlutterDisplayLinkManager.shared];
   viewController.keyboardInsetManager = managerMock;
 
   UIScreen* screen = [self setUpMockScreen];
@@ -628,7 +745,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   OCMStub([viewControllerMock isViewLoaded]).andReturn(YES);
-  [viewControllerMock view];
+  __unused UIView* dummyView = [viewControllerMock view];
   viewController.keyboardInsetManager.delegate =
       (id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock;
 
@@ -858,7 +975,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.mockConvertedViewRect = convertedViewFrame;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   CGFloat adjustment = [manager calculateMultitaskingAdjustment:screenRect
                                                   keyboardFrame:keyboardFrame];
@@ -879,7 +997,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.mockConvertedViewRect = convertedViewFrame;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   CGFloat inset = [manager calculateKeyboardInset:keyboardFrame
                                      keyboardMode:FlutterKeyboardModeDocked];
@@ -906,19 +1025,29 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.isViewLoaded = YES;
   delegate.mockScreen = screen;
 
+  // view() is non-optional in the delegate protocol; provide a real view so the real
+  // startKeyBoardAnimation: can add its animation view to the hierarchy.
+  delegate.mockView = [[UIView alloc] init];
   delegate.mockConvertedViewRect = viewFrame;
 
   FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
   delegate.mockEngine = engine;
   engine.viewController = (FlutterViewController*)delegate;
 
-  FlutterKeyboardInsetManagerMock* managerMock =
-      [[FlutterKeyboardInsetManagerMock alloc] initWithDelegate:delegate];
-  managerMock.targetViewInsetBottom = 0;
+  FlutterKeyboardInsetManager* manager =
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
+  manager.targetViewInsetBottom = 0;
 
-  [managerMock handleKeyboardNotification:notification];
-  XCTAssertTrue(managerMock.targetViewInsetBottom == 320 * screen.scale);
-  XCTAssertTrue(managerMock.didCallStartKeyboardAnimation);
+  [manager handleKeyboardNotification:notification];
+
+  // Verify the docked keyboard produces an inset.
+  XCTAssertTrue(manager.targetViewInsetBottom == 320 * screen.scale);
+
+  // Verify handleKeyboardNotification: kicks off the animation, which sets up the vsync client.
+  XCTAssertNotNil(manager.keyboardAnimationVSyncClient);
+
+  [manager invalidate];
 }
 
 - (void)testEnsureBottomInsetIsZeroWhenKeyboardDismissed {
@@ -964,7 +1093,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   engine.viewController = viewControllerMock;
   OCMStub([viewControllerMock isViewLoaded]).andReturn(YES);
-  [viewControllerMock view];
+  __unused UIView* dummyView2 = [viewControllerMock view];
 
   UIScreen* screen = [self setUpMockScreen];
   OCMStub([screen scale]).andReturn(1.0);
@@ -1020,13 +1149,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   viewController.keyboardInsetManager.delegate =
       (id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock;
 
-  id managerMock = OCMPartialMock(viewController.keyboardInsetManager);
+  FakeFlutterKeyboardInsetManager* managerMock = [[FakeFlutterKeyboardInsetManager alloc]
+      initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock];
   viewController.keyboardInsetManager = managerMock;
 
   [viewControllerMock viewDidDisappear:YES];
 
-  OCMVerify([managerMock ensureViewportMetricsIsCorrect]);
-  OCMVerify([managerMock invalidateKeyboardAnimationVSyncClient]);
+  XCTAssertTrue(managerMock.didCallEnsureViewportMetricsIsCorrect);
+  XCTAssertTrue(managerMock.didCallInvalidateKeyboardAnimationVSyncClient);
 }
 
 - (void)testViewDidDisappearDoesntPauseEngineWhenNotTheViewController {
@@ -2545,7 +2675,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([bundleMock objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"])
       .andReturn(@YES);
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 120;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
@@ -2577,7 +2710,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)
     testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 120;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
@@ -2590,7 +2726,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateNewVSyncClientWhenClientAlreadyExists {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 120;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
 
@@ -2611,7 +2750,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWhenRefreshRateIs60HZ {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 60;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
@@ -2624,7 +2766,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testTriggerTouchRateCorrectionVSyncClientCorrectly {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
   double maxFrameRate = 120;
   (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
@@ -2694,7 +2839,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.mockEngine = engine;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
   manager.targetViewInsetBottom = 100;
   [manager startKeyBoardAnimation:0.25];
 
