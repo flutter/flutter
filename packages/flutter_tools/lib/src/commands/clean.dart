@@ -177,50 +177,8 @@ class CleanCommand extends FlutterCommand {
       deletionStatus.stop();
       final String path = file.path;
       if (globals.platform.isWindows) {
-        final bool stopGradleFlag =
-            (argResults?.wasParsed('stop-gradle') ?? false) && boolArg('stop-gradle');
-        final bool isInteractive =
-            globals.terminal.stdinHasTerminal && globals.terminal.usesTerminalUi;
-        var shouldStopGradle = stopGradleFlag;
-
-        if (!stopGradleFlag && isInteractive) {
-          try {
-            final String choice = await globals.terminal.promptForCharInput(
-              <String>['y', 'n'],
-              logger: globals.logger,
-              prompt:
-                  'Files in build/ are locked by background processes (likely Gradle).\n'
-                  'Stop active Gradle daemons ("gradlew --stop") and retry clean? [y/N]',
-              defaultChoiceIndex: 1,
-            );
-            shouldStopGradle = choice.toLowerCase() == 'y';
-          } on StateError {
-            shouldStopGradle = false;
-          }
-        }
-
-        if (shouldStopGradle) {
-          final FlutterProject flutterProject = project ?? FlutterProject.current();
-          final File gradlewFile = flutterProject.android.hostAppGradleRoot.childFile(
-            'gradlew.bat',
-          );
-          if (gradlewFile.existsSync()) {
-            final Status stopStatus = globals.logger.startProgress('Stopping Gradle daemons...');
-            try {
-              await globals.processUtils.run(<String>[
-                gradlewFile.path,
-                '--stop',
-              ], workingDirectory: gradlewFile.parent.path);
-            } finally {
-              stopStatus.stop();
-            }
-            try {
-              file.deleteSync(recursive: true);
-              return;
-            } on FileSystemException {
-              // Retried deletion failed as well.
-            }
-          }
+        if (await _tryStopGradleAndRetryDelete(file, project)) {
+          return;
         }
 
         globals.printError(
@@ -234,8 +192,56 @@ class CleanCommand extends FlutterCommand {
       } else {
         globals.printError('Failed to remove $path: $error');
       }
+    }
+  }
+
+  Future<bool> _tryStopGradleAndRetryDelete(FileSystemEntity file, FlutterProject? project) async {
+    final bool stopGradleFlag =
+        (argResults?.wasParsed('stop-gradle') ?? false) && boolArg('stop-gradle');
+    final bool isInteractive = globals.terminal.stdinHasTerminal && globals.terminal.usesTerminalUi;
+    var shouldStopGradle = stopGradleFlag;
+
+    if (!stopGradleFlag && isInteractive) {
+      try {
+        final String choice = await globals.terminal.promptForCharInput(
+          <String>['y', 'n'],
+          logger: globals.logger,
+          prompt:
+              'Files in build/ are locked by background processes (likely Gradle).\n'
+              'Stop active Gradle daemons ("gradlew --stop") and retry clean? [y/N]',
+          defaultChoiceIndex: 1,
+        );
+        shouldStopGradle = choice.toLowerCase() == 'y';
+      } on StateError {
+        shouldStopGradle = false;
+      }
+    }
+
+    if (!shouldStopGradle) {
+      return false;
+    }
+
+    final FlutterProject flutterProject = project ?? FlutterProject.current();
+    final File gradlewFile = flutterProject.android.hostAppGradleRoot.childFile('gradlew.bat');
+    if (!gradlewFile.existsSync()) {
+      return false;
+    }
+
+    final Status stopStatus = globals.logger.startProgress('Stopping Gradle daemons...');
+    try {
+      await globals.processUtils.run(<String>[
+        gradlewFile.path,
+        '--stop',
+      ], workingDirectory: gradlewFile.parent.path);
     } finally {
-      deletionStatus.stop();
+      stopStatus.stop();
+    }
+
+    try {
+      file.deleteSync(recursive: true);
+      return true;
+    } on FileSystemException {
+      return false;
     }
   }
 }
