@@ -265,7 +265,7 @@ class ShaderCompiler {
       final List<String> shaderTargets = _shaderTargetsFromTargetPlatform(targetPlatform);
       final List<String> cmd = makeImpellercCommand(shaderTargets);
       _logger.printTrace('impellerc command: $cmd');
-      final ProcessResult result = await _runCommand(cmd);
+      ProcessResult result = await _runCommand(cmd);
       if (result.exitCode != 0) {
         // Maybe retry impellerc command without --sksl.
         if (!(shaderTargets.length > 1 && shaderTargets.contains('--sksl'))) {
@@ -286,6 +286,7 @@ class ShaderCompiler {
         if (retryResult.exitCode != 0) {
           // Retry failed.
           _logger.printError('impellerc failure: ${retryResult.stderr}');
+          result = retryResult;
           failure = true;
         } else {
           // Retry succeeded. Don't fail, but log a warning message and the sksl
@@ -302,9 +303,38 @@ class ShaderCompiler {
 
       if (failure) {
         if (fatal) {
+          final hintBuffer = StringBuffer();
+          if (_platform.isMacOS && result.exitCode == -9) {
+            hintBuffer.write(
+              'The shader compiler may have been killed by the OS (e.g. out of memory) or blocked by macOS Gatekeeper.\n'
+              'To allow the binary to run, try running:\n'
+              '  xattr -d com.apple.quarantine "${impellerc.path}"',
+            );
+          } else if ((_platform.isWindows && result.exitCode == 3) ||
+              ((_platform.isMacOS || _platform.isLinux) && result.exitCode == -6)) {
+            hintBuffer.write('The shader compiler aborted.');
+            if (_platform.isWindows) {
+              final bool hasNonAscii =
+                  RegExp(r'[^\x00-\x7F]').hasMatch(input.path) ||
+                  RegExp(r'[^\x00-\x7F]').hasMatch(outputPath);
+              if (hasNonAscii) {
+                hintBuffer.write(
+                  '\nThis may be caused by non-ASCII (Unicode) characters in the project path.\n'
+                  'Please try moving the project to a directory containing only ASCII characters in its path.',
+                );
+              }
+            }
+          }
+
+          final message =
+              'Shader compilation of "${input.path}" to "$outputPath" '
+              'failed with exit code ${result.exitCode}.'
+              '${hintBuffer.isNotEmpty ? '\n\n$hintBuffer' : ''}';
+
           throw ShaderCompilerException._(
-            'Shader compilation of "${input.path}" to "$outputPath" '
-            'failed with exit code ${result.exitCode}.',
+            message,
+            stderr: result.stderr as String?,
+            stdout: result.stdout as String?,
           );
         }
         return false;
@@ -363,10 +393,21 @@ class _SecurityPolicyBlockException implements Exception {
 }
 
 class ShaderCompilerException implements Exception {
-  ShaderCompilerException._(this.message);
+  ShaderCompilerException._(this.message, {this.stderr, this.stdout});
 
   final String message;
+  final String? stderr;
+  final String? stdout;
 
   @override
-  String toString() => 'ShaderCompilerException: $message\n\n';
+  String toString() {
+    final buffer = StringBuffer('ShaderCompilerException: $message\n');
+    if (stdout != null && stdout!.isNotEmpty) {
+      buffer.writeln('stdout:\n$stdout');
+    }
+    if (stderr != null && stderr!.isNotEmpty) {
+      buffer.writeln('stderr:\n$stderr');
+    }
+    return buffer.toString();
+  }
 }
