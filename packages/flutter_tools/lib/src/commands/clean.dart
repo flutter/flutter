@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
-import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
@@ -28,6 +27,13 @@ class CleanCommand extends FlutterCommand {
       help:
           'Also clean the example directory, if one exists. '
           'Useful when developing in a package project.',
+    );
+    argParser.addFlag(
+      'stop-gradle',
+      negatable: false,
+      help:
+          'Force stop active Gradle daemons before or during clean. '
+          'Useful on Windows when files in build/ are locked by background processes.',
     );
   }
 
@@ -75,24 +81,24 @@ class CleanCommand extends FlutterCommand {
     }
 
     final Directory buildDir = flutterProject.directory.childDirectory(getBuildDirectory());
-    deleteFile(buildDir);
+    await deleteFile(buildDir, flutterProject);
 
-    deleteFile(flutterProject.dartTool);
+    await deleteFile(flutterProject.dartTool, flutterProject);
 
-    deleteFile(flutterProject.android.ephemeralDirectory);
+    await deleteFile(flutterProject.android.ephemeralDirectory, flutterProject);
 
-    deleteFile(flutterProject.ios.ephemeralDirectory);
-    deleteFile(flutterProject.ios.ephemeralModuleDirectory);
-    deleteFile(flutterProject.ios.generatedXcodePropertiesFile);
-    deleteFile(flutterProject.ios.generatedEnvironmentVariableExportScript);
-    deleteFile(flutterProject.ios.deprecatedCompiledDartFramework);
-    deleteFile(flutterProject.ios.deprecatedProjectFlutterFramework);
-    deleteFile(flutterProject.ios.flutterPodspec);
+    await deleteFile(flutterProject.ios.ephemeralDirectory, flutterProject);
+    await deleteFile(flutterProject.ios.ephemeralModuleDirectory, flutterProject);
+    await deleteFile(flutterProject.ios.generatedXcodePropertiesFile, flutterProject);
+    await deleteFile(flutterProject.ios.generatedEnvironmentVariableExportScript, flutterProject);
+    await deleteFile(flutterProject.ios.deprecatedCompiledDartFramework, flutterProject);
+    await deleteFile(flutterProject.ios.deprecatedProjectFlutterFramework, flutterProject);
+    await deleteFile(flutterProject.ios.flutterPodspec, flutterProject);
 
-    deleteFile(flutterProject.linux.ephemeralDirectory);
-    deleteFile(flutterProject.macos.ephemeralDirectory);
-    deleteFile(flutterProject.windows.ephemeralDirectory);
-    deleteFile(flutterProject.flutterPluginsDependenciesFile);
+    await deleteFile(flutterProject.linux.ephemeralDirectory, flutterProject);
+    await deleteFile(flutterProject.macos.ephemeralDirectory, flutterProject);
+    await deleteFile(flutterProject.windows.ephemeralDirectory, flutterProject);
+    await deleteFile(flutterProject.flutterPluginsDependenciesFile, flutterProject);
   }
 
   Future<void> _cleanXcode(XcodeBasedProject xcodeProject) async {
@@ -146,17 +152,15 @@ class CleanCommand extends FlutterCommand {
   }
 
   @visibleForTesting
-  void deleteFile(FileSystemEntity file) {
+  Future<void> deleteFile(FileSystemEntity file, [FlutterProject? project]) async {
     try {
-      ErrorHandlingFileSystem.noExitOnFailure(() {
-        _deleteFile(file);
-      });
+      await _deleteFile(file, project);
     } on Exception catch (e) {
       globals.printError('Failed to remove ${file.path}: $e');
     }
   }
 
-  void _deleteFile(FileSystemEntity file) {
+  Future<void> _deleteFile(FileSystemEntity file, FlutterProject? project) async {
     // This will throw a FileSystemException if the directory is missing permissions.
     try {
       if (!file.existsSync()) {
@@ -170,13 +174,62 @@ class CleanCommand extends FlutterCommand {
     try {
       file.deleteSync(recursive: true);
     } on FileSystemException catch (error) {
+      deletionStatus.stop();
       final String path = file.path;
       if (globals.platform.isWindows) {
+        final bool stopGradleFlag =
+            (argResults?.wasParsed('stop-gradle') ?? false) && boolArg('stop-gradle');
+        final bool isInteractive =
+            globals.terminal.stdinHasTerminal && globals.terminal.usesTerminalUi;
+        var shouldStopGradle = stopGradleFlag;
+
+        if (!stopGradleFlag && isInteractive) {
+          try {
+            final String choice = await globals.terminal.promptForCharInput(
+              <String>['y', 'n'],
+              logger: globals.logger,
+              prompt:
+                  'Files in build/ are locked by background processes (likely Gradle).\n'
+                  'Stop active Gradle daemons ("gradlew --stop") and retry clean? [y/N]',
+              defaultChoiceIndex: 1,
+            );
+            shouldStopGradle = choice.toLowerCase() == 'y';
+          } on StateError {
+            shouldStopGradle = false;
+          }
+        }
+
+        if (shouldStopGradle) {
+          final FlutterProject flutterProject = project ?? FlutterProject.current();
+          final File gradlewFile = flutterProject.android.hostAppGradleRoot.childFile(
+            'gradlew.bat',
+          );
+          if (gradlewFile.existsSync()) {
+            final Status stopStatus = globals.logger.startProgress('Stopping Gradle daemons...');
+            try {
+              await globals.processUtils.run(<String>[
+                gradlewFile.path,
+                '--stop',
+              ], workingDirectory: gradlewFile.parent.path);
+            } finally {
+              stopStatus.stop();
+            }
+            try {
+              file.deleteSync(recursive: true);
+              return;
+            } on FileSystemException {
+              // Retried deletion failed as well.
+            }
+          }
+        }
+
         globals.printError(
           'Failed to remove $path. '
-          'A program may still be using a file in the directory or the directory itself. '
-          'To find and stop such a program, see: '
-          'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used',
+          'A background process (e.g. Gradle daemon or Java) is locking files in the directory.\n'
+          'To automatically stop Gradle daemons during clean, run:\n'
+          '  flutter clean --stop-gradle\n'
+          'Or manually stop daemons:\n'
+          '  cd android && ./gradlew --stop',
         );
       } else {
         globals.printError('Failed to remove $path: $error');

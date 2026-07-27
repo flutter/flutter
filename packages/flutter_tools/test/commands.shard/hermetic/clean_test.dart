@@ -323,11 +323,14 @@ void main() {
       late FakePlatform windowsPlatform;
       late MemoryFileSystem fileSystem;
       late FileExceptionHandler exceptionHandler;
+      late FakeProcessManager processManager;
 
       setUp(() {
         windowsPlatform = FakePlatform(operatingSystem: 'windows');
         exceptionHandler = FileExceptionHandler();
         fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
+        fileSystem.file('pubspec.yaml').createSync(recursive: true);
+        processManager = FakeProcessManager.any();
       });
 
       testUsingContext(
@@ -343,46 +346,100 @@ void main() {
           );
 
           final command = CleanCommand();
-          command.deleteFile(file);
-          expect(testLogger.errorText, contains('A program may still be using a file'));
+          await command.deleteFile(file);
+          expect(
+            testLogger.errorText,
+            contains('A background process (e.g. Gradle daemon or Java) is locking files'),
+          );
         },
         overrides: <Type, Generator>{
           Platform: () => windowsPlatform,
           Xcode: () => xcode,
           FileSystem: () => fileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
+          ProcessManager: () => processManager,
         },
       );
 
-      testUsingContext('$CleanCommand handles missing delete permissions', () async {
-        final handler = FileExceptionHandler();
+      testUsingContext(
+        '$CleanCommand handles missing delete permissions',
+        () async {
+          final handler = FileExceptionHandler();
 
-        // Ensures we handle ErrorHandlingFileSystem appropriately in prod.
-        // See https://github.com/flutter/flutter/issues/108978.
-        final FileSystem fileSystem = ErrorHandlingFileSystem(
-          delegate: MemoryFileSystem.test(opHandle: handler.opHandle),
-          platform: windowsPlatform,
-        );
-        final File throwingFile = fileSystem.file('bad')..createSync();
-        handler.addError(
-          throwingFile,
-          FileSystemOp.delete,
-          const FileSystemException('OS error: Access Denied'),
-        );
+          // Ensures we handle ErrorHandlingFileSystem appropriately in prod.
+          // See https://github.com/flutter/flutter/issues/108978.
+          final FileSystem fileSystem = ErrorHandlingFileSystem(
+            delegate: MemoryFileSystem.test(opHandle: handler.opHandle),
+            platform: windowsPlatform,
+          );
+          final File throwingFile = fileSystem.file('bad')..createSync();
+          handler.addError(
+            throwingFile,
+            FileSystemOp.delete,
+            const FileSystemException('OS error: Access Denied'),
+          );
 
-        xcodeProjectInterpreter.isInstalled = false;
+          xcodeProjectInterpreter.isInstalled = false;
 
-        final command = CleanCommand();
-        command.deleteFile(throwingFile);
+          final command = CleanCommand();
+          await command.deleteFile(throwingFile);
 
-        expect(
-          testLogger.errorText,
-          contains(
-            'Failed to remove bad. A program may still be using a file in the directory or the directory itself',
-          ),
-        );
-        expect(throwingFile, exists);
-      }, overrides: <Type, Generator>{Platform: () => windowsPlatform, Xcode: () => xcode});
+          expect(
+            testLogger.errorText,
+            contains(
+              'Failed to remove bad. A background process (e.g. Gradle daemon or Java) is locking files',
+            ),
+          );
+          expect(throwingFile, exists);
+        },
+        overrides: <Type, Generator>{Platform: () => windowsPlatform, Xcode: () => xcode},
+      );
+
+      testUsingContext(
+        '$CleanCommand invokes gradlew --stop and retries deletion when --stop-gradle flag is passed',
+        () async {
+          xcodeProjectInterpreter.isInstalled = false;
+
+          var shouldThrow = true;
+          fileSystem = MemoryFileSystem.test(
+            opHandle: (String path, FileSystemOp op) {
+              if (shouldThrow && op == FileSystemOp.delete && path.endsWith('build')) {
+                throw const FileSystemException('Locked');
+              }
+            },
+          );
+          fileSystem.file('pubspec.yaml').createSync(recursive: true);
+
+          final FlutterProject project = setupProjectUnderTest(fileSystem.currentDirectory, false);
+          final File gradlewFile = project.android.hostAppGradleRoot.childFile('gradlew.bat')
+            ..createSync(recursive: true);
+
+          final Directory buildDir = project.directory.childDirectory('build')
+            ..createSync(recursive: true);
+          buildDir.childFile('locked').createSync(recursive: true);
+
+          processManager = FakeProcessManager.list(<FakeCommand>[
+            FakeCommand(
+              command: <String>[gradlewFile.path, '--stop'],
+              workingDirectory: gradlewFile.parent.path,
+              onRun: (_) {
+                shouldThrow = false;
+              },
+            ),
+          ]);
+
+          final command = CleanCommand();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          await runner.run(<String>['clean', '--stop-gradle']);
+
+          expect(testLogger.statusText, contains('Stopping Gradle daemons'));
+        },
+        overrides: <Type, Generator>{
+          Platform: () => windowsPlatform,
+          Xcode: () => xcode,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+        },
+      );
     });
   });
 }
