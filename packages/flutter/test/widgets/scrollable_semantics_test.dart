@@ -4,11 +4,35 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+
+class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _PinnedHeaderDelegate({required double height}) : minExtent = height, maxExtent = height;
+
+  const _PinnedHeaderDelegate.collapsing({required this.minExtent, required this.maxExtent});
+
+  @override
+  final double minExtent;
+
+  @override
+  final double maxExtent;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return const SizedBox.expand();
+  }
+
+  @override
+  bool shouldRebuild(covariant _PinnedHeaderDelegate oldDelegate) {
+    return oldDelegate.minExtent != minExtent || oldDelegate.maxExtent != maxExtent;
+  }
+}
+
+const double _kToolbarHeight = 56.0;
 
 void main() {
   SemanticsTester semantics;
@@ -158,6 +182,33 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Scrollable exposes implicit scrolling before dimensions are available', (
+    WidgetTester tester,
+  ) async {
+    semantics = SemanticsTester(tester);
+    final controller = _NoDimensionsDuringSemanticsScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          children: List<Widget>.generate(60, (int i) => Text('$i')),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling]));
+    expect(
+      semantics.nodesWith(
+        actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+      ),
+      isEmpty,
+    );
+    semantics.dispose();
+  });
+
   testWidgets('scrollToOffset respects implicit scrolling configuration', (
     WidgetTester tester,
   ) async {
@@ -224,6 +275,8 @@ void main() {
     semantics.dispose();
   });
 
+  // TODO(rkishan516): Cover this test with SliverAppBar in material_ui package.
+  // https://github.com/flutter/flutter/issues/189117
   testWidgets('showOnScreen works with pinned app bar and sliver list', (
     WidgetTester tester,
   ) async {
@@ -247,10 +300,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Localizations(
           locale: const Locale('en', 'us'),
-          delegates: const <LocalizationsDelegate<dynamic>>[
-            DefaultWidgetsLocalizations.delegate,
-            DefaultMaterialLocalizations.delegate,
-          ],
+          delegates: const <LocalizationsDelegate<dynamic>>[DefaultWidgetsLocalizations.delegate],
           child: MediaQuery(
             data: const MediaQueryData(),
             child: Scrollable(
@@ -259,10 +309,9 @@ void main() {
                 return Viewport(
                   offset: offset,
                   slivers: <Widget>[
-                    const SliverAppBar(
+                    const SliverPersistentHeader(
                       pinned: true,
-                      expandedHeight: kExpandedAppBarHeight,
-                      flexibleSpace: FlexibleSpaceBar(title: Text('App Bar')),
+                      delegate: _PinnedHeaderDelegate(height: kExpandedAppBarHeight),
                     ),
                     SliverList.list(children: containers),
                   ],
@@ -316,20 +365,19 @@ void main() {
           data: const MediaQueryData(),
           child: Localizations(
             locale: const Locale('en', 'us'),
-            delegates: const <LocalizationsDelegate<dynamic>>[
-              DefaultWidgetsLocalizations.delegate,
-              DefaultMaterialLocalizations.delegate,
-            ],
+            delegates: const <LocalizationsDelegate<dynamic>>[DefaultWidgetsLocalizations.delegate],
             child: Scrollable(
               controller: scrollController,
               viewportBuilder: (BuildContext context, ViewportOffset offset) {
                 return Viewport(
                   offset: offset,
                   slivers: <Widget>[
-                    const SliverAppBar(
+                    const SliverPersistentHeader(
                       pinned: true,
-                      expandedHeight: kExpandedAppBarHeight,
-                      flexibleSpace: FlexibleSpaceBar(title: Text('App Bar')),
+                      delegate: _PinnedHeaderDelegate.collapsing(
+                        minExtent: _kToolbarHeight,
+                        maxExtent: kExpandedAppBarHeight,
+                      ),
                     ),
                     ...slivers,
                   ],
@@ -347,7 +395,7 @@ void main() {
     tester.binding.pipelineOwner.semanticsOwner!.performAction(id0, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
-    expect(tester.getTopLeft(find.byWidget(children[0])).dy, kToolbarHeight);
+    expect(tester.getTopLeft(find.byWidget(children[0])).dy, _kToolbarHeight);
 
     semantics.dispose();
   });
@@ -856,4 +904,48 @@ class _NoImplicitScrollingScrollPhysics extends ScrollPhysics {
 
   @override
   ScrollPhysics applyTo(ScrollPhysics? ancestor) => this;
+}
+
+class _NoDimensionsDuringSemanticsScrollController extends ScrollController {
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _NoDimensionsDuringSemanticsScrollPosition(
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+      initialPixels: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
+      debugLabel: debugLabel,
+    );
+  }
+}
+
+class _NoDimensionsDuringSemanticsScrollPosition extends ScrollPositionWithSingleContext {
+  _NoDimensionsDuringSemanticsScrollPosition({
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+    super.initialPixels,
+    super.keepScrollOffset,
+    super.debugLabel,
+  });
+
+  bool _useRealDimensionsForLayout = false;
+
+  @override
+  bool get haveDimensions => _useRealDimensionsForLayout && super.haveDimensions;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    // Let ScrollPosition update its layout state normally, then hide dimensions
+    // again so semantics sees the transient no-dimensions state.
+    _useRealDimensionsForLayout = true;
+    final bool result = super.applyContentDimensions(minScrollExtent, maxScrollExtent);
+    _useRealDimensionsForLayout = false;
+    return result;
+  }
 }

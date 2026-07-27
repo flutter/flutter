@@ -1062,6 +1062,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   }
 
   external DomImageData getImageData(int x, int y, int sw, int sh);
+  external void putImageData(DomImageData imagedata, int dx, int dy);
   external void lineTo(num x, num y);
   external DomTextMetrics measureText(String text);
   external void moveTo(num x, num y);
@@ -1996,6 +1997,19 @@ extension type DomTouchEvent._(JSObject _) implements DomUIEvent {
   @JS('changedTouches')
   external _DomList get _changedTouches;
   Iterable<DomTouch> get changedTouches => _createDomListWrapper<DomTouch>(_changedTouches);
+
+  @JS('touches')
+  external _DomList get _touches;
+
+  /// All touch points currently in contact with the surface.
+  ///
+  /// On iOS WebKit this stays accurate even where the pointer events do not:
+  /// WebKit can stop dispatching pointer events for a touch it has taken over
+  /// for a native gesture, but it still drops that touch from this list once
+  /// the finger leaves, which is what makes an abandoned touch detectable. This
+  /// is observed WebKit behavior, not a cross-browser guarantee.
+  /// See: https://github.com/flutter/flutter/issues/188781
+  Iterable<DomTouch> get touches => _createDomListWrapper<DomTouch>(_touches);
 }
 
 @JS('Touch')

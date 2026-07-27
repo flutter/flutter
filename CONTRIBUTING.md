@@ -164,6 +164,14 @@ incomplete patch from the list of [issues with partial patches][has-partial-patc
 
 [has-partial-patch]: https://github.com/flutter/flutter/labels/has%20partial%20patch
 
+### Open Pull Request Limits
+
+To ensure our maintainers can provide timely and high-quality feedback, public Flutter repositories limit contributors without write access to **2 concurrent open pull requests per repository**.
+* **Draft PRs are exempt**: Work-in-progress draft PRs do not count toward your limit.
+* **Focus on Quality**: Once you reach the limit, please focus on merging or closing your existing PRs before opening new ones.
+
+For more details on pull request expectations and code review, see our [Tree hygiene](./docs/contributing/Tree-hygiene.md) guide.
+
 
 Reviewing Code
 --------------

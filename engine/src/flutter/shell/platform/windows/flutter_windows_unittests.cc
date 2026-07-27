@@ -67,7 +67,7 @@ TEST(WindowsNoFixtureTest, GetTextureRegistrar) {
   FlutterDesktopEngineProperties properties = {};
   properties.assets_path = L"";
   properties.icu_data_path = L"icudtl.dat";
-  properties.impeller_switch = DisabledImpeller;
+  properties.impeller_switch = DefaultImpeller;
   auto engine = FlutterDesktopEngineCreate(&properties);
   ASSERT_NE(engine, nullptr);
   auto texture_registrar = FlutterDesktopEngineGetTextureRegistrar(engine);
