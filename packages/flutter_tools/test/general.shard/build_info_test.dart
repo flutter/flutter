@@ -292,6 +292,20 @@ void main() {
     });
   });
 
+  testWithoutContext('toEnvironmentConfig includes build name and build number', () {
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: '4.5.6',
+      buildNumber: '7',
+      treeShakeIcons: false,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+    );
+
+    expect(buildInfo.toEnvironmentConfig()['BUILD_NAME'], '4.5.6');
+    expect(buildInfo.toEnvironmentConfig()['BUILD_NUMBER'], '7');
+  });
+
   testWithoutContext('toGradleConfig encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
