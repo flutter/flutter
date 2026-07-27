@@ -1778,7 +1778,6 @@ class RenderTable extends RenderBox {
           borderRect,
           rows: const <double>[],
           columns: const <double>[],
-          rowTops: const <double>[],
         );
       }
       return;
@@ -1823,7 +1822,6 @@ class RenderTable extends RenderBox {
         borderRect,
         rows: rows,
         columns: columns,
-        rowTops: _rowTops,
         spannedCells: _cachedSpannedCells,
         textDirection: textDirection,
       );
