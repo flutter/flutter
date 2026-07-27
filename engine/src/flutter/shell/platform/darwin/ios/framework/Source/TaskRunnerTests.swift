@@ -2,40 +2,68 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import Foundation
 import InternalFlutterSwift
-import XCTest
+import QuartzCore
+import Testing
 
-class TaskRunnerTests: XCTestCase {
+@MainActor
+struct TaskRunnerTests {
 
-  func testPostTask() {
+  @Test func postTask() {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
-    let expectation = self.expectation(description: "Task should be executed")
+    var didRun = false
     taskRunner.postTask {
-      expectation.fulfill()
+      didRun = true
     }
 
-    waitForExpectations(timeout: 5.0, handler: nil)
+    #expect(runLoopUntil(timeout: 5.0) { didRun }, "Posted task did not run within timeout")
   }
 
-  func testPostDelayedTask() {
+  @Test func postDelayedTask() {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
-    let expectation = self.expectation(description: "Delayed task should be executed")
+    var didRun = false
+    var elapsed: CFTimeInterval = 0
     let startTime = CACurrentMediaTime()
     taskRunner.postTask(delay: 0.1) {
-      let endTime = CACurrentMediaTime()
-      let epsilon = 0.001
-      XCTAssertGreaterThanOrEqual(endTime - startTime, 0.1 - epsilon)
-      expectation.fulfill()
+      elapsed = CACurrentMediaTime() - startTime
+      didRun = true
     }
 
-    waitForExpectations(timeout: 5.0, handler: nil)
+    #expect(runLoopUntil(timeout: 5.0) { didRun }, "Delayed task did not run within timeout")
+    let epsilon = 0.001
+    #expect(elapsed >= 0.1 - epsilon)
   }
 
-  func testRunsTasksOnCurrentThread() {
+  @Test func runsTasksOnCurrentThread() {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
-    XCTAssertTrue(taskRunner.runsTasksOnCurrentThread())
+    #expect(taskRunner.runsTasksOnCurrentThread())
   }
+}
+
+/// Spins the current thread's run loop until `condition` returns true, or `timeout` elapses.
+///
+/// A current-thread `TaskRunner` posts to the current thread's `fml::MessageLoop`, which is backed
+/// by the thread's run loop. That run loop must be actively run for posted tasks to execute, so we
+/// pump it here rather than blocking. Returns true if the condition was met before the timeout.
+@MainActor
+private func runLoopUntil(
+  timeout: TimeInterval,
+  condition: () -> Bool
+) -> Bool {
+  let deadline = Date(timeIntervalSinceNow: timeout)
+  while !condition() {
+    if Date() >= deadline {
+      return false
+    }
+    // `run(mode:before:)` immediately returns false when the run loop has no input sources or
+    // timers to process. In that case, sleep to avoid spinning in a tight loop until the deadline.
+    if !RunLoop.current.run(mode: .default, before: deadline) {
+      Thread.sleep(forTimeInterval: 0.01)
+    }
+  }
+  return true
 }
