@@ -1321,20 +1321,28 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
       help:
           'Enable the use of the HCPP platform view rendering mode on the Impeller rendering '
-          'backend. On "run", "test", and "drive" an explicit value overrides the '
-          'AndroidManifest.xml metadata at launch. On build commands there is no launch-time '
-          'override, so an explicit value only selects the default that is baked into the '
-          'manifest when the manifest does not already set '
-          'EnableHcpp; an explicit manifest entry always wins for '
-          'the built artifact.',
+          'backend. On "run", "test", and "drive", "--enable-hcpp" turns HCPP on at launch '
+          'regardless of the AndroidManifest.xml metadata. On build commands there is no '
+          'launch-time override, so an explicit value only selects the default that is baked '
+          'into the manifest when the manifest does not already set EnableHcpp; an explicit '
+          'manifest entry always wins for the built artifact.',
     );
   }
+
+  /// Whether an explicit `--[no-]enable-hcpp` should be reported to Gradle so
+  /// that the build can warn when it conflicts with the merged manifest.
+  ///
+  /// Only true for commands whose output is a final artifact. "run", "test",
+  /// and "drive" send `--enable-hcpp` to the device at launch, where it does
+  /// take effect, so warning that the flag was ignored would be wrong.
+  bool get warnOnHcppManifestConflict => false;
 
   /// The explicit `--[no-]enable-hcpp` value, or null when the flag was not
   /// passed (or the command does not define it).
   ///
-  /// Commands that launch the app (run/test/drive) forward this to the device
-  /// as a runtime override, which takes priority over the built manifest.
+  /// Commands that launch the app (run/test/drive) forward `--enable-hcpp` to
+  /// the device as a runtime override, which takes priority over the built
+  /// manifest.
   bool? get explicitEnableHcpp =>
       (argResults?.options.contains('enable-hcpp') ?? false) && argResults!.wasParsed('enable-hcpp')
       ? boolArg('enable-hcpp')
@@ -1551,7 +1559,7 @@ abstract class FlutterCommand extends Command<void> {
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       androidEnableHcpp: enableHcpp,
-      explicitAndroidEnableHcpp: explicitEnableHcpp,
+      explicitAndroidEnableHcpp: warnOnHcppManifestConflict ? explicitEnableHcpp : null,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,

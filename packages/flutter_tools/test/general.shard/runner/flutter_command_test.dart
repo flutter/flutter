@@ -653,6 +653,38 @@ void main() {
     );
 
     testUsingContext(
+      'only reports an explicit --enable-hcpp to gradle for commands that produce an artifact',
+      () async {
+        // On run/test/drive the explicit flag is applied at launch and does override the
+        // manifest, so gradle must not be told to warn that it was ignored.
+        final launchingCommand = DummyHcppFlutterCommand(warnOnHcppManifestConflict: false);
+        await createTestCommandRunner(launchingCommand).run(<String>['dummy', '--enable-hcpp']);
+        final BuildInfo launchingBuildInfo = await launchingCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(launchingBuildInfo.androidEnableHcpp, isTrue);
+        expect(launchingBuildInfo.explicitAndroidEnableHcpp, isNull);
+        expect(
+          launchingBuildInfo.toGradleConfig(),
+          isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
+        );
+
+        final buildingCommand = DummyHcppFlutterCommand(warnOnHcppManifestConflict: true);
+        await createTestCommandRunner(buildingCommand).run(<String>['dummy', '--enable-hcpp']);
+        final BuildInfo buildingBuildInfo = await buildingCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(buildingBuildInfo.androidEnableHcpp, isTrue);
+        expect(buildingBuildInfo.explicitAndroidEnableHcpp, isTrue);
+        expect(buildingBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'use fileSystemScheme to generate BuildInfo',
       () async {
         final flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
@@ -2107,4 +2139,13 @@ class DummyMachineFlutterCommand extends DummyFlutterCommand {
   DummyMachineFlutterCommand() : super(name: 'dummy') {
     addMachineOutputFlag(verboseHelp: false);
   }
+}
+
+class DummyHcppFlutterCommand extends DummyFlutterCommand {
+  DummyHcppFlutterCommand({required this.warnOnHcppManifestConflict}) : super(name: 'dummy') {
+    addEnableHcppFlag(verboseHelp: false);
+  }
+
+  @override
+  final bool warnOnHcppManifestConflict;
 }

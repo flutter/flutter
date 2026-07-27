@@ -111,9 +111,12 @@ class BuildApkCommand extends BuildSubCommand {
       buildApkTargetPlatform: _targetArchs.join(','),
       buildApkBuildMode: _buildMode.cliName,
       buildApkSplitPerAbi: boolArg('split-per-abi'),
-      buildApkEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
+      buildApkEnableHcpp: FlutterProject.current().android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   }
+
+  @override
+  bool get warnOnHcppManifestConflict => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
