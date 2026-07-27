@@ -4782,6 +4782,9 @@ targets:
   - name: Mac_arm64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
     timeout: 60
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189302): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189302): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
         [
