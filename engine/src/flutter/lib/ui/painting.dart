@@ -2579,7 +2579,7 @@ Future<Codec> instantiateImageCodecWithSize(
     final TargetImageSize targetSize = getTargetSize(descriptor.width, descriptor.height);
     assert(targetSize.width == null || targetSize.width! > 0);
     assert(targetSize.height == null || targetSize.height! > 0);
-    return descriptor.instantiateCodec(
+    return await descriptor.instantiateCodec(
       targetWidth: targetSize.width,
       targetHeight: targetSize.height,
     );

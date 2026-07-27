@@ -42,6 +42,7 @@ This mode is the latest hybrid composition strategy, and is designed to solve co
 
 ### Requirements
 - **Android API 34 or later**: Required for native transaction synchronization capabilities.
+- **Impeller**: [Impeller](https://docs.flutter.dev/perf/impeller) must be enabled.
 - **Vulkan Rendering**: The device must be capable of rendering with Vulkan.
 
 If these requirements are not met on the end-user device, Flutter will automatically fall back to the existing platform view strategy configured for the app.
@@ -69,6 +70,7 @@ You can enable HCPP using one of the following methods:
 ### Limitations and Known Issues
 The following is a list of limitations and known issues. If you encounter an issue not listed below, please file an issue!
 - **Complex Overlay Stacking**: Transparent platform views will not display correctly in layout stacks structured as: Flutter canvas -> Platform View -> Overlay -> Transparent Platform View, when all four of these layers intersect.
+- **Android Text Magnifier (Loupe)**: When using a platform view with a transparent background (such as a native `EditText` with no background), the Android text magnifier does not display the Flutter-rendered content behind it. The magnifier only samples the native platform view's surface rather than the final composited scene. This is a bug in the Android OS text magnifier's interaction with SurfaceControl hierarchies; it only has access to the specific native surface it is attached to, without visibility into the underlying Flutter-composited surfaces. Because this is an underlying Android platform bug, it cannot be resolved by the Flutter framework or engine (see [Flutter Issue #187659](https://github.com/flutter/flutter/issues/187659) and [Android Issue Tracker #494307996](https://issuetracker.google.com/issues/494307996)).
 
 ## Virtual Display
 

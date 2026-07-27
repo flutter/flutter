@@ -260,14 +260,13 @@ class UpgradeCommandRunner {
   Future<void> flutterUpgradeContinue({required DateTime startedAt}) async {
     final int code = await globals.processUtils.stream(
       [
-        globals.fs.path.join('bin', 'flutter'),
+        globals.fs.path.join(workingDirectory ?? Cache.flutterRoot!, 'bin', 'flutter'),
         'upgrade',
         '--continue',
         '--continue-started-at',
         startedAt.toIso8601String(),
         '--no-version-check',
       ],
-      workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
       environment: Map<String, String>.of(globals.platform.environment),
     );

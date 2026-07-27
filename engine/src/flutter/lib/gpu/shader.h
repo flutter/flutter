@@ -42,6 +42,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   ~Shader() override;
 
   static fml::RefPtr<Shader> Make(
+      std::string library_id,
       std::string entrypoint,
       impeller::ShaderStage stage,
       std::shared_ptr<fml::Mapping> code_mapping,
@@ -57,6 +58,20 @@ class Shader : public RefCountedDartWrappable<Shader> {
   bool IsRegistered(Context& context);
 
   bool RegisterSync(Context& context);
+
+  /// Whether this shader needs to be re-registered with the impeller shader
+  /// library on next use. Fresh shaders start dirty. Set back to false by
+  /// `RegisterSync` after registration completes, and back to true by
+  /// `ResetFrom` when the underlying asset is reloaded.
+  bool IsDirty() const;
+
+  void SetClean();
+
+  /// Replaces this shader's payload (code, layouts, uniforms) with the data
+  /// from `other`, preserving the library_id / entrypoint registry key and
+  /// marking this shader dirty. Used by `ShaderLibrary` to reload a shader
+  /// bundle in place without breaking existing Dart wrappers.
+  void ResetFrom(Shader& other);
 
   std::shared_ptr<impeller::VertexDescriptor> CreateVertexDescriptor() const;
 
@@ -78,6 +93,11 @@ class Shader : public RefCountedDartWrappable<Shader> {
  private:
   Shader();
 
+  // Stable per-source identifier used to namespace this shader's entrypoint
+  // in the shared shader registry. Set by ShaderLibrary at construction, and
+  // shared by all shaders within the same library. Typically the asset path
+  // the bundle was loaded from.
+  std::string library_id_;
   std::string entrypoint_;
   impeller::ShaderStage stage_;
   std::shared_ptr<fml::Mapping> code_mapping_;
@@ -86,6 +106,11 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::unordered_map<std::string, UniformBinding> uniform_structs_;
   std::unordered_map<std::string, TextureBinding> uniform_textures_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
+  bool is_dirty_ = true;
+
+  // Returns the scoped name to use when registering or looking up this
+  // shader's function in a shared impeller::ShaderLibrary.
+  std::string GetScopedName() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shader);
 };
@@ -109,6 +134,12 @@ extern int InternalFlutterGpu_Shader_GetUniformMemberOffset(
     flutter::gpu::Shader* wrapper,
     Dart_Handle struct_name_handle,
     Dart_Handle member_name_handle);
+
+// Test-only: exposes the per-shader dirty bit so tests can assert that
+// reload deduplication keeps unchanged shaders clean.
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Shader_DebugIsDirty(
+    flutter::gpu::Shader* wrapper);
 
 }  // extern "C"
 

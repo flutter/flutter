@@ -205,7 +205,7 @@ class KernelSnapshot extends Target {
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
-    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
+    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
 
     // This configuration is all optional.
     final String? frontendServerStarterPath = environment.defines[kFrontendServerStarterPath];
@@ -386,7 +386,7 @@ abstract class AotElfBase extends Target {
       kExtraGenSnapshotOptions,
     );
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
+    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
@@ -500,7 +500,7 @@ abstract final class Lipo {
   /// Otherwise, `lipo` would fail if the given paths didn't exist.
   static Future<void> create(
     Environment environment,
-    List<DarwinArch> darwinArchs, {
+    List<CpuArch> cpuArchs, {
     required String relativePath,
     required String inputDir,
     bool skipMissingInputs = false,
@@ -511,9 +511,9 @@ abstract final class Lipo {
     );
     environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
 
-    Iterable<String> inputPaths = darwinArchs.map(
-      (DarwinArch iosArch) =>
-          environment.fileSystem.path.join(inputDir, iosArch.name, relativePath),
+    Iterable<String> inputPaths = cpuArchs.map(
+      (CpuArch cpuArch) =>
+          environment.fileSystem.path.join(inputDir, cpuArch.darwinArchName, relativePath),
     );
     if (skipMissingInputs) {
       inputPaths = inputPaths.where(environment.fileSystem.isFileSync);

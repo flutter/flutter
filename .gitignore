@@ -170,3 +170,4 @@ app.*.symbols
 # AI related
 .agents/rules/personal-*
 .agents/skills/personal-*
+/.agent-shell/

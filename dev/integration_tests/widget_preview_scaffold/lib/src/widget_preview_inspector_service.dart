@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:widget_preview_scaffold/src/dtd/dtd_connection_info.dart';
 import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
@@ -16,6 +17,7 @@ import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 class WidgetPreviewScaffoldInspectorService with WidgetInspectorService {
   WidgetPreviewScaffoldInspectorService({required this.dtdServices}) {
     WidgetInspectorService.instance = this;
+    addPubRootDirectories(<String>[kProjectRootPath]);
   }
 
   /// The DTD services instance used to communicate with the tool.

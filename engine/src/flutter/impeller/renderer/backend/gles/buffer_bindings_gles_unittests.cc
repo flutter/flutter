@@ -7,6 +7,7 @@
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
+#include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
 #include "impeller/renderer/command.h"
 
@@ -14,6 +15,29 @@ namespace impeller {
 namespace testing {
 
 using ::testing::_;
+
+TEST(BufferBindingsGLESTest, ToVertexAttribTypeSupportedFormats) {
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kFloat32x3),
+            std::optional<GLenum>(GL_FLOAT));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kSInt8x4),
+            std::optional<GLenum>(GL_BYTE));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kUInt8),
+            std::optional<GLenum>(GL_UNSIGNED_BYTE));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kSInt16x2),
+            std::optional<GLenum>(GL_SHORT));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kUInt16),
+            std::optional<GLenum>(GL_UNSIGNED_SHORT));
+}
+
+TEST(BufferBindingsGLESTest, ToVertexAttribTypeRejectsUnsupportedFormats) {
+  // Half-float and 32-bit integer vertex attributes are not available on the
+  // GLES 2.0 floor.
+  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kFloat16).has_value());
+  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kSInt32).has_value());
+  EXPECT_FALSE(
+      ToVertexAttribType(VertexAttributeFormat::kUInt32x4).has_value());
+  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kInvalid).has_value());
+}
 
 TEST(BufferBindingsGLESTest, BindUniformData) {
   BufferBindingsGLES bindings;
@@ -182,6 +206,63 @@ TEST(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType) {
   EXPECT_FALSE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
                                         bound_buffers, Range{0, 0},
                                         Range{0, 1}));
+}
+
+// An instanced draw reaches per-instance data through instance-rate vertex
+// attributes. A vertex layout with an instance-rate binding must set a
+// glVertexAttribDivisor of 1 on that binding's attributes, while a
+// per-vertex binding keeps a divisor of 0.
+TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(0, 0)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(1, 1)).Times(1);
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+
+  BufferBindingsGLES bindings;
+
+  ShaderStageIOSlot per_vertex_input = {
+      .name = "position",
+      .location = 0,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 0,
+  };
+  ShaderStageIOSlot per_instance_input = {
+      .name = "instance_offset",
+      .location = 1,
+      .set = 0,
+      .binding = 1,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 0,
+  };
+  std::vector<ShaderStageIOSlot> inputs = {per_vertex_input,
+                                           per_instance_input};
+  std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{.stride = sizeof(float) * 2,
+                              .binding = 0,
+                              .input_rate = VertexInputRate::kVertex},
+      ShaderStageBufferLayout{.stride = sizeof(float) * 2,
+                              .binding = 1,
+                              .input_rate = VertexInputRate::kInstance},
+  };
+
+  ASSERT_TRUE(bindings.RegisterVertexStageInput(mock_gl->GetProcTable(), inputs,
+                                                layouts));
+  // Binding 0 is per-vertex (divisor 0); binding 1 is per-instance
+  // (divisor 1).
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/0, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/1, /*vertex_offset=*/0,
+                                            /*instance=*/0));
 }
 
 }  // namespace testing

@@ -60,8 +60,14 @@
 
 # Skills owners
 .agents/skills @reidbaker # Fallback owners
+.agents/skills/analyze-github-flake @gmackall
 .agents/skills/find-release @reidbaker
 .agents/skills/rebuilding-flutter-tool @vashworth
 .agents/skills/upgrade-browser @mdebbar
 .agents/skills/flutter-pr-checks-finder @bkonyi
 .agents/skills/dart-log-failure-parser @bkonyi
+.agents/skills/updating-android-sdk @reidbaker
+
+# Agent owners
+.agents/agents/reidbaker-agent/** @reidbaker
+.agents/agents/android-agent/** @flutter/android-reviewers

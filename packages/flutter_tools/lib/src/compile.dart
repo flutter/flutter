@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-import 'package:usage/uuid/uuid.dart';
+import 'package:uuid/uuid.dart';
 
 import 'artifacts.dart';
 import 'base/common.dart';
@@ -62,6 +62,15 @@ class TargetModel {
 
   @override
   String toString() => _value;
+
+  /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
+  static TargetModel fromTargetPlatform(TargetPlatform? platform) {
+    return switch (platform) {
+      TargetPlatform.web_javascript => TargetModel.dartdevc,
+      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
+      _ => TargetModel.flutter,
+    };
+  }
 }
 
 class CompilerOutput {
@@ -727,6 +736,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
              fileSystem: fileSystem,
              trackWidgetCreation: buildInfo.trackWidgetCreation,
              dartDefines: buildInfo.dartDefines,
+             targetModel: targetModel,
              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
            ),
        extraFrontEndOptions = buildInfo.extraFrontEndOptions,
@@ -868,7 +878,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         nativeAssetsUri: nativeAssets,
       );
     }
-    final String inputKey = Uuid().generateV4();
+    final String inputKey = const Uuid().v4();
 
     if (nativeAssets != null && nativeAssets.isNotEmpty) {
       server.stdin.writeln('native-assets $nativeAssets');
@@ -1069,7 +1079,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return null;
     }
 
-    final String inputKey = Uuid().generateV4();
+    final String inputKey = const Uuid().v4();
     server.stdin
       ..writeln('compile-expression $inputKey')
       ..writeln(request.expression);

@@ -1454,6 +1454,20 @@ void pointer_data_packet() {
 
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
+void pointer_data_packet_stylus_buttons() {
+  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket packet) {
+    signalNativeCount(packet.data.length);
+
+    for (final PointerData pointerData in packet.data) {
+      signalNativeMessage('buttons: ${pointerData.buttons}');
+    }
+  };
+
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
 void pointer_data_packet_view_id() {
   PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket packet) {
     assert(packet.data.length == 1);
@@ -1644,6 +1658,41 @@ Future<void> render_impeller_image_snapshot_test() async {
 
   final bool result = (pixel & 0xFF) == color.alpha && ((pixel >> 8) & 0xFF) == color.blue;
   notifyBoolValue(result);
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+void render_impeller_platform_view() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final builder = SceneBuilder();
+
+    // Background
+    builder.addPicture(
+      Offset.zero,
+      createColoredBox(const Color.fromARGB(255, 128, 128, 128), const Size(800.0, 600.0)),
+    );
+
+    // The top bar and the platform view are pushed to the side.
+    builder.pushOffset(100.0, 0.0);
+
+    // Platform view offset from the top
+    builder.pushOffset(0.0, 150.0);
+    builder.addPlatformView(1, width: 700.0, height: 450.0);
+    builder.pop();
+
+    // Top bar
+    builder.addPicture(
+      Offset.zero,
+      createColoredBox(const Color.fromARGB(255, 255, 0, 0), const Size(800.0, 150.0)),
+    );
+
+    builder.pop();
+
+    signalNativeTest(); // Signal 2
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  signalNativeTest(); // Signal 1
+  PlatformDispatcher.instance.scheduleFrame();
 }
 
 @pragma('vm:entry-point')

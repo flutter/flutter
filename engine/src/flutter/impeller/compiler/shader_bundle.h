@@ -6,13 +6,27 @@
 #define FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_H_
 
 #include <set>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/switches.h"
+#include "impeller/compiler/types.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 
 namespace impeller {
 namespace compiler {
+
+/// @brief  The platform-discriminating preprocessor defines injected when
+///         compiling a bundled shader for `platform` (for example
+///         `IMPELLER_TARGET_METAL`). These let bundled Flutter GPU shaders
+///         specialize for the backend they will run on, matching the defines
+///         that Impeller's own shaders receive from the build templates.
+///
+/// @note   Exposed only for testing purposes.
+std::vector<std::string_view> GetShaderBundleTargetPlatformDefines(
+    TargetPlatform platform);
 
 /// @brief  Parse a shader bundle configuration from a given JSON string.
 ///
