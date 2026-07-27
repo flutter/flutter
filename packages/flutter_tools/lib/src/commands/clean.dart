@@ -195,6 +195,10 @@ class CleanCommand extends FlutterCommand {
     }
   }
 
+  /// Attempts to stop active Gradle daemons via `gradlew --stop` when Windows file locks
+  /// prevent deletion of build files, either via the `--stop-gradle` flag or an interactive prompt.
+  ///
+  /// Retries file deletion after stopping Gradle daemons and returns `true` if deletion succeeds.
   Future<bool> _tryStopGradleAndRetryDelete(FileSystemEntity file, FlutterProject? project) async {
     final bool stopGradleFlag =
         (argResults?.wasParsed('stop-gradle') ?? false) && boolArg('stop-gradle');
@@ -233,6 +237,8 @@ class CleanCommand extends FlutterCommand {
         gradlewFile.path,
         '--stop',
       ], workingDirectory: gradlewFile.parent.path);
+    } on Exception catch (e) {
+      globals.printTrace('Failed to stop Gradle daemons: $e');
     } finally {
       stopStatus.stop();
     }

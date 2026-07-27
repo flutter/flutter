@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
@@ -440,8 +441,75 @@ void main() {
           ProcessManager: () => processManager,
         },
       );
+
+      testUsingContext(
+        '$CleanCommand prompts user and invokes gradlew --stop when locked on Windows interactively',
+        () async {
+          xcodeProjectInterpreter.isInstalled = false;
+
+          var shouldThrow = true;
+          fileSystem = MemoryFileSystem.test(
+            opHandle: (String path, FileSystemOp op) {
+              if (shouldThrow && op == FileSystemOp.delete && path.endsWith('build')) {
+                throw const FileSystemException('Locked');
+              }
+            },
+          );
+          fileSystem.file('pubspec.yaml').createSync(recursive: true);
+
+          final FlutterProject project = setupProjectUnderTest(fileSystem.currentDirectory, false);
+          final File gradlewFile = project.android.hostAppGradleRoot.childFile('gradlew.bat')
+            ..createSync(recursive: true);
+
+          final Directory buildDir = project.directory.childDirectory('build')
+            ..createSync(recursive: true);
+          buildDir.childFile('locked').createSync(recursive: true);
+
+          processManager = FakeProcessManager.list(<FakeCommand>[
+            FakeCommand(
+              command: <String>[gradlewFile.path, '--stop'],
+              workingDirectory: gradlewFile.parent.path,
+              onRun: (_) {
+                shouldThrow = false;
+              },
+            ),
+          ]);
+
+          final command = CleanCommand();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          await runner.run(<String>['clean']);
+
+          expect(testLogger.statusText, contains('Stopping Gradle daemons'));
+        },
+        overrides: <Type, Generator>{
+          Platform: () => windowsPlatform,
+          Xcode: () => xcode,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          AnsiTerminal: () => FakeTerminal(),
+        },
+      );
     });
   });
+}
+
+class FakeTerminal extends Fake implements AnsiTerminal {
+  @override
+  bool get stdinHasTerminal => true;
+
+  @override
+  bool get usesTerminalUi => true;
+
+  @override
+  Future<String> promptForCharInput(
+    List<String> acceptedCharacters, {
+    Logger? logger,
+    String? prompt,
+    int? defaultChoiceIndex,
+    bool displayAcceptedCharacters = true,
+  }) async {
+    return 'y';
+  }
 }
 
 FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcodeWorkspace) {
