@@ -84,5 +84,4 @@ object EnableHcppManifestTaskHelper {
             manifestFile.copyTo(updatedManifest, overwrite = true)
         }
     }
-
 }
