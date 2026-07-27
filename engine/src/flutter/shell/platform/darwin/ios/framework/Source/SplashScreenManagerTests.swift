@@ -31,8 +31,8 @@ final class MockBundle: Bundle, @unchecked Sendable {
   }
 }
 
-@Suite @MainActor
-struct SplashScreenManagerTests {
+@MainActor
+@Suite struct SplashScreenManagerTests {
 
   /// Verifies `loadDefaultSplashScreenView` fails when the `UILaunchStoryboardName` key is missing.
   @Test func loadDefaultSplashScreenViewFailsWhenNoPlistKey() {
@@ -75,7 +75,7 @@ struct SplashScreenManagerTests {
   }
 
   /// Verifies `removeSplashScreen` calls the completion block after fading out.
-  @Test() func removeSplashScreenCallsCompletion() async {
+  @Test func removeSplashScreenCallsCompletion() async {
     let manager = SplashScreenManager()
     let view = UIView()
     manager.splashScreenView = view

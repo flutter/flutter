@@ -5,13 +5,14 @@
 import InternalFlutterSwift
 import Testing
 
+// The TaskRunner API relies on CFRunLoop.
+// `@MainActor` makes sure the test subject TaskRunner can use the main thread
+// run loop which tests do not have to manually pump.
 @MainActor
 @Suite struct TaskRunnerTests {
+  let taskRunner: TaskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
-  @Test()
-  func postTask() async {
-    let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
-
+  @Test func postTask() async {
     await withCheckedContinuation { continuation in
       taskRunner.postTask {
         continuation.resume()
@@ -19,10 +20,7 @@ import Testing
     }
   }
 
-  @Test()
-  func postDelayedTask() async {
-    let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
-
+  @Test func postDelayedTask() async {
     let startTime = CACurrentMediaTime()
     await withCheckedContinuation { continuation in
       taskRunner.postTask(delay: 0.1) {
@@ -35,8 +33,6 @@ import Testing
   }
 
   @Test func runsTasksOnCurrentThread() {
-    let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
-
     #expect(taskRunner.runsTasksOnCurrentThread())
   }
 }
