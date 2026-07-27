@@ -73,8 +73,7 @@ static GtkWindow* fl_application_create_window(FlApplication* self,
     const gchar* current_desktop = g_getenv("XDG_CURRENT_DESKTOP");
     if (current_desktop != nullptr) {
       g_auto(GStrv) desktops = g_strsplit(current_desktop, ":", -1);
-      use_header_bar = g_strv_contains(
-          reinterpret_cast<const gchar* const*>(desktops), "GNOME");
+      use_header_bar = g_strv_contains(desktops, "GNOME");
     }
   }
   if (use_header_bar) {
