@@ -27,6 +27,7 @@ const _kWindowsArtifacts = <String>[
   'flutter_plugin_registrar.h',
   'flutter_texture_registrar.h',
   'flutter_windows.h',
+  'libvmservice_snapshot.dll',
 ];
 
 const _kWindowsDepfile = 'windows_engine_sources.d';

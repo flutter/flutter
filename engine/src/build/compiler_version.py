@@ -57,7 +57,7 @@ def GetVersion(compiler, tool):
     if tool == "compiler":
       compiler = compiler + " -dumpversion"
       # 4.6
-      version_re = re.compile(r"(\d+)\.(\d+)")
+      version_re = re.compile(r"(\d+)(?:\.(\d+))?")
     elif tool == "assembler":
       compiler = compiler + " -Xassembler --version -x assembler -c /dev/null"
       # Unmodified: GNU assembler (GNU Binutils) 2.24
@@ -88,8 +88,11 @@ def GetVersion(compiler, tool):
     if pipe.returncode:
       raise subprocess.CalledProcessError(pipe.returncode, compiler)
 
+    tool_output = tool_output.decode("utf-8")
+    tool_error = tool_error.decode("utf-8")
     parsed_output = version_re.match(tool_output)
-    result = parsed_output.group(1) + parsed_output.group(2)
+    minor = parsed_output.group(2) or "0"
+    result = parsed_output.group(1) + minor
     compiler_version_cache[cache_key] = result
     return result
   except Exception as e:

@@ -104,10 +104,12 @@ dart_snapshot_kernel("vmservice_kernel") {
   dart_kernel = "$target_gen_dir/assets/vmservice_kernel.bin"
 }
 
-dart_snapshot_aot("vmservice_snapshot") {
-  dart_kernel = "$target_gen_dir/assets/vmservice_kernel.bin"
-  dart_elf_filename = "libvmservice_snapshot.so"
-  deps = [ ":vmservice_kernel" ]
+if (is_aot_test) {
+  dart_snapshot_aot("vmservice_snapshot") {
+    dart_kernel = "$target_gen_dir/assets/vmservice_kernel.bin"
+    dart_elf_filename = "libvmservice_snapshot.so"
+    deps = [ ":vmservice_kernel" ]
+  }
 }
 
 source_set("fixture_test") {

@@ -71,6 +71,15 @@ abstract class AndroidAssetBundle extends Target {
       environment.fileSystem
           .file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
+
+      final String vmserviceDill = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceKernelDill,
+        mode: BuildMode.debug,
+      );
+      final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
+      if (vmserviceDillFile.existsSync()) {
+        vmserviceDillFile.copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
+      }
     }
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
@@ -341,6 +350,16 @@ class AndroidAotBundle extends Target {
     }
     final File outputLibFile = buildDir.childFile('app.so');
     outputLibFile.copySync(outputDirectory.childFile('app.so').path);
+
+    final String vmserviceSharedLib = environment.artifacts.getArtifactPath(
+      Artifact.vmserviceSharedLibrary,
+      platform: targetPlatform,
+      mode: buildMode,
+    );
+    final File vmserviceFile = environment.fileSystem.file(vmserviceSharedLib);
+    if (vmserviceFile.existsSync()) {
+      vmserviceFile.copySync(outputDirectory.childFile('libvmservice_snapshot.so').path);
+    }
 
     final inputs = <File>[];
     final outputs = <File>[];

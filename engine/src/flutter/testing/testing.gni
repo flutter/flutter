@@ -91,6 +91,9 @@ template("dart_snapshot_kernel") {
     main_dart = invoker.dart_main
     kernel_output = invoker.dart_kernel
     extra_args = args
+    if (defined(invoker.package_config)) {
+      package_config = invoker.package_config
+    }
   }
 }
 

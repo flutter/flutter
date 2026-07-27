@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -21,6 +22,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -620,6 +622,45 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
+      if (globals.artifacts != null) ...<String>['--ez', 'experimental-vm-service', 'true'],
+      if (debuggingOptions.buildInfo.isProfile &&
+          globals.artifacts != null &&
+          globals.fs
+              .file(
+                globals.artifacts!.getArtifactPath(
+                  Artifact.vmserviceSharedLibrary,
+                  platform: await targetPlatform,
+                  mode: BuildMode.profile,
+                ),
+              )
+              .existsSync()) ...<String>[
+        '--es',
+        'aot-vmservice-shared-library-name',
+        globals.artifacts!.getArtifactPath(
+          Artifact.vmserviceSharedLibrary,
+          platform: await targetPlatform,
+          mode: BuildMode.profile,
+        ),
+      ],
+      if (debuggingOptions.buildInfo.isDebug &&
+          globals.artifacts != null &&
+          globals.fs
+              .file(
+                globals.artifacts!.getArtifactPath(
+                  Artifact.vmserviceKernelDill,
+                  platform: await targetPlatform,
+                  mode: BuildMode.debug,
+                ),
+              )
+              .existsSync()) ...<String>[
+        '--es',
+        'vmservice-kernel-path',
+        globals.artifacts!.getArtifactPath(
+          Artifact.vmserviceKernelDill,
+          platform: await targetPlatform,
+          mode: BuildMode.debug,
+        ),
+      ],
       if (debuggingOptions.enableDartProfiling) ...<String>[
         '--ez',
         'enable-dart-profiling',

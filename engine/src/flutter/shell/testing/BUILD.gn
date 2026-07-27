@@ -11,7 +11,7 @@ if (is_fuchsia) {
 
 group("testing") {
   public_deps = [ ":flutter_tester" ]
-  if (current_toolchain == host_toolchain) {
+  if (enable_unittests && current_toolchain == host_toolchain) {
     public_deps += [ ":flutter_tester_opengles" ]
   }
 }
@@ -111,7 +111,7 @@ tester("flutter_tester") {
   }
 }
 
-if (current_toolchain == host_toolchain) {
+if (enable_unittests && current_toolchain == host_toolchain) {
   tester("flutter_tester_opengles") {
     output_name = "flutter_tester_opengles"
 

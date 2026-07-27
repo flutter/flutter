@@ -1244,7 +1244,11 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && dartFlags.isNotEmpty)
         '--dart-flags=$dartFlags',
       if (useTestFonts) '--use-test-fonts',
-      if (debuggingEnabled) ...<String>['--enable-checked-mode', '--verify-entry-points'],
+      if (debuggingEnabled) ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--experimental-vm-service',
+      ],
       if (enableSoftwareRendering) '--enable-software-rendering',
       if (traceSystrace) '--trace-systrace',
       if (traceToFile != null) '--trace-to-file="$traceToFile"',
