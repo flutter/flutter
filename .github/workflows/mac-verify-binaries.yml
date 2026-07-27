@@ -5,6 +5,7 @@ on:
     branches: [master]
   merge_group:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   check-engine-changes:
