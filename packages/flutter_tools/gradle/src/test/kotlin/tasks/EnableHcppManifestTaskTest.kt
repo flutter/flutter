@@ -11,6 +11,7 @@ import org.gradle.api.logging.Logger
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -66,7 +67,11 @@ class EnableHcppManifestTaskTest {
             )
         val updatedManifest = createTempOutputFile()
 
-        EnableHcppManifestTaskHelper.addEnableHcppMetadataIfAbsent(manifestFile, updatedManifest)
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true
+        )
 
         assertEquals("true", findHcppMetadataValue(updatedManifest))
     }
@@ -87,7 +92,11 @@ class EnableHcppManifestTaskTest {
             )
         val updatedManifest = createTempOutputFile()
 
-        EnableHcppManifestTaskHelper.addEnableHcppMetadataIfAbsent(manifestFile, updatedManifest)
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true
+        )
 
         assertEquals("false", findHcppMetadataValue(updatedManifest))
         assertEquals(
@@ -113,7 +122,11 @@ class EnableHcppManifestTaskTest {
             )
         val updatedManifest = createTempOutputFile()
 
-        EnableHcppManifestTaskHelper.addEnableHcppMetadataIfAbsent(manifestFile, updatedManifest)
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true
+        )
 
         assertEquals("true", findHcppMetadataValue(updatedManifest))
         assertEquals(
@@ -270,7 +283,11 @@ class EnableHcppManifestTaskTest {
             )
         val updatedManifest = createTempOutputFile()
 
-        EnableHcppManifestTaskHelper.addEnableHcppMetadataIfAbsent(manifestFile, updatedManifest)
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true
+        )
 
         assertEquals("true", findHcppMetadataValue(updatedManifest))
     }
@@ -291,7 +308,11 @@ class EnableHcppManifestTaskTest {
             )
         val updatedManifest = createTempOutputFile()
 
-        EnableHcppManifestTaskHelper.addEnableHcppMetadataIfAbsent(manifestFile, updatedManifest)
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true
+        )
 
         assertEquals("true", findHcppMetadataValue(updatedManifest))
         val manifest: Node =
@@ -372,7 +393,11 @@ class EnableHcppManifestTaskTest {
             )
         val updatedManifest = createTempOutputFile()
 
-        EnableHcppManifestTaskHelper.addEnableHcppMetadataIfAbsent(manifestFile, updatedManifest)
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true
+        )
 
         assertEquals("true", findHcppMetadataValue(updatedManifest))
 
@@ -447,6 +472,75 @@ class EnableHcppManifestTaskTest {
         assertEquals("true", metadataValuesByName["io.flutter.embedding.android.EnableImpeller"])
         assertEquals("519", metadataValuesByName["io.flutter.embedding.android.OldGenHeapSize"])
         assertEquals("true", metadataValuesByName[EnableHcppManifestTaskHelper.HCPP_METADATA_NAME])
+    }
+
+    @Test
+    fun copiesManifestUnmodifiedWhenNotRequestedAndMetadataAbsent() {
+        val manifestFile =
+            createTempManifestFile(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                    package="$defaultNamespace">
+                    <application android:label="Test App">
+                        <activity android:name=".MainActivity" android:exported="true" />
+                    </application>
+                </manifest>
+                """
+            )
+        val updatedManifest = createTempOutputFile()
+        val logger = mockk<Logger>(relaxed = true)
+
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = false,
+            logger = logger
+        )
+
+        assertNull(
+            findHcppMetadataValue(updatedManifest),
+            "No metadata should be injected when it was not requested"
+        )
+        assertEquals(
+            manifestFile.readText(),
+            updatedManifest.readText(),
+            "The manifest should be copied byte for byte when nothing is injected"
+        )
+        verify(exactly = 0) { logger.warn(any()) }
+    }
+
+    @Test
+    fun dropsXmlCommentsWhenInjecting() {
+        // Documents a known side effect of re-serializing the parsed manifest: groovy's XmlParser
+        // discards comments, so the provenance comments the manifest merger emits do not survive
+        // injection. aapt2 does not care, but the merged manifest is less readable.
+        val manifestFile =
+            createTempManifestFile(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                    package="$defaultNamespace">
+                    <application android:label="Test App">
+                        <!-- Added by com.example.somelibrary -->
+                        <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="true" />
+                    </application>
+                </manifest>
+                """
+            )
+        val updatedManifest = createTempOutputFile()
+
+        EnableHcppManifestTaskHelper.processHcppManifest(
+            manifestFile = manifestFile,
+            updatedManifest = updatedManifest,
+            requestedEnableHcpp = true
+        )
+
+        assertEquals("true", findHcppMetadataValue(updatedManifest))
+        assertFalse(
+            updatedManifest.readText().contains("Added by com.example.somelibrary"),
+            "Comments are expected to be dropped; update this test if that changes"
+        )
     }
 
     @Test

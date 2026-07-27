@@ -19,6 +19,7 @@ import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
 import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
 import com.flutter.gradle.FlutterPluginUtils.detectApplyingKotlinGradlePlugin
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.EnableHcppManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import io.mockk.called
 import io.mockk.every
@@ -2698,36 +2699,70 @@ class FlutterPluginUtilsTest {
         verify(exactly = 0) { project.tasks }
     }
 
-    @Test
-    fun `addTasksForEnableHcppManifest registers manifest transform on app projects when enable-hcpp is true`() {
-        val project = mockk<Project>()
-        val extensions = mockk<org.gradle.api.plugins.ExtensionContainer>()
-        val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
-        every { project.extensions } returns extensions
-        every { extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
-        every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns "true"
-        every { project.hasProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP) } returns false
-        every { extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
+    /**
+     * Sets up [project] as an application project with the given hcpp properties, and drives
+     * [FlutterPluginUtils.addTasksForEnableHcppManifest] through a single "debug" variant.
+     *
+     * Returns the [EnableHcppManifestTask] the registration action was applied to, so callers can
+     * verify how it was configured.
+     */
+    private fun registerHcppTaskForDebugVariant(
+        enableHcppProperty: String,
+        explicitEnableHcppProperty: String?
+    ): EnableHcppManifestTask {
+        val project = mockk<Project>(relaxed = true)
+        val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
+        every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
+        every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns enableHcppProperty
+        every {
+            project.hasProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP)
+        } returns (explicitEnableHcppProperty != null)
+        every {
+            project.findProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP)
+        } returns explicitEnableHcppProperty
+        every { project.tasks.register(any(), eq(EnableHcppManifestTask::class.java), any()) } returns mockk(relaxed = true)
+
+        // AGP's onVariants takes a defaulted selector, so selector().all() has to be stubbed for
+        // the call to get through to the captured callback.
+        every { androidComponents.selector() } returns mockk { every { all() } returns mockk() }
+        val onVariantsSlot = slot<(Variant) -> Unit>()
+        every { androidComponents.onVariants(any(), capture(onVariantsSlot)) } answers {
+            onVariantsSlot.captured.invoke(mockk<Variant>(relaxed = true) { every { name } returns "debug" })
+        }
 
         FlutterPluginUtils.addTasksForEnableHcppManifest(project)
 
-        verify(exactly = 1) { extensions.getByType(AndroidComponentsExtension::class.java) }
+        val configureSlot = slot<Action<EnableHcppManifestTask>>()
+        verify(exactly = 1) {
+            project.tasks.register(
+                "enableHcppInManifestDebug",
+                eq(EnableHcppManifestTask::class.java),
+                capture(configureSlot)
+            )
+        }
+        val task = mockk<EnableHcppManifestTask>(relaxed = true)
+        configureSlot.captured.execute(task)
+        return task
+    }
+
+    @Test
+    fun `addTasksForEnableHcppManifest registers manifest transform on app projects when enable-hcpp is true`() {
+        val task = registerHcppTaskForDebugVariant(enableHcppProperty = "true", explicitEnableHcppProperty = null)
+
+        verify(exactly = 1) { task.requestedEnableHcpp.set(true) }
+        // Without an explicit flag there is nothing to warn about, so the task must not be told
+        // to compare against one.
+        verify(exactly = 0) { task.explicitEnableHcpp.set(any<Boolean>()) }
     }
 
     @Test
     fun `addTasksForEnableHcppManifest registers manifest transform when explicit-enable-hcpp is present even if enable-hcpp is false`() {
-        val project = mockk<Project>()
-        val extensions = mockk<org.gradle.api.plugins.ExtensionContainer>()
-        val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
-        every { project.extensions } returns extensions
-        every { extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
-        every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns "false"
-        every { project.hasProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP) } returns true
-        every { project.findProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP) } returns "false"
-        every { extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
+        val task = registerHcppTaskForDebugVariant(enableHcppProperty = "false", explicitEnableHcppProperty = "false")
 
-        FlutterPluginUtils.addTasksForEnableHcppManifest(project)
-
-        verify(exactly = 1) { extensions.getByType(AndroidComponentsExtension::class.java) }
+        // Nothing is injected, but the task still runs so that it can warn when the manifest
+        // explicitly disagrees with --no-enable-hcpp.
+        verify(exactly = 1) { task.requestedEnableHcpp.set(false) }
+        verify(exactly = 1) { task.explicitEnableHcpp.set(false) }
     }
 }

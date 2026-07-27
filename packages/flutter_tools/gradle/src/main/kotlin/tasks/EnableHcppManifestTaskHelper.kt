@@ -27,11 +27,15 @@ object EnableHcppManifestTaskHelper {
      *
      * If [explicitEnableHcpp] is specified (non-null) and conflicts with an existing metadata
      * value in the merged manifest, logs a warning via [logger].
+     *
+     * Note that the manifest is re-serialized from the parsed tree when metadata is injected,
+     * which drops XML comments (including the provenance comments the manifest merger emits).
+     * This is invisible to aapt2, but does affect the merged manifest as read by a human.
      */
     fun processHcppManifest(
         manifestFile: File,
         updatedManifest: File,
-        requestedEnableHcpp: Boolean = true,
+        requestedEnableHcpp: Boolean,
         explicitEnableHcpp: Boolean? = null,
         logger: Logger? = null
     ) {
@@ -81,17 +85,4 @@ object EnableHcppManifestTaskHelper {
         }
     }
 
-    /**
-     * Legacy wrapper for [processHcppManifest] with [requestedEnableHcpp] = true.
-     */
-    fun addEnableHcppMetadataIfAbsent(
-        manifestFile: File,
-        updatedManifest: File
-    ) {
-        processHcppManifest(
-            manifestFile = manifestFile,
-            updatedManifest = updatedManifest,
-            requestedEnableHcpp = true
-        )
-    }
 }

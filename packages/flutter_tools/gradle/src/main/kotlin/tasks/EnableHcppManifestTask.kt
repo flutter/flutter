@@ -23,6 +23,10 @@ import org.gradle.api.tasks.TaskAction
  * If [requestedEnableHcpp] is true, injects the metadata element if absent.
  * If [explicitEnableHcpp] is provided and conflicts with an explicit metadata value
  * in the merged manifest, logs a warning.
+ *
+ * The conflict warning is emitted from the task action, so it is only printed when the task
+ * actually runs. A subsequent up-to-date or cached build repeats the same (correct) output
+ * without repeating the warning.
  */
 @CacheableTask
 abstract class EnableHcppManifestTask : DefaultTask() {
@@ -46,7 +50,7 @@ abstract class EnableHcppManifestTask : DefaultTask() {
         EnableHcppManifestTaskHelper.processHcppManifest(
             manifestFile = manifestFile.get().asFile,
             updatedManifest = updatedManifest.get().asFile,
-            requestedEnableHcpp = requestedEnableHcpp.getOrElse(true),
+            requestedEnableHcpp = requestedEnableHcpp.getOrElse(false),
             explicitEnableHcpp = explicitEnableHcpp.orNull,
             logger = logger
         )
