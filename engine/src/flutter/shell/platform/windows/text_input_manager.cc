@@ -44,7 +44,14 @@ class ImmContext {
   FML_DISALLOW_COPY_AND_ASSIGN(ImmContext);
 };
 
+TextInputManager::~TextInputManager() {
+  DestroyOwnedImeContext();
+}
+
 void TextInputManager::SetWindowHandle(HWND window_handle) {
+  if (window_handle_ != window_handle) {
+    DestroyOwnedImeContext();
+  }
   window_handle_ = window_handle;
 }
 
@@ -56,35 +63,98 @@ void TextInputManager::SetImeEnabled(bool enabled) {
   HIMC previous_context = ::ImmGetContext(window_handle_);
   if (previous_context != nullptr) {
     ime_open_status_ = ::ImmGetOpenStatus(previous_context) != FALSE;
+    DWORD conversion_mode = 0;
+    DWORD sentence_mode = 0;
+    if (::ImmGetConversionStatus(previous_context, &conversion_mode,
+                                 &sentence_mode) != FALSE) {
+      ime_conversion_mode_ = conversion_mode;
+      ime_sentence_mode_ = sentence_mode;
+    }
     ::ImmReleaseContext(window_handle_, previous_context);
   }
 
+  const bool previous_owned_context_destroyed = DestroyOwnedImeContext();
   if (!enabled) {
     ::ImmAssociateContextEx(window_handle_, nullptr, 0);
     return;
   }
-
-  // Reassociate rather than reusing the current context. Windows can rebuild
-  // the TSF document for a window while leaving its legacy IMM32 context
-  // association stale after the window regains focus.
-  ::ImmAssociateContextEx(window_handle_, nullptr, 0);
-  if (::ImmAssociateContextEx(window_handle_, nullptr, IACE_DEFAULT) == FALSE) {
-    if (previous_context != nullptr) {
-      ::ImmAssociateContext(window_handle_, previous_context);
-    }
+  if (!previous_owned_context_destroyed) {
     return;
   }
 
-  ImmContext restored_context(window_handle_);
-  if (!restored_context.IsValid()) {
-    if (previous_context != nullptr) {
-      ::ImmAssociateContext(window_handle_, previous_context);
+  // Restoring the thread's default HIMC is not sufficient when its TSF bridge
+  // is stale: Windows can return the same context while reporting success.
+  // Start every text-input activation with a distinct application-owned HIMC.
+  CreateAndAssociateImeContext();
+}
+
+bool TextInputManager::DestroyOwnedImeContext() {
+  if (owned_ime_context_ == nullptr) {
+    return true;
+  }
+
+  bool context_disassociated =
+      owned_ime_window_ == nullptr || ::IsWindow(owned_ime_window_) == FALSE;
+  if (!context_disassociated) {
+    HIMC current_context = ::ImmGetContext(owned_ime_window_);
+    if (current_context != nullptr) {
+      ::ImmReleaseContext(owned_ime_window_, current_context);
     }
-    return;
+    if (current_context == owned_ime_context_) {
+      ::ImmAssociateContext(owned_ime_window_, replaced_ime_context_);
+      current_context = ::ImmGetContext(owned_ime_window_);
+      if (current_context != nullptr) {
+        ::ImmReleaseContext(owned_ime_window_, current_context);
+      }
+    }
+    context_disassociated = current_context != owned_ime_context_;
   }
-  if (ime_open_status_.has_value()) {
-    ::ImmSetOpenStatus(restored_context.get(), ime_open_status_.value());
+
+  if (context_disassociated &&
+      ::ImmDestroyContext(owned_ime_context_) != FALSE) {
+    owned_ime_window_ = nullptr;
+    owned_ime_context_ = nullptr;
+    replaced_ime_context_ = nullptr;
   }
+  return owned_ime_context_ == nullptr;
+}
+
+bool TextInputManager::CreateAndAssociateImeContext() {
+  FML_DCHECK(window_handle_);
+
+  // Make the thread default context available as the context to restore when
+  // this application-owned context is disabled or destroyed.
+  ::ImmAssociateContextEx(window_handle_, nullptr, IACE_DEFAULT);
+
+  HIMC new_context = ::ImmCreateContext();
+  if (new_context == nullptr) {
+    return false;
+  }
+  if (ime_open_status_.has_value() &&
+      ::ImmSetOpenStatus(new_context, ime_open_status_.value()) == FALSE) {
+    ::ImmDestroyContext(new_context);
+    return false;
+  }
+  if (ime_conversion_mode_.has_value() && ime_sentence_mode_.has_value()) {
+    ::ImmSetConversionStatus(new_context, ime_conversion_mode_.value(),
+                             ime_sentence_mode_.value());
+  }
+
+  HIMC replaced_context = ::ImmAssociateContext(window_handle_, new_context);
+  HIMC associated_context = ::ImmGetContext(window_handle_);
+  if (associated_context != nullptr) {
+    ::ImmReleaseContext(window_handle_, associated_context);
+  }
+  if (associated_context != new_context) {
+    ::ImmAssociateContext(window_handle_, replaced_context);
+    ::ImmDestroyContext(new_context);
+    return false;
+  }
+
+  owned_ime_context_ = new_context;
+  owned_ime_window_ = window_handle_;
+  replaced_ime_context_ = replaced_context;
+  return true;
 }
 
 void TextInputManager::CreateImeWindow() {

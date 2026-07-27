@@ -36,6 +36,10 @@ TEST(TextInputManager, ImeContextFollowsEnabledState) {
   HIMC original_context = ImmGetContext(window);
   ASSERT_NE(original_context, nullptr);
   const BOOL original_open_status = ImmGetOpenStatus(original_context);
+  DWORD original_conversion_mode = 0;
+  DWORD original_sentence_mode = 0;
+  const BOOL original_conversion_available = ImmGetConversionStatus(
+      original_context, &original_conversion_mode, &original_sentence_mode);
   ImmReleaseContext(window, original_context);
 
   TextInputManager manager;
@@ -46,9 +50,26 @@ TEST(TextInputManager, ImeContextFollowsEnabledState) {
   manager.SetImeEnabled(true);
   HIMC restored_context = ImmGetContext(window);
   ASSERT_NE(restored_context, nullptr);
+  EXPECT_NE(restored_context, original_context);
   EXPECT_EQ(ImmGetOpenStatus(restored_context), original_open_status);
+  if (original_conversion_available != FALSE) {
+    DWORD restored_conversion_mode = 0;
+    DWORD restored_sentence_mode = 0;
+    ASSERT_NE(
+        ImmGetConversionStatus(restored_context, &restored_conversion_mode,
+                               &restored_sentence_mode),
+        FALSE);
+    EXPECT_EQ(restored_conversion_mode, original_conversion_mode);
+    EXPECT_EQ(restored_sentence_mode, original_sentence_mode);
+  }
   ImmReleaseContext(window, restored_context);
 
+  manager.SetWindowHandle(nullptr);
+  HIMC final_context = ImmGetContext(window);
+  EXPECT_EQ(final_context, original_context);
+  if (final_context != nullptr) {
+    ImmReleaseContext(window, final_context);
+  }
   DestroyWindow(window);
 }
 
