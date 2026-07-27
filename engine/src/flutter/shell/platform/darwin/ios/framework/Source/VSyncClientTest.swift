@@ -27,7 +27,7 @@ import Testing
   /// This test passes a newly created, paused `CADisplayLink` (whose properties both evaluate to
   /// 0.0) and asserts that the client intercepts the invalid state and synthesizes a safe, positive
   /// next-frame target timestamp based on the display's maximum refresh rate.
-  @Test func realDisplayLinkVsyncTimestampsCorrect() {
+  @Test func realDisplayLinkVsyncTimestampsCorrect() throws {
     var callbackStartTime: CFTimeInterval = -1
     var callbackTargetTime: CFTimeInterval = -1
     let vsyncClient = VSyncClient(
@@ -38,7 +38,7 @@ import Testing
       callbackStartTime = startTime
       callbackTargetTime = targetTime
     }
-    let link = vsyncClient.displayLink!
+    let link = try #require(vsyncClient.displayLink)
 
     vsyncClient.onDisplayLink(link)
 
@@ -49,7 +49,7 @@ import Testing
     #expect(abs(callbackTargetTime - callbackStartTime - 1.0 / 60.0) < 0.0001)
   }
 
-  @Test func vsyncClientPreventsZeroRefreshRateDivision() {
+  @Test func vsyncClientPreventsZeroRefreshRateDivision() throws {
     var callbackStartTime: CFTimeInterval = -1
     var callbackTargetTime: CFTimeInterval = -1
     // Initialize with maxRefreshRate = 0.0 to simulate uninitialized/zero max refresh rate.
@@ -61,7 +61,7 @@ import Testing
       callbackStartTime = startTime
       callbackTargetTime = targetTime
     }
-    let link = vsyncClient.displayLink!
+    let link = try #require(vsyncClient.displayLink)
 
     vsyncClient.onDisplayLink(link)
 
@@ -84,13 +84,13 @@ import Testing
     #expect(vsyncClient.refreshRate == 60.0)
   }
 
-  @Test func setAllowPauseAfterVsyncCorrect() {
+  @Test func setAllowPauseAfterVsyncCorrect() throws {
     let vsyncClient = VSyncClient(
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: 60.0
     ) { _, _ in }
-    let link = vsyncClient.displayLink!
+    let link = try #require(vsyncClient.displayLink)
 
     vsyncClient.allowPauseAfterVsync = false
     vsyncClient.await()
@@ -103,41 +103,41 @@ import Testing
     #expect(link.isPaused)
   }
 
-  @Test func setCorrectVariableRefreshRates() {
+  @Test func setCorrectVariableRefreshRates() throws {
     let maxFrameRate: Double = 120.0
     let vsyncClient = VSyncClient(
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: true,
       maxRefreshRate: maxFrameRate
     ) { _, _ in }
-    let link = vsyncClient.displayLink!
+    let link = try #require(vsyncClient.displayLink)
 
     #expect(abs(Double(link.preferredFrameRateRange.maximum) - maxFrameRate) < 0.1)
     #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0) - maxFrameRate) < 0.1)
     #expect(abs(Double(link.preferredFrameRateRange.minimum) - maxFrameRate / 2) < 0.1)
   }
 
-  @Test func doNotSetVariableRefreshRatesIfCADisableMinimumFrameDurationOnPhoneIsNotOn() {
+  @Test func doNotSetVariableRefreshRatesIfCADisableMinimumFrameDurationOnPhoneIsNotOn() throws {
     let maxFrameRate: Double = 120.0
     let vsyncClient = VSyncClient(
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: maxFrameRate
     ) { _, _ in }
-    let link = vsyncClient.displayLink!
+    let link = try #require(vsyncClient.displayLink)
 
     #expect(abs(Double(link.preferredFrameRateRange.maximum)) < 0.1)
     #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0)) < 0.1)
     #expect(abs(Double(link.preferredFrameRateRange.minimum)) < 0.1)
   }
 
-  @Test func awaitAndPauseWillWorkCorrectly() {
+  @Test func awaitAndPauseWillWorkCorrectly() throws {
     let vsyncClient = VSyncClient(
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: 60.0
     ) { _, _ in }
-    let link = vsyncClient.displayLink!
+    let link = try #require(vsyncClient.displayLink)
 
     #expect(link.isPaused)
     vsyncClient.await()
@@ -146,7 +146,7 @@ import Testing
     #expect(link.isPaused)
   }
 
-  @Test func releasesLinkOnInvalidation() async {
+  @Test func releasesLinkOnInvalidation() async throws {
     weak var weakClient: VSyncClient?
     // This variable keeps the test subject VsyncClient in memory until
     // it is explicitly set to nil in the second autoreleasepool.
@@ -169,8 +169,8 @@ import Testing
       }
     }
 
-    autoreleasepool {
-      tempClient!.invalidate()
+    try autoreleasepool {
+      try #require(tempClient).invalidate()
       tempClient = nil
     }
 
