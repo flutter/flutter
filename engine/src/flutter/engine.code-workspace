@@ -137,6 +137,9 @@
     ],
     "dotnet.defaultSolution": "disable",
     "dart.showTodos": false,
+    "swift.sourcekit-lsp.supported-languages": [
+      "swift"
+    ],
     "testMate.cpp.test.advancedExecutables": [
       {
         "name": "impeller_unittests_arm64",

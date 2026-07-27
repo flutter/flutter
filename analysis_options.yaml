@@ -17,7 +17,6 @@ analyzer:
   language:
     strict-casts: true
     strict-inference: true
-    strict-raw-types: true
   errors:
     # allow deprecated members (we do this because otherwise we have to annotate
     # every member in every test, assert, etc, when we or the Dart SDK deprecates
@@ -70,7 +69,6 @@ linter:
     - avoid_init_to_null
     - avoid_js_rounded_ints
     # - avoid_multiple_declarations_per_line # seems to be a stylistic choice we don't subscribe to
-    - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # would have been nice to enable this but by now there's too many places that break it
     - avoid_print
     # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
@@ -145,6 +143,7 @@ linter:
     - no_leading_underscores_for_local_identifiers
     - no_literal_bool_comparisons
     - no_logic_in_create_state
+    - no_raw_types
     # - no_runtimeType_toString # ok in tests; we enable this only in packages/
     - no_self_assignments
     - no_wildcard_variable_uses
@@ -177,7 +176,6 @@ linter:
     - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
-    # - prefer_final_parameters # adds too much verbosity
     - prefer_for_elements_to_map_fromIterable
     - prefer_foreach
     - prefer_function_declarations_over_variables
@@ -260,7 +258,6 @@ linter:
     - use_enums
     - use_full_hex_values_for_flutter_colors
     - use_function_type_syntax_for_parameters
-    - use_if_null_to_convert_nulls_to_bools
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors
     - use_late_for_private_fields_and_variables

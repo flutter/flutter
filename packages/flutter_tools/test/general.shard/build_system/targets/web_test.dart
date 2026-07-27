@@ -135,6 +135,31 @@ name: foo
   );
 
   test(
+    'WebEntrypointTarget declares package_config.json, pubspec.yaml, and plugin dependencies as inputs',
+    () => testbed.run(() async {
+      const target = WebEntrypointTarget();
+      expect(
+        target.inputs,
+        equals(<Source>[
+          const Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart',
+          ),
+          const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
+          const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+          const Source.pattern('{PROJECT_DIR}/.flutter-plugins-dependencies', optional: true),
+        ]),
+      );
+      expect(
+        target.outputs,
+        equals(<Source>[
+          const Source.pattern('{BUILD_DIR}/main.dart'),
+          const Source.pattern('{BUILD_DIR}/web_plugin_registrant.dart'),
+        ]),
+      );
+    }),
+  );
+
+  test(
     'version.json is created after release build',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
@@ -1381,6 +1406,34 @@ _flutter.loader.load();
       }
     }
   }
+
+  test('Dart2WasmTarget.buildFiles respects compilerConfig.sourceMaps and matches modules', () {
+    final File wasmFile = environment.buildDir.childFile('main.dart.wasm')..createSync();
+    final File mjsFile = environment.buildDir.childFile('main.dart.mjs')..createSync();
+    final File mapFile = environment.buildDir.childFile('main.dart.wasm.map')..createSync();
+
+    final File partWasmFile = environment.buildDir.childFile('main.dart_module1.wasm')
+      ..createSync();
+    final File partMapFile = environment.buildDir.childFile('main.dart_module1.wasm.map')
+      ..createSync();
+
+    final targetWithMaps = Dart2WasmTarget(const WasmCompilerConfig(), const NoOpAnalytics());
+    expect(
+      targetWithMaps.buildFiles(environment).map((f) => f.path),
+      containsAll(<File>[wasmFile, mjsFile, mapFile, partWasmFile, partMapFile].map((f) => f.path)),
+    );
+
+    final targetWithoutMaps = Dart2WasmTarget(
+      const WasmCompilerConfig(sourceMaps: false),
+      const NoOpAnalytics(),
+    );
+    expect(
+      targetWithoutMaps.buildFiles(environment).map((f) => f.path),
+      containsAll(<File>[wasmFile, mjsFile, partWasmFile].map((f) => f.path)),
+    );
+    expect(targetWithoutMaps.buildFiles(environment), isNot(contains(mapFile)));
+    expect(targetWithoutMaps.buildFiles(environment), isNot(contains(partMapFile)));
+  });
 
   test('Dart2JSTarget has unique build keys for compiler configurations', () {
     const testConfigs = <JsCompilerConfig>[

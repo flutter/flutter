@@ -10,8 +10,8 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_context.h"
-#include "flutter/impeller/golden_tests/screenshot.h"
 #include "flutter/impeller/runtime_stage/runtime_stage.h"
+#include "flutter/impeller/testing/screenshot.h"
 #include "flutter/testing/testing.h"
 #include "impeller/playground/playground.h"
 #include "impeller/typographer/typographer_context.h"
@@ -69,10 +69,6 @@ class GoldenPlaygroundTest
   static bool SaveScreenshot(std::unique_ptr<testing::Screenshot> screenshot,
                              const std::string& postfix = "");
 
-  static bool ImGuiBegin(const char* name,
-                         bool* p_open,
-                         ImGuiWindowFlags flags);
-
   std::shared_ptr<Texture> CreateTextureForFixture(
       const char* fixture_name,
       bool enable_mipmapping = false) const;
@@ -99,30 +95,45 @@ class GoldenPlaygroundTest
   [[nodiscard]] fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities);
 
-  /// Returns true if `OpenPlaygroundHere` will actually render anything.
-  bool WillRenderSomething() const { return true; }
-
   RuntimeStageBackend GetRuntimeStageBackend() const;
 
-  bool IsGoldenTest() { return true; }
+  /// @brief Sets a particular test to either write a golden or not.
+  ///
+  /// For purposes of the GoldenPlayground test harness, we don't maintain
+  /// a flag for this status, all tests are assumed to be golden tests and
+  /// passing false here means we should just skip this test entirely
+  /// (enforced in the implementation with a GTEST_SKIP).
+  void SetEnableWriteGolden(bool write_golden);
+
+  bool IsPlaygroundEnabled() const { return false; }
+
+  /// @brief Initializes the provided |PipelineDescriptor| with appropriate
+  ///        default values to match the conditions under which a pipeline
+  ///        will be rendered.
+  bool InitializePipelineDescriptorForRendering(PipelineDescriptor& desc) const;
 
  protected:
   void SetWindowSize(ISize size);
 
-  // See |Playground::PlatformSupportsWideGamutTests|
-  [[nodiscard]] bool PlatformSupportsWideGamutTests() const;
+  /// @brief Returns true if the rendering path supports MSAA rendering.
+  ///
+  /// In the case of goldens, all tests are rendered to a non-MSAA backend.
+  bool RenderingSupportsMSAA() const { return false; }
+
+  /// @brief Returns the default sample count of the rendering path.
+  ///
+  /// In the case of goldens, all tests are rendered to a non-MSAA backend.
+  SampleCount GetDefaultSampleCount() const { return SampleCount::kCount1; }
 
   // See |Playground::EnsureContextIsUnique|
   // GoldenPlaygroundTest uses context replacement on the fly to support this.
   void EnsureContextIsUnique() {}
 
   // See |Playground::EnsureContextSupportsWideGamut|
-  // GoldenPlaygroundTest uses name matching to support this.
+  // GoldenPlaygroundTest uses testname matching in |Setup| to manage this.
+  // In particular, it will automatically GTEST_SKIP if the platform doesn't
+  // support wide gamuts.
   [[nodiscard]] bool EnsureContextSupportsWideGamut() { return true; }
-
-  // See |Playground::EnsureContextSupportsAntialiasLines|
-  // GoldenPlaygroundTest uses name matching to support this.
-  void EnsureContextSupportsAntialiasLines() {}
 
  private:
 #if FML_OS_MACOSX
