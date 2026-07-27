@@ -148,6 +148,8 @@ import Testing
 
   @Test func releasesLinkOnInvalidation() async {
     weak var weakClient: VSyncClient?
+    // This variable keeps the test subject VsyncClient in memory until
+    // it is explicitly set to nil in the second autoreleasepool.
     var tempClient: VSyncClient?
 
     await withCheckedContinuation { continuation in
