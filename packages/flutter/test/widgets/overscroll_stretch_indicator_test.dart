@@ -1512,7 +1512,16 @@ final class _HighFrictionClampingScrollPhysics extends ScrollPhysics {
       position: position.pixels,
       velocity: velocity,
       friction: 0.94,
-      tolerance: tolerance,
+      tolerance: toleranceFor(
+        FixedScrollMetrics(
+          minScrollExtent: null,
+          maxScrollExtent: null,
+          pixels: null,
+          viewportDimension: null,
+          axisDirection: AxisDirection.down,
+          devicePixelRatio: WidgetsBinding.instance.window.devicePixelRatio,
+        ),
+      ),
     );
   }
 }
