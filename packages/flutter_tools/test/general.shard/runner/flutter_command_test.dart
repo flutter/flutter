@@ -13,8 +13,10 @@ import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart' show OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -193,6 +195,44 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'does not print Intel Mac warning on macOS ARM64',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+        await flutterCommand.run();
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: .darwin_arm64),
+      },
+    );
+
+    testUsingContext(
+      'prints Intel Mac warning on macOS X64 once',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+
+        await flutterCommand.run();
+
+        final String warningText = testLogger.warningText;
+        expect(warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+
+        // Run the command again, the message shouldn't be printed again.
+        await flutterCommand.run();
+
+        // BufferLogger.clear() does not clear warnings.
+        expect(testLogger.warningText, equals(warningText));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: .darwin_x64),
       },
     );
 
@@ -786,6 +826,77 @@ void main() {
       });
     });
 
+    group('findAllTargetDevices canPrompt/machine mode interaction', () {
+      final device1 = FakeDevice('device1', 'device-1');
+      final device2 = FakeDevice('device2', 'device-2');
+      late FakeTerminal terminal;
+
+      setUp(() {
+        terminal = FakeTerminal();
+      });
+
+      testUsingContext('defaults to prompting when machine mode is false', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+
+        final flutterCommand = DummyFlutterCommand();
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+
+        // Should prompt the user and print prompt options (so status contains "Connected devices")
+        expect(testLogger.statusText, contains('Connected devices:'));
+        expect(devices, <Device>[device1]);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
+      testUsingContext('defaults to not prompting when machine mode is true', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+
+        final flutterCommand = DummyMachineFlutterCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--machine']);
+
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+
+        // Should NOT prompt, should print specify device help, and return null
+        expect(
+          testLogger.statusText,
+          contains('More than one device connected; please specify a device'),
+        );
+        expect(devices, isNull);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
+      testUsingContext('can override default canPrompt when machine mode is true', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+
+        final flutterCommand = DummyMachineFlutterCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--machine']);
+
+        // Explicitly set canPrompt to true, overriding outputMachineFormat default of false.
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: true);
+
+        // Should prompt the user even in machine mode.
+        expect(testLogger.statusText, contains('Connected devices:'));
+        expect(devices, <Device>[device1]);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
+      testUsingContext('can override default canPrompt when machine mode is false', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+
+        final flutterCommand = DummyFlutterCommand();
+        final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: false);
+
+        // Should NOT prompt the user even if machine mode is false.
+        expect(
+          testLogger.statusText,
+          contains('More than one device connected; please specify a device'),
+        );
+        expect(devices, isNull);
+      }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+    });
+
     group('--dart-define-from-file', () {
       late FlutterCommand dummyCommand;
       late CommandRunner<void> dummyCommandRunner;
@@ -1342,6 +1453,152 @@ flutter:
       },
     );
 
+    group('build name and number', () {
+      late FileSystem fileSystem;
+
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+      });
+
+      testUsingContext(
+        'are injected as dart defines from the pubspec version',
+        () async {
+          final File pubspec = fileSystem.file('pubspec.yaml');
+          await pubspec.create();
+          await pubspec.writeAsString('''
+name: test
+version: 1.2.3+45
+        ''');
+
+          final flutterCommand = DummyFlutterCommand();
+          final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+          );
+          expect(buildInfo.dartDefines, contains('$kAppBuildName=1.2.3'));
+          expect(buildInfo.dartDefines, contains('$kAppBuildNumber=45'));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.empty(),
+        },
+      );
+
+      testUsingContext(
+        'are not injected when the pubspec has no version',
+        () async {
+          final File pubspec = fileSystem.file('pubspec.yaml');
+          await pubspec.create();
+          await pubspec.writeAsString('''
+name: test
+        ''');
+
+          final flutterCommand = DummyFlutterCommand();
+          final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+          );
+          expect(
+            buildInfo.dartDefines.where(
+              (String define) =>
+                  define.startsWith(kAppBuildName) || define.startsWith(kAppBuildNumber),
+            ),
+            isEmpty,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.empty(),
+        },
+      );
+
+      testUsingContext(
+        "tool exits when $kAppBuildName is already set in user's environment",
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+          expect(
+            runner.run(<String>['run', '--no-pub', '--no-hot']),
+            throwsToolExit(
+              message:
+                  '$kAppBuildName is used by the framework and cannot be set in the environment.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          FileSystem: () {
+            final fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            return fileSystem;
+          },
+          ProcessManager: FakeProcessManager.empty,
+          Platform: () => FakePlatform()..environment = <String, String>{kAppBuildName: '1.0.0'},
+        },
+      );
+
+      testUsingContext(
+        'tool exits when $kAppBuildNumber is set in --dart-define',
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+          expect(
+            runner.run(<String>[
+              'run',
+              '--dart-define=$kAppBuildNumber=42',
+              '--no-pub',
+              '--no-hot',
+            ]),
+            throwsToolExit(
+              message:
+                  '$kAppBuildNumber is used by the framework and cannot be set using --dart-define',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          FileSystem: () {
+            final fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            return fileSystem;
+          },
+          ProcessManager: FakeProcessManager.empty,
+        },
+      );
+
+      testUsingContext(
+        'user defines sharing a prefix with a reserved key are allowed',
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+          await runner.run(<String>[
+            'run',
+            '--dart-define=${kAppFlavor}_CUSTOM=foo',
+            '--dart-define=${kAppBuildName}SPACE=bar',
+            '--dart-define=${kAppBuildNumber}_OFFSET=7',
+            '--no-pub',
+            '--no-hot',
+          ]);
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          FileSystem: () {
+            final fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            return fileSystem;
+          },
+          ProcessManager: FakeProcessManager.empty,
+        },
+      );
+    });
+
     group('Flutter version', () {
       for (final String dartDefine in FlutterCommand.flutterVersionDartDefines) {
         testUsingContext(
@@ -1811,4 +2068,43 @@ class FakeFeatureFlags implements FeatureFlags {
 
   @override
   Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeTerminal extends Fake implements AnsiTerminal {
+  FakeTerminal({this.stdinHasTerminal = true, this.supportsColor = false});
+
+  @override
+  final bool stdinHasTerminal;
+
+  @override
+  final bool supportsColor;
+
+  @override
+  bool get isCliAnimationEnabled => supportsColor;
+
+  @override
+  bool usesTerminalUi = true;
+
+  @override
+  bool singleCharMode = false;
+
+  @override
+  Stream<String> get keystrokes => const Stream<String>.empty();
+
+  @override
+  Future<String> promptForCharInput(
+    List<String> acceptedCharacters, {
+    Logger? logger,
+    String? prompt,
+    int? defaultChoiceIndex,
+    bool displayAcceptedCharacters = true,
+  }) async {
+    return '1';
+  }
+}
+
+class DummyMachineFlutterCommand extends DummyFlutterCommand {
+  DummyMachineFlutterCommand() : super(name: 'dummy') {
+    addMachineOutputFlag(verboseHelp: false);
+  }
 }

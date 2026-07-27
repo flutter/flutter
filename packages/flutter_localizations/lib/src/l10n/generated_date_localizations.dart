@@ -331,6 +331,7 @@ final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols>{
     WEEKENDRANGE: const <int>[4, 5],
     FIRSTWEEKCUTOFFDAY: 4,
     DATETIMEFORMATS: const <String>['{1}، {0}', '{1}، {0}', '{1}، {0}', '{1}، {0}'],
+    ZERODIGIT: '٠',
   ),
   'as': intl.DateSymbols(
     NAME: 'as',

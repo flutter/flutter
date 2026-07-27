@@ -28,7 +28,7 @@ namespace {
 // factor based on the text color's luminance, which is used in the shader
 // to adjust the glyph's coverage.
 constexpr bool kPlatformGammaCorrectionDefault =
-#if FML_OS_LINUX
+#if FML_OS_LINUX || FML_OS_WIN
     true;
 #else
     false;

@@ -277,6 +277,10 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   settings.disable_service_auth_codes =
       command_line.HasOption(FlagForSwitch(Switch::DisableServiceAuthCodes));
 
+  // Disable WebSocket origin checks for the VM service, if specified.
+  settings.disable_service_origin_check =
+      command_line.HasOption(FlagForSwitch(Switch::DisableServiceOriginCheck));
+
   // Allow fallback to automatic port selection if binding to a specified port
   // fails.
   settings.enable_service_port_fallback =
@@ -554,8 +558,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
       command_line.HasOption(FlagForSwitch(Switch::EnableFlutterGPU));
   settings.impeller_enable_lazy_shader_mode =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerLazyShaderMode));
-  settings.impeller_antialiased_lines =
-      command_line.HasOption(FlagForSwitch(Switch::ImpellerAntialiasLines));
   settings.impeller_use_sdfs =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerUseSDFs));
 
