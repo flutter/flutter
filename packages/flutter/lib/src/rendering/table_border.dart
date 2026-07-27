@@ -422,10 +422,6 @@ class TableBorder {
   /// single value, 100.0, which is the vertical position between the two
   /// columns (relative to the left edge of `rect`).
   ///
-  /// The [rowTops] list contains the absolute y-position of the top edge of
-  /// each row (plus a final entry for the bottom of the last row). Row heights
-  /// are derived from consecutive differences and never cached separately.
-  ///
   /// The optional [spannedCells] records which logical cells are covered by a
   /// spanning cell, so that the inner borders that fall inside a span can be
   /// skipped:
@@ -453,7 +449,6 @@ class TableBorder {
     Rect rect, {
     required Iterable<double> rows,
     required Iterable<double> columns,
-    required List<double> rowTops,
     TableSpannedCells? spannedCells,
     TextDirection textDirection = TextDirection.ltr,
   }) {
@@ -469,17 +464,12 @@ class TableBorder {
       final int tableColumns = columnList.length + 1;
       final isRTL = textDirection == TextDirection.rtl;
       final List<double> rowList = rows.toList();
-      _paintHorizontalDividersWithSpans(
-        canvas,
-        rect,
-        rowList,
-        columnList,
-        spannedCells,
-        tableColumns,
-        isRTL,
-        paint,
-        path,
-      );
+      // The full set of row edges: the top of the first row (0.0), the inner
+      // row boundaries ([rowList]), and the bottom of the last row
+      // ([rect.height]). Consecutive differences give each row's height.
+      final rowTops = <double>[0.0, ...rowList, rect.height];
+      // Vertical dividers are painted before the horizontal ones (see the doc
+      // comment), so that horizontal borders sit on top at the intersections.
       _paintVerticalDividersWithSpans(
         canvas,
         rect,
@@ -491,9 +481,20 @@ class TableBorder {
         paint,
         path,
       );
+      _paintHorizontalDividersWithSpans(
+        canvas,
+        rect,
+        rowList,
+        columnList,
+        spannedCells,
+        tableColumns,
+        isRTL,
+        paint,
+        path,
+      );
     } else {
-      _paintHorizontalDividersUnspanned(canvas, rect, rows, paint, path);
       _paintVerticalDividersUnspanned(canvas, rect, columns, paint, path);
+      _paintHorizontalDividersUnspanned(canvas, rect, rows, paint, path);
     }
 
     // Paint the outer border of the table.
