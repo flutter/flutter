@@ -1794,10 +1794,10 @@ abstract class FocusOrder with Diagnosticable implements Comparable<FocusOrder> 
   /// const constructors so that they can be used in const expressions.
   const FocusOrder();
 
-  /// Creates a [FocusOrder] that describes its order in lexical order.
+  /// Creates a [LexicalFocusOrder] that describes its order in lexical order.
   const factory FocusOrder.lexical(String order) = LexicalFocusOrder;
 
-  /// Creates a [FocusOrder] that describes its order numerically.
+  /// Creates a [NumericFocusOrder] that describes its order numerically.
   const factory FocusOrder.numeric(double order) = NumericFocusOrder;
 
   /// Compares this object to another [Comparable].
