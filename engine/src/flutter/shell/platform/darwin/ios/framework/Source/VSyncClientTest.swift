@@ -126,9 +126,9 @@ import Testing
     ) { _, _ in }
     let link = try #require(vsyncClient.displayLink)
 
-    #expect(abs(Double(link.preferredFrameRateRange.maximum)) < 0.1)
-    #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0)) < 0.1)
-    #expect(abs(Double(link.preferredFrameRateRange.minimum)) < 0.1)
+    #expect(abs(link.preferredFrameRateRange.maximum) < 0.1)
+    #expect(abs(link.preferredFrameRateRange.preferred ?? 0) < 0.1)
+    #expect(abs(link.preferredFrameRateRange.minimum) < 0.1)
   }
 
   @Test func awaitAndPauseWillWorkCorrectly() throws {
