@@ -1215,6 +1215,40 @@ TEST(RasterizerTest, TeardownFreesResourceCache) {
   EXPECT_EQ(context->getResourceCachePurgeableBytes(), 0ul);
 }
 
+TEST(RasterizerTest, TeardownClearsRenderContext) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform |
+                             ThreadHost::Type::kRaster | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
+  auto rasterizer = std::make_unique<Rasterizer>(delegate);
+  auto surface = std::make_unique<NiceMock<MockSurface>>();
+  bool render_context_is_current = false;
+  EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillRepeatedly([&]() {
+    render_context_is_current = true;
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  EXPECT_CALL(*surface, ClearRenderContext()).WillRepeatedly([&]() {
+    render_context_is_current = false;
+    return true;
+  });
+
+  rasterizer->Setup(std::move(surface));
+  EXPECT_TRUE(render_context_is_current);
+
+  rasterizer->Teardown();
+  EXPECT_FALSE(render_context_is_current);
+}
+
 TEST(RasterizerTest, TeardownNoSurface) {
   std::string test_name =
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
