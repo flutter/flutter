@@ -133,7 +133,7 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
                                  bool disable_origin_check,
                                  bool disable_service_auth_codes,
                                  bool enable_service_port_fallback,
-                                 bool is_custom_vmservice,
+                                 bool is_experimental_vmservice,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
   FML_CHECK(isolate);
@@ -153,7 +153,7 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
 
   Dart_Handle library = Dart_RootLibrary();
 
-  if (!is_custom_vmservice) {
+  if (!is_experimental_vmservice) {
     Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
     library = Dart_LookupLibrary(uri);
     SHUTDOWN_ON_ERROR(library);

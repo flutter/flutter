@@ -65,7 +65,7 @@ class DartServiceIsolate {
                       bool disable_origin_check,
                       bool disable_service_auth_codes,
                       bool enable_service_port_fallback,
-                      bool is_custom_vmservice,
+                      bool is_experimental_vmservice,
                       char** error);
 
   //----------------------------------------------------------------------------
