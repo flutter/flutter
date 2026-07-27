@@ -363,6 +363,7 @@ typedef struct MouseState {
   _initialized = YES;
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
+  _shouldIgnoreTouchesWhenPresented = YES;
 
   _accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
   _displayLinkManager = FlutterDisplayLinkManager.shared;
@@ -1281,28 +1282,32 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.presentedViewController != nil || self.isBeingDismissed) {
+  if (self.shouldIgnoreTouchesWhenPresented &&
+      (self.presentedViewController != nil || self.isBeingDismissed)) {
     return;
   }
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.presentedViewController != nil || self.isBeingDismissed) {
+  if (self.shouldIgnoreTouchesWhenPresented &&
+      (self.presentedViewController != nil || self.isBeingDismissed)) {
     return;
   }
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.presentedViewController != nil || self.isBeingDismissed) {
+  if (self.shouldIgnoreTouchesWhenPresented &&
+      (self.presentedViewController != nil || self.isBeingDismissed)) {
     return;
   }
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.presentedViewController != nil || self.isBeingDismissed) {
+  if (self.shouldIgnoreTouchesWhenPresented &&
+      (self.presentedViewController != nil || self.isBeingDismissed)) {
     return;
   }
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
