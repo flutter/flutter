@@ -831,16 +831,6 @@ def to_gn_args(args):
   if args.darwin_extension_safe:
     gn_args['darwin_extension_safe'] = True
 
-  gn_args['angle_enable_vulkan_validation_layers'] = False
-  gn_args['angle_enable_libdrm'] = False
-  gn_args['angle_build_all'] = False
-  gn_args['angle_enable_commit_id'] = False
-  gn_args['angle_has_astc_encoder'] = False
-  gn_args['angle_vulkan_headers_dir'] = '//flutter/third_party/vulkan-deps/vulkan-headers/src'
-  gn_args['angle_vulkan_loader_dir'] = '//flutter/third_party/vulkan-deps/vulkan-loader/src'
-  gn_args['angle_vulkan_tools_dir'] = '//flutter/third_party/vulkan-deps/vulkan-tools/src'
-  gn_args['angle_lunarg_vulkantools_dir'] = '//flutter/third_party/vulkan-deps/lunarg-vulkantools/src'
-
   return gn_args
 
 
