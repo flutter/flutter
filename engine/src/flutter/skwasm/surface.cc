@@ -129,6 +129,10 @@ void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
   render_context_ = Skwasm::RenderContext::Make(sample_count, stencil);
   render_context_->Resize(canvas_width_, canvas_height_);
 
+  if (resource_cache_limit_) {
+    render_context_->SetResourceCacheLimit(*resource_cache_limit_);
+  }
+
   context_lost_callback_id_ = ++current_callback_id_;
 
   skwasm_reportInitialized(this, context_lost_callback_id_, callback_id);
@@ -288,8 +292,20 @@ void Skwasm::Surface::OnContextLost() {
 
 // Other
 
+// Main thread only
 void Skwasm::Surface::SetResourceCacheLimit(int bytes) {
-  render_context_->SetResourceCacheLimit(bytes);
+  assert(emscripten_is_main_browser_thread());
+  skwasm_dispatchSetResourceCacheLimit(GetRasterThread(), this, bytes);
+}
+
+// Worker thread only
+void Skwasm::Surface::SetResourceCacheLimitOnWorker(int bytes) {
+  // Always stored so ReceiveCanvasOnWorker can reapply it whenever the
+  // render context is (re)created.
+  resource_cache_limit_ = bytes;
+  if (render_context_) {
+    render_context_->SetResourceCacheLimit(bytes);
+  }
 }
 
 std::unique_ptr<Skwasm::TextureSourceWrapper>
@@ -410,7 +426,14 @@ SKWASM_EXPORT void surface_dispose(Skwasm::Surface* surface) {
 
 SKWASM_EXPORT void surface_setResourceCacheLimitBytes(Skwasm::Surface* surface,
                                                       int bytes) {
+  // Dispatch to the worker, which owns the render context.
   surface->SetResourceCacheLimit(bytes);
+}
+
+SKWASM_EXPORT void surface_setResourceCacheLimitOnWorker(
+    Skwasm::Surface* surface,
+    int bytes) {
+  surface->SetResourceCacheLimitOnWorker(bytes);
 }
 
 SKWASM_EXPORT uint32_t surface_renderPictures(Skwasm::Surface* surface,

@@ -12,6 +12,14 @@ declare_args() {
   emsdk_dir = rebase_path("//flutter/prebuilts/emsdk")
 
   wasm_use_workers = false
+
+  # Links the pthread-enabled ("-mt") system libraries while still creating
+  # threads as wasm workers (emscripten's hybrid mode). Without this,
+  # wasm_use_workers builds get stub pthread primitives: locks are no-ops
+  # even though workers share linear memory. See
+  # https://github.com/flutter/flutter/issues/190039.
+  wasm_use_pthreads = false
+
   wasm_shared_memory = false
   wasm_use_dwarf = false
 }
