@@ -227,20 +227,7 @@ class _MyState extends State<MyWidget> {
       kPlatformViewHybridCompositionPlusPlusTest => const AndroidPlatformView(
         mode: PlatformViewMode.hybridCompositionPlusPlus,
       ),
-      'platformViewSimulatedBlankScreenshotTest' => const AndroidPlatformView(
-        mode: PlatformViewMode.textureLayer,
-      ),
-      'simulatedEglFailureTest' ||
-      'simulatedHostEglFailureTest' => const Center(
-        child: Text(
-          'EGL FAIL TEST',
-          style: TextStyle(
-            color: Colors.red,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-      ),
+
       kTextTest => const TextDrawingCanvas(),
       kImageTest => ImageDrawingCanvas(image: _loadedImage),
       _ => VectorDrawingsCanvas(message: _message),

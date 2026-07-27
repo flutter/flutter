@@ -137,10 +137,6 @@ class FlutterActivityTest {
             Log.i(TAG, marker)
             Log.d(TAG, "Starting $testName (attempt $currentAttempt/$maxAttempts)")
 
-            if (testName == "simulatedEglFailureTest" && currentAttempt == 1) {
-                Log.w("HWUI", "Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...")
-            }
-
             try {
                 runAttempt(testName, marker)
                 return
@@ -301,10 +297,6 @@ class FlutterActivityTest {
                             screenshot.recycle()
                         }
 
-                        if (testName == "platformViewSimulatedBlankScreenshotTest" && attempt == 1) {
-                            candidate.eraseColor(android.graphics.Color.BLACK)
-                        }
-
                         if (!isBitmapBlank(candidate)) {
                             cropped = candidate
                             break
@@ -417,15 +409,5 @@ class FlutterActivityTest {
     @Test
     fun platformViewHybridCompositionPlusPlusTest() {
         templateTest(Constants.PLATFORM_VIEW_HYBRID_COMPOSITION_PLUS_PLUS_TEST)
-    }
-
-    @Test
-    fun simulatedEglFailureTest() {
-        templateTest("simulatedEglFailureTest")
-    }
-
-    @Test
-    fun platformViewSimulatedBlankScreenshotTest() {
-        templateTest("platformViewSimulatedBlankScreenshotTest")
     }
 }

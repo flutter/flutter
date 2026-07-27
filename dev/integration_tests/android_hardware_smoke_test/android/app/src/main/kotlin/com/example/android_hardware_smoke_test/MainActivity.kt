@@ -91,16 +91,6 @@ class MainActivity : FlutterActivity() {
         methodChannel?.setMethodCallHandler { call, result ->
             if (call.method == "impeller_backend") {
                 result.success(impellerBackend)
-            } else if (call.method == "simulated_host_egl_failure") {
-                val attemptSetting =
-                    android.provider.Settings.Global
-                        .getInt(contentResolver, "smoke_test_retry_attempt", -1)
-                if (attemptSetting == 0) {
-                    Log.w("HWUI", "Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...")
-                    result.error("SIMULATED_EGL_FAILURE", "Simulated EGL initialization warning and failure", null)
-                } else {
-                    result.success(null)
-                }
             } else {
                 result.notImplemented()
             }

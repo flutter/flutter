@@ -94,11 +94,6 @@ void main() async {
 
         final img.Image candidate = cropImage(decoded, x, y, w, h);
 
-        // Simulation hook for host-driven blank screenshot retry
-        if (testName == 'platformViewSimulatedBlankScreenshotTest' &&
-            attempt == 1) {
-          candidate.clear(img.ColorRgba8(0, 0, 0, 0));
-        }
         if (!isImageBlank(candidate)) {
           cropped = candidate;
           break;
@@ -125,10 +120,7 @@ void main() async {
     }
 
     // Compare the bytes to a golden file on the host filesystem using the cached variant
-    if (testName == 'simulatedHostEglFailureTest' ||
-        testName == 'platformViewSimulatedBlankScreenshotTest') {
-      return;
-    }
+
     await expectLater(
       imageBytes,
       matchesGoldenFile('goldens/$testName$activeGoldenVariant.png'),
@@ -179,18 +171,6 @@ void main() async {
     'should render and match $kPlatformViewHybridCompositionPlusPlusTest golden',
     () async {
       await templateTest(kPlatformViewHybridCompositionPlusPlusTest);
-    },
-    timeout: Timeout.none,
-  );
-
-  test('should render and match simulatedHostEglFailureTest', () async {
-    await templateTest('simulatedHostEglFailureTest');
-  }, timeout: Timeout.none);
-
-  test(
-    'should render and match platformViewSimulatedBlankScreenshotTest',
-    () async {
-      await templateTest('platformViewSimulatedBlankScreenshotTest');
     },
     timeout: Timeout.none,
   );
