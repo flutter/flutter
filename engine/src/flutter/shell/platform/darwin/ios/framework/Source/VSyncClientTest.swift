@@ -200,7 +200,6 @@ import Testing
   /// the display server has taken ownership of the link. On iOS 27+, QuartzCore holds a
   /// `_CADisplayLinkAssertion` on registered links; a never-unpaused link may therefore
   /// outlive `VSyncClient` itself, which is expected.
-  @MainActor
   @Test func deallocatesAfterRegistrationCompletes() async {
     weak var weakClient: VSyncClient?
 
