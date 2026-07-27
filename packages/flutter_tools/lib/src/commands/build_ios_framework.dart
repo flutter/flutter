@@ -802,7 +802,7 @@ end
             kIosArchs: defaultIOSArchsForEnvironment(
               sdkType,
               globals.artifacts!,
-            ).map((DarwinArch e) => e.name).join(' '),
+            ).map((CpuArch e) => e.darwinArchName).join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
             ...buildInfo.toBuildSystemEnvironment(),
           },
