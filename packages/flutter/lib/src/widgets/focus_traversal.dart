@@ -1371,8 +1371,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     final FocusScopeNode nearestScope = currentNode.nearestScope!;
     final FocusNode? focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      final FocusNode firstFocus =
-          findFirstFocusInDirection(currentNode, direction) ?? currentNode;
+      final FocusNode firstFocus = findFirstFocusInDirection(currentNode, direction) ?? currentNode;
       switch (direction) {
         case TraversalDirection.up:
         case TraversalDirection.left:
@@ -1794,6 +1793,12 @@ abstract class FocusOrder with Diagnosticable implements Comparable<FocusOrder> 
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const FocusOrder();
+
+  /// Creates a [FocusOrder] that describes its order in lexical order.
+  const factory FocusOrder.lexical(String order) = LexicalFocusOrder;
+
+  /// Creates a [FocusOrder] that describes its order numerically.
+  const factory FocusOrder.numeric(double order) = NumericFocusOrder;
 
   /// Compares this object to another [Comparable].
   ///
