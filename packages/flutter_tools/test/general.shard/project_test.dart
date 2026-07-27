@@ -2255,6 +2255,7 @@ resolution: workspace
         () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
+          project.ios.xcodeProjectSchemeFile(scheme: 'WatchScheme').createSync(recursive: true);
           project.ios.xcodeProjectInfoFile.writeAsStringSync('''
         Build settings for action build and target "WatchTarget":
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.someProject
@@ -2292,6 +2293,7 @@ resolution: workspace
         () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
+          project.ios.xcodeProjectSchemeFile(scheme: 'WatchScheme').createSync(recursive: true);
           project.ios.xcodeProjectInfoFile.writeAsStringSync(r'''
         Build settings for action build and target "WatchTarget":
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER)

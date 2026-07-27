@@ -29,6 +29,12 @@ class CleanCommand extends FlutterCommand {
           'Also clean the example directory, if one exists. '
           'Useful when developing in a package project.',
     );
+    argParser.addFlag(
+      'clean-xcode-workspace',
+      help:
+          'Whether to run "xcodebuild clean" on the Xcode workspace. '
+          'Skipping this prevents Xcode from unnecessarily downloading Swift packages.',
+    );
   }
 
   final bool _verbose;
@@ -49,7 +55,10 @@ class CleanCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
     final Xcode? xcode = globals.xcode;
-    final bool cleanXcode = xcode != null && xcode.isInstalledAndMeetsVersionCheck;
+    final bool userWantsXcodeClean =
+        boolArg('clean-xcode-workspace') || (argResults?.wasParsed('scheme') ?? false);
+    final bool cleanXcode =
+        xcode != null && xcode.isInstalledAndMeetsVersionCheck && userWantsXcodeClean;
 
     await _cleanProject(flutterProject, cleanXcode: cleanXcode);
     if (boolArg('include-example')) {
@@ -124,6 +133,9 @@ class CleanCommand extends FlutterCommand {
         );
       } else {
         for (final String scheme in projectInfo.schemes) {
+          if (!xcodeProject.xcodeProjectSchemeFile(scheme: scheme).existsSync()) {
+            continue;
+          }
           await xcodeProjectInterpreter.cleanWorkspace(
             xcodeProject,
             xcodeWorkspace.path,
