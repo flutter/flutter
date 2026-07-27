@@ -1876,6 +1876,7 @@ class FlutterPluginUtilsTest {
         fakeCmakeFile.createNewFile()
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every {
@@ -1883,9 +1884,15 @@ class FlutterPluginUtilsTest {
                 .findByType(BaseExtension::class.java)!!
                 .externalNativeBuild.cmake
         } returns mockCmakeOptions
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .externalNativeBuild.ndkBuild
+        } returns mockNdkBuildOptions
         every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
 
         every { mockCmakeOptions.path } returns fakeCmakeFile
+        every { mockNdkBuildOptions.path } returns null
 
         FlutterPluginUtils.forceNdkDownload(project, "ignored")
 
@@ -1897,6 +1904,44 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
+    fun `forceNdkDownload skips projects which are already configuring an ndk-build`(
+        @TempDir tempDir: Path
+    ) {
+        val fakeAndroidMkFile = tempDir.resolve("Android.mk").toFile()
+        fakeAndroidMkFile.createNewFile()
+        val project = mockk<Project>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .externalNativeBuild.cmake
+        } returns mockCmakeOptions
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .externalNativeBuild.ndkBuild
+        } returns mockNdkBuildOptions
+        every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
+
+        every { mockCmakeOptions.path } returns null
+        every { mockNdkBuildOptions.path } returns fakeAndroidMkFile
+
+        FlutterPluginUtils.forceNdkDownload(project, "ignored")
+
+        verify(exactly = 1) {
+            mockCmakeOptions.path
+        }
+        verify(exactly = 1) {
+            mockNdkBuildOptions.path
+        }
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify(exactly = 0) { mockCmakeOptions.buildStagingDirectory(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
     fun `forceNdkDownload installs a missing ndk when tool properties are provided`(
         @TempDir tempDir: Path
     ) {
@@ -1907,10 +1952,13 @@ class FlutterPluginUtilsTest {
         val mockExecResult = mockk<ExecResult>()
         val mockExecOperations = mockk<ExecOperations>()
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
         every { mockCmakeOptions.path } returns null
@@ -1955,10 +2003,13 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val finalizeDslSlot = captureFinalizeDslAction(project)
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
         every { mockCmakeOptions.path } returns null
@@ -1982,6 +2033,7 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val finalizeDslSlot = captureFinalizeDslAction(project)
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockDirectoryProperty = mockk<DirectoryProperty>()
         val mockDirectory = mockk<Directory>()
@@ -1990,6 +2042,8 @@ class FlutterPluginUtilsTest {
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
         every { mockCmakeOptions.path } answers { cmakePath }
@@ -2033,11 +2087,14 @@ class FlutterPluginUtilsTest {
         val mockExecResult = mockk<ExecResult>()
         val mockExecOperations = mockk<ExecOperations>()
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
         var configuredNdkVersion = "26.3.11579264"
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } answers { configuredNdkVersion }
         every { mockCmakeOptions.path } returns null
@@ -2091,6 +2148,7 @@ class FlutterPluginUtilsTest {
         val mockExecResult = mockk<ExecResult>()
         val mockExecOperations = mockk<ExecOperations>()
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
         val mockApplicationExtension = mockk<ApplicationExtension>()
@@ -2100,6 +2158,8 @@ class FlutterPluginUtilsTest {
             project.extensions.findByType(ApplicationExtension::class.java)
         } returns mockApplicationExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } answers {
             throw AssertionError(
@@ -2151,11 +2211,14 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val finalizeDslSlot = captureFinalizeDslAction(project)
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
         every { mockCmakeOptions.path } returns null
@@ -2176,12 +2239,15 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val finalizeDslSlot = captureFinalizeDslAction(project)
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
         val mockApplicationExtension = mockk<ApplicationExtension>()
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } answers {
             throw AssertionError("legacy ndkVersion should not be read when ApplicationExtension is available")
@@ -2209,10 +2275,13 @@ class FlutterPluginUtilsTest {
         val mockExecResult = mockk<ExecResult>()
         val mockExecOperations = mockk<ExecOperations>()
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
         every { mockCmakeOptions.path } returns null
@@ -2263,6 +2332,7 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val finalizeDslSlot = captureFinalizeDslAction(project)
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockDirectoryProperty = mockk<DirectoryProperty>()
         val mockDirectory = mockk<Directory>()
@@ -2270,6 +2340,8 @@ class FlutterPluginUtilsTest {
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
         every { mockCmakeOptions.path } returns null
@@ -2311,6 +2383,7 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val finalizeDslSlot = captureFinalizeDslAction(project)
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockDirectoryProperty = mockk<DirectoryProperty>()
         val mockDirectory = mockk<Directory>()
@@ -2318,6 +2391,8 @@ class FlutterPluginUtilsTest {
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
         every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
         every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
         every { mockCmakeOptions.path } returns null
@@ -2359,6 +2434,7 @@ class FlutterPluginUtilsTest {
     fun `forceNdkDownload sets externalNativeBuild properties`() {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockDirectoryProperty = mockk<DirectoryProperty>()
         val mockDirectory = mockk<Directory>()
@@ -2371,17 +2447,24 @@ class FlutterPluginUtilsTest {
                 .findByType(BaseExtension::class.java)!!
                 .externalNativeBuild.cmake
         } returns mockCmakeOptions
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .externalNativeBuild.ndkBuild
+        } returns mockNdkBuildOptions
         every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
 
         val basePath = "/base/path"
         val fakeBuildPath = "/randomapp/build/app/"
         every { mockCmakeOptions.path } returns null
+        every { mockNdkBuildOptions.path } returns null
         every { mockCmakeOptions.path(any()) } returns Unit
         every { mockCmakeOptions.buildStagingDirectory(any()) } returns Unit
         every { project.layout.buildDirectory } returns mockDirectoryProperty
         every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
         every { mockDirectoryProperty.get() } returns mockDirectory
-        every { mockDirectory.asFile.path } returns fakeBuildPath
+        val realFile = File(fakeBuildPath)
+        every { mockDirectory.asFile } returns realFile
 
         val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
         every {

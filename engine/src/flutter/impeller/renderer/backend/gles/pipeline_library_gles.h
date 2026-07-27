@@ -9,7 +9,9 @@
 #include <vector>
 
 #include "flutter/fml/hash_combine.h"
+#include "flutter/fml/task_runner.h"
 #include "impeller/base/thread.h"
+#include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/unique_handle_gles.h"
 #include "impeller/renderer/pipeline_library.h"
@@ -91,8 +93,11 @@ class PipelineLibraryGLES final
   PipelineMap pipelines_;
   Mutex programs_mutex_;
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
+  std::shared_ptr<PipelineCompileQueueGLES> compile_queue_;
 
-  explicit PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor);
+  explicit PipelineLibraryGLES(
+      std::shared_ptr<ReactorGLES> reactor,
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner);
 
   // |PipelineLibrary|
   bool IsValid() const override;
@@ -127,6 +132,8 @@ class PipelineLibraryGLES final
 
   void SetProgramForKey(const ProgramKey& key,
                         std::shared_ptr<UniqueHandleGLES> program);
+  // |PipelineLibrary|
+  PipelineCompileQueue* GetPipelineCompileQueue() const override;
 };
 
 }  // namespace impeller

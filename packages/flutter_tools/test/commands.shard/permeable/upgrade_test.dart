@@ -24,6 +24,10 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.flutterRoot = getFlutterRoot();
+  });
+
   group('UpgradeCommandRunner', () {
     final jan12026 = DateTime.utc(2026);
 
