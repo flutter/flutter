@@ -359,6 +359,12 @@ void main() {
       SystemChannels.restoration,
       (MethodCall call) => result.future,
     );
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.restoration,
+        null,
+      );
+    });
 
     final manager = RestorationManager();
     addTearDown(manager.dispose);
