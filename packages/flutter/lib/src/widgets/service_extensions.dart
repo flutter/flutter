@@ -555,4 +555,13 @@ enum AccessibilityServiceExtensions {
   /// * [AccessibilityInspector.initServiceExtensions], where the service
   ///   extension is registered.
   getSemanticsTree,
+
+  /// Name of service extension that, when called, disposes the semantics handle
+  /// created by [getSemanticsTree].
+  ///
+  /// See also:
+  ///
+  /// * [AccessibilityInspector.initServiceExtensions], where the service
+  ///   extension is registered.
+  disposeSemantics,
 }

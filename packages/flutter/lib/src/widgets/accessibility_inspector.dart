@@ -25,6 +25,10 @@ class AccessibilityInspector {
       name: 'accessibility.${AccessibilityServiceExtensions.getSemanticsTree.name}',
       callback: _getSemanticsTree,
     );
+    registerServiceExtension(
+      name: 'accessibility.${AccessibilityServiceExtensions.disposeSemantics.name}',
+      callback: _disposeSemantics,
+    );
   }
 
   /// Reset the helper state (primarily used in tests).
@@ -32,6 +36,11 @@ class AccessibilityInspector {
   void resetAllState() {
     _semanticsHandle?.dispose();
     _semanticsHandle = null;
+  }
+
+  Future<Map<String, dynamic>> _disposeSemantics(Map<String, String> parameters) async {
+    resetAllState();
+    return <String, dynamic>{};
   }
 
   Future<Map<String, dynamic>> _getSemanticsTree(Map<String, String> parameters) async {

@@ -118,6 +118,12 @@ void main() {
     expect(transform, hasLength(16));
     expect(transform[0], equals(2.0));
 
+    // Calling disposeSemantics succeeds and cleans up semantics handle.
+    final Map<String, Object?> disposeResult = await callExtension(
+      'accessibility.disposeSemantics',
+    );
+    expect(disposeResult, isEmpty);
+
     AccessibilityInspector.instance.resetAllState();
   }, semanticsEnabled: false);
 }
