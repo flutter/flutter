@@ -101,10 +101,10 @@ void _setStaticStyleAttributes(DomHTMLElement domElement) {
 const String _kAutofillFieldMinWidth = '40px';
 const String _kAutofillFieldMinHeight = '20px';
 
-// Injected once per document so an autofilled field fires an 'animationstart'
-// event (through the ':-webkit-autofill' pseudo-class) that the autofill
-// listeners use to detect a fill on Blink/WebKit even while the field is
-// blurred. Global, so the style is added exactly once rather than once per form.
+/// Injected once per document so an autofilled field fires an 'animationstart'
+/// event (through the ':-webkit-autofill' pseudo-class) that the autofill
+/// listeners use to detect a fill on Blink/WebKit even while the field is
+/// blurred. Global, so the style is added exactly once rather than once per form.
 bool _autofillAnimationStyleInjected = false;
 
 void _ensureAutofillStyleInjected() {
@@ -162,8 +162,13 @@ void _styleAutofillElements(
   if (shouldHideElement) {
     // 1px rather than 0: Safari and some password managers ignore zero-sized
     // inputs (see https://github.com/flutter/flutter/issues/71275), so even a
-    // hidden proxy keeps a minimal layout box.
+    // hidden proxy keeps a minimal layout box. Clear any min-width/min-height
+    // floor (set by the discoverable branch below, or on the focused element)
+    // first, otherwise it would override the 1px and the element would not
+    // actually shrink when it is hidden.
     elementStyle
+      ..setProperty('min-width', '0px')
+      ..setProperty('min-height', '0px')
       ..width = '1px'
       ..height = '1px';
   } else {
@@ -417,13 +422,13 @@ class EngineAutofillForm {
     scanForAutofilledValues();
   }
 
-  // True while a password manager holds focus to fill the form. During that
-  // window the focused field and the non-focused proxies are held at their
-  // current positions instead of tracking the browser's scroll/relayout, so
-  // repositioning them does not churn the DOM under the manager's own overlay
-  // UI. Some extension overlays race their own DOM insertion when the page
-  // mutates the tree mid-fill, so holding still avoids interfering with them.
-  // The filled values still arrive through the input/animationstart listeners.
+  /// True while a password manager holds focus to fill the form. During that
+  /// window the focused field and the non-focused proxies are held at their
+  /// current positions instead of tracking the browser's scroll/relayout, so
+  /// repositioning them does not churn the DOM under the manager's own overlay
+  /// UI. Some extension overlays race their own DOM insertion when the page
+  /// mutates the tree mid-fill, so holding still avoids interfering with them.
+  /// The filled values still arrive through the input/animationstart listeners.
   bool _fillWindowActive = false;
 
   /// Whether a password manager currently holds focus to fill the form, during
@@ -756,7 +761,6 @@ class EngineAutofillForm {
     keys.forEach(addSubscriptionForKey);
     return subscriptions;
   }
-
 
   /// Sends the 'TextInputClient.updateEditingStateWithTag' message to the framework.
   void _sendAutofillEditingState(String tag, EditingState editingState) {
