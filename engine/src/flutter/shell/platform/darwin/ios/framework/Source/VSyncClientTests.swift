@@ -6,7 +6,7 @@ import XCTest
 
 @testable import InternalFlutterSwift
 
-class VSyncClientTest: XCTestCase {
+class VSyncClientTests: XCTestCase {
   var threadTaskRunner: TaskRunner!
 
   override func setUp() {
