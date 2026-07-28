@@ -154,13 +154,10 @@ Future<void> testMain() async {
 
   test('handleProgressAndGetStream bypasses stream teeing when chunkCallback is null', () async {
     final mockBody = JSObject();
-    final mockResponse = JSObject();
-    mockResponse['body'] = mockBody;
 
-    final DomReadableStream result = await handleProgressAndGetStream(
-      mockResponse as DomResponse,
-      null,
-    );
+    final mockResponse = _TestHttpFetchResponse(stream: mockBody as DomReadableStream);
+
+    final DomReadableStream result = await handleProgressAndGetStream(mockResponse, null);
     expect(result, mockBody);
   });
 
@@ -168,15 +165,14 @@ Future<void> testMain() async {
     'handleProgressAndGetStream bypasses stream teeing when Content-Length is missing',
     () async {
       final mockBody = JSObject();
-      final mockHeaders = JSObject();
-      mockHeaders['get'] = ((JSString name) => null).toJS;
 
-      final mockResponse = JSObject();
-      mockResponse['body'] = mockBody;
-      mockResponse['headers'] = mockHeaders;
+      final mockResponse = _TestHttpFetchResponse(
+        stream: mockBody as DomReadableStream,
+        contentLength: null,
+      );
 
       final DomReadableStream result = await handleProgressAndGetStream(
-        mockResponse as DomResponse,
+        mockResponse,
         (int loaded, int total) {},
       );
       expect(result, mockBody);
@@ -186,8 +182,8 @@ Future<void> testMain() async {
   test(
     'handleProgressAndGetStream tees the stream when chunkCallback and Content-Length are present',
     () async {
-      final DomResponse response = await rawHttpGet('/test_images/1x1.png');
-      final DomReadableStream originalBody = response.body;
+      final HttpFetchResponse response = await httpFetch('/test_images/1x1.png');
+      final DomReadableStream originalBody = response.payload.stream;
 
       var callbackCalled = false;
       final DomReadableStream result = await handleProgressAndGetStream(response, (
@@ -270,4 +266,32 @@ Future<void> testMain() async {
 
     expect(disposeCalled, isTrue);
   });
+}
+
+class _TestHttpFetchResponse implements HttpFetchResponse {
+  _TestHttpFetchResponse({required this.stream, this.contentLength});
+
+  final DomReadableStream stream;
+
+  @override
+  final int? contentLength;
+
+  @override
+  bool get hasPayload => true;
+
+  @override
+  HttpFetchPayload get payload => _TestHttpFetchPayload(stream);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _TestHttpFetchPayload implements HttpFetchPayload {
+  _TestHttpFetchPayload(this.stream);
+
+  @override
+  final DomReadableStream stream;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
