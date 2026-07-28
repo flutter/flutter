@@ -1074,7 +1074,7 @@ abstract class FlutterCommand extends Command<void> {
       help:
           'Whether to skip version checking for Java, Gradle, '
           'the Android Gradle Plugin (AGP), and the Kotlin Gradle Plugin (KGP)'
-          ' during Android builds. Note that skipping validation does not make '
+          ' during Android builds. Skipping validation does not make '
           'unsupported versions work: the Flutter Gradle Plugin compiles '
           "against AGP's public API artifact, and builds with an AGP version "
           'below the supported minimum fail in Gradle regardless of this flag.',

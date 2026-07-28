@@ -8,9 +8,9 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
-import 'package:flutter_tools/src/android/migrations/disable_built_in_kotlin_migration.dart';
 import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
 import 'package:flutter_tools/src/android/migrations/multidex_removal_migration.dart';
+import 'package:flutter_tools/src/android/migrations/remove_built_in_kotlin_opt_out_migration.dart';
 import 'package:flutter_tools/src/android/migrations/remove_new_dsl_opt_out_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -245,33 +245,6 @@ tasks.register("clean", Delete) {
       late BufferLogger bufferLogger;
       late FakeAndroidProject project;
       late File topLevelGradlePropertiesFile;
-      late MemoryFileSystem errorThrowingFileSystemForRead;
-      late MemoryFileSystem errorThrowingFileSystemForWrite;
-      late MemoryFileSystem errorThrowingFileSystemForProcessFile;
-
-      MemoryFileSystem createErrorThrowingFileSystem({
-        required FileSystemOp failingOperation,
-        int failOnAttempt = 1,
-        String targetFileName = 'gradle.properties',
-        String? customErrorMessage,
-      }) {
-        var attemptCount = 0;
-        final opName = failingOperation == FileSystemOp.read ? 'read' : 'write';
-        final String errorMessage = customErrorMessage ?? 'Mock $opName error';
-
-        return MemoryFileSystem.test(
-          opHandle: (String context, FileSystemOp operation) {
-            if (operation == failingOperation && context.contains(targetFileName)) {
-              attemptCount++;
-
-              if (attemptCount >= failOnAttempt) {
-                throw FileSystemException(errorMessage);
-              }
-            }
-          },
-        );
-      }
-
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
         bufferLogger = BufferLogger.test();
@@ -279,224 +252,69 @@ tasks.register("clean", Delete) {
           root: memoryFileSystem.currentDirectory.childDirectory('android')..createSync(),
         );
         topLevelGradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
-        errorThrowingFileSystemForRead = createErrorThrowingFileSystem(
-          failingOperation: FileSystemOp.read,
-        );
-        errorThrowingFileSystemForWrite = createErrorThrowingFileSystem(
-          failingOperation: FileSystemOp.write,
-        );
-        errorThrowingFileSystemForProcessFile = createErrorThrowingFileSystem(
-          failingOperation: FileSystemOp.write,
-          failOnAttempt: 2,
-          customErrorMessage: 'Mock write error during processing',
-        );
       });
 
-      group('Migrate to opt-out of Built-in Kotlin', () {
-        testUsingContext('skip if Built-in Kotlin flag exists', () async {
+      group('Remove the Built-in Kotlin opt-out', () {
+        testUsingContext('removes the template-added opt-out and keeps newDsl', () async {
           topLevelGradlePropertiesFile.writeAsStringSync('''
+org.gradle.jvmargs=-Xmx8G
+android.useAndroidX=true
+# This newDsl flag was added by the Flutter template
+android.newDsl=false
+# This builtInKotlin flag was added by the Flutter template
 android.builtInKotlin=false
 ''');
-          expect(
-            topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
-            isTrue,
-          );
-          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+          final androidProjectMigration = RemoveBuiltInKotlinOptOutMigration(project, bufferLogger);
 
           await androidProjectMigration.migrate();
-          expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+
+          final String fileContents = topLevelGradlePropertiesFile.readAsStringSync();
+          expect(fileContents, isNot(contains('android.builtInKotlin')));
+          expect(fileContents, isNot(contains('builtInKotlin flag')));
+          expect(fileContents, contains('# This newDsl flag was added by the Flutter template'));
+          expect(fileContents, contains('android.newDsl=false'));
+          expect(fileContents, contains('android.useAndroidX=true'));
           expect(
-            bufferLogger.traceText,
-            contains(
-              'The developer has already configured the Built-In Kotlin flag, skipping migration.',
-            ),
+            bufferLogger.statusText,
+            contains('Removed the android.builtInKotlin opt-out that Flutter previously added'),
           );
         });
 
-        testUsingContext(
-          'skip if Built-in Kotlin flag uses a nonstandard separator and exists',
-          () async {
-            topLevelGradlePropertiesFile.writeAsStringSync('''
-android.builtInKotlin    false
+        testUsingContext('removes the migrator-added opt-out', () async {
+          topLevelGradlePropertiesFile.writeAsStringSync('''
+android.useAndroidX=true
+# This builtInKotlin flag was added automatically by Flutter migrator
+android.builtInKotlin=false
 ''');
-            expect(
-              topLevelGradlePropertiesFile.readAsStringSync().contains(
-                'android.builtInKotlin    false',
-              ),
-              isTrue,
-            );
-            final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+          final androidProjectMigration = RemoveBuiltInKotlinOptOutMigration(project, bufferLogger);
 
-            await androidProjectMigration.migrate();
-            expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
-            expect(
-              bufferLogger.traceText,
-              contains(
-                'The developer has already configured the Built-In Kotlin flag, skipping migration.',
-              ),
-            );
-          },
-        );
+          await androidProjectMigration.migrate();
 
-        testUsingContext(
-          'create gradle.properties file and add the Built-in Kotlin flag if gradle.properties file is missing',
-          () async {
-            final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
-            expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
-            await androidProjectMigration.migrate();
-            expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
-            expect(
-              bufferLogger.traceText,
-              contains(
-                'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
-              ),
-            );
-            expect(
-              topLevelGradlePropertiesFile.readAsStringSync().contains(
-                'android.builtInKotlin=false',
-              ),
-              isTrue,
-            );
-          },
-        );
+          final String fileContents = topLevelGradlePropertiesFile.readAsStringSync();
+          expect(fileContents, isNot(contains('android.builtInKotlin')));
+          expect(fileContents, contains('android.useAndroidX=true'));
+        });
 
-        testUsingContext(
-          'logs an error if the gradle.properties file cannot be written to',
-          () async {
-            final projectWithUnwritablePropertiesFile = FakeAndroidProject(
-              root: errorThrowingFileSystemForWrite.currentDirectory.childDirectory('android')
-                ..createSync(),
-            );
-
-            final File unwritablePropertiesFile = projectWithUnwritablePropertiesFile
-                .hostAppGradleRoot
-                .childFile('gradle.properties');
-
-            expect(unwritablePropertiesFile.existsSync(), isFalse);
-
-            final androidProjectMigration = DisableBuiltInKotlinMigration(
-              projectWithUnwritablePropertiesFile,
-              bufferLogger,
-            );
-
-            await androidProjectMigration.migrate();
-
-            expect(
-              bufferLogger.traceText,
-              contains(
-                'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
-              ),
-            );
-
-            expect(
-              bufferLogger.errorText,
-              contains('Failed to write to the gradle.properties during migration'),
-            );
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => errorThrowingFileSystemForWrite,
-            ProcessManager: () => FakeProcessManager.any(),
-          },
-        );
-
-        testUsingContext(
-          'logs an error and aborts if the gradle.properties file cannot be read',
-          () async {
-            final projectWithUnreadablePropertiesFile = FakeAndroidProject(
-              root: errorThrowingFileSystemForRead.currentDirectory.childDirectory('android')
-                ..createSync(),
-            );
-
-            final File unreadablePropertiesFile =
-                projectWithUnreadablePropertiesFile.hostAppGradleRoot.childFile('gradle.properties')
-                  ..createSync(recursive: true);
-
-            final androidProjectMigration = DisableBuiltInKotlinMigration(
-              projectWithUnreadablePropertiesFile,
-              bufferLogger,
-            );
-
-            expect(unreadablePropertiesFile.existsSync(), isTrue);
-            await androidProjectMigration.migrate();
-            expect(
-              bufferLogger.errorText,
-              contains('Failed to read gradle.properties during migration'),
-            );
-          },
-
-          overrides: <Type, Generator>{
-            FileSystem: () => errorThrowingFileSystemForRead,
-            ProcessManager: () => FakeProcessManager.any(),
-          },
-        );
-
-        testUsingContext(
-          'add Built-in Kotlin flag if it does not exist in gradle.properties file',
-          () async {
-            topLevelGradlePropertiesFile.writeAsStringSync('''
+        testUsingContext('does not remove hand-written opt-out without marker comment', () async {
+          topLevelGradlePropertiesFile.writeAsStringSync('''
+android.useAndroidX=true
+android.builtInKotlin=false
 ''');
-            expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
-            expect(
-              topLevelGradlePropertiesFile.readAsStringSync().contains(
-                'android.builtInKotlin=false',
-              ),
-              isFalse,
-            );
-            final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+          final androidProjectMigration = RemoveBuiltInKotlinOptOutMigration(project, bufferLogger);
 
-            await androidProjectMigration.migrate();
+          await androidProjectMigration.migrate();
 
-            expect(
-              bufferLogger.traceText,
-              contains('Migrating to disable Built-in Kotlin by default.'),
-            );
+          final String fileContents = topLevelGradlePropertiesFile.readAsStringSync();
+          expect(fileContents, contains('android.builtInKotlin=false'));
+          expect(fileContents, contains('android.useAndroidX=true'));
+        });
 
-            final String fileContents = topLevelGradlePropertiesFile.readAsStringSync();
-            expect(
-              fileContents.contains(
-                '# This builtInKotlin flag was added automatically by Flutter migrator',
-              ),
-              isTrue,
-            );
-            expect(fileContents.contains('android.builtInKotlin=false'), isTrue);
-          },
-        );
-
-        testUsingContext(
-          'logs an error if processFileLines fails to write the migrated file',
-          () async {
-            final projectWithProcessError = FakeAndroidProject(
-              root: errorThrowingFileSystemForProcessFile.currentDirectory.childDirectory('android')
-                ..createSync(),
-            );
-
-            final File topLevelGradlePropertiesFile = projectWithProcessError.hostAppGradleRoot
-                .childFile('gradle.properties');
-
-            topLevelGradlePropertiesFile.writeAsStringSync('');
-
-            final androidProjectMigration = DisableBuiltInKotlinMigration(
-              projectWithProcessError,
-              bufferLogger,
-            );
-
-            await androidProjectMigration.migrate();
-
-            expect(
-              bufferLogger.traceText,
-              contains('Migrating to disable Built-in Kotlin by default.'),
-            );
-
-            expect(
-              bufferLogger.errorText,
-              contains('Failed to process/migrate gradle.properties during migration:'),
-            );
-          },
-          overrides: <Type, Generator>{
-            FileSystem: () => errorThrowingFileSystemForProcessFile,
-            ProcessManager: () => FakeProcessManager.any(),
-          },
-        );
+        testUsingContext('does nothing if gradle.properties file is missing', () async {
+          final androidProjectMigration = RemoveBuiltInKotlinOptOutMigration(project, bufferLogger);
+          expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
+          await androidProjectMigration.migrate();
+          expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
+        });
       });
 
       group('Remove the new DSL opt-out', () {
@@ -556,10 +374,7 @@ android.newDsl=false
             await androidProjectMigration.migrate();
 
             expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
-            expect(
-              topLevelGradlePropertiesFile.readAsStringSync().trim(),
-              isEmpty,
-            );
+            expect(topLevelGradlePropertiesFile.readAsStringSync().trim(), isEmpty);
           },
         );
 
