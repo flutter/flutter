@@ -253,7 +253,7 @@ Future<DomReadableStream> handleProgressAndGetStream(
   List<void Function()>? onDisposeCallbacks,
 ]) async {
   if (!response.hasPayload) {
-    throw ImageCodecException('Failed to load network image. No payload.');
+    throw ImageCodecException('Failed to load network image.');
   }
   final DomReadableStream body = response.payload.stream;
   final int? contentLength = response.contentLength;
