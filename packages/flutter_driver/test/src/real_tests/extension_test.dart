@@ -27,6 +27,21 @@ Future<void> silenceDriverLogger(AsyncCallback callback) async {
 }
 
 void main() {
+  setUpAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async {
+        return null;
+      },
+    );
+  });
+
+  tearDownAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
+  });
   group('waitUntilNoTransientCallbacks', () {
     late FlutterDriverExtension driverExtension;
     Map<String, dynamic>? result;
@@ -618,10 +633,12 @@ void main() {
       final controller3 = TextEditingController(text: 'Hello3');
       final controller4 = TextEditingController(text: 'Hello4');
       final controller5 = TextEditingController(text: 'Hello5');
+      final focusNode3 = FocusNode();
       addTearDown(() {
         controller3.dispose();
         controller4.dispose();
         controller5.dispose();
+        focusNode3.dispose();
       });
       await tester.pumpWidget(
         MaterialApp(
@@ -642,7 +659,7 @@ void main() {
                   child: EditableText(
                     key: const ValueKey<String>('text3'),
                     controller: controller3,
-                    focusNode: FocusNode(),
+                    focusNode: focusNode3,
                     style: const TextStyle(),
                     cursorColor: Colors.red,
                     backgroundCursorColor: Colors.black,
