@@ -67,11 +67,11 @@ class FlutterActivityTest {
 
         private fun getGraphicsPipelineErrors(marker: String): List<String> {
             val errorLogs = mutableListOf<String>()
-            var process: Process? = null
             try {
                 val pid = android.os.Process.myPid()
-                process = Runtime.getRuntime().exec(arrayOf("logcat", "-d", "--pid=$pid", "*:W"))
-                process.inputStream.bufferedReader().use { reader ->
+                val instrumentation = InstrumentationRegistry.getInstrumentation()
+                val pfd = instrumentation.uiAutomation.executeShellCommand("logcat -d --pid=$pid *:W")
+                android.os.ParcelFileDescriptor.AutoCloseInputStream(pfd).bufferedReader().use { reader ->
                     var line: String?
                     var seenMarker = false
                     while (reader.readLine().also { line = it } != null) {
@@ -91,8 +91,6 @@ class FlutterActivityTest {
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to self-inspect logcat: ${e.message}")
-            } finally {
-                process?.destroy()
             }
             return errorLogs
         }
@@ -103,7 +101,7 @@ class FlutterActivityTest {
             val pixels = IntArray(width * height)
             bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
             val firstPixel = pixels[0]
-            if (firstPixel != 0 && firstPixel != -0x1000000) {
+            if (firstPixel != android.graphics.Color.TRANSPARENT && firstPixel != android.graphics.Color.BLACK) {
                 return false
             }
             for (pixel in pixels) {

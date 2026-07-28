@@ -180,7 +180,12 @@ Future<void> _deleteRetryAttemptSetting() async {
 }
 
 Future<bool> _checkForTransientEglFailure() async {
-  final String logcatOutput = await runAndGetStdout('adb', <String>['logcat', '-d']).join('\n');
-  return logcatOutput.contains('Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED') ||
-      logcatOutput.contains('Failed to initialize 101010-2 format');
+  try {
+    final String logcatOutput = await runAndGetStdout('adb', <String>['logcat', '-d']).join('\n');
+    return logcatOutput.contains('Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED') ||
+        logcatOutput.contains('Failed to initialize 101010-2 format');
+  } catch (e) {
+    io.stderr.writeln('Warning: Failed to check logcat for EGL failure: $e');
+    return false;
+  }
 }

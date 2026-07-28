@@ -25,6 +25,7 @@ void main() async {
   setUpAll(() async {
     flutterDriver = await FlutterDriver.connect();
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
+    await nativeDriver.configureForScreenshotTesting();
 
     final String response = await flutterDriver.requestData(
       json.encode(<String, Object?>{keyCommand: commandGetGoldenVariant}),
@@ -47,6 +48,7 @@ void main() async {
   });
 
   tearDownAll(() async {
+    await nativeDriver.close();
     await flutterDriver.close();
   });
 
