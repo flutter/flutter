@@ -161,16 +161,17 @@ enum HitTestBehavior {
   /// When both a translucent target and its descendant are listening to the
   /// same pointer event, both will receive it. Events are dispatched to the
   /// most specific target first (the descendant), then to the translucent
-  /// target. In gesture arena competitions, the descendant typically wins
-  /// because it enters the arena first (first come, first served), and the
-  /// translucent target's gesture is not invoked.
+  /// target. In gesture arena competitions for the same gesture, the
+  /// descendant typically wins because it enters the arena first (first come,
+  /// first served), and the translucent target's gesture is not invoked unless
+  /// the descendant's gesture is rejected.
   ///
   /// See also:
   ///
   ///  * [HitTestResult.path], which describes the order in which hit test
   ///    entries receive events.
-  ///  * [GestureDetector.behavior], which explains how hit test behavior
-  ///    interacts with gesture disambiguation.
+  ///  * [GestureDetector.behavior], which configures the hit test behavior
+  ///    used for gesture detection.
   translucent,
 }
 
