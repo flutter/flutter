@@ -1759,7 +1759,10 @@ _flutter.loader.load();
       environment.buildDir.childFile('main.dart.01234567.js').createSync();
       final target = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
       expect(target.getBuildConfig(environment)['mainJsPath'], 'main.dart.01234567.js');
-      final files = target.buildFiles(environment).map((File f) => f.basename).toList();
+      final List<String> files = target
+          .buildFiles(environment)
+          .map((File f) => f.basename)
+          .toList();
       expect(files, contains('main.dart.01234567.js'));
     }),
   );
@@ -1773,10 +1776,13 @@ _flutter.loader.load();
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
       );
-      final buildConfig = target.getBuildConfig(environment);
+      final Map<String, Object?> buildConfig = target.getBuildConfig(environment);
       expect(buildConfig['mainWasmPath'], 'main.dart.89abcdef.wasm');
       expect(buildConfig['jsSupportRuntimePath'], 'main.dart.01234567.mjs');
-      final files = target.buildFiles(environment).map((File f) => f.basename).toList();
+      final List<String> files = target
+          .buildFiles(environment)
+          .map((File f) => f.basename)
+          .toList();
       expect(files, containsAll(<String>['main.dart.89abcdef.wasm', 'main.dart.01234567.mjs']));
     }),
   );
