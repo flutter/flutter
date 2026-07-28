@@ -760,6 +760,136 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
+    test('keeps connection open when a blurred autofill field is focused again', () async {
+      // Password managers and browser autofill popups blur the hidden input
+      // (with a null relatedTarget) while the page keeps focus, then hand focus
+      // back to fill the field. For an autofill field that re-focus must cancel
+      // the pending close, or the autofilled value is dropped.
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      expect(textEditing.isEditing, isTrue);
+
+      final strategy = textEditing.strategy;
+      strategy.debugDocumentHasFocusOverride = true;
+      strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+      // The popup takes focus: the field blurs while the page keeps focus.
+      strategy.handleBlur(createDomEvent('Event', 'blur'));
+
+      // The close is deferred, never synchronous.
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      // The browser hands focus back to the field to autofill it.
+      strategy.handleFocus(createDomEvent('Event', 'focus'));
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      // The re-focus cancelled the close, so the connection stays open.
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      strategy.debugDocumentHasFocusOverride = null;
+      strategy.debugDocumentVisibilityStateOverride = null;
+      send(const MethodCall('TextInput.clearClient'));
+      spy.tearDown();
+    });
+
+    test('keeps connection open for an autofill field that blurs without refocus', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      expect(textEditing.isEditing, isTrue);
+
+      final strategy = textEditing.strategy;
+      strategy.debugDocumentHasFocusOverride = true;
+      strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+      // A password manager takes focus to fill the form (relatedTarget is null)
+      // and may keep its dialog open for several seconds without returning focus
+      // to the field.
+      strategy.handleBlur(createDomEvent('Event', 'blur'));
+
+      // The close is deferred, never synchronous.
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      // The connection is kept alive so the pending fill is not dropped; it is
+      // closed normally later when the framework unfocuses the field
+      // (clearClient), not on this transient blur.
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      strategy.debugDocumentHasFocusOverride = null;
+      strategy.debugDocumentVisibilityStateOverride = null;
+      spy.tearDown();
+    });
+
+    test('geometry update before the input is shown does not throw (autofill)', () async {
+      // A setEditableSizeAndTransform can arrive before TextInput.show enables
+      // the strategy (for example a password manager forcing a relayout of the
+      // not-yet-shown field). updateElementPlacement must not read the late
+      // `inputConfiguration` before the strategy is enabled. Regression test for
+      // a LateInitializationError thrown from the autofill fill-window check.
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
+
+      // No TextInput.show yet, so the strategy is not enabled.
+      expect(
+        () => send(
+          configureSetSizeAndTransformMethodCall(
+            150,
+            50,
+            Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+          ),
+        ),
+        returnsNormally,
+      );
+
+      send(const MethodCall('TextInput.clearClient'));
+    });
+
     test(
       'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
       () async {
@@ -1430,10 +1560,14 @@ Future<void> testMain() async {
         // DOM element is blurred.
         textEditing!.strategy.domElement!.blur();
 
-        expect(spy.messages, hasLength(1));
-        expect(spy.messages[0].channel, 'flutter/textinput');
-        expect(spy.messages[0].methodName, 'TextInputClient.onConnectionClosed');
-        await Future<void>.delayed(Duration.zero);
+        // The connection close is deferred so a transient blur (e.g. an
+        // autofill popup) does not tear editing down; wait for the grace period.
+        expect(connectionClosedMessages(spy), isEmpty);
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+
+        final List<PlatformMessage> closedMessages = connectionClosedMessages(spy);
+        expect(closedMessages, hasLength(1));
+        expect(closedMessages.single.channel, 'flutter/textinput');
         // DOM element loses the focus.
         expect(defaultTextEditingRoot.ownerDocument?.activeElement, domDocument.body);
       },
@@ -1662,7 +1796,13 @@ Future<void> testMain() async {
       });
 
       final setClient1 = MethodCall('TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
-      final setClient2 = MethodCall('TextInput.setClient', <dynamic>[567, flutterSinglelineConfig]);
+      // A distinct field (different autofill id) so the second client does not
+      // reuse the first field's dormant element; focus moves to a new element.
+      final Map<String, dynamic> secondFieldConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'username',
+      );
+      final setClient2 = MethodCall('TextInput.setClient', <dynamic>[567, secondFieldConfig]);
       const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
         'text': 'abcd',
         'selectionBase': 2,
@@ -3741,7 +3881,7 @@ Future<void> testMain() async {
       );
     });
 
-    test('hidden autofill elements should have a width and height of 0 on non-Safari browsers', () {
+    test('non-focused autofill fields are discoverable but non-interactive on non-Safari browsers', () {
       final List<Map<String, Object?>> fields = createFieldValues(
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
@@ -3764,12 +3904,16 @@ Future<void> testMain() async {
 
       expect(username.name, 'username');
       expect(password.name, 'current-password');
-      expect(username.style.width, '0px');
-      expect(username.style.height, '0px');
-      expect(username.style.pointerEvents, isNot('none'));
-      expect(password.style.width, '0px');
-      expect(password.style.height, '0px');
-      expect(password.style.pointerEvents, isNot('none'));
+      // Non-focused autofill fields are kept discoverable (a non-zero size,
+      // positioned next to the focused field) but non-interactive, so password
+      // managers detect and fill them without the invisible field intercepting
+      // taps meant for the app UI.
+      expect(username.style.width, isNot('0px'));
+      expect(username.style.height, isNot('0px'));
+      expect(username.style.pointerEvents, 'none');
+      expect(password.style.width, isNot('0px'));
+      expect(password.style.height, isNot('0px'));
+      expect(password.style.pointerEvents, 'none');
       expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
     }, skip: isSafari);
 

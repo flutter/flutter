@@ -90,6 +90,49 @@ void main() {
         expect(client2.currentTextEditingValue, text2);
       },
     );
+
+    test('updateEditingStateWithTag is delivered via the last connection after it closes', () async {
+      // A browser password manager can autofill a field in the brief window
+      // after the text input connection is torn down (so TextInput's
+      // _currentConnection is null) but before it is re-established. The value
+      // must still reach the client, routed through the last connection.
+      final client1 = FakeAutofillClient(const TextEditingValue(text: 'test1'));
+      final client2 = FakeAutofillClient(const TextEditingValue(text: 'test2'));
+
+      client1.textInputConfiguration = TextInputConfiguration(
+        autofillConfiguration: AutofillConfiguration(
+          uniqueIdentifier: client1.autofillId,
+          autofillHints: const <String>['client1'],
+          currentEditingValue: client1.currentTextEditingValue,
+        ),
+      );
+      client2.textInputConfiguration = TextInputConfiguration(
+        autofillConfiguration: AutofillConfiguration(
+          uniqueIdentifier: client2.autofillId,
+          autofillHints: const <String>['client2'],
+          currentEditingValue: client2.currentTextEditingValue,
+        ),
+      );
+
+      scope.register(client1);
+      scope.register(client2);
+      client1.currentAutofillScope = scope;
+      client2.currentAutofillScope = scope;
+
+      final TextInputConnection connection = scope.attach(client1, client1.textInputConfiguration);
+      // Tear the connection down: _currentConnection becomes null.
+      connection.close();
+
+      const filled = TextEditingValue(text: 'filled');
+      fakeTextChannel.incoming?.call(
+        MethodCall('TextInputClient.updateEditingStateWithTag', <dynamic>[
+          0,
+          <String, dynamic>{client2.autofillId: filled.toJSON()},
+        ]),
+      );
+
+      expect(client2.currentTextEditingValue, filled);
+    });
   });
 
   group('AutoFillConfiguration', () {

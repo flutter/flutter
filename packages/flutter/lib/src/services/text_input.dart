@@ -2201,6 +2201,27 @@ class TextInput {
         }
         return false;
     }
+    final args = methodCall.arguments as List<dynamic>;
+
+    // The updateEditingStateWithTag request (autofill) can come up even to a
+    // text field that doesn't have an active connection.
+    if (method == 'TextInputClient.updateEditingStateWithTag') {
+      final TextInputConnection? connection = _currentConnection ?? _lastConnection;
+      final AutofillScope? scope = connection?._client.currentAutofillScope;
+      final editingValue = args[1] as Map<String, dynamic>;
+      for (final String tag in editingValue.keys) {
+        final textEditingValue = TextEditingValue.fromJSON(
+          editingValue[tag] as Map<String, dynamic>,
+        );
+        final AutofillClient? client = scope?.getAutofillClient(tag);
+        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
+          client.autofill(textEditingValue);
+        }
+      }
+
+      return;
+    }
+
     if (_currentConnection == null) {
       return;
     }
@@ -2213,27 +2234,6 @@ class TextInput {
       if (editingValue != null) {
         _setEditingState(editingValue);
       }
-      return;
-    }
-
-    final args = methodCall.arguments as List<dynamic>;
-
-    // The updateEditingStateWithTag request (autofill) can come up even to a
-    // text field that doesn't have a connection.
-    if (method == 'TextInputClient.updateEditingStateWithTag') {
-      final TextInputClient client = _currentConnection!._client;
-      final AutofillScope? scope = client.currentAutofillScope;
-      final editingValue = args[1] as Map<String, dynamic>;
-      for (final String tag in editingValue.keys) {
-        final textEditingValue = TextEditingValue.fromJSON(
-          editingValue[tag] as Map<String, dynamic>,
-        );
-        final AutofillClient? client = scope?.getAutofillClient(tag);
-        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
-          client.autofill(textEditingValue);
-        }
-      }
-
       return;
     }
 
