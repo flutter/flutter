@@ -60,6 +60,7 @@ class FlutterPluginTest {
 
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
+        every { mockApplicationExtension.defaultConfig } returns mockk<com.android.build.api.dsl.ApplicationDefaultConfig>(relaxed = true)
 
         every { project.rootProject } returns project
         every { project.state.failure as Throwable? } returns null

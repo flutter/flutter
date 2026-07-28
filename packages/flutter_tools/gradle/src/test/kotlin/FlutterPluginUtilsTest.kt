@@ -383,7 +383,7 @@ class FlutterPluginUtilsTest {
     @Test
     fun `shouldConfigureFlutterTask returns true for assemble task`() {
         val project = mockk<Project>()
-        val assembleTask = mockk<Task>()
+        val assembleTask = mockk<Task>(relaxed = true)
 
         every { project.gradle.startParameter.taskNames } returns listOf("assemble")
 
