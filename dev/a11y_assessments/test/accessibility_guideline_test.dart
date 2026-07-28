@@ -31,51 +31,57 @@ void main() {
   });
 
   for (final UseCase useCase in useCases) {
-    testWidgets('testing accessibility guideline for ${useCase.name}', (WidgetTester tester) async {
-      await tester.pumpWidget(const App(initialTags: <Tag>{}));
+    for (final Brightness brightness in Brightness.values) {
+      testWidgets('testing accessibility guideline for ${useCase.name} - ${brightness.name}', (
+        WidgetTester tester,
+      ) async {
+        tester.platformDispatcher.platformBrightnessTestValue = brightness;
+        addTearDown(tester.platformDispatcher.clearAllTestValues);
+        await tester.pumpWidget(const App(initialTags: <Tag>{}));
 
-      final ScrollController controller = tester
-          .state<HomePageState>(find.byType(HomePage))
-          .scrollController;
-      while (find.byKey(Key(useCase.name)).evaluate().isEmpty) {
-        controller.jumpTo(controller.offset + 400);
-        await tester.pumpAndSettle();
-      }
-      await tester.tap(find.byKey(Key(useCase.name)));
-      await tester.pumpAndSettle();
-
-      await _expectMeetsGuidelines(tester);
-
-      // After checking the guideline for the main page,
-      // iterate through all tappable semantic nodes on the current screen.
-      // Tap each one (excluding the back button) to navigate deeper into the app
-      // and re-run the accessibility checks. This assumes that tapping a target
-      // does not remove other tappable targets from the screen, which is true
-      // for the a11y assessment app's current structure.
-      final SemanticsFinder tappables = find.semantics.byAction(SemanticsAction.tap);
-      final int tappableCount = tappables.evaluate().length;
-
-      for (var i = 0; i < tappableCount; i++) {
-        final FinderBase<SemanticsNode> tappable = tappables.at(i);
-        final SemanticsNode node = tappable.evaluate().first;
-
-        // We do not want to tap the back button or close button, as that will pop the page
-        // and disrupt the current test flow.
-        if (node.tooltip == 'Back' || node.label == 'Close') {
-          continue;
+        final ScrollController controller = tester
+            .state<HomePageState>(find.byType(HomePage))
+            .scrollController;
+        while (find.byKey(Key(useCase.name)).evaluate().isEmpty) {
+          controller.jumpTo(controller.offset + 400);
+          await tester.pumpAndSettle();
         }
-        tester.semantics.tap(tappable);
+        await tester.tap(find.byKey(Key(useCase.name)));
         await tester.pumpAndSettle();
 
-        // Re-check the accessibility guidelines after the tap action.
-        // The DatePicker use case has known issues with tap target sizes
-        // So we skip these checks for this use case .
-        await _expectMeetsGuidelines(
-          tester,
-          skipTapTarget: useCase.name == DatePickerUseCase().name,
-        );
-      }
-    });
+        await _expectMeetsGuidelines(tester);
+
+        // After checking the guideline for the main page,
+        // iterate through all tappable semantic nodes on the current screen.
+        // Tap each one (excluding the back button) to navigate deeper into the app
+        // and re-run the accessibility checks. This assumes that tapping a target
+        // does not remove other tappable targets from the screen, which is true
+        // for the a11y assessment app's current structure.
+        final SemanticsFinder tappables = find.semantics.byAction(SemanticsAction.tap);
+        final int tappableCount = tappables.evaluate().length;
+
+        for (var i = 0; i < tappableCount; i++) {
+          final FinderBase<SemanticsNode> tappable = tappables.at(i);
+          final SemanticsNode node = tappable.evaluate().first;
+
+          // We do not want to tap the back button or close button, as that will pop the page
+          // and disrupt the current test flow.
+          if (node.tooltip == 'Back' || node.label == 'Close') {
+            continue;
+          }
+          tester.semantics.tap(tappable);
+          await tester.pumpAndSettle();
+
+          // Re-check the accessibility guidelines after the tap action.
+          // The DatePicker use case has known issues with tap target sizes
+          // So we skip these checks for this use case .
+          await _expectMeetsGuidelines(
+            tester,
+            skipTapTarget: useCase.name == DatePickerUseCase().name,
+          );
+        }
+      });
+    }
   }
 }
 

@@ -51,10 +51,16 @@ class WebFontCollection implements FlutterFontCollection {
   }
 
   @override
-  FontFallbackManager? get fontFallbackManager => null;
+  FontFallbackManager get fontFallbackManager => throw UnimplementedError(
+    "fontFallbackManager is not supported in WebFontCollection as it uses the browser's native font fallback.",
+  );
 
   @override
-  set fontFallbackManager(FontFallbackManager? value) {}
+  set fontFallbackManager(FontFallbackManager? value) {
+    throw UnimplementedError(
+      "fontFallbackManager is not supported in WebFontCollection as it uses the browser's native font fallback.",
+    );
+  }
 
   @override
   FallbackFontRegistry? get fallbackFontRegistry => null;
@@ -131,7 +137,7 @@ class WebFontCollection implements FlutterFontCollection {
       // There might be paragraph measurements for this new font before it is
       // loaded. They were measured using fallback fonts, so we should clear the
       // cache.
-      // TODO(rusino): https://github.com/flutter/flutter/issues/168001
+      // TODO(jlavrova): https://github.com/flutter/flutter/issues/168001
     } catch (e) {
       // Failures here will throw a DomException. Return false.
       printWarning('Failed to load font "$family" from bytes: $e');

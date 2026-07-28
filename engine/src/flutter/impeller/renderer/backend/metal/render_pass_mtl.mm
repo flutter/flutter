@@ -64,6 +64,10 @@ static bool ConfigureAttachment(const Attachment& desc,
   attachment.texture = TextureMTL::Cast(*desc.texture).GetMTLTexture();
   attachment.loadAction = ToMTLLoadAction(desc.load_action);
   attachment.storeAction = ToMTLStoreAction(desc.store_action);
+  // mip_level/slice select the subresource of the primary texture. The
+  // resolve texture, if any, resolves into its own level 0 / slice 0.
+  attachment.level = desc.mip_level;
+  attachment.slice = desc.slice;
 
   if (!ConfigureResolveTextureAttachment(desc, attachment)) {
     return false;
@@ -216,16 +220,6 @@ static bool Bind(PassBindingsCacheMTL& pass,
                  const Texture& texture) {
   if (!sampler || !texture.IsValid()) {
     return false;
-  }
-
-  if (texture.NeedsMipmapGeneration()) {
-    // TODO(127697): generate mips when the GPU is available on iOS.
-#if !FML_OS_IOS
-    VALIDATION_LOG
-        << "Texture at binding index " << bind_index
-        << " has a mip count > 1, but the mipmap has not been generated.";
-    return false;
-#endif  // !FML_OS_IOS
   }
 
   return pass.SetTexture(stage, bind_index,

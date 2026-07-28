@@ -5,8 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 class TestTransition extends AnimatedWidget {
   const TestTransition({
     super.key,
@@ -29,8 +27,7 @@ class TestTransition extends AnimatedWidget {
 }
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({required this.child, required RouteSettings settings, this.barrierColor})
-    : super(settings: settings);
+  TestRoute({required this.child, required RouteSettings super.settings, this.barrierColor});
 
   final Widget child;
 

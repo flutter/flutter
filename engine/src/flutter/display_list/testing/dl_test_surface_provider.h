@@ -22,10 +22,10 @@ class DlPixelData : public SkRefCnt {
  public:
   virtual ~DlPixelData() = default;
 
-  virtual const uint32_t* addr32(int x, int y) const = 0;
+  virtual const uint32_t* addr32(uint32_t x, uint32_t y) const = 0;
   virtual size_t width() const = 0;
   virtual size_t height() const = 0;
-  virtual void write(const std::string& path) const = 0;
+  virtual bool write(const std::string& path) const = 0;
 };
 
 class DlSurfaceInstance {
@@ -37,7 +37,15 @@ class DlSurfaceInstance {
 
   /// Return a DlCanvas instance that renders to this surface. Note that
   /// actual execution of the rendering calls are not guaranteed until the
-  /// FlushSubmitCpuSync method is called.
+  /// FlushSubmitCpuSync method is called. The DlCanvas will also be reset
+  /// by the operations of the sync method so transform and clip state will
+  /// not be carried over to subsequent calls.
+  ///
+  /// Rendering to this canvas does not necessarily render the commands
+  /// immediately in all backends, some backends accumulate the commands
+  /// into a DisplayList and only flush that DisplayList when the
+  /// FlushSubmitCpuSync is called. Tests should strongly prefer using
+  /// RenderDisplayList instead of multiple calls on this canvas object.
   virtual DlCanvas* GetCanvas() = 0;
 
   /// Render the indicated DisplayList to the surface. Note that the
@@ -52,6 +60,14 @@ class DlSurfaceInstance {
   /// Ensure that all outstanding calls executed on the DlCanvas instance
   /// are rendered to the surface.
   virtual void FlushSubmitCpuSync() = 0;
+
+  /// Read back the current contents of the surface and return it as a
+  /// DlPixelData structure.
+  virtual std::unique_ptr<DlPixelData> SnapshotToPixelData() const = 0;
+
+  /// Return the current contents of the surface as a DlImage compatible
+  /// with the DlCanvas that it provides.
+  virtual sk_sp<DlImage> SnapshotToImage() const = 0;
 
   /// Store a snapshot of this Surface to the file indicated by the filename.
   virtual bool SnapshotToFile(std::string& filename) const = 0;
@@ -97,6 +113,7 @@ class DlSurfaceProvider {
     FML_DCHECK(false);
   }
 
+  static std::optional<BackendType> NameToBackend(const std::string& name);
   static std::string BackendName(BackendType type);
   static std::unique_ptr<DlSurfaceProvider> Create(BackendType backend_type);
 
@@ -105,26 +122,15 @@ class DlSurfaceProvider {
   virtual const std::string GetBackendName() const = 0;
   virtual BackendType GetBackendType() const = 0;
   virtual bool SupportsPixelFormat(PixelFormat format) const = 0;
-  virtual bool SupportsImpeller() const { return false; }
+  virtual bool TargetsImpeller() const = 0;
   virtual bool InitializeSurface(size_t width,
                                  size_t height,
                                  PixelFormat format = kN32Premul) = 0;
   virtual std::shared_ptr<DlSurfaceInstance> GetPrimarySurface() const = 0;
-  virtual std::shared_ptr<DlSurfaceInstance> MakeOffscreenSurface(
+  virtual std::unique_ptr<DlSurfaceInstance> MakeOffscreenSurface(
       size_t width,
       size_t height,
       PixelFormat format = kN32Premul) const = 0;
-
-  virtual sk_sp<DlPixelData> ImpellerSnapshot(const sk_sp<DisplayList>& list,
-                                              int width,
-                                              int height) const {
-    return nullptr;
-  }
-  virtual sk_sp<DlImage> MakeImpellerImage(const sk_sp<DisplayList>& list,
-                                           int width,
-                                           int height) const {
-    return nullptr;
-  }
 
  protected:
   DlSurfaceProvider() = default;

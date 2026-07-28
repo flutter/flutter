@@ -327,20 +327,6 @@ class WebAssetServer implements AssetReader {
 
     // Ensure dwds is present and provide middleware to avoid trying to
     // load the through the isolate APIs.
-    final Directory directory = await loadDwdsDirectory(fileSystem, logger);
-    shelf.Handler middleware(FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
-      return (shelf.Request request) async {
-        if (request.url.path.endsWith('dwds/src/injected/client.js')) {
-          final Uri uri = directory.uri.resolve('src/injected/client.js');
-          final String result = await fileSystem.file(uri.toFilePath()).readAsString();
-          return shelf.Response.ok(
-            result,
-            headers: <String, String>{HttpHeaders.contentTypeHeader: 'application/javascript'},
-          );
-        }
-        return innerHandler(request);
-      };
-    }
 
     logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen((logging.LogRecord event) => log(logger, event));
@@ -398,7 +384,7 @@ class WebAssetServer implements AssetReader {
     );
     var pipeline = const shelf.Pipeline();
     if (shouldEnableMiddleware) {
-      pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
+      pipeline = pipeline.addMiddleware(dwds.middleware);
     }
     pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, globals.logger));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);

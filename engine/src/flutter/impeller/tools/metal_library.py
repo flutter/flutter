@@ -80,8 +80,6 @@ def main():
       '-Oz',
       # Allow aggressive, lossy floating-point optimizations.
       '-ffast-math',
-      # Record symbols in a separate *.metallibsym file.
-      '-frecord-sources=flat',
       '-MF',
       args.depfile,
       '-o',
@@ -92,6 +90,11 @@ def main():
     command += [
         '-g',
         '-frecord-sources',
+    ]
+  else:
+    command += [
+        # Record symbols in a separate *.metallibsym file.
+        '-frecord-sources=flat',
     ]
 
   # Select the Metal standard and the minimum supported OS versions.

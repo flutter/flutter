@@ -4,12 +4,15 @@
 
 #include "flutter/lib/gpu/shader.h"
 
+#include <cstring>
 #include <utility>
 
 #include "flutter/lib/gpu/formats.h"
 #include "fml/make_copyable.h"
 #include "impeller/core/runtime_types.h"
+#include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/shader_function.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/shader_library.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -36,6 +39,7 @@ Shader::Shader() = default;
 Shader::~Shader() = default;
 
 fml::RefPtr<Shader> Shader::Make(
+    std::string library_id,
     std::string entrypoint,
     impeller::ShaderStage stage,
     std::shared_ptr<fml::Mapping> code_mapping,
@@ -45,6 +49,7 @@ fml::RefPtr<Shader> Shader::Make(
     std::unordered_map<std::string, TextureBinding> uniform_textures,
     std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts) {
   auto shader = fml::MakeRefCounted<Shader>();
+  shader->library_id_ = std::move(library_id);
   shader->entrypoint_ = std::move(entrypoint);
   shader->stage_ = stage;
   shader->code_mapping_ = std::move(code_mapping);
@@ -56,9 +61,14 @@ fml::RefPtr<Shader> Shader::Make(
   return shader;
 }
 
+std::string Shader::GetScopedName() const {
+  return impeller::ShaderKey::MakeUserScopedName(
+      impeller::ShaderKey::kScopeFlutterGPU, library_id_, entrypoint_);
+}
+
 std::shared_ptr<const impeller::ShaderFunction> Shader::GetFunctionFromLibrary(
     impeller::ShaderLibrary& library) {
-  return library.GetFunction(entrypoint_, stage_);
+  return library.GetFunction(GetScopedName(), stage_);
 }
 
 bool Shader::IsRegistered(Context& context) {
@@ -66,23 +76,75 @@ bool Shader::IsRegistered(Context& context) {
   return GetFunctionFromLibrary(lib) != nullptr;
 }
 
+bool Shader::IsDirty() const {
+  return is_dirty_;
+}
+
+void Shader::SetClean() {
+  is_dirty_ = false;
+}
+
+void Shader::ResetFrom(Shader& other) {
+  // Compare the compiled bytes against the freshly-parsed mapping before
+  // moving anything. A shader bundle is the unit of asset distribution, so
+  // editing one shader recompiles the whole bundle; without this dedupe
+  // every unchanged shader in the bundle would still be evicted and
+  // re-registered on reload. Code-byte equality is sufficient because
+  // impellerc derives reflection metadata (uniforms, inputs, layouts)
+  // deterministically from the compiled output.
+  const bool code_changed =
+      code_mapping_ == nullptr || other.code_mapping_ == nullptr ||
+      code_mapping_->GetSize() != other.code_mapping_->GetSize() ||
+      std::memcmp(code_mapping_->GetMapping(),
+                  other.code_mapping_->GetMapping(),
+                  code_mapping_->GetSize()) != 0;
+
+  // library_id_ is intentionally preserved: the scoped registry key
+  // (library_id + entrypoint) must remain stable across reloads so the
+  // eviction triple-call in `RegisterSync` lands at the same slot.
+  entrypoint_ = std::move(other.entrypoint_);
+  stage_ = other.stage_;
+  code_mapping_ = std::move(other.code_mapping_);
+  inputs_ = std::move(other.inputs_);
+  layouts_ = std::move(other.layouts_);
+  uniform_structs_ = std::move(other.uniform_structs_);
+  uniform_textures_ = std::move(other.uniform_textures_);
+  descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
+  if (code_changed) {
+    is_dirty_ = true;
+  }
+}
+
 bool Shader::RegisterSync(Context& context) {
-  if (IsRegistered(context)) {
-    return true;  // Already registered.
+  auto& lib = *context.GetContext().GetShaderLibrary();
+  const std::string scoped_name = GetScopedName();
+
+  std::shared_ptr<const impeller::ShaderFunction> existing =
+      lib.GetFunction(scoped_name, stage_);
+  if (existing && !is_dirty_) {
+    return true;  // Already registered and current.
   }
 
-  auto& lib = *context.GetContext().GetShaderLibrary();
+  // Dirty path: an earlier asset version still occupies the scoped slot.
+  // Evict it (and any pipelines that referenced it) before registering the
+  // new code mapping. Mirrors `RuntimeEffectContents::RegisterShader`.
+  if (existing && is_dirty_) {
+    context.GetContext().GetPipelineLibrary()->RemovePipelinesWithEntryPoint(
+        existing);
+    lib.UnregisterFunction(scoped_name, stage_);
+  }
 
   std::promise<bool> promise;
   auto future = promise.get_future();
   lib.RegisterFunction(
-      entrypoint_, stage_, code_mapping_,
+      scoped_name, stage_, code_mapping_,
       fml::MakeCopyable([promise = std::move(promise)](bool result) mutable {
         promise.set_value(result);
       }));
   if (!future.get()) {
     return false;  // Registration failed.
   }
+  is_dirty_ = false;
   return true;
 }
 
@@ -91,6 +153,15 @@ std::shared_ptr<impeller::VertexDescriptor> Shader::CreateVertexDescriptor()
   auto vertex_descriptor = std::make_shared<impeller::VertexDescriptor>();
   vertex_descriptor->SetStageInputs(inputs_, layouts_);
   return vertex_descriptor;
+}
+
+const std::vector<impeller::ShaderStageIOSlot>& Shader::GetStageInputs() const {
+  return inputs_;
+}
+
+const std::vector<impeller::ShaderStageBufferLayout>&
+Shader::GetStageBufferLayouts() const {
+  return layouts_;
 }
 
 impeller::ShaderStage Shader::GetShaderStage() const {
@@ -156,4 +227,8 @@ int InternalFlutterGpu_Shader_GetUniformMemberOffset(
   }
 
   return member->offset;
+}
+
+bool InternalFlutterGpu_Shader_DebugIsDirty(flutter::gpu::Shader* wrapper) {
+  return wrapper->IsDirty();
 }

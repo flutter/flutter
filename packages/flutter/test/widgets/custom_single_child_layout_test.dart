@@ -168,4 +168,18 @@ void main() {
     box = tester.renderObject(find.byType(CustomSingleChildLayout));
     expect(box.size, equals(const Size(150.0, 240.0)));
   });
+
+  testWidgets('CustomSingleChildLayout does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final size = ValueNotifier<Size>(const Size(100, 200));
+    addTearDown(tester.view.reset);
+    addTearDown(size.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: CustomSingleChildLayout(delegate: NotifierLayoutDelegate(size))),
+      ),
+    );
+    expect(tester.getSize(find.byType(CustomSingleChildLayout)), Size.zero);
+  });
 }

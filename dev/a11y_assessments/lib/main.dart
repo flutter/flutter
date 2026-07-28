@@ -15,6 +15,32 @@ void main() {
   }
 }
 
+ThemeData _buildTheme({required Brightness brightness, double contrastLevel = 0.0}) {
+  final scheme = ColorScheme.fromSeed(
+    brightness: brightness,
+    seedColor: const Color(0xff6750a4),
+    contrastLevel: contrastLevel,
+  );
+  return ThemeData(
+    colorScheme: scheme,
+    appBarTheme: AppBarTheme(backgroundColor: scheme.primary, foregroundColor: scheme.onPrimary),
+    pageTransitionsTheme: PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        for (final TargetPlatform platform in TargetPlatform.values)
+          platform: const FadeForwardsPageTransitionsBuilder(),
+      },
+    ),
+  );
+}
+
+final ThemeData _lightTheme = _buildTheme(brightness: Brightness.light);
+final ThemeData _darkTheme = _buildTheme(brightness: Brightness.dark);
+final ThemeData _highContrastTheme = _buildTheme(brightness: Brightness.light, contrastLevel: 1.0);
+final ThemeData _highContrastDarkTheme = _buildTheme(
+  brightness: Brightness.dark,
+  contrastLevel: 1.0,
+);
+
 class App extends StatelessWidget {
   const App({super.key, this.initialTags = const <Tag>{Tag.batch2}});
 
@@ -22,20 +48,6 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lightTheme = ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xff6750a4),
-        contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
-      ),
-    );
-    final darkTheme = ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        brightness: Brightness.dark,
-        seedColor: const Color(0xff6750a4),
-        contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
-      ),
-    );
-
     final routes = Map<String, WidgetBuilder>.fromEntries(
       useCases.map(
         (UseCase useCase) => MapEntry<String, WidgetBuilder>(
@@ -48,8 +60,10 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Accessibility Assessments Home Page',
-      theme: lightTheme,
-      darkTheme: darkTheme,
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
+      highContrastTheme: _highContrastTheme,
+      highContrastDarkTheme: _highContrastDarkTheme,
       routes: <String, WidgetBuilder>{
         '/': (_) => HomePage(initialTags: initialTags),
         ...routes,

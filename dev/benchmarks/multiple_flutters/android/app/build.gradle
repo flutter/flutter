@@ -4,7 +4,6 @@
 
 plugins {
     id 'com.android.application'
-    id 'kotlin-android'
 }
 
 android {
@@ -23,10 +22,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
     defaultConfig {
         applicationId "dev.flutter.multipleflutters"
         minSdk = 24
@@ -43,6 +38,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = debug.signingConfig
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

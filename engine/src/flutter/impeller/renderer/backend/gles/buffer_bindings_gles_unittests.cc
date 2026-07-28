@@ -7,13 +7,41 @@
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
+#include "impeller/renderer/backend/gles/formats_gles.h"
+#include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
 #include "impeller/renderer/command.h"
 
 namespace impeller {
 namespace testing {
+namespace {
+const GLint kBlockDataSize = 16;
+}
 
 using ::testing::_;
+
+TEST(BufferBindingsGLESTest, ToVertexAttribTypeSupportedFormats) {
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kFloat32x3),
+            std::optional<GLenum>(GL_FLOAT));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kSInt8x4),
+            std::optional<GLenum>(GL_BYTE));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kUInt8),
+            std::optional<GLenum>(GL_UNSIGNED_BYTE));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kSInt16x2),
+            std::optional<GLenum>(GL_SHORT));
+  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kUInt16),
+            std::optional<GLenum>(GL_UNSIGNED_SHORT));
+}
+
+TEST(BufferBindingsGLESTest, ToVertexAttribTypeRejectsUnsupportedFormats) {
+  // Half-float and 32-bit integer vertex attributes are not available on the
+  // GLES 2.0 floor.
+  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kFloat16).has_value());
+  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kSInt32).has_value());
+  EXPECT_FALSE(
+      ToVertexAttribType(VertexAttributeFormat::kUInt32x4).has_value());
+  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kInvalid).has_value());
+}
 
 TEST(BufferBindingsGLESTest, BindUniformData) {
   BufferBindingsGLES bindings;
@@ -144,6 +172,193 @@ TEST(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices) {
   EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
                                        bound_buffers, Range{0, 0},
                                        Range{0, 1}));
+}
+
+// Regression guard: a float uniform that arrives at the GLES backend without
+// `float_type` populated must be rejected rather than silently dispatched to
+// the wrong glUniform call. This is the fault mode that motivated the schema
+// extension; if a future change forgets to populate `float_type` (in the
+// shader bundle loader, runtime effects, or anywhere else), this test
+// catches it at unit-test time instead of at runtime.
+TEST(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType) {
+  BufferBindingsGLES bindings;
+  absl::flat_hash_map<std::string, GLint> uniform_bindings;
+  uniform_bindings["SHADERMETADATA.FOOBAR"] = 1;
+  bindings.SetUniformBindings(std::move(uniform_bindings));
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  std::vector<BufferResource> bound_buffers;
+  std::vector<TextureAndSampler> bound_textures;
+
+  ShaderMetadata shader_metadata = {
+      .name = "shader_metadata",
+      .members = {ShaderStructMemberMetadata{.type = ShaderType::kFloat,
+                                             .name = "foobar",
+                                             .offset = 0,
+                                             .size = sizeof(float),
+                                             .byte_length = sizeof(float),
+                                             .array_elements = std::nullopt,
+                                             .float_type = std::nullopt}}};
+  std::shared_ptr<ReactorGLES> reactor;
+  auto backing_store = std::make_unique<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float)}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = sizeof(float)},
+                                 reactor, std::move(backing_store));
+  BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
+  bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
+
+  EXPECT_FALSE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
+                                        bound_buffers, Range{0, 0},
+                                        Range{0, 1}));
+}
+
+// An instanced draw reaches per-instance data through instance-rate vertex
+// attributes. A vertex layout with an instance-rate binding must set a
+// glVertexAttribDivisor of 1 on that binding's attributes, while a
+// per-vertex binding keeps a divisor of 0.
+TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(0, 0)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(1, 1)).Times(1);
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+
+  BufferBindingsGLES bindings;
+
+  ShaderStageIOSlot per_vertex_input = {
+      .name = "position",
+      .location = 0,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 0,
+  };
+  ShaderStageIOSlot per_instance_input = {
+      .name = "instance_offset",
+      .location = 1,
+      .set = 0,
+      .binding = 1,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 0,
+  };
+  std::vector<ShaderStageIOSlot> inputs = {per_vertex_input,
+                                           per_instance_input};
+  std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{.stride = sizeof(float) * 2,
+                              .binding = 0,
+                              .input_rate = VertexInputRate::kVertex},
+      ShaderStageBufferLayout{.stride = sizeof(float) * 2,
+                              .binding = 1,
+                              .input_rate = VertexInputRate::kInstance},
+  };
+
+  ASSERT_TRUE(bindings.RegisterVertexStageInput(mock_gl->GetProcTable(), inputs,
+                                                layouts));
+  // Binding 0 is per-vertex (divisor 0); binding 1 is per-instance
+  // (divisor 1).
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/0, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/1, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+}
+
+namespace {
+class TestWorker : public ReactorGLES::Worker {
+ public:
+  bool CanReactorReactOnCurrentThreadNow(
+      const ReactorGLES& reactor) const override {
+    return true;
+  }
+};
+}  // namespace
+
+void TestBindUniformBufferRange(size_t buffer_view_length,
+                                size_t expected_bound_size) {
+  BufferBindingsGLES bindings;
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+
+  const GLuint kProgram = 1;
+
+  ON_CALL(*mock_gles_impl,
+          GetProgramiv(/*program=*/kProgram,
+                       /*pname=*/GL_ACTIVE_UNIFORM_BLOCKS, /*params=*/_))
+      .WillByDefault(::testing::SetArgPointee<2>(1));
+  ON_CALL(*mock_gles_impl,
+          GetActiveUniformBlockiv(/*program=*/kProgram,
+                                  /*uniformBlockIndex=*/0,
+                                  /*pname=*/GL_UNIFORM_BLOCK_NAME_LENGTH,
+                                  /*params=*/_))
+      .WillByDefault(::testing::SetArgPointee<3>(9));
+  ON_CALL(*mock_gles_impl,
+          GetActiveUniformBlockName(/*program=*/kProgram,
+                                    /*uniformBlockIndex=*/0,
+                                    /*bufSize=*/9, /*length=*/_,
+                                    /*uniformBlockName=*/_))
+      .WillByDefault([](GLuint program, GLuint index, GLsizei bufSize,
+                        GLsizei* length, GLchar* name) {
+        *length = 8;
+        std::memcpy(name, "FragInfo", 9);
+      });
+  ON_CALL(
+      *mock_gles_impl,
+      GetUniformBlockIndex(/*program=*/kProgram,
+                           /*uniformBlockName=*/::testing::StrEq("FragInfo")))
+      .WillByDefault(::testing::Return(0));
+  ON_CALL(*mock_gles_impl,
+          GetActiveUniformBlockiv(/*program=*/kProgram,
+                                  /*uniformBlockIndex=*/0,
+                                  /*pname=*/GL_UNIFORM_BLOCK_DATA_SIZE,
+                                  /*params=*/_))
+      .WillByDefault(::testing::SetArgPointee<3>(kBlockDataSize));
+
+  EXPECT_CALL(*mock_gles_impl,
+              BindBufferRange(/*target=*/GL_UNIFORM_BUFFER, /*index=*/0,
+                              /*buffer=*/_, /*offset=*/0,
+                              /*size=*/expected_bound_size))
+      .Times(1);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  ASSERT_TRUE(bindings.ReadUniformsBindings(mock_gl->GetProcTable(), kProgram));
+
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  std::vector<BufferResource> bound_buffers;
+  std::vector<TextureAndSampler> bound_textures;
+
+  ShaderMetadata shader_metadata = {.name = "FragInfo"};
+  auto backing_store = std::make_unique<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{1024}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = 1024}, reactor,
+                                 std::move(backing_store));
+  BufferView buffer_view(&device_buffer, Range(0, buffer_view_length));
+  bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
+
+  EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
+                                       bound_buffers, Range{0, 0},
+                                       Range{0, 1}));
+}
+
+TEST(BufferBindingsGLESTest,
+     BindUniformBufferUsesMaxOfBufferViewAndBlockDataSize) {
+  TestBindUniformBufferRange(/*buffer_view_length=*/4,
+                             /*expected_bound_size=*/kBlockDataSize);
+}
+
+TEST(BufferBindingsGLESTest,
+     BindUniformBufferUsesBufferViewLengthWhenGreaterThanBlockDataSize) {
+  TestBindUniformBufferRange(/*buffer_view_length=*/32,
+                             /*expected_bound_size=*/32);
 }
 
 }  // namespace testing

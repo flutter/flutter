@@ -10,7 +10,7 @@
 library;
 
 import 'dart:async';
-import 'dart:ui' as ui show PictureRecorder, SceneBuilder, SemanticsUpdate;
+import 'dart:ui' as ui show PictureRecorder, Rect, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -483,6 +483,55 @@ mixin RendererBinding
       action.type,
       action.arguments,
     );
+  }
+
+  @override
+  ui.Rect? getRectOfSemanticsNodeInViewCoordinates(int viewId, int nodeId) {
+    final RenderView? renderView = _viewIdToRenderView[viewId];
+    assert(
+      renderView != null,
+      'getRectOfSemanticsNodeInViewCoordinates was called for unknown view $viewId.',
+    );
+    if (renderView == null) {
+      return null;
+    }
+
+    final SemanticsOwner? semanticsOwner = renderView.owner?.semanticsOwner;
+    assert(
+      semanticsOwner != null,
+      'getRectOfSemanticsNodeInViewCoordinates was called for view $viewId, but the view does not have a '
+      'SemanticsOwner. Semantics must be enabled for the lookup to succeed.',
+    );
+    if (semanticsOwner == null) {
+      return null;
+    }
+
+    final SemanticsNode? node = semanticsOwner.getSemanticsNode(nodeId);
+    assert(
+      node != null,
+      'getRectOfSemanticsNodeInViewCoordinates was called for unknown node $nodeId in view $viewId.',
+    );
+    if (node == null) {
+      return null;
+    }
+
+    var transform = Matrix4.identity();
+    SemanticsNode? current = node;
+    while (current != null) {
+      if (current.transform != null) {
+        transform = current.transform! * transform as Matrix4;
+      }
+      current = current.parent;
+    }
+
+    // The walk above accumulates RenderView's root transform, which scales
+    // from logical to physical pixels. Undo it with the same matrix the
+    // framework applied, so the result is in logical pixels regardless of
+    // what that matrix encodes.
+    final rootInverse = Matrix4.copy(renderView.configuration.toMatrix())..invert();
+    transform = rootInverse * transform as Matrix4;
+
+    return MatrixUtils.transformRect(transform, node.rect);
   }
 
   void _handleWebFirstFrame(Duration _) {

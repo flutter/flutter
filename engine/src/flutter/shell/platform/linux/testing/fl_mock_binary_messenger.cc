@@ -685,7 +685,7 @@ static SendMessageData* send_message_data_new(
 
 static void send_message_data_free(SendMessageData* data) {
   g_object_unref(data->codec);
-  free(data);
+  g_free(data);
 }
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(SendMessageData, send_message_data_free)

@@ -109,16 +109,24 @@ class Geometry {
                                            Scalar stroke_width);
 
   /// @brief    Determines if this geometry, transformed by the given
-  ///           `transform`, will completely cover all surface area of the given
-  ///           `rect`.
+  ///           `transform`, will completely cover all of the pixels
+  ///           within the given integer `rect`.
   ///
-  ///           This is a conservative estimate useful for certain
-  ///           optimizations.
+  ///           The integer `rect`, by definition, will contain all of
+  ///           the area covered by any pixel within its boundary.
   ///
-  /// @returns  `true` if the transformed geometry is guaranteed to cover the
-  ///           given `rect`. May return `false` in many undetected cases where
+  ///           The return value can be a conservative estimate which
+  ///           will still be useful for certain optimizations. It may
+  ///           return `false` for obscure cases that might actually contain
+  ///           all of the pixels if it is too computationally costly
+  ///           to prove containment, but it should never return 'true'
+  ///           unless the implementation can prove that all pixels are
+  ///           fully covered (rendered) by the geometry.
+  ///
+  /// @returns  `true` if the transformed geometry is guaranteed to cover
+  ///           the given `rect`. May return `false` in some cases where
   ///           the transformed geometry does in fact cover the `rect`.
-  virtual bool CoversArea(const Matrix& transform, const Rect& rect) const;
+  virtual bool CoversArea(const Matrix& transform, const IRect& rect) const;
 
   virtual bool IsAxisAlignedRect() const;
 

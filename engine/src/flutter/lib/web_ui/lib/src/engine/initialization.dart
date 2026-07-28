@@ -29,7 +29,7 @@ String get buildMode => kReleaseMode
 
 /// A benchmark metric that includes frame-related computations prior to
 /// submitting layer and picture operations to the underlying renderer, such as
-/// HTML and CanvasKit. During this phase we compute transforms, clips, and
+/// CanvasKit and Skwasm. During this phase we compute transforms, clips, and
 /// other information needed for rendering.
 const String kProfilePrerollFrame = 'preroll_frame';
 

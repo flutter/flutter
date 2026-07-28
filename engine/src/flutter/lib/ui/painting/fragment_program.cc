@@ -158,6 +158,13 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
       ui_dart_state->GetRuntimeStageBackend();
   std::shared_ptr<impeller::RuntimeStage> runtime_stage =
       (*runtime_stages)[backend];
+  if (runtime_stage) {
+    // Anchor the registry namespace to the asset path so hot reload of the
+    // same asset evicts the previous registration at the same scoped key,
+    // and so two different FragmentProgram assets cannot collide with each
+    // other or with engine-internal entrypoint names.
+    runtime_stage->SetLibraryId(asset_name);
+  }
   if (!runtime_stage) {
     std::ostringstream stream;
     stream << "Asset '" << asset_name

@@ -6,6 +6,27 @@
 
 namespace flutter::testing {
 
+std::optional<DlSurfaceProvider::BackendType> DlSurfaceProvider::NameToBackend(
+    const std::string& name) {
+#define FLT_SURFACE_PROVIDER_HANDLE_BACKEND(name, BACKEND)         \
+  {                                                                \
+    BackendType type = BackendType::k##BACKEND;                    \
+    if (name.compare(DlSurfaceProvider::BackendName(type)) == 0) { \
+      return type;                                                 \
+    }                                                              \
+  }
+
+  FLT_SURFACE_PROVIDER_HANDLE_BACKEND(name, SkiaSoftware);
+  FLT_SURFACE_PROVIDER_HANDLE_BACKEND(name, SkiaOpenGL);
+  FLT_SURFACE_PROVIDER_HANDLE_BACKEND(name, SkiaMetal);
+  FLT_SURFACE_PROVIDER_HANDLE_BACKEND(name, ImpellerMetal);
+  FLT_SURFACE_PROVIDER_HANDLE_BACKEND(name, ImpellerMetalSDF);
+
+#undef FLT_SURFACE_PROVIDER_HANDLE_BACKEND
+
+  return std::nullopt;
+}
+
 std::string DlSurfaceProvider::BackendName(BackendType type) {
   switch (type) {
     case BackendType::kSkiaSoftware:

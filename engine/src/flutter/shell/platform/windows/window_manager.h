@@ -57,6 +57,8 @@ struct RegularWindowCreationRequest {
   WindowSizeRequest preferred_size;
   WindowConstraints preferred_constraints;
   LPCWSTR title;
+  bool sized_to_content = false;
+  bool resizable = true;
 };
 
 struct DialogWindowCreationRequest {
@@ -64,6 +66,8 @@ struct DialogWindowCreationRequest {
   WindowConstraints preferred_constraints;
   LPCWSTR title;
   HWND parent_or_null;
+  bool sized_to_content = false;
+  bool resizable = true;
 };
 
 typedef WindowRect* (*GetWindowPositionCallback)(const WindowSize& child_size,

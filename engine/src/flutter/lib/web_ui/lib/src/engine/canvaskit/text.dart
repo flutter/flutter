@@ -1261,6 +1261,6 @@ List<String> _computeCombinedFontFamilies(String? fontFamily, [List<String>? fon
       !fontFamilyFallback.every((String font) => fontFamily == font)) {
     fontFamilies.addAll(fontFamilyFallback);
   }
-  fontFamilies.addAll(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks);
+  fontFamilies.addAll(renderer.fontCollection.fontFallbackManager.globalFontFallbacks);
   return fontFamilies;
 }

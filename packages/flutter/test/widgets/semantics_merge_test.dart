@@ -195,4 +195,81 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('MergeSemantics with child delegate', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
+      final builder = ChildSemanticsConfigurationsResultBuilder();
+      final sibling = <SemanticsConfiguration>[];
+      for (final config in configs) {
+        if (config.value == '123') {
+          builder.markAsMergeUp(config);
+        } else {
+          sibling.add(config);
+        }
+      }
+      builder.markAsSiblingMergeGroup(sibling);
+      return builder.build();
+    }
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MergeSemantics(
+          child: Semantics(
+            label: 'Room Height',
+            child: TestConfigDelegate(
+              delegate: delegate,
+              child: Column(
+                children: <Widget>[
+                  Semantics(label: 'height', child: const SizedBox(width: 100, height: 100)),
+                  Semantics(value: '123', child: const SizedBox(width: 100, height: 100)),
+                  Semantics(label: 'feet', child: const SizedBox(width: 100, height: 100)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byType(MergeSemantics));
+    final SemanticsData data = node.getSemanticsData();
+    expect(data.label, 'Room Height\nheight\nfeet');
+    expect(data.value, '123');
+
+    semantics.dispose();
+  });
+}
+
+class TestConfigDelegate extends SingleChildRenderObjectWidget {
+  const TestConfigDelegate({super.key, required this.delegate, super.child});
+  final ChildSemanticsConfigurationsDelegate delegate;
+
+  @override
+  RenderTestConfigDelegate createRenderObject(BuildContext context) =>
+      RenderTestConfigDelegate(delegate: delegate);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderTestConfigDelegate renderObject) {
+    renderObject.delegate = delegate;
+  }
+}
+
+class RenderTestConfigDelegate extends RenderProxyBox {
+  RenderTestConfigDelegate({ChildSemanticsConfigurationsDelegate? delegate}) : _delegate = delegate;
+
+  ChildSemanticsConfigurationsDelegate? get delegate => _delegate;
+  ChildSemanticsConfigurationsDelegate? _delegate;
+  set delegate(ChildSemanticsConfigurationsDelegate? value) {
+    if (value != _delegate) {
+      markNeedsSemanticsUpdate();
+    }
+    _delegate = value;
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    config.childConfigurationsDelegate = delegate;
+  }
 }

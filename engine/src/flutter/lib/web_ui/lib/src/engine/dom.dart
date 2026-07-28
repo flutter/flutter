@@ -872,8 +872,8 @@ extension type DomPerformanceMeasure._(JSObject _) implements DomPerformanceEntr
 
 @JS('HTMLCanvasElement')
 extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, DomCanvasImageSource {
-  external double? width;
-  external double? height;
+  external num? width;
+  external num? height;
 
   @JS('toDataURL')
   external JSString _toDataURL(JSString type);
@@ -969,6 +969,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external String textRendering;
   external String fontKerning;
   external String fontVariantCaps;
+  external String lang;
   external set lineWidth(num? value);
 
   @JS('setLineDash')
@@ -1061,6 +1062,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   }
 
   external DomImageData getImageData(int x, int y, int sw, int sh);
+  external void putImageData(DomImageData imagedata, int dx, int dy);
   external void lineTo(num x, num y);
   external DomTextMetrics measureText(String text);
   external void moveTo(num x, num y);
@@ -1570,16 +1572,16 @@ extension type DomTextMetrics._(JSObject _) implements JSObject {
   external JSArray<JSAny?> _getTextClusters();
   List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
 
-  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+  external DomRectReadOnly getActualBoundingBox(int start, int end);
 
   external double get fontBoundingBoxAscent;
 
   external double get fontBoundingBoxDescent;
 
   @JS('getSelectionRects')
-  external JSArray<JSAny> _getSelectionRects(int begin, int end);
-  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
-      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
+  external JSArray<JSAny> _getSelectionRects(int start, int end);
+  List<DomRectReadOnly> getSelectionRects(int start, int end) =>
+      _getSelectionRects(start, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')
@@ -1995,6 +1997,19 @@ extension type DomTouchEvent._(JSObject _) implements DomUIEvent {
   @JS('changedTouches')
   external _DomList get _changedTouches;
   Iterable<DomTouch> get changedTouches => _createDomListWrapper<DomTouch>(_changedTouches);
+
+  @JS('touches')
+  external _DomList get _touches;
+
+  /// All touch points currently in contact with the surface.
+  ///
+  /// On iOS WebKit this stays accurate even where the pointer events do not:
+  /// WebKit can stop dispatching pointer events for a touch it has taken over
+  /// for a native gesture, but it still drops that touch from this list once
+  /// the finger leaves, which is what makes an abandoned touch detectable. This
+  /// is observed WebKit behavior, not a cross-browser guarantee.
+  /// See: https://github.com/flutter/flutter/issues/188781
+  Iterable<DomTouch> get touches => _createDomListWrapper<DomTouch>(_touches);
 }
 
 @JS('Touch')
@@ -2700,6 +2715,11 @@ extension JSArrayExtension on JSArray<JSAny?> {
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
 }
+
+@JS('window.TextCluster')
+external JSAny? get _textClusterConstructor;
+
+bool browserSupportsTextCluster = _textClusterConstructor != null;
 
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {

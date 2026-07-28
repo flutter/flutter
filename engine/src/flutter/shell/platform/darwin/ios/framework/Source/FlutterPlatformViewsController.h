@@ -18,6 +18,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
@@ -32,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 /// The task runner used to post rendering tasks to the platform thread.
-@property(nonatomic, assign) const fml::RefPtr<fml::TaskRunner>& taskRunner;
+@property(nonatomic, strong) FlutterFMLTaskRunner* taskRunner;
 
 /// The flutter view.
 @property(nonatomic, weak) UIView* _Nullable flutterView;
@@ -67,19 +68,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// Returns nil if there is no platform view with the provided id. Called
 /// from the platform thread.
 - (FlutterTouchInterceptingView*)flutterTouchInterceptingViewForId:(int64_t)viewId;
-
-/// @brief Determine if thread merging is required after prerolling platform views.
-///
-/// Called from the raster thread.
-- (flutter::PostPrerollResult)postPrerollActionWithThreadMerger:
-    (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger;
-
-/// @brief Mark the end of a compositor frame.
-///
-/// May determine changes are required to the thread merging state.
-/// Called from the raster thread.
-- (void)endFrameWithResubmit:(BOOL)shouldResubmitFrame
-                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger;
 
 /// @brief Returns the Canvas for the overlay slice for the given platform view.
 ///

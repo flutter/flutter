@@ -6,6 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERENGINE_INTERNAL_H_
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
@@ -28,6 +30,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
@@ -39,10 +43,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
                                                    viewId:(uint64_t)viewId;
-
-- (fml::RefPtr<fml::TaskRunner>)platformTaskRunner;
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner;
-- (fml::RefPtr<fml::TaskRunner>)rasterTaskRunner;
 
 - (void)installFirstFrameCallback:(void (^)(void))block;
 - (void)enableSemantics:(BOOL)enabled withFlags:(int64_t)flags;

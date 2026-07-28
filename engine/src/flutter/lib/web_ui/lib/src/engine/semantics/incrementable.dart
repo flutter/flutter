@@ -123,10 +123,16 @@ class SemanticIncrementable extends SemanticRole {
     switch (EngineSemantics.instance.gestureMode) {
       case GestureMode.browserGestures:
         _enableBrowserGestureHandling();
-        _updateInputValues();
       case GestureMode.pointerEvents:
         _disableBrowserGestureHandling();
     }
+    // Always sync the input element's value attributes, even while the input
+    // is disabled in pointer-events mode. Otherwise, when semantics is first
+    // enabled by a pointer interaction (e.g. clicking the "Enable
+    // Accessibility" placeholder), the slider's initial update arrives while
+    // the gesture mode is `pointerEvents`.
+    // See https://github.com/flutter/flutter/issues/186472.
+    _updateInputValues();
     _focusManager.changeFocus(semanticsObject.hasFocus);
   }
 
@@ -139,8 +145,6 @@ class SemanticIncrementable extends SemanticRole {
   }
 
   void _updateInputValues() {
-    assert(EngineSemantics.instance.gestureMode == GestureMode.browserGestures);
-
     final bool updateNeeded =
         _pendingResync ||
         semanticsObject.isValueDirty ||
