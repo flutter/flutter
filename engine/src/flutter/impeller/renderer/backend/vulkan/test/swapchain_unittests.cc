@@ -183,6 +183,7 @@ TEST(SwapchainTest, SwapchainSizeChangeDoesNotAcquireDrawable) {
       KHRSwapchainVK::Create(context, std::move(surface), original_size,
                              /*enable_msaa=*/false);
   auto image = swapchain->AcquireNextDrawable();
+  ASSERT_NE(image, nullptr);
   EXPECT_EQ(image->GetSize(), original_size);
 
   ISize new_size(100, 100);
@@ -191,6 +192,7 @@ TEST(SwapchainTest, SwapchainSizeChangeDoesNotAcquireDrawable) {
 
   acquire_call_count = 0;
   image = swapchain->AcquireNextDrawable();
+  ASSERT_NE(image, nullptr);
   EXPECT_EQ(image->GetSize(), new_size);
 
   // Verify that the call to AcquireNextDrawable after the resize did not make
