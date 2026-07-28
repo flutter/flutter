@@ -2769,6 +2769,605 @@ void main() {
     );
     expect(tester.getSize(find.byType(ReorderableListView)), Size.zero);
   });
+
+  group('ReorderableListView.separated', () {
+    const itemHeight = 48.0;
+    const separatorHeight = 16.0;
+    late List<String> items;
+
+    setUp(() {
+      items = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+    });
+
+    Widget itemBuilder(BuildContext context, int index) {
+      final String item = items[index];
+      return SizedBox(key: Key(item), height: itemHeight, child: Text(item));
+    }
+
+    // Separators are deliberately keyless: only items must have a key.
+    Widget separatorBuilder(BuildContext context, int boundary) {
+      return SizedBox(height: separatorHeight, child: Text('Separator $boundary'));
+    }
+
+    // The pointer travel that drops a dragged item [count] slots away, where
+    // one slot is an item plus a separator. Dropping into a slot requires the
+    // proxy's edge to enter the target item's nearer half: traveling a full
+    // multiple of one slot would land the edge exactly on the far end of that
+    // trigger window (the target's trailing edge going down, its leading edge
+    // going up), so stopping a quarter item short parks it safely inside.
+    double dragDistance(int count) => count * (itemHeight + separatorHeight) - itemHeight / 4;
+
+    Widget buildList({
+      Widget? header,
+      Widget? footer,
+      EdgeInsets? padding,
+      IndexedWidgetBuilder? itemBuilderOverride,
+      IndexedWidgetBuilder? separatorBuilderOverride,
+      ReorderCallback? onReorderItem,
+      ChildIndexGetter? findItemIndexCallback,
+      ReorderItemProxyDecorator? proxyDecorator,
+    }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ReorderableListView.separated(
+                header: header,
+                footer: footer,
+                padding: padding,
+                itemBuilder: itemBuilderOverride ?? itemBuilder,
+                separatorBuilder: separatorBuilderOverride ?? separatorBuilder,
+                itemCount: items.length,
+                proxyDecorator: proxyDecorator,
+                findItemIndexCallback: findItemIndexCallback,
+                onReorderItem: (int oldIndex, int newIndex) {
+                  onReorderItem?.call(oldIndex, newIndex);
+                  setState(() {
+                    items.insert(newIndex, items.removeAt(oldIndex));
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // All separators remain visible for the whole drag: there is no hiding
+    // mechanism, so every one of the itemCount - 1 separators must be present.
+    void expectAllSeparatorsVisible(WidgetTester tester) {
+      for (var boundary = 0; boundary < items.length - 1; boundary += 1) {
+        expect(
+          find.text('Separator $boundary'),
+          findsOneWidget,
+          reason: 'separator $boundary should exist',
+        );
+      }
+      expect(find.text('Separator ${items.length - 1}'), findsNothing);
+    }
+
+    testWidgets('asserts on a negative itemCount', (WidgetTester tester) async {
+      expect(
+        () => ReorderableListView.separated(
+          itemBuilder: (_, _) => const SizedBox(),
+          separatorBuilder: (_, _) => const SizedBox(),
+          itemCount: -1,
+          onReorderItem: (_, _) {},
+        ),
+        throwsAssertionError,
+      );
+    });
+
+    testWidgets('creates only the items and separators it needs', (WidgetTester tester) async {
+      final itemsCreated = <int>{};
+      final separatorsCreated = <int>{};
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableListView.separated(
+            itemBuilder: (BuildContext context, int index) {
+              itemsCreated.add(index);
+              return SizedBox(key: ValueKey<int>(index), height: itemHeight, child: Text('$index'));
+            },
+            separatorBuilder: (BuildContext context, int boundary) {
+              separatorsCreated.add(boundary);
+              return const SizedBox(height: separatorHeight);
+            },
+            itemCount: 1000,
+            onReorderItem: (_, _) {},
+          ),
+        ),
+      );
+
+      // With the default 800x600 test surface and the default 250 pixel cache
+      // extent, the build budget is 600 + 250 = 850 pixels: around 14 of the
+      // 64 pixel item-plus-separator slots. The looser bound of 20 leaves
+      // slack for those defaults changing while still proving lazy building
+      // nowhere near the full 1000.
+      expect(itemsCreated, isNotEmpty);
+      expect(separatorsCreated, isNotEmpty);
+      expect(itemsCreated.every((int index) => index < 20), isTrue);
+      expect(separatorsCreated.every((int boundary) => boundary < 20), isTrue);
+    });
+
+    testWidgets('throws an error when an item has no key', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildList(itemBuilderOverride: (BuildContext context, int index) => Text(items[index])),
+      );
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(exception.toString(), contains('Every item of ReorderableListView must have a key.'));
+    });
+
+    testWidgets('accepts keyless separators', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList());
+      expect(tester.takeException(), isNull);
+      expectAllSeparatorsVisible(tester);
+      // Separators appear at their boundary geometry: separator j sits
+      // directly below item j.
+      for (var boundary = 0; boundary < items.length - 1; boundary += 1) {
+        expect(
+          tester.getTopLeft(find.text('Separator $boundary')).dy,
+          (boundary + 1) * itemHeight + boundary * separatorHeight,
+        );
+      }
+    });
+
+    testWidgets('shows default drag handles on items only', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList());
+
+      // One handle per item, none for the three separators: no separator sits
+      // inside a drag listener, and no handle icon sits inside a separator.
+      expect(find.byIcon(Icons.drag_handle), findsNWidgets(items.length));
+      for (var boundary = 0; boundary < items.length - 1; boundary += 1) {
+        final Finder separatorText = find.text('Separator $boundary');
+        expect(
+          find.ancestor(of: separatorText, matching: find.byType(ReorderableDragStartListener)),
+          findsNothing,
+        );
+        // The nearest SizedBox ancestor is the separator subtree built by
+        // separatorBuilder.
+        final Finder separator = find
+            .ancestor(of: separatorText, matching: find.byType(SizedBox))
+            .first;
+        expect(
+          find.descendant(of: separator, matching: find.byIcon(Icons.drag_handle)),
+          findsNothing,
+        );
+      }
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets(
+      'wraps items but not separators in delayed drag listeners',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildList());
+
+        // On mobile platforms the default handles are not icons; instead each
+        // whole item is wrapped in a ReorderableDelayedDragStartListener.
+        // Separators get neither.
+        expect(find.byIcon(Icons.drag_handle), findsNothing);
+        expect(find.byType(ReorderableDelayedDragStartListener), findsNWidgets(items.length));
+        for (final item in items) {
+          expect(
+            find.ancestor(
+              of: find.byKey(Key(item)),
+              matching: find.byType(ReorderableDelayedDragStartListener),
+            ),
+            findsOneWidget,
+          );
+        }
+        for (var boundary = 0; boundary < items.length - 1; boundary += 1) {
+          expect(
+            find.ancestor(
+              of: find.text('Separator $boundary'),
+              matching: find.byType(ReorderableDelayedDragStartListener),
+            ),
+            findsNothing,
+          );
+        }
+      },
+      variant: TargetPlatformVariant.mobile(),
+    );
+
+    testWidgets('forwards onReorderStart and onReorderEnd on the separated path', (
+      WidgetTester tester,
+    ) async {
+      final startIndices = <int>[];
+      final endIndices = <int>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ReorderableListView.separated(
+              itemBuilder: itemBuilder,
+              separatorBuilder: separatorBuilder,
+              itemCount: items.length,
+              onReorderStart: startIndices.add,
+              onReorderEnd: endIndices.add,
+              onReorderItem: (int oldIndex, int newIndex) {
+                items.insert(newIndex, items.removeAt(oldIndex));
+              },
+            ),
+          ),
+        ),
+      );
+
+      final Offset start = tester.getCenter(find.text('Item 1'));
+      final TestGesture drag = await tester.startGesture(start);
+      await tester.pump(kLongPressTimeout + kPressTimeout);
+      expect(startIndices, <int>[0]);
+      expect(endIndices, isEmpty);
+
+      await drag.moveTo(start + Offset(0, dragDistance(1)));
+      await tester.pump(kPressTimeout);
+      await drag.up();
+      await tester.pumpAndSettle();
+
+      // onReorderStart reports the dragged item's index and onReorderEnd the
+      // raw insertion index, exactly as for the other constructors, while
+      // onReorderItem receives the adjusted final item index.
+      expect(startIndices, <int>[0]);
+      expect(endIndices, <int>[2]);
+      expect(items, orderedEquals(<String>['Item 2', 'Item 1', 'Item 3', 'Item 4']));
+    });
+
+    testWidgets('renders zero and one item lists without separators', (WidgetTester tester) async {
+      items = <String>[];
+      await tester.pumpWidget(buildList());
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('Item'), findsNothing);
+      expect(find.textContaining('Separator'), findsNothing);
+      expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).semanticChildCount, 0);
+
+      items = <String>['Item 1'];
+      await tester.pumpWidget(buildList());
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(find.textContaining('Separator'), findsNothing);
+      expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).semanticChildCount, 1);
+    });
+
+    testWidgets('long pressing a separator cannot start a reorder', (WidgetTester tester) async {
+      var reorderCalls = 0;
+      await tester.pumpWidget(buildList(onReorderItem: (_, _) => reorderCalls += 1));
+
+      // On mobile platforms the default handles make the whole item a delayed
+      // drag listener; separators receive no such listener.
+      await longPressDrag(
+        tester,
+        tester.getCenter(find.text('Separator 0')),
+        tester.getCenter(find.text('Item 4')),
+      );
+      await tester.pumpAndSettle();
+      expect(reorderCalls, 0);
+      expect(items, orderedEquals(<String>['Item 1', 'Item 2', 'Item 3', 'Item 4']));
+    });
+
+    testWidgets('default proxy decoration elevates only the dragged item', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(buildList());
+
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 2')));
+      await tester.pump(kLongPressTimeout + kPressTimeout);
+      await drag.moveBy(const Offset(0, itemHeight));
+      // Drive the 250 ms elevation animation to its end while holding.
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // The dragged item is rendered by the item-only proxy: it keeps the bare
+      // item size with no separator accreted.
+      expect(tester.getSize(find.byKey(const Key('Item 2'))), const Size(800.0, itemHeight));
+      final Material material = tester.widget<Material>(
+        find.ancestor(of: find.byKey(const Key('Item 2')), matching: find.byType(Material)).first,
+      );
+      expect(material.elevation, 6.0);
+      // No separator is duplicated into the overlay proxy.
+      for (var boundary = 0; boundary < items.length - 1; boundary += 1) {
+        expect(find.text('Separator $boundary'), findsOneWidget);
+      }
+
+      await drag.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a custom proxy decorator receives an item-only child and size', (
+      WidgetTester tester,
+    ) async {
+      final decoratedIndices = <int>[];
+      await tester.pumpWidget(
+        buildList(
+          proxyDecorator: (Widget child, int index, Animation<double> animation) {
+            decoratedIndices.add(index);
+            return ColoredBox(
+              key: const Key('proxy'),
+              color: const Color(0xFF00FF00),
+              child: child,
+            );
+          },
+        ),
+      );
+
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 2')));
+      await tester.pump(kLongPressTimeout + kPressTimeout);
+      await drag.moveBy(const Offset(0, itemHeight));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // The decorator was handed the dragged item's index, and the widget it
+      // decorates measures exactly one item: no separator extent is included.
+      expect(decoratedIndices, isNotEmpty);
+      expect(decoratedIndices.toSet(), <int>{1});
+      expect(tester.getSize(find.byKey(const Key('proxy'))), const Size(800.0, itemHeight));
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('proxy')),
+          matching: find.textContaining('Separator'),
+        ),
+        findsNothing,
+      );
+
+      await drag.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('reports final item indices for first, middle, and last reorders', (
+      WidgetTester tester,
+    ) async {
+      final reorders = <(int, int)>[];
+      await tester.pumpWidget(
+        buildList(
+          onReorderItem: (int oldIndex, int newIndex) => reorders.add((oldIndex, newIndex)),
+        ),
+      );
+
+      // A one-slot downward move: the reported index must be the final item
+      // index, one less than the raw insertion index (and in particular not
+      // double-decremented, which would swallow a one-slot move entirely).
+      Offset start = tester.getCenter(find.text('Item 1'));
+      await longPressDrag(tester, start, start + Offset(0, dragDistance(1)));
+      await tester.pumpAndSettle();
+      expect(reorders, orderedEquals(<(int, int)>[(0, 1)]));
+      expect(items, orderedEquals(<String>['Item 2', 'Item 1', 'Item 3', 'Item 4']));
+
+      // A multi-slot downward move of the first item to the last slot.
+      start = tester.getCenter(find.text('Item 2'));
+      await longPressDrag(tester, start, start + Offset(0, dragDistance(3)));
+      await tester.pumpAndSettle();
+      expect(reorders.last, (0, 3));
+      expect(items, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
+
+      // An upward move of the last item to the very top.
+      start = tester.getCenter(find.text('Item 2'));
+      await longPressDrag(tester, start, start - Offset(0, dragDistance(3)));
+      await tester.pumpAndSettle();
+      expect(reorders.last, (3, 0));
+      expect(items, orderedEquals(<String>['Item 2', 'Item 1', 'Item 3', 'Item 4']));
+
+      // A one-slot upward move from the middle.
+      start = tester.getCenter(find.text('Item 3'));
+      await longPressDrag(tester, start, start - Offset(0, dragDistance(1)));
+      await tester.pumpAndSettle();
+      expect(reorders.last, (2, 1));
+      expect(items, orderedEquals(<String>['Item 2', 'Item 3', 'Item 1', 'Item 4']));
+
+      // Every reported newIndex is a final item index in 0 .. itemCount - 1.
+      for (final (int oldIndex, int newIndex) in reorders) {
+        expect(oldIndex, inInclusiveRange(0, items.length - 1));
+        expect(newIndex, inInclusiveRange(0, items.length - 1));
+      }
+    });
+
+    testWidgets('repeated successive reorders preserve every separator', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(buildList());
+      expectAllSeparatorsVisible(tester);
+
+      // Alternate downward and upward drags several times; after every drop
+      // and pumpAndSettle all itemCount - 1 separators must be visible again
+      // at their boundary geometry, guarding against stale drag state leaving
+      // a separator permanently missing or displaced after a drop.
+      for (var round = 0; round < 3; round += 1) {
+        final String first = items.first;
+        Offset start = tester.getCenter(find.text(first));
+        await longPressDrag(tester, start, start + Offset(0, dragDistance(2)));
+        await tester.pumpAndSettle();
+        expect(items.first, isNot(first));
+        expectAllSeparatorsVisible(tester);
+
+        final String last = items.last;
+        start = tester.getCenter(find.text(last));
+        await longPressDrag(tester, start, start - Offset(0, dragDistance(3)));
+        await tester.pumpAndSettle();
+        expect(items.last, isNot(last));
+        expectAllSeparatorsVisible(tester);
+
+        for (var boundary = 0; boundary < items.length - 1; boundary += 1) {
+          expect(
+            tester.getTopLeft(find.text('Separator $boundary')).dy,
+            (boundary + 1) * itemHeight + boundary * separatorHeight,
+            reason: 'separator $boundary should be back at its boundary after round $round',
+          );
+        }
+      }
+    });
+
+    testWidgets('separators appear only between items, never next to the header or footer', (
+      WidgetTester tester,
+    ) async {
+      const padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
+      await tester.pumpWidget(
+        buildList(
+          padding: padding,
+          header: const SizedBox(key: Key('Header'), height: 30),
+          footer: const SizedBox(key: Key('Footer'), height: 30),
+        ),
+      );
+
+      // Header and footer carry their split padding; the separated body sits
+      // between them with no separator synthesized at either boundary.
+      expect(tester.getRect(find.byKey(const Key('Header'))), const Rect.fromLTRB(10, 20, 770, 50));
+      expect(tester.getRect(find.byKey(const Key('Item 1'))), const Rect.fromLTRB(10, 50, 770, 98));
+      expect(
+        tester.getRect(find.byKey(const Key('Item 4'))),
+        const Rect.fromLTRB(10, 242, 770, 290),
+      );
+      expect(
+        tester.getRect(find.byKey(const Key('Footer'))),
+        const Rect.fromLTRB(10, 290, 770, 320),
+      );
+      expect(find.textContaining('Separator'), findsNWidgets(items.length - 1));
+      expect(tester.getTopLeft(find.text('Separator 0')).dy, 98);
+      expect(tester.getBottomLeft(find.text('Separator 2')).dy, 242);
+    });
+
+    testWidgets('reports a semantic child count of itemCount', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList());
+      // Separators are not semantic list items, so the scroll view reports
+      // the dense item-only count for accessibility scrolling.
+      expect(
+        tester.widget<CustomScrollView>(find.byType(CustomScrollView)).semanticChildCount,
+        items.length,
+      );
+
+      // The non-separated constructors are unchanged and set no count.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableListView.builder(
+            itemBuilder: itemBuilder,
+            itemCount: items.length,
+            onReorderItem: (_, _) {},
+          ),
+        ),
+      );
+      expect(
+        tester.widget<CustomScrollView>(find.byType(CustomScrollView)).semanticChildCount,
+        isNull,
+      );
+    });
+
+    testWidgets('findItemIndexCallback receives original item keys and preserves item state', (
+      WidgetTester tester,
+    ) async {
+      final receivedKeys = <Key>[];
+      await tester.pumpWidget(
+        buildList(
+          itemBuilderOverride: (BuildContext context, int index) {
+            final String item = items[index];
+            return SizedBox(
+              key: Key(item),
+              height: itemHeight,
+              child: _StatefulLabel(label: item),
+            );
+          },
+          findItemIndexCallback: (Key key) {
+            receivedKeys.add(key);
+            if (key is ValueKey<String>) {
+              final int index = items.indexOf(key.value);
+              return index == -1 ? null : index;
+            }
+            return null;
+          },
+        ),
+      );
+
+      // Capture the State of an item the reorder relocates and give it local
+      // state that only survives if the State instance itself survives.
+      final _StatefulLabelState stateBefore = tester.state<_StatefulLabelState>(
+        find.byWidgetPredicate(
+          (Widget widget) => widget is _StatefulLabel && widget.label == 'Item 2',
+        ),
+      );
+      stateBefore.localState = 42;
+
+      // A non-adjacent reorder forces the delegate to relocate keyed children,
+      // which invokes findItemIndexCallback.
+      final Offset start = tester.getCenter(find.text('Item 1'));
+      await longPressDrag(tester, start, start + Offset(0, dragDistance(2)));
+      await tester.pumpAndSettle();
+      expect(items, orderedEquals(<String>['Item 2', 'Item 3', 'Item 1', 'Item 4']));
+
+      // Every forwarded key is an original item key (the Material-private
+      // wrapper key is unwrapped before user code sees it).
+      expect(receivedKeys, isNotEmpty);
+      expect(
+        receivedKeys.every((Key key) => key.runtimeType == ValueKey<String>),
+        isTrue,
+        reason: 'findItemIndexCallback must only receive original item keys, got $receivedKeys',
+      );
+
+      // Relocating the keyed item preserved its State.
+      final _StatefulLabelState stateAfter = tester.state<_StatefulLabelState>(
+        find.byWidgetPredicate(
+          (Widget widget) => widget is _StatefulLabel && widget.label == 'Item 2',
+        ),
+      );
+      expect(identical(stateAfter, stateBefore), isTrue);
+      expect(stateAfter.localState, 42);
+    });
+
+    testWidgets('ListTile items with alternating separators keep boundary-based styling', (
+      WidgetTester tester,
+    ) async {
+      const evenColor = Color(0xFFFF0000);
+      const oddColor = Color(0xFF0000FF);
+      await tester.pumpWidget(
+        buildList(
+          itemBuilderOverride: (BuildContext context, int index) {
+            final String item = items[index];
+            return ListTile(key: Key(item), title: Text(item));
+          },
+          separatorBuilderOverride: (BuildContext context, int boundary) {
+            // Position-dependent style: even boundaries are tall and red, odd
+            // boundaries short and blue.
+            return Container(
+              height: boundary.isEven ? 24.0 : 8.0,
+              color: boundary.isEven ? evenColor : oddColor,
+              child: Text('Separator $boundary'),
+            );
+          },
+        ),
+      );
+
+      void expectBoundaryStyles() {
+        for (var boundary = 0; boundary < items.length - 1; boundary += 1) {
+          final Finder separator = find.ancestor(
+            of: find.text('Separator $boundary'),
+            matching: find.byType(Container),
+          );
+          expect(tester.getSize(separator).height, boundary.isEven ? 24.0 : 8.0);
+          final Container container = tester.widget<Container>(separator);
+          expect(container.color, boundary.isEven ? evenColor : oddColor);
+        }
+        // Separators tile the gaps exactly: each one starts where the item
+        // above it ends, with no overlap and no paint-order artifacts.
+        double top = tester.getBottomLeft(find.byKey(Key(items[0]))).dy;
+        for (var boundary = 0; boundary < items.length - 1; boundary += 1) {
+          final Finder separator = find.ancestor(
+            of: find.text('Separator $boundary'),
+            matching: find.byType(Container),
+          );
+          expect(tester.getTopLeft(separator).dy, top);
+          top = tester.getBottomLeft(separator).dy;
+          expect(tester.getTopLeft(find.byKey(Key(items[boundary + 1]))).dy, top);
+          top = tester.getBottomLeft(find.byKey(Key(items[boundary + 1]))).dy;
+        }
+      }
+
+      expectBoundaryStyles();
+
+      // A two-slot downward move: the pointer must end between the top and
+      // the center of the third tile so that the proxy's trailing edge lands
+      // in the tile's trailing half.
+      final double tileHeight = tester.getSize(find.byKey(const Key('Item 1'))).height;
+      await longPressDrag(
+        tester,
+        tester.getCenter(find.text('Item 1')),
+        tester.getCenter(find.byKey(const Key('Item 3'))) - Offset(0, tileHeight / 4),
+      );
+      await tester.pumpAndSettle();
+
+      // The styles stay tied to the visual boundary index after the reorder.
+      expect(items, orderedEquals(<String>['Item 2', 'Item 3', 'Item 1', 'Item 4']));
+      expectBoundaryStyles();
+    });
+  });
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
@@ -2799,5 +3398,26 @@ class _StatefulState extends State<_Stateful> {
         child: Checkbox(value: checked, onChanged: (bool? newValue) => checked = newValue),
       ),
     );
+  }
+}
+
+// A stateful leaf for the separated-list tests. Its [State] retains
+// [localState] only if the framework relocates (rather than recreates) its
+// element when a keyed item moves to a new index.
+class _StatefulLabel extends StatefulWidget {
+  const _StatefulLabel({required this.label});
+
+  final String label;
+
+  @override
+  State<_StatefulLabel> createState() => _StatefulLabelState();
+}
+
+class _StatefulLabelState extends State<_StatefulLabel> {
+  int localState = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(widget.label);
   }
 }

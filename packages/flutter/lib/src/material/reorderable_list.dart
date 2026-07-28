@@ -132,7 +132,9 @@ class ReorderableListView extends StatefulWidget {
          'Remove the onReorder callback when both callbacks are provided.',
        ),
        itemBuilder = ((BuildContext context, int index) => children[index]),
-       itemCount = children.length;
+       itemCount = children.length,
+       _separatorBuilder = null,
+       _findItemIndexCallback = null;
 
   /// Creates a reorderable list from widget items that are created on demand.
   ///
@@ -203,7 +205,9 @@ class ReorderableListView extends StatefulWidget {
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
     this.mouseCursor,
-  }) : assert(itemCount >= 0),
+  }) : _separatorBuilder = null,
+       _findItemIndexCallback = null,
+       assert(itemCount >= 0),
        assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
@@ -216,6 +220,120 @@ class ReorderableListView extends StatefulWidget {
          'The onReorder callback is obsolete and is replaced by onReorderItem. '
          'Remove the onReorder callback when both callbacks are provided.',
        );
+
+  /// Creates a reorderable list where the items and the separators between
+  /// them are created on demand.
+  ///
+  /// This constructor is appropriate for separated list views with a large
+  /// number of items, and mirrors [ListView.separated]: [itemCount] counts
+  /// data items only, and the separator built for boundary index `j` appears
+  /// between the items built for indices `j` and `j + 1`.
+  ///
+  /// The [itemBuilder] is called with item indices in the range `0` to
+  /// `itemCount - 1`, and every item it returns must have a unique key, just
+  /// like the other [ReorderableListView] constructors.
+  ///
+  /// The `separatorBuilder` is called with boundary indices in the range `0`
+  /// to `itemCount - 2`. Separators do not need a key, never receive a default
+  /// drag handle, and cannot start a reorder. They appear only between items:
+  /// no separator is created before the first item or after the last item, so
+  /// none appears next to [header] or [footer].
+  /// {@macro flutter.widgets.reorderable_list.separated.positionBasedSeparators}
+  ///
+  /// Only the dragged item appears in the drag proxy, so [proxyDecorator]
+  /// receives an item-only child and size; no separator is measured or
+  /// decorated by it.
+  /// {@macro flutter.widgets.reorderable_list.separated.dragBehavior}
+  /// See [SliverReorderableList.separated], which implements this behavior,
+  /// for details.
+  ///
+  /// [onReorderItem] reports the reorder using item indices: `newIndex` is
+  /// already adjusted for the removal of the item at `oldIndex`, so it is
+  /// always in the range `0` to `itemCount - 1` and is the final index of the
+  /// moved item.
+  ///
+  /// The `findItemIndexCallback` matches the parameter of the same name on
+  /// [ListView.separated]: it receives the original item keys (the keys of the
+  /// widgets returned by [itemBuilder]) and must return the item's logical
+  /// index in the range `0` to `itemCount - 1`, or null for an unknown key.
+  /// It operates purely in item-index space, unlike
+  /// [SliverChildBuilderDelegate.findChildIndexCallback], whose delegate child
+  /// indices also count separators.
+  /// {@macro flutter.widgets.reorderable_list.separated.statePreservation}
+  ///
+  /// The `onReorder` and `cacheExtent` parameters are intentionally
+  /// unavailable on this constructor; it accepts [onReorderItem] and
+  /// [scrollCacheExtent] only. The `itemExtent`, `itemExtentBuilder`, and
+  /// `prototypeItem` options are also unavailable, because a single
+  /// item-extent policy cannot describe alternating, heterogeneous items and
+  /// separators.
+  ///
+  /// {@tool dartpad}
+  /// This example builds a reorderable list of [ListTile]s whose separators are
+  /// chosen by boundary index rather than by the items around them, so the
+  /// thicker dividers stay on the even boundaries however the items are
+  /// reordered. Every separator stays visible while an item is dragged: the
+  /// insertion gap opens between the two separators that will surround the item
+  /// when it is dropped.
+  ///
+  /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.separated.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///   * [ReorderableListView.builder], which builds a reorderable list
+  ///     without separators.
+  ///   * [ListView.separated], which is the non-reorderable equivalent of this
+  ///     constructor.
+  const ReorderableListView.separated({
+    super.key,
+    required this.itemBuilder,
+    required IndexedWidgetBuilder separatorBuilder,
+    required this.itemCount,
+    // The explicit type keeps the parameter non-nullable, unlike the shared
+    // field: there is no `onReorder` alternative here, so an explicit null
+    // would silently swallow every reorder.
+    required ReorderCallback this.onReorderItem,
+    ChildIndexGetter? findItemIndexCallback,
+    this.onReorderStart,
+    this.onReorderEnd,
+    this.proxyDecorator,
+    this.buildDefaultDragHandles = true,
+    this.padding,
+    this.header,
+    this.footer,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
+    this.scrollController,
+    this.primary,
+    this.physics,
+    this.shrinkWrap = false,
+    this.anchor = 0.0,
+    this.scrollCacheExtent,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.keyboardDismissBehavior,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
+    this.autoScrollerVelocityScalar,
+    this.dragBoundaryProvider,
+    this.mouseCursor,
+  }) : _separatorBuilder = separatorBuilder,
+       _findItemIndexCallback = findItemIndexCallback,
+       onReorder = null,
+       cacheExtent = null,
+       itemExtent = null,
+       itemExtentBuilder = null,
+       prototypeItem = null,
+       assert(itemCount >= 0);
+
+  /// The builder used to build separators between items. Non-null only for the
+  /// [ReorderableListView.separated] constructor; the other constructors leave
+  /// it null so their widget trees and timing are unchanged.
+  final IndexedWidgetBuilder? _separatorBuilder;
+
+  /// The finder used to map an original item key to its logical item index for
+  /// the separated constructor. See [ReorderableListView.separated].
+  final ChildIndexGetter? _findItemIndexCallback;
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
@@ -446,6 +564,20 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     return KeyedSubtree(key: itemGlobalKey, child: item);
   }
 
+  /// Unwraps the private key that [_itemBuilder] adds around every item before
+  /// invoking the user's `findItemIndexCallback`, so user code only ever sees
+  /// original item keys. Unknown keys map to null.
+  int? _findItemIndex(Key key) {
+    assert(
+      widget._findItemIndexCallback != null,
+      'Only forwarded to the sliver when the user supplied a callback.',
+    );
+    if (key is! _ReorderableListViewChildGlobalKey) {
+      return null;
+    }
+    return widget._findItemIndexCallback!(key.subKey);
+  }
+
   Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {
     return AnimatedBuilder(
       animation: animation,
@@ -501,6 +633,18 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         widget.scrollCacheExtent ??
         (widget.cacheExtent == null ? null : ScrollCacheExtent.pixels(widget.cacheExtent!));
 
+    void handleReorderStart(int index) {
+      _dragging.value = true;
+      widget.onReorderStart?.call(index);
+    }
+
+    void handleReorderEnd(int index) {
+      _dragging.value = false;
+      widget.onReorderEnd?.call(index);
+    }
+
+    final IndexedWidgetBuilder? separatorBuilder = widget._separatorBuilder;
+
     return CustomScrollView(
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
@@ -514,6 +658,11 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       keyboardDismissBehavior: widget.keyboardDismissBehavior,
       restorationId: widget.restorationId,
       clipBehavior: widget.clipBehavior,
+      // Only the separated path reports a semantic child count: its sliver's
+      // children include separators, which are not semantic list items, so
+      // accessibility scrolling needs the dense item-only count. The other
+      // constructors deliberately leave it unset.
+      semanticChildCount: separatorBuilder == null ? null : widget.itemCount,
       slivers: <Widget>[
         if (widget.header != null)
           SliverPadding(
@@ -522,26 +671,38 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           ),
         SliverPadding(
           padding: listPadding,
-          sliver: SliverReorderableList(
-            itemBuilder: _itemBuilder,
-            itemExtent: widget.itemExtent,
-            itemExtentBuilder: widget.itemExtentBuilder,
-            prototypeItem: widget.prototypeItem,
-            itemCount: widget.itemCount,
-            onReorder: widget.onReorder,
-            onReorderItem: widget.onReorderItem,
-            onReorderStart: (int index) {
-              _dragging.value = true;
-              widget.onReorderStart?.call(index);
-            },
-            onReorderEnd: (int index) {
-              _dragging.value = false;
-              widget.onReorderEnd?.call(index);
-            },
-            proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
-            autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
-            dragBoundaryProvider: widget.dragBoundaryProvider,
-          ),
+          sliver: separatorBuilder == null
+              ? SliverReorderableList(
+                  itemBuilder: _itemBuilder,
+                  itemExtent: widget.itemExtent,
+                  itemExtentBuilder: widget.itemExtentBuilder,
+                  prototypeItem: widget.prototypeItem,
+                  itemCount: widget.itemCount,
+                  onReorder: widget.onReorder,
+                  onReorderItem: widget.onReorderItem,
+                  onReorderStart: handleReorderStart,
+                  onReorderEnd: handleReorderEnd,
+                  proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
+                  autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
+                  dragBoundaryProvider: widget.dragBoundaryProvider,
+                )
+              : SliverReorderableList.separated(
+                  itemBuilder: _itemBuilder,
+                  separatorBuilder: separatorBuilder,
+                  itemCount: widget.itemCount,
+                  onReorderItem: widget.onReorderItem!,
+                  // Forward the unwrapping wrapper only when the user supplied
+                  // a callback: a null here keeps the sliver's relocation
+                  // lookup disabled exactly as if no callback existed.
+                  findItemIndexCallback: widget._findItemIndexCallback == null
+                      ? null
+                      : _findItemIndex,
+                  onReorderStart: handleReorderStart,
+                  onReorderEnd: handleReorderEnd,
+                  proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
+                  autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
+                  dragBoundaryProvider: widget.dragBoundaryProvider,
+                ),
         ),
         if (widget.footer != null)
           SliverPadding(

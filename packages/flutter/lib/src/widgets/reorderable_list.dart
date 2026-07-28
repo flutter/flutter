@@ -592,7 +592,9 @@ class SliverReorderableList extends StatefulWidget {
     this.proxyDecorator,
     this.dragBoundaryProvider,
     double? autoScrollerVelocityScalar,
-  }) : autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
+  }) : _separatorBuilder = null,
+       _findItemIndexCallback = null,
+       autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
        assert(itemCount >= 0),
        assert(
          (itemExtent == null && prototypeItem == null) ||
@@ -607,13 +609,116 @@ class SliverReorderableList extends StatefulWidget {
          'Remove the onReorder callback when both callbacks are provided.',
        );
 
+  /// Creates a sliver list that allows the user to interactively reorder its
+  /// items, with a separator between each pair of adjacent items.
+  ///
+  /// This is the sliver equivalent of [ListView.separated] with reordering
+  /// support. Only the items participate in reordering; the separators are
+  /// position-based and are rebuilt for their visual boundary. Callers that
+  /// need a separated reorderable list outside a hand-built [CustomScrollView]
+  /// can use [ReorderableListView.separated], which wraps this sliver.
+  ///
+  /// The [itemCount] must be greater than or equal to zero. When [itemCount] is
+  /// `n`, there are `n` items and `n - 1` separators.
+  ///
+  /// The [itemBuilder] is called with item indices in the range `0` to
+  /// `itemCount - 1`. Every item must have a unique [Key] and, like
+  /// [SliverReorderableList], should include a drag listener (such as a
+  /// [ReorderableDragStartListener]) to start a reorder.
+  ///
+  /// The `separatorBuilder` is called with boundary indices in the range `0` to
+  /// `itemCount - 2`. Separator `j` appears between item `j` and item `j + 1`;
+  /// separators never appear before the first item or after the last item.
+  /// Separators do not need a key, cannot start a reorder, never appear in the
+  /// drag proxy, and receive no reorder semantics or callbacks.
+  /// {@template flutter.widgets.reorderable_list.separated.positionBasedSeparators}
+  /// The `separatorBuilder` index always refers to the current visual
+  /// boundary, so an alternating or otherwise index-dependent separator keeps
+  /// its position-based appearance during and after a reorder.
+  /// {@endtemplate}
+  ///
+  /// The drag proxy contains and measures only the dragged item, never a
+  /// separator.
+  /// {@template flutter.widgets.reorderable_list.separated.dragBehavior}
+  /// All separators remain visible for the whole drag: they translate to stay
+  /// aligned with their current visual boundary, so the insertion gap always
+  /// appears as an empty slot, exactly the dragged item's extent, between the
+  /// two separators (or list edge) that will surround the item when it is
+  /// dropped.
+  /// {@endtemplate}
+  ///
+  /// [onReorderItem] reports the reorder using item indices; `newIndex` is
+  /// already adjusted for the removal of the item at `oldIndex`, so it is always
+  /// in the range `0` to `itemCount - 1`. The [onReorderStart] and
+  /// [onReorderEnd] callbacks are not adjusted this way: [onReorderStart]
+  /// receives the dragged item's index and [onReorderEnd] receives the raw
+  /// insertion index in the range `0` to `itemCount`, exactly as they do for
+  /// the default constructor.
+  ///
+  /// The `findItemIndexCallback` receives the original item keys (the keys
+  /// returned by [itemBuilder]) and must return the item's logical index, not a
+  /// delegate index. This differs from [findChildIndexCallback] (available on
+  /// the default [SliverReorderableList] constructor), which operates on the
+  /// delegate's child indices. For this constructor the delegate interleaves
+  /// separators with items, so raw child indices are an internal detail;
+  /// `findItemIndexCallback` operates purely in logical item-index space.
+  /// {@template flutter.widgets.reorderable_list.separated.statePreservation}
+  /// Providing it lets the list relocate an existing keyed item to its new
+  /// index when the underlying data moves, preserving the item's [State],
+  /// instead of rebuilding it there.
+  /// {@endtemplate}
+  ///
+  /// The deprecated `onReorder` callback and the `itemExtent`,
+  /// `itemExtentBuilder`, and `prototypeItem` extent options are intentionally
+  /// unavailable on this constructor: a new API must not launch with a
+  /// deprecated callback, and a single item-extent policy cannot describe
+  /// alternating, heterogeneous items and separators.
+  const SliverReorderableList.separated({
+    super.key,
+    required this.itemBuilder,
+    required IndexedWidgetBuilder separatorBuilder,
+    required this.itemCount,
+    // The explicit type keeps the parameter non-nullable, unlike the shared
+    // field: there is no `onReorder` alternative here, so an explicit null
+    // would silently swallow every reorder.
+    required ReorderCallback this.onReorderItem,
+    ChildIndexGetter? findItemIndexCallback,
+    this.onReorderStart,
+    this.onReorderEnd,
+    this.proxyDecorator,
+    this.dragBoundaryProvider,
+    double? autoScrollerVelocityScalar,
+  }) : _separatorBuilder = separatorBuilder,
+       _findItemIndexCallback = findItemIndexCallback,
+       onReorder = null,
+       findChildIndexCallback = null,
+       itemExtent = null,
+       itemExtentBuilder = null,
+       prototypeItem = null,
+       autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
+       assert(itemCount >= 0);
+
   // An eyeballed value for a smooth scrolling experience.
   static const double _kDefaultAutoScrollVelocityScalar = 50;
+
+  /// The builder used to build separators between items. Non-null only for the
+  /// [SliverReorderableList.separated] constructor; the other constructors leave
+  /// it null so their tree structure and timing are unchanged.
+  final IndexedWidgetBuilder? _separatorBuilder;
+
+  /// The finder used to map an original item key to its logical item index for
+  /// the separated constructor. See [SliverReorderableList.separated].
+  final ChildIndexGetter? _findItemIndexCallback;
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
+  ///
+  /// This is always null for [SliverReorderableList.separated], whose delegate
+  /// interleaves separators with items so that delegate child indices are an
+  /// internal detail. That constructor takes a `findItemIndexCallback` instead,
+  /// which operates in logical item-index space.
   final ChildIndexGetter? findChildIndexCallback;
 
   /// {@macro flutter.widgets.reorderable_list.itemCount}
@@ -762,6 +867,23 @@ class SliverReorderableListState extends State<SliverReorderableList>
   // to be inserted.
   final Map<int, _ReorderableItemState> _items = <int, _ReorderableItemState>{};
 
+  /// Map of boundary index -> separator state, used only by the separated
+  /// constructor. Separators are position-based and never enter [_items],
+  /// [_dragIndex], [_insertIndex], hit testing, semantics, or the drag proxy.
+  final Map<int, _ReorderableSeparatorState> _separators = <int, _ReorderableSeparatorState>{};
+
+  /// Natural (untransformed) scroll-axis extents of items and separators, cached
+  /// for the duration of a drag so that children which scroll out and later
+  /// return keep their correct target computation. An extent is captured when a
+  /// child registers or is first measured, not continuously tracked: extents
+  /// are assumed to stay stable for the duration of one drag.
+  final Map<int, double> _itemExtentCache = <int, double>{};
+  final Map<int, double> _separatorExtentCache = <int, double>{};
+
+  bool _separatedGeometryRefreshScheduled = false;
+
+  bool get _isSeparated => widget._separatorBuilder != null;
+
   OverlayEntry? _overlayEntry;
   int? _dragIndex;
   _DragInfo? _dragInfo;
@@ -795,7 +917,11 @@ class SliverReorderableListState extends State<SliverReorderableList>
   @override
   void didUpdateWidget(covariant SliverReorderableList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.itemCount != oldWidget.itemCount) {
+    // Switching between the separated and default constructors changes both
+    // the delegate's child model and the drag-offset model, so an in-flight
+    // drag can no more survive it than it can survive an itemCount change.
+    final wasSeparated = oldWidget._separatorBuilder != null;
+    if (widget.itemCount != oldWidget.itemCount || _isSeparated != wasSeparated) {
       cancelReorder();
     }
 
@@ -874,7 +1000,22 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _registerItem(_ReorderableItemState item) {
     if (_dragInfo != null && _items[item.index] != item) {
-      item.updateForGap(_dragInfo!.index, _dragInfo!.index, _dragInfo!.itemExtent, false, _reverse);
+      if (_isSeparated) {
+        // Snap the newly (re)registered item to its current target without a
+        // rebuild (this can run during build), then refresh once its extent is
+        // known after layout.
+        _measureChildExtent(item.context, _itemExtentCache, item.index);
+        item.initTargetOffset(_separatedItemTargetOffset(item.index));
+        _scheduleSeparatedGeometryRefresh();
+      } else {
+        item.updateForGap(
+          _dragInfo!.index,
+          _dragInfo!.index,
+          _dragInfo!.itemExtent,
+          false,
+          _reverse,
+        );
+      }
     }
     _items[item.index] = item;
     if (item.index == _dragInfo?.index) {
@@ -887,6 +1028,22 @@ class SliverReorderableListState extends State<SliverReorderableList>
     final _ReorderableItemState? currentItem = _items[index];
     if (currentItem == item) {
       _items.remove(index);
+    }
+  }
+
+  void _registerSeparator(_ReorderableSeparatorState separator) {
+    if (_dragInfo != null && _separators[separator.index] != separator) {
+      _measureChildExtent(separator.context, _separatorExtentCache, separator.index);
+      separator.initTargetOffset(_separatedSeparatorTargetOffset(separator.index));
+      _scheduleSeparatedGeometryRefresh();
+    }
+    _separators[separator.index] = separator;
+  }
+
+  void _unregisterSeparator(int index, _ReorderableSeparatorState separator) {
+    final _ReorderableSeparatorState? currentSeparator = _separators[index];
+    if (currentSeparator == separator) {
+      _separators.remove(index);
     }
   }
 
@@ -916,11 +1073,24 @@ class SliverReorderableListState extends State<SliverReorderableList>
     _overlayEntry = OverlayEntry(builder: _dragInfo!.createProxy);
     overlay.insert(_overlayEntry!);
 
-    for (final _ReorderableItemState childItem in _items.values) {
-      if (childItem == item || !childItem.mounted) {
-        continue;
+    if (_isSeparated) {
+      // Capture the natural extents of all mounted children before autoscroll
+      // can dispose any of them. Targets are all zero at drag start
+      // (gap == dragIndex), so nothing needs to move yet.
+      _cacheMountedChildExtents();
+    } else {
+      for (final _ReorderableItemState childItem in _items.values) {
+        if (childItem == item || !childItem.mounted) {
+          continue;
+        }
+        childItem.updateForGap(
+          _insertIndex!,
+          _insertIndex!,
+          _dragInfo!.itemExtent,
+          false,
+          _reverse,
+        );
       }
-      childItem.updateForGap(_insertIndex!, _insertIndex!, _dragInfo!.itemExtent, false, _reverse);
     }
     return _dragInfo;
   }
@@ -941,7 +1111,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dragEnd(_DragInfo item) {
     setState(() {
-      if (_insertIndex! - item.index == 1) {
+      if (_isSeparated) {
+        _finalDropPosition = _separatedDropPosition(item.index);
+      } else if (_insertIndex! - item.index == 1) {
         // When returning to original position from below, _insertIndex equals
         // item.index + 1 because insertion index is calculated with the dragged
         // item still present. Use the actual target position for animation.
@@ -977,9 +1149,21 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dropCompleted() {
     final int oldIndex = _dragIndex!;
-    final int newIndex = _insertIndex!;
 
-    _handleReorderItem(oldIndex, newIndex);
+    if (_isSeparated) {
+      // `_separatedGap` is already the final item index (it applies the same
+      // "-1 for a downward move" adjustment that `_handleReorderItem` would),
+      // so call `onReorderItem` directly to avoid decrementing twice. Preserve
+      // the "no callback when the item does not move" guard.
+      final int newIndex = _separatedGap;
+      if (oldIndex != newIndex) {
+        // The separated constructor requires onReorderItem, so it cannot be
+        // null here.
+        widget.onReorderItem!(oldIndex, newIndex);
+      }
+    } else {
+      _handleReorderItem(oldIndex, _insertIndex!);
+    }
 
     setState(() {
       _dragReset();
@@ -998,6 +1182,14 @@ class SliverReorderableListState extends State<SliverReorderableList>
       _dragInfo = null;
       _autoScroller?.stopAutoScroll();
       _resetItemGap();
+      // Separator state is reset unconditionally rather than only when
+      // `_isSeparated`: if the widget switched between the separated and
+      // default constructors mid-drag, `_isSeparated` no longer describes the
+      // constructor this drag started under. The collections are all empty in
+      // non-separated mode, so this costs nothing there.
+      _resetSeparatorGap();
+      _itemExtentCache.clear();
+      _separatorExtentCache.clear();
       _recognizer?.dispose();
       _recognizer = null;
       _overlayEntry?.remove();
@@ -1010,6 +1202,12 @@ class SliverReorderableListState extends State<SliverReorderableList>
   void _resetItemGap() {
     for (final _ReorderableItemState item in _items.values) {
       item.resetGap();
+    }
+  }
+
+  void _resetSeparatorGap() {
+    for (final _ReorderableSeparatorState separator in _separators.values) {
+      separator.resetGap();
     }
   }
 
@@ -1109,11 +1307,15 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
     if (newIndex != _insertIndex) {
       _insertIndex = newIndex;
-      for (final _ReorderableItemState item in _items.values) {
-        if (item.index == _dragIndex! || !item.mounted) {
-          continue;
+      if (_isSeparated) {
+        _pushSeparatedTargets(animate: true);
+      } else {
+        for (final _ReorderableItemState item in _items.values) {
+          if (item.index == _dragIndex! || !item.mounted) {
+            continue;
+          }
+          item.updateForGap(_dragIndex!, newIndex, gapExtent, true, _reverse);
         }
-        item.updateForGap(_dragIndex!, newIndex, gapExtent, true, _reverse);
       }
     }
   }
@@ -1134,6 +1336,240 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   double _itemExtentAt(int index) {
     return _sizeExtent(_items[index]!.targetGeometry().size, _scrollDirection);
+  }
+
+  /// The insertion gap in final item-index space for a given dragged item.
+  ///
+  /// `_insertIndex` is in insertion-index space (the dragged item is still
+  /// counted), so a downward move is decremented by one. The result is the final
+  /// index the dragged item would occupy, always in `0 .. itemCount - 1`.
+  ///
+  /// Only meaningful while an item is being dragged, which implies at least one
+  /// item; the clamp below would throw for an empty list because its upper
+  /// limit would fall below its lower limit.
+  int _separatedGapFor(int dragIndex) {
+    assert(
+      widget.itemCount > 0,
+      'A gap only exists while an item is dragged, so the list is non-empty.',
+    );
+    final int insert = _insertIndex ?? dragIndex;
+    final int gap = insert > dragIndex ? insert - 1 : insert;
+    return gap.clamp(0, widget.itemCount - 1);
+  }
+
+  /// The insertion gap for the currently dragged item. Only valid while a drag
+  /// is active (`_dragIndex != null`).
+  int get _separatedGap => _separatedGapFor(_dragIndex!);
+
+  void _measureChildExtent(BuildContext childContext, Map<int, double> cache, int index) {
+    final RenderObject? box = childContext.findRenderObject();
+    if (box is RenderBox && box.hasSize) {
+      cache[index] = _sizeExtent(box.size, _scrollDirection);
+    }
+  }
+
+  void _cacheMountedChildExtents() {
+    for (final MapEntry<int, _ReorderableItemState> entry in _items.entries) {
+      if (entry.key == _dragIndex || !entry.value.mounted) {
+        continue;
+      }
+      _measureChildExtent(entry.value.context, _itemExtentCache, entry.key);
+    }
+    for (final MapEntry<int, _ReorderableSeparatorState> entry in _separators.entries) {
+      if (!entry.value.mounted) {
+        continue;
+      }
+      _measureChildExtent(entry.value.context, _separatorExtentCache, entry.key);
+    }
+  }
+
+  /// The natural extent of the child at `index`, read through `cache`. A miss
+  /// measures the mounted [child]'s render box and caches the result; a child
+  /// that is unmounted and was never measured during this drag contributes 0.0.
+  double _cachedChildExtent(
+    Map<int, double> cache,
+    _ReorderableGapMixin<StatefulWidget>? child,
+    int index,
+  ) {
+    final double? cached = cache[index];
+    if (cached != null) {
+      return cached;
+    }
+    if (child != null && child.mounted) {
+      _measureChildExtent(child.context, cache, index);
+      return cache[index] ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  double _cachedItemExtent(int index) {
+    if (index == _dragIndex && _dragInfo != null) {
+      return _dragInfo!.itemExtent;
+    }
+    return _cachedChildExtent(_itemExtentCache, _items[index], index);
+  }
+
+  double _cachedSeparatorExtent(int index) {
+    return _cachedChildExtent(_separatorExtentCache, _separators[index], index);
+  }
+
+  /// The shared inputs of the separated target-offset formulas: the dragged
+  /// item's index, the insertion gap, and the dragged item's extent. Null when
+  /// no drag is active.
+  (int drag, int gap, double draggedExtent)? get _separatedDragGeometry {
+    if (_dragIndex == null) {
+      return null;
+    }
+    return (_dragIndex!, _separatedGap, _cachedItemExtent(_dragIndex!));
+  }
+
+  /// The target translation for item `index`, treating items and separators as
+  /// fixed-size children that translate to their final visual origins. The
+  /// math is computed in non-reversed main-axis coordinates and then flipped for
+  /// reversed lists.
+  Offset _separatedItemTargetOffset(int index) {
+    final (int, int, double)? geometry = _separatedDragGeometry;
+    if (geometry == null) {
+      return Offset.zero;
+    }
+    final (int drag, int gap, double draggedExtent) = geometry;
+    var main = 0.0;
+    if (drag < gap) {
+      // Downward move: items in (drag, gap] shift toward the list start.
+      if (index > drag && index <= gap) {
+        main = -(draggedExtent + _cachedSeparatorExtent(index - 1));
+      }
+    } else if (gap < drag) {
+      // Upward move: items in [gap, drag) shift toward the list end.
+      if (index >= gap && index < drag) {
+        main = draggedExtent + _cachedSeparatorExtent(index);
+      }
+    }
+    return _extentOffset(_reverse ? -main : main, _scrollDirection);
+  }
+
+  /// The target translation for separator `index`. See
+  /// [_separatedItemTargetOffset].
+  Offset _separatedSeparatorTargetOffset(int index) {
+    final (int, int, double)? geometry = _separatedDragGeometry;
+    if (geometry == null) {
+      return Offset.zero;
+    }
+    final (int drag, int gap, double draggedExtent) = geometry;
+    var main = 0.0;
+    if (drag < gap) {
+      if (index >= drag && index < gap) {
+        main = _cachedItemExtent(index + 1) - draggedExtent;
+      }
+    } else if (gap < drag) {
+      if (index >= gap && index < drag) {
+        main = draggedExtent - _cachedItemExtent(index);
+      }
+    }
+    return _extentOffset(_reverse ? -main : main, _scrollDirection);
+  }
+
+  void _pushSeparatedTargets({required bool animate}) {
+    for (final MapEntry<int, _ReorderableItemState> entry in _items.entries) {
+      if (entry.key == _dragIndex || !entry.value.mounted) {
+        continue;
+      }
+      entry.value.updateTargetOffset(_separatedItemTargetOffset(entry.key), animate: animate);
+    }
+    for (final MapEntry<int, _ReorderableSeparatorState> entry in _separators.entries) {
+      if (!entry.value.mounted) {
+        continue;
+      }
+      entry.value.updateTargetOffset(_separatedSeparatorTargetOffset(entry.key), animate: animate);
+    }
+  }
+
+  /// Lazily built or autoscrolled children register mid-drag before their
+  /// extent is known. Refresh the geometry once after the next layout so their
+  /// targets reflect real measured extents.
+  void _scheduleSeparatedGeometryRefresh() {
+    if (_separatedGeometryRefreshScheduled) {
+      return;
+    }
+    _separatedGeometryRefreshScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      _separatedGeometryRefreshScheduled = false;
+      if (!mounted || _dragInfo == null || !_isSeparated) {
+        return;
+      }
+      _cacheMountedChildExtents();
+      _pushSeparatedTargets(animate: false);
+    });
+  }
+
+  /// The global position the item-only drag proxy animates to on drop: the
+  /// origin of the insertion gap in the transformed layout.
+  ///
+  /// The gap is bounded by the separator on its leading side (boundary
+  /// `gap - 1`) or, for the first gap, by the separator on its trailing side
+  /// (boundary `gap`). A gap-adjacent separator is mounted whenever the drop
+  /// gap itself is on screen - unlike the dragged item's origin slot, which a
+  /// long autoscrolled drag may have disposed.
+  Offset? _separatedDropPosition(int dragIndex) {
+    final int gap = _separatedGapFor(dragIndex);
+    final double draggedExtent = _cachedItemExtent(dragIndex);
+    final _ReorderableSeparatorState? leading = _separators[gap - 1];
+    if (leading != null && leading.mounted) {
+      // The gap begins where its leading separator ends.
+      final Rect anchor = leading.targetGeometry();
+      final double main = _reverse ? -draggedExtent : _sizeExtent(anchor.size, _scrollDirection);
+      return anchor.topLeft + _extentOffset(main, _scrollDirection);
+    }
+    final _ReorderableSeparatorState? trailing = _separators[gap];
+    if (trailing != null && trailing.mounted) {
+      // The gap ends where its trailing separator begins (for the first gap,
+      // which has no leading separator, this is also the list's logical
+      // start).
+      final Rect anchor = trailing.targetGeometry();
+      final double main = _reverse ? _sizeExtent(anchor.size, _scrollDirection) : -draggedExtent;
+      return anchor.topLeft + _extentOffset(main, _scrollDirection);
+    }
+    // A single-item list has no separators; the gap is the dragged item's own
+    // slot. With no mounted anchor at all, return null so the proxy settles
+    // where it was released instead of animating toward a stale position.
+    final _ReorderableItemState? dragItem = _items[dragIndex];
+    if (dragItem != null && dragItem.mounted) {
+      return dragItem.targetGeometry().topLeft;
+    }
+    return null;
+  }
+
+  Widget _separatedChildBuilder(BuildContext context, int index) {
+    if (index.isOdd) {
+      final int separatorIndex = index ~/ 2;
+      return _ReorderableSeparator(
+        key: _ReorderableSeparatorKey(separatorIndex),
+        index: separatorIndex,
+        child: widget._separatorBuilder!(context, separatorIndex),
+      );
+    }
+    // Even delegate children are items. The index passed on is always in
+    // `0 .. itemCount - 1`, so `_itemBuilder`'s trailing drag-filler branch
+    // is unreachable in separated mode.
+    return _itemBuilder(context, index ~/ 2);
+  }
+
+  int? _separatedFindChildIndexCallback(Key key) {
+    // Separators are position-fixed: boundary `j` is always delegate child
+    // `2j + 1`. Resolve their private keys internally and never forward them to
+    // user code.
+    if (key is _ReorderableSeparatorKey) {
+      return key.value * 2 + 1;
+    }
+    final ChildIndexGetter? findItemIndexCallback = widget._findItemIndexCallback;
+    if (findItemIndexCallback == null) {
+      return null;
+    }
+    // Forward the original user item key (unwrapping the private item key) and
+    // map the returned logical item index to the even delegate child `2i`.
+    final Key itemKey = key is _ReorderableItemGlobalKey ? key.subKey : key;
+    final int? itemIndex = findItemIndexCallback(itemKey);
+    return itemIndex == null ? null : itemIndex * 2;
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
@@ -1206,6 +1642,19 @@ class SliverReorderableListState extends State<SliverReorderableList>
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
+    if (_isSeparated) {
+      // A stable 2n - 1 delegate interleaving items (even children) and
+      // separators (odd children). The separated constructor does not expose
+      // fixed, varied, or prototype item-extent optimizations, so it always
+      // uses a plain SliverList.
+      final childrenDelegate = SliverChildBuilderDelegate(
+        _separatedChildBuilder,
+        childCount: widget.itemCount == 0 ? 0 : widget.itemCount * 2 - 1,
+        findChildIndexCallback: _separatedFindChildIndexCallback,
+        semanticIndexCallback: (Widget _, int index) => index.isEven ? index ~/ 2 : null,
+      );
+      return SliverList(delegate: childrenDelegate);
+    }
     final childrenDelegate = SliverChildBuilderDelegate(
       _itemBuilder,
       childCount: widget.itemCount,
@@ -1244,12 +1693,109 @@ class _ReorderableItem extends StatefulWidget {
   _ReorderableItemState createState() => _ReorderableItemState();
 }
 
-class _ReorderableItemState extends State<_ReorderableItem> {
-  late SliverReorderableListState _listState;
-
+/// Shared drag-offset animation machinery for the children (items and
+/// separators) of a [SliverReorderableList]. It owns the interruptible 250 ms
+/// transform animation and the current/target offsets, but not the policy that
+/// decides a target: the target is always supplied by the owning state (via
+/// [_ReorderableItemState.updateForGap] for items, or directly by the list
+/// state for the separated path), so exactly one code path writes a given
+/// child's [_targetOffset] at a time.
+mixin _ReorderableGapMixin<T extends StatefulWidget> on State<T> {
   Offset _startOffset = Offset.zero;
   Offset _targetOffset = Offset.zero;
   AnimationController? _offsetAnimation;
+
+  SliverReorderableListState get _listState;
+
+  Offset get offset {
+    if (_offsetAnimation != null) {
+      final double animValue = Curves.easeInOut.transform(_offsetAnimation!.value);
+      return Offset.lerp(_startOffset, _targetOffset, animValue)!;
+    }
+    return _targetOffset;
+  }
+
+  /// Immediately snaps the child to [target] without animating or scheduling a
+  /// rebuild. Used when a child is (re)registered during an active drag so that
+  /// it appears at its correct offset on its first build, avoiding a setState
+  /// during build or initState.
+  void initTargetOffset(Offset target) {
+    _offsetAnimation?.dispose();
+    _offsetAnimation = null;
+    _startOffset = target;
+    _targetOffset = target;
+  }
+
+  /// Moves the child toward [newTargetOffset]. When [animate] is true, an
+  /// interrupted animation is retargeted from its currently painted offset
+  /// rather than snapping to an endpoint.
+  void updateTargetOffset(Offset newTargetOffset, {required bool animate}) {
+    if (newTargetOffset == _targetOffset) {
+      return;
+    }
+    final Offset previousTarget = _targetOffset;
+    _targetOffset = newTargetOffset;
+    if (animate) {
+      if (_offsetAnimation == null) {
+        _offsetAnimation =
+            AnimationController(vsync: _listState, duration: const Duration(milliseconds: 250))
+              ..addListener(rebuild)
+              ..addStatusListener((AnimationStatus status) {
+                if (status.isCompleted) {
+                  _startOffset = _targetOffset;
+                  _offsetAnimation!.dispose();
+                  _offsetAnimation = null;
+                }
+              })
+              ..forward();
+      } else {
+        // Animation interrupted - calculate current position from previous animation
+        final double currentAnimValue = Curves.easeInOut.transform(_offsetAnimation!.value);
+        final Offset currentPosition = Offset.lerp(_startOffset, previousTarget, currentAnimValue)!;
+        _startOffset = currentPosition;
+        _offsetAnimation!.forward(from: 0.0);
+      }
+    } else {
+      if (_offsetAnimation != null) {
+        _offsetAnimation!.dispose();
+        _offsetAnimation = null;
+      }
+      _startOffset = _targetOffset;
+    }
+    rebuild();
+  }
+
+  void resetGap() {
+    if (_offsetAnimation != null) {
+      _offsetAnimation!.dispose();
+      _offsetAnimation = null;
+    }
+    _startOffset = Offset.zero;
+    _targetOffset = Offset.zero;
+    rebuild();
+  }
+
+  void disposeGap() {
+    _offsetAnimation?.dispose();
+  }
+
+  Rect targetGeometry() {
+    final itemRenderBox = context.findRenderObject()! as RenderBox;
+    final Offset itemPosition = itemRenderBox.localToGlobal(Offset.zero) + _targetOffset;
+    return itemPosition & itemRenderBox.size;
+  }
+
+  void rebuild() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+}
+
+class _ReorderableItemState extends State<_ReorderableItem>
+    with _ReorderableGapMixin<_ReorderableItem> {
+  @override
+  late SliverReorderableListState _listState;
 
   Key get key => widget.key!;
   int get index => widget.index;
@@ -1274,7 +1820,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
 
   @override
   void dispose() {
-    _offsetAnimation?.dispose();
+    disposeGap();
     _listState._unregisterItem(index, this);
     super.dispose();
   }
@@ -1295,7 +1841,18 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       return SizedBox.fromSize(size: size);
     }
     _listState._registerItem(this);
-    return Transform.translate(offset: offset, child: widget.child);
+    Widget child = widget.child;
+    if (_listState._isSeparated) {
+      // [_ReorderableItemGlobalKey] compares the item index too, so relocating
+      // a keyed item to a new index (via findItemIndexCallback) recreates this
+      // element. The inner key is index-independent and reparents the subtree
+      // into the recreated element, preserving the item's State. It is added
+      // here, below the wrapper, so that the drag proxy's copy of
+      // [widget.child] never contains it and cannot claim the same global key.
+      final Key userKey = (key as _ReorderableItemGlobalKey).subKey;
+      child = KeyedSubtree(key: _ReorderableItemChildGlobalKey(userKey, _listState), child: child);
+    }
+    return Transform.translate(offset: offset, child: child);
   }
 
   @override
@@ -1304,15 +1861,13 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     super.deactivate();
   }
 
-  Offset get offset {
-    if (_offsetAnimation != null) {
-      final double animValue = Curves.easeInOut.transform(_offsetAnimation!.value);
-      return Offset.lerp(_startOffset, _targetOffset, animValue)!;
-    }
-    return _targetOffset;
-  }
-
   void updateForGap(int dragIndex, int gapIndex, double gapExtent, bool animate, bool reverse) {
+    assert(
+      !_listState._isSeparated,
+      'The uniform-gap model must never drive a child during a separated drag; '
+      'the separated path supplies per-child targets directly from the list '
+      'state via updateTargetOffset.',
+    );
     // An offset needs to be added to create a gap when we are between the
     // moving element (dragIndex) and the current gap position (gapIndex).
     // For how to update the gap position, refer to [_dragUpdateItems].
@@ -1330,64 +1885,67 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     } else {
       newTargetOffset = Offset.zero;
     }
-    if (newTargetOffset != _targetOffset) {
-      final Offset previousTarget = _targetOffset;
-      _targetOffset = newTargetOffset;
-      if (animate) {
-        if (_offsetAnimation == null) {
-          _offsetAnimation =
-              AnimationController(vsync: _listState, duration: const Duration(milliseconds: 250))
-                ..addListener(rebuild)
-                ..addStatusListener((AnimationStatus status) {
-                  if (status.isCompleted) {
-                    _startOffset = _targetOffset;
-                    _offsetAnimation!.dispose();
-                    _offsetAnimation = null;
-                  }
-                })
-                ..forward();
-        } else {
-          // Animation interrupted - calculate current position from previous animation
-          final double currentAnimValue = Curves.easeInOut.transform(_offsetAnimation!.value);
-          final Offset currentPosition = Offset.lerp(
-            _startOffset,
-            previousTarget,
-            currentAnimValue,
-          )!;
-          _startOffset = currentPosition;
-          _offsetAnimation!.forward(from: 0.0);
-        }
-      } else {
-        if (_offsetAnimation != null) {
-          _offsetAnimation!.dispose();
-          _offsetAnimation = null;
-        }
-        _startOffset = _targetOffset;
-      }
-      rebuild();
-    }
+    updateTargetOffset(newTargetOffset, animate: animate);
+  }
+}
+
+/// A private wrapper for a separator built by
+/// [SliverReorderableList.separated]. Separators are position-based: separator
+/// `index` is always rebuilt for the visual boundary between item `index` and
+/// item `index + 1`. They translate to follow the moving gap during a drag but
+/// never become reorder targets.
+class _ReorderableSeparator extends StatefulWidget {
+  const _ReorderableSeparator({required Key super.key, required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  _ReorderableSeparatorState createState() => _ReorderableSeparatorState();
+}
+
+class _ReorderableSeparatorState extends State<_ReorderableSeparator>
+    with _ReorderableGapMixin<_ReorderableSeparator> {
+  @override
+  late SliverReorderableListState _listState;
+
+  int get index => widget.index;
+
+  @override
+  void initState() {
+    _listState = SliverReorderableList.of(context);
+    _listState._registerSeparator(this);
+    super.initState();
   }
 
-  void resetGap() {
-    if (_offsetAnimation != null) {
-      _offsetAnimation!.dispose();
-      _offsetAnimation = null;
-    }
-    _startOffset = Offset.zero;
-    _targetOffset = Offset.zero;
-    rebuild();
+  @override
+  void dispose() {
+    disposeGap();
+    _listState._unregisterSeparator(index, this);
+    super.dispose();
   }
 
-  Rect targetGeometry() {
-    final itemRenderBox = context.findRenderObject()! as RenderBox;
-    final Offset itemPosition = itemRenderBox.localToGlobal(Offset.zero) + _targetOffset;
-    return itemPosition & itemRenderBox.size;
+  @override
+  void didUpdateWidget(covariant _ReorderableSeparator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    assert(
+      oldWidget.index == widget.index,
+      "The wrapper's key is derived from the boundary index, and an element is "
+      'only updated with a widget whose key matches, so the index cannot '
+      'change for a live separator state.',
+    );
   }
 
-  void rebuild() {
-    if (mounted) {
-      setState(() {});
-    }
+  @override
+  void deactivate() {
+    _listState._unregisterSeparator(index, this);
+    super.deactivate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _listState._registerSeparator(this);
+    return Transform.translate(offset: offset, child: widget.child);
   }
 }
 
@@ -1754,4 +2312,47 @@ class _ReorderableItemGlobalKey extends GlobalObjectKey {
 
   @override
   int get hashCode => Object.hash(subKey, index, state);
+}
+
+/// A global key for the subtree below a separated item's [_ReorderableItem]
+/// wrapper, derived from the item's key and the list state but not the item
+/// index.
+///
+/// [_ReorderableItemGlobalKey] compares the index too, so relocating a keyed
+/// item to a new index recreates its wrapper element; this key survives the
+/// recreation and reparents the item's subtree into the new wrapper,
+/// preserving the item's [State]. It is applied inside
+/// [_ReorderableItemState.build] rather than around [_ReorderableItem.child]
+/// so that the drag proxy, which builds its own copy of that child in the
+/// overlay, never contains the same global key as the in-list subtree.
+@optionalTypeArgs
+class _ReorderableItemChildGlobalKey extends GlobalObjectKey {
+  const _ReorderableItemChildGlobalKey(this.subKey, this.state) : super(subKey);
+
+  final Key subKey;
+  final SliverReorderableListState state;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _ReorderableItemChildGlobalKey &&
+        other.subKey == subKey &&
+        other.state == state;
+  }
+
+  @override
+  int get hashCode => Object.hash(subKey, state);
+}
+
+/// A private local key for a separator wrapper, derived from its boundary index
+/// alone. Separators are position-fixed and are never dragged into the overlay,
+/// so they need neither the global identity nor the overlay state-preservation
+/// semantics that items require; a value key by boundary index suffices and
+/// avoids the global-key registry overhead and uniqueness constraints. The
+/// dedicated subtype lets [SliverReorderableListState._separatedFindChildIndexCallback]
+/// recognize separator keys without mistaking them for a user's `ValueKey<int>`.
+class _ReorderableSeparatorKey extends ValueKey<int> {
+  const _ReorderableSeparatorKey(super.value);
 }
