@@ -1342,6 +1342,33 @@ void main() {
       expect(label, 'Emoji: 😀🎉 Math: ∑∆π Currency: €£¥');
     });
   });
+
+  test('SemanticsNode.toJsonMap generates expected map', () {
+    final node = SemanticsNode()
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0)
+      ..updateWith(
+        config: SemanticsConfiguration()
+          ..label = 'Test Label'
+          ..textDirection = TextDirection.ltr
+          ..value = 'Test Value'
+          ..hint = 'Test Hint'
+          ..isButton = true,
+      );
+
+    final Map<String, dynamic> jsonMap = node.toJsonMap();
+    expect(jsonMap['id'], node.id.toString());
+    expect(jsonMap['label'], 'Test Label');
+    expect(jsonMap['value'], 'Test Value');
+    expect(jsonMap['hint'], 'Test Hint');
+    expect(jsonMap['flags'], contains('isButton'));
+    expect(jsonMap['rect'], <String, double>{
+      'left': 0.0,
+      'top': 0.0,
+      'width': 100.0,
+      'height': 50.0,
+    });
+    expect(jsonMap['children'], isEmpty);
+  });
 }
 
 class TestRender extends RenderProxyBox {

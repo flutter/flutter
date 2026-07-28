@@ -112,9 +112,8 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 ///
 /// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
 /// value.
-typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(
-  List<SemanticsConfiguration>,
-);
+typedef ChildSemanticsConfigurationsDelegate =
+    ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
 /// Controls how accessibility focus is blocked.
 ///
@@ -4564,6 +4563,51 @@ class SemanticsNode with DiagnosticableTreeMixin {
     return switch (childOrder) {
       DebugSemanticsDumpOrder.inverseHitTest => _childrenInHitTestOrder(),
       DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
+    };
+  }
+
+  /// Returns a JSON-compatible map representation of this node and its children.
+  ///
+  /// Used by debugging tools and VM service extensions such as
+  /// `ext.flutter.accessibility.getSemanticsTree`.
+  Map<String, dynamic> toJsonMap({
+    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
+  }) {
+    final SemanticsData data = getSemanticsData();
+    final flags = <String>[];
+    for (final SemanticsFlag flag in SemanticsFlag.values) {
+      if (data.hasFlag(flag)) {
+        flags.add(flag.name);
+      }
+    }
+    final actions = <String>[];
+    for (final SemanticsAction action in SemanticsAction.values) {
+      if (data.hasAction(action)) {
+        actions.add(action.name);
+      }
+    }
+    final children = <Map<String, dynamic>>[
+      for (final SemanticsNode child in debugListChildrenInOrder(childOrder))
+        child.toJsonMap(childOrder: childOrder),
+    ];
+    return <String, dynamic>{
+      'id': id.toString(),
+      'label': data.label,
+      'value': data.value,
+      'hint': data.hint,
+      'tooltip': data.tooltip,
+      'increasedValue': data.increasedValue,
+      'decreasedValue': data.decreasedValue,
+      'flags': flags,
+      'actions': actions,
+      'rect': <String, double>{
+        'left': rect.left,
+        'top': rect.top,
+        'width': rect.width,
+        'height': rect.height,
+      },
+      if (transform != null) 'transform': transform!.storage.toList(),
+      'children': children,
     };
   }
 }
