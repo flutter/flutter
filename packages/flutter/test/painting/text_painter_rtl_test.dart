@@ -557,68 +557,68 @@ void main() {
     expect(
       //                     Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       // ^
-      painter.getPositionForOffset(const Offset(-100.0, 5.0)).toString(),
-      const TextPosition(offset: 0).toString(),
+      painter.getPositionForOffset(const Offset(-100.0, 5.0)),
+      const TextPosition(offset: 0),
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //  ^
-      painter.getPositionForOffset(const Offset(4.0, 5.0)).toString(),
-      const TextPosition(offset: 0).toString(),
+      painter.getPositionForOffset(const Offset(4.0, 5.0)),
+      const TextPosition(offset: 0),
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //    ^
-      painter.getPositionForOffset(const Offset(8.0, 5.0)).toString(),
-      const TextPosition(offset: 1, affinity: TextAffinity.upstream).toString(),
+      painter.getPositionForOffset(const Offset(8.0, 5.0)),
+      const TextPosition(offset: 1, affinity: TextAffinity.upstream),
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //       ^
-      painter.getPositionForOffset(const Offset(12.0, 5.0)).toString(),
-      const TextPosition(offset: 1).toString(),
+      painter.getPositionForOffset(const Offset(12.0, 5.0)),
+      const TextPosition(offset: 1),
       // currently we say upstream instead of downstream
       skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //              ^
-      painter.getPositionForOffset(const Offset(28.0, 5.0)).toString(),
-      const TextPosition(offset: 3, affinity: TextAffinity.upstream).toString(),
+      painter.getPositionForOffset(const Offset(28.0, 5.0)),
+      const TextPosition(offset: 3, affinity: TextAffinity.upstream),
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //                 ^
-      painter.getPositionForOffset(const Offset(32.0, 5.0)).toString(),
-      const TextPosition(offset: 6, affinity: TextAffinity.upstream).toString(),
+      painter.getPositionForOffset(const Offset(32.0, 5.0)),
+      const TextPosition(offset: 6, affinity: TextAffinity.upstream),
       // this is part of https://github.com/flutter/flutter/issues/11375
       skip: skipExpectsWithKnownBugs,
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //                                ^
-      painter.getPositionForOffset(const Offset(58.0, 5.0)).toString(),
-      const TextPosition(offset: 3).toString(),
+      painter.getPositionForOffset(const Offset(58.0, 5.0)),
+      const TextPosition(offset: 3),
       // this is part of https://github.com/flutter/flutter/issues/11375
       skip: skipExpectsWithKnownBugs,
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //                                   ^
-      painter.getPositionForOffset(const Offset(62.0, 5.0)).toString(),
-      const TextPosition(offset: 6).toString(),
+      painter.getPositionForOffset(const Offset(62.0, 5.0)),
+      const TextPosition(offset: 6),
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //                                               ^
-      painter.getPositionForOffset(const Offset(88.0, 5.0)).toString(),
-      const TextPosition(offset: 9, affinity: TextAffinity.upstream).toString(),
+      painter.getPositionForOffset(const Offset(88.0, 5.0)),
+      const TextPosition(offset: 9, affinity: TextAffinity.upstream),
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //                                                     ^
-      painter.getPositionForOffset(const Offset(100.0, 5.0)).toString(),
-      const TextPosition(offset: 9, affinity: TextAffinity.upstream).toString(),
+      painter.getPositionForOffset(const Offset(100.0, 5.0)),
+      const TextPosition(offset: 9, affinity: TextAffinity.upstream),
     );
     painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
@@ -641,30 +641,30 @@ void main() {
     expect(
       // Vav He Dalet Aaa Bbb Ccc Gimel Bet Alef
       //            ^
-      painter.getPositionForOffset(const Offset(28.0, 5.0)).toString(),
-      const TextPosition(offset: 6).toString(),
+      painter.getPositionForOffset(const Offset(28.0, 5.0)),
+      const TextPosition(offset: 6),
     );
     expect(
       // Vav He Dalet Aaa Bbb Ccc Gimel Bet Alef
       //              ^
-      painter.getPositionForOffset(const Offset(32.0, 5.0)).toString(),
-      const TextPosition(offset: 3).toString(),
+      painter.getPositionForOffset(const Offset(32.0, 5.0)),
+      const TextPosition(offset: 3),
       // this is part of https://github.com/flutter/flutter/issues/11375
       skip: skipExpectsWithKnownBugs,
     );
     expect(
       // Vav He Dalet Aaa Bbb Ccc Gimel Bet Alef
       //                        ^
-      painter.getPositionForOffset(const Offset(58.0, 5.0)).toString(),
-      const TextPosition(offset: 6, affinity: TextAffinity.upstream).toString(),
+      painter.getPositionForOffset(const Offset(58.0, 5.0)),
+      const TextPosition(offset: 6, affinity: TextAffinity.upstream),
       // this is part of https://github.com/flutter/flutter/issues/11375
       skip: skipExpectsWithKnownBugs,
     );
     expect(
       // Vav He Dalet Aaa Bbb Ccc Gimel Bet Alef
       //                          ^
-      painter.getPositionForOffset(const Offset(62.0, 5.0)).toString(),
-      const TextPosition(offset: 3, affinity: TextAffinity.upstream).toString(),
+      painter.getPositionForOffset(const Offset(62.0, 5.0)),
+      const TextPosition(offset: 3, affinity: TextAffinity.upstream),
     );
     painter.dispose();
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
