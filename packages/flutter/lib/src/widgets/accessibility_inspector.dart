@@ -54,6 +54,9 @@ class AccessibilityInspector {
     return root.toJsonMap();
   }
 
+  // TODO(hannahjin): This returns the first SemanticsOwner of any RenderView.
+  // This getSemanticsTree feature is used in DevTools, which currently only supports
+  // single-view inspection. Add multi-view support when DevTools needs it.
   PipelineOwner? _findPipelineOwner() {
     for (final RenderView renderView in RendererBinding.instance.renderViews) {
       if (renderView.owner?.semanticsOwner != null) {
