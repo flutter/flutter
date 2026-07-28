@@ -278,8 +278,13 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// marked as needing to build during those phases, and throws an exception
   /// when a listener attempts it. Setting the text from a build method also
   /// risks rebuilding in a loop, as every notification can schedule another
-  /// build that sets the text again. This property can be set from a listener
-  /// added to this [TextEditingController].
+  /// build that sets the text again.
+  ///
+  /// This property can be set from a listener added to this
+  /// [TextEditingController], but take care to avoid an infinite loop: setting
+  /// the text notifies listeners, so a listener that sets the text will be
+  /// triggered again. A common way to avoid this is to remove the listener
+  /// before setting the text and re-add it afterward.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
