@@ -218,7 +218,7 @@ class AccessibilityViewEmbedder {
       @NonNull AccessibilityNodeInfo input, @NonNull AccessibilityNodeInfo output) {
     output.setAccessibilityFocused(input.isAccessibilityFocused());
     output.setCheckable(input.isCheckable());
-    output.setChecked(input.isChecked());
+    output.setChecked(input.getChecked());
     output.setContentDescription(input.getContentDescription());
     output.setEnabled(input.isEnabled());
     output.setClickable(input.isClickable());
