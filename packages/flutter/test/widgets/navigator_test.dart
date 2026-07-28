@@ -18,7 +18,6 @@ import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'route_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {

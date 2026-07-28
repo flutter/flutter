@@ -102,6 +102,16 @@ FLUTTER_DARWIN_EXPORT
 - (void)publish:(nonnull NSObject*)value;
 
 /**
+ * Returns a value published by the specified plugin.
+ *
+ * @param pluginKey The unique key identifying the plugin.
+ * @return An object published by the plugin, if any. Will be `NSNull` if
+ *   nothing has been published. Will be `nil` if the plugin has not been
+ *   registered.
+ */
+- (nullable NSObject*)valuePublishedByPlugin:(nonnull NSString*)pluginKey;
+
+/**
  * Returns the file name for the given asset.
  * The returned file name can be used to access the asset in the application's main bundle.
  *

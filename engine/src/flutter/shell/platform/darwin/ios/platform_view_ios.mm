@@ -12,6 +12,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
@@ -34,7 +35,6 @@ PlatformViewIOS::PlatformViewIOS(
     IOSRenderingAPI rendering_api,
     __weak FlutterPlatformViewsController* platform_views_controller,
     const flutter::TaskRunners& task_runners,
-    const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
     : PlatformViewIOS(delegate,
                       IOSContext::Create(rendering_api,
@@ -138,16 +138,6 @@ std::shared_ptr<impeller::Context> PlatformViewIOS::GetImpellerContext() const {
 }
 
 // |PlatformView|
-void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
-  PlatformView::SetSemanticsEnabled(enabled);
-}
-
-// |PlatformView|
-void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
-  PlatformView::SetAccessibilityFeatures(flags);
-}
-
-// |PlatformView|
 void PlatformViewIOS::UpdateSemantics(int64_t view_id,
                                       flutter::SemanticsNodeUpdates update,
                                       flutter::CustomAccessibilityActionUpdates actions) {
@@ -181,7 +171,7 @@ void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
 
 // |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewIOS::CreateVSyncWaiter() {
-  return std::make_unique<VsyncWaiterIOS>(task_runners_);
+  return std::make_unique<VsyncWaiterIOS>(task_runners_, FlutterDisplayLinkManager.shared);
 }
 
 // |PlatformView|

@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
 import 'web_platform_view_registry_utils.dart';
-import 'widgets_app_tester.dart';
 
 extension on web.HTMLCollection {
   Iterable<web.Element?> get iterable =>
