@@ -693,10 +693,14 @@ FlutterWindow::HandleMessage(UINT const message,
           mods |= kShift;
         }
 
-        // Mouse move with buttons pressed but current HWND does not have
-        // capture. This can happen when switching windows mid drag and the
-        // event should be ignored:
-        // https://github.com/flutter/flutter/issues/189583
+        // Mouse move with mouse buttons pressed but current HWND does not have
+        // capture. This can happen when switching windows mid drag - windows
+        // will stop honoring current capture and starts sending WM_MOUSEMOVE
+        // to the HWND below cursor, but without sending a WM_(LRMX)BUTTONDOWN
+        // first. This would confuse pointer tracking in Flutter so it is better
+        // to ignore these events. This also matches behavior of other
+        // applications where drag like this is ignored despite the mouse
+        // capture being lost. https://github.com/flutter/flutter/issues/189583
         auto buttons = ConvertWinMouseStateToFlutterButtons(wparam);
         if (buttons != 0 && GetCapture() != window_handle_) {
           break;
