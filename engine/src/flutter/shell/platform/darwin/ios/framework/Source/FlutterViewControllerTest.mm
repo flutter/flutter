@@ -358,7 +358,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification;
-- (void)dispatchTouches:(NSSet*)touches pointerDataChangeOverride:(void*)overridden_change event:(UIEvent*)event;
+- (void)dispatchTouches:(NSSet*)touches
+    pointerDataChangeOverride:(void*)overridden_change
+                        event:(UIEvent*)event;
 @end
 
 @interface FlutterViewControllerTest : XCTestCase
@@ -3118,8 +3120,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 // Regression tests for https://github.com/flutter/flutter/issues/14720
 
-- (FlutterViewControllerDispatchTouchesSpy*)
-    spyViewControllerWithPresentedViewController:(UIViewController*)presentedVC {
+- (FlutterViewControllerDispatchTouchesSpy*)spyViewControllerWithPresentedViewController:
+    (UIViewController*)presentedVC {
   FlutterViewControllerDispatchTouchesSpy* vc =
       [[FlutterViewControllerDispatchTouchesSpy alloc] initWithEngine:self.mockEngine
                                                               nibName:nil
