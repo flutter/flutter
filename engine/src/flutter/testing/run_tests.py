@@ -164,6 +164,12 @@ def is_aarm64() -> bool:
   return aarm64
 
 
+def mac_hardware_model() -> str:
+  assert is_mac()
+  output = subprocess.check_output(['sysctl', '-n', 'hw.model'])
+  return output.decode('utf-8').strip()
+
+
 def is_linux() -> bool:
   return sys_platform.startswith('linux')
 
@@ -568,7 +574,13 @@ def run_cc_tests(
       )
     extra_env = metal_validation_env()
     extra_env.update(vulkan_validation_env(build_dir))
-    mac_impeller_unittests_flags = repeat_flags + [
+    if mac_hardware_model() == 'Macmini9,1':
+      # For the Mac Minis used on CI, limit the number of Impeller test cases run in parallel
+      # in order to reduce the risk of resource exhaustion errors.
+      workers_flag = ['--workers=%d' % (os.cpu_count() - 2)]
+    else:
+      workers_flag = []
+    mac_impeller_unittests_flags = repeat_flags + workers_flag + [
         '--gtest_filter=-*OpenGLES',  # These are covered in the golden tests.
         '--',
         '--enable_vulkan_validation',

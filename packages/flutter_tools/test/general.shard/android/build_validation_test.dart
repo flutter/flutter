@@ -13,10 +13,10 @@ void main() {
       () => validateBuild(
         const AndroidBuildInfo(
           BuildInfo.release,
-          targetArchs: <AndroidArch>[
-            AndroidArch.x86_64,
-            AndroidArch.armeabi_v7a,
-            AndroidArch.arm64_v8a,
+          targetArchs: <CpuArch>[
+            CpuArch.x64,
+            CpuArch.armv7,
+            CpuArch.arm64,
           ],
         ),
       ),
@@ -36,7 +36,7 @@ void main() {
             buildNumber: 'a',
             packageConfigPath: '.dart_tool/package_config.json',
           ),
-          targetArchs: <AndroidArch>[AndroidArch.x86_64],
+          targetArchs: <CpuArch>[CpuArch.x64],
         ),
       ),
       throwsToolExit(message: 'buildNumber: a was not a valid integer value.'),
@@ -53,7 +53,7 @@ void main() {
             buildNumber: '-1',
             packageConfigPath: '.dart_tool/package_config.json',
           ),
-          targetArchs: <AndroidArch>[AndroidArch.x86_64],
+          targetArchs: <CpuArch>[CpuArch.x64],
         ),
       ),
       throwsToolExit(message: 'buildNumber: -1 must be a positive integer value.'),
@@ -70,7 +70,7 @@ void main() {
             buildNumber: '2100000001',
             packageConfigPath: '.dart_tool/package_config.json',
           ),
-          targetArchs: <AndroidArch>[AndroidArch.x86_64],
+          targetArchs: <CpuArch>[CpuArch.x64],
         ),
       ),
       throwsToolExit(
@@ -92,7 +92,7 @@ void main() {
             buildNumber: '2',
             packageConfigPath: '.dart_tool/package_config.json',
           ),
-          targetArchs: <AndroidArch>[AndroidArch.x86_64],
+          targetArchs: <CpuArch>[CpuArch.x64],
         ),
       ),
       returnsNormally,
