@@ -5,7 +5,7 @@
 import InternalFlutterSwift
 import Testing
 
-struct ConnectionCollectionTest {
+struct ConnectionCollectionTests {
   @Test func acquireAndRelease() {
     let connections = ConnectionCollection()
     let connectionID = connections.acquireConnection(forChannel: "foo")
