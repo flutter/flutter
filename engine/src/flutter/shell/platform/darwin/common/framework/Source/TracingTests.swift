@@ -6,7 +6,7 @@ import Foundation
 import InternalFlutterSwiftCommon
 import Testing
 
-@Suite struct TracingTest {
+@Suite struct TracingTests {
 
   @Test func testTracePlatformVsyncDoesNotCrash() {
     Tracing.tracePlatformVsync(
