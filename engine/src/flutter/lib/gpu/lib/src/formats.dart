@@ -159,6 +159,14 @@ enum PixelFormat {
 
   /// ASTC LDR sRGB, 8x8 blocks, 16 bytes per block. Modern mobile ASTC family.
   astc8x8LDRSRGB,
+
+  /// ASTC HDR, 4x4 blocks, 16 bytes per block. Modern mobile ASTC HDR family.
+  /// HDR samples are linear floating point, so there is no sRGB variant.
+  astc4x4HDR,
+
+  /// ASTC HDR, 8x8 blocks, 16 bytes per block. Modern mobile ASTC HDR family.
+  /// HDR samples are linear floating point, so there is no sRGB variant.
+  astc8x8HDR,
 }
 
 /// The family of a block-compressed pixel format. Hardware support for
@@ -172,6 +180,10 @@ enum TextureCompressionFamily {
 
   /// ASTC LDR. Typical on modern mobile and some desktop GPUs.
   astc,
+
+  /// ASTC HDR. A separate device feature from ASTC LDR. Typical on newer mobile
+  /// GPUs.
+  astcHdr,
 }
 
 /// Block-geometry and family queries for [PixelFormat].
@@ -186,6 +198,7 @@ extension PixelFormatProperties on PixelFormat {
     switch (this) {
       case PixelFormat.astc8x8LDR:
       case PixelFormat.astc8x8LDRSRGB:
+      case PixelFormat.astc8x8HDR:
         return 8;
       case PixelFormat.bc1RGBAUNormInt:
       case PixelFormat.bc1RGBAUNormIntSRGB:
@@ -200,6 +213,7 @@ extension PixelFormatProperties on PixelFormat {
       case PixelFormat.etc2RGBA8UNormIntSRGB:
       case PixelFormat.astc4x4LDR:
       case PixelFormat.astc4x4LDRSRGB:
+      case PixelFormat.astc4x4HDR:
         return 4;
       // ignore: no_default_cases
       default:
@@ -212,6 +226,7 @@ extension PixelFormatProperties on PixelFormat {
     switch (this) {
       case PixelFormat.astc8x8LDR:
       case PixelFormat.astc8x8LDRSRGB:
+      case PixelFormat.astc8x8HDR:
         return 8;
       case PixelFormat.bc1RGBAUNormInt:
       case PixelFormat.bc1RGBAUNormIntSRGB:
@@ -226,6 +241,7 @@ extension PixelFormatProperties on PixelFormat {
       case PixelFormat.etc2RGBA8UNormIntSRGB:
       case PixelFormat.astc4x4LDR:
       case PixelFormat.astc4x4LDRSRGB:
+      case PixelFormat.astc4x4HDR:
         return 4;
       // ignore: no_default_cases
       default:
@@ -274,6 +290,8 @@ extension PixelFormatProperties on PixelFormat {
       case PixelFormat.astc4x4LDRSRGB:
       case PixelFormat.astc8x8LDR:
       case PixelFormat.astc8x8LDRSRGB:
+      case PixelFormat.astc4x4HDR:
+      case PixelFormat.astc8x8HDR:
         return 16;
     }
   }
@@ -300,6 +318,9 @@ extension PixelFormatProperties on PixelFormat {
       case PixelFormat.astc8x8LDR:
       case PixelFormat.astc8x8LDRSRGB:
         return TextureCompressionFamily.astc;
+      case PixelFormat.astc4x4HDR:
+      case PixelFormat.astc8x8HDR:
+        return TextureCompressionFamily.astcHdr;
       // ignore: no_default_cases
       default:
         return null;

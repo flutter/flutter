@@ -25,6 +25,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
+#include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/base64.h"
@@ -545,6 +546,15 @@ Shell::Shell(DartVMRef vm,
   resource_cache_limit_calculator->AddResourceCacheLimitItem(
       weak_factory_.GetWeakPtr());
 
+  std::shared_future<fml::WeakPtr<ShellIOManager>> weak_io_manager_future(
+      weak_io_manager_promise_.get_future());
+  shutdown_safe_io_task_runner_ =
+      std::make_shared<fml::ConditionalBasicTaskRunner>(
+          task_runners_.GetIOTaskRunner(),
+          [weak_io_manager_future = std::move(weak_io_manager_future)] {
+            return static_cast<bool>(weak_io_manager_future.get());
+          });
+
   // Generate a WeakPtrFactory for use with the raster thread. This does not
   // need to wait on a latch because it can only ever be used from the raster
   // thread from this class, so we have ordering guarantees.
@@ -873,6 +883,7 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   engine_ = std::move(engine);
   rasterizer_ = std::move(rasterizer);
   io_manager_ = io_manager;
+  weak_io_manager_promise_.set_value(io_manager_->GetWeakPtr());
 
   // Set the external view embedder for the rasterizer.
   auto view_embedder = platform_view_->CreateExternalViewEmbedder();
@@ -949,6 +960,10 @@ fml::WeakPtr<PlatformView> Shell::GetPlatformView() {
 fml::WeakPtr<ShellIOManager> Shell::GetIOManager() {
   FML_DCHECK(is_set_up_);
   return io_manager_->GetWeakPtr();
+}
+
+std::shared_ptr<fml::BasicTaskRunner> Shell::GetShutdownSafeIOTaskRunner() {
+  return shutdown_safe_io_task_runner_;
 }
 
 DartVM* Shell::GetDartVM() {
@@ -1365,6 +1380,12 @@ void Shell::OnPlatformViewSetNextFrameCallback(const fml::closure& closure) {
 // |PlatformView::Delegate|
 const Settings& Shell::OnPlatformViewGetSettings() const {
   return settings_;
+}
+
+// |PlatformView::Delegate|
+std::shared_ptr<fml::BasicTaskRunner>
+Shell::OnPlatformViewGetShutdownSafeIOTaskRunner() const {
+  return shutdown_safe_io_task_runner_;
 }
 
 // |Animator::Delegate|

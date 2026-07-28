@@ -69,6 +69,9 @@ abstract class Surface {
   /// Converts a `ui.Image` into a `ByteData` object in the specified format.
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format);
 
+  /// Whether this surface supports rasterizing an image directly into PNG format.
+  bool get supportsPngEncoding;
+
   /// Sets the maximum number of bytes for the GPU resource cache.
   void setSkiaResourceCacheMaxBytes(int bytes);
 

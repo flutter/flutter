@@ -14,13 +14,10 @@ void main() {
   try {
     WidgetsFlutterBinding.ensureInitialized();
     runWidget(
-      RegularWindow(
-        controller: RegularWindowController(
-          preferredSize: const Size(800, 600),
-          preferredConstraints: const BoxConstraints(
-            minWidth: 640,
-            minHeight: 480,
-          ),
+      Window(
+        controller: WindowController(
+          size: const Size(800, 600),
+          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
           title: 'Example Window',
         ),
         child: const MaterialApp(home: MyApp()),
@@ -70,7 +67,7 @@ class _MyAppState extends State<MyApp> {
                 parentAnchor: WindowPositionerAnchor.right,
                 childAnchor: WindowPositionerAnchor.left,
               ),
-              preferredSize: const Size(300, 200),
+              size: const Size(300, 200),
               title: 'Satellite Window',
               delegate: _CallbackSatelliteDelegate(
                 onDestroyCallback: () {
