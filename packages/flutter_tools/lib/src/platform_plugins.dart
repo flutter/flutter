@@ -39,7 +39,7 @@ final RegExp _pluginIdentifierPattern = RegExp(
 
 /// Whether [value] is a valid native plugin class or dot-separated package
 /// identifier. Callers first confirm the value is a String via the schema type
-/// checks; absent fields are simply not validated here.
+/// checks; absent fields are not validated here.
 bool _isValidPluginIdentifier(String value) => _pluginIdentifierPattern.hasMatch(value);
 
 /// Matches a safe relative Dart source path (e.g. `src/foo_web.dart`) ending in
