@@ -2201,11 +2201,10 @@ class TextInput {
         }
         return false;
     }
-    final args = methodCall.arguments as List<dynamic>;
-
     // The updateEditingStateWithTag request (autofill) can come up even to a
     // text field that doesn't have an active connection.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
+      final args = methodCall.arguments as List<dynamic>;
       final TextInputConnection? connection = _currentConnection ?? _lastConnection;
       final AutofillScope? scope = connection?._client.currentAutofillScope;
       final editingValue = args[1] as Map<String, dynamic>;
@@ -2237,6 +2236,7 @@ class TextInput {
       return;
     }
 
+    final args = methodCall.arguments as List<dynamic>;
     final client = args[0] as int;
     if (client != _currentConnection!._id) {
       // If the client IDs don't match, the incoming message was for a different
