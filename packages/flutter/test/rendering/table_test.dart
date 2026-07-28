@@ -770,6 +770,41 @@ void main() {
         // For row 1, cells with same font size should have same offset
         expect(reg1Data.offset.dy, equals(reg2Data.offset.dy));
       });
+
+      test('Baseline: a cell without a baseline is top-aligned', () {
+        // Regression test: in a baseline-aligned row, a cell whose child has no
+        // baseline must be top-aligned (matching the first layout pass), not
+        // pushed down by the row's baseline distance.
+        final table = RenderTable(
+          textDirection: TextDirection.ltr,
+          columns: 2,
+          rows: 1,
+          defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+        );
+
+        // A tall text cell defines a non-zero baseline distance for the row.
+        final textCell = RenderParagraph(
+          const TextSpan(text: 'Text', style: TextStyle(fontSize: 40)),
+          textDirection: TextDirection.ltr,
+        );
+        textCell.parentData = TableCellParentData()
+          ..verticalAlignment = TableCellVerticalAlignment.baseline;
+        // A plain box has no baseline.
+        final RenderBox boxCell = sizedBox(50.0, 30.0);
+        boxCell.parentData = TableCellParentData()
+          ..verticalAlignment = TableCellVerticalAlignment.baseline;
+
+        table.setChild(0, 0, textCell);
+        table.setChild(1, 0, boxCell);
+
+        layout(table, constraints: const BoxConstraints.tightFor(width: 200.0));
+
+        // Row 0 starts at y = 0, so top-aligned means offset.dy == 0. Before the
+        // fix this was rowTop + beforeBaselineDistance (> 0).
+        final boxData = boxCell.parentData! as TableCellParentData;
+        expect(boxData.offset.dy, 0.0);
+      });
     });
   });
 
