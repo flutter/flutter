@@ -376,7 +376,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 // Overrides dispatchTouches:pointerDataChangeOverride:event: with void* for the C++ pointer
 // parameter so ObjC selector dispatch matches without pulling in flutter::PointerData types.
-// Does not call super to avoid crashing on raw UITouch stubs in the loop body.
 @interface FlutterViewControllerDispatchTouchesSpy : FlutterViewController
 @property(nonatomic) BOOL touchesDispatched;
 @property(nonatomic, strong) UIViewController* stubbedPresentedViewController;
@@ -3134,7 +3133,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
   UITouch* touch = [[UITouch alloc] init];
   touch.phase = UITouchPhaseBegan;
-  UIEvent* event = nil;  // nil via variable suppresses -Wnonnull; event is unused by the fix path
+  UIEvent* event = nil;
   [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
   XCTAssertFalse(vc.touchesDispatched,
                  @"touchesBegan must not dispatch to Flutter when a native VC is presented");
