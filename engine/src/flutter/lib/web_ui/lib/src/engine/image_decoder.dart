@@ -248,19 +248,17 @@ ImageType tryDetectImageType(Uint8List data, String debugSource) {
 /// disposed before the download completes, the progress reader is cancelled to prevent
 /// dangling resource locks.
 Future<DomReadableStream> handleProgressAndGetStream(
-  DomResponse response,
+  HttpFetchResponse response,
   ui_web.ImageCodecChunkCallback? chunkCallback, [
   List<void Function()>? onDisposeCallbacks,
 ]) async {
-  final DomReadableStream body = response.body;
-  if (chunkCallback == null) {
-    return body;
+  if (!response.hasPayload) {
+    throw ImageCodecException('Failed to load network image. No payload.');
   }
+  final DomReadableStream body = response.payload.stream;
+  final int? contentLength = response.contentLength;
 
-  final String? contentLengthHeader = response.headers.get('Content-Length');
-  final int? contentLength = contentLengthHeader != null ? int.tryParse(contentLengthHeader) : null;
-
-  if (contentLength == null) {
+  if (chunkCallback == null || contentLength == null) {
     return body;
   }
 
@@ -443,7 +441,12 @@ Future<ui.Codec> engineInstantiateImageCodecFromUrl(
   ui_web.ImageCodecChunkCallback? chunkCallback,
 }) async {
   final url = uri.toString();
-  final DomResponse response = await rawHttpGet(url);
+  final HttpFetchResponse response;
+  try {
+    response = await httpFetch(url);
+  } catch (e) {
+    throw ImageCodecException('Failed to load network image: $e');
+  }
 
   if (response.status < 200 || response.status >= 300) {
     throw ImageCodecException(
@@ -453,7 +456,7 @@ Future<ui.Codec> engineInstantiateImageCodecFromUrl(
     );
   }
 
-  final String? cleanContentType = parseMimeType(response.headers.get('Content-Type'));
+  final String? cleanContentType = parseMimeType(response.header('Content-Type'));
   final bool isKnownImageMimeType =
       cleanContentType != null && _knownImageMimeTypes.contains(cleanContentType);
 
@@ -478,7 +481,7 @@ Future<ui.Codec> engineInstantiateImageCodecFromUrl(
     }
     return EngineCodec.browser(decoder);
   } else {
-    final ByteBuffer buffer = await response.arrayBuffer();
+    final ByteBuffer buffer = await response.payload.asByteBuffer();
     final Uint8List list = buffer.asUint8List();
     final ImageType imageType = tryDetectImageType(list, url);
 

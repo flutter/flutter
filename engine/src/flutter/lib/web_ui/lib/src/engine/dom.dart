@@ -1345,6 +1345,10 @@ abstract class HttpFetchResponse {
   /// Returns null if "Content-Length" is missing.
   int? get contentLength;
 
+  /// Returns the value of the HTTP header with the given [name], or null if
+  /// the header is not present.
+  String? header(String name);
+
   /// Return true if this response has a [payload].
   ///
   /// Returns false if this response does not have a payload and therefore it is
@@ -1403,12 +1407,15 @@ class HttpFetchResponseImpl implements HttpFetchResponse {
 
   @override
   int? get contentLength {
-    final String? header = _domResponse.headers.get('Content-Length');
+    final String? header = this.header('Content-Length');
     if (header == null) {
       return null;
     }
     return int.tryParse(header);
   }
+
+  @override
+  String? header(String name) => _domResponse.headers.get(name);
 
   @override
   bool get hasPayload {
@@ -1449,6 +1456,14 @@ class MockHttpFetchResponse implements HttpFetchResponse {
   final int? contentLength;
 
   @override
+  String? header(String name) {
+    if (name.toLowerCase() == 'content-length' && contentLength != null) {
+      return contentLength.toString();
+    }
+    return null;
+  }
+
+  @override
   bool get hasPayload => _payload != null;
 
   @override
@@ -1473,12 +1488,18 @@ abstract class HttpFetchPayload {
 
   /// Return the data as a string.
   Future<String> text();
+
+  /// Returns the raw DOM readable stream.
+  DomReadableStream get stream;
 }
 
 class HttpFetchPayloadImpl implements HttpFetchPayload {
   HttpFetchPayloadImpl._(this._domResponse);
 
   final DomResponse _domResponse;
+
+  @override
+  DomReadableStream get stream => _domResponse.body;
 
   @override
   Future<void> read(HttpFetchReader<JSUint8Array> callback) async {
@@ -1541,6 +1562,9 @@ class MockHttpFetchPayload implements HttpFetchPayload {
 
   @override
   Future<String> text() async => throw AssertionError('text not supported by mock');
+
+  @override
+  DomReadableStream get stream => throw AssertionError('stream not supported by mock');
 }
 
 /// Indicates a missing HTTP payload when one was expected, such as when

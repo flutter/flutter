@@ -57,11 +57,6 @@ abstract class EngineCodec implements ui.Codec {
 /// This class orchestrates a multi-step asynchronous pipeline that decodes frames
 /// using the browser's native `ImageDecoder` and resizes them natively on the CPU
 /// using `createImageBitmap` if target dimensions are requested.
-/// An [EngineCodec] that decodes frames using the browser's [BrowserImageDecoder].
-///
-/// This class orchestrates a multi-step asynchronous pipeline that decodes frames
-/// using the browser's native `ImageDecoder` and resizes them natively on the CPU
-/// using `createImageBitmap` if target dimensions are requested.
 class _BrowserEngineCodec extends EngineCodec {
   _BrowserEngineCodec(
     BrowserImageDecoder browserDecoder, {
@@ -116,12 +111,17 @@ class _BrowserEngineCodec extends EngineCodec {
 
       final int originalWidth = frame.displayWidth.toInt();
       final int originalHeight = frame.displayHeight.toInt();
-      final BitmapSize? scaledSize = scaledImageSize(
+      BitmapSize? scaledSize = scaledImageSize(
         originalWidth,
         originalHeight,
         targetWidth,
         targetHeight,
       );
+      if (scaledSize != null &&
+          !allowUpscaling &&
+          (scaledSize.width > originalWidth || scaledSize.height > originalHeight)) {
+        scaledSize = null;
+      }
 
       final int destWidth = scaledSize?.width ?? originalWidth;
       final int destHeight = scaledSize?.height ?? originalHeight;

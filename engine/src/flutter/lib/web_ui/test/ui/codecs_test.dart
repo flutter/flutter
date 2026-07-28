@@ -463,6 +463,20 @@ Future<void> testMain() async {
     expect(gotError, isTrue, reason: 'Should have got CORS error');
   });
 
+  test('does not upscale when allowUpscaling is false', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/1x1.png');
+    final Uint8List bytes = (await response.payload.asByteBuffer()).asUint8List();
+    final ui.Codec codec = await renderer.instantiateImageCodec(
+      bytes,
+      targetWidth: 100,
+      targetHeight: 100,
+      allowUpscaling: false,
+    );
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    expect(frame.image.width, 1);
+    expect(frame.image.height, 1);
+  });
+
   test('isAvif', () {
     expect(isAvif(Uint8List.fromList(<int>[])), isFalse);
     expect(isAvif(Uint8List.fromList(<int>[1, 2, 3])), isFalse);
