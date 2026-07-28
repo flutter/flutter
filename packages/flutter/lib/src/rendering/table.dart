@@ -1482,7 +1482,7 @@ class RenderTable extends RenderBox {
     // child has no real baseline. Such cells are top-aligned, so they must not
     // be offset by the row's baseline distance in the second pass. Real baseline
     // distances are always >= 0, so a negative value is unambiguous.
-    const noBaseline = -1.0;
+    const kNoBaseline = -1.0;
 
     switch (textDirection) {
       case TextDirection.rtl:
@@ -1625,7 +1625,7 @@ class RenderTable extends RenderBox {
               // row. Record the sentinel so the second pass places it the same
               // way instead of offsetting it by the row's baseline distance.
               rowHeight = math.max(rowHeight, child.size.height);
-              baselinesInRowMajor[y * columns + x] = noBaseline;
+              baselinesInRowMajor[y * columns + x] = kNoBaseline;
             }
           case TableCellVerticalAlignment.top:
           case TableCellVerticalAlignment.middle:
@@ -1729,7 +1729,7 @@ class RenderTable extends RenderBox {
             // A child with no real baseline was top-aligned in the first pass;
             // keep it top-aligned here rather than offsetting it by the row's
             // baseline distance.
-            childParentData.offset = childBaseline == noBaseline
+            childParentData.offset = childBaseline == kNoBaseline
                 ? Offset(cellX, rowTop)
                 : Offset(cellX, rowTop + beforeBaselineDistance - childBaseline);
           case TableCellVerticalAlignment.top:
