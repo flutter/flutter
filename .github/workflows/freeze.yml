@@ -5,7 +5,9 @@
 name: Material and Cupertino Code Freeze
 
 on:
-  pull_request_target:
+  # Safe because this workflow does not check out code or run arbitrary scripts.
+  # It only runs a metadata-based path filter to enforce freeze restrictions.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
     branches:
       - master
@@ -24,7 +26,7 @@ jobs:
     steps:
       - name: Check for changes in frozen folders
         if: github.event_name != 'merge_group'
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
         id: filter
         with:
           token: ${{ github.token }}

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart' show HostPlatform, OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart' show Version;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -71,6 +72,22 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   }
 }
 
+class FakeXcodeProjectInterpreterWithVersion extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterWithVersion({required this.version});
+
+  @override
+  final Version version;
+
+  @override
+  Future<Map<String, String>> getBuildSettings(
+    XcodeBasedProject xcodeProject, {
+    XcodeProjectBuildContext? buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    return <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
+  }
+}
+
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{'FLUTTER_ROOT': '/', 'HOME': '/'},
@@ -114,13 +131,15 @@ void main() {
   }
 
   // Sets up the minimal mock project files necessary for macOS builds to succeed.
-  void createMinimalMockProjectFiles() {
+  void createMinimalMockProjectFiles({bool createWorkspace = true}) {
     fileSystem
         .directory(fileSystem.path.join('macos', 'Runner.xcodeproj'))
         .createSync(recursive: true);
-    fileSystem
-        .directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
-        .createSync(recursive: true);
+    if (createWorkspace) {
+      fileSystem
+          .directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
+          .createSync(recursive: true);
+    }
     createCoreMockProjectFiles();
   }
 
@@ -129,6 +148,7 @@ void main() {
   FakeCommand setUpFakeXcodeBuildHandler(
     String configuration, {
     bool verbose = false,
+    bool hasWorkspace = true,
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
@@ -143,8 +163,13 @@ void main() {
         '/usr/bin/env',
         'xcrun',
         'xcodebuild',
-        '-workspace',
-        flutterProject.macos.xcodeWorkspace!.path,
+        if (hasWorkspace) ...<String>[
+          '-workspace',
+          flutterProject.macos.xcodeWorkspace!.path,
+        ] else ...<String>[
+          '-project',
+          flutterProject.macos.xcodeProject.path,
+        ],
         '-configuration',
         configuration,
         '-scheme',
@@ -285,6 +310,51 @@ STDERR STUFF
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       Analytics: () => fakeAnalytics,
+    },
+  );
+
+  testUsingContext(
+    'macOS build invokes xcodebuild with -project when there is no .xcworkspace',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      createMinimalMockProjectFiles(createWorkspace: false);
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler('Debug', hasWorkspace: false),
+      ]);
+
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
 
@@ -1431,7 +1501,8 @@ STDERR STUFF
       await expectLater(
         createTestCommandRunner(command).run(<String>['build', 'macos', '--release', '--no-pub']),
         throwsToolExit(
-          message: 'No Valid Target Arch: '
+          message:
+              'No Valid Target Arch: '
               'You have enabled the macOSArm64Only feature flag but '
               "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
               'Consider removing arm64 from EXCLUDED_ARCHS.',
@@ -1503,6 +1574,58 @@ STDERR STUFF
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
         // Empty overrides - no EXCLUDED_ARCHS
       ),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'Prints warning when building a release app for macOS that contains an x86_64 slice and Xcode version is 27 or greater',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: testLogger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
+
+      expect(
+        testLogger.warningText,
+        contains(
+          'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
+          'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
+          'This will become the default behavior in a future Flutter release.',
+        ),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithVersion(version: Version(27, 0, 0)),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );

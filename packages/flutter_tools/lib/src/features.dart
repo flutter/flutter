@@ -224,7 +224,9 @@ const recordUse = Feature(
   name: 'record use experiment',
   configSetting: 'enable-record-use',
   environmentOverride: 'FLUTTER_RECORD_USE',
-  master: FeatureChannelSetting(available: true),
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Enable Swift Package Manager as a darwin dependency manager.
