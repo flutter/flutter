@@ -1614,6 +1614,7 @@ void main() {
               fileSystem: fileSystem,
               isCoreDevice: true,
               coreDeviceControl: FakeIOSCoreDeviceControl(),
+              logger: testLogger,
               xcodeDebug: FakeXcodeDebug(
                 expectedProject: XcodeDebugProject(
                   scheme: 'Runner',
