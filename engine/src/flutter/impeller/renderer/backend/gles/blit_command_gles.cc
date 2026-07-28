@@ -263,22 +263,23 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
           std::max<int32_t>(1, tex_descriptor.size.height >> mip_level);
       gl.TexImage3D(
           /*target=*/texture_target,                         //
-          /*level=*/mip_level,                               //
+          /*level=*/static_cast<GLint>(mip_level),           //
           /*internal_format=*/gles_format->internal_format,  //
           /*width=*/level_width,                             //
           /*height=*/level_height,                           //
-          /*depth=*/tex_descriptor.array_layer_count,        //
-          /*border=*/0u,                                     //
-          /*format=*/gles_format->external_format,           //
-          /*type=*/gles_format->type,                        //
-          /*data=*/nullptr                                   //
+          /*depth=*/
+          static_cast<GLsizei>(tex_descriptor.array_layer_count),  //
+          /*border=*/0u,                                           //
+          /*format=*/gles_format->external_format,                 //
+          /*type=*/gles_format->type,                              //
+          /*data=*/nullptr                                         //
       );
       texture_gles.MarkSliceMipLevelInitialized(0, mip_level);
     }
     gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl.TexSubImage3D(
         /*target=*/texture_target,                  //
-        /*level=*/mip_level,                        //
+        /*level=*/static_cast<GLint>(mip_level),    //
         /*xoffset=*/destination_region.GetX(),      //
         /*yoffset=*/destination_region.GetY(),      //
         /*zoffset=*/static_cast<GLint>(slice),      //
