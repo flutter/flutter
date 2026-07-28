@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 import '../painting/fake_codec.dart';
 import '../painting/fake_image_provider.dart';
-import 'widgets_app_tester.dart';
 
 Future<void> main() async {
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
