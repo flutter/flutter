@@ -201,6 +201,9 @@ struct Settings {
   // the VM service.
   bool disable_service_auth_codes = true;
 
+  // Determines whether WebSocket origin checks are disabled for the VM service.
+  bool disable_service_origin_check = false;
+
   // Determine whether the vmservice should fallback to automatic port selection
   // after failing to bind to a specified port.
   bool enable_service_port_fallback = false;
@@ -237,9 +240,6 @@ struct Settings {
 
   // Whether to lazily initialize impeller PSO state.
   bool impeller_enable_lazy_shader_mode = false;
-
-  // An experimental mode that antialiases lines.
-  bool impeller_antialiased_lines = false;
 
   // Whether to use SDFs for rendering in Impeller.
   bool impeller_use_sdfs = false;

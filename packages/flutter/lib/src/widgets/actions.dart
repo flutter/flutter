@@ -23,6 +23,10 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'shortcuts.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late Intent intent;
+
 /// Returns the parent [BuildContext] of a given `context`.
 ///
 /// [BuildContext] (or rather, [Element]) doesn't have a `parent` accessor, but
@@ -181,10 +185,29 @@ abstract class Action<T extends Intent> with Diagnosticable {
 
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
 
-  Action<T>? _currentCallingAction;
+  Action<Intent>? _currentCallingAction;
   // ignore: use_setters_to_change_properties, (code predates enabling of this lint)
-  void _updateCallingAction(Action<T>? value) {
+  void _updateCallingAction(Action<Intent>? value) {
     _currentCallingAction = value;
+  }
+
+  // Checks if the intent's type is a subtype of T.
+  // Prefer using the runtime type but if intent is null, this method will try
+  // using the specified type parameter.
+  bool _debugCanHandleIntent<I extends Intent>(I? intent) {
+    final Object? badIntentString = switch (intent) {
+      T() => null,
+      Object(:final runtimeType) => runtimeType,
+      // The List literal is needed to reify the type I.
+      // ignore: literal_only_boolean_expressions
+      null when <I>[] is List<T> => null,
+      null => I.toString(),
+    };
+    assert(
+      badIntentString == null,
+      'An Intent of type $badIntentString cannot be handled by $runtimeType: the Intent must be of a subtype of $T.',
+    );
+    return badIntentString == null;
   }
 
   /// The [Action] overridden by this [Action].
@@ -229,7 +252,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// ```
   /// {@end-tool}
   @protected
-  Action<T>? get callingAction => _currentCallingAction;
+  Action<T>? get callingAction => _currentCallingAction as Action<T>?;
 
   /// Gets the type of intent this action responds to.
   Type get intentType => T;
@@ -786,7 +809,7 @@ class Actions extends StatefulWidget {
   /// returned callback is called. If the return value is needed, consider using
   /// [Actions.invoke] instead.
   static VoidCallback? handler<T extends Intent>(BuildContext context, T intent) {
-    final Action<T>? action = Actions.maybeFind<T>(context);
+    final Action<Intent>? action = Actions.maybeFind(context);
     if (action != null && action._isEnabled(intent, context)) {
       return () {
         // Could be that the action was enabled when the closure was created,
@@ -811,6 +834,8 @@ class Actions extends StatefulWidget {
   ///
   /// If no [Actions] widget surrounds the given context, this function will
   /// assert in debug mode, and throw an exception in release mode.
+  ///
+  /// {@macro flutter.widgets.actions.findLimitations}
   ///
   /// See also:
   ///
@@ -851,60 +876,72 @@ class Actions extends StatefulWidget {
   /// If no [Actions] widget surrounds the given context, this function will
   /// return null.
   ///
+  /// {@template flutter.widgets.actions.findLimitations}
+  /// ## Limitations:
+  ///
+  /// It is strongly recommended that callers explicitly set the type parameter
+  /// to `Intent` when the `intent` parameter is not null:
+  ///
+  /// ```dart
+  /// Actions.find<Intent>(context, intent: intent); // GOOD
+  /// Actions.find(context, intent: intent); // BAD
+  /// ```
+  ///
+  /// If the type parameter is not set to `Intent` when the `intent` parameter is
+  /// not null, this method might be unable to return a perfectly capable `Action`.
+  /// For instance, this method cannot return an `Action<Intent>` - an action
+  /// that can be bound to any intent - unless `T` is exactly `Intent`.
+  /// This will trigger assertions in debug mode.
+  /// {@endtemplate}
+  ///
   /// See also:
   ///
   ///  * [find], which is similar to this function, but will throw if
   ///    no [Actions] ancestor is found.
   static Action<T>? maybeFind<T extends Intent>(BuildContext context, {T? intent}) {
-    Action<T>? action;
-
-    // Specialize the type if a runtime example instance of the intent is given.
-    // This allows this function to be called by code that doesn't know the
-    // concrete type of the intent at compile time.
-    final Type type = intent?.runtimeType ?? T;
-    assert(
-      type != Intent,
-      'The type passed to "find" resolved to "Intent": either a non-Intent '
-      'generic type argument or an example intent derived from Intent must be '
-      'specified. Intent may be used as the generic type as long as the optional '
-      '"intent" argument is passed.',
-    );
-
+    Action<Intent>? action;
     _visitActionsAncestors(context, (InheritedElement element) {
       final actions = element.widget as _ActionsScope;
-      final Action<T>? result = _castAction(actions, intent: intent);
+      final Action<Intent>? result = _getActionForIntent<T>(actions, intent);
       if (result != null) {
         context.dependOnInheritedElement(element);
         action = result;
         return true;
       }
+
       return false;
     });
 
-    return action;
+    if (action case final Action<T>? action) {
+      return action;
+    }
+    assert(() {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('An ${action.runtimeType} cannot be cast to an Action<$T>.'),
+        ErrorDescription(
+          'A valid action $action was found but could not be returned by Actions.maybeFind<$T>.',
+        ),
+        ErrorHint(
+          'This is a current limitation of the Actions widget, '
+          'see https://github.com/flutter/flutter/issues/180871 for more details. '
+          'As a workaround, consider using Actions.invoke or Actions.maybeInvoke instead, '
+          'or explicitly set the type parameter to Intent: '
+          'Actions.maybeFind<Intent>(context, intent)',
+        ),
+      ]);
+    }());
+    return null;
   }
 
-  static Action<T>? _maybeFindWithoutDependingOn<T extends Intent>(
-    BuildContext context, {
+  static Action<Intent>? _maybeFindWithoutDependingOn<T extends Intent>(
+    BuildContext context,
     T? intent,
-  }) {
-    Action<T>? action;
-
-    // Specialize the type if a runtime example instance of the intent is given.
-    // This allows this function to be called by code that doesn't know the
-    // concrete type of the intent at compile time.
-    final Type type = intent?.runtimeType ?? T;
-    assert(
-      type != Intent,
-      'The type passed to "find" resolved to "Intent": either a non-Intent '
-      'generic type argument or an example intent derived from Intent must be '
-      'specified. Intent may be used as the generic type as long as the optional '
-      '"intent" argument is passed.',
-    );
+  ) {
+    Action<Intent>? action;
 
     _visitActionsAncestors(context, (InheritedElement element) {
       final actions = element.widget as _ActionsScope;
-      final Action<T>? result = _castAction(actions, intent: intent);
+      final Action<Intent>? result = _getActionForIntent<T>(actions, intent);
       if (result != null) {
         action = result;
         return true;
@@ -915,19 +952,13 @@ class Actions extends StatefulWidget {
     return action;
   }
 
-  // Find the [Action] that handles the given `intent` in the given
-  // `_ActionsScope`, and verify it has the right type parameter.
-  static Action<T>? _castAction<T extends Intent>(_ActionsScope actionsMarker, {T? intent}) {
+  static Action<Intent>? _getActionForIntent<T extends Intent>(
+    _ActionsScope actionsMarker,
+    T? intent,
+  ) {
     final Action<Intent>? mappedAction = actionsMarker.actions[intent?.runtimeType ?? T];
-    if (mappedAction is Action<T>?) {
-      return mappedAction;
-    } else {
-      assert(
-        false,
-        '$T cannot be handled by an Action of runtime type ${mappedAction.runtimeType}.',
-      );
-      return null;
-    }
+    assert(mappedAction?._debugCanHandleIntent(intent) ?? true);
+    return mappedAction;
   }
 
   /// Returns the [ActionDispatcher] associated with the [Actions] widget that
@@ -957,7 +988,7 @@ class Actions extends StatefulWidget {
 
     final bool actionFound = _visitActionsAncestors(context, (InheritedElement element) {
       final actions = element.widget as _ActionsScope;
-      final Action<T>? result = _castAction(actions, intent: intent);
+      final Action<Intent>? result = _getActionForIntent(actions, intent);
       if (result != null && result._isEnabled(intent, context)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
         // Element we found.
@@ -1002,7 +1033,7 @@ class Actions extends StatefulWidget {
     Object? returnValue;
     _visitActionsAncestors(context, (InheritedElement element) {
       final actions = element.widget as _ActionsScope;
-      final Action<T>? result = _castAction(actions, intent: intent);
+      final Action<Intent>? result = _getActionForIntent(actions, intent);
       if (result != null && result._isEnabled(intent, context)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
         // element we found.
@@ -1593,7 +1624,7 @@ class PrioritizedAction extends ContextAction<PrioritizedIntents> {
       return false;
     }
     for (final Intent candidateIntent in intent.orderedIntents) {
-      final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
+      final Action<Intent>? candidateAction = Actions.maybeFind(
         focus.context!,
         intent: candidateIntent,
       );
@@ -1616,46 +1647,49 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   // When debugAssertMutuallyRecursive is true, this action will throw an
   // assertion error when the override calls this action's "invoke" method and
   // the override is already being invoked from within the "invoke" method.
-  bool debugAssertMutuallyRecursive = false;
-  bool debugAssertIsActionEnabledMutuallyRecursive = false;
-  bool debugAssertIsEnabledMutuallyRecursive = false;
-  bool debugAssertConsumeKeyMutuallyRecursive = false;
+  bool _debugAssertMutuallyRecursive = false;
+  bool _debugAssertIsActionEnabledMutuallyRecursive = false;
+  bool _debugAssertIsEnabledMutuallyRecursive = false;
+  bool _debugAssertConsumeKeyMutuallyRecursive = false;
 
   // The default action to invoke if an enabled override Action can't be found
   // using [lookupContext].
-  Action<T> get defaultAction;
+  Action<T> get _defaultAction;
 
   // The [BuildContext] used to find the override of this [Action].
-  BuildContext get lookupContext;
+  BuildContext get _lookupContext;
 
   // How to invoke [defaultAction], given the caller [fromAction].
-  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context);
+  Object? _invokeDefaultAction(T intent, Action<Intent>? fromAction, BuildContext? context);
 
-  Action<T>? getOverrideAction({bool declareDependency = false}) {
-    final Action<T>? override = declareDependency
-        ? Actions.maybeFind(lookupContext)
-        : Actions._maybeFindWithoutDependingOn(lookupContext);
+  Action<Intent>? _getOverrideAction<U extends Intent>(
+    U? intent, {
+    bool declareDependency = false,
+  }) {
+    final Action<Intent>? override = declareDependency
+        ? Actions.maybeFind(_lookupContext, intent: intent)
+        : Actions._maybeFindWithoutDependingOn(_lookupContext, intent);
     assert(!identical(override, this));
     return override;
   }
 
   @override
-  void _updateCallingAction(Action<T>? value) {
+  void _updateCallingAction(Action<Intent>? value) {
     super._updateCallingAction(value);
-    defaultAction._updateCallingAction(value);
+    _defaultAction._updateCallingAction(value);
   }
 
-  Object? _invokeOverride(Action<T> overrideAction, T intent, BuildContext? context) {
-    assert(!debugAssertMutuallyRecursive);
+  Object? _invokeOverride(Action<Intent> overrideAction, T intent, BuildContext? context) {
+    assert(!_debugAssertMutuallyRecursive);
     assert(() {
-      debugAssertMutuallyRecursive = true;
+      _debugAssertMutuallyRecursive = true;
       return true;
     }());
-    overrideAction._updateCallingAction(defaultAction);
+    overrideAction._updateCallingAction(_defaultAction);
     final Object? returnValue = overrideAction._invoke(intent, context);
     overrideAction._updateCallingAction(null);
     assert(() {
-      debugAssertMutuallyRecursive = false;
+      _debugAssertMutuallyRecursive = false;
       return true;
     }());
     return returnValue;
@@ -1663,24 +1697,24 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
-    final Action<T>? overrideAction = getOverrideAction();
+    final Action<Intent>? overrideAction = _getOverrideAction(intent);
     final Object? returnValue = overrideAction == null
-        ? invokeDefaultAction(intent, callingAction, context)
+        ? _invokeDefaultAction(intent, _currentCallingAction, context)
         : _invokeOverride(overrideAction, intent, context);
     return returnValue;
   }
 
-  bool isOverrideActionEnabled(Action<T> overrideAction) {
-    assert(!debugAssertIsActionEnabledMutuallyRecursive);
+  bool _isOverrideActionEnabled(Action<Intent> overrideAction) {
+    assert(!_debugAssertIsActionEnabledMutuallyRecursive);
     assert(() {
-      debugAssertIsActionEnabledMutuallyRecursive = true;
+      _debugAssertIsActionEnabledMutuallyRecursive = true;
       return true;
     }());
-    overrideAction._updateCallingAction(defaultAction);
+    overrideAction._updateCallingAction(_defaultAction);
     final bool isOverrideEnabled = overrideAction.isActionEnabled;
     overrideAction._updateCallingAction(null);
     assert(() {
-      debugAssertIsActionEnabledMutuallyRecursive = false;
+      _debugAssertIsActionEnabledMutuallyRecursive = false;
       return true;
     }());
     return isOverrideEnabled;
@@ -1688,27 +1722,28 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
 
   @override
   bool get isActionEnabled {
-    final Action<T>? overrideAction = getOverrideAction(declareDependency: true);
+    final Action<Intent>? overrideAction = _getOverrideAction<T>(null, declareDependency: true);
     final bool returnValue = overrideAction != null
-        ? isOverrideActionEnabled(overrideAction)
-        : defaultAction.isActionEnabled;
+        ? _isOverrideActionEnabled(overrideAction)
+        : _defaultAction.isActionEnabled;
     return returnValue;
   }
 
   @override
   bool isEnabled(T intent, [BuildContext? context]) {
-    assert(!debugAssertIsEnabledMutuallyRecursive);
+    assert(!_debugAssertIsEnabledMutuallyRecursive);
     assert(() {
-      debugAssertIsEnabledMutuallyRecursive = true;
+      _debugAssertIsEnabledMutuallyRecursive = true;
       return true;
     }());
 
-    final Action<T>? overrideAction = getOverrideAction();
-    overrideAction?._updateCallingAction(defaultAction);
-    final bool returnValue = (overrideAction ?? defaultAction)._isEnabled(intent, context);
+    final Action<Intent>? overrideAction = _getOverrideAction(intent);
+    assert(overrideAction?._debugCanHandleIntent(intent) ?? true);
+    overrideAction?._updateCallingAction(_defaultAction);
+    final bool returnValue = (overrideAction ?? _defaultAction)._isEnabled(intent, context);
     overrideAction?._updateCallingAction(null);
     assert(() {
-      debugAssertIsEnabledMutuallyRecursive = false;
+      _debugAssertIsEnabledMutuallyRecursive = false;
       return true;
     }());
     return returnValue;
@@ -1716,17 +1751,17 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
 
   @override
   bool consumesKey(T intent) {
-    assert(!debugAssertConsumeKeyMutuallyRecursive);
+    assert(!_debugAssertConsumeKeyMutuallyRecursive);
     assert(() {
-      debugAssertConsumeKeyMutuallyRecursive = true;
+      _debugAssertConsumeKeyMutuallyRecursive = true;
       return true;
     }());
-    final Action<T>? overrideAction = getOverrideAction();
-    overrideAction?._updateCallingAction(defaultAction);
-    final bool isEnabled = (overrideAction ?? defaultAction).consumesKey(intent);
+    final Action<Intent>? overrideAction = _getOverrideAction(intent);
+    overrideAction?._updateCallingAction(_defaultAction);
+    final bool isEnabled = (overrideAction ?? _defaultAction).consumesKey(intent);
     overrideAction?._updateCallingAction(null);
     assert(() {
-      debugAssertConsumeKeyMutuallyRecursive = false;
+      _debugAssertConsumeKeyMutuallyRecursive = false;
       return true;
     }());
     return isEnabled;
@@ -1735,86 +1770,93 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Action<T>>('defaultAction', defaultAction));
+    properties.add(DiagnosticsProperty<Action<T>>('defaultAction', _defaultAction));
   }
 }
 
 class _OverridableAction<T extends Intent> extends ContextAction<T>
     with _OverridableActionMixin<T> {
-  _OverridableAction({required this.defaultAction, required this.lookupContext});
+  _OverridableAction({required Action<T> defaultAction, required BuildContext lookupContext})
+    : _lookupContext = lookupContext,
+      _defaultAction = defaultAction;
 
   @override
-  final Action<T> defaultAction;
+  final Action<T> _defaultAction;
 
   @override
-  final BuildContext lookupContext;
+  final BuildContext _lookupContext;
 
   @override
-  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context) {
+  Object? _invokeDefaultAction(T intent, Action<Intent>? fromAction, BuildContext? context) {
     if (fromAction == null) {
-      return defaultAction.invoke(intent);
+      return _defaultAction.invoke(intent);
     } else {
-      final Object? returnValue = defaultAction.invoke(intent);
+      final Object? returnValue = _defaultAction.invoke(intent);
       return returnValue;
     }
   }
 
   @override
   ContextAction<T> _makeOverridableAction(BuildContext context) {
-    return _OverridableAction<T>(defaultAction: defaultAction, lookupContext: context);
+    return _OverridableAction<T>(defaultAction: _defaultAction, lookupContext: context);
   }
 }
 
 class _OverridableContextAction<T extends Intent> extends ContextAction<T>
     with _OverridableActionMixin<T> {
-  _OverridableContextAction({required this.defaultAction, required this.lookupContext});
+  _OverridableContextAction({
+    required ContextAction<T> defaultAction,
+    required BuildContext lookupContext,
+  }) : _lookupContext = lookupContext,
+       _defaultAction = defaultAction;
 
   @override
-  final ContextAction<T> defaultAction;
+  final ContextAction<T> _defaultAction;
 
   @override
-  final BuildContext lookupContext;
+  final BuildContext _lookupContext;
 
   @override
-  Object? _invokeOverride(Action<T> overrideAction, T intent, BuildContext? context) {
+  Object? _invokeOverride(Action<Intent> overrideAction, T intent, BuildContext? context) {
     assert(context != null);
-    assert(!debugAssertMutuallyRecursive);
+    assert(!_debugAssertMutuallyRecursive);
     assert(() {
-      debugAssertMutuallyRecursive = true;
+      _debugAssertMutuallyRecursive = true;
       return true;
     }());
+    assert(overrideAction._debugCanHandleIntent(intent));
 
     // Wrap the default Action together with the calling context in case
     // overrideAction is not a ContextAction and thus have no access to the
     // calling BuildContext.
     final Action<T> wrappedDefault = _ContextActionToActionAdapter<T>(
       invokeContext: context!,
-      action: defaultAction,
+      action: _defaultAction,
     );
     overrideAction._updateCallingAction(wrappedDefault);
     final Object? returnValue = overrideAction._invoke(intent, context);
     overrideAction._updateCallingAction(null);
 
     assert(() {
-      debugAssertMutuallyRecursive = false;
+      _debugAssertMutuallyRecursive = false;
       return true;
     }());
     return returnValue;
   }
 
   @override
-  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context) {
+  Object? _invokeDefaultAction(T intent, Action<Intent>? fromAction, BuildContext? context) {
     if (fromAction == null) {
-      return defaultAction.invoke(intent, context);
+      return _defaultAction.invoke(intent, context);
     } else {
-      final Object? returnValue = defaultAction.invoke(intent, context);
+      final Object? returnValue = _defaultAction.invoke(intent, context);
       return returnValue;
     }
   }
 
   @override
   ContextAction<T> _makeOverridableAction(BuildContext context) {
-    return _OverridableContextAction<T>(defaultAction: defaultAction, lookupContext: context);
+    return _OverridableContextAction<T>(defaultAction: _defaultAction, lookupContext: context);
   }
 }
 
@@ -1825,7 +1867,7 @@ class _ContextActionToActionAdapter<T extends Intent> extends Action<T> {
   final ContextAction<T> action;
 
   @override
-  void _updateCallingAction(Action<T>? value) {
+  void _updateCallingAction(Action<Intent>? value) {
     action._updateCallingAction(value);
   }
 

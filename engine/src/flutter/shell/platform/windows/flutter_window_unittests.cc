@@ -306,7 +306,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerDown) {
       .WillRepeatedly([](UINT32 pointer_id, POINTER_PEN_INFO* pen_info) {
         if (pen_info != nullptr) {
           pen_info->pressure = 720;  // Non-zero pressure for contact events
-          pen_info->rotation = 0;
+          pen_info->rotation = 10;
           pen_info->penFlags = 0;
         }
         return TRUE;
@@ -323,7 +323,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerDown) {
   EXPECT_CALL(delegate,
               OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 10, 720))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -410,7 +410,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerUp) {
   EXPECT_CALL(delegate,
               OnPointerDown(25, 30, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 0, 720))
       .Times(1);
   EXPECT_CALL(delegate, OnPointerUp(25, 30, kFlutterPointerDeviceKindStylus,
                                     kDefaultPointerDeviceId, 0))
@@ -570,7 +570,7 @@ TEST_F(FlutterWindowTest, OnStylusHoverAfterPointerUp) {
   EXPECT_CALL(delegate,
               OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 0, 720))
       .Times(1);
   EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                                     kDefaultPointerDeviceId, 0))
@@ -622,7 +622,7 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUsesPenFlags) {
                             kDefaultPointerDeviceId,
                             kFlutterPointerButtonStylusContact |
                                 kFlutterPointerButtonStylusPrimary,
-                            720, 0))
+                            0, 720))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -663,7 +663,7 @@ TEST_F(FlutterWindowTest, OnStylusEraserButtonUsesPenFlags) {
                             kDefaultPointerDeviceId,
                             kFlutterPointerButtonStylusContact |
                                 kFlutterPointerButtonStylusSecondary,
-                            720, 0))
+                            0, 720))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -702,7 +702,7 @@ TEST_F(FlutterWindowTest, OnInvertedStylusPointerDownUsesDeviceKind) {
   EXPECT_CALL(delegate,
               OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindInvertedStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 0, 720))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -749,7 +749,7 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateMovesWithUpdatedButtons) {
   EXPECT_CALL(delegate,
               OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusContact, 720, 0))
+                            kFlutterPointerButtonStylusContact, 0, 720))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
@@ -807,7 +807,7 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateMovesWithReleasedButton) {
                             kDefaultPointerDeviceId,
                             kFlutterPointerButtonStylusContact |
                                 kFlutterPointerButtonStylusPrimary,
-                            720, 0))
+                            0, 720))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
@@ -851,6 +851,80 @@ TEST_F(FlutterWindowTest, OnMousePointerDown) {
   WPARAM wparam = static_cast<WPARAM>(pointerId);
   InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 45,
                                       50);
+}
+
+TEST_F(FlutterWindowTest, NonPrimaryMouseButtonCapturesPointer) {
+  MockFlutterWindow win32window(100, 100);
+  MockWindowBindingHandlerDelegate delegate;
+  EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
+  EXPECT_CALL(delegate, OnWindowStateEvent).Times(AnyNumber());
+  win32window.SetView(&delegate);
+
+  HWND window_handle = win32window.FlutterWindow::GetWindowHandle();
+  ASSERT_NE(window_handle, nullptr);
+  ReleaseCapture();
+  ASSERT_EQ(GetCapture(), nullptr);
+
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMouseSecondary, 0, 0))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_RBUTTONDOWN, MK_RBUTTON,
+                                  MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), window_handle);
+
+  EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                                    kDefaultPointerDeviceId,
+                                    kFlutterPointerButtonMouseSecondary))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_RBUTTONUP, 0, MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), nullptr);
+}
+
+TEST_F(FlutterWindowTest, MouseButtonCaptureReleasedAfterAllButtonsReleased) {
+  MockFlutterWindow win32window(100, 100);
+  MockWindowBindingHandlerDelegate delegate;
+  EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
+  EXPECT_CALL(delegate, OnWindowStateEvent).Times(AnyNumber());
+  win32window.SetView(&delegate);
+
+  HWND window_handle = win32window.FlutterWindow::GetWindowHandle();
+  ASSERT_NE(window_handle, nullptr);
+  ReleaseCapture();
+  ASSERT_EQ(GetCapture(), nullptr);
+
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMouseSecondary, 0, 0))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_RBUTTONDOWN, MK_RBUTTON,
+                                  MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), window_handle);
+
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_LBUTTONDOWN, MK_LBUTTON | MK_RBUTTON,
+                                  MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), window_handle);
+
+  EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                                    kDefaultPointerDeviceId,
+                                    kFlutterPointerButtonMouseSecondary))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_RBUTTONUP, MK_LBUTTON, MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), window_handle);
+
+  EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                                    kDefaultPointerDeviceId,
+                                    kFlutterPointerButtonMousePrimary))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_LBUTTONUP, 0, MAKELPARAM(10, 10));
+  EXPECT_EQ(GetCapture(), nullptr);
 }
 
 TEST_F(FlutterWindowTest, OnTouchPointerDown) {

@@ -170,6 +170,7 @@ base class SamplerOptions {
     this.mipFilter = MipFilter.nearest,
     this.widthAddressMode = SamplerAddressMode.clampToEdge,
     this.heightAddressMode = SamplerAddressMode.clampToEdge,
+    this.maxAnisotropy = 1,
   });
 
   MinMagFilter minFilter;
@@ -177,6 +178,19 @@ base class SamplerOptions {
   MipFilter mipFilter;
   SamplerAddressMode widthAddressMode;
   SamplerAddressMode heightAddressMode;
+
+  /// The maximum anisotropy clamp used when sampling. The default value of 1
+  /// disables anisotropic filtering.
+  ///
+  /// When greater than 1, [minFilter], [magFilter], and [mipFilter] must all
+  /// be linear. Values beyond [GpuContext.maxSamplerAnisotropy] are clamped
+  /// to it, and a maximum of 1 means the device does not support anisotropic
+  /// filtering.
+  ///
+  /// Anisotropic filtering samples across the mip chain, so populate mip
+  /// levels (via [Texture.overwrite] or by rendering into them) to get the
+  /// full quality benefit.
+  int maxAnisotropy;
 }
 
 base class Scissor {
@@ -483,6 +497,19 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       return true;
     }());
 
+    if (sampler.maxAnisotropy < 1) {
+      throw Exception("SamplerOptions.maxAnisotropy must be at least 1");
+    }
+    if (sampler.maxAnisotropy > 1 &&
+        (sampler.minFilter != MinMagFilter.linear ||
+            sampler.magFilter != MinMagFilter.linear ||
+            sampler.mipFilter != MipFilter.linear)) {
+      throw Exception(
+        "When SamplerOptions.maxAnisotropy is greater than 1, minFilter, "
+        "magFilter, and mipFilter must all be linear",
+      );
+    }
+
     bool success = _bindTexture(
       slot.shader,
       slot.uniformName,
@@ -492,6 +519,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       sampler.mipFilter.index,
       sampler.widthAddressMode.index,
       sampler.heightAddressMode.index,
+      sampler.maxAnisotropy,
     );
     if (!success) {
       throw Exception("Failed to bind texture");
@@ -806,6 +834,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
+      Int,
     )
   >(symbol: 'InternalFlutterGpu_RenderPass_BindTexture')
   external bool _bindTexture(
@@ -817,6 +846,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     int mipFilter,
     int widthAddressMode,
     int heightAddressMode,
+    int maxAnisotropy,
   );
 
   @Native<Void Function(Pointer<Void>)>(
