@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 
-import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
+import 'test_utils.dart';
 
 void main() {
   group(
@@ -289,7 +289,10 @@ void main() {
                   'VERBOSE_SCRIPT_LOGGING': '1',
                   'FLUTTER_BUILD_MODE': 'release',
                   'ACTION': 'install',
+                  'FLUTTER_ROOT': flutterRoot,
                   'FLUTTER_BUILD_DIR': 'build',
+                  'FLUTTER_BUILD_NAME': '1.0.0',
+                  'FLUTTER_BUILD_NUMBER': '1',
                   // Skip bitcode stripping since we just checked that above.
                 },
               );
@@ -330,7 +333,7 @@ void main() {
 
       for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
         for (final arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
-          test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
+          testWithoutContext('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
             final String artifactDir;
             switch (buildMode) {
               case BuildMode.debug:
