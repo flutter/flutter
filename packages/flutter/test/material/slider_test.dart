@@ -5903,15 +5903,12 @@ void main() {
   );
 
   testWidgets(
-    'Discrete Slider tapping the exact midpoint between two ticks snaps up',
+    'Discrete Slider tapping near a tick snaps to the nearer tick',
     (WidgetTester tester) async {
-      // Converting a tapped pixel to a track fraction can land a few ULPs
-      // below an exact geometric tie between two divisions, which then rounds
-      // down instead of up. On this slider's default M2 geometry that happens
-      // at the midpoints between ticks 0-1 and 5-6 (not 3-4, which a prior
-      // version of this test checked and which is NOT epsilon-sensitive here
-      // — the affected pair depends on track geometry, so this loops over
-      // every midpoint rather than hardcoding one).
+      // Tapping just past the midpoint toward a tick (x.1/x.9 of the way,
+      // rather than the exact midpoint) should snap to the nearer tick.
+      // Loops over every tick pair rather than hardcoding one, since which
+      // pair is affected by rounding depends on track geometry.
       const divisions = 10;
       double value = 0;
       final tickPositions = <Offset>[];
@@ -5945,16 +5942,25 @@ void main() {
       expect(tickCenters.length, equals(divisions + 1));
 
       for (var k = 0; k < divisions; k++) {
-        final midpoint = Offset(
-          (tickCenters[k].dx + tickCenters[k + 1].dx) / 2,
-          tickCenters[k].dy,
+        final double dx = tickCenters[k + 1].dx - tickCenters[k].dx;
+        final double dy = tickCenters[k].dy;
+
+        final nearLower = Offset(tickCenters[k].dx + dx * 0.1, dy);
+        await tester.tapAt(nearLower);
+        await tester.pump();
+        expect(
+          value,
+          equals(k.toDouble()),
+          reason: 'Tap near tick $k (10% toward ${k + 1}) should snap to $k',
         );
-        await tester.tapAt(midpoint);
+
+        final nearUpper = Offset(tickCenters[k].dx + dx * 0.9, dy);
+        await tester.tapAt(nearUpper);
         await tester.pump();
         expect(
           value,
           equals((k + 1).toDouble()),
-          reason: 'Midpoint between ticks $k and ${k + 1} should snap to ${k + 1}',
+          reason: 'Tap near tick ${k + 1} (90% toward ${k + 1}) should snap to ${k + 1}',
         );
       }
     },
