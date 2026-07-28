@@ -556,8 +556,17 @@ enum AccessibilityServiceExtensions {
   ///   extension is registered.
   getSemanticsTree,
 
+  /// Name of service extension that, when called, enables semantics in the app
+  /// by creating a [SemanticsHandle].
+  ///
+  /// See also:
+  ///
+  /// * [AccessibilityInspector.initServiceExtensions], where the service
+  ///   extension is registered.
+  enableSemantics,
+
   /// Name of service extension that, when called, disposes the semantics handle
-  /// created by [getSemanticsTree].
+  /// created by [enableSemantics] or [getSemanticsTree].
   ///
   /// See also:
   ///

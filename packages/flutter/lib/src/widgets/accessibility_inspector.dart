@@ -26,6 +26,10 @@ class AccessibilityInspector {
       callback: _getSemanticsTree,
     );
     registerServiceExtension(
+      name: 'accessibility.${AccessibilityServiceExtensions.enableSemantics.name}',
+      callback: _enableSemantics,
+    );
+    registerServiceExtension(
       name: 'accessibility.${AccessibilityServiceExtensions.disposeSemantics.name}',
       callback: _disposeSemantics,
     );
@@ -36,6 +40,11 @@ class AccessibilityInspector {
   void resetAllState() {
     _semanticsHandle?.dispose();
     _semanticsHandle = null;
+  }
+
+  Future<Map<String, dynamic>> _enableSemantics(Map<String, String> parameters) async {
+    _semanticsHandle ??= SemanticsBinding.instance.ensureSemantics();
+    return <String, dynamic>{};
   }
 
   Future<Map<String, dynamic>> _disposeSemantics(Map<String, String> parameters) async {
@@ -60,7 +69,32 @@ class AccessibilityInspector {
       return <String, dynamic>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
     }
 
-    return root.toJsonMap();
+    final nodes = <String, dynamic>{};
+    final visited = <int>{};
+    final queue = <SemanticsNode>[root];
+    while (queue.isNotEmpty) {
+      final SemanticsNode node = queue.removeLast();
+      if (!visited.add(node.id)) {
+        continue;
+      }
+      nodes[node.id.toString()] = node.toJson();
+      for (final SemanticsNode child in node.debugListChildrenInOrder(
+        DebugSemanticsDumpOrder.traversalOrder,
+      )) {
+        if (!visited.contains(child.id)) {
+          queue.add(child);
+        }
+      }
+      for (final SemanticsNode child in node.debugListChildrenInOrder(
+        DebugSemanticsDumpOrder.inverseHitTest,
+      )) {
+        if (!visited.contains(child.id)) {
+          queue.add(child);
+        }
+      }
+    }
+
+    return <String, dynamic>{'data': nodes};
   }
 
   // TODO(hannahjin): This returns the first SemanticsOwner of any RenderView.
@@ -71,10 +105,6 @@ class AccessibilityInspector {
       if (renderView.owner?.semanticsOwner != null) {
         return renderView.owner;
       }
-    }
-    final PipelineOwner rootOwner = RendererBinding.instance.rootPipelineOwner;
-    if (rootOwner.semanticsOwner != null) {
-      return rootOwner;
     }
     final PipelineOwner deprecatedOwner = RendererBinding.instance.pipelineOwner;
     if (deprecatedOwner.semanticsOwner != null) {

@@ -61,7 +61,11 @@ void main() {
           as Map<String, Object?>;
     }
 
-    // The first call registers semantics, schedules a frame, and returns an error map indicating root is null.
+    // Calling enableSemantics enables semantics without returning the tree.
+    final Map<String, Object?> enableResult = await callExtension('accessibility.enableSemantics');
+    expect(enableResult, isEmpty);
+
+    // Calling getSemanticsTree schedules a frame and returns an error map indicating root is null.
     final Map<String, Object?> result1 = await callExtension('accessibility.getSemanticsTree');
 
     expect(result1['error'], equals('rootSemanticsNode is null'));
@@ -74,36 +78,30 @@ void main() {
     final Map<String, Object?> result2 = await callExtension('accessibility.getSemanticsTree');
 
     expect(result2['error'], isNull);
-    expect(result2['id'], isNotNull);
+    expect(result2['data'], isA<Map<String, Object?>>());
+    final nodes = result2['data']! as Map<String, Object?>;
+    expect(nodes, isNotEmpty);
 
-    // Let's explore the children structure recursively
-    Map<String, Object?> findNodeWithLabel(Map<String, Object?> node, String label) {
-      if ((node['label']! as String).contains(label)) {
-        return node;
-      }
-      final children = node['children']! as List<Object?>;
-      for (final child in children) {
-        final Map<String, Object?> result = findNodeWithLabel(
-          child! as Map<String, Object?>,
-          label,
-        );
-        if (result.isNotEmpty) {
-          return result;
+    Map<String, Object?> findNodeWithLabel(Map<String, Object?> nodes, String label) {
+      for (final Object? value in nodes.values) {
+        final node = value! as Map<String, Object?>;
+        if ((node['label']! as String).contains(label)) {
+          return node;
         }
       }
       return <String, Object?>{};
     }
 
-    final Map<String, Object?> rootNode = findNodeWithLabel(result2, 'Root Node');
+    final Map<String, Object?> rootNode = findNodeWithLabel(nodes, 'Root Node');
     expect(rootNode, isNotEmpty);
     expect(rootNode['id'], isNotNull);
 
-    final Map<String, Object?> child1 = findNodeWithLabel(result2, 'Child Node 1');
+    final Map<String, Object?> child1 = findNodeWithLabel(nodes, 'Child Node 1');
     expect(child1, isNotEmpty);
     expect(child1['flags']! as List<Object?>, contains('isButton'));
     expect(child1['tooltip'], equals('This is a tooltip'));
 
-    final Map<String, Object?> child2 = findNodeWithLabel(result2, 'Child Node 2');
+    final Map<String, Object?> child2 = findNodeWithLabel(nodes, 'Child Node 2');
     expect(child2, isNotEmpty);
     expect(child2['value'], equals('42'));
     expect(child2['increasedValue'], equals('43'));
@@ -111,12 +109,21 @@ void main() {
     expect(child2['actions']! as List<Object?>, contains('increase'));
     expect(child2['actions']! as List<Object?>, contains('decrease'));
 
-    final Map<String, Object?> child3 = findNodeWithLabel(result2, 'Child Node 3');
+    final Map<String, Object?> child3 = findNodeWithLabel(nodes, 'Child Node 3');
     expect(child3, isNotEmpty);
     expect(child3['transform'], isNotNull);
     final transform = child3['transform']! as List<Object?>;
     expect(transform, hasLength(16));
     expect(transform[0], equals(2.0));
+
+    expect(
+      rootNode['childrenInTraversalOrder']! as List<Object?>,
+      containsAll(<Object?>[child1['id'], child2['id'], child3['id']]),
+    );
+    expect(
+      rootNode['childrenInHitTestOrder']! as List<Object?>,
+      containsAll(<Object?>[child1['id'], child2['id'], child3['id']]),
+    );
 
     // Calling disposeSemantics succeeds and cleans up semantics handle.
     final Map<String, Object?> disposeResult = await callExtension(

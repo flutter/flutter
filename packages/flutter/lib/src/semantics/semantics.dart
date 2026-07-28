@@ -1376,6 +1376,38 @@ class SemanticsData with Diagnosticable {
   /// Whether [actions] contains the given action.
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
 
+  /// Returns a JSON-compatible map representation of this object.
+  ///
+  /// Used by debugging tools and VM service extensions such as
+  /// `ext.flutter.accessibility.getSemanticsTree`.
+  Map<String, dynamic> toJson() {
+    final flagsList = <String>[
+      for (final SemanticsFlag flag in SemanticsFlag.values)
+        if (hasFlag(flag)) flag.name,
+    ];
+    final actionsList = <String>[
+      for (final SemanticsAction action in SemanticsAction.values)
+        if (hasAction(action)) action.name,
+    ];
+    return <String, dynamic>{
+      'label': label,
+      'value': value,
+      'hint': hint,
+      'tooltip': tooltip,
+      'increasedValue': increasedValue,
+      'decreasedValue': decreasedValue,
+      'flags': flagsList,
+      'actions': actionsList,
+      'rect': <String, double>{
+        'left': rect.left,
+        'top': rect.top,
+        'width': rect.width,
+        'height': rect.height,
+      },
+      if (transform != null) 'transform': transform!.storage.toList(),
+    };
+  }
+
   @override
   String toStringShort() => objectRuntimeType(this, 'SemanticsData');
 
@@ -4566,48 +4598,26 @@ class SemanticsNode with DiagnosticableTreeMixin {
     };
   }
 
-  /// Returns a JSON-compatible map representation of this node and its children.
+  /// Returns a JSON-compatible map representation of this node and its children
+  /// identifiers.
   ///
   /// Used by debugging tools and VM service extensions such as
   /// `ext.flutter.accessibility.getSemanticsTree`.
-  Map<String, dynamic> toJsonMap({
-    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
-  }) {
+  Map<String, dynamic> toJson() {
     final SemanticsData data = getSemanticsData();
-    final flags = <String>[];
-    for (final SemanticsFlag flag in SemanticsFlag.values) {
-      if (data.hasFlag(flag)) {
-        flags.add(flag.name);
-      }
-    }
-    final actions = <String>[];
-    for (final SemanticsAction action in SemanticsAction.values) {
-      if (data.hasAction(action)) {
-        actions.add(action.name);
-      }
-    }
-    final children = <Map<String, dynamic>>[
-      for (final SemanticsNode child in debugListChildrenInOrder(childOrder))
-        child.toJsonMap(childOrder: childOrder),
-    ];
+    final List<SemanticsNode> traversalChildren = debugListChildrenInOrder(
+      DebugSemanticsDumpOrder.traversalOrder,
+    );
+    final List<SemanticsNode> hitTestChildren = debugListChildrenInOrder(
+      DebugSemanticsDumpOrder.inverseHitTest,
+    );
     return <String, dynamic>{
-      'id': id.toString(),
-      'label': data.label,
-      'value': data.value,
-      'hint': data.hint,
-      'tooltip': data.tooltip,
-      'increasedValue': data.increasedValue,
-      'decreasedValue': data.decreasedValue,
-      'flags': flags,
-      'actions': actions,
-      'rect': <String, double>{
-        'left': rect.left,
-        'top': rect.top,
-        'width': rect.width,
-        'height': rect.height,
-      },
-      if (transform != null) 'transform': transform!.storage.toList(),
-      'children': children,
+      'id': id,
+      ...data.toJson(),
+      'childrenInTraversalOrder': <int>[
+        for (final SemanticsNode child in traversalChildren) child.id,
+      ],
+      'childrenInHitTestOrder': <int>[for (final SemanticsNode child in hitTestChildren) child.id],
     };
   }
 }

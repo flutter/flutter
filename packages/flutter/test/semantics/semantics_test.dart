@@ -1343,7 +1343,7 @@ void main() {
     });
   });
 
-  test('SemanticsNode.toJsonMap generates expected map', () {
+  test('SemanticsData.toJson and SemanticsNode.toJson generate expected maps', () {
     final node = SemanticsNode()
       ..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0)
       ..updateWith(
@@ -1355,19 +1355,33 @@ void main() {
           ..isButton = true,
       );
 
-    final Map<String, dynamic> jsonMap = node.toJsonMap();
-    expect(jsonMap['id'], node.id.toString());
-    expect(jsonMap['label'], 'Test Label');
-    expect(jsonMap['value'], 'Test Value');
-    expect(jsonMap['hint'], 'Test Hint');
-    expect(jsonMap['flags'], contains('isButton'));
-    expect(jsonMap['rect'], <String, double>{
+    final SemanticsData data = node.getSemanticsData();
+    final Map<String, dynamic> dataJsonMap = data.toJson();
+    expect(dataJsonMap['label'], 'Test Label');
+    expect(dataJsonMap['value'], 'Test Value');
+    expect(dataJsonMap['hint'], 'Test Hint');
+    expect(dataJsonMap['flags'], contains('isButton'));
+    expect(dataJsonMap['rect'], <String, double>{
       'left': 0.0,
       'top': 0.0,
       'width': 100.0,
       'height': 50.0,
     });
-    expect(jsonMap['children'], isEmpty);
+
+    final Map<String, dynamic> nodeJsonMap = node.toJson();
+    expect(nodeJsonMap['id'], node.id);
+    expect(nodeJsonMap['label'], 'Test Label');
+    expect(nodeJsonMap['value'], 'Test Value');
+    expect(nodeJsonMap['hint'], 'Test Hint');
+    expect(nodeJsonMap['flags'], contains('isButton'));
+    expect(nodeJsonMap['rect'], <String, double>{
+      'left': 0.0,
+      'top': 0.0,
+      'width': 100.0,
+      'height': 50.0,
+    });
+    expect(nodeJsonMap['childrenInTraversalOrder'], isEmpty);
+    expect(nodeJsonMap['childrenInHitTestOrder'], isEmpty);
   });
 }
 
