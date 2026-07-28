@@ -548,12 +548,11 @@ void main() {
     );
     painter.layout();
 
-    // TODO(ianh): Remove the toString()s once https://github.com/flutter/engine/pull/4283 lands
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       // ^
-      painter.getPositionForOffset(const Offset(0.0, 5.0)).toString(),
-      const TextPosition(offset: 0).toString(),
+      painter.getPositionForOffset(const Offset(0.0, 5.0)),
+      const TextPosition(offset: 0),
     );
     expect(
       //                     Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
@@ -633,12 +632,11 @@ void main() {
     );
     painter.layout();
 
-    // TODO(ianh): Remove the toString()s once https://github.com/flutter/engine/pull/4283 lands
     expect(
       //   Vav He Dalet Aaa Bbb Ccc Gimel Bet Alef
       // ^
-      painter.getPositionForOffset(const Offset(-4.0, 5.0)).toString(),
-      const TextPosition(offset: 9, affinity: TextAffinity.upstream).toString(),
+      painter.getPositionForOffset(const Offset(-4.0, 5.0)),
+      const TextPosition(offset: 9, affinity: TextAffinity.upstream),
     );
     expect(
       // Vav He Dalet Aaa Bbb Ccc Gimel Bet Alef
