@@ -299,6 +299,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/renderer/FlutterRenderer.java",
   "io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java",
   "io/flutter/embedding/engine/renderer/FlutterUiResizeListener.java",
+  "io/flutter/embedding/engine/launchargs/FlutterLaunchArgsProvider.java",
   "io/flutter/embedding/engine/renderer/RenderSurface.java",
   "io/flutter/embedding/engine/renderer/SurfaceTextureSurfaceProducer.java",
   "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper.java",
@@ -393,6 +394,12 @@ android_java_sources = [
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]
+
+if (flutter_runtime_mode == "release" || flutter_runtime_mode == "jit_release") {
+  android_java_sources += [ "../android_release/io/flutter/embedding/engine/launchargs/FlutterLaunchArgsProviderImpl.java" ]
+} else {
+  android_java_sources += [ "../android_debug/io/flutter/embedding/engine/launchargs/FlutterLaunchArgsProviderImpl.java" ]
+}
 
 embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/activity-1.8.1.jar",

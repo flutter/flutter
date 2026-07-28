@@ -28,6 +28,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
@@ -343,6 +344,26 @@ class FlutterPlugin : Plugin<Project> {
                 copyJniLibsTaskProvider,
                 CopyFlutterJniLibsTask::destinationDir
             )
+
+            val engineShellArgsJson = projectToAddTasksTo.findProperty("flutter.engineShellArgs") as? String
+            if (engineShellArgsJson != null) {
+                val generateManifestTaskProvider = projectToAddTasksTo.tasks.register(
+                    "generateEngineFlagsManifest$capitalizeVariantName",
+                    GenerateEngineFlagsManifestTask::class.java
+                ) {
+                    this.engineShellArgsJson.set(engineShellArgsJson)
+                    this.manifestOutputFile.set(
+                        projectToAddTasksTo.layout.buildDirectory.file(
+                            "intermediates/flutter/${variant.name}/AndroidManifest.xml"
+                        )
+                    )
+                }
+                
+                variant.sources.manifests?.addGeneratedManifestFile(
+                    generateManifestTaskProvider,
+                    GenerateEngineFlagsManifestTask::manifestOutputFile
+                )
+            }
         }
 
         val flutterPlugin = this

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -566,6 +567,70 @@ class AndroidDevice extends Device {
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       _logger.printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
+      
+      if (debuggingOptions.buildInfo.mode == BuildMode.release) {
+        final Map<String, Object> shellArgs = <String, Object>{};
+        if (debuggingOptions.enableDartProfiling) {
+          shellArgs['io.flutter.embedding.android.enable-dart-profiling'] = true;
+        }
+        if (debuggingOptions.profileStartup) {
+          shellArgs['io.flutter.embedding.android.profile-startup'] = true;
+        }
+        if (platformArgs['trace-startup'] as bool? ?? false) {
+          shellArgs['io.flutter.embedding.android.trace-startup'] = true;
+        }
+        if (debuggingOptions.enableSoftwareRendering) {
+          shellArgs['io.flutter.embedding.android.enable-software-rendering'] = true;
+        }
+        if (debuggingOptions.skiaDeterministicRendering) {
+          shellArgs['io.flutter.embedding.android.skia-deterministic-rendering'] = true;
+        }
+        if (debuggingOptions.traceSkia) {
+          shellArgs['io.flutter.embedding.android.trace-skia'] = true;
+        }
+        if (debuggingOptions.traceAllowlist != null) {
+          shellArgs['io.flutter.embedding.android.trace-allowlist'] = debuggingOptions.traceAllowlist!;
+        }
+        if (debuggingOptions.traceSkiaAllowlist != null) {
+          shellArgs['io.flutter.embedding.android.trace-skia-allowlist'] = debuggingOptions.traceSkiaAllowlist!;
+        }
+        if (debuggingOptions.traceSystrace) {
+          shellArgs['io.flutter.embedding.android.trace-systrace'] = true;
+        }
+        if (debuggingOptions.traceToFile != null) {
+          shellArgs['io.flutter.embedding.android.trace-to-file'] = debuggingOptions.traceToFile!;
+        }
+        if (debuggingOptions.endlessTraceBuffer) {
+          shellArgs['io.flutter.embedding.android.endless-trace-buffer'] = true;
+        }
+        if (debuggingOptions.profileMicrotasks) {
+          shellArgs['io.flutter.embedding.android.profile-microtasks'] = true;
+        }
+        if (debuggingOptions.purgePersistentCache) {
+          shellArgs['io.flutter.embedding.android.purge-persistent-cache'] = true;
+        }
+        if (debuggingOptions.enableImpeller == ImpellerStatus.enabled) {
+          shellArgs['io.flutter.embedding.android.enable-impeller'] = true;
+        }
+        if (debuggingOptions.enableImpeller == ImpellerStatus.disabled) {
+          shellArgs['io.flutter.embedding.android.enable-impeller'] = false;
+        }
+        if (debuggingOptions.enableFlutterGpu) {
+          shellArgs['io.flutter.embedding.android.enable-flutter-gpu'] = true;
+        }
+        if (debuggingOptions.enableVulkanValidation) {
+          shellArgs['io.flutter.embedding.android.enable-vulkan-validation'] = true;
+        }
+        if (debuggingOptions.enableHcpp) {
+          shellArgs['io.flutter.embedding.android.enable-hcpp-and-surface-control'] = true;
+        }
+
+        if (shellArgs.isNotEmpty) {
+          final String base64Json = base64Encode(utf8.encode(jsonEncode(shellArgs)));
+          debuggingOptions.buildInfo.androidProjectArgs.add('flutter.engineShellArgs=$base64Json');
+        }
+      }
+
       await androidBuilder!.buildApk(
         project: project,
         target: mainPath ?? 'lib/main.dart',
@@ -615,12 +680,45 @@ class AndroidDevice extends Device {
     final String? traceAllowlist = debuggingOptions.traceAllowlist;
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
     final String? traceToFile = debuggingOptions.traceToFile;
+    final bool isReleaseMode = debuggingOptions.buildInfo.mode == BuildMode.release;
+    final bool hasFlags = route != null ||
+        traceStartup ||
+        debuggingOptions.enableDartProfiling ||
+        debuggingOptions.profileStartup ||
+        debuggingOptions.enableSoftwareRendering ||
+        debuggingOptions.skiaDeterministicRendering ||
+        debuggingOptions.traceSkia ||
+        traceAllowlist != null ||
+        traceSkiaAllowlist != null ||
+        debuggingOptions.traceSystrace ||
+        traceToFile != null ||
+        debuggingOptions.endlessTraceBuffer ||
+        debuggingOptions.profileMicrotasks ||
+        debuggingOptions.purgePersistentCache ||
+        debuggingOptions.enableImpeller == ImpellerStatus.enabled ||
+        debuggingOptions.enableImpeller == ImpellerStatus.disabled ||
+        debuggingOptions.enableFlutterGpu ||
+        debuggingOptions.enableVulkanValidation ||
+        debuggingOptions.enableHcpp ||
+        debuggingOptions.startPaused ||
+        debuggingOptions.disableServiceAuthCodes ||
+        debuggingOptions.disableServiceOriginCheck ||
+        debuggingOptions.dartFlags.isNotEmpty ||
+        debuggingOptions.useTestFonts ||
+        debuggingOptions.verboseSystemLogs ||
+        debuggingOptions.testFlag;
+
+    if (prebuiltApplication && isReleaseMode && hasFlags) {
+      throwToolExit('Configuration flags cannot be dynamically passed to a prebuilt release APK via Intents. Please statically define these flags in the AndroidManifest.xml during compilation.');
+    }
+
     final cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      if (debuggingOptions.enableDartProfiling) ...<String>[
+      if (!isReleaseMode) ...<String>[
+        if (debuggingOptions.enableDartProfiling) ...<String>[
         '--ez',
         'enable-dart-profiling',
         'true',
@@ -674,6 +772,7 @@ class AndroidDevice extends Device {
         '--ez',
         'enable-hcpp-and-surface-control',
         'true',
+      ],
       ],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[

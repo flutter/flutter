@@ -126,7 +126,7 @@ void main() {
   }
 
   testWithoutContext(
-    'AndroidDevice.startApp forwards Impeller and HCPP flags in release mode',
+    'AndroidDevice.startApp throws ToolExit when prebuilt application passes flags in release mode',
     () async {
       final device = AndroidDevice(
         '1234',
@@ -145,69 +145,24 @@ void main() {
         versionCode: 1,
       );
 
-      processManager.addCommand(kAdbVersionCommand);
-      processManager.addCommand(kStartServer);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-          stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+      expect(
+        () async => device.startApp(
+          apk,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.disabled(
+            BuildInfo.release,
+            enableImpeller: ImpellerStatus.enabled,
+            enableHcpp: true,
+            enableDartProfiling: false,
+          ),
+          platformArgs: <String, dynamic>{},
         ),
+        throwsToolExit(message: 'Engine configuration flags cannot be passed'),
       );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-release.apk'],
-        ),
-      );
-      processManager.addCommand(kShaCommand);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'am',
-            'start',
-            '-a',
-            'android.intent.action.MAIN',
-            '-c',
-            'android.intent.category.LAUNCHER',
-            '-f',
-            '0x20000000',
-            '--ez',
-            'enable-impeller',
-            'true',
-            '--ez',
-            'enable-hcpp-and-surface-control',
-            'true',
-            'FlutterActivity',
-          ],
-        ),
-      );
-
-      final LaunchResult launchResult = await device.startApp(
-        apk,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.disabled(
-          BuildInfo.release,
-          enableImpeller: ImpellerStatus.enabled,
-          enableHcpp: true,
-          enableDartProfiling: false,
-        ),
-        platformArgs: <String, dynamic>{},
-      );
-
-      expect(launchResult.started, true);
-      expect(processManager, hasNoRemainingExpectations);
     },
   );
 
-  testWithoutContext('AndroidDevice.startApp forwards traceSystrace in release mode', () async {
+  testWithoutContext('AndroidDevice.startApp omits intent extras when building from source in release mode', () async {
     final device = AndroidDevice(
       '1234',
       modelID: 'TestModel',
@@ -259,9 +214,6 @@ void main() {
           'android.intent.category.LAUNCHER',
           '-f',
           '0x20000000',
-          '--ez',
-          'trace-systrace',
-          'true',
           'FlutterActivity',
         ],
       ),
@@ -269,7 +221,7 @@ void main() {
 
     final LaunchResult launchResult = await device.startApp(
       apk,
-      prebuiltApplication: true,
+      prebuiltApplication: false,
       debuggingOptions: DebuggingOptions.disabled(
         BuildInfo.release,
         traceSystrace: true,
