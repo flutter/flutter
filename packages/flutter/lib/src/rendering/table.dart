@@ -1474,6 +1474,11 @@ class RenderTable extends RenderBox {
     // nested lists for better cache locality.
     final spanWidthsInRowMajor = Float64List(rows * columns);
     final baselinesInRowMajor = Float64List(rows * columns);
+    // Sentinel stored in [baselinesInRowMajor] for baseline-aligned cells whose
+    // child has no real baseline. Such cells are top-aligned, so they must not
+    // be offset by the row's baseline distance in the second pass. Real baseline
+    // distances are always >= 0, so a negative value is unambiguous.
+    const noBaseline = -1.0;
 
     switch (textDirection) {
       case TextDirection.rtl:
@@ -1578,12 +1583,14 @@ class RenderTable extends RenderBox {
         }
 
         final bool isHiddenCell = spannedCells._isSpanned(x, y);
+        assert(
+          isHiddenCell == !childParentData._isVisible,
+          'Cell at ($x, $y): a cell is covered by a span if and only if it is a '
+          'TableCell.none placeholder. A cell covered by a colSpan or rowSpan must '
+          'be declared as TableCell.none, and a TableCell.none must only appear '
+          'where it is covered by a span.',
+        );
         if (isHiddenCell) {
-          assert(
-            !childParentData._isVisible,
-            'Cell at ($x, $y) is covered by a spanning cell but is not TableCell.none. '
-            'Cells that are covered by a colSpan or rowSpan must be declared as TableCell.none.',
-          );
           continue;
         }
 
@@ -1610,13 +1617,11 @@ class RenderTable extends RenderBox {
               baselinesInRowMajor[y * columns + x] = childBaseline;
               haveBaseline = true;
             } else {
+              // The child has no real baseline, so it is top-aligned within the
+              // row. Record the sentinel so the second pass places it the same
+              // way instead of offsetting it by the row's baseline distance.
               rowHeight = math.max(rowHeight, child.size.height);
-              final double cellX = _computeCellX(
-                positions: columnStartPositions,
-                columnIndex: x,
-                colSpan: colSpan,
-              );
-              childParentData.offset = Offset(cellX, rowTop);
+              baselinesInRowMajor[y * columns + x] = noBaseline;
             }
           case TableCellVerticalAlignment.top:
           case TableCellVerticalAlignment.middle:
@@ -1686,12 +1691,14 @@ class RenderTable extends RenderBox {
         final childParentData = child.parentData! as TableCellParentData;
         final int rowSpan = childParentData.rowSpan;
         final bool isHiddenCell = spannedCells._isSpanned(x, y);
+        assert(
+          isHiddenCell == !childParentData._isVisible,
+          'Cell at ($x, $y): a cell is covered by a span if and only if it is a '
+          'TableCell.none placeholder. A cell covered by a colSpan or rowSpan must '
+          'be declared as TableCell.none, and a TableCell.none must only appear '
+          'where it is covered by a span.',
+        );
         if (isHiddenCell) {
-          assert(
-            !childParentData._isVisible,
-            'Cell at ($x, $y) is covered by a spanning cell but is not TableCell.none. '
-            'Cells that are covered by a colSpan or rowSpan must be declared as TableCell.none.',
-          );
           continue;
         }
 
@@ -1714,10 +1721,13 @@ class RenderTable extends RenderBox {
         // Set the child's final offset based on vertical alignment.
         switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
           case TableCellVerticalAlignment.baseline:
-            childParentData.offset = Offset(
-              cellX,
-              rowTop + beforeBaselineDistance - baselinesInRowMajor[y * columns + x],
-            );
+            final double childBaseline = baselinesInRowMajor[y * columns + x];
+            // A child with no real baseline was top-aligned in the first pass;
+            // keep it top-aligned here rather than offsetting it by the row's
+            // baseline distance.
+            childParentData.offset = childBaseline == noBaseline
+                ? Offset(cellX, rowTop)
+                : Offset(cellX, rowTop + beforeBaselineDistance - childBaseline);
           case TableCellVerticalAlignment.top:
             childParentData.offset = Offset(cellX, rowTop);
           case TableCellVerticalAlignment.middle:

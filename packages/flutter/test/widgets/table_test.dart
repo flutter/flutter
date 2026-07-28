@@ -1294,7 +1294,7 @@ void main() {
       expect(errors, isNotEmpty);
       expect(
         errors.first.exception.toString(),
-        contains('is covered by a spanning cell but is not TableCell.none'),
+        contains('must be declared as TableCell.none'),
       );
     });
 
@@ -1332,7 +1332,7 @@ void main() {
       expect(errors, isNotEmpty);
       expect(
         errors.first.exception.toString(),
-        contains('is covered by a spanning cell but is not TableCell.none'),
+        contains('must be declared as TableCell.none'),
       );
     });
 
