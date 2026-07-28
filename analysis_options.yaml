@@ -27,7 +27,6 @@ analyzer:
     - "bin/cache/**"
       # Ignore protoc generated files
     - "dev/conductor/lib/proto/*"
-    - "engine/**"
     - build/**
     - android/**
     - ios/**
