@@ -1587,6 +1587,7 @@ _flutter.loader.load();
       JsCompilerConfig(useFrequencyBasedMinification: false),
       JsCompilerConfig(sourceMaps: false),
       JsCompilerConfig(minify: false),
+      JsCompilerConfig(webContentHash: true),
 
       // All properties non-default
       JsCompilerConfig(
@@ -1619,6 +1620,7 @@ _flutter.loader.load();
       WasmCompilerConfig(stripWasm: false),
       WasmCompilerConfig(minify: false),
       WasmCompilerConfig(dryRun: true),
+      WasmCompilerConfig(webContentHash: true),
 
       // All properties non-default
       WasmCompilerConfig(
@@ -1748,6 +1750,51 @@ _flutter.loader.load();
           .childFile('canvaskit.wasm');
       expect(canvasKitOutputAfter.existsSync(), true);
       expect(canvasKitOutputAfter.readAsStringSync(), 'bar');
+    }),
+  );
+
+  test(
+    'Dart2JSTarget getBuildConfig dynamically discovers hashed output',
+    () => testbed.run(() {
+      environment.buildDir.childFile('main.dart.01234567.js').createSync();
+      final target = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      expect(target.getBuildConfig(environment)['mainJsPath'], 'main.dart.01234567.js');
+      final files = target.buildFiles(environment).map((File f) => f.basename).toList();
+      expect(files, contains('main.dart.01234567.js'));
+    }),
+  );
+
+  test(
+    'Dart2WasmTarget getBuildConfig dynamically discovers hashed output',
+    () => testbed.run(() {
+      environment.buildDir.childFile('main.dart.89abcdef.wasm').createSync();
+      environment.buildDir.childFile('main.dart.01234567.mjs').createSync();
+      final target = Dart2WasmTarget(
+        const WasmCompilerConfig(webContentHash: true),
+        const NoOpAnalytics(),
+      );
+      final buildConfig = target.getBuildConfig(environment);
+      expect(buildConfig['mainWasmPath'], 'main.dart.89abcdef.wasm');
+      expect(buildConfig['jsSupportRuntimePath'], 'main.dart.01234567.mjs');
+      final files = target.buildFiles(environment).map((File f) => f.basename).toList();
+      expect(files, containsAll(<String>['main.dart.89abcdef.wasm', 'main.dart.01234567.mjs']));
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles evaluates target getBuildConfig dynamically when compileTargets provided',
+    () => testbed.run(() async {
+      environment.projectDir.childDirectory('web').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.01234567.js').createSync();
+      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final target = WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        compileTargets: <Dart2WebTarget>[jsTarget],
+      );
+      await target.build(environment);
+      final File bootstrapJs = environment.outputDir.childFile('flutter_bootstrap.js');
+      expect(bootstrapJs.existsSync(), isTrue);
+      expect(bootstrapJs.readAsStringSync(), contains('main.dart.01234567.js'));
     }),
   );
 }
