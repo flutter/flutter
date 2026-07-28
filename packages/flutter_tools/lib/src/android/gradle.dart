@@ -149,8 +149,8 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
   final flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
   if (androidBuildInfo.splitPerAbi) {
-    return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
-      final String abi = arch.archName;
+    return androidBuildInfo.targetArchs.map<String>((CpuArch arch) {
+      final String abi = arch.androidArchName;
       return 'app$flavorString-$abi-$buildType.apk';
     });
   }
@@ -574,7 +574,7 @@ Alternatively, you can bypass this check using "--android-skip-build-dependency-
       );
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
-          .map((AndroidArch e) => e.platformName)
+          .map((CpuArch e) => e.androidPlatformName)
           .join(',');
       options.add('-Ptarget-platform=$targetPlatforms');
     }
@@ -726,7 +726,7 @@ Alternatively, you can bypass this check using "--android-skip-build-dependency-
   Future<bool> _isAabStrippedOfDebugSymbols(
     FlutterProject project,
     String aabPath,
-    Iterable<AndroidArch> targetArchs,
+    Iterable<CpuArch> targetArchs,
   ) async {
     if (_androidSdk == null) {
       _logger.printTrace(
@@ -793,7 +793,7 @@ Alternatively, you can bypass this check using "--android-skip-build-dependency-
       logger: _logger,
       analytics: _analytics,
     );
-    final String archName = androidBuildInfo.targetArchs.single.archName;
+    final String archName = androidBuildInfo.targetArchs.single.androidArchName;
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final File aotSnapshot = _fileSystem
         .directory(buildInfo.codeSizeDirectory)
@@ -914,7 +914,7 @@ Alternatively, you can bypass this check using "--android-skip-build-dependency-
       );
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
-          .map((AndroidArch e) => e.platformName)
+          .map((CpuArch e) => e.androidPlatformName)
           .join(',');
       command.add('-Ptarget-platform=$targetPlatforms');
     }
@@ -1177,7 +1177,25 @@ bool isAppUsingAndroidX(Directory androidDirectory) {
   if (!properties.existsSync()) {
     return false;
   }
-  return properties.readAsStringSync().contains('android.useAndroidX=true');
+  bool? usesAndroidX;
+  final androidXRegExp = RegExp(r'^android\.useAndroidX(?:\s*[=:]\s*|\s+)(\S+)');
+  for (final String rawLine in properties.readAsLinesSync()) {
+    final String line = rawLine.trimLeft();
+    if (line.isEmpty || line.startsWith('#') || line.startsWith('!')) {
+      continue;
+    }
+    final RegExpMatch? match = androidXRegExp.firstMatch(line);
+    if (match == null) {
+      continue;
+    }
+    final String value = match.group(1)!.toLowerCase();
+    if (value == 'true') {
+      usesAndroidX = true;
+    } else if (value == 'false') {
+      usesAndroidX = false;
+    }
+  }
+  return usesAndroidX ?? false;
 }
 
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
@@ -1236,8 +1254,8 @@ Iterable<String> listApkPaths(AndroidBuildInfo androidBuildInfo) {
   ];
   if (androidBuildInfo.splitPerAbi) {
     return <String>[
-      for (final AndroidArch androidArch in androidBuildInfo.targetArchs)
-        <String>['app', androidArch.archName, ...apkPartialName].join('-'),
+      for (final CpuArch cpuArch in androidBuildInfo.targetArchs)
+        <String>['app', cpuArch.androidArchName, ...apkPartialName].join('-'),
     ];
   }
   return <String>[

@@ -1093,7 +1093,7 @@ void main() {
             codeSizeDirectory: 'foo',
             packageConfigPath: '.dart_tool/package_config.json',
           ),
-          targetArchs: <AndroidArch>[AndroidArch.arm64_v8a],
+          targetArchs: <CpuArch>[CpuArch.arm64],
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
@@ -1329,10 +1329,10 @@ void main() {
                 treeShakeIcons: false,
                 packageConfigPath: '.dart_tool/package_config.json',
               ),
-              targetArchs: <AndroidArch>[
-                AndroidArch.arm64_v8a,
-                AndroidArch.armeabi_v7a,
-                AndroidArch.x86_64,
+              targetArchs: <CpuArch>[
+                CpuArch.arm64,
+                CpuArch.armv7,
+                CpuArch.x64,
               ],
             ),
             target: 'lib/main.dart',
@@ -1404,10 +1404,10 @@ void main() {
                 treeShakeIcons: false,
                 packageConfigPath: '.dart_tool/package_config.json',
               ),
-              targetArchs: <AndroidArch>[
-                AndroidArch.arm64_v8a,
-                AndroidArch.armeabi_v7a,
-                AndroidArch.x86_64,
+              targetArchs: <CpuArch>[
+                CpuArch.arm64,
+                CpuArch.armv7,
+                CpuArch.x64,
               ],
             ),
             target: 'lib/main.dart',
@@ -1472,10 +1472,10 @@ void main() {
                 treeShakeIcons: false,
                 packageConfigPath: '.dart_tool/package_config.json',
               ),
-              targetArchs: <AndroidArch>[
-                AndroidArch.arm64_v8a,
-                AndroidArch.armeabi_v7a,
-                AndroidArch.x86_64,
+              targetArchs: <CpuArch>[
+                CpuArch.arm64,
+                CpuArch.armv7,
+                CpuArch.x64,
               ],
             ),
             target: 'lib/main.dart',
@@ -1562,10 +1562,10 @@ void main() {
                   treeShakeIcons: false,
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                targetArchs: <AndroidArch>[
-                  AndroidArch.arm64_v8a,
-                  AndroidArch.armeabi_v7a,
-                  AndroidArch.x86_64,
+                targetArchs: <CpuArch>[
+                  CpuArch.arm64,
+                  CpuArch.armv7,
+                  CpuArch.x64,
                 ],
               ),
               target: 'lib/main.dart',
@@ -1655,10 +1655,10 @@ void main() {
                   treeShakeIcons: false,
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                targetArchs: <AndroidArch>[
-                  AndroidArch.arm64_v8a,
-                  AndroidArch.armeabi_v7a,
-                  AndroidArch.x86_64,
+                targetArchs: <CpuArch>[
+                  CpuArch.arm64,
+                  CpuArch.armv7,
+                  CpuArch.x64,
                 ],
               ),
               target: 'lib/main.dart',
