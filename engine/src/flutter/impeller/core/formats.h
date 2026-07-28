@@ -452,6 +452,11 @@ enum class TextureType {
   kTexture2DMultisample,
   kTextureCube,
   kTextureExternalOES,
+  // A 2D texture with multiple layers, sampled as `sampler2DArray`. The layer
+  // count is carried by `TextureDescriptor::array_layer_count`. Kept last so
+  // the integer values of the existing types (mirrored by Flutter GPU) are
+  // unchanged.
+  kTexture2DArray,
 };
 
 constexpr const char* TextureTypeToString(TextureType type) {
@@ -464,6 +469,8 @@ constexpr const char* TextureTypeToString(TextureType type) {
       return "TextureCube";
     case TextureType::kTextureExternalOES:
       return "TextureExternalOES";
+    case TextureType::kTexture2DArray:
+      return "Texture2DArray";
   }
   FML_UNREACHABLE();
 }
@@ -473,6 +480,7 @@ constexpr bool IsMultisampleCapable(TextureType type) {
     case TextureType::kTexture2D:
     case TextureType::kTextureCube:
     case TextureType::kTextureExternalOES:
+    case TextureType::kTexture2DArray:
       return false;
     case TextureType::kTexture2DMultisample:
       return true;
@@ -510,17 +518,6 @@ constexpr const char* TextureUsageToString(TextureUsage usage) {
 }
 
 std::string TextureUsageMaskToString(TextureUsageMask mask);
-
-// Texture coordinate system.
-enum class TextureCoordinateSystem {
-  // Alternative coordinate system used when uploading texture data from the
-  // host.
-  // (0, 0) is the bottom-left of the image with +Y going up.
-  kUploadFromHost,
-  // Default coordinate system.
-  // (0, 0) is the top-left of the image with +Y going down.
-  kRenderToTexture,
-};
 
 enum class CullMode {
   kNone,

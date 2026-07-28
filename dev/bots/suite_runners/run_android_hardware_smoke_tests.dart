@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -14,8 +16,22 @@ import 'run_android_engine_tests.dart';
 String _impellerBackendMetadata({required String value}) =>
     '<meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="$value" />';
 
+void _cleanGoldensDirectory(Directory directory) {
+  if (!directory.existsSync()) {
+    return;
+  }
+  for (final FileSystemEntity entity in directory.listSync()) {
+    if (path.basename(entity.path) != 'README.md') {
+      entity.deleteSync(recursive: true);
+    }
+  }
+}
+
 /// Runs the Android Hardware Smoke Test golden suite in CI.
-Future<void> runAndroidHardwareSmokeTests({required ImpellerBackend backend}) async {
+Future<void> runAndroidHardwareSmokeTests({
+  required ImpellerBackend backend,
+  bool runInstrumented = false,
+}) async {
   printProgress('Running Android Hardware Smoke Tests Shard (backend=${backend.name})');
 
   final String testDir = path.join('dev', 'integration_tests', 'android_hardware_smoke_test');
@@ -28,10 +44,15 @@ Future<void> runAndroidHardwareSmokeTests({required ImpellerBackend backend}) as
     '.',
   ], workingDirectory: testDir);
 
+  final String androidDir = path.join(testDir, 'android');
   final File androidManifestXml = const LocalFileSystem().file(
-    path.join(testDir, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
+    path.join(androidDir, 'app', 'src', 'main', 'AndroidManifest.xml'),
   );
   final String androidManifestContents = androidManifestXml.readAsStringSync();
+
+  final Directory destinationDir = const LocalFileSystem().directory(
+    path.join(testDir, 'test_driver', 'goldens'),
+  );
 
   try {
     // Replace whatever the current backend is with the specified backend.
@@ -48,6 +69,7 @@ Future<void> runAndroidHardwareSmokeTests({required ImpellerBackend backend}) as
       ),
     );
 
+    // 1. Run driver tests to generate reference screenshots
     await runCommand('flutter', <String>[
       'drive',
       '--driver=test_driver/driver_test.dart',
@@ -55,8 +77,24 @@ Future<void> runAndroidHardwareSmokeTests({required ImpellerBackend backend}) as
       '--no-dds',
       '--no-enable-dart-profiling',
     ], workingDirectory: testDir);
+
+    if (runInstrumented) {
+      final String gradle = path.absolute(
+        path.join(androidDir, Platform.isWindows ? 'gradlew.bat' : 'gradlew'),
+      );
+
+      // 3. Build and run the instrumented tests.
+      await runCommand(gradle, <String>[
+        ':app:connectedDebugAndroidTest',
+        '-Pandroid.testInstrumentationRunnerArguments.class=com.example.android_hardware_smoke_test.FlutterActivityTest',
+        '-s',
+      ], workingDirectory: androidDir);
+    }
   } finally {
     // Restore original contents.
     androidManifestXml.writeAsStringSync(androidManifestContents);
+
+    // Clean up copied goldens to keep Git worktree completely clean
+    _cleanGoldensDirectory(destinationDir);
   }
 }

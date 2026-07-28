@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/gpu/render_pass.h"
+#include <algorithm>
 #include <future>
 #include <memory>
 
@@ -275,13 +276,17 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     float clear_color_b,
     float clear_color_a,
     flutter::gpu::Texture* texture,
-    Dart_Handle resolve_texture_wrapper) {
+    Dart_Handle resolve_texture_wrapper,
+    int mip_level,
+    int slice) {
   impeller::ColorAttachment desc;
   desc.load_action = flutter::gpu::ToImpellerLoadAction(load_action);
   desc.store_action = flutter::gpu::ToImpellerStoreAction(store_action);
   desc.clear_color = impeller::Color(clear_color_r, clear_color_g,
                                      clear_color_b, clear_color_a);
   desc.texture = texture->GetTexture();
+  desc.mip_level = mip_level;
+  desc.slice = slice;
   if (!Dart_IsNull(resolve_texture_wrapper)) {
     flutter::gpu::Texture* resolve_texture =
         tonic::DartConverter<flutter::gpu::Texture*>::FromDart(
@@ -308,13 +313,17 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
     int stencil_load_action,
     int stencil_store_action,
     int stencil_clear_value,
-    flutter::gpu::Texture* texture) {
+    flutter::gpu::Texture* texture,
+    int mip_level,
+    int slice) {
   {
     impeller::DepthAttachment desc;
     desc.load_action = flutter::gpu::ToImpellerLoadAction(depth_load_action);
     desc.store_action = flutter::gpu::ToImpellerStoreAction(depth_store_action);
     desc.clear_depth = depth_clear_value;
     desc.texture = texture->GetTexture();
+    desc.mip_level = mip_level;
+    desc.slice = slice;
     wrapper->GetRenderTarget().SetDepthAttachment(desc);
   }
   {
@@ -324,6 +333,8 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
         flutter::gpu::ToImpellerStoreAction(stencil_store_action);
     desc.clear_stencil = stencil_clear_value;
     desc.texture = texture->GetTexture();
+    desc.mip_level = mip_level;
+    desc.slice = slice;
     wrapper->GetRenderTarget().SetStencilAttachment(desc);
   }
 
@@ -461,7 +472,8 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
     int mag_filter,
     int mip_filter,
     int width_address_mode,
-    int height_address_mode) {
+    int height_address_mode,
+    int max_anisotropy) {
   auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
   const flutter::gpu::Shader::TextureBinding* texture_binding =
       shader->GetUniformTexture(uniform_name);
@@ -479,6 +491,10 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
       flutter::gpu::ToImpellerSamplerAddressMode(width_address_mode);
   sampler_desc.height_address_mode =
       flutter::gpu::ToImpellerSamplerAddressMode(height_address_mode);
+  // Backends clamp this to the device limit reported by
+  // Capabilities::GetMaxSamplerAnisotropy.
+  sampler_desc.max_anisotropy =
+      static_cast<uint8_t>(std::clamp(max_anisotropy, 1, 255));
   auto sampler =
       wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
 
@@ -545,7 +561,7 @@ void InternalFlutterGpu_RenderPass_SetDepthWriteEnable(
     flutter::gpu::RenderPass* wrapper,
     bool enable) {
   auto& depth = wrapper->GetDepthAttachmentDescriptor();
-  depth.depth_write_enabled = true;
+  depth.depth_write_enabled = enable;
 }
 
 void InternalFlutterGpu_RenderPass_SetDepthCompareOperation(

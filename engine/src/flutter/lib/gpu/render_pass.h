@@ -142,7 +142,9 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     float clear_color_b,
     float clear_color_a,
     flutter::gpu::Texture* texture,
-    Dart_Handle resolve_texture_wrapper);
+    Dart_Handle resolve_texture_wrapper,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
@@ -153,7 +155,9 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
     int stencil_load_action,
     int stencil_store_action,
     int stencil_clear_value,
-    flutter::gpu::Texture* texture);
+    flutter::gpu::Texture* texture,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_Begin(
@@ -200,7 +204,8 @@ extern bool InternalFlutterGpu_RenderPass_BindTexture(
     int mag_filter,
     int mip_filter,
     int width_address_mode,
-    int height_address_mode);
+    int height_address_mode,
+    int max_anisotropy);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_ClearBindings(

@@ -45,13 +45,13 @@ struct FlAccessibleNodePrivate {
   AtkObject parent_instance;
 
   // Weak reference to the engine this node is created for.
-  FlEngine* engine;
+  GWeakRef engine;
 
   /// The unique identifier of the view to which this node belongs.
   FlutterViewId view_id;
 
   // Weak reference to the parent node of this one or %NULL.
-  AtkObject* parent;
+  GWeakRef parent;
 
   int32_t node_id;
   gchar* name;
@@ -152,10 +152,7 @@ static void fl_accessible_node_set_property(GObject* object,
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(object);
   switch (prop_id) {
     case PROP_ENGINE:
-      g_assert(priv->engine == nullptr);
-      priv->engine = FL_ENGINE(g_value_get_object(value));
-      g_object_add_weak_pointer(object,
-                                reinterpret_cast<gpointer*>(&priv->engine));
+      g_weak_ref_set(&priv->engine, g_value_get_object(value));
       break;
     case PROP_VIEW_ID:
       priv->view_id = g_value_get_int64(value);
@@ -172,16 +169,8 @@ static void fl_accessible_node_set_property(GObject* object,
 static void fl_accessible_node_dispose(GObject* object) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(object);
 
-  if (priv->engine != nullptr) {
-    g_object_remove_weak_pointer(object,
-                                 reinterpret_cast<gpointer*>(&(priv->engine)));
-    priv->engine = nullptr;
-  }
-  if (priv->parent != nullptr) {
-    g_object_remove_weak_pointer(object,
-                                 reinterpret_cast<gpointer*>(&(priv->parent)));
-    priv->parent = nullptr;
-  }
+  g_weak_ref_clear(&priv->engine);
+  g_weak_ref_clear(&priv->parent);
   g_clear_pointer(&priv->name, g_free);
   g_clear_pointer(&priv->actions, g_ptr_array_unref);
   g_clear_pointer(&priv->children, g_ptr_array_unref);
@@ -198,7 +187,8 @@ static const gchar* fl_accessible_node_get_name(AtkObject* accessible) {
 // Implements AtkObject::get_parent.
 static AtkObject* fl_accessible_node_get_parent(AtkObject* accessible) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(accessible);
-  return priv->parent;
+  g_autoptr(AtkObject) parent = ATK_OBJECT(g_weak_ref_get(&priv->parent));
+  return parent;
 }
 
 // Implements AtkObject::get_index_in_parent.
@@ -316,9 +306,10 @@ static void fl_accessible_node_get_extents(AtkComponent* component,
 
   *x = 0;
   *y = 0;
-  if (priv->parent != nullptr) {
-    atk_component_get_extents(ATK_COMPONENT(priv->parent), x, y, nullptr,
-                              nullptr, coord_type);
+  g_autoptr(AtkObject) parent = ATK_OBJECT(g_weak_ref_get(&priv->parent));
+  if (parent != nullptr) {
+    atk_component_get_extents(ATK_COMPONENT(parent), x, y, nullptr, nullptr,
+                              coord_type);
   }
 
   *x += priv->x;
@@ -336,7 +327,8 @@ static AtkLayer fl_accessible_node_get_layer(AtkComponent* component) {
 static gboolean fl_accessible_node_do_action(AtkAction* action, gint i) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(action);
 
-  if (priv->engine == nullptr) {
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+  if (engine == nullptr) {
     return FALSE;
   }
 
@@ -488,8 +480,12 @@ static void fl_accessible_node_perform_action_impl(
     FlutterSemanticsAction action,
     GBytes* data) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
-  fl_engine_dispatch_semantics_action(priv->engine, priv->view_id,
-                                      priv->node_id, action, data);
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+  if (engine == nullptr) {
+    return;
+  }
+  fl_engine_dispatch_semantics_action(engine, priv->view_id, priv->node_id,
+                                      action, data);
 }
 
 static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
@@ -553,6 +549,8 @@ static void fl_accessible_node_action_interface_init(AtkActionIface* iface) {
 
 static void fl_accessible_node_init(FlAccessibleNode* self) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
+  g_weak_ref_init(&priv->engine, nullptr);
+  g_weak_ref_init(&priv->parent, nullptr);
   priv->actions = g_ptr_array_new();
   priv->children = g_ptr_array_new_with_free_func(g_object_unref);
 }
@@ -571,10 +569,8 @@ void fl_accessible_node_set_parent(FlAccessibleNode* self,
                                    gint index) {
   g_return_if_fail(FL_IS_ACCESSIBLE_NODE(self));
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
-  priv->parent = parent;
+  g_weak_ref_set(&priv->parent, parent);
   priv->index = index;
-  g_object_add_weak_pointer(G_OBJECT(self),
-                            reinterpret_cast<gpointer*>(&(priv->parent)));
 }
 
 void fl_accessible_node_set_children(FlAccessibleNode* self,

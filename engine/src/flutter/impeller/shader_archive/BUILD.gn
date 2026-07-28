@@ -53,6 +53,6 @@ impeller_component("shader_archive_unittests") {
   deps = [
     ":shader_archive",
     "//flutter/fml",
-    "//flutter/testing",
+    "//flutter/testing:testing_lib",
   ]
 }
