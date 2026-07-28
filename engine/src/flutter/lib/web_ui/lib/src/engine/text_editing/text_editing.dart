@@ -610,13 +610,13 @@ class EngineAutofillForm {
     }
   }
 
-  /// Records the framework's own value for the focused field so a later
+  /// Records the framework's own value for [fieldId] so a later
   /// [scanForAutofilledValues] or [_updateFieldValues] does not mistake it for a
-  /// browser autofill and echo it straight back. The focused field's *current*
-  /// framework value must be compared against, not the stale config-time
+  /// browser autofill and echo it straight back. The field's *current* framework
+  /// value must be compared against, not the stale config-time
   /// [AutofillInfo.editingState].
-  void noteFrameworkEditingState(EditingState editingState) {
-    _lastSentAutofillText[focusedElementId] = editingState.text;
+  void noteFrameworkEditingState(String fieldId, EditingState editingState) {
+    _lastSentAutofillText[fieldId] = editingState.text;
   }
 
   /// Scans every field for a value the browser autofilled but the framework has
@@ -2019,7 +2019,10 @@ abstract class DefaultTextEditingStrategy
     // too late: the wake-up scan can run first.)
     final EditingState? currentState = lastEditingState;
     if (currentState != null) {
-      inputConfiguration.autofillGroup!.noteFrameworkEditingState(currentState);
+      inputConfiguration.autofillGroup!.noteFrameworkEditingState(
+        inputConfiguration.autofill!.uniqueIdentifier,
+        currentState,
+      );
     }
     inputConfiguration.autofillGroup!.wakeUp(activeDomElement, inputConfiguration.autofill!);
     _appendedToForm = true;
@@ -2054,7 +2057,10 @@ abstract class DefaultTextEditingStrategy
         onChange!(lastEditingState, _editingDeltaState);
         // The user's own edit was just delivered above; record it so the autofill
         // listeners do not re-forward the same value as a browser autofill.
-        inputConfiguration.autofillGroup?.noteFrameworkEditingState(lastEditingState!);
+        inputConfiguration.autofillGroup?.noteFrameworkEditingState(
+          inputConfiguration.autofill!.uniqueIdentifier,
+          lastEditingState!,
+        );
       }
     }
     // Flush delta state.
