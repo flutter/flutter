@@ -1171,10 +1171,10 @@ packages:
     dependency: "direct main"
     description:
       name: vector_math
-      sha256: "1d774bbdf6b72a0b12122fc1560c9c2d2a67db5a4a4cc2bd8a5c990ab20e3188"
+      sha256: "99b6fb0d1881dd1302cd42e0f53bcce99ea246e0a85c8aeb79fb38b283852e88"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.0"
+    version: "2.4.1"
   video_player:
     dependency: "direct main"
     description:
