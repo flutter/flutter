@@ -52,9 +52,10 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
   /// the child.
   ///
   /// If [clipBehavior] is [Clip.none], no clipping will be applied.
+  /// The [clipBehavior] argument defaults to [Clip.hardEdge].
   RenderSliverClipRect({
     super.clipper,
-    super.clipBehavior = .antiAlias,
+    super.clipBehavior = .hardEdge,
     super.clipOverlap = .followEdge,
   });
 
@@ -124,6 +125,12 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
       context.paintChild(child!, offset);
     }
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
+  }
 }
 
 /// A sliver render object that clips its child using a rounded rectangle.
@@ -140,6 +147,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
   /// If [clipBehavior] is [Clip.none], no clipping will be applied.
+  /// The [clipBehavior] argument defaults to [Clip.antiAlias].
   RenderSliverClipRRect({
     BorderRadiusGeometry borderRadius = .zero,
     super.clipper,
@@ -257,6 +265,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.antiAlias));
     properties.add(
       DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null),
     );
@@ -267,9 +276,9 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
 abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
   _RenderSliverCustomClip({
     RenderSliver? sliver,
-    CustomClipper<T>? clipper,
-    Clip clipBehavior = .antiAlias,
-    ClipOverlapBehavior clipOverlap = .followEdge,
+    required CustomClipper<T>? clipper,
+    required Clip clipBehavior,
+    required ClipOverlapBehavior clipOverlap,
   }) : _clipper = clipper,
        _clipBehavior = clipBehavior,
        _clipOverlap = clipOverlap,
@@ -445,7 +454,6 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<CustomClipper<T>>('clipper', clipper, defaultValue: null));
     properties.add(DiagnosticsProperty<T?>('clip', _clip));
-    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.antiAlias));
     properties.add(
       EnumProperty<ClipOverlapBehavior>(
         'clipOverlap',

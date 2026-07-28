@@ -84,7 +84,7 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
     super.key,
     required Widget sliver,
     this.clipper,
-    this.clipBehavior = .antiAlias,
+    this.clipBehavior = .hardEdge,
     this.clipOverlap = .followEdge,
   }) : super(child: sliver);
 
@@ -92,6 +92,8 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
   final CustomClipper<Rect>? clipper;
 
   /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// How the clip reacts to the area overlapped by preceding pinned slivers.
@@ -245,6 +247,8 @@ class SliverClipRRect extends SingleChildRenderObjectWidget {
   final CustomClipper<RRect>? clipper;
 
   /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
+  ///
+  /// Defaults to [Clip.antiAlias].
   final Clip clipBehavior;
 
   /// How the clip reacts to the area overlapped by preceding pinned slivers.

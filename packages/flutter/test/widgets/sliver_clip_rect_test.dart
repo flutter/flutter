@@ -119,7 +119,7 @@ void main() {
 
       final RenderSliverClipRect renderObject = tester.renderObject(find.byType(SliverClipRect));
       expect(renderObject.clipOverlap, ClipOverlapBehavior.followEdge);
-      expect(renderObject.clipBehavior, Clip.antiAlias);
+      expect(renderObject.clipBehavior, Clip.hardEdge);
 
       await tester.pumpWidget(
         const Directionality(
@@ -128,7 +128,7 @@ void main() {
             slivers: <Widget>[
               SliverClipRect(
                 clipOverlap: .none,
-                clipBehavior: .hardEdge,
+                clipBehavior: .antiAlias,
                 sliver: SliverToBoxAdapter(child: SizedBox(height: 100.0)),
               ),
             ],
@@ -137,7 +137,7 @@ void main() {
       );
 
       expect(renderObject.clipOverlap, ClipOverlapBehavior.none);
-      expect(renderObject.clipBehavior, Clip.hardEdge);
+      expect(renderObject.clipBehavior, Clip.antiAlias);
     });
 
     testWidgets('updates clip when overlap changes even if geometry is same', (
@@ -223,7 +223,7 @@ void main() {
 
       expect(renderSliver.constraints.overlap, 50.0);
       expect(renderSliver.clipOverlap, ClipOverlapBehavior.followEdge);
-      expect(renderSliver.clipBehavior, Clip.antiAlias);
+      expect(renderSliver.clipBehavior, Clip.hardEdge);
 
       // getClip() should be cached and have top = 50.0.
       Rect clip = renderSliver.getClip()!;
