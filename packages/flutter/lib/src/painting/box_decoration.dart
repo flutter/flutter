@@ -221,18 +221,13 @@ class BoxDecoration extends Decoration {
 
   @override
   Path getClipPath(Rect rect, TextDirection textDirection) {
-    switch (shape) {
-      case BoxShape.circle:
-        final Offset center = rect.center;
-        final double radius = rect.shortestSide / 2.0;
-        final square = Rect.fromCircle(center: center, radius: radius);
-        return Path()..addOval(square);
-      case BoxShape.rectangle:
-        if (borderRadius != null) {
-          return Path()..addRRect(borderRadius!.resolve(textDirection).toRRect(rect));
-        }
-        return Path()..addRect(rect);
-    }
+    return switch ((shape, borderRadius)) {
+      (BoxShape.circle, _) =>
+        Path()..addOval(Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0)),
+      (BoxShape.rectangle, final BorderRadiusGeometry radius) =>
+        Path()..addRRect(radius.resolve(textDirection).toRRect(rect)),
+      (BoxShape.rectangle, null) => Path()..addRect(rect),
+    };
   }
 
   /// Returns a new box decoration that is scaled by the given factor.
@@ -374,19 +369,13 @@ class BoxDecoration extends Decoration {
   @override
   bool hitTest(Size size, Offset position, {TextDirection? textDirection}) {
     assert((Offset.zero & size).contains(position));
-    switch (shape) {
-      case BoxShape.rectangle:
-        if (borderRadius != null) {
-          final RRect bounds = borderRadius!.resolve(textDirection).toRRect(Offset.zero & size);
-          return bounds.contains(position);
-        }
-        return true;
-      case BoxShape.circle:
-        // Circles are inscribed into our smallest dimension.
-        final Offset center = size.center(Offset.zero);
-        final double distance = (position - center).distance;
-        return distance <= math.min(size.width, size.height) / 2.0;
-    }
+    return switch ((shape, borderRadius)) {
+      (BoxShape.rectangle, final BorderRadiusGeometry radius) =>
+        radius.resolve(textDirection).toRRect(Offset.zero & size).contains(position),
+      (BoxShape.rectangle, null) => true,
+      (BoxShape.circle, _) =>
+        (position - size.center(Offset.zero)).distance <= math.min(size.width, size.height) / 2.0,
+    };
   }
 
   @override
@@ -427,22 +416,18 @@ class _BoxDecorationPainter extends BoxPainter {
   }
 
   void _paintBox(Canvas canvas, Rect rect, Paint paint, TextDirection? textDirection) {
-    switch (_decoration.shape) {
-      case BoxShape.circle:
-        assert(
-          _decoration.borderRadius == null,
-          'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
-        );
-        final Offset center = rect.center;
-        final double radius = rect.shortestSide / 2.0;
-        canvas.drawCircle(center, radius, paint);
-      case BoxShape.rectangle:
-        if (_decoration.borderRadius == null || _decoration.borderRadius == BorderRadius.zero) {
-          canvas.drawRect(rect, paint);
-        } else {
-          canvas.drawRRect(_decoration.borderRadius!.resolve(textDirection).toRRect(rect), paint);
-        }
-    }
+    assert(
+      _decoration.shape != BoxShape.circle || _decoration.borderRadius == null,
+      'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
+    );
+    return switch ((_decoration.shape, _decoration.borderRadius)) {
+      (BoxShape.circle, _) => canvas.drawCircle(rect.center, rect.shortestSide / 2.0, paint),
+      (BoxShape.rectangle, null || BorderRadius.zero) => canvas.drawRect(rect, paint),
+      (BoxShape.rectangle, final BorderRadiusGeometry radius) => canvas.drawRRect(
+        radius.resolve(textDirection).toRRect(rect),
+        paint,
+      ),
+    };
   }
 
   void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
@@ -538,25 +523,17 @@ class _BoxDecorationPainter extends BoxPainter {
       return;
     }
     _imagePainter ??= _decoration.image!.createPainter(onChanged!);
-    Path? clipPath;
-    switch (_decoration.shape) {
-      case BoxShape.circle:
-        assert(
-          _decoration.borderRadius == null,
-          'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
-        );
-        final Offset center = rect.center;
-        final double radius = rect.shortestSide / 2.0;
-        final square = Rect.fromCircle(center: center, radius: radius);
-        clipPath = Path()..addOval(square);
-      case BoxShape.rectangle:
-        if (_decoration.borderRadius != null) {
-          clipPath = Path()
-            ..addRRect(
-              _decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect),
-            );
-        }
-    }
+    assert(
+      _decoration.shape != BoxShape.circle || _decoration.borderRadius == null,
+      'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
+    );
+    final Path? clipPath = switch ((_decoration.shape, _decoration.borderRadius)) {
+      (BoxShape.circle, _) =>
+        Path()..addOval(Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0)),
+      (BoxShape.rectangle, final BorderRadiusGeometry radius) =>
+        Path()..addRRect(radius.resolve(configuration.textDirection).toRRect(rect)),
+      (BoxShape.rectangle, null) => null,
+    };
     _imagePainter!.paint(canvas, rect, clipPath, configuration);
   }
 
