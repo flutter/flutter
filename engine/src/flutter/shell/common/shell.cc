@@ -2405,9 +2405,9 @@ fml::Status Shell::WaitForFirstFrame(fml::TimeDelta timeout) {
       lock, duration,
       [&waiting_for_first_frame = waiting_for_first_frame_,
        &cancelled = wait_for_first_frame_cancelled_] {
-        return !waiting_for_first_frame.load() || cancelled.load();
+        return !waiting_for_first_frame.load() || cancelled;
       });
-  if (wait_for_first_frame_cancelled_.load()) {
+  if (wait_for_first_frame_cancelled_) {
     return fml::Status(fml::StatusCode::kAborted, "Shell is shutting down.");
   } else if (success) {
     return fml::Status();
@@ -2419,7 +2419,7 @@ fml::Status Shell::WaitForFirstFrame(fml::TimeDelta timeout) {
 void Shell::CancelWaitForFirstFrame() {
   {
     std::scoped_lock lock(waiting_for_first_frame_mutex_);
-    wait_for_first_frame_cancelled_.store(true);
+    wait_for_first_frame_cancelled_ = true;
   }
   waiting_for_first_frame_condition_.notify_all();
 }

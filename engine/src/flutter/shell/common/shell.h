@@ -522,8 +522,19 @@ class Shell final : public PlatformView::Delegate,
   uint64_t next_pointer_flow_id_ = 0;
 
   bool first_frame_rasterized_ = false;
+
+  // True if a first frame has not yet been rendered.
+  //
+  // This is read and written lock-free on the raster thread, and read under
+  // waiting_for_first_frame_mutex_ in WaitForFirstFrame.
   std::atomic<bool> waiting_for_first_frame_ = true;
-  std::atomic<bool> wait_for_first_frame_cancelled_ = false;
+
+  // True when WaitForFirstFrame has been cancelled because the shell is
+  // shutting down and waiting threads should be unblocked.
+  //
+  // Guarded by waiting_for_first_frame_mutex_.
+  bool wait_for_first_frame_cancelled_ = false;
+
   std::mutex waiting_for_first_frame_mutex_;
   std::condition_variable waiting_for_first_frame_condition_;
 
