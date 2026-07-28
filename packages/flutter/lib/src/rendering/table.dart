@@ -799,6 +799,10 @@ class RenderTable extends RenderBox {
         }
         // Add wrapper transform
         if (addCellWrapper) {
+          // TODO(hm21): These wrapper bounds use a single column width and a
+          // single row height, so a cell spanning multiple columns or rows is
+          // clipped to one cell in the semantics tree. Make them span-aware
+          // (along with the RTL handling in findColumnIndex) in a follow-up.
           cell
             ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
             ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
