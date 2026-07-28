@@ -259,6 +259,61 @@ TEST(AndroidExternalViewEmbedder, PlatformViewRectChangedParams) {
   ASSERT_EQ(DlRect::MakeXYWH(75, 90, 105, 120), embedder->GetViewRect(view_id));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/189834.
+//
+// A platform view that exactly covers the screen must be laid out at the full
+// physical size of the screen. The logical size the framework computes is
+// `physical / dpr` narrowed to a float, so multiplying it back out lands a hair
+// *under* the physical size. Truncating that (rather than rounding) shaves a
+// pixel off of the right and bottom edges, and the Flutter content behind the
+// platform view shows through as a thin line.
+TEST(AndroidExternalViewEmbedder, PlatformViewSizeIsRoundedNotTruncated) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
+  auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
+      android_context, jni_mock, nullptr, GetTaskRunnersForFixture());
+
+  auto raster_thread_merger = GetThreadMergerFromPlatformThread();
+
+  // A 1080x2400 screen at the device pixel ratio of, say, a Pixel 6.
+  constexpr double kDevicePixelRatio = 2.625;
+  const auto frame_size = DlISize(1080, 2400);
+
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+  embedder->BeginFrame(nullptr, raster_thread_merger);
+  embedder->PrepareFlutterView(frame_size, kDevicePixelRatio);
+
+  // The framework sizes the view in logical pixels, which is narrowed to a
+  // float on the way in: 411.42856f * 2.625 == 1079.9999656677246, and
+  // 914.28571f * 2.625 == 2399.9999771118164.
+  const auto size_points =
+      DlSize(static_cast<DlScalar>(frame_size.width / kDevicePixelRatio),
+             static_cast<DlScalar>(frame_size.height / kDevicePixelRatio));
+  MutatorsStack stack;
+  const DlMatrix scale =
+      DlMatrix::MakeScale({kDevicePixelRatio, kDevicePixelRatio, 1});
+  stack.PushTransform(scale);
+  embedder->PrerollCompositeEmbeddedView(
+      0, std::make_unique<EmbeddedViewParams>(scale, size_points, stack));
+
+  // Both the bounding rect and the size of the view itself cover the whole
+  // screen; neither is 1079x2399.
+  EXPECT_CALL(*jni_mock, FlutterViewOnDisplayPlatformView(0, 0, 0, 1080, 2400,
+                                                          1080, 2400, stack));
+
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  auto surface_frame = std::make_unique<SurfaceFrame>(
+      SkSurfaces::Null(1080, 2400), framebuffer_info,
+      [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
+      [](const SurfaceFrame& surface_frame) { return true; },
+      /*frame_size=*/frame_size);
+  embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                              std::move(surface_frame));
+
+  EXPECT_CALL(*jni_mock, FlutterViewEndFrame());
+  embedder->EndFrame(/*should_resubmit_frame=*/false, raster_thread_merger);
+}
+
 TEST(AndroidExternalViewEmbedder, SubmitFlutterView) {
   auto jni_mock = std::make_shared<JNIMock>();
   auto android_context =
