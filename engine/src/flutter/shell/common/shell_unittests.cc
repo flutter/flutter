@@ -186,6 +186,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               (),
               (const, override));
 
+  MOCK_METHOD(std::shared_ptr<fml::BasicTaskRunner>,
+              OnPlatformViewGetShutdownSafeIOTaskRunner,
+              (),
+              (const, override));
+
   MOCK_METHOD(void,
               LoadDartDeferredLibrary,
               (intptr_t loading_unit_id,
@@ -1720,6 +1725,68 @@ TEST_F(ShellTest, WaitForFirstFrameTimeout) {
   ASSERT_FALSE(result.ok());
   ASSERT_EQ(result.code(), fml::StatusCode::kDeadlineExceeded);
 
+  DestroyShell(std::move(shell));
+}
+
+// Ensure CancelWaitForFirstFrame() correctly causes all tasks blocked on
+// WaitForFirstFrame() to return kAborted.
+//
+// See: b/521830222
+TEST_F(ShellTest, CancelWaitForFirstFrameAllowsSafeShellDestruction) {
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+  RunEngine(shell.get(), std::move(configuration));
+  // No PumpOneFrame: waiting_for_first_frame_ stays true, so
+  // WaitForFirstFrame would otherwise park on the condvar for the full
+  // timeout below.
+
+  fml::AutoResetWaitableEvent bg_has_ref;
+  fml::AutoResetWaitableEvent proceed_with_wait;
+
+  // Background thread holds a raw Shell* obtained while the shell was still
+  // live -- exactly what `strongSelf.shell` (-> `*_shell`) hands the GCD
+  // block in -[FlutterEngine waitForFirstFrame:callback:].
+  Shell* raw_shell = shell.get();
+  fml::Status background_result;
+  std::thread background(
+      [raw_shell, &bg_has_ref, &proceed_with_wait, &background_result] {
+        bg_has_ref.Signal();
+        proceed_with_wait.Wait();
+        // A well-behaved caller must not still be here once the owner has
+        // finished destroying the Shell. CancelWaitForFirstFrame() below makes
+        // sure this call returns promptly instead of blocking for 30 seconds.
+        background_result =
+            raw_shell->WaitForFirstFrame(fml::TimeDelta::FromSeconds(30));
+      });
+
+  bg_has_ref.Wait();
+  proceed_with_wait.Signal();
+
+  // Give the background thread a chance to actually call WaitForFirstFrame()
+  // before it is cancelled below. If it hasn't gotten there yet, cancellation
+  // is still observed safely (and just as fast) the moment it does.
+  std::this_thread::yield();
+
+  fml::TimePoint cancel_start = fml::TimePoint::Now();
+  // Models -[FlutterEngine destroyContext]: cancel any in-flight waiter,
+  // then join it, before freeing the Shell.
+  raw_shell->CancelWaitForFirstFrame();
+  background.join();
+  fml::TimeDelta elapsed = fml::TimePoint::Now() - cancel_start;
+
+  // The whole point of CancelWaitForFirstFrame() is to avoid blocking the
+  // owner for anywhere near the caller's requested timeout.
+  EXPECT_LT(elapsed.ToSecondsF(), 5.0);
+  ASSERT_FALSE(background_result.ok());
+  ASSERT_EQ(background_result.code(), fml::StatusCode::kAborted);
+
+  // Only safe to destroy now that the background thread has been joined,
+  // i.e. is guaranteed to no longer be touching the Shell.
   DestroyShell(std::move(shell));
 }
 

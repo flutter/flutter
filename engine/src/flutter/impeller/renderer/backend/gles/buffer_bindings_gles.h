@@ -82,7 +82,12 @@ class BufferBindingsGLES {
   std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
 
   absl::flat_hash_map<std::string, GLint> uniform_locations_;
-  absl::flat_hash_map<std::string, std::pair<GLint, GLuint>> ubo_locations_;
+  struct UBOInfo {
+    GLint block_index = 0;
+    GLuint binding_point = 0;
+    GLint data_size = 0;
+  };
+  absl::flat_hash_map<std::string, UBOInfo> ubo_locations_;
 
   using BindingMap = absl::flat_hash_map<std::string, std::vector<GLint>>;
   BindingMap binding_map_ = {};
