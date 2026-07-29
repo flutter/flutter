@@ -4,7 +4,10 @@
 
 package io.flutter.embedding.android;
 
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_BACKGROUND_MODE;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID;
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT;
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT_ARGS;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -51,6 +54,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding.OnSave
 import io.flutter.plugins.GeneratedPluginRegistrant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
@@ -335,6 +339,78 @@ public class FlutterActivityTest {
     assertEquals(BackgroundMode.transparent, flutterActivity.getBackgroundMode());
     assertEquals(RenderMode.texture, flutterActivity.getRenderMode());
     assertEquals(TransparencyMode.transparent, flutterActivity.getTransparencyMode());
+  }
+
+  @Test
+  public void itIgnoresDartEntrypointFromBrowserOriginatedIntent() {
+    // A web page can reach any exported Activity that declares CATEGORY_BROWSABLE by navigating to
+    // an intent:// URL carrying arbitrary string extras. Such an Intent must never be able to
+    // choose which Dart code the application runs.
+    Intent intent =
+        new Intent(ctx, FlutterActivity.class)
+            .addCategory(Intent.CATEGORY_BROWSABLE)
+            .putExtra(EXTRA_DART_ENTRYPOINT, "attackerChosenEntrypoint");
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    assertEquals("main", flutterActivity.getDartEntrypointFunctionName());
+  }
+
+  @Test
+  public void itHonorsDartEntrypointFromFirstPartyIntent() {
+    // An app launching its own Activity does not set CATEGORY_BROWSABLE, so the builders keep
+    // working. This is the counterpart of itIgnoresDartEntrypointFromBrowserOriginatedIntent.
+    Intent intent =
+        FlutterActivity.withNewEngineInGroup("my_cached_engine_group")
+            .dartEntrypoint("custom_entrypoint")
+            .build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
+  }
+
+  @Test
+  public void itIgnoresDartEntrypointArgsFromBrowserOriginatedIntent() {
+    Intent intent =
+        new Intent(ctx, FlutterActivity.class)
+            .addCategory(Intent.CATEGORY_BROWSABLE)
+            .putExtra(
+                EXTRA_DART_ENTRYPOINT_ARGS, new ArrayList<String>(Arrays.asList("foo", "bar")));
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    assertNull(flutterActivity.getDartEntrypointArgs());
+  }
+
+  @Test
+  public void itReturnsNullWhenDartEntrypointArgsIsNotAList() {
+    // Previously an unchecked (List<String>) cast, so a non-List Serializable from any caller
+    // crashed the Activity with ClassCastException before it drew a frame.
+    Intent intent =
+        new Intent(ctx, FlutterActivity.class)
+            .putExtra(EXTRA_DART_ENTRYPOINT_ARGS, new HashMap<String, String>());
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    assertNull(flutterActivity.getDartEntrypointArgs());
+  }
+
+  @Test
+  public void itFallsBackToDefaultBackgroundModeWhenValueIsUnknown() {
+    // Previously BackgroundMode.valueOf() threw IllegalArgumentException, so any caller could
+    // crash the Activity on launch.
+    Intent intent =
+        new Intent(ctx, FlutterActivity.class).putExtra(EXTRA_BACKGROUND_MODE, "NOT_A_REAL_MODE");
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    assertEquals(BackgroundMode.opaque, flutterActivity.getBackgroundMode());
   }
 
   @Test
