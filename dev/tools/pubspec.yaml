@@ -28,6 +28,7 @@ dependencies:
       path: tool/dart_skills_lint
       ref: 05e5a45fa412ddbdd1d694eee0c71f4bbaea2617
   logging: ^1.3.0
+  pigeon: any
 
 dev_dependencies:
   test: any
@@ -36,4 +37,4 @@ dev_dependencies:
 
   matcher: any
 
-# PUBSPEC CHECKSUM: oeqba8
+# PUBSPEC CHECKSUM: 3st88
