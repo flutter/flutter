@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
@@ -3709,38 +3710,40 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('TabBar throws indicatorWeight: 0 with the default underline indicator', (
-    WidgetTester tester,
-  ) async {
-    // With no indicator on the widget or the theme, the TabBar falls back to the
-    // default underline indicator, which requires a positive indicatorWeight.
-    const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
-    final Matcher throwsInvalidIndicatorWeightError = isFlutterError.having(
-      (FlutterError error) => error.message,
-      'message',
-      contains('Invalid indicatorWeight for TabBar.'),
-    );
+  testWidgets(
+    'TabBar throws indicatorWeight: 0 with the default underline indicator',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+    (WidgetTester tester) async {
+      // With no indicator on the widget or the theme, the TabBar falls back to the
+      // default underline indicator, which requires a positive indicatorWeight.
+      const tabs = <Widget>[Tab(text: 'A'), Tab(text: 'B')];
+      final Matcher throwsInvalidIndicatorWeightError = isFlutterError.having(
+        (FlutterError error) => error.message,
+        'message',
+        contains('Invalid indicatorWeight for TabBar.'),
+      );
 
-    await tester.pumpWidget(
-      boilerplate(
-        child: DefaultTabController(
-          length: tabs.length,
-          child: const TabBar(indicatorWeight: 0.0, tabs: tabs),
+      await tester.pumpWidget(
+        boilerplate(
+          child: DefaultTabController(
+            length: tabs.length,
+            child: const TabBar(indicatorWeight: 0.0, tabs: tabs),
+          ),
         ),
-      ),
-    );
-    expect(tester.takeException(), throwsInvalidIndicatorWeightError);
+      );
+      expect(tester.takeException(), throwsInvalidIndicatorWeightError);
 
-    await tester.pumpWidget(
-      boilerplate(
-        child: DefaultTabController(
-          length: tabs.length,
-          child: const TabBar.secondary(indicatorWeight: 0.0, tabs: tabs),
+      await tester.pumpWidget(
+        boilerplate(
+          child: DefaultTabController(
+            length: tabs.length,
+            child: const TabBar.secondary(indicatorWeight: 0.0, tabs: tabs),
+          ),
         ),
-      ),
-    );
-    expect(tester.takeException(), throwsInvalidIndicatorWeightError);
-  });
+      );
+      expect(tester.takeException(), throwsInvalidIndicatorWeightError);
+    },
+  );
 
   testWidgets('TabBar with custom indicator - directional indicatorPadding (LTR)', (
     WidgetTester tester,
