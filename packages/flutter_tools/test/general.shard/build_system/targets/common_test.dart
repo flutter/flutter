@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -113,6 +114,7 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         exitCode: 1,
@@ -155,6 +157,7 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
@@ -200,6 +203,7 @@ void main() {
             '--depfile',
             '$build/kernel_snapshot_program.d',
             '--verbosity=error',
+            '--recorded-uses=$build/recorded_uses.json',
             'file:///lib/main.dart',
           ],
           stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
@@ -245,6 +249,7 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
@@ -293,6 +298,7 @@ void main() {
           '--verbosity=error',
           'foo',
           'bar',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
@@ -497,6 +503,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
+      Config: () => Config.test(directory: fileSystem.currentDirectory),
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
@@ -554,6 +561,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
+      Config: () => Config.test(directory: fileSystem.currentDirectory),
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
@@ -631,6 +639,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
     );
+    testEnvironment.buildDir.createSync(recursive: true);
     final String build = testEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
