@@ -5,6 +5,10 @@
 #ifndef FLUTTER_TXT_SRC_SKIA_PARAGRAPH_BUILDER_SKIA_H_
 #define FLUTTER_TXT_SRC_SKIA_PARAGRAPH_BUILDER_SKIA_H_
 
+#include <optional>
+#include <string>
+#include <vector>
+
 #include "txt/paragraph_builder.h"
 
 #include "flutter/display_list/dl_paint.h"
@@ -36,13 +40,29 @@ class ParagraphBuilderSkia : public ParagraphBuilder {
  private:
   friend class SkiaParagraphBuilderTests_ParagraphStrutStyle_Test;
 
+  struct RecordedOp {
+    enum class Kind { kPushStyle, kPop, kUtf16, kUtf8, kPlaceholder };
+    Kind kind;
+    TextStyle style;
+    std::u16string utf16_text;
+    std::string utf8_text;
+    std::optional<PlaceholderRun> placeholder;
+  };
+
   skia::textlayout::ParagraphPainter::PaintID CreatePaintID(
       const flutter::DlPaint& dl_paint);
   skia::textlayout::ParagraphStyle TxtToSkia(const ParagraphStyle& txt);
   skia::textlayout::TextStyle TxtToSkia(const TextStyle& txt);
+  TextDirection ResolveEffectiveDirection() const;
+  void ReplayOperations(skia::textlayout::ParagraphBuilder& target);
 
   std::shared_ptr<skia::textlayout::ParagraphBuilder> builder_;
   TextStyle base_style_;
+  ParagraphStyle original_style_;
+  std::shared_ptr<FontCollection> font_collection_;
+  bool direction_is_auto_ = false;
+  std::vector<RecordedOp> recorded_ops_;
+  std::u16string accumulated_text_;
 
   /// @brief      Whether Impeller is enabled in the runtime.
   ///

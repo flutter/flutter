@@ -18,7 +18,8 @@ class ParagraphSkia : public Paragraph {
  public:
   ParagraphSkia(std::unique_ptr<skia::textlayout::Paragraph> paragraph,
                 std::vector<flutter::DlPaint>&& dl_paints,
-                bool impeller_enabled);
+                bool impeller_enabled,
+                TextDirection resolved_direction);
 
   virtual ~ParagraphSkia() = default;
 
@@ -47,6 +48,8 @@ class ParagraphSkia : public Paragraph {
   int GetLineNumberAt(size_t utf16Offset) const override;
 
   bool DidExceedMaxLines() override;
+
+  TextDirection GetTextDirection() const override;
 
   void Layout(double width) override;
 
@@ -82,6 +85,7 @@ class ParagraphSkia : public Paragraph {
   std::optional<std::vector<LineMetrics>> line_metrics_;
   std::vector<TextStyle> line_metrics_styles_;
   const bool impeller_enabled_;
+  const TextDirection resolved_direction_;
 };
 
 }  // namespace txt

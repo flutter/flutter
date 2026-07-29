@@ -615,7 +615,11 @@ class Text extends StatelessWidget {
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
-  /// Defaults to the ambient [Directionality], if any.
+  /// When `null`, the engine resolves the paragraph direction by scanning
+  /// the text content (first-strong-character rule). To opt into the
+  /// previous behavior of falling back to the ambient [Directionality],
+  /// explicitly pass the resolved value (e.g.
+  /// `textDirection: Directionality.of(context)`).
   final TextDirection? textDirection;
 
   /// Used to select a font when the same Unicode character can
@@ -623,8 +627,6 @@ class Text extends StatelessWidget {
   ///
   /// It's rarely necessary to set this property. By default its value
   /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
-  ///
-  /// See [RenderParagraph.locale] for more information.
   final Locale? locale;
 
   /// Whether the text should break at soft line breaks.
@@ -779,8 +781,7 @@ class Text extends StatelessWidget {
     } else {
       result = RichText(
         textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
-        textDirection:
-            textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+        textDirection: textDirection, // Forwarded as-is; null triggers engine-level auto-resolve.
         locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
         softWrap: softWrap ?? defaultTextStyle.softWrap,
         overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,

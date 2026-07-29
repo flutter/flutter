@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/text/paragraph_builder.h"
 
 #include <cstring>
+#include <optional>
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
@@ -90,6 +91,7 @@ const int kPSHeightIndex = 9;
 const int kPSStrutStyleIndex = 10;
 const int kPSEllipsisIndex = 11;
 const int kPSLocaleIndex = 12;
+const int kPSDefaultTextDirectionIndex = 13;
 
 const int kPSTextAlignMask = 1 << kPSTextAlignIndex;
 const int kPSTextDirectionMask = 1 << kPSTextDirectionIndex;
@@ -97,6 +99,7 @@ const int kPSFontWeightMask = 1 << kPSFontWeightIndex;
 const int kPSFontStyleMask = 1 << kPSFontStyleIndex;
 const int kPSMaxLinesMask = 1 << kPSMaxLinesIndex;
 const int kPSFontFamilyMask = 1 << kPSFontFamilyIndex;
+const int kPSDefaultTextDirectionMask = 1 << kPSDefaultTextDirectionIndex;
 const int kPSFontSizeMask = 1 << kPSFontSizeIndex;
 const int kPSHeightMask = 1 << kPSHeightIndex;
 const int kPSTextHeightBehaviorMask = 1 << kPSTextHeightBehaviorIndex;
@@ -242,6 +245,15 @@ ParagraphBuilder::ParagraphBuilder(
     if (mask & kPSTextDirectionMask) {
       style.text_direction =
           static_cast<txt::TextDirection>(encoded[kPSTextDirectionIndex]);
+    } else {
+      style.text_direction = std::nullopt;
+    }
+
+    if (mask & kPSDefaultTextDirectionMask) {
+      style.default_text_direction = static_cast<txt::TextDirection>(
+          encoded[kPSDefaultTextDirectionIndex]);
+    } else {
+      style.default_text_direction = std::nullopt;
     }
 
     if (mask & kPSFontWeightMask) {

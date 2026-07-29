@@ -6499,8 +6499,14 @@ class RichText extends MultiChildRenderObjectWidget {
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   ///
-  /// The [textDirection], if null, defaults to the ambient [Directionality],
-  /// which in that case must not be null.
+  // / The [textDirection], if null, is forwarded as-is to the engine
+  // / layer. The engine then resolves the paragraph direction by
+  // / scanning the actual text content via the first-strong-character
+  // / rule.
+  ///
+  /// To opt back into the previous behavior (fall back to the ambient
+  /// [Directionality]), explicitly pass the resolved value at the
+  /// call site (e.g. `Text(text, textDirection: Directionality.of(context))`).
   RichText({
     super.key,
     required this.text,
@@ -6562,8 +6568,11 @@ class RichText extends MultiChildRenderObjectWidget {
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
-  /// Defaults to the ambient [Directionality], if any. If there is no ambient
-  /// [Directionality], then this must not be null.
+  /// When `null`, the engine resolves the paragraph direction by scanning
+  /// the text content (first-strong-character rule). To opt into the
+  /// previous behavior of falling back to the ambient [Directionality],
+  /// explicitly pass the resolved value (e.g.
+  /// `textDirection: Directionality.of(context)`).
   final TextDirection? textDirection;
 
   /// Whether the text should break at soft line breaks.
@@ -6636,11 +6645,12 @@ class RichText extends MultiChildRenderObjectWidget {
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
-    assert(textDirection != null || debugCheckHasDirectionality(context));
     return RenderParagraph(
       text,
       textAlign: textAlign,
-      textDirection: textDirection ?? Directionality.of(context),
+      textDirection: textDirection,
+      defaultTextDirection:
+          Directionality.maybeOf(context) ?? TextDirection.ltr,
       softWrap: softWrap,
       overflow: overflow,
       textScaler: textScaler,
@@ -6657,11 +6667,12 @@ class RichText extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
-    assert(textDirection != null || debugCheckHasDirectionality(context));
     renderObject
       ..text = text
       ..textAlign = textAlign
-      ..textDirection = textDirection ?? Directionality.of(context)
+      ..textDirection = textDirection
+      ..defaultTextDirection =
+          Directionality.maybeOf(context) ?? TextDirection.ltr
       ..softWrap = softWrap
       ..overflow = overflow
       ..textScaler = textScaler

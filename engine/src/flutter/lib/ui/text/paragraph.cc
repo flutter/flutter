@@ -58,6 +58,10 @@ bool Paragraph::didExceedMaxLines() {
   return m_paragraph_->DidExceedMaxLines();
 }
 
+int32_t Paragraph::getTextResolvedDirection() {
+  return static_cast<int32_t>(m_paragraph_->GetTextDirection());
+}
+
 void Paragraph::layout(double width) {
   m_paragraph_->Layout(width);
 }

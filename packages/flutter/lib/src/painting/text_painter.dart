@@ -295,6 +295,11 @@ class _UntilTextBoundary extends TextBoundary {
 class _TextLayout {
   _TextLayout._(this._paragraph, this.writingDirection, this._painter);
 
+  // Exposed so `getOffsetForCaret` (and similar) can read
+  // `paragraph.direction` to get the engine-resolved direction in
+  // `TextDirection.Auto` mode without re-querying the cache.
+  ui.Paragraph get paragraph => _paragraph;
+
   final TextDirection writingDirection;
 
   // Computing plainText is a bit expensive and is currently not needed for
@@ -641,7 +646,7 @@ class TextPainter {
   /// text or get other information about it.
   static double computeWidth({
     required InlineSpan text,
-    required TextDirection textDirection,
+    TextDirection? textDirection,
     TextAlign textAlign = TextAlign.start,
     @Deprecated(
       'Use textScaler instead. '
@@ -695,7 +700,7 @@ class TextPainter {
   /// text or get other information about it.
   static double computeMaxIntrinsicWidth({
     required InlineSpan text,
-    required TextDirection textDirection,
+    TextDirection? textDirection,
     TextAlign textAlign = TextAlign.start,
     @Deprecated(
       'Use textScaler instead. '
@@ -877,6 +882,49 @@ class TextPainter {
     _layoutTemplate?.dispose();
     _layoutTemplate = null; // Shouldn't really matter, but for strict correctness...
   }
+
+  /// The default paragraph direction, supplied internally as the
+  /// ambient `Directionality.of(context)` value.
+  ///
+  /// This is an internal implementation detail of the text layout
+  /// pipeline; the application should set [textDirection] instead.
+  /// It is exposed only so that [RenderParagraph] and
+  /// [RenderEditable] can forward the ambient direction captured at
+  /// build time. When `null`, the engine falls back to LTR after the
+  /// first-strong-character scan in `TextDirection.Auto` mode.
+  @internal
+  TextDirection get defaultTextDirection => _defaultTextDirection;
+  TextDirection _defaultTextDirection = TextDirection.ltr;
+  @internal
+  set defaultTextDirection(TextDirection value) {
+    assert(value != null);
+    if (_defaultTextDirection == value) {
+      return;
+    }
+    _defaultTextDirection = value;
+    markNeedsLayout();
+    _layoutTemplate?.dispose();
+    _layoutTemplate = null;
+  }
+
+  /// The paragraph base direction resolved by the engine after [layout].
+  ///
+  /// Unlike [textDirection] (which returns the user-supplied value, possibly
+  /// `null` for `TextDirection.Auto`), this getter returns the actual
+  /// direction Skia used to lay out the glyphs: the explicit value when
+  /// [textDirection] was set, or the first-strong-character scan result
+  /// for `TextDirection.Auto`.
+  ///
+  /// Returns `null` before [layout] is called, when no layout cache exists,
+  /// or when the underlying engine binding does not yet expose direction
+  /// resolution (e.g. older engine versions where `Paragraph.direction`
+  /// always returns LTR).
+  ///
+  /// Use this when you need the resolved direction in `RenderParagraph` /
+  /// `RenderEditable` / `_SelectableFragment` — it is always consistent
+  /// with what [getOffsetForCaret] and other caret calculations use.
+  @internal
+  TextDirection? get resolvedDirection => _layoutCache?.layout._paragraph.direction;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
   /// [textScaler] instead.
@@ -1082,14 +1130,11 @@ class TextPainter {
   List<PlaceholderDimensions>? _placeholderDimensions;
 
   ui.ParagraphStyle _createParagraphStyle([TextAlign? textAlignOverride]) {
-    assert(
-      textDirection != null,
-      'TextPainter.textDirection must be set to a non-null value before using the TextPainter.',
-    );
     final TextStyle baseStyle = _text?.style ?? const TextStyle();
     return baseStyle.getParagraphStyle(
       textAlign: textAlignOverride ?? textAlign,
       textDirection: textDirection,
+      defaultTextDirection: _defaultTextDirection,
       textScaler: textScaler,
       maxLines: _maxLines,
       textHeightBehavior: _textHeightBehavior,
@@ -1237,22 +1282,26 @@ class TextPainter {
         'TextPainter.text must be set to a non-null value before using the TextPainter.',
       );
     }
-    final TextDirection? textDirection = this.textDirection;
-    if (textDirection == null) {
-      throw StateError(
-        'TextPainter.textDirection must be set to a non-null value before using the TextPainter.',
-      );
-    }
-
-    final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection);
+    // When `textDirection` is `null` (i.e. `TextDirection.Auto`), the
+    // engine resolves the paragraph direction from the text content
+    // (first-strong-character rule). We therefore have to do a
+    // tentative layout first to obtain the resolved direction, then
+    // recompute `paintOffsetAlignment` (used to decide
+    // `layoutMaxWidth` when the caller passes an infinite `maxWidth`)
+    // and re-layout if the resolved direction differs from the
+    // tentative value. This guarantees that
+    // `_TextLayout.writingDirection` (and therefore
+    // `getOffsetForCaret`) reflects the actual rendered direction.
+    final TextDirection effectiveDirection = this.textDirection ?? this.resolvedDirection ?? this.defaultTextDirection;
+    double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, effectiveDirection);
     // Try to avoid laying out the paragraph with maxWidth=double.infinity
     // when the text is not left-aligned, so we don't have to deal with an
     // infinite paint offset.
-    final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
+    bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
     final double? adjustedMaxWidth = !adjustMaxWidth
         ? maxWidth
         : cachedLayout?.layout.maxIntrinsicLineExtent;
-    final double layoutMaxWidth = adjustedMaxWidth ?? maxWidth;
+    double layoutMaxWidth = adjustedMaxWidth ?? maxWidth;
 
     // Only rebuild the paragraph when there're layout changes, even when
     // `_rebuildParagraphForPaint` is true. It's best to not eagerly rebuild
@@ -1263,7 +1312,43 @@ class TextPainter {
     //    called.
     final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
       ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
-    final layout = _TextLayout._(paragraph, textDirection, this);
+    // `paragraph.direction` returns the engine-resolved direction
+    // (which is the explicit value when `textDirection` was set, or
+    // the first-strong-character scan result for `TextDirection.Auto`).
+    // The internal `_TextLayout.writingDirection` is non-nullable for
+    // its switch statements, so we read from `paragraph.direction`
+    // (which is always non-null) instead of falling back to LTR
+    // unconditionally. The fallback to LTR remains a safety net in
+    // case the engine binding is unavailable (e.g. older engine
+    // versions).
+    //
+    // If the resolved direction differs from the tentative value we
+    // used to compute `paintOffsetAlignment` (e.g. user passed `null`
+    // and the engine detected an RTL first-strong character), and the
+    // `maxWidth` is infinite (the only case where
+    // `paintOffsetAlignment` matters), relayout the paragraph with
+    // the corrected `layoutMaxWidth` so that `getOffsetForCaret` and
+    // text alignment reflect the actual rendered direction. If the
+    // resolved direction matches the tentative value (or `maxWidth` is
+    // finite, in which case `paintOffsetAlignment` is unused), the
+    // relayout is a no-op.
+    if (paragraph.direction != effectiveDirection) {
+      final double resolvedPaintOffsetAlignment = _computePaintOffsetFraction(
+        textAlign,
+        paragraph.direction,
+      );
+      if (resolvedPaintOffsetAlignment != paintOffsetAlignment) {
+        paintOffsetAlignment = resolvedPaintOffsetAlignment;
+        adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
+        // The original first pass used `cachedLayout?.layout.maxIntrinsicLineExtent`
+        // (which is null on a cold layout). After a tentative layout we now
+        // have a paragraph and can read its `maxIntrinsicWidth` instead.
+        final double? maxIntrinsic = !adjustMaxWidth ? null : paragraph.maxIntrinsicWidth;
+        layoutMaxWidth = maxIntrinsic ?? maxWidth;
+        paragraph.layout(ui.ParagraphConstraints(width: layoutMaxWidth));
+      }
+    }
+    final _TextLayout layout = _TextLayout._(paragraph, paragraph.direction, this);
     final double contentWidth = layout._contentWidthFor(minWidth, maxWidth, textWidthBasis);
 
     final _TextPainterLayoutCacheWithOffset newLayoutCache;
@@ -1449,7 +1534,12 @@ class TextPainter {
     final _LineCaretMetrics? caretMetrics = _computeCaretMetrics(position);
 
     if (caretMetrics == null) {
-      final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
+      // Use the engine-resolved direction (which reflects the
+      // first-strong-character scan for `TextDirection.Auto`).
+      final double paintOffsetAlignment = _computePaintOffsetFraction(
+        textAlign,
+        layoutCache.layout._paragraph.direction,
+      );
       // The full width is not (width - caretPrototype.width), because
       // RenderEditable reserves cursor width on the right. Ideally this
       // should be handled by RenderEditable instead.
