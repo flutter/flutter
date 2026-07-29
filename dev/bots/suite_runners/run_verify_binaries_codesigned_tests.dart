@@ -98,6 +98,7 @@ List<String> binariesWithEntitlements(String flutterRoot) {
 List<String> binariesWithoutEntitlements(String flutterRoot) {
   final List<String> binaries = <String>[
     'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    'artifacts/engine/darwin-x64-profile/libvmservice_snapshot.dylib',
     'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/font-subset',
@@ -106,9 +107,13 @@ List<String> binariesWithoutEntitlements(String flutterRoot) {
     'artifacts/engine/darwin-x64/libpath_ops.dylib',
     'artifacts/engine/darwin-x64/libtessellator.dylib',
     'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Frameworks/libvmservice_snapshot.dylib',
     'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Frameworks/libvmservice_snapshot.dylib',
     'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Frameworks/libvmservice_snapshot.dylib',
     'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Frameworks/libvmservice_snapshot.dylib',
     'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
     'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
     'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
