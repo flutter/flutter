@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
@@ -578,7 +577,10 @@ void main() {
         );
         expect(applicationPackageIdResponse.data['id'], 0);
         expect(applicationPackageFactory.applicationBinaryRequested!.basename, 'test_file');
-        expect(applicationPackageFactory.platformRequested, TargetPlatform.android);
+        expect(
+          applicationPackageFactory.platformRequested,
+          const TargetPlatform(.android, .unknown),
+        );
         final applicationPackageId = applicationPackageIdResponse.data['result'] as String?;
 
         // Try starting the app.
@@ -732,20 +734,15 @@ void main() {
       expect(response.data['error'], contains('coldBoot is not a bool'));
     });
 
-    testUsingContext(
-      'emulator.getEmulators should respond with list',
-      () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-        daemonStreams.inputs.add(
-          DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}),
-        );
-        final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
-        expect(response.data['id'], 0);
-        expect(response.data['result'], isList);
-      },
-      // TODO(vashworth): https://github.com/flutter/flutter/issues/189876
-      skip: const LocalPlatform().isMacOS,
-    );
+    testUsingContext('emulator.getEmulators should respond with list', () async {
+      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemonStreams.inputs.add(
+        DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}),
+      );
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(response.data['id'], 0);
+      expect(response.data['result'], isList);
+    });
 
     testUsingContext('daemon can send exposeUrl requests to the client', () async {
       const originalUrl = 'http://localhost:1234/';
@@ -1168,7 +1165,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<String> get emulatorId async => 'device';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.android, .armv7);
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.armv7;

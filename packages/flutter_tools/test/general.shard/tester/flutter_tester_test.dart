@@ -111,7 +111,7 @@ void main() {
       expect(await device.isLocalEmulator, isFalse);
       expect(device.name, 'Flutter test device');
       expect(device.portForwarder, isNot(isNull));
-      expect(await device.targetPlatform, TargetPlatform.tester);
+      expect(await device.targetPlatform, const TargetPlatform(.tester, .unknown));
 
       expect(await device.installApp(FakeApplicationPackage()), isTrue);
       expect(await device.isAppInstalled(FakeApplicationPackage()), isFalse);

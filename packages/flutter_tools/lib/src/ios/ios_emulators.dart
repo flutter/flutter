@@ -4,6 +4,7 @@
 
 import '../base/common.dart';
 import '../base/process.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart' as globals;

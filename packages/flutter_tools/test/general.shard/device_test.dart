@@ -288,9 +288,9 @@ void main() {
       isSupportedForProject: false,
     );
     final webDevice = FakeDevice('webby', 'webby')
-      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
+      ..targetPlatform = Future<TargetPlatform>.value(const TargetPlatform(.web, .unknown));
     final fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
-      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
+      ..targetPlatform = Future<TargetPlatform>.value(const TargetPlatform(.fuchsia, .x64));
     final unconnectedDevice = FakeDevice('ephemeralTwo', 'ephemeralTwo', isConnected: false);
     final wirelessDevice = FakeDevice(
       'ephemeralTwo',

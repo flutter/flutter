@@ -433,11 +433,7 @@ class BuildInfo {
 class AndroidBuildInfo {
   const AndroidBuildInfo(
     this.buildInfo, {
-    this.targetArchs = const <AndroidArch>[
-      AndroidArch.armeabi_v7a,
-      AndroidArch.arm64_v8a,
-      AndroidArch.x86_64,
-    ],
+    this.targetArchs = const <CpuArch>[.armv7, .arm64, .x64],
     this.splitPerAbi = false,
   });
 
@@ -452,7 +448,7 @@ class AndroidBuildInfo {
   final bool splitPerAbi;
 
   /// The target platforms for the build.
-  final Iterable<AndroidArch> targetArchs;
+  final Iterable<CpuArch> targetArchs;
 }
 
 /// A summary of the compilation strategy used for Dart.
@@ -517,14 +513,14 @@ enum BuildMode {
 enum EnvironmentType { physical, simulator }
 
 String? validatedBuildNumberForPlatform(
-  TargetPlatform targetPlatform,
+  PlatformType platformType,
   String? buildNumber,
   Logger logger,
 ) {
   if (buildNumber == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (platformType == .ios || platformType == .macos) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
@@ -547,9 +543,7 @@ String? validatedBuildNumberForPlatform(
     }
     return tmpBuildNumber;
   }
-  if (targetPlatform == TargetPlatform.android_arm ||
-      targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64) {
+  if (platformType == .android) {
     // See versionCode at https://developer.android.com/studio/publish/versioning
     final disallowed = RegExp(r'[^\d]');
     String tmpBuildNumberStr = buildNumber.replaceAll(disallowed, '');
@@ -569,15 +563,11 @@ String? validatedBuildNumberForPlatform(
   return buildNumber;
 }
 
-String? validatedBuildNameForPlatform(
-  TargetPlatform targetPlatform,
-  String? buildName,
-  Logger logger,
-) {
+String? validatedBuildNameForPlatform(PlatformType platformType, String? buildName, Logger logger) {
   if (buildName == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (platformType == .ios || platformType == .macos) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
@@ -600,13 +590,7 @@ String? validatedBuildNameForPlatform(
     }
     return tmpBuildName;
   }
-  if (targetPlatform == TargetPlatform.android ||
-      targetPlatform == TargetPlatform.android_arm ||
-      targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64) {
-    // See versionName at https://developer.android.com/studio/publish/versioning
-    return buildName;
-  }
+  // See versionName at https://developer.android.com/studio/publish/versioning for Android.
   return buildName;
 }
 
@@ -632,12 +616,12 @@ enum CpuArch {
 
   factory CpuArch.fromName(String name) {
     return switch (name) {
-      'unknown' => CpuArch.unknown,
-      'armv7' => CpuArch.armv7,
-      'arm64' => CpuArch.arm64,
-      'x86' => CpuArch.x86,
-      'x64' || 'x86_64' => CpuArch.x64,
-      'riscv64' => CpuArch.riscv64,
+      'unknown' => .unknown,
+      'armv7' => .armv7,
+      'arm64' => .arm64,
+      'x86' => .x86,
+      'x64' || 'x86_64' => .x64,
+      'riscv64' => .riscv64,
       _ => throw Exception('Unsupported CPU arch name "$name"'),
     };
   }
@@ -645,128 +629,11 @@ enum CpuArch {
   /// The [CpuArch] of the given [hostPlatform].
   factory CpuArch.fromHostPlatform(HostPlatform hostPlatform) {
     return switch (hostPlatform) {
-      .darwin_x64 || .linux_x64 || .windows_x64 => CpuArch.x64,
-      .darwin_arm64 || .linux_arm64 || .windows_arm64 => CpuArch.arm64,
-      .linux_riscv64 => CpuArch.riscv64,
+      .darwin_x64 || .linux_x64 || .windows_x64 => .x64,
+      .darwin_arm64 || .linux_arm64 || .windows_arm64 => .arm64,
+      .linux_riscv64 => .riscv64,
     };
   }
-}
-
-enum TargetPlatform {
-  android('android'),
-  ios('ios'),
-  darwin('darwin'),
-  linux_x64('linux-x64'),
-  linux_arm64('linux-arm64'),
-  linux_riscv64('linux-riscv64'),
-  windows_x64('windows-x64'),
-  windows_arm64('windows-arm64'),
-  fuchsia_arm64('fuchsia-arm64'),
-  fuchsia_x64('fuchsia-x64'),
-  tester('flutter-tester'),
-  web_javascript('web-javascript'),
-  // The arch specific android target platforms are soft-deprecated.
-  // Instead of using TargetPlatform as a combination arch + platform
-  // the code will be updated to carry arch information in [DarwinArch]
-  // and [AndroidArch].
-  android_arm('android-arm'),
-  android_arm64('android-arm64'),
-  android_x64('android-x64'),
-  unsupported('unsupported');
-
-  const TargetPlatform(this._defaultName);
-
-  factory TargetPlatform.fromName(String name) {
-    return switch (name) {
-      'android' => TargetPlatform.android,
-      'android-arm' => TargetPlatform.android_arm,
-      'android-arm64' => TargetPlatform.android_arm64,
-      'android-x64' => TargetPlatform.android_x64,
-      'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
-      'fuchsia-x64' => TargetPlatform.fuchsia_x64,
-      'ios' => TargetPlatform.ios,
-      // For backward-compatibility and also for Tester, where it must match
-      // host platform name (HostPlatform.darwin_x64)
-      'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
-      'linux-x64' => TargetPlatform.linux_x64,
-      'linux-arm64' => TargetPlatform.linux_arm64,
-      'linux-riscv64' => TargetPlatform.linux_riscv64,
-      'windows-x64' => TargetPlatform.windows_x64,
-      'windows-arm64' => TargetPlatform.windows_arm64,
-      'web-javascript' => TargetPlatform.web_javascript,
-      'flutter-tester' => TargetPlatform.tester,
-      _ => throw Exception('Unsupported platform name "$name"'),
-    };
-  }
-
-  final String _defaultName;
-
-  String getName({DarwinArch? darwinArch}) {
-    return switch (this) {
-      TargetPlatform.ios when darwinArch != null => 'ios-${darwinArch.name}',
-      TargetPlatform.darwin when darwinArch != null => 'darwin-${darwinArch.name}',
-      _ => _defaultName,
-    };
-  }
-
-  String get fuchsiaArchForTargetPlatform => switch (this) {
-    fuchsia_arm64 => 'arm64',
-    fuchsia_x64 => 'x64',
-    android ||
-    android_arm ||
-    android_arm64 ||
-    android_x64 ||
-    darwin ||
-    ios ||
-    linux_arm64 ||
-    linux_riscv64 ||
-    linux_x64 ||
-    tester ||
-    web_javascript ||
-    windows_x64 ||
-    windows_arm64 ||
-    unsupported => throw UnsupportedError('Unexpected Fuchsia platform $this'),
-  };
-
-  String get osName => switch (this) {
-    linux_x64 || linux_arm64 || linux_riscv64 => 'linux',
-    darwin => 'macos',
-    windows_x64 || windows_arm64 => 'windows',
-    android || android_arm || android_arm64 || android_x64 => 'android',
-    fuchsia_arm64 || fuchsia_x64 => 'fuchsia',
-    ios => 'ios',
-    tester => 'flutter-tester',
-    web_javascript => 'web',
-    unsupported => throw UnsupportedError('Unexpected target platform $this'),
-  };
-
-  String get simpleName => switch (this) {
-    linux_x64 || darwin || windows_x64 => 'x64',
-    linux_arm64 || windows_arm64 => 'arm64',
-    linux_riscv64 => 'riscv64',
-    android ||
-    android_arm ||
-    android_arm64 ||
-    android_x64 ||
-    fuchsia_arm64 ||
-    fuchsia_x64 ||
-    ios ||
-    tester ||
-    web_javascript ||
-    unsupported => throw UnsupportedError('Unexpected target platform $this'),
-  };
-
-  static Never throwUnsupportedTarget() =>
-      throw UnsupportedError('Target platform is unsupported.');
-}
-
-/// iOS and macOS target device architecture.
-//
-// TODO(cbracken): split TargetPlatform.ios into ios_armv7, ios_arm64.
-enum DarwinArch {
-  armv7, // Deprecated. Used to display 32-bit unsupported devices.
-  arm64,
-  x86_64;
 
   /// Returns the Dart SDK's name for the specified target architecture.
   ///
@@ -778,118 +645,272 @@ enum DarwinArch {
     return switch (this) {
       armv7 => 'armv7',
       arm64 => 'arm64',
-      x86_64 => 'x64',
+      x86 => 'x86',
+      x64 => 'x64',
+      riscv64 => 'riscv64',
+      unknown => throw UnsupportedError('Unexpected CPU arch $this'),
     };
   }
+
+  /// The Apple architecture name for this architecture.
+  ///
+  /// This is the name understood by the Darwin toolchain (e.g. `lipo`, `clang`,
+  /// and the `-arch` flag) and used for architecture-specific build output
+  /// directories on iOS and macOS. This differs from [dartName] for [x64],
+  /// which maps to `x86_64` here.
+  String get darwinArchName => switch (this) {
+    armv7 => 'armv7',
+    arm64 => 'arm64',
+    x64 => 'x86_64',
+    x86 || riscv64 || unknown => throw UnsupportedError('Unexpected Darwin CPU arch $this'),
+  };
+
+  /// The name of the Android ABI (as used in `jniLibs` directories) for this
+  /// architecture.
+  String get androidArchName => switch (this) {
+    armv7 => 'armeabi-v7a',
+    arm64 => 'arm64-v8a',
+    x64 => 'x86_64',
+    x86 || riscv64 || unknown => throw UnsupportedError('Unexpected Android CPU arch $this'),
+  };
+
+  /// The `TargetPlatform` name of the Android platform for this architecture.
+  String get androidPlatformName => switch (this) {
+    armv7 => 'android-arm',
+    arm64 => 'android-arm64',
+    x64 => 'android-x64',
+    x86 || riscv64 || unknown => throw UnsupportedError('Unexpected Android CPU arch $this'),
+  };
 }
 
-// TODO(zanderso): replace all android TargetPlatform usage with AndroidArch.
-enum AndroidArch {
-  armeabi_v7a,
-  arm64_v8a,
-  x86_64;
+/// The type of platform (OS / runtime family) that a target or device
+/// represents.
+///
+/// This is combined with a [CpuArch] to form a [TargetPlatform].
+enum PlatformType {
+  web,
+  android,
+  ios,
+  linux,
+  macos,
+  windows,
+  fuchsia,
+  custom,
+  tester,
+  unsupported;
 
-  String get archName => switch (this) {
-    armeabi_v7a => 'armeabi-v7a',
-    arm64_v8a => 'arm64-v8a',
-    x86_64 => 'x86_64',
+  @override
+  String toString() => name;
+
+  static PlatformType? fromString(String platformType) => values.asNameMap()[platformType];
+}
+
+/// The platform a Flutter application is built for.
+///
+/// A [TargetPlatform] is the combination of a [PlatformType] (the OS / runtime
+/// family, e.g. Android or macOS) and a [CpuArch] (the CPU architecture, e.g.
+/// arm64).
+///
+/// Code that needs to branch on the platform should generally inspect [type]
+/// and/or [cpuArch].
+@immutable
+final class TargetPlatform {
+  const TargetPlatform(this.type, this.cpuArch);
+
+  factory TargetPlatform.fromName(String name) {
+    return switch (name) {
+      'android' => const TargetPlatform(.android, .unknown),
+      'android-arm' => const TargetPlatform(.android, .armv7),
+      'android-arm64' => const TargetPlatform(.android, .arm64),
+      'android-x64' => const TargetPlatform(.android, .x64),
+      'fuchsia-arm64' => const TargetPlatform(.fuchsia, .arm64),
+      'fuchsia-x64' => const TargetPlatform(.fuchsia, .x64),
+      // `ios` is architecture-agnostic and defaults to arm64; `ios-arm64` and
+      // `ios-x64` (simulator) name a specific architecture.
+      'ios' || 'ios-arm64' => const TargetPlatform(.ios, .arm64),
+      'ios-x64' => const TargetPlatform(.ios, .x64),
+      'ios-armv7' => const TargetPlatform(.ios, .armv7),
+      // `darwin` is architecture-agnostic and defaults to arm64 (Apple
+      // Silicon); `darwin-x64` and `darwin-arm64` name a specific architecture.
+      'darwin' || 'darwin-arm64' => const TargetPlatform(.macos, .arm64),
+      'darwin-x64' => const TargetPlatform(.macos, .x64),
+      'linux-x64' => const TargetPlatform(.linux, .x64),
+      'linux-arm64' => const TargetPlatform(.linux, .arm64),
+      'linux-riscv64' => const TargetPlatform(.linux, .riscv64),
+      'windows-x64' => const TargetPlatform(.windows, .x64),
+      'windows-arm64' => const TargetPlatform(.windows, .arm64),
+      'web-javascript' => const TargetPlatform(.web, .unknown),
+      'flutter-tester' => const TargetPlatform(.tester, .unknown),
+      _ => throw Exception('Unsupported platform name "$name"'),
+    };
+  }
+
+  /// The platform type (OS / runtime family).
+  final PlatformType type;
+
+  /// The CPU architecture of the target.
+  ///
+  /// This is [CpuArch.unknown] only when a CPU architecture is not applicable
+  /// (e.g. web) or has not yet been resolved (e.g. a generic Android target).
+  final CpuArch cpuArch;
+
+  /// The canonical set of known target platforms.
+  ///
+  /// This mirrors the values that used to exist when [TargetPlatform] was an
+  /// enum, and is primarily useful for tests that need to iterate over all
+  /// known platforms.
+  static const List<TargetPlatform> values = <TargetPlatform>[
+    TargetPlatform(.android, .unknown),
+    TargetPlatform(.ios, .arm64),
+    TargetPlatform(.macos, .arm64),
+    TargetPlatform(.linux, .x64),
+    TargetPlatform(.linux, .arm64),
+    TargetPlatform(.linux, .riscv64),
+    TargetPlatform(.windows, .x64),
+    TargetPlatform(.windows, .arm64),
+    TargetPlatform(.fuchsia, .arm64),
+    TargetPlatform(.fuchsia, .x64),
+    TargetPlatform(.tester, .unknown),
+    TargetPlatform(.web, .unknown),
+    TargetPlatform(.android, .armv7),
+    TargetPlatform(.android, .arm64),
+    TargetPlatform(.android, .x64),
+    TargetPlatform(.unsupported, .unknown),
+  ];
+
+  @override
+  bool operator ==(Object other) =>
+      other is TargetPlatform && other.type == type && other.cpuArch == cpuArch;
+
+  @override
+  int get hashCode => Object.hash(type, cpuArch);
+
+  /// The canonical string name for this target platform.
+  ///
+  /// The name generally follows the `<platform>-<arch>` convention (e.g.
+  /// `linux-x64`, `android-arm64`, `ios-arm64`, `darwin-x64`), with a few
+  /// historical exceptions retained for backward compatibility (e.g. the macOS
+  /// platform is named `darwin`, and `flutter-tester`). When the architecture
+  /// is not known ([CpuArch.unknown]), the bare platform name is used (e.g.
+  /// `ios`, `darwin`, `android`).
+  String getName() {
+    return switch (type) {
+      .android => cpuArch == .unknown ? 'android' : cpuArch.androidPlatformName,
+      .ios => cpuArch == .unknown ? 'ios' : 'ios-${cpuArch.dartName}',
+      .macos => cpuArch == .unknown ? 'darwin' : 'darwin-${cpuArch.dartName}',
+      .linux || .windows || .fuchsia => '${type.name}-${cpuArch.dartName}',
+      .tester => 'flutter-tester',
+      .web => 'web-javascript',
+      .unsupported => 'unsupported',
+      .custom => throw UnsupportedError('Unexpected target platform $this'),
+    };
+  }
+
+  /// The platform name used to identify a device, e.g. in the `flutter devices`
+  /// output, the daemon protocol, and analytics.
+  ///
+  /// This is like [getName], but omits the CPU architecture for iOS and macOS,
+  /// preserving the historical device platform identifiers (`ios`, `darwin`).
+  /// The architecture of a device is reported separately (e.g. via the device's
+  /// `cpuArch`), so it is not duplicated here.
+  String get devicePlatformName => switch (type) {
+    .ios => 'ios',
+    .macos => 'darwin',
+    _ => getName(),
   };
 
-  String get platformName => switch (this) {
-    armeabi_v7a => 'android-arm',
-    arm64_v8a => 'android-arm64',
-    x86_64 => 'android-x64',
+  String get fuchsiaArchForTargetPlatform => switch (type) {
+    .fuchsia => cpuArch == .arm64 ? 'arm64' : 'x64',
+    _ => throw UnsupportedError('Unexpected Fuchsia platform $this'),
   };
+
+  String get osName => switch (type) {
+    .linux => 'linux',
+    .macos => 'macos',
+    .windows => 'windows',
+    .android => 'android',
+    .fuchsia => 'fuchsia',
+    .ios => 'ios',
+    .tester => 'flutter-tester',
+    .web => 'web',
+    .custom || .unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  };
+
+  @override
+  String toString() => getName();
+
+  static Never throwUnsupportedTarget() =>
+      throw UnsupportedError('Target platform is unsupported.');
 }
 
 /// The default set of iOS device architectures to build for.
-List<DarwinArch> defaultIOSArchsForEnvironment(
-  EnvironmentType environmentType,
-  Artifacts artifacts,
-) {
+List<CpuArch> defaultIOSArchsForEnvironment(EnvironmentType environmentType, Artifacts artifacts) {
   // Handle single-arch local engines.
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
     final String localEngineName = localEngineInfo.localTargetName;
     if (localEngineName.contains('_arm64')) {
-      return <DarwinArch>[DarwinArch.arm64];
+      return <CpuArch>[.arm64];
     }
     if (localEngineName.contains('_sim')) {
-      return <DarwinArch>[DarwinArch.x86_64];
+      return <CpuArch>[.x64];
     }
   } else if (environmentType == EnvironmentType.simulator) {
-    return <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+    return <CpuArch>[.x64, .arm64];
   }
-  return <DarwinArch>[DarwinArch.arm64];
+  return <CpuArch>[.arm64];
 }
 
 /// The default set of macOS device architectures to build for.
-List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
+List<CpuArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
   // Handle single-arch local engines.
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
     if (localEngineInfo.localTargetName.contains('_arm64')) {
-      return <DarwinArch>[DarwinArch.arm64];
+      return <CpuArch>[.arm64];
     }
-    return <DarwinArch>[DarwinArch.x86_64];
+    return <CpuArch>[.x64];
   }
-  return <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+  return <CpuArch>[.x64, .arm64];
 }
 
-DarwinArch getIOSArchForName(String arch) {
-  switch (arch) {
-    case 'armv7':
-    case 'armv7f': // iPhone 4S.
-    case 'armv7s': // iPad 4.
-      return DarwinArch.armv7;
-    case 'arm64':
-    case 'arm64e': // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
-      return DarwinArch.arm64;
-    case 'x86_64':
-      return DarwinArch.x86_64;
-  }
-  throw Exception('Unsupported iOS arch name "$arch"');
-}
-
-DarwinArch getDarwinArchForName(String arch) {
-  return switch (arch) {
-    'arm64' => DarwinArch.arm64,
-    'x86_64' => DarwinArch.x86_64,
-    _ => throw Exception('Unsupported MacOS arch name "$arch"'),
+/// Returns the [CpuArch] for the given architecture or platform [name].
+///
+/// This accepts the various naming conventions used across platforms:
+///  * Apple architecture names (e.g. `armv7`, `arm64`, `arm64e`, `x86_64`).
+///  * Android target platform names (e.g. `android-arm`, `android-arm64`,
+///    `android-x64`).
+///
+/// Consolidating these into a single lookup is safe because the accepted names
+/// do not overlap, so callers on any platform get the expected result.
+CpuArch getCpuArchForName(String name) {
+  return switch (name) {
+    'armv7' ||
+    'armv7f' || // iPhone 4S.
+    'armv7s' || // iPad 4.
+    'android-arm' => .armv7,
+    'arm64' ||
+    'arm64e' || // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
+    'android-arm64' => .arm64,
+    'x86_64' || 'android-x64' => .x64,
+    _ => throw Exception('Unsupported CPU arch name "$name"'),
   };
 }
 
-List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) {
-  const defaultDarwinArchitectures = <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
-  return defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
+/// The set of Darwin (iOS/macOS) architectures configured in [defines], or a
+/// default of x86_64 and arm64 if unspecified.
+List<CpuArch> getCpuArchsFromEnv(Map<String, String> defines) {
+  const defaultDarwinArchitectures = <CpuArch>[.x64, .arm64];
+  return defines[kDarwinArchs]?.split(' ').map(getCpuArchForName).toList() ??
       defaultDarwinArchitectures;
-}
-
-AndroidArch getAndroidArchForName(String platform) {
-  return switch (platform) {
-    'android-arm' => AndroidArch.armeabi_v7a,
-    'android-arm64' => AndroidArch.arm64_v8a,
-    'android-x64' => AndroidArch.x86_64,
-    _ => throw Exception('Unsupported Android arch name "$platform"'),
-  };
-}
-
-DarwinArch getCurrentDarwinArch() {
-  return switch (globals.os.hostPlatform) {
-    HostPlatform.darwin_arm64 => DarwinArch.arm64,
-    HostPlatform.darwin_x64 => DarwinArch.x86_64,
-    final HostPlatform unsupported => throw Exception(
-      'Unsupported Darwin host platform "$unsupported"',
-    ),
-  };
 }
 
 HostPlatform getCurrentHostPlatform() {
   if (globals.platform.isMacOS) {
-    return switch (getCurrentDarwinArch()) {
-      DarwinArch.arm64 => HostPlatform.darwin_arm64,
-      DarwinArch.x86_64 => HostPlatform.darwin_x64,
-      DarwinArch.armv7 => throw Exception('Unsupported macOS arch "amv7"'),
+    return switch (globals.os.hostPlatform) {
+      HostPlatform.darwin_arm64 => .darwin_arm64,
+      HostPlatform.darwin_x64 => .darwin_x64,
+      _ => throw Exception('Unsupported Darwin host platform "${globals.os.hostPlatform}"'),
     };
   }
   if (globals.platform.isLinux) {
@@ -971,7 +992,7 @@ String getWebBuildDirectory() {
 String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) {
   final String arch = (targetPlatform == null)
       ? _getCurrentHostPlatformArchName()
-      : targetPlatform.simpleName;
+      : targetPlatform.cpuArch.dartName;
   final String subDirs = (flavor != null && flavor.isNotEmpty)
       ? globals.fs.path.join('linux', arch, flavor)
       : globals.fs.path.join('linux', arch);
@@ -983,7 +1004,7 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) 
 /// When [flavor] is non-empty, a `/<flavor>` segment is inserted so that
 /// different flavors can coexist on disk without overwriting each other.
 String getWindowsBuildDirectory(TargetPlatform targetPlatform, [String? flavor]) {
-  final String arch = targetPlatform.simpleName;
+  final String arch = targetPlatform.cpuArch.dartName;
   final String subDirs = (flavor != null && flavor.isNotEmpty)
       ? globals.fs.path.join('windows', arch, flavor)
       : globals.fs.path.join('windows', arch);
@@ -1242,8 +1263,8 @@ String? _uncapitalize(String? s) {
 
 // flutter_ignore: deprecation_syntax (see analyze.dart)
 @Deprecated('Use TargetPlatform.getName() instead')
-String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
-  return platform.getName(darwinArch: darwinArch);
+String getNameForTargetPlatform(TargetPlatform platform) {
+  return platform.getName();
 }
 
 // flutter_ignore: deprecation_syntax (see analyze.dart)

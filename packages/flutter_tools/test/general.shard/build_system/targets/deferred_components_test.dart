@@ -38,7 +38,7 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const androidAot = AndroidAot(TargetPlatform(.android, .arm64), BuildMode.release);
     const androidAotBundle = AndroidAotBundle(androidAot);
     final androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
     final validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
@@ -72,7 +72,7 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const androidAot = AndroidAot(TargetPlatform(.android, .arm64), BuildMode.release);
     const androidAotBundle = AndroidAotBundle(androidAot);
     final androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
     final validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(
@@ -105,7 +105,7 @@ void main() {
       logger: logger,
     );
     environment.buildDir.createSync(recursive: true);
-    const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+    const androidAot = AndroidAot(TargetPlatform(.android, .arm64), BuildMode.release);
     const androidAotBundle = AndroidAotBundle(androidAot);
     final androidDefBundle = AndroidAotDeferredComponentsBundle(androidAotBundle);
     final validatorTarget = DeferredComponentsGenSnapshotValidatorTarget(

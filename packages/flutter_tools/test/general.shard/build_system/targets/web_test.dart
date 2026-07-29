@@ -28,7 +28,7 @@ import '../../../src/testbed.dart';
 import '../../../src/throwing_pub.dart';
 
 const _kDart2jsLinuxArgs = <String>[
-  'Artifact.engineDartBinary.TargetPlatform.web_javascript',
+  'Artifact.engineDartBinary.web-javascript',
   'compile',
   'js',
   '--platform-binaries=HostArtifact.webPlatformKernelFolder',
@@ -44,7 +44,7 @@ const _kStandardFlutterWebDefines = <String>[
 ];
 
 const _kDart2WasmLinuxArgs = <String>[
-  'Artifact.engineDartBinary.TargetPlatform.web_javascript',
+  'Artifact.engineDartBinary.web-javascript',
   'compile',
   'wasm',
   '--packages=/.dart_tool/package_config.json',
@@ -132,6 +132,31 @@ name: foo
         Pub: ThrowingPub.new,
       },
     ),
+  );
+
+  test(
+    'WebEntrypointTarget declares package_config.json, pubspec.yaml, and plugin dependencies as inputs',
+    () => testbed.run(() async {
+      const target = WebEntrypointTarget();
+      expect(
+        target.inputs,
+        equals(<Source>[
+          const Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart',
+          ),
+          const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
+          const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+          const Source.pattern('{PROJECT_DIR}/.flutter-plugins-dependencies', optional: true),
+        ]),
+      );
+      expect(
+        target.outputs,
+        equals(<Source>[
+          const Source.pattern('{BUILD_DIR}/main.dart'),
+          const Source.pattern('{BUILD_DIR}/web_plugin_registrant.dart'),
+        ]),
+      );
+    }),
   );
 
   test(
