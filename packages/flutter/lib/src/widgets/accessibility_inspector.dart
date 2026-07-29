@@ -53,15 +53,13 @@ class AccessibilityInspector {
   }
 
   Future<Map<String, dynamic>> _getSemanticsTree(Map<String, String> parameters) async {
-    _semanticsHandle ??= SemanticsBinding.instance.ensureSemantics();
-
+    if (!SemanticsBinding.instance.semanticsEnabled) {
+      return <String, dynamic>{'error': 'Semantics not enabled.'};
+    }
     final PipelineOwner? pipelineOwner = _findPipelineOwner();
     final SemanticsOwner? semanticsOwner = pipelineOwner?.semanticsOwner;
     if (semanticsOwner == null) {
-      return <String, dynamic>{
-        'error': 'No PipelineOwner with SemanticsOwner found',
-        'needsFrame': true,
-      };
+      return <String, dynamic>{'error': 'No PipelineOwner with SemanticsOwner found'};
     }
     final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
     if (root == null) {

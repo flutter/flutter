@@ -61,6 +61,13 @@ void main() {
           as Map<String, Object?>;
     }
 
+    // Calling getSemanticsTree before semantics is enabled returns an error.
+    final Map<String, Object?> disabledResult = await callExtension(
+      'accessibility.getSemanticsTree',
+    );
+    expect(disabledResult['error'], equals('Semantics not enabled.'));
+    expect(disabledResult['needsFrame'], isNull);
+
     // Calling enableSemantics enables semantics without returning the tree.
     final Map<String, Object?> enableResult = await callExtension('accessibility.enableSemantics');
     expect(enableResult, isEmpty);
