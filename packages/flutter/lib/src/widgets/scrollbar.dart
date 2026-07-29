@@ -2201,17 +2201,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   Set<WidgetState> get cursorStates => <WidgetState>{if (_dragIsActive) WidgetState.dragged};
 
-  /// Recomputes the cursor applied by the [MouseRegion] wrapping the
-  /// scrollbar. The wrapping [MouseRegion] also covers the scrollable content,
-  /// so [_hoverIsActive] gates the override to the painted scrollbar's hit
-  /// test area; otherwise [MouseCursor.defer] is used so that ancestor cursors
-  /// (such as a [TextField]'s I-beam) are preserved.
+  /// Recomputes the effective mouse cursor for the scrollbar and updates the
+  /// active cursor if it has changed.
   ///
   /// Subclasses should call this after changes to state that affect cursor
   /// resolution (for example, when entering or leaving a drag).
   @protected
   @mustCallSuper
   void updateMouseCursor() {
+    // The wrapping MouseRegion covers the entire scrollable viewport rather
+    // than just the scrollbar painter. Therefore, _hoverIsActive is used to
+    // gate the cursor override to the painted scrollbar track/thumb; otherwise
+    // MouseCursor.defer is used to preserve ancestor cursors (e.g. TextField I-beam).
     final MouseCursor? resolved = widget.mouseCursor?.resolve(cursorStates);
     final MouseCursor desired = ((_hoverIsActive || _dragIsActive) && resolved != null)
         ? resolved
