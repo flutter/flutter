@@ -655,59 +655,61 @@ class ExamplesCrossImportChecker {
         continue;
       }
 
-      if (fileSystemEntity is Directory) {
-        final String directoryName = path.basename(fileSystemEntity.absolute.path);
-
-        if (directoryName == 'build' || directoryName == '.dart_tool') {
-          continue;
-        }
-
-        // The examples/api folder contains examples in a single Flutter project,
-        // grouped in subfolders in lib/ and test/, so these need to be handled separately.
-        if (directoryName == 'api') {
-          final examplesSlashApiLibrary = _ExamplesLibrary.fromDirectory(
-            fileSystemEntity,
-            flutterRoot: flutterRoot,
-          );
-
-          // First list the files directly under examples/api.
-          mapping[examplesSlashApiLibrary] = {
-            for (final File file in fileSystemEntity.listSync().whereType<File>())
-              if (file.absolute.path.contains(dartFilePattern)) file,
-          };
-
-          final (:Directory libDirectory, :Directory testDirectory) =
-              _findExamplesSlashApiDirectories(fileSystemEntity);
-
-          // Handle the files under examples/api/lib/sample_templates and examples/api/test/sample_templates,
-          // which list individual files with a specific file pattern.
-          mapping.addAll(
-            _getExamplesSlashApiSampleTemplatesFiles(
-              libDirectory: libDirectory,
-              testDirectory: testDirectory,
-              dartFilePattern: dartFilePattern,
-            ),
-          );
-
-          // Handle the other samples, which are divided per subfolder.
-          mapping.addAll(
-            _getExamplesSlashApiExamples(
-              libDirectory: libDirectory,
-              testDirectory: testDirectory,
-              dartFilePattern: dartFilePattern,
-            ),
-          );
-
-          continue;
-        }
-
-        final library = _ExamplesLibrary.fromDirectory(fileSystemEntity, flutterRoot: flutterRoot);
-
-        mapping[library] = _getExampleFilesForDirectory(
-          fileSystemEntity,
-          dartFilePattern: dartFilePattern,
-        );
+      if (fileSystemEntity is! Directory) {
+        continue;
       }
+
+      final String directoryName = path.basename(fileSystemEntity.absolute.path);
+
+      if (directoryName == 'build' || directoryName == '.dart_tool') {
+        continue;
+      }
+
+      // The examples/api folder contains examples in a single Flutter project,
+      // grouped in subfolders in lib/ and test/, so these need to be handled separately.
+      if (directoryName == 'api') {
+        final examplesSlashApiLibrary = _ExamplesLibrary.fromDirectory(
+          fileSystemEntity,
+          flutterRoot: flutterRoot,
+        );
+
+        // First list the files directly under examples/api.
+        mapping[examplesSlashApiLibrary] = {
+          for (final File file in fileSystemEntity.listSync().whereType<File>())
+            if (file.absolute.path.contains(dartFilePattern)) file,
+        };
+
+        final (:Directory libDirectory, :Directory testDirectory) =
+            _findExamplesSlashApiDirectories(fileSystemEntity);
+
+        // Handle the files under examples/api/lib/sample_templates and examples/api/test/sample_templates,
+        // which list individual files with a specific file pattern.
+        mapping.addAll(
+          _getExamplesSlashApiSampleTemplatesFiles(
+            libDirectory: libDirectory,
+            testDirectory: testDirectory,
+            dartFilePattern: dartFilePattern,
+          ),
+        );
+
+        // Handle the other samples, which are divided per subfolder.
+        mapping.addAll(
+          _getExamplesSlashApiExamples(
+            libDirectory: libDirectory,
+            testDirectory: testDirectory,
+            dartFilePattern: dartFilePattern,
+          ),
+        );
+
+        continue;
+      }
+
+      final library = _ExamplesLibrary.fromDirectory(fileSystemEntity, flutterRoot: flutterRoot);
+
+      mapping[library] = _getExampleFilesForDirectory(
+        fileSystemEntity,
+        dartFilePattern: dartFilePattern,
+      );
     }
 
     return mapping;
@@ -736,15 +738,17 @@ class ExamplesCrossImportChecker {
           continue;
         }
 
-        if (fileSystemEntity is Directory) {
-          final String directoryName = path.basename(fileSystemEntity.absolute.path);
-
-          if (directoryName == 'build' || directoryName == '.dart_tool') {
-            continue;
-          }
-
-          queue.add(fileSystemEntity);
+        if (fileSystemEntity is! Directory) {
+          continue;
         }
+
+        final String directoryName = path.basename(fileSystemEntity.absolute.path);
+
+        if (directoryName == 'build' || directoryName == '.dart_tool') {
+          continue;
+        }
+
+        queue.add(fileSystemEntity);
       }
     }
 
