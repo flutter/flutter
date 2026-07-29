@@ -124,6 +124,14 @@ class StubFlutterWindowsApi {
     return false;
   }
 
+  // Called for FlutterDesktopPluginRegistrarIsPlatformThread.
+  virtual bool PluginRegistrarIsPlatformThread() { return false; }
+
+  // Called for FlutterDesktopPluginRegistrarPostPlatformThreadTask.
+  virtual void PluginRegistrarPostPlatformThreadTask(VoidCallback callback,
+                                                     VoidCallback on_cancel,
+                                                     void* user_data) {}
+
   // Called for FlutterDesktopEngineProcessExternalWindowMessage.
   virtual bool EngineProcessExternalWindowMessage(
       FlutterDesktopEngineRef engine,
