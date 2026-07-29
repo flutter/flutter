@@ -300,9 +300,9 @@ Image _backdropBlurWithTileMode(TileMode? tileMode) {
 }
 
 Future<Image> _backdropShaderWithFilterQuality(FilterQuality filterQuality) async {
-  const int width = 16;
-  const int height = 4;
-  const double stripeWidth = 1.0;
+  const width = 16;
+  const height = 4;
+  const stripeWidth = 1.0;
 
   final FragmentProgram program = await FragmentProgram.fromAsset(
     'filter_shader_fractional_texel.frag.iplr',
@@ -310,7 +310,7 @@ Future<Image> _backdropShaderWithFilterQuality(FilterQuality filterQuality) asyn
   final FragmentShader shader = program.fragmentShader();
 
   final Picture stripePicture = _makePicture((Canvas canvas) {
-    for (int x = 0; x < width; x++) {
+    for (var x = 0; x < width; x++) {
       canvas.drawRect(
         Rect.fromLTWH(x * stripeWidth, 0, stripeWidth, height.toDouble()),
         Paint()..color = x.isEven ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
