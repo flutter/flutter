@@ -718,7 +718,7 @@ public class TextInputChannel {
    * A text input type.
    *
    * <p>If the {@link #type} is {@link TextInputType#NUMBER}, this {@code InputType} also reports
-   * whether that number {@link #isSigned} and {@link #isDecimal}.
+   * whether that number {@link #isSigned}, {@link #isDecimal}, and {@link #isPassword}.
    */
   public static class InputType {
     @NonNull
@@ -727,17 +727,29 @@ public class TextInputChannel {
       return new InputType(
           TextInputType.fromValue(json.getString("name")),
           json.optBoolean("signed", false),
-          json.optBoolean("decimal", false));
+          json.optBoolean("decimal", false),
+          json.optBoolean("password", false));
     }
 
     @NonNull public final TextInputType type;
     public final boolean isSigned;
     public final boolean isDecimal;
+    public final boolean isPassword;
 
+    /**
+     * Legacy 3-argument constructor kept for source compatibility with existing callsites (e.g.
+     * unit tests). Delegates to the 4-argument constructor with {@code isPassword = false}.
+     */
     public InputType(@NonNull TextInputType type, boolean isSigned, boolean isDecimal) {
+      this(type, isSigned, isDecimal, false);
+    }
+
+    public InputType(
+        @NonNull TextInputType type, boolean isSigned, boolean isDecimal, boolean isPassword) {
       this.type = type;
       this.isSigned = isSigned;
       this.isDecimal = isDecimal;
+      this.isPassword = isPassword;
     }
   }
 

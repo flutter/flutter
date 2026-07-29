@@ -3040,6 +3040,159 @@ public class TextInputPluginTest {
     assertEquals(editorInfo.hintLocales, new LocaleList(hintLocales));
   }
 
+  /**
+   * Helper that constructs a minimal {@link TextInputChannel.Configuration} with the given number
+   * variation flags and captures the resulting {@link EditorInfo} from {@link
+   * TextInputPlugin#createInputConnection}.
+   */
+  private EditorInfo editorInfoForNumberConfig(
+      boolean isSigned,
+      boolean isDecimal,
+      boolean isPassword,
+      boolean obscureText,
+      boolean enableIMEPersonalizedLearning,
+      TextInputChannel.Configuration.Autofill autofill) {
+    View testView = new View(ctx);
+    DartExecutor dartExecutor = mock(DartExecutor.class);
+    TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            obscureText,
+            false,
+            true,
+            enableIMEPersonalizedLearning,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.NUMBER, isSigned, isDecimal, isPassword),
+            null,
+            null,
+            autofill,
+            null,
+            null,
+            null));
+
+    EditorInfo editorInfo = new EditorInfo();
+    textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
+    return editorInfo;
+  }
+
+  @Test
+  public void inputType_number() {
+    EditorInfo editorInfo =
+        editorInfoForNumberConfig(false, false, false, false, true, null);
+    assertEquals(InputType.TYPE_CLASS_NUMBER, editorInfo.inputType);
+  }
+
+  @Test
+  public void inputType_numberWithPassword() {
+    EditorInfo editorInfo =
+        editorInfoForNumberConfig(false, false, true, false, true, null);
+    assertEquals(
+        InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD,
+        editorInfo.inputType);
+  }
+
+  @Test
+  public void inputType_numberWithSigned() {
+    EditorInfo editorInfo =
+        editorInfoForNumberConfig(true, false, false, false, true, null);
+    assertEquals(
+        InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED, editorInfo.inputType);
+  }
+
+  @Test
+  public void inputType_numberWithDecimal() {
+    EditorInfo editorInfo =
+        editorInfoForNumberConfig(false, true, false, false, true, null);
+    assertEquals(
+        InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, editorInfo.inputType);
+  }
+
+  @Test
+  public void inputType_numberWithSignedAndPassword() {
+    EditorInfo editorInfo =
+        editorInfoForNumberConfig(true, false, true, false, true, null);
+    assertEquals(
+        InputType.TYPE_CLASS_NUMBER
+            | InputType.TYPE_NUMBER_FLAG_SIGNED
+            | InputType.TYPE_NUMBER_VARIATION_PASSWORD,
+        editorInfo.inputType);
+  }
+
+  @Test
+  public void inputType_numberWithDecimalAndPassword() {
+    EditorInfo editorInfo =
+        editorInfoForNumberConfig(false, true, true, false, true, null);
+    assertEquals(
+        InputType.TYPE_CLASS_NUMBER
+            | InputType.TYPE_NUMBER_FLAG_DECIMAL
+            | InputType.TYPE_NUMBER_VARIATION_PASSWORD,
+        editorInfo.inputType);
+  }
+
+  @Test
+  public void inputType_numberObscureTextDoesNotSetPasswordVariation() {
+    // obscureText is orthogonal to the numeric password variation; it must not implicitly set
+    // TYPE_NUMBER_VARIATION_PASSWORD on a NUMBER field. This test is load-bearing because the
+    // obscureText branch lives in the same inputTypeFromTextInputType() function as the NUMBER
+    // branch — the two are the most plausible place for accidental coupling.
+    EditorInfo editorInfo =
+        editorInfoForNumberConfig(false, false, false, true, true, null);
+    assertEquals(InputType.TYPE_CLASS_NUMBER, editorInfo.inputType);
+    assertEquals(
+        0, editorInfo.inputType & InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+  }
+
+  @Test
+  public void inputType_numberWithPasswordJsonRoundTrip() throws JSONException, NoSuchFieldException {
+    // End-to-end coverage from JSON through Configuration.fromJson -> InputType.fromJson ->
+    // setTextInputClient -> createInputConnection. Catches typos in the "password" JSON key,
+    // gaps in Configuration.fromJson's recursive inputType handling, and any break in the
+    // JSON -> field -> plugin chain that the matrix tests bypass by calling new InputType(...)
+    // directly.
+    final JSONObject inputType = new JSONObject();
+    inputType.put("name", "TextInputType.number");
+    inputType.put("password", true);
+
+    final JSONObject arguments = new JSONObject();
+    arguments.put("inputAction", "TextInputAction.done");
+    arguments.put("textCapitalization", "TextCapitalization.none");
+    arguments.put("inputType", inputType);
+
+    final TextInputChannel.Configuration configuration =
+        TextInputChannel.Configuration.fromJson(arguments);
+
+    View testView = new View(ctx);
+    DartExecutor dartExecutor = mock(DartExecutor.class);
+    TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    textInputPlugin.setTextInputClient(0, configuration);
+
+    EditorInfo editorInfo = new EditorInfo();
+    textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
+
+    assertEquals(
+        InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD,
+        editorInfo.inputType);
+  }
+
   interface EventHandler {
     void sendAppPrivateCommand(View view, String action, Bundle data);
   }
