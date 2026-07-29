@@ -8,7 +8,7 @@ import Testing
 import InternalFlutterSwiftCommon
 import test_utils_swift
 
-@Suite struct LoggerTest {
+@Suite struct LoggerTests {
 
   @Test func testInitialization() {
     let writer = StringOutputWriter()
