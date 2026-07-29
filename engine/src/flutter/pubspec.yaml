@@ -202,6 +202,8 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
   dap:
     path: ./third_party/dart/third_party/pkg/dap
+  dap_adapters:
+    path: ./third_party/dart/pkg/dap_adapters
   dart_mcp:
     path: ./third_party/ai/pkgs/dart_mcp
   dart_runtime_service:
