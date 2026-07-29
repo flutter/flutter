@@ -69,7 +69,7 @@ class _MainWidgetState extends State<_MainWidget> {
                   hintText: 'Enter your email',
                 ),
                 enabled: false,
-                controller: TextEditingController(text: 'xyz'),
+                initialValue: 'xyz',
               ),
             ),
             ElevatedButton(

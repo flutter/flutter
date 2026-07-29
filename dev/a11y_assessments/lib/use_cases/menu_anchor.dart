@@ -59,9 +59,6 @@ class _MainWidgetState extends State<_MainWidget> {
               menuChildren: <Widget>[
                 MenuItemButton(
                   onPressed: () {
-                    if (!mounted) {
-                      return;
-                    }
                     setState(() {
                       _lastSelection = 'Item 1';
                     });
