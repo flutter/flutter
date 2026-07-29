@@ -58,7 +58,8 @@ public class FlutterLoader {
   // The key is set in the custom Gradle task found in
   // packages/flutter_tools/gradle/src/main/kotlin/tasks/GenerateEngineFlagsManifestTask.kt.
   // The command line flags set there are later loaded by ensureInitializationComplete.
-  private static final String ANDROID_ENGINE_SHELL_ARGS_KEY = "io.flutter.app.androidEngineShellArgs";
+  private static final String ANDROID_ENGINE_SHELL_ARGS_KEY =
+      "io.flutter.app.androidEngineShellArgs";
 
   private static FlutterLoader instance;
 
@@ -439,9 +440,7 @@ public class FlutterLoader {
                 } else if (!flag.allowedInRelease) {
                   Log.e(
                       TAG,
-                      "Flag "
-                          + arg
-                          + " is not allowed in release builds and will be ignored.");
+                      "Flag " + arg + " is not allowed in release builds and will be ignored.");
                   continue;
                 } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
                     || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
