@@ -46,6 +46,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -842,7 +843,19 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    // Deliberately does not use the untyped getSerializableExtra(String) overload: this Activity can
+    // be exported, so an arbitrary caller could otherwise supply a non-List Serializable and crash
+    // the app on launch via the unchecked cast.
+    try {
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
+        return getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS, ArrayList.class);
+      }
+      final Serializable extra = getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+      return extra instanceof List ? (List<String>) extra : null;
+    } catch (Exception e) {
+      Log.w(TAG, "Ignoring malformed " + EXTRA_DART_ENTRYPOINT_ARGS + " extra.", e);
+      return null;
+    }
   }
 
   /**

@@ -54,6 +54,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1110,7 +1111,7 @@ public class FlutterActivity extends Activity
    */
   @NonNull
   public String getDartEntrypointFunctionName() {
-    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT)) {
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT) && !isRemotelyOriginatedIntent()) {
       return getIntent().getStringExtra(EXTRA_DART_ENTRYPOINT);
     }
 
@@ -1125,6 +1126,22 @@ public class FlutterActivity extends Activity
   }
 
   /**
+   * Whether the {@code Intent} that launched this {@code Activity} came from a web context.
+   *
+   * <p>Android's {@code intent://} URL scheme lets a web page construct an {@code Intent} carrying
+   * arbitrary string extras and deliver it to any exported {@code Activity} that declares {@link
+   * Intent#CATEGORY_BROWSABLE}. Browsers add {@code CATEGORY_BROWSABLE} to such {@code Intent}s.
+   *
+   * <p>Extras that select which code the application executes must never be honoured from that
+   * source. Configuration supplied by the app itself - for example via {@link NewEngineIntentBuilder}
+   * - is unaffected, because an app launching its own {@code Activity} does not set this category.
+   */
+  private boolean isRemotelyOriginatedIntent() {
+    final Intent intent = getIntent();
+    return intent != null && intent.hasCategory(Intent.CATEGORY_BROWSABLE);
+  }
+
+  /**
    * The Dart entrypoint arguments will be passed as a list of string to Dart's entrypoint function.
    *
    * <p>A value of null means do not pass any arguments to Dart's entrypoint function.
@@ -1133,7 +1150,22 @@ public class FlutterActivity extends Activity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    if (isRemotelyOriginatedIntent()) {
+      return null;
+    }
+    // Deliberately does not use the untyped getSerializableExtra(String) overload. On an exported
+    // Activity that deserializes an arbitrary sender's object graph, and an unchecked cast of the
+    // result then crashes the app before it draws a frame if the value is not a List.
+    try {
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
+        return getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS, ArrayList.class);
+      }
+      final Serializable extra = getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+      return extra instanceof List ? (List<String>) extra : null;
+    } catch (Exception e) {
+      Log.w(TAG, "Ignoring malformed " + EXTRA_DART_ENTRYPOINT_ARGS + " extra.", e);
+      return null;
+    }
   }
 
   /**
@@ -1270,9 +1302,16 @@ public class FlutterActivity extends Activity
    */
   @NonNull
   protected BackgroundMode getBackgroundMode() {
-    if (getIntent().hasExtra(EXTRA_BACKGROUND_MODE)) {
-      return BackgroundMode.valueOf(getIntent().getStringExtra(EXTRA_BACKGROUND_MODE));
-    } else {
+    final String mode = getIntent().getStringExtra(EXTRA_BACKGROUND_MODE);
+    if (mode == null) {
+      return BackgroundMode.opaque;
+    }
+    // valueOf() throws IllegalArgumentException on an unknown name, and this Activity is exported
+    // by the default project template, so any caller could otherwise crash the app on launch.
+    try {
+      return BackgroundMode.valueOf(mode);
+    } catch (IllegalArgumentException e) {
+      Log.w(TAG, "Unknown " + EXTRA_BACKGROUND_MODE + " \"" + mode + "\"; using the default.");
       return BackgroundMode.opaque;
     }
   }
