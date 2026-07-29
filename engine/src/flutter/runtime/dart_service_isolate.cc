@@ -205,10 +205,12 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
     Dart_Handle dart_io_str = Dart_NewStringFromCString("dart:io");
     Dart_Handle io_lib = Dart_LookupLibrary(dart_io_str);
     if (!Dart_IsError(io_lib)) {
-      Dart_Handle function_name = Dart_NewStringFromCString("_getWatchSignalInternal");
+      Dart_Handle function_name =
+          Dart_NewStringFromCString("_getWatchSignalInternal");
       Dart_Handle signal_watch = Dart_Invoke(io_lib, function_name, 0, nullptr);
       if (!Dart_IsError(signal_watch)) {
-        result = Dart_SetField(library, Dart_NewStringFromCString("_signalWatch"), signal_watch);
+        result = Dart_SetField(
+            library, Dart_NewStringFromCString("_signalWatch"), signal_watch);
         SHUTDOWN_ON_ERROR(result);
       }
     }

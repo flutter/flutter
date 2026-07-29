@@ -403,9 +403,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
         {snapshot_asset_path, isolate_snapshot_instr_filename});
   }
 
-  command_line.GetOptionValue(
-      FlagForSwitch(Switch::VMServiceKernelPath),
-      &settings.vmservice_kernel_path);
+  command_line.GetOptionValue(FlagForSwitch(Switch::VMServiceKernelPath),
+                              &settings.vmservice_kernel_path);
 
   command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
                               &settings.temp_directory_path);

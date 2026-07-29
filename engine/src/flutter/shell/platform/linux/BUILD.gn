@@ -340,7 +340,8 @@ zip_bundle("flutter_gtk") {
   ]
   if (flutter_runtime_mode == "profile") {
     deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
-  } else if (flutter_runtime_mode == "debug" || flutter_runtime_mode == "debug_unopt") {
+  } else if (flutter_runtime_mode == "debug" ||
+             flutter_runtime_mode == "debug_unopt") {
     deps += [ "//flutter/shell/vmservice:vmservice_snapshot_dill" ]
   }
 
@@ -371,7 +372,8 @@ zip_bundle("flutter_gtk") {
         destination = "libvmservice_snapshot.so"
       },
     ]
-  } else if (flutter_runtime_mode == "debug" || flutter_runtime_mode == "debug_unopt") {
+  } else if (flutter_runtime_mode == "debug" ||
+             flutter_runtime_mode == "debug_unopt") {
     tmp_files += [
       {
         source = "$root_build_dir/vmservice_snapshot.dill"
