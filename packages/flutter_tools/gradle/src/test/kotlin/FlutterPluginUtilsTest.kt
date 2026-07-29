@@ -2775,7 +2775,7 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
         every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns "false"
-        every { project.hasProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP) } returns false
+        every { project.findProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP) } returns null
 
         FlutterPluginUtils.addTasksForEnableHcppManifest(project)
 
@@ -2798,9 +2798,6 @@ class FlutterPluginUtilsTest {
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
         every { project.findProperty(FlutterPluginUtils.PROP_ENABLE_HCPP) } returns enableHcppProperty
-        every {
-            project.hasProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP)
-        } returns (explicitEnableHcppProperty != null)
         every {
             project.findProperty(FlutterPluginUtils.PROP_EXPLICIT_ENABLE_HCPP)
         } returns explicitEnableHcppProperty

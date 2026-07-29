@@ -1343,10 +1343,15 @@ abstract class FlutterCommand extends Command<void> {
   /// Commands that launch the app (run/test/drive) forward `--enable-hcpp` to
   /// the device as a runtime override, which takes priority over the built
   /// manifest.
-  bool? get explicitEnableHcpp =>
-      (argResults?.options.contains('enable-hcpp') ?? false) && argResults!.wasParsed('enable-hcpp')
-      ? boolArg('enable-hcpp')
-      : null;
+  bool? get explicitEnableHcpp {
+    final ArgResults? results = argResults;
+    if (results == null ||
+        !results.options.contains('enable-hcpp') ||
+        !results.wasParsed('enable-hcpp')) {
+      return null;
+    }
+    return boolArg('enable-hcpp');
+  }
 
   /// The requested HCPP default for an Android artifact:
   /// [explicitEnableHcpp] if supplied, otherwise defaults to false.

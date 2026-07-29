@@ -1186,11 +1186,7 @@ object FlutterPluginUtils {
         val enableHcpp: Boolean =
             project.findProperty(PROP_ENABLE_HCPP)?.toString()?.toBoolean() ?: false
         val explicitEnableHcpp: Boolean? =
-            if (project.hasProperty(PROP_EXPLICIT_ENABLE_HCPP)) {
-                project.findProperty(PROP_EXPLICIT_ENABLE_HCPP)?.toString()?.toBoolean()
-            } else {
-                null
-            }
+            project.findProperty(PROP_EXPLICIT_ENABLE_HCPP)?.toString()?.toBoolean()
         if (!enableHcpp && explicitEnableHcpp == null) {
             return
         }
