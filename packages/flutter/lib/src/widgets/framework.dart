@@ -6267,7 +6267,8 @@ class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedElement(InheritedWidget super.widget);
 
-  /// Creates an [InheritedElement] that has many dependencies but will infrequently change.
+  /// Creates an [InheritedElement] that has many dependencies but changes infrequently.
+  ///
   /// {@template flutter.widgets.InheritedElement.ubiquitous}
   /// This provides a performance tradeoff where building
   /// the [Widget]s is faster but performing updates is slower.
