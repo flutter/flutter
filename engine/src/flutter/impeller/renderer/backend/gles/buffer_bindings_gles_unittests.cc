@@ -367,18 +367,10 @@ TEST(BufferBindingsGLESTest,
 
 namespace {
 
-class BindTexturesTestWorker : public ReactorGLES::Worker {
- public:
-  bool CanReactorReactOnCurrentThreadNow(
-      const ReactorGLES& reactor) const override {
-    return true;
-  }
-};
-
 // Owns the reactor, sampler, and metadata behind a set of texture bindings.
 struct BoundTexturesFixture {
   std::shared_ptr<ReactorGLES> reactor;
-  std::shared_ptr<BindTexturesTestWorker> worker;
+  std::shared_ptr<TestWorker> worker;
   std::unique_ptr<SamplerLibrary> sampler_library;
   raw_ptr<const Sampler> sampler;
   std::vector<std::unique_ptr<ShaderMetadata>> metadata;
@@ -387,7 +379,7 @@ struct BoundTexturesFixture {
 
   explicit BoundTexturesFixture(std::unique_ptr<ProcTableGLES> proc_table) {
     reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
-    worker = std::make_shared<BindTexturesTestWorker>();
+    worker = std::make_shared<TestWorker>();
     reactor->AddWorker(worker);
     sampler_library = std::make_unique<SamplerLibraryGLES>(
         /*supports_decal_sampler_address_mode=*/false);
