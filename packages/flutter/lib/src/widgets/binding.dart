@@ -1456,7 +1456,28 @@ mixin WidgetsBinding
       }
       return true;
     }());
-    ensureVisualUpdate();
+    if (schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      // ensureVisualUpdate() is a no-op in this phase (see its doc comment).
+      // If this build was scheduled while BuildOwner.buildScope() was still
+      // running, that frame's own dirty-flush loop will still pick it up. But
+      // a build can also be scheduled *after* buildScope() has returned for
+      // this frame yet *before* the frame has finished producing - notably
+      // from State.dispose() while BuildOwner.finalizeTree() is unmounting
+      // elements (see WidgetsBinding.drawFrame()). In that case nothing else
+      // requests a frame this cycle, and because BuildOwner only calls
+      // onBuildScheduled() on the false-to-true edge of its internal flag, no
+      // later call re-triggers it either - the app stops producing frames
+      // entirely.
+      //
+      // scheduleFrame() can be called mid-frame (see its doc comment) and
+      // requests the *next* frame directly, so do that instead of relying on
+      // ensureVisualUpdate() here.
+      //
+      // See: https://github.com/flutter/flutter/issues/189976
+      scheduleFrame();
+    } else {
+      ensureVisualUpdate();
+    }
   }
 
   /// Whether we are currently in a frame. This is used to verify
