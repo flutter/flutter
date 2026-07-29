@@ -274,7 +274,6 @@ android_java_sources = [
   "io/flutter/embedding/engine/image/ImageUtils.java",
   "io/flutter/embedding/engine/image/MediaMetadataReader.java",
   "io/flutter/embedding/engine/image/Metadata.java",
-  "io/flutter/embedding/engine/launchargs/FlutterLaunchArgsProvider.java",
   "io/flutter/embedding/engine/loader/ApplicationInfoLoader.java",
   "io/flutter/embedding/engine/loader/FlutterApplicationInfo.java",
   "io/flutter/embedding/engine/loader/FlutterLoader.java",
@@ -394,13 +393,6 @@ android_java_sources = [
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]
-
-if (flutter_runtime_mode == "release" ||
-    flutter_runtime_mode == "jit_release") {
-  android_java_sources += [ "../android_release/io/flutter/embedding/engine/launchargs/FlutterLaunchArgsProviderImpl.java" ]
-} else {
-  android_java_sources += [ "../android_debug/io/flutter/embedding/engine/launchargs/FlutterLaunchArgsProviderImpl.java" ]
-}
 
 embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/activity-1.8.1.jar",
