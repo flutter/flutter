@@ -82,13 +82,13 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
             overlayColor: WidgetStateProperty<Color?>.fromMap(
               // If neither of these states is active, the property will
               // resolve to null, deferring to the default overlay color.
-              <WidgetState, Color>{WidgetState.focused: Colors.red, WidgetState.hovered: Colors.blue},
+              <WidgetState, Color>{.focused: Colors.red, .hovered: Colors.blue},
             ),
             foregroundColor: WidgetStateProperty<Color?>.fromMap(
               // "WidgetState.focused | WidgetState.hovered" could be used
               // instead of separate map keys, but this setup allows setting
               // the button style to a constant value for improved efficiency.
-              <WidgetState, Color>{WidgetState.focused: Colors.white, WidgetState.hovered: Colors.white},
+              <WidgetState, Color>{.focused: Colors.white, .hovered: Colors.white},
             ),
           ),
           onPressed: () => _handleOnPressed(),
