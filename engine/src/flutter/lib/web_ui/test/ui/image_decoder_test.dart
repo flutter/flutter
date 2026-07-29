@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -166,10 +165,7 @@ Future<void> testMain() async {
     () async {
       final mockBody = JSObject();
 
-      final mockResponse = _TestHttpFetchResponse(
-        stream: mockBody as DomReadableStream,
-        contentLength: null,
-      );
+      final mockResponse = _TestHttpFetchResponse(stream: mockBody as DomReadableStream);
 
       final DomReadableStream result = await handleProgressAndGetStream(
         mockResponse,
