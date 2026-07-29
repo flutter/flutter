@@ -163,7 +163,6 @@ enum HostArtifact {
   idevicesyslog('idevicesyslog'),
   iproxy('iproxy'),
 
-  @Deprecated('This artifact is no longer checked or used by Flutter.')
   idevicescreenshot('idevicescreenshot'),
 
   /// The root of the sky_engine package.
