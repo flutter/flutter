@@ -13,7 +13,6 @@ import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../features.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
@@ -155,10 +154,9 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Source> get outputs => <Source>[
-    const Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
-    if (featureFlags.isRecordUseEnabled)
-      const Source.pattern('{BUILD_DIR}/${KernelSnapshot.recordedUsesFileName}'),
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
+    Source.pattern('{BUILD_DIR}/${KernelSnapshot.recordedUsesFileName}'),
   ];
 
   static const depfile = 'kernel_snapshot_program.d';
@@ -216,14 +214,14 @@ class KernelSnapshot extends Target {
     final File recordedUsesFile = environment.buildDir.childFile(
       KernelSnapshot.recordedUsesFileName,
     );
-    if (featureFlags.isRecordUseEnabled) {
-      if (buildMode.isPrecompiled) {
-        extraFrontEndOptions.add('--recorded-uses=${recordedUsesFile.path}');
-      } else {
-        // Produce an empty file to satisfy the build system in JIT mode.
-        // Always overwrite to avoid stale data.
-        recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
-      }
+    if (buildMode.isPrecompiled) {
+      // Always pass --recorded-uses in AOT mode because both recorded uses for
+      // link hooks and icon tree shaking depend on this file.
+      extraFrontEndOptions.add('--recorded-uses=${recordedUsesFile.path}');
+    } else {
+      // Produce an empty file to satisfy the build system in JIT mode.
+      // Always overwrite to avoid stale data.
+      recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
     }
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];

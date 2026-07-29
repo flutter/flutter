@@ -20,6 +20,10 @@ void main() async {
   print('HELLO: $hello');
   print('FRIEND: $friend');
   print('COUNT: $count');
+  // Intentionally missing fontFamily to test that icon tree shaking detects
+  // constant IconData instances with null fontFamily.
+  const dummyIcon = IconData(0x1234);
+  print('ICON: ${dummyIcon.codePoint}');
   runApp(MyApp(hello: hello, friend: friend, count: count));
 }
 

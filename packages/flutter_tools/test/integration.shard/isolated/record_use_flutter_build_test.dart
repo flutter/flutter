@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Timeout(Duration(minutes: 10))
+library;
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -37,6 +40,16 @@ void main() {
         if (result.exitCode != 0) {
           throw Exception(
             'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+          );
+        }
+        if (target.first == hostOs) {
+          // Verify that IconTreeShaker detects dummyIcon with null fontFamily.
+          // Icon tree shaking for this icon fails with a trace message, but the overall build succeeds.
+          expect(
+            result.stdout,
+            contains(
+              contains('Expected to find fontFamily for constant IconData with codepoint: 4660'),
+            ),
           );
         }
         final Directory buildTargetDir = appRoot
