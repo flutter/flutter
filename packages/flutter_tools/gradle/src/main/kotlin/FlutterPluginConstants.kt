@@ -10,14 +10,14 @@ import org.gradle.api.GradleException
 //                 kotlin conversion is complete.
 object FlutterPluginConstants {
     /** The platforms that can be passed to the `--Ptarget-platform` flag. */
-    private const val PLATFORM_ARM32 = "android-arm"
-    private const val PLATFORM_ARM64 = "android-arm64"
-    private const val PLATFORM_X86_64 = "android-x64"
+    private const val PLATFORM_ARM32 = platformArm32
+    private const val PLATFORM_ARM64 = platformArm64
+    private const val PLATFORM_X86_64 = platformX86_64
 
     /** The ABI architectures supported by Flutter. */
-    private const val ARCH_ARM32 = "armeabi-v7a"
-    private const val ARCH_ARM64 = "arm64-v8a"
-    private const val ARCH_X86_64 = "x86_64"
+    private const val ARCH_ARM32 = archArm32
+    private const val ARCH_ARM64 = archArm64
+    private const val ARCH_X86_64 = archX86_64
 
     const val INTERMEDIATES_DIR = "intermediates"
     const val FLUTTER_STORAGE_BASE_URL = "FLUTTER_STORAGE_BASE_URL"
@@ -38,10 +38,10 @@ object FlutterPluginConstants {
      */
     @JvmStatic val ABI_VERSION =
         mapOf(
-            ARCH_ARM32 to 1,
-            ARCH_ARM64 to 2,
+            ARCH_ARM32 to abiVersionArm32.toInt(),
+            ARCH_ARM64 to abiVersionArm64.toInt(),
             // 3 was reserved for ARCH_X86, whose support was removed in https://github.com/flutter/flutter/pull/169884
-            ARCH_X86_64 to 4
+            ARCH_X86_64 to abiVersionX86_64.toInt()
         )
 
     /** When split is enabled, multiple APKs are generated per each ABI. */
