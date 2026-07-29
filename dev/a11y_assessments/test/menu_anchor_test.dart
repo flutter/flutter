@@ -23,6 +23,16 @@ void main() {
       expect(find.widgetWithText(MenuItemButton, 'Item 1'), findsWidgets);
       await tester.tap(find.widgetWithText(MenuItemButton, 'Item 1').last, warnIfMissed: false);
       await tester.pumpAndSettle();
+      expect(find.text('Last Selection: Item 1'), findsOneWidget);
+      expect(
+        find.ancestor(
+          of: find.text('Last Selection: Item 1'),
+          matching: find.byWidgetPredicate(
+            (Widget w) => w is Semantics && w.properties.liveRegion == true,
+          ),
+        ),
+        findsOneWidget,
+      );
     }
 
     // Test the disabled menu anchor

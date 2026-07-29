@@ -22,8 +22,15 @@ class MenuAnchorUseCase extends UseCase {
   Widget build(BuildContext context) => const _MainWidget();
 }
 
-class _MainWidget extends StatelessWidget {
+class _MainWidget extends StatefulWidget {
   const _MainWidget();
+
+  @override
+  State<_MainWidget> createState() => _MainWidgetState();
+}
+
+class _MainWidgetState extends State<_MainWidget> {
+  String _lastSelection = 'None';
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +39,7 @@ class _MainWidget extends StatelessWidget {
       appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: ListView(
         children: <Widget>[
+          Semantics(liveRegion: true, child: Text('Last Selection: $_lastSelection')),
           Semantics(
             label: 'Enabled menu anchor',
             child: MenuAnchor(
@@ -49,7 +57,17 @@ class _MainWidget extends StatelessWidget {
                 );
               },
               menuChildren: <Widget>[
-                MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
+                MenuItemButton(
+                  onPressed: () {
+                    if (!mounted) {
+                      return;
+                    }
+                    setState(() {
+                      _lastSelection = 'Item 1';
+                    });
+                  },
+                  child: const Text('Item 1'),
+                ),
                 const MenuItemButton(child: Text('Disabled Item')),
               ],
             ),
