@@ -448,8 +448,9 @@ def ShouldUpdateToolchain():
     toolchain_data = json.load(tempf)
   version = toolchain_data['version']
   env_version = GetVisualStudioVersion()
+  # If there's a mismatch between the version set in the environment and the one
+  # in the json file then the toolchain should be updated.
   return version != env_version
-
 
 
 def Update(force=False, no_download=False):
@@ -512,8 +513,6 @@ def Update(force=False, no_download=False):
     if no_download:
       get_toolchain_args.append('--no-download')
     subprocess.check_call(get_toolchain_args)
-
-
 
   return 0
 
