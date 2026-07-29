@@ -897,9 +897,7 @@ void main() {
         expect(findFadeInImage(tester).target.opacity, 1);
       });
 
-      testWidgets('asserts when a non-default fadeOutDuration is provided', (
-        WidgetTester tester,
-      ) async {
+      testWidgets('asserts when fadeOutDuration is set', (WidgetTester tester) async {
         expect(
           () => FadeInImage(
             placeholder: TestImageProvider(placeholderImage),
@@ -911,9 +909,7 @@ void main() {
         );
       });
 
-      testWidgets('asserts when a non-default fadeOutCurve is provided', (
-        WidgetTester tester,
-      ) async {
+      testWidgets('asserts when fadeOutCurve is set', (WidgetTester tester) async {
         expect(
           () => FadeInImage(
             placeholder: TestImageProvider(placeholderImage),
