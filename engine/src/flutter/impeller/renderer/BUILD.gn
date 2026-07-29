@@ -108,6 +108,7 @@ template("renderer_unittests_component") {
     "blit_pass_unittests.cc",
     "capabilities_unittests.cc",
     "device_buffer_unittests.cc",
+    "pipeline_compile_queue_unittests.cc",
     "pipeline_descriptor_unittests.cc",
     "pipeline_library_unittests.cc",
     "pool_unittests.cc",

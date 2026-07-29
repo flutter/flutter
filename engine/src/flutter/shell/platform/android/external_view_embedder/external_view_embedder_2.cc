@@ -177,7 +177,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         } else {
           HideOverlayLayerIfNeeded();
         }
-        jni_facade->swapTransaction();
 
         for (int64_t view_id : composition_order) {
           DlRect view_rect = GetViewRect(view_id, view_params);
@@ -200,6 +199,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           jni_facade->hidePlatformView2(view_id);
         }
 
+        jni_facade->swapTransaction();
         jni_facade_->onEndFrame2();
       }));
 
