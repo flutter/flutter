@@ -3110,7 +3110,7 @@ class FakeDevice extends Fake implements Device {
     this.isConnected = true,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.platformType = PlatformType.android,
-    TargetPlatform deviceTargetPlatform = TargetPlatform.android,
+    TargetPlatform deviceTargetPlatform = const TargetPlatform(.android, .unknown),
   }) : id = deviceId ?? 'xxx',
        name = deviceName ?? 'test',
        _isSupported = deviceSupported,
@@ -3126,7 +3126,7 @@ class FakeDevice extends Fake implements Device {
     this.isConnected = true,
     this.connectionInterface = DeviceConnectionInterface.wireless,
     this.platformType = PlatformType.android,
-    TargetPlatform deviceTargetPlatform = TargetPlatform.android,
+    TargetPlatform deviceTargetPlatform = const TargetPlatform(.android, .unknown),
   }) : id = deviceId ?? 'xxx',
        name = deviceName ?? 'test',
        _isSupported = deviceSupported,
@@ -3142,7 +3142,7 @@ class FakeDevice extends Fake implements Device {
     this.isConnected = true,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.platformType = PlatformType.fuchsia,
-    TargetPlatform deviceTargetPlatform = TargetPlatform.fuchsia_arm64,
+    TargetPlatform deviceTargetPlatform = const TargetPlatform(.fuchsia, .arm64),
   }) : id = deviceId ?? 'xxx',
        name = deviceName ?? 'test',
        _isSupported = deviceSupported,
@@ -3204,7 +3204,7 @@ class FakeDevice extends Fake implements Device {
   Category? get category => Category.mobile;
 
   @override
-  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).devicePlatformName;
 }
 
 class FakeIOSDevice extends Fake implements IOSDevice {
@@ -3314,7 +3314,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   Future<String> get targetPlatformDisplayName async => 'ios';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.tester, .unknown);
 }
 
 class FakeTerminal extends Fake implements AnsiTerminal {

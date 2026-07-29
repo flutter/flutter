@@ -2201,38 +2201,32 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
 // if none is supported
 @protected
 DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
-  switch (targetPlatform) {
-    case TargetPlatform.android:
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
+  switch (targetPlatform.type) {
+    case .android:
       return DevelopmentArtifact.androidGenSnapshot;
-    case TargetPlatform.web_javascript:
+    case .web:
       return DevelopmentArtifact.web;
-    case TargetPlatform.ios:
+    case .ios:
       return DevelopmentArtifact.iOS;
-    case TargetPlatform.darwin:
+    case .macos:
       if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
       return null;
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
+    case .windows:
       if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }
       return null;
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_riscv64:
+    case .linux:
       if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.tester:
-    case TargetPlatform.unsupported:
+    case .fuchsia:
+    case .tester:
+    case .custom:
+    case .unsupported:
       return null;
   }
 }

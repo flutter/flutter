@@ -169,7 +169,7 @@ void main() {
           applicationPackageFactory.applicationBinaryRequested!.readAsStringSync(),
           'dummy content',
         );
-        expect(applicationPackageFactory.platformRequested, TargetPlatform.android_arm);
+        expect(applicationPackageFactory.platformRequested, const TargetPlatform(.android, .armv7));
 
         expect(fakeDevice.startAppPackage, applicationPackage);
 
@@ -254,7 +254,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<String> get emulatorId async => 'device';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.android, .armv7);
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.arm64;
