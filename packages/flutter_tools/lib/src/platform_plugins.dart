@@ -46,7 +46,7 @@ bool _isValidPluginIdentifier(String value) => _pluginIdentifierPattern.hasMatch
 /// `.dart`. Plugin `fileName`/`dartFileName` values are interpolated into an
 /// `import` in the generated registrant, so they must not contain quotes,
 /// semicolons, whitespace or parent-directory segments.
-final RegExp pluginDartFileNamePattern = RegExp(r'^[a-zA-Z0-9_][a-zA-Z0-9_./-]*\.dart$');
+final RegExp pluginDartFileNamePattern = RegExp(r'^\w[\w./-]*\.dart$');
 
 /// Whether [value] is a safe relative Dart source path for a plugin. Callers
 /// first confirm the value is a String via the schema type checks.
