@@ -935,7 +935,7 @@ class ScreenshotDevice extends Fake implements Device {
   final id = 'fake_device';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.android, .unknown);
 
   @override
   bool supportsScreenshot = true;
@@ -1130,7 +1130,7 @@ class FakeIosDevice extends Fake implements IOSDevice {
   bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.ios, .arm64);
 }
 
 class FakeChromiumDriveDevice extends Fake implements ChromiumDevice {
@@ -1162,7 +1162,7 @@ class FakeChromiumDriveDevice extends Fake implements ChromiumDevice {
   Future<String> get sdkNameAndVersion async => 'Google Chrome 0.0';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.web, .unknown);
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {

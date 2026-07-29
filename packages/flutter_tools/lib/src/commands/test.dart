@@ -640,7 +640,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'Ensure that `flutter doctor` shows at least one connected device',
         );
       }
-      if (integrationTestDevice.platformType == PlatformType.web) {
+      if (integrationTestDevice.platformType == .web) {
         // TODO(jiahaog): Support web. https://github.com/flutter/flutter/issues/66264
         throwToolExit('Web devices are not supported for integration tests yet.');
       }
@@ -802,7 +802,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       packageConfigPath: packageConfigPath,
       flavor: flavor,
       includeAssetsFromDevDependencies: true,
-      targetPlatform: TargetPlatform.tester,
+      targetPlatform: const TargetPlatform(.tester, .unknown),
     );
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
@@ -811,7 +811,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
-        targetPlatform: TargetPlatform.tester,
+        targetPlatform: const TargetPlatform(.tester, .unknown),
         impellerStatus: impellerStatus,
         processManager: globals.processManager,
         fileSystem: globals.fs,

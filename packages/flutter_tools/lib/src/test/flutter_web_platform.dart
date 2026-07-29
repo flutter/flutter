@@ -246,7 +246,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(
       _artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
+        platform: const TargetPlatform(.web, .unknown),
       ),
       'lib',
       'dev_compiler',
@@ -260,7 +260,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(
       _artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
+        platform: const TargetPlatform(.web, .unknown),
       ),
       'lib',
       'dev_compiler',
@@ -274,7 +274,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(
       _artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
+        platform: const TargetPlatform(.web, .unknown),
       ),
       'lib',
       'dev_compiler',
@@ -539,7 +539,11 @@ window.\$dartLoader.loader.nextAttempt();
     final File canvasKitFile = _canvasKitFile(relativePath);
     return shelf.Response.ok(
       canvasKitFile.openRead(),
-      headers: <String, Object>{HttpHeaders.contentTypeHeader: contentType},
+      headers: <String, Object>{
+        HttpHeaders.contentTypeHeader: contentType,
+        HttpHeaders.cacheControlHeader: 'public, max-age=3600',
+        HttpHeaders.contentLengthHeader: canvasKitFile.lengthSync().toString(),
+      },
     );
   }
 

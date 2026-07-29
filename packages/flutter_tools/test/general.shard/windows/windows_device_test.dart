@@ -24,7 +24,7 @@ void main() {
     final File dummyFile = MemoryFileSystem.test().file('dummy');
     final windowsApp = PrebuiltWindowsApp(executable: 'foo', applicationPackage: dummyFile);
 
-    expect(await windowsDevice.targetPlatform, TargetPlatform.windows_x64);
+    expect(await windowsDevice.targetPlatform, const TargetPlatform(.windows, .x64));
     expect(windowsDevice.name, 'Windows');
     expect(await windowsDevice.installApp(windowsApp), true);
     expect(await windowsDevice.uninstallApp(windowsApp), true);
