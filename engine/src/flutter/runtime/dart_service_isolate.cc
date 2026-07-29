@@ -201,14 +201,32 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
       Dart_NewBoolean(enable_service_port_fallback));
   SHUTDOWN_ON_ERROR(result);
 
+  if (is_experimental_vmservice) {
+    Dart_Handle dart_io_str = Dart_NewStringFromCString("dart:io");
+    Dart_Handle io_lib = Dart_LookupLibrary(dart_io_str);
+    if (!Dart_IsError(io_lib)) {
+      Dart_Handle function_name = Dart_NewStringFromCString("_getWatchSignalInternal");
+      Dart_Handle signal_watch = Dart_Invoke(io_lib, function_name, 0, nullptr);
+      if (!Dart_IsError(signal_watch)) {
+        result = Dart_SetField(library, Dart_NewStringFromCString("_signalWatch"), signal_watch);
+        SHUTDOWN_ON_ERROR(result);
+      }
+    }
+  }
+
   // Make runnable.
   Dart_ExitScope();
   Dart_ExitIsolate();
   *error = Dart_IsolateMakeRunnable(isolate);
   if (*error) {
-    Dart_EnterIsolate(isolate);
-    Dart_ShutdownIsolate();
-    return false;
+    if (strcmp(*error, "Isolate is already runnable") == 0) {
+      free(*error);
+      *error = nullptr;
+    } else {
+      Dart_EnterIsolate(isolate);
+      Dart_ShutdownIsolate();
+      return false;
+    }
   }
   Dart_EnterIsolate(isolate);
   Dart_EnterScope();
