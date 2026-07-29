@@ -17,7 +17,7 @@ final _paintContext =
     _paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
 
 typedef ParagraphImageGenerator = Uint8List Function();
-
+/*
 /// Resizes the global paint canvas to the given width and height and updates the device pixel ratio.
 ///
 /// The paint canvas is scaled by the device pixel ratio to avoid pixelation
@@ -29,7 +29,7 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   _paintCanvas.style.height = '${rect.height / devicePixelRatio}px';
   _paintContext.scale(devicePixelRatio, devicePixelRatio);
 }
-
+*/
 /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text block.
 (ui.Rect sourceRect, ui.Rect targetRect) _calculateBlock(TextBlock block, ui.Offset offset) {
   final double dpr = ui.window.devicePixelRatio;
@@ -48,28 +48,100 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
 }
 
 /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph
-(ui.Rect sourceRect, ui.Rect targetRect) _calculateParagraph(
+(ui.Rect sourceRect, ui.Rect targetRect, double padLeft, double padTop) _calculateParagraph(
   WebParagraph paragraph,
   ui.Offset offset,
   double devicePixelRatio,
 ) {
-  // Define the paragraph rect (using advances, not selected rects)
-  // Source rect must take in account the scaling
-  final sourceRect = ui.Rect.fromLTWH(
-    0,
-    0,
-    ((paragraph.paintBounds.width) * devicePixelRatio).ceilToDouble(),
-    ((paragraph.paintBounds.height) * devicePixelRatio).ceilToDouble(),
-  );
-  // Target rect will be scaled by the canvas transform, so we don't scale it here
+  final dpr = devicePixelRatio;
+
+  // Calculate how far the ink bleeds outside the stable logical layout box
+  final double logicalBleedLeft = paragraph.paintBounds.left < 0 ? -paragraph.paintBounds.left : 0.0;
+  final double logicalBleedTop = paragraph.paintBounds.top < 0 ? -paragraph.paintBounds.top : 0.0;
+  final double logicalBleedRight = paragraph.paintBounds.right > paragraph.longestLine ? paragraph.paintBounds.right - paragraph.longestLine : 0.0;
+  final double logicalBleedBottom = paragraph.paintBounds.bottom > paragraph.height ? paragraph.paintBounds.bottom - paragraph.height : 0.0;
+
+  // Convert the bleeds to physical pixels
+  final double physBleedLeft = logicalBleedLeft * dpr;
+  final double physBleedTop = logicalBleedTop * dpr;
+  final double physBleedRight = logicalBleedRight * dpr;
+  final double physBleedBottom = logicalBleedBottom * dpr;
+
+  // Quantize the physical padding into chunks of 32 pixels
+  // This scales dynamically with zoom/font size, but prevents per-keystroke jitter!
+  const chunkSize = 32.0;
+  final double padLeft = (physBleedLeft / chunkSize).ceil() * chunkSize;
+  final double padTop = (physBleedTop / chunkSize).ceil() * chunkSize;
+  final double padRight = (physBleedRight / chunkSize).ceil() * chunkSize;
+  final double padBottom = (physBleedBottom / chunkSize).ceil() * chunkSize;
+
+  // Calculate total physical buffer dimensions using the stable layout + quantized padding
+  final double layoutPhysWidth = (paragraph.longestLine * dpr).ceilToDouble();
+  final double layoutPhysHeight = (paragraph.height * dpr).ceilToDouble();
+
+  int physicalWidth = (padLeft + layoutPhysWidth + padRight).toInt();
+  int physicalHeight = (padTop + layoutPhysHeight + padBottom).toInt();
+
+  // Enforce even dimensions to prevent WebGL odd-dimension texture sampling.
+  if (physicalWidth % 2 != 0) {
+    physicalWidth += 1;
+  }
+  if (physicalHeight % 2 != 0) {
+    physicalHeight += 1;
+  }
+
+  final sourceRect = ui.Rect.fromLTWH(0, 0, physicalWidth.toDouble(), physicalHeight.toDouble());
+
+  // Lock the global layout anchor to the physical grid
+  final double anchorPhysicalX = (offset.dx * dpr).roundToDouble();
+  final double anchorPhysicalY = (offset.dy * dpr).roundToDouble();
+
+  // Position the target rect offset by our quantized physical padding
   final targetRect = ui.Rect.fromLTWH(
-    (offset.dx + paragraph.paintBounds.left).floorToDouble(),
-    (offset.dy + paragraph.paintBounds.top).floorToDouble(),
-    (sourceRect.width / devicePixelRatio).ceilToDouble(),
-    (sourceRect.height / devicePixelRatio).ceilToDouble(),
+    (anchorPhysicalX - padLeft) / dpr,
+    (anchorPhysicalY - padTop) / dpr,
+    physicalWidth / dpr,
+    physicalHeight / dpr,
   );
 
-  return (sourceRect, targetRect);
+  return (sourceRect, targetRect, padLeft, padTop);
+}
+
+(ui.Rect sourceRect, ui.Rect targetRect, double physicalTx, double physicalTy) _calculateParagraph1(
+  WebParagraph paragraph,
+  ui.Offset offset,
+  double devicePixelRatio,
+) {
+  final dpr = devicePixelRatio;
+
+  // Calculate strict physical integer bounds
+  final int bufferPhysicalLeft = (paragraph.paintBounds.left * dpr).floor();
+  final int bufferPhysicalTop = (paragraph.paintBounds.top * dpr).floor();
+  final int bufferPhysicalRight = (paragraph.paintBounds.right * dpr).ceil();
+  final int bufferPhysicalBottom = (paragraph.paintBounds.bottom * dpr).ceil();
+
+  int physicalWidth = bufferPhysicalRight - bufferPhysicalLeft;
+  int physicalHeight = bufferPhysicalBottom - bufferPhysicalTop;
+
+  // Pad to even dimensions to prevent WebGL sub-pixel texture sampling
+  physicalWidth += physicalWidth % 2 != 0 ? 1 : 0;
+  physicalHeight += physicalHeight % 2 != 0 ? 1 : 0;
+
+  final sourceRect = ui.Rect.fromLTWH(0, 0, physicalWidth.toDouble(), physicalHeight.toDouble());
+
+  // Lock the global canvas anchor to the physical grid
+  final double anchorPhysicalX = (offset.dx * dpr).roundToDouble();
+  final double anchorPhysicalY = (offset.dy * dpr).roundToDouble();
+
+  // Combine the physical anchor with the physical ink offset
+  final targetRect = ui.Rect.fromLTWH(
+    (anchorPhysicalX + bufferPhysicalLeft) / dpr,
+    (anchorPhysicalY + bufferPhysicalTop) / dpr,
+    physicalWidth / dpr,
+    physicalHeight / dpr,
+  );
+
+  return (sourceRect, targetRect, bufferPhysicalLeft.toDouble(), bufferPhysicalTop.toDouble());
 }
 
 /// Paints a [WebParagraph].
@@ -139,14 +211,14 @@ abstract class WebParagraphPainter {
   }
 
   /// Paints the entire paragraph on Canvas2D
-  void paint(ui.Canvas canvas, ui.Offset offset) {
+void paint(ui.Canvas canvas, ui.Offset offset) {
     if (_paragraph.text.isEmpty) {
       return;
     }
 
     final TextLayout layout = _paragraph.getLayout();
 
-    final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateParagraph(
+    final (ui.Rect sourceRect, ui.Rect targetRect, double padLeft, double padTop) = _calculateParagraph(
       _paragraph,
       offset,
       ui.window.devicePixelRatio,
@@ -154,12 +226,9 @@ abstract class WebParagraphPainter {
 
     const epsilon = 0.001;
     if (sourceRect.width.abs() < epsilon || sourceRect.height.abs() < epsilon) {
-      // If there is nothing to draw getImageData fails
       return;
     }
 
-    // Draw background blocks directly on the output canvas
-    // so it will be cached together with the text blocks on Canvas2D canvas
     _paintAllBlocks(StyleElements.background, canvas, offset);
 
     paintParagraphText(
@@ -167,12 +236,17 @@ abstract class WebParagraphPainter {
       sourceRect,
       targetRect,
       generateParagraphImage: () {
-        _resizePaintCanvas(ui.window.devicePixelRatio, sourceRect);
+        final double dpr = ui.window.devicePixelRatio;
 
-        // We only want to paint the actual paint bounds of the paragraph.
-        _paintContext.translate(-_paragraph.paintBounds.left, -_paragraph.paintBounds.top);
+        _paintCanvas.width = sourceRect.width.toInt();
+        _paintCanvas.height = sourceRect.height.toInt();
+        _paintCanvas.style.width = '';
+        _paintCanvas.style.height = '';
 
-        // Fill out all the blocks on Canvas2D canvas
+        // Apply the exact, chunked physical padding to the DOM matrix.
+        // The text origin will always land exactly on an integer physical pixel.
+        _paintContext.setTransform(dpr, 0, 0, dpr, padLeft, padTop);
+
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.shadows, layout);
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.text, layout);
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.decorations, layout);
@@ -180,8 +254,8 @@ abstract class WebParagraphPainter {
         final DomImageData imageData = _paintContext.getImageData(
           0,
           0,
-          sourceRect.width.ceil(),
-          sourceRect.height.ceil(),
+          sourceRect.width.toInt(),
+          sourceRect.height.toInt(),
         );
         return imageData.data.buffer.asUint8List();
       },
