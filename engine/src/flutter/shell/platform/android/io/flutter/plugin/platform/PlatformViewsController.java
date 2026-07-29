@@ -357,15 +357,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                 physicalHeight,
                 () -> {
                   unlockInputConnection(vdController);
-                  // Converting back to logic pixels requires a context, which may no longer be
-                  // available. If that happens, assume the same logic/physical relationship as
-                  // was present when the request arrived.
-                  final float displayDensity =
-                      context == null ? originalDisplayDensity : getDisplayDensity();
                   onComplete.run(
                       new PlatformViewsChannel.PlatformViewBufferSize(
-                          toLogicalPixels(vdController.getRenderTargetWidth(), displayDensity),
-                          toLogicalPixels(vdController.getRenderTargetHeight(), displayDensity)));
+                          request.newLogicalWidth,
+                          request.newLogicalHeight));
                 });
             return;
           }
@@ -406,8 +401,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
           onComplete.run(
               new PlatformViewsChannel.PlatformViewBufferSize(
-                  toLogicalPixels(viewWrapper.getRenderTargetWidth()),
-                  toLogicalPixels(viewWrapper.getRenderTargetHeight())));
+                  request.newLogicalWidth,
+                  request.newLogicalHeight));
         }
 
         @Override
