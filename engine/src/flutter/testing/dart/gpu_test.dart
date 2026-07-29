@@ -1210,8 +1210,7 @@ void main() async {
 
   test('Binding a dead-code-eliminated sampler does not crash', () async {
     final RenderPassState state = createSimpleRenderPass();
-    final gpu.RenderPipeline pipeline =
-        await createOptimizedOutSamplerRenderPipeline();
+    final gpu.RenderPipeline pipeline = await createOptimizedOutSamplerRenderPipeline();
     state.renderPass.bindPipeline(pipeline);
 
     final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
@@ -1226,16 +1225,9 @@ void main() async {
 
     // `tex` is optimized out. Binding it used to crash; now it either binds or
     // is skipped, and either way the pass must draw.
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.devicePrivate,
-      1,
-      1,
-    );
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 1, 1);
     try {
-      state.renderPass.bindTexture(
-        pipeline.fragmentShader.getUniformSlot('tex'),
-        texture,
-      );
+      state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
     } on Exception {
       // Optimized out; binding it is a no-op.
     }
