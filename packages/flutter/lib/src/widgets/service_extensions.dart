@@ -6,6 +6,7 @@
 /// @docImport 'package:flutter/foundation.dart';
 /// @docImport 'package:flutter/rendering.dart';
 ///
+/// @docImport 'accessibility_inspector.dart';
 /// @docImport 'app.dart';
 /// @docImport 'binding.dart';
 /// @docImport 'debug.dart';
