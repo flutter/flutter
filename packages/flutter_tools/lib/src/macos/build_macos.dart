@@ -18,6 +18,7 @@ import '../darwin/darwin.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
+import '../ios/plist_parser.dart';
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
@@ -283,10 +284,7 @@ Future<void> buildMacOS({
       <String>[
         '/usr/bin/env',
         ...xcodebuildCommandArgs,
-        if (xcodeWorkspace != null) ...<String>[
-          '-workspace',
-          xcodeWorkspace.path,
-        ] else ...<String>[
+        if (xcodeWorkspace != null) ...<String>['-workspace', xcodeWorkspace.path] else ...<String>[
           '-project',
           xcodeProject.path,
         ],
@@ -366,6 +364,17 @@ Future<void> buildMacOS({
       elapsedMilliseconds: elapsedDuration.inMilliseconds,
     ),
   );
+
+  final String plistPath = flutterProject.macos.defaultHostInfoPlist.path;
+  final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
+    plistPath,
+    PlistParser.kFLTEnableImpellerKey,
+  );
+
+  final buildLabel = impellerEnabled == false
+      ? 'plist-impeller-disabled'
+      : 'plist-impeller-enabled';
+  globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'macos'));
 }
 
 /// Performs a size analysis of the AOT snapshot and writes to an analysis file, if configured.
