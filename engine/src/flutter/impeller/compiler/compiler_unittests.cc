@@ -670,6 +670,66 @@ TEST_P(CompilerTestUnknownPlatform, MustFailDueToUnknownPlatform) {
       CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
 }
 
+TEST(CompilerTest, DerivativeInNonUniformControlFlowFails) {
+  std::string source_invalid = R"(
+    precision mediump float;
+    uniform FragInfo {
+      float type;
+    } frag_info;
+    in vec2 v_position;
+    out vec4 frag_color;
+
+    void main() {
+      float dx = 0.0;
+      if (frag_info.type > 0.5) {
+        dx = dFdx(v_position.x);
+      }
+      frag_color = vec4(dx, 0.0, 0.0, 1.0);
+    }
+  )";
+
+  auto mapping_invalid = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(source_invalid.data()),
+      source_invalid.size());
+
+  SourceOptions options("invalid.frag", SourceType::kFragmentShader);
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kOpenGLES;
+  options.entry_point_name = "main";
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kOpenGLES;
+
+  Compiler compiler_invalid(mapping_invalid, options, reflector_options);
+  EXPECT_FALSE(compiler_invalid.IsValid());
+  EXPECT_NE(compiler_invalid.GetErrorMessages().find("Derivative instruction"),
+            std::string::npos);
+
+  std::string source_valid = R"(
+    precision mediump float;
+    uniform FragInfo {
+      float type;
+    } frag_info;
+    in vec2 v_position;
+    out vec4 frag_color;
+
+    void main() {
+      float dx = dFdx(v_position.x);
+      if (frag_info.type > 0.5) {
+        dx += 1.0;
+      }
+      frag_color = vec4(dx, 0.0, 0.0, 1.0);
+    }
+  )";
+
+  auto mapping_valid = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(source_valid.data()),
+      source_valid.size());
+
+  Compiler compiler_valid(mapping_valid, options, reflector_options);
+  EXPECT_TRUE(compiler_valid.IsValid());
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller
