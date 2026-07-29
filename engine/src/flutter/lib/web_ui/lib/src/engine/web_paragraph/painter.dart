@@ -56,10 +56,16 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   final dpr = devicePixelRatio;
 
   // Calculate how far the ink bleeds outside the stable logical layout box
-  final double logicalBleedLeft = paragraph.paintBounds.left < 0 ? -paragraph.paintBounds.left : 0.0;
+  final double logicalBleedLeft = paragraph.paintBounds.left < 0
+      ? -paragraph.paintBounds.left
+      : 0.0;
   final double logicalBleedTop = paragraph.paintBounds.top < 0 ? -paragraph.paintBounds.top : 0.0;
-  final double logicalBleedRight = paragraph.paintBounds.right > paragraph.longestLine ? paragraph.paintBounds.right - paragraph.longestLine : 0.0;
-  final double logicalBleedBottom = paragraph.paintBounds.bottom > paragraph.height ? paragraph.paintBounds.bottom - paragraph.height : 0.0;
+  final double logicalBleedRight = paragraph.paintBounds.right > paragraph.longestLine
+      ? paragraph.paintBounds.right - paragraph.longestLine
+      : 0.0;
+  final double logicalBleedBottom = paragraph.paintBounds.bottom > paragraph.height
+      ? paragraph.paintBounds.bottom - paragraph.height
+      : 0.0;
 
   // Convert the bleeds to physical pixels
   final double physBleedLeft = logicalBleedLeft * dpr;
@@ -211,18 +217,15 @@ abstract class WebParagraphPainter {
   }
 
   /// Paints the entire paragraph on Canvas2D
-void paint(ui.Canvas canvas, ui.Offset offset) {
+  void paint(ui.Canvas canvas, ui.Offset offset) {
     if (_paragraph.text.isEmpty) {
       return;
     }
 
     final TextLayout layout = _paragraph.getLayout();
 
-    final (ui.Rect sourceRect, ui.Rect targetRect, double padLeft, double padTop) = _calculateParagraph(
-      _paragraph,
-      offset,
-      ui.window.devicePixelRatio,
-    );
+    final (ui.Rect sourceRect, ui.Rect targetRect, double padLeft, double padTop) =
+        _calculateParagraph(_paragraph, offset, ui.window.devicePixelRatio);
 
     const epsilon = 0.001;
     if (sourceRect.width.abs() < epsilon || sourceRect.height.abs() < epsilon) {
