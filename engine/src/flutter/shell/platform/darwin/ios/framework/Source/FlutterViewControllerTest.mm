@@ -359,7 +359,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification;
 - (void)dispatchTouches:(NSSet*)touches
-    pointerDataChangeOverride:(void*)overridden_change
+    pointerDataChangeOverride:(flutter::PointerData::Change*)overridden_change
                         event:(UIEvent*)event;
 @end
 
@@ -376,8 +376,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @end
 
-// Overrides dispatchTouches:pointerDataChangeOverride:event: with void* for the C++ pointer
-// parameter so ObjC selector dispatch matches without pulling in flutter::PointerData types.
+// Records whether dispatchTouches:pointerDataChangeOverride:event: was invoked, while still
+// calling super so the real dispatch pipeline (touch -> PointerDataPacket -> engine) is exercised.
 @interface FlutterViewControllerDispatchTouchesSpy : FlutterViewController
 @property(nonatomic) BOOL touchesDispatched;
 @property(nonatomic, strong) UIViewController* stubbedPresentedViewController;
@@ -392,9 +392,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   return self.stubbedIsBeingDismissed;
 }
 - (void)dispatchTouches:(NSSet*)touches
-    pointerDataChangeOverride:(void*)overridden_change
+    pointerDataChangeOverride:(flutter::PointerData::Change*)overridden_change
                         event:(UIEvent*)event {
-  // Do not call super — raw UITouch stubs crash in the dispatch loop body.
+  [super dispatchTouches:touches pointerDataChangeOverride:overridden_change event:event];
   self.touchesDispatched = YES;
 }
 @end
@@ -3172,6 +3172,55 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
   XCTAssertFalse(vc.touchesDispatched,
                  @"touchesCancelled must not dispatch to Flutter when a native VC is presented");
+}
+
+// Positive-path controls for the tests above: verifies the guard only blocks dispatch when
+// something is actually presented / being dismissed, not unconditionally.
+
+- (FlutterViewControllerDispatchTouchesSpy*)spyViewControllerNotPresented {
+  return [[FlutterViewControllerDispatchTouchesSpy alloc] initWithEngine:self.mockEngine
+                                                                 nibName:nil
+                                                                  bundle:nil];
+}
+
+- (void)testTouchesBeganDispatchedWhenNothingPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerNotPresented];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseBegan;
+  UIEvent* event = nil;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesBegan must dispatch to Flutter when nothing is presented");
+}
+
+- (void)testTouchesMovedDispatchedWhenNothingPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerNotPresented];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseMoved;
+  UIEvent* event = nil;
+  [vc touchesMoved:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesMoved must dispatch to Flutter when nothing is presented");
+}
+
+- (void)testTouchesEndedDispatchedWhenNothingPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerNotPresented];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseEnded;
+  UIEvent* event = nil;
+  [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesEnded must dispatch to Flutter when nothing is presented");
+}
+
+- (void)testTouchesCancelledDispatchedWhenNothingPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerNotPresented];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseCancelled;
+  UIEvent* event = nil;
+  [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesCancelled must dispatch to Flutter when nothing is presented");
 }
 
 // Regression tests for the isBeingDismissed guard.
