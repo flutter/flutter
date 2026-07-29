@@ -173,8 +173,8 @@ public class PlatformViewsChannel {
                     result.error("error", "Failed to resize the platform view", null);
                   } else {
                     final Map<String, Object> response = new HashMap<>();
-                    response.put("width", (double) bufferSize.width);
-                    response.put("height", (double) bufferSize.height);
+                    response.put("width", bufferSize.width);
+                    response.put("height", bufferSize.height);
                     result.success(response);
                   }
                 });

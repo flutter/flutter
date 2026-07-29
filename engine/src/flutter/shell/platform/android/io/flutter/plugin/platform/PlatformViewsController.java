@@ -345,7 +345,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           final int viewId = request.viewId;
 
           if (usesVirtualDisplay(viewId)) {
-            final float originalDisplayDensity = getDisplayDensity();
             final VirtualDisplayController vdController = vdControllers.get(viewId);
             // Resizing involved moving the platform view to a new virtual display. Doing so
             // potentially results in losing an active input connection. To make sure we preserve
@@ -357,6 +356,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                 physicalHeight,
                 () -> {
                   unlockInputConnection(vdController);
+                  // A virtual display is always recreated at exactly the requested size, so the
+                  // buffer is the requested size. Reporting the request avoids both a round trip
+                  // through physical pixels (which loses precision) and a call to
+                  // getDisplayDensity(), which needs a context that may no longer be available by
+                  // the time the resize completes.
                   onComplete.run(
                       new PlatformViewsChannel.PlatformViewBufferSize(
                           request.newLogicalWidth, request.newLogicalHeight));
@@ -398,9 +402,14 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             embeddedViewLayoutParams.height = physicalHeight;
             embeddedView.setLayoutParams(embeddedViewLayoutParams);
           }
+          // Report the size of the render target, not the requested size. Because the buffer is
+          // only ever grown (see above), it can be larger than the view. The framework relies on
+          // this to size the texture 1:1 with the buffer and clip it to the widget instead of
+          // scaling the buffer down onto the widget.
           onComplete.run(
               new PlatformViewsChannel.PlatformViewBufferSize(
-                  request.newLogicalWidth, request.newLogicalHeight));
+                  toLogicalPixels(viewWrapper.getRenderTargetWidth()),
+                  toLogicalPixels(viewWrapper.getRenderTargetHeight())));
         }
 
         @Override
@@ -1088,12 +1097,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     return (int) Math.round(logicalPixels * getDisplayDensity());
   }
 
-  private int toLogicalPixels(double physicalPixels, float displayDensity) {
-    return (int) Math.round(physicalPixels / displayDensity);
-  }
-
-  private int toLogicalPixels(double physicalPixels) {
-    return toLogicalPixels(physicalPixels, getDisplayDensity());
+  // Deliberately not rounded to a whole pixel: the result is handed back to the framework, which
+  // sizes a texture with it. Rounding here shrinks the texture by up to half a logical pixel
+  // relative to the widget, leaving a line of Flutter content visible along the right and bottom
+  // edges. See https://github.com/flutter/flutter/issues/189834.
+  private double toLogicalPixels(double physicalPixels) {
+    return physicalPixels / getDisplayDensity();
   }
 
   private void disposeAllViews() {

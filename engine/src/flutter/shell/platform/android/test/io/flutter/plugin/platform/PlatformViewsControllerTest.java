@@ -1303,6 +1303,88 @@ public class PlatformViewsControllerTest {
     assertEquals(layoutParamsCaptor.getValue().height, 20);
   }
 
+  // Regression test for https://github.com/flutter/flutter/issues/189834.
+  //
+  // The buffer size reported back to the framework is used to size the texture the platform view
+  // is drawn into. Rounding it to a whole logical pixel makes the texture up to half a logical
+  // pixel narrower than the widget, leaving a line of Flutter content visible along the right and
+  // bottom edges.
+  @Test
+  @Config(
+      qualifiers = "420dpi",
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void resizeAndroidView_reportsFractionalBufferSize() {
+    // 420dpi is a display density of 2.625, which does not evenly divide a 1080px wide screen.
+    final double density = 2.625;
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    int platformViewId = 0;
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    reset(androidView);
+    when(androidView.getLayoutParams()).thenReturn(new FrameLayout.LayoutParams(0, 0));
+
+    // A platform view that exactly covers a 1080x1080 region of the screen.
+    final double logicalSize = 1080 / density;
+    resize(jni, platformViewsController, platformViewId, logicalSize, logicalSize);
+
+    // The render target is 1080 physical pixels, so the buffer is exactly logicalSize logical
+    // pixels. Before this was reported as a double it came back as 411 rather than 411.42857.
+    final Map<String, Object> bufferSize = lastResponse();
+    assertEquals(logicalSize, (double) bufferSize.get("width"), 1e-9);
+    assertEquals(logicalSize, (double) bufferSize.get("height"), 1e-9);
+  }
+
+  // The render target is only ever grown, never shrunk, so that a smooth keyboard animation does
+  // not resize the texture on every frame. That means the buffer can be larger than the view, and
+  // the framework needs to be told the real size: it sizes the texture with it and clips the
+  // texture to the widget, rather than scaling the buffer down onto the widget.
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void resizeAndroidView_reportsUnshrunkBufferSize() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    int platformViewId = 0;
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    reset(androidView);
+    when(androidView.getLayoutParams()).thenReturn(new FrameLayout.LayoutParams(0, 0));
+
+    // Grow the view, which grows the render target to match.
+    resize(jni, platformViewsController, platformViewId, 400.0, 400.0);
+    assertEquals(400.0, (double) lastResponse().get("width"), 1e-9);
+
+    // Shrinking the view leaves the render target alone, so the reported buffer stays at 400.
+    resize(jni, platformViewsController, platformViewId, 200.0, 200.0);
+    final Map<String, Object> bufferSize = lastResponse();
+    assertEquals(400.0, (double) bufferSize.get("width"), 1e-9);
+    assertEquals(400.0, (double) bufferSize.get("height"), 1e-9);
+  }
+
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void disposeAndroidView_hybridComposition() {
@@ -1906,6 +1988,14 @@ public class PlatformViewsControllerTest {
     return buffer;
   }
 
+  /** Decodes the reply to the most recent platform message, which all use a reply id of 0. */
+  @SuppressWarnings("unchecked")
+  private static Map<String, Object> lastResponse() {
+    final ByteBuffer response = ShadowFlutterJNI.getResponses().get(0);
+    response.position(0);
+    return (Map<String, Object>) StandardMethodCodec.INSTANCE.decodeEnvelope(response);
+  }
+
   private static void createPlatformView(
       FlutterJNI jni,
       PlatformViewsController platformViewsController,
@@ -2070,6 +2160,9 @@ public class PlatformViewsControllerTest {
               @Override
               public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
                 return new SurfaceProducer() {
+                  private int width = 0;
+                  private int height = 0;
+
                   @Override
                   public void setCallback(SurfaceProducer.Callback cb) {}
 
@@ -2083,16 +2176,19 @@ public class PlatformViewsControllerTest {
 
                   @Override
                   public int getWidth() {
-                    return 0;
+                    return width;
                   }
 
                   @Override
                   public int getHeight() {
-                    return 0;
+                    return height;
                   }
 
                   @Override
-                  public void setSize(int width, int height) {}
+                  public void setSize(int width, int height) {
+                    this.width = width;
+                    this.height = height;
+                  }
 
                   @Override
                   public Surface getSurface() {
