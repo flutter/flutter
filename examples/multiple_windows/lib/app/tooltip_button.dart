@@ -32,7 +32,7 @@ class _TooltipButtonState extends State<TooltipButton> {
     super.dispose();
   }
 
-  void _onPressed(final WindowRegistry windowRegistry, final WindowSettings windowSettings) {
+  void _onPressed(WindowSettings windowSettings) {
     // Toggle tooltip visibility.
     if (_tooltipEntry != null) {
       _tooltipEntry!.controller.destroy();
@@ -50,7 +50,6 @@ class _TooltipButtonState extends State<TooltipButton> {
         positioner: windowSettings.positioner,
         delegate: _TooltipWindowControllerDelegate(
           onDestroyed: () {
-            windowRegistry.unregister(entry);
             tracker.dispose();
             if (mounted) {
               setState(() {
@@ -66,7 +65,6 @@ class _TooltipButtonState extends State<TooltipButton> {
         controller: controller,
         builder: (BuildContext context) => TooltipWindowContent(controller: controller),
       );
-      windowRegistry.register(entry);
       tracker.onGlobalRectChange = (rect) {
         controller.updatePosition(anchorRect: rect);
       };
@@ -79,13 +77,20 @@ class _TooltipButtonState extends State<TooltipButton> {
 
   @override
   Widget build(BuildContext context) {
-    final WindowRegistry windowManager = WindowRegistry.of(context);
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     return OutlinedButton(
       key: _tooltipButtonKey,
-      onPressed: () => _onPressed(windowManager, windowSettings),
-      child: Text(_tooltipEntry != null ? 'Hide Tooltip' : 'Show Tooltip'),
+      onPressed: () => _onPressed(windowSettings),
+      child: ViewAnchor(
+        view: _tooltipEntry != null
+            ? View(
+                view: _tooltipEntry!.controller.rootView,
+                child: Builder(builder: _tooltipEntry!.builder),
+              )
+            : null,
+        child: Text(_tooltipEntry != null ? 'Hide Tooltip' : 'Show Tooltip'),
+      ),
     );
   }
 }

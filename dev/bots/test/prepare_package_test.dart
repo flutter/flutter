@@ -21,6 +21,19 @@ import 'common.dart';
 
 void main() {
   const testRef = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
+
+  test('PreparePackageException string includes class name and stderr', () {
+    final exception = PreparePackageException(
+      'failed to prepare package',
+      ProcessResult(0, 1, '', 'stderr details'),
+    );
+
+    expect(
+      exception.toString(),
+      'PreparePackageException: failed to prepare package:\nstderr details',
+    );
+  });
+
   test('Throws on missing executable', () async {
     // Uses a *real* process manager, since we want to know what happens if
     // it can't find an executable.

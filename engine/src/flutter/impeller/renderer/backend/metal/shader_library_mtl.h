@@ -56,7 +56,14 @@ class ShaderLibraryMTL final : public ShaderLibrary {
 
   id<MTLDevice> GetDevice() const;
 
-  void RegisterLibrary(id<MTLLibrary> library);
+  // Adds the just-compiled `library` to `libraries_` and caches its
+  // stage-matching function under `ShaderKey(name, stage)` in `functions_`
+  // so that namespaced registration names (e.g. `re:<library_id>:<entry>`)
+  // resolve via the cache rather than via the MSL function-name lookup that
+  // `GetFunction` falls back to.
+  void RegisterLibraryAndCacheFunction(id<MTLLibrary> library,
+                                       const std::string& name,
+                                       ShaderStage stage);
 
   ShaderLibraryMTL(const ShaderLibraryMTL&) = delete;
 

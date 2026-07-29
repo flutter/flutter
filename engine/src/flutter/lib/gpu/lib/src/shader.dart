@@ -51,4 +51,15 @@ base class Shader extends NativeFieldWrapperClass1 {
     String uniformStructName,
     String memberName,
   );
+
+  /// Test-only. Whether this shader is currently marked dirty (will be
+  /// evicted and re-registered with the impeller shader library on next
+  /// pipeline build). Used by tests to assert that reload dedupe keeps
+  /// unchanged shaders clean.
+  bool get debugIsDirty => _debugIsDirty();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Shader_DebugIsDirty',
+  )
+  external bool _debugIsDirty();
 }

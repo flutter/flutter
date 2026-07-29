@@ -20,6 +20,7 @@ namespace testing {
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindArrayData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices);
+FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType);
 }  // namespace testing
 
 //------------------------------------------------------------------------------
@@ -39,9 +40,16 @@ class BufferBindingsGLES {
 
   bool ReadUniformsBindings(const ProcTableGLES& gl, GLuint program);
 
+  /// Bind the vertex attributes for buffer slot [binding].
+  ///
+  /// [instance] re-points instance-rate attributes at the given instance,
+  /// used to emulate an instanced draw on drivers without hardware
+  /// instancing support. It is 0 for a non-instanced or hardware-instanced
+  /// draw.
   bool BindVertexAttributes(const ProcTableGLES& gl,
                             size_t binding,
-                            size_t vertex_offset);
+                            size_t vertex_offset,
+                            size_t instance = 0);
 
   bool BindUniformData(const ProcTableGLES& gl,
                        const std::vector<TextureAndSampler>& bound_textures,
@@ -56,6 +64,8 @@ class BufferBindingsGLES {
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest, BindArrayData);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   BindUniformDataVerticesAndMatrices);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  BindUniformFailsWithoutFloatType);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///
@@ -66,11 +76,18 @@ class BufferBindingsGLES {
     GLenum normalized = GL_FALSE;
     GLsizei stride = 0u;
     GLsizei offset = 0u;
+    // glVertexAttribDivisor value: 0 advances per vertex, 1 per instance.
+    GLuint vertex_attrib_divisor = 0u;
   };
   std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
 
   absl::flat_hash_map<std::string, GLint> uniform_locations_;
-  absl::flat_hash_map<std::string, std::pair<GLint, GLuint>> ubo_locations_;
+  struct UBOInfo {
+    GLint block_index = 0;
+    GLuint binding_point = 0;
+    GLint data_size = 0;
+  };
+  absl::flat_hash_map<std::string, UBOInfo> ubo_locations_;
 
   using BindingMap = absl::flat_hash_map<std::string, std::vector<GLint>>;
   BindingMap binding_map_ = {};

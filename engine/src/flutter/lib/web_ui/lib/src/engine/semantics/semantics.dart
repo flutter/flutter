@@ -584,7 +584,7 @@ enum EngineSemanticsRole {
   /// A graphic object that spins to indicate the application is busy.
   loadingSpinner,
 
-  /// A role used when a more specific role cannot be assigend to
+  /// A role used when a more specific role cannot be assigned to
   /// a [SemanticsObject].
   ///
   /// Provides a label or a value.
@@ -618,7 +618,7 @@ enum EngineSemanticsRole {
   /// A region of a web page that contains navigation links.
   navigation,
 
-  /// A section of content sufficiently important but cannot be descrived by one
+  /// A section of content sufficiently important but cannot be described by one
   /// of the other landmark roles, such as main, contentinfo, complementary, or
   /// navigation.
   region,
@@ -654,7 +654,7 @@ abstract class SemanticRole {
   ///
   /// Use this constructor for highly specialized cases where
   /// [SemanticRole.withBasics] does not work, for example when the default focus
-  /// management intereferes with the widget's functionality.
+  /// management interferes with the widget's functionality.
   SemanticRole.blank(this.kind, this.semanticsObject) {
     element = _initElement(createElement(), semanticsObject);
   }
@@ -1027,7 +1027,7 @@ abstract class SemanticRole {
   ///
   /// This method is expected to remove role-specific functionality from the
   /// DOM. In particular, this method is the appropriate place to call
-  /// [EngineSemanticsOwner.removeGestureModeListener] if this role reponds to
+  /// [EngineSemanticsOwner.removeGestureModeListener] if this role responds to
   /// gesture mode changes.
   @mustCallSuper
   void dispose() {
@@ -1180,7 +1180,7 @@ abstract class SemanticBehavior {
   ///
   /// This method is expected to remove role-specific functionality from the
   /// DOM. In particular, this method is the appropriate place to call
-  /// [EngineSemanticsOwner.removeGestureModeListener] if this role reponds to
+  /// [EngineSemanticsOwner.removeGestureModeListener] if this role responds to
   /// gesture mode changes.
   @mustCallSuper
   void dispose() {
@@ -2442,7 +2442,7 @@ class SemanticsObject {
   /// mapped onto the [Selectable] behavior.
   ///
   /// [Selectable] and [SemanticCheckable] are not used together on the same
-  /// node. [SemanticCheckable] has precendence over [Selectable].
+  /// node. [SemanticCheckable] has precedence over [Selectable].
   ///
   /// See also:
   ///

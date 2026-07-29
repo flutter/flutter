@@ -16,6 +16,7 @@ TEST(RoudingRadiiTest, RoundingRadiiEmptyDeclaration) {
 
   EXPECT_TRUE(radii.AreAllCornersEmpty());
   EXPECT_TRUE(radii.AreAllCornersSame());
+  EXPECT_TRUE(radii.AreAllCornersCircular());
   EXPECT_TRUE(radii.IsFinite());
   EXPECT_EQ(radii.top_left, Size());
   EXPECT_EQ(radii.top_right, Size());
@@ -36,6 +37,7 @@ TEST(RoudingRadiiTest, RoundingRadiiDefaultConstructor) {
 
   EXPECT_TRUE(radii.AreAllCornersEmpty());
   EXPECT_TRUE(radii.AreAllCornersSame());
+  EXPECT_TRUE(radii.AreAllCornersCircular());
   EXPECT_TRUE(radii.IsFinite());
   EXPECT_EQ(radii.top_left, Size());
   EXPECT_EQ(radii.top_right, Size());
@@ -48,6 +50,7 @@ TEST(RoudingRadiiTest, RoundingRadiiScalarConstructor) {
 
   EXPECT_FALSE(radii.AreAllCornersEmpty());
   EXPECT_TRUE(radii.AreAllCornersSame());
+  EXPECT_TRUE(radii.AreAllCornersCircular());
   EXPECT_TRUE(radii.IsFinite());
   EXPECT_EQ(radii.top_left, Size(5.0f, 5.0f));
   EXPECT_EQ(radii.top_right, Size(5.0f, 5.0f));
@@ -60,6 +63,7 @@ TEST(RoudingRadiiTest, RoundingRadiiEmptyScalarConstructor) {
 
   EXPECT_TRUE(radii.AreAllCornersEmpty());
   EXPECT_TRUE(radii.AreAllCornersSame());
+  EXPECT_TRUE(radii.AreAllCornersCircular());
   EXPECT_TRUE(radii.IsFinite());
   EXPECT_EQ(radii.top_left, Size(-5.0f, -5.0f));
   EXPECT_EQ(radii.top_right, Size(-5.0f, -5.0f));
@@ -72,6 +76,7 @@ TEST(RoudingRadiiTest, RoundingRadiiSizeConstructor) {
 
   EXPECT_FALSE(radii.AreAllCornersEmpty());
   EXPECT_TRUE(radii.AreAllCornersSame());
+  EXPECT_FALSE(radii.AreAllCornersCircular());
   EXPECT_TRUE(radii.IsFinite());
   EXPECT_EQ(radii.top_left, Size(5.0f, 6.0f));
   EXPECT_EQ(radii.top_right, Size(5.0f, 6.0f));
@@ -85,6 +90,7 @@ TEST(RoudingRadiiTest, RoundingRadiiEmptySizeConstructor) {
 
     EXPECT_TRUE(radii.AreAllCornersEmpty());
     EXPECT_TRUE(radii.AreAllCornersSame());
+    EXPECT_FALSE(radii.AreAllCornersCircular());
     EXPECT_TRUE(radii.IsFinite());
     EXPECT_EQ(radii.top_left, Size(-5.0f, 6.0f));
     EXPECT_EQ(radii.top_right, Size(-5.0f, 6.0f));
@@ -97,6 +103,7 @@ TEST(RoudingRadiiTest, RoundingRadiiEmptySizeConstructor) {
 
     EXPECT_TRUE(radii.AreAllCornersEmpty());
     EXPECT_TRUE(radii.AreAllCornersSame());
+    EXPECT_FALSE(radii.AreAllCornersCircular());
     EXPECT_TRUE(radii.IsFinite());
     EXPECT_EQ(radii.top_left, Size(5.0f, -6.0f));
     EXPECT_EQ(radii.top_right, Size(5.0f, -6.0f));
@@ -115,6 +122,7 @@ TEST(RoudingRadiiTest, RoundingRadiiNamedSizesConstructor) {
 
   EXPECT_FALSE(radii.AreAllCornersEmpty());
   EXPECT_FALSE(radii.AreAllCornersSame());
+  EXPECT_FALSE(radii.AreAllCornersCircular());
   EXPECT_TRUE(radii.IsFinite());
   EXPECT_EQ(radii.top_left, Size(5.0f, 5.5f));
   EXPECT_EQ(radii.top_right, Size(6.0f, 6.5f));
@@ -130,6 +138,7 @@ TEST(RoudingRadiiTest, RoundingRadiiPartialNamedSizesConstructor) {
 
     EXPECT_FALSE(radii.AreAllCornersEmpty());
     EXPECT_FALSE(radii.AreAllCornersSame());
+    EXPECT_FALSE(radii.AreAllCornersCircular());
     EXPECT_TRUE(radii.IsFinite());
     EXPECT_EQ(radii.top_left, Size(5.0f, 5.5f));
     EXPECT_EQ(radii.top_right, Size());
@@ -144,6 +153,7 @@ TEST(RoudingRadiiTest, RoundingRadiiPartialNamedSizesConstructor) {
 
     EXPECT_FALSE(radii.AreAllCornersEmpty());
     EXPECT_FALSE(radii.AreAllCornersSame());
+    EXPECT_FALSE(radii.AreAllCornersCircular());
     EXPECT_TRUE(radii.IsFinite());
     EXPECT_EQ(radii.top_left, Size());
     EXPECT_EQ(radii.top_right, Size(6.0f, 6.5f));
@@ -158,6 +168,7 @@ TEST(RoudingRadiiTest, RoundingRadiiPartialNamedSizesConstructor) {
 
     EXPECT_FALSE(radii.AreAllCornersEmpty());
     EXPECT_FALSE(radii.AreAllCornersSame());
+    EXPECT_FALSE(radii.AreAllCornersCircular());
     EXPECT_TRUE(radii.IsFinite());
     EXPECT_EQ(radii.top_left, Size());
     EXPECT_EQ(radii.top_right, Size());
@@ -172,6 +183,7 @@ TEST(RoudingRadiiTest, RoundingRadiiPartialNamedSizesConstructor) {
 
     EXPECT_FALSE(radii.AreAllCornersEmpty());
     EXPECT_FALSE(radii.AreAllCornersSame());
+    EXPECT_FALSE(radii.AreAllCornersCircular());
     EXPECT_TRUE(radii.IsFinite());
     EXPECT_EQ(radii.top_left, Size());
     EXPECT_EQ(radii.top_right, Size());
@@ -191,6 +203,7 @@ TEST(RoudingRadiiTest, RoundingRadiiMultiply) {
 
   EXPECT_FALSE(doubled.AreAllCornersEmpty());
   EXPECT_FALSE(doubled.AreAllCornersSame());
+  EXPECT_FALSE(doubled.AreAllCornersCircular());
   EXPECT_TRUE(doubled.IsFinite());
   EXPECT_EQ(doubled.top_left, Size(10.0f, 11.0f));
   EXPECT_EQ(doubled.top_right, Size(12.0f, 13.0f));

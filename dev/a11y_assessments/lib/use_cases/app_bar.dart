@@ -42,12 +42,8 @@ class MainWidgetState extends State<MainWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: <PreferredSizeWidget>[
+        AppBar(title: Semantics(headingLevel: 1, child: const Text('AppBar'))),
         AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Semantics(headingLevel: 1, child: const Text('AppBar')),
-        ),
-        AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Semantics(headingLevel: 1, child: const Text('AppBar')),
           actions: <Widget>[
             IconButton(
@@ -69,7 +65,6 @@ class MainWidgetState extends State<MainWidget> {
                     builder: (BuildContext context) {
                       return Scaffold(
                         appBar: AppBar(
-                          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
                           title: Semantics(headingLevel: 1, child: const Text('Next Page')),
                         ),
                         body: const Center(
@@ -84,14 +79,13 @@ class MainWidgetState extends State<MainWidget> {
           ],
         ),
         AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Semantics(headingLevel: 1, child: const Text('AppBar')),
           actions: <Widget>[
             for (final String label in const <String>['Action 1', 'Action 2'])
               TextButton(
                 onPressed: () {},
                 style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
                 child: Text(label),
               ),

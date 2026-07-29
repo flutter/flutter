@@ -13,6 +13,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -63,16 +64,21 @@ class IOSSimulatorUtils {
     required Xcode xcode,
     required Logger logger,
     required ProcessManager processManager,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
-       _xcode = xcode;
+       _xcode = xcode,
+       _operatingSystemUtils = operatingSystemUtils;
 
   final SimControl _simControl;
   final Xcode _xcode;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
+
+    final cpuArch = CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
@@ -93,6 +99,7 @@ class IOSSimulatorUtils {
             simControl: _simControl,
             simulatorCategory: device.category,
             logger: _simControl._logger,
+            cpuArch: cpuArch,
           );
         })
         .whereType<IOSSimulator>()
@@ -162,7 +169,13 @@ class SimControl {
       '--json',
     ];
     _logger.printTrace(command.join(' '));
-    final RunResult results = await _processUtils.run(command);
+    final RunResult results;
+    try {
+      results = await _processUtils.run(command);
+    } on Exception catch (exception) {
+      _logger.printError('Error executing simctl:\n$exception');
+      return <String, Map<String, Object?>>{};
+    }
     if (results.exitCode != 0) {
       _logger.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, Object?>>{};
@@ -185,6 +198,11 @@ class SimControl {
 
   /// Returns all the connected simulator devices.
   Future<List<BootedSimDevice>> getConnectedDevices() async {
+    if (!_xcode.isSimctlInstalled) {
+      _logger.printTrace('Skipping iOS simulator discovery because simctl is not available.');
+      return <BootedSimDevice>[];
+    }
+
     final Map<String, Object?> devicesSection = await _listBootedDevices();
 
     return <BootedSimDevice>[
@@ -347,8 +365,10 @@ class IOSSimulator extends Device {
     required this.name,
     required this.simulatorCategory,
     required SimControl simControl,
+    required CpuArch cpuArch,
     required super.logger,
   }) : _simControl = simControl,
+       _cpuArch = cpuArch,
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
@@ -357,6 +377,8 @@ class IOSSimulator extends Device {
   final String simulatorCategory;
 
   final SimControl _simControl;
+
+  final CpuArch _cpuArch;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -383,6 +405,9 @@ class IOSSimulator extends Device {
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
 
   final _logReaders = <IOSApp?, DeviceLogReader>{};
   _IOSSimulatorDevicePortForwarder? _portForwarder;
@@ -772,6 +797,7 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
       'senderImagePath ENDSWITH "/Flutter"',
       'senderImagePath ENDSWITH "/libswiftCore.dylib"',
       'processImageUUID == senderImageUUID',
+      'eventMessage CONTAINS "UIScene life cycle is required"',
       'eventMessage CONTAINS "`UIScene` lifecycle will soon be required"',
       'eventMessage CONTAINS "This process does not adopt UIScene lifecycle."',
     ]),
@@ -813,7 +839,17 @@ Future<Process?> launchSystemLogTool(IOSSimulator device) async {
 }
 
 class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
-  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '');
+  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '') {
+    final uisceneCrashInterceptor = LogInterceptor(
+      identifier: 'uiscene_crash',
+      pattern: RegExp(r'UIScene life\s?cycle is required'),
+      action: () {
+        throwToolExit(kUISceneMigrationRequiredError);
+      },
+      excludeFromStream: false,
+    );
+    addLogInterceptor(uisceneCrashInterceptor);
+  }
 
   final IOSSimulator device;
 

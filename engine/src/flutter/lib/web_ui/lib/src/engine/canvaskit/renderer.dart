@@ -11,8 +11,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-bool get isExperimentalWebParagraph =>
-    configuration.canvasKitVariant == CanvasKitVariant.experimentalWebParagraph;
+bool get isWebParagraphEnabled => configuration.preferWebParagraph && browserSupportsWebParagraph;
 
 class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
@@ -26,7 +25,7 @@ class CanvasKitRenderer extends Renderer {
   /// Whether the renderer is using software rendering.
   bool get isSoftware => _pictureToImageSurface.isSoftware;
 
-  late final FlutterFontCollection _fontCollection = isExperimentalWebParagraph
+  late final FlutterFontCollection _fontCollection = isWebParagraphEnabled
       ? WebFontCollection()
       : SkiaFontCollection();
 
@@ -215,15 +214,23 @@ class CanvasKitRenderer extends Renderer {
   @override
   ui.Image createImageFromImageBitmap(DomImageBitmap imageBitmap) {
     SkImage? skImage;
+    // For software rendering, instantiate an SkImage immediately from the canvas source.
     if (isSoftware) {
       skImage = canvasKit.MakeImageFromCanvasImageSource(imageBitmap);
     } else {
+      // For GPU-accelerated CanvasKit, create a lazy image from the ImageBitmap, which
+      // defers uploading the image texture to the WebGL context until render time.
       skImage = canvasKit.MakeLazyImageFromImageBitmap(imageBitmap, true);
     }
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
     }
-    return CkImage(skImage, imageSource: ImageBitmapImageSource(imageBitmap));
+    return EngineImage(
+      CkImageDelegate(skImage),
+      skImage.width().toInt(),
+      skImage.height().toInt(),
+      imageSource: ImageBitmapImageSource(imageBitmap),
+    );
   }
 
   @override
@@ -271,7 +278,7 @@ class CanvasKitRenderer extends Renderer {
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
     }
-    return CkImage(skImage);
+    return EngineImage(CkImageDelegate(skImage), skImage.width().toInt(), skImage.height().toInt());
   }
 
   @override
@@ -332,7 +339,7 @@ class CanvasKitRenderer extends Renderer {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
-  }) => isExperimentalWebParagraph
+  }) => isWebParagraphEnabled
       ? WebTextStyle(
           color: color,
           decoration: decoration,
@@ -394,7 +401,7 @@ class CanvasKitRenderer extends Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) => isExperimentalWebParagraph
+  }) => isWebParagraphEnabled
       ? WebParagraphStyle(
           textAlign: textAlign,
           textDirection: textDirection,
@@ -435,7 +442,7 @@ class CanvasKitRenderer extends Renderer {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) => isExperimentalWebParagraph
+  }) => isWebParagraphEnabled
       ? WebStrutStyle(
           fontFamily: fontFamily,
           fontFamilyFallback: fontFamilyFallback,
@@ -461,7 +468,11 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      isExperimentalWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
+      isWebParagraphEnabled ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
+
+  @override
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>
+      CanvasKitPainter(paragraph);
 
   @override
   void clearFragmentProgramCache() {

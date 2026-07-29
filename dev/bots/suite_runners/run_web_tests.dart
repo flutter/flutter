@@ -17,6 +17,7 @@ import 'dart:io'
         SocketDirection,
         SocketException;
 import 'dart:math' as math;
+
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
@@ -246,7 +247,7 @@ class WebTestsSuite {
   }
 
   Future<void> runWebSkwasmUnitTests() {
-    return _runWebUnitTests(useWasm: true, webShardCount: 2);
+    return _runWebUnitTests(useWasm: true, webShardCount: 8);
   }
 
   /// Runs one of the `dev/integration_tests/web_e2e_tests` tests.

@@ -65,6 +65,11 @@ ThemeData _baseTheme({
     ),
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
+    sliderTheme: theme.sliderTheme.copyWith(
+      trackHeight: 2.0,
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5.0),
+      overlayShape: const RoundSliderOverlayShape(overlayRadius: 10.0),
+    ),
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(
         padding: const EdgeInsets.all(densePadding),

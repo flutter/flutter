@@ -48,7 +48,7 @@ class HandleResult extends _Result {
   Handle get handle => _handle!;
 
   @pragma('vm:entry-point')
-  const HandleResult(final int status, [this._handle]) : super(status);
+  const HandleResult(super.status, [this._handle]);
   @override
   String toString() => 'HandleResult(status=$status, handle=$_handle)';
 }
@@ -62,7 +62,7 @@ class HandlePairResult extends _Result {
   Handle get second => _second!;
 
   @pragma('vm:entry-point')
-  const HandlePairResult(final int status, [this._first, this._second]) : super(status);
+  const HandlePairResult(super.status, [this._first, this._second]);
   @override
   String toString() => 'HandlePairResult(status=$status, first=$_first, second=$_second)';
 }
@@ -78,7 +78,7 @@ class ReadResult extends _Result {
   List<Handle> get handles => _handles!;
 
   @pragma('vm:entry-point')
-  const ReadResult(final int status, [this._bytes, this._numBytes, this._handles]) : super(status);
+  const ReadResult(super.status, [this._bytes, this._numBytes, this._handles]);
 
   /// Returns the bytes as a Uint8List. If status != OK this will throw
   /// an exception.
@@ -120,8 +120,7 @@ class ReadEtcResult extends _Result {
   List<HandleInfo> get handleInfos => _handleInfos!;
 
   @pragma('vm:entry-point')
-  const ReadEtcResult(final int status, [this._bytes, this._numBytes, this._handleInfos])
-    : super(status);
+  const ReadEtcResult(super.status, [this._bytes, this._numBytes, this._handleInfos]);
 
   /// Returns the bytes as a Uint8List. If status != OK this will throw
   /// an exception.
@@ -145,7 +144,7 @@ class WriteResult extends _Result {
   int get numBytes => _numBytes!;
 
   @pragma('vm:entry-point')
-  const WriteResult(final int status, [this._numBytes]) : super(status);
+  const WriteResult(super.status, [this._numBytes]);
   @override
   String toString() => 'WriteResult(status=$status, numBytes=$_numBytes)';
 }
@@ -156,7 +155,7 @@ class GetSizeResult extends _Result {
   int get size => _size!;
 
   @pragma('vm:entry-point')
-  const GetSizeResult(final int status, [this._size]) : super(status);
+  const GetSizeResult(super.status, [this._size]);
   @override
   String toString() => 'GetSizeResult(status=$status, size=$_size)';
 }
@@ -170,7 +169,7 @@ class FromFileResult extends _Result {
   int get numBytes => _numBytes!;
 
   @pragma('vm:entry-point')
-  const FromFileResult(final int status, [this._handle, this._numBytes]) : super(status);
+  const FromFileResult(super.status, [this._handle, this._numBytes]);
   @override
   String toString() => 'FromFileResult(status=$status, handle=$_handle, numBytes=$_numBytes)';
 }
@@ -181,7 +180,7 @@ class MapResult extends _Result {
   Uint8List get data => _data!;
 
   @pragma('vm:entry-point')
-  const MapResult(final int status, [this._data]) : super(status);
+  const MapResult(super.status, [this._data]);
   @override
   String toString() => 'MapResult(status=$status, data=$_data)';
 }

@@ -47,6 +47,18 @@ TEST(ProcTableGLES, CheckFrameBufferStatusDebugOnly) {
   mock_gles->GetProcTable().CheckFramebufferStatusDebug(0);
 }
 
+TEST(ProcTableGLES, GLES2VertexAttribDivisor) {
+  const auto extensions = std::vector<const char*>{"GL_EXT_instanced_arrays"};
+  auto mock_gles = MockGLES::Init(extensions);
+  EXPECT_TRUE(mock_gles->GetProcTable().VertexAttribDivisorEXT.IsAvailable());
+}
+
+TEST(ProcTableGLES, GLES3VertexAttribDivisor) {
+  auto mock_gles = MockGLES::Init();
+  EXPECT_FALSE(mock_gles->GetProcTable().VertexAttribDivisorEXT.IsAvailable());
+  EXPECT_TRUE(mock_gles->GetProcTable().VertexAttribDivisor.IsAvailable());
+}
+
 TEST(GLErrorToString, ReturnsCorrectStringForKnownErrors) {
   EXPECT_EQ(GLErrorToString(GL_NO_ERROR), "GL_NO_ERROR");
   EXPECT_EQ(GLErrorToString(GL_INVALID_ENUM), "GL_INVALID_ENUM");

@@ -5,8 +5,8 @@
 import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
@@ -76,6 +76,25 @@ void main() {
     root.elevation = 0.0;
     pumpFrame(phase: EnginePhase.composite);
     expect(root.needsCompositing, isFalse);
+  });
+
+  test('RenderPhysicalModel paints shadow only for non-zero elevation', () {
+    final root = RenderPhysicalModel(
+      color: const Color(0xffff00ff),
+      child: RenderSizedBox(const Size(10.0, 10.0)),
+    );
+    layout(root, phase: EnginePhase.paint);
+    expect(
+      (PaintingContext context, Offset offset) => root.paint(context, offset),
+      paintsExactlyCountTimes(#drawShadow, 0),
+    );
+
+    root.elevation = 1.0;
+    pumpFrame(phase: EnginePhase.paint);
+    expect(
+      (PaintingContext context, Offset offset) => root.paint(context, offset),
+      paintsExactlyCountTimes(#drawShadow, 1),
+    );
   });
 
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {

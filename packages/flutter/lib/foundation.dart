@@ -11,6 +11,7 @@ library foundation;
 
 export 'package:meta/meta.dart'
     show
+        awaitNotRequired,
         factory,
         immutable,
         internal,

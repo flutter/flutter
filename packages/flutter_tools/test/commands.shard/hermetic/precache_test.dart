@@ -21,6 +21,19 @@ void main() {
     cache.isUpToDateValue = false;
   });
 
+  testUsingContext('precache description explains currently enabled platforms', () {
+    final command = PrecacheCommand(
+      cache: cache,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(environment: <String, String>{}),
+      featureFlags: TestFeatureFlags(),
+    );
+
+    expect(command.description, contains('enabled by the current host and Flutter configuration'));
+    expect(command.description, contains('flutter config --list'));
+    expect(command.description, contains('(Not set)'));
+  });
+
   testUsingContext('precache should acquire lock', () async {
     final Platform platform = FakePlatform(environment: <String, String>{});
     final command = PrecacheCommand(

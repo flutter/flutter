@@ -84,6 +84,10 @@ class TestImpellerContext : public impeller::Context {
     FML_UNREACHABLE();
   }
 
+  // A stub returning false is allowed from implementations that are not
+  // planned to be used in benchmarking situations.
+  bool FinishQueue() override { return false; }
+
   void Shutdown() override { did_shutdown = true; }
 
   impeller::RuntimeStageBackend GetRuntimeStageBackend() const override {

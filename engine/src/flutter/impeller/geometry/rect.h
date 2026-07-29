@@ -302,6 +302,16 @@ struct TRect {
                             o.bottom_ <= bottom_));
   }
 
+  template <class U, class FT = T>
+  [[nodiscard]] constexpr std::enable_if_t<std::is_floating_point_v<FT>, bool>
+  Contains(const TRect<U>& o) const {
+    return !this->IsEmpty() &&                         //
+           (o.IsEmpty() || (o.GetLeft() >= left_ &&    //
+                            o.GetTop() >= top_ &&      //
+                            o.GetRight() <= right_ &&  //
+                            o.GetBottom() <= bottom_));
+  }
+
   /// @brief  Returns true if all of the fields of this floating point
   ///         rectangle are finite.
   ///
@@ -684,6 +694,41 @@ struct TRect {
   ///         Negative expansion results in shrinking.
   [[nodiscard]] constexpr TRect<T> Expand(TSize<T> amount) const {
     return Expand(amount.width, amount.height);
+  }
+
+  /// @brief  Returns a rectangle with edges expanded to satisfy a minimum size
+  ///         in a 2D-transformed coordinate space. This function is not valid
+  ///         for a matrix with perspective elements.
+  ///
+  ///         If the transform has a scaling factor of zero in either dimension,
+  ///         it cannot be expanded to the minimum size. This returns nullopt.
+  [[nodiscard]] constexpr std::optional<TRect<T>> ExpandToMinTransformedSize(
+      TSize<T> min_transformed_size,
+      const Matrix& transform) const {
+    FML_DCHECK(!transform.HasPerspective2D());
+
+    Vector2 transform_scaling = transform.GetBasisScaleXY();
+    if (transform_scaling.x == 0.0f || transform_scaling.y == 0.0f) {
+      return std::nullopt;
+    }
+
+    Size min_local_size =
+        Size(min_transformed_size.width / transform_scaling.x,
+             min_transformed_size.height / transform_scaling.y);
+    if (!min_local_size.IsFinite()) {
+      return std::nullopt;
+    }
+    Size current_size = GetSize();
+
+    if (current_size.width >= min_local_size.width &&
+        current_size.height >= min_local_size.height) {
+      // No expansion needed.
+      return *this;
+    }
+
+    Size expanded_size = current_size.Max(min_local_size);
+    return MakeEllipseBounds(GetCenter(), Point(expanded_size.width * 0.5f,
+                                                expanded_size.height * 0.5f));
   }
 
   /// @brief  Returns a new rectangle that represents the projection of the

@@ -37,10 +37,7 @@ class _DrawerExampleState extends State<DrawerExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       endDrawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,

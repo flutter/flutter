@@ -124,6 +124,9 @@ template("compiled_action") {
     if (defined(invoker.deps)) {
       deps += invoker.deps
     }
+    if (defined(invoker.public_deps)) {
+      public_deps = invoker.public_deps
+    }
     if (defined(invoker.depfile)) {
       depfile = invoker.depfile
     }

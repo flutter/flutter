@@ -95,12 +95,10 @@ class TextContents final : public Contents {
       const std::shared_ptr<TextFrame>& frame,
       Point position,
       const Matrix& screen_transform,
-      std::optional<GlyphProperties> glyph_properties,
+      GlyphProperties glyph_properties,
       const std::shared_ptr<GlyphAtlas>& atlas);
 
  private:
-  std::optional<GlyphProperties> GetGlyphProperties() const;
-
   std::shared_ptr<TextFrame> frame_;
   Scalar inherited_opacity_ = 1.0;
   Point position_;

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -37,6 +39,8 @@ const _kStandardFlutterWebDefines = <String>[
   '-DFLUTTER_WEB_USE_SKIA=true',
   '-DFLUTTER_WEB_USE_SKWASM=false',
   '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+  '--write-resources',
+  '--enable-experiment=record-use',
 ];
 
 const _kDart2WasmLinuxArgs = <String>[
@@ -75,6 +79,9 @@ name: foo
         processManager = FakeProcessManager.empty();
         globals.fs
             .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
+            .createSync(recursive: true);
+        globals.fs
+            .file('engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf')
             .createSync(recursive: true);
 
         environment = Environment.test(
@@ -125,6 +132,31 @@ name: foo
         Pub: ThrowingPub.new,
       },
     ),
+  );
+
+  test(
+    'WebEntrypointTarget declares package_config.json, pubspec.yaml, and plugin dependencies as inputs',
+    () => testbed.run(() async {
+      const target = WebEntrypointTarget();
+      expect(
+        target.inputs,
+        equals(<Source>[
+          const Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart',
+          ),
+          const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
+          const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+          const Source.pattern('{PROJECT_DIR}/.flutter-plugins-dependencies', optional: true),
+        ]),
+      );
+      expect(
+        target.outputs,
+        equals(<Source>[
+          const Source.pattern('{BUILD_DIR}/main.dart'),
+          const Source.pattern('{BUILD_DIR}/web_plugin_registrant.dart'),
+        ]),
+      );
+    }),
   );
 
   test(
@@ -357,6 +389,55 @@ _flutter.loader.load();
       }),
     );
   });
+
+  test(
+    'WebReleaseBundle bundles a local Roboto fallback when CDN assets are disabled',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kUseLocalCanvasKitFlag] = 'true';
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
+
+      final fontManifest =
+          jsonDecode(
+                environment.outputDir
+                    .childDirectory('assets')
+                    .childFile('FontManifest.json')
+                    .readAsStringSync(),
+              )
+              as List<dynamic>;
+      expect(
+        fontManifest,
+        contains(
+          predicate<dynamic>((dynamic entry) {
+            if (entry is! Map<dynamic, dynamic>) {
+              return false;
+            }
+            if (entry['family'] != 'Roboto') {
+              return false;
+            }
+            final dynamic fonts = entry['fonts'];
+            return fonts is List<dynamic> &&
+                fonts.length == 1 &&
+                fonts.single is Map<dynamic, dynamic> &&
+                (fonts.single as Map<dynamic, dynamic>)['asset'] ==
+                    'fonts/fallback/Roboto-Regular.ttf';
+          }),
+        ),
+      );
+      expect(
+        environment.outputDir
+            .childDirectory('assets')
+            .childFile('fonts/fallback/Roboto-Regular.ttf'),
+        exists,
+      );
+    }),
+  );
 
   test(
     'WebReleaseBundle copies dart2js output and resource files to output directory',
@@ -1284,6 +1365,8 @@ _flutter.loader.load();
                           ],
                           '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
                           '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+                          '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').absolute.path}',
+                          '--enable-experiment=record-use',
                           '-O$expectedLevel',
                           if (strip && buildMode == 'release')
                             '--strip-wasm'
@@ -1323,6 +1406,34 @@ _flutter.loader.load();
       }
     }
   }
+
+  test('Dart2WasmTarget.buildFiles respects compilerConfig.sourceMaps and matches modules', () {
+    final File wasmFile = environment.buildDir.childFile('main.dart.wasm')..createSync();
+    final File mjsFile = environment.buildDir.childFile('main.dart.mjs')..createSync();
+    final File mapFile = environment.buildDir.childFile('main.dart.wasm.map')..createSync();
+
+    final File partWasmFile = environment.buildDir.childFile('main.dart_module1.wasm')
+      ..createSync();
+    final File partMapFile = environment.buildDir.childFile('main.dart_module1.wasm.map')
+      ..createSync();
+
+    final targetWithMaps = Dart2WasmTarget(const WasmCompilerConfig(), const NoOpAnalytics());
+    expect(
+      targetWithMaps.buildFiles(environment).map((f) => f.path),
+      containsAll(<File>[wasmFile, mjsFile, mapFile, partWasmFile, partMapFile].map((f) => f.path)),
+    );
+
+    final targetWithoutMaps = Dart2WasmTarget(
+      const WasmCompilerConfig(sourceMaps: false),
+      const NoOpAnalytics(),
+    );
+    expect(
+      targetWithoutMaps.buildFiles(environment).map((f) => f.path),
+      containsAll(<File>[wasmFile, mjsFile, partWasmFile].map((f) => f.path)),
+    );
+    expect(targetWithoutMaps.buildFiles(environment), isNot(contains(mapFile)));
+    expect(targetWithoutMaps.buildFiles(environment), isNot(contains(partMapFile)));
+  });
 
   test('Dart2JSTarget has unique build keys for compiler configurations', () {
     const testConfigs = <JsCompilerConfig>[

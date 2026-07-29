@@ -15,7 +15,8 @@ std::unordered_map<int64_t, DlRect> SliceViews(
     const std::vector<int64_t>& composition_order,
     const std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>&
         slices,
-    const std::unordered_map<int64_t, DlRect>& view_rects) {
+    const std::unordered_map<int64_t, DlRect>& view_rects,
+    const std::unordered_set<int64_t>& views_with_underlay_preserved) {
   std::unordered_map<int64_t, DlRect> overlay_layers;
 
   auto current_frame_view_count = composition_order.size();
@@ -110,9 +111,17 @@ std::unordered_map<int64_t, DlRect> SliceViews(
     if (!full_joined_rect.IsEmpty()) {
       overlay_layers.insert({view_id, full_joined_rect});
 
-      // Clip the background canvas, so it doesn't contain any of the pixels
-      // drawn on the overlay layer.
-      background_canvas->ClipRect(full_joined_rect, DlClipOp::kDifference);
+      // If overlay has a non-rect clip, we need to preserve the underlay in
+      // that area to show correctly after overlay is clipped behind the
+      // platform view
+      const bool preserve_underlay =
+          views_with_underlay_preserved.find(view_id) !=
+          views_with_underlay_preserved.end();
+      if (!preserve_underlay) {
+        // Clip the background canvas, so it doesn't contain any of the pixels
+        // drawn on the overlay layer.
+        background_canvas->ClipRect(full_joined_rect, DlClipOp::kDifference);
+      }
     }
     slice->render_into(background_canvas);
   }

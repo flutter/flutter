@@ -92,6 +92,9 @@ interface class FlutterTestRunner {
     ];
 
     if (web) {
+      // Unsupported for general Flutter developers.
+      // This is only used by the Flutter Framework tests.
+      // See: https://github.com/flutter/flutter/pull/65984.
       final String tempBuildDir = globals.fs.systemTempDirectory
           .createTempSync('flutter_test.')
           .absolute
@@ -737,7 +740,8 @@ class SpawnPlugin extends PlatformPlugin {
     globals.logger.printTrace('Started flutter_tester process at pid ${process.pid}');
 
     for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform<String>(utf8.decoder).listen(globals.stdio.stdoutWrite);
+      // Use permissive decoder for test output which may contain invalid UTF-8
+      stream.transform<String>(utf8AllowMalformed.decoder).listen(globals.stdio.stdoutWrite);
     }
 
     return process.exitCode.then((int exitCode) {

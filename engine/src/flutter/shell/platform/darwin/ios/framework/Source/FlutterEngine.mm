@@ -196,11 +196,19 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   std::shared_ptr<flutter::ThreadHost> _threadHost;
   std::unique_ptr<flutter::Shell> _shell;
 
+  // Callers to -waitForFirstFrame:callback: that are currently queued/processing.
+  // -destroyContext must wait for this group to drain before it is safe to free _shell.
+  dispatch_group_t _firstFrameWaiters;
+
   flutter::IOSRenderingAPI _renderingApi;
   std::shared_ptr<flutter::SamplingProfiler> _profiler;
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
   FlutterTextureRegistryRelay* _textureRegistry;
+
+  FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
+  FlutterFMLTaskRunner* _uiTaskRunnerWrapper;
+  FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
 }
 
 - (int64_t)engineIdentifier {
@@ -315,6 +323,9 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)sceneWillConnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
+    return;
+  }
   UIScene* scene = notification.object;
   if (!FlutterSharedApplication.application.supportsMultipleScenes) {
     // Since there is only one scene, we can assume that the FlutterEngine is within this scene and
@@ -332,7 +343,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)recreatePlatformViewsController {
-  _renderingApi = flutter::GetRenderingAPIForProcess(/*force_software=*/false);
+  _renderingApi = flutter::GetRenderingAPIForProcess();
   _platformViewsController = [[FlutterPlatformViewsController alloc] init];
 }
 
@@ -410,9 +421,11 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
     }
     FML_DCHECK(strongSelf.platformTaskRunner);
     FML_DCHECK(strongSelf.rasterTaskRunner);
-    FML_DCHECK(strongSelf.rasterTaskRunner->RunsTasksOnCurrentThread());
+    FML_DCHECK([strongSelf.rasterTaskRunner runsTasksOnCurrentThread]);
     // Get callback on raster thread and jump back to platform thread.
-    strongSelf.platformTaskRunner->PostTask([block]() { block(); });
+    [strongSelf.platformTaskRunner postTask:^{
+      block();
+    }];
   });
 }
 
@@ -445,25 +458,16 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   return static_cast<flutter::PlatformViewIOS*>(_shell->GetPlatformView().get());
 }
 
-- (fml::RefPtr<fml::TaskRunner>)platformTaskRunner {
-  if (!_shell) {
-    return {};
-  }
-  return _shell->GetTaskRunners().GetPlatformTaskRunner();
+- (FlutterFMLTaskRunner*)platformTaskRunner {
+  return _platformTaskRunnerWrapper;
 }
 
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner {
-  if (!_shell) {
-    return {};
-  }
-  return _shell->GetTaskRunners().GetUITaskRunner();
+- (FlutterFMLTaskRunner*)uiTaskRunner {
+  return _uiTaskRunnerWrapper;
 }
 
-- (fml::RefPtr<fml::TaskRunner>)rasterTaskRunner {
-  if (!_shell) {
-    return {};
-  }
-  return _shell->GetTaskRunners().GetRasterTaskRunner();
+- (FlutterFMLTaskRunner*)rasterTaskRunner {
+  return _rasterTaskRunnerWrapper;
 }
 
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
@@ -571,12 +575,22 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)destroyContext {
+  // Clear any tasks waiting on first frame prior to destroying _shell.
+  if (_shell) {
+    _shell->CancelWaitForFirstFrame();
+  }
+  if (_firstFrameWaiters) {
+    dispatch_group_wait(_firstFrameWaiters, DISPATCH_TIME_FOREVER);
+  }
   [self resetChannels];
   self.isolateId = nil;
   _shell.reset();
   _profiler.reset();
   _threadHost.reset();
   _platformViewsController = nil;
+  _platformTaskRunnerWrapper = nil;
+  _uiTaskRunnerWrapper = nil;
+  _rasterTaskRunnerWrapper = nil;
 }
 
 - (NSURL*)vmServiceUrl {
@@ -797,6 +811,13 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
     withVMServicePublication:(BOOL)doesVMServicePublication {
   _shell = std::move(shell);
+  _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
+      initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
+  _uiTaskRunnerWrapper =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:_shell->GetTaskRunners().GetUITaskRunner()];
+  _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
+      initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
+
   [self setUpChannels];
   [self onLocaleUpdated:nil];
   [self updateDisplays];
@@ -903,12 +924,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
           return std::unique_ptr<flutter::PlatformViewIOS>();
         }
         [strongSelf recreatePlatformViewsController];
-        strongSelf.platformViewsController.taskRunner =
-            shell.GetTaskRunners().GetPlatformTaskRunner();
+        strongSelf.platformViewsController.taskRunner = [[FlutterFMLTaskRunner alloc]
+            initWithTaskRunner:shell.GetTaskRunners().GetPlatformTaskRunner()];
         return std::make_unique<flutter::PlatformViewIOS>(
             shell, strongSelf->_renderingApi, strongSelf.platformViewsController,
-            shell.GetTaskRunners(), shell.GetConcurrentWorkerTaskRunner(),
-            shell.GetIsGpuDisabledSyncSwitch());
+            shell.GetTaskRunners(), shell.GetIsGpuDisabledSyncSwitch());
       };
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
@@ -1439,10 +1459,16 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 #pragma mark - Notifications
 
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
+    return;
+  }
   [self flutterWillEnterForeground:notification];
 }
 
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
+    return;
+  }
   [self flutterDidEnterBackground:notification];
 }
 
@@ -1520,17 +1546,28 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
   dispatch_group_t group = dispatch_group_create();
 
+  // Increment count of tasks waiting for first frame callback. Decrement below
+  // on completion or timeout. In -destroyContext we block until all pending
+  // first frame waiter tasks are cancelled.
+  if (!_firstFrameWaiters) {
+    _firstFrameWaiters = dispatch_group_create();
+  }
+  dispatch_group_t firstFrameWaiters = _firstFrameWaiters;
+  dispatch_group_enter(firstFrameWaiters);
+
   __weak FlutterEngine* weakSelf = self;
   __block BOOL didTimeout = NO;
   dispatch_group_async(group, queue, ^{
     FlutterEngine* strongSelf = weakSelf;
-    if (!strongSelf) {
+    if (!strongSelf || !strongSelf->_shell) {
+      dispatch_group_leave(firstFrameWaiters);
       return;
     }
 
     fml::TimeDelta waitTime = fml::TimeDelta::FromMilliseconds(timeout * 1000);
     fml::Status status = strongSelf.shell.WaitForFirstFrame(waitTime);
     didTimeout = status.code() == fml::StatusCode::kDeadlineExceeded;
+    dispatch_group_leave(firstFrameWaiters);
   });
 
   // Only execute the main queue task once the background task has completely finished executing.
@@ -1580,7 +1617,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
       [result, context](flutter::Shell& shell) {
         [result recreatePlatformViewsController];
-        result.platformViewsController.taskRunner = shell.GetTaskRunners().GetPlatformTaskRunner();
+        result.platformViewsController.taskRunner = [[FlutterFMLTaskRunner alloc]
+            initWithTaskRunner:shell.GetTaskRunners().GetPlatformTaskRunner()];
         return std::make_unique<flutter::PlatformViewIOS>(
             shell, context, result.platformViewsController, shell.GetTaskRunners());
       };

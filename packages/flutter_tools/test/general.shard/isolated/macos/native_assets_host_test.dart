@@ -4,6 +4,8 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart';
+import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../src/common.dart';
 
@@ -114,5 +116,113 @@ void main() {
         },
       );
     });
+  });
+
+  test('fatAssetTargetLocations ignores cross-architecture conflicts', () {
+    final asset1 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      target: Target.fromString('macos_arm64'),
+    );
+    final asset2 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'my_package',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libmy_asset.dylib'),
+      ),
+      target: Target.fromString('macos_x64'),
+    );
+
+    final Map<KernelAssetPath, List<FlutterCodeAsset>> result = fatAssetTargetLocations(
+      <FlutterCodeAsset>[asset1, asset2],
+      (FlutterCodeAsset asset, Set<String> alreadyTakenNames) {
+        final String fileName = asset.codeAsset.file!.pathSegments.last;
+        final Uri uri = frameworkUri(fileName, alreadyTakenNames);
+        return KernelAsset(
+          id: asset.codeAsset.id,
+          target: asset.target,
+          path: KernelAssetAbsolutePath(uri),
+        );
+      },
+    );
+
+    expect(result.length, equals(1));
+    final KernelAssetPath path = result.keys.single;
+    expect((path as KernelAssetAbsolutePath).uri.path, equals('my_asset.framework/my_asset'));
+    expect(result[path]!.length, equals(2));
+  });
+
+  test('fatAssetTargetLocations handles conflicts between different assets', () {
+    final assetA1 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'package_a',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libfoo.dylib'),
+      ),
+      target: Target.fromString('macos_arm64'),
+    );
+    final assetB1 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'package_b',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libfoo.dylib'),
+      ),
+      target: Target.fromString('macos_arm64'),
+    );
+    final assetA2 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'package_a',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libfoo.dylib'),
+      ),
+      target: Target.fromString('macos_x64'),
+    );
+    final assetB2 = FlutterCodeAsset(
+      codeAsset: CodeAsset(
+        package: 'package_b',
+        name: 'my_asset',
+        linkMode: DynamicLoadingBundled(),
+        file: Uri.file('libfoo.dylib'),
+      ),
+      target: Target.fromString('macos_x64'),
+    );
+
+    final Map<KernelAssetPath, List<FlutterCodeAsset>> result = fatAssetTargetLocations(
+      <FlutterCodeAsset>[assetA1, assetB1, assetA2, assetB2],
+      (FlutterCodeAsset asset, Set<String> alreadyTakenNames) {
+        final String fileName = asset.codeAsset.file!.pathSegments.last;
+        final Uri uri = frameworkUri(fileName, alreadyTakenNames);
+        return KernelAsset(
+          id: asset.codeAsset.id,
+          target: asset.target,
+          path: KernelAssetAbsolutePath(uri),
+        );
+      },
+    );
+
+    expect(result.length, equals(2));
+
+    final KernelAssetPath pathA = result.keys.firstWhere(
+      (k) => (k as KernelAssetAbsolutePath).uri.path == 'foo.framework/foo',
+    );
+    final KernelAssetPath pathB = result.keys.firstWhere(
+      (k) => (k as KernelAssetAbsolutePath).uri.path == 'foo1.framework/foo1',
+    );
+
+    expect(result[pathA]!.length, equals(2));
+    expect(result[pathA]!.contains(assetA1), isTrue);
+    expect(result[pathA]!.contains(assetA2), isTrue);
+
+    expect(result[pathB]!.length, equals(2));
+    expect(result[pathB]!.contains(assetB1), isTrue);
+    expect(result[pathB]!.contains(assetB2), isTrue);
   });
 }

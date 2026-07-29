@@ -4,7 +4,7 @@
 {
     include: [
         "sys/testing/gtest_runner.shard.cml",
-        "sys/component/realm_builder_absolute.shard.cml",
+        "sys/component/realm_builder_subpackage.shard.cml",
 
         // This test needs both the vulkan facet and the hermetic-tier-2 facet,
         // so we are forced to make it a system test.
@@ -36,15 +36,7 @@
     facets: {
         "fuchsia.test": {
             "deprecated-allowed-packages": [
-                "child-view",
-                "flatland-scene-manager-test-ui-stack",
-                "oot_flutter_aot_runner",
-                "oot_flutter_jit_runner",
-                "oot_flutter_jit_product_runner",
-                "oot_flutter_aot_product_runner",
-                "parent-view",
-                "test-ui-stack",
-                "test_manager",
+                "flatland-scene-manager-test-ui-stack"
             ],
         },
     },

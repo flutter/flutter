@@ -256,4 +256,17 @@ Future<void> testMain() async {
     p.relativeLineTo(-50, 50);
     expect(p.getBounds(), equals(const Rect.fromLTRB(50.0, 50.0, 150.0, 100.0)));
   });
+
+  test('path containing polygon with thousands of points', () {
+    // Check that addPolygon works with a large point list that exceeds the
+    // capacity of the Wasm stack.
+    const pointCount = 10000;
+    final points = List<Offset>.generate(pointCount + 1, (i) => Offset(i.toDouble(), i.toDouble()));
+    final p = Path();
+    p.addPolygon(points, false);
+    expect(
+      p.getBounds(),
+      equals(Rect.fromLTRB(0, 0, pointCount.toDouble(), pointCount.toDouble())),
+    );
+  });
 }

@@ -71,6 +71,45 @@ void main() {
           }
         }
       });
+
+      testWithoutContext(
+        'flutter build $target rebuilds when data asset file is deleted',
+        () async {
+          final assets = <String, String>{'id1.txt': 'content1'};
+          writeAssets(assets, appRoot);
+          writeHookLibrary(appRoot, assets, available: <String>['id1.txt']);
+          writeHelperLibrary(appRoot, 'version1', assets.keys.toList());
+
+          ProcessTestResult result = await runFlutter(
+            <String>['build', '-v', target],
+            appRoot.path,
+            <Transition>[Barrier.contains('Built build${Platform.pathSeparator}$target')],
+          );
+          if (result.exitCode != 0) {
+            throw Exception(
+              'first flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+            );
+          }
+
+          final File fileToDelete = dependencyRoot
+              .childDirectory('data')
+              .childFile('generated.txt');
+          expect(fileToDelete.existsSync(), true);
+          fileToDelete.deleteSync();
+
+          // Second build should re-run the build_hooks target and succeed.
+          result = await runFlutter(
+            <String>['build', '-v', target],
+            appRoot.path,
+            <Transition>[Barrier.contains('Built build${Platform.pathSeparator}$target')],
+          );
+          if (result.exitCode != 0) {
+            throw Exception(
+              'second flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+            );
+          }
+        },
+      );
     }
   });
 }

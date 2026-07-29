@@ -35,6 +35,12 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
   final TextEditingController fieldText = TextEditingController();
 
   @override
+  void dispose() {
+    fieldText.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: .center,

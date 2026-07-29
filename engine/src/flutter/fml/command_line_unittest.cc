@@ -443,5 +443,34 @@ TEST(CommandLineTest, CommandLineToArgv) {
   }
 }
 
+#ifdef _WIN32
+TEST(CommandLineTest, CommandLineFromWideArgvUnicode) {
+  // Non-ASCII and UTF-8 unicode characters (accented e/o, ink_sparkle,
+  // Cyrillic, Japanese)
+  const wchar_t* const wide_argv[] = {
+      L"my_program", L"--user=J\u00e9r\u00f4me", L"--shader=ink_sparkle",
+      L"\u0439\u0446\u0443\u043a\u0435\u043d", L"\u65e5\u672c\u8a9e"};
+
+  const auto cl = CommandLineFromWideArgv(5, wide_argv);
+
+  EXPECT_TRUE(cl.has_argv0());
+  EXPECT_EQ("my_program", cl.argv0());
+
+  EXPECT_EQ(2u, cl.options().size());
+  EXPECT_EQ("user", cl.options()[0].name);
+  // Accent e and o: Jérôme in UTF-8
+  EXPECT_EQ("J\xc3\xa9r\xc3\xb4me", cl.options()[0].value);
+  EXPECT_EQ("shader", cl.options()[1].name);
+  EXPECT_EQ("ink_sparkle", cl.options()[1].value);
+
+  EXPECT_EQ(2u, cl.positional_args().size());
+  // Cyrillic string in UTF-8
+  EXPECT_EQ("\xd0\xb9\xd1\x86\xd1\x83\xd0\xba\xd0\xb5\xd0\xbd",
+            cl.positional_args()[0]);
+  // Japanese string in UTF-8
+  EXPECT_EQ("\xe6\x97\xa5\xe6\x9c\xac\xe8\xaa\x9e", cl.positional_args()[1]);
+}
+#endif
+
 }  // namespace
 }  // namespace fml
