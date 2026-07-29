@@ -49,9 +49,6 @@ class _MainWidgetState extends State<_MainWidget> {
                   menuChildren: <Widget>[
                     MenuItemButton(
                       onPressed: () {
-                        if (!mounted) {
-                          return;
-                        }
                         setState(() {
                           _lastSelection = 'Save';
                         });
@@ -66,9 +63,6 @@ class _MainWidgetState extends State<_MainWidget> {
                   menuChildren: <Widget>[
                     MenuItemButton(
                       onPressed: () {
-                        if (!mounted) {
-                          return;
-                        }
                         setState(() {
                           _lastSelection = 'About';
                         });
@@ -79,9 +73,6 @@ class _MainWidgetState extends State<_MainWidget> {
                       menuChildren: <Widget>[
                         MenuItemButton(
                           onPressed: () {
-                            if (!mounted) {
-                              return;
-                            }
                             setState(() {
                               _lastSelection = 'Documentation';
                             });
@@ -90,9 +81,6 @@ class _MainWidgetState extends State<_MainWidget> {
                         ),
                         MenuItemButton(
                           onPressed: () {
-                            if (!mounted) {
-                              return;
-                            }
                             setState(() {
                               _lastSelection = 'Send Feedback';
                             });
