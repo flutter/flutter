@@ -91,29 +91,13 @@ class ExamplesCrossImportChecker {
 
   static const String _kSampleTemplatesDirectoryName = 'sample_templates';
 
-  /// The known cross imports in the `examples/` directory itself, excluding subdirectories.
+  /// The known cross imports in the `examples/` directory, including subdirectories.
   ///
   /// These cross imports should all eventually be resolved, but until they are we allow them, so
   /// that we can catch any new cross imports that are added.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesCrossImports = <String>{};
-
-  /// The known cross imports in the `examples/api/` directory itself, excluding subdirectories.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesSlashApiRootCrossImports = <String>{};
-
-  /// The known cross imports in the `examples/api` directory and its subdirectories.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesSlashApiCrossImports = <String>{
+  static final Set<String> knownExamplesCrossImports = <String>{
     'examples/api/lib/animation/animation_controller/animated_digit.0.dart',
     'examples/api/lib/animation/curves/curve2_d.0.dart',
     'examples/api/test/animation/animation_controller/animated_digit.0_test.dart',
@@ -584,43 +568,8 @@ class ExamplesCrossImportChecker {
     'examples/api/test/widgets/scrollbar/raw_scrollbar.1_test.dart',
     'examples/api/test/widgets/inherited_notifier/inherited_notifier.0_test.dart',
     'examples/api/test/widgets/text_magnifier/text_magnifier.0_test.dart',
-  };
-
-  /// The known cross imports in the `examples/flutter_view` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesFlutterViewCrossImports = <String>{
     'examples/flutter_view/lib/main.dart',
-  };
-
-  /// The known cross imports in the `examples/hello_world` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesHelloWorldCrossImports = <String>{};
-
-  /// The known cross imports in the `examples/image_list` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesImageListCrossImports = <String>{
     'examples/image_list/lib/main.dart',
-  };
-
-  /// The known cross imports in the `examples/layers` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesLayersCrossImports = <String>{
     'examples/layers/rendering/touch_input.dart',
     'examples/layers/services/isolate.dart',
     'examples/layers/widgets/gestures.dart',
@@ -629,15 +578,6 @@ class ExamplesCrossImportChecker {
     'examples/layers/widgets/sectors.dart',
     'examples/layers/widgets/styled_text.dart',
     'examples/layers/test/gestures_test.dart',
-  };
-
-  /// The known cross imports in the `examples/multiple_windows` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesMultipleWindowsCrossImports = <String>{
     'examples/multiple_windows/lib/app/main_window.dart',
     'examples/multiple_windows/lib/app/tooltip_button.dart',
     'examples/multiple_windows/lib/app/tooltip_window_edit_dialog.dart',
@@ -653,73 +593,12 @@ class ExamplesCrossImportChecker {
     'examples/multiple_windows/lib/app/window_settings_dialog.dart',
     'examples/multiple_windows/lib/main.dart',
     'examples/multiple_windows/test/multiple_windows_test.dart',
-  };
-
-  /// The known cross imports in the `examples/platform_channel` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesPlatformChannelCrossImports = <String>{
     'examples/platform_channel/lib/main.dart',
-  };
-
-  /// The known cross imports in the `examples/platform_channel_swift` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesPlatformChannelSwiftCrossImports = <String>{
     'examples/platform_channel_swift/lib/main.dart',
-  };
-
-  /// The known cross imports in the `examples/platform_view` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesPlatformViewCrossImports = <String>{
     'examples/platform_view/lib/main.dart',
-  };
-
-  /// The known cross imports in the `examples/splash` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesSplashCrossImports = <String>{
     'examples/splash/lib/main.dart',
     'examples/splash/test/splash_test.dart',
-  };
-
-  /// The known cross imports in the `examples/texture` directory.
-  ///
-  /// These cross imports should all eventually be resolved, but until they are we allow them, so
-  /// that we can catch any new cross imports that are added.
-  // TODO(justinmc): Fix all of these tests so there are no cross imports.
-  // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesTextureCrossImports = <String>{
     'examples/texture/lib/main.dart',
-  };
-
-  static final Set<String> _knownCrossImports = {
-    ...knownExamplesCrossImports,
-    ...knownExamplesSlashApiRootCrossImports,
-    ...knownExamplesSlashApiCrossImports,
-    ...knownExamplesFlutterViewCrossImports,
-    ...knownExamplesHelloWorldCrossImports,
-    ...knownExamplesImageListCrossImports,
-    ...knownExamplesLayersCrossImports,
-    ...knownExamplesMultipleWindowsCrossImports,
-    ...knownExamplesPlatformChannelCrossImports,
-    ...knownExamplesPlatformChannelSwiftCrossImports,
-    ...knownExamplesPlatformViewCrossImports,
-    ...knownExamplesSplashCrossImports,
-    ...knownExamplesTextureCrossImports,
   };
 
   static final RegExp _examplesPrefix = RegExp(r'examples');
@@ -972,12 +851,12 @@ class ExamplesCrossImportChecker {
     for (final MapEntry<CrossImportCheckedLibrary, CrossImportingFiles> entry
         in crossImportsPerLibrary.entries) {
       final Set<File> unknownCupertinoImports = getUnknowns(
-        _knownCrossImports,
+        knownExamplesCrossImports,
         entry.value.cupertinoImports,
         prefix: _examplesPrefix,
       );
       final Set<File> unknownMaterialImports = getUnknowns(
-        _knownCrossImports,
+        knownExamplesCrossImports,
         entry.value.materialImports,
         prefix: _examplesPrefix,
       );
@@ -1008,11 +887,20 @@ class ExamplesCrossImportChecker {
     }
 
     // Find any known cross imports that weren't found, and are therefore fixed.
+    // Pre-compute all library prefixes so that root libraries (e.g. `examples`,
+    // `examples/api`) don't claim entries that belong to a more-specific sub-library.
     // TODO(justinmc): Remove this after all known cross imports have been
     // fixed.
     // See https://github.com/flutter/flutter/issues/187645.
+    final Set<String> allLibraryPrefixes = {
+      for (final CrossImportCheckedLibrary library in crossImportsPerLibrary.keys)
+        '${library.libraryName}/',
+    };
+
     for (final MapEntry<CrossImportCheckedLibrary, CrossImportingFiles> entry
         in crossImportsPerLibrary.entries) {
+      final ownPrefix = '${entry.key.libraryName}/';
+
       final Set<File> crossImportsForLibrary = entry.value.cupertinoImports.union(
         entry.value.materialImports,
       );
@@ -1020,7 +908,15 @@ class ExamplesCrossImportChecker {
       final Set<String> knownCrossImportsForLibrary = {
         for (final String element in entry.key.knownCrossImports)
           // The known cross imports include both /lib and /test entries, so handle both.
-          if (element.startsWith('${entry.key.libraryName}/')) element,
+          // Exclude entries that are owned by a more-specific sub-library.
+          if (element.startsWith(ownPrefix) &&
+              !allLibraryPrefixes.any(
+                (String prefix) =>
+                    prefix != ownPrefix &&
+                    prefix.startsWith(ownPrefix) &&
+                    element.startsWith(prefix),
+              ))
+            element,
       };
 
       final Set<String> fixedCrossImports = differencePaths(
@@ -1112,26 +1008,7 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
   }
 
   @override
-  Set<String> get knownCrossImports {
-    return switch (crossImportsListSymbolName) {
-      // dart format off
-      'knownExamplesCrossImports' => ExamplesCrossImportChecker.knownExamplesCrossImports,
-      'knownExamplesSlashApiRootCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiRootCrossImports,
-      'knownExamplesSlashApiCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
-      'knownExamplesFlutterViewCrossImports' => ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports,
-      'knownExamplesHelloWorldCrossImports' => ExamplesCrossImportChecker.knownExamplesHelloWorldCrossImports,
-      'knownExamplesImageListCrossImports' => ExamplesCrossImportChecker.knownExamplesImageListCrossImports,
-      'knownExamplesLayersCrossImports' => ExamplesCrossImportChecker.knownExamplesLayersCrossImports,
-      'knownExamplesMultipleWindowsCrossImports' => ExamplesCrossImportChecker.knownExamplesMultipleWindowsCrossImports,
-      'knownExamplesPlatformChannelCrossImports' => ExamplesCrossImportChecker.knownExamplesPlatformChannelCrossImports,
-      'knownExamplesPlatformChannelSwiftCrossImports' => ExamplesCrossImportChecker.knownExamplesPlatformChannelSwiftCrossImports,
-      'knownExamplesPlatformViewCrossImports' => ExamplesCrossImportChecker.knownExamplesPlatformViewCrossImports,
-      'knownExamplesSplashCrossImports' => ExamplesCrossImportChecker.knownExamplesSplashCrossImports,
-      'knownExamplesTextureCrossImports' => ExamplesCrossImportChecker.knownExamplesTextureCrossImports,
-      // dart format on
-      _ => throw UnimplementedError('Unknown cross imports list: $crossImportsListSymbolName'),
-    };
-  }
+  Set<String> get knownCrossImports => ExamplesCrossImportChecker.knownExamplesCrossImports;
 
   @override
   String get libraryName => _name;
@@ -1139,7 +1016,7 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
   @override
   String get removeCrossImportsInstructionMessage {
     return 'However, they now need to be removed from the\n'
-        '$crossImportsListSymbolName list in the script /dev/bots/check_examples_cross_imports.dart.';
+        'knownExamplesCrossImports list in the script /dev/bots/check_examples_cross_imports.dart.';
   }
 
   @override
@@ -1152,54 +1029,6 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
               'Refactor it or move it to the $importedLibraryName examples.\n'
         : 'The following $filesCount files in $libraryName have a disallowed import of $importedLibraryName. '
               'Refactor them or move them to the $importedLibraryName examples.\n';
-  }
-
-  /// The name of the variable in [ExamplesCrossImportChecker]
-  /// that contains the list of known cross imports for this library.
-  ///
-  /// This is used for reporting mismatched cross imports.
-  String get crossImportsListSymbolName {
-    return switch (libraryName) {
-      _
-          when libraryName.startsWith('examples/api/lib/animation') ||
-              libraryName.startsWith('examples/api/lib/foundation') ||
-              libraryName.startsWith('examples/api/lib/gestures') ||
-              libraryName.startsWith('examples/api/lib/painting') ||
-              libraryName.startsWith('examples/api/lib/rendering') ||
-              libraryName.startsWith('examples/api/lib/sample_templates') ||
-              libraryName.startsWith('examples/api/lib/services') ||
-              libraryName.startsWith('examples/api/lib/ui') ||
-              libraryName.startsWith('examples/api/lib/widgets') ||
-              libraryName.startsWith('examples/api/test/animation') ||
-              libraryName.startsWith('examples/api/test/foundation') ||
-              libraryName.startsWith('examples/api/test/gestures') ||
-              libraryName.startsWith('examples/api/test/painting') ||
-              libraryName.startsWith('examples/api/test/rendering') ||
-              libraryName.startsWith('examples/api/test/sample_templates') ||
-              libraryName.startsWith('examples/api/test/services') ||
-              libraryName.startsWith('examples/api/test/ui') ||
-              libraryName.startsWith('examples/api/test/widgets') =>
-        'knownExamplesSlashApiCrossImports',
-      _ when libraryName.startsWith('examples/flutter_view') =>
-        'knownExamplesFlutterViewCrossImports',
-      _ when libraryName.startsWith('examples/hello_world') =>
-        'knownExamplesHelloWorldCrossImports',
-      _ when libraryName.startsWith('examples/image_list') => 'knownExamplesImageListCrossImports',
-      _ when libraryName.startsWith('examples/layers') => 'knownExamplesLayersCrossImports',
-      _ when libraryName.startsWith('examples/multiple_windows') =>
-        'knownExamplesMultipleWindowsCrossImports',
-      _ when libraryName.startsWith('examples/platform_channel_swift') =>
-        'knownExamplesPlatformChannelSwiftCrossImports',
-      _ when libraryName.startsWith('examples/platform_channel') =>
-        'knownExamplesPlatformChannelCrossImports',
-      _ when libraryName.startsWith('examples/platform_view') =>
-        'knownExamplesPlatformViewCrossImports',
-      _ when libraryName.startsWith('examples/splash') => 'knownExamplesSplashCrossImports',
-      _ when libraryName.startsWith('examples/texture') => 'knownExamplesTextureCrossImports',
-      _ when libraryName.startsWith('examples/api') => 'knownExamplesSlashApiRootCrossImports',
-      _ when libraryName.startsWith('examples') => 'knownExamplesCrossImports',
-      _ => throw UnimplementedError('Unknown library: $libraryName'),
-    };
   }
 }
 

@@ -258,12 +258,15 @@ void main() {
     expect(success, isFalse);
   });
 
-  for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
-      in crossImportsGenericExamplesTestCases) {
+  for (final String libraryName in crossImportsGenericExamplesTestCases) {
+    // The examples root (examples/) is expected to not contain examples.
+    final bool hasNoCrossImports =
+        isExamplesRoot(libraryName) || hasNoKnownCrossImports(libraryName);
+
     test(
       'when not all $libraryName knowns have cross imports',
       () async {
-        final String excludedSample = knownCrossImports.first;
+        final String excludedSample = getFirstCrossImportForLibrary(libraryName);
 
         buildKnownCrossImportExamplesFiles(excludes: <String>{excludedSample});
 
@@ -276,13 +279,13 @@ void main() {
           '║ Huzzah! The following files in $libraryName no longer contain cross imports!',
           '║   $excludedSample',
           '║ However, they now need to be removed from the',
-          '║ $knownCrossImportsListName list in the script /dev/bots/check_examples_cross_imports.dart.',
+          '║ knownExamplesCrossImports list in the script /dev/bots/check_examples_cross_imports.dart.',
           '╚═══════════════════════════════════════════════════════════════════════════════',
         ].join('\n');
         expect(result, equals('$lines\n'));
         expect(success, isFalse);
       },
-      skip: knownCrossImports.isEmpty, // [intended]: Nothing to log if there are no known imports
+      skip: hasNoCrossImports, // [intended]: Nothing to log if there are no known imports
     );
 
     test('unknown $libraryName cross import of Material', () async {
@@ -515,10 +518,7 @@ void main() {
     // due to a formatter bug with comments and named arguments,
     // which causes `dev/bots/analyze.dart` to fail, since the skip test comment gets put on the next line.
     // TODO(navaronbracke): Remove this when https://github.com/dart-lang/dart_style/pull/1848 rolls into Flutter
-    final bool noCrossImports = hasNoKnownCrossImports(
-      libraryName,
-      ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
-    );
+    final bool noCrossImports = hasNoKnownCrossImports(libraryName);
 
     test('non-Dart files are ignored in $libraryName', () async {
       buildKnownCrossImportExamplesFiles();
@@ -571,10 +571,7 @@ void main() {
     test(
       'when not all $libraryName knowns have cross imports',
       () async {
-        final String excludedSample = getFirstCrossImportForLibrary(
-          libraryName,
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
-        );
+        final String excludedSample = getFirstCrossImportForLibrary(libraryName);
 
         buildKnownCrossImportExamplesFiles(excludes: <String>{excludedSample});
 
@@ -587,7 +584,7 @@ void main() {
           '║ Huzzah! The following files in $libraryName no longer contain cross imports!',
           '║   $excludedSample',
           '║ However, they now need to be removed from the',
-          '║ knownExamplesSlashApiCrossImports list in the script /dev/bots/check_examples_cross_imports.dart.',
+          '║ knownExamplesCrossImports list in the script /dev/bots/check_examples_cross_imports.dart.',
           '╚═══════════════════════════════════════════════════════════════════════════════',
         ].join('\n');
         expect(result, equals('$lines\n'));
@@ -927,15 +924,19 @@ Directory getDirectoryForExamplesSlashApiLibrary(
 /// Get the first known cross import for the given [libraryName].
 ///
 /// Throws a [StateError] if there are no known cross imports for the given library.
-String getFirstCrossImportForLibrary(String libraryName, Set<String> knownCrossImports) {
+String getFirstCrossImportForLibrary(String libraryName) {
   // Use the first entry that belongs to this library, since known imports sets
   // are shared between lib/ and test/ directories and may contain paths for both.
-  return knownCrossImports.firstWhere((String p) => p.startsWith('$libraryName/'));
+  return ExamplesCrossImportChecker.knownExamplesCrossImports.firstWhere(
+    (String p) => p.startsWith('$libraryName/'),
+  );
 }
 
 /// Returns whether there are no known cross imports for the given [libraryName].
-bool hasNoKnownCrossImports(String libraryName, Set<String> knownCrossImports) {
-  return !knownCrossImports.any((String entry) => entry.startsWith('$libraryName/'));
+bool hasNoKnownCrossImports(String libraryName) {
+  return !ExamplesCrossImportChecker.knownExamplesCrossImports.any(
+    (String entry) => entry.startsWith('$libraryName/'),
+  );
 }
 
 /// Returns whether the given [libraryName] matches the Material examples under `examples/api`.
@@ -1011,43 +1012,39 @@ class _CrossImportsExamplesDirectories {
 
     for (final directory in <Directory>[libDirectory, testDirectory]) {
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('animation')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
+          ExamplesCrossImportChecker.knownExamplesCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('foundation')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
+          ExamplesCrossImportChecker.knownExamplesCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('gestures')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
+          ExamplesCrossImportChecker.knownExamplesCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('painting')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
+          ExamplesCrossImportChecker.knownExamplesCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('rendering')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
+          ExamplesCrossImportChecker.knownExamplesCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('sample_templates')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
+          ExamplesCrossImportChecker.knownExamplesCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('services')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
+          ExamplesCrossImportChecker.knownExamplesCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('ui')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
+          ExamplesCrossImportChecker.knownExamplesCrossImports;
       exampleSlashApiSubdirectoryMapping[directory.childDirectory('widgets')] =
-          ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports;
+          ExamplesCrossImportChecker.knownExamplesCrossImports;
     }
 
     return <Directory, Set<String>>{
       examplesDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
-      examplesSlashApiDirectory: ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
+      examplesSlashApiDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
       ...exampleSlashApiSubdirectoryMapping,
-      examplesFlutterViewDirectory: ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports,
-      examplesHelloWorldDirectory: ExamplesCrossImportChecker.knownExamplesHelloWorldCrossImports,
-      examplesImageListDirectory: ExamplesCrossImportChecker.knownExamplesImageListCrossImports,
-      examplesLayersDirectory: ExamplesCrossImportChecker.knownExamplesLayersCrossImports,
-      examplesMultipleWindowsDirectory:
-          ExamplesCrossImportChecker.knownExamplesMultipleWindowsCrossImports,
-      examplesPlatformChannelDirectory:
-          ExamplesCrossImportChecker.knownExamplesPlatformChannelCrossImports,
-      examplesPlatformChannelSwiftDirectory:
-          ExamplesCrossImportChecker.knownExamplesPlatformChannelSwiftCrossImports,
-      examplesPlatformViewDirectory:
-          ExamplesCrossImportChecker.knownExamplesPlatformViewCrossImports,
-      examplesSplashDirectory: ExamplesCrossImportChecker.knownExamplesSplashCrossImports,
-      examplesTextureDirectory: ExamplesCrossImportChecker.knownExamplesTextureCrossImports,
+      examplesFlutterViewDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesHelloWorldDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesImageListDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesLayersDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesMultipleWindowsDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesPlatformChannelDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesPlatformChannelSwiftDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesPlatformViewDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesSplashDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesTextureDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
     };
   }
 
@@ -1096,27 +1093,20 @@ class _CrossImportsExamplesDirectories {
 }
 
 // A mapping of `examples/**` test cases for the cross imports checker, excluding `examples/api/**`.
-//
-// Each entry contains:
-// - a shortened directory name of the examples folder for the library
-// - the name of the known cross imports list variable in `check_examples_cross_imports.dart` for that library
-// - the actual known cross imports list for that library
-// dart format off
-final crossImportsGenericExamplesTestCases = <(String, String, Set<String>)>[
-  ('examples', 'knownExamplesCrossImports', ExamplesCrossImportChecker.knownExamplesCrossImports),
-  ('examples/api', 'knownExamplesSlashApiRootCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiRootCrossImports),
-  ('examples/flutter_view', 'knownExamplesFlutterViewCrossImports', ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports),
-  ('examples/hello_world', 'knownExamplesHelloWorldCrossImports', ExamplesCrossImportChecker.knownExamplesHelloWorldCrossImports),
-  ('examples/image_list', 'knownExamplesImageListCrossImports', ExamplesCrossImportChecker.knownExamplesImageListCrossImports),
-  ('examples/layers', 'knownExamplesLayersCrossImports', ExamplesCrossImportChecker.knownExamplesLayersCrossImports),
-  ('examples/multiple_windows', 'knownExamplesMultipleWindowsCrossImports', ExamplesCrossImportChecker.knownExamplesMultipleWindowsCrossImports),
-  ('examples/platform_channel', 'knownExamplesPlatformChannelCrossImports', ExamplesCrossImportChecker.knownExamplesPlatformChannelCrossImports),
-  ('examples/platform_channel_swift', 'knownExamplesPlatformChannelSwiftCrossImports', ExamplesCrossImportChecker.knownExamplesPlatformChannelSwiftCrossImports),
-  ('examples/platform_view', 'knownExamplesPlatformViewCrossImports', ExamplesCrossImportChecker.knownExamplesPlatformViewCrossImports),
-  ('examples/splash', 'knownExamplesSplashCrossImports', ExamplesCrossImportChecker.knownExamplesSplashCrossImports),
-  ('examples/texture', 'knownExamplesTextureCrossImports', ExamplesCrossImportChecker.knownExamplesTextureCrossImports),
+const crossImportsGenericExamplesTestCases = <String>[
+  'examples',
+  'examples/api',
+  'examples/flutter_view',
+  'examples/hello_world',
+  'examples/image_list',
+  'examples/layers',
+  'examples/multiple_windows',
+  'examples/platform_channel',
+  'examples/platform_channel_swift',
+  'examples/platform_view',
+  'examples/splash',
+  'examples/texture',
 ];
-// dart format on
 
 // A mapping of `examples/api/lib/**` and `examples/api/test/**` test cases for the cross imports checker,
 // excluding `examples/api/lib/sample_templates` and `examples/api/test/sample_templates`.
