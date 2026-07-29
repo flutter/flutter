@@ -3,16 +3,19 @@
 // found in the LICENSE file.
 
 import InternalFlutterSwift
+import QuartzCore
 import Testing
 
-// The TaskRunner API relies on CFRunLoop.
-// `@MainActor` makes sure the test subject TaskRunner can use the main thread
-// run loop which tests do not have to manually pump.
+// A current-thread `TaskRunner` posts to the current thread's `fml::MessageLoop`, which is backed by
+// the thread's run loop. `@MainActor` binds the runner to the main thread, whose run loop the test
+// host keeps running; each `await` yields to that run loop so posted tasks execute without manual
+// pumping.
 @MainActor
-@Suite struct TaskRunnerTests {
-  let taskRunner: TaskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
+struct TaskRunnerTests {
 
   @Test func postTask() async {
+    let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
+
     await withCheckedContinuation { continuation in
       taskRunner.postTask {
         continuation.resume()
@@ -21,18 +24,24 @@ import Testing
   }
 
   @Test func postDelayedTask() async {
+    let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
+
+    var elapsed: CFTimeInterval = 0
     let startTime = CACurrentMediaTime()
     await withCheckedContinuation { continuation in
       taskRunner.postTask(delay: 0.1) {
-        let endTime = CACurrentMediaTime()
-        let epsilon = 0.001
-        #expect(endTime - startTime >= 0.1 - epsilon)
+        elapsed = CACurrentMediaTime() - startTime
         continuation.resume()
       }
     }
+
+    let epsilon = 0.001
+    #expect(elapsed >= 0.1 - epsilon)
   }
 
   @Test func runsTasksOnCurrentThread() {
+    let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
+
     #expect(taskRunner.runsTasksOnCurrentThread())
   }
 }

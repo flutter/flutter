@@ -6,8 +6,9 @@ import Testing
 
 @testable import InternalFlutterSwift
 
-@Suite struct VSyncClientTests {
-  private let threadTaskRunner: TaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
+@MainActor
+struct VSyncClientTests {
+  let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
 
   /// Verifies that the vsync client safely synthesizes a target timestamp when the display link's
   /// `targetTimestamp` is invalid (i.e. evaluates to 0.0).
@@ -46,7 +47,7 @@ import Testing
     // targetTimestamp are 0.0. Verify the client synthesizes a valid target timestamp using the max
     // refresh rate.
     #expect(callbackStartTime > 0.0)
-    #expect(abs(callbackTargetTime - callbackStartTime - 1.0 / 60.0) < 0.0001)
+    #expect(abs((callbackTargetTime - callbackStartTime) - 1.0 / 60.0) <= 0.0001)
   }
 
   @Test func vsyncClientPreventsZeroRefreshRateDivision() throws {
@@ -67,9 +68,9 @@ import Testing
 
     #expect(callbackStartTime > 0.0)
     // Should fallback to effectiveRefreshRate of 60.0.
-    #expect(abs(callbackTargetTime - callbackStartTime - 1.0 / 60.0) < 0.0001)
-    #expect(!callbackTargetTime.isNaN)
-    #expect(!callbackTargetTime.isInfinite)
+    #expect(abs((callbackTargetTime - callbackStartTime) - 1.0 / 60.0) <= 0.0001)
+    #expect(callbackTargetTime.isNaN == false)
+    #expect(callbackTargetTime.isInfinite == false)
   }
 
   @Test func refreshRatePropertyFallsBackToDefaultWhenInvalid() {
@@ -95,7 +96,7 @@ import Testing
     vsyncClient.allowPauseAfterVsync = false
     vsyncClient.await()
     vsyncClient.onDisplayLink(link)
-    #expect(!link.isPaused)
+    #expect(link.isPaused == false)
 
     vsyncClient.allowPauseAfterVsync = true
     vsyncClient.await()
@@ -112,9 +113,13 @@ import Testing
     ) { _, _ in }
     let link = try #require(vsyncClient.displayLink)
 
-    #expect(abs(Double(link.preferredFrameRateRange.maximum) - maxFrameRate) < 0.1)
-    #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0) - maxFrameRate) < 0.1)
-    #expect(abs(Double(link.preferredFrameRateRange.minimum) - maxFrameRate / 2) < 0.1)
+    if #available(iOS 15.0, *) {
+      #expect(abs(Double(link.preferredFrameRateRange.maximum) - maxFrameRate) <= 0.1)
+      #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0) - maxFrameRate) <= 0.1)
+      #expect(abs(Double(link.preferredFrameRateRange.minimum) - maxFrameRate / 2) <= 0.1)
+    } else {
+      #expect(abs(Double(link.preferredFramesPerSecond) - maxFrameRate) <= 0.1)
+    }
   }
 
   @Test func doNotSetVariableRefreshRatesIfCADisableMinimumFrameDurationOnPhoneIsNotOn() throws {
@@ -126,9 +131,13 @@ import Testing
     ) { _, _ in }
     let link = try #require(vsyncClient.displayLink)
 
-    #expect(abs(link.preferredFrameRateRange.maximum) < 0.1)
-    #expect(abs(link.preferredFrameRateRange.preferred ?? 0) < 0.1)
-    #expect(abs(link.preferredFrameRateRange.minimum) < 0.1)
+    if #available(iOS 15.0, *) {
+      #expect(abs(Double(link.preferredFrameRateRange.maximum)) <= 0.1)
+      #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0)) <= 0.1)
+      #expect(abs(Double(link.preferredFrameRateRange.minimum)) <= 0.1)
+    } else {
+      #expect(abs(Double(link.preferredFramesPerSecond)) <= 0.1)
+    }
   }
 
   @Test func awaitAndPauseWillWorkCorrectly() throws {
@@ -141,45 +150,40 @@ import Testing
 
     #expect(link.isPaused)
     vsyncClient.await()
-    #expect(!link.isPaused)
+    #expect(link.isPaused == false)
     vsyncClient.pause()
     #expect(link.isPaused)
   }
 
-  @Test func releasesLinkOnInvalidation() async throws {
+  @Test func releasesLinkOnInvalidation() {
     weak var weakClient: VSyncClient?
-    // This variable keeps the test subject VsyncClient in memory until
-    // it is explicitly set to nil in the second autoreleasepool.
-    var tempClient: VSyncClient?
 
-    await withCheckedContinuation { continuation in
-      autoreleasepool {
-        let client = VSyncClient(
-          taskRunner: threadTaskRunner,
-          isVariableRefreshRateEnabled: false,
-          maxRefreshRate: 60.0
-        ) { _, _ in
-          continuation.resume()
-        }
-        weakClient = client
-        tempClient = client
-        threadTaskRunner.postTask {
-          client.await()
-        }
+    autoreleasepool {
+      let vsyncSignal = DispatchSemaphore(value: 0)
+      let client = VSyncClient(
+        taskRunner: threadTaskRunner,
+        isVariableRefreshRateEnabled: false,
+        maxRefreshRate: 60.0
+      ) { _, _ in
+        vsyncSignal.signal()
       }
-    }
+      weakClient = client
 
-    try autoreleasepool {
-      try #require(tempClient).invalidate()
-      tempClient = nil
-    }
-
-    await withCheckedContinuation { continuation in
       threadTaskRunner.postTask {
-        continuation.resume()
+        client.await()
       }
+
+      #expect(vsyncSignal.wait(timeout: .now() + 1.0) == .success)
+
+      client.invalidate()
     }
 
+    let backgroundThreadFlushed = DispatchSemaphore(value: 0)
+    threadTaskRunner.postTask {
+      backgroundThreadFlushed.signal()
+    }
+
+    #expect(backgroundThreadFlushed.wait(timeout: .now() + 1.0) == .success)
     #expect(weakClient == nil)
   }
 
@@ -202,25 +206,23 @@ import Testing
   /// the display server has taken ownership of the link. On iOS 27+, QuartzCore holds a
   /// `_CADisplayLinkAssertion` on registered links; a never-unpaused link may therefore
   /// outlive `VSyncClient` itself, which is expected.
-  @Test func deallocatesAfterRegistrationCompletes() async {
+  @Test func deallocatesAfterRegistrationCompletes() {
     weak var weakClient: VSyncClient?
 
-    await withCheckedContinuation { continuation in
-      autoreleasepool {
-        let client = VSyncClient(
-          taskRunner: threadTaskRunner,
-          isVariableRefreshRateEnabled: false,
-          maxRefreshRate: 60.0
-        ) { _, _ in }
+    autoreleasepool {
+      let client = VSyncClient(
+        taskRunner: threadTaskRunner,
+        isVariableRefreshRateEnabled: false,
+        maxRefreshRate: 60.0
+      ) { _, _ in }
 
-        weakClient = client
+      weakClient = client
 
-        // Registration is dispatched to the task runner in init. Post a barrier task after it
-        // so we know registration has completed before deinit fires.
-        threadTaskRunner.postTask {
-          continuation.resume()
-        }
-      }
+      // Registration is dispatched to the task runner in init. Post a barrier task after it
+      // so we know registration has completed before deinit fires.
+      let registered = DispatchSemaphore(value: 0)
+      threadTaskRunner.postTask { registered.signal() }
+      #expect(registered.wait(timeout: .now() + 1.0) == .success)
     }
 
     #expect(weakClient == nil)

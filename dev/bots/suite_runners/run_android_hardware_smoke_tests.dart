@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
@@ -14,18 +15,6 @@ import 'run_android_engine_tests.dart';
 
 String _impellerBackendMetadata({required String value}) =>
     '<meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="$value" />';
-
-void _copyDirectory(Directory source, Directory destination) {
-  destination.createSync(recursive: true);
-  for (final FileSystemEntity entity in source.listSync(recursive: true)) {
-    if (entity is File) {
-      final String relativePath = path.relative(entity.path, from: source.path);
-      final String destPath = path.join(destination.path, relativePath);
-      entity.fileSystem.file(destPath).parent.createSync(recursive: true);
-      entity.copySync(destPath);
-    }
-  }
-}
 
 void _cleanGoldensDirectory(Directory directory) {
   if (!directory.existsSync()) {
@@ -64,9 +53,6 @@ Future<void> runAndroidHardwareSmokeTests({
   final Directory destinationDir = const LocalFileSystem().directory(
     path.join(testDir, 'test_driver', 'goldens'),
   );
-  final Directory sourceDir = const LocalFileSystem().directory(
-    path.join(testDir, 'android_hardware_smoke_test.${backend.name}.goldens'),
-  );
 
   try {
     // Replace whatever the current backend is with the specified backend.
@@ -93,13 +79,6 @@ Future<void> runAndroidHardwareSmokeTests({
     ], workingDirectory: testDir);
 
     if (runInstrumented) {
-      // 2. Copy the generated goldens to the assets directory so they get packaged with the APK.
-      // In CI, the Skia Gold comparator downloads the baseline images into a temporary prefixed
-      // directory (sourceDir) instead of the default assets directory (destinationDir).
-      if (sourceDir.existsSync()) {
-        _copyDirectory(sourceDir, destinationDir);
-      }
-
       final String gradle = path.absolute(
         path.join(androidDir, Platform.isWindows ? 'gradlew.bat' : 'gradlew'),
       );
@@ -117,10 +96,5 @@ Future<void> runAndroidHardwareSmokeTests({
 
     // Clean up copied goldens to keep Git worktree completely clean
     _cleanGoldensDirectory(destinationDir);
-
-    // Clean up the temporary prefixed goldens directory
-    if (sourceDir.existsSync()) {
-      sourceDir.deleteSync(recursive: true);
-    }
   }
 }
