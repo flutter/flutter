@@ -529,6 +529,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
           .join(',');
       options.add('-Ptarget-platform=$targetPlatforms');
     }
+    if (androidBuildInfo.androidEngineShellArgs != null) {
+      options.add('-Pflutter.engineShellArgs=${androidBuildInfo.androidEngineShellArgs}');
+    }
     options.add('-Ptarget=$target');
     // If using v1 embedding, we want to use FlutterApplication as the base app.
     final baseApplicationName = project.android.getEmbeddingVersion() == AndroidEmbeddingVersion.v2

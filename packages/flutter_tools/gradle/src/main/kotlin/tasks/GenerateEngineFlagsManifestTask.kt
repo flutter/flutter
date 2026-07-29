@@ -22,23 +22,28 @@ abstract class GenerateEngineFlagsManifestTask : DefaultTask() {
         val base64Encoded = engineShellArgsJson.get()
         val decodedJsonStr = String(Base64.getDecoder().decode(base64Encoded), StandardCharsets.UTF_8)
         
-        val jsonSlurper = JsonSlurper()
-        val jsonObject = jsonSlurper.parseText(decodedJsonStr) as Map<*, *>
+        val escapedValue = escapeXml(decodedJsonStr)
+        val metaDataTags = "                    <meta-data android:name=\"io.flutter.app.androidEngineShellArgs\" android:value=\"$escapedValue\" />"
 
-        val stringBuilder = StringBuilder()
-        stringBuilder.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-        stringBuilder.append("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n")
-        stringBuilder.append("    <application>\n")
-
-        for ((key, value) in jsonObject) {
-            stringBuilder.append("        <meta-data android:name=\"$key\" android:value=\"$value\" />\n")
-        }
-
-        stringBuilder.append("    </application>\n")
-        stringBuilder.append("</manifest>")
+        val manifestContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+$metaDataTags
+                </application>
+            </manifest>
+        """.trimIndent()
 
         val outputFile = manifestOutputFile.get().asFile
         outputFile.parentFile.mkdirs()
-        outputFile.writeText(stringBuilder.toString())
+        outputFile.writeText(manifestContent)
+    }
+
+    private fun escapeXml(str: String): String {
+        return str.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&apos;")
     }
 }

@@ -1,40 +1,172 @@
 package com.flutter.gradle.tasks
 
-import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import java.io.File
 import java.util.Base64
 import kotlin.test.Test
-import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 
 class GenerateEngineFlagsManifestTaskTest {
-    @Test
-    fun `manifest is generated correctly with decoded json flags`() {
+
+    private fun setupTask(): Pair<GenerateEngineFlagsManifestTask, File> {
         val project = ProjectBuilder.builder().build()
-        val testTask = project.tasks.register(
+        val task = project.tasks.register(
             "generateEngineFlagsManifestTest",
             GenerateEngineFlagsManifestTask::class.java
         ).get()
-
-        // Base64 encoded JSON
-        val jsonStr = """{"io.flutter.embedding.android.enable-impeller":"true","io.flutter.embedding.android.trace-systrace":"true"}"""
-        val base64Encoded = Base64.getEncoder().encodeToString(jsonStr.toByteArray(Charsets.UTF_8))
-        
         val outputFile = File.createTempFile("AndroidManifest", ".xml")
         outputFile.deleteOnExit()
+        return Pair(task, outputFile)
+    }
 
-        testTask.engineShellArgsJson.set(base64Encoded)
-        testTask.manifestOutputFile.set(outputFile)
+    private fun encodeJsonMap(json: String): String {
+        return Base64.getEncoder().encodeToString(json.toByteArray(Charsets.UTF_8))
+    }
 
-        testTask.generateManifest()
+    @Test
+    fun generateHandlesNoArgsCorrectly() {
+        val (task, outputFile) = setupTask()
+        val jsonStr = "[]"
+        task.engineShellArgsJson.set(encodeJsonMap(jsonStr))
+        task.manifestOutputFile.set(outputFile)
 
-        val manifestContent = outputFile.readText()
+        task.generateManifest()
 
-        assertTrue(manifestContent.contains("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">"))
-        assertTrue(manifestContent.contains("<application>"))
-        assertTrue(manifestContent.contains("""<meta-data android:name="io.flutter.embedding.android.enable-impeller" android:value="true" />"""))
-        assertTrue(manifestContent.contains("""<meta-data android:name="io.flutter.embedding.android.trace-systrace" android:value="true" />"""))
-        assertTrue(manifestContent.contains("</application>"))
-        assertTrue(manifestContent.contains("</manifest>"))
+        val expectedContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[]" />
+                </application>
+            </manifest>
+        """.trimIndent()
+        
+        assertEquals(expectedContent, outputFile.readText())
+    }
+
+    @Test
+    fun generateHandlesOneArgCorrectly() {
+        val (task, outputFile) = setupTask()
+        val jsonStr = """["--enable-impeller"]"""
+        task.engineShellArgsJson.set(encodeJsonMap(jsonStr))
+        task.manifestOutputFile.set(outputFile)
+
+        task.generateManifest()
+
+        val expectedContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--enable-impeller&quot;]" />
+                </application>
+            </manifest>
+        """.trimIndent()
+
+        assertEquals(expectedContent, outputFile.readText())
+    }
+
+    @Test
+    fun generateHandlesMultipleArgsCorrectly() {
+        val (task, outputFile) = setupTask()
+        val jsonStr = """["--enable-impeller","--trace-systrace"]"""
+        task.engineShellArgsJson.set(encodeJsonMap(jsonStr))
+        task.manifestOutputFile.set(outputFile)
+
+        task.generateManifest()
+
+        val expectedContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--enable-impeller&quot;,&quot;--trace-systrace&quot;]" />
+                </application>
+            </manifest>
+        """.trimIndent()
+
+        assertEquals(expectedContent, outputFile.readText())
+    }
+
+    @Test
+    fun generateHandlesArgsWithSpecialCharacters() {
+        val (task, outputFile) = setupTask()
+        val jsonStr = """["--trace-to-file=\"path/to/a file\""]"""
+        task.engineShellArgsJson.set(encodeJsonMap(jsonStr))
+        task.manifestOutputFile.set(outputFile)
+
+        task.generateManifest()
+
+        val expectedContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--trace-to-file=\&quot;path/to/a file\&quot;&quot;]" />
+                </application>
+            </manifest>
+        """.trimIndent()
+
+        assertEquals(expectedContent, outputFile.readText())
+    }
+
+    @Test
+    fun generateHandlesArgsWithAmpersandCorrectly() {
+        val (task, outputFile) = setupTask()
+        val jsonStr = """["--some-arg=a&b"]"""
+        task.engineShellArgsJson.set(encodeJsonMap(jsonStr))
+        task.manifestOutputFile.set(outputFile)
+
+        task.generateManifest()
+
+        val expectedContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--some-arg=a&amp;b&quot;]" />
+                </application>
+            </manifest>
+        """.trimIndent()
+
+        assertEquals(expectedContent, outputFile.readText())
+    }
+
+    @Test
+    fun generateHandlesArgsWithAngleBracketsCorrectly() {
+        val (task, outputFile) = setupTask()
+        val jsonStr = """["--some-arg=<a>"]"""
+        task.engineShellArgsJson.set(encodeJsonMap(jsonStr))
+        task.manifestOutputFile.set(outputFile)
+
+        task.generateManifest()
+
+        val expectedContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--some-arg=&lt;a&gt;&quot;]" />
+                </application>
+            </manifest>
+        """.trimIndent()
+
+        assertEquals(expectedContent, outputFile.readText())
+    }
+
+    @Test
+    fun generateHandlesArgsWithSingleQuotesCorrectly() {
+        val (task, outputFile) = setupTask()
+        val jsonStr = """["--some-arg='a'"]"""
+        task.engineShellArgsJson.set(encodeJsonMap(jsonStr))
+        task.manifestOutputFile.set(outputFile)
+
+        task.generateManifest()
+
+        val expectedContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--some-arg=&apos;a&apos;&quot;]" />
+                </application>
+            </manifest>
+        """.trimIndent()
+
+        assertEquals(expectedContent, outputFile.readText())
     }
 }

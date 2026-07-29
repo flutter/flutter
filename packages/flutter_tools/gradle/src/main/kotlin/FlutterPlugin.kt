@@ -304,6 +304,9 @@ class FlutterPlugin : Plugin<Project> {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
             FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
+
+            // Task required to pass command line flags for apps to the Flutter Android embedding.
+            FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(projectToAddTasksTo)
         }
 
         val targetPlatforms: List<String> =
@@ -345,25 +348,6 @@ class FlutterPlugin : Plugin<Project> {
                 CopyFlutterJniLibsTask::destinationDir
             )
 
-            val engineShellArgsJson = projectToAddTasksTo.findProperty("flutter.engineShellArgs") as? String
-            if (engineShellArgsJson != null) {
-                val generateManifestTaskProvider = projectToAddTasksTo.tasks.register(
-                    "generateEngineFlagsManifest$capitalizeVariantName",
-                    GenerateEngineFlagsManifestTask::class.java
-                ) {
-                    this.engineShellArgsJson.set(engineShellArgsJson)
-                    this.manifestOutputFile.set(
-                        projectToAddTasksTo.layout.buildDirectory.file(
-                            "intermediates/flutter/${variant.name}/AndroidManifest.xml"
-                        )
-                    )
-                }
-                
-                variant.sources.manifests?.addGeneratedManifestFile(
-                    generateManifestTaskProvider,
-                    GenerateEngineFlagsManifestTask::manifestOutputFile
-                )
-            }
         }
 
         val flutterPlugin = this

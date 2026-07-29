@@ -567,67 +567,17 @@ class AndroidDevice extends Device {
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       _logger.printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
-      
-      if (debuggingOptions.buildInfo.mode == BuildMode.release) {
-        final Map<String, Object> shellArgs = <String, Object>{};
-        if (debuggingOptions.enableDartProfiling) {
-          shellArgs['io.flutter.embedding.android.enable-dart-profiling'] = true;
-        }
-        if (debuggingOptions.profileStartup) {
-          shellArgs['io.flutter.embedding.android.profile-startup'] = true;
-        }
+
+      String? base64JsonArgs;
+      final bool isReleaseMode = debuggingOptions.buildInfo.mode == BuildMode.release;
+      if (isReleaseMode) {
+        final List<String> shellArgs = debuggingOptions.getAndroidLaunchArguments().toList();
         if (platformArgs['trace-startup'] as bool? ?? false) {
-          shellArgs['io.flutter.embedding.android.trace-startup'] = true;
-        }
-        if (debuggingOptions.enableSoftwareRendering) {
-          shellArgs['io.flutter.embedding.android.enable-software-rendering'] = true;
-        }
-        if (debuggingOptions.skiaDeterministicRendering) {
-          shellArgs['io.flutter.embedding.android.skia-deterministic-rendering'] = true;
-        }
-        if (debuggingOptions.traceSkia) {
-          shellArgs['io.flutter.embedding.android.trace-skia'] = true;
-        }
-        if (debuggingOptions.traceAllowlist != null) {
-          shellArgs['io.flutter.embedding.android.trace-allowlist'] = debuggingOptions.traceAllowlist!;
-        }
-        if (debuggingOptions.traceSkiaAllowlist != null) {
-          shellArgs['io.flutter.embedding.android.trace-skia-allowlist'] = debuggingOptions.traceSkiaAllowlist!;
-        }
-        if (debuggingOptions.traceSystrace) {
-          shellArgs['io.flutter.embedding.android.trace-systrace'] = true;
-        }
-        if (debuggingOptions.traceToFile != null) {
-          shellArgs['io.flutter.embedding.android.trace-to-file'] = debuggingOptions.traceToFile!;
-        }
-        if (debuggingOptions.endlessTraceBuffer) {
-          shellArgs['io.flutter.embedding.android.endless-trace-buffer'] = true;
-        }
-        if (debuggingOptions.profileMicrotasks) {
-          shellArgs['io.flutter.embedding.android.profile-microtasks'] = true;
-        }
-        if (debuggingOptions.purgePersistentCache) {
-          shellArgs['io.flutter.embedding.android.purge-persistent-cache'] = true;
-        }
-        if (debuggingOptions.enableImpeller == ImpellerStatus.enabled) {
-          shellArgs['io.flutter.embedding.android.enable-impeller'] = true;
-        }
-        if (debuggingOptions.enableImpeller == ImpellerStatus.disabled) {
-          shellArgs['io.flutter.embedding.android.enable-impeller'] = false;
-        }
-        if (debuggingOptions.enableFlutterGpu) {
-          shellArgs['io.flutter.embedding.android.enable-flutter-gpu'] = true;
-        }
-        if (debuggingOptions.enableVulkanValidation) {
-          shellArgs['io.flutter.embedding.android.enable-vulkan-validation'] = true;
-        }
-        if (debuggingOptions.enableHcpp) {
-          shellArgs['io.flutter.embedding.android.enable-hcpp-and-surface-control'] = true;
+          shellArgs.add('--trace-startup');
         }
 
         if (shellArgs.isNotEmpty) {
-          final String base64Json = base64Encode(utf8.encode(jsonEncode(shellArgs)));
-          debuggingOptions.buildInfo.androidProjectArgs.add('flutter.engineShellArgs=$base64Json');
+          base64JsonArgs = base64Encode(utf8.encode(jsonEncode(shellArgs)));
         }
       }
 
@@ -637,6 +587,7 @@ class AndroidDevice extends Device {
         androidBuildInfo: AndroidBuildInfo(
           debuggingOptions.buildInfo,
           targetArchs: <CpuArch>[cpuArch],
+          androidEngineShellArgs: base64JsonArgs,
         ),
       );
       // Package has been built, so we can get the updated application ID and
@@ -680,126 +631,16 @@ class AndroidDevice extends Device {
     final String? traceAllowlist = debuggingOptions.traceAllowlist;
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
     final String? traceToFile = debuggingOptions.traceToFile;
-    final bool isReleaseMode = debuggingOptions.buildInfo.mode == BuildMode.release;
-    final bool hasFlags = route != null ||
-        traceStartup ||
-        debuggingOptions.enableDartProfiling ||
-        debuggingOptions.profileStartup ||
-        debuggingOptions.enableSoftwareRendering ||
-        debuggingOptions.skiaDeterministicRendering ||
-        debuggingOptions.traceSkia ||
-        traceAllowlist != null ||
-        traceSkiaAllowlist != null ||
-        debuggingOptions.traceSystrace ||
-        traceToFile != null ||
-        debuggingOptions.endlessTraceBuffer ||
-        debuggingOptions.profileMicrotasks ||
-        debuggingOptions.purgePersistentCache ||
-        debuggingOptions.enableImpeller == ImpellerStatus.enabled ||
-        debuggingOptions.enableImpeller == ImpellerStatus.disabled ||
-        debuggingOptions.enableFlutterGpu ||
-        debuggingOptions.enableVulkanValidation ||
-        debuggingOptions.enableHcpp ||
-        debuggingOptions.startPaused ||
-        debuggingOptions.disableServiceAuthCodes ||
-        debuggingOptions.disableServiceOriginCheck ||
-        debuggingOptions.dartFlags.isNotEmpty ||
-        debuggingOptions.useTestFonts ||
-        debuggingOptions.verboseSystemLogs ||
-        debuggingOptions.testFlag;
-
-    if (prebuiltApplication && isReleaseMode && hasFlags) {
-      throwToolExit('Configuration flags cannot be dynamically passed to a prebuilt release APK via Intents. Please statically define these flags in the AndroidManifest.xml during compilation.');
-    }
 
     final cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      if (!isReleaseMode) ...<String>[
-        if (debuggingOptions.enableDartProfiling) ...<String>[
-        '--ez',
-        'enable-dart-profiling',
-        'true',
-      ],
-      if (debuggingOptions.profileStartup) ...<String>['--ez', 'profile-startup', 'true'],
+      ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
       if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null) ...<String>['--es', 'route', route],
-      if (debuggingOptions.enableSoftwareRendering) ...<String>[
-        '--ez',
-        'enable-software-rendering',
-        'true',
-      ],
-      if (debuggingOptions.skiaDeterministicRendering) ...<String>[
-        '--ez',
-        'skia-deterministic-rendering',
-        'true',
-      ],
-      if (debuggingOptions.traceSkia) ...<String>['--ez', 'trace-skia', 'true'],
-      if (traceAllowlist != null) ...<String>['--es', 'trace-allowlist', traceAllowlist],
-      if (traceSkiaAllowlist != null) ...<String>[
-        '--es',
-        'trace-skia-allowlist',
-        traceSkiaAllowlist,
-      ],
-      if (debuggingOptions.traceSystrace) ...<String>['--ez', 'trace-systrace', 'true'],
-      if (traceToFile != null) ...<String>['--es', 'trace-to-file', traceToFile],
-      if (debuggingOptions.endlessTraceBuffer) ...<String>['--ez', 'endless-trace-buffer', 'true'],
-      if (debuggingOptions.profileMicrotasks) ...<String>['--ez', 'profile-microtasks', 'true'],
-      if (debuggingOptions.purgePersistentCache) ...<String>[
-        '--ez',
-        'purge-persistent-cache',
-        'true',
-      ],
-      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled) ...<String>[
-        '--ez',
-        'enable-impeller',
-        'true',
-      ],
-      if (debuggingOptions.enableImpeller == ImpellerStatus.disabled) ...<String>[
-        '--ez',
-        'enable-impeller',
-        'false',
-      ],
-      if (debuggingOptions.enableFlutterGpu) ...<String>['--ez', 'enable-flutter-gpu', 'true'],
-      if (debuggingOptions.enableVulkanValidation) ...<String>[
-        '--ez',
-        'enable-vulkan-validation',
-        'true',
-      ],
-      if (debuggingOptions.enableHcpp) ...<String>[
-        '--ez',
-        'enable-hcpp-and-surface-control',
-        'true',
-      ],
-      ],
-      if (debuggingOptions.debuggingEnabled) ...<String>[
-        if (debuggingOptions.buildInfo.isDebug) ...<String>[
-          ...<String>['--ez', 'enable-checked-mode', 'true'],
-          ...<String>['--ez', 'verify-entry-points', 'true'],
-        ],
-        if (debuggingOptions.startPaused) ...<String>['--ez', 'start-paused', 'true'],
-        if (debuggingOptions.disableServiceAuthCodes) ...<String>[
-          '--ez',
-          'disable-service-auth-codes',
-          'true',
-        ],
-        if (debuggingOptions.disableServiceOriginCheck) ...<String>[
-          '--ez',
-          'disable-service-origin-check',
-          'true',
-        ],
-        if (debuggingOptions.dartFlags.isNotEmpty) ...<String>[
-          '--es',
-          'dart-flags',
-          debuggingOptions.dartFlags,
-        ],
-        if (debuggingOptions.useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
-        if (debuggingOptions.verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
-        if (debuggingOptions.testFlag) ...<String>['--ez', 'test-flag', 'true'],
-        if (userIdentifier != null) ...<String>['--user', userIdentifier],
-      ],
+      if (userIdentifier != null) ...<String>['--user', userIdentifier],
       builtPackage.launchActivity,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
@@ -1000,6 +841,8 @@ class AndroidDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.android.existsSync();
   }
+
+
 
   @override
   Future<void> dispose() async {
