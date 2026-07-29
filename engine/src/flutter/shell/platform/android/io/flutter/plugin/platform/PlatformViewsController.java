@@ -359,8 +359,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                   unlockInputConnection(vdController);
                   onComplete.run(
                       new PlatformViewsChannel.PlatformViewBufferSize(
-                          request.newLogicalWidth,
-                          request.newLogicalHeight));
+                          request.newLogicalWidth, request.newLogicalHeight));
                 });
             return;
           }
@@ -401,8 +400,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
           onComplete.run(
               new PlatformViewsChannel.PlatformViewBufferSize(
-                  request.newLogicalWidth,
-                  request.newLogicalHeight));
+                  request.newLogicalWidth, request.newLogicalHeight));
         }
 
         @Override
