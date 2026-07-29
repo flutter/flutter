@@ -87,7 +87,7 @@ $assetsSection
     await bundle.build(
       packageConfigPath: '.dart_tool/package_config.json',
       flavor: flavor,
-      targetPlatform: TargetPlatform.tester,
+      targetPlatform: const TargetPlatform(.tester, .unknown),
     );
 
     for (final packageName in packages) {
@@ -153,7 +153,7 @@ $assetsSection
         expect(
           () => bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: TargetPlatform.tester,
+            targetPlatform: const TargetPlatform(.tester, .unknown),
           ),
           throwsToolExit(message: 'resolves to a location outside the package directory'),
         );
@@ -178,7 +178,7 @@ $assetsSection
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -209,7 +209,7 @@ $assetsSection
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -711,7 +711,7 @@ $assetsSection
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(
@@ -803,7 +803,7 @@ $assetsSection
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
       },
       overrides: <Type, Generator>{

@@ -87,7 +87,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
@@ -135,7 +135,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
@@ -179,7 +179,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
         flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
-        targetPlatform: TargetPlatform.tester,
+        targetPlatform: const TargetPlatform(.tester, .unknown),
       );
 
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
@@ -219,7 +219,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
         flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
-        targetPlatform: TargetPlatform.tester,
+        targetPlatform: const TargetPlatform(.tester, .unknown),
       );
 
       final expectedManifest = <String, List<Map<String, Object>>>{
@@ -287,7 +287,7 @@ flutter:
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
         flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
-        targetPlatform: TargetPlatform.tester,
+        targetPlatform: const TargetPlatform(.tester, .unknown),
       );
 
       final expectedAssetManifest = <String, List<Map<String, Object>>>{
