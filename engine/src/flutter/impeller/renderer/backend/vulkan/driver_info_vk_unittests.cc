@@ -153,13 +153,13 @@ TEST(DriverInfoVKTest, CanGenerateMipMaps) {
 }
 
 bool CanSampleManuallyWrittenMips(std::string_view driver_name,
-                                  bool qc = true) {
+                                  bool is_qualcomm = true) {
   auto const context =
       MockVulkanContextBuilder()
           .SetPhysicalPropertiesCallback(
-              [&driver_name, qc](VkPhysicalDevice device,
-                                 VkPhysicalDeviceProperties* prop) {
-                if (qc) {
+              [&driver_name, is_qualcomm](VkPhysicalDevice device,
+                                          VkPhysicalDeviceProperties* prop) {
+                if (is_qualcomm) {
                   prop->vendorID = 0x168C;  // Qualcomm
                 } else {
                   prop->vendorID = 0x13B5;  // ARM
@@ -174,11 +174,13 @@ bool CanSampleManuallyWrittenMips(std::string_view driver_name,
 TEST(DriverInfoVKTest, ManuallyMippedTexturesDisabledWithMipWorkaround) {
   // The mipmap workaround rewrites every sampler to base-mip-only, so the
   // capability must not advertise hand-written mip chains on these devices.
-  EXPECT_FALSE(CanSampleManuallyWrittenMips("Adreno (TM) 540", true));
-  EXPECT_FALSE(CanSampleManuallyWrittenMips("Adreno (TM) 750", true));
+  EXPECT_FALSE(
+      CanSampleManuallyWrittenMips("Adreno (TM) 540", /*is_qualcomm=*/true));
+  EXPECT_FALSE(
+      CanSampleManuallyWrittenMips("Adreno (TM) 750", /*is_qualcomm=*/true));
 
   // Mali A-OK
-  EXPECT_TRUE(CanSampleManuallyWrittenMips("Mali-G51", false));
+  EXPECT_TRUE(CanSampleManuallyWrittenMips("Mali-G51", /*is_qualcomm=*/false));
 }
 
 TEST(DriverInfoVKTest, DriverParsingMali) {
