@@ -539,7 +539,7 @@ enum WidgetInspectorServiceExtensions {
   setFlexProperties,
 }
 
-/// Service extension constants for accessibility/semantics.
+/// Service extension constants for accessibility and semantics.
 ///
 /// These constants will be used when registering service extensions in the
 /// framework, and they will also be used by tools and services that call these
@@ -550,6 +550,9 @@ enum WidgetInspectorServiceExtensions {
 enum AccessibilityServiceExtensions {
   /// Name of service extension that, when called, returns the JSON serialized
   /// semantics tree.
+  ///
+  /// This extension should only be called after semantics has been enabled
+  /// (for example, by calling [enableSemantics]).
   ///
   /// See also:
   ///
@@ -566,8 +569,8 @@ enum AccessibilityServiceExtensions {
   ///   extension is registered.
   enableSemantics,
 
-  /// Name of service extension that, when called, disposes the semantics handle
-  /// created by [enableSemantics] or [getSemanticsTree].
+  /// Name of service extension that, when called, disposes the [SemanticsHandle]
+  /// created by [enableSemantics].
   ///
   /// See also:
   ///
