@@ -66,7 +66,7 @@ Future<void> run(List<String> args) async {
     packageConfigPath:
         argResults[_kOptionPackages] as String? ??
         findPackageConfigFileOrDefault(globals.fs.currentDirectory).path,
-    targetPlatform: TargetPlatform.fuchsia_arm64, // This is not arch specific.
+    targetPlatform: const TargetPlatform(.fuchsia, .arm64), // This is not arch specific.
   );
 
   if (assets == null) {

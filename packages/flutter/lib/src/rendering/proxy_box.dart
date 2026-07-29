@@ -2212,7 +2212,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     _updateClip();
     final RRect offsetRRect = _clip!.shift(offset);
-    final offsetRRectAsPath = Path()..addRRect(offsetRRect);
     var paintShadows = true;
     assert(() {
       if (debugDisableShadows) {
@@ -2232,6 +2231,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
+      final offsetRRectAsPath = Path()..addRRect(offsetRRect);
       canvas.drawShadow(offsetRRectAsPath, shadowColor, elevation, color.alpha != 0xFF);
     }
     final usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;

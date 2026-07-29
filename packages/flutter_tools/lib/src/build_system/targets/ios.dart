@@ -72,10 +72,10 @@ abstract class AotAssemblyBase extends Target {
     final targetPlatform = TargetPlatform.fromName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<DarwinArch> darwinArchs =
-        environment.defines[kIosArchs]?.split(' ').map(getIOSArchForName).toList() ??
-        <DarwinArch>[DarwinArch.arm64];
-    if (targetPlatform != TargetPlatform.ios) {
+    final List<CpuArch> cpuArchs =
+        environment.defines[kIosArchs]?.split(' ').map(getCpuArchForName).toList() ??
+        <CpuArch>[CpuArch.arm64];
+    if (targetPlatform.type != .ios) {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
 
@@ -94,25 +94,24 @@ abstract class AotAssemblyBase extends Target {
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
     final pending = <Future<int>>[];
-    for (final darwinArch in darwinArchs) {
+    for (final cpuArch in cpuArchs) {
       final archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('snapshot.${darwinArch.name}.json');
+            .childFile('snapshot.${cpuArch.darwinArchName}.json');
         final File precompilerTraceFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('trace.${darwinArch.name}.json');
+            .childFile('trace.${cpuArch.darwinArchName}.json');
         archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         archExtraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
       pending.add(
         snapshotter.build(
-          platform: targetPlatform,
+          platform: TargetPlatform(.ios, cpuArch),
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
-          outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
-          darwinArch: darwinArch,
+          outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
           sdkRoot: sdkRoot,
           quiet: true,
           splitDebugInfo: splitDebugInfo,
@@ -129,7 +128,7 @@ abstract class AotAssemblyBase extends Target {
     // Combine the app lib into a fat framework.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework/App',
       inputDir: buildOutputPath,
     );
@@ -137,7 +136,7 @@ abstract class AotAssemblyBase extends Target {
     // And combine the dSYM for each architecture too, if it was created.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
       inputDir: buildOutputPath,
       // Don't fail if the dSYM wasn't created (i.e. during a debug build).
@@ -163,7 +162,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
     // split into gen_snapshot_arm64 and gen_snapshot_armv7.
     // Source.artifact(Artifact.genSnapshot,
-    //   platform: TargetPlatform.ios,
+    //   platform: TargetPlatform(.ios, .arm64),
     //   mode: BuildMode.release,
     // ),
   ];
@@ -192,7 +191,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
     // split into gen_snapshot_arm64 and gen_snapshot_armv7.
     // Source.artifact(Artifact.genSnapshot,
-    //   platform: TargetPlatform.ios,
+    //   platform: TargetPlatform(.ios, .arm64),
     //   mode: BuildMode.profile,
     // ),
   ];
@@ -250,7 +249,11 @@ abstract class UnpackIOS extends UnpackDarwin {
     const Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
     ),
-    Source.artifact(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: buildMode),
+    Source.artifact(
+      Artifact.flutterXcframework,
+      platform: darwinPlatform.targetPlatform,
+      mode: buildMode,
+    ),
   ];
 
   @override
@@ -285,7 +288,7 @@ abstract class UnpackIOS extends UnpackDarwin {
       environment,
       environmentType: environmentType,
       framework: Artifact.flutterFramework,
-      targetPlatform: TargetPlatform.ios,
+      targetPlatform: darwinPlatform.targetPlatform,
       buildMode: buildMode,
     );
     await _copyFrameworkDysm(environment, sdkRoot: sdkRoot, environmentType: environmentType);
@@ -311,7 +314,7 @@ abstract class UnpackIOS extends UnpackDarwin {
     final Directory frameworkDsym = environment.fileSystem.directory(
       environment.artifacts.getArtifactPath(
         Artifact.flutterFrameworkDsym,
-        platform: TargetPlatform.ios,
+        platform: darwinPlatform.targetPlatform,
         mode: buildMode,
         environmentType: environmentType,
       ),
@@ -715,7 +718,7 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.ios,
+      targetPlatform: FlutterDarwinPlatform.ios.targetPlatform,
       buildMode: buildMode,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,

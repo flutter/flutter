@@ -110,7 +110,7 @@ class FakeAnalysisServer extends Fake implements AnalysisServer {
 
 class FakeGoogleChromeDevice extends Fake implements GoogleChromeDevice {
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.web, .unknown);
 
   @override
   PlatformType? get platformType => PlatformType.web;
@@ -121,7 +121,7 @@ class FakeGoogleChromeDevice extends Fake implements GoogleChromeDevice {
 
 class FakeMicrosoftEdgeDevice extends Fake implements MicrosoftEdgeDevice {
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.web, .unknown);
 
   @override
   PlatformType? get platformType => PlatformType.web;
@@ -132,7 +132,7 @@ class FakeMicrosoftEdgeDevice extends Fake implements MicrosoftEdgeDevice {
 
 class FakeCustomBrowserDevice extends Fake implements ChromiumDevice {
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.web, .unknown);
 
   @override
   PlatformType? get platformType => PlatformType.web;

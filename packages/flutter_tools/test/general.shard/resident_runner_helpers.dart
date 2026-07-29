@@ -177,7 +177,7 @@ class TestFlutterDevice extends FlutterDevice {
     : _vmServiceUris = vmServiceUris,
       super(
         generator: FakeResidentCompiler(),
-        targetPlatform: .unsupported,
+        targetPlatform: const TargetPlatform(.unsupported, .unknown),
         buildInfo: BuildInfo.debug,
         developmentShaderCompiler: const FakeShaderCompiler(),
       );
@@ -206,8 +206,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
   Exception? reportError;
   Exception? runColdError;
+  Exception? connectError;
   int runHotCode = 0;
   int runColdCode = 0;
+
+  @override
+  Duration logFlushDelay = Duration.zero;
 
   @override
   ResidentCompiler? generator;
@@ -216,7 +220,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
 
   @override
-  TargetPlatform targetPlatform = TargetPlatform.android;
+  TargetPlatform targetPlatform = const TargetPlatform(.android, .unknown);
 
   @override
   Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
@@ -266,7 +270,11 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
     bool? ipv6 = false,
-  }) async {}
+  }) async {
+    if (connectError != null) {
+      throw connectError!;
+    }
+  }
 
   @override
   Future<UpdateFSReport> updateDevFS({
@@ -302,7 +310,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     ResidentCompiler residentCompiler,
     this.fakeDevFS,
   ) : super(
-        targetPlatform: .unsupported,
+        targetPlatform: const TargetPlatform(.unsupported, .unknown),
         buildInfo: buildInfo,
         generator: residentCompiler,
         developmentShaderCompiler: const FakeShaderCompiler(),
@@ -381,7 +389,7 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     String sdkNameAndVersion = 'Android',
-    TargetPlatform targetPlatform = TargetPlatform.android_arm,
+    TargetPlatform targetPlatform = const TargetPlatform(.android, .armv7),
     bool isLocalEmulator = false,
     this.supportsHotRestart = true,
     this.supportsScreenshot = true,
@@ -408,8 +416,9 @@ class FakeDevice extends Fake implements Device {
   bool supportsFlutterExit;
 
   @override
-  PlatformType get platformType =>
-      _targetPlatform == TargetPlatform.web_javascript ? PlatformType.web : PlatformType.android;
+  PlatformType get platformType => _targetPlatform == const TargetPlatform(.web, .unknown)
+      ? PlatformType.web
+      : PlatformType.android;
 
   @override
   Future<String> get sdkNameAndVersion async => _sdkNameAndVersion;

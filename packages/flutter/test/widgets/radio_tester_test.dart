@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'radio_group_tester.dart';
 import 'radio_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('TestRadio renders and can be selected', (WidgetTester tester) async {

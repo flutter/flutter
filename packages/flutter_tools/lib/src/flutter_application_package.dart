@@ -49,11 +49,8 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
+    switch (platform.type) {
+      case .android:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
             FlutterProject.current().android,
@@ -74,35 +71,32 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
           userMessages: _userMessages,
           processUtils: _processUtils,
         );
-      case TargetPlatform.ios:
+      case .ios:
         return applicationBinary == null
             ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.tester:
+      case .tester:
         return FlutterTesterApp.fromCurrentDirectory(globals.fs);
-      case TargetPlatform.darwin:
+      case .macos:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.web_javascript:
+      case .web:
         if (!FlutterProject.current().web.existsSync()) {
           return null;
         }
         return WebApplicationPackage(FlutterProject.current());
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
+      case .linux:
         return applicationBinary == null
             ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
+      case .windows:
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.unsupported:
+      case .fuchsia:
+      case .custom:
+      case .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
   }
