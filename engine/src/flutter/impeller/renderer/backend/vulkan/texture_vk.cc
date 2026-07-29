@@ -184,13 +184,21 @@ bool TextureVK::SetLayout(const BarrierVK& barrier) const {
 }
 
 vk::ImageLayout TextureVK::SetLayoutWithoutEncoding(
-    vk::ImageLayout layout) const {
-  return source_ ? source_->SetLayoutWithoutEncoding(layout)
+    vk::ImageLayout layout,
+    uint32_t base_mip_level,
+    uint32_t level_count,
+    uint32_t base_array_layer,
+    uint32_t layer_count) const {
+  return source_ ? source_->SetLayoutWithoutEncoding(
+                       layout, base_mip_level, level_count, base_array_layer,
+                       layer_count)
                  : vk::ImageLayout::eUndefined;
 }
 
-vk::ImageLayout TextureVK::GetLayout() const {
-  return source_ ? source_->GetLayout() : vk::ImageLayout::eUndefined;
+vk::ImageLayout TextureVK::GetLayout(uint32_t mip_level,
+                                     uint32_t array_layer) const {
+  return source_ ? source_->GetLayout(mip_level, array_layer)
+                 : vk::ImageLayout::eUndefined;
 }
 
 vk::ImageView TextureVK::GetRenderTargetView(uint32_t mip_level,
