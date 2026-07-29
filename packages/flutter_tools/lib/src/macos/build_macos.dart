@@ -354,6 +354,22 @@ Future<void> buildMacOS({
       'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
       color: TerminalColor.green,
     );
+
+    final File builtInfoPlist = globals.fs.file(
+      globals.fs.path.join(outputDirectory.path, 'Contents', 'Info.plist'),
+    );
+    final String plistPath = builtInfoPlist.existsSync()
+        ? builtInfoPlist.path
+        : flutterProject.macos.defaultHostInfoPlist.path;
+    final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
+      plistPath,
+      PlistParser.kFLTEnableImpellerKey,
+    );
+
+    final buildLabel = impellerEnabled == false
+        ? 'plist-impeller-disabled'
+        : 'plist-impeller-enabled';
+    globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'macos'));
   }
   await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
   final Duration elapsedDuration = sw.elapsed;
@@ -364,17 +380,6 @@ Future<void> buildMacOS({
       elapsedMilliseconds: elapsedDuration.inMilliseconds,
     ),
   );
-
-  final String plistPath = flutterProject.macos.defaultHostInfoPlist.path;
-  final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
-    plistPath,
-    PlistParser.kFLTEnableImpellerKey,
-  );
-
-  final buildLabel = impellerEnabled == false
-      ? 'plist-impeller-disabled'
-      : 'plist-impeller-enabled';
-  globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'macos'));
 }
 
 /// Performs a size analysis of the AOT snapshot and writes to an analysis file, if configured.
