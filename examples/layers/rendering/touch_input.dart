@@ -5,8 +5,8 @@
 // This example shows how to use process input events in the underlying render
 // tree.
 
-import 'package:material_ui/material_ui.dart'; // Imported just for its color palette.
 import 'package:flutter/rendering.dart';
+import 'package:material_ui/material_ui.dart'; // Imported just for its color palette.
 
 import 'src/binding.dart';
 
