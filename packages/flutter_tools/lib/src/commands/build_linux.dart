@@ -72,7 +72,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     final targetPlatform = TargetPlatform.fromName(stringArg('target-platform')!);
     final needCrossBuild =
-        _operatingSystemUtils.hostPlatform.platformName != targetPlatform.simpleName;
+        _operatingSystemUtils.hostPlatform.platformName != targetPlatform.cpuArch.dartName;
 
     if (!featureFlags.isLinuxEnabled) {
       throwToolExit(
@@ -88,14 +88,14 @@ class BuildLinuxCommand extends BuildSubCommand {
     }
     // TODO(fujino): https://github.com/flutter/flutter/issues/74929
     if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64 &&
-        targetPlatform == TargetPlatform.linux_arm64) {
+        targetPlatform == const TargetPlatform(.linux, .arm64)) {
       throwToolExit(
         'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.',
       );
     }
     // Building for riscv64 (on a non-riscv64 host) is experimental
     if (_operatingSystemUtils.hostPlatform != HostPlatform.linux_riscv64 &&
-        targetPlatform == TargetPlatform.linux_riscv64 &&
+        targetPlatform == const TargetPlatform(.linux, .riscv64) &&
         !featureFlags.isRiscv64SupportEnabled) {
       throwToolExit(
         'Building for Linux riscv64 is currently an experimental feature. To enable, run "flutter config --enable-riscv64"',
