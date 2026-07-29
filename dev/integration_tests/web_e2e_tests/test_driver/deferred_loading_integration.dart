@@ -20,5 +20,6 @@ void main() {
 
     final int value = deferred_lib.getDeferredValue();
     expect(value, equals(42));
+    await tester.pumpAndSettle();
   });
 }
