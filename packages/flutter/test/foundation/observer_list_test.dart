@@ -71,4 +71,31 @@ void main() {
     }
     expect(list.isEmpty, isTrue);
   });
+  test('ObserverList.length', () {
+    final list = ObserverList<int>();
+    expect(list.length, 0);
+    list.add(1);
+    list.add(2);
+    list.add(2);
+    expect(list.length, 3);
+    list.remove(2);
+    expect(list.length, 2);
+  });
+  test('HashedObserverList.length and toList', () {
+    final list = HashedObserverList<int>();
+    expect(list.length, 0);
+    list.add(1);
+    list.add(2);
+    list.add(2);
+    expect(list.length, 2);
+    expect(list.toList(), <int>[1, 2]);
+    final List<int> fixed = list.toList(growable: false);
+    expect(fixed, <int>[1, 2]);
+    expect(() => fixed.add(3), throwsUnsupportedError);
+    expect(list.remove(2), isTrue);
+    expect(list.length, 2);
+    expect(list.remove(2), isTrue);
+    expect(list.length, 1);
+    expect(list.toList(), <int>[1]);
+  });
 }

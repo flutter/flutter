@@ -81,6 +81,9 @@ class ObserverList<T> extends Iterable<T> {
   @override
   bool get isNotEmpty => _list.isNotEmpty;
 
+  @override
+  int get length => _list.length;
+
   /// Creates a List containing the elements of the [ObserverList].
   ///
   /// Overrides the default implementation of the [Iterable] to reduce number
@@ -147,6 +150,9 @@ class HashedObserverList<T> extends Iterable<T> {
 
   @override
   bool get isNotEmpty => _map.isNotEmpty;
+
+  @override
+  int get length => _map.length;
 
   /// Creates a List containing the elements of the [HashedObserverList].
   ///
