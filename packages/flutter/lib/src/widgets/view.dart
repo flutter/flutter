@@ -276,6 +276,13 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
         view: widget.view,
         child: FocusTraversalGroup(
           policy: _policy,
+          // Attach this view's focus subtree directly to the root scope rather
+          // than nesting it under an enclosing view's scope (which happens when
+          // a view is rendered inside another via a [ViewAnchor]). Each view is
+          // an independent focus root: nesting would otherwise make an ancestor
+          // view report hasFocus when a descendant view is focused, causing it
+          // to request native focus and pull its window forward.
+          parentNode: FocusManager.instance.rootScope,
           child: FocusScope.withExternalFocusNode(
             includeSemantics: false,
             focusScopeNode: _scopeNode,

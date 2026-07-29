@@ -337,7 +337,6 @@ FLUTTER_ASSERT_ARC
   yDesc.size = impeller::ISize(yTex.width, yTex.height);
   yDesc.mip_count = 1;
   auto yTexture = impeller::TextureMTL::Wrapper(yDesc, yTex);
-  yTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
 
   impeller::TextureDescriptor uvDesc;
   uvDesc.storage_mode = impeller::StorageMode::kDevicePrivate;
@@ -345,8 +344,6 @@ FLUTTER_ASSERT_ARC
   uvDesc.size = impeller::ISize(uvTex.width, uvTex.height);
   uvDesc.mip_count = 1;
   auto uvTexture = impeller::TextureMTL::Wrapper(uvDesc, uvTex);
-  uvTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
-  ;
 
   return impeller::DlImageImpeller::MakeFromYUVTextures(aiks_context, yTexture, uvTexture,
                                                         colorSpace);
@@ -360,7 +357,6 @@ FLUTTER_ASSERT_ARC
   desc.size = impeller::ISize(rgbaTex.width, rgbaTex.height);
   desc.mip_count = 1;
   auto texture = impeller::TextureMTL::Wrapper(desc, rgbaTex);
-  texture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
   return impeller::DlImageImpeller::Make(texture);
 }
 @end

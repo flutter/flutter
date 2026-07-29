@@ -440,8 +440,9 @@ abstract class ShapeBorder {
   /// class) to `this`.
   ///
   /// When implementing this method in subclasses, return null if this class
-  /// cannot interpolate from `a`. In that case, [lerp] will try `a`'s [lerpTo]
-  /// method instead. If `a` is null, this must not return null.
+  /// cannot interpolate from `a`. In that case, [lerp] will try other ways to
+  /// interpolate between the two borders before applying a default behavior. If
+  /// `a` is null, this must not return null.
   ///
   /// The base class implementation handles the case of `a` being null by
   /// deferring to [scale].
@@ -471,11 +472,10 @@ abstract class ShapeBorder {
   /// Linearly interpolates from `this` to another [ShapeBorder] (possibly of
   /// another class).
   ///
-  /// This is called if `b`'s [lerpTo] did not know how to handle this class.
-  ///
   /// When implementing this method in subclasses, return null if this class
-  /// cannot interpolate from `b`. In that case, [lerp] will apply a default
-  /// behavior instead. If `b` is null, this must not return null.
+  /// cannot interpolate to `b`. In that case, [lerp] will try other ways to
+  /// interpolate between the two borders before applying a default behavior. If
+  /// `b` is null, this must not return null.
   ///
   /// The base class implementation handles the case of `b` being null by
   /// deferring to [scale].
@@ -503,17 +503,20 @@ abstract class ShapeBorder {
 
   /// Linearly interpolates between two [ShapeBorder]s.
   ///
-  /// This defers to `b`'s [lerpTo] function if `b` is not null. If `b` is
-  /// null or if its [lerpTo] returns null, it uses `a`'s [lerpFrom]
-  /// function instead. If both return null, it returns `a` before `t=0.5`
-  /// and `b` after `t=0.5`.
+  /// This first tries the forward interpolation, by calling `b.lerpFrom(a, t)`
+  /// and then `a.lerpTo(b, t)`. If both return null, this tries the same
+  /// interpolation on the reversed timeline, by calling
+  /// `b.lerpTo(a, 1.0 - t)` and then `a.lerpFrom(b, 1.0 - t)`. If all of
+  /// these methods return null, this returns `a` before `t=0.5` and `b` after
+  /// `t=0.5`.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ShapeBorder? lerp(ShapeBorder? a, ShapeBorder? b, double t) {
     if (identical(a, b)) {
       return a;
     }
-    final ShapeBorder? result = b?.lerpFrom(a, t) ?? a?.lerpTo(b, t);
+    final ShapeBorder? result =
+        b?.lerpFrom(a, t) ?? a?.lerpTo(b, t) ?? b?.lerpTo(a, 1.0 - t) ?? a?.lerpFrom(b, 1.0 - t);
     return result ?? (t < 0.5 ? a : b);
   }
 
@@ -693,17 +696,20 @@ abstract class OutlinedBorder extends ShapeBorder {
 
   /// Linearly interpolates between two [OutlinedBorder]s.
   ///
-  /// This defers to `b`'s [lerpTo] function if `b` is not null. If `b` is
-  /// null or if its [lerpTo] returns null, it uses `a`'s [lerpFrom]
-  /// function instead. If both return null, it returns `a` before `t=0.5`
-  /// and `b` after `t=0.5`.
+  /// This first tries the forward interpolation, by calling `b.lerpFrom(a, t)`
+  /// and then `a.lerpTo(b, t)`. If both return null, this tries the same
+  /// interpolation on the reversed timeline, by calling
+  /// `b.lerpTo(a, 1.0 - t)` and then `a.lerpFrom(b, 1.0 - t)`. If all of
+  /// these methods return null, this returns `a` before `t=0.5` and `b` after
+  /// `t=0.5`.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static OutlinedBorder? lerp(OutlinedBorder? a, OutlinedBorder? b, double t) {
     if (identical(a, b)) {
       return a;
     }
-    final ShapeBorder? result = b?.lerpFrom(a, t) ?? a?.lerpTo(b, t);
+    final ShapeBorder? result =
+        b?.lerpFrom(a, t) ?? a?.lerpTo(b, t) ?? b?.lerpTo(a, 1.0 - t) ?? a?.lerpFrom(b, 1.0 - t);
     return result as OutlinedBorder? ?? (t < 0.5 ? a : b);
   }
 }

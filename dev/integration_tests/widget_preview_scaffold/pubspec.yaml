@@ -2,7 +2,7 @@ name: widget_preview_scaffold
 description: Scaffolding for Flutter Widget Previews
 
 environment:
-  sdk: ^3.13.0-0
+  sdk: ^3.12.0
 
 resolution: workspace
 

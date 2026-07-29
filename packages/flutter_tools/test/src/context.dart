@@ -407,8 +407,6 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   Future<void> prefetchSwiftPackagesForProject(
     XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
-    bool quiet = true,
-    bool waitForCompletion = true,
   }) async {}
 
   @override

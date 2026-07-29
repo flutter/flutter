@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/bundle_builder.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -43,7 +44,7 @@ void main() {
       });
 
       await BundleBuilder().build(
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         buildInfo: BuildInfo.debug,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         mainPath: globals.fs.path.join('lib', 'main.dart'),
@@ -118,7 +119,7 @@ void main() {
       await writeBundle(
         bundleDir,
         bundle.entries,
-        targetPlatform: TargetPlatform.tester,
+        targetPlatform: const TargetPlatform(.tester, .unknown),
         impellerStatus: ImpellerStatus.platformDefault,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -139,7 +140,7 @@ void main() {
     () {
       expect(
         () => BundleBuilder().build(
-          platform: TargetPlatform.ios,
+          platform: const TargetPlatform(.ios, .arm64),
           buildInfo: BuildInfo.debug,
           project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
           mainPath: 'lib/main.dart',
@@ -176,7 +177,7 @@ void main() {
       });
 
       await BundleBuilder().build(
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
@@ -199,7 +200,7 @@ void main() {
 
       expect(env, isNotNull);
       expect(env!.defines[kBuildMode], 'debug');
-      expect(env!.defines[kTargetPlatform], 'ios');
+      expect(env!.defines[kTargetPlatform], 'ios-arm64');
       expect(env!.defines[kTargetFile], mainPath);
       expect(env!.defines[kTrackWidgetCreation], 'true');
       expect(env!.defines[kFrontendServerStarterPath], 'path/to/frontend_server_starter.dart');
@@ -266,6 +267,38 @@ void main() {
     );
   });
 
+  testWithoutContext('TargetModel isolates getDefaultCachedKernelPath hash', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final config = Config.test();
+
+    final String pathWithFlutter = getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      fileSystem: fileSystem,
+      config: config,
+      targetModel: TargetModel.flutter,
+    );
+
+    final String pathWithDartdevc = getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      fileSystem: fileSystem,
+      config: config,
+      targetModel: TargetModel.dartdevc,
+    );
+
+    final String pathWithoutTarget = getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      fileSystem: fileSystem,
+      config: config,
+    );
+
+    expect(pathWithFlutter, isNot(pathWithDartdevc));
+    expect(pathWithFlutter, isNot(pathWithoutTarget));
+    expect(pathWithDartdevc, isNot(pathWithoutTarget));
+  });
+
   testUsingContext(
     'Release bundle includes native assets',
     () async {
@@ -279,7 +312,7 @@ void main() {
         }
       });
       await BundleBuilder().build(
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         buildInfo: BuildInfo.release,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         mainPath: globals.fs.path.join('lib', 'main.dart'),

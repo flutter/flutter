@@ -54,10 +54,16 @@ class WebEntrypointTarget extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{PROJECT_DIR}/.flutter-plugins-dependencies', optional: true),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/main.dart')];
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/main.dart'),
+    Source.pattern('{BUILD_DIR}/web_plugin_registrant.dart'),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -181,7 +187,10 @@ class Dart2JSTarget extends Dart2WebTarget {
         .getHostArtifact(HostArtifact.webPlatformKernelFolder)
         .path;
     final sharedCommandOptions = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
+      artifacts.getArtifactPath(
+        Artifact.engineDartBinary,
+        platform: const TargetPlatform(.web, .unknown),
+      ),
       'compile',
       'js',
       '--platform-binaries=$platformBinariesPath',
@@ -354,7 +363,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final List<String> dartDefines = computeDartDefines(environment);
 
     final compilationArgs = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
+      artifacts.getArtifactPath(
+        Artifact.engineDartBinary,
+        platform: const TargetPlatform(.web, .unknown),
+      ),
       'compile',
       'wasm',
       '--packages=${findPackageConfigFileOrDefault(environment.projectDir).path}',
@@ -413,27 +425,39 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'jsSupportRuntimePath': 'main.dart.mjs',
         };
 
+  static final RegExp _partWasmRegex = RegExp(r'^main\.dart_module[0-9].*\.wasm$');
+  static final RegExp _partWasmMapRegex = RegExp(r'^main\.dart_module[0-9].*\.wasm\.map$');
+
   @override
   Iterable<File> buildFiles(Environment environment) => compilerConfig.dryRun
       ? const <File>[]
-      : environment.buildDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where(
-              (File file) => switch (file.basename) {
-                'main.dart.wasm' || 'main.dart.mjs' => true,
-                'main.dart.wasm.map' => compilerConfig.sourceMaps,
-                _ => false,
-              },
-            );
+      : environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
+          if (file.basename == 'main.dart.wasm' || file.basename == 'main.dart.mjs') {
+            return true;
+          }
+          if (compilerConfig.sourceMaps && file.basename == 'main.dart.wasm.map') {
+            return true;
+          }
+          if (_partWasmRegex.hasMatch(file.basename)) {
+            return true;
+          }
+          if (compilerConfig.sourceMaps && _partWasmMapRegex.hasMatch(file.basename)) {
+            return true;
+          }
+          return false;
+        });
 
   @override
   Iterable<String> get buildPatternStems => compilerConfig.dryRun
       ? const <String>[]
       : <String>[
           'main.dart.wasm',
+          'main.dart_module*.wasm',
           'main.dart.mjs',
-          if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
+          if (compilerConfig.sourceMaps) ...<String>[
+            'main.dart.wasm.map',
+            'main.dart_module*.wasm.map',
+          ],
           if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesWasmFileName,
         ];
 
@@ -647,7 +671,7 @@ class WebReleaseBundle extends Target {
       environment,
       environment.outputDir.childDirectory('assets'),
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.web_javascript,
+      targetPlatform: const TargetPlatform(.web, .unknown),
       buildMode: buildMode,
     );
     final Depfile bundledDepfile = _bundleLocalRobotoFallback(environment, depfile);

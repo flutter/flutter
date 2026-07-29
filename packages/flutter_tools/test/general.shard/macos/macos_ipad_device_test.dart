@@ -122,7 +122,7 @@ void main() {
     expect(await device.isLocalEmulator, isFalse);
     expect(device.name, 'Mac Designed for iPad');
     expect(device.portForwarder, isNot(isNull));
-    expect(await device.targetPlatform, TargetPlatform.darwin);
+    expect(await device.targetPlatform, const TargetPlatform(.macos, .arm64));
 
     expect(await device.installApp(FakeApplicationPackage()), isTrue);
     expect(await device.isAppInstalled(FakeApplicationPackage()), isTrue);

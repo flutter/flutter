@@ -34,7 +34,7 @@ final Platform macPlatform = FakePlatform(
 
 const _kSharedConfig = <String>[
   '-dynamiclib',
-  '-miphoneos-version-min=13.0',
+  '-miphoneos-version-min=15.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -52,7 +52,7 @@ const _kSharedConfig = <String>[
 
 FakeCommand createPlutilFakeCommand(File infoPlist) {
   return FakeCommand(
-    command: <String>['plutil', '-replace', 'MinimumOSVersion', '-string', '13.0', infoPlist.path],
+    command: <String>['plutil', '-replace', 'MinimumOSVersion', '-string', '15.0', infoPlist.path],
   );
 }
 
@@ -113,7 +113,7 @@ void main() {
               fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc'),
             ),
             '-dynamiclib',
-            '-miphonesimulator-version-min=13.0',
+            '-miphonesimulator-version-min=15.0',
             '-Xlinker',
             '-rpath',
             '-Xlinker',
@@ -252,7 +252,7 @@ void main() {
             '-replace',
             'MinimumOSVersion',
             '-string',
-            '13.0',
+            '15.0',
             infoPlist.path,
           ],
           exitCode: 1,
@@ -862,7 +862,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFramework.ios.debug.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -875,7 +875,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.ios.debug.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -888,7 +888,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.ios.debug.EnvironmentType.physical',
           outputDir.path,
         ],
         exitCode: 1,
@@ -932,7 +932,7 @@ void main() {
             '--filter',
             '- .DS_Store/',
             '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-            'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+            'Artifact.flutterFramework.ios.debug.EnvironmentType.simulator',
             outputDir.path,
           ],
           onRun: (_) => binary.createSync(recursive: true),
@@ -979,7 +979,7 @@ void main() {
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
-          platform: TargetPlatform.ios,
+          platform: const TargetPlatform(.ios, .arm64),
           mode: BuildMode.debug,
           environmentType: EnvironmentType.physical,
         ),
@@ -1030,10 +1030,7 @@ void main() {
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
         ),
-        FakeCommand(
-          command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64'],
-          exitCode: 1,
-        ),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64'], exitCode: 1),
       ]);
 
       await expectLater(
@@ -1043,7 +1040,7 @@ void main() {
             (Exception exception) => exception.toString(),
             'description',
             contains(
-              'does not contain architectures "arm64 x86_64".\n\n'
+              'does not contain architecture "arm64" (expected "arm64 x86_64").\n\n'
               'lipo -info:\nArchitectures in the fat file:',
             ),
           ),
@@ -1070,7 +1067,8 @@ void main() {
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
         ),
-        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64']),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64']),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'x86_64']),
         FakeCommand(
           command: <String>[
             'lipo',
@@ -1234,7 +1232,8 @@ void main() {
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
         ),
-        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64']),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64']),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'x86_64']),
         FakeCommand(
           command: <String>[
             'lipo',
@@ -1338,7 +1337,7 @@ void main() {
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
-          platform: TargetPlatform.ios,
+          platform: const TargetPlatform(.ios, .arm64),
           mode: BuildMode.debug,
           environmentType: EnvironmentType.physical,
         ),

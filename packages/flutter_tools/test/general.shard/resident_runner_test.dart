@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -239,7 +240,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: TargetPlatform.android_arm.getName(),
+            targetPlatform: const TargetPlatform(.android, .armv7).getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -307,7 +308,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'reload-barred',
-            targetPlatform: TargetPlatform.android_arm.getName(),
+            targetPlatform: const TargetPlatform(.android, .armv7).getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -360,7 +361,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: TargetPlatform.android_arm.getName(),
+            targetPlatform: const TargetPlatform(.android, .armv7).getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -578,7 +579,7 @@ void main() {
       final Event event = fakeAnalytics.sentEvents.first;
       expect(event.eventName.label, 'hot_runner_info');
       expect(event.eventData['label'], 'reload');
-      expect(event.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
+      expect(event.eventData['targetPlatform'], const TargetPlatform(.android, .armv7).getName());
     }),
   );
 
@@ -724,7 +725,10 @@ void main() {
       expect(hotRunnerInfoEvents, hasLength(1));
       final Event newEvent = hotRunnerInfoEvents.first;
       expect(newEvent.eventData['label'], 'restart');
-      expect(newEvent.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
+      expect(
+        newEvent.eventData['targetPlatform'],
+        const TargetPlatform(.android, .armv7).getName(),
+      );
     }),
   );
 
@@ -942,7 +946,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: TargetPlatform.android_arm.getName(),
+            targetPlatform: const TargetPlatform(.android, .armv7).getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: true,
@@ -1309,7 +1313,7 @@ flutter:
     'ResidentRunner printHelpDetails hides v on web in profile mode',
     () => testbed.run(() async {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
-        FakeDevice(targetPlatform: TargetPlatform.web_javascript),
+        FakeDevice(targetPlatform: const TargetPlatform(.web, .unknown)),
         target: 'lib/main.dart',
         buildInfo: BuildInfo.profile,
         platform: FakePlatform(),
@@ -1426,10 +1430,15 @@ flutter:
 
       await residentRunner.run();
 
-      expect(
-        await globals.fs.file(globals.fs.path.join('build', 'cache.dill')).readAsString(),
-        'ABC',
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: residentRunner.trackWidgetCreation,
+        dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
+        extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
+        config: globals.config,
+        fileSystem: globals.fs,
+        targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
+      expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
     }),
   );
 
@@ -1460,12 +1469,15 @@ flutter:
 
       await residentRunner.run();
 
-      expect(
-        await globals.fs
-            .file(globals.fs.path.join('build', '187ef4436122d1cc2f40dc2b92f0eba0.cache.dill'))
-            .readAsString(),
-        'ABC',
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: residentRunner.trackWidgetCreation,
+        dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
+        extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
+        config: globals.config,
+        fileSystem: globals.fs,
+        targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
+      expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
     }),
   );
 
@@ -1496,10 +1508,15 @@ flutter:
 
       await residentRunner.run();
 
-      expect(
-        await globals.fs.file(globals.fs.path.join('build', 'cache.dill')).readAsString(),
-        'ABC',
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: residentRunner.trackWidgetCreation,
+        dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
+        extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
+        config: globals.config,
+        fileSystem: globals.fs,
+        targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
+      expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
     }),
   );
 
@@ -1522,12 +1539,15 @@ flutter:
 
       await residentRunner.run();
 
-      expect(
-        await globals.fs
-            .file(globals.fs.path.join('build', 'cache.dill.track.dill'))
-            .readAsString(),
-        'ABC',
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: residentRunner.trackWidgetCreation,
+        dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
+        extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
+        config: globals.config,
+        fileSystem: globals.fs,
+        targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
+      expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
     }),
   );
 
@@ -1582,12 +1602,15 @@ flutter:
 
       await residentRunner.run();
 
-      expect(
-        await globals.fs
-            .file(globals.fs.path.join('build', 'cache.dill.track.dill'))
-            .readAsString(),
-        'ABC',
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: residentRunner.trackWidgetCreation,
+        dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
+        extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
+        config: globals.config,
+        fileSystem: globals.fs,
+        targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
+      expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
     }),
   );
 
@@ -1665,7 +1688,7 @@ flutter:
     'FlutterDevice uses dartdevc configuration when targeting web',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
+      final device = FakeDevice(targetPlatform: const TargetPlatform(.web, .unknown));
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
@@ -1680,10 +1703,14 @@ flutter:
               )).generator
               as DefaultResidentCompiler?;
 
-      expect(
-        residentCompiler!.initializeFromDill,
-        globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: false,
+        dartDefines: const <String>[],
+        config: globals.config,
+        fileSystem: globals.fs,
+        targetModel: TargetModel.dartdevc,
       );
+      expect(residentCompiler!.initializeFromDill, expectedPath);
       expect(
         residentCompiler.librariesSpec,
         globals.fs
@@ -1712,7 +1739,7 @@ flutter:
     'FlutterDevice uses dartdevc configuration when targeting web with null-safety autodetected',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
+      final device = FakeDevice(targetPlatform: const TargetPlatform(.web, .unknown));
 
       final residentCompiler =
           (await FlutterDevice.create(
@@ -1729,10 +1756,14 @@ flutter:
               )).generator
               as DefaultResidentCompiler?;
 
-      expect(
-        residentCompiler!.initializeFromDill,
-        globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: false,
+        dartDefines: const <String>[],
+        config: globals.config,
+        fileSystem: globals.fs,
+        targetModel: TargetModel.dartdevc,
       );
+      expect(residentCompiler!.initializeFromDill, expectedPath);
       expect(
         residentCompiler.librariesSpec,
         globals.fs
@@ -2065,6 +2096,63 @@ flutter:
   );
 
   testUsingContext(
+    'HotRunner reinitializes Flutter GPU shader libraries for changed .shaderbundle assets',
+    () => testbed.run(() async {
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, setAssetBundlePath, reinitializeShaderLibrary],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      // A `.shaderbundle` asset reloads the compiled Flutter GPU ShaderLibrary
+      // instead of going through the generic asset eviction.
+      (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'foo.shaderbundle'};
+
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(fakeVmServiceHost!.hasRemainingExpectations, false);
+    }),
+  );
+
+  testUsingContext(
+    'HotRunner evicts a changed .shaderbundle asset generically on web',
+    () => testbed.run(() async {
+      final webFlutterDevice = FakeFlutterDevice()
+        ..vmServiceHost = (() => fakeVmServiceHost)
+        ..fakeDevFS = devFS
+        ..targetPlatform = const TargetPlatform(.web, .unknown);
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          listViews,
+          setAssetBundlePath,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.evict',
+            args: <String, Object>{'value': 'foo.shaderbundle', 'isolateId': '1'},
+          ),
+        ],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[webFlutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      // The Flutter GPU reload extension is unavailable on web, so the bundle
+      // falls back to the generic asset eviction.
+      (webFlutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'foo.shaderbundle'};
+
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(fakeVmServiceHost!.hasRemainingExpectations, false);
+    }),
+  );
+
+  testUsingContext(
     'HotRunner does not sets asset directory when no assets to evict',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
@@ -2105,16 +2193,61 @@ flutter:
   );
 
   testUsingContext(
+    'HotRunner evictDirtyAssets correctly finds UI isolate and view ID when multiple views are present and the first view has no isolate',
+    () => testbed.run(() async {
+      final viewWithoutIsolate = FlutterView(id: 'view_empty', uiIsolate: null);
+      final viewWithIsolate = FlutterView(id: 'view_active', uiIsolate: fakeUnpausedIsolate);
+
+      final listMultipleViews = FakeVmServiceRequest(
+        method: kListViewsMethod,
+        jsonResponse: <String, Object>{
+          'views': <Object>[viewWithoutIsolate.toJson(), viewWithIsolate.toJson()],
+        },
+      );
+
+      const setAssetBundlePathForActiveView = FakeVmServiceRequest(
+        method: '_flutter.setAssetBundlePath',
+        args: <String, Object>{
+          'viewId': 'view_active',
+          'assetDirectory': 'build/flutter_assets',
+          'isolateId': '1',
+        },
+      );
+
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listMultipleViews, setAssetBundlePathForActiveView, evict],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
+
+      expect(flutterDevice.devFS!.hasSetAssetDirectory, isFalse);
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(flutterDevice.devFS!.hasSetAssetDirectory, isTrue);
+      expect(fakeVmServiceHost!.hasRemainingExpectations, isFalse);
+    }),
+  );
+
+  testUsingContext(
     'use the nativeAssetsYamlFile when provided',
     () => testbed.run(() async {
-      final device = FakeDevice(targetPlatform: TargetPlatform.darwin, sdkNameAndVersion: 'Macos');
+      final device = FakeDevice(
+        targetPlatform: const TargetPlatform(.macos, .x64),
+        sdkNameAndVersion: 'Macos',
+      );
       final residentCompiler = FakeResidentCompiler();
       final flutterDevice = FakeFlutterDevice()
         ..testUri = testUri
         ..vmServiceHost = (() => fakeVmServiceHost)
         ..device = device
         ..fakeDevFS = devFS
-        ..targetPlatform = TargetPlatform.darwin
+        ..targetPlatform = const TargetPlatform(.macos, .x64)
         ..generator = residentCompiler;
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
@@ -2147,4 +2280,130 @@ flutter:
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     },
   );
+
+  testUsingContext(
+    'ResidentRunner delays on connection failure to allow logs to flush',
+    () => testbed.run(() async {
+      flutterDevice.connectError = Exception('Failed to connect');
+      flutterDevice.logFlushDelay = const Duration(milliseconds: 100);
+
+      final stopwatch = Stopwatch()..start();
+      final int result = await residentRunner.attach();
+      stopwatch.stop();
+
+      expect(result, 2);
+      expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(100));
+    }),
+  );
+  group('ResidentRunner cached Initial Dill Compilation', () {
+    late TestBed testbed;
+    late FakeFlutterDevice flutterDevice;
+    late FakeDevFS devFS;
+    late TestHotRunner residentRunner;
+    late FakeDevice device;
+
+    setUp(() {
+      testbed = TestBed(
+        setup: () {
+          residentRunner = TestHotRunner(
+            <FlutterDevice>[flutterDevice],
+            stayResident: false,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+            target: 'main.dart',
+            analytics: fakeAnalytics,
+          );
+          // Write the source dill file
+          globals.fs.file(residentRunner.dillOutputPath)
+            ..createSync(recursive: true)
+            ..writeAsStringSync('ABC');
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => getInitializedFakeAnalyticsInstance(
+            fakeFlutterVersion: FakeFlutterVersion(),
+            fs: MemoryFileSystem.test(),
+          ),
+        },
+      );
+      device = FakeDevice();
+      devFS = FakeDevFS();
+      flutterDevice = FakeFlutterDevice()
+        ..testUri = testUri
+        ..device = device
+        ..fakeDevFS = devFS;
+    });
+
+    testUsingContext(
+      'correctly caches Web Device compilation',
+      () => testbed.run(() {
+        flutterDevice.targetPlatform = const TargetPlatform(.web, .unknown);
+        residentRunner.testCacheInitialDillCompilation();
+
+        final String expectedPath = getDefaultCachedKernelPath(
+          trackWidgetCreation: residentRunner.trackWidgetCreation,
+          dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
+          extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
+          config: globals.config,
+          fileSystem: globals.fs,
+          targetModel: TargetModel.dartdevc,
+        );
+
+        expect(globals.fs.file(expectedPath), exists);
+        expect(globals.fs.file(expectedPath).readAsStringSync(), 'ABC');
+      }),
+    );
+
+    testUsingContext(
+      'correctly caches Fuchsia Device compilation',
+      () => testbed.run(() {
+        flutterDevice.targetPlatform = const TargetPlatform(.fuchsia, .arm64);
+        residentRunner.testCacheInitialDillCompilation();
+
+        final String expectedPath = getDefaultCachedKernelPath(
+          trackWidgetCreation: residentRunner.trackWidgetCreation,
+          dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
+          extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
+          config: globals.config,
+          fileSystem: globals.fs,
+          targetModel: TargetModel.flutterRunner,
+        );
+
+        expect(globals.fs.file(expectedPath), exists);
+        expect(globals.fs.file(expectedPath).readAsStringSync(), 'ABC');
+      }),
+    );
+
+    testUsingContext(
+      'correctly caches Android Device compilation',
+      () => testbed.run(() {
+        flutterDevice.targetPlatform = const TargetPlatform(.android, .armv7);
+        residentRunner.testCacheInitialDillCompilation();
+
+        final String expectedPath = getDefaultCachedKernelPath(
+          trackWidgetCreation: residentRunner.trackWidgetCreation,
+          dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
+          extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
+          config: globals.config,
+          fileSystem: globals.fs,
+          targetModel: TargetModel.flutter,
+        );
+
+        expect(globals.fs.file(expectedPath), exists);
+        expect(globals.fs.file(expectedPath).readAsStringSync(), 'ABC');
+      }),
+    );
+  });
+}
+
+class TestHotRunner extends HotRunner {
+  TestHotRunner(
+    super.flutterDevices, {
+    required super.stayResident,
+    required super.debuggingOptions,
+    required super.target,
+    required super.analytics,
+  });
+
+  void testCacheInitialDillCompilation() {
+    cacheInitialDillCompilation();
+  }
 }

@@ -10,14 +10,12 @@ import 'package:hooks/hooks.dart';
 import '../../base/common.dart' show throwToolExit;
 import '../../build_info.dart'
     show
-        AndroidArch,
         BuildMode,
-        DarwinArch,
+        CpuArch,
         EnvironmentType,
         TargetPlatform,
-        getAndroidArchForName,
-        getDarwinArchsFromEnv,
-        getIOSArchForName,
+        getCpuArchForName,
+        getCpuArchsFromEnv,
         kAndroidArchs,
         kIosArchs,
         kSdkRoot;
@@ -69,33 +67,32 @@ sealed class AssetBuildTarget {
     required List<SupportedAssetTypes> supportedAssetTypes,
     required Directory? buildDirectory,
   }) {
-    switch (targetPlatform) {
-      case TargetPlatform.windows_x64:
-        return _windowsTarget(supportedAssetTypes, Architecture.x64);
-      case TargetPlatform.linux_x64:
-        return _linuxTarget(supportedAssetTypes, Architecture.x64, buildMode, buildDirectory);
-      case TargetPlatform.linux_arm64:
-        return _linuxTarget(supportedAssetTypes, Architecture.arm64, buildMode, buildDirectory);
-      case TargetPlatform.linux_riscv64:
-        return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildMode, buildDirectory);
-      case TargetPlatform.windows_arm64:
-        return _windowsTarget(supportedAssetTypes, Architecture.arm64);
-      case TargetPlatform.darwin:
+    switch (targetPlatform.type) {
+      case .windows:
+        return _windowsTarget(
+          supportedAssetTypes,
+          targetPlatform.cpuArch == .arm64 ? Architecture.arm64 : Architecture.x64,
+        );
+      case .linux:
+        final Architecture architecture = switch (targetPlatform.cpuArch) {
+          .arm64 => Architecture.arm64,
+          .riscv64 => Architecture.riscv64,
+          _ => Architecture.x64,
+        };
+        return _linuxTarget(supportedAssetTypes, architecture, buildMode, buildDirectory);
+      case .macos:
         return _macTargets(environmentDefines, supportedAssetTypes);
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
+      case .android:
         return _androidTargets(targetPlatform, environmentDefines, supportedAssetTypes);
-      case TargetPlatform.ios:
+      case .ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
-      case TargetPlatform.web_javascript:
+      case .web:
         return _webTarget(supportedAssetTypes);
-      case TargetPlatform.tester:
+      case .tester:
         return _flutterTesterTarget(supportedAssetTypes);
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.unsupported:
+      case .fuchsia:
+      case .custom:
+      case .unsupported:
         throwToolExit('No targets defined for target platform $targetPlatform.');
     }
   }
@@ -136,7 +133,7 @@ sealed class AssetBuildTarget {
     Map<String, String> environmentDefines,
     List<SupportedAssetTypes> supportedAssetTypes,
   ) {
-    return getDarwinArchsFromEnv(environmentDefines)
+    return getCpuArchsFromEnv(environmentDefines)
         .map(getNativeMacOSArchitecture)
         .map(
           (Architecture architecture) => MacOSAssetTarget(
@@ -169,10 +166,10 @@ sealed class AssetBuildTarget {
     FileSystem fileSystem,
     List<SupportedAssetTypes> supportedAssetTypes,
   ) {
-    final List<DarwinArch> iosArchitectures =
-        _emptyToNull(environmentDefines[kIosArchs])?.split(' ').map(getIOSArchForName).toList() ??
-        <DarwinArch>[DarwinArch.arm64];
-    return iosArchitectures
+    final List<CpuArch> cpuArchs =
+        _emptyToNull(environmentDefines[kIosArchs])?.split(' ').map(getCpuArchForName).toList() ??
+        <CpuArch>[CpuArch.arm64];
+    return cpuArchs
         .map(getNativeIOSArchitecture)
         .map(
           (Architecture architecture) => IOSAssetTarget(
@@ -259,8 +256,7 @@ class WindowsAssetTarget extends CodeAssetTarget {
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      // TODO(simolus3): Respect the mustMatchAppBuild option in cCompilerConfigWindows.
-      cCompilerConfigSync = await cCompilerConfigWindows();
+      cCompilerConfigSync = await cCompilerConfigWindows(throwIfNotFound: mustMatchAppBuild);
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
@@ -276,12 +272,11 @@ final class LinuxAssetTarget extends CodeAssetTarget {
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
-    if (cmakeBuildDirectory == null && mustMatchAppBuild) {
-      throw StateError('Missing CMake build directory on LinuxAssetTarget');
-    }
+    final bool isNativeAppBuild = cmakeBuildDirectory != null && cmakeBuildDirectory!.existsSync();
 
     cCompilerConfigSync = await cCompilerConfigLinux(
-      cmakeDirectory: mustMatchAppBuild ? cmakeBuildDirectory! : null,
+      cmakeDirectory: isNativeAppBuild ? cmakeBuildDirectory : null,
+      throwIfNotFound: mustMatchAppBuild,
     );
   }
 
@@ -422,33 +417,17 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
       subtarget.setCCompilerConfig(mustMatchAppBuild: false);
 }
 
-List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {
-  switch (targetPlatform) {
-    case TargetPlatform.android_arm:
-      return <AndroidArch>[AndroidArch.armeabi_v7a];
-    case TargetPlatform.android_arm64:
-      return <AndroidArch>[AndroidArch.arm64_v8a];
-    case TargetPlatform.android_x64:
-      return <AndroidArch>[AndroidArch.x86_64];
-    case TargetPlatform.android:
-      if (androidArchsEnvironment == null) {
-        throw MissingDefineException(kAndroidArchs, 'native_assets');
-      }
-      return androidArchsEnvironment.split(' ').map(getAndroidArchForName).toList();
-    case TargetPlatform.darwin:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.ios:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_riscv64:
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.tester:
-    case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
-    case TargetPlatform.unsupported:
-      throwToolExit('Unsupported Android target platform: $targetPlatform.');
+List<CpuArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {
+  if (targetPlatform.type != .android) {
+    throwToolExit('Unsupported Android target platform: $targetPlatform.');
   }
+  return switch (targetPlatform.cpuArch) {
+    .armv7 || .arm64 || .x64 => <CpuArch>[targetPlatform.cpuArch],
+    CpuArch.unknown when androidArchsEnvironment != null =>
+      androidArchsEnvironment.split(' ').map(getCpuArchForName).toList(),
+    .unknown => throw MissingDefineException(kAndroidArchs, 'native_assets'),
+    .x86 || .riscv64 => throwToolExit('Unsupported Android target platform: $targetPlatform.'),
+  };
 }
 
 String? _emptyToNull(String? input) {

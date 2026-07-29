@@ -96,7 +96,7 @@ dependencies:
           packageConfigPath: packageConfigPath,
           manifestPath: manifestPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(assetBundle.entries, contains('FontManifest.json'));
@@ -255,7 +255,7 @@ flutter:
             packageConfigPath: packageConfigPath,
             manifestPath: manifestPath,
             flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
-            targetPlatform: TargetPlatform.tester,
+            targetPlatform: const TargetPlatform(.tester, .unknown),
           );
 
           expect(assetBundle.entries, contains('FontManifest.json'));
@@ -300,29 +300,37 @@ flutter:
           manifestPath: manifestPath, // file doesn't exist
           packageConfigPath: packageConfigPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.file(manifestPath).parent),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(assetBundle.wasBuiltOnce(), true);
         expect(assetBundle.inputFiles.map((File f) => f.path), <String>[]);
       });
 
-      final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
-
       testWithoutContext('bundles material shaders on non-web platforms', () async {
-        for (final shader in testShaders) {
-          final String shaderPath = fileSystem.path.join(
-            flutterRoot,
-            'packages',
-            'flutter',
-            'lib',
-            'src',
-            'material',
-            'shaders',
-            shader,
-          );
-          fileSystem.file(shaderPath).createSync(recursive: true);
-        }
+        final String inkSparklePath = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'material',
+          'shaders',
+          'ink_sparkle.frag',
+        );
+        fileSystem.file(inkSparklePath).createSync(recursive: true);
+
+        final String stretchEffectPath = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'widgets',
+          'shaders',
+          'stretch_effect.frag',
+        );
+        fileSystem.file(stretchEffectPath).createSync(recursive: true);
 
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
@@ -335,29 +343,38 @@ flutter:
 
         await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.android_arm,
+          targetPlatform: const TargetPlatform(.android, .armv7),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        for (final shader in testShaders) {
-          expect(assetBundle.entries.keys, contains('shaders/$shader'));
-        }
+        expect(assetBundle.entries.keys, contains('shaders/ink_sparkle.frag'));
+        expect(assetBundle.entries.keys, contains('shaders/stretch_effect.frag'));
       });
 
       testWithoutContext('bundles material shaders on web platforms', () async {
-        for (final shader in testShaders) {
-          final String shaderPath = fileSystem.path.join(
-            flutterRoot,
-            'packages',
-            'flutter',
-            'lib',
-            'src',
-            'material',
-            'shaders',
-            shader,
-          );
-          fileSystem.file(shaderPath).createSync(recursive: true);
-        }
+        final String inkSparklePath = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'material',
+          'shaders',
+          'ink_sparkle.frag',
+        );
+        fileSystem.file(inkSparklePath).createSync(recursive: true);
+
+        final String stretchEffectPath = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'widgets',
+          'shaders',
+          'stretch_effect.frag',
+        );
+        fileSystem.file(stretchEffectPath).createSync(recursive: true);
 
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
         fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_package');
@@ -370,13 +387,12 @@ flutter:
 
         await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        for (final shader in testShaders) {
-          expect(assetBundle.entries.keys, contains('shaders/$shader'));
-        }
+        expect(assetBundle.entries.keys, contains('shaders/ink_sparkle.frag'));
+        expect(assetBundle.entries.keys, contains('shaders/stretch_effect.frag'));
       });
 
       testWithoutContext('fails if shader is also in assets', () async {
@@ -400,7 +416,7 @@ flutter:
         final int result = await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(result, isNot(0));
         expect(
@@ -430,7 +446,7 @@ flutter:
         final int result = await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(result, isNot(0));
         expect(

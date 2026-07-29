@@ -92,6 +92,9 @@ interface class FlutterTestRunner {
     ];
 
     if (web) {
+      // Unsupported for general Flutter developers.
+      // This is only used by the Flutter Framework tests.
+      // See: https://github.com/flutter/flutter/pull/65984.
       final String tempBuildDir = globals.fs.systemTempDirectory
           .createTempSync('flutter_test.')
           .absolute
@@ -551,7 +554,7 @@ class SpawnPlugin extends PlatformPlugin {
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
 
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
-      targetPlatform: .tester,
+      targetPlatform: const TargetPlatform(.tester, .unknown),
       artifacts: globals.artifacts!,
       logger: globals.logger,
       processManager: globals.processManager,

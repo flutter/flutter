@@ -61,6 +61,10 @@ std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
   return nullptr;
 }
 
+std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
+  return nullptr;
+}
+
 Point GoldenPlaygroundTest::GetContentScale() const {
   return Point();
 }

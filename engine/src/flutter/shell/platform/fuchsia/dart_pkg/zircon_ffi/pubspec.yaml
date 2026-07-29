@@ -1,7 +1,7 @@
 name: zircon_ffi
 
 environment:
-  sdk: ^3.13.0-0
+  sdk: ^3.11.0-0
 
 dependencies:
   ffi: ^1.0.0

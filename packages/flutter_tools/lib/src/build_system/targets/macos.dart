@@ -140,7 +140,7 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
     final Directory frameworkDsym = environment.fileSystem.directory(
       environment.artifacts.getArtifactPath(
         Artifact.flutterMacOSFrameworkDsym,
-        platform: TargetPlatform.darwin,
+        platform: darwinPlatform.targetPlatform,
         mode: buildMode,
       ),
     );
@@ -210,10 +210,10 @@ class DebugMacOSFramework extends Target {
       environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'),
     );
 
-    final Iterable<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
+    final Iterable<CpuArch> cpuArchs = getCpuArchsFromEnv(environment.defines);
 
-    final Iterable<String> darwinArchArguments = darwinArchs.expand(
-      (DarwinArch arch) => <String>['-arch', arch.name],
+    final Iterable<String> darwinArchArguments = cpuArchs.expand(
+      (CpuArch arch) => <String>['-arch', arch.darwinArchName],
     );
 
     outputFile.createSync(recursive: true);
@@ -287,8 +287,8 @@ class CompileMacOSFramework extends Target {
       kExtraGenSnapshotOptions,
     );
     final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
-    final List<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
-    if (targetPlatform != TargetPlatform.darwin) {
+    final List<CpuArch> cpuArchs = getCpuArchsFromEnv(environment.defines);
+    if (targetPlatform.type != .macos) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
 
@@ -301,14 +301,14 @@ class CompileMacOSFramework extends Target {
     );
 
     final pending = <Future<int>>[];
-    for (final darwinArch in darwinArchs) {
+    for (final cpuArch in cpuArchs) {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('snapshot.${darwinArch.name}.json');
+            .childFile('snapshot.${cpuArch.darwinArchName}.json');
         final File precompilerTraceFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('trace.${darwinArch.name}.json');
+            .childFile('trace.${cpuArch.darwinArchName}.json');
         extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
@@ -320,9 +320,8 @@ class CompileMacOSFramework extends Target {
         snapshotter.build(
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
-          outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
-          platform: TargetPlatform.darwin,
-          darwinArch: darwinArch,
+          outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
+          platform: TargetPlatform(.macos, cpuArch),
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
@@ -339,7 +338,7 @@ class CompileMacOSFramework extends Target {
     // Combine the app lib into a fat framework.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework/App',
       inputDir: buildOutputPath,
     );
@@ -347,7 +346,7 @@ class CompileMacOSFramework extends Target {
     // And combine the dSYM for each architecture too, if it was created.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
       inputDir: buildOutputPath,
       // Don't fail if the dSYM wasn't created (i.e. during a debug build).
@@ -359,10 +358,16 @@ class CompileMacOSFramework extends Target {
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin),
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart',
+    ),
+    Source.artifact(
+      Artifact.genSnapshot,
+      mode: BuildMode.release,
+      platform: FlutterDarwinPlatform.macos.targetPlatform,
+    ),
   ];
 
   @override
@@ -451,7 +456,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       environment,
       assetDirectory,
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.darwin,
+      targetPlatform: FlutterDarwinPlatform.macos.targetPlatform,
       buildMode: buildMode,
       flavor: flavor,
       additionalContent: <String, DevFSContent>{
@@ -505,12 +510,12 @@ abstract class MacOSBundleFlutterAssets extends Target {
       try {
         final String vmSnapshotData = environment.artifacts.getArtifactPath(
           Artifact.vmSnapshotData,
-          platform: TargetPlatform.darwin,
+          platform: FlutterDarwinPlatform.macos.targetPlatform,
           mode: BuildMode.debug,
         );
         final String isolateSnapshotData = environment.artifacts.getArtifactPath(
           Artifact.isolateSnapshotData,
-          platform: TargetPlatform.darwin,
+          platform: FlutterDarwinPlatform.macos.targetPlatform,
           mode: BuildMode.debug,
         );
         environment.fileSystem
@@ -582,14 +587,14 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Source> get inputs => <Source>[
     ...super.inputs,
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(
+    Source.artifact(
       Artifact.isolateSnapshotData,
-      platform: TargetPlatform.darwin,
+      platform: FlutterDarwinPlatform.macos.targetPlatform,
       mode: BuildMode.debug,
     ),
-    const Source.artifact(
+    Source.artifact(
       Artifact.vmSnapshotData,
-      platform: TargetPlatform.darwin,
+      platform: FlutterDarwinPlatform.macos.targetPlatform,
       mode: BuildMode.debug,
     ),
   ];

@@ -215,7 +215,7 @@ abstract class Renderer {
   void clearFragmentProgramCache();
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey);
 
-  DisposablePathConstructors get pathConstructors;
+  BackendPathConstructors get pathConstructors;
 
   ui.LineMetrics createLineMetrics({
     required bool hardBreak,

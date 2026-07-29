@@ -47,7 +47,7 @@ void main() {
         expect(
           await ab.build(
             packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: TargetPlatform.tester,
+            targetPlatform: const TargetPlatform(.tester, .unknown),
           ),
           0,
         );
@@ -70,7 +70,7 @@ void main() {
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin']));
         const expectedBinAssetManifest = <Object, Object>{};
@@ -120,7 +120,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(
@@ -163,7 +163,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -182,7 +182,7 @@ flutter:
         expect(bundle.needsBuild(), true);
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -223,7 +223,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -254,7 +254,7 @@ name: my_app''')
         expect(bundle.needsBuild(), true);
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -295,7 +295,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -350,7 +350,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -401,7 +401,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -462,7 +462,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(
           bundle.entries.keys,
@@ -486,7 +486,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(
@@ -540,7 +540,7 @@ flutter:
         () => bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         throwsToolExit(
           message:
@@ -580,7 +580,7 @@ flutter:
         () => bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         throwsToolExit(
           message:
@@ -625,15 +625,16 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+        bundle.entries['my-asset.txt']!.content.markClean();
 
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
@@ -651,7 +652,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
@@ -681,7 +682,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
         );
 
         expect(
@@ -720,7 +721,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
         );
 
         expect(
@@ -773,7 +774,7 @@ flutter:
     await writeBundle(
       directory,
       const <String, AssetBundleEntry>{},
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
       impellerStatus: ImpellerStatus.disabled,
       processManager: globals.processManager,
       fileSystem: globals.fs,
@@ -802,7 +803,7 @@ assets:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
-        targetPlatform: TargetPlatform.tester,
+        targetPlatform: const TargetPlatform(.tester, .unknown),
       );
 
       final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
@@ -810,7 +811,7 @@ assets:
 
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
-        targetPlatform: TargetPlatform.tester,
+        targetPlatform: const TargetPlatform(.tester, .unknown),
       );
 
       expect(fontManifest, bundle.entries['FontManifest.json']);
@@ -842,7 +843,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         0,
       );
@@ -877,7 +878,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         0,
       );
@@ -930,7 +931,7 @@ flutter:
         expect(
           await bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: TargetPlatform.tester,
+            targetPlatform: const TargetPlatform(.tester, .unknown),
           ),
           0,
         );
@@ -938,7 +939,7 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: TargetPlatform.android,
+          targetPlatform: const TargetPlatform(.android, .unknown),
           impellerStatus: ImpellerStatus.disabled,
           processManager: globals.processManager,
           fileSystem: globals.fs,
@@ -993,7 +994,7 @@ flutter:
         expect(
           await bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: TargetPlatform.web_javascript,
+            targetPlatform: const TargetPlatform(.web, .unknown),
           ),
           0,
         );
@@ -1001,7 +1002,7 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
           impellerStatus: ImpellerStatus.disabled,
           processManager: globals.processManager,
           fileSystem: globals.fs,
@@ -1052,44 +1053,96 @@ flutter:
         );
         fileSystem.file(materialIconsPath).createSync(recursive: true);
 
-        final String materialPath = fileSystem.path.join(
-          getFlutterRoot(),
+        final String flutterRoot = getFlutterRoot();
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                flutterRoot,
+                'packages',
+                'flutter',
+                'lib',
+                'src',
+                'material',
+                'shaders',
+                'ink_sparkle.frag',
+              ),
+            )
+            .createSync(recursive: true);
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                flutterRoot,
+                'packages',
+                'flutter',
+                'lib',
+                'src',
+                'widgets',
+                'shaders',
+                'stretch_effect.frag',
+              ),
+            )
+            .createSync(recursive: true);
+
+        final String materialShaderDir = fileSystem.path.join(
+          flutterRoot,
           'packages',
           'flutter',
           'lib',
           'src',
           'material',
+          'shaders',
         );
-        final Directory materialDir = fileSystem.directory(materialPath)
-          ..createSync(recursive: true);
-        for (final String shader in kMaterialShaders) {
-          materialDir.childFile(shader).createSync(recursive: true);
-        }
+        final String widgetsShaderDir = fileSystem.path.join(
+          flutterRoot,
+          'packages',
+          'flutter',
+          'lib',
+          'src',
+          'widgets',
+          'shaders',
+        );
 
-        final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
+        (globals.processManager as FakeProcessManager).addCommand(
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
+              '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
+              '--input=${fileSystem.path.join(materialShaderDir, 'ink_sparkle.frag')}',
+              '--input-type=frag',
+              '--include=$materialShaderDir',
+              '--include=$shaderLibDir',
+            ],
+            onRun: (_) {
+              fileSystem.file(outputPath).createSync(recursive: true);
+              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+            },
+          ),
+        );
 
-        for (final shader in testShaders) {
-          (globals.processManager as FakeProcessManager).addCommand(
-            FakeCommand(
-              command: <String>[
-                impellerc,
-                '--sksl',
-                '--iplr',
-                '--json',
-                '--sl=${fileSystem.path.join(output.path, 'shaders', shader)}',
-                '--spirv=${fileSystem.path.join(output.path, 'shaders', '$shader.spirv')}',
-                '--input=${fileSystem.path.join(materialDir.path, 'shaders', shader)}',
-                '--input-type=frag',
-                '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
-                '--include=$shaderLibDir',
-              ],
-              onRun: (_) {
-                fileSystem.file(outputPath).createSync(recursive: true);
-                fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-              },
-            ),
-          );
-        }
+        (globals.processManager as FakeProcessManager).addCommand(
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=${fileSystem.path.join(output.path, 'shaders', 'stretch_effect.frag')}',
+              '--spirv=${fileSystem.path.join(output.path, 'shaders', 'stretch_effect.frag.spirv')}',
+              '--input=${fileSystem.path.join(widgetsShaderDir, 'stretch_effect.frag')}',
+              '--input-type=frag',
+              '--include=$widgetsShaderDir',
+              '--include=$shaderLibDir',
+            ],
+            onRun: (_) {
+              fileSystem.file(outputPath).createSync(recursive: true);
+              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+            },
+          ),
+        );
 
         fileSystem.file('pubspec.yaml')
           ..createSync()
@@ -1103,7 +1156,7 @@ flutter:
         expect(
           await bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: TargetPlatform.web_javascript,
+            targetPlatform: const TargetPlatform(.web, .unknown),
           ),
           0,
         );
@@ -1111,7 +1164,7 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
           impellerStatus: ImpellerStatus.disabled,
           processManager: globals.processManager,
           fileSystem: globals.fs,
@@ -1162,7 +1215,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         0,
       );
@@ -1205,7 +1258,7 @@ flutter:
 
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
-        targetPlatform: TargetPlatform.tester,
+        targetPlatform: const TargetPlatform(.tester, .unknown),
       );
 
       expect(
@@ -1262,7 +1315,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         1,
       );
@@ -1297,7 +1350,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         1,
       );
@@ -1342,7 +1395,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         0,
       );
@@ -1384,7 +1437,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         0,
       );
@@ -1434,7 +1487,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         0,
       );
@@ -1476,7 +1529,7 @@ flutter:
         () => bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         ),
         throwsToolExit(
           message:

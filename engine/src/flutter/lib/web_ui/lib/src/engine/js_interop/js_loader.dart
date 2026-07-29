@@ -46,9 +46,10 @@ extension type FlutterEngineInitializer._primary(JSObject _) implements JSObject
     required InitializeEngineFn initializeEngine,
     required ImmediateRunAppFn autoStart,
   }) => FlutterEngineInitializer._(
-    initializeEngine: (([
-      JsFlutterConfiguration? config,
-    ]) => (initializeEngine(config) as Future<JSObject>).toPromise).toJS,
+    initializeEngine:
+        (([JsFlutterConfiguration? config]) =>
+                (initializeEngine(config) as Future<JSObject>).toPromise)
+            .toJS,
     autoStart: (() => (autoStart() as Future<JSObject>).toPromise).toJS,
   );
   external factory FlutterEngineInitializer._({

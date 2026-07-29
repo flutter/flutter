@@ -33,15 +33,18 @@ class WindowsDevice extends DesktopDevice {
   Future<bool> isSupported() async => true;
 
   @override
-  String get name => 'Windows';
+  bool get supportsFlavors => true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => _targetPlatform;
+  String get name => 'Windows';
 
   TargetPlatform get _targetPlatform => switch (_operatingSystemUtils.hostPlatform) {
-    HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
-    _ => TargetPlatform.windows_x64,
+    HostPlatform.windows_arm64 => const TargetPlatform(.windows, .arm64),
+    _ => const TargetPlatform(.windows, .x64),
   };
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -64,7 +67,7 @@ class WindowsDevice extends DesktopDevice {
 
   @override
   String executablePathForDevice(covariant WindowsApp package, BuildInfo buildInfo) {
-    return package.executable(buildInfo.mode, _targetPlatform);
+    return package.executable(buildInfo.mode, _targetPlatform, buildInfo.flavor);
   }
 }
 

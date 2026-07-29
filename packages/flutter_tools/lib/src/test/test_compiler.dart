@@ -120,6 +120,7 @@ class TestCompiler {
                fileSystem: globals.fs,
                trackWidgetCreation: buildInfo.trackWidgetCreation,
                dartDefines: buildInfo.dartDefines,
+               targetModel: TargetModel.flutter,
                extraFrontEndOptions: buildInfo.extraFrontEndOptions,
              ),
            ),
@@ -200,7 +201,7 @@ class TestCompiler {
       fileSystem: globals.fs,
       shutdownHooks: globals.shutdownHooks,
       config: globals.config,
-      targetPlatform: .tester,
+      targetPlatform: const TargetPlatform(.tester, .unknown),
     );
     return residentCompiler;
   }

@@ -844,9 +844,9 @@ flutter:
         testUsingContext(
           platform,
           () async {
-            final TargetPlatform targetPlatform = platform == 'android'
-                ? TargetPlatform.ios
-                : TargetPlatform.android;
+            final targetPlatform = platform == 'android'
+                ? const TargetPlatform(.ios, .arm64)
+                : const TargetPlatform(.android, .unknown);
             final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
 
             expect(
@@ -978,11 +978,12 @@ flutter:
         userMessages: UserMessages(),
       );
 
+      final processManager = FakeProcessManager.list(
+        List<FakeCommand>.filled(assetsToTransform, transformerCommand, growable: true),
+      );
       final environment = Environment.test(
         fileSystem.currentDirectory,
-        processManager: FakeProcessManager.list(
-          List<FakeCommand>.filled(assetsToTransform, transformerCommand, growable: true),
-        ),
+        processManager: processManager,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: logger,
@@ -1023,8 +1024,9 @@ flutter:
       markTransformDone.complete();
       await waitFor;
 
-      expect(inputFilePaths.toSet(), hasLength(4));
-      expect(outputFilePaths.toSet(), hasLength(4));
+      expect(inputFilePaths, hasLength(5));
+      expect(outputFilePaths, hasLength(5));
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       Platform: () => FakePlatform(numberOfProcessors: 4),

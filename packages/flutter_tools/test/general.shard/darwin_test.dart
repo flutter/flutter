@@ -14,8 +14,8 @@ import '../src/context.dart';
 void main() {
   group('FlutterDarwinPlatform', () {
     group('iOS', () {
-      testWithoutContext('deployment target is 13.0', () {
-        expect(FlutterDarwinPlatform.ios.deploymentTarget().toString(), '13.0');
+      testWithoutContext('deployment target is 15.0', () {
+        expect(FlutterDarwinPlatform.ios.deploymentTarget().toString(), '15.0');
       });
       testWithoutContext('debug artifactName', () {
         expect(FlutterDarwinPlatform.ios.artifactName(BuildMode.debug), 'ios');
@@ -28,10 +28,13 @@ void main() {
       });
       testWithoutContext('fromTargetPlatform', () {
         expect(
-          FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.ios),
+          FlutterDarwinPlatform.fromTargetPlatform(const TargetPlatform(.ios, .arm64)),
           FlutterDarwinPlatform.ios,
         );
-        expect(FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.android), null);
+        expect(
+          FlutterDarwinPlatform.fromTargetPlatform(const TargetPlatform(.android, .unknown)),
+          null,
+        );
       });
       testWithoutContext('fromName', () {
         expect(FlutterDarwinPlatform.fromName('ios'), FlutterDarwinPlatform.ios);
@@ -40,8 +43,8 @@ void main() {
       });
     });
     group('macOS', () {
-      testWithoutContext('deployment target is 10.15', () {
-        expect(FlutterDarwinPlatform.macos.deploymentTarget().toString(), '10.15');
+      testWithoutContext('deployment target is 12.0', () {
+        expect(FlutterDarwinPlatform.macos.deploymentTarget().toString(), '12.0');
       });
 
       testWithoutContext('debug artifactName', () {
@@ -55,10 +58,13 @@ void main() {
       });
       testWithoutContext('fromTargetPlatform', () {
         expect(
-          FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.darwin),
+          FlutterDarwinPlatform.fromTargetPlatform(const TargetPlatform(.macos, .x64)),
           FlutterDarwinPlatform.macos,
         );
-        expect(FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.android), null);
+        expect(
+          FlutterDarwinPlatform.fromTargetPlatform(const TargetPlatform(.android, .unknown)),
+          null,
+        );
       });
       testWithoutContext('fromName', () {
         expect(FlutterDarwinPlatform.fromName('macos'), FlutterDarwinPlatform.macos);

@@ -17,7 +17,7 @@ class SkwasmRenderer extends Renderer {
   bool get isWimp => false;
 
   @override
-  DisposablePathConstructors get pathConstructors =>
+  BackendPathConstructors get pathConstructors =>
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override

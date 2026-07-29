@@ -54,6 +54,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required bool stayResident,
     required FlutterProject flutterProject,
     required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     UrlTunneller? urlTunneller,
     required Logger logger,
     required Terminal terminal,
@@ -70,6 +71,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       target: target,
       flutterProject: flutterProject,
       debuggingOptions: debuggingOptions,
+      platformArgs: platformArgs,
       stayResident: stayResident,
       urlTunneller: urlTunneller,
       machine: machine,
@@ -101,6 +103,7 @@ class ResidentWebRunner extends ResidentRunner {
     super.projectRootPath,
     required this.flutterProject,
     required super.debuggingOptions,
+    this.platformArgs = const <String, Object?>{},
     required FileSystem fileSystem,
     required Logger logger,
     required Terminal terminal,
@@ -136,6 +139,7 @@ class ResidentWebRunner extends ResidentRunner {
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
   final Map<String, String> _webDefines;
+  final Map<String, Object?> platformArgs;
 
   @override
   Logger get logger => _logger;
@@ -259,7 +263,7 @@ class ResidentWebRunner extends ResidentRunner {
   }) async {
     final ApplicationPackage? package = await ApplicationPackageFactory.instance!
         .getPackageForPlatform(
-          TargetPlatform.web_javascript,
+          const TargetPlatform(.web, .unknown),
           buildInfo: debuggingOptions.buildInfo,
         );
     if (package == null) {
@@ -287,6 +291,10 @@ class ResidentWebRunner extends ResidentRunner {
             debuggingOptions.webEnableExpressionEvaluation
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: _fileSystem)
             : null;
+
+        flutterDevice!.developmentShaderCompiler.configureCompiler(
+          const TargetPlatform(.web, .unknown),
+        );
 
         flutterDevice!.devFS = WebDevFS(
           webDevServerConfig: updatedConfig,
@@ -363,7 +371,7 @@ class ResidentWebRunner extends ResidentRunner {
           package,
           mainPath: target,
           debuggingOptions: debuggingOptions,
-          platformArgs: <String, Object>{'uri': url.toString()},
+          platformArgs: <String, Object?>{...platformArgs, 'uri': url.toString()},
         );
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
@@ -455,7 +463,7 @@ class ResidentWebRunner extends ResidentRunner {
       status = _logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
     }
 
-    final String targetPlatform = TargetPlatform.web_javascript.getName();
+    final String targetPlatform = const TargetPlatform(.web, .unknown).getName();
     final String sdkName = await flutterDevice!.device!.sdkNameAndVersion;
 
     // Will be null if there is no report.
@@ -508,7 +516,7 @@ class ResidentWebRunner extends ResidentRunner {
       }
     }
 
-    if (_connectionResult == null) {
+    if (supportsServiceProtocol && _connectionResult == null) {
       return _handleNoClientsAvailable(status);
     }
 
@@ -585,6 +593,7 @@ class ResidentWebRunner extends ResidentRunner {
             }
             return OperationResult(1, reloadFailedMessage);
           }
+          await evictDirtyAssets();
           String? failedReassemble;
           final DateTime reassembleStart = _systemClock.now();
           await _vmService
@@ -743,12 +752,12 @@ class ResidentWebRunner extends ResidentRunner {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
         flutterHookResult: await dartBuilder?.runHooks(
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
           environment: environment,
           logger: _logger,
         ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-        targetPlatform: TargetPlatform.web_javascript,
+        targetPlatform: const TargetPlatform(.web, .unknown),
       );
       if (result != 0) {
         return UpdateFSReport();

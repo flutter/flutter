@@ -41,6 +41,9 @@ abstract class WebDevice extends Device {
   Uri? _devToolsUri;
 
   set devToolsUri(Uri? uri) => _devToolsUri = uri;
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.unknown;
 }
 
 /// A web device that supports a chromium browser.
@@ -163,9 +166,6 @@ abstract class ChromiumDevice extends WebDevice {
     await future;
     return true;
   }
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => true;
@@ -465,9 +465,6 @@ class WebServerDevice extends WebDevice {
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     return true;
   }
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {

@@ -35,17 +35,13 @@ class LinuxDevice extends DesktopDevice {
   Future<bool> isSupported() async => true;
 
   @override
+  bool get supportsFlavors => true;
+
+  @override
   String get name => 'Linux';
 
   @override
-  late final Future<TargetPlatform> targetPlatform = () async {
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
-      return TargetPlatform.linux_x64;
-    } else if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_riscv64) {
-      return TargetPlatform.linux_riscv64;
-    }
-    return TargetPlatform.linux_arm64;
-  }();
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -69,7 +65,7 @@ class LinuxDevice extends DesktopDevice {
 
   @override
   String executablePathForDevice(covariant LinuxApp package, BuildInfo buildInfo) {
-    return package.executable(buildInfo.mode);
+    return package.executable(buildInfo.mode, buildInfo.flavor);
   }
 }
 

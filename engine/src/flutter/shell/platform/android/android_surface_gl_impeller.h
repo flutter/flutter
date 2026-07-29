@@ -81,6 +81,7 @@ class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
   fml::RefPtr<AndroidNativeWindow> native_window_;
 
   bool is_valid_ = false;
+  std::optional<bool> should_clear_context_between_frames_;
 
   bool OnGLContextMakeCurrent();
 

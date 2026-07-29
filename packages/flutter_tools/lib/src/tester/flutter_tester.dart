@@ -94,7 +94,10 @@ class FlutterTesterDevice extends Device {
   bool get supportsFlavors => true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.tester, .unknown);
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.unknown;
 
   @override
   void clearLogs() {}
@@ -149,7 +152,7 @@ class FlutterTesterDevice extends Device {
       buildInfo: buildInfo,
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      platform: TargetPlatform.tester,
+      platform: const TargetPlatform(.tester, .unknown),
       assetDirPath: assetDirectory.path,
     );
 
@@ -162,6 +165,7 @@ class FlutterTesterDevice extends Device {
       '--flutter-assets-dir=${assetDirectory.path}',
       if (debuggingOptions.startPaused) '--start-paused',
       if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (debuggingOptions.disableServiceOriginCheck) '--disable-service-origin-check',
       if (debuggingOptions.hostVmServicePort != null)
         '--vm-service-port=${debuggingOptions.hostVmServicePort}',
       applicationKernelFilePath,

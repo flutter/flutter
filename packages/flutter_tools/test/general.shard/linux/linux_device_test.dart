@@ -31,7 +31,7 @@ void main() {
     );
 
     final linuxApp = PrebuiltLinuxApp(executable: 'foo');
-    expect(await device.targetPlatform, TargetPlatform.linux_x64);
+    expect(await device.targetPlatform, const TargetPlatform(.linux, .x64));
     expect(device.name, 'Linux');
     expect(await device.installApp(linuxApp), true);
     expect(await device.uninstallApp(linuxApp), true);
@@ -53,7 +53,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
     );
-    expect(await deviceArm64Host.targetPlatform, TargetPlatform.linux_arm64);
+    expect(await deviceArm64Host.targetPlatform, const TargetPlatform(.linux, .arm64));
   });
 
   testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
@@ -186,7 +186,7 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeLinuxApp extends Fake implements LinuxApp {
   @override
-  String executable(BuildMode buildMode) => switch (buildMode) {
+  String executable(BuildMode buildMode, [String? flavor]) => switch (buildMode) {
     BuildMode.debug => 'debug/executable',
     BuildMode.profile => 'profile/executable',
     BuildMode.release => 'release/executable',

@@ -37,8 +37,8 @@ void main() {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <Pattern>[
-          'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-          'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+          'Artifact.engineDartAotRuntime.web-javascript',
+          'Artifact.frontendServerSnapshotForEngineDartSdk.web-javascript',
           '--sdk-root',
           'HostArtifact.flutterWebSdk/',
           '--incremental',
@@ -60,7 +60,7 @@ void main() {
           '--filesystem-scheme',
           'org-dartlang-app',
           '--initialize-from-dill',
-          'build/cache.dill',
+          'build/471e67e273aac2e3e05542afef95ef7f.cache.dill',
           '--platform',
           'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
           '--verbosity=error',
@@ -118,7 +118,7 @@ void main() {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <Pattern>[
-          'Artifact.engineDartBinary.TargetPlatform.web_javascript',
+          'Artifact.engineDartBinary.web-javascript',
           'compile',
           'wasm',
           '--packages=.dart_tool/package_config.json',

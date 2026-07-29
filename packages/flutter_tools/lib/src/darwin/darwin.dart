@@ -18,7 +18,7 @@ import '../project.dart';
 enum FlutterDarwinPlatform {
   ios(
     binaryName: 'Flutter',
-    targetPlatform: TargetPlatform.ios,
+    targetPlatform: TargetPlatform(.ios, .arm64),
     swiftPackagePlatform: SwiftPackagePlatform.ios,
     artifactName: 'ios',
     artifactZip: 'artifacts.zip',
@@ -27,7 +27,7 @@ enum FlutterDarwinPlatform {
   ),
   macos(
     binaryName: 'FlutterMacOS',
-    targetPlatform: TargetPlatform.darwin,
+    targetPlatform: TargetPlatform(.macos, .x64),
     swiftPackagePlatform: SwiftPackagePlatform.macos,
     artifactName: 'darwin-x64',
     artifactZip: 'framework.zip',
@@ -76,8 +76,8 @@ enum FlutterDarwinPlatform {
   /// Minimum supported version for the platform.
   Version deploymentTarget() {
     return switch (this) {
-      ios => Version(13, 0, null),
-      macos => Version(10, 15, null),
+      ios => Version(15, 0, null),
+      macos => Version(12, 0, null),
     };
   }
 
@@ -110,7 +110,10 @@ enum FlutterDarwinPlatform {
   /// Returns corresponding [FlutterDarwinPlatform] for the [targetPlatform].
   static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {
     for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
-      if (targetPlatform == darwinPlatform.targetPlatform) {
+      // Match on the platform type (family) only. A [FlutterDarwinPlatform]
+      // describes an OS (iOS or macOS) and is architecture-agnostic, whereas
+      // [TargetPlatform] equality also considers the CPU architecture.
+      if (targetPlatform.type == darwinPlatform.targetPlatform.type) {
         return darwinPlatform;
       }
     }
