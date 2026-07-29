@@ -245,7 +245,7 @@ bool RenderPass::Draw(size_t element_count,
     // pipeline in the backend.
     return false;
   }
-  render_pass_->SetPipeline(impeller::PipelineRef(std::move(pipeline)));
+  render_pass_->SetPipeline(impeller::PipelineRef(pipeline));
 
   for (const auto& [_, buffer] : vertex_uniform_bindings) {
     render_pass_->BindDynamicResource(
