@@ -140,7 +140,8 @@ runs:
       - name: Setup PUB_CACHE environment variable
         shell: bash
         run: |
-          echo "PUB_CACHE=/opt/pub-cache" >> $GITHUB_ENV
+          mkdir -p "$RUNNER_TEMP/pub-cache"
+          echo "PUB_CACHE=$RUNNER_TEMP/pub-cache" >> "$GITHUB_ENV"
 
       # Get the Flutter revision. This is the key for the cache for artifacts
       # under bin/cache
@@ -169,7 +170,7 @@ runs:
         id: pub-cache
         with:
           path: |
-            /opt/pub-cache
+            ${{ runner.temp }}/pub-cache
             ${{ github.workspace }}/**/.dart_tool
             ${{ github.workspace }}/**/pubspec.lock
           key: ${{ runner.os }}-pub-${{ steps.pub-deps-hash.outputs.revision }}

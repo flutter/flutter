@@ -6,7 +6,7 @@ import InternalFlutterSwift
 import Testing
 
 @MainActor
-struct LaunchEngineTest {
+struct LaunchEngineTests {
 
   /// Verifies that the engine is lazily created on first access, cached on subsequent accesses, and
   /// successfully transferred when taken, leaving the container empty.
