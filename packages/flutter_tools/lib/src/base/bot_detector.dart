@@ -107,27 +107,17 @@ class AzureDetector {
           .timeout(requestTimeout);
       request.headers.add('Metadata', true);
       await request.close();
-    } on SocketException {
-      // If there is an error on the socket, it probably means that we are not
-      // running on Azure.
-      return _isRunningOnAzure = false;
     } on HttpException {
-      // If the connection gets set up, but encounters an error condition, it
-      // still means we're on Azure.
+      // The connection was established but an HTTP error occurred.
+      // This still indicates we're running on Azure.
       return _isRunningOnAzure = true;
-    } on TimeoutException {
-      // The HttpClient connected to a host, but it did not respond in a timely
-      // fashion. Assume we are not on a bot.
-      return _isRunningOnAzure = false;
-    } on OSError {
-      // The HttpClient might be running in a WSL1 environment.
-      return _isRunningOnAzure = false;
-    } on Object {
-      // Metadata detection is best-effort. Unexpected failures (for example,
-      // malformed redirect URIs injected by transparent proxies) should not
-      // prevent Flutter from starting.
+    } catch (e) {
+      // Metadata detection is best-effort. Any other failure (socket errors,
+      // timeouts, malformed redirect URIs, WSL1 networking issues, etc.)
+      // should not prevent Flutter from starting.
       return _isRunningOnAzure = false;
     }
+
     // We got a response. We're running on Azure.
     return _isRunningOnAzure = true;
   }
