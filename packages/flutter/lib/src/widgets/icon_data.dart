@@ -10,7 +10,6 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 /// A description of an icon fulfilled by a font glyph.
 ///
