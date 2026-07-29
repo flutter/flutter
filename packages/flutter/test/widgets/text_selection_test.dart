@@ -2162,7 +2162,7 @@ void main() {
     testWidgets(
       'Android selection handles match endpoint direction: ${testCase.description}',
       (WidgetTester tester) async {
-        final customControls = DirectionalitySpyTextSelectionControls();
+        final customControls = _DirectionalitySpyTextSelectionControls();
         final controller = TextEditingController(text: testCase.text);
         final focusNode = FocusNode();
         addTearDown(controller.dispose);
@@ -2216,7 +2216,7 @@ void main() {
   testWidgets(
     'selection handles use text direction for mixed-directionality text on iOS',
     (WidgetTester tester) async {
-      final customControls = DirectionalitySpyTextSelectionControls();
+      final customControls = _DirectionalitySpyTextSelectionControls();
       final controller = TextEditingController(text: 'abc مرحبا');
       addTearDown(controller.dispose);
       final focusNode = FocusNode();
@@ -2544,7 +2544,7 @@ class _MockTextSelectionHandleControls extends TextSelectionControls
   }
 }
 
-class DirectionalitySpyTextSelectionControls extends TextSelectionControls {
+class _DirectionalitySpyTextSelectionControls extends TextSelectionControls {
   final List<TextSelectionHandleType> builtHandleTypes = <TextSelectionHandleType>[];
 
   void clearBuiltHandleTypes() {
