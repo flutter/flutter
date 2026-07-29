@@ -1075,16 +1075,16 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     };
 
     var bandColorIndex = 0;
+    final paint = Paint();
     for (var dx = 0; dx < shadowWidth; dx += 1) {
       if (dx ~/ bandWidth != bandColorIndex) {
         bandColorIndex += 1;
       }
-      final paint = Paint()
-        ..color = Color.lerp(
-          colors[bandColorIndex],
-          colors[bandColorIndex + 1],
-          (dx % bandWidth) / bandWidth,
-        )!;
+      paint.color = Color.lerp(
+        colors[bandColorIndex],
+        colors[bandColorIndex + 1],
+        (dx % bandWidth) / bandWidth,
+      )!;
       final double x = start + shadowDirection * dx;
       canvas.drawRect(Rect.fromLTWH(x - 1.0, offset.dy, 1.0, shadowHeight), paint);
     }
