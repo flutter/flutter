@@ -367,6 +367,21 @@ bool FlutterDesktopPluginRegistrarGetGraphicsAdapter(
       HandleForEngine(registrar->engine), adapter_out);
 }
 
+bool FlutterDesktopPluginRegistrarIsPlatformThread(
+    FlutterDesktopPluginRegistrarRef registrar) {
+  return FlutterDesktopEngineIsPlatformThread(
+      HandleForEngine(registrar->engine));
+}
+
+void FlutterDesktopPluginRegistrarPostPlatformThreadTask(
+    FlutterDesktopPluginRegistrarRef registrar,
+    VoidCallback callback,
+    VoidCallback on_cancel,
+    void* user_data) {
+  FlutterDesktopEnginePostPlatformThreadTask(
+      HandleForEngine(registrar->engine), callback, on_cancel, user_data);
+}
+
 UINT FlutterDesktopGetDpiForHWND(HWND hwnd) {
   return flutter::GetDpiForHWND(hwnd);
 }
