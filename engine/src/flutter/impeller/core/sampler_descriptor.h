@@ -26,6 +26,14 @@ struct SamplerDescriptor final {
   /// filtering only applies when all filters are linear.
   uint8_t max_anisotropy = 1;
 
+  /// When true, the Adreno broken-mipmap workaround does not clamp this sampler
+  /// to the base mip level. Set for textures whose mip levels were uploaded by
+  /// hand rather than produced by the corrupt `GenerateMipmap` blit, so they
+  /// keep their requested mip filtering. Not part of `ToKey`: the workaround
+  /// rewrites `mip_filter` before the key is computed, which already
+  /// distinguishes clamped from unclamped samplers.
+  bool allow_manual_mip_sampling = false;
+
   std::string_view label = "NN Clamp Sampler";
 
   SamplerDescriptor();

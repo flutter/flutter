@@ -26,7 +26,10 @@ void SamplerLibraryVK::ApplyWorkarounds(const WorkaroundsVK& workarounds) {
 raw_ptr<const Sampler> SamplerLibraryVK::GetSampler(
     const SamplerDescriptor& desc) {
   SamplerDescriptor desc_copy = desc;
-  if (mips_disabled_workaround_) {
+  // The workaround exists because blit-generated mip chains are corrupt on
+  // Adreno. Textures whose mips were uploaded by hand are unaffected, so honor
+  // their requested mip filtering instead of collapsing to the base level.
+  if (mips_disabled_workaround_ && !desc_copy.allow_manual_mip_sampling) {
     desc_copy.mip_filter = MipFilter::kBase;
   }
   // Clamp to the device limit before keying the cache so that all values

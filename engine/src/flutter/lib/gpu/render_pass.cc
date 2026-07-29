@@ -580,6 +580,12 @@ static bool BindTextureBinding(
   impeller::SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = flutter::gpu::ToImpellerMinMagFilter(min_filter);
   sampler_desc.mag_filter = flutter::gpu::ToImpellerMinMagFilter(mag_filter);
+  // A texture whose mip levels were uploaded by hand (mip_count > 1 and never
+  // produced by GenerateMipmap) has a valid mip chain even on drivers where
+  // blit-based generation is broken, so let it keep its requested mip filtering
+  // instead of being clamped to the base level by the Adreno workaround.
+  sampler_desc.allow_manual_mip_sampling =
+      texture->GetTexture()->NeedsMipmapGeneration();
   sampler_desc.mip_filter = flutter::gpu::ToImpellerMipFilter(mip_filter);
   sampler_desc.width_address_mode =
       flutter::gpu::ToImpellerSamplerAddressMode(width_address_mode);
