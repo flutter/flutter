@@ -22,8 +22,15 @@ class MenuBarUseCase extends UseCase {
   Widget build(BuildContext context) => const _MainWidget();
 }
 
-class _MainWidget extends StatelessWidget {
+class _MainWidget extends StatefulWidget {
   const _MainWidget();
+
+  @override
+  State<_MainWidget> createState() => _MainWidgetState();
+}
+
+class _MainWidgetState extends State<_MainWidget> {
+  String _lastSelection = 'None';
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +39,7 @@ class _MainWidget extends StatelessWidget {
       appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: ListView(
         children: <Widget>[
+          Semantics(liveRegion: true, child: Text('Last Selection: $_lastSelection')),
           Semantics(
             label: 'Enabled menu bar',
             child: MenuBar(
@@ -39,12 +47,64 @@ class _MainWidget extends StatelessWidget {
               children: <Widget>[
                 SubmenuButton(
                   menuChildren: <Widget>[
-                    MenuItemButton(onPressed: () {}, child: const Text('Save')),
+                    MenuItemButton(
+                      onPressed: () {
+                        if (!mounted) {
+                          return;
+                        }
+                        setState(() {
+                          _lastSelection = 'Save';
+                        });
+                      },
+                      child: const Text('Save'),
+                    ),
                     const MenuItemButton(child: Text('Disabled Item')),
                   ],
                   child: const Text('File'),
                 ),
-                MenuItemButton(onPressed: () {}, child: const Text('Help')),
+                SubmenuButton(
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      onPressed: () {
+                        if (!mounted) {
+                          return;
+                        }
+                        setState(() {
+                          _lastSelection = 'About';
+                        });
+                      },
+                      child: const Text('About'),
+                    ),
+                    SubmenuButton(
+                      menuChildren: <Widget>[
+                        MenuItemButton(
+                          onPressed: () {
+                            if (!mounted) {
+                              return;
+                            }
+                            setState(() {
+                              _lastSelection = 'Documentation';
+                            });
+                          },
+                          child: const Text('Documentation'),
+                        ),
+                        MenuItemButton(
+                          onPressed: () {
+                            if (!mounted) {
+                              return;
+                            }
+                            setState(() {
+                              _lastSelection = 'Send Feedback';
+                            });
+                          },
+                          child: const Text('Send Feedback'),
+                        ),
+                      ],
+                      child: const Text('Online Help'),
+                    ),
+                  ],
+                  child: const Text('Help'),
+                ),
               ],
             ),
           ),

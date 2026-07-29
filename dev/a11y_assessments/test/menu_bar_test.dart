@@ -26,6 +26,30 @@ void main() {
       expect(find.widgetWithText(MenuItemButton, 'Save'), findsWidgets);
       await tester.tap(find.widgetWithText(MenuItemButton, 'Save').last, warnIfMissed: false);
       await tester.pumpAndSettle();
+      expect(find.text('Last Selection: Save'), findsOneWidget);
+
+      await tester.tap(find.text('Help'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('About'), findsOneWidget);
+      expect(find.text('Online Help'), findsOneWidget);
+
+      await tester.tap(find.text('Online Help'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Documentation'), findsOneWidget);
+      await tester.tap(find.text('Documentation'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+      expect(find.text('Last Selection: Documentation'), findsOneWidget);
+      expect(
+        find.ancestor(
+          of: find.text('Last Selection: Documentation'),
+          matching: find.byWidgetPredicate(
+            (Widget w) => w is Semantics && w.properties.liveRegion == true,
+          ),
+        ),
+        findsOneWidget,
+      );
     }
 
     // Test the disabled menu bar
