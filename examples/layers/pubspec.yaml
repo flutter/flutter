@@ -10,11 +10,9 @@ dependencies:
     sdk: flutter
   material_ui: ^0.0.2
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
 
 flutter:
   assets:
