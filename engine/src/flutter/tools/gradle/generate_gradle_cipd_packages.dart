@@ -1,6 +1,13 @@
 import 'dart:io';
 
-Future<void> main() async {
+import 'package:args/args.dart';
+
+Future<void> main(List<String> args) async {
+  final parser = ArgParser()
+    ..addFlag('dry-run', negatable: false, help: 'Print out the cipd commands without executing them.');
+  final argResults = parser.parse(args);
+  final dryRun = argResults['dry-run'] as bool;
+
   // Define the list of versions to create in the format <version>-<distributionType>
   // This should be the list of gradle versions found in all
   // gradle-wrapper.properties files underneath the /dev folder (these
@@ -28,7 +35,9 @@ Future<void> main() async {
   }
 
   // 1. Create a single reusable staging project for all iterations
-  final stagingProject = await Directory.systemTemp.createTemp('staging_project_');
+  Directory? stagingProject;
+  stagingProject = await Directory.systemTemp.createTemp('staging_project_');
+
   try {
     // 2. Initialize a basic gradle project using the gclient-synced binary
     await _runCommand(gradleExecutable, [
@@ -37,7 +46,7 @@ Future<void> main() async {
       'basic',
       '--dsl',
       'groovy',
-    ], stagingProject.path);
+    ], stagingProject!.path);
     final gradlewExecutable = isWindows ? '.\\gradlew.bat' : './gradlew';
 
     for (final versionStr in versions) {
@@ -70,7 +79,8 @@ Future<void> main() async {
       }
 
       // 4. Create an isolated Gradle home for this specific version download
-      final isolatedGradleHome = await Directory.systemTemp.createTemp('gradle_home_');
+      Directory? isolatedGradleHome = await Directory.systemTemp.createTemp('gradle_home_');
+
       try {
         // 5. Update the staging project to the target version
         await _runCommand(gradlewExecutable, [
@@ -79,42 +89,59 @@ Future<void> main() async {
           version,
           '--distribution-type',
           distType,
-        ], stagingProject.path);
+        ], stagingProject!.path);
 
         // 6. Trigger download into our isolated cache
         await _runCommand(
           gradlewExecutable,
           ['--version'],
           stagingProject.path,
-          environment: {'GRADLE_USER_HOME': isolatedGradleHome.path},
+          environment: {'GRADLE_USER_HOME': isolatedGradleHome!.path},
         );
 
         // 7. Navigate into the dists folder and upload to CIPD
-        final distsDir = Directory('${isolatedGradleHome.path}/wrapper/dists');
+        final distsDirPath = '${isolatedGradleHome!.path}/wrapper/dists';
+        final distsDir = Directory(distsDirPath);
+
+        final cipdYamlContent = '''
+package: $location/$versionStr
+description: Gradle $version $distType distribution
+install_mode: copy
+data:
+- dir: .
+''';
         if (await distsDir.exists()) {
-          // 8. Upload to CIPD
-          await _runCommand('cipd', [
-            'create',
-            '-in', '.',
-            '-name', '$location/$versionStr', // Use versionStr for separated versions!
-            '-install-mode', 'copy',
-            '-tag', 'version:$versionStr',
-            '-ref', 'latest',
-          ], distsDir.path);
-          print('Successfully uploaded $location/$versionStr');
+          // Write the YAML file
+          final yamlFile = File('${distsDir.path}/cipd.yaml');
+          await yamlFile.writeAsString(cipdYamlContent);
+
+          if (dryRun) {
+            print('Working dir: ${distsDir.path}');
+            print('cipd create -in . -name $location/$versionStr -tag "version:$versionStr" -ref latest');
+          } else {
+            // 8. Upload to CIPD
+            await _runCommand('cipd', [
+              'create',
+              '-in', '.',
+              '-name', '$location/$versionStr',
+              '-tag', 'version:$versionStr',
+              '-ref', 'latest',
+            ], distsDir.path);
+            print('Successfully uploaded $location/$versionStr');
+          }
         } else {
           throw Exception('Dists directory not found at ${distsDir.path}');
         }
       } finally {
         // 9. Clean up the isolated Gradle home for this iteration
-        if (await isolatedGradleHome.exists()) {
+        if (isolatedGradleHome != null && await isolatedGradleHome.exists()) {
           await isolatedGradleHome.delete(recursive: true);
         }
       }
     }
   } finally {
     // 10. Clean up the shared staging project when script finishes
-    if (await stagingProject.exists()) {
+    if (stagingProject != null && await stagingProject.exists()) {
       await stagingProject.delete(recursive: true);
     }
   }
