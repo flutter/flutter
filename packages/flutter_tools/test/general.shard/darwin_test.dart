@@ -28,13 +28,10 @@ void main() {
       });
       testWithoutContext('fromTargetPlatform', () {
         expect(
-          FlutterDarwinPlatform.fromTargetPlatform(const TargetPlatform(.ios, .arm64)),
+          FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.ios),
           FlutterDarwinPlatform.ios,
         );
-        expect(
-          FlutterDarwinPlatform.fromTargetPlatform(const TargetPlatform(.android, .unknown)),
-          null,
-        );
+        expect(FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.android), null);
       });
       testWithoutContext('fromName', () {
         expect(FlutterDarwinPlatform.fromName('ios'), FlutterDarwinPlatform.ios);
@@ -58,13 +55,10 @@ void main() {
       });
       testWithoutContext('fromTargetPlatform', () {
         expect(
-          FlutterDarwinPlatform.fromTargetPlatform(const TargetPlatform(.macos, .x64)),
+          FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.darwin),
           FlutterDarwinPlatform.macos,
         );
-        expect(
-          FlutterDarwinPlatform.fromTargetPlatform(const TargetPlatform(.android, .unknown)),
-          null,
-        );
+        expect(FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.android), null);
       });
       testWithoutContext('fromName', () {
         expect(FlutterDarwinPlatform.fromName('macos'), FlutterDarwinPlatform.macos);

@@ -83,7 +83,7 @@ name: my_app
           fakeFlutterVersion: FakeFlutterVersion(),
         );
         commandArgs = [
-          'Artifact.engineDartBinary.web-javascript',
+          'Artifact.engineDartBinary.TargetPlatform.web_javascript',
           'compile',
           'wasm',
           '--packages=/.dart_tool/package_config.json',

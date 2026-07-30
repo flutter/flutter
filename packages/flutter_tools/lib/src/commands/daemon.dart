@@ -468,11 +468,7 @@ class DaemonDomain extends Domain {
       void handlePlatformType(PlatformType platform) {
         final reasons = <Map<String, Object>>[];
         switch (platform) {
-          case .tester:
-          case .unsupported:
-            // Not user-facing project platforms.
-            return;
-          case .linux:
+          case PlatformType.linux:
             if (!featureFlags.isLinuxEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Linux feature is not enabled',
@@ -487,7 +483,7 @@ class DaemonDomain extends Domain {
                 'fixCode': _ReasonCode.create.name,
               });
             }
-          case .macos:
+          case PlatformType.macos:
             if (!featureFlags.isMacOSEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the macOS feature is not enabled',
@@ -502,7 +498,7 @@ class DaemonDomain extends Domain {
                 'fixCode': _ReasonCode.create.name,
               });
             }
-          case .windows:
+          case PlatformType.windows:
             if (!featureFlags.isWindowsEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Windows feature is not enabled',
@@ -518,7 +514,7 @@ class DaemonDomain extends Domain {
                 'fixCode': _ReasonCode.create.name,
               });
             }
-          case .ios:
+          case PlatformType.ios:
             if (!featureFlags.isIOSEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the iOS feature is not enabled',
@@ -533,7 +529,7 @@ class DaemonDomain extends Domain {
                 'fixCode': _ReasonCode.create.name,
               });
             }
-          case .android:
+          case PlatformType.android:
             if (!featureFlags.isAndroidEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Android feature is not enabled',
@@ -549,7 +545,7 @@ class DaemonDomain extends Domain {
                 'fixCode': _ReasonCode.create.name,
               });
             }
-          case .web:
+          case PlatformType.web:
             if (!featureFlags.isWebEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Web feature is not enabled',
@@ -564,7 +560,7 @@ class DaemonDomain extends Domain {
                 'fixCode': _ReasonCode.create.name,
               });
             }
-          case .fuchsia:
+          case PlatformType.fuchsia:
             if (!featureFlags.isFuchsiaEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Fuchsia feature is not enabled',
@@ -580,7 +576,7 @@ class DaemonDomain extends Domain {
                 'fixCode': _ReasonCode.create.name,
               });
             }
-          case .custom:
+          case PlatformType.custom:
             if (!featureFlags.areCustomDevicesEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the custom devices feature is not enabled',
@@ -701,7 +697,7 @@ class AppDomain extends Domain {
 
     ResidentRunner runner;
 
-    if ((await device.targetPlatform).type == .web) {
+    if (await device.targetPlatform == TargetPlatform.web_javascript) {
       runner = webRunnerFactory!.createWebRunner(
         flutterDevice,
         flutterProject: flutterProject,
@@ -1420,7 +1416,7 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
   return <String, Object?>{
     'id': device.id,
     'name': device.displayName,
-    'platform': (await device.targetPlatform).devicePlatformName,
+    'platform': (await device.targetPlatform).getName(),
     'emulator': await device.isLocalEmulator,
     'category': device.category?.toString(),
     'platformType': device.platformType?.toString(),

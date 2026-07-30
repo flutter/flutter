@@ -1882,7 +1882,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<String> get targetPlatformDisplayName async => 'android';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.android, .armv7);
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
   DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
@@ -1996,7 +1996,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   String get displayName => name;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.ios, .arm64);
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
   final PlatformType platformType = PlatformType.ios;
@@ -2075,7 +2075,7 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
   bool get ephemeral => true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.ios, .arm64);
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
   final PlatformType platformType = PlatformType.ios;

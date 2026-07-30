@@ -32,9 +32,9 @@ void main() {
       outputPath: tmpDir.childFile('test_shader.frag.out').path,
       targetPlatform: targetSkslOnly
           // web_javascript compiles to sksl only.
-          ? const TargetPlatform(.web, .unknown)
+          ? TargetPlatform.web_javascript
           // tester compiles to sksl and runtime-stage-vulkan
-          : const TargetPlatform(.tester, .unknown),
+          : TargetPlatform.tester,
     );
   }
 
@@ -66,7 +66,7 @@ void main() {
     final bool compileResult = await shaderCompiler.compileShader(
       input: globals.fs.file(inkSparklePath),
       outputPath: inkSparkleOutputPath,
-      targetPlatform: const TargetPlatform(.tester, .unknown),
+      targetPlatform: TargetPlatform.tester,
     );
     final File resultFile = globals.fs.file(inkSparkleOutputPath);
 
