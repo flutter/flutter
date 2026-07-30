@@ -107,7 +107,10 @@ class CkColorFilterImageFilter extends CkImageFilter {
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    final SkImageFilter skImageFilter = colorFilter.initRawImageFilter();
+    final SkImageFilter skImageFilter = canvasKit.ImageFilter.MakeColorFilter(
+      colorFilter.skiaObject,
+      null,
+    );
     borrow(skImageFilter);
     skImageFilter.delete();
   }

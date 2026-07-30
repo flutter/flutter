@@ -171,6 +171,9 @@ abstract class Renderer {
     required ui.ImageFilter inner,
   });
 
+  BackendColorFilter createColorFilter(EngineColorFilter filter);
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter);
+
   Future<ui.Codec> instantiateImageCodec(
     Uint8List list, {
     int? targetWidth,

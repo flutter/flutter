@@ -115,6 +115,12 @@ class SkwasmRenderer extends Renderer {
   ui.Paint createPaint() => SkwasmPaint();
 
   @override
+  BackendColorFilter createColorFilter(EngineColorFilter filter) => SkwasmColorFilter(filter);
+
+  @override
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter) => SkwasmMaskFilter(filter);
+
+  @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
       SkwasmParagraphBuilder(style as SkwasmParagraphStyle, fontCollection);
 

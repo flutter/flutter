@@ -473,24 +473,11 @@ enum BlurStyle {
   inner,
 }
 
-class MaskFilter {
-  const MaskFilter.blur(this._style, this._sigma);
+abstract class MaskFilter {
+  const factory MaskFilter.blur(BlurStyle style, double sigma) = engine.EngineMaskFilter.blur;
 
-  final BlurStyle _style;
-  final double _sigma;
-  double get webOnlySigma => _sigma;
-  BlurStyle get webOnlyBlurStyle => _style;
-
-  @override
-  bool operator ==(Object other) {
-    return other is MaskFilter && other._style == _style && other._sigma == _sigma;
-  }
-
-  @override
-  int get hashCode => Object.hash(_style, _sigma);
-
-  @override
-  String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
+  double get webOnlySigma;
+  BlurStyle get webOnlyBlurStyle;
 }
 
 abstract class _ColorTransform {

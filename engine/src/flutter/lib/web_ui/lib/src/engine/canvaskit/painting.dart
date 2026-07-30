@@ -7,7 +7,8 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../color_filter.dart';
+import '../primitives/color_filter.dart';
+import '../primitives/mask_filter.dart';
 import '../shader_data.dart';
 import '../vector_math.dart';
 import 'canvaskit_api.dart';
@@ -40,7 +41,7 @@ class CkPaint implements ui.Paint {
     skPaint.setColorInt(_colorValue);
     skPaint.setStrokeMiter(strokeMiterLimit);
 
-    final ManagedSkColorFilter? effectiveColorFilter = _effectiveColorFilter;
+    final CkColorFilter? effectiveColorFilter = _effectiveColorFilter;
     if (effectiveColorFilter != null) {
       skPaint.setColorFilter(effectiveColorFilter.skiaObject);
     }
@@ -53,13 +54,12 @@ class CkPaint implements ui.Paint {
       }
     }
 
-    final ui.MaskFilter? localMaskFilter = maskFilter;
+    final localMaskFilter = maskFilter as EngineMaskFilter?;
     if (localMaskFilter != null) {
       // CanvasKit returns `null` if the sigma is `0` or infinite.
       if (localMaskFilter.webOnlySigma.isFinite && localMaskFilter.webOnlySigma > 0) {
-        skPaint.setMaskFilter(
-          createBlurSkMaskFilter(localMaskFilter.webOnlyBlurStyle, localMaskFilter.webOnlySigma),
-        );
+        final backendFilter = localMaskFilter.backendFilter as CkMaskFilter;
+        skPaint.setMaskFilter(backendFilter.skiaObject);
       }
     }
 
@@ -114,10 +114,13 @@ class CkPaint implements ui.Paint {
     } else {
       _originalColorFilter = _effectiveColorFilter;
       if (_effectiveColorFilter == null) {
-        _effectiveColorFilter = _invertColorFilter;
+        _effectiveColorFilter = EngineColorFilter.invert.backendFilter as CkColorFilter;
       } else {
-        _effectiveColorFilter = ManagedSkColorFilter(
-          CkComposeColorFilter(_invertColorFilter, _effectiveColorFilter!),
+        _effectiveColorFilter = CkColorFilter.fromSkColorFilter(
+          canvasKit.ColorFilter.MakeCompose(
+            (EngineColorFilter.invert.backendFilter as CkColorFilter).skiaObject,
+            _effectiveColorFilter!.skiaObject,
+          ),
         );
       }
     }
@@ -128,7 +131,7 @@ class CkPaint implements ui.Paint {
   // The original color filter before we inverted colors. If we set
   // `invertColors` back to `false`, then restore this filter rather than
   // invert the color filter again.
-  ManagedSkColorFilter? _originalColorFilter;
+  CkColorFilter? _originalColorFilter;
 
   @override
   ui.Shader? get shader => _shader;
@@ -161,17 +164,19 @@ class CkPaint implements ui.Paint {
     if (value == null) {
       _effectiveColorFilter = null;
     } else {
-      final CkColorFilter ckColorFilter = createCkColorFilter(value)!;
-      _effectiveColorFilter = ManagedSkColorFilter(ckColorFilter);
+      _effectiveColorFilter = _engineColorFilter!.backendFilter as CkColorFilter;
     }
 
     if (invertColors) {
       _originalColorFilter = _effectiveColorFilter;
       if (_effectiveColorFilter == null) {
-        _effectiveColorFilter = _invertColorFilter;
+        _effectiveColorFilter = EngineColorFilter.invert.backendFilter as CkColorFilter;
       } else {
-        _effectiveColorFilter = ManagedSkColorFilter(
-          CkComposeColorFilter(_invertColorFilter, _effectiveColorFilter!),
+        _effectiveColorFilter = CkColorFilter.fromSkColorFilter(
+          canvasKit.ColorFilter.MakeCompose(
+            (EngineColorFilter.invert.backendFilter as CkColorFilter).skiaObject,
+            _effectiveColorFilter!.skiaObject,
+          ),
         );
       }
     }
@@ -183,7 +188,7 @@ class CkPaint implements ui.Paint {
   /// The effective color filter.
   ///
   /// This is a combination of the `colorFilter` and `invertColors` properties.
-  ManagedSkColorFilter? _effectiveColorFilter;
+  CkColorFilter? _effectiveColorFilter;
 
   @override
   double strokeMiterLimit = 4.0;
@@ -197,7 +202,9 @@ class CkPaint implements ui.Paint {
     }
 
     if (value is ui.ColorFilter) {
-      _imageFilter = createCkColorFilter(value as EngineColorFilter);
+      _imageFilter = CkColorFilterImageFilter(
+        colorFilter: (value as EngineColorFilter).backendFilter as CkColorFilter,
+      );
     } else {
       _imageFilter = value as CkManagedSkImageFilterConvertible?;
     }
@@ -284,17 +291,6 @@ class CkPaint implements ui.Paint {
     return resultString;
   }
 }
-
-final Float32List _invertColorMatrix = Float32List.fromList(const <double>[
-  -1.0, 0, 0, 1.0, 0, // row
-  0, -1.0, 0, 1.0, 0, // row
-  0, 0, -1.0, 1.0, 0, // row
-  1.0, 1.0, 1.0, 1.0, 0,
-]);
-
-final ManagedSkColorFilter _invertColorFilter = ManagedSkColorFilter(
-  CkMatrixColorFilter(_invertColorMatrix),
-);
 
 class CkFragmentProgram implements ui.FragmentProgram {
   CkFragmentProgram(this.name, this.effect, this.uniforms, this.floatCount, this.textureCount);
