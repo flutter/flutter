@@ -1116,11 +1116,8 @@ class FlutterPluginSwiftDependencies {
         if (target case {'type': 'regular', 'dependencies': final List<Object?> dependenciesData}) {
           for (final Map<String, Object?> dependency
               in dependenciesData.whereType<Map<String, Object?>>()) {
-            if (dependency case {'product': final List<Object?> productData}) {
-              final Object? productName = productData.isEmpty ? null : productData.first;
-              if (productName is String) {
-                targetProductDependencyNames.add(productName);
-              }
+            if (dependency case {'product': [final String productName, ...]}) {
+              targetProductDependencyNames.add(productName);
             }
           }
         }
