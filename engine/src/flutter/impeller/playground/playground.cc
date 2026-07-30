@@ -83,7 +83,9 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
   FML_UNREACHABLE();
 }
 
-static void InitializeGLFWOnce() {
+std::atomic<bool> Playground::glfw_initialized_ = false;
+
+void Playground::InitializeGLFWOnce() {
   // This guard is a hack to work around a problem where glfwCreateWindow
   // hangs when opening a second window after GLFW has been reinitialized (for
   // example, when flipping through multiple playground tests).
@@ -106,7 +108,14 @@ static void InitializeGLFWOnce() {
       FML_LOG(ERROR) << "GLFW Error '" << description << "'  (" << code << ").";
     });
     FML_CHECK(::glfwInit() == GLFW_TRUE);
+    glfw_initialized_ = true;
   });
+}
+
+void Playground::OnTearDownTestEnvironment() {
+  if (glfw_initialized_) {
+    ::glfwTerminate();
+  }
 }
 
 testing::GoldenDigestManager* Playground::GetGoldenDigestManager() const {
@@ -184,12 +193,6 @@ bool Playground::EnsureContextSupportsWideGamut() {
     return false;
   }
   switches_.enable_wide_gamut = true;
-  return true;
-}
-
-bool Playground::EnsureContextSupportsAntialiasLines() {
-  FML_CHECK(!context_) << "Must be called before a context is created.";
-  switches_.flags.antialiased_lines = true;
   return true;
 }
 
