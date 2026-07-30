@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1096,4 +1097,69 @@ void main() {
     );
     expect(tester.getSize(find.byType(SingleChildScrollView)), Size.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/145078
+  testWidgets('overscroll survives a relayout of the content', (WidgetTester tester) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    late StateSetter rebuildRow;
+    var revealed = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          child: SizedBox(
+            width: 300.0,
+            height: 300.0,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: Column(
+                children: <Widget>[
+                  StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      rebuildRow = setState;
+                      // Stands in for a row revealing an action on hover: the rebuild has to lay
+                      // the row out again, a repaint alone does not reach performLayout.
+                      return Row(
+                        children: <Widget>[
+                          const Expanded(child: SizedBox(height: 32.0)),
+                          if (revealed) const SizedBox(width: 16.0, height: 32.0),
+                        ],
+                      );
+                    },
+                  ),
+                  for (var i = 1; i < 30; i++) const SizedBox(height: 32.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Drag past the leading edge with a trackpad gesture and hold it there.
+    const center = Offset(400.0, 300.0);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.trackpad);
+    await gesture.panZoomStart(center);
+    var pan = 0.0;
+    for (var i = 0; i < 8; i++) {
+      pan += 12.0;
+      await gesture.panZoomUpdate(center, pan: Offset(0.0, pan));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    final double overscrolled = controller.position.pixels;
+    expect(overscrolled, lessThan(-20.0));
+
+    // The row rebuilds mid-gesture, as it would when hover reveals an action.
+    rebuildRow(() => revealed = true);
+    await tester.pump(const Duration(milliseconds: 16));
+
+    expect(controller.position.pixels, overscrolled);
+
+    await gesture.panZoomEnd();
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, 0.0);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 }
