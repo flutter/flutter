@@ -92,16 +92,16 @@ void main() {
     final ui.Image imageAfterDisablingCrosshair = await _captureRenderView(binding);
 
     expect(
-      await _pixelAtLogicalPosition(imageWithoutCrosshair, binding.renderView, position),
-      0xFFFFFFFF,
+      await _colorAtLogicalPosition(imageWithoutCrosshair, binding.renderView, position),
+      const Color(0xFFFFFFFF),
     );
     expect(
-      await _pixelAtLogicalPosition(imageWithCrosshair, binding.renderView, position),
-      isNot(0xFFFFFFFF),
+      await _colorAtLogicalPosition(imageWithCrosshair, binding.renderView, position),
+      isNot(const Color(0xFFFFFFFF)),
     );
     expect(
-      await _pixelAtLogicalPosition(imageAfterDisablingCrosshair, binding.renderView, position),
-      0xFFFFFFFF,
+      await _colorAtLogicalPosition(imageAfterDisablingCrosshair, binding.renderView, position),
+      const Color(0xFFFFFFFF),
     );
 
     imageWithoutCrosshair.dispose();
@@ -271,13 +271,23 @@ Future<ui.Image> _captureRenderView(LiveTestWidgetsFlutterBinding binding) async
   return image!;
 }
 
-Future<int> _pixelAtLogicalPosition(ui.Image image, RenderView renderView, Offset position) async {
+Future<Color> _colorAtLogicalPosition(
+  ui.Image image,
+  RenderView renderView,
+  Offset position,
+) async {
   final ByteData data = (await image.toByteData())!;
   final double scaleX = image.width / renderView.size.width;
   final double scaleY = image.height / renderView.size.height;
   final int x = (position.dx * scaleX).round().clamp(0, image.width - 1);
   final int y = (position.dy * scaleY).round().clamp(0, image.height - 1);
-  return data.getUint32((y * image.width + x) * 4);
+  final int offset = (y * image.width + x) * 4;
+  return Color.fromARGB(
+    data.getUint8(offset + 3),
+    data.getUint8(offset),
+    data.getUint8(offset + 1),
+    data.getUint8(offset + 2),
+  );
 }
 
 /// A widget that shows the number of times it has been tapped.

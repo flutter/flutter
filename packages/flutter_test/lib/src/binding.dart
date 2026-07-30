@@ -2973,33 +2973,29 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void handlePointerEvent(PointerEvent event) {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
-        if (!showTestPointerCrosshairs) {
-          super.handlePointerEvent(event);
-          break;
-        }
-        RenderView? target;
-        for (final RenderView renderView in renderViews) {
-          if (renderView.flutterView.viewId == event.viewId) {
-            target = renderView;
-            break;
-          }
-        }
-        if (target != null) {
-          final _LiveTestPointerRecord? record =
-              _renderViewToPointerIdToPointerRecord[target]?[event.pointer];
-          if (record != null) {
-            record.position = event.position;
-            if (!event.down) {
-              record.decay = _kPointerDecay;
+        if (showTestPointerCrosshairs) {
+          RenderView? target;
+          for (final RenderView renderView in renderViews) {
+            if (renderView.flutterView.viewId == event.viewId) {
+              target = renderView;
+              break;
             }
-            _markViewsNeedPaint(event.viewId);
-          } else if (event.down) {
-            _renderViewToPointerIdToPointerRecord[target] ??= <int, _LiveTestPointerRecord>{};
-            _renderViewToPointerIdToPointerRecord[target]![event.pointer] = _LiveTestPointerRecord(
-              event.pointer,
-              event.position,
-            );
-            _markViewsNeedPaint(event.viewId);
+          }
+          if (target != null) {
+            final _LiveTestPointerRecord? record =
+                _renderViewToPointerIdToPointerRecord[target]?[event.pointer];
+            if (record != null) {
+              record.position = event.position;
+              if (!event.down) {
+                record.decay = _kPointerDecay;
+              }
+              _markViewsNeedPaint(event.viewId);
+            } else if (event.down) {
+              _renderViewToPointerIdToPointerRecord[target] ??= <int, _LiveTestPointerRecord>{};
+              _renderViewToPointerIdToPointerRecord[target]![event.pointer] =
+                  _LiveTestPointerRecord(event.pointer, event.position);
+              _markViewsNeedPaint(event.viewId);
+            }
           }
         }
         super.handlePointerEvent(event);
