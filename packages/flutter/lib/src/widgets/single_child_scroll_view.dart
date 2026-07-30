@@ -22,6 +22,7 @@ import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
+import 'scroll_position.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
 
@@ -503,7 +504,14 @@ class _RenderSingleChildViewport extends RenderBox
       size = constraints.constrain(child!.size);
     }
 
-    if (offset.hasPixels) {
+    // Reconcile an out-of-range offset only while nothing is driving it. During a
+    // drag or a ballistic simulation the offset is allowed past the edge if the
+    // physics says so, and correcting here would discard that overscroll: an
+    // unrelated relayout — a row reacting to hover, content growing — would cut
+    // the gesture short.
+    final ScrollPosition? position = offset is ScrollPosition ? offset as ScrollPosition : null;
+    final bool driven = position?.isScrollingNotifier.value ?? false;
+    if (offset.hasPixels && !driven) {
       if (offset.pixels > _maxScrollExtent) {
         offset.correctBy(_maxScrollExtent - offset.pixels);
       } else if (offset.pixels < _minScrollExtent) {
