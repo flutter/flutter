@@ -1903,11 +1903,13 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Stack(children: [PositionedDirectional(child: Placeholder())]),
+          child: Stack(
+            children: [PositionedDirectional(top: 0.0, start: 0.0, child: Placeholder())],
+          ),
         ),
       ),
     );
-    expect(tester.getSize(find.byType(PositionedDirectional)), Size.zero);
+    expect(tester.getSize(find.byType(Stack)), Size.zero);
   });
 
   testWidgets('IntrinsicHeight does not crash at zero area', (WidgetTester tester) async {

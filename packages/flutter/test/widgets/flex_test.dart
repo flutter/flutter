@@ -94,6 +94,7 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Flexible)), Size.zero);
+    expect(tester.getSize(find.byType(Row)), Size.zero);
   });
 
   testWidgets('Expanded does not crash at zero area', (WidgetTester tester) async {
@@ -108,6 +109,7 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Expanded)), Size.zero);
+    expect(tester.getSize(find.byType(Row)), Size.zero);
   });
 
   testWidgets("Doesn't overflow because of floating point accumulated error", (
