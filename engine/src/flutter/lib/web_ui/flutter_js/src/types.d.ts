@@ -54,6 +54,12 @@ type WasmAllowList = {
   [k in BrowserEngine]?: boolean;
 }
 
+export type DeferredWasmModuleLoadedCallback =
+  (moduleName: string, module: Response | Promise<Response> | ArrayBuffer) => Promise<void>;
+
+export type DeferredWasmModulesLoader =
+  (moduleNames: string[], onModuleLoaded: DeferredWasmModuleLoadedCallback) => Promise<void>;
+
 export interface FlutterConfiguration {
   assetBase?: string;
   canvasKitBaseUrl?: string;
@@ -80,6 +86,16 @@ export interface FlutterConfiguration {
    *  When false (default), per-build skip details are not printed; the
    *  fatal "no compatible build found" warning is always printed. */
   verboseBuildSelection?: boolean;
+  /**
+   * The loader for deferred Wasm modules. The loader is called with a list
+   * of module names, and a callback for each module. The callback takes
+   * the module name, and a loaded module in a format supported by
+   * `WebAssembly.compile` or `WebAssembly.compileStreaming`
+   * (e.g. Promise<Response> as returned from the 'fetch' API). The callback
+   * returns a Promise that resolves when the module is instantiated. The loader
+   * should return a Promise that resolves when all callback promises resolve.
+   */
+  wasmDeferredModulesLoader?: DeferredWasmModulesLoader;
 }
 
 /** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/

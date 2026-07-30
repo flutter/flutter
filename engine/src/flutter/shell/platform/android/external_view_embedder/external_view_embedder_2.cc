@@ -200,7 +200,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         } else {
           HideOverlayLayerIfNeeded();
         }
-        jni_facade->swapTransaction();
 
         for (int64_t view_id : composition_order) {
           // Round, rather than truncate, the bounds onto the pixel grid. See
@@ -226,6 +225,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           jni_facade->hidePlatformView2(view_id);
         }
 
+        jni_facade->swapTransaction();
         jni_facade_->onEndFrame2();
       }));
 
