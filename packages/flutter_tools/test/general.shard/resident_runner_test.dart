@@ -240,7 +240,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: const TargetPlatform(.android, .armv7).getName(),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -308,7 +308,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'reload-barred',
-            targetPlatform: const TargetPlatform(.android, .armv7).getName(),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -361,7 +361,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: const TargetPlatform(.android, .armv7).getName(),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -579,7 +579,7 @@ void main() {
       final Event event = fakeAnalytics.sentEvents.first;
       expect(event.eventName.label, 'hot_runner_info');
       expect(event.eventData['label'], 'reload');
-      expect(event.eventData['targetPlatform'], const TargetPlatform(.android, .armv7).getName());
+      expect(event.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
     }),
   );
 
@@ -725,10 +725,7 @@ void main() {
       expect(hotRunnerInfoEvents, hasLength(1));
       final Event newEvent = hotRunnerInfoEvents.first;
       expect(newEvent.eventData['label'], 'restart');
-      expect(
-        newEvent.eventData['targetPlatform'],
-        const TargetPlatform(.android, .armv7).getName(),
-      );
+      expect(newEvent.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
     }),
   );
 
@@ -946,7 +943,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: const TargetPlatform(.android, .armv7).getName(),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: true,
@@ -1313,7 +1310,7 @@ flutter:
     'ResidentRunner printHelpDetails hides v on web in profile mode',
     () => testbed.run(() async {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
-        FakeDevice(targetPlatform: const TargetPlatform(.web, .unknown)),
+        FakeDevice(targetPlatform: TargetPlatform.web_javascript),
         target: 'lib/main.dart',
         buildInfo: BuildInfo.profile,
         platform: FakePlatform(),
@@ -1688,7 +1685,7 @@ flutter:
     'FlutterDevice uses dartdevc configuration when targeting web',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice(targetPlatform: const TargetPlatform(.web, .unknown));
+      final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
@@ -1739,7 +1736,7 @@ flutter:
     'FlutterDevice uses dartdevc configuration when targeting web with null-safety autodetected',
     () async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      final device = FakeDevice(targetPlatform: const TargetPlatform(.web, .unknown));
+      final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
 
       final residentCompiler =
           (await FlutterDevice.create(
@@ -2124,7 +2121,7 @@ flutter:
       final webFlutterDevice = FakeFlutterDevice()
         ..vmServiceHost = (() => fakeVmServiceHost)
         ..fakeDevFS = devFS
-        ..targetPlatform = const TargetPlatform(.web, .unknown);
+        ..targetPlatform = TargetPlatform.web_javascript;
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           listViews,
@@ -2237,17 +2234,14 @@ flutter:
   testUsingContext(
     'use the nativeAssetsYamlFile when provided',
     () => testbed.run(() async {
-      final device = FakeDevice(
-        targetPlatform: const TargetPlatform(.macos, .x64),
-        sdkNameAndVersion: 'Macos',
-      );
+      final device = FakeDevice(targetPlatform: TargetPlatform.darwin, sdkNameAndVersion: 'Macos');
       final residentCompiler = FakeResidentCompiler();
       final flutterDevice = FakeFlutterDevice()
         ..testUri = testUri
         ..vmServiceHost = (() => fakeVmServiceHost)
         ..device = device
         ..fakeDevFS = devFS
-        ..targetPlatform = const TargetPlatform(.macos, .x64)
+        ..targetPlatform = TargetPlatform.darwin
         ..generator = residentCompiler;
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
@@ -2335,7 +2329,7 @@ flutter:
     testUsingContext(
       'correctly caches Web Device compilation',
       () => testbed.run(() {
-        flutterDevice.targetPlatform = const TargetPlatform(.web, .unknown);
+        flutterDevice.targetPlatform = TargetPlatform.web_javascript;
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
@@ -2355,7 +2349,7 @@ flutter:
     testUsingContext(
       'correctly caches Fuchsia Device compilation',
       () => testbed.run(() {
-        flutterDevice.targetPlatform = const TargetPlatform(.fuchsia, .arm64);
+        flutterDevice.targetPlatform = TargetPlatform.fuchsia_arm64;
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
@@ -2375,7 +2369,7 @@ flutter:
     testUsingContext(
       'correctly caches Android Device compilation',
       () => testbed.run(() {
-        flutterDevice.targetPlatform = const TargetPlatform(.android, .armv7);
+        flutterDevice.targetPlatform = TargetPlatform.android_arm;
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(

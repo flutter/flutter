@@ -28,7 +28,7 @@ import '../../../src/testbed.dart';
 import '../../../src/throwing_pub.dart';
 
 const _kDart2jsLinuxArgs = <String>[
-  'Artifact.engineDartBinary.web-javascript',
+  'Artifact.engineDartBinary.TargetPlatform.web_javascript',
   'compile',
   'js',
   '--platform-binaries=HostArtifact.webPlatformKernelFolder',
@@ -44,7 +44,7 @@ const _kStandardFlutterWebDefines = <String>[
 ];
 
 const _kDart2WasmLinuxArgs = <String>[
-  'Artifact.engineDartBinary.web-javascript',
+  'Artifact.engineDartBinary.TargetPlatform.web_javascript',
   'compile',
   'wasm',
   '--packages=/.dart_tool/package_config.json',

@@ -168,6 +168,9 @@ abstract class ChromiumDevice extends WebDevice {
   }
 
   @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+
+  @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   @override
@@ -465,6 +468,9 @@ class WebServerDevice extends WebDevice {
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     return true;
   }
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
