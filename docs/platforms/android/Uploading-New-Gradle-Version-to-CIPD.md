@@ -1,4 +1,4 @@
-# Uploading New Java Version to CIPD
+# Uploading New Gradle Version for CI to CIPD
 
 We store multiple Gradle version packages on CIPD for use on CI. For more information read the internal
 docs [here](https://goto.google.com/luci-cipd).
