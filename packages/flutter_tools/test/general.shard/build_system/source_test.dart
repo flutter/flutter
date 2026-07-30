@@ -111,7 +111,7 @@ void main() {
       globals.fs.file(path).createSync(recursive: true);
       const fizzSource = Source.artifact(
         Artifact.windowsDesktopPath,
-        platform: TargetPlatform.windows_x64,
+        platform: TargetPlatform(.windows, .x64),
       );
       fizzSource.accept(visitor);
 
@@ -277,7 +277,7 @@ void main() {
 
       const fizzSource = Source.artifact(
         Artifact.windowsDesktopPath,
-        platform: TargetPlatform.windows_x64,
+        platform: TargetPlatform(.windows, .x64),
       );
       fizzSource.accept(visitor);
 

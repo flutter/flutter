@@ -1191,13 +1191,13 @@ void updateLocalProperties({
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(
-      TargetPlatform.android_arm,
+      PlatformType.android,
       buildInfo.buildName ?? project.manifest.buildName,
       globals.logger,
     );
     changeIfNecessary('flutter.versionName', buildName);
     final String? buildNumber = validatedBuildNumberForPlatform(
-      TargetPlatform.android_arm,
+      PlatformType.android,
       buildInfo.buildNumber ?? project.manifest.buildNumber,
       globals.logger,
     );

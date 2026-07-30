@@ -77,7 +77,7 @@ abstract class AndroidAssetBundle extends Target {
       environment,
       outputDirectory,
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: const TargetPlatform(.android, .unknown),
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
       additionalContent: <String, DevFSContent>{
@@ -141,7 +141,7 @@ class ProfileAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfProfile(TargetPlatform.android_arm),
+    AotElfProfile(TargetPlatform(.android, .armv7)),
     AotAndroidAssetBundle(),
   ];
 }
@@ -155,7 +155,7 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfRelease(TargetPlatform.android_arm),
+    AotElfRelease(TargetPlatform(.android, .armv7)),
     AotAndroidAssetBundle(),
   ];
 }
@@ -287,12 +287,12 @@ class AndroidAot extends AotElfBase {
 }
 
 // AndroidAot instances used by the bundle rules below.
-const androidArmProfile = AndroidAot(TargetPlatform.android_arm, BuildMode.profile);
-const androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
-const androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
-const androidArmRelease = AndroidAot(TargetPlatform.android_arm, BuildMode.release);
-const androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-const androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
+const androidArmProfile = AndroidAot(TargetPlatform(.android, .armv7), BuildMode.profile);
+const androidArm64Profile = AndroidAot(TargetPlatform(.android, .arm64), BuildMode.profile);
+const androidx64Profile = AndroidAot(TargetPlatform(.android, .x64), BuildMode.profile);
+const androidArmRelease = AndroidAot(TargetPlatform(.android, .armv7), BuildMode.release);
+const androidArm64Release = AndroidAot(TargetPlatform(.android, .arm64), BuildMode.release);
+const androidx64Release = AndroidAot(TargetPlatform(.android, .x64), BuildMode.release);
 
 /// A rule paired with [AndroidAot] that copies the produced so file and manifest.json (if present) into the output directory.
 class AndroidAotBundle extends Target {

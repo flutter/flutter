@@ -168,10 +168,8 @@ Future<void> _runCmake(
   await buildDir.create(recursive: true);
 
   final String buildFlag = sentenceCase(buildModeName);
-  final bool needCrossBuildOptionsForArm64 =
-      needCrossBuild && targetPlatform == TargetPlatform.linux_arm64;
-  final bool needCrossBuildOptionsForRiscv64 =
-      needCrossBuild && targetPlatform == TargetPlatform.linux_riscv64;
+  final bool needCrossBuildOptionsForArm64 = needCrossBuild && targetPlatform.cpuArch == .arm64;
+  final bool needCrossBuildOptionsForRiscv64 = needCrossBuild && targetPlatform.cpuArch == .riscv64;
   int result;
   if (!globals.processManager.canRun('cmake')) {
     throwToolExit(globals.userMessages.cmakeMissing);
