@@ -176,14 +176,16 @@ float roundRectPixelSize(vec2 p) {
   vec2 corner_center = frag_info.size - radius;
   vec2 q = abs(p) - corner_center;
 
+  float pixel_size;
   // If in the rounded corner arc, blend X and Y pixel sizes along the normal.
   if (q.x > 0.0 && q.y > 0.0) {
-    return length(normalize(q) * device_pixel_size);
+    pixel_size = length(normalize(q) * device_pixel_size);
+  } else {
+    // Otherwise, we are closer to a straight edge. Get pixel size in the
+    // direction perpendicular to the closer edge.
+    pixel_size = (q.x > q.y) ? device_pixel_size.x : device_pixel_size.y;
   }
-
-  // Otherwise, we are closer to a straight edge. Get pixel size in the
-  // direction perpendicular to the closer edge.
-  return (q.x > q.y) ? device_pixel_size.x : device_pixel_size.y;
+  return pixel_size;
 }
 
 float pixelSize(float sdf) {
@@ -199,14 +201,11 @@ vec2 filledSDF(vec2 p) {
     sdf = distanceFromCircle(p, frag_info.size.x);
   } else if (frag_info.type < 1.5) {  // Rect
     sdf = distanceFromRect(p, frag_info.size);
-    // Rect has its own separate logic for calculating pixel size.
-    return vec2(sdf, rectPixelSize(p));
   } else if (frag_info.type < 2.5) {  // Oval
     sdf = distanceFromOval(p, frag_info.size);
   } else if (frag_info.type < 3.5) {  // Rounded Rect
     // RoundRect has its own separate logic for calculating pixel size.
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
-    return vec2(sdf, roundRectPixelSize(p));
   } else {  // Symmetric Rounded Superellipse
     sdf = distanceFromRoundedSuperellipse(
         p, frag_info.superellipse_degree, frag_info.superellipse_semi_axis,
@@ -214,7 +213,20 @@ vec2 filledSDF(vec2 p) {
         frag_info.circle_center_right, frag_info.octant_offset_c,
         frag_info.superellipse_scale);
   }
-  return vec2(sdf, pixelSize(sdf));
+
+  float pixel_size;
+  if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
+    // Special case pixel size calculation for rectangles.
+    pixel_size = rectPixelSize(p);
+  } else if (frag_info.type >= 2.5 && frag_info.type < 3.5) {  // Rounded Rect
+    // Special case pixel size calculation for rounded rectangles.
+    pixel_size = roundRectPixelSize(p);
+  } else {
+    // All other shapes use standard SDF-derivative-based pixel size.
+    pixel_size = pixelSize(sdf);
+  }
+
+  return vec2(sdf, pixel_size);
 }
 
 // Evaluates the stroked SDF for the shape selected by frag_info.type.
@@ -226,23 +238,31 @@ vec2 strokedSDF(vec2 p) {
 
   float half_stroke = max(frag_info.stroke_width, base_pixel_size) * 0.5;
 
-  if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
-
-    if (frag_info.stroke_join < 0.5) {  // Miter
-      float outer = distanceFromRect(p, frag_info.size + half_stroke);
-      float inner = base_sdf + half_stroke;
-      float sdf = max(outer, -inner);
-      return vec2(sdf, pixelSize(sdf));
-    } else if (frag_info.stroke_join < 1.5) {  // Bevel
-      float outer =
-          distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
-      float inner = base_sdf + half_stroke;
-      float sdf = max(outer, -inner);
-      return vec2(sdf, pixelSize(sdf));
-    }
+  float sdf;
+  float pixel_size;
+  if (frag_info.type >= 0.5 && frag_info.type < 1.5 &&
+      frag_info.stroke_join < 0.5) {
+    // Rect with Miter join
+    float outer = distanceFromRect(p, frag_info.size + half_stroke);
+    float inner = base_sdf + half_stroke;
+    sdf = max(outer, -inner);
+    pixel_size = pixelSize(sdf);
+  } else if (frag_info.type >= 0.5 && frag_info.type < 1.5 &&
+             frag_info.stroke_join >= 0.5 && frag_info.stroke_join < 1.5) {
+    // Rect with Bevel join
+    float outer =
+        distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
+    float inner = base_sdf + half_stroke;
+    sdf = max(outer, -inner);
+    pixel_size = pixelSize(sdf);
+  } else {
+    // All other shapes
+    vec2 sdf_and_pixel_size =
+        SDFStroke(base_sdf, base_pixel_size, frag_info.stroke_width);
+    sdf = sdf_and_pixel_size.x;
+    pixel_size = sdf_and_pixel_size.y;
   }
-
-  return SDFStroke(base_sdf, base_pixel_size, frag_info.stroke_width);
+  return vec2(sdf, pixel_size);
 }
 
 // Converts linear coverage alpha to perceptual alpha.
