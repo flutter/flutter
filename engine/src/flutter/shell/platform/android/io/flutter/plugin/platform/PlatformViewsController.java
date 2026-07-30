@@ -1102,7 +1102,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // relative to the widget, leaving a line of Flutter content visible along the right and bottom
   // edges. See https://github.com/flutter/flutter/issues/189834.
   private double toLogicalPixels(double physicalPixels) {
-    return physicalPixels / getDisplayDensity();
+    float density = getDisplayDensity();
+    return density > 0.0f ? physicalPixels / density : 0.0;
   }
 
   private void disposeAllViews() {
