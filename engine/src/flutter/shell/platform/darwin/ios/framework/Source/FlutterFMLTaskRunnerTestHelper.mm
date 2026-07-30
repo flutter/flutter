@@ -27,8 +27,8 @@ static void ConfigureThread(const fml::Thread::ThreadConfig& config) {
 
 - (instancetype)initWithLabel:(NSString*)label {
   _thread = std::make_unique<fml::Thread>(
-      ConfigureThread,
-      fml::Thread::ThreadConfig(label.UTF8String, fml::Thread::ThreadPriority::kDisplay));
+      ConfigureThread, fml::Thread::ThreadConfig(label ? label.UTF8String : "",
+                                                 fml::Thread::ThreadPriority::kDisplay));
   self = [super initWithTaskRunner:_thread->GetTaskRunner()];
   return self;
 }
