@@ -429,17 +429,6 @@ void main() {
         }, overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)});
       });
     });
-
-    testWithoutContext('hostAppProjectName prefers Runner when multiple xcodeproj exist', () {
-      final fs = MemoryFileSystem.test();
-      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-      final Directory iosDirectory = project.hostAppRoot..createSync(recursive: true);
-      iosDirectory.childDirectory('WidgetExtension.xcodeproj').createSync();
-      iosDirectory.childDirectory('Runner.xcodeproj').createSync();
-
-      expect(project.hostAppProjectName, 'Runner');
-      expect(project.xcodeProject.path, 'app_name/ios/Runner.xcodeproj');
-    });
   });
 
   group('MacOSProject', () {
@@ -629,8 +618,6 @@ void main() {
               'xcodebuild',
               '-clonedSourcePackagesDirPath',
               '/${buildDirectory.path}/SourcePackages',
-              '-project',
-              '/app_name/ios/Runner.xcodeproj',
               '-resolvePackageDependencies',
             ],
             stdout: '''
@@ -691,8 +678,6 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
               'xcodebuild',
               '-clonedSourcePackagesDirPath',
               '/${buildDirectory.path}/SourcePackages',
-              '-project',
-              '/app_name/ios/Runner.xcodeproj',
               '-resolvePackageDependencies',
             ],
           ),
@@ -739,8 +724,6 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
               'xcodebuild',
               '-clonedSourcePackagesDirPath',
               '/${buildDirectory.path}/SourcePackages',
-              '-project',
-              '/app_name/ios/Runner.xcodeproj',
               '-resolvePackageDependencies',
             ],
             exitCode: 1,
@@ -765,6 +748,48 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
         );
       });
 
+      testWithoutContext('throws exception explaining how to resolve multiple projects', () async {
+        final fs = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        const projectPath = 'path/to/project';
+        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+        final fakeProcessManager = FakeProcessManager.empty();
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+            exitCode: 78,
+            stderr: 'xcodebuild failed',
+          ),
+        ]);
+        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        iosProject.hostAppRoot.childDirectory('Runner.xcodeproj').createSync(recursive: true);
+        iosProject.hostAppRoot.childDirectory('Widget.xcodeproj').createSync(recursive: true);
+        await expectLater(
+          iosProject.prefetchSwiftPackages(
+            xcodebuildProjectCommandArguments: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+            ],
+            processUtils: processUtils,
+            logger: testLogger,
+          ),
+          throwsToolExit(
+            message: 'Found multiple Xcode projects in ios/: Runner.xcodeproj, Widget.xcodeproj.',
+          ),
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
       testWithoutContext('prefetchSwiftPackages can run for both platforms', () async {
         final fs = MemoryFileSystem.test();
         final testLogger = BufferLogger.test();
@@ -780,8 +805,6 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
               'xcodebuild',
               '-clonedSourcePackagesDirPath',
               '/${iosBuildDirectory.path}/SourcePackages',
-              '-project',
-              '/app_name/ios/Runner.xcodeproj',
               '-resolvePackageDependencies',
             ],
           ),
@@ -791,8 +814,6 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
               'xcodebuild',
               '-clonedSourcePackagesDirPath',
               '/${macosBuildDirectory.path}/SourcePackages',
-              '-project',
-              '/app_name/macos/Runner.xcodeproj',
               '-resolvePackageDependencies',
             ],
           ),
@@ -818,44 +839,6 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/${macosBuildDirectory.path}/SourcePackages',
-          ],
-          processUtils: processUtils,
-          logger: testLogger,
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
-      testWithoutContext('passes -project when multiple xcodeproj exist', () async {
-        final fs = MemoryFileSystem.test();
-        final testLogger = BufferLogger.test();
-        const projectPath = 'path/to/project';
-        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
-        final fakeProcessManager = FakeProcessManager.empty();
-        fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'xcodebuild',
-              '-clonedSourcePackagesDirPath',
-              '/${buildDirectory.path}/SourcePackages',
-              '-project',
-              '/app_name/ios/Runner.xcodeproj',
-              '-resolvePackageDependencies',
-            ],
-          ),
-        ]);
-        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
-
-        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-        iosProject.hostAppRoot.createSync(recursive: true);
-        iosProject.hostAppRoot.childDirectory('WidgetExtension.xcodeproj').createSync();
-        iosProject.hostAppRoot.childDirectory('Runner.xcodeproj').createSync();
-        await iosProject.prefetchSwiftPackages(
-          xcodebuildProjectCommandArguments: <String>[
-            'xcrun',
-            'xcodebuild',
-            '-clonedSourcePackagesDirPath',
-            '/${buildDirectory.path}/SourcePackages',
           ],
           processUtils: processUtils,
           logger: testLogger,

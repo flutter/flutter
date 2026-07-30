@@ -63,20 +63,14 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   }();
 
   Directory? _xcodeDirectoryWithExtension(String extension) {
-    final path = hostAppRoot.fileSystem.path;
-    Directory? fallback;
-    for (final FileSystemEntity entity in hostAppRoot.listSync()) {
-      final String basename = entity.basename;
-      if (path.extension(entity.path) != extension || basename.startsWith('.')) {
-        continue;
+    final List<FileSystemEntity> contents = hostAppRoot.listSync();
+    for (final entity in contents) {
+      if (globals.fs.path.extension(entity.path) == extension &&
+          !globals.fs.path.basename(entity.path).startsWith('.')) {
+        return hostAppRoot.childDirectory(entity.basename);
       }
-      final Directory directory = hostAppRoot.childDirectory(basename);
-      if (basename == '$_defaultHostAppName$extension') {
-        return directory;
-      }
-      fallback ??= directory;
     }
-    return fallback;
+    return null;
   }
 
   /// The parent of this project.
@@ -416,18 +410,12 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return;
     }
 
-    if (_swiftPackageFetchProcess != null) {
-      return;
-    }
-
     Status? status;
     try {
-      final command = <String>[
-        ...xcodebuildProjectCommandArguments,
-        '-project',
-        xcodeProject.fileSystem.path.absolute(xcodeProject.path),
-        '-resolvePackageDependencies',
-      ];
+      final command = <String>[...xcodebuildProjectCommandArguments, '-resolvePackageDependencies'];
+      if (_swiftPackageFetchProcess != null) {
+        return;
+      }
       final Process process = await processUtils.start(command, workingDirectory: hostAppRoot.path);
       _swiftPackageFetchProcess = process;
       var printFetchWarnings = false;
@@ -456,6 +444,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         await _swiftPackageFetchStderrSubscription?.cancel();
       });
       if (exitCode != 0) {
+        throwToolExitIfMultipleXcodeProjects(hostAppRoot);
         throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
       }
     } finally {
