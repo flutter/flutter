@@ -680,6 +680,21 @@ targets:
       - DEPS
       - dartdoc_options.yaml
 
+  - name: Linux snippets
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 30
+    properties:
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      shard: snippets
+    runIf:
+      - dev/snippets/**
+      - dev/bots/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone
     timeout: 60
