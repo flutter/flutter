@@ -643,18 +643,19 @@ Future<void> reportTestResultsToResultDb(
     return;
   }
 
-  final ResultDbRecorder? recorder = ResultDbRecorder.fromEnvironment();
-  if (recorder == null) {
-    print('ResultDB is not available; skipping test result reporting.');
-    return;
-  }
+  ResultDbRecorder? recorder;
   try {
+    recorder = ResultDbRecorder.fromEnvironment();
+    if (recorder == null) {
+      print('ResultDB is not available; skipping test result reporting.');
+      return;
+    }
     await recorder.reportTestResults(results);
     print('Reported ${results.length} test result(s) to ResultDB.');
   } catch (e) {
     print('Failed to report test results to ResultDB: $e');
   } finally {
-    recorder.close();
+    recorder?.close();
   }
 }
 

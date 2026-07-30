@@ -22,11 +22,17 @@ Map<String, Object?>? readLuciContext([Map<String, String>? environment]) {
   if (!file.existsSync()) {
     return null;
   }
-  final Object? decoded = json.decode(file.readAsStringSync());
-  if (decoded is! Map<String, Object?>) {
+  // Be defensive: an unreadable file or malformed JSON must never crash the
+  // test run, since this is called outside the reporting try/catch.
+  try {
+    final Object? decoded = json.decode(file.readAsStringSync());
+    if (decoded is! Map<String, Object?>) {
+      return null;
+    }
+    return decoded;
+  } catch (_) {
     return null;
   }
-  return decoded;
 }
 
 /// A client for the [ResultDB Recorder][recorder] `BatchCreateTestResults` API.
@@ -367,6 +373,16 @@ String _sanitizeCaseName(String caseName) {
 /// Truncates [value] so its UTF-8 encoding is at most [maxBytes] bytes, without
 /// splitting a UTF-16 code unit.
 String _truncateToBytes(String value, int maxBytes) {
+  if (utf8.encode(value).length <= maxBytes) {
+    return value;
+  }
+  // A UTF-8 encoding is always at least as long (in bytes) as the string's
+  // UTF-16 code unit length, so truncating to [maxBytes] code units first keeps
+  // the byte-length loop below to at most [maxBytes] iterations (avoiding O(N^2)
+  // behavior on very long names).
+  if (value.length > maxBytes) {
+    value = value.substring(0, maxBytes);
+  }
   while (utf8.encode(value).length > maxBytes) {
     value = value.substring(0, value.length - 1);
   }
