@@ -49,7 +49,6 @@ class PlatformViewIOS final : public PlatformView {
       IOSRenderingAPI rendering_api,
       __weak FlutterPlatformViewsController* platform_views_controller,
       const flutter::TaskRunners& task_runners,
-      const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
   ~PlatformViewIOS() override;
@@ -86,9 +85,6 @@ class PlatformViewIOS final : public PlatformView {
   PointerDataDispatcherMaker GetDispatcherMaker() override;
 
   // |PlatformView|
-  void SetSemanticsEnabled(bool enabled) override;
-
-  // |PlatformView|
   void SetSemanticsTreeEnabled(bool enabled) override;
 
   // |PlatformView|
@@ -102,9 +98,6 @@ class PlatformViewIOS final : public PlatformView {
 
   // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
-  // |PlatformView|
-  void SetAccessibilityFeatures(int32_t flags) override;
 
   // |PlatformView|
   void UpdateSemantics(int64_t view_id,

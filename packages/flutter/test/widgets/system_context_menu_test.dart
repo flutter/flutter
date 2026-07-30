@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../system_context_menu_utils.dart';
 import 'editable_text_tester.dart';
-import 'widgets_app_tester.dart';
 
 Widget _buildSystemContextMenuTestApp({
   required Widget child,
