@@ -308,7 +308,12 @@ void main() {
             controller: controller,
             focusNode: focusNode,
             maxLines: null,
-            style: const TextStyle(fontFamily: 'Roboto', fontSize: 14.0, color: black),
+            style: const TextStyle(
+              fontFamily: 'FlutterTest',
+              fontSize: 14.0,
+              color: black,
+              height: 2.0,
+            ),
             cursorColor: blue,
             backgroundCursorColor: grey,
             selectionColor: selectionColor,
