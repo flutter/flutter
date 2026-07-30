@@ -258,10 +258,10 @@ end
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         defines: <String, String>{
           kTargetFile: targetFile,
-          kTargetPlatform: TargetPlatform.darwin.getName(),
+          kTargetPlatform: FlutterDarwinPlatform.macos.targetPlatform.getName(),
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             globals.artifacts!,
-          ).map((DarwinArch e) => e.name).join(' '),
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,
@@ -316,7 +316,7 @@ end
     final Status status = globals.logger.startProgress(' ├─Copying FlutterMacOS.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
       Artifact.flutterMacOSXcframework,
-      platform: TargetPlatform.darwin,
+      platform: FlutterDarwinPlatform.macos.targetPlatform,
       mode: buildInfo.mode,
     );
     final String flutterFrameworkFileName = globals.fs.path.basename(

@@ -21,51 +21,47 @@ void main() {
 
   group('Validate build number', () {
     testWithoutContext('CFBundleVersion for iOS', () async {
-      String? buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
+      String? buildName = validatedBuildNumberForPlatform(PlatformType.ios, 'xyz', logger);
       expect(buildName, isNull);
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1', logger);
+      buildName = validatedBuildNumberForPlatform(PlatformType.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.xyz', logger);
+      buildName = validatedBuildNumberForPlatform(PlatformType.ios, '123.xyz', logger);
       expect(buildName, '123');
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.456.xyz', logger);
+      buildName = validatedBuildNumberForPlatform(PlatformType.ios, '123.456.xyz', logger);
       expect(buildName, '123.456');
     });
 
     testWithoutContext('versionCode for Android', () async {
       String? buildName = validatedBuildNumberForPlatform(
-        TargetPlatform.android_arm,
+        PlatformType.android,
         '123.abc+-',
         logger,
       );
       expect(buildName, '123');
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, 'abc', logger);
+      buildName = validatedBuildNumberForPlatform(PlatformType.android, 'abc', logger);
       expect(buildName, '1');
     });
   });
 
   group('Validate build name', () {
     testWithoutContext('CFBundleShortVersionString for iOS', () async {
-      String? buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
+      String? buildName = validatedBuildNameForPlatform(PlatformType.ios, 'xyz', logger);
       expect(buildName, isNull);
-      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1', logger);
+      buildName = validatedBuildNameForPlatform(PlatformType.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
 
-      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.456.xyz', logger);
+      buildName = validatedBuildNameForPlatform(PlatformType.ios, '123.456.xyz', logger);
       expect(logger.traceText, contains('Invalid build-name'));
       expect(buildName, '123.456.0');
 
-      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.xyz', logger);
+      buildName = validatedBuildNameForPlatform(PlatformType.ios, '123.xyz', logger);
       expect(buildName, '123.0.0');
     });
 
     testWithoutContext('versionName for Android', () async {
-      String? buildName = validatedBuildNameForPlatform(
-        TargetPlatform.android_arm,
-        '123.abc+-',
-        logger,
-      );
+      String? buildName = validatedBuildNameForPlatform(PlatformType.android, '123.abc+-', logger);
       expect(buildName, '123.abc+-');
-      buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-', logger);
+      buildName = validatedBuildNameForPlatform(PlatformType.android, 'abc+-', logger);
       expect(buildName, 'abc+-');
     });
 
@@ -95,22 +91,36 @@ void main() {
   });
 
   testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
-    expect(DarwinArch.armv7.dartName, 'armv7');
-    expect(DarwinArch.arm64.dartName, 'arm64');
-    expect(DarwinArch.x86_64.dartName, 'x64');
+    expect(CpuArch.armv7.dartName, 'armv7');
+    expect(CpuArch.arm64.dartName, 'arm64');
+    expect(CpuArch.x64.dartName, 'x64');
   });
 
-  testWithoutContext('getNameForDarwinArch returns Apple names', () {
-    expect(DarwinArch.armv7.name, 'armv7');
-    expect(DarwinArch.arm64.name, 'arm64');
-    expect(DarwinArch.x86_64.name, 'x86_64');
+  testWithoutContext('darwinArchName returns Apple names', () {
+    expect(CpuArch.armv7.darwinArchName, 'armv7');
+    expect(CpuArch.arm64.darwinArchName, 'arm64');
+    expect(CpuArch.x64.darwinArchName, 'x86_64');
   });
 
-  testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
-    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.arm64), 'ios-arm64');
-    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.armv7), 'ios-armv7');
-    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.x86_64), 'ios-x86_64');
-    expect(TargetPlatform.android.getName(), isNot(contains('ios')));
+  testWithoutContext('getName derives the canonical name from the platform and arch', () {
+    // iOS and macOS include the CPU architecture in their name (e.g.
+    // `ios-arm64`, `darwin-x64`), falling back to the bare platform name when
+    // the architecture is unknown.
+    expect(const TargetPlatform(.ios, .arm64).getName(), 'ios-arm64');
+    expect(const TargetPlatform(.ios, .x64).getName(), 'ios-x64');
+    expect(const TargetPlatform(.ios, .unknown).getName(), 'ios');
+    expect(const TargetPlatform(.macos, .arm64).getName(), 'darwin-arm64');
+    expect(const TargetPlatform(.macos, .x64).getName(), 'darwin-x64');
+    expect(const TargetPlatform(.macos, .unknown).getName(), 'darwin');
+    // Desktop platforms follow the `<platform>-<arch>` convention.
+    expect(const TargetPlatform(.linux, .x64).getName(), 'linux-x64');
+    expect(const TargetPlatform(.linux, .arm64).getName(), 'linux-arm64');
+    expect(const TargetPlatform(.windows, .arm64).getName(), 'windows-arm64');
+    // Android has its own per-arch names.
+    expect(const TargetPlatform(.android, .armv7).getName(), 'android-arm');
+    expect(const TargetPlatform(.android, .arm64).getName(), 'android-arm64');
+    expect(const TargetPlatform(.android, .x64).getName(), 'android-x64');
+    expect(const TargetPlatform(.android, .unknown).getName(), 'android');
   });
 
   testUsingContext(
@@ -124,7 +134,7 @@ void main() {
             localEngine: 'ios_debug_unopt',
           ),
         ).single,
-        DarwinArch.arm64,
+        CpuArch.arm64,
       );
 
       expect(
@@ -135,7 +145,7 @@ void main() {
             localEngine: 'ios_debug_sim_unopt',
           ),
         ).single,
-        DarwinArch.x86_64,
+        CpuArch.x64,
       );
 
       expect(
@@ -146,18 +156,18 @@ void main() {
             localEngine: 'ios_debug_sim_unopt_arm64',
           ),
         ).single,
-        DarwinArch.arm64,
+        CpuArch.arm64,
       );
 
       expect(
         defaultIOSArchsForEnvironment(EnvironmentType.physical, Artifacts.test()).single,
-        DarwinArch.arm64,
+        CpuArch.arm64,
       );
 
-      expect(
-        defaultIOSArchsForEnvironment(EnvironmentType.simulator, Artifacts.test()),
-        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64],
-      );
+      expect(defaultIOSArchsForEnvironment(EnvironmentType.simulator, Artifacts.test()), <CpuArch>[
+        CpuArch.x64,
+        CpuArch.arm64,
+      ]);
     },
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
@@ -175,7 +185,7 @@ void main() {
             localEngine: 'host_debug_unopt',
           ),
         ).single,
-        DarwinArch.x86_64,
+        CpuArch.x64,
       );
 
       expect(
@@ -185,12 +195,12 @@ void main() {
             localEngine: 'host_debug_unopt_arm64',
           ),
         ).single,
-        DarwinArch.arm64,
+        CpuArch.arm64,
       );
 
-      expect(defaultMacOSArchsForEnvironment(Artifacts.test()), <DarwinArch>[
-        DarwinArch.x86_64,
-        DarwinArch.arm64,
+      expect(defaultMacOSArchsForEnvironment(Artifacts.test()), <CpuArch>[
+        CpuArch.x64,
+        CpuArch.arm64,
       ]);
     },
     overrides: <Type, Generator>{
@@ -199,12 +209,15 @@ void main() {
     },
   );
 
-  testWithoutContext('getIOSArchForName on Darwin arches', () {
-    expect(getIOSArchForName('armv7'), DarwinArch.armv7);
-    expect(getIOSArchForName('arm64'), DarwinArch.arm64);
-    expect(getIOSArchForName('arm64e'), DarwinArch.arm64);
-    expect(getIOSArchForName('x86_64'), DarwinArch.x86_64);
-    expect(() => getIOSArchForName('bogus'), throwsException);
+  testWithoutContext('getCpuArchForName on Darwin and Android arches', () {
+    expect(getCpuArchForName('armv7'), CpuArch.armv7);
+    expect(getCpuArchForName('arm64'), CpuArch.arm64);
+    expect(getCpuArchForName('arm64e'), CpuArch.arm64);
+    expect(getCpuArchForName('x86_64'), CpuArch.x64);
+    expect(getCpuArchForName('android-arm'), CpuArch.armv7);
+    expect(getCpuArchForName('android-arm64'), CpuArch.arm64);
+    expect(getCpuArchForName('android-x64'), CpuArch.x64);
+    expect(() => getCpuArchForName('bogus'), throwsException);
   });
 
   testWithoutContext('named BuildInfo has correct defaults', () {

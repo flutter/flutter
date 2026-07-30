@@ -263,10 +263,10 @@ packages:
     dependency: transitive
     description:
       name: dds
-      sha256: "6673c5b29e502fd44dbf5836685e7c7c16b11c0fa7f91ef241e0cbf0638c8794"
+      sha256: f8e875dcd7b5e5073a7bfe54095144c70487f18e2f8e47fa51c09dd67eccfb0c
       url: "https://pub.dev"
     source: hosted
-    version: "5.3.0"
+    version: "5.4.0"
   dds_service_extensions:
     dependency: transitive
     description:
@@ -279,10 +279,10 @@ packages:
     dependency: transitive
     description:
       name: devtools_shared
-      sha256: "2daf7a9fba6a470668b26ecbd04200f7bf992aad81a2c31d12457c7791419dea"
+      sha256: "13df2c17d5f21dd7c92d08145386d45e1153364c04e531e994afb0ee7b67554b"
       url: "https://pub.dev"
     source: hosted
-    version: "12.1.0"
+    version: "13.1.0"
   dtd:
     dependency: transitive
     description:
@@ -1171,10 +1171,10 @@ packages:
     dependency: "direct main"
     description:
       name: vector_math
-      sha256: "1d774bbdf6b72a0b12122fc1560c9c2d2a67db5a4a4cc2bd8a5c990ab20e3188"
+      sha256: f36f9f3be64c6198714492bb455c11056e33e2f85d9a0b676a48301e44fdcf47
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.0"
+    version: "2.4.2"
   video_player:
     dependency: "direct main"
     description:

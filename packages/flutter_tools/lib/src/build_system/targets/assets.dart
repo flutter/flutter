@@ -295,7 +295,7 @@ class CopyAssets extends Target {
   @override
   Future<void> build(
     Environment environment, {
-    TargetPlatform targetPlatform = TargetPlatform.android,
+    TargetPlatform targetPlatform = const TargetPlatform(.android, .unknown),
   }) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {

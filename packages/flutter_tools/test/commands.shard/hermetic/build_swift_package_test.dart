@@ -742,7 +742,7 @@ let package = Package(
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
-                  'TargetPlatform': 'darwin',
+                  'TargetPlatform': 'darwin-x64',
                   'DarwinArchs': 'x86_64 arm64',
                   'BuildMode': 'debug',
                   'DartObfuscation': 'false',
@@ -850,7 +850,7 @@ let package = Package(
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
-                  'TargetPlatform': 'darwin',
+                  'TargetPlatform': 'darwin-x64',
                   'DarwinArchs': 'x86_64 arm64',
                   'BuildMode': 'release',
                   'DartObfuscation': 'false',
@@ -976,7 +976,7 @@ let package = Package(
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
-                  'TargetPlatform': 'darwin',
+                  'TargetPlatform': 'darwin-x64',
                   'DarwinArchs': 'x86_64 arm64',
                   'BuildMode': 'release',
                   'DartObfuscation': 'false',
@@ -1087,7 +1087,7 @@ let package = Package(
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
-                  'TargetPlatform': 'ios',
+                  'TargetPlatform': 'ios-arm64',
                   'IosArchs': 'arm64',
                   'SdkRoot': _iosSdkRoot,
                   'BuildMode': 'debug',
@@ -1109,7 +1109,7 @@ let package = Package(
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
-                  'TargetPlatform': 'ios',
+                  'TargetPlatform': 'ios-arm64',
                   'IosArchs': 'x86_64 arm64',
                   'SdkRoot': _iosSdkRoot,
                   'BuildMode': 'debug',
@@ -1221,7 +1221,7 @@ let package = Package(
                   expectedEngineVersion: _engineVersion,
                   expectedDefines: <String, String>{
                     'TargetFile': 'lib/main.dart',
-                    'TargetPlatform': 'ios',
+                    'TargetPlatform': 'ios-arm64',
                     'IosArchs': 'arm64',
                     'SdkRoot': _iosSdkRoot,
                     'BuildMode': 'debug',
@@ -1243,7 +1243,7 @@ let package = Package(
                   expectedEngineVersion: _engineVersion,
                   expectedDefines: <String, String>{
                     'TargetFile': 'lib/main.dart',
-                    'TargetPlatform': 'ios',
+                    'TargetPlatform': 'ios-arm64',
                     'IosArchs': 'x86_64 arm64',
                     'SdkRoot': _iosSdkRoot,
                     'BuildMode': 'debug',
@@ -3077,7 +3077,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
-                  'TargetPlatform': 'ios',
+                  'TargetPlatform': 'ios-arm64',
                   'IosArchs': 'arm64',
                   'SdkRoot': _iosSdkRoot,
                   'BuildMode': 'debug',
@@ -3099,7 +3099,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
-                  'TargetPlatform': 'ios',
+                  'TargetPlatform': 'ios-arm64',
                   'IosArchs': 'x86_64 arm64',
                   'SdkRoot': _iosSdkRoot,
                   'BuildMode': 'debug',

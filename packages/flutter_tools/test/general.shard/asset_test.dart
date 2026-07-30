@@ -96,7 +96,7 @@ dependencies:
           packageConfigPath: packageConfigPath,
           manifestPath: manifestPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(assetBundle.entries, contains('FontManifest.json'));
@@ -255,7 +255,7 @@ flutter:
             packageConfigPath: packageConfigPath,
             manifestPath: manifestPath,
             flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
-            targetPlatform: TargetPlatform.tester,
+            targetPlatform: const TargetPlatform(.tester, .unknown),
           );
 
           expect(assetBundle.entries, contains('FontManifest.json'));
@@ -300,7 +300,7 @@ flutter:
           manifestPath: manifestPath, // file doesn't exist
           packageConfigPath: packageConfigPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.file(manifestPath).parent),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
 
         expect(assetBundle.wasBuiltOnce(), true);
@@ -343,7 +343,7 @@ flutter:
 
         await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.android_arm,
+          targetPlatform: const TargetPlatform(.android, .armv7),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
@@ -387,7 +387,7 @@ flutter:
 
         await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
@@ -416,7 +416,7 @@ flutter:
         final int result = await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(result, isNot(0));
         expect(
@@ -446,7 +446,7 @@ flutter:
         final int result = await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
+          targetPlatform: const TargetPlatform(.tester, .unknown),
         );
         expect(result, isNot(0));
         expect(

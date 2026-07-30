@@ -286,7 +286,7 @@ void main() {
         () async {
           final command = RunCommand();
           final mockDevice = FakeDevice(
-            targetPlatform: TargetPlatform.android_arm,
+            targetPlatform: const TargetPlatform(.android, .armv7),
             isLocalEmulator: true,
             sdkNameAndVersion: 'api-14',
             isSupported: false,
@@ -545,7 +545,7 @@ void main() {
               final command = RunCommand();
               final device = FakeDevice(
                 platformType: PlatformType.web,
-                targetPlatform: TargetPlatform.web_javascript,
+                targetPlatform: const TargetPlatform(.web, .unknown),
               );
               testDeviceManager.devices = <Device>[device];
 
@@ -691,7 +691,7 @@ void main() {
       'should only request artifacts corresponding to connected devices',
       () async {
         testDeviceManager.devices = <Device>[
-          FakeDevice(targetPlatform: TargetPlatform.android_arm),
+          FakeDevice(targetPlatform: const TargetPlatform(.android, .armv7)),
         ];
 
         expect(
@@ -714,7 +714,7 @@ void main() {
 
         testDeviceManager.devices = <Device>[
           FakeDevice(),
-          FakeDevice(targetPlatform: TargetPlatform.android_arm),
+          FakeDevice(targetPlatform: const TargetPlatform(.android, .armv7)),
         ];
 
         expect(
@@ -727,7 +727,7 @@ void main() {
         );
 
         testDeviceManager.devices = <Device>[
-          FakeDevice(targetPlatform: TargetPlatform.web_javascript),
+          FakeDevice(targetPlatform: const TargetPlatform(.web, .unknown)),
         ];
 
         expect(
@@ -752,7 +752,7 @@ void main() {
         () async {
           final devices = <Device>[
             FakeDevice(
-              targetPlatform: TargetPlatform.android_arm,
+              targetPlatform: const TargetPlatform(.android, .armv7),
               platformType: PlatformType.android,
             ),
           ];
@@ -986,7 +986,7 @@ void main() {
         final device = FakeDevice(
           isLocalEmulator: true,
           platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
         );
         testDeviceManager.devices = <Device>[device];
       });
@@ -1160,7 +1160,7 @@ void main() {
         final device = FakeDevice(
           isLocalEmulator: true,
           platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
         );
         testDeviceManager.devices = <Device>[device];
       });
@@ -1425,7 +1425,7 @@ server:
         final device = FakeDevice(
           isLocalEmulator: true,
           platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
         );
         testDeviceManager.devices = <Device>[device];
       });
@@ -1931,7 +1931,7 @@ class TestDeviceManager extends DeviceManager {
 class FakeDevice extends Fake implements Device {
   FakeDevice({
     bool isLocalEmulator = false,
-    TargetPlatform targetPlatform = TargetPlatform.ios,
+    TargetPlatform targetPlatform = const TargetPlatform(.ios, .arm64),
     String sdkNameAndVersion = '',
     PlatformType platformType = PlatformType.ios,
     bool isSupported = true,
@@ -1999,7 +1999,7 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
 
   @override
-  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).devicePlatformName;
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
@@ -2086,7 +2086,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.ios, .arm64);
 }
 
 class TestRunCommandForUsageValues extends RunCommand {

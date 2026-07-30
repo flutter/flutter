@@ -263,7 +263,7 @@ class ResidentWebRunner extends ResidentRunner {
   }) async {
     final ApplicationPackage? package = await ApplicationPackageFactory.instance!
         .getPackageForPlatform(
-          TargetPlatform.web_javascript,
+          const TargetPlatform(.web, .unknown),
           buildInfo: debuggingOptions.buildInfo,
         );
     if (package == null) {
@@ -292,7 +292,9 @@ class ResidentWebRunner extends ResidentRunner {
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: _fileSystem)
             : null;
 
-        flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
+        flutterDevice!.developmentShaderCompiler.configureCompiler(
+          const TargetPlatform(.web, .unknown),
+        );
 
         flutterDevice!.devFS = WebDevFS(
           webDevServerConfig: updatedConfig,
@@ -461,7 +463,7 @@ class ResidentWebRunner extends ResidentRunner {
       status = _logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
     }
 
-    final String targetPlatform = TargetPlatform.web_javascript.getName();
+    final String targetPlatform = const TargetPlatform(.web, .unknown).getName();
     final String sdkName = await flutterDevice!.device!.sdkNameAndVersion;
 
     // Will be null if there is no report.
@@ -750,12 +752,12 @@ class ResidentWebRunner extends ResidentRunner {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
         flutterHookResult: await dartBuilder?.runHooks(
-          targetPlatform: TargetPlatform.web_javascript,
+          targetPlatform: const TargetPlatform(.web, .unknown),
           environment: environment,
           logger: _logger,
         ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-        targetPlatform: TargetPlatform.web_javascript,
+        targetPlatform: const TargetPlatform(.web, .unknown),
       );
       if (result != 0) {
         return UpdateFSReport();

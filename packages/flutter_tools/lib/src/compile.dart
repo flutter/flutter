@@ -65,9 +65,9 @@ class TargetModel {
 
   /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
   static TargetModel fromTargetPlatform(TargetPlatform? platform) {
-    return switch (platform) {
-      TargetPlatform.web_javascript => TargetModel.dartdevc,
-      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
+    return switch (platform?.type) {
+      .web => TargetModel.dartdevc,
+      .fuchsia => TargetModel.flutterRunner,
       _ => TargetModel.flutter,
     };
   }
@@ -280,7 +280,7 @@ class KernelCompiler {
     String? nativeAssets,
   }) async {
     final TargetPlatform? platform = targetModel == TargetModel.dartdevc
-        ? TargetPlatform.web_javascript
+        ? const TargetPlatform(.web, .unknown)
         : null;
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
@@ -359,7 +359,7 @@ class KernelCompiler {
           '--no-print-incremental-dependencies',
           for (final Object dartDefine in dartDefines) '-D$dartDefine',
           ...buildModeOptions(buildMode, dartDefines),
-          if (trackWidgetCreation) '--track-widget-creation',
+          if (trackWidgetCreation) '--track-creation-locations',
           if (!linkPlatformKernelIn) '--no-link-platform',
           if (aot) ...<String>[
             '--aot',
@@ -545,7 +545,7 @@ class ResidentCompilerFactory {
     TargetModel targetModel = targetModelOverride ?? .flutter;
 
     // Configure the compiler to target the DDC runtime.
-    if (targetPlatform case .web_javascript) {
+    if (targetPlatform.type == .web) {
       sdkRoot = artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
       targetModel = .dartdevc;
 
@@ -578,7 +578,7 @@ class ResidentCompilerFactory {
         ],
       );
     } else {
-      if (targetPlatform case .fuchsia_arm64 || .fuchsia_x64) {
+      if (targetPlatform.type == .fuchsia) {
         targetModel = .flutterRunner;
       }
       buildInfo = buildInfo.copyWith(
@@ -935,7 +935,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? nativeAssetsUri,
   }) async {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc)
-        ? TargetPlatform.web_javascript
+        ? const TargetPlatform(.web, .unknown)
         : null;
     late final List<String> commandToStartFrontendServer;
     if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
@@ -974,7 +974,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       if (packagesPath != null) ...<String>['--packages', packagesPath!],
       ...buildModeOptions(buildMode, dartDefines),
-      if (trackWidgetCreation) '--track-widget-creation',
+      if (trackWidgetCreation) '--track-creation-locations',
       if (includeUnsupportedPlatformLibraryStubs) '--include-unsupported-platform-library-stubs',
       for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
       if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme!],
