@@ -191,6 +191,16 @@ void main() {
       );
     });
 
+    test('returns null (does not throw) when LUCI_CONTEXT is malformed JSON', () {
+      final Directory dir = Directory.systemTemp.createTempSync('luci_resultdb_test');
+      addTearDown(() => tryToDelete(dir));
+      final context = File('${dir.path}/luci_context.json')..writeAsStringSync('{not valid json');
+      expect(
+        ResultDbRecorder.fromEnvironment(<String, String>{'LUCI_CONTEXT': context.path}),
+        isNull,
+      );
+    });
+
     test('parses hostname and current_invocation from LUCI_CONTEXT', () {
       final Directory dir = Directory.systemTemp.createTempSync('luci_resultdb_test');
       addTearDown(() => tryToDelete(dir));
