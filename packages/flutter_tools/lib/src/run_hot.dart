@@ -156,7 +156,7 @@ class HotRunner extends ResidentRunner {
       case 1:
         final Device device = flutterDevices.first.device!;
         final TargetPlatform targetPlatform = await device.targetPlatform;
-        _targetPlatformName = targetPlatform.getName();
+        _targetPlatformName = targetPlatform.devicePlatformName;
         _targetPlatforms.add(targetPlatform);
         _sdkName = await device.sdkNameAndVersion;
         _emulator = await device.isLocalEmulator;
@@ -1124,9 +1124,8 @@ class HotRunner extends ResidentRunner {
             uiIsolateId: view.uiIsolate!.id,
             viewId: view.id,
             windows:
-                (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
-                device.targetPlatform == TargetPlatform.windows_x64 ||
-                device.targetPlatform == TargetPlatform.windows_arm64,
+                (device.targetPlatform.type == .tester && globals.platform.isWindows) ||
+                device.targetPlatform.type == .windows,
           ),
         ),
       );

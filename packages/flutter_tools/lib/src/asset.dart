@@ -356,7 +356,7 @@ class ManifestAssetBundle implements AssetBundle {
         transformers: const <AssetTransformerEntry>[],
       );
       // Create .bin.json on web builds.
-      if (targetPlatform == TargetPlatform.web_javascript) {
+      if (targetPlatform.type == .web) {
         entries[_kAssetManifestBinJsonFilename] = AssetBundleEntry(
           DevFSStringContent('""'),
           kind: AssetKind.regular,
@@ -660,7 +660,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
     // Create .bin.json on web builds.
-    if (targetPlatform == TargetPlatform.web_javascript) {
+    if (targetPlatform.type == .web) {
       final assetManifestBinaryJson = DevFSStringContent(
         json.encode(base64.encode(assetManifestBinary.bytes)),
       );
@@ -719,7 +719,7 @@ class ManifestAssetBundle implements AssetBundle {
     // On the web, don't compress the NOTICES file since the client doesn't have
     // dart:io to decompress it. So use the standard _setIfChanged to check if
     // the strings still match.
-    if (targetPlatform == TargetPlatform.web_javascript) {
+    if (targetPlatform.type == .web) {
       _setIfChanged(_kNoticeFile, DevFSStringContent(combinedLicenses), AssetKind.regular);
       return;
     }
@@ -1398,7 +1398,11 @@ class ManifestAssetBundle implements AssetBundle {
     required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
-    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri, packageName: packageName);
+    _ensureAssetPathIsValid(
+      assetsBaseDir: assetsBaseDir,
+      assetUri: assetUri,
+      packageName: packageName,
+    );
     if (assetUri.pathSegments.first == 'packages' &&
         !_fileSystem.isFileSync(
           _fileSystem.path.join(assetsBaseDir, _fileSystem.path.fromUri(assetUri)),
@@ -1542,7 +1546,7 @@ class _Asset {
   }
 
   bool matchesPlatform(TargetPlatform targetPlatform) {
-    if (platforms.isEmpty || targetPlatform == TargetPlatform.tester) {
+    if (platforms.isEmpty || targetPlatform.type == .tester) {
       return true;
     }
 

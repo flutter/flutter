@@ -98,8 +98,8 @@ class CustomDeviceConfig {
   }) : assert(forwardPortCommand == null || forwardPortSuccessRegex != null),
        assert(
          platform == null ||
-             platform == TargetPlatform.linux_x64 ||
-             platform == TargetPlatform.linux_arm64,
+             platform == const TargetPlatform(.linux, .x64) ||
+             platform == const TargetPlatform(.linux, .arm64),
        );
 
   /// Create a CustomDeviceConfig from some JSON value.
@@ -144,8 +144,8 @@ class CustomDeviceConfig {
     }
 
     if (platform != null &&
-        platform != TargetPlatform.linux_arm64 &&
-        platform != TargetPlatform.linux_x64) {
+        platform != const TargetPlatform(.linux, .arm64) &&
+        platform != const TargetPlatform(.linux, .x64)) {
       throw const CustomDeviceRevivalException.fromDescriptions(
         _kPlatform,
         'null or one of linux-arm64, linux-x64',
@@ -243,7 +243,7 @@ class CustomDeviceConfig {
     id: 'pi',
     label: 'Raspberry Pi',
     sdkNameAndVersion: 'Raspberry Pi 4 Model B+',
-    platform: TargetPlatform.linux_arm64,
+    platform: const TargetPlatform(.linux, .arm64),
     enabled: false,
     pingCommand: const <String>['ping', '-w', '500', '-n', '1', 'raspberrypi'],
     pingSuccessRegex: RegExp(r'[<=]\d+ms'),

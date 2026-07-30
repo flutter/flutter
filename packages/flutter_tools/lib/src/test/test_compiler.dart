@@ -201,7 +201,7 @@ class TestCompiler {
       fileSystem: globals.fs,
       shutdownHooks: globals.shutdownHooks,
       config: globals.config,
-      targetPlatform: .tester,
+      targetPlatform: const TargetPlatform(.tester, .unknown),
     );
     return residentCompiler;
   }

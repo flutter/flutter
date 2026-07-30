@@ -72,7 +72,7 @@ void main() {
       ];
       final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
         environmentDefines: environmentDefines,
-        targetPlatform: TargetPlatform.linux_x64,
+        targetPlatform: const TargetPlatform(.linux, .x64),
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
@@ -87,7 +87,7 @@ void main() {
       await installCodeAssets(
         dartHookResult: dartHookResult,
         environmentDefines: environmentDefines,
-        targetPlatform: TargetPlatform.windows_x64,
+        targetPlatform: const TargetPlatform(.windows, .x64),
         projectUri: projectUri,
         fileSystem: fileSystem,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
@@ -111,7 +111,7 @@ void main() {
       expect(
         () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-          targetPlatform: TargetPlatform.windows_x64,
+          targetPlatform: const TargetPlatform(.windows, .x64),
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
@@ -140,7 +140,7 @@ void main() {
       final environmentDefines = <String, String>{kBuildMode: BuildMode.debug.cliName};
       final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
         environmentDefines: environmentDefines,
-        targetPlatform: TargetPlatform.windows_x64,
+        targetPlatform: const TargetPlatform(.windows, .x64),
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
@@ -154,7 +154,7 @@ void main() {
       await installCodeAssets(
         dartHookResult: dartHookResult,
         environmentDefines: environmentDefines,
-        targetPlatform: TargetPlatform.windows_x64,
+        targetPlatform: const TargetPlatform(.windows, .x64),
         projectUri: projectUri,
         fileSystem: fileSystem,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
@@ -178,7 +178,7 @@ void main() {
       expect(
         () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-          targetPlatform: TargetPlatform.linux_x64,
+          targetPlatform: const TargetPlatform(.linux, .x64),
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
@@ -217,7 +217,7 @@ void main() {
           // Release mode means the dart build has linking enabled.
           kBuildMode: BuildMode.release.cliName,
         },
-        targetPlatform: TargetPlatform.linux_x64,
+        targetPlatform: const TargetPlatform(.linux, .x64),
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
@@ -267,7 +267,7 @@ void main() {
       expect(
         () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{kBuildMode: BuildMode.release.cliName},
-          targetPlatform: TargetPlatform.linux_x64,
+          targetPlatform: const TargetPlatform(.linux, .x64),
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
@@ -338,7 +338,7 @@ void main() {
 
       await runFlutterSpecificHooks(
         environmentDefines: {},
-        targetPlatform: TargetPlatform.tester,
+        targetPlatform: const TargetPlatform(.tester, .unknown),
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: target,
@@ -381,7 +381,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
 
       await runFlutterSpecificHooks(
         environmentDefines: {kBuildMode: 'release'},
-        targetPlatform: TargetPlatform.linux_arm64,
+        targetPlatform: const TargetPlatform(.linux, .arm64),
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: target,
