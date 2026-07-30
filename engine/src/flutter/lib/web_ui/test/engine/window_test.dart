@@ -547,15 +547,45 @@ void testMain() {
   });
 
   test('dispatches browser event asynchronously on flutter/service_worker channel', () async {
-    final completer = Completer<void>();
-    final DomEventListener listener = createDomEventListener((DomEvent e) => completer.complete());
+    // Each dispatcher tracks its own first frame, and only the first one. The
+    // singleton's is already over by now, because 'onDrawFrame preserves the
+    // zone' above pumps a frame, so this test brings its own dispatcher, like
+    // 'registration' below, to make the frame it pumps really the first one.
+    final ownDispatcher = EnginePlatformDispatcher();
+    addTearDown(ownDispatcher.dispose);
+
+    var eventCount = 0;
+    final DomEventListener listener = createDomEventListener((DomEvent e) => eventCount++);
     domWindow.addEventListener('flutter-first-frame', listener);
     addTearDown(() => domWindow.removeEventListener('flutter-first-frame', listener));
 
-    myWindow.sendPlatformMessage('flutter/service_worker', ByteData(0), (ByteData? outputData) {});
+    // The event is dispatched from an animation frame callback, so an animation
+    // frame is long enough to observe one that was sent.
+    Future<void> awaitAnimationFrame() {
+      final completer = Completer<void>();
+      domWindow.requestAnimationFrame((_) => Timer.run(completer.complete));
+      return completer.future;
+    }
 
-    expect(completer.isCompleted, isFalse);
-    await expectLater(completer.future, completes);
+    ownDispatcher.sendPlatformMessage(
+      'flutter/service_worker',
+      ByteData(0),
+      (ByteData? outputData) {},
+    );
+
+    // The event waits for the first frame to be on screen, which hasn't happened
+    // yet.
+    await awaitAnimationFrame();
+    expect(eventCount, 0);
+
+    // This frame renders no scene, but a first frame that rendered nothing is
+    // still a first frame, so ending it releases the event with nothing left to
+    // wait for. Ending the frame resolves what the dispatch is waiting on
+    // synchronously, so the dispatch is queued from a microtask, which runs
+    // before the animation frame below.
+    ownDispatcher.invokeOnDrawFrame();
+    await awaitAnimationFrame();
+    expect(eventCount, 1);
   });
 
   test('sets global html attributes', () {
