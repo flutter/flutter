@@ -308,36 +308,48 @@ void main() {
       expect(ephemeralDevice, ephemeralOne);
     }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
-    testUsingContext('returns null when multiple non ephemeral devices are found', () async {
-      final devices = <Device>[ephemeralOne, ephemeralTwo, nonEphemeralOne, nonEphemeralTwo];
+    testUsingContext(
+      'returns null when multiple non ephemeral devices are found',
+      () async {
+        final devices = <Device>[ephemeralOne, ephemeralTwo, nonEphemeralOne, nonEphemeralTwo];
 
-      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
-      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+        final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-      expect(ephemeralDevice, isNull);
-    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
+        expect(ephemeralDevice, isNull);
+      },
+      overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()},
+    );
 
-    testUsingContext('return null when hasSpecifiedDeviceId is true', () async {
-      final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
+    testUsingContext(
+      'return null when hasSpecifiedDeviceId is true',
+      () async {
+        final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
 
-      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
-      deviceManager.specifiedDeviceId = 'device';
+        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+        deviceManager.specifiedDeviceId = 'device';
 
-      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+        final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-      expect(ephemeralDevice, isNull);
-    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
+        expect(ephemeralDevice, isNull);
+      },
+      overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()},
+    );
 
-    testUsingContext('returns null when no ephemeral devices are found', () async {
-      final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
+    testUsingContext(
+      'returns null when no ephemeral devices are found',
+      () async {
+        final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
 
-      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
-      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+        final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-      expect(ephemeralDevice, isNull);
-    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
+        expect(ephemeralDevice, isNull);
+      },
+      overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()},
+    );
 
     testWithoutContext('Unsupported devices listed in all devices', () async {
       final devices = <Device>[unsupported, unsupportedForProject];
@@ -741,6 +753,7 @@ void main() {
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
+            '--experimental-vm-service',
             '--enable-software-rendering',
             '--trace-systrace',
             '--trace-to-file="path/to/trace.binpb"',
@@ -778,6 +791,7 @@ void main() {
             '--enable-dart-profiling',
             '--enable-checked-mode',
             '--verify-entry-points',
+            '--experimental-vm-service',
           ].join(' '),
         );
       },
@@ -799,6 +813,7 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
+          '--experimental-vm-service',
           '--vm-service-host=0.0.0.0',
         ].join(' '),
       );
@@ -820,6 +835,7 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
+          '--experimental-vm-service',
           '--vm-service-host=::0',
         ].join(' '),
       );
@@ -898,6 +914,7 @@ void main() {
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
+            '--experimental-vm-service',
             '--enable-software-rendering',
             '--trace-systrace',
             '--trace-to-file="path/to/trace.binpb"',
@@ -935,6 +952,7 @@ void main() {
             '--enable-dart-profiling',
             '--enable-checked-mode',
             '--verify-entry-points',
+            '--experimental-vm-service',
           ].join(' '),
         );
       },
@@ -951,7 +969,11 @@ void main() {
 
       expect(
         launchArguments.join(' '),
-        <String>['--enable-checked-mode', '--verify-entry-points'].join(' '),
+        <String>[
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--experimental-vm-service',
+        ].join(' '),
       );
     });
   });

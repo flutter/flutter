@@ -991,7 +991,10 @@ void main() {
                 hostAppProjectName: 'Runner',
               ),
               expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedLaunchArguments: <String>[
+                '--enable-dart-profiling',
+                '--experimental-vm-service',
+              ],
             ),
           );
 
@@ -1089,7 +1092,10 @@ void main() {
                   hostAppProjectName: 'Runner',
                 ),
                 expectedDeviceId: '123',
-                expectedLaunchArguments: <String>['--enable-dart-profiling'],
+                expectedLaunchArguments: <String>[
+                  '--enable-dart-profiling',
+                  '--experimental-vm-service',
+                ],
                 expectedSchemeFilePath:
                     '/ios/Runner.xcodeproj/xcshareddata/xcschemes/$flavor.xcscheme',
               ),
@@ -1174,7 +1180,10 @@ void main() {
                 expectedConfigurationBuildDir: '/build/ios/iphoneos',
               ),
               expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedLaunchArguments: <String>[
+                '--enable-dart-profiling',
+                '--experimental-vm-service',
+              ],
               debugStartedCompleter: debugStartedCompleter,
               debugEndedCompleter: debugEndedCompleter,
             ),
