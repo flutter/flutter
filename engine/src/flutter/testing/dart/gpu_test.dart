@@ -64,9 +64,7 @@ Future<ByteData> readTextureBytes(gpu.Texture texture) async {
 }
 
 Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
-  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset(
-    'test.shaderbundle',
-  );
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
   final gpu.Shader? vertex = library!['UnlitVertex'];
   assert(vertex != null);
@@ -76,9 +74,7 @@ Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
 }
 
 Future<gpu.RenderPipeline> createTextureRenderPipeline() async {
-  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset(
-    'test.shaderbundle',
-  );
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
   final gpu.Shader? vertex = library!['TextureVertex'];
   assert(vertex != null);
@@ -114,14 +110,10 @@ RenderPassState createSimpleRenderPass({Vector4? clearColor}) {
 
   final renderTarget = gpu.RenderTarget.singleColor(
     gpu.ColorAttachment(texture: renderTexture, clearValue: clearColor),
-    depthStencilAttachment: gpu.DepthStencilAttachment(
-      texture: depthStencilTexture,
-    ),
+    depthStencilAttachment: gpu.DepthStencilAttachment(texture: depthStencilTexture),
   );
 
-  final gpu.RenderPass renderPass = commandBuffer.createRenderPass(
-    renderTarget,
-  );
+  final gpu.RenderPass renderPass = commandBuffer.createRenderPass(renderTarget);
 
   return RenderPassState(renderTexture, commandBuffer, renderPass);
 }
@@ -164,14 +156,10 @@ RenderPassState createSimpleRenderPassWithMSAA() {
       resolveTexture: resolveTexture,
       storeAction: gpu.StoreAction.multisampleResolve,
     ),
-    depthStencilAttachment: gpu.DepthStencilAttachment(
-      texture: depthStencilTexture,
-    ),
+    depthStencilAttachment: gpu.DepthStencilAttachment(texture: depthStencilTexture),
   );
 
-  final gpu.RenderPass renderPass = commandBuffer.createRenderPass(
-    renderTarget,
-  );
+  final gpu.RenderPass renderPass = commandBuffer.createRenderPass(renderTarget);
 
   return RenderPassState(resolveTexture, commandBuffer, renderPass);
 }
@@ -189,14 +177,10 @@ Future<void> drawTriangle(RenderPassState state, Vector4 color) async {
       0.5, 0.5, //
     ]),
   );
-  final gpu.BufferView vertInfoData = transients.emplace(
-    unlitUBO(Matrix4.identity(), color),
-  );
+  final gpu.BufferView vertInfoData = transients.emplace(unlitUBO(Matrix4.identity(), color));
   state.renderPass.bindVertexBuffer(vertices);
 
-  final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-    'VertInfo',
-  );
+  final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
   state.renderPass.bindUniform(vertInfo, vertInfoData);
 
   state.renderPass.draw(3);
@@ -214,15 +198,10 @@ void main() async {
       }
     } catch (e) {
       if (impellerEnabled && flutterGpuEnabled) {
-        fail(
-          'Exception thrown even though Impeller and Flutter GPU are both enabled: $e',
-        );
+        fail('Exception thrown even though Impeller and Flutter GPU are both enabled: $e');
       }
       if (!impellerEnabled) {
-        expect(
-          e.toString(),
-          contains('Flutter GPU requires the Impeller rendering backend'),
-        );
+        expect(e.toString(), contains('Flutter GPU requires the Impeller rendering backend'));
       }
     }
   });
@@ -236,16 +215,12 @@ void main() async {
       }
     } catch (e) {
       if (flutterGpuEnabled && impellerEnabled) {
-        fail(
-          'Exception thrown even though Flutter GPU and Impeller are both enabled: $e',
-        );
+        fail('Exception thrown even though Flutter GPU and Impeller are both enabled: $e');
       }
       if (impellerEnabled) {
         expect(
           e.toString(),
-          contains(
-            'Flutter GPU must be enabled via the Flutter GPU manifest setting',
-          ),
+          contains('Flutter GPU must be enabled via the Flutter GPU manifest setting'),
         );
       }
     }
@@ -257,9 +232,7 @@ void main() async {
       gpu.gpuContext; // Force the context to instantiate.
     } catch (e) {
       if (impellerEnabled && flutterGpuEnabled) {
-        fail(
-          'Exception thrown even though Impeller and Flutter GPU are enabled: $e',
-        );
+        fail('Exception thrown even though Impeller and Flutter GPU are enabled: $e');
       }
     }
   });
@@ -281,10 +254,7 @@ void main() async {
     final gpu.BufferView view1 = hostBuffer.emplace(
       Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
     );
-    expect(
-      view1.offsetInBytes,
-      equals(gpu.gpuContext.minimumUniformByteAlignment),
-    );
+    expect(view1.offsetInBytes, equals(gpu.gpuContext.minimumUniformByteAlignment));
     expect(view1.lengthInBytes, 4);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -359,37 +329,26 @@ void main() async {
     expect(success, false);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'DeviceBuffer.overwrite throws for negative destination offset',
-    () async {
-      final gpu.DeviceBuffer deviceBuffer = gpu.gpuContext.createDeviceBuffer(
-        gpu.StorageMode.hostVisible,
-        4,
-      );
+  test('DeviceBuffer.overwrite throws for negative destination offset', () async {
+    final gpu.DeviceBuffer deviceBuffer = gpu.gpuContext.createDeviceBuffer(
+      gpu.StorageMode.hostVisible,
+      4,
+    );
 
-      try {
-        deviceBuffer.overwrite(
-          Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
-          destinationOffsetInBytes: -1,
-        );
-        deviceBuffer.flush();
-        fail('Exception not thrown for negative destination offset.');
-      } catch (e) {
-        expect(
-          e.toString(),
-          contains('destinationOffsetInBytes must be positive'),
-        );
-      }
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+    try {
+      deviceBuffer.overwrite(
+        Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
+        destinationOffsetInBytes: -1,
+      );
+      deviceBuffer.flush();
+      fail('Exception not thrown for negative destination offset.');
+    } catch (e) {
+      expect(e.toString(), contains('destinationOffsetInBytes must be positive'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('GpuContext.createTexture', () async {
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.hostVisible,
-      100,
-      100,
-    );
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
 
     // Check the defaults.
     expect(texture.width, 100);
@@ -433,24 +392,15 @@ void main() async {
     expect(gpu.PixelFormat.bc1RGBAUNormInt.blockWidth, 4);
     expect(gpu.PixelFormat.bc1RGBAUNormInt.blockHeight, 4);
     expect(gpu.PixelFormat.bc1RGBAUNormInt.bytesPerBlock, 8);
-    expect(
-      gpu.PixelFormat.bc1RGBAUNormInt.compressionFamily,
-      gpu.TextureCompressionFamily.bc,
-    );
+    expect(gpu.PixelFormat.bc1RGBAUNormInt.compressionFamily, gpu.TextureCompressionFamily.bc);
     expect(gpu.PixelFormat.etc2RGB8UNormInt.bytesPerBlock, 8);
-    expect(
-      gpu.PixelFormat.etc2RGB8UNormInt.compressionFamily,
-      gpu.TextureCompressionFamily.etc2,
-    );
+    expect(gpu.PixelFormat.etc2RGB8UNormInt.compressionFamily, gpu.TextureCompressionFamily.etc2);
 
     // BC7 / ETC2 RGBA / ASTC 4x4: 4x4 blocks, 16 bytes per block.
     expect(gpu.PixelFormat.bc7RGBAUNormInt.bytesPerBlock, 16);
     expect(gpu.PixelFormat.etc2RGBA8UNormInt.bytesPerBlock, 16);
     expect(gpu.PixelFormat.astc4x4LDR.bytesPerBlock, 16);
-    expect(
-      gpu.PixelFormat.astc4x4LDR.compressionFamily,
-      gpu.TextureCompressionFamily.astc,
-    );
+    expect(gpu.PixelFormat.astc4x4LDR.compressionFamily, gpu.TextureCompressionFamily.astc);
 
     // ASTC 8x8: 8x8 blocks, 16 bytes per block.
     expect(gpu.PixelFormat.astc8x8LDR.blockWidth, 8);
@@ -458,162 +408,99 @@ void main() async {
     expect(gpu.PixelFormat.astc8x8LDR.bytesPerBlock, 16);
 
     // All ASTC LDR variants map to the astc family.
-    expect(
-      gpu.PixelFormat.astc4x4LDRSRGB.compressionFamily,
-      gpu.TextureCompressionFamily.astc,
-    );
-    expect(
-      gpu.PixelFormat.astc8x8LDR.compressionFamily,
-      gpu.TextureCompressionFamily.astc,
-    );
-    expect(
-      gpu.PixelFormat.astc8x8LDRSRGB.compressionFamily,
-      gpu.TextureCompressionFamily.astc,
-    );
+    expect(gpu.PixelFormat.astc4x4LDRSRGB.compressionFamily, gpu.TextureCompressionFamily.astc);
+    expect(gpu.PixelFormat.astc8x8LDR.compressionFamily, gpu.TextureCompressionFamily.astc);
+    expect(gpu.PixelFormat.astc8x8LDRSRGB.compressionFamily, gpu.TextureCompressionFamily.astc);
 
     // ASTC HDR shares geometry with ASTC LDR but is its own family.
     expect(gpu.PixelFormat.astc4x4HDR.blockWidth, 4);
     expect(gpu.PixelFormat.astc4x4HDR.blockHeight, 4);
     expect(gpu.PixelFormat.astc4x4HDR.bytesPerBlock, 16);
-    expect(
-      gpu.PixelFormat.astc4x4HDR.compressionFamily,
-      gpu.TextureCompressionFamily.astcHdr,
-    );
+    expect(gpu.PixelFormat.astc4x4HDR.compressionFamily, gpu.TextureCompressionFamily.astcHdr);
     expect(gpu.PixelFormat.astc8x8HDR.blockWidth, 8);
     expect(gpu.PixelFormat.astc8x8HDR.blockHeight, 8);
     expect(gpu.PixelFormat.astc8x8HDR.bytesPerBlock, 16);
-    expect(
-      gpu.PixelFormat.astc8x8HDR.compressionFamily,
-      gpu.TextureCompressionFamily.astcHdr,
-    );
+    expect(gpu.PixelFormat.astc8x8HDR.compressionFamily, gpu.TextureCompressionFamily.astcHdr);
   });
 
-  test(
-    'GpuContext.supportsTextureCompression returns a bool per family',
-    () async {
-      // The exact answer depends on the device, but each query must return.
-      expect(
-        gpu.gpuContext.supportsTextureCompression(
-          gpu.TextureCompressionFamily.bc,
-        ),
-        isA<bool>(),
-      );
-      expect(
-        gpu.gpuContext.supportsTextureCompression(
-          gpu.TextureCompressionFamily.etc2,
-        ),
-        isA<bool>(),
-      );
-      expect(
-        gpu.gpuContext.supportsTextureCompression(
-          gpu.TextureCompressionFamily.astc,
-        ),
-        isA<bool>(),
-      );
-      expect(
-        gpu.gpuContext.supportsTextureCompression(
-          gpu.TextureCompressionFamily.astcHdr,
-        ),
-        isA<bool>(),
-      );
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('GpuContext.supportsTextureCompression returns a bool per family', () async {
+    // The exact answer depends on the device, but each query must return.
+    expect(gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc), isA<bool>());
+    expect(
+      gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.etc2),
+      isA<bool>(),
+    );
+    expect(
+      gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.astc),
+      isA<bool>(),
+    );
+    expect(
+      gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.astcHdr),
+      isA<bool>(),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'GpuContext.supportsTextureFormat rejects render-target on compressed',
-    () async {
-      // Sample-only is always permitted to be queried (subject to the family
-      // capability); render-target and shader-write are always rejected for
-      // compressed formats.
-      expect(
-        gpu.gpuContext.supportsTextureFormat(
-          gpu.PixelFormat.bc7RGBAUNormInt,
-          renderTarget: true,
-        ),
-        false,
-      );
-      expect(
-        gpu.gpuContext.supportsTextureFormat(
-          gpu.PixelFormat.bc7RGBAUNormInt,
-          shaderWrite: true,
-        ),
-        false,
-      );
-      // Uncompressed formats are not gated by per-format usage today.
-      expect(
-        gpu.gpuContext.supportsTextureFormat(
-          gpu.PixelFormat.r8g8b8a8UNormInt,
-          renderTarget: true,
-        ),
-        true,
-      );
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('GpuContext.supportsTextureFormat rejects render-target on compressed', () async {
+    // Sample-only is always permitted to be queried (subject to the family
+    // capability); render-target and shader-write are always rejected for
+    // compressed formats.
+    expect(
+      gpu.gpuContext.supportsTextureFormat(gpu.PixelFormat.bc7RGBAUNormInt, renderTarget: true),
+      false,
+    );
+    expect(
+      gpu.gpuContext.supportsTextureFormat(gpu.PixelFormat.bc7RGBAUNormInt, shaderWrite: true),
+      false,
+    );
+    // Uncompressed formats are not gated by per-format usage today.
+    expect(
+      gpu.gpuContext.supportsTextureFormat(gpu.PixelFormat.r8g8b8a8UNormInt, renderTarget: true),
+      true,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'Texture.getMipLevelSizeInBytes is block-aware for compressed formats',
-    () async {
-      if (!gpu.gpuContext.supportsTextureCompression(
-        gpu.TextureCompressionFamily.bc,
-      )) {
-        markTestSkipped(
-          'BC texture compression is not supported on this device.',
-        );
-        return;
-      }
-      final gpu.Texture texture = gpu.gpuContext.createTexture(
-        gpu.StorageMode.hostVisible,
-        16,
-        16,
-        format: gpu.PixelFormat.bc1RGBAUNormInt,
-        enableRenderTargetUsage: false,
-        mipLevelCount: 3,
-      );
-      // 16x16 -> 4x4 blocks * 8 bytes = 128.
-      expect(texture.getMipLevelSizeInBytes(0), 128);
-      // 8x8 -> 2x2 blocks * 8 bytes = 32.
-      expect(texture.getMipLevelSizeInBytes(1), 32);
-      // 4x4 -> 1x1 block * 8 bytes = 8.
-      expect(texture.getMipLevelSizeInBytes(2), 8);
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('Texture.getMipLevelSizeInBytes is block-aware for compressed formats', () async {
+    if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
+      return;
+    }
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      16,
+      16,
+      format: gpu.PixelFormat.bc1RGBAUNormInt,
+      enableRenderTargetUsage: false,
+      mipLevelCount: 3,
+    );
+    // 16x16 -> 4x4 blocks * 8 bytes = 128.
+    expect(texture.getMipLevelSizeInBytes(0), 128);
+    // 8x8 -> 2x2 blocks * 8 bytes = 32.
+    expect(texture.getMipLevelSizeInBytes(1), 32);
+    // 4x4 -> 1x1 block * 8 bytes = 8.
+    expect(texture.getMipLevelSizeInBytes(2), 8);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'GpuContext.createTexture allocates a compressed texture when supported',
-    () async {
-      if (!gpu.gpuContext.supportsTextureCompression(
-        gpu.TextureCompressionFamily.bc,
-      )) {
-        markTestSkipped(
-          'BC texture compression is not supported on this device.',
-        );
-        return;
-      }
-      final gpu.Texture texture = gpu.gpuContext.createTexture(
-        gpu.StorageMode.hostVisible,
-        8,
-        8,
-        format: gpu.PixelFormat.bc1RGBAUNormInt,
-        enableRenderTargetUsage: false,
-      );
-      expect(texture.format, gpu.PixelFormat.bc1RGBAUNormInt);
-      expect(texture.format.isCompressed, true);
-      // 8x8 -> 2x2 blocks * 8 bytes = 32.
-      expect(texture.getBaseMipLevelSizeInBytes(), 32);
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('GpuContext.createTexture allocates a compressed texture when supported', () async {
+    if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
+      return;
+    }
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      8,
+      8,
+      format: gpu.PixelFormat.bc1RGBAUNormInt,
+      enableRenderTargetUsage: false,
+    );
+    expect(texture.format, gpu.PixelFormat.bc1RGBAUNormInt);
+    expect(texture.format.isCompressed, true);
+    // 8x8 -> 2x2 blocks * 8 bytes = 32.
+    expect(texture.getBaseMipLevelSizeInBytes(), 32);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.overwrite uploads block-aligned compressed data', () async {
-    if (!gpu.gpuContext.supportsTextureCompression(
-      gpu.TextureCompressionFamily.bc,
-    )) {
-      markTestSkipped(
-        'BC texture compression is not supported on this device.',
-      );
+    if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
       return;
     }
     final gpu.Texture texture = gpu.gpuContext.createTexture(
@@ -628,12 +515,8 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.overwrite rejects wrong size for compressed format', () async {
-    if (!gpu.gpuContext.supportsTextureCompression(
-      gpu.TextureCompressionFamily.bc,
-    )) {
-      markTestSkipped(
-        'BC texture compression is not supported on this device.',
-      );
+    if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
       return;
     }
     final gpu.Texture texture = gpu.gpuContext.createTexture(
@@ -648,92 +531,71 @@ void main() async {
       texture.overwrite(Uint8List(16).buffer.asByteData());
       fail('Exception not thrown for wrong compressed buffer size.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('must exactly match the size of mip level 0'),
-      );
+      expect(e.toString(), contains('must exactly match the size of mip level 0'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'GpuContext.createTexture rejects compressed format as render target',
-    () async {
-      try {
-        gpu.gpuContext.createTexture(
-          gpu.StorageMode.hostVisible,
-          8,
-          8,
-          format: gpu.PixelFormat.bc1RGBAUNormInt,
-        );
-        fail('Exception not thrown for compressed render target.');
-      } catch (e) {
-        expect(e.toString(), contains('sample-only'));
-      }
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('GpuContext.createTexture rejects compressed format as render target', () async {
+    try {
+      gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        8,
+        8,
+        format: gpu.PixelFormat.bc1RGBAUNormInt,
+      );
+      fail('Exception not thrown for compressed render target.');
+    } catch (e) {
+      expect(e.toString(), contains('sample-only'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'GpuContext.createTexture rejects compressed format with shader write',
-    () async {
-      try {
-        gpu.gpuContext.createTexture(
-          gpu.StorageMode.hostVisible,
-          8,
-          8,
-          format: gpu.PixelFormat.bc1RGBAUNormInt,
-          enableRenderTargetUsage: false,
-          enableShaderWriteUsage: true,
-        );
-        fail('Exception not thrown for compressed shader write.');
-      } catch (e) {
-        expect(e.toString(), contains('sample-only'));
-      }
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('GpuContext.createTexture rejects compressed format with shader write', () async {
+    try {
+      gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        8,
+        8,
+        format: gpu.PixelFormat.bc1RGBAUNormInt,
+        enableRenderTargetUsage: false,
+        enableShaderWriteUsage: true,
+      );
+      fail('Exception not thrown for compressed shader write.');
+    } catch (e) {
+      expect(e.toString(), contains('sample-only'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'GpuContext.createTexture rejects compressed format with MSAA',
-    () async {
-      try {
-        gpu.gpuContext.createTexture(
-          gpu.StorageMode.hostVisible,
-          8,
-          8,
-          format: gpu.PixelFormat.bc1RGBAUNormInt,
-          enableRenderTargetUsage: false,
-          sampleCount: 4,
-        );
-        fail('Exception not thrown for compressed MSAA.');
-      } catch (e) {
-        expect(e.toString(), contains('sample-only'));
-      }
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('GpuContext.createTexture rejects compressed format with MSAA', () async {
+    try {
+      gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        8,
+        8,
+        format: gpu.PixelFormat.bc1RGBAUNormInt,
+        enableRenderTargetUsage: false,
+        sampleCount: 4,
+      );
+      fail('Exception not thrown for compressed MSAA.');
+    } catch (e) {
+      expect(e.toString(), contains('sample-only'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'GpuContext.createTexture rejects non-block-aligned compressed dimensions',
-    () async {
-      try {
-        // 5 is not a multiple of the 4x4 BC1 block.
-        gpu.gpuContext.createTexture(
-          gpu.StorageMode.hostVisible,
-          5,
-          8,
-          format: gpu.PixelFormat.bc1RGBAUNormInt,
-          enableRenderTargetUsage: false,
-        );
-        fail(
-          'Exception not thrown for non-block-aligned compressed dimensions.',
-        );
-      } catch (e) {
-        expect(e.toString(), contains('multiple of the block size'));
-      }
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('GpuContext.createTexture rejects non-block-aligned compressed dimensions', () async {
+    try {
+      // 5 is not a multiple of the 4x4 BC1 block.
+      gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        5,
+        8,
+        format: gpu.PixelFormat.bc1RGBAUNormInt,
+        enableRenderTargetUsage: false,
+      );
+      fail('Exception not thrown for non-block-aligned compressed dimensions.');
+    } catch (e) {
+      expect(e.toString(), contains('multiple of the block size'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.fullMipCount', () async {
     // Matches Impeller's `ISize::MipCount`: `floor(log2(min(w, h)))`,
@@ -750,128 +612,101 @@ void main() async {
     expect(gpu.Texture.fullMipCount(1, 256), 1);
   });
 
-  test(
-    'GpuContext.createTexture with mipLevelCount allocates a mip chain',
-    () async {
-      final gpu.Texture texture = gpu.gpuContext.createTexture(
-        gpu.StorageMode.hostVisible,
-        8,
-        8,
-        mipLevelCount: 3,
-      );
-      expect(texture.mipLevelCount, 3);
-      // Per-level sizes: 8*8*4=256, 4*4*4=64, 2*2*4=16.
-      expect(texture.getMipLevelSizeInBytes(0), 256);
-      expect(texture.getMipLevelSizeInBytes(1), 64);
-      expect(texture.getMipLevelSizeInBytes(2), 16);
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('GpuContext.createTexture with mipLevelCount allocates a mip chain', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      8,
+      8,
+      mipLevelCount: 3,
+    );
+    expect(texture.mipLevelCount, 3);
+    // Per-level sizes: 8*8*4=256, 4*4*4=64, 2*2*4=16.
+    expect(texture.getMipLevelSizeInBytes(0), 256);
+    expect(texture.getMipLevelSizeInBytes(1), 64);
+    expect(texture.getMipLevelSizeInBytes(2), 16);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('GpuContext.createTexture rejects out-of-range mipLevelCount', () async {
     try {
-      gpu.gpuContext.createTexture(
-        gpu.StorageMode.hostVisible,
-        8,
-        8,
-        mipLevelCount: 0,
-      );
+      gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 8, 8, mipLevelCount: 0);
       fail('Exception not thrown for mipLevelCount=0.');
     } catch (e) {
       expect(e.toString(), contains('mipLevelCount'));
     }
     try {
       // Max for 8x8 is 3.
-      gpu.gpuContext.createTexture(
-        gpu.StorageMode.hostVisible,
-        8,
-        8,
-        mipLevelCount: 4,
-      );
+      gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 8, 8, mipLevelCount: 4);
       fail('Exception not thrown for mipLevelCount above the maximum.');
     } catch (e) {
       expect(e.toString(), contains('mipLevelCount'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('GpuContext.createTexture fails if invalid sampleCount and texture type is passed.', () async {
-    try {
-      gpu.gpuContext.createTexture(
-        gpu.StorageMode.hostVisible,
-        100,
-        100,
-        sampleCount: 4,
-        textureType: gpu.TextureType.texture2D,
-      );
-      fail('Exception not thrown when creating an invalid texture.');
-    } catch (e) {
-      expect(e.toString(), contains('Texture creation failed'));
-    }
-  }, skip: !(impellerEnabled && flutterGpuEnabled));
+  test(
+    'GpuContext.createTexture fails if invalid sampleCount and texture type is passed.',
+    () async {
+      try {
+        gpu.gpuContext.createTexture(
+          gpu.StorageMode.hostVisible,
+          100,
+          100,
+          sampleCount: 4,
+          textureType: gpu.TextureType.texture2D,
+        );
+        fail('Exception not thrown when creating an invalid texture.');
+      } catch (e) {
+        expect(e.toString(), contains('Texture creation failed'));
+      }
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
 
   test('Texture.overwrite', () async {
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.hostVisible,
-      2,
-      2,
-    );
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
 
     const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     const green = ui.Color.fromARGB(0xFF, 0, 0xFF, 0);
     texture.overwrite(
-      Int32List.fromList(<int>[red.value, green.value, green.value, red.value])
-          .buffer
-          .asByteData(),
+      Int32List.fromList(<int>[red.value, green.value, green.value, red.value]).buffer.asByteData(),
     );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'CommandBuffer.copyBufferToTexture writes tightly packed texture regions',
-    () async {
-      final gpu.Texture texture = gpu.gpuContext.createTexture(
-        gpu.StorageMode.hostVisible,
-        2,
-        2,
-      );
-      final ByteData pixels = Uint8List.fromList(<int>[
-        0xFF, 0x00, 0x00, 0xFF, // red
-        0x00, 0xFF, 0x00, 0xFF, // green
-        0x00, 0x00, 0xFF, 0xFF, // blue
-        0xFF, 0xFF, 0x00, 0xFF, // yellow
-      ]).buffer.asByteData();
-      final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(
-        pixels,
-      );
+  test('CommandBuffer.copyBufferToTexture writes tightly packed texture regions', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
+    final ByteData pixels = Uint8List.fromList(<int>[
+      0xFF, 0x00, 0x00, 0xFF, // red
+      0x00, 0xFF, 0x00, 0xFF, // green
+      0x00, 0x00, 0xFF, 0xFF, // blue
+      0xFF, 0xFF, 0x00, 0xFF, // yellow
+    ]).buffer.asByteData();
+    final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(pixels);
 
-      final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-          .createCommandBuffer();
-      commandBuffer.copyBufferToTexture(
-        gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: 4),
-        gpu.TextureRegion(texture, width: 1, height: 1),
-      );
-      commandBuffer.copyBufferToTexture(
-        gpu.BufferView(source, offsetInBytes: 4, lengthInBytes: 4),
-        gpu.TextureRegion(texture, x: 1, width: 1, height: 1),
-      );
-      commandBuffer.copyBufferToTexture(
-        gpu.BufferView(source, offsetInBytes: 8, lengthInBytes: 8),
-        gpu.TextureRegion(texture, y: 1, width: 2, height: 1),
-      );
-      await submitAndWait(commandBuffer);
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: 4),
+      gpu.TextureRegion(texture, width: 1, height: 1),
+    );
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 4, lengthInBytes: 4),
+      gpu.TextureRegion(texture, x: 1, width: 1, height: 1),
+    );
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 8, lengthInBytes: 8),
+      gpu.TextureRegion(texture, y: 1, width: 2, height: 1),
+    );
+    await submitAndWait(commandBuffer);
 
-      final ByteData bytes = await readTextureBytes(texture);
-      expect(bytes.getUint8(0), 0xFF);
-      expect(bytes.getUint8(1), 0x00);
-      expect(bytes.getUint8(2), 0x00);
-      expect(bytes.getUint8(3), 0xFF);
-      final int bottomRightOffset = (1 + 1 * texture.width) * 4;
-      expect(bytes.getUint8(bottomRightOffset), 0xFF);
-      expect(bytes.getUint8(bottomRightOffset + 1), 0xFF);
-      expect(bytes.getUint8(bottomRightOffset + 2), 0x00);
-      expect(bytes.getUint8(bottomRightOffset + 3), 0xFF);
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+    final ByteData bytes = await readTextureBytes(texture);
+    expect(bytes.getUint8(0), 0xFF);
+    expect(bytes.getUint8(1), 0x00);
+    expect(bytes.getUint8(2), 0x00);
+    expect(bytes.getUint8(3), 0xFF);
+    final int bottomRightOffset = (1 + 1 * texture.width) * 4;
+    expect(bytes.getUint8(bottomRightOffset), 0xFF);
+    expect(bytes.getUint8(bottomRightOffset + 1), 0xFF);
+    expect(bytes.getUint8(bottomRightOffset + 2), 0x00);
+    expect(bytes.getUint8(bottomRightOffset + 3), 0xFF);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('CommandBuffer.copyTextureToTexture copies a texture region', () async {
     final gpu.Texture sourceTexture = gpu.gpuContext.createTexture(
@@ -904,8 +739,7 @@ void main() async {
     ]).buffer.asByteData();
     sourceTexture.overwrite(pixels);
 
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
     commandBuffer.copyTextureToTexture(
       gpu.TextureRegion(sourceTexture, x: 1, y: 1, width: 1, height: 1),
       gpu.TextureDestinationRegion(destinationTexture),
@@ -920,11 +754,7 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('CommandBuffer.copyTextureToBuffer appends successfully', () async {
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.hostVisible,
-      4,
-      4,
-    );
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 4, 4);
     final ByteData pixels = Uint8List.fromList(
       List<int>.filled(4 * 4 * 4, 0xFF),
     ).buffer.asByteData();
@@ -934,8 +764,7 @@ void main() async {
       gpu.StorageMode.hostVisible,
       2 * 2 * texture.format.bytesPerBlock,
     );
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
     commandBuffer.copyTextureToBuffer(
       gpu.TextureRegion(texture, width: 2, height: 2),
       gpu.BufferView(
@@ -948,16 +777,11 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('CommandBuffer.copyBufferToTexture validates copy size', () async {
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.hostVisible,
-      2,
-      2,
-    );
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
     final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(
       Uint8List.fromList(<int>[0xFF, 0x00, 0x00, 0xFF]).buffer.asByteData(),
     );
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
     try {
       commandBuffer.copyBufferToTexture(
@@ -966,26 +790,17 @@ void main() async {
       );
       fail('Exception not thrown for wrong copy size.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('must match the destination texture region size'),
-      );
+      expect(e.toString(), contains('must match the destination texture region size'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.overwrite throws for wrong buffer size', () async {
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.hostVisible,
-      100,
-      100,
-    );
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
 
     const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     try {
       texture.overwrite(
-        Int32List.fromList(<int>[red.value, red.value, red.value, red.value])
-            .buffer
-            .asByteData(),
+        Int32List.fromList(<int>[red.value, red.value, red.value, red.value]).buffer.asByteData(),
       );
       fail('Exception not thrown for wrong buffer size.');
     } catch (e) {
@@ -1009,9 +824,7 @@ void main() async {
     const blue = ui.Color.fromARGB(0xFF, 0, 0, 0xFF);
 
     // Mip 0: 8x8 = 64 texels.
-    texture.overwrite(
-      Int32List.fromList(List<int>.filled(64, red.value)).buffer.asByteData(),
-    );
+    texture.overwrite(Int32List.fromList(List<int>.filled(64, red.value)).buffer.asByteData());
     // Mip 1: 4x4 = 16 texels.
     texture.overwrite(
       Int32List.fromList(List<int>.filled(16, blue.value)).buffer.asByteData(),
@@ -1033,25 +846,15 @@ void main() async {
     );
     const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     try {
-      texture.overwrite(
-        Int32List.fromList(<int>[red.value]).buffer.asByteData(),
-        mipLevel: 2,
-      );
+      texture.overwrite(Int32List.fromList(<int>[red.value]).buffer.asByteData(), mipLevel: 2);
       fail('Exception not thrown for out-of-range mipLevel.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('mipLevel (2) must be in the range [0, 1]'),
-      );
+      expect(e.toString(), contains('mipLevel (2) must be in the range [0, 1]'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.overwrite throws for an out-of-range slice', () async {
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.hostVisible,
-      2,
-      2,
-    );
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
     const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     try {
       texture.overwrite(
@@ -1082,19 +885,12 @@ void main() async {
     ];
     for (var slice = 0; slice < 6; slice++) {
       final int v = colors[slice].value;
-      texture.overwrite(
-        Int32List.fromList(<int>[v, v, v, v]).buffer.asByteData(),
-        slice: slice,
-      );
+      texture.overwrite(Int32List.fromList(<int>[v, v, v, v]).buffer.asByteData(), slice: slice);
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.asImage returns a valid ui.Image handle', () async {
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.hostVisible,
-      100,
-      100,
-    );
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
 
     final ui.Image image = texture.asImage();
     expect(image.width, 100);
@@ -1162,51 +958,38 @@ void main() async {
     } catch (e) {
       expect(
         e.toString(),
-        contains(
-          'Only shader readable Flutter GPU textures can be used as UI Images',
-        ),
+        contains('Only shader readable Flutter GPU textures can be used as UI Images'),
       );
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'GpuImageSurface acquireNextFrame returns a presentable color texture',
-    () async {
-      final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(
-        17,
-        19,
-      );
+  test('GpuImageSurface acquireNextFrame returns a presentable color texture', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
 
-      expect(surface.width, 17);
-      expect(surface.height, 19);
-      expect(surface.format, gpu.gpuContext.defaultColorFormat);
-      expect(surface.currentImage, isNull);
-      expect(surface.debugBackingTextureCount, 0);
+    expect(surface.width, 17);
+    expect(surface.height, 19);
+    expect(surface.format, gpu.gpuContext.defaultColorFormat);
+    expect(surface.currentImage, isNull);
+    expect(surface.debugBackingTextureCount, 0);
 
-      final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
 
-      expect(frame.colorTexture.width, 17);
-      expect(frame.colorTexture.height, 19);
-      expect(frame.colorTexture.format, gpu.gpuContext.defaultColorFormat);
-      expect(frame.colorTexture.enableRenderTargetUsage, isTrue);
-      expect(frame.colorTexture.enableShaderReadUsage, isTrue);
-      expect(frame.colorTexture.isValid, isTrue);
-      expect(surface.debugBackingTextureCount, 1);
+    expect(frame.colorTexture.width, 17);
+    expect(frame.colorTexture.height, 19);
+    expect(frame.colorTexture.format, gpu.gpuContext.defaultColorFormat);
+    expect(frame.colorTexture.enableRenderTargetUsage, isTrue);
+    expect(frame.colorTexture.enableShaderReadUsage, isTrue);
+    expect(frame.colorTexture.isValid, isTrue);
+    expect(surface.debugBackingTextureCount, 1);
 
-      frame.discard();
-      expect(frame.colorTexture.isValid, isFalse);
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+    frame.discard();
+    expect(frame.colorTexture.isValid, isFalse);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('GpuImageSurface present updates currentImage', () async {
-    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(
-      17,
-      19,
-    );
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
     final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
     final gpu.GpuPresentStatus status = frame.present(commandBuffer);
     expect(status, gpu.GpuPresentStatus.success);
@@ -1220,130 +1003,88 @@ void main() async {
     commandBuffer.submit();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'GpuImageSurface present must happen before command buffer submit',
-    () async {
-      final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(
-        17,
-        19,
-      );
-      final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
-      final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-          .createCommandBuffer();
-      commandBuffer.submit();
-
-      try {
-        frame.present(commandBuffer);
-        fail(
-          'Exception not thrown for presenting after command buffer submit.',
-        );
-      } catch (e) {
-        expect(
-          e.toString(),
-          contains('SurfaceFrame.present must be called before submitting'),
-        );
-      }
-      frame.discard();
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
-
-  test(
-    'GpuImageSurface cannot present or discard the same frame twice',
-    () async {
-      final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(
-        17,
-        19,
-      );
-      final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
-      final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-          .createCommandBuffer();
-
-      frame.present(commandBuffer);
-      commandBuffer.submit();
-
-      expect(
-        () => frame.present(gpu.gpuContext.createCommandBuffer()),
-        throwsA(isA<StateError>()),
-      );
-
-      // Discarding an inactive frame is intentionally a no-op.
-      frame.discard();
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
-
-  test('GpuImageSurface acquireNextFrame throws if the previous present was never submitted', () async {
-    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(
-      17,
-      19,
-    );
+  test('GpuImageSurface present must happen before command buffer submit', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
     final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    commandBuffer.submit();
+
+    try {
+      frame.present(commandBuffer);
+      fail('Exception not thrown for presenting after command buffer submit.');
+    } catch (e) {
+      expect(e.toString(), contains('SurfaceFrame.present must be called before submitting'));
+    }
+    frame.discard();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuImageSurface cannot present or discard the same frame twice', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
     frame.present(commandBuffer);
-    // Intentionally skip commandBuffer.submit() to simulate the footgun.
-
-    expect(surface.acquireNextFrame, throwsA(isA<StateError>()));
-
-    // Submitting clears the pending state so acquisition can resume.
     commandBuffer.submit();
-    final gpu.GpuImageSurfaceFrame nextFrame = surface.acquireNextFrame();
-    nextFrame.discard();
+
+    expect(() => frame.present(gpu.gpuContext.createCommandBuffer()), throwsA(isA<StateError>()));
+
+    // Discarding an inactive frame is intentionally a no-op.
+    frame.discard();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test(
-    'GpuImageSurface discard releases an unpresented frame for reuse',
+    'GpuImageSurface acquireNextFrame throws if the previous present was never submitted',
     () async {
-      final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(
-        17,
-        19,
-      );
+      final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
       final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
-      expect(surface.debugBackingTextureCount, 1);
-
-      frame.discard();
-      expect(frame.colorTexture.isValid, isFalse);
-
-      final gpu.GpuImageSurfaceFrame nextFrame = surface.acquireNextFrame();
-      expect(surface.debugBackingTextureCount, 1);
-      expect(nextFrame.colorTexture.isValid, isTrue);
-
-      nextFrame.discard();
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
-
-  test(
-    'GpuImageSurface keeps current image out of the next acquired frame',
-    () async {
-      final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(
-        17,
-        19,
-      );
-      final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
-      final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-          .createCommandBuffer();
+      final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
       frame.present(commandBuffer);
+      // Intentionally skip commandBuffer.submit() to simulate the footgun.
+
+      expect(surface.acquireNextFrame, throwsA(isA<StateError>()));
+
+      // Submitting clears the pending state so acquisition can resume.
       commandBuffer.submit();
-      expect(surface.currentImage!.width, 17);
-      expect(surface.debugBackingTextureCount, 1);
-
       final gpu.GpuImageSurfaceFrame nextFrame = surface.acquireNextFrame();
-      expect(surface.debugBackingTextureCount, 2);
-
       nextFrame.discard();
     },
     skip: !(impellerEnabled && flutterGpuEnabled),
   );
 
+  test('GpuImageSurface discard releases an unpresented frame for reuse', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
+    expect(surface.debugBackingTextureCount, 1);
+
+    frame.discard();
+    expect(frame.colorTexture.isValid, isFalse);
+
+    final gpu.GpuImageSurfaceFrame nextFrame = surface.acquireNextFrame();
+    expect(surface.debugBackingTextureCount, 1);
+    expect(nextFrame.colorTexture.isValid, isTrue);
+
+    nextFrame.discard();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuImageSurface keeps current image out of the next acquired frame', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    frame.present(commandBuffer);
+    commandBuffer.submit();
+    expect(surface.currentImage!.width, 17);
+    expect(surface.debugBackingTextureCount, 1);
+
+    final gpu.GpuImageSurfaceFrame nextFrame = surface.acquireNextFrame();
+    expect(surface.debugBackingTextureCount, 2);
+
+    nextFrame.discard();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('GpuImageSurface resize affects future acquired frames', () async {
-    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(
-      17,
-      19,
-    );
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
     final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
 
     expect(
@@ -1370,41 +1111,27 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('GpuImageSurface can render clear color into presented image', () async {
-    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(
-      100,
-      100,
-    );
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(100, 100);
     final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
     commandBuffer.createRenderPass(
       gpu.RenderTarget.singleColor(
-        gpu.ColorAttachment(
-          texture: frame.colorTexture,
-          clearValue: Colors.lime,
-        ),
+        gpu.ColorAttachment(texture: frame.colorTexture, clearValue: Colors.lime),
       ),
     );
 
     frame.present(commandBuffer);
     commandBuffer.submit();
-    await comparer.addGoldenImage(
-      surface.currentImage!,
-      'flutter_gpu_test_clear_color.png',
-    );
+    await comparer.addGoldenImage(surface.currentImage!, 'flutter_gpu_test_clear_color.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'RenderPass.setStencilReference doesnt throw for valid values',
-    () async {
-      final RenderPassState state = createSimpleRenderPass();
+  test('RenderPass.setStencilReference doesnt throw for valid values', () async {
+    final RenderPassState state = createSimpleRenderPass();
 
-      state.renderPass.setStencilReference(0);
-      state.renderPass.setStencilReference(2 << 30);
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+    state.renderPass.setStencilReference(0);
+    state.renderPass.setStencilReference(2 << 30);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('RenderPass.setStencilReference throws for invalid values', () async {
     final RenderPassState state = createSimpleRenderPass();
@@ -1413,20 +1140,14 @@ void main() async {
       state.renderPass.setStencilReference(-1);
       fail('Exception not thrown for out of bounds stencil reference.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('The stencil reference value must be in the range'),
-      );
+      expect(e.toString(), contains('The stencil reference value must be in the range'));
     }
 
     try {
       state.renderPass.setStencilReference(2 << 31);
       fail('Exception not thrown for out of bounds stencil reference.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('The stencil reference value must be in the range'),
-      );
+      expect(e.toString(), contains('The stencil reference value must be in the range'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -1454,42 +1175,26 @@ void main() async {
       state.renderPass.setStencilConfig(gpu.StencilConfig(readMask: -1));
       fail('Exception not thrown for invalid stencil read mask.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('The stencil read mask must be in the range'),
-      );
+      expect(e.toString(), contains('The stencil read mask must be in the range'));
     }
     try {
-      state.renderPass.setStencilConfig(
-        gpu.StencilConfig(readMask: 0xFFFFFFFF + 1),
-      );
+      state.renderPass.setStencilConfig(gpu.StencilConfig(readMask: 0xFFFFFFFF + 1));
       fail('Exception not thrown for invalid stencil read mask.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('The stencil read mask must be in the range'),
-      );
+      expect(e.toString(), contains('The stencil read mask must be in the range'));
     }
 
     try {
       state.renderPass.setStencilConfig(gpu.StencilConfig(writeMask: -1));
       fail('Exception not thrown for invalid stencil write mask.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('The stencil write mask must be in the range'),
-      );
+      expect(e.toString(), contains('The stencil write mask must be in the range'));
     }
     try {
-      state.renderPass.setStencilConfig(
-        gpu.StencilConfig(writeMask: 0xFFFFFFFF + 1),
-      );
+      state.renderPass.setStencilConfig(gpu.StencilConfig(writeMask: 0xFFFFFFFF + 1));
       fail('Exception not thrown for invalid stencil write mask.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('The stencil write mask must be in the range'),
-      );
+      expect(e.toString(), contains('The stencil write mask must be in the range'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -1499,9 +1204,7 @@ void main() async {
     final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
     // Although this is a non-texture uniform slot, it'll work fine for the
     // purposes of testing this error.
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-      'VertInfo',
-    );
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
 
     final gpu.Texture texture = gpu.gpuContext.createTexture(
       gpu.StorageMode.deviceTransient,
@@ -1515,9 +1218,7 @@ void main() async {
     } catch (e) {
       expect(
         e.toString(),
-        contains(
-          'Textures with StorageMode.deviceTransient cannot be bound to a RenderPass',
-        ),
+        contains('Textures with StorageMode.deviceTransient cannot be bound to a RenderPass'),
       );
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
@@ -1526,55 +1227,43 @@ void main() async {
     expect(gpu.gpuContext.maxSamplerAnisotropy, greaterThanOrEqualTo(1));
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'RenderPass.bindTexture throws for invalid SamplerOptions.maxAnisotropy',
-    () async {
-      final RenderPassState state = createSimpleRenderPass();
+  test('RenderPass.bindTexture throws for invalid SamplerOptions.maxAnisotropy', () async {
+    final RenderPassState state = createSimpleRenderPass();
 
-      final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
-      // Although this is a non-texture uniform slot, it'll work fine for the
-      // purposes of testing this error.
-      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-        'VertInfo',
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    // Although this is a non-texture uniform slot, it'll work fine for the
+    // purposes of testing this error.
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
+
+    try {
+      state.renderPass.bindTexture(
+        vertInfo,
+        texture,
+        sampler: gpu.SamplerOptions(maxAnisotropy: 0),
       );
+      fail('Exception not thrown for a maxAnisotropy less than 1.');
+    } catch (e) {
+      expect(e.toString(), contains('maxAnisotropy must be at least 1'));
+    }
 
-      final gpu.Texture texture = gpu.gpuContext.createTexture(
-        gpu.StorageMode.hostVisible,
-        100,
-        100,
+    // Anisotropic filtering requires all filters to be linear.
+    try {
+      state.renderPass.bindTexture(
+        vertInfo,
+        texture,
+        sampler: gpu.SamplerOptions(maxAnisotropy: 16),
       );
-
-      try {
-        state.renderPass.bindTexture(
-          vertInfo,
-          texture,
-          sampler: gpu.SamplerOptions(maxAnisotropy: 0),
-        );
-        fail('Exception not thrown for a maxAnisotropy less than 1.');
-      } catch (e) {
-        expect(e.toString(), contains('maxAnisotropy must be at least 1'));
-      }
-
-      // Anisotropic filtering requires all filters to be linear.
-      try {
-        state.renderPass.bindTexture(
-          vertInfo,
-          texture,
-          sampler: gpu.SamplerOptions(maxAnisotropy: 16),
-        );
-        fail('Exception not thrown for anisotropy with non-linear filters.');
-      } catch (e) {
-        expect(e.toString(), contains('must all be linear'));
-      }
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+      fail('Exception not thrown for anisotropy with non-linear filters.');
+    } catch (e) {
+      expect(e.toString(), contains('must all be linear'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // Performs no draw calls. Just clears the render target to a solid green color.
   test('Can render clear color', () async {
-    final RenderPassState state = createSimpleRenderPass(
-      clearColor: Colors.lime,
-    );
+    final RenderPassState state = createSimpleRenderPass(clearColor: Colors.lime);
 
     state.commandBuffer.submit();
 
@@ -1582,13 +1271,9 @@ void main() async {
     await comparer.addGoldenImage(image, 'flutter_gpu_test_clear_color.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'GpuContext.doesSupportFramebufferRenderMipmap returns a bool',
-    () async {
-      expect(gpu.gpuContext.doesSupportFramebufferRenderMipmap, isA<bool>());
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('GpuContext.doesSupportFramebufferRenderMipmap returns a bool', () async {
+    expect(gpu.gpuContext.doesSupportFramebufferRenderMipmap, isA<bool>());
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Can render into a cube map slice', () async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(
@@ -1599,8 +1284,7 @@ void main() async {
     );
     expect(texture.sliceCount, 6);
 
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
     final renderTarget = gpu.RenderTarget.singleColor(
       gpu.ColorAttachment(texture: texture, slice: 2, clearValue: Colors.lime),
     );
@@ -1612,9 +1296,7 @@ void main() async {
     // Rendering into a non-zero mip level needs ES 3.0 or
     // GL_OES_fbo_render_mipmap on the GLES backend.
     if (!gpu.gpuContext.doesSupportFramebufferRenderMipmap) {
-      markTestSkipped(
-        'Backend does not support rendering into non-zero mip levels.',
-      );
+      markTestSkipped('Backend does not support rendering into non-zero mip levels.');
       return;
     }
     final gpu.Texture texture = gpu.gpuContext.createTexture(
@@ -1624,14 +1306,9 @@ void main() async {
       mipLevelCount: 3,
     );
 
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
     final renderTarget = gpu.RenderTarget.singleColor(
-      gpu.ColorAttachment(
-        texture: texture,
-        mipLevel: 1,
-        clearValue: Colors.lime,
-      ),
+      gpu.ColorAttachment(texture: texture, mipLevel: 1, clearValue: Colors.lime),
     );
     commandBuffer.createRenderPass(renderTarget);
     commandBuffer.submit();
@@ -1644,8 +1321,7 @@ void main() async {
       4,
       mipLevelCount: 2,
     );
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
     final renderTarget = gpu.RenderTarget.singleColor(
       gpu.ColorAttachment(texture: texture, mipLevel: 2),
     );
@@ -1653,21 +1329,13 @@ void main() async {
       commandBuffer.createRenderPass(renderTarget);
       fail('Exception not thrown for out-of-range mipLevel.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('mipLevel (2) must be in the range [0, 1]'),
-      );
+      expect(e.toString(), contains('mipLevel (2) must be in the range [0, 1]'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('ColorAttachment throws for an out-of-range slice', () async {
-    final gpu.Texture texture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.devicePrivate,
-      4,
-      4,
-    );
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 4, 4);
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
     final renderTarget = gpu.RenderTarget.singleColor(
       gpu.ColorAttachment(texture: texture, slice: 1),
     );
@@ -1694,8 +1362,7 @@ void main() async {
       8,
       format: gpu.gpuContext.defaultDepthStencilFormat,
     );
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext
-        .createCommandBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
     final renderTarget = gpu.RenderTarget.singleColor(
       gpu.ColorAttachment(texture: color, mipLevel: 1),
       depthStencilAttachment: gpu.DepthStencilAttachment(texture: depthStencil),
@@ -1713,9 +1380,7 @@ void main() async {
     final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-      'VertInfo',
-    );
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
 
     final ByteData vertInfoData = float32(<double>[
       1, 0, 0, 0, // mvp
@@ -1724,8 +1389,7 @@ void main() async {
       0, 0, 0, 1, // mvp
       0, 1, 0, 1, // color
     ]);
-    final gpu.DeviceBuffer uniformBuffer = gpu.gpuContext
-        .createDeviceBufferWithCopy(vertInfoData);
+    final gpu.DeviceBuffer uniformBuffer = gpu.gpuContext.createDeviceBufferWithCopy(vertInfoData);
     final gooduniformBufferView = gpu.BufferView(
       uniformBuffer,
       offsetInBytes: 0,
@@ -1746,35 +1410,26 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'Shader.getUniformSlot returns the same slot for repeat lookups',
-    () async {
-      final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
-      final gpu.UniformSlot first = pipeline.vertexShader.getUniformSlot(
-        'VertInfo',
-      );
-      final gpu.UniformSlot second = pipeline.vertexShader.getUniformSlot(
-        'VertInfo',
-      );
-      expect(identical(first, second), isTrue);
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('Shader.getUniformSlot returns the same slot for repeat lookups', () async {
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.UniformSlot first = pipeline.vertexShader.getUniformSlot('VertInfo');
+    final gpu.UniformSlot second = pipeline.vertexShader.getUniformSlot('VertInfo');
+    expect(identical(first, second), isTrue);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('RenderPass.bindUniform throws for an unknown uniform name', () async {
     final RenderPassState state = createSimpleRenderPass();
 
     final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
-    final gpu.DeviceBuffer uniformBuffer = gpu.gpuContext
-        .createDeviceBufferWithCopy(float32(<double>[1, 2, 3, 4]));
+    final gpu.DeviceBuffer uniformBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
+      float32(<double>[1, 2, 3, 4]),
+    );
     final uniformBufferView = gpu.BufferView(
       uniformBuffer,
       offsetInBytes: 0,
       lengthInBytes: uniformBuffer.sizeInBytes,
     );
-    final gpu.UniformSlot unknownSlot = pipeline.vertexShader.getUniformSlot(
-      'DoesNotExist',
-    );
+    final gpu.UniformSlot unknownSlot = pipeline.vertexShader.getUniformSlot('DoesNotExist');
     try {
       state.renderPass.bindUniform(unknownSlot, uniformBufferView);
       fail('Exception not thrown for an unknown uniform name.');
@@ -1896,18 +1551,12 @@ void main() async {
       pipeline.vertexShader.getUniformSlot('VertInfo'),
       transients.emplace(mvpUBO(Matrix4.identity())),
     );
-    state.renderPass.bindTexture(
-      pipeline.fragmentShader.getUniformSlot('tex'),
-      texture,
-    );
+    state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
     state.renderPass.draw(6);
     state.commandBuffer.submit();
 
     final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(
-      image,
-      'flutter_gpu_test_manually_mipped_texture.png',
-    );
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_manually_mipped_texture.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('drawIndexed throws when no index buffer is bound', () async {
@@ -1944,81 +1593,67 @@ void main() async {
   // backend, producing a black render. `impellerc` now canonicalizes the
   // instance name to `_<BlockName>` for GL targets so the block resolves
   // correctly on all backends.
-  test(
-    'Uniform block with non-conforming instance name binds on all backends',
-    () async {
-      final RenderPassState state = createSimpleRenderPass();
+  test('Uniform block with non-conforming instance name binds on all backends', () async {
+    final RenderPassState state = createSimpleRenderPass();
 
-      final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset(
-        'test.shaderbundle',
-      ))!;
-      final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
-        library['UnlitVertex']!,
-        library['UnlitFragmentAltInstance']!,
-      );
-      state.renderPass.bindPipeline(pipeline);
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
+    final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
+      library['UnlitVertex']!,
+      library['UnlitFragmentAltInstance']!,
+    );
+    state.renderPass.bindPipeline(pipeline);
 
-      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
-      final gpu.BufferView vertices = transients.emplace(
-        float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
-      );
-      state.renderPass.bindVertexBuffer(vertices);
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
 
-      // Vertex shader writes v_color from VertInfo.color; pick white so the
-      // final pixel color is dictated entirely by ColorParams.base_color.
-      state.renderPass.bindUniform(
-        pipeline.vertexShader.getUniformSlot('VertInfo'),
-        transients.emplace(unlitUBO(Matrix4.identity(), Vector4(1, 1, 1, 1))),
-      );
+    // Vertex shader writes v_color from VertInfo.color; pick white so the
+    // final pixel color is dictated entirely by ColorParams.base_color.
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Vector4(1, 1, 1, 1))),
+    );
 
-      // Bind the fragment shader's uniform block by its *block* name. Without
-      // canonicalization, GLES would bind the members to location -1 and
-      // sample zeros here.
-      state.renderPass.bindUniform(
-        pipeline.fragmentShader.getUniformSlot('ColorParams'),
-        transients.emplace(float32(<double>[1.0, 0.0, 0.0, 1.0])),
-      );
+    // Bind the fragment shader's uniform block by its *block* name. Without
+    // canonicalization, GLES would bind the members to location -1 and
+    // sample zeros here.
+    state.renderPass.bindUniform(
+      pipeline.fragmentShader.getUniformSlot('ColorParams'),
+      transients.emplace(float32(<double>[1.0, 0.0, 0.0, 1.0])),
+    );
 
-      state.renderPass.draw(3);
-      state.commandBuffer.submit();
+    state.renderPass.draw(3);
+    state.commandBuffer.submit();
 
-      final ui.Image image = state.renderTexture.asImage();
-      await comparer.addGoldenImage(
-        image,
-        'flutter_gpu_uniform_block_alt_instance.png',
-      );
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_uniform_block_alt_instance.png');
 
-      // Belt-and-suspenders: also assert programmatically that the center of
-      // the rendered triangle is red. If the bug regresses, the uniform reads
-      // zero and the triangle renders as fully transparent black. Sampling a
-      // single pixel inside the triangle catches that without relying on
-      // golden-file plumbing.
-      final ByteData? bytes = await image.toByteData();
-      expect(bytes, isNotNull);
-      final int centerOffset =
-          (image.width ~/ 2 + image.height ~/ 2 * image.width) * 4;
-      final int b0 = bytes!.getUint8(centerOffset);
-      final int b1 = bytes.getUint8(centerOffset + 1);
-      final int b2 = bytes.getUint8(centerOffset + 2);
-      final int b3 = bytes.getUint8(centerOffset + 3);
-      // Format may be RGBA or BGRA depending on backend; check that exactly
-      // one of the first three channels is red-saturated and the others are
-      // dark, with full alpha.
-      expect(
-        b0 + b1 + b2,
-        greaterThan(200),
-        reason:
-            'Center pixel was black (channels=$b0,$b1,$b2,$b3); '
-            'uniform block likely failed to bind.',
-      );
-      expect(
-        b3,
-        greaterThan(200),
-        reason: 'Center pixel alpha was low (channels=$b0,$b1,$b2,$b3).',
-      );
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+    // Belt-and-suspenders: also assert programmatically that the center of
+    // the rendered triangle is red. If the bug regresses, the uniform reads
+    // zero and the triangle renders as fully transparent black. Sampling a
+    // single pixel inside the triangle catches that without relying on
+    // golden-file plumbing.
+    final ByteData? bytes = await image.toByteData();
+    expect(bytes, isNotNull);
+    final int centerOffset = (image.width ~/ 2 + image.height ~/ 2 * image.width) * 4;
+    final int b0 = bytes!.getUint8(centerOffset);
+    final int b1 = bytes.getUint8(centerOffset + 1);
+    final int b2 = bytes.getUint8(centerOffset + 2);
+    final int b3 = bytes.getUint8(centerOffset + 3);
+    // Format may be RGBA or BGRA depending on backend; check that exactly
+    // one of the first three channels is red-saturated and the others are
+    // dark, with full alpha.
+    expect(
+      b0 + b1 + b2,
+      greaterThan(200),
+      reason:
+          'Center pixel was black (channels=$b0,$b1,$b2,$b3); '
+          'uniform block likely failed to bind.',
+    );
+    expect(b3, greaterThan(200), reason: 'Center pixel alpha was low (channels=$b0,$b1,$b2,$b3).');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // A custom VertexLayout that matches the shader bundle's default for the
   // UnlitVertex shader (one buffer at slot 0, vec2 position at offset 0)
@@ -2028,9 +1663,7 @@ void main() async {
   test('Can render triangle with explicit VertexLayout', () async {
     final RenderPassState state = createSimpleRenderPass();
 
-    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset(
-      'test.shaderbundle',
-    ))!;
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
     final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
       library['UnlitVertex']!,
       library['UnlitFragment']!,
@@ -2039,10 +1672,7 @@ void main() async {
           gpu.VertexBuffer(
             strideInBytes: 8,
             attributes: <gpu.VertexAttribute>[
-              gpu.VertexAttribute(
-                name: 'position',
-                format: gpu.VertexFormat.float32x2,
-              ),
+              gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.float32x2),
             ],
           ),
         ],
@@ -2054,14 +1684,9 @@ void main() async {
     final gpu.BufferView vertices = transients.emplace(
       float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
     );
-    final gpu.BufferView vertInfo = transients.emplace(
-      unlitUBO(Matrix4.identity(), Colors.lime),
-    );
+    final gpu.BufferView vertInfo = transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime));
     state.renderPass.bindVertexBuffer(vertices);
-    state.renderPass.bindUniform(
-      pipeline.vertexShader.getUniformSlot('VertInfo'),
-      vertInfo,
-    );
+    state.renderPass.bindUniform(pipeline.vertexShader.getUniformSlot('VertInfo'), vertInfo);
     state.renderPass.draw(3);
     state.commandBuffer.submit();
 
@@ -2069,137 +1694,101 @@ void main() async {
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'Can render instanced triangles with instance-rate vertex buffer',
-    () async {
-      const triangleVertexCount = 3;
-      const triangleInstanceCount = 4;
-      final RenderPassState state = createSimpleRenderPass();
+  test('Can render instanced triangles with instance-rate vertex buffer', () async {
+    const triangleVertexCount = 3;
+    const triangleInstanceCount = 4;
+    final RenderPassState state = createSimpleRenderPass();
 
-      final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset(
-        'test.shaderbundle',
-      ))!;
-      final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
-        library['InstancedVertex']!,
-        library['InstancedFragment']!,
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
+    final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
+      library['InstancedVertex']!,
+      library['InstancedFragment']!,
+      vertexLayout: const gpu.VertexLayout(
+        buffers: <gpu.VertexBuffer>[
+          gpu.VertexBuffer(
+            strideInBytes: 8,
+            attributes: <gpu.VertexAttribute>[
+              gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.float32x2),
+            ],
+          ),
+          gpu.VertexBuffer(
+            strideInBytes: 24,
+            stepMode: gpu.VertexStepMode.instance,
+            attributes: <gpu.VertexAttribute>[
+              gpu.VertexAttribute(name: 'instance_offset', format: gpu.VertexFormat.float32x2),
+              gpu.VertexAttribute(
+                name: 'instance_color',
+                offsetInBytes: 8,
+                format: gpu.VertexFormat.float32x4,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[
+        -0.18, 0.18, //
+        0.0, -0.18, //
+        0.18, 0.18, //
+      ]),
+    );
+    final gpu.BufferView instances = transients.emplace(
+      float32(<double>[
+        -0.45, 0.45, 1, 0, 0, 1, //
+        0.45, 0.45, 0, 1, 0, 1, //
+        -0.45, -0.45, 0, 0, 1, 1, //
+        0.45, -0.45, 1, 1, 0, 1, //
+      ]),
+    );
+    final gpu.BufferView vertInfo = transients.emplace(mvpUBO(Matrix4.identity()));
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindVertexBuffer(instances, slot: 1);
+    state.renderPass.bindUniform(pipeline.vertexShader.getUniformSlot('VertInfo'), vertInfo);
+    state.renderPass.draw(triangleVertexCount, instanceCount: triangleInstanceCount);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_instanced_triangles.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('createRenderPipeline rejects VertexLayout with wrong attribute format', () async {
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
+    try {
+      gpu.gpuContext.createRenderPipeline(
+        library['UnlitVertex']!,
+        library['UnlitFragment']!,
         vertexLayout: const gpu.VertexLayout(
           buffers: <gpu.VertexBuffer>[
             gpu.VertexBuffer(
               strideInBytes: 8,
               attributes: <gpu.VertexAttribute>[
-                gpu.VertexAttribute(
-                  name: 'position',
-                  format: gpu.VertexFormat.float32x2,
-                ),
-              ],
-            ),
-            gpu.VertexBuffer(
-              strideInBytes: 24,
-              stepMode: gpu.VertexStepMode.instance,
-              attributes: <gpu.VertexAttribute>[
-                gpu.VertexAttribute(
-                  name: 'instance_offset',
-                  format: gpu.VertexFormat.float32x2,
-                ),
-                gpu.VertexAttribute(
-                  name: 'instance_color',
-                  offsetInBytes: 8,
-                  format: gpu.VertexFormat.float32x4,
-                ),
+                // UnlitVertex declares a float `vec2 position`, so binding
+                // a uint32x2 (different scalar type class) here must throw.
+                // Component-count mismatches are NOT errors: a buffer can
+                // supply more or fewer components than the shader reads,
+                // matching the default-substitution rules every modern HAL
+                // uses.
+                gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.uint32x2),
               ],
             ),
           ],
         ),
       );
-      state.renderPass.bindPipeline(pipeline);
-
-      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
-      final gpu.BufferView vertices = transients.emplace(
-        float32(<double>[
-          -0.18, 0.18, //
-          0.0, -0.18, //
-          0.18, 0.18, //
-        ]),
+      fail('Expected exception for mismatched VertexFormat scalar type.');
+    } catch (e) {
+      expect(
+        e.toString(),
+        contains("format does not match the vertex shader's declared input type"),
       );
-      final gpu.BufferView instances = transients.emplace(
-        float32(<double>[
-          -0.45, 0.45, 1, 0, 0, 1, //
-          0.45, 0.45, 0, 1, 0, 1, //
-          -0.45, -0.45, 0, 0, 1, 1, //
-          0.45, -0.45, 1, 1, 0, 1, //
-        ]),
-      );
-      final gpu.BufferView vertInfo = transients.emplace(
-        mvpUBO(Matrix4.identity()),
-      );
-      state.renderPass.bindVertexBuffer(vertices);
-      state.renderPass.bindVertexBuffer(instances, slot: 1);
-      state.renderPass.bindUniform(
-        pipeline.vertexShader.getUniformSlot('VertInfo'),
-        vertInfo,
-      );
-      state.renderPass.draw(
-        triangleVertexCount,
-        instanceCount: triangleInstanceCount,
-      );
-      state.commandBuffer.submit();
-
-      final ui.Image image = state.renderTexture.asImage();
-      await comparer.addGoldenImage(
-        image,
-        'flutter_gpu_test_instanced_triangles.png',
-      );
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
-
-  test(
-    'createRenderPipeline rejects VertexLayout with wrong attribute format',
-    () async {
-      final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset(
-        'test.shaderbundle',
-      ))!;
-      try {
-        gpu.gpuContext.createRenderPipeline(
-          library['UnlitVertex']!,
-          library['UnlitFragment']!,
-          vertexLayout: const gpu.VertexLayout(
-            buffers: <gpu.VertexBuffer>[
-              gpu.VertexBuffer(
-                strideInBytes: 8,
-                attributes: <gpu.VertexAttribute>[
-                  // UnlitVertex declares a float `vec2 position`, so binding
-                  // a uint32x2 (different scalar type class) here must throw.
-                  // Component-count mismatches are NOT errors: a buffer can
-                  // supply more or fewer components than the shader reads,
-                  // matching the default-substitution rules every modern HAL
-                  // uses.
-                  gpu.VertexAttribute(
-                    name: 'position',
-                    format: gpu.VertexFormat.uint32x2,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-        fail('Expected exception for mismatched VertexFormat scalar type.');
-      } catch (e) {
-        expect(
-          e.toString(),
-          contains(
-            "format does not match the vertex shader's declared input type",
-          ),
-        );
-      }
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('createRenderPipeline rejects VertexAttribute that overruns stride', () async {
-    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset(
-      'test.shaderbundle',
-    ))!;
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
     try {
       gpu.gpuContext.createRenderPipeline(
         library['UnlitVertex']!,
@@ -2226,47 +1815,35 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'createRenderPipeline rejects VertexLayout with overlapping attributes',
-    () async {
-      final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset(
-        'test.shaderbundle',
-      ))!;
-      try {
-        gpu.gpuContext.createRenderPipeline(
-          library['UnlitVertex']!,
-          library['UnlitFragment']!,
-          vertexLayout: const gpu.VertexLayout(
-            buffers: <gpu.VertexBuffer>[
-              gpu.VertexBuffer(
-                strideInBytes: 8,
-                attributes: <gpu.VertexAttribute>[
-                  // Two attributes both occupying bytes [0, 8) in the same
-                  // buffer. The second one isn't a real shader input, but
-                  // the overlap check fires before the name check.
-                  gpu.VertexAttribute(
-                    name: 'position',
-                    format: gpu.VertexFormat.float32x2,
-                  ),
-                  gpu.VertexAttribute(
-                    name: 'aliased',
-                    format: gpu.VertexFormat.float32x2,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-        fail('Expected exception for overlapping VertexAttributes.');
-      } catch (e) {
-        final msg = e.toString();
-        expect(msg, contains('overlaps'));
-        expect(msg, contains("'position'"));
-        expect(msg, contains("'aliased'"));
-      }
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('createRenderPipeline rejects VertexLayout with overlapping attributes', () async {
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
+    try {
+      gpu.gpuContext.createRenderPipeline(
+        library['UnlitVertex']!,
+        library['UnlitFragment']!,
+        vertexLayout: const gpu.VertexLayout(
+          buffers: <gpu.VertexBuffer>[
+            gpu.VertexBuffer(
+              strideInBytes: 8,
+              attributes: <gpu.VertexAttribute>[
+                // Two attributes both occupying bytes [0, 8) in the same
+                // buffer. The second one isn't a real shader input, but
+                // the overlap check fires before the name check.
+                gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.float32x2),
+                gpu.VertexAttribute(name: 'aliased', format: gpu.VertexFormat.float32x2),
+              ],
+            ),
+          ],
+        ),
+      );
+      fail('Expected exception for overlapping VertexAttributes.');
+    } catch (e) {
+      final msg = e.toString();
+      expect(msg, contains('overlaps'));
+      expect(msg, contains("'position'"));
+      expect(msg, contains("'aliased'"));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('bindVertexBuffer throws RangeError for out-of-range slot', () async {
     final RenderPassState state = createSimpleRenderPass();
@@ -2278,14 +1855,8 @@ void main() async {
       float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
     );
 
-    expect(
-      () => state.renderPass.bindVertexBuffer(vertices, slot: -1),
-      throwsRangeError,
-    );
-    expect(
-      () => state.renderPass.bindVertexBuffer(vertices, slot: 16),
-      throwsRangeError,
-    );
+    expect(() => state.renderPass.bindVertexBuffer(vertices, slot: -1), throwsRangeError);
+    expect(() => state.renderPass.bindVertexBuffer(vertices, slot: 16), throwsRangeError);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('draw throws StateError on sparse vertex buffer bindings', () async {
@@ -2326,10 +1897,7 @@ void main() async {
     state.renderPass.bindVertexBuffer(vertices);
 
     expect(() => state.renderPass.draw(3, instanceCount: -1), throwsRangeError);
-    expect(
-      () => state.renderPass.drawIndexed(3, instanceCount: -1),
-      throwsRangeError,
-    );
+    expect(() => state.renderPass.drawIndexed(3, instanceCount: -1), throwsRangeError);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('draw calls with zero count or instanceCount are no-ops', () async {
@@ -2343,48 +1911,38 @@ void main() async {
     state.renderPass.drawIndexed(3, instanceCount: 0);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test(
-    'createRenderPipeline rejects VertexAttribute with unknown name',
-    () async {
-      final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset(
-        'test.shaderbundle',
-      ))!;
-      try {
-        gpu.gpuContext.createRenderPipeline(
-          library['UnlitVertex']!,
-          library['UnlitFragment']!,
-          vertexLayout: const gpu.VertexLayout(
-            buffers: <gpu.VertexBuffer>[
-              gpu.VertexBuffer(
-                strideInBytes: 8,
-                attributes: <gpu.VertexAttribute>[
-                  gpu.VertexAttribute(
-                    name: 'nonexistent_attribute',
-                    format: gpu.VertexFormat.float32x2,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-        fail('Expected exception for unknown attribute name.');
-      } catch (e) {
-        expect(
-          e.toString(),
-          contains(
-            'does not match any input declared by the bound vertex shader',
-          ),
-        );
-      }
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+  test('createRenderPipeline rejects VertexAttribute with unknown name', () async {
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
+    try {
+      gpu.gpuContext.createRenderPipeline(
+        library['UnlitVertex']!,
+        library['UnlitFragment']!,
+        vertexLayout: const gpu.VertexLayout(
+          buffers: <gpu.VertexBuffer>[
+            gpu.VertexBuffer(
+              strideInBytes: 8,
+              attributes: <gpu.VertexAttribute>[
+                gpu.VertexAttribute(
+                  name: 'nonexistent_attribute',
+                  format: gpu.VertexFormat.float32x2,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+      fail('Expected exception for unknown attribute name.');
+    } catch (e) {
+      expect(
+        e.toString(),
+        contains('does not match any input declared by the bound vertex shader'),
+      );
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // The awaited library exposes the bundle's shaders and can drive a pipeline.
   test('ShaderLibrary.fromAsset loads a usable library', () async {
-    final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset(
-      'test.shaderbundle',
-    );
+    final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
     expect(library, isNotNull);
 
     final gpu.Shader? vertex = library!['UnlitVertex'];
@@ -2393,10 +1951,7 @@ void main() async {
     expect(fragment, isNotNull);
 
     // The shaders are real enough to build a pipeline from.
-    final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
-      vertex!,
-      fragment!,
-    );
+    final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
     expect(pipeline.vertexShader, vertex);
     expect(pipeline.fragmentShader, fragment);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
@@ -2408,71 +1963,55 @@ void main() async {
   // the same registry key and the second load would evict the first. With
   // namespacing the asset paths (the bundle library_ids) make the keys
   // distinct, so both bundles can be loaded and used in the same process.
-  test(
-    'Two shader bundles with the same entrypoint names do not collide',
-    () async {
-      final gpu.ShaderLibrary? libraryA = await gpu.ShaderLibrary.fromAsset(
-        'test.shaderbundle',
+  test('Two shader bundles with the same entrypoint names do not collide', () async {
+    final gpu.ShaderLibrary? libraryA = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+    final gpu.ShaderLibrary? libraryB = await gpu.ShaderLibrary.fromAsset('test_alt.shaderbundle');
+    expect(libraryA, isNotNull);
+    expect(libraryB, isNotNull);
+
+    final gpu.Shader? unlitVertexA = libraryA!['UnlitVertex'];
+    final gpu.Shader? unlitFragmentA = libraryA['UnlitFragment'];
+    final gpu.Shader? unlitVertexB = libraryB!['UnlitVertex'];
+    final gpu.Shader? unlitFragmentB = libraryB['UnlitFragment'];
+    expect(unlitVertexA, isNotNull);
+    expect(unlitFragmentA, isNotNull);
+    expect(unlitVertexB, isNotNull);
+    expect(unlitFragmentB, isNotNull);
+
+    // Both pipelines must register and remain usable. Without namespacing,
+    // `RuntimeEffectContents::RegisterShader`-style eviction would tear one
+    // of these pipelines down at registration time and the second draw
+    // would render against invalid state. With namespacing they coexist.
+    final gpu.RenderPipeline pipelineA = gpu.gpuContext.createRenderPipeline(
+      unlitVertexA!,
+      unlitFragmentA!,
+    );
+    final gpu.RenderPipeline pipelineB = gpu.gpuContext.createRenderPipeline(
+      unlitVertexB!,
+      unlitFragmentB!,
+    );
+
+    void drawWithPipeline(RenderPassState state, gpu.RenderPipeline pipeline, Vector4 color) {
+      state.renderPass.bindPipeline(pipeline);
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
       );
-      final gpu.ShaderLibrary? libraryB = await gpu.ShaderLibrary.fromAsset(
-        'test_alt.shaderbundle',
-      );
-      expect(libraryA, isNotNull);
-      expect(libraryB, isNotNull);
+      final gpu.BufferView vertInfoData = transients.emplace(unlitUBO(Matrix4.identity(), color));
+      state.renderPass.bindVertexBuffer(vertices);
+      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+      state.renderPass.bindUniform(vertInfo, vertInfoData);
+      state.renderPass.draw(3);
+    }
 
-      final gpu.Shader? unlitVertexA = libraryA!['UnlitVertex'];
-      final gpu.Shader? unlitFragmentA = libraryA['UnlitFragment'];
-      final gpu.Shader? unlitVertexB = libraryB!['UnlitVertex'];
-      final gpu.Shader? unlitFragmentB = libraryB['UnlitFragment'];
-      expect(unlitVertexA, isNotNull);
-      expect(unlitFragmentA, isNotNull);
-      expect(unlitVertexB, isNotNull);
-      expect(unlitFragmentB, isNotNull);
+    final RenderPassState stateA = createSimpleRenderPass();
+    drawWithPipeline(stateA, pipelineA, Colors.lime);
+    stateA.commandBuffer.submit();
 
-      // Both pipelines must register and remain usable. Without namespacing,
-      // `RuntimeEffectContents::RegisterShader`-style eviction would tear one
-      // of these pipelines down at registration time and the second draw
-      // would render against invalid state. With namespacing they coexist.
-      final gpu.RenderPipeline pipelineA = gpu.gpuContext.createRenderPipeline(
-        unlitVertexA!,
-        unlitFragmentA!,
-      );
-      final gpu.RenderPipeline pipelineB = gpu.gpuContext.createRenderPipeline(
-        unlitVertexB!,
-        unlitFragmentB!,
-      );
-
-      void drawWithPipeline(
-        RenderPassState state,
-        gpu.RenderPipeline pipeline,
-        Vector4 color,
-      ) {
-        state.renderPass.bindPipeline(pipeline);
-        final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
-        final gpu.BufferView vertices = transients.emplace(
-          float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
-        );
-        final gpu.BufferView vertInfoData = transients.emplace(
-          unlitUBO(Matrix4.identity(), color),
-        );
-        state.renderPass.bindVertexBuffer(vertices);
-        final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-          'VertInfo',
-        );
-        state.renderPass.bindUniform(vertInfo, vertInfoData);
-        state.renderPass.draw(3);
-      }
-
-      final RenderPassState stateA = createSimpleRenderPass();
-      drawWithPipeline(stateA, pipelineA, Colors.lime);
-      stateA.commandBuffer.submit();
-
-      final RenderPassState stateB = createSimpleRenderPass();
-      drawWithPipeline(stateB, pipelineB, Colors.lime);
-      stateB.commandBuffer.submit();
-    },
-    skip: !(impellerEnabled && flutterGpuEnabled),
-  );
+    final RenderPassState stateB = createSimpleRenderPass();
+    drawWithPipeline(stateB, pipelineB, Colors.lime);
+    stateB.commandBuffer.submit();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // Renders a green triangle pointing downwards using polygon mode line.
   test('Can render triangle with polygon mode line.', () async {
@@ -2507,63 +2046,41 @@ void main() async {
     );
     state.renderPass.bindVertexBuffer(vertices);
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-      'VertInfo',
-    );
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
     state.renderPass.bindUniform(vertInfo, vertInfoData);
     state.renderPass.draw(3);
 
     state.commandBuffer.submit();
 
     final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(
-      image,
-      'flutter_gpu_test_triangle_polygon_mode.png',
-    );
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle_polygon_mode.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // Renders a green triangle pointing downwards, with 4xMSAA.
-  test(
-    'Can render triangle with MSAA',
-    () async {
+  test('Can render triangle with MSAA', () async {
+    final RenderPassState state = createSimpleRenderPassWithMSAA();
+    await drawTriangle(state, Colors.lime);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle_msaa.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled && gpu.gpuContext.doesSupportOffscreenMSAA));
+
+  test('Rendering with MSAA throws exception when offscreen MSAA is not supported', () async {
+    try {
       final RenderPassState state = createSimpleRenderPassWithMSAA();
       await drawTriangle(state, Colors.lime);
       state.commandBuffer.submit();
-
-      final ui.Image image = state.renderTexture.asImage();
-      await comparer.addGoldenImage(
-        image,
-        'flutter_gpu_test_triangle_msaa.png',
+      fail('Exception not thrown when offscreen MSAA is not supported.');
+    } catch (e) {
+      expect(
+        e.toString(),
+        contains(
+          'The backend does not support multisample anti-aliasing for offscreen color and stencil attachments',
+        ),
       );
-    },
-    skip:
-        !(impellerEnabled &&
-            flutterGpuEnabled &&
-            gpu.gpuContext.doesSupportOffscreenMSAA),
-  );
-
-  test(
-    'Rendering with MSAA throws exception when offscreen MSAA is not supported',
-    () async {
-      try {
-        final RenderPassState state = createSimpleRenderPassWithMSAA();
-        await drawTriangle(state, Colors.lime);
-        state.commandBuffer.submit();
-        fail('Exception not thrown when offscreen MSAA is not supported.');
-      } catch (e) {
-        expect(
-          e.toString(),
-          contains(
-            'The backend does not support multisample anti-aliasing for offscreen color and stencil attachments',
-          ),
-        );
-      }
-    },
-    skip:
-        !(impellerEnabled &&
-            flutterGpuEnabled &&
-            !gpu.gpuContext.doesSupportOffscreenMSAA),
-  );
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled && !gpu.gpuContext.doesSupportOffscreenMSAA));
 
   // Renders a hollow green triangle pointing downwards.
   test('Can render hollowed out triangle using stencil ops', () async {
@@ -2604,9 +2121,7 @@ void main() async {
     );
     state.renderPass.bindVertexBuffer(vertices);
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-      'VertInfo',
-    );
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
 
     // First, punch out a scaled down triangle in the stencil buffer.
     // Since the stencil buffer is initialized to 0, we set the stencil ref to 1
@@ -2641,10 +2156,7 @@ void main() async {
     state.commandBuffer.submit();
 
     final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(
-      image,
-      'flutter_gpu_test_triangle_stencil.png',
-    );
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle_stencil.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Drawing respects cull mode', () async {
@@ -2670,9 +2182,7 @@ void main() async {
         unlitUBO(Matrix4.identity(), color),
       );
 
-      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-        'VertInfo',
-      );
+      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
       state.renderPass.bindVertexBuffer(vertices);
       state.renderPass.bindUniform(vertInfo, vertInfoUboFront);
       state.renderPass.draw(3);
@@ -2715,22 +2225,7 @@ void main() async {
 
     final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
     final gpu.BufferView vertices = transients.emplace(
-      float32(<double>[
-        1.0,
-        0.0,
-        0.5,
-        0.8,
-        -0.5,
-        0.8,
-        -1.0,
-        0.0,
-        -0.5,
-        -0.8,
-        0.5,
-        -0.8,
-        1.0,
-        0.0,
-      ]),
+      float32(<double>[1.0, 0.0, 0.5, 0.8, -0.5, 0.8, -1.0, 0.0, -0.5, -0.8, 0.5, -0.8, 1.0, 0.0]),
     );
     final gpu.BufferView vertInfoData = transients.emplace(
       float32(<double>[
@@ -2743,19 +2238,14 @@ void main() async {
     );
     state.renderPass.bindVertexBuffer(vertices);
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-      'VertInfo',
-    );
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
     state.renderPass.bindUniform(vertInfo, vertInfoData);
     state.renderPass.draw(7);
 
     state.commandBuffer.submit();
 
     final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(
-      image,
-      'flutter_gpu_test_hexgon_line_strip.png',
-    );
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_hexgon_line_strip.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // Renders the middle part triangle using scissor.
@@ -2790,9 +2280,7 @@ void main() async {
     );
     state.renderPass.bindVertexBuffer(vertices);
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-      'VertInfo',
-    );
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
     state.renderPass.bindUniform(vertInfo, vertInfoData);
     state.renderPass.draw(3);
 
@@ -2816,20 +2304,14 @@ void main() async {
       state.renderPass.setScissor(gpu.Scissor(x: -1, width: 50, height: 100));
       fail('Exception not thrown for invalid scissor.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('Invalid values for scissor. All values should be positive.'),
-      );
+      expect(e.toString(), contains('Invalid values for scissor. All values should be positive.'));
     }
 
     try {
       state.renderPass.setScissor(gpu.Scissor(width: 50, height: -100));
       fail('Exception not thrown for invalid scissor.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('Invalid values for scissor. All values should be positive.'),
-      );
+      expect(e.toString(), contains('Invalid values for scissor. All values should be positive.'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -2847,20 +2329,14 @@ void main() async {
       state.renderPass.setViewport(gpu.Viewport(x: -1, width: 50, height: 100));
       fail('Exception not thrown for invalid viewport.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('Invalid values for viewport. All values should be positive.'),
-      );
+      expect(e.toString(), contains('Invalid values for viewport. All values should be positive.'));
     }
 
     try {
       state.renderPass.setViewport(gpu.Viewport(width: 50, height: -100));
       fail('Exception not thrown for invalid viewport.');
     } catch (e) {
-      expect(
-        e.toString(),
-        contains('Invalid values for viewport. All values should be positive.'),
-      );
+      expect(e.toString(), contains('Invalid values for viewport. All values should be positive.'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -2896,9 +2372,7 @@ void main() async {
     );
     state.renderPass.bindVertexBuffer(vertices);
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot(
-      'VertInfo',
-    );
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
     state.renderPass.bindUniform(vertInfo, vertInfoData);
     state.renderPass.draw(3);
 
