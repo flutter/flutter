@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/metal/sampler_library_mtl.h"
 
+#include <algorithm>
+
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 
@@ -31,6 +33,9 @@ raw_ptr<const Sampler> SamplerLibraryMTL::GetSampler(
   desc.sAddressMode = ToMTLSamplerAddressMode(descriptor.width_address_mode);
   desc.tAddressMode = ToMTLSamplerAddressMode(descriptor.height_address_mode);
   desc.rAddressMode = ToMTLSamplerAddressMode(descriptor.depth_address_mode);
+  // Metal supports a maxAnisotropy in the range [1, 16] on all devices.
+  desc.maxAnisotropy =
+      std::clamp<NSUInteger>(descriptor.max_anisotropy, 1u, 16u);
   if (@available(iOS 14.0, macos 10.12, *)) {
     desc.borderColor = MTLSamplerBorderColorTransparentBlack;
   }

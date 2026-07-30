@@ -152,7 +152,7 @@ bool FlutterWindowsView::OnEmptyFrameGenerated() {
     return true;
   }
 
-  if (!ResizeRenderSurface(resize_target_height_, resize_target_width_)) {
+  if (!ResizeRenderSurface(resize_target_width_, resize_target_height_)) {
     return false;
   }
 

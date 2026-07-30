@@ -59,6 +59,13 @@ static void moved_to_rect_cb(FlWindowMonitor* self,
                              GdkRectangle* final_rect,
                              gboolean flipped_x,
                              gboolean flipped_y) {
+  // According to the documentation, the final_rect can be null
+  // if the backend can't obtain it.
+  // Reference: https://docs.gtk.org/gdk3/signal.Window.moved-to-rect.html
+  if (final_rect == nullptr) {
+    return;
+  }
+
   flutter::IsolateScope scope(self->isolate);
   self->on_moved_to_rect(final_rect->x, final_rect->y, final_rect->width,
                          final_rect->height);
@@ -80,9 +87,6 @@ static void destroy_cb(FlWindowMonitor* self) {
 static void fl_window_monitor_dispose(GObject* object) {
   FlWindowMonitor* self = FL_WINDOW_MONITOR(object);
 
-  // Disconnect all handlers using data. If we try and disconnect them
-  // individually they generated warnings after the widget has been destroyed.
-  g_signal_handlers_disconnect_by_data(self->window, self);
   g_clear_object(&self->window);
 
   G_OBJECT_CLASS(fl_window_monitor_parent_class)->dispose(object);
@@ -115,19 +119,24 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
   self->on_moved_to_rect = on_moved_to_rect;
   self->on_close = on_close;
   self->on_destroy = on_destroy;
-  g_signal_connect_swapped(window, "configure-event",
-                           G_CALLBACK(configure_event_cb), self);
-  g_signal_connect_swapped(window, "window-state-event",
-                           G_CALLBACK(window_state_event_cb), self);
-  g_signal_connect_swapped(window, "notify::is-active",
-                           G_CALLBACK(is_active_notify_cb), self);
-  g_signal_connect_swapped(window, "notify::title", G_CALLBACK(title_notify_cb),
-                           self);
-  g_signal_connect_swapped(gtk_widget_get_window(GTK_WIDGET(window)),
-                           "moved-to-rect", G_CALLBACK(moved_to_rect_cb), self);
-  g_signal_connect_swapped(window, "delete-event", G_CALLBACK(delete_event_cb),
-                           self);
-  g_signal_connect_swapped(window, "destroy", G_CALLBACK(destroy_cb), self);
+  g_signal_connect_object(window, "configure-event",
+                          G_CALLBACK(configure_event_cb), self,
+                          G_CONNECT_SWAPPED);
+  g_signal_connect_object(window, "window-state-event",
+                          G_CALLBACK(window_state_event_cb), self,
+                          G_CONNECT_SWAPPED);
+  g_signal_connect_object(window, "notify::is-active",
+                          G_CALLBACK(is_active_notify_cb), self,
+                          G_CONNECT_SWAPPED);
+  g_signal_connect_object(window, "notify::title", G_CALLBACK(title_notify_cb),
+                          self, G_CONNECT_SWAPPED);
+  g_signal_connect_object(gtk_widget_get_window(GTK_WIDGET(window)),
+                          "moved-to-rect", G_CALLBACK(moved_to_rect_cb), self,
+                          G_CONNECT_SWAPPED);
+  g_signal_connect_object(window, "delete-event", G_CALLBACK(delete_event_cb),
+                          self, G_CONNECT_SWAPPED);
+  g_signal_connect_object(window, "destroy", G_CALLBACK(destroy_cb), self,
+                          G_CONNECT_SWAPPED);
 
   return self;
 }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/gpu/render_pass.h"
+#include <algorithm>
 #include <future>
 #include <memory>
 
@@ -404,18 +405,13 @@ void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
                   length_in_bytes, index_type);
 }
 
-static bool BindUniform(
+static bool BindUniformStruct(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::Shader* shader,
-    Dart_Handle uniform_name_handle,
+    const flutter::gpu::Shader::UniformBinding* uniform_struct,
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     int offset_in_bytes,
     int length_in_bytes) {
-  auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
-  const flutter::gpu::Shader::UniformBinding* uniform_struct =
-      shader->GetUniformStruct(uniform_name);
-  // TODO(bdero): Return an error string stating that no uniform struct with
-  //              this name exists and throw an exception.
   if (!uniform_struct) {
     return false;
   }
@@ -457,26 +453,35 @@ bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes) {
-  return BindUniform(wrapper, shader, uniform_name_handle,
-                     device_buffer->GetBuffer(), offset_in_bytes,
-                     length_in_bytes);
+  auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
+  return BindUniformStruct(
+      wrapper, shader, shader->GetUniformStruct(uniform_name),
+      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
 }
 
-bool InternalFlutterGpu_RenderPass_BindTexture(
+bool InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::Shader* shader,
-    Dart_Handle uniform_name_handle,
+    int uniform_struct_index,
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int length_in_bytes) {
+  return BindUniformStruct(
+      wrapper, shader, shader->GetUniformStructAt(uniform_struct_index),
+      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
+}
+
+static bool BindTextureBinding(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    const flutter::gpu::Shader::TextureBinding* texture_binding,
     flutter::gpu::Texture* texture,
     int min_filter,
     int mag_filter,
     int mip_filter,
     int width_address_mode,
-    int height_address_mode) {
-  auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
-  const flutter::gpu::Shader::TextureBinding* texture_binding =
-      shader->GetUniformTexture(uniform_name);
-  // TODO(bdero): Return an error string stating that no uniform texture with
-  //              this name exists and throw an exception.
+    int height_address_mode,
+    int max_anisotropy) {
   if (!texture_binding) {
     return false;
   }
@@ -489,6 +494,10 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
       flutter::gpu::ToImpellerSamplerAddressMode(width_address_mode);
   sampler_desc.height_address_mode =
       flutter::gpu::ToImpellerSamplerAddressMode(height_address_mode);
+  // Backends clamp this to the device limit reported by
+  // Capabilities::GetMaxSamplerAnisotropy.
+  sampler_desc.max_anisotropy =
+      static_cast<uint8_t>(std::clamp(max_anisotropy, 1, 255));
   auto sampler =
       wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
 
@@ -512,6 +521,41 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
           .sampler = sampler,
       });
   return true;
+}
+
+bool InternalFlutterGpu_RenderPass_BindTexture(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    Dart_Handle uniform_name_handle,
+    flutter::gpu::Texture* texture,
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy) {
+  auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
+  return BindTextureBinding(
+      wrapper, shader, shader->GetUniformTexture(uniform_name), texture,
+      min_filter, mag_filter, mip_filter, width_address_mode,
+      height_address_mode, max_anisotropy);
+}
+
+bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    int uniform_texture_index,
+    flutter::gpu::Texture* texture,
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy) {
+  return BindTextureBinding(
+      wrapper, shader, shader->GetUniformTextureAt(uniform_texture_index),
+      texture, min_filter, mag_filter, mip_filter, width_address_mode,
+      height_address_mode, max_anisotropy);
 }
 
 void InternalFlutterGpu_RenderPass_ClearBindings(
@@ -555,7 +599,7 @@ void InternalFlutterGpu_RenderPass_SetDepthWriteEnable(
     flutter::gpu::RenderPass* wrapper,
     bool enable) {
   auto& depth = wrapper->GetDepthAttachmentDescriptor();
-  depth.depth_write_enabled = true;
+  depth.depth_write_enabled = enable;
 }
 
 void InternalFlutterGpu_RenderPass_SetDepthCompareOperation(

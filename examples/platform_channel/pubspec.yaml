@@ -1,13 +1,14 @@
 name: platform_channel
 
 environment:
-  sdk: ^3.10.0-0
+  sdk: ^3.11.0-0
 
 resolution: workspace
 
 dependencies:
   flutter:
     sdk: flutter
+  material_ui: ^0.0.2
 
 
 dev_dependencies:
@@ -21,4 +22,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: f9g2jl
+# PUBSPEC CHECKSUM: kujv36
