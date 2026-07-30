@@ -48,8 +48,6 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   // |Texture|
   ISize GetSize() const override;
 
-  void SetMipMapGenerated();
-
   bool IsSwapchainImage() const;
 
   std::shared_ptr<SamplerVK> GetImmutableSamplerVariant(

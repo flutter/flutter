@@ -219,10 +219,6 @@ FramebufferAndRenderPass TextureVK::GetCachedFrameData(SampleCount sample_count,
   return source_->GetCachedFrameData(sample_count, mip_level, slice);
 }
 
-void TextureVK::SetMipMapGenerated() {
-  mipmap_generated_ = true;
-}
-
 bool TextureVK::IsSwapchainImage() const {
   return source_->IsSwapchainImage();
 }

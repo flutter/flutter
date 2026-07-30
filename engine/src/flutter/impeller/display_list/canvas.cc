@@ -56,6 +56,7 @@
 #include "impeller/entity/geometry/shadow_path_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/geometry/uber_sdf_geometry.h"
+#include "impeller/entity/mipmap_generator.h"
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
@@ -2593,12 +2594,13 @@ bool Canvas::EnsureFinalMipmapGeneration() const {
   if (!cmd_buffer) {
     return false;
   }
-  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-  if (!blit_pass) {
+  if (!AddMipmapGeneration(cmd_buffer, renderer_.GetContext(),
+                           render_target_.GetRenderTargetTexture(),
+                           *renderer_.GetRenderTargetCache(),
+                           renderer_.GetTransientsDataBuffer())
+           .ok()) {
     return false;
   }
-  blit_pass->GenerateMipmap(render_target_.GetRenderTargetTexture());
-  blit_pass->EncodeCommands();
   return renderer_.GetContext()->EnqueueCommandBuffer(std::move(cmd_buffer));
 }
 

@@ -528,7 +528,7 @@ bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
   // We modified the layouts of this image from underneath it. Tell it its new
   // state so it doesn't try to perform redundant transitions under the hood.
   src.SetLayoutWithoutEncoding(vk::ImageLayout::eShaderReadOnlyOptimal);
-  src.SetMipMapGenerated();
+  src.SetMipmapGenerated();
 
   return true;
 }
