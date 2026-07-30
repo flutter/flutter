@@ -255,13 +255,13 @@ if (enable_ios_unittests) {
     bridge_header = "FlutterTests-Bridging-Header.h"
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
-      "framework/Source/ConnectionCollectionTest.swift",
-      "framework/Source/DisplayLinkManagerTest.swift",
+      "framework/Source/ConnectionCollectionTests.swift",
+      "framework/Source/DisplayLinkManagerTests.swift",
       "framework/Source/FakeUIPressProxy.swift",
-      "framework/Source/LaunchEngineTest.swift",
+      "framework/Source/LaunchEngineTests.swift",
       "framework/Source/SplashScreenManagerTests.swift",
       "framework/Source/TaskRunnerTests.swift",
-      "framework/Source/VSyncClientTest.swift",
+      "framework/Source/VSyncClientTests.swift",
     ]
     frameworks = [ "Testing.framework" ]
     deps = [

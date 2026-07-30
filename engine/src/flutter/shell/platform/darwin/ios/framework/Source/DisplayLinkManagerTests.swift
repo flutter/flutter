@@ -7,7 +7,7 @@ import XCTest
 @testable import InternalFlutterSwift
 
 @MainActor
-class DisplayLinkManagerTest: XCTestCase {
+class DisplayLinkManagerTests: XCTestCase {
 
   func testDisplayLinkManagerCanBeInstantiatedWithMockValues() {
     let manager = DisplayLinkManager(maxRefreshRateEnabled: true, refreshRate: 120.0)
