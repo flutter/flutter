@@ -19,7 +19,7 @@ import '../src/allow_list_devices.dart';
 /// Deliberately not a whole number of pixels. Android view geometry is
 /// integral, so the engine has to snap this to the pixel grid; if it truncates
 /// instead of rounding, the view ends up 200x200 and a line of
-/// [_backgroundColor] is left uncovered along the right and bottom edges.
+/// [_underlayColor] is left uncovered along the right and bottom edges.
 ///
 /// This is the same defect that a platform view covering the whole screen hits
 /// on a device whose device pixel ratio does not evenly divide its resolution
@@ -36,6 +36,7 @@ const double _viewPhysicalSize = 200.75;
 const double _clipPhysicalSize = 150.75;
 
 const Color _backgroundColor = Colors.red;
+const Color _underlayColor = Colors.green;
 
 void main() async {
   ensureAndroidDevice();
@@ -82,6 +83,9 @@ class _FractionalSizeHomePageState extends State<FractionalSizeHomePage> {
   Widget build(BuildContext context) {
     final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
     final double viewSize = _viewPhysicalSize / devicePixelRatio;
+    final double underlayPhysicalSize = (_isClipped ? _clipPhysicalSize : _viewPhysicalSize)
+        .roundToDouble();
+    final double underlaySize = underlayPhysicalSize / devicePixelRatio;
 
     Widget platformView = const _HybridCompositionAndroidPlatformView(
       viewType: 'box_platform_view',
@@ -100,6 +104,13 @@ class _FractionalSizeHomePageState extends State<FractionalSizeHomePage> {
       backgroundColor: _backgroundColor,
       body: Stack(
         children: <Widget>[
+          Positioned(
+            left: 0,
+            top: 0,
+            width: underlaySize,
+            height: underlaySize,
+            child: const ColoredBox(color: _underlayColor),
+          ),
           Positioned(left: 0, top: 0, width: viewSize, height: viewSize, child: platformView),
           Positioned(
             left: 0,

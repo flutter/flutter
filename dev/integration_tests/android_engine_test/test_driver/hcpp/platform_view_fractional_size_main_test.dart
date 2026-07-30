@@ -18,7 +18,7 @@ import '../_luci_skia_gold_prelude.dart';
 /// pushing clip rects onto the mutator stack. That shrinks the view by up to a
 /// pixel, uncovering a thin line of the Flutter content behind it along the
 /// right and bottom edges. These goldens should show a blue box over a red
-/// background with no red line between the box and its own edges.
+/// background with no green underlay line around the edges of the box.
 ///
 /// For local debugging, a (local) golden-file is required as a baseline:
 ///
@@ -60,14 +60,14 @@ void main() async {
     expect(response['supported'], true);
   }, timeout: Timeout.none);
 
-  test('should not leave a background-colored line along the edges of the view', () async {
+  test('should not leave an underlay-colored line along the edges of the view', () async {
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('$goldenPrefix.fractional_size.png'),
     );
   }, timeout: Timeout.none);
 
-  test('should not leave a background-colored line along the edges of the clip', () async {
+  test('should not leave an underlay-colored line along the edges of the clip', () async {
     await flutterDriver.tap(find.byValueKey('toggle_clip_button'));
     await expectLater(
       nativeDriver.screenshot(),
