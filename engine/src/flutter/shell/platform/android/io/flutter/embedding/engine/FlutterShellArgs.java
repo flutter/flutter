@@ -87,8 +87,10 @@ public class FlutterShellArgs {
   public static final String ARG_DART_FLAGS = "--dart-flags";
   public static final String ARG_KEY_EXPERIMENTAL_VM_SERVICE = "experimental-vm-service";
   public static final String ARG_EXPERIMENTAL_VM_SERVICE = "--experimental-vm-service";
-  public static final String ARG_KEY_AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
-  public static final String ARG_AOT_VMSERVICE_SHARED_LIBRARY_NAME = "--aot-vmservice-shared-library-name=";
+  public static final String ARG_KEY_AOT_VMSERVICE_SHARED_LIBRARY_NAME =
+      "aot-vmservice-shared-library-name";
+  public static final String ARG_AOT_VMSERVICE_SHARED_LIBRARY_NAME =
+      "--aot-vmservice-shared-library-name=";
   public static final String ARG_KEY_VMSERVICE_KERNEL_PATH = "vmservice-kernel-path";
   public static final String ARG_VMSERVICE_KERNEL_PATH = "--vmservice-kernel-path=";
   private static final String ARG_KEY_TEST_FLAG = "test-flag";
@@ -184,7 +186,8 @@ public class FlutterShellArgs {
     if (intent.getBooleanExtra(ARG_KEY_EXPERIMENTAL_VM_SERVICE, false)) {
       args.add(ARG_EXPERIMENTAL_VM_SERVICE);
     }
-    String aotVMServiceSharedLibraryName = intent.getStringExtra(ARG_KEY_AOT_VMSERVICE_SHARED_LIBRARY_NAME);
+    String aotVMServiceSharedLibraryName =
+        intent.getStringExtra(ARG_KEY_AOT_VMSERVICE_SHARED_LIBRARY_NAME);
     if (aotVMServiceSharedLibraryName != null) {
       args.add(ARG_AOT_VMSERVICE_SHARED_LIBRARY_NAME + aotVMServiceSharedLibraryName);
     }
