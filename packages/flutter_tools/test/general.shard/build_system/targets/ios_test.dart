@@ -862,7 +862,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFramework.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -875,7 +875,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -888,7 +888,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
           outputDir.path,
         ],
         exitCode: 1,
@@ -932,7 +932,7 @@ void main() {
             '--filter',
             '- .DS_Store/',
             '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-            'Artifact.flutterFramework.ios.debug.EnvironmentType.simulator',
+            'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
             outputDir.path,
           ],
           onRun: (_) => binary.createSync(recursive: true),
@@ -979,7 +979,7 @@ void main() {
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.debug,
           environmentType: EnvironmentType.physical,
         ),
@@ -1337,7 +1337,7 @@ void main() {
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.debug,
           environmentType: EnvironmentType.physical,
         ),

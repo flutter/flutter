@@ -2508,7 +2508,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Exception? reportError;
 
   @override
-  TargetPlatform get targetPlatform => const TargetPlatform(.web, .unknown);
+  TargetPlatform get targetPlatform => TargetPlatform.web_javascript;
 
   @override
   ResidentCompiler? generator;

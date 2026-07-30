@@ -111,27 +111,33 @@ class BuildBundleCommand extends BuildSubCommand {
     final String targetPlatform = stringArg('target-platform')!;
     final platform = TargetPlatform.fromName(targetPlatform);
     // Check for target platforms that are only allowed via feature flags.
-    switch (platform.type) {
-      case .macos:
+    switch (platform) {
+      case TargetPlatform.darwin:
         if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
-      case .windows:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
-      case .linux:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
         if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
-      case .android:
-      case .fuchsia:
-      case .ios:
-      case .tester:
-      case .web:
-      case .custom:
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
         break;
-      case .unsupported:
+      case TargetPlatform.unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
 
