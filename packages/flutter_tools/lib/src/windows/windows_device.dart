@@ -38,12 +38,9 @@ class WindowsDevice extends DesktopDevice {
   @override
   String get name => 'Windows';
 
-  @override
-  Future<TargetPlatform> get targetPlatform async => _targetPlatform;
-
   TargetPlatform get _targetPlatform => switch (_operatingSystemUtils.hostPlatform) {
-    HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
-    _ => TargetPlatform.windows_x64,
+    HostPlatform.windows_arm64 => const TargetPlatform(.windows, .arm64),
+    _ => const TargetPlatform(.windows, .x64),
   };
 
   @override

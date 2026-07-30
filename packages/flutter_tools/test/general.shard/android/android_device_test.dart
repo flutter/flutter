@@ -77,11 +77,11 @@ void main() {
       'abi and abiList', () async {
     // The format is [ABI, ABI list]: expected target platform.
     final values = <List<String>, TargetPlatform>{
-      <String>['x86_64', 'unknown']: TargetPlatform.android_x64,
-      <String>['armeabi-v7a', 'unknown']: TargetPlatform.android_arm,
-      <String>['arm64-v8a', 'arm64-v8a,']: TargetPlatform.android_arm64,
+      <String>['x86_64', 'unknown']: const TargetPlatform(.android, .x64),
+      <String>['armeabi-v7a', 'unknown']: const TargetPlatform(.android, .armv7),
+      <String>['arm64-v8a', 'arm64-v8a,']: const TargetPlatform(.android, .arm64),
       // The Kindle Fire runs 32 bit apps on 64 bit hardware.
-      <String>['arm64-v8a', 'arm']: TargetPlatform.android_arm,
+      <String>['arm64-v8a', 'arm']: const TargetPlatform(.android, .armv7),
     };
 
     for (final MapEntry<List<String>, TargetPlatform> entry in values.entries) {
