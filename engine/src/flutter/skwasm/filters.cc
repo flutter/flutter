@@ -107,6 +107,7 @@ colorFilter_createLinearToSRGBGamma() {
   return new Skwasm::sp_wrapper<const flutter::DlColorFilter>(
       flutter::DlColorFilter::MakeLinearToSrgbGamma());
 }
+
 SKWASM_EXPORT void colorFilter_dispose(
     Skwasm::sp_wrapper<const flutter::DlColorFilter>* filter) {
   Skwasm::live_color_filter_count--;

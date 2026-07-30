@@ -41,9 +41,22 @@ class CkPaint implements ui.Paint {
     skPaint.setColorInt(_colorValue);
     skPaint.setStrokeMiter(strokeMiterLimit);
 
-    final CkColorFilter? effectiveColorFilter = _effectiveColorFilter;
-    if (effectiveColorFilter != null) {
-      skPaint.setColorFilter(effectiveColorFilter.skiaObject);
+    final EngineColorFilter? colorFilter = _engineColorFilter;
+    SkColorFilter? composedSkColorFilter;
+    if (invertColors) {
+      final SkColorFilter invertSkColorFilter =
+          (EngineColorFilter.invert.backendFilter as CkColorFilter).skiaObject;
+      if (colorFilter != null) {
+        composedSkColorFilter = canvasKit.ColorFilter.MakeCompose(
+          invertSkColorFilter,
+          (colorFilter.backendFilter as CkColorFilter).skiaObject,
+        );
+        skPaint.setColorFilter(composedSkColorFilter);
+      } else {
+        skPaint.setColorFilter(invertSkColorFilter);
+      }
+    } else if (colorFilter != null) {
+      skPaint.setColorFilter((colorFilter.backendFilter as CkColorFilter).skiaObject);
     }
 
     final CkShader? shader = _shader;
@@ -68,6 +81,10 @@ class CkPaint implements ui.Paint {
       localImageFilter.withSkImageFilter((skImageFilter) {
         skPaint.setImageFilter(skImageFilter);
       }, defaultBlurTileMode: defaultBlurTileMode);
+    }
+
+    if (composedSkColorFilter != null) {
+      composedSkColorFilter.delete();
     }
 
     return skPaint;
@@ -105,33 +122,10 @@ class CkPaint implements ui.Paint {
   bool get invertColors => _invertColors;
   @override
   set invertColors(bool value) {
-    if (value == _invertColors) {
-      return;
-    }
-    if (!value) {
-      _effectiveColorFilter = _originalColorFilter;
-      _originalColorFilter = null;
-    } else {
-      _originalColorFilter = _effectiveColorFilter;
-      if (_effectiveColorFilter == null) {
-        _effectiveColorFilter = EngineColorFilter.invert.backendFilter as CkColorFilter;
-      } else {
-        _effectiveColorFilter = CkColorFilter.fromSkColorFilter(
-          canvasKit.ColorFilter.MakeCompose(
-            (EngineColorFilter.invert.backendFilter as CkColorFilter).skiaObject,
-            _effectiveColorFilter!.skiaObject,
-          ),
-        );
-      }
-    }
     _invertColors = value;
   }
 
   bool _invertColors = false;
-  // The original color filter before we inverted colors. If we set
-  // `invertColors` back to `false`, then restore this filter rather than
-  // invert the color filter again.
-  CkColorFilter? _originalColorFilter;
 
   @override
   ui.Shader? get shader => _shader;
@@ -156,39 +150,11 @@ class CkPaint implements ui.Paint {
 
   @override
   set colorFilter(ui.ColorFilter? value) {
-    if (_engineColorFilter == value) {
-      return;
-    }
     _engineColorFilter = value as EngineColorFilter?;
-    _originalColorFilter = null;
-    if (value == null) {
-      _effectiveColorFilter = null;
-    } else {
-      _effectiveColorFilter = _engineColorFilter!.backendFilter as CkColorFilter;
-    }
-
-    if (invertColors) {
-      _originalColorFilter = _effectiveColorFilter;
-      if (_effectiveColorFilter == null) {
-        _effectiveColorFilter = EngineColorFilter.invert.backendFilter as CkColorFilter;
-      } else {
-        _effectiveColorFilter = CkColorFilter.fromSkColorFilter(
-          canvasKit.ColorFilter.MakeCompose(
-            (EngineColorFilter.invert.backendFilter as CkColorFilter).skiaObject,
-            _effectiveColorFilter!.skiaObject,
-          ),
-        );
-      }
-    }
   }
 
   /// The original color filter objects passed by the framework.
   EngineColorFilter? _engineColorFilter;
-
-  /// The effective color filter.
-  ///
-  /// This is a combination of the `colorFilter` and `invertColors` properties.
-  CkColorFilter? _effectiveColorFilter;
 
   @override
   double strokeMiterLimit = 4.0;
@@ -202,9 +168,7 @@ class CkPaint implements ui.Paint {
     }
 
     if (value is ui.ColorFilter) {
-      _imageFilter = CkColorFilterImageFilter(
-        colorFilter: (value as EngineColorFilter).backendFilter as CkColorFilter,
-      );
+      _imageFilter = CkColorFilterImageFilter(colorFilter: value as EngineColorFilter);
     } else {
       _imageFilter = value as CkManagedSkImageFilterConvertible?;
     }

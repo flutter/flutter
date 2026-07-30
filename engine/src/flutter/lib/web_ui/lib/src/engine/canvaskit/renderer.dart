@@ -187,10 +187,10 @@ class CanvasKitRenderer extends Renderer {
     required ui.ImageFilter inner,
   }) {
     if (outer is EngineColorFilter) {
-      outer = CkColorFilterImageFilter(colorFilter: outer.backendFilter as CkColorFilter);
+      outer = CkColorFilterImageFilter(colorFilter: outer);
     }
     if (inner is EngineColorFilter) {
-      inner = CkColorFilterImageFilter(colorFilter: inner.backendFilter as CkColorFilter);
+      inner = CkColorFilterImageFilter(colorFilter: inner);
     }
     return CkImageFilter.compose(outer: outer as CkImageFilter, inner: inner as CkImageFilter);
   }

@@ -18,31 +18,23 @@ final Finalizer _colorFilterFinalizer = NativeMemoryFinalizer((Object filter) {
 class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   const EngineColorFilter.mode(ui.Color this.color, ui.BlendMode this.blendMode)
     : matrix = null,
-      inner = null,
-      outer = null,
       type = ColorFilterType.mode;
 
   const EngineColorFilter.matrix(List<double> this.matrix)
     : color = null,
       blendMode = null,
-      inner = null,
-      outer = null,
       type = ColorFilterType.matrix;
 
   const EngineColorFilter.linearToSrgbGamma()
     : color = null,
       blendMode = null,
       matrix = null,
-      inner = null,
-      outer = null,
       type = ColorFilterType.linearToSrgbGamma;
 
   const EngineColorFilter.srgbToLinearGamma()
     : color = null,
       blendMode = null,
       matrix = null,
-      inner = null,
-      outer = null,
       type = ColorFilterType.srgbToLinearGamma;
 
   factory EngineColorFilter.saturation(double saturation) {
@@ -62,33 +54,17 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   }
 
   static const EngineColorFilter invert = EngineColorFilter.matrix(<double>[
-    -1.0,
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    -1.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    0.0,
-    -1.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    0.0,
+    // dart format off
+    -1.0,  0.0,  0.0, 1.0, 0.0,
+     0.0, -1.0,  0.0, 1.0, 0.0,
+     0.0,  0.0, -1.0, 1.0, 0.0,
+     1.0,  1.0,  1.0, 1.0, 0.0,
+    // dart format on
   ]);
 
   final ui.Color? color;
   final ui.BlendMode? blendMode;
   final List<double>? matrix;
-  final EngineColorFilter? inner;
-  final EngineColorFilter? outer;
   final ColorFilterType type;
 
   /// The backend implementation of this color filter.
@@ -129,12 +105,10 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
     return other.type == type &&
         other.color == color &&
         other.blendMode == blendMode &&
-        other.inner == inner &&
-        other.outer == outer &&
         listEquals(other.matrix, matrix);
   }
 
   @override
   int get hashCode =>
-      Object.hash(type, color, blendMode, inner, outer, Object.hashAll(matrix ?? const <double>[]));
+      Object.hash(type, color, blendMode, Object.hashAll(matrix ?? const <double>[]));
 }
