@@ -102,8 +102,8 @@ TEST(PipelineCompileQueueTest, ExecutesJobsInInsertionOrder) {
   for (size_t i = 0; i < kJobCount; i++) {
     PipelineDescriptor desc;
     desc.SetLabel(std::to_string(i));
-    queue->AddJobForTest(
-        desc, [&job_order, index = i] { job_order.push_back(index); });
+    ASSERT_TRUE(queue->AddJobForTest(
+        desc, [&job_order, index = i] { job_order.push_back(index); }));
   }
 
   for (size_t i = 0; i < kJobCount; i++) {
