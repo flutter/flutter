@@ -8,7 +8,7 @@ import 'test_utils.dart';
 void main() {
   testWithoutContext('Android Gradle settings templates canonicalize flutter.sdk', () {
     const expectedIncludeBuild =
-        r'includeBuild("${file(flutterSdkPath).canonicalPath}/packages/flutter_tools/gradle")';
+        r'includeBuild(file("$flutterSdkPath/packages/flutter_tools/gradle").canonicalPath)';
     const templatePaths = <String>[
       'templates/app/android.tmpl/settings.gradle.kts.tmpl',
       'templates/module/android/host_app_ephemeral/settings.gradle.tmpl',
