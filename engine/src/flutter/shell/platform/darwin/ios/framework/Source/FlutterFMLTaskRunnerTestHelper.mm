@@ -4,9 +4,18 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunnerTestHelper.h"
 
+#include <pthread/qos.h>
+
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
+
+// Configures the worker thread to match the QoS of the real platform/UI thread,
+// which is `kDisplay` (user-interactive).
+static void ConfigureThread(const fml::Thread::ThreadConfig& config) {
+  fml::Thread::SetCurrentThreadName(config);
+  pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
+}
 
 // A FlutterFMLTaskRunner that owns the fml::Thread it runs on.
 @interface FlutterFMLThreadTaskRunner : FlutterFMLTaskRunner
@@ -17,7 +26,9 @@
 }
 
 - (instancetype)initWithLabel:(NSString*)label {
-  _thread = std::make_unique<fml::Thread>(label.UTF8String);
+  _thread = std::make_unique<fml::Thread>(
+      ConfigureThread,
+      fml::Thread::ThreadConfig(label.UTF8String, fml::Thread::ThreadPriority::kDisplay));
   self = [super initWithTaskRunner:_thread->GetTaskRunner()];
   return self;
 }
