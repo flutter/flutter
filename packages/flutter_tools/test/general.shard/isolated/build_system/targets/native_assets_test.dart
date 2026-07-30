@@ -39,7 +39,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: const TargetPlatform(.ios, .arm64).getName(),
+        kTargetPlatform: TargetPlatform.ios.getName(),
         kIosArchs: 'arm64',
         kSdkRoot: 'path/to/iPhoneOS.sdk',
       },
@@ -53,7 +53,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: const TargetPlatform(.android, .unknown).getName(),
+        kTargetPlatform: TargetPlatform.android.getName(),
         kAndroidArchs: CpuArch.arm64.androidPlatformName,
       },
       inputs: <String, String>{},
