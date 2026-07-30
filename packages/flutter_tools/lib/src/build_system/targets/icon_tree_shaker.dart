@@ -68,7 +68,11 @@ class IconTreeShaker {
     'application/x-font-ttf', // based on running locally.
   };
 
-  /// The [Source] inputs that targets using this should depend on.
+  /// The [Source] inputs that native targets using this should depend on.
+  ///
+  /// Web targets (such as `WebReleaseBundle`) do not use this field because
+  /// their recorded uses inputs are dynamically provided via
+  /// `Dart2WebTarget.buildPatternStems`.
   ///
   /// See [Target.inputs].
   static const inputs = <Source>[
@@ -76,8 +80,6 @@ class IconTreeShaker {
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/icon_tree_shaker.dart',
     ),
     Source.pattern('{BUILD_DIR}/recorded_uses.json'),
-    Source.pattern('{BUILD_DIR}/recorded_uses_js.json'),
-    Source.pattern('{BUILD_DIR}/recorded_uses_wasm.json'),
     Source.artifact(Artifact.fontSubset),
   ];
 
