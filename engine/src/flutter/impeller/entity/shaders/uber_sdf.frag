@@ -197,35 +197,29 @@ float pixelSize(float sdf) {
 // Returns vec2(sdf, pixel_size).
 vec2 filledSDF(vec2 p) {
   float sdf;
+  float pixel_size;
   if (frag_info.type < 0.5) {  // Circle
     sdf = distanceFromCircle(p, frag_info.size.x);
+    pixel_size = pixelSize(sdf);
   } else if (frag_info.type < 1.5) {  // Rect
     sdf = distanceFromRect(p, frag_info.size);
+    // Rect has its own separate logic for calculating pixel size.
+    pixel_size = rectPixelSize(p);
   } else if (frag_info.type < 2.5) {  // Oval
     sdf = distanceFromOval(p, frag_info.size);
+    pixel_size = pixelSize(sdf);
   } else if (frag_info.type < 3.5) {  // Rounded Rect
-    // RoundRect has its own separate logic for calculating pixel size.
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
+    // RoundRect has its own separate logic for calculating pixel size.
+    pixel_size = roundRectPixelSize(p);
   } else {  // Symmetric Rounded Superellipse
     sdf = distanceFromRoundedSuperellipse(
         p, frag_info.superellipse_degree, frag_info.superellipse_semi_axis,
         frag_info.radii.xy, frag_info.angle_span, frag_info.circle_center_top,
         frag_info.circle_center_right, frag_info.octant_offset_c,
         frag_info.superellipse_scale);
-  }
-
-  float pixel_size;
-  if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
-    // Special case pixel size calculation for rectangles.
-    pixel_size = rectPixelSize(p);
-  } else if (frag_info.type >= 2.5 && frag_info.type < 3.5) {  // Rounded Rect
-    // Special case pixel size calculation for rounded rectangles.
-    pixel_size = roundRectPixelSize(p);
-  } else {
-    // All other shapes use standard SDF-derivative-based pixel size.
     pixel_size = pixelSize(sdf);
   }
-
   return vec2(sdf, pixel_size);
 }
 
