@@ -7,7 +7,7 @@ sometimes known as a permalink.
 Even if you update the link in the repo if it changes or breaks,
 outdated versions might remain in older versions of tools, docs, etc.
 Sometimes the link destination itself can add an appropriate redirect,
-but sometimes it can't and other times it's destination isn't the best choice.
+but sometimes it can't and other times its destination isn't the best choice.
 
 - If you're not sure if you need a more reliable link,
   check out [Situations to consider](#situations-to-consider).
