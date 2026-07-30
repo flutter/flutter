@@ -1601,7 +1601,7 @@ let package = Package(
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: true),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
