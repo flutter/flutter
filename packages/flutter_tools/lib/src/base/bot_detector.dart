@@ -111,7 +111,7 @@ class AzureDetector {
       // The connection was established but an HTTP error occurred.
       // This still indicates we're running on Azure.
       return _isRunningOnAzure = true;
-    } catch (e) {
+    } on Object {
       // Metadata detection is best-effort. Any other failure (socket errors,
       // timeouts, malformed redirect URIs, WSL1 networking issues, etc.)
       // should not prevent Flutter from starting.
