@@ -265,12 +265,12 @@ Future<void> testMain() async {
 }
 
 class _TestHttpFetchResponse implements HttpFetchResponse {
-  _TestHttpFetchResponse({required this.stream, this.contentLength});
+  _TestHttpFetchResponse({required this.stream});
 
   final DomReadableStream stream;
 
   @override
-  final int? contentLength;
+  final int? contentLength = null;
 
   @override
   bool get hasPayload => true;
