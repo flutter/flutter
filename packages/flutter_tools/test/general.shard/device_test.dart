@@ -956,6 +956,196 @@ void main() {
     });
   });
 
+  group('Get Android launch arguments from DebuggingOptions', () {
+    testWithoutContext('Get launch arguments (Manifest) - top level flags', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableDartProfiling: true,
+        profileStartup: true,
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'bar',
+        traceSystrace: true,
+        traceToFile: 'path',
+        endlessTraceBuffer: true,
+        profileMicrotasks: true,
+        purgePersistentCache: true,
+        enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
+        enableVulkanValidation: true,
+        enableHcpp: true,
+      );
+
+      final Set<String> launchArguments = original.getAndroidLaunchArguments();
+
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--enable-dart-profiling',
+          '--profile-startup',
+          '--enable-software-rendering',
+          '--skia-deterministic-rendering',
+          '--trace-skia',
+          '--trace-allowlist=foo',
+          '--trace-skia-allowlist=bar',
+          '--trace-systrace',
+          '--trace-to-file=path',
+          '--endless-trace-buffer',
+          '--profile-microtasks',
+          '--purge-persistent-cache',
+          '--enable-impeller=true',
+          '--enable-flutter-gpu',
+          '--enable-vulkan-validation',
+          '--enable-hcpp-and-surface-control',
+        ]),
+      );
+    });
+
+    testWithoutContext('Get launch arguments (Manifest) - debugging enabled', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        disableServiceOriginCheck: true,
+        dartFlags: 'baz',
+        useTestFonts: true,
+        verboseSystemLogs: true,
+        testFlag: true,
+      );
+
+      final Set<String> launchArguments = original.getAndroidLaunchArguments();
+
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--start-paused',
+          '--disable-service-auth-codes',
+          '--disable-service-origin-check',
+          '--dart-flags=baz',
+          '--use-test-fonts',
+          '--verbose-logging',
+          '--test-flag',
+        ]),
+      );
+    });
+
+    testWithoutContext('Get launch arguments (Manifest) - debugging disabled', () {
+      final DebuggingOptions original = DebuggingOptions.disabled(
+        BuildInfo.release,
+      );
+
+      final Set<String> launchArguments = original.getAndroidLaunchArguments();
+
+      expect(launchArguments.contains('--enable-checked-mode'), isFalse);
+      expect(launchArguments.contains('--verify-entry-points'), isFalse);
+      expect(launchArguments.contains('--start-paused'), isFalse);
+      expect(launchArguments.contains('--disable-service-auth-codes'), isFalse);
+      expect(launchArguments.contains('--disable-service-origin-check'), isFalse);
+      expect(launchArguments.contains('--dart-flags='), isFalse);
+      expect(launchArguments.contains('--use-test-fonts'), isFalse);
+      expect(launchArguments.contains('--verbose-logging'), isFalse);
+      expect(launchArguments.contains('--test-flag'), isFalse);
+    });
+
+    testWithoutContext('Get launch arguments (Intent) - top level flags', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableDartProfiling: true,
+        profileStartup: true,
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'bar',
+        traceSystrace: true,
+        traceToFile: 'path',
+        endlessTraceBuffer: true,
+        profileMicrotasks: true,
+        purgePersistentCache: true,
+        enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
+        enableVulkanValidation: true,
+        enableHcpp: true,
+      );
+
+      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--ez', 'enable-dart-profiling', 'true',
+          '--ez', 'profile-startup', 'true',
+          '--ez', 'enable-software-rendering', 'true',
+          '--ez', 'skia-deterministic-rendering', 'true',
+          '--ez', 'trace-skia', 'true',
+          '--es', 'trace-allowlist', 'foo',
+          '--es', 'trace-skia-allowlist', 'bar',
+          '--ez', 'trace-systrace', 'true',
+          '--es', 'trace-to-file', 'path',
+          '--ez', 'endless-trace-buffer', 'true',
+          '--ez', 'profile-microtasks', 'true',
+          '--ez', 'purge-persistent-cache', 'true',
+          '--ez', 'enable-impeller', 'true',
+          '--ez', 'enable-flutter-gpu', 'true',
+          '--ez', 'enable-vulkan-validation', 'true',
+          '--ez', 'enable-hcpp-and-surface-control', 'true',
+        ]),
+      );
+    });
+
+    testWithoutContext('Get launch arguments (Intent) - debugging enabled', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        disableServiceOriginCheck: true,
+        dartFlags: 'baz',
+        useTestFonts: true,
+        verboseSystemLogs: true,
+        testFlag: true,
+      );
+
+      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--ez', 'enable-checked-mode', 'true',
+          '--ez', 'verify-entry-points', 'true',
+          '--ez', 'start-paused', 'true',
+          '--ez', 'disable-service-auth-codes', 'true',
+          '--ez', 'disable-service-origin-check', 'true',
+          '--es', 'dart-flags', 'baz',
+          '--ez', 'use-test-fonts', 'true',
+          '--ez', 'verbose-logging', 'true',
+          '--ez', 'test-flag', 'true',
+        ]),
+      );
+    });
+
+    testWithoutContext('Get launch arguments (Intent) - debugging disabled', () {
+      final DebuggingOptions original = DebuggingOptions.disabled(
+        BuildInfo.release,
+      );
+
+      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+
+      expect(launchArguments.contains('enable-checked-mode'), isFalse);
+      expect(launchArguments.contains('verify-entry-points'), isFalse);
+      expect(launchArguments.contains('start-paused'), isFalse);
+      expect(launchArguments.contains('disable-service-auth-codes'), isFalse);
+      expect(launchArguments.contains('disable-service-origin-check'), isFalse);
+      expect(launchArguments.contains('dart-flags'), isFalse);
+      expect(launchArguments.contains('use-test-fonts'), isFalse);
+      expect(launchArguments.contains('verbose-logging'), isFalse);
+      expect(launchArguments.contains('test-flag'), isFalse);
+    });
+  });
+
   group('PollingDeviceDiscovery', () {
     final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
 

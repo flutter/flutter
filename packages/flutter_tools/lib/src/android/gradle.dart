@@ -4,6 +4,7 @@
 
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -529,8 +530,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
           .join(',');
       options.add('-Ptarget-platform=$targetPlatforms');
     }
-    if (androidBuildInfo.androidEngineShellArgs != null) {
-      options.add('-Pflutter.engineShellArgs=${androidBuildInfo.androidEngineShellArgs}');
+    if (androidBuildInfo.releaseManifestEngineShellArgs != null) {
+      final String base64JsonArgs = base64Encode(utf8.encode(jsonEncode(androidBuildInfo.releaseManifestEngineShellArgs)));
+      options.add('-Pflutter.engineShellArgs=$base64JsonArgs');
     }
     options.add('-Ptarget=$target');
     // If using v1 embedding, we want to use FlutterApplication as the base app.

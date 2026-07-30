@@ -568,7 +568,7 @@ class AndroidDevice extends Device {
       _logger.printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
 
-      String? base64JsonArgs;
+      List<String>? engineShellArgs;
       final bool isReleaseMode = debuggingOptions.buildInfo.mode == BuildMode.release;
       if (isReleaseMode) {
         final List<String> shellArgs = debuggingOptions.getAndroidLaunchArguments().toList();
@@ -577,7 +577,7 @@ class AndroidDevice extends Device {
         }
 
         if (shellArgs.isNotEmpty) {
-          base64JsonArgs = base64Encode(utf8.encode(jsonEncode(shellArgs)));
+          engineShellArgs = shellArgs;
         }
       }
 
@@ -587,7 +587,7 @@ class AndroidDevice extends Device {
         androidBuildInfo: AndroidBuildInfo(
           debuggingOptions.buildInfo,
           targetArchs: <CpuArch>[cpuArch],
-          androidEngineShellArgs: base64JsonArgs,
+          releaseManifestEngineShellArgs: engineShellArgs,
         ),
       );
       // Package has been built, so we can get the updated application ID and

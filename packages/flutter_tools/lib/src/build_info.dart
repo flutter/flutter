@@ -435,7 +435,7 @@ class AndroidBuildInfo {
     this.buildInfo, {
     this.targetArchs = const <CpuArch>[.armv7, .arm64, .x64],
     this.splitPerAbi = false,
-    this.androidEngineShellArgs,
+    this.releaseManifestEngineShellArgs,
   });
 
   // The build info containing the mode and flavor.
@@ -451,8 +451,12 @@ class AndroidBuildInfo {
   /// The target platforms for the build.
   final Iterable<CpuArch> targetArchs;
 
-  /// The JSON serialized and base64 encoded engine shell arguments.
-  final String? androidEngineShellArgs;
+  /// Engine shell arguments to be injected into the application's AndroidManifest.xml.
+  /// 
+  /// This is exclusively used in release mode to allow the FlutterLoader to pass debugging
+  /// options to the engine without relying on intent extras. It is only applicable when building 
+  /// from source (i.e., not using a prebuilt application binary).
+  final List<String>? releaseManifestEngineShellArgs;
 }
 
 /// A summary of the compilation strategy used for Dart.

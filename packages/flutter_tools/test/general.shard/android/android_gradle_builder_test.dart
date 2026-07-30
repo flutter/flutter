@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -267,6 +268,98 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        AndroidSdk: () {
+          fileSystem.directory(sdkPath()).createSync(recursive: true);
+          fileSystem
+              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
+              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
+              .createSync(recursive: true);
+          return AndroidSdk(
+            fileSystem.directory(sdkPath()),
+            java: FakeJava(),
+            fileSystem: fileSystem,
+          );
+        },
+        AndroidStudio: () => FakeAndroidStudio(),
+      },
+    );
+
+    testUsingContext(
+      'build apk passes releaseManifestEngineShellArgs to gradle as a base64 encoded JSON string',
+      () async {
+        final builder = AndroidGradleBuilder(
+          java: FakeJava(),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+          androidSdk: globals.androidSdk,
+        );
+        processManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'gradlew',
+              '-q',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              '-Pflutter.engineShellArgs=WyItLWVuYWJsZS1pbXBlbGxlcj10cnVlIiwiLS10cmFjZS1za2lhIl0=',
+              '-Ptarget=lib/main.dart',
+              '-Pbase-application-name=android.app.Application',
+              '-Pdart-obfuscation=false',
+              '-Ptrack-widget-creation=false',
+              '-Ptree-shake-icons=false',
+              '-Pflutter.androidSdkRoot=${sdkPath()}',
+              '-Pflutter.installedNdkVersions=',
+              'assembleRelease',
+            ],
+          ),
+        );
+
+        fileSystem.file('android/gradlew').createSync(recursive: true);
+        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+        fileSystem.file('android/build.gradle').createSync(recursive: true);
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+        fileSystem
+            .directory('build')
+            .childDirectory('app')
+            .childDirectory('outputs')
+            .childDirectory('flutter-apk')
+            .childFile('app-release.apk')
+            .createSync(recursive: true);
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+        await builder.buildGradleApp(
+          project: project,
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+            ),
+            releaseManifestEngineShellArgs: <String>['--enable-impeller=true', '--trace-skia'],
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          configOnly: false,
+          localGradleErrors: const <GradleHandledError>[],
+        );
+
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        Java: () => FakeJava(),
         AndroidSdk: () {
           fileSystem.directory(sdkPath()).createSync(recursive: true);
           fileSystem
