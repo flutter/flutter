@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -63,6 +64,7 @@ void main() {
         logger: BufferLogger.test(),
         platform: FakePlatform(),
         androidSdk: androidSdk,
+        artifacts: FakeArtifacts(),
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -108,6 +110,9 @@ void main() {
             'android.intent.category.LAUNCHER',
             '-f',
             '0x20000000',
+            '--ez',
+            'experimental-vm-service',
+            'true',
             'FlutterActivity',
           ],
         ),
@@ -136,6 +141,7 @@ void main() {
         logger: BufferLogger.test(),
         platform: FakePlatform(),
         androidSdk: androidSdk,
+        artifacts: FakeArtifacts(),
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -180,6 +186,9 @@ void main() {
             '-f',
             '0x20000000',
             '--ez',
+            'experimental-vm-service',
+            'true',
+            '--ez',
             'enable-impeller',
             'true',
             '--ez',
@@ -216,6 +225,7 @@ void main() {
       logger: BufferLogger.test(),
       platform: FakePlatform(),
       androidSdk: androidSdk,
+      artifacts: FakeArtifacts(),
     );
     final File apkFile = fileSystem.file('app-release.apk')..createSync();
     final apk = AndroidApk(
@@ -260,6 +270,9 @@ void main() {
           '-f',
           '0x20000000',
           '--ez',
+          'experimental-vm-service',
+          'true',
+          '--ez',
           'trace-systrace',
           'true',
           'FlutterActivity',
@@ -291,6 +304,7 @@ void main() {
       logger: BufferLogger.test(),
       platform: FakePlatform(),
       androidSdk: androidSdk,
+      artifacts: FakeArtifacts(),
     );
     final File apkFile = fileSystem.file('app-debug.apk')..createSync();
     final apk = AndroidApk(
@@ -363,6 +377,9 @@ void main() {
           'android.intent.category.LAUNCHER',
           '-f',
           '0x20000000',
+          '--ez',
+          'experimental-vm-service',
+          'true',
           // The DebuggingOptions arguments go here.
           '--ez', 'enable-dart-profiling', 'true',
           '--ez', 'profile-startup', 'true',
@@ -435,6 +452,7 @@ void main() {
       logger: BufferLogger.test(),
       platform: FakePlatform(),
       androidSdk: androidSdk,
+      artifacts: FakeArtifacts(),
     );
     final File apkFile = fileSystem.file('app-release.apk')..createSync();
     final apk = AndroidApk(
@@ -478,6 +496,9 @@ void main() {
           'android.intent.category.LAUNCHER',
           '-f',
           '0x20000000',
+          '--ez',
+          'experimental-vm-service',
+          'true',
           'FlutterActivity',
         ],
         stdout: 'Error type 3: Activity class {FlutterApp/FlutterActivity} does not exist.',
@@ -506,6 +527,7 @@ void main() {
         logger: BufferLogger.test(),
         platform: FakePlatform(),
         androidSdk: androidSdk,
+        artifacts: FakeArtifacts(),
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -549,6 +571,9 @@ void main() {
             'android.intent.category.LAUNCHER',
             '-f',
             '0x20000000',
+            '--ez',
+            'experimental-vm-service',
+            'true',
             'FlutterActivity',
           ],
           stdout: 'Security exception: Permission Denial: starting Intent...',
@@ -574,4 +599,14 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   bool get licensesAvailable => false;
+}
+
+class FakeArtifacts extends Fake implements Artifacts {
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) => 'dummy_path';
 }

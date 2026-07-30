@@ -22,7 +22,6 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -69,12 +68,14 @@ class AndroidDevice extends Device {
     required Platform platform,
     required AndroidSdk androidSdk,
     required FileSystem fileSystem,
+    required Artifacts artifacts,
     AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
   }) : _logger = logger,
        _processManager = processManager,
        _androidSdk = androidSdk,
        _platform = platform,
        _fileSystem = fileSystem,
+       _artifacts = artifacts,
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(category: Category.mobile, platformType: PlatformType.android, ephemeral: true);
@@ -84,6 +85,7 @@ class AndroidDevice extends Device {
   final AndroidSdk _androidSdk;
   final Platform _platform;
   final FileSystem _fileSystem;
+  final Artifacts _artifacts;
   final ProcessUtils _processUtils;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
 
@@ -622,12 +624,11 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      if (globals.artifacts != null) ...<String>['--ez', 'experimental-vm-service', 'true'],
+      ...<String>['--ez', 'experimental-vm-service', 'true'],
       if (debuggingOptions.buildInfo.isProfile &&
-          globals.artifacts != null &&
-          globals.fs
+          _fileSystem
               .file(
-                globals.artifacts!.getArtifactPath(
+                _artifacts.getArtifactPath(
                   Artifact.vmserviceSharedLibrary,
                   platform: await targetPlatform,
                   mode: BuildMode.profile,
@@ -636,17 +637,16 @@ class AndroidDevice extends Device {
               .existsSync()) ...<String>[
         '--es',
         'aot-vmservice-shared-library-name',
-        globals.artifacts!.getArtifactPath(
+        _artifacts.getArtifactPath(
           Artifact.vmserviceSharedLibrary,
           platform: await targetPlatform,
           mode: BuildMode.profile,
         ),
       ],
       if (debuggingOptions.buildInfo.isDebug &&
-          globals.artifacts != null &&
-          globals.fs
+          _fileSystem
               .file(
-                globals.artifacts!.getArtifactPath(
+                _artifacts.getArtifactPath(
                   Artifact.vmserviceKernelDill,
                   platform: await targetPlatform,
                   mode: BuildMode.debug,
@@ -655,7 +655,7 @@ class AndroidDevice extends Device {
               .existsSync()) ...<String>[
         '--es',
         'vmservice-kernel-path',
-        globals.artifacts!.getArtifactPath(
+        _artifacts.getArtifactPath(
           Artifact.vmserviceKernelDill,
           platform: await targetPlatform,
           mode: BuildMode.debug,

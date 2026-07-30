@@ -9,12 +9,14 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeArtifacts;
 
 void main() {
   testWithoutContext('stopApp times out and does not hang forever', () {
@@ -101,7 +103,7 @@ void main() {
   });
 }
 
-AndroidDevice setUpAndroidDevice({required ProcessManager processManager}) {
+AndroidDevice setUpAndroidDevice({required ProcessManager processManager, Artifacts? artifacts}) {
   return AndroidDevice(
     '1234',
     modelID: 'TestModel',
@@ -111,6 +113,7 @@ AndroidDevice setUpAndroidDevice({required ProcessManager processManager}) {
     fileSystem: MemoryFileSystem.test(),
     processManager: processManager,
     androidConsoleSocketFactory: (String host, int port) async => throw UnimplementedError(),
+    artifacts: artifacts ?? FakeArtifacts(),
   );
 }
 
