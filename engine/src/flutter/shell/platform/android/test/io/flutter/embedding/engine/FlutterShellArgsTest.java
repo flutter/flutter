@@ -59,4 +59,21 @@ public class FlutterShellArgsTest {
 
     assertEquals(0, argValues.size());
   }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void itProcessesExperimentalVmServiceFlags() {
+    Intent intent = new Intent();
+    intent.putExtra("experimental-vm-service", true);
+    intent.putExtra("aot-vmservice-shared-library-name", "libvmservice_snapshot.so");
+    intent.putExtra("vmservice-kernel-path", "vmservice_loader.dill");
+
+    FlutterShellArgs args = FlutterShellArgs.fromIntent(intent);
+    HashSet<String> argValues = new HashSet<String>(Arrays.asList(args.toArray()));
+
+    assertEquals(3, argValues.size());
+    assertTrue(argValues.contains("--experimental-vm-service"));
+    assertTrue(argValues.contains("--aot-vmservice-shared-library-name=libvmservice_snapshot.so"));
+    assertTrue(argValues.contains("--vmservice-kernel-path=vmservice_loader.dill"));
+  }
 }
