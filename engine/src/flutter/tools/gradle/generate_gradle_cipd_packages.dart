@@ -4,7 +4,11 @@ import 'package:args/args.dart';
 
 Future<void> main(List<String> args) async {
   final parser = ArgParser()
-    ..addFlag('dry-run', negatable: false, help: 'Print out the cipd commands without executing them.');
+    ..addFlag(
+      'dry-run',
+      negatable: false,
+      help: 'Print out the cipd commands without executing them.',
+    );
   final argResults = parser.parse(args);
   final dryRun = argResults['dry-run'] as bool;
 
@@ -103,7 +107,8 @@ Future<void> main(List<String> args) async {
         final distsDirPath = '${isolatedGradleHome!.path}/wrapper/dists';
         final distsDir = Directory(distsDirPath);
 
-        final cipdYamlContent = '''
+        final cipdYamlContent =
+            '''
 package: $location/$versionStr
 description: Gradle $version $distType distribution
 install_mode: copy
@@ -117,15 +122,21 @@ data:
 
           if (dryRun) {
             print('Working dir: ${distsDir.path}');
-            print('cipd create -in . -name $location/$versionStr -tag "version:$versionStr" -ref latest');
+            print(
+              'cipd create -in . -name $location/$versionStr -tag "version:$versionStr" -ref latest',
+            );
           } else {
             // 8. Upload to CIPD
             await _runCommand('cipd', [
               'create',
-              '-in', '.',
-              '-name', '$location/$versionStr',
-              '-tag', 'version:$versionStr',
-              '-ref', 'latest',
+              '-in',
+              '.',
+              '-name',
+              '$location/$versionStr',
+              '-tag',
+              'version:$versionStr',
+              '-ref',
+              'latest',
             ], distsDir.path);
             print('Successfully uploaded $location/$versionStr');
           }
