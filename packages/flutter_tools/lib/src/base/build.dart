@@ -215,7 +215,18 @@ class AOTSnapshotter {
     // the architecture, since a single build command may produce
     // multiple debug files. [TargetPlatform.getName] already includes the
     // architecture for the platforms that need it (e.g. `ios-arm64`).
-    final String archName = platform.getName();
+    //
+    // On Apple platforms, use the Darwin architecture name (e.g. `x86_64`
+    // rather than `x64`) so the symbol file name matches the architecture of
+    // the produced binaries and the naming convention used by the Apple
+    // toolchain.
+    final String archName;
+    if (targetingApplePlatform) {
+      final platformName = platform.type == .macos ? 'darwin' : 'ios';
+      archName = '$platformName-${platform.cpuArch.darwinArchName}';
+    } else {
+      archName = platform.getName();
+    }
     final debugFilename = 'app.$archName.symbols';
     final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
     if (shouldSplitDebugInfo) {
