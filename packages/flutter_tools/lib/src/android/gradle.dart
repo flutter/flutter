@@ -476,8 +476,7 @@ Gradle build failed due to Java/Gradle incompatibility.
 The Java version used for the build is $javaVersion, which is incompatible with Gradle $gradleVersion.
 To fix this, you can either:
   1. Upgrade your project's Gradle version (typically in gradle-wrapper.properties to a version matching the range: $gradleRangeInfo).
-  2. Use a different Java version for Flutter by running `flutter config --jdk-dir=<path>`.
-Alternatively, you can bypass this check using "--android-skip-build-dependency-validation".""");
+  2. Use a different Java version for Flutter by running `flutter config --jdk-dir=<path>`.""");
         }
       }
     }
