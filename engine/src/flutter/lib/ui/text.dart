@@ -1940,6 +1940,7 @@ class TextStyle {
 Int32List _encodeParagraphStyle(
   TextAlign? textAlign,
   TextDirection? textDirection,
+  TextDirection? defaultTextDirection,
   int? maxLines,
   String? fontFamily,
   double? fontSize,
@@ -1951,7 +1952,7 @@ Int32List _encodeParagraphStyle(
   String? ellipsis,
   Locale? locale,
 ) {
-  final result = Int32List(7); // also update paragraph_builder.cc
+  final Int32List result = Int32List(14); // also update paragraph_builder.cc
   if (textAlign != null) {
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
@@ -2001,6 +2002,10 @@ Int32List _encodeParagraphStyle(
   if (locale != null) {
     result[0] |= 1 << 12;
     // Passed separately to native.
+  }
+  if (defaultTextDirection != null) {
+    result[0] |= 1 << 13;
+    result[13] = defaultTextDirection.index;
   }
   return result;
 }
@@ -2071,6 +2076,7 @@ class ParagraphStyle {
   ParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
+    TextDirection? defaultTextDirection,
     int? maxLines,
     String? fontFamily,
     double? fontSize,
@@ -2084,6 +2090,7 @@ class ParagraphStyle {
   }) : _encoded = _encodeParagraphStyle(
          textAlign,
          textDirection,
+         defaultTextDirection,
          maxLines,
          fontFamily,
          fontSize,
@@ -2153,6 +2160,7 @@ class ParagraphStyle {
         'maxLines: ${_encoded[0] & 0x020 == 0x020 ? _encoded[5] : "unspecified"}, '
         'textHeightBehavior: ${_encoded[0] & 0x040 == 0x040 ? TextHeightBehavior._fromEncoded(_encoded[6], _leadingDistribution).toString() : "unspecified"}, '
         'fontFamily: ${_encoded[0] & 0x080 == 0x080 ? _fontFamily : "unspecified"}, '
+        'defaultTextDirection: ${_encoded[0] & 0x2000 == 0x2000 ? TextDirection.values[_encoded[13]] : "unspecified"}, '
         'fontSize: ${_encoded[0] & 0x100 == 0x100 ? _fontSize : "unspecified"}, '
         'height: ${_encoded[0] & 0x200 == 0x200 ? "${_height}x" : "unspecified"}, '
         'strutStyle: ${_encoded[0] & 0x400 == 0x400 ? _strutStyle : "unspecified"}, '
@@ -3053,6 +3061,24 @@ abstract class Paragraph {
   /// [ParagraphStyle.new].
   bool get didExceedMaxLines;
 
+  /// The resolved paragraph base direction.
+  ///
+  /// When the corresponding [ParagraphStyle.textDirection] was set
+  /// explicitly to LTR or RTL, this returns the value that was passed
+  /// in. When the value was `null` (i.e. `TextDirection.Auto`), the
+  /// engine resolves the direction by scanning the text content
+  /// (first-strong-character rule) before constructing the underlying
+  /// Skia paragraph, and this getter returns the resolved value. If
+  /// no strong-direction character was found, this returns
+  /// [TextDirection.ltr] as a conservative fallback.
+  ///
+  /// Used by [TextPainter.getOffsetForCaret] and other caret
+  /// calculations to render the caret correctly under
+  /// [TextDirection.Auto]. See also
+  /// `ParagraphBuilderSkia::ResolveEffectiveDirection` in
+  /// `txt/src/skia/paragraph_builder_skia.cc`.
+  TextDirection get direction => TextDirection.ltr;
+
   /// Computes the size and position of each glyph in the paragraph.
   ///
   /// The [ParagraphConstraints] control how wide the text is allowed to be.
@@ -3223,6 +3249,13 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
   @override
   @Native<Bool Function(Pointer<Void>)>(symbol: 'Paragraph::didExceedMaxLines', isLeaf: true)
   external bool get didExceedMaxLines;
+
+  @Native<Int32 Function(Pointer<Void>)>(symbol: 'Paragraph::getTextResolvedDirection', isLeaf: true)
+  external int get _resolvedDirection;
+
+  @override
+  TextDirection get direction =>
+      TextDirection.values[_resolvedDirection.clamp(0, TextDirection.values.length - 1)];
 
   @override
   void layout(ParagraphConstraints constraints) {

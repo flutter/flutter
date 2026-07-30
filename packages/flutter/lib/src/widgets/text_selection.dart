@@ -548,16 +548,23 @@ class TextSelectionOverlay {
   }
 
   void _updateSelectionOverlay() {
+    // `renderObject.textDirection` is nullable to support
+    // `TextDirection.Auto` (resolved at the engine layer).
+    // Use the engine-resolved direction (which falls
+    // back through `defaultTextDirection` and LTR) so the handle
+    // orientation tracks the actual rendered direction, not a hard-
+    // coded LTR default.
+    final TextDirection direction = renderObject.textDirection ?? renderObject.resolvedDirection;
     _selectionOverlay
       // Update selection handle metrics.
       ..startHandleType = _chooseType(
-        renderObject.textDirection,
+        direction,
         TextSelectionHandleType.left,
         TextSelectionHandleType.right,
       )
       ..lineHeightAtStart = _getStartGlyphHeight()
       ..endHandleType = _chooseType(
-        renderObject.textDirection,
+        direction,
         TextSelectionHandleType.right,
         TextSelectionHandleType.left,
       )

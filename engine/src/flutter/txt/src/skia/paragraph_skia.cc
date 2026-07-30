@@ -205,10 +205,12 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
 
 ParagraphSkia::ParagraphSkia(std::unique_ptr<skt::Paragraph> paragraph,
                              std::vector<flutter::DlPaint>&& dl_paints,
-                             bool impeller_enabled)
+                             bool impeller_enabled,
+                             TextDirection resolved_direction)
     : paragraph_(std::move(paragraph)),
       dl_paints_(dl_paints),
-      impeller_enabled_(impeller_enabled) {}
+      impeller_enabled_(impeller_enabled),
+      resolved_direction_(resolved_direction) {}
 
 double ParagraphSkia::GetMaxWidth() {
   return SkScalarToDouble(paragraph_->getMaxWidth());
@@ -366,6 +368,10 @@ size_t ParagraphSkia::GetNumberOfLines() const {
 
 int ParagraphSkia::GetLineNumberAt(size_t codeUnitIndex) const {
   return paragraph_->getLineNumberAtUTF16Offset(codeUnitIndex);
+}
+
+TextDirection ParagraphSkia::GetTextDirection() const {
+  return resolved_direction_;
 }
 
 TextStyle ParagraphSkia::SkiaToTxt(const skt::TextStyle& skia) {

@@ -337,7 +337,8 @@ class RenderParagraph extends RenderBox
   RenderParagraph(
     InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
-    required TextDirection textDirection,
+    TextDirection? textDirection,
+    required TextDirection defaultTextDirection,
     bool softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
     @Deprecated(
@@ -380,6 +381,7 @@ class RenderParagraph extends RenderBox
          textWidthBasis: textWidthBasis,
          textHeightBehavior: textHeightBehavior,
        ) {
+    _textPainter.defaultTextDirection = defaultTextDirection;
     addAll(children);
     this.registrar = registrar;
   }
@@ -403,6 +405,7 @@ class RenderParagraph extends RenderBox
       ..text = _textPainter.text
       ..textAlign = _textPainter.textAlign
       ..textDirection = _textPainter.textDirection
+      ..defaultTextDirection = _textPainter.defaultTextDirection
       ..textScaler = _textPainter.textScaler
       ..maxLines = _textPainter.maxLines
       ..ellipsis = _textPainter.ellipsis
@@ -593,13 +596,56 @@ class RenderParagraph extends RenderBox
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
-  TextDirection get textDirection => _textPainter.textDirection!;
+  ///
+  /// May be `null` if the paragraph was constructed with
+  /// [TextDirection.Auto] semantics. In that case, the engine resolves
+  /// the direction from the text content at layout time.
+  TextDirection? get textDirection => _textPainter.textDirection;
 
-  set textDirection(TextDirection value) {
+  set textDirection(TextDirection? value) {
     if (_textPainter.textDirection == value) {
       return;
     }
     _textPainter.textDirection = value;
+    markNeedsLayout();
+  }
+
+  /// The paragraph base direction resolved by the engine after layout.
+  ///
+  /// Unlike [textDirection] (which returns the user-supplied value, possibly
+  /// `null` for `TextDirection.Auto`), this getter returns the actual
+  /// direction Skia used to lay out the glyphs: the explicit value when
+  /// [textDirection] was set, or the first-strong-character scan result
+  /// for `TextDirection.Auto`.
+  ///
+  /// Use this when you need the *resolved* direction (e.g. for selection
+  /// handle placement, drag-offset adjustment, bidi caret flipping) — it
+  /// is always consistent with what `TextPainter.getOffsetForCaret` and
+  /// other caret calculations use.
+  ///
+  /// When the engine has not yet resolved a direction (e.g. before
+  /// [layout] was called, or when the underlying engine binding is too
+  /// old to expose direction resolution), falls back through
+  /// [defaultTextDirection] (the ambient `Directionality.of(context)`
+  /// direction captured at render-object attach time). Always returns a
+  /// non-null value once [layout] has been performed.
+  TextDirection get resolvedDirection =>
+      _textPainter.resolvedDirection ?? defaultTextDirection;
+
+  /// The default paragraph direction, supplied as the ambient
+  /// `Directionality.of(context)` value when the render object was
+  /// created. Forwarded to the engine as a fallback direction when
+  /// [textDirection] is `null` and the first-strong-character scan
+  /// finds no strong character.
+  @internal
+  TextDirection get defaultTextDirection => _textPainter.defaultTextDirection;
+  @internal
+  set defaultTextDirection(TextDirection value) {
+    assert(value != null);
+    if (_textPainter.defaultTextDirection == value) {
+      return;
+    }
+    _textPainter.defaultTextDirection = value;
     markNeedsLayout();
   }
 
@@ -995,7 +1041,12 @@ class RenderParagraph extends RenderBox
             locale: locale,
           )..layout();
           if (didOverflowWidth) {
-            final (double fadeStart, double fadeEnd) = switch (textDirection) {
+            // When [textDirection] is null (Auto), fall back to LTR for
+            // the fade geometry. The actual paragraph direction is
+            // resolved at the engine layer at layout time; this only
+            // affects the gradient stops for the overflow fade.
+            final TextDirection fadeDirection = textDirection ?? resolvedDirection;
+            final (double fadeStart, double fadeEnd) = switch (fadeDirection) {
               TextDirection.rtl => (fadeSizePainter.width, 0.0),
               TextDirection.ltr => (size.width - fadeSizePainter.width, size.width),
             };
@@ -1350,7 +1401,12 @@ class RenderParagraph extends RenderBox
   ) {
     assert(_semanticsInfo != null && _semanticsInfo!.isNotEmpty);
     final newChildren = <SemanticsNode>[];
-    TextDirection currentDirection = textDirection;
+    // `textDirection` is nullable to support `TextDirection.Auto`.
+    // Use the engine-resolved direction (with fallback through
+    // `defaultTextDirection` and LTR) so the semantics tree reflects the
+    // direction the paragraph is actually rendered in, even for empty
+    // paragraphs in a system RTL locale.
+    TextDirection currentDirection = textDirection ?? resolvedDirection;
     Rect currentRect;
     var ordinal = 0.0;
     var start = 0;
@@ -1560,7 +1616,14 @@ class _SelectableFragment
     final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
         ? startOffsetInParagraphCoordinates
         : paragraph._getOffsetForPosition(_textSelectionEnd!);
-    final flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
+    // In Auto mode, [paragraph.textDirection] is null. Use
+    // [paragraph.resolvedDirection] to pick up the engine-resolved
+    // direction (the result of the first-strong-character scan), so
+    // that selection handles flip correctly even when [TextDirection.Auto]
+    // resolves to RTL (e.g. when the paragraph contains Arabic, Hebrew,
+    // or Uyghur text).
+    final bool flipHandles =
+        isReversed != (TextDirection.rtl == paragraph.resolvedDirection);
     final selection = TextSelection(baseOffset: selectionStart, extentOffset: selectionEnd);
     final selectionRects = <Rect>[];
     for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
@@ -1917,7 +1980,7 @@ class _SelectableFragment
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
       localPosition,
-      direction: paragraph.textDirection,
+      direction: paragraph.resolvedDirection,
     );
 
     final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
@@ -1990,7 +2053,7 @@ class _SelectableFragment
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
       localPosition,
-      direction: paragraph.textDirection,
+      direction: paragraph.resolvedDirection,
     );
 
     final TextPosition position = _clampTextPosition(
@@ -2495,7 +2558,7 @@ class _SelectableFragment
         final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
           originParagraph.paintBounds,
           originParagraphLocalPosition,
-          direction: paragraph.textDirection,
+          direction: originParagraph.resolvedDirection,
         );
         final TextPosition adjustedPositionRelativeToOriginParagraph = originParagraph
             .getPositionForOffset(adjustedOffset);
@@ -2747,7 +2810,7 @@ class _SelectableFragment
         final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
           originParagraph.paintBounds,
           originParagraphLocalPosition,
-          direction: paragraph.textDirection,
+          direction: originParagraph.resolvedDirection,
         );
         final TextPosition adjustedPositionRelativeToOriginParagraph = originParagraph
             .getPositionForOffset(adjustedOffset);
@@ -2905,12 +2968,12 @@ class _SelectableFragment
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
       localPosition,
-      direction: paragraph.textDirection,
+      direction: paragraph.resolvedDirection,
     );
     final Offset adjustedOffsetRelativeToParagraph = SelectionUtils.adjustDragOffset(
       paragraph.paintBounds,
       localPosition,
-      direction: paragraph.textDirection,
+      direction: paragraph.resolvedDirection,
     );
 
     final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);

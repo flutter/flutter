@@ -1392,6 +1392,7 @@ class TextStyle with Diagnosticable {
   ui.ParagraphStyle getParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
+    @internal TextDirection? defaultTextDirection,
     TextScaler textScaler = TextScaler.noScaling,
     String? ellipsis,
     int? maxLines,
@@ -1416,6 +1417,7 @@ class TextStyle with Diagnosticable {
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
+      defaultTextDirection: defaultTextDirection,
       // Here, we establish the contents of this TextStyle as the paragraph's default font
       // unless an override is passed in.
       fontWeight: fontWeight ?? this.fontWeight,

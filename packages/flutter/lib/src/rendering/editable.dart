@@ -284,7 +284,8 @@ class RenderEditable extends RenderBox
   /// scrolling.
   RenderEditable({
     InlineSpan? text,
-    required TextDirection textDirection,
+    TextDirection? textDirection,
+    required TextDirection defaultTextDirection,
     TextAlign textAlign = TextAlign.start,
     Color? cursorColor,
     Color? backgroundCursorColor,
@@ -360,7 +361,7 @@ class RenderEditable extends RenderBox
          strutStyle: strutStyle,
          textHeightBehavior: textHeightBehavior,
          textWidthBasis: textWidthBasis,
-       ),
+       )..defaultTextDirection = defaultTextDirection,
        _showCursor = showCursor ?? ValueNotifier<bool>(false),
        _maxLines = maxLines,
        _minLines = minLines,
@@ -799,6 +800,7 @@ class RenderEditable extends RenderBox
       ..text = _textPainter.text
       ..textAlign = _textPainter.textAlign
       ..textDirection = _textPainter.textDirection
+      ..defaultTextDirection = _textPainter.defaultTextDirection
       ..textScaler = _textPainter.textScaler
       ..maxLines = _textPainter.maxLines
       ..ellipsis = _textPainter.ellipsis
@@ -829,11 +831,10 @@ class RenderEditable extends RenderBox
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
-  // TextPainter.textDirection is nullable, but it is set to a
-  // non-null value in the RenderEditable constructor and we refuse to
-  // set it to null here, so _textPainter.textDirection cannot be null.
-  TextDirection get textDirection => _textPainter.textDirection!;
-  set textDirection(TextDirection value) {
+  // `textDirection` may be `null` to support `TextDirection.Auto`
+  // (resolved at the engine layer via first-strong-character scan).
+  TextDirection? get textDirection => _textPainter.textDirection;
+  set textDirection(TextDirection? value) {
     if (_textPainter.textDirection == value) {
       return;
     }
@@ -841,6 +842,37 @@ class RenderEditable extends RenderBox
     markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
+
+  /// The default paragraph direction, supplied as the ambient
+  /// `Directionality.of(context)` value when the render object was
+  /// created. Forwarded to the engine as a fallback direction when
+  /// [textDirection] is `null` and the first-strong-character scan
+  /// finds no strong character.
+  @internal
+  TextDirection get defaultTextDirection => _textPainter.defaultTextDirection;
+  @internal
+  set defaultTextDirection(TextDirection value) {
+    assert(value != null);
+    if (_textPainter.defaultTextDirection == value) {
+      return;
+    }
+    _textPainter.defaultTextDirection = value;
+    markNeedsLayout();
+    markNeedsSemanticsUpdate();
+  }
+
+  /// The paragraph base direction resolved by the engine after layout.
+  ///
+  /// Unlike [textDirection] (which returns the user-supplied value, possibly
+  /// `null` for `TextDirection.Auto`), this getter returns the actual
+  /// direction Skia used to lay out the glyphs: the explicit value when
+  /// [textDirection] was set, or the first-strong-character scan result
+  /// for `TextDirection.Auto`.
+  ///
+  /// Falls back through [defaultTextDirection]. Always returns a non-null
+  /// value once [layout] has been performed.
+  TextDirection get resolvedDirection =>
+      _textPainter.resolvedDirection ?? defaultTextDirection;
 
   /// Used by this renderer's internal [TextPainter] to select a locale-specific
   /// font.
@@ -1424,7 +1456,13 @@ class RenderEditable extends RenderBox
   ) {
     assert(_semanticsInfo != null && _semanticsInfo!.isNotEmpty);
     final newChildren = <SemanticsNode>[];
-    TextDirection currentDirection = textDirection;
+    // When the paragraph direction is Auto, fall back to LTR for
+    // semantics direction reporting. The actual rendered direction is
+    // resolved at the engine layer; this only affects the accessibility
+    // tree. Use the engine-resolved direction (with fallback through
+    // `defaultTextDirection` and LTR) so that an empty content paragraph
+    // under a system RTL locale still reports RTL.
+    TextDirection? currentDirection = textDirection ?? resolvedDirection;
     Rect currentRect;
     var ordinal = 0.0;
     var start = 0;
@@ -1453,7 +1491,11 @@ class RenderEditable extends RenderBox
         child = childAfter(child!);
         placeholderIndex += 1;
       } else {
-        final initialDirection = currentDirection;
+        // `currentDirection` is `TextDirection?` to support
+        // `TextDirection.Auto`. Fall back to LTR for semantics
+        // direction reporting; this only affects the accessibility
+        // tree.
+        final TextDirection initialDirection = currentDirection ?? TextDirection.ltr;
         final List<ui.TextBox> rects = _textPainter.getBoxesForSelection(selection);
         if (rects.isEmpty) {
           continue;

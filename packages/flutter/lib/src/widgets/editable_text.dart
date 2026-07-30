@@ -1146,7 +1146,10 @@ class EditableText extends StatefulWidget {
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
-  /// Defaults to the ambient [Directionality], if any.
+  /// When `null`, the engine resolves the paragraph direction by scanning
+  /// the text content (first-strong-character rule). To opt into the
+  /// previous behavior of falling back to the ambient [Directionality],
+  /// explicitly pass the resolved value at the call site.
   /// {@endtemplate}
   final TextDirection? textDirection;
 
@@ -3594,7 +3597,12 @@ class EditableTextState extends State<EditableText>
       fontFamily: _style.fontFamily,
       fontSize: _style.fontSize,
       fontWeight: _style.fontWeight,
-      textDirection: _textDirection,
+      // `setStyle` requires a non-null textDirection; in Auto
+      // mode fall back to the resolved direction (with fallback
+      // through `defaultTextDirection` and LTR) for the platform
+      // text input style.
+      textDirection: _textDirection ?? renderEditable?.resolvedDirection
+          ?? Directionality.of(context),
       textAlign: widget.textAlign,
       letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
       wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
@@ -5131,7 +5139,12 @@ class EditableTextState extends State<EditableText>
     _textInputConnection!.setCaretRect(caretRect);
   }
 
-  TextDirection get _textDirection => widget.textDirection ?? Directionality.of(context);
+  // Forwarded as-is. When `widget.textDirection` is `null`, the engine
+  // resolves the paragraph direction from the text content (first-strong
+  // character rule). The previous fallback to `Directionality.of(context)`
+  // has been removed; callers that want that behavior must resolve the
+  // value at the call site.
+  TextDirection? get _textDirection => widget.textDirection;
 
   /// The renderer for this widget's descendant.
   ///
@@ -6122,7 +6135,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.selectionColor,
     required this.textScaler,
     required this.textAlign,
-    required this.textDirection,
+    this.textDirection,
     this.locale,
     required this.obscuringCharacter,
     required this.obscureText,
@@ -6162,7 +6175,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final Color? selectionColor;
   final TextScaler textScaler;
   final TextAlign textAlign;
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
   final Locale? locale;
   final String obscuringCharacter;
   final bool obscureText;
@@ -6204,6 +6217,8 @@ class _Editable extends MultiChildRenderObjectWidget {
       textScaler: textScaler,
       textAlign: textAlign,
       textDirection: textDirection,
+      defaultTextDirection:
+          Directionality.maybeOf(context) ?? TextDirection.ltr,
       locale: locale ?? Localizations.maybeLocaleOf(context),
       selection: value.selection,
       offset: offset,
@@ -6248,6 +6263,8 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..textScaler = textScaler
       ..textAlign = textAlign
       ..textDirection = textDirection
+      ..defaultTextDirection =
+          Directionality.maybeOf(context) ?? TextDirection.ltr
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..selection = value.selection
       ..offset = offset
@@ -6301,7 +6318,7 @@ class _ScribbleCacheKey {
   });
 
   final TextAlign textAlign;
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
   final TextScaler textScaler;
   final TextHeightBehavior? textHeightBehavior;
   final Locale? locale;

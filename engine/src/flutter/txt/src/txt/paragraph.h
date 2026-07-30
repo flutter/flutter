@@ -194,6 +194,22 @@ class Paragraph {
   // number of the line this hard line break breaks, intead of the new line it
   // creates.
   virtual int GetLineNumberAt(size_t utf16Offset) const = 0;
+
+  // Returns the resolved paragraph base direction.
+  //
+  // When the paragraph was built with an explicit LTR/RTL paragraph style,
+  // this returns the value that was passed in. When the paragraph was built
+  // with `std::nullopt` (i.e. `TextDirection.Auto`), the builder scans the
+  // actual text content (first-strong-character rule) to determine the
+  // direction before constructing the underlying Skia paragraph, and this
+  // method returns the resolved value. If no strong-direction character
+  // was found, this returns `TextDirection::ltr` as a conservative
+  // fallback.
+  //
+  // Used by `ui.Paragraph` to expose the resolved direction to the
+  // framework, so that `TextPainter.getOffsetForCaret` and other caret
+  // calculations can render the caret correctly under `TextDirection.Auto`.
+  virtual TextDirection GetTextDirection() const = 0;
 };
 
 }  // namespace txt
