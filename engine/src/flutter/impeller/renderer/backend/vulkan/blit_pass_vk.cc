@@ -68,7 +68,8 @@ bool BlitPassVK::OnCopyTextureToTextureCommand(
     std::shared_ptr<Texture> destination,
     IRect source_region,
     IPoint destination_origin,
-    std::string_view label) {
+    std::string_view label,
+    uint32_t destination_mip_level) {
   const auto& cmd_buffer = command_buffer_->GetCommandBuffer();
 
   const auto& src = TextureVK::Cast(*source);
@@ -109,8 +110,8 @@ bool BlitPassVK::OnCopyTextureToTextureCommand(
 
   image_copy.setSrcSubresource(
       vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1));
-  image_copy.setDstSubresource(
-      vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1));
+  image_copy.setDstSubresource(vk::ImageSubresourceLayers(
+      vk::ImageAspectFlagBits::eColor, destination_mip_level, 0, 1));
 
   image_copy.srcOffset =
       vk::Offset3D(source_region.GetX(), source_region.GetY(), 0);
@@ -151,7 +152,8 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
     std::shared_ptr<DeviceBuffer> destination,
     IRect source_region,
     size_t destination_offset,
-    std::string_view label) {
+    std::string_view label,
+    uint32_t source_mip_level) {
   const auto& cmd_buffer = command_buffer_->GetCommandBuffer();
 
   // cast source and destination to TextureVK
@@ -180,8 +182,8 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
   image_copy.setBufferOffset(destination_offset);
   image_copy.setBufferRowLength(0);
   image_copy.setBufferImageHeight(0);
-  image_copy.setImageSubresource(
-      vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1));
+  image_copy.setImageSubresource(vk::ImageSubresourceLayers(
+      vk::ImageAspectFlagBits::eColor, source_mip_level, 0, 1));
   image_copy.setImageOffset(
       vk::Offset3D(source_region.GetX(), source_region.GetY(), 0));
   image_copy.setImageExtent(

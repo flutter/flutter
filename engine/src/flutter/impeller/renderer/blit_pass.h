@@ -64,6 +64,8 @@ class BlitPass {
   ///                                 destination texture.
   /// @param[in]  label               The optional debug label to give the
   ///                                 command.
+  /// @param[in]  destination_mip_level  The mip level of the destination to
+  ///                                 write to.
   ///
   /// @return     If the command was valid for subsequent commitment.
   ///
@@ -71,7 +73,8 @@ class BlitPass {
                std::shared_ptr<Texture> destination,
                std::optional<IRect> source_region = std::nullopt,
                IPoint destination_origin = {},
-               std::string_view label = "");
+               std::string_view label = "",
+               uint32_t destination_mip_level = 0);
 
   //----------------------------------------------------------------------------
   /// @brief      Record a command to copy the contents of a texture to a
@@ -94,7 +97,8 @@ class BlitPass {
                std::shared_ptr<DeviceBuffer> destination,
                std::optional<IRect> source_region = std::nullopt,
                size_t destination_offset = 0,
-               std::string_view label = "");
+               std::string_view label = "",
+               uint32_t source_mip_level = 0);
 
   //----------------------------------------------------------------------------
   /// @brief      Record a command to copy the contents of a buffer to a
@@ -161,14 +165,16 @@ class BlitPass {
       std::shared_ptr<Texture> destination,
       IRect source_region,
       IPoint destination_origin,
-      std::string_view label) = 0;
+      std::string_view label,
+      uint32_t destination_mip_level = 0) = 0;
 
   virtual bool OnCopyTextureToBufferCommand(
       std::shared_ptr<Texture> source,
       std::shared_ptr<DeviceBuffer> destination,
       IRect source_region,
       size_t destination_offset,
-      std::string_view label) = 0;
+      std::string_view label,
+      uint32_t source_mip_level = 0) = 0;
 
   virtual bool OnCopyBufferToTextureCommand(
       BufferView source,

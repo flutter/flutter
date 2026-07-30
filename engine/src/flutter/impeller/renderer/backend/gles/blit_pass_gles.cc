@@ -8,6 +8,7 @@
 
 #include "flutter/fml/trace_event.h"
 #include "fml/closure.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
@@ -95,7 +96,17 @@ bool BlitPassGLES::OnCopyTextureToTextureCommand(
     std::shared_ptr<Texture> destination,
     IRect source_region,
     IPoint destination_origin,
-    std::string_view label) {
+    std::string_view label,
+    uint32_t destination_mip_level) {
+  if (destination_mip_level != 0u) {
+    // TODO(bdero): Thread the destination mip level through the GLES texture
+    // copy paths. Nothing routes a non-zero level here today; render-pass
+    // mipmap generation is never dispatched on GLES.
+    VALIDATION_LOG
+        << "Texture to texture blits to a non-zero mip level are not "
+           "supported on GLES.";
+    return false;
+  }
   auto command = std::make_unique<BlitCopyTextureToTextureCommandGLES>();
   command->label = label;
   command->source = std::move(source);
@@ -113,7 +124,8 @@ bool BlitPassGLES::OnCopyTextureToBufferCommand(
     std::shared_ptr<DeviceBuffer> destination,
     IRect source_region,
     size_t destination_offset,
-    std::string_view label) {
+    std::string_view label,
+    uint32_t source_mip_level) {
   auto command = std::make_unique<BlitCopyTextureToBufferCommandGLES>();
   command->label = label;
   command->source = std::move(source);
