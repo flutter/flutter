@@ -575,6 +575,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
+        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.vmserviceSharedLibrary:
       case Artifact.vmserviceKernelDill:
         return _fileSystem.path.join(engineDir, artifact.getFileName(_platform, mode, platform));

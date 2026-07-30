@@ -27,7 +27,6 @@ const _kWindowsArtifacts = <String>[
   'flutter_plugin_registrar.h',
   'flutter_texture_registrar.h',
   'flutter_windows.h',
-  'libvmservice_snapshot.dll',
 ];
 
 const _kWindowsDepfile = 'windows_engine_sources.d';
@@ -84,7 +83,10 @@ class UnpackWindows extends Target {
     );
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
-      artifacts: _kWindowsArtifacts,
+      artifacts: <String>[
+        ..._kWindowsArtifacts,
+        if (buildMode == BuildMode.profile) 'libvmservice_snapshot.dll',
+      ],
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
       clientSourcePaths: <String>[clientSourcePath],
