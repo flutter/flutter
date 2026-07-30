@@ -57,7 +57,7 @@ class _EditableTextToolbarBuilderExampleAppState
             children: <Widget>[
               const SizedBox(height: 20.0),
               TextField(
-                controller: _controller!,
+                controller: _controller,
                 contextMenuBuilder:
                     (
                       BuildContext context,
