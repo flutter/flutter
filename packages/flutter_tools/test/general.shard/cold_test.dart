@@ -209,7 +209,7 @@ class FakeDevice extends Fake implements Device {
   String get displayName => name;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.tester, .unknown);
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
   DartDevelopmentService get dds => FakeDartDevelopmentService();
@@ -259,7 +259,7 @@ class TestFlutterDevice extends FlutterDevice {
     required this.exception,
     required ResidentCompiler generator,
   }) : super(
-         targetPlatform: const TargetPlatform(.unsupported, .unknown),
+         targetPlatform: .unsupported,
          device,
          buildInfo: BuildInfo.debug,
          generator: generator,

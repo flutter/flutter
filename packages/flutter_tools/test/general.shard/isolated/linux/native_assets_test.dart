@@ -59,7 +59,7 @@ void main() {
 
       await runFlutterSpecificHooks(
         environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        targetPlatform: const TargetPlatform(.linux, .x64),
+        targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutClang(),
@@ -296,8 +296,10 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     'cCompilerConfigLinux FileSystemException on resolveSymbolicLinks and throwIfNotFound: false',
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.empty(),
-      FileSystem: () =>
-          _ThrowingResolveFileSystem(fileSystem, '${environment.outputDir.path}/mock_clang++'),
+      FileSystem: () => _ThrowingResolveFileSystem(
+            fileSystem,
+            '${environment.outputDir.path}/mock_clang++',
+          ),
     },
     () async {
       if (!const LocalPlatform().isLinux) {
@@ -325,8 +327,10 @@ CMAKE_LINKER:FILEPATH=/some/path/to/ld.lld
     'cCompilerConfigLinux FileSystemException on resolveSymbolicLinks and throwIfNotFound: true',
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.empty(),
-      FileSystem: () =>
-          _ThrowingResolveFileSystem(fileSystem, '${environment.outputDir.path}/mock_clang++'),
+      FileSystem: () => _ThrowingResolveFileSystem(
+            fileSystem,
+            '${environment.outputDir.path}/mock_clang++',
+          ),
     },
     () async {
       if (!const LocalPlatform().isLinux) {

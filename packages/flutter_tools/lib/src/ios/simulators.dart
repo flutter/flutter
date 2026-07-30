@@ -623,6 +623,9 @@ class IOSSimulator extends Device {
   }
 
   @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+
+  @override
   Future<String> get sdkNameAndVersion async => simulatorCategory;
 
   final _iosSdkRegExp = RegExp(r'iOS( |-)(\d+)');

@@ -42,7 +42,7 @@ class FakeDevFs extends Fake implements DevFS {
 }
 
 class FakeDevice extends Fake implements Device {
-  FakeDevice({TargetPlatform targetPlatform = const TargetPlatform(.tester, .unknown)})
+  FakeDevice({TargetPlatform targetPlatform = TargetPlatform.tester})
     : _targetPlatform = targetPlatform;
 
   final TargetPlatform _targetPlatform;
@@ -148,7 +148,7 @@ class TestFlutterDevice extends FlutterDevice {
     required ResidentCompiler generator,
   }) : super(
          device,
-         targetPlatform: const TargetPlatform(.unsupported, .unknown),
+         targetPlatform: TargetPlatform.unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
