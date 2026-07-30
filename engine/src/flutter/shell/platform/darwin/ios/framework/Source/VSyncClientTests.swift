@@ -6,7 +6,6 @@ import Testing
 
 @testable import InternalFlutterSwift
 
-@MainActor
 struct VSyncClientTests {
   let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
 
