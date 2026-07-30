@@ -65,7 +65,8 @@ def main():
   arm64_vmservice = os.path.join(arm64_out_dir, 'libvmservice_snapshot.dylib')
   x64_vmservice = os.path.join(x64_out_dir, 'libvmservice_snapshot.dylib')
   if os.path.exists(arm64_vmservice) and os.path.exists(x64_vmservice):
-    sky_utils.lipo([arm64_vmservice, x64_vmservice], os.path.join(dst, 'libvmservice_snapshot.dylib'))
+    sky_utils.lipo([arm64_vmservice, x64_vmservice],
+                   os.path.join(dst, 'libvmservice_snapshot.dylib'))
 
   # Create XCFramework from the arm64 and x64 fat framework.
   xcframeworks = [fat_framework]
