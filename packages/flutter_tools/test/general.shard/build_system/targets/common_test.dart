@@ -161,6 +161,9 @@ void main() {
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -207,6 +210,9 @@ void main() {
             'file:///lib/main.dart',
           ],
           stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+          onRun: (_) {
+            fileSystem.file('$build/recorded_uses.json').createSync();
+          },
         ),
       ]);
 
@@ -253,6 +259,9 @@ void main() {
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -302,6 +311,9 @@ void main() {
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
