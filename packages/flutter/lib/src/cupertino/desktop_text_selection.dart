@@ -68,10 +68,26 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     return const SizedBox.shrink();
   }
 
-  /// Gets the position for the text selection handles, but desktop has none.
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double targetWidth,
+  }) {
     return Offset.zero;
+  }
+
+  @Deprecated(
+    'Use `calculateHandleAnchor` instead. '
+    'This feature was deprecated after v3.32.0-0.0.pre.',
+  )
+  @override
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    double cursorWidth = 2.0,
+  }) {
+    return calculateHandleAnchor(type, textLineHeight, targetWidth: cursorWidth);
   }
 
   @Deprecated(
