@@ -42,15 +42,20 @@ void main() {
             'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
           );
         }
+        final String stdout = result.stdout.join('\n');
         if (target.first == hostOs) {
           // Verify that IconTreeShaker detects dummyIcon with null fontFamily.
           // Icon tree shaking for this icon fails with a trace message, but the overall build succeeds.
           expect(
-            result.stdout,
-            contains(
-              contains('Expected to find fontFamily for constant IconData with codepoint: 4660'),
-            ),
+            stdout,
+            contains('Expected to find fontFamily for constant IconData with codepoint: 4660'),
           );
+        }
+        if (target.length == 2 && target[0] == 'web' && target[1] == '--wasm') {
+          // Verify that both wasm (Icons.fastfood: 57946) and js (Icons.favorite: 57947)
+          // codepoints are retained when merging recorded uses.
+          expect(stdout, contains('57946'));
+          expect(stdout, contains('57947'));
         }
         final Directory buildTargetDir = appRoot
             .childDirectory('build')

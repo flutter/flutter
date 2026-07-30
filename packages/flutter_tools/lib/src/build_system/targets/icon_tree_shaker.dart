@@ -106,27 +106,34 @@ class IconTreeShaker {
       return;
     }
 
-    File? recordedUsesFile;
     final candidates = <String>[
       'recorded_uses.json',
       'recorded_uses_js.json',
       'recorded_uses_wasm.json',
     ];
+    final recordedUsesFiles = <File>[];
     for (final candidate in candidates) {
       final File file = environment.buildDir.childFile(candidate);
       if (file.existsSync() && file.readAsStringSync().isNotEmpty) {
-        recordedUsesFile = file;
-        break;
+        recordedUsesFiles.add(file);
       }
     }
-    recordedUsesFile ??= environment.buildDir.childFile('recorded_uses.json');
-    if (!recordedUsesFile.existsSync()) {
+    if (recordedUsesFiles.isEmpty) {
+      final File defaultFile = environment.buildDir.childFile('recorded_uses.json');
       throw IconTreeShakerException._(
-        'Expected to find recorded uses file at ${recordedUsesFile.path}, but no file found.',
+        'Expected to find recorded uses file at ${defaultFile.path}, but no file found.',
       );
     }
 
-    final Map<String, List<int>> iconData = await _readRecordedUses(recordedUsesFile);
+    Recordings? combinedRecordings;
+    for (final file in recordedUsesFiles) {
+      final Recordings recordings = await _readRecordings(file);
+      combinedRecordings = combinedRecordings == null
+          ? recordings
+          : combinedRecordings.merge(recordings);
+    }
+
+    final Map<String, List<int>> iconData = _parseRecordings(combinedRecordings!);
     final Set<String> familyKeys = iconData.keys.toSet();
 
     final Map<String, String> fonts = await _parseFontJson(
@@ -303,7 +310,7 @@ class IconTreeShaker {
     return result;
   }
 
-  Future<Map<String, List<int>>> _readRecordedUses(File recordedUsesFile) async {
+  Future<Recordings> _readRecordings(File recordedUsesFile) async {
     final String content = await recordedUsesFile.readAsString();
     final Object? data;
     try {
@@ -317,15 +324,16 @@ class IconTreeShaker {
       );
     }
 
-    final result = <String, List<int>>{};
-    var hasNonConstant = false;
-
-    final Recordings recordings;
     try {
-      recordings = Recordings.fromJson(data);
+      return Recordings.fromJson(data);
     } on Exception catch (e) {
       throw IconTreeShakerException._('Failed to parse recorded uses file: $e');
     }
+  }
+
+  Map<String, List<int>> _parseRecordings(Recordings recordings) {
+    final result = <String, List<int>>{};
+    var hasNonConstant = false;
 
     for (final MapEntry<DefinitionWithInstances, List<InstanceReference>> entry
         in recordings.instances.entries) {
@@ -455,4 +463,34 @@ class IconTreeShakerException implements Exception {
       'IconTreeShakerException: $message\n\n'
       'To disable icon tree shaking, pass --no-tree-shake-icons to the requested '
       'flutter build command';
+}
+
+extension on Recordings {
+  /// Returns a new [Recordings] containing all usages from both `this` and
+  /// [other].
+  ///
+  /// If a definition is present in both recordings, its usages from both
+  /// are combined in the returned [Recordings].
+  Recordings merge(Recordings other) {
+    final newCalls = <DefinitionWithStaticCalls, List<CallReference>>{};
+    for (final MapEntry<DefinitionWithStaticCalls, List<CallReference>> entry in calls.entries) {
+      newCalls[entry.key] = <CallReference>[...entry.value];
+    }
+    for (final MapEntry<DefinitionWithStaticCalls, List<CallReference>> entry
+        in other.calls.entries) {
+      newCalls.putIfAbsent(entry.key, () => <CallReference>[]).addAll(entry.value);
+    }
+
+    final newInstances = <DefinitionWithInstances, List<InstanceReference>>{};
+    for (final MapEntry<DefinitionWithInstances, List<InstanceReference>> entry
+        in instances.entries) {
+      newInstances[entry.key] = <InstanceReference>[...entry.value];
+    }
+    for (final MapEntry<DefinitionWithInstances, List<InstanceReference>> entry
+        in other.instances.entries) {
+      newInstances.putIfAbsent(entry.key, () => <InstanceReference>[]).addAll(entry.value);
+    }
+
+    return Recordings(calls: newCalls, instances: newInstances);
+  }
 }

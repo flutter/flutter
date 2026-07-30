@@ -733,6 +733,58 @@ void main() {
     );
     expect(processManager, hasNoRemainingExpectations);
   });
+
+  testWithoutContext('Combines recorded uses from both js and wasm files', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.web_javascript,
+    );
+
+    writeRecordedUsesFile(
+      appDill.path,
+      content: validRecordedUsesResult,
+      fileName: 'recorded_uses_js.json',
+    );
+    writeRecordedUsesFile(
+      appDill.path,
+      content: validRecordedUsesSecondResult,
+      fileName: 'recorded_uses_wasm.json',
+    );
+
+    final stdinSink = CompleterIOSink();
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+
+    final File inputFont = fileSystem.file(inputPath)..writeAsBytesSync(List<int>.filled(2500, 0));
+    fileSystem.file(outputPath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(1200, 0));
+
+    expect(
+      await iconTreeShaker.subsetFont(
+        input: inputFont,
+        outputPath: outputPath,
+        relativePath: relativePath,
+      ),
+      true,
+    );
+
+    final String stdin = stdinSink.getAndClear();
+    expect(stdin, contains('59470'));
+    expect(stdin, contains('59471'));
+    expect(stdin, contains('optional:32'));
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
 
 const Library iconDataLibrary = Library('package:flutter/src/widgets/icon_data.dart');
@@ -750,6 +802,27 @@ final String validRecordedUsesResult = json.encode(
             definition: iconDataClass,
             fields: <String, Constant>{
               'codePoint': IntConstant(59470),
+              'fontFamily': StringConstant('MaterialIcons'),
+            },
+          ),
+          loadingUnit: rootLoadingUnit,
+        ),
+      ],
+    },
+  ).toJson(),
+);
+
+// Generated from: const IconData(0xe84f, fontFamily: 'MaterialIcons')
+final String validRecordedUsesSecondResult = json.encode(
+  Recordings(
+    calls: <DefinitionWithStaticCalls, List<CallReference>>{},
+    instances: <DefinitionWithInstances, List<InstanceReference>>{
+      iconDataClass: <InstanceReference>[
+        const InstanceConstantReference(
+          instanceConstant: InstanceConstant(
+            definition: iconDataClass,
+            fields: <String, Constant>{
+              'codePoint': IntConstant(59471),
               'fontFamily': StringConstant('MaterialIcons'),
             },
           ),
