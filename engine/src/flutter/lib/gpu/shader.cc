@@ -207,8 +207,7 @@ int Shader::GetUniformStructIndex(const std::string& name) const {
 }
 
 const Shader::UniformBinding* Shader::GetUniformStructAt(int index) const {
-  if (index < 0 ||
-      static_cast<size_t>(index) >= uniform_struct_order_.size()) {
+  if (index < 0 || static_cast<size_t>(index) >= uniform_struct_order_.size()) {
     return nullptr;
   }
   return uniform_struct_order_[index];

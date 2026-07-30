@@ -454,10 +454,9 @@ bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     int offset_in_bytes,
     int length_in_bytes) {
   auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
-  return BindUniformStruct(wrapper, shader,
-                           shader->GetUniformStruct(uniform_name),
-                           device_buffer->GetBuffer(), offset_in_bytes,
-                           length_in_bytes);
+  return BindUniformStruct(
+      wrapper, shader, shader->GetUniformStruct(uniform_name),
+      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
 }
 
 bool InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed(
@@ -467,10 +466,9 @@ bool InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes) {
-  return BindUniformStruct(wrapper, shader,
-                           shader->GetUniformStructAt(uniform_struct_index),
-                           device_buffer->GetBuffer(), offset_in_bytes,
-                           length_in_bytes);
+  return BindUniformStruct(
+      wrapper, shader, shader->GetUniformStructAt(uniform_struct_index),
+      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
 }
 
 static bool BindTextureBinding(
@@ -537,11 +535,10 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
     int height_address_mode,
     int max_anisotropy) {
   auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
-  return BindTextureBinding(wrapper, shader,
-                            shader->GetUniformTexture(uniform_name), texture,
-                            min_filter, mag_filter, mip_filter,
-                            width_address_mode, height_address_mode,
-                            max_anisotropy);
+  return BindTextureBinding(
+      wrapper, shader, shader->GetUniformTexture(uniform_name), texture,
+      min_filter, mag_filter, mip_filter, width_address_mode,
+      height_address_mode, max_anisotropy);
 }
 
 bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
@@ -555,11 +552,10 @@ bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
     int width_address_mode,
     int height_address_mode,
     int max_anisotropy) {
-  return BindTextureBinding(wrapper, shader,
-                            shader->GetUniformTextureAt(uniform_texture_index),
-                            texture, min_filter, mag_filter, mip_filter,
-                            width_address_mode, height_address_mode,
-                            max_anisotropy);
+  return BindTextureBinding(
+      wrapper, shader, shader->GetUniformTextureAt(uniform_texture_index),
+      texture, min_filter, mag_filter, mip_filter, width_address_mode,
+      height_address_mode, max_anisotropy);
 }
 
 void InternalFlutterGpu_RenderPass_ClearBindings(
