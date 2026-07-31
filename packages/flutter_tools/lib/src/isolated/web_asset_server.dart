@@ -737,7 +737,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         .directory(
           globals.artifacts!.getArtifactPath(
             Artifact.engineDartSdkPath,
-            platform: const TargetPlatform(.web, .unknown),
+            platform: TargetPlatform.web_javascript,
           ),
         )
         .parent;

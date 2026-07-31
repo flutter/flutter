@@ -65,9 +65,9 @@ class TargetModel {
 
   /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
   static TargetModel fromTargetPlatform(TargetPlatform? platform) {
-    return switch (platform?.type) {
-      .web => TargetModel.dartdevc,
-      .fuchsia => TargetModel.flutterRunner,
+    return switch (platform) {
+      TargetPlatform.web_javascript => TargetModel.dartdevc,
+      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
       _ => TargetModel.flutter,
     };
   }
@@ -280,7 +280,7 @@ class KernelCompiler {
     String? nativeAssets,
   }) async {
     final TargetPlatform? platform = targetModel == TargetModel.dartdevc
-        ? const TargetPlatform(.web, .unknown)
+        ? TargetPlatform.web_javascript
         : null;
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
@@ -545,7 +545,7 @@ class ResidentCompilerFactory {
     TargetModel targetModel = targetModelOverride ?? .flutter;
 
     // Configure the compiler to target the DDC runtime.
-    if (targetPlatform.type == .web) {
+    if (targetPlatform case .web_javascript) {
       sdkRoot = artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
       targetModel = .dartdevc;
 
@@ -578,7 +578,7 @@ class ResidentCompilerFactory {
         ],
       );
     } else {
-      if (targetPlatform.type == .fuchsia) {
+      if (targetPlatform case .fuchsia_arm64 || .fuchsia_x64) {
         targetModel = .flutterRunner;
       }
       buildInfo = buildInfo.copyWith(
@@ -935,7 +935,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? nativeAssetsUri,
   }) async {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc)
-        ? const TargetPlatform(.web, .unknown)
+        ? TargetPlatform.web_javascript
         : null;
     late final List<String> commandToStartFrontendServer;
     if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {

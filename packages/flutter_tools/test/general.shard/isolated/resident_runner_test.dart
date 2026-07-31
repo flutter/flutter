@@ -36,17 +36,14 @@ void main() {
   testUsingContext(
     'use the nativeAssetsYamlFile when provided',
     () => testbed.run(() async {
-      final device = FakeDevice(
-        targetPlatform: const TargetPlatform(.macos, .x64),
-        sdkNameAndVersion: 'Macos',
-      );
+      final device = FakeDevice(targetPlatform: TargetPlatform.darwin, sdkNameAndVersion: 'Macos');
       final residentCompiler = FakeResidentCompiler();
       final flutterDevice = FakeFlutterDevice()
         ..testUri = testUri
         ..vmServiceHost = (() => fakeVmServiceHost)
         ..device = device
         ..fakeDevFS = devFS
-        ..targetPlatform = const TargetPlatform(.macos, .x64)
+        ..targetPlatform = TargetPlatform.darwin
         ..generator = residentCompiler;
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
