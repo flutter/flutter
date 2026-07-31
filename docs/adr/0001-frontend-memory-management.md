@@ -3,7 +3,7 @@
 ## Context & Problem
 The Flutter Web UI engine is split into a shared frontend layer (e.g., `EngineColorFilter`, `EngineMaskFilter`) and backend-specific delegates that wrap the actual native handles (e.g., `CkColorFilter` for CanvasKit, `SkwasmColorFilter` for Skwasm).
 
-Because Web UI interacts heavily with native C++ objects (like Skia handles), we must ensure these native resources are properly deleted (via a `Finalizer` or explicit `dispose`) when their Dart wrappers are garbage collected to prevent memory leaks. 
+Because Web UI interacts heavily with native C++ objects (like Skia handles), we must ensure these native resources are properly deleted (via a `Finalizer` or explicit `dispose`) when their Dart wrappers are garbage collected to prevent memory leaks.
 
 The core question was: **Where should the `Finalizer` be attached?** Should it be attached to the backend delegates, or should it be attached to the shared frontend wrapper?
 
@@ -18,9 +18,9 @@ This approach was **rejected** for the following reasons:
 ## The Decision
 **Memory management logic, including the attachment of `Finalizer`s for native resources, must remain strictly in the shared frontend `Engine`-classes (e.g., `EngineColorFilter`).**
 
-Backend delegates should be treated as dumb wrappers around native handles. They should expose a `.dispose()` method, but the responsibility of invoking that method (whether explicitly or via a `Finalizer`) belongs to the frontend layer. 
+Backend delegates should be treated as dumb wrappers around native handles. They should expose a `.dispose()` method, but the responsibility of invoking that method (whether explicitly or via a `Finalizer`) belongs to the frontend layer.
 
-Any consumer of these primitives (such as `CkPaint` or `CkColorFilterImageFilter`) must hold a strong reference to the **frontend `Engine` class**, not the raw backend delegate, to ensure the object is kept alive during garbage collection. 
+Any consumer of these primitives (such as `CkPaint` or `CkColorFilterImageFilter`) must hold a strong reference to the **frontend `Engine` class**, not the raw backend delegate, to ensure the object is kept alive during garbage collection.
 
 ## Consequences
 
