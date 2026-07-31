@@ -577,10 +577,7 @@ void main() {
         );
         expect(applicationPackageIdResponse.data['id'], 0);
         expect(applicationPackageFactory.applicationBinaryRequested!.basename, 'test_file');
-        expect(
-          applicationPackageFactory.platformRequested,
-          const TargetPlatform(.android, .unknown),
-        );
+        expect(applicationPackageFactory.platformRequested, TargetPlatform.android);
         final applicationPackageId = applicationPackageIdResponse.data['result'] as String?;
 
         // Try starting the app.
@@ -1165,7 +1162,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<String> get emulatorId async => 'device';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.android, .armv7);
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.armv7;
