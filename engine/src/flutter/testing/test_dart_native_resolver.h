@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "flutter/fml/macros.h"
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -21,6 +22,13 @@
     };                                                                      \
     closure = (native_entry);                                               \
     return entrypoint;                                                      \
+  })()
+
+#define CREATE_FFI_LAMBDA(lambda)                                       \
+  ([&]() {                                                              \
+    using FfiWrapper = ::flutter::testing::FfiLambda<decltype(lambda)>; \
+    FfiWrapper::function = (lambda);                                    \
+    return reinterpret_cast<void*>(FfiWrapper::FfiFunction);            \
   })()
 
 namespace flutter::testing {
@@ -54,6 +62,26 @@ class TestDartNativeResolver
 
   FML_DISALLOW_COPY_AND_ASSIGN(TestDartNativeResolver);
 };
+
+template <typename T>
+struct FfiLambdaFunction {};
+
+/// Wraps a lambda in a function pointer that can be called through Dart FFI.
+template <typename ReturnType, typename ClassType, typename... Args>
+struct FfiLambdaFunction<ReturnType (ClassType::*)(Args...) const> {
+  static std::function<ReturnType(Args...)> function;
+
+  static ReturnType FfiFunction(Args... args) {
+    return function(std::forward<Args>(args)...);
+  }
+};
+
+template <typename ReturnType, typename ClassType, typename... Args>
+std::function<ReturnType(Args...)>
+    FfiLambdaFunction<ReturnType (ClassType::*)(Args...) const>::function;
+
+template <typename LambdaType>
+using FfiLambda = FfiLambdaFunction<decltype(&LambdaType::operator())>;
 
 }  // namespace flutter::testing
 
