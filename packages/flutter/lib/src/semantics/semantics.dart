@@ -6749,6 +6749,15 @@ class SemanticsConfiguration {
     if (_traversalChildIdentifier != other._traversalChildIdentifier) {
       return false;
     }
+    // Two configurations that each anchor a different traversal parent (e.g.
+    // two sibling OverlayPortals) must not be merged: [absorb] can only keep
+    // one `traversalParentIdentifier`, so the other one would be dropped and
+    // its traversal children would end up grafted to nothing.
+    if (_traversalParentIdentifier != null &&
+        other._traversalParentIdentifier != null &&
+        _traversalParentIdentifier != other._traversalParentIdentifier) {
+      return false;
+    }
     if (!hasBeenAnnotated) {
       return true;
     }
