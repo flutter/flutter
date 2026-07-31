@@ -19,6 +19,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -2293,6 +2294,15 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (!kReleaseMode) {
+      debugViewMetricsOverridesNotifier.addListener(_handleViewMetricsOverridesChanged);
+    }
+  }
+
+  void _handleViewMetricsOverridesChanged() {
+    // The override is read in build(), so an empty setState is enough to pick
+    // up the new value.
+    setState(() {});
   }
 
   @override
@@ -2369,6 +2379,9 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void dispose() {
+    if (!kReleaseMode) {
+      debugViewMetricsOverridesNotifier.removeListener(_handleViewMetricsOverridesChanged);
+    }
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -2383,7 +2396,53 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
         effectiveData.platformBrightness != debugBrightnessOverride) {
       effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
     }
+    // Developer tooling can override the metrics of an individual view. Unlike
+    // debugBrightnessOverride above, this applies even when there is a parent
+    // MediaQuery, because the override explicitly names the view it targets.
+    if (!kReleaseMode) {
+      final ViewMetricsOverride? override = debugViewMetricsOverrides[widget.view.viewId];
+      if (override != null) {
+        effectiveData = _applyViewMetricsOverride(effectiveData, override);
+      }
+    }
     return MediaQuery(data: effectiveData, child: widget.child);
+  }
+
+  static MediaQueryData _applyViewMetricsOverride(
+    MediaQueryData data,
+    ViewMetricsOverride override,
+  ) {
+    // devicePixelRatio and physicalSize are also applied to the RenderView's
+    // ViewConfiguration by RendererBinding.createViewConfigurationFor, so that
+    // the app really lays out at the overridden size instead of merely
+    // reporting it here.
+    final double devicePixelRatio = override.devicePixelRatio ?? data.devicePixelRatio;
+    // MediaQueryData.size is logical, so it has to be recomputed whenever
+    // either the physical size or the device pixel ratio is overridden.
+    final ui.Size? size;
+    if (override.physicalSize != null) {
+      size = override.physicalSize! / devicePixelRatio;
+    } else if (override.devicePixelRatio != null) {
+      size = data.size * data.devicePixelRatio / devicePixelRatio;
+    } else {
+      size = null;
+    }
+    return data.copyWith(
+      devicePixelRatio: devicePixelRatio,
+      size: size,
+      textScaler: override.textScaler,
+      platformBrightness: override.platformBrightness,
+      padding: override.padding,
+      viewPadding: override.viewPadding,
+      viewInsets: override.viewInsets,
+      alwaysUse24HourFormat: override.alwaysUse24HourFormat,
+      accessibleNavigation: override.accessibleNavigation,
+      invertColors: override.invertColors,
+      disableAnimations: override.disableAnimations,
+      boldText: override.boldText,
+      highContrast: override.highContrast,
+      onOffSwitchLabels: override.onOffSwitchLabels,
+    );
   }
 }
 

@@ -10,7 +10,7 @@
 library;
 
 import 'dart:async';
-import 'dart:ui' as ui show PictureRecorder, SceneBuilder, SemanticsUpdate;
+import 'dart:ui' as ui show FlutterView, PictureRecorder, SceneBuilder, SemanticsUpdate, Size;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -18,11 +18,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'box.dart';
 import 'debug.dart';
 import 'mouse_tracker.dart';
 import 'object.dart';
 import 'service_extensions.dart';
 import 'view.dart';
+import 'view_metrics_override.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
@@ -59,6 +61,9 @@ mixin RendererBinding
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
     addPersistentFrameCallback(_handlePersistentFrameCallback);
+    if (!kReleaseMode) {
+      debugViewMetricsOverridesNotifier.addListener(_handleViewMetricsOverridesChanged);
+    }
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
@@ -368,7 +373,33 @@ mixin RendererBinding
   /// using `flutter run`.
   @protected
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    return ViewConfiguration.fromView(renderView.flutterView);
+    final ui.FlutterView view = renderView.flutterView;
+    if (!kReleaseMode) {
+      final ViewMetricsOverride? override = debugViewMetricsOverrides[view.viewId];
+      if (override != null && override.affectsViewConfiguration) {
+        final double devicePixelRatio = override.devicePixelRatio ?? view.devicePixelRatio;
+        final ui.Size physicalSize = override.physicalSize ?? view.physicalSize;
+        final physicalConstraints = BoxConstraints.tight(physicalSize);
+        return ViewConfiguration(
+          logicalConstraints: physicalConstraints / devicePixelRatio,
+          physicalConstraints: physicalConstraints,
+          devicePixelRatio: devicePixelRatio,
+        );
+      }
+    }
+    return ViewConfiguration.fromView(view);
+  }
+
+  /// Rebuilds the [ViewConfiguration] of every [RenderView] whose view metrics
+  /// are overridden, and schedules a frame.
+  ///
+  /// Called when [debugViewMetricsOverrides] changes an entry that affects
+  /// layout. Has no effect in release mode.
+  void _handleViewMetricsOverridesChanged() {
+    if (kReleaseMode) {
+      return;
+    }
+    handleMetricsChanged();
   }
 
   /// Create a [SceneBuilder].
