@@ -1036,7 +1036,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
 
   bool is_experimental_vmservice =
       !settings.vmservice_kernel_path.empty() ||
-      vm_data->GetServiceIsolateSnapshot() != vm_data->GetIsolateSnapshot();
+      !settings.vmservice_snapshot_library_path.empty();
 
   if (!DartServiceIsolate::Startup(
           settings.vm_service_host,            // server IP address

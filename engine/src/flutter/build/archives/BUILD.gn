@@ -67,6 +67,9 @@ if (build_engine_artifacts) {
       "//flutter/shell/testing",
       "//flutter/tools/path_ops",
     ]
+    if (flutter_runtime_mode == "debug") {
+      deps += [ "//flutter/shell/vmservice:vmservice_snapshot_dill" ]
+    }
     if (is_mac) {
       # TODO(godofredoc): Remove after paths are standardized flutter/flutter#105351.
       # Mac artifacts sometimes use mac and sometimes darwin. Standardizing the
@@ -147,6 +150,10 @@ if (build_engine_artifacts) {
         {
           source = "$root_gen_dir/frontend_server_aot.dart.snapshot"
           destination = "frontend_server_aot.dart.snapshot"
+        },
+        {
+          source = "$root_out_dir/vmservice_snapshot.dill"
+          destination = "vmservice_snapshot.dill"
         },
       ]
     }
