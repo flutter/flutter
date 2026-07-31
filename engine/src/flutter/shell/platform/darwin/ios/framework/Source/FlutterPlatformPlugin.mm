@@ -450,7 +450,13 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 }
 
 - (void)showTranslateViewControllerForTerm:(NSString*)term {
+  if (term.length == 0) {
+    return;
+  }
   UIViewController* flutterViewController = [self.engine viewController];
+  if (!flutterViewController) {
+    return;
+  }
   FLTTranslateViewController* translateViewController;
 
   if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
@@ -474,7 +480,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     CGRect ipadBounds =
         CGRectMake(fmin(transformedFirstRect.origin.x, transformedLastRect.origin.x),
                    transformedFirstRect.origin.y,
-                   abs(transformedLastRect.origin.x - transformedFirstRect.origin.x),
+                   fabs(transformedLastRect.origin.x - transformedFirstRect.origin.x),
                    transformedFirstRect.size.height);
 
     translateViewController = [[FLTTranslateViewController alloc] initWithTerm:term

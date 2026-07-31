@@ -60,16 +60,18 @@ class TranslateViewController: UIViewController {
     swiftUIViewController.didMove(toParent: self)
   }
 
-  @objc func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
+  private func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
     var contentView = ContentView(
       termToTranslate: termToTranslate,
       ipadBounds: ipadBounds
     )
     contentView.onDismiss = { [weak self] in
-      guard let self = self else { return }
-      self.willMove(toParent: nil)
-      self.view.removeFromSuperview()
-      self.removeFromParent()
+      DispatchQueue.main.async {
+        guard let self = self else { return }
+        self.willMove(toParent: nil)
+        self.view.removeFromSuperview()
+        self.removeFromParent()
+      }
     }
 
     let hostingController = UIHostingController(rootView: contentView)

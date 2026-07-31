@@ -1013,7 +1013,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                               suggestedMenu:suggestedMenu];
       }
     } else if ([type isEqualToString:@"translate"]) {
-      if (@available(ios 17.4, *)) {
+      if (@available(iOS 17.4, *)) {
         [self addAdditionalBasicCommandToItems:items
                                           type:type
                                       selector:@selector(handleTranslateAction)
