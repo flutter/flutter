@@ -38,6 +38,7 @@ import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'application_package.dart';
 import 'core_devices.dart';
+import 'device_support.dart';
 import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
@@ -308,6 +309,7 @@ class IOSDevice extends Device {
   IOSDevice(
     super.id, {
     required FileSystem fileSystem,
+    required ProcessUtils processUtils,
     required this.name,
     required CpuArch cpuArch,
     required this.connectionInterface,
@@ -325,6 +327,7 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required super.logger,
     required Analytics analytics,
+    required Xcode? xcode,
   }) : _cpuArch = cpuArch,
        _sdkVersion = sdkVersion,
        _iosDeploy = iosDeploy,
@@ -332,8 +335,10 @@ class IOSDevice extends Device {
        _coreDeviceControl = coreDeviceControl,
        _coreDeviceLauncher = coreDeviceLauncher,
        _xcodeDebug = xcodeDebug,
+       _xcode = xcode,
        _iproxy = iProxy,
        _fileSystem = fileSystem,
+       _processUtils = processUtils,
        _logger = logger,
        _analytics = analytics,
        _platform = platform,
@@ -348,12 +353,14 @@ class IOSDevice extends Device {
   final IOSDeploy _iosDeploy;
   final Analytics _analytics;
   final FileSystem _fileSystem;
+  final ProcessUtils _processUtils;
   final Logger _logger;
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
+  final Xcode? _xcode;
   final IProxy _iproxy;
 
   Version? get sdkVersion {
@@ -1018,6 +1025,11 @@ class IOSDevice extends Device {
     );
   }
 
+  bool shouldAttachDebugger(DebuggingOptions debuggingOptions) {
+    return debuggingOptions.buildInfo.isDebug ||
+        (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
+  }
+
   /// Uses either `devicectl` or Xcode automation to install, launch, and debug
   /// apps on physical iOS devices.
   ///
@@ -1069,6 +1081,15 @@ class IOSDevice extends Device {
 
     IOSDeploymentMethod? deploymentMethod;
 
+    final bool attachDebugger = shouldAttachDebugger(debuggingOptions);
+    if (attachDebugger) {
+      await IOSDeviceSupport(
+        logger: _logger,
+        processUtils: _processUtils,
+        xcode: _xcode,
+      ).prepareDeviceSupport(id);
+    }
+
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
@@ -1083,11 +1104,7 @@ class IOSDevice extends Device {
         await deviceLogReader.listenToCoreDeviceLauncher(_coreDeviceLauncher);
       }
 
-      final bool shouldAttachDebugger =
-          debuggingOptions.buildInfo.isDebug ||
-          (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
-
-      if (shouldAttachDebugger) {
+      if (attachDebugger) {
         final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
           deviceId: id,
           bundlePath: package.deviceBundlePath,
