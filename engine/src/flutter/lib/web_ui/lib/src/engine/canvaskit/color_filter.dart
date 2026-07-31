@@ -72,14 +72,25 @@ class CkColorFilter implements BackendColorFilter {
 /// A reusable identity transform matrix.
 ///
 /// WARNING: DO NOT MUTATE THIS MATRIX! It is a shared global singleton.
-Float32List _identityTransform = _computeIdentityTransform();
-
-Float32List _computeIdentityTransform() {
-  final result = Float32List(20);
-  const translationIndices = <int>[0, 6, 12, 18];
-  for (final i in translationIndices) {
-    result[i] = 1;
-  }
-  _identityTransform = result;
-  return result;
-}
+final Float32List _identityTransform = Float32List.fromList(<double>[
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+]);
