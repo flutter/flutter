@@ -637,10 +637,12 @@ class AndroidDevice extends Device {
               .existsSync()) ...<String>[
         '--es',
         'aot-vmservice-shared-library-name',
-        _artifacts.getArtifactPath(
-          Artifact.vmserviceSharedLibrary,
-          platform: await targetPlatform,
-          mode: BuildMode.profile,
+        _fileSystem.path.basename(
+          _artifacts.getArtifactPath(
+            Artifact.vmserviceSharedLibrary,
+            platform: await targetPlatform,
+            mode: BuildMode.profile,
+          ),
         ),
       ],
       if (debuggingOptions.buildInfo.isDebug &&
