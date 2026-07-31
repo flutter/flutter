@@ -114,7 +114,7 @@ class IconTreeShaker {
     final recordedUsesFiles = <File>[];
     for (final candidate in candidates) {
       final File file = environment.buildDir.childFile(candidate);
-      if (file.existsSync() && file.readAsStringSync().isNotEmpty) {
+      if (file.existsSync() && file.lengthSync() > 0) {
         recordedUsesFiles.add(file);
       }
     }
@@ -389,8 +389,13 @@ class IconTreeShaker {
   static const String _fontPackageFieldName = 'fontPackage';
 
   bool _isIconDataDefinition(DefinitionWithInstances definition) {
-    return definition.toString().contains(_iconDataClassName) ||
-        (definition is Class && definition.name == _iconDataClassName);
+    if (definition is Class) {
+      return definition.name == _iconDataClassName &&
+          definition.library.uri == 'package:flutter/src/widgets/icon_data.dart';
+    }
+    final str = definition.toString();
+    return str == 'package:flutter/src/widgets/icon_data.dart::IconData' ||
+        str.startsWith('package:flutter/src/widgets/icon_data.dart::IconData.');
   }
 
   ({Constant? codePoint, Constant? fontFamily, Constant? fontPackage})? _extractIconDataConstants(
