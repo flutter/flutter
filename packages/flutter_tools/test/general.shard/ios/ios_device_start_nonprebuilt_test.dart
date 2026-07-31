@@ -1465,7 +1465,7 @@ IOSDevice setUpIOSDevice({
   IOSCoreDeviceControl? coreDeviceControl,
   IOSCoreDeviceLauncher? coreDeviceLauncher,
   FakeXcodeDebug? xcodeDebug,
-  DarwinArch cpuArchitecture = DarwinArch.arm64,
+  CpuArch cpuArchitecture = CpuArch.arm64,
   FakeExactAnalytics? analytics,
 }) {
   artifacts ??= Artifacts.test();
@@ -1500,7 +1500,7 @@ IOSDevice setUpIOSDevice({
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
-    cpuArchitecture: cpuArchitecture,
+    cpuArch: cpuArchitecture,
     connectionInterface: DeviceConnectionInterface.attached,
     isConnected: true,
     isPaired: true,
@@ -1537,7 +1537,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
-    String projectPath,
+    XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
     bool skipPackageUpdatesAndValidation = true,
   }) async {
@@ -1546,14 +1546,14 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async => projectInfo;
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async => buildSettings;
@@ -1735,6 +1735,17 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
     required String bundleId,
     required List<String> launchArguments,
     required BuildMode mode,
+    required ShutdownHooks shutdownHooks,
+  }) async {
+    return true;
+  }
+
+  @override
+  Future<bool> launchAppAndStreamLogsWithoutDebugger({
+    required String deviceId,
+    required String bundlePath,
+    required String bundleId,
+    required List<String> launchArguments,
     required ShutdownHooks shutdownHooks,
   }) async {
     return true;

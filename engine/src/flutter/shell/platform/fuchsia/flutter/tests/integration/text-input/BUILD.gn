@@ -52,6 +52,7 @@ executable("text-input-test-bin") {
 fuchsia_test_archive("text-input-test") {
   deps = [ ":text-input-test-bin" ]
   subpackages = [
+    "${fuchsia_sdk}/packages/realm_builder_server",
     "text-input-view:package",
     "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner",
   ]

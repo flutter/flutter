@@ -55,6 +55,7 @@ executable("mouse-input-test-bin") {
 fuchsia_test_archive("mouse-input-test") {
   deps = [ ":mouse-input-test-bin" ]
   subpackages = [
+    "${fuchsia_sdk}/packages/realm_builder_server",
     "mouse-input-view:package",
     "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner",
   ]

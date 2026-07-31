@@ -40,6 +40,7 @@ executable("dart-aot-runner-integration-test-bin") {
 fuchsia_test_archive("dart-aot-runner-integration-test") {
   deps = [ ":dart-aot-runner-integration-test-bin" ]
   subpackages = [
+    "${fuchsia_sdk}/packages/realm_builder_server",
     "../dart_echo_server:aot_echo_package",
     "//flutter/shell/platform/fuchsia/dart_runner:dart_aot_runner",
   ]

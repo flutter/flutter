@@ -11,6 +11,8 @@ import 'package:test/test.dart';
 
 import 'check_backticks_relative_paths_rule.dart';
 
+const String _configFileName = 'dart_skills_lint.yaml';
+
 Directory _findSkillsDir() {
   Directory dir = Directory.current;
   while (dir.path != dir.parent.path) {
@@ -29,6 +31,13 @@ void main() {
   final Directory skillsDir = _findSkillsDir();
   final String skillsDirectory = skillsDir.path;
   final Directory repoRoot = skillsDir.parent.parent;
+  final String reidbakerSkillsDirectory = path.join(
+    repoRoot.path,
+    '.agents',
+    'agents',
+    'reidbaker-agent',
+    'skills',
+  );
 
   late Level oldLevel;
   StreamSubscription<LogRecord>? subscription;
@@ -47,13 +56,12 @@ void main() {
   });
 
   test('Validate Flutter Skills', () async {
+    final Configuration config = await ConfigParser.loadConfig(
+      path: path.join(repoRoot.path, 'dev', 'tools', _configFileName),
+    );
     final bool isValid = await validateSkills(
-      skillDirPaths: [skillsDirectory],
-      resolvedRules: {
-        'check-relative-paths': AnalysisSeverity.error,
-        'check-absolute-paths': AnalysisSeverity.error,
-        'check-trailing-whitespace': AnalysisSeverity.error,
-      },
+      skillDirPaths: [skillsDirectory, reidbakerSkillsDirectory],
+      config: config,
     );
     expect(isValid, isTrue, reason: 'Skills validation failed. See above for details.');
   });
@@ -83,9 +91,17 @@ void main() {
     }
 
     final bool isValid = await validateSkills(
-      skillDirPaths: [skillsDirectory],
+      skillDirPaths: [skillsDirectory, reidbakerSkillsDirectory],
       customRules: [CheckBackticksRelativePathsRule(valid2SegmentPaths, repoRoot.path)],
-      resolvedRules: {'check-absolute-paths': AnalysisSeverity.disabled},
+      resolvedRuleConfigs: {
+        'check-absolute-paths': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'check-relative-paths': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'check-trailing-whitespace': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'description-too-long': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'disallowed-field': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'invalid-skill-name': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'valid-yaml-metadata': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+      },
     );
     expect(isValid, isTrue, reason: 'Skills validation failed. See above for details.');
   });

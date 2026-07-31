@@ -14,6 +14,7 @@ uniform FragInfo {
   float is_color_glyph;
   float use_text_color;
   f16vec4 text_color;
+  float text_contrast;
 }
 frag_info;
 
@@ -31,10 +32,20 @@ void main() {
       frag_color = value * frag_info.text_color.aaaa;
     }
   } else {
+    float coverage;
     if (use_alpha_color_channel == 1.0) {
-      frag_color = value.aaaa * frag_info.text_color;
+      coverage = float(value.a);
     } else {
-      frag_color = value.rrrr * frag_info.text_color;
+      coverage = float(value.r);
     }
+
+    if (frag_info.text_contrast != 1.0) {
+      // Applies gamma correction to take into account we are performing in
+      // linear space but some fonts are expecting to operate in gamma space.
+      // https://www.desmos.com/calculator/gsblcyg5vv
+      coverage = 1.0 - pow(1.0 - coverage, frag_info.text_contrast);
+    }
+
+    frag_color = f16vec4(coverage) * frag_info.text_color;
   }
 }

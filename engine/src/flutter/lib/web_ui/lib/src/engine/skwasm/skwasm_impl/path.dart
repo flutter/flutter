@@ -14,7 +14,7 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath implements DisposablePath, DisposablePathBuilder {
+class SkwasmPath implements BackendPath, BackendPathBuilder {
   factory SkwasmPath() {
     return SkwasmPath.fromHandle(pathCreate());
   }
@@ -184,20 +184,20 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
-    addPath((path as LazyPath).builtPath, offset);
+    addPath((path as EnginePath).backendPath, offset);
   }
 
   @override
-  void addPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
+  void addPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, false, matrix4: matrix4);
   }
 
   @override
-  void extendWithPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
+  void extendWithPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, true, matrix4: matrix4);
   }
 
-  void _addPath(DisposablePath path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
+  void _addPath(BackendPath path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
     assert(path is SkwasmPath);
     withStackScope((StackScope s) {
       final Pointer<Float> convertedMatrix = s.convertMatrix4toSkMatrix(
@@ -243,7 +243,7 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
       SkwasmPath.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
 
   @override
-  SkwasmPathMetricIterator getMetricsIterator({bool forceClosed = false}) {
+  SkwasmPathMetricIterator computeMetrics({bool forceClosed = false}) {
     return SkwasmPathMetricIterator(this, forceClosed);
   }
 
@@ -252,22 +252,36 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
     final SkStringHandle skString = pathGetSvgString(handle);
     final Pointer<Int8> buffer = skStringGetData(skString);
     final int length = skStringGetLength(skString);
-    final characters = List<int>.generate(length, (int i) => buffer[i]);
-    final String svgString = utf8.decode(characters);
+    final String svgString = utf8.decode(buffer.toUint8List(length));
     skStringFree(skString);
     return svgString;
   }
 }
 
-class SkwasmPathConstructors implements DisposablePathConstructors {
+class SkwasmPathConstructors implements BackendPathConstructors {
   @override
   SkwasmPath createNew() => SkwasmPath();
 
   @override
-  DisposablePathBuilder fromPath(DisposablePath path) => SkwasmPath.from(path as SkwasmPath);
+  BackendPathBuilder fromPath(BackendPath path) => SkwasmPath.from(path as SkwasmPath);
 
   @override
-  SkwasmPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
+  SkwasmPath combinePaths(ui.PathOperation operation, BackendPath path1, BackendPath path2) {
     return SkwasmPath.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
+  }
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+/// Explicitly masks the signed Int8 values to positive unsigned bytes (& 0xFF)
+/// to guarantee correct decoding by the UTF-8 decoder.
+extension on Pointer<Int8> {
+  Uint8List toUint8List(int length) {
+    final list = Uint8List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i] & 0xFF;
+    }
+    return list;
   }
 }

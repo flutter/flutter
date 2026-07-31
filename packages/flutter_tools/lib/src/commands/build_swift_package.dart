@@ -1258,7 +1258,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       flutterRootDir: _utils.fileSystem.directory(_utils.flutterRoot),
       defines: <String, String>{
         kTargetFile: targetFile,
-        kTargetPlatform: getNameForTargetPlatform(platform.targetPlatform),
+        kTargetPlatform: platform.targetPlatform.getName(),
         ...await _platformDefines(platform, sdk),
         ...buildInfo.toBuildSystemEnvironment(),
         kBuildSwiftPackage: 'true',
@@ -1413,14 +1413,14 @@ class AppFrameworkAndNativeAssetsDependencies {
           kIosArchs: defaultIOSArchsForEnvironment(
             sdk.sdkType,
             _utils.artifacts,
-          ).map((DarwinArch e) => e.name).join(' '),
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
           kSdkRoot: await _utils.xcode.sdkLocation(sdk.sdkType),
         };
       case FlutterDarwinPlatform.macos:
         return <String, String>{
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             _utils.artifacts,
-          ).map((DarwinArch e) => e.name).join(' '),
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
         };
     }
   }

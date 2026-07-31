@@ -120,6 +120,7 @@ class TestCompiler {
                fileSystem: globals.fs,
                trackWidgetCreation: buildInfo.trackWidgetCreation,
                dartDefines: buildInfo.dartDefines,
+               targetModel: TargetModel.flutter,
                extraFrontEndOptions: buildInfo.extraFrontEndOptions,
              ),
            ),

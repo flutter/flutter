@@ -426,7 +426,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterPluginRegistrant",
     platforms: [
-        .iOS("13.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "FlutterPluginRegistrant", type: .static, targets: ["FlutterPluginRegistrant"])
@@ -2114,7 +2114,7 @@ let package = Package(
   "platforms": [
     {
       "platformName": "ios",
-      "version": "13.0"
+      "version": "15.0"
     }
   ],
   "targets": [
@@ -2187,7 +2187,7 @@ let package = Package(
         expect(processManager, hasNoRemainingExpectations);
         expect(pluginSwiftDependencies.copiedPlugins.length, 1);
         expect(pluginSwiftDependencies.copiedPlugins[0].name, 'PluginA');
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(13, 0, 0));
+        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
 
         final File cachedManifest = cacheDir
             .childDirectory('Manifests')
@@ -2292,7 +2292,7 @@ let package = Package(
   "platforms": [
     {
       "platformName": "ios",
-      "version": "13.0"
+      "version": "15.0"
     }
   ],
   "targets": [
@@ -2377,7 +2377,7 @@ let package = Package(
         expect(processManager, hasNoRemainingExpectations);
         expect(pluginSwiftDependencies.copiedPlugins.length, 1);
         expect(pluginSwiftDependencies.copiedPlugins[0].name, 'PluginA');
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(13, 0, 0));
+        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
         expect(logger.statusText, contains('Skipping processing plugins. No change detected.'));
       });
 
@@ -2414,7 +2414,7 @@ let package = Package(
           const FakeCommand(
             command: ['swift', 'package', 'dump-package'],
             stdout:
-                '{"platforms": [{"platformName": "ios", "version": "13.0"}], "targets": [{"name": "PluginA", "type": "regular"}], "dependencies": []}',
+                '{"platforms": [{"platformName": "ios", "version": "15.0"}], "targets": [{"name": "PluginA", "type": "regular"}], "dependencies": []}',
           ),
           const FakeCommand(
             command: [
@@ -2500,7 +2500,7 @@ let package = Package(
         );
 
         expect(processManager, hasNoRemainingExpectations);
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(14, 0, 0));
+        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
         expect(pluginSwiftDependencies.copiedPlugins.length, 2);
       });
 
@@ -2538,7 +2538,7 @@ let package = Package(
     },
     {
       "platformName": "ios",
-      "version": "13.0"
+      "version": "15.0"
     }
   ],
   "targets": [
@@ -2611,7 +2611,7 @@ let package = Package(
           expect(processManager, hasNoRemainingExpectations);
           expect(pluginSwiftDependencies.copiedPlugins.length, 1);
           expect(pluginSwiftDependencies.copiedPlugins[0].name, 'PluginA');
-          expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(13, 0, 0));
+          expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
         },
       );
 
@@ -2645,7 +2645,7 @@ let package = Package(
   "platforms": [
     {
       "platformName": "ios",
-      "version": "13.0"
+      "version": "15.0"
     }
   ],
   "targets": [
@@ -2791,7 +2791,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterPluginRegistrant",
     platforms: [
-        .macOS("10.15")
+        .macOS("12.0")
     ],
     products: [
         .library(name: "FlutterPluginRegistrant", type: .static, targets: ["FlutterPluginRegistrant"])
@@ -3322,7 +3322,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterNativeIntegration",
     platforms: [
-        .iOS("13.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"])
@@ -3574,7 +3574,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterNativeIntegration",
     platforms: [
-        .macOS("10.15")
+        .macOS("12.0")
     ],
     products: [
         .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"])

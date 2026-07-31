@@ -96,6 +96,11 @@ struct RoundSuperellipseParam {
   // If true, all corners are the same and only `top_right` is popularized.
   bool all_corners_same;
 
+  Scalar top_split;
+  Scalar bottom_split;
+  Scalar left_split;
+  Scalar right_split;
+
   // Create a param for a rounded superellipse with the specific bounds and
   // radii.
   [[nodiscard]] static RoundSuperellipseParam MakeBoundsRadii(

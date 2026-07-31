@@ -78,6 +78,6 @@ public class MouseCursorChannel {
   public interface MouseCursorMethodHandler {
     // Called when the pointer should start displaying a system mouse cursor
     // specified by {@code shapeCode}.
-    public void activateSystemCursor(@NonNull String kind);
+    void activateSystemCursor(@NonNull String kind);
   }
 }

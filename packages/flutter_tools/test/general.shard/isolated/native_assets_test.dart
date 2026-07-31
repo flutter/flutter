@@ -251,6 +251,44 @@ void main() {
   );
 
   testUsingContext(
+    'Native assets: duplicate assets throws tool exit listing duplicate IDs',
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+    () async {
+      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+      await packageConfig.parent.create();
+      await packageConfig.create();
+
+      final File directSoFile = environment.projectDir.childFile('direct.so');
+      directSoFile.writeAsBytesSync(<int>[]);
+
+      CodeAsset makeCodeAsset(String name, Uri file, LinkMode linkMode) =>
+          CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
+
+      expect(
+        () => runFlutterSpecificHooks(
+          environmentDefines: <String, String>{kBuildMode: BuildMode.release.cliName},
+          targetPlatform: TargetPlatform.linux_x64,
+          projectUri: projectUri,
+          fileSystem: fileSystem,
+          buildRunner: FakeFlutterNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <String>['bar'],
+            buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+              codeAssets: <CodeAsset>[
+                makeCodeAsset('direct', directSoFile.uri, DynamicLoadingBundled()),
+                makeCodeAsset('direct', directSoFile.uri, DynamicLoadingBundled()),
+              ],
+            ),
+          ),
+          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+          buildDataAssets: true,
+          recordedUsesFile: null,
+        ),
+        throwsToolExit(message: 'Found duplicates in the code assets: [package:bar/direct]'),
+      );
+    },
+  );
+
+  testUsingContext(
     'unit tests does not require compiler toolchain',
     overrides: <Type, Generator>{
       ProcessManager: () {

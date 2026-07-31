@@ -12,6 +12,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "vulkan/vulkan_enums.hpp"
 
@@ -177,6 +178,40 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
       return vk::Format::eR8G8Unorm;
     case PixelFormat::kR32Float:
       return vk::Format::eR32Sfloat;
+    case PixelFormat::kBC1RGBAUNormInt:
+      return vk::Format::eBc1RgbaUnormBlock;
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+      return vk::Format::eBc1RgbaSrgbBlock;
+    case PixelFormat::kBC3RGBAUNormInt:
+      return vk::Format::eBc3UnormBlock;
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+      return vk::Format::eBc3SrgbBlock;
+    case PixelFormat::kBC5RGUNormInt:
+      return vk::Format::eBc5UnormBlock;
+    case PixelFormat::kBC7RGBAUNormInt:
+      return vk::Format::eBc7UnormBlock;
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+      return vk::Format::eBc7SrgbBlock;
+    case PixelFormat::kETC2RGB8UNormInt:
+      return vk::Format::eEtc2R8G8B8UnormBlock;
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+      return vk::Format::eEtc2R8G8B8SrgbBlock;
+    case PixelFormat::kETC2RGBA8UNormInt:
+      return vk::Format::eEtc2R8G8B8A8UnormBlock;
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+      return vk::Format::eEtc2R8G8B8A8SrgbBlock;
+    case PixelFormat::kASTC4x4LDR:
+      return vk::Format::eAstc4x4UnormBlock;
+    case PixelFormat::kASTC4x4LDRSRGB:
+      return vk::Format::eAstc4x4SrgbBlock;
+    case PixelFormat::kASTC8x8LDR:
+      return vk::Format::eAstc8x8UnormBlock;
+    case PixelFormat::kASTC8x8LDRSRGB:
+      return vk::Format::eAstc8x8SrgbBlock;
+    case PixelFormat::kASTC4x4HDR:
+      return vk::Format::eAstc4x4SfloatBlock;
+    case PixelFormat::kASTC8x8HDR:
+      return vk::Format::eAstc8x8SfloatBlock;
   }
 
   FML_UNREACHABLE();
@@ -429,6 +464,23 @@ constexpr bool PixelFormatIsDepthStencil(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return false;
     case PixelFormat::kS8UInt:
     case PixelFormat::kD24UnormS8Uint:
@@ -529,6 +581,23 @@ constexpr vk::ImageAspectFlags ToVKImageAspectFlags(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return vk::ImageAspectFlagBits::eColor;
     case PixelFormat::kS8UInt:
       return vk::ImageAspectFlagBits::eStencil;
@@ -540,11 +609,13 @@ constexpr vk::ImageAspectFlags ToVKImageAspectFlags(PixelFormat format) {
   FML_UNREACHABLE();
 }
 
-constexpr uint32_t ToArrayLayerCount(TextureType type) {
-  switch (type) {
+constexpr uint32_t ToArrayLayerCount(const TextureDescriptor& desc) {
+  switch (desc.type) {
     case TextureType::kTexture2D:
     case TextureType::kTexture2DMultisample:
       return 1u;
+    case TextureType::kTexture2DArray:
+      return desc.array_layer_count;
     case TextureType::kTextureCube:
       return 6u;
     case TextureType::kTextureExternalOES:
@@ -559,6 +630,8 @@ constexpr vk::ImageViewType ToVKImageViewType(TextureType type) {
     case TextureType::kTexture2D:
     case TextureType::kTexture2DMultisample:
       return vk::ImageViewType::e2D;
+    case TextureType::kTexture2DArray:
+      return vk::ImageViewType::e2DArray;
     case TextureType::kTextureCube:
       return vk::ImageViewType::eCube;
     case TextureType::kTextureExternalOES:
@@ -572,6 +645,7 @@ constexpr vk::ImageCreateFlags ToVKImageCreateFlags(TextureType type) {
   switch (type) {
     case TextureType::kTexture2D:
     case TextureType::kTexture2DMultisample:
+    case TextureType::kTexture2DArray:
       return {};
     case TextureType::kTextureCube:
       return vk::ImageCreateFlagBits::eCubeCompatible;
@@ -604,6 +678,23 @@ constexpr vk::ImageAspectFlags ToImageAspectFlags(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return vk::ImageAspectFlagBits::eColor;
     case PixelFormat::kS8UInt:
       return vk::ImageAspectFlagBits::eStencil;
