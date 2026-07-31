@@ -212,7 +212,7 @@ template("flutter_snapshot") {
       shared_library(compile_target) {
         public_deps = [ ":$compile_asm_target" ]
         sources = [ obj_output ]
-        output_name = invoker_target_name
+        output_name = "lib$invoker_target_name"
         ldflags = [ "/NOENTRY" ]
       }
     } else {

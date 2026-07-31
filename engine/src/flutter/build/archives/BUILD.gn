@@ -377,6 +377,15 @@ if (host_os == "win") {
         destination = "gen_snapshot.exe"
       },
     ]
+    if (flutter_runtime_mode == "profile") {
+      deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+      files += [
+        {
+          source = "$root_out_dir/libvmservice_snapshot.dll"
+          destination = "libvmservice_snapshot.dll"
+        },
+      ]
+    }
   }
 }
 
