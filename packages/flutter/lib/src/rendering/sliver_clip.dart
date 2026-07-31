@@ -3,10 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show clampDouble;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+
+import 'layer.dart';
+import 'object.dart';
+import 'proxy_box.dart';
+import 'proxy_sliver.dart';
+import 'sliver.dart';
 
 /// Describes how a sliver's clip reacts to the area overlapped by other slivers.
 ///
