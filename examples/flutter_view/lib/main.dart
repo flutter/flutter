@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
   runApp(const FlutterView());
@@ -15,9 +16,22 @@ class FlutterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return WidgetsApp(
       title: 'Flutter View',
-      theme: ThemeData(primarySwatch: Colors.grey),
+      color: const Color(0xFF9E9E9E),
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return PageRouteBuilder<T>(
+          settings: settings,
+          pageBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return builder(context);
+              },
+        );
+      },
       home: const MyHomePage(),
     );
   }
@@ -60,32 +74,67 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return ColoredBox(
+      color: const Color(0xFFFFFFFF),
+      child: Stack(
         children: <Widget>[
-          Expanded(
-            child: Center(
-              child: Text(
-                'Platform button tapped $_counter time${_counter == 1 ? '' : 's'}.',
-                style: const TextStyle(fontSize: 17.0),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'Platform button tapped $_counter time${_counter == 1 ? '' : 's'}.',
+                    style: const TextStyle(
+                      color: Color(0xFF000000),
+                      fontSize: 17.0,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
+                child: Row(
+                  children: <Widget>[
+                    Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
+                    const Text(
+                      'Flutter',
+                      style: TextStyle(
+                        color: Color(0xFF000000),
+                        fontSize: 30.0,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 16.0,
+            right: 16.0,
+            child: GestureDetector(
+              onTap: _sendFlutterIncrement,
+              child: Container(
+                width: 56.0,
+                height: 56.0,
+                decoration: const BoxDecoration(color: Color(0xFF2196F3), shape: BoxShape.circle),
+                child: const Center(
+                  child: Text(
+                    '+',
+                    style: TextStyle(
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 28.0,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
-            child: Row(
-              children: <Widget>[
-                Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
-                const Text('Flutter', style: TextStyle(fontSize: 30.0)),
-              ],
-            ),
-          ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _sendFlutterIncrement,
-        child: const Icon(Icons.add),
       ),
     );
   }
