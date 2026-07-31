@@ -8,15 +8,10 @@ import 'package:integration_test/integration_test.dart';
 import 'package:primitive_shape_test/main.dart';
 
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('renders primitive shapes', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
-
-    // Ensure the first frame is fully rasterized by the GPU driver.
-    await binding.convertFlutterSurfaceToImage();
     await tester.pumpAndSettle();
 
     // Take a screenshot of the test canvas widget.

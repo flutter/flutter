@@ -16,16 +16,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: Colors.black,
-        body: InteractiveViewer(
-          maxScale: 10,
-          child: Container(
-            key: const Key('primitive_shape_canvas'),
-            color: Colors.black,
-            width: double.infinity,
-            height: double.infinity,
-            child: CustomPaint(painter: TestPainter()),
-          ),
+        body: Container(
+          key: const Key('primitive_shape_canvas'),
+          color: Colors.black,
+          width: double.infinity,
+          height: double.infinity,
+          child: CustomPaint(painter: TestPainter()),
         ),
       ),
     );
@@ -41,6 +37,9 @@ class TestPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5;
     const rect = Rect.fromLTWH(20, 20, 30.5, 15.5);
+
+    // Column 1
+    canvas.save();
 
     // circle
     canvas.drawCircle(const Offset(35, 25), 15.5, filledPaint);
@@ -65,11 +64,13 @@ class TestPainter extends CustomPainter {
     canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(5)), strokedPaint);
     canvas.restore();
 
-    // column 2
-    canvas.translate(120, -150);
+    canvas.restore();
+
+    // Column 2
+    canvas.save();
+    canvas.translate(120, 0);
 
     // rect
-    canvas.translate(0, 50);
     canvas.drawRect(rect, filledPaint);
     canvas.save();
     canvas.translate(50, 0);
@@ -100,6 +101,8 @@ class TestPainter extends CustomPainter {
       RSuperellipse.fromRectAndRadius(rect, const Radius.circular(5)),
       strokedPaint,
     );
+    canvas.restore();
+
     canvas.restore();
   }
 
