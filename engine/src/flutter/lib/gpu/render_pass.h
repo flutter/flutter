@@ -195,10 +195,32 @@ extern bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     int length_in_bytes);
 
 FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    int uniform_struct_index,
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int length_in_bytes);
+
+FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_BindTexture(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::Shader* shader,
     Dart_Handle uniform_name_handle,
+    flutter::gpu::Texture* texture,
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    int uniform_texture_index,
     flutter::gpu::Texture* texture,
     int min_filter,
     int mag_filter,
