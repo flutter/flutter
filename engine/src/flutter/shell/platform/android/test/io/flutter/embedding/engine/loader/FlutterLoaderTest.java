@@ -1355,10 +1355,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsSingleCommandLineFlagFromManifestMetadataInReleaseMode() {
     testMultipleFlagsFromManifestMetadata(
-        "[\"--enable-impeller=true\"]",
-        new String[] {"--enable-impeller=true"},
-        true,
-        true);
+        "[\"--enable-impeller=true\"]", new String[] {"--enable-impeller=true"}, true, true);
   }
 
   @Test
@@ -1371,7 +1368,8 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsMultipleCommandLineFlagsWithSpecialCharactersFromManifestMetadataInReleaseMode() {
+  public void
+      itSetsMultipleCommandLineFlagsWithSpecialCharactersFromManifestMetadataInReleaseMode() {
     testMultipleFlagsFromManifestMetadata(
         "[\"--trace-to-file=\\\"path/to/a file\\\"\",\"--enable-impeller=true\"]",
         new String[] {"--trace-to-file=\"path/to/a file\"", "--enable-impeller=true"},
@@ -1382,10 +1380,7 @@ public class FlutterLoaderTest {
   @Test
   public void itIgnoresCommandLineFlagsFromManifestMetadataInDebugMode() {
     testMultipleFlagsFromManifestMetadata(
-        "[\"--enable-impeller=true\"]",
-        new String[] {"--enable-impeller=true"},
-        false,
-        false);
+        "[\"--enable-impeller=true\"]", new String[] {"--enable-impeller=true"}, false, false);
   }
 
   @Test
@@ -1401,8 +1396,7 @@ public class FlutterLoaderTest {
     metadata.putBoolean("io.flutter.embedding.android.EnableImpeller", false);
 
     // Mock metadata put into the manifest by the Flutter tool when command line flag specified.
-    metadata.putString(
-        "androidEngineShellArgs", "[\"" + expectedImpellerArgFromShellArgs + "\"]");
+    metadata.putString("androidEngineShellArgs", "[\"" + expectedImpellerArgFromShellArgs + "\"]");
 
     ctx.getApplicationInfo().metaData = metadata;
 
@@ -1431,10 +1425,7 @@ public class FlutterLoaderTest {
   }
 
   private void testMultipleFlagsFromManifestMetadata(
-      String jsonFlags,
-      String[] expectedArgs,
-      boolean shouldBeSet,
-      boolean isReleaseMode) {
+      String jsonFlags, String[] expectedArgs, boolean shouldBeSet, boolean isReleaseMode) {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metadata = new Bundle();
