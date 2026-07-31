@@ -210,8 +210,7 @@ void main() {
     final firstRequestStarted = Completer<void>();
     final finishFirstRequest = Completer<void>();
     var disposedListenerCalled = false;
-    late final TestAppLifecycleListener disposedListener;
-    listener = TestAppLifecycleListener(
+    final firstListener = TestAppLifecycleListener(
       binding: WidgetsBinding.instance,
       onExitRequested: () async {
         firstRequestStarted.complete();
@@ -219,7 +218,8 @@ void main() {
         return AppExitResponse.exit;
       },
     );
-    disposedListener = TestAppLifecycleListener(
+    addTearDown(firstListener.dispose);
+    listener = TestAppLifecycleListener(
       binding: WidgetsBinding.instance,
       onExitRequested: () async {
         disposedListenerCalled = true;
@@ -229,7 +229,8 @@ void main() {
 
     final Future<void> exitRequest = sendAppExitRequest();
     await firstRequestStarted.future;
-    disposedListener.dispose();
+    listener!.dispose();
+    listener = null;
     finishFirstRequest.complete();
     await exitRequest;
 
