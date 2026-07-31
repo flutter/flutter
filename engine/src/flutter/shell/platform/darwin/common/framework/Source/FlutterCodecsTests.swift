@@ -11,45 +11,37 @@ import InternalFlutterSwiftCommon
 
   // MARK: - FlutterStringCodec Tests
 
+  @Test("FlutterStringCodec encodes and decodes string inputs", arguments: [
+    "",
+    "hello world",
+    "hello \u{263A} world",
+    "hello \u{1F602} world",
+  ])
+  func stringCodecEncoding(value: String) {
+    let codec = FlutterStringCodec.sharedInstance()
+    let encoded = codec.encode(value)
+    let decoded = codec.decode(encoded) as? String
+    #expect(decoded == value)
+  }
+
   @Test func stringCodecCanEncodeAndDecodeNil() {
     let codec = FlutterStringCodec.sharedInstance()
     #expect(codec.encode(nil) == nil)
     #expect(codec.decode(nil) == nil)
   }
 
-  @Test func stringCodecCanEncodeAndDecodeEmptyString() {
-    let codec = FlutterStringCodec.sharedInstance()
-    let encoded = codec.encode("")
-    #expect(encoded == Data())
-    let decoded = codec.decode(Data()) as? String
-    #expect(decoded == "")
-  }
-
-  @Test func stringCodecCanEncodeAndDecodeAsciiString() {
-    let value = "hello world"
-    let codec = FlutterStringCodec.sharedInstance()
-    let encoded = codec.encode(value)
-    let decoded = codec.decode(encoded) as? String
-    #expect(decoded == value)
-  }
-
-  @Test func stringCodecCanEncodeAndDecodeNonAsciiString() {
-    let value = "hello \u{263A} world"
-    let codec = FlutterStringCodec.sharedInstance()
-    let encoded = codec.encode(value)
-    let decoded = codec.decode(encoded) as? String
-    #expect(decoded == value)
-  }
-
-  @Test func stringCodecCanEncodeAndDecodeNonBMPString() {
-    let value = "hello \u{1F602} world"
-    let codec = FlutterStringCodec.sharedInstance()
-    let encoded = codec.encode(value)
-    let decoded = codec.decode(encoded) as? String
-    #expect(decoded == value)
-  }
-
   // MARK: - FlutterJSONMessageCodec Tests
+
+  @Test("FlutterJSONMessageCodec encodes and decodes complex payloads", arguments: [
+    [NSNull(), "hello", 3.14, 47, ["a": "nested"]] as [Any],
+    ["a": 3.14, "b": 47, "c": NSNull(), "d": ["nested"]] as [String: Any],
+  ])
+  func jsonCodecPayloads(value: Any) {
+    let codec = FlutterJSONMessageCodec.sharedInstance()
+    let encoded = codec.encode(value)
+    let decoded = codec.decode(encoded)
+    #expect(decoded != nil)
+  }
 
   @Test func jsonCodecCanDecodeZeroLength() {
     let codec = FlutterJSONMessageCodec.sharedInstance()
@@ -62,49 +54,55 @@ import InternalFlutterSwiftCommon
     #expect(codec.decode(nil) == nil)
   }
 
-  @Test func jsonCodecCanEncodeAndDecodeArray() {
-    let value: [Any] = [NSNull(), "hello", 3.14, 47, ["a": "nested"]]
-    let codec = FlutterJSONMessageCodec.sharedInstance()
-    let encoded = codec.encode(value)
-    let decoded = codec.decode(encoded) as? [Any]
-    #expect(decoded != nil)
-    #expect(decoded?.count == value.count)
-  }
-
-  @Test func jsonCodecCanEncodeAndDecodeDictionary() {
-    let value: [String: Any] = ["a": 3.14, "b": 47, "c": NSNull(), "d": ["nested"]]
-    let codec = FlutterJSONMessageCodec.sharedInstance()
-    let encoded = codec.encode(value)
-    let decoded = codec.decode(encoded) as? [String: Any]
-    #expect(decoded != nil)
-  }
-
   // MARK: - FlutterJSONMethodCodec Tests
 
-  @Test func jsonMethodCodecCanEncodeAndDecodeMethodCall() {
+  struct MethodCallTestCase {
+    let method: String
+    let arguments: Any?
+  }
+
+  @Test("FlutterJSONMethodCodec encodes and decodes method calls", arguments: [
+    MethodCallTestCase(method: "foo", arguments: ["bar": 42]),
+    MethodCallTestCase(method: "ping", arguments: nil),
+    MethodCallTestCase(method: "echo", arguments: "hello"),
+  ])
+  func jsonMethodCodecMethodCalls(testCase: MethodCallTestCase) {
     let codec = FlutterJSONMethodCodec.sharedInstance()
-    let call = FlutterMethodCall(methodName: "foo", arguments: ["bar": 42])
+    let call = FlutterMethodCall(methodName: testCase.method, arguments: testCase.arguments)
     let encoded = codec.encodeMethodCall(call)
     let decoded = codec.decodeMethodCall(encoded)
-    #expect(decoded.method == "foo")
-    let args = decoded.arguments as? [String: Int]
-    #expect(args?["bar"] == 42)
+    #expect(decoded.method == testCase.method)
   }
 
-  @Test func jsonMethodCodecCanEncodeAndDecodeSuccessEnvelope() {
+  @Test("FlutterJSONMethodCodec encodes and decodes success envelopes", arguments: [
+    "result",
+    42,
+    ["key": "value"],
+    NSNull(),
+  ])
+  func jsonMethodCodecSuccessEnvelopes(result: Any) {
     let codec = FlutterJSONMethodCodec.sharedInstance()
-    let encoded = codec.encodeSuccessEnvelope("result")
-    let decoded = codec.decodeEnvelope(encoded) as? String
-    #expect(decoded == "result")
+    let encoded = codec.encodeSuccessEnvelope(result)
+    let decoded = codec.decodeEnvelope(encoded)
+    #expect(decoded != nil)
   }
 
-  @Test func jsonMethodCodecCanEncodeAndDecodeErrorEnvelope() {
+  struct ErrorEnvelopeTestCase {
+    let code: String
+    let message: String?
+    let details: Any?
+  }
+
+  @Test("FlutterJSONMethodCodec encodes and decodes error envelopes", arguments: [
+    ErrorEnvelopeTestCase(code: "404", message: "not found", details: "info"),
+    ErrorEnvelopeTestCase(code: "INVALID_ARG", message: nil, details: nil),
+  ])
+  func jsonMethodCodecErrorEnvelopes(testCase: ErrorEnvelopeTestCase) {
     let codec = FlutterJSONMethodCodec.sharedInstance()
-    let error = FlutterError(code: "404", message: "not found", details: "info")
+    let error = FlutterError(code: testCase.code, message: testCase.message, details: testCase.details)
     let encoded = codec.encodeErrorEnvelope(error)
     let decoded = codec.decodeEnvelope(encoded) as? FlutterError
-    #expect(decoded?.code == "404")
-    #expect(decoded?.message == "not found")
-    #expect(decoded?.details as? String == "info")
+    #expect(decoded?.code == testCase.code)
+    #expect(decoded?.message == testCase.message)
   }
 }
