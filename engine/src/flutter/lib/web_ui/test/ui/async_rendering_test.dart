@@ -11,7 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../common/rendering.dart';
 import '../common/test_initialization.dart';
 
 void main() {
@@ -91,9 +90,13 @@ void testMain() {
     printWarning = originalPrintWarning;
   });
 
-  // This test has to stay first in this file: the dispatcher tracks the first
-  // frame only, and the first `render()` in an `onDrawFrame` scope ends it.
   test('first-frame browser event waits for the first frame to be rendered', () async {
+    // Each dispatcher tracks only its own first frame, so this test brings its
+    // own and drives its `onDrawFrame` directly, instead of going through the
+    // singleton via `renderScene`, to stay independent of what ran before it.
+    final ownDispatcher = EnginePlatformDispatcher();
+    addTearDown(ownDispatcher.dispose);
+
     final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
     final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
       createCanvas: () => FakeDisplayCanvas(),
@@ -124,10 +127,21 @@ void testMain() {
       return completer.future;
     }
 
-    // `renderScene` renders in an `onDrawFrame` scope, which is the only scope
-    // in which `EnginePlatformDispatcher.render` actually renders anything.
-    final Future<void> renderFuture = renderScene(ui.SceneBuilder().build());
-    ui.PlatformDispatcher.instance.sendPlatformMessage(
+    // `render` only draws anything in an `onDrawFrame` scope, so a frame is a
+    // scene rendered from within `onDrawFrame`.
+    Future<void> renderFrame() {
+      final ui.Scene scene = ui.SceneBuilder().build();
+      addTearDown(scene.dispose);
+      late final Future<void> rendered;
+      ownDispatcher.onDrawFrame = () {
+        rendered = ownDispatcher.render(scene, view);
+      };
+      ownDispatcher.invokeOnDrawFrame();
+      return rendered;
+    }
+
+    final Future<void> renderFuture = renderFrame();
+    ownDispatcher.sendPlatformMessage(
       'flutter/service_worker',
       ByteData(0),
       (ByteData? response) {},
@@ -144,16 +158,20 @@ void testMain() {
     await expectLater(firstFrameEvent.future, completes);
 
     // Renders requested by later frames are not tracked, and don't dispatch the
-    // event a second time.
-    await renderScene(ui.SceneBuilder().build());
+    // event again, no matter how many frames go by.
+    await renderFrame();
+    await waitForAnimationFrame();
+    expect(firstFrameEventCount, 1);
+
+    await renderFrame();
     await waitForAnimationFrame();
     expect(firstFrameEventCount, 1);
   });
 
   test('first-frame browser event is still sent if a first-frame render fails', () async {
-    // The singleton dispatcher's first frame is already over — the test above
-    // consumed it — so this test brings its own dispatcher and drives its
-    // `onDrawFrame` directly instead of going through `renderScene`.
+    // Each dispatcher tracks only its own first frame, so this test brings its
+    // own and drives its `onDrawFrame` directly instead of going through
+    // `renderScene`, to stay independent of what ran before it.
     final ownDispatcher = EnginePlatformDispatcher();
     addTearDown(ownDispatcher.dispose);
 

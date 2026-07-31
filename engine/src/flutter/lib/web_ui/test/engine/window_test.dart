@@ -548,9 +548,9 @@ void testMain() {
 
   test('dispatches browser event asynchronously on flutter/service_worker channel', () async {
     // Each dispatcher tracks its own first frame, and only the first one. The
-    // singleton's is already over by now, because 'onDrawFrame preserves the
-    // zone' above pumps a frame, so this test brings its own dispatcher, like
-    // 'registration' below, to make the frame it pumps really the first one.
+    // singleton's is already over by now, because previous tests pump frames on
+    // it, so this test brings its own dispatcher, like 'registration' below, to
+    // make the frame it pumps really the first one.
     final ownDispatcher = EnginePlatformDispatcher();
     addTearDown(ownDispatcher.dispose);
 
