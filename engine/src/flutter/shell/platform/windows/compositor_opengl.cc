@@ -106,10 +106,6 @@ bool CompositorOpenGL::CreateBackingStore(
       gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
                                    GL_RENDERBUFFER, store->depth_stencil_id);
     } else {
-      // TODO(190362): I suspect this branch is never taken since ANGLE will
-      // support offscreen MSAA. We should investigate removing this branch and
-      // the implicit MSAA branch.
-      FML_LOG(WARNING) << "Running without MSAA.";
       gl_->GenTextures(1, &store->texture_id);
       gl_->BindTexture(GL_TEXTURE_2D, store->texture_id);
       gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -294,6 +290,14 @@ bool CompositorOpenGL::Initialize() {
   supports_implicit_msaa_ =
       gl_->GetCapabilities()->SupportsImplicitResolvingMSAA();
   supports_offscreen_msaa_ = gl_->GetCapabilities()->SupportsOffscreenMSAA();
+
+  if (enable_impeller_ && !supports_implicit_msaa_ &&
+      !supports_offscreen_msaa_) {
+    // TODO(190362): I suspect this branch is never taken since ANGLE will
+    // support offscreen MSAA. We should investigate removing this branch and
+    // the implicit MSAA branch in the rendering functions.
+    FML_LOG(WARNING) << "Rendering without MSAA.";
+  }
 
   is_initialized_ = true;
   return true;
