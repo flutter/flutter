@@ -41,6 +41,7 @@ workspace:
   - dev/integration_tests/link_hook
   - dev/integration_tests/new_gallery
   - dev/integration_tests/platform_interaction
+  - dev/integration_tests/primitive_shape_test
   - dev/integration_tests/record_use_test_app
   - dev/integration_tests/record_use_test_package
   - dev/integration_tests/release_smoke_test
