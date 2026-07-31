@@ -1361,8 +1361,8 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsMultipleCommandLineFlagsFromManifestMetadataInReleaseMode() {
     testMultipleFlagsFromManifestMetadata(
-        "[\"--enable-impeller=true\",\"--enable-vulkan-validation\"]",
-        new String[] {"--enable-impeller=true", "--enable-vulkan-validation"},
+        "[\"--enable-impeller=true\",\"--enable-dart-profiling\"]",
+        new String[] {"--enable-impeller=true", "--enable-dart-profiling"},
         true,
         true);
   }
@@ -1371,8 +1371,8 @@ public class FlutterLoaderTest {
   public void
       itSetsMultipleCommandLineFlagsWithSpecialCharactersFromManifestMetadataInReleaseMode() {
     testMultipleFlagsFromManifestMetadata(
-        "[\"--trace-to-file=\\\"path/to/a file\\\"\",\"--enable-impeller=true\"]",
-        new String[] {"--trace-to-file=\"path/to/a file\"", "--enable-impeller=true"},
+        "[\"--flutter-assets-dir=\\\"path/to/a file\\\"\",\"--enable-impeller=true\"]",
+        new String[] {"--flutter-assets-dir=\"path/to/a file\"", "--enable-impeller=true"},
         true,
         true);
   }
@@ -1396,7 +1396,8 @@ public class FlutterLoaderTest {
     metadata.putBoolean("io.flutter.embedding.android.EnableImpeller", false);
 
     // Mock metadata put into the manifest by the Flutter tool when command line flag specified.
-    metadata.putString("androidEngineShellArgs", "[\"" + expectedImpellerArgFromShellArgs + "\"]");
+    metadata.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"" + expectedImpellerArgFromShellArgs + "\"]");
 
     ctx.getApplicationInfo().metaData = metadata;
 
@@ -1430,7 +1431,7 @@ public class FlutterLoaderTest {
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metadata = new Bundle();
 
-    metadata.putString("androidEngineShellArgs", jsonFlags);
+    metadata.putString("io.flutter.app.androidEngineShellArgs", jsonFlags);
     ctx.getApplicationInfo().metaData = metadata;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
