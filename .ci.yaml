@@ -7280,6 +7280,19 @@ targets:
         ]
       task_name: windows_desktop_impeller
 
+  - name: Windows windows_primitive_shape_golden_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_primitive_shape_golden_test
+
   - name: Windows texture_impeller_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
