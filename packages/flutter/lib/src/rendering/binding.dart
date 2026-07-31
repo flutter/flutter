@@ -10,7 +10,7 @@
 library;
 
 import 'dart:async';
-import 'dart:ui' as ui show FlutterView, PictureRecorder, Rect, SceneBuilder, SemanticsUpdate, Size;
+import 'dart:ui' as ui show FlutterView, PictureRecorder, Rect, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -378,8 +378,9 @@ mixin RendererBinding
       final ViewMetricsOverride? override = debugViewMetricsOverrides[view.viewId];
       if (override != null && override.affectsViewConfiguration) {
         final double devicePixelRatio = override.devicePixelRatio ?? view.devicePixelRatio;
-        final ui.Size physicalSize = override.physicalSize ?? view.physicalSize;
-        final physicalConstraints = BoxConstraints.tight(physicalSize);
+        final physicalConstraints = override.physicalSize != null
+            ? BoxConstraints.tight(override.physicalSize!)
+            : BoxConstraints.fromViewConstraints(view.physicalConstraints);
         return ViewConfiguration(
           logicalConstraints: physicalConstraints / devicePixelRatio,
           physicalConstraints: physicalConstraints,
