@@ -124,13 +124,15 @@ class FlutterDriverService extends DriverService {
     required String dartSdkPath,
     required DevtoolsLauncher devtoolsLauncher,
     @visibleForTesting VMServiceConnector vmServiceConnector = connectToVmService,
+    @visibleForTesting Duration logFlushDelay = const Duration(milliseconds: 500),
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
        _platform = platform,
        _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
        _vmServiceConnector = vmServiceConnector,
-       _devtoolsLauncher = devtoolsLauncher;
+       _devtoolsLauncher = devtoolsLauncher,
+       _logFlushDelay = logFlushDelay;
 
   static const _kLaunchAttempts = 3;
 
@@ -141,6 +143,7 @@ class FlutterDriverService extends DriverService {
   final String _dartSdkPath;
   final VMServiceConnector _vmServiceConnector;
   final DevtoolsLauncher _devtoolsLauncher;
+  final Duration _logFlushDelay;
 
   Device? _device;
   ApplicationPackage? _applicationPackage;
@@ -216,26 +219,34 @@ class FlutterDriverService extends DriverService {
     }
     _vmServiceUri = uri.toString();
     _device = device;
-    if (debuggingOptions.enableDds) {
-      try {
-        await device.dds.startDartDevelopmentServiceFromDebuggingOptions(
-          uri,
-          appName:
-              'Kind: Flutter - Device: ${device.displayName} - '
-              'Package: ${_applicationPackage?.name}',
-          debuggingOptions: debuggingOptions,
-        );
-        _vmServiceUri = device.dds.uri.toString();
-      } on DartDevelopmentServiceException {
-        // If there's another flutter_tools instance still connected to the target
-        // application, DDS will already be running remotely and this call will fail.
-        // This can be ignored to continue to use the existing remote DDS instance.
-      }
-    }
-    _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
+
     final DeviceLogReader logReader = await device.getLogReader(app: _applicationPackage);
     logReader.logLines.listen(_logger.printStatus);
-    await logReader.provideVmService(_vmService);
+
+    try {
+      if (debuggingOptions.enableDds) {
+        try {
+          await device.dds.startDartDevelopmentServiceFromDebuggingOptions(
+            uri,
+            appName:
+                'Kind: Flutter - Device: ${device.displayName} - '
+                'Package: ${_applicationPackage?.name}',
+            debuggingOptions: debuggingOptions,
+          );
+          _vmServiceUri = device.dds.uri.toString();
+        } on DartDevelopmentServiceException {
+          // If there's another flutter_tools instance still connected to the target
+          // application, DDS will already be running remotely and this call will fail.
+          // This can be ignored to continue to use the existing remote DDS instance.
+        }
+      }
+      _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
+      await logReader.provideVmService(_vmService);
+    } catch (error) {
+      // Allow time for buffered/async log messages (e.g. engine crash logs) to arrive and flush.
+      await Future<void>.delayed(_logFlushDelay);
+      rethrow;
+    }
   }
 
   @override

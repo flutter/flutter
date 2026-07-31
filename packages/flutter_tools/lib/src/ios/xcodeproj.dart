@@ -194,11 +194,7 @@ class XcodeProjectInterpreter {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
     // to control the output.
-    await prefetchSwiftPackagesForProject(
-      xcodeProject,
-      buildDirectory: buildDirectory,
-      quiet: false,
-    );
+    await prefetchSwiftPackagesForProject(xcodeProject, buildDirectory: buildDirectory);
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
@@ -395,8 +391,6 @@ class XcodeProjectInterpreter {
   Future<void> prefetchSwiftPackagesForProject(
     XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
-    bool quiet = true,
-    bool waitForCompletion = true,
   }) async {
     await xcodeProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: _xcodebuildProjectCommandArguments(
@@ -407,8 +401,6 @@ class XcodeProjectInterpreter {
       ),
       processUtils: _processUtils,
       logger: _logger,
-      quiet: quiet,
-      waitForCompletion: waitForCompletion,
     );
   }
 

@@ -367,6 +367,55 @@ void main() {
     await tester.pumpWidget(SizedBox(child: widget));
   });
 
+  testWidgets('Safe to deactivate and re-activate OverlayPortal', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    final Widget portal = OverlayPortal(
+      key: key,
+      controller: controller1,
+      overlayChildBuilder: (BuildContext context) => const SizedBox(),
+      child: const SizedBox(),
+    );
+
+    var children = <Widget>[portal, const SizedBox()];
+    late StateSetter setState;
+
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setter) {
+                    setState = setter;
+                    return Column(children: children);
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller1.show();
+    await tester.pump();
+
+    setState(() {
+      children = <Widget>[const SizedBox(), portal];
+    });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Safe to hide overlay child and remove OverlayPortal in the same frame', (
     WidgetTester tester,
   ) async {
@@ -3285,6 +3334,60 @@ void main() {
     expect(tester.getSize(find.byType(OverlayPortal)), Size.zero);
     controller.show();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180569.
+  testWidgets(
+    'OverlayPortal does not throw when reparenting and overlay child requests re-layout',
+    (WidgetTester tester) async {
+      late StateSetter setState;
+      late final OverlayEntry entry;
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
+      final portal = OverlayPortal(
+        key: GlobalKey(debugLabel: 'OverlayPortal'),
+        controller: OverlayPortalController()..show(),
+        overlayChildBuilder: (BuildContext context) => const MetaData(),
+        child: const Placeholder(),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry = OverlayEntry(
+                builder: (BuildContext context) {
+                  return LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      return StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setter) {
+                          setState = setter;
+                          // This subtree re-inflates whenever it rebuilds,
+                          // because of the new GlobalKey.
+                          return KeyedSubtree(key: GlobalKey(), child: portal);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Overlay child calls markNeedsLayout.
+      tester.renderObject(find.byType(MetaData)).markNeedsLayout();
+      // Triggers reparent.
+      setState(() {});
+
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 class OverlayStatefulEntry extends OverlayEntry {

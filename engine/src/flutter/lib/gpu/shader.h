@@ -59,6 +59,20 @@ class Shader : public RefCountedDartWrappable<Shader> {
 
   bool RegisterSync(Context& context);
 
+  /// Whether this shader needs to be re-registered with the impeller shader
+  /// library on next use. Fresh shaders start dirty. Set back to false by
+  /// `RegisterSync` after registration completes, and back to true by
+  /// `ResetFrom` when the underlying asset is reloaded.
+  bool IsDirty() const;
+
+  void SetClean();
+
+  /// Replaces this shader's payload (code, layouts, uniforms) with the data
+  /// from `other`, preserving the library_id / entrypoint registry key and
+  /// marking this shader dirty. Used by `ShaderLibrary` to reload a shader
+  /// bundle in place without breaking existing Dart wrappers.
+  void ResetFrom(Shader& other);
+
   std::shared_ptr<impeller::VertexDescriptor> CreateVertexDescriptor() const;
 
   const std::vector<impeller::ShaderStageIOSlot>& GetStageInputs() const;
@@ -76,6 +90,22 @@ class Shader : public RefCountedDartWrappable<Shader> {
   const Shader::TextureBinding* GetUniformTexture(
       const std::string& name) const;
 
+  /// The position of the named uniform struct in this shader's stable
+  /// binding order, or -1. Indices stay valid until the shader's payload
+  /// is replaced by a reload (`ResetFrom`); callers cache them to bind
+  /// without passing the name across the FFI boundary on every draw.
+  int GetUniformStructIndex(const std::string& name) const;
+
+  /// The uniform struct at `index` in the stable binding order, or nullptr
+  /// when the index is out of range.
+  const Shader::UniformBinding* GetUniformStructAt(int index) const;
+
+  /// The texture counterpart to `GetUniformStructIndex`.
+  int GetUniformTextureIndex(const std::string& name) const;
+
+  /// The texture counterpart to `GetUniformStructAt`.
+  const Shader::TextureBinding* GetUniformTextureAt(int index) const;
+
  private:
   Shader();
 
@@ -91,7 +121,15 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::vector<impeller::ShaderStageBufferLayout> layouts_;
   std::unordered_map<std::string, UniformBinding> uniform_structs_;
   std::unordered_map<std::string, TextureBinding> uniform_textures_;
+  // The maps' entries in a stable order for index-based lookup. Entry
+  // pointers stay valid for the maps' lifetime (node-based containers);
+  // rebuilt whenever the maps are replaced (`Make`, `ResetFrom`).
+  std::vector<const UniformBinding*> uniform_struct_order_;
+  std::vector<const TextureBinding*> uniform_texture_order_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
+  bool is_dirty_ = true;
+
+  void RebuildBindingOrder();
 
   // Returns the scoped name to use when registering or looking up this
   // shader's function in a shared impeller::ShaderLibrary.
@@ -119,6 +157,22 @@ extern int InternalFlutterGpu_Shader_GetUniformMemberOffset(
     flutter::gpu::Shader* wrapper,
     Dart_Handle struct_name_handle,
     Dart_Handle member_name_handle);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Shader_GetUniformStructIndex(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle struct_name_handle);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Shader_GetUniformTextureIndex(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle texture_name_handle);
+
+// Test-only: exposes the per-shader dirty bit so tests can assert that
+// reload deduplication keeps unchanged shaders clean.
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Shader_DebugIsDirty(
+    flutter::gpu::Shader* wrapper);
 
 }  // extern "C"
 

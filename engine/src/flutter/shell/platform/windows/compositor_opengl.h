@@ -63,6 +63,9 @@ class CompositorOpenGL : public Compositor {
   // Whether the Impeller rendering backend is enabled.
   bool enable_impeller_ = false;
 
+  // Whether the OpenGL context supports implicit MSAA.
+  bool supports_implicit_msaa_ = false;
+
   // Initialize the compositor. This must run on the raster thread.
   bool Initialize();
 

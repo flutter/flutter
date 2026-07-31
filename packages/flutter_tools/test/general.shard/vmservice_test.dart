@@ -300,6 +300,21 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
+  testWithoutContext('reloadAssetFonts handles missing method', () async {
+    final fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        FakeVmServiceRequest(
+          method: '_flutter.reloadAssetFonts',
+          args: <String, Object>{'isolateId': '1', 'viewId': '2'},
+          error: FakeRPCError(code: vm_service.RPCErrorKind.kMethodNotFound.code),
+        ),
+      ],
+    );
+
+    await fakeVmServiceHost.vmService.reloadAssetFonts(isolateId: '1', viewId: '2');
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
   testWithoutContext('flutterDebugDumpFocusTree returns data', () async {
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[

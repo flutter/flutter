@@ -38,6 +38,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   FakeXcodeProjectInterpreterWithBuildSettings({
     this.productBundleIdentifier,
     this.developmentTeam = 'abc',
+    this.returnsEmptyBuildSettings = false,
   });
 
   @override
@@ -46,6 +47,10 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
+    if (returnsEmptyBuildSettings) {
+      return <String, String>{};
+    }
+
     return <String, String>{
       'PRODUCT_BUNDLE_IDENTIFIER': productBundleIdentifier ?? 'io.flutter.someProject',
       'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
@@ -58,6 +63,8 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   final String? productBundleIdentifier;
 
   final String? developmentTeam;
+
+  final bool returnsEmptyBuildSettings;
 }
 
 final Platform macosPlatform = FakePlatform(
@@ -71,6 +78,7 @@ void main() {
   late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeProcessManager processManager;
+  late FakePlistParser testPlistUtils;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -84,6 +92,7 @@ void main() {
     );
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
+    testPlistUtils = FakePlistParser();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -94,13 +103,15 @@ void main() {
   }
 
   // Sets up the minimal mock project files necessary for iOS builds to succeed.
-  void createMinimalMockProjectFiles() {
+  void createMinimalMockProjectFiles({bool createWorkspace = true}) {
     fileSystem
         .directory(fileSystem.path.join('ios', 'Runner.xcodeproj'))
         .createSync(recursive: true);
-    fileSystem
-        .directory(fileSystem.path.join('ios', 'Runner.xcworkspace'))
-        .createSync(recursive: true);
+    if (createWorkspace) {
+      fileSystem
+          .directory(fileSystem.path.join('ios', 'Runner.xcworkspace'))
+          .createSync(recursive: true);
+    }
     fileSystem
         .file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj'))
         .createSync();
@@ -158,6 +169,7 @@ void main() {
     bool verbose = false,
     bool simulator = false,
     bool customNaming = false,
+    bool hasWorkspace = true,
     bool disablePortPublication = false,
     String? deviceId,
     int exitCode = 0,
@@ -173,8 +185,13 @@ void main() {
         if (verbose) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         '-allowProvisioningUpdates',
         '-allowProvisioningDeviceRegistration',
-        '-workspace',
-        if (customNaming) 'RenamedWorkspace.xcworkspace' else 'Runner.xcworkspace',
+        if (hasWorkspace) ...<String>[
+          '-workspace',
+          if (customNaming) 'RenamedWorkspace.xcworkspace' else 'Runner.xcworkspace',
+        ] else ...<String>[
+          '-project',
+          if (customNaming) 'RenamedProj.xcodeproj' else 'Runner.xcodeproj',
+        ],
         '-scheme',
         'Runner',
         'BUILD_DIR=/build/ios',
@@ -322,6 +339,60 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
+
+  testUsingContext(
+    'ios build fails eagerly if the Xcode build settings retrieval fails',
+    () async {
+      createMinimalMockProjectFiles();
+
+      // Init dummy plist with basic values to detect valid folder
+      testPlistUtils.setProperty('CFBundleIdentifier', 'io.flutter.someProject');
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Runner', 'Info.plist'))
+          .createSync(recursive: true);
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        processUtils: FakeProcessUtils(),
+        processManager: processManager,
+        fileSystemUtils: FakeFileSystemUtils(),
+        templateRenderer: FakeTemplateRenderer(),
+        terminal: FakeTerminal(),
+        plistParser: testPlistUtils,
+        xcode: FakeXcode(),
+      );
+
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        throwsToolExit(message: 'Encountered error while building for device.'),
+      );
+
+      // Eager failure message if something went wrong obtaining the xcode build settings
+      expect(
+        testLogger.errorText,
+        contains('No Xcode build settings have been found. Please check possible errors above'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Pub: ThrowingPub.new,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler()]),
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(returnsEmptyBuildSettings: true),
+      Artifacts: () => Artifacts.test(),
+      PlistParser: () => testPlistUtils,
     },
   );
 
@@ -564,6 +635,55 @@ void main() {
           .file(fileSystem.path.join('ios', 'RenamedProj.xcodeproj', 'project.pbxproj'))
           .createSync();
       createCoreMockProjectFiles();
+
+      await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']);
+      expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'ios build invokes xcodebuild with -project when there is no .xcworkspace',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      createMinimalMockProjectFiles(createWorkspace: false);
+
+      processManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          hasWorkspace: false,
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Release-iphoneos/Runner.app')
+                .createSync(recursive: true);
+          },
+        ),
+        ...postBuildCommands(),
+      ]);
 
       await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));

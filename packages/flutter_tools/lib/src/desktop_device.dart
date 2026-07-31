@@ -298,8 +298,9 @@ abstract class DesktopDevice extends Device {
       case ImpellerStatus.enabled:
         addFlag('enable-impeller=true');
       case ImpellerStatus.disabled:
-      case ImpellerStatus.platformDefault:
         addFlag('enable-impeller=false');
+      case ImpellerStatus.platformDefault:
+        break;
     }
     if (debuggingOptions.enableFlutterGpu) {
       addFlag('enable-flutter-gpu=true');
@@ -319,6 +320,9 @@ abstract class DesktopDevice extends Device {
       }
       if (debuggingOptions.disableServiceAuthCodes) {
         addFlag('disable-service-auth-codes=true');
+      }
+      if (debuggingOptions.disableServiceOriginCheck) {
+        addFlag('disable-service-origin-check=true');
       }
       final String dartVmFlags = debuggingOptions.dartFlags;
       if (dartVmFlags.isNotEmpty) {

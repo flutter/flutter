@@ -20,8 +20,8 @@ sk_sp<SkTypeface> DeserializeTypefaceWithoutData(SkStream&, void* ctx);
 
 // Serializes only the metadata of the image and not the underlying pixel data.
 SkSerialReturnType SerializeImageWithoutData(SkImage* image, void* ctx);
-sk_sp<SkImage> DeserializeImageWithoutData(const void* data,
-                                           size_t length,
+sk_sp<SkImage> DeserializeImageWithoutData(sk_sp<SkData>,
+                                           std::optional<SkAlphaType>,
                                            void* ctx);
 
 }  // namespace flutter

@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
 
 #include <cstdint>
+#include <optional>
 
 #include "flutter/display_list/geometry/dl_path.h"
 #include "fml/status_or.h"
@@ -91,11 +92,25 @@ class TextFrame {
 
   fml::StatusOr<flutter::DlPath> GetPath() const;
 
+  /// @brief Toggle the platform-specific contrast and gamma correction in the
+  ///        fragment shader.
+  ///
+  ///        By default, this is true on Linux to compensate for FreeType
+  ///        rasterization in linear space, and false elsewhere. Setting a
+  ///        value overrides this default behavior.
+  void SetEnableGammaCorrection(std::optional<bool> value) {
+    enable_gamma_correction_ = value;
+  }
+  std::optional<bool> GetEnableGammaCorrection() const {
+    return enable_gamma_correction_;
+  }
+
  private:
   std::vector<TextRun> runs_;
   Rect bounds_;
   bool has_color_;
   const PathCreator path_creator_;
+  std::optional<bool> enable_gamma_correction_ = std::nullopt;
 };
 
 }  // namespace impeller

@@ -62,6 +62,15 @@ class TargetModel {
 
   @override
   String toString() => _value;
+
+  /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
+  static TargetModel fromTargetPlatform(TargetPlatform? platform) {
+    return switch (platform) {
+      TargetPlatform.web_javascript => TargetModel.dartdevc,
+      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
+      _ => TargetModel.flutter,
+    };
+  }
 }
 
 class CompilerOutput {
@@ -350,7 +359,7 @@ class KernelCompiler {
           '--no-print-incremental-dependencies',
           for (final Object dartDefine in dartDefines) '-D$dartDefine',
           ...buildModeOptions(buildMode, dartDefines),
-          if (trackWidgetCreation) '--track-widget-creation',
+          if (trackWidgetCreation) '--track-creation-locations',
           if (!linkPlatformKernelIn) '--no-link-platform',
           if (aot) ...<String>[
             '--aot',
@@ -727,6 +736,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
              fileSystem: fileSystem,
              trackWidgetCreation: buildInfo.trackWidgetCreation,
              dartDefines: buildInfo.dartDefines,
+             targetModel: targetModel,
              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
            ),
        extraFrontEndOptions = buildInfo.extraFrontEndOptions,
@@ -964,7 +974,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       if (packagesPath != null) ...<String>['--packages', packagesPath!],
       ...buildModeOptions(buildMode, dartDefines),
-      if (trackWidgetCreation) '--track-widget-creation',
+      if (trackWidgetCreation) '--track-creation-locations',
       if (includeUnsupportedPlatformLibraryStubs) '--include-unsupported-platform-library-stubs',
       for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
       if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme!],

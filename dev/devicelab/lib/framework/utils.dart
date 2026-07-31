@@ -988,6 +988,6 @@ Future<void> createFfiPackage(String name, Directory parent) async {
 
 Future<void> _pinDependencies(File pubspecFile) async {
   final String oldPubspec = await pubspecFile.readAsString();
-  final String newPubspec = oldPubspec.replaceAll(RegExp(r'(?<!sdk):\s*\^'), ': ');
+  final String newPubspec = oldPubspec.replaceAll(': ^', ': ');
   await pubspecFile.writeAsString(newPubspec);
 }

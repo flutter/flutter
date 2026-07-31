@@ -593,8 +593,12 @@ void testMain() {
     expect(newMeta.name, 'viewport');
     expect(newMeta.content, contains('width=device-width'));
     expect(newMeta.content, contains('initial-scale=1.0'));
-    expect(newMeta.content, contains('maximum-scale=1.0'));
-    expect(newMeta.content, contains('user-scalable=no'));
+    // WCAG 2 compliance checks
+    expect(newMeta.content, contains('maximum-scale=5.0'));
+    expect(
+      newMeta.content,
+      allOf(isNot(contains('maximum-scale=1.0')), isNot(contains('user-scalable=no'))),
+    );
     implicitView.dispose();
   });
 

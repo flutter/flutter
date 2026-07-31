@@ -42,6 +42,13 @@ class LocalFileSystemFake extends Fake implements LocalFileSystem {
   File file(dynamic path) => memoryFileSystem.file(path);
 
   @override
+  Link link(dynamic path) => memoryFileSystem.link(path);
+
+  @override
+  FileSystemEntityType typeSync(String path, {bool followLinks = true}) =>
+      memoryFileSystem.typeSync(path, followLinks: followLinks);
+
+  @override
   Context get path => memoryFileSystem.path;
 
   @override

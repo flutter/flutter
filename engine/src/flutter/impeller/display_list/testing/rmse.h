@@ -5,7 +5,7 @@
 #ifndef FLUTTER_IMPELLER_DISPLAY_LIST_TESTING_RMSE_H_
 #define FLUTTER_IMPELLER_DISPLAY_LIST_TESTING_RMSE_H_
 
-#include "flutter/impeller/golden_tests/screenshot.h"
+#include "flutter/impeller/testing/screenshot.h"
 
 namespace flutter {
 namespace testing {

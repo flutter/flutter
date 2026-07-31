@@ -14,7 +14,9 @@ void main() {
 
     bool item1IsBeforeItem2() {
       final Iterable<Text> texts = tester.widgetList<Text>(find.byType(Text));
-      final List<String?> labels = texts.map((Text text) => text.data).toList();
+      final List<String?> labels = texts
+          .map((final Text text) => text.data)
+          .toList();
       return labels.indexOf('Item 1') < labels.indexOf('Item 2');
     }
 

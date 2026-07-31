@@ -149,6 +149,30 @@ void main() {
       }, FSGuardIOOverrides());
     },
   );
+
+  testWithoutContext('FSGuardIOOverrides resolves symlinks for temp directory', () {
+    final io.Directory baseDir = io.Directory.systemTemp.createTempSync('fs_guard_symlink_test_');
+    addTearDown(() => baseDir.deleteSync(recursive: true));
+
+    final io.Directory targetDir = baseDir.createTempSync('target_');
+    final link = io.Link(path.join(baseDir.path, 'link_to_target'));
+    link.createSync(targetDir.path);
+
+    final mockTemp = io.Directory(link.path);
+    final mockOverrides = MockSystemTempOverrides(mockTemp);
+
+    io.IOOverrides.runWithIOOverrides(() {
+      io.IOOverrides.runWithIOOverrides(() {
+        final resolvedFile = io.File(path.join(targetDir.path, 'test.txt'));
+
+        // This should NOT throw if the guard resolves symlinks.
+        resolvedFile.writeAsStringSync('hello');
+        expect(resolvedFile.readAsStringSync(), 'hello');
+
+        resolvedFile.deleteSync();
+      }, FSGuardIOOverrides());
+    }, mockOverrides);
+  });
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
@@ -156,4 +180,11 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
 
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
+}
+
+final class MockSystemTempOverrides extends io.IOOverrides {
+  MockSystemTempOverrides(this.mockTemp);
+  final io.Directory mockTemp;
+  @override
+  io.Directory getSystemTempDirectory() => mockTemp;
 }

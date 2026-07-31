@@ -10,6 +10,7 @@ import UIKit
 public class VSyncClient: NSObject {
   private static let defaultRefreshRate: Double = 60.0
 
+  private let taskRunner: TaskRunner
   private let isVariableRefreshRateEnabled: Bool
   private let callback: (CFTimeInterval, CFTimeInterval) -> Void
 
@@ -52,13 +53,15 @@ public class VSyncClient: NSObject {
     maxRefreshRate: Double,
     callback: @escaping (CFTimeInterval, CFTimeInterval) -> Void
   ) {
+    self.taskRunner = taskRunner
     self.isVariableRefreshRateEnabled = isVariableRefreshRateEnabled
     self._refreshRate = maxRefreshRate
     self.callback = callback
 
     super.init()
 
-    let link = CADisplayLink(target: self, selector: #selector(onDisplayLink(_:)))
+    let relay = VSyncClientRelay(target: self)
+    let link = CADisplayLink(target: relay, selector: #selector(VSyncClientRelay.onDisplayLink(_:)))
     link.isPaused = true
     self.displayLink = link
 
@@ -125,8 +128,20 @@ public class VSyncClient: NSObject {
   /// caused by the `CADisplayLink` retaining its target.
   @objc
   public func invalidate() {
-    displayLink?.invalidate()
+    guard let link = displayLink else { return }
     displayLink = nil
+
+    // Ensure that the CADisplayLink target (us) is invalidated on the thread it was created on.
+    // CADisplayLinkManager.invalidate() is thread-safe and will do this for us, but both for
+    // symmetry with how we do registration in init() and to use TaskRunner APIs for all thread
+    // hops, we do this explicitly.
+    if taskRunner.runsTasksOnCurrentThread() {
+      link.invalidate()
+    } else {
+      taskRunner.postTask {
+        link.invalidate()
+      }
+    }
   }
 
   /// The callback target triggered by the `CADisplayLink` on every vsync tick.
@@ -184,5 +199,24 @@ public class VSyncClient: NSObject {
       link.isPaused = true
     }
     callback(timestamp, targetTimestamp)
+  }
+}
+
+/// A weak proxy target for `CADisplayLink` callbacks to prevent retain cycles.
+///
+/// `CADisplayLink` strongly retains its target. If the display link directly targeted
+/// `VSyncClient`, it would form a strong retain cycle (since `VSyncClient` also strongly retains
+/// the `CADisplayLink` instance). Instead, we route display link callbacks through this
+/// intermediate relay holding `VSyncClient` weakly.
+private final class VSyncClientRelay: NSObject {
+  private weak var target: VSyncClient?
+
+  init(target: VSyncClient) {
+    self.target = target
+  }
+
+  @objc
+  func onDisplayLink(_ link: CADisplayLink) {
+    target?.onDisplayLink(link)
   }
 }
