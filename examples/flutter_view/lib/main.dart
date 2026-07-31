@@ -7,6 +7,11 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+const Color _grey = Color(0xFF9E9E9E);
+const Color _white = Color(0xFFFFFFFF);
+const Color _black = Color(0xFF000000);
+const Color _blue = Color(0xFF2196F3);
+
 void main() {
   runApp(const FlutterView());
 }
@@ -18,7 +23,7 @@ class FlutterView extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       title: 'Flutter View',
-      color: const Color(0xFF9E9E9E),
+      color: _grey,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return PageRouteBuilder<T>(
           settings: settings,
@@ -75,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: const Color(0xFFFFFFFF),
+      color: _white,
       child: Stack(
         children: <Widget>[
           Column(
@@ -86,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text(
                     'Platform button tapped $_counter time${_counter == 1 ? '' : 's'}.',
                     style: const TextStyle(
-                      color: Color(0xFF000000),
+                      color: _black,
                       fontSize: 17.0,
                       decoration: TextDecoration.none,
                     ),
@@ -101,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     const Text(
                       'Flutter',
                       style: TextStyle(
-                        color: Color(0xFF000000),
+                        color: _black,
                         fontSize: 30.0,
                         decoration: TextDecoration.none,
                       ),
@@ -114,27 +119,40 @@ class _MyHomePageState extends State<MyHomePage> {
           Positioned(
             bottom: 16.0,
             right: 16.0,
-            child: GestureDetector(
-              onTap: _sendFlutterIncrement,
-              child: Container(
-                width: 56.0,
-                height: 56.0,
-                decoration: const BoxDecoration(color: Color(0xFF2196F3), shape: BoxShape.circle),
-                child: const Center(
-                  child: Text(
-                    '+',
-                    style: TextStyle(
-                      color: Color(0xFFFFFFFF),
-                      fontSize: 28.0,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
+            child: _FloatingActionButton(
+              onPressed: _sendFlutterIncrement,
+              icon: const Text(
+                '+',
+                style: TextStyle(
+                  color: _white,
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.none,
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FloatingActionButton extends StatelessWidget {
+  const _FloatingActionButton({required this.onPressed, required this.icon});
+
+  final VoidCallback onPressed;
+  final Widget icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 56.0,
+        height: 56.0,
+        decoration: const BoxDecoration(color: _blue, shape: BoxShape.circle),
+        child: Center(child: icon),
       ),
     );
   }
