@@ -143,7 +143,6 @@ TEST_F(FlutterVSyncWaiterTest, VSyncWorks) {
                       if (baton == kWarmUpBaton) {
                         return;
                       }
-                      EXPECT_TRUE(CACurrentMediaTime() >= timestamp - kTimerLatencyCompensation);
                       CFRunLoopStop(CFRunLoopGetCurrent());
                     }];
 
@@ -169,12 +168,10 @@ TEST_F(FlutterVSyncWaiterTest, VSyncWorks) {
   [waiter waitForVSync:2];
   [displayLink tickWithTimestamp:now + 1.5 * displayLink.nominalOutputRefreshPeriod
                  targetTimestamp:now + 3 * displayLink.nominalOutputRefreshPeriod];
-  CFRunLoopRun();
 
   [waiter waitForVSync:3];
   [displayLink tickWithTimestamp:now + 2.5 * displayLink.nominalOutputRefreshPeriod
                  targetTimestamp:now + 4 * displayLink.nominalOutputRefreshPeriod];
-  CFRunLoopRun();
 
   EXPECT_FALSE(displayLink.paused);
   // Vsync without baton should pause the display link.

@@ -76,23 +76,18 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
     // timestamp. That can cause frame-pacing issues if the frame is rendered too early,
     // it may also trigger frame start before events are processed.
     CFTimeInterval minStart = targetTimestamp - _displayLink.nominalOutputRefreshPeriod;
-    CFTimeInterval current = CACurrentMediaTime();
-    CFTimeInterval remaining = std::max(minStart - current - kTimerLatencyCompensation, 0.0);
-
     TRACE_VSYNC("DisplayLinkCallback-Original", _pendingBaton.value_or(0));
 
-    [FlutterRunLoop.mainRunLoop
-        performAfterDelay:remaining
-                    block:^{
-                      if (!_pendingBaton.has_value()) {
-                        TRACE_VSYNC("DisplayLinkPaused", size_t(0));
-                        _displayLink.paused = YES;
-                        return;
-                      }
-                      TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
-                      _block(minStart, targetTimestamp, *_pendingBaton);
-                      _pendingBaton = std::nullopt;
-                    }];
+    // Return the future interval now. The engine schedules its UI task for
+    // minStart, avoiding a second platform-run-loop timer that can fire late.
+    if (!_pendingBaton.has_value()) {
+      TRACE_VSYNC("DisplayLinkPaused", size_t(0));
+      _displayLink.paused = YES;
+      return;
+    }
+    TRACE_VSYNC("DisplayLinkCallback-Delivered", _pendingBaton.value_or(0));
+    _block(minStart, targetTimestamp, *_pendingBaton);
+    _pendingBaton = std::nullopt;
   }
 }
 
