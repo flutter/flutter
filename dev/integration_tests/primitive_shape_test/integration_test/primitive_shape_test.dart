@@ -11,9 +11,7 @@ void main() {
   final IntegrationTestWidgetsFlutterBinding binding =
       IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('renders primitive shapes', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('renders primitive shapes', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
