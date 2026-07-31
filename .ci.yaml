@@ -7290,7 +7290,8 @@ targets:
         ["devicelab", "hostonly", "windows"]
       dependencies: >-
         [
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       task_name: windows_primitive_shape_golden_test
 
