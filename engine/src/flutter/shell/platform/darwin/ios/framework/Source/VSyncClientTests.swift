@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import Foundation
 import Testing
 
 @testable import InternalFlutterSwift
@@ -17,6 +18,25 @@ extension TaskRunner {
       postTask {
         continuation.resume(returning: work())
       }
+    }
+  }
+}
+
+extension AsyncStream where Element: Sendable {
+  /// Returns the stream's next element, or `nil` if `timeout` elapses first.
+  fileprivate func next(timeout: TimeInterval) async -> Element? {
+    await withTaskGroup(of: Element?.self) { group in
+      group.addTask {
+        var iterator = self.makeAsyncIterator()
+        return await iterator.next()
+      }
+      group.addTask {
+        try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+        return nil
+      }
+      let result = await group.next() ?? nil
+      group.cancelAll()
+      return result
     }
   }
 }
@@ -207,8 +227,8 @@ struct VSyncClientTests {
       await threadTaskRunner.run { client.await() }
 
       // Wait for the display link to deliver its first vsync on the runner's thread.
-      var vsyncs = vsyncSignals.makeAsyncIterator()
-      _ = await vsyncs.next()
+      let vsync = await vsyncSignals.next(timeout: 1.0)
+      #expect(vsync != nil)
 
       client.invalidate()
     }
