@@ -1351,18 +1351,24 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// Resolves in the following [WidgetState]s:
   ///  * [WidgetState.dragged].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
   ///
-  /// The hovered state is not included because the cursor is only resolved for
-  /// a mouse pointer that is already hovering over the painted scrollbar.
+  /// The [WidgetState.hovered] state is resolved when the pointer is over the
+  /// painted scrollbar track or thumb (using the same hit test area as hover
+  /// interactions). The [WidgetState.dragged] state is resolved while the
+  /// scrollbar thumb is being dragged. The [WidgetState.disabled] state is
+  /// resolved when the scrollbar is not [interactive]; a non-interactive
+  /// scrollbar does not track pointer hovering, so ancestor cursors are
+  /// preserved over it.
   ///
-  /// The cursor is applied while the pointer is over the painted scrollbar
-  /// (using the same hit test area as the hover interaction) and while the
-  /// scrollbar thumb is being dragged, so the dragged cursor (typically
-  /// [SystemMouseCursors.grabbing]) remains stable even if the pointer
-  /// briefly moves outside the scrollbar during a drag. When neither
-  /// condition holds, cursor resolution is deferred to ancestors, so a
-  /// parent widget's cursor (for example, the I-beam cursor of an enclosing
-  /// [TextField]) is preserved.
+  /// The cursor is applied while the pointer is over the painted scrollbar and
+  /// while the scrollbar thumb is being dragged, so the dragged cursor
+  /// (typically [SystemMouseCursors.grabbing]) remains stable even if the
+  /// pointer moves outside the scrollbar during a drag. When neither condition
+  /// holds, cursor resolution is deferred to ancestors, so a parent widget's
+  /// cursor (for example, the I-beam cursor of an enclosing [EditableText]) is
+  /// preserved.
   ///
   /// When this is null, or when its resolved value is null, [MouseCursor.defer]
   /// is used and ancestor cursors are left unchanged.
@@ -1391,6 +1397,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   final GlobalKey _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
   bool _dragIsActive = false;
+  PointerDeviceKind? _thumbDragPointerKind;
   MouseCursor _effectiveMouseCursor = MouseCursor.defer;
   Drag? _thumbDrag;
   bool _maxScrollExtentPermitsScrolling = false;
@@ -1637,6 +1644,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (widget.mouseCursor != oldWidget.mouseCursor) {
       updateMouseCursor();
     }
+    _releaseStalePointerState();
   }
 
   void _maybeStartFadeoutTimer() {
@@ -1967,6 +1975,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       setState(() {
         _maxScrollExtentPermitsScrolling = !_maxScrollExtentPermitsScrolling;
       });
+      _releaseStalePointerState();
     }
 
     return false;
@@ -2024,6 +2033,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _handleThumbDragStart(DragStartDetails details) {
+    _thumbDragPointerKind = details.kind;
     handleThumbPressStart(_globalToScrollbar(details.globalPosition));
   }
 
@@ -2032,7 +2042,59 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _handleThumbDragEnd(DragEndDetails details) {
+    _updateHoverStateAfterThumbDrag(details.globalPosition);
     handleThumbPressEnd(_globalToScrollbar(details.globalPosition), details.velocity);
+  }
+
+  // Hover events are not delivered while a pointer button is held down, so
+  // _hoverIsActive can be stale by the time a thumb drag ends. Recompute it
+  // from the position the drag ended at, before handleThumbPressEnd resolves
+  // the cursor. Otherwise releasing a drag away from the scrollbar would leave
+  // the hovered cursor applied over the scroll view's content until the next
+  // pointer move.
+  //
+  // Only mouse and trackpad pointers drive the hover state, matching the kinds
+  // handled by handleHover. A touch or stylus drag must not clobber the hover
+  // state of a separate mouse pointer.
+  void _updateHoverStateAfterThumbDrag(Offset globalPosition) {
+    final PointerDeviceKind? kind = _thumbDragPointerKind;
+    _thumbDragPointerKind = null;
+    if (kind == null || !enableGestures) {
+      return;
+    }
+    switch (kind) {
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.trackpad:
+        _hoverIsActive = isPointerOverScrollbar(globalPosition, kind, forHover: true);
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.unknown:
+        break;
+    }
+  }
+
+  // The hover callbacks are only installed while the scrollbar is interactive,
+  // and the thumb drag recognizers only exist while the child is scrollable.
+  // When either stops being true the callbacks simply stop arriving, and a
+  // dropped drag recognizer is disposed without reporting a cancel, so the
+  // pointer state feeding the cursor has to be released here. Otherwise the
+  // resolved cursor would stay applied over the whole scroll view, with no
+  // event left to clear it.
+  void _releaseStalePointerState() {
+    final bool hoverIsStale = _hoverIsActive && !enableGestures;
+    final bool dragIsStale = _dragIsActive && !_canHandleScrollGestures();
+    if (!hoverIsStale && !dragIsStale) {
+      return;
+    }
+    if (hoverIsStale) {
+      _hoverIsActive = false;
+    }
+    if (dragIsStale) {
+      _dragIsActive = false;
+      _thumbDragPointerKind = null;
+    }
+    updateMouseCursor();
   }
 
   void _handleThumbDragCancel() {
@@ -2049,6 +2111,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _thumbDrag?.cancel();
     assert(_thumbHold == null);
     assert(_thumbDrag == null);
+    _thumbDragPointerKind = null;
     if (_dragIsActive) {
       _dragIsActive = false;
       updateMouseCursor();
@@ -2197,9 +2260,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   /// The set of [WidgetState]s used to resolve [RawScrollbar.mouseCursor].
   ///
+  /// Contains [WidgetState.dragged] while the scrollbar thumb is being dragged,
+  /// [WidgetState.hovered] while a pointer is over the painted scrollbar track
+  /// or thumb, and [WidgetState.disabled] while the scrollbar is not
+  /// interactive.
+  ///
   /// Subclasses can override this to add additional states.
   @protected
-  Set<WidgetState> get cursorStates => <WidgetState>{if (_dragIsActive) WidgetState.dragged};
+  Set<WidgetState> get cursorStates => <WidgetState>{
+    if (_dragIsActive) WidgetState.dragged,
+    if (_hoverIsActive) WidgetState.hovered,
+    if (!enableGestures) WidgetState.disabled,
+  };
 
   /// Recomputes the effective mouse cursor for the scrollbar and updates the
   /// active cursor if it has changed.
@@ -2212,7 +2284,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // The wrapping MouseRegion covers the entire scrollable viewport rather
     // than just the scrollbar painter. Therefore, _hoverIsActive is used to
     // gate the cursor override to the painted scrollbar track/thumb; otherwise
-    // MouseCursor.defer is used to preserve ancestor cursors (e.g. TextField I-beam).
+    // MouseCursor.defer is used to preserve ancestor cursors (e.g. the
+    // EditableText I-beam).
     final MouseCursor? resolved = widget.mouseCursor?.resolve(cursorStates);
     final MouseCursor desired = ((_hoverIsActive || _dragIsActive) && resolved != null)
         ? resolved

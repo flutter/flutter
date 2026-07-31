@@ -3854,7 +3854,9 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
     );
-    expect(resolvedStates.last, isNot(contains(WidgetState.hovered)));
+    expect(resolvedStates.last, contains(WidgetState.hovered));
+    expect(resolvedStates.last, isNot(contains(WidgetState.dragged)));
+    expect(resolvedStates.last, isNot(contains(WidgetState.disabled)));
 
     // Move back to the content area: the override should yield again.
     await gesture.moveTo(const Offset(100.0, 100.0));
@@ -3862,6 +3864,85 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.text,
+    );
+    expect(resolvedStates.last, isNot(contains(WidgetState.hovered)));
+  });
+
+  testWidgets('RawScrollbar.mouseCursor resolves a WidgetStateProperty.fromMap', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            child: RawScrollbar(
+              controller: controller,
+              thumbVisibility: true,
+              mouseCursor: const WidgetStateProperty<MouseCursor?>.fromMap(
+                <WidgetStatesConstraint, MouseCursor?>{
+                  WidgetState.dragged: SystemMouseCursors.grabbing,
+                  WidgetState.hovered: SystemMouseCursors.grab,
+                },
+              ),
+              child: SingleChildScrollView(
+                controller: controller,
+                child: const SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Settle so the scroll metrics arrive and the thumb drag recognizers are
+    // wired up before the drag below.
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: ui.PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture.removePointer);
+
+    // Over the content, no state matches the map, so the ancestor cursor wins.
+    await gesture.addPointer(location: const Offset(100.0, 100.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+
+    // Hovering the thumb must match WidgetState.hovered.
+    await gesture.moveTo(const Offset(796.0, 5.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    // Dragging the thumb must match WidgetState.dragged, which the map lists
+    // first and therefore takes precedence over the hovered entry.
+    await gesture.down(const Offset(796.0, 5.0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0.0, 10.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grabbing,
+    );
+
+    // Releasing over the thumb falls back to the hovered entry.
+    await gesture.up();
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
     );
   });
 
@@ -4015,9 +4096,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       // Start a touch drag on the thumb so the scrollbar enters the dragged
       // state without ending the mouse hover.
       final TestGesture touch = await tester.startGesture(const Offset(796.0, 6.0), pointer: 2);
-      addTearDown(() async {
-        await touch.up();
-      });
+      addTearDown(touch.up);
       await touch.moveBy(const Offset(0.0, 5.0));
       await tester.pump();
       expect(scrollbarCursor(), SystemMouseCursors.grabbing);
@@ -4030,6 +4109,233 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       expect(scrollbarCursor(), SystemMouseCursors.grabbing);
     },
   );
+
+  testWidgets('RawScrollbar.mouseCursor is released when a mouse drag ends off the scrollbar', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            child: RawScrollbar(
+              controller: controller,
+              thumbVisibility: true,
+              mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>(
+                (Set<WidgetState> states) => states.contains(WidgetState.dragged)
+                    ? SystemMouseCursors.grabbing
+                    : SystemMouseCursors.grab,
+              ),
+              child: SingleChildScrollView(
+                controller: controller,
+                child: const SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: ui.PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture.removePointer);
+
+    // Hover the painted scrollbar thumb with the mouse.
+    await gesture.addPointer(location: const Offset(100.0, 100.0));
+    await gesture.moveTo(const Offset(796.0, 5.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    // Press the thumb and drag the same pointer into the content area. Hover
+    // events are not delivered while the button is down, so the dragged cursor
+    // must stay applied.
+    await gesture.down(const Offset(796.0, 5.0));
+    await tester.pump();
+    await gesture.moveTo(const Offset(100.0, 100.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grabbing,
+    );
+
+    // Releasing in the content area must hand the cursor straight back to the
+    // ancestor, without waiting for another pointer move.
+    await gesture.up();
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+  });
+
+  testWidgets('RawScrollbar.mouseCursor is released when the scrollbar stops being interactive', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    Widget buildFrame({required bool interactive}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            child: RawScrollbar(
+              controller: controller,
+              thumbVisibility: true,
+              interactive: interactive,
+              mouseCursor: const WidgetStateProperty<MouseCursor?>.fromMap(
+                <WidgetStatesConstraint, MouseCursor?>{
+                  WidgetState.dragged: SystemMouseCursors.grabbing,
+                  WidgetState.hovered: SystemMouseCursors.grab,
+                },
+              ),
+              child: SingleChildScrollView(
+                controller: controller,
+                child: const SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(interactive: true));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: ui.PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: const Offset(100.0, 100.0));
+    await gesture.moveTo(const Offset(796.0, 5.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    // A non-interactive scrollbar stops receiving hover events, so the hovered
+    // state has to be released when it changes; there is no later event that
+    // could clear it.
+    await tester.pumpWidget(buildFrame(interactive: false));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+
+    // The same applies while a drag is in flight: the thumb drag recognizer is
+    // dropped without reporting a cancel.
+    await tester.pumpWidget(buildFrame(interactive: true));
+    await gesture.moveTo(const Offset(796.0, 6.0));
+    await tester.pump();
+    await gesture.down(const Offset(796.0, 6.0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0.0, 10.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grabbing,
+    );
+
+    await tester.pumpWidget(buildFrame(interactive: false));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+    await gesture.up();
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+  });
+
+  testWidgets('RawScrollbar.mouseCursor is released when the child stops being scrollable', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    Widget buildFrame(double childHeight) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            child: RawScrollbar(
+              controller: controller,
+              thumbVisibility: true,
+              mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>(
+                (Set<WidgetState> states) => states.contains(WidgetState.dragged)
+                    ? SystemMouseCursors.grabbing
+                    : SystemMouseCursors.grab,
+              ),
+              child: SingleChildScrollView(
+                controller: controller,
+                child: SizedBox(width: 4000.0, height: childHeight),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(4000.0));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: ui.PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: const Offset(100.0, 100.0));
+    await gesture.moveTo(const Offset(796.0, 5.0));
+    await tester.pump();
+    await gesture.down(const Offset(796.0, 5.0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0.0, 10.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grabbing,
+    );
+
+    // Shrinking the child mid drag removes the thumb drag recognizer, which is
+    // disposed without reporting a cancel. The dragged state must not survive
+    // it, otherwise no later event could ever clear it.
+    await tester.pumpWidget(buildFrame(10.0));
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    // Hover is still tracked here, so moving away resolves normally again.
+    await gesture.up();
+    await gesture.moveTo(const Offset(100.0, 100.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+  });
 
   testWidgets('RawScrollbar.mouseCursor clears dragged state when thumb drag is cancelled', (
     WidgetTester tester,
