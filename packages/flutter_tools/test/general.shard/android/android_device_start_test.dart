@@ -110,9 +110,6 @@ void main() {
             'android.intent.category.LAUNCHER',
             '-f',
             '0x20000000',
-            '--ez',
-            'experimental-vm-service',
-            'true',
             'FlutterActivity',
           ],
         ),
@@ -185,9 +182,6 @@ void main() {
             'android.intent.category.LAUNCHER',
             '-f',
             '0x20000000',
-            '--ez',
-            'experimental-vm-service',
-            'true',
             '--ez',
             'enable-impeller',
             'true',
@@ -270,9 +264,6 @@ void main() {
           '-f',
           '0x20000000',
           '--ez',
-          'experimental-vm-service',
-          'true',
-          '--ez',
           'trace-systrace',
           'true',
           'FlutterActivity',
@@ -295,87 +286,87 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('AndroidDevice.startApp forwards aot-vmservice-shared-library-name as basename in profile mode', () async {
-    final String artifactPath = fileSystem.path.join('path', 'to', 'libvmservice_snapshot.so');
-    final device = AndroidDevice(
-      '1234',
-      modelID: 'TestModel',
-      fileSystem: fileSystem,
-      processManager: processManager,
-      logger: BufferLogger.test(),
-      platform: FakePlatform(),
-      androidSdk: androidSdk,
-      artifacts: FakeArtifacts(artifactPath),
-    );
-    final File apkFile = fileSystem.file('app-profile.apk')..createSync();
-    final apk = AndroidApk(
-      id: 'FlutterApp',
-      applicationPackage: apkFile,
-      launchActivity: 'FlutterActivity',
-      versionCode: 1,
-    );
+  testWithoutContext(
+    'AndroidDevice.startApp forwards aot-vmservice-shared-library-name as basename in profile mode',
+    () async {
+      final String artifactPath = fileSystem.path.join('path', 'to', 'libvmservice_snapshot.so');
+      final device = AndroidDevice(
+        '1234',
+        modelID: 'TestModel',
+        fileSystem: fileSystem,
+        processManager: processManager,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        androidSdk: androidSdk,
+        artifacts: FakeArtifacts(artifactPath),
+      );
+      final File apkFile = fileSystem.file('app-profile.apk')..createSync();
+      final apk = AndroidApk(
+        id: 'FlutterApp',
+        applicationPackage: apkFile,
+        launchActivity: 'FlutterActivity',
+        versionCode: 1,
+      );
 
-    // Create the artifact file on the host to pass the existsSync() check.
-    fileSystem.file(artifactPath).createSync(recursive: true);
+      // Create the artifact file on the host to pass the existsSync() check.
+      fileSystem.file(artifactPath).createSync(recursive: true);
 
-    processManager.addCommand(kAdbVersionCommand);
-    processManager.addCommand(kStartServer);
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-        stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
-      ),
-    );
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
-      ),
-    );
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-profile.apk'],
-      ),
-    );
-    processManager.addCommand(kShaCommand);
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>[
-          'adb',
-          '-s',
-          '1234',
-          'shell',
-          'am',
-          'start',
-          '-a',
-          'android.intent.action.MAIN',
-          '-c',
-          'android.intent.category.LAUNCHER',
-          '-f',
-          '0x20000000',
-          '--ez',
-          'experimental-vm-service',
-          'true',
-          '--es',
-          'aot-vmservice-shared-library-name',
-          'libvmservice_snapshot.so', // Should be basename, not full path!
-          'FlutterActivity',
-        ],
-      ),
-    );
+      processManager.addCommand(kAdbVersionCommand);
+      processManager.addCommand(kStartServer);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+          stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+        ),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+        ),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-profile.apk'],
+        ),
+      );
+      processManager.addCommand(kShaCommand);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'adb',
+            '-s',
+            '1234',
+            'shell',
+            'am',
+            'start',
+            '-a',
+            'android.intent.action.MAIN',
+            '-c',
+            'android.intent.category.LAUNCHER',
+            '-f',
+            '0x20000000',
+            '--ez',
+            'experimental-vm-service',
+            'true',
+            '--es',
+            'aot-vmservice-shared-library-name',
+            'libvmservice_snapshot.so', // Should be basename, not full path!
+            'FlutterActivity',
+          ],
+        ),
+      );
 
-    final LaunchResult launchResult = await device.startApp(
-      apk,
-      prebuiltApplication: true,
-      debuggingOptions: DebuggingOptions.disabled(
-        BuildInfo.profile,
-        enableDartProfiling: false,
-      ),
-      platformArgs: <String, dynamic>{},
-    );
+      final LaunchResult launchResult = await device.startApp(
+        apk,
+        prebuiltApplication: true,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.profile, enableDartProfiling: false),
+        platformArgs: <String, dynamic>{},
+      );
 
-    expect(launchResult.started, true);
-    expect(processManager, hasNoRemainingExpectations);
-  });
+      expect(launchResult.started, true);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
 
   testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
     final device = AndroidDevice(
@@ -395,6 +386,8 @@ void main() {
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
+
+    fileSystem.file('dummy_path').createSync(recursive: true);
 
     // These commands are required to install and start the app
     processManager.addCommand(kAdbVersionCommand);
@@ -462,6 +455,9 @@ void main() {
           '--ez',
           'experimental-vm-service',
           'true',
+          '--es',
+          'vmservice-kernel-path',
+          'dummy_path',
           // The DebuggingOptions arguments go here.
           '--ez', 'enable-dart-profiling', 'true',
           '--ez', 'profile-startup', 'true',
@@ -578,9 +574,6 @@ void main() {
           'android.intent.category.LAUNCHER',
           '-f',
           '0x20000000',
-          '--ez',
-          'experimental-vm-service',
-          'true',
           'FlutterActivity',
         ],
         stdout: 'Error type 3: Activity class {FlutterApp/FlutterActivity} does not exist.',
@@ -619,6 +612,8 @@ void main() {
         versionCode: 1,
       );
 
+      fileSystem.file('dummy_path').createSync(recursive: true);
+
       processManager.addCommand(kAdbVersionCommand);
       processManager.addCommand(kStartServer);
       processManager.addCommand(
@@ -653,9 +648,6 @@ void main() {
             'android.intent.category.LAUNCHER',
             '-f',
             '0x20000000',
-            '--ez',
-            'experimental-vm-service',
-            'true',
             'FlutterActivity',
           ],
           stdout: 'Security exception: Permission Denial: starting Intent...',

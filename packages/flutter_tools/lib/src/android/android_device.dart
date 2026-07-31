@@ -624,7 +624,6 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      ...<String>['--ez', 'experimental-vm-service', 'true'],
       if (debuggingOptions.buildInfo.isProfile &&
           _fileSystem
               .file(
@@ -635,6 +634,9 @@ class AndroidDevice extends Device {
                 ),
               )
               .existsSync()) ...<String>[
+        '--ez',
+        'experimental-vm-service',
+        'true',
         '--es',
         'aot-vmservice-shared-library-name',
         _fileSystem.path.basename(
@@ -655,6 +657,9 @@ class AndroidDevice extends Device {
                 ),
               )
               .existsSync()) ...<String>[
+        '--ez',
+        'experimental-vm-service',
+        'true',
         '--es',
         'vmservice-kernel-path',
         _artifacts.getArtifactPath(
