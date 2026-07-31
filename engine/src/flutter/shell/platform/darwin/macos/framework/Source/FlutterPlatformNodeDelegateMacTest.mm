@@ -32,6 +32,7 @@ FlutterViewController* CreateTestViewController() {
 TEST(FlutterPlatformNodeDelegateMac, Basics) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
+  [viewController loadView];
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -60,9 +61,11 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   // Verify the accessibility attribute matches.
   NSAccessibilityElement* native_accessibility =
       root_platform_node_delegate->GetNativeViewAccessible();
+  ASSERT_NE(native_accessibility, nil);
   std::string value = [native_accessibility.accessibilityValue UTF8String];
   EXPECT_TRUE(value == "accessibility");
-  EXPECT_EQ(native_accessibility.accessibilityRole, NSAccessibilityStaticTextRole);
+  EXPECT_TRUE(
+      [native_accessibility.accessibilityRole isEqualToString:NSAccessibilityStaticTextRole]);
   EXPECT_EQ([native_accessibility.accessibilityChildren count], 0u);
   [engine shutDownEngine];
 }
@@ -70,6 +73,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
 TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
+  [viewController loadView];
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -99,9 +103,11 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   // Verify the accessibility attribute matches.
   NSAccessibilityElement* native_accessibility =
       root_platform_node_delegate->GetNativeViewAccessible();
+  ASSERT_NE(native_accessibility, nil);
   std::string value = [native_accessibility.accessibilityValue UTF8String];
   EXPECT_EQ(value, "selectable text");
-  EXPECT_EQ(native_accessibility.accessibilityRole, NSAccessibilityStaticTextRole);
+  EXPECT_TRUE(
+      [native_accessibility.accessibilityRole isEqualToString:NSAccessibilityStaticTextRole]);
   EXPECT_EQ([native_accessibility.accessibilityChildren count], 0u);
   NSRange selection = native_accessibility.accessibilitySelectedTextRange;
   EXPECT_EQ(selection.location, 1u);
@@ -113,6 +119,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
 TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRange) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
+  [viewController loadView];
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
@@ -142,6 +149,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   // Verify the accessibility attribute matches.
   NSAccessibilityElement* native_accessibility =
       root_platform_node_delegate->GetNativeViewAccessible();
+  ASSERT_NE(native_accessibility, nil);
   NSRange selection = native_accessibility.accessibilitySelectedTextRange;
   EXPECT_TRUE(selection.location == NSNotFound);
   EXPECT_EQ(selection.length, 0u);
