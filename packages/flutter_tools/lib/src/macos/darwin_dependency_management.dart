@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
@@ -41,6 +42,15 @@ class DarwinDependencyManagement {
   final FileSystem _fileSystem;
   final FeatureFlags _featureFlags;
   final Analytics _analytics;
+
+  static bool _hasWarnedSwiftPackageManagerDisabled = false;
+
+  /// Used by tests, since they run in one process and would otherwise only
+  /// see the warning once across the whole suite.
+  @visibleForTesting
+  static void resetSwiftPackageManagerDisabledWarning() {
+    _hasWarnedSwiftPackageManagerDisabled = false;
+  }
 
   /// Generates/updates required files and project settings for Darwin
   /// Dependency Managers (CocoaPods and Swift Package Manager). Projects may
@@ -175,12 +185,13 @@ class DarwinDependencyManagement {
     required FileSystem fileSystem,
     required Logger logger,
     required CocoaPods? cocoapods,
+    required FeatureFlags featureFlags,
   }) async {
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     final bool projectUsesSwiftPM =
         usesSwiftPackageManager && xcodeProject.flutterPluginSwiftPackageInProjectSettings;
-    if (!usesSwiftPackageManager && xcodeProject.compatibleWithSwiftPackageManager) {
-      logger.printWarning(kSwiftPackageManagerDisabledWarning);
+    if (!featureFlags.isSwiftPackageManagerEnabled) {
+      _warnSwiftPackageManagerDisabled(logger);
     }
 
     final swiftPackageOnlyPlugins = <String>[];
@@ -244,6 +255,18 @@ class DarwinDependencyManagement {
       project: xcodeProject.parent,
       plugins: plugins,
     );
+  }
+
+  /// Print a warning that Swift Package Manager is disabled, once per Flutter invocation.
+  static void _warnSwiftPackageManagerDisabled(Logger logger) {
+    if (_hasWarnedSwiftPackageManagerDisabled) {
+      return;
+    }
+    logger.printWarning(
+      'Swift Package Manager is currently disabled. $kSwiftPackageManagerDisabledWarning '
+      'To re-enable it, run "flutter config --enable-swift-package-manager"',
+    );
+    _hasWarnedSwiftPackageManagerDisabled = true;
   }
 
   /// Throw a [ToolExit] if there are plugins that only support SwiftPM but the project does not

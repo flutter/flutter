@@ -1097,6 +1097,10 @@ flutter:
   });
 
   group('validatePluginSupport', () {
+    setUp(() {
+      DarwinDependencyManagement.resetSwiftPackageManagerDisabledWarning();
+    });
+
     for (final platform in supportedPlatforms) {
       testWithoutContext(
         'warns when Swift Package Manager is disabled for ${platform.name}',
@@ -1123,12 +1127,45 @@ flutter:
             fileSystem: fileSystem,
             logger: logger,
             cocoapods: FakeCocoaPods(),
+            featureFlags: TestFeatureFlags(),
           );
 
-          expect(logger.warningText, '$kSwiftPackageManagerDisabledWarning\n');
+          expect(
+            logger.warningText,
+            'Swift Package Manager is currently disabled. $kSwiftPackageManagerDisabledWarning '
+            'To re-enable it, run "flutter config --enable-swift-package-manager"\n',
+          );
         },
       );
     }
+
+    testWithoutContext('only warns once when Swift Package Manager is disabled', () async {
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final project = FakeIosProject(
+        fileSystem: fileSystem,
+        usesSwiftPackageManager: false,
+        compatibleWithSwiftPackageManager: true,
+      );
+
+      for (var i = 0; i < 2; i++) {
+        await DarwinDependencyManagement.validatePluginSupport(
+          platform: FlutterDarwinPlatform.ios,
+          xcodeProject: project,
+          plugins: <Plugin>[],
+          fileSystem: fileSystem,
+          logger: logger,
+          cocoapods: FakeCocoaPods(),
+          featureFlags: TestFeatureFlags(),
+        );
+      }
+
+      expect(
+        logger.warningText,
+        'Swift Package Manager is currently disabled. $kSwiftPackageManagerDisabledWarning '
+        'To re-enable it, run "flutter config --enable-swift-package-manager"\n',
+      );
+    });
 
     testWithoutContext('does not warn when Swift Package Manager is unavailable', () async {
       final fileSystem = MemoryFileSystem.test();
@@ -1146,6 +1183,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: FakeCocoaPods(),
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(logger.warningText, isEmpty);
@@ -1165,6 +1203,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(logger.warningText, isEmpty);
@@ -1250,6 +1289,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
       expect(logger.warningText, isEmpty);
       expect(logger.errorText, isEmpty);
@@ -1274,6 +1314,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(logger.warningText, isEmpty);
@@ -1304,6 +1345,7 @@ flutter:
           fileSystem: fileSystem,
           logger: logger,
           cocoapods: cocoapods,
+          featureFlags: TestFeatureFlags(),
         ),
         throwsToolExit(
           message:
@@ -1343,6 +1385,7 @@ flutter:
             fileSystem: fileSystem,
             logger: logger,
             cocoapods: cocoapods,
+            featureFlags: TestFeatureFlags(),
           ),
           throwsToolExit(
             message:
@@ -1377,6 +1420,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(
@@ -1419,6 +1463,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(
@@ -1462,6 +1507,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(
@@ -1506,6 +1552,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         cocoapods: cocoapods,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(
