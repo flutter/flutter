@@ -119,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Positioned(
             bottom: 16.0,
             right: 16.0,
-            child: _FloatingActionButton(
+            child: _Button(
               onPressed: _sendFlutterIncrement,
               icon: const Text(
                 '+',
@@ -138,8 +138,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class _FloatingActionButton extends StatelessWidget {
-  const _FloatingActionButton({required this.onPressed, required this.icon});
+class _Button extends StatelessWidget {
+  const _Button({required this.onPressed, required this.icon});
 
   final VoidCallback onPressed;
   final Widget icon;
