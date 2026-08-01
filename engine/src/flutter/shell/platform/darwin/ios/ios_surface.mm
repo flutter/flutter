@@ -6,9 +6,9 @@
 
 #include <memory>
 
+#include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_noop.h"
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 FLUTTER_ASSERT_ARC
@@ -28,7 +28,11 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
       );
     }
   }
-  return std::make_unique<IOSSurfaceNoop>(std::move(context));
+  // The layer MUST be a CAMetalLayer or FlutterMetalLayer, which overrides
+  // isKindOfClass to return true for the above check. Anything else means the
+  // rendering surface was misconfigured.
+  FML_CHECK(false) << "Expected a Metal-backed layer for iOS rendering.";
+  FML_UNREACHABLE();
 }
 
 IOSSurface::IOSSurface(std::shared_ptr<IOSContext> ios_context)
