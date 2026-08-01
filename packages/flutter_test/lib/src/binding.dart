@@ -2936,8 +2936,21 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher? deviceEventDispatcher;
 
-  /// Framework code may asynchronously cancel a pointer after the test-dispatched
-  /// event has reset the source back to device.
+  // Tracks active pointer IDs that were initiated by test gestures (i.e.
+  // dispatched under [TestBindingEventSource.test]).
+  //
+  // A pointer stream initiated by a test gesture belongs to
+  // [TestBindingEventSource.test] throughout its entire lifecycle. However,
+  // framework operations (such as `Navigator.cancelPointer` during route
+  // transitions) may dispatch a synthetic [PointerCancelEvent] while
+  // [pointerEventSource] is set to [TestBindingEventSource.device].
+  //
+  // This set tracks active test pointers from
+  // `PointerDown`/`PointerPanZoomStart` until
+  // `PointerUp`/`PointerCancel`/`PointerPanZoomEnd`, allowing
+  // [handlePointerEvent] to identify and re-route framework-generated
+  // cancellation events back through the `test` source so active gesture
+  // recognizers can process them correctly.
   final Set<int> _testPointerIds = <int>{};
 
   /// Dispatch an event to the targets found by a hit test on its position.
@@ -2951,6 +2964,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// forwarded to [deviceEventDispatcher].
   @override
   void handlePointerEvent(PointerEvent event) {
+    // Ensure all events belonging to a test pointer stream are processed under
+    // TestBindingEventSource.test, even if a framework-generated cancellation
+    // arrives while pointerEventSource is set to 'device'.
     if (pointerEventSource == TestBindingEventSource.device &&
         event is PointerCancelEvent &&
         _testPointerIds.contains(event.pointer)) {
