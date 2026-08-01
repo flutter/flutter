@@ -3465,6 +3465,58 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('showDialog applies custom barrierBuilder', (WidgetTester tester) async {
+    const expectedPadding = 12.0;
+    const barrierKey = ValueKey<String>('custom-barrier-padding');
+    RouteBarrierDetails? capturedDetails;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  barrierLabel: 'barrier_label',
+                  barrierColor: const Color(0xFF00FF00),
+                  barrierBuilder:
+                      (BuildContext context, RouteBarrierDetails details, Widget barrier) {
+                        capturedDetails = details;
+                        return Padding(
+                          key: barrierKey,
+                          padding: const EdgeInsets.all(expectedPadding),
+                          child: barrier,
+                        );
+                      },
+                  builder: (BuildContext context) => const Text('Dialog'),
+                );
+              },
+              child: const Text('Show Dialog'),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+
+    final Padding paddingWidget = tester.widget<Padding>(find.byKey(barrierKey));
+    expect(paddingWidget.padding, const EdgeInsets.all(expectedPadding));
+
+    final ModalBarrier barrierWidget = tester.widget<ModalBarrier>(
+      find.descendant(of: find.byKey(barrierKey), matching: find.byType(ModalBarrier)),
+    );
+    expect(barrierWidget.color, const Color(0xFF00FF00));
+
+    expect(capturedDetails, isNotNull);
+    expect(capturedDetails!.barrierColor, const Color(0xFF00FF00));
+    expect(capturedDetails!.barrierDismissible, true);
+    expect(capturedDetails!.barrierLabel, 'barrier_label');
+  });
 }
 
 @pragma('vm:entry-point')
