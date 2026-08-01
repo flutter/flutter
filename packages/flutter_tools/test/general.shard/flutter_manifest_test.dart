@@ -1790,6 +1790,46 @@ name: test
     expect(flutterManifest, isNotNull);
     expect(flutterManifest!.workspace, isEmpty);
   });
+
+  testWithoutContext('FlutterManifest can parse engine section', () async {
+    const manifest = '''
+name: test
+flutter:
+  engine:
+    local-path: /path/to/engine/src
+    local-name: android_debug_unopt
+    host-local-name: host_debug_unopt
+    revision: 5852516484c25f778d1059b589f67a6857d4220f
+''';
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.engine, isNotNull);
+    expect(flutterManifest.engine!.localPath, '/path/to/engine/src');
+    expect(flutterManifest.engine!.localName, 'android_debug_unopt');
+    expect(flutterManifest.engine!.hostLocalName, 'host_debug_unopt');
+    expect(flutterManifest.engine!.revision, '5852516484c25f778d1059b589f67a6857d4220f');
+  });
+
+  testWithoutContext('FlutterManifest fails on invalid engine section', () async {
+    const manifest = '''
+name: test
+flutter:
+  engine:
+    local-path: 123
+    unknown-key: value
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, isNull);
+    expect(logger.errorText, contains('Expected "local-path" to be a string, but got 123 (int)'));
+    expect(logger.errorText, contains('Unexpected child "unknown-key" found under "engine"'));
+  });
 }
 
 Matcher matchesManifest({String? appVersion, String? buildName, String? buildNumber}) {

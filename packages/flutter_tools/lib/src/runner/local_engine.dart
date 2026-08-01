@@ -12,6 +12,7 @@ import '../base/platform.dart';
 import '../base/user_messages.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
+import '../flutter_manifest.dart';
 
 /// A strategy for locating the `out/` directory of a local engine build.
 ///
@@ -75,6 +76,7 @@ class LocalEngineLocator {
     String? localHostEngine,
     String? localWebSdk,
     String? packagePath,
+    FlutterManifest? manifest,
   }) async {
     if (localHostEngine != null && localEngine == null) {
       throwToolExit(_runnerHostEngineRequiresLocalEngine, exitCode: 2);
@@ -84,7 +86,8 @@ class LocalEngineLocator {
     if (engineSourcePath == null &&
         localEngine == null &&
         localWebSdk == null &&
-        packagePath == null) {
+        packagePath == null &&
+        manifest?.engine == null) {
       return null;
     }
 
@@ -97,6 +100,7 @@ class LocalEngineLocator {
           engineSourcePath ??= _findEngineSourceByBuildPath(localWebSdk);
         }
         engineSourcePath ??= await _findEngineSourceByPackageConfig(packagePath);
+        engineSourcePath ??= manifest?.engine?.localPath;
       } on FileSystemException catch (e) {
         _logger.printTrace('Local engine auto-detection file exception: $e');
         engineSourcePath = null;
@@ -116,12 +120,12 @@ class LocalEngineLocator {
       _logger.printTrace('Local engine source at $engineSourcePath');
       return _findEngineBuildPath(
         engineSourcePath: engineSourcePath,
-        localEngine: localEngine,
+        localEngine: localEngine ?? manifest?.engine?.localName,
         localWebSdk: localWebSdk,
-        localHostEngine: localHostEngine,
+        localHostEngine: localHostEngine ?? manifest?.engine?.hostLocalName,
       );
     }
-    if (localEngine != null || localWebSdk != null) {
+    if (localEngine != null || localWebSdk != null || manifest?.engine != null) {
       throwToolExit(
         _userMessages.runnerNoEngineSrcDir(
           kFlutterEnginePackageName,

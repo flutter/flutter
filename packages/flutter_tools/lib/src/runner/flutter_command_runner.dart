@@ -17,6 +17,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
@@ -414,6 +415,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
       WebServerDevice.showWebServerDevice = true;
     }
 
+    // Load the manifest from the pubspec.yaml file, if one exists.
+    final String pubspecPath = globals.fs.path.join(globals.fs.currentDirectory.path, 'pubspec.yaml');
+    final FlutterManifest? manifest = FlutterManifest.createFromPath(
+      pubspecPath,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+
     // Set up the tooling configuration.
     final EngineBuildPaths? engineBuildPaths = await globals.localEngineLocator?.findEnginePath(
       engineSourcePath: topLevelResults[FlutterGlobalOptions.kLocalEngineSrcPathOption] as String?,
@@ -421,11 +430,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
       localHostEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineHostOption] as String?,
       localWebSdk: topLevelResults[FlutterGlobalOptions.kLocalWebSDKOption] as String?,
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
+      manifest: manifest,
     );
     if (engineBuildPaths != null) {
       contextOverrides.addAll(<Type, Object?>{
         Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
       });
+    }
+
+    if (manifest?.engine?.revision != null) {
+      Cache.engineRevisionOverride = manifest!.engine!.revision;
     }
 
     await context.run<void>(

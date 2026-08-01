@@ -438,9 +438,39 @@ class FlutterManifest {
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;
 
+  /// The engine configuration, if any.
+  late final EngineManifest? engine = _extractEngine();
+
+  EngineManifest? _extractEngine() {
+    final Object? engine = _flutterDescriptor['engine'];
+    if (engine is! YamlMap) {
+      return null;
+    }
+    return EngineManifest._(engine.cast<String, Object?>());
+  }
+
   YamlMap toYaml() {
     return YamlMap.wrap(_descriptor);
   }
+}
+
+/// Represents the engine configuration in the `pubspec.yaml` file.
+class EngineManifest {
+  EngineManifest._(this._descriptor);
+
+  final Map<String, Object?> _descriptor;
+
+  /// The path to the engine `src` directory.
+  String? get localPath => _descriptor['local-path'] as String?;
+
+  /// The name of the local engine build (e.g. `android_debug_unopt`).
+  String? get localName => _descriptor['local-name'] as String?;
+
+  /// The name of the host engine build (e.g. `host_debug_unopt`).
+  String? get hostLocalName => _descriptor['host-local-name'] as String?;
+
+  /// The engine revision to use.
+  String? get revision => _descriptor['revision'] as String?;
 }
 
 class Font {
@@ -617,6 +647,30 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           errors.add(
             'Expected "$yamlKey" to be a string, but got $yamlValue (${yamlValue.runtimeType}).',
           );
+        }
+      case 'engine':
+        if (yamlValue is! YamlMap) {
+          errors.add(
+            'Expected "$yamlKey" section to be an object, but got $yamlValue (${yamlValue.runtimeType}).',
+          );
+        } else {
+          for (final MapEntry<Object?, Object?> kvp in (yamlValue as YamlMap).entries) {
+            if (kvp.key is! String) {
+              errors.add('Expected YAML key to be a string, but got ${kvp.key}.');
+              continue;
+            }
+            switch (kvp.key as String) {
+              case 'local-path':
+              case 'local-name':
+              case 'host-local-name':
+              case 'revision':
+                if (kvp.value is! String) {
+                  errors.add('Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
+                }
+              default:
+                errors.add('Unexpected child "${kvp.key}" found under "engine".');
+            }
+          }
         }
       default:
         errors.add('Unexpected child "$yamlKey" found under "flutter".');
