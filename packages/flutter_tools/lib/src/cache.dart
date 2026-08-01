@@ -502,6 +502,9 @@ class Cache {
 
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {
+    if (engineRevisionOverride != null) {
+      return engineRevisionOverride!;
+    }
     _engineRevision ??= getStampFor('engine');
     if (_engineRevision == null) {
       throwToolExit('Could not determine engine revision.');
@@ -510,6 +513,10 @@ class Cache {
   }
 
   String? _engineRevision;
+
+  /// The revision of the engine to use, if it should be different from the one
+  /// in the bin/internal/engine.version file.
+  static String? engineRevisionOverride;
 
   /// The "realm" for the storage URL.
   ///
