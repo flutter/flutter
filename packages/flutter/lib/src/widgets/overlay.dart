@@ -418,19 +418,17 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return TickerMode(
-      enabled: widget.tickerEnabled,
-      child: SelectionRegistrarScope(
-        registrar: widget.tickerEnabled ? SelectionContainer.maybeOf(context) : null,
-        child: _RenderTheaterMarker(
-          theater: _theater,
-          overlayEntryWidgetState: this,
-          // Use a Builder so that the `widget.entry.builder` can have access to
-          // _RenderTheaterMarker.of
-          child: Builder(builder: widget.entry.builder),
-        ),
-      ),
+    final Widget overlayChild = _RenderTheaterMarker(
+      theater: _theater,
+      overlayEntryWidgetState: this,
+      // Use a Builder so that the `widget.entry.builder` can have access to
+      // _RenderTheaterMarker.of
+      child: Builder(builder: widget.entry.builder),
     );
+    final Widget child = !widget.tickerEnabled && SelectionContainer.maybeOf(context) != null
+        ? SelectionContainer.disabled(child: overlayChild)
+        : overlayChild;
+    return TickerMode(enabled: widget.tickerEnabled, child: child);
   }
 
   void _markNeedsBuild() {
