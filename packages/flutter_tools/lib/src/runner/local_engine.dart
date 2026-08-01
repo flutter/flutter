@@ -125,7 +125,7 @@ class LocalEngineLocator {
         localHostEngine: localHostEngine ?? manifest?.engine?.hostLocalName,
       );
     }
-    if (localEngine != null || localWebSdk != null || manifest?.engine != null) {
+    if (localEngine != null || localWebSdk != null || manifest?.engine?.isLocal == true) {
       throwToolExit(
         _userMessages.runnerNoEngineSrcDir(
           kFlutterEnginePackageName,
