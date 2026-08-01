@@ -465,20 +465,20 @@ void main() {
       ),
     );
 
-    Future<void> updateContextMenu(Future<void> update, {bool settle = false}) async {
-      await update;
-      rebuild(() {});
-      if (settle) {
-        await tester.pumpAndSettle();
-      } else {
-        await tester.pump();
-      }
-      expect(tester.takeException(), isNull);
-    }
+    await BrowserContextMenu.disableContextMenu();
+    rebuild(() {});
+    await tester.pump();
+    expect(tester.takeException(), isNull);
 
-    await updateContextMenu(BrowserContextMenu.disableContextMenu());
-    await updateContextMenu(BrowserContextMenu.enableContextMenu());
-    await updateContextMenu(BrowserContextMenu.disableContextMenu(), settle: true);
+    await BrowserContextMenu.enableContextMenu();
+    rebuild(() {});
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    await BrowserContextMenu.disableContextMenu();
+    rebuild(() {});
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   }, variant: _browserContextMenuEnabledVariants);
 }
 
