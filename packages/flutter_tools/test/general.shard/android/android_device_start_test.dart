@@ -455,9 +455,6 @@ void main() {
           '--ez',
           'experimental-vm-service',
           'true',
-          '--es',
-          'vmservice-kernel-path',
-          'dummy_path',
           // The DebuggingOptions arguments go here.
           '--ez', 'enable-dart-profiling', 'true',
           '--ez', 'profile-startup', 'true',

@@ -656,18 +656,7 @@ class AndroidDevice extends Device {
                   mode: BuildMode.debug,
                 ),
               )
-              .existsSync()) ...<String>[
-        '--ez',
-        'experimental-vm-service',
-        'true',
-        '--es',
-        'vmservice-kernel-path',
-        _artifacts.getArtifactPath(
-          Artifact.vmserviceKernelDill,
-          platform: await targetPlatform,
-          mode: BuildMode.debug,
-        ),
-      ],
+              .existsSync()) ...<String>['--ez', 'experimental-vm-service', 'true'],
       if (debuggingOptions.enableDartProfiling) ...<String>[
         '--ez',
         'enable-dart-profiling',
