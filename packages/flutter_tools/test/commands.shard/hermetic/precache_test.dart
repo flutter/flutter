@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/precache.dart';
@@ -504,6 +505,21 @@ void main() {
       }),
     );
   });
+
+  testUsingContext('precache --host-arch overrides cache and os hostPlatformOverride', () async {
+    final os = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64);
+    final PrecacheCommand command = PrecacheCommand(
+      cache: cache,
+      logger: BufferLogger.test(),
+      featureFlags: TestFeatureFlags(),
+      platform: FakePlatform(operatingSystem: 'macos', environment: <String, String>{}),
+      os: os,
+    );
+    await createTestCommandRunner(command).run(const <String>['precache', '--host-arch=x64']);
+
+    expect(os.hostPlatformOverride, HostPlatform.darwin_x64);
+    expect(cache.osUtils.hostPlatformOverride, HostPlatform.darwin_x64);
+  });
 }
 
 class FakeCache extends Fake implements Cache {
@@ -540,4 +556,7 @@ class FakeCache extends Fake implements Cache {
 
   @override
   bool includeAllPlatforms = false;
+
+  @override
+  late final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
 }

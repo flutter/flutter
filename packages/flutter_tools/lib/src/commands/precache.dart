@@ -4,9 +4,11 @@
 
 import '../base/common.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../cache.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// The flutter precache command allows downloading of cache artifacts without
@@ -18,10 +20,12 @@ class PrecacheCommand extends FlutterCommand {
     required Platform platform,
     required Logger logger,
     required FeatureFlags featureFlags,
+    OperatingSystemUtils? os,
   }) : _cache = cache,
        _platform = platform,
        _logger = logger,
-       _featureFlags = featureFlags {
+       _featureFlags = featureFlags,
+       _os = os ?? globals.os {
     argParser.addFlag(
       'all-platforms',
       abbr: 'a',
@@ -83,12 +87,19 @@ class PrecacheCommand extends FlutterCommand {
       help: 'Precache the unsigned macOS binaries when available.',
       hide: !verboseHelp,
     );
+    argParser.addOption(
+      'host-arch',
+      allowed: const <String>['x64', 'arm64'],
+      help: 'Override the architecture of host artifacts to precache.',
+      hide: !verboseHelp,
+    );
   }
 
   final Cache _cache;
   final Logger _logger;
   final Platform _platform;
   final FeatureFlags _featureFlags;
+  final OperatingSystemUtils _os;
 
   @override
   final name = 'precache';
@@ -170,6 +181,22 @@ class PrecacheCommand extends FlutterCommand {
     }
     if (boolArg('use-unsigned-mac-binaries')) {
       _cache.useUnsignedMacBinaries = true;
+    }
+    final String? hostArch = stringArg('host-arch');
+    if (hostArch != null) {
+      final HostPlatform overridePlatform = switch ((hostArch, _platform.operatingSystem)) {
+        ('x64', 'macos') => HostPlatform.darwin_x64,
+        ('x64', 'linux') => HostPlatform.linux_x64,
+        ('x64', 'windows') => HostPlatform.windows_x64,
+        ('arm64', 'macos') => HostPlatform.darwin_arm64,
+        ('arm64', 'linux') => HostPlatform.linux_arm64,
+        ('arm64', 'windows') => HostPlatform.windows_arm64,
+        _ => throwToolExit(
+          'Unsupported host architecture "$hostArch" for OS "${_platform.operatingSystem}"',
+        ),
+      };
+      _os.hostPlatformOverride = overridePlatform;
+      _cache.osUtils.hostPlatformOverride = overridePlatform;
     }
     final Set<String> explicitlyEnabled = _explicitArtifactSelections();
     _cache.platformOverrideArtifacts = explicitlyEnabled;

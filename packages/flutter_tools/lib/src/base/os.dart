@@ -143,8 +143,32 @@ abstract class OperatingSystemUtils {
     return osNames[osName] ?? osName;
   }
 
+  /// Optional override for the host platform architecture.
+  HostPlatform? hostPlatformOverride;
+
   /// Represents the platform of the host machine running the Flutter tool.
   HostPlatform get hostPlatform {
+    if (hostPlatformOverride != null) {
+      return hostPlatformOverride!;
+    }
+    final String? overrideArch = _platform.environment['FLUTTER_HOST_ARCH'];
+    if (overrideArch == 'arm64') {
+      if (_platform.isMacOS) {
+        return HostPlatform.darwin_arm64;
+      } else if (_platform.isLinux) {
+        return HostPlatform.linux_arm64;
+      } else if (_platform.isWindows) {
+        return HostPlatform.windows_arm64;
+      }
+    } else if (overrideArch == 'x64') {
+      if (_platform.isMacOS) {
+        return HostPlatform.darwin_x64;
+      } else if (_platform.isLinux) {
+        return HostPlatform.linux_x64;
+      } else if (_platform.isWindows) {
+        return HostPlatform.windows_x64;
+      }
+    }
     return switch (_currentAbi) {
       Abi.macosX64 => HostPlatform.darwin_x64,
       Abi.macosArm64 => HostPlatform.darwin_arm64,
@@ -366,29 +390,42 @@ class _MacOSUtils extends _PosixUtils {
 
   @override
   HostPlatform get hostPlatform {
+    if (hostPlatformOverride != null) {
+      return hostPlatformOverride!;
+    }
     if (_hostPlatform == null) {
-      String? sysctlPath;
-      if (which('sysctl') == null) {
-        // Fallback to known install locations.
-        for (final path in <String>['/usr/sbin/sysctl', '/sbin/sysctl']) {
-          if (_fileSystem.isFileSync(path)) {
-            sysctlPath = path;
-          }
-        }
-      } else {
-        sysctlPath = 'sysctl';
-      }
-
-      if (sysctlPath == null) {
-        throwToolExit('sysctl not found. Try adding it to your PATH environment variable.');
-      }
-      final RunResult arm64Check = _processUtils.runSync(<String>[sysctlPath, 'hw.optional.arm64']);
-      // On arm64 stdout is "sysctl hw.optional.arm64: 1"
-      // On x86 hw.optional.arm64 is unavailable and exits with 1.
-      if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
+      final String? overrideArch = _platform.environment['FLUTTER_HOST_ARCH'];
+      if (overrideArch == 'arm64') {
         _hostPlatform = HostPlatform.darwin_arm64;
-      } else {
+      } else if (overrideArch == 'x64') {
         _hostPlatform = HostPlatform.darwin_x64;
+      } else {
+        String? sysctlPath;
+        if (which('sysctl') == null) {
+          // Fallback to known install locations.
+          for (final path in <String>['/usr/sbin/sysctl', '/sbin/sysctl']) {
+            if (_fileSystem.isFileSync(path)) {
+              sysctlPath = path;
+            }
+          }
+        } else {
+          sysctlPath = 'sysctl';
+        }
+
+        if (sysctlPath == null) {
+          throwToolExit('sysctl not found. Try adding it to your PATH environment variable.');
+        }
+        final RunResult arm64Check = _processUtils.runSync(<String>[
+          sysctlPath,
+          'hw.optional.arm64',
+        ]);
+        // On arm64 stdout is "sysctl hw.optional.arm64: 1"
+        // On x86 hw.optional.arm64 is unavailable and exits with 1.
+        if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
+          _hostPlatform = HostPlatform.darwin_arm64;
+        } else {
+          _hostPlatform = HostPlatform.darwin_x64;
+        }
       }
     }
     return _hostPlatform!;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi' show Abi;
+
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -173,6 +174,49 @@ void main() {
         currentAbi: Abi.macosArm64,
       );
       expect(utils.hostPlatform, HostPlatform.darwin_arm64);
+    });
+
+    testWithoutContext('macOS ARM64 with FLUTTER_HOST_ARCH=x64 override', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(
+          operatingSystem: 'macos',
+          environment: <String, String>{'FLUTTER_HOST_ARCH': 'x64'},
+        ),
+        currentAbi: Abi.macosArm64,
+      );
+      expect(utils.hostPlatform, HostPlatform.darwin_x64);
+    });
+
+    testWithoutContext('macOS x64 with FLUTTER_HOST_ARCH=arm64 override', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(
+          operatingSystem: 'macos',
+          environment: <String, String>{'FLUTTER_HOST_ARCH': 'arm64'},
+        ),
+        currentAbi: Abi.macosX64,
+      );
+      expect(utils.hostPlatform, HostPlatform.darwin_arm64);
+    });
+
+    testWithoutContext('Linux x64 with FLUTTER_HOST_ARCH=arm64 override', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(
+          operatingSystem: 'linux',
+          environment: <String, String>{'FLUTTER_HOST_ARCH': 'arm64'},
+        ),
+        currentAbi: Abi.linuxX64,
+      );
+      expect(utils.hostPlatform, HostPlatform.linux_arm64);
+    });
+
+    testWithoutContext('hostPlatformOverride property takes precedence', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kARMCheckCommand]);
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(operatingSystem: 'macos'),
+        currentAbi: Abi.macosArm64,
+      );
+      utils.hostPlatformOverride = HostPlatform.darwin_x64;
+      expect(utils.hostPlatform, HostPlatform.darwin_x64);
     });
 
     testWithoutContext('unsupported throws', () async {
