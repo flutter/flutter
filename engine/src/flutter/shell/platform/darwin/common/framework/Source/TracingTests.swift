@@ -41,7 +41,7 @@ import Testing
 
   @Test func testTraceScopeTokenDoesNotCrash() {
     let scope = Tracing.beginScope("TestScope")
-    defer { scope.end() }
+    scope.end()
   }
 }
 

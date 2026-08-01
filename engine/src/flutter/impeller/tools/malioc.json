@@ -8629,7 +8629,7 @@
             "shortest_path_cycles": [
               0.53125,
               0.53125,
-              0.140625,
+              0.15625,
               0.5,
               0.0,
               0.25,
@@ -8640,10 +8640,10 @@
               "arith_fma"
             ],
             "total_cycles": [
-              13.375,
-              13.375,
-              4.65625,
-              12.625,
+              13.625,
+              13.625,
+              4.53125,
+              13.4375,
               0.0,
               0.25,
               0.0
@@ -8651,7 +8651,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 44,
+          "uniform_registers_used": 46,
           "work_registers_used": 32
         }
       }
@@ -8659,7 +8659,7 @@
     "Mali-T880": {
       "core": "Mali-T880",
       "filename": "flutter/impeller/entity/gles/uber_sdf.frag.gles",
-      "has_uniform_computation": false,
+      "has_uniform_computation": true,
       "type": "Fragment",
       "variants": {
         "Main": {
@@ -8669,7 +8669,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              45.209999084472656,
+              43.88999938964844,
               3.0,
               4.0
             ],
@@ -8690,13 +8690,13 @@
               "arithmetic"
             ],
             "total_cycles": [
-              102.33333587646484,
+              105.66666412353516,
               3.0,
-              16.0
+              24.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 5,
+          "uniform_registers_used": 7,
           "work_registers_used": 4
         }
       }
@@ -11823,7 +11823,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 36,
+          "fp16_arithmetic": 35,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -11833,7 +11833,7 @@
             "longest_path_cycles": [
               4.0,
               3.387500047683716,
-              1.9249999523162842,
+              1.9375,
               4.0,
               0.0,
               0.25,
@@ -11855,7 +11855,7 @@
             "shortest_path_cycles": [
               0.5,
               0.453125,
-              0.15625,
+              0.171875,
               0.5,
               0.0,
               0.25,
@@ -11866,10 +11866,10 @@
               "arith_sfu"
             ],
             "total_cycles": [
-              12.625,
-              12.125,
-              4.800000190734863,
-              12.625,
+              13.4375,
+              12.4375,
+              4.875,
+              13.4375,
               0.0,
               0.25,
               0.0
@@ -11877,7 +11877,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 50,
+          "uniform_registers_used": 48,
           "work_registers_used": 32
         }
       }
