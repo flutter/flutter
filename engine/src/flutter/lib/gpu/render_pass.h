@@ -9,11 +9,14 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <vector>
 #include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/raw_ptr.h"
+#include "impeller/core/sampler.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
@@ -81,22 +84,37 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   /// can observe which mutations re-dirty it.
   void ClearPipelineStateDirtyForTesting();
 
+  /// Keeps [shader] alive until this pass is destroyed. Bindings borrow the
+  /// `impeller::ShaderMetadata` stored on the shader instead of copying it,
+  /// and the backend reads that metadata when the command buffer encodes,
+  /// which is after the last draw.
+  void RetainShader(Shader* shader);
+
   struct BufferAndUniformSlot {
-    impeller::ShaderUniformSlot slot;
+    /// The shader binding this entry was recorded for. Rebinding the same
+    /// uniform overwrites the entry rather than appending another.
+    const flutter::gpu::Shader::UniformBinding* binding = nullptr;
+    impeller::ShaderUniformSlot slot = {};
     impeller::BufferResource view;
   };
 
-  using BufferUniformMap =
-      std::unordered_map<const flutter::gpu::Shader::UniformBinding*,
-                         BufferAndUniformSlot>;
-  using TextureUniformMap =
-      std::unordered_map<const flutter::gpu::Shader::TextureBinding*,
-                         impeller::TextureAndSampler>;
+  struct TextureAndSamplerSlot {
+    const flutter::gpu::Shader::TextureBinding* binding = nullptr;
+    impeller::SampledImageSlot slot = {};
+    impeller::TextureResource texture;
+    impeller::raw_ptr<const impeller::Sampler> sampler;
+  };
 
-  BufferUniformMap vertex_uniform_bindings;
-  TextureUniformMap vertex_texture_bindings;
-  BufferUniformMap fragment_uniform_bindings;
-  TextureUniformMap fragment_texture_bindings;
+  // Bindings are replayed in full on every draw, and a draw binds well under
+  // 16 of them, so these are flat lists scanned linearly rather than hash
+  // maps. Draws see them in the order they were first bound.
+  using BufferUniformList = std::vector<BufferAndUniformSlot>;
+  using TextureUniformList = std::vector<TextureAndSamplerSlot>;
+
+  BufferUniformList vertex_uniform_bindings;
+  TextureUniformList vertex_texture_bindings;
+  BufferUniformList fragment_uniform_bindings;
+  TextureUniformList fragment_texture_bindings;
 
   // Vertex buffers indexed by binding slot. Mirrors
   // `impeller::kMaxVertexBuffers`; Impeller's HAL caps vertex buffer
@@ -141,6 +159,11 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   impeller::RenderTarget render_target_;
   std::shared_ptr<impeller::RenderPass> render_pass_;
+
+  // Shaders whose reflection metadata the recorded bindings point at. Held
+  // for the whole pass, not just until `ClearBindings`, because draws
+  // recorded before a rebind still reference it.
+  std::vector<fml::RefPtr<Shader>> retained_shaders_;
 
   // Command encoding state.
   fml::RefPtr<RenderPipeline> render_pipeline_;

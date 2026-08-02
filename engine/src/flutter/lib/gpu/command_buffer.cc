@@ -5,6 +5,7 @@
 #include "flutter/lib/gpu/command_buffer.h"
 
 #include "dart_api.h"
+#include "flutter/lib/gpu/render_pass.h"
 #include "fml/make_copyable.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/renderer/command_buffer.h"
@@ -40,10 +41,12 @@ std::shared_ptr<impeller::CommandBuffer> CommandBuffer::GetCommandBuffer() {
 }
 
 void CommandBuffer::AddRenderPass(
-    std::shared_ptr<impeller::RenderPass> render_pass) {
+    std::shared_ptr<impeller::RenderPass> render_pass,
+    fml::RefPtr<RenderPass> owner) {
   Encodable encodable;
   encodable.render_pass = std::move(render_pass);
   encodables_.push_back(std::move(encodable));
+  retained_render_passes_.push_back(std::move(owner));
 }
 
 std::shared_ptr<impeller::BlitPass> CommandBuffer::GetOrCreateBlitPass() {
