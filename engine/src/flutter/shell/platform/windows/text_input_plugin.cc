@@ -316,9 +316,6 @@ void TextInputPlugin::HandleMethodCall(
     if (selection_base == -1 && selection_extent == -1) {
       selection_base = selection_extent = 0;
     }
-    active_model_->SetText(text->value.GetString());
-    active_model_->SetSelection(TextRange(selection_base, selection_extent));
-
     base = args.FindMember(kComposingBaseKey);
     extent = args.FindMember(kComposingExtentKey);
     if (base == args.MemberEnd() || base->value.IsNull() ||
@@ -330,13 +327,16 @@ void TextInputPlugin::HandleMethodCall(
     int composing_base = base->value.GetInt();
     int composing_extent = extent->value.GetInt();
     if (composing_base == -1 && composing_extent == -1) {
-      active_model_->EndComposing();
-    } else {
-      int composing_start = std::min(composing_base, composing_extent);
-      int cursor_offset = selection_base - composing_start;
-      active_model_->SetComposingRange(
-          TextRange(composing_base, composing_extent), cursor_offset);
+      composing_base = composing_extent = 0;
     }
+
+    // Apply the framework's editing state in a single SetText call so the
+    // composing range is preserved: SetText derives composing state from the
+    // range, whereas a later SetComposingRange call would be a no-op because
+    // the single-argument SetText resets composing state first.
+    active_model_->SetText(text->value.GetString(),
+                           TextRange(selection_base, selection_extent),
+                           TextRange(composing_base, composing_extent));
   } else if (method.compare(kSetMarkedTextRect) == 0) {
     FlutterWindowsView* view = engine_->view(view_id_);
     if (view == nullptr) {
