@@ -471,12 +471,14 @@ class SkwasmRenderer extends Renderer {
     // is multi-threaded and the provided texture type cannot be natively transferred
     // between threads, convert the texture to a transferable DomImageBitmap first.
     if (!transferOwnership || (isMultiThreaded && !_isTransferable(textureSource))) {
-      textureSource = (await createImageBitmap(textureSource, (
+      textureSource = await createImageBitmap(
+        textureSource,
         x: 0,
         y: 0,
         width: width,
         height: height,
-      ))).toJSAnyShallow;
+      );
+
     }
     final ImageHandle handle = imageCreateFromTextureSource(
       textureSource as JSObject,

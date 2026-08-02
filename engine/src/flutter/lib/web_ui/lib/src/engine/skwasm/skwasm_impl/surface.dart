@@ -9,6 +9,7 @@ import 'dart:_wasm';
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:js_interop';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -197,7 +198,10 @@ class SkwasmSurface implements OffscreenSurface {
   }
 
   @override
-  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures) async {
+  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(
+    List<ui.Picture> pictures, {
+    BitmapSize? size,
+  }) async {
     await initialized;
     final int callbackId = withStackScope((StackScope scope) {
       final Pointer<PictureHandle> pictureHandles = scope
@@ -215,7 +219,26 @@ class SkwasmSurface implements OffscreenSurface {
       rasterStartMicros: (rasterResult.rasterStartMilliseconds * 1000).toInt(),
       rasterEndMicros: (rasterResult.rasterEndMilliseconds * 1000).toInt(),
     );
-    return result.imageBitmaps;
+
+    final List<DomImageBitmap> imageBitmaps = result.imageBitmaps;
+    if (size != null) {
+      final croppedBitmaps = <DomImageBitmap>[];
+      for (final bitmap in imageBitmaps) {
+        if (bitmap.width != size.width || bitmap.height != size.height) {
+          croppedBitmaps.add(await createImageBitmap(
+            bitmap,
+            x: 0,
+            y: 0,
+            width: size.width.toInt(),
+            height: size.height.toInt(),
+          ));
+        } else {
+          croppedBitmaps.add(bitmap);
+        }
+      }
+      return croppedBitmaps;
+    }
+    return imageBitmaps;
   }
 
   @override
@@ -241,6 +264,18 @@ class SkwasmSurface implements OffscreenSurface {
     _currentSize = size;
     final int callbackId = surfaceSetSize(handle, size.width, size.height);
     await SkwasmCallbackHandler.instance.registerCallback(callbackId);
+  }
+
+  @override
+  Future<void> setMinimumSize(BitmapSize size) async {
+    if (size.width <= _currentSize.width && size.height <= _currentSize.height) {
+      return;
+    }
+    final newSize = BitmapSize(
+      math.max(size.width, _currentSize.width),
+      math.max(size.height, _currentSize.height),
+    );
+    await setSize(newSize);
   }
 
   @override
