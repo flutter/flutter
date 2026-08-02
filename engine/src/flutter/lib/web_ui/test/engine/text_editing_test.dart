@@ -860,6 +860,65 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
+    test('does not echo a programmatic setEditingState change as an autofill', () async {
+      // A programmatic controller.text change on a focused autofill field arrives
+      // through setEditingState. The next autofill rescan (e.g. after the tab is
+      // switched away and back) must not mistake that framework value for a browser
+      // autofill and forward it, which would collapse the cursor to the end.
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      // The framework programmatically sets a new value on the focused field.
+      send(
+        const MethodCall('TextInput.setEditingState', <String, dynamic>{
+          'text': 'from-code@example.com',
+          'selectionBase': 21,
+          'selectionExtent': 21,
+          'composingBase': -1,
+          'composingExtent': -1,
+        }),
+      );
+
+      final strategy = textEditing.strategy;
+      strategy.debugDocumentHasFocusOverride = true;
+      strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+      spy.messages.clear();
+
+      // The tab is switched away: the field blurs (null relatedTarget) and an
+      // autofill rescan runs. The programmatic value was recorded, so it must not
+      // be re-forwarded as a fake autofill.
+      strategy.handleBlur(createDomEvent('Event', 'blur'));
+
+      final Iterable<PlatformMessage> autofillMessages = spy.messages.where(
+        (PlatformMessage message) =>
+            message.methodName == 'TextInputClient.updateEditingStateWithTag',
+      );
+      expect(autofillMessages, isEmpty);
+
+      strategy.debugDocumentHasFocusOverride = null;
+      strategy.debugDocumentVisibilityStateOverride = null;
+      send(const MethodCall('TextInput.clearClient'));
+      spy.tearDown();
+    });
+
     test('geometry update before the input is shown does not throw (autofill)', () async {
       // A setEditableSizeAndTransform can arrive before TextInput.show enables
       // the strategy (for example a password manager forcing a relayout of the
@@ -3899,6 +3958,7 @@ Future<void> testMain() async {
 
       final formChildNodes =
           autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+      final DomHTMLInputElement email = formChildNodes[0];
       final DomHTMLInputElement username = formChildNodes[1];
       final DomHTMLInputElement password = formChildNodes[2];
 
@@ -3915,6 +3975,14 @@ Future<void> testMain() async {
       expect(password.style.height, isNot('0px'));
       expect(password.style.pointerEvents, 'none');
       expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
+      // They are also removed from the tab order and the accessibility tree so
+      // keyboard Tab and screen readers do not land on the invisible fields, while
+      // the focused field stays reachable.
+      expect(username.tabIndex, -1);
+      expect(username.getAttribute('aria-hidden'), 'true');
+      expect(password.tabIndex, -1);
+      expect(password.getAttribute('aria-hidden'), 'true');
+      expect(email.getAttribute('aria-hidden'), isNull);
     }, skip: isSafari);
 
     test('hidden autofill elements should not have a width and height of 0 on Safari', () {

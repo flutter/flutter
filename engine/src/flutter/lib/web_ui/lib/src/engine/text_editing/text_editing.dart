@@ -412,9 +412,18 @@ class EngineAutofillForm {
     // from when it was focused, so reset the non-focused fields here to keep
     // them from intercepting taps meant for the app UI.
     for (final MapEntry<String, DomHTMLElement> entry in elements.entries) {
-      entry.value.style.pointerEvents = entry.key == focusedAutofill.uniqueIdentifier
-          ? 'all'
-          : 'none';
+      final bool isFocused = entry.key == focusedAutofill.uniqueIdentifier;
+      entry.value.style.pointerEvents = isFocused ? 'all' : 'none';
+      // The focused field stays interactive (its tabIndex is set in
+      // _reuseDormantAutofillElementOrCreate); the others are kept discoverable for
+      // password managers but out of the tab order and the accessibility tree, so
+      // Tab and screen readers do not land on an invisible field.
+      if (isFocused) {
+        entry.value.removeAttribute('aria-hidden');
+      } else {
+        entry.value.tabIndex = -1;
+        entry.value.setAttribute('aria-hidden', 'true');
+      }
     }
 
     _updateFieldValues();
@@ -551,6 +560,11 @@ class EngineAutofillForm {
           shouldHideElement: false,
           shouldDisablePointerEvents: true,
         );
+        // Keep the proxy discoverable to password managers (which scan the DOM)
+        // but out of the tab order and the accessibility tree, so keyboard Tab
+        // and screen readers do not land on this invisible field.
+        htmlElement.tabIndex = -1;
+        htmlElement.setAttribute('aria-hidden', 'true');
       }
 
       elements[field.autofillInfo.uniqueIdentifier] = htmlElement;
@@ -2010,6 +2024,13 @@ abstract class DefaultTextEditingStrategy
       return;
     }
     lastEditingState!.applyToDomElement(domElement);
+    // Record the framework's value so a later autofill rescan does not mistake this
+    // programmatic update for a browser autofill and echo it back (which would
+    // collapse the cursor to the end). See EngineAutofillForm.noteFrameworkEditingState.
+    inputConfiguration.autofillGroup?.noteFrameworkEditingState(
+      inputConfiguration.autofill!.uniqueIdentifier,
+      lastEditingState!,
+    );
   }
 
   void placeElement() {
