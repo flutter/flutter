@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/command_buffer.h"
 
+#include "impeller/base/validation.h"
 #include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
@@ -40,8 +41,13 @@ void CommandBuffer::WaitUntilScheduled() {
 }
 
 std::shared_ptr<RenderPass> CommandBuffer::CreateRenderPass(
-    const RenderTarget& render_target) {
-  auto pass = OnCreateRenderPass(render_target);
+    const RenderTarget& render_target,
+    const TimestampWrites& timestamp_writes) {
+  if (timestamp_writes.HasWrites() && !timestamp_writes.IsValid()) {
+    VALIDATION_LOG << "Invalid timestamp writes for render pass.";
+    return nullptr;
+  }
+  auto pass = OnCreateRenderPass(render_target, timestamp_writes);
   if (pass && pass->IsValid()) {
     pass->SetLabel("RenderPass");
     return pass;

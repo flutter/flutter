@@ -77,6 +77,8 @@ impeller_component("renderer") {
     "surface.h",
     "texture_util.cc",
     "texture_util.h",
+    "timestamp_query_pool.cc",
+    "timestamp_query_pool.h",
     "vertex_buffer_builder.cc",
     "vertex_buffer_builder.h",
     "vertex_descriptor.cc",

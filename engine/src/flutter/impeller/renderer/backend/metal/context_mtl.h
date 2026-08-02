@@ -119,6 +119,10 @@ class ContextMTL final : public Context,
   std::shared_ptr<CommandQueue> GetCommandQueue() const override;
 
   // |Context|
+  std::shared_ptr<TimestampQueryPool> CreateTimestampQueryPool(
+      size_t query_count) const override;
+
+  // |Context|
   const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
 
   // |Context|

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/metal/context_mtl.h"
+
 #include <Metal/Metal.h>
 
 #include <memory>
@@ -17,6 +18,7 @@
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/metal/gpu_tracer_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_library_mtl.h"
+#include "impeller/renderer/backend/metal/timestamp_query_pool_mtl.h"
 #include "impeller/renderer/capabilities.h"
 
 namespace impeller {
@@ -89,6 +91,7 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
       .SetSupportsExtendedRangeFormats(
           DeviceSupportsExtendedRangeFormats(device))
+      .SetSupportsTimestampQueries(TimestampQueryPoolMTL::IsSupported(device))
       .SetSupportsTextureCompression(CompressedTextureFamily::kBC,
                                      DeviceSupportsTextureCompressionBC(device))
       .SetSupportsTextureCompression(
@@ -500,6 +503,12 @@ void ContextMTL::SyncSwitchObserver::OnSyncSwitchUpdate(bool new_is_disabled) {
 // |Context|
 std::shared_ptr<CommandQueue> ContextMTL::GetCommandQueue() const {
   return command_queue_ip_;
+}
+
+// |Context|
+std::shared_ptr<TimestampQueryPool> ContextMTL::CreateTimestampQueryPool(
+    size_t query_count) const {
+  return TimestampQueryPoolMTL::Create(device_, query_count);
 }
 
 // |Context|

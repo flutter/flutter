@@ -1632,4 +1632,94 @@ void main() async {
     final ui.Image image = state.renderTexture.asImage();
     await comparer.addGoldenImage(image, 'flutter_gpu_test_viewport.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('TimestampQuerySet validates its slot indices', () async {
+    if (!gpu.gpuContext.doesSupportTimestampQueries) {
+      return;
+    }
+    final gpu.TimestampQuerySet querySet = gpu.gpuContext.createTimestampQuerySet(count: 2);
+    expect(querySet.count, 2);
+
+    expect(() => gpu.gpuContext.createTimestampQuerySet(count: 0), throwsArgumentError);
+
+    final gpu.TimestampQueryResults results = await querySet.resolve();
+    expect(results.timestamps.length, 2);
+    expect(results.timestamps, everyElement(isNull));
+
+    final gpu.Texture renderTexture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      100,
+      100,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.RenderTarget renderTarget = gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: renderTexture),
+    );
+    expect(
+      () => commandBuffer.createRenderPass(
+        renderTarget,
+        timestampWrites: gpu.TimestampWrites(querySet: querySet, beginningOfPassWriteIndex: 5),
+      ),
+      throwsRangeError,
+    );
+    expect(
+      () => commandBuffer.createRenderPass(
+        renderTarget,
+        timestampWrites: gpu.TimestampWrites(
+          querySet: querySet,
+          beginningOfPassWriteIndex: 0,
+          endOfPassWriteIndex: 0,
+        ),
+      ),
+      throwsArgumentError,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Can resolve GPU timestamps written by a render pass', () async {
+    if (!gpu.gpuContext.doesSupportTimestampQueries) {
+      return;
+    }
+    final gpu.TimestampQuerySet querySet = gpu.gpuContext.createTimestampQuerySet(count: 2);
+
+    final gpu.Texture renderTexture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      100,
+      100,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.RenderPass renderPass = commandBuffer.createRenderPass(
+      gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: renderTexture)),
+      timestampWrites: gpu.TimestampWrites(
+        querySet: querySet,
+        beginningOfPassWriteIndex: 0,
+        endOfPassWriteIndex: 1,
+      ),
+    );
+
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    renderPass.bindPipeline(pipeline);
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    renderPass.bindVertexBuffer(
+      transients.emplace(float32(<double>[-0.5, -0.5, 0, 0.5, 0.5, -0.5])),
+    );
+    renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Vector4(0, 1, 0, 1))),
+    );
+    renderPass.draw(3);
+    commandBuffer.submit();
+
+    final gpu.TimestampQueryResults results = await querySet.resolve();
+    expect(results.timestamps.length, 2);
+    if (results.disjoint) {
+      return;
+    }
+    // A backend is free to drop a query, so ordering is only checked when both
+    // slots actually landed.
+    final int? beginning = results.timestamps[0];
+    final int? end = results.timestamps[1];
+    if (beginning != null && end != null) {
+      expect(end, greaterThanOrEqualTo(beginning));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
 }

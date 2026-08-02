@@ -111,7 +111,16 @@ void CommandBufferGLES::OnWaitUntilScheduled() {
 
 // |CommandBuffer|
 std::shared_ptr<RenderPass> CommandBufferGLES::OnCreateRenderPass(
-    RenderTarget target) {
+    RenderTarget target,
+    const TimestampWrites& timestamp_writes) {
+  // TODO(bdero): Record timestamps on GLES. This needs `glQueryCounterEXT`
+  // added to the proc table, a `GL_TIMESTAMP_EXT` probe (the GLES flavor of
+  // `GL_EXT_disjoint_timer_query` may only implement `GL_TIME_ELAPSED_EXT`),
+  // and a `GL_GPU_DISJOINT_EXT` check feeding
+  // `TimestampQueryResults::disjoint`. Until then
+  // `Capabilities::SupportsTimestampQueries` reports false, so a pool can
+  // never reach this point.
+  // https://github.com/flutter/flutter/issues/190404
   if (!IsValid()) {
     return nullptr;
   }

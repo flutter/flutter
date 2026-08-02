@@ -157,7 +157,8 @@ class MockCommandBuffer : public CommandBuffer {
               (override));
   MOCK_METHOD(std::shared_ptr<RenderPass>,
               OnCreateRenderPass,
-              (RenderTarget render_target),
+              (RenderTarget render_target,
+               const TimestampWrites& timestamp_writes),
               (override));
 };
 

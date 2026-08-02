@@ -19,6 +19,7 @@
 #include "impeller/renderer/backend/metal/pipeline_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
+#include "impeller/renderer/backend/metal/timestamp_query_pool_mtl.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
@@ -107,7 +108,8 @@ static bool ConfigureStencilAttachment(
 }
 
 static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
-    const RenderTarget& desc) {
+    const RenderTarget& desc,
+    const TimestampWrites& timestamp_writes) {
   auto result = [MTLRenderPassDescriptor renderPassDescriptor];
 
   bool configured_attachment = desc.IterateAllColorAttachments(
@@ -137,15 +139,22 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
     return nil;
   }
 
+  if (timestamp_writes.pool) {
+    TimestampQueryPoolMTL::Cast(*timestamp_writes.pool)
+        .AttachTo(result, timestamp_writes.beginning_of_pass_write_index,
+                  timestamp_writes.end_of_pass_write_index);
+  }
+
   return result;
 }
 
 RenderPassMTL::RenderPassMTL(std::shared_ptr<const Context> context,
                              const RenderTarget& target,
-                             id<MTLCommandBuffer> buffer)
+                             id<MTLCommandBuffer> buffer,
+                             const TimestampWrites& timestamp_writes)
     : RenderPass(std::move(context), target),
       buffer_(buffer),
-      desc_(ToMTLRenderPassDescriptor(GetRenderTarget())) {
+      desc_(ToMTLRenderPassDescriptor(GetRenderTarget(), timestamp_writes)) {
   if (!buffer_ || !desc_ || !render_target_.IsValid()) {
     return;
   }

@@ -52,6 +52,8 @@ source_set("gpu") {
       "shader_library.h",
       "texture.cc",
       "texture.h",
+      "timestamp_query_set.cc",
+      "timestamp_query_set.h",
     ]
   }
   deps = [

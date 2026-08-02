@@ -10,6 +10,7 @@
 
 #include "impeller/renderer/blit_pass.h"
 #include "impeller/renderer/compute_pass.h"
+#include "impeller/renderer/timestamp_query_pool.h"
 
 namespace impeller {
 
@@ -75,13 +76,18 @@ class CommandBuffer {
   //----------------------------------------------------------------------------
   /// @brief      Create a render pass to record render commands into.
   ///
-  /// @param[in]  render_target  The description of the render target this pass
-  ///                            will target.
+  /// @param[in]  render_target     The description of the render target this
+  ///                               pass will target.
+  /// @param[in]  timestamp_writes  The GPU timestamps to record at the
+  ///                               boundaries of this pass. Ignored by
+  ///                               backends that do not support timestamp
+  ///                               queries.
   ///
   /// @return     A valid render pass or null.
   ///
   std::shared_ptr<RenderPass> CreateRenderPass(
-      const RenderTarget& render_target);
+      const RenderTarget& render_target,
+      const TimestampWrites& timestamp_writes = {});
 
   //----------------------------------------------------------------------------
   /// @brief      Create a blit pass to record blit commands into.
@@ -103,7 +109,8 @@ class CommandBuffer {
   explicit CommandBuffer(std::weak_ptr<const Context> context);
 
   virtual std::shared_ptr<RenderPass> OnCreateRenderPass(
-      RenderTarget render_target) = 0;
+      RenderTarget render_target,
+      const TimestampWrites& timestamp_writes) = 0;
 
   virtual std::shared_ptr<BlitPass> OnCreateBlitPass() = 0;
 

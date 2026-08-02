@@ -237,6 +237,7 @@ void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
                                       VK_SAMPLE_COUNT_4_BIT);
   pProperties->limits.maxImageDimension2D = 4096;
   pProperties->limits.timestampPeriod = 1;
+  pProperties->limits.timestampComputeAndGraphics = VK_TRUE;
   if (GetMockVulkanState().physical_device_properties_callback) {
     GetMockVulkanState().physical_device_properties_callback(physicalDevice,
                                                              pProperties);
@@ -253,6 +254,7 @@ void vkGetPhysicalDeviceQueueFamilyProperties(
     pQueueFamilyProperties[0].queueCount = 3;
     pQueueFamilyProperties[0].queueFlags = static_cast<VkQueueFlags>(
         VK_QUEUE_TRANSFER_BIT | VK_QUEUE_COMPUTE_BIT | VK_QUEUE_GRAPHICS_BIT);
+    pQueueFamilyProperties[0].timestampValidBits = 64;
   }
 }
 
@@ -523,6 +525,24 @@ void vkCmdBindPipeline(VkCommandBuffer commandBuffer,
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(commandBuffer);
   mock_command_buffer->called_functions_->push_back("vkCmdBindPipeline");
+}
+
+void vkCmdResetQueryPool(VkCommandBuffer commandBuffer,
+                         VkQueryPool queryPool,
+                         uint32_t firstQuery,
+                         uint32_t queryCount) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->called_functions_->push_back("vkCmdResetQueryPool");
+}
+
+void vkCmdWriteTimestamp(VkCommandBuffer commandBuffer,
+                         VkPipelineStageFlagBits pipelineStage,
+                         VkQueryPool queryPool,
+                         uint32_t query) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(commandBuffer);
+  mock_command_buffer->called_functions_->push_back("vkCmdWriteTimestamp");
 }
 
 void vkCmdPipelineBarrier(VkCommandBuffer commandBuffer,
@@ -1004,6 +1024,10 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateDebugUtilsMessengerEXT);
   } else if (strcmp("vkSetDebugUtilsObjectNameEXT", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkSetDebugUtilsObjectNameEXT);
+  } else if (strcmp("vkCmdResetQueryPool", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdResetQueryPool);
+  } else if (strcmp("vkCmdWriteTimestamp", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdWriteTimestamp);
   } else if (strcmp("vkCreateQueryPool", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateQueryPool);
   } else if (strcmp("vkDestroyQueryPool", pName) == 0) {

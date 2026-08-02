@@ -196,7 +196,8 @@ void CommandBufferMTL::OnWaitUntilCompleted() {}
 void CommandBufferMTL::OnWaitUntilScheduled() {}
 
 std::shared_ptr<RenderPass> CommandBufferMTL::OnCreateRenderPass(
-    RenderTarget target) {
+    RenderTarget target,
+    const TimestampWrites& timestamp_writes) {
   if (!buffer_) {
     return nullptr;
   }
@@ -206,7 +207,7 @@ std::shared_ptr<RenderPass> CommandBufferMTL::OnCreateRenderPass(
     return nullptr;
   }
   auto pass = std::shared_ptr<RenderPassMTL>(
-      new RenderPassMTL(context, target, buffer_));
+      new RenderPassMTL(context, target, buffer_, timestamp_writes));
   if (!pass->IsValid()) {
     return nullptr;
   }

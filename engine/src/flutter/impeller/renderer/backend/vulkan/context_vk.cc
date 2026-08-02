@@ -41,6 +41,7 @@
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
+#include "impeller/renderer/backend/vulkan/timestamp_query_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
 #include "impeller/renderer/capabilities.h"
 
@@ -650,6 +651,11 @@ std::shared_ptr<DescriptorPoolRecyclerVK> ContextVK::GetDescriptorPoolRecycler()
 
 std::shared_ptr<CommandQueue> ContextVK::GetCommandQueue() const {
   return command_queue_vk_;
+}
+
+std::shared_ptr<TimestampQueryPool> ContextVK::CreateTimestampQueryPool(
+    size_t query_count) const {
+  return TimestampQueryPoolVK::Create(*this, query_count);
 }
 
 bool ContextVK::EnqueueCommandBuffer(

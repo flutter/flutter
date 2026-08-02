@@ -15,6 +15,10 @@ size_t Capabilities::GetMinimumStorageBufferAlignment() const {
   return GetMinimumUniformAlignment();
 }
 
+bool Capabilities::SupportsTimestampQueries() const {
+  return false;
+}
+
 class StandardCapabilities final : public Capabilities {
  public:
   // |Capabilities|
@@ -129,6 +133,11 @@ class StandardCapabilities final : public Capabilities {
     return needs_partitioned_host_buffer_;
   }
 
+  // |Capabilities|
+  bool SupportsTimestampQueries() const override {
+    return supports_timestamp_queries_;
+  }
+
  private:
   StandardCapabilities(bool supports_offscreen_msaa,
                        bool supports_ssbo,
@@ -148,6 +157,7 @@ class StandardCapabilities final : public Capabilities {
                        ISize default_maximum_render_pass_attachment_size,
                        size_t minimum_uniform_alignment,
                        bool needs_partitioned_host_buffer,
+                       bool supports_timestamp_queries,
                        bool supports_texture_compression_bc,
                        bool supports_texture_compression_etc2,
                        bool supports_texture_compression_astc,
@@ -165,6 +175,7 @@ class StandardCapabilities final : public Capabilities {
         supports_triangle_fan_(supports_triangle_fan),
         supports_extended_range_formats_(supports_extended_range_formats),
         needs_partitioned_host_buffer_(needs_partitioned_host_buffer),
+        supports_timestamp_queries_(supports_timestamp_queries),
         default_color_format_(default_color_format),
         default_stencil_format_(default_stencil_format),
         default_depth_stencil_format_(default_depth_stencil_format),
@@ -192,6 +203,7 @@ class StandardCapabilities final : public Capabilities {
   bool supports_triangle_fan_ = false;
   bool supports_extended_range_formats_ = false;
   bool needs_partitioned_host_buffer_ = false;
+  bool supports_timestamp_queries_ = false;
   PixelFormat default_color_format_ = PixelFormat::kUnknown;
   PixelFormat default_stencil_format_ = PixelFormat::kUnknown;
   PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
@@ -336,6 +348,12 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetNeedsPartitionedHostBuffer(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsTimestampQueries(
+    bool value) {
+  supports_timestamp_queries_ = value;
+  return *this;
+}
+
 std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   return std::unique_ptr<StandardCapabilities>(new StandardCapabilities(   //
@@ -357,6 +375,7 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       default_maximum_render_pass_attachment_size_.value_or(ISize{1, 1}),  //
       minimum_uniform_alignment_,                                          //
       needs_partitioned_host_buffer_,                                      //
+      supports_timestamp_queries_,                                         //
       supports_texture_compression_bc_,                                    //
       supports_texture_compression_etc2_,                                  //
       supports_texture_compression_astc_,                                  //

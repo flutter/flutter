@@ -7,6 +7,8 @@
 #include <mutex>
 #include <utility>
 
+#include "impeller/renderer/timestamp_query_pool.h"
+
 namespace impeller {
 
 ImpellerContextFuture::ImpellerContextFuture(
@@ -53,6 +55,11 @@ bool Context::AddTrackingFence(const std::shared_ptr<Texture>& texture) const {
 
 bool Context::SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer) {
   return EnqueueCommandBuffer(std::move(cmd_buffer));
+}
+
+std::shared_ptr<TimestampQueryPool> Context::CreateTimestampQueryPool(
+    size_t query_count) const {
+  return nullptr;
 }
 
 }  // namespace impeller

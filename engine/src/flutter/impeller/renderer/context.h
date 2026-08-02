@@ -27,6 +27,7 @@ namespace impeller {
 class ShaderLibrary;
 class CommandBuffer;
 class PipelineLibrary;
+class TimestampQueryPool;
 
 /// A wrapper for provided a deferred initialization of impeller to various
 /// engine subsystems.
@@ -187,6 +188,20 @@ class Context {
 
   /// @brief Return the graphics queue for submitting command buffers.
   virtual std::shared_ptr<CommandQueue> GetCommandQueue() const = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Create a pool of [query_count] slots that passes can write GPU
+  ///             timestamps into.
+  ///
+  ///             Attach a pool to a pass with `TimestampWrites` when creating
+  ///             the pass, then read the slots back once the GPU has retired
+  ///             the command buffer.
+  ///
+  /// @return     A new pool, or nullptr if the backend cannot record
+  ///             timestamps. See `Capabilities::SupportsTimestampQueries`.
+  ///
+  virtual std::shared_ptr<TimestampQueryPool> CreateTimestampQueryPool(
+      size_t query_count) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Force all pending asynchronous work to finish. This is

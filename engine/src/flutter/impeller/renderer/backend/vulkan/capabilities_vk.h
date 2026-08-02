@@ -303,6 +303,9 @@ class CapabilitiesVK final : public Capabilities,
   // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
 
+  // |Capabilities|
+  bool SupportsTimestampQueries() const override;
+
   //----------------------------------------------------------------------------
   /// @return     If fixed-rate compression for non-onscreen surfaces is
   ///             supported.

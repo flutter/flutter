@@ -147,8 +147,14 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
 
 RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                            const RenderTarget& target,
-                           std::shared_ptr<CommandBufferVK> command_buffer)
+                           std::shared_ptr<CommandBufferVK> command_buffer,
+                           const TimestampWrites& timestamp_writes)
     : RenderPass(context, target), command_buffer_(std::move(command_buffer)) {
+  if (timestamp_writes.pool) {
+    timestamp_pool_ =
+        std::static_pointer_cast<TimestampQueryPoolVK>(timestamp_writes.pool);
+    end_of_pass_timestamp_index_ = timestamp_writes.end_of_pass_write_index;
+  }
   const ColorAttachment& color0 = render_target_.GetColorAttachment(0);
   color_image_vk_ = color0.texture;
   resolve_image_vk_ = color0.resolve_texture;
@@ -237,6 +243,14 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
       static_cast<uint32_t>(target_size.height);
   pass_info.setPClearValues(clears.data());
   pass_info.setClearValueCount(clear_count);
+
+  // Recorded outside the render pass instance, since resetting a query is not
+  // allowed inside one.
+  if (timestamp_pool_ && timestamp_writes.beginning_of_pass_write_index) {
+    timestamp_pool_->RecordTimestamp(
+        command_buffer_vk_, vk::PipelineStageFlagBits::eTopOfPipe,
+        timestamp_writes.beginning_of_pass_write_index.value());
+  }
 
   command_buffer_vk_.beginRenderPass(pass_info, vk::SubpassContents::eInline);
 
@@ -708,6 +722,11 @@ bool RenderPassVK::BindResource(ShaderStage stage,
 
 bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   command_buffer_->GetCommandBuffer().endRenderPass();
+  if (timestamp_pool_ && end_of_pass_timestamp_index_) {
+    timestamp_pool_->RecordTimestamp(command_buffer_->GetCommandBuffer(),
+                                     vk::PipelineStageFlagBits::eBottomOfPipe,
+                                     end_of_pass_timestamp_index_.value());
+  }
   return true;
 }
 

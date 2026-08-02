@@ -18,6 +18,7 @@
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/renderer/timestamp_query_pool.h"
 #include "lib/gpu/device_buffer.h"
 #include "lib/gpu/render_pipeline.h"
 #include "lib/gpu/texture.h"
@@ -50,7 +51,8 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   impeller::PipelineDescriptor& GetPipelineDescriptor();
 
-  bool Begin(flutter::gpu::CommandBuffer& command_buffer);
+  bool Begin(flutter::gpu::CommandBuffer& command_buffer,
+             const impeller::TimestampWrites& timestamp_writes);
 
   void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
 
@@ -159,7 +161,10 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_Begin(
     flutter::gpu::RenderPass* wrapper,
-    flutter::gpu::CommandBuffer* command_buffer);
+    flutter::gpu::CommandBuffer* command_buffer,
+    Dart_Handle timestamp_query_set_wrapper,
+    int beginning_of_pass_write_index,
+    int end_of_pass_write_index);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_BindPipeline(

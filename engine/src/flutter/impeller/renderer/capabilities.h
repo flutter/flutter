@@ -144,6 +144,10 @@ class Capabilities {
   /// for indexes from other data.
   virtual bool NeedsPartitionedHostBuffer() const = 0;
 
+  /// @brief Whether the backend can write GPU timestamps at pass boundaries.
+  ///        When false, `Context::CreateTimestampQueryPool` returns nullptr.
+  virtual bool SupportsTimestampQueries() const;
+
  protected:
   Capabilities();
 
@@ -198,6 +202,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetNeedsPartitionedHostBuffer(bool value);
 
+  CapabilitiesBuilder& SetSupportsTimestampQueries(bool value);
+
   std::unique_ptr<Capabilities> Build();
 
  private:
@@ -213,6 +219,7 @@ class CapabilitiesBuilder {
   bool supports_triangle_fan_ = false;
   bool supports_extended_range_formats_ = false;
   bool needs_partitioned_host_buffer_ = false;
+  bool supports_timestamp_queries_ = false;
   bool supports_texture_compression_bc_ = false;
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;

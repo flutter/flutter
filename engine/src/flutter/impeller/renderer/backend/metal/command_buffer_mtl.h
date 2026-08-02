@@ -44,7 +44,9 @@ class CommandBufferMTL final : public CommandBuffer {
   void OnWaitUntilScheduled() override;
 
   // |CommandBuffer|
-  std::shared_ptr<RenderPass> OnCreateRenderPass(RenderTarget target) override;
+  std::shared_ptr<RenderPass> OnCreateRenderPass(
+      RenderTarget target,
+      const TimestampWrites& timestamp_writes) override;
 
   // |CommandBuffer|
   std::shared_ptr<BlitPass> OnCreateBlitPass() override;

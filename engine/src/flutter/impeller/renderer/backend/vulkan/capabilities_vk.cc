@@ -783,6 +783,12 @@ bool CapabilitiesVK::NeedsPartitionedHostBuffer() const {
   return false;
 }
 
+bool CapabilitiesVK::SupportsTimestampQueries() const {
+  // A zero period means the device has no timestamp counter at all.
+  return device_properties_.limits.timestampComputeAndGraphics &&
+         device_properties_.limits.timestampPeriod > 0.f;
+}
+
 bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {
   return required_common_device_extensions_.find(ext) !=
          required_common_device_extensions_.end();

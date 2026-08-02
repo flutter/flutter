@@ -58,6 +58,14 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getSupportsOffscreenMSAA();
   }
 
+  /// Whether this device can write GPU timestamps at render pass boundaries.
+  ///
+  /// When false, [createTimestampQuerySet] throws. Timestamp queries are
+  /// currently implemented on the Metal and Vulkan backends.
+  bool get doesSupportTimestampQueries {
+    return _supportsTimestampQueries();
+  }
+
   /// Whether this device supports the given family of block-compressed
   /// texture formats. Hardware support is granted on a per-family basis.
   ///
@@ -214,6 +222,15 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return result;
   }
 
+  /// Allocates a set of [count] slots that render passes can write GPU
+  /// timestamps into.
+  ///
+  /// Throws an exception if the backend does not support timestamp queries.
+  /// See [doesSupportTimestampQueries].
+  TimestampQuerySet createTimestampQuerySet({required int count}) {
+    return TimestampQuerySet._(this, count);
+  }
+
   /// Create a new command buffer that can be used to submit GPU commands.
   CommandBuffer createCommandBuffer() {
     return CommandBuffer._(this);
@@ -262,6 +279,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetSupportsOffscreenMSAA',
   )
   external bool _getSupportsOffscreenMSAA();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_SupportsTimestampQueries',
+  )
+  external bool _supportsTimestampQueries();
 
   @Native<Bool Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_Context_SupportsTextureCompression',

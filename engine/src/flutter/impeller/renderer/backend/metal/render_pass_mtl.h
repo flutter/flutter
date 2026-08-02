@@ -46,7 +46,8 @@ class RenderPassMTL final : public RenderPass {
 
   RenderPassMTL(std::shared_ptr<const Context> context,
                 const RenderTarget& target,
-                id<MTLCommandBuffer> buffer);
+                id<MTLCommandBuffer> buffer,
+                const TimestampWrites& timestamp_writes);
 
   // |RenderPass|
   bool IsValid() const override;

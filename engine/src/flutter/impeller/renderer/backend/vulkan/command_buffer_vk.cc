@@ -53,15 +53,17 @@ void CommandBufferVK::OnWaitUntilCompleted() {}
 void CommandBufferVK::OnWaitUntilScheduled() {}
 
 std::shared_ptr<RenderPass> CommandBufferVK::OnCreateRenderPass(
-    RenderTarget target) {
+    RenderTarget target,
+    const TimestampWrites& timestamp_writes) {
   auto context = context_.lock();
   if (!context) {
     return nullptr;
   }
   auto pass =
-      std::shared_ptr<RenderPassVK>(new RenderPassVK(context,            //
-                                                     target,             //
-                                                     shared_from_this()  //
+      std::shared_ptr<RenderPassVK>(new RenderPassVK(context,             //
+                                                     target,              //
+                                                     shared_from_this(),  //
+                                                     timestamp_writes     //
                                                      ));
   if (!pass->IsValid()) {
     return nullptr;

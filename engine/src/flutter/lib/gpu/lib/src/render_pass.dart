@@ -245,9 +245,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     GpuContext gpuContext,
     CommandBuffer commandBuffer,
     RenderTarget renderTarget,
+    TimestampWrites? timestampWrites,
   ) {
     assert(() {
       renderTarget._validate();
+      timestampWrites?._validate();
       return true;
     }());
 
@@ -285,7 +287,12 @@ base class RenderPass extends NativeFieldWrapperClass1 {
         throw Exception(error);
       }
     }
-    error = _begin(commandBuffer);
+    error = _begin(
+      commandBuffer,
+      timestampWrites?.querySet,
+      timestampWrites?.beginningOfPassWriteIndex ?? -1,
+      timestampWrites?.endOfPassWriteIndex ?? -1,
+    );
     if (error != null) {
       throw Exception(error);
     }
@@ -594,10 +601,15 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     Texture texture,
   );
 
-  @Native<Handle Function(Pointer<Void>, Pointer<Void>)>(
+  @Native<Handle Function(Pointer<Void>, Pointer<Void>, Handle, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_Begin',
   )
-  external String? _begin(CommandBuffer commandBuffer);
+  external String? _begin(
+    CommandBuffer commandBuffer,
+    TimestampQuerySet? timestampQuerySet,
+    int beginningOfPassWriteIndex,
+    int endOfPassWriteIndex,
+  );
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindPipeline',

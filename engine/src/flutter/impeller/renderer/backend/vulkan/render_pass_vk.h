@@ -9,6 +9,7 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
+#include "impeller/renderer/backend/vulkan/timestamp_query_pool_vk.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
@@ -35,6 +36,8 @@ class RenderPassVK final : public RenderPass {
   std::shared_ptr<Texture> color_image_vk_;
   std::shared_ptr<Texture> resolve_image_vk_;
   uint32_t current_stencil_ = 0;
+  std::shared_ptr<TimestampQueryPoolVK> timestamp_pool_;
+  std::optional<size_t> end_of_pass_timestamp_index_;
 
   // Per-command state.
   std::array<vk::DescriptorImageInfo, kMaxBindings> image_workspace_;
@@ -55,7 +58,8 @@ class RenderPassVK final : public RenderPass {
 
   RenderPassVK(const std::shared_ptr<const Context>& context,
                const RenderTarget& target,
-               std::shared_ptr<CommandBufferVK> command_buffer);
+               std::shared_ptr<CommandBufferVK> command_buffer,
+               const TimestampWrites& timestamp_writes);
 
   // |RenderPass|
   void SetPipeline(PipelineRef pipeline) override;

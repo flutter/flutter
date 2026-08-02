@@ -140,6 +140,11 @@ extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(
   return flutter::gpu::SupportsNormalOffscreenMSAA(wrapper->GetContext());
 }
 
+extern bool InternalFlutterGpu_Context_SupportsTimestampQueries(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext().GetCapabilities()->SupportsTimestampQueries();
+}
+
 extern bool InternalFlutterGpu_Context_SupportsTextureCompression(
     flutter::gpu::Context* wrapper,
     int family) {

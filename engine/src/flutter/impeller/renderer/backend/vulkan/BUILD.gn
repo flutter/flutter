@@ -42,6 +42,7 @@ impeller_component("vulkan_unittests") {
     "test/mock_vulkan_unittests.cc",
     "test/sampler_library_vk_unittests.cc",
     "test/swapchain_unittests.cc",
+    "test/timestamp_query_pool_unittests.cc",
   ]
   deps = [
     ":mock_vulkan",
@@ -133,6 +134,8 @@ impeller_component("vulkan") {
     "texture_source_vk.h",
     "texture_vk.cc",
     "texture_vk.h",
+    "timestamp_query_pool_vk.cc",
+    "timestamp_query_pool_vk.h",
     "tracked_objects_vk.cc",
     "tracked_objects_vk.h",
     "vertex_descriptor_vk.cc",

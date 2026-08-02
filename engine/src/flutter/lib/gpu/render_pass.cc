@@ -9,6 +9,7 @@
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/gpu/render_pipeline.h"
 #include "flutter/lib/gpu/shader.h"
+#include "flutter/lib/gpu/timestamp_query_set.h"
 #include "fml/make_copyable.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/core/buffer_view.h"
@@ -73,9 +74,10 @@ impeller::PipelineDescriptor& RenderPass::GetPipelineDescriptor() {
   return pipeline_descriptor_;
 }
 
-bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
-  render_pass_ =
-      command_buffer.GetCommandBuffer()->CreateRenderPass(render_target_);
+bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer,
+                       const impeller::TimestampWrites& timestamp_writes) {
+  render_pass_ = command_buffer.GetCommandBuffer()->CreateRenderPass(
+      render_target_, timestamp_writes);
   if (!render_pass_) {
     return false;
   }
@@ -324,8 +326,25 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
 
 Dart_Handle InternalFlutterGpu_RenderPass_Begin(
     flutter::gpu::RenderPass* wrapper,
-    flutter::gpu::CommandBuffer* command_buffer) {
-  if (!wrapper->Begin(*command_buffer)) {
+    flutter::gpu::CommandBuffer* command_buffer,
+    Dart_Handle timestamp_query_set_wrapper,
+    int beginning_of_pass_write_index,
+    int end_of_pass_write_index) {
+  impeller::TimestampWrites timestamp_writes;
+  if (!Dart_IsNull(timestamp_query_set_wrapper)) {
+    flutter::gpu::TimestampQuerySet* query_set =
+        tonic::DartConverter<flutter::gpu::TimestampQuerySet*>::FromDart(
+            timestamp_query_set_wrapper);
+    timestamp_writes.pool = query_set->GetPool();
+    if (beginning_of_pass_write_index >= 0) {
+      timestamp_writes.beginning_of_pass_write_index =
+          beginning_of_pass_write_index;
+    }
+    if (end_of_pass_write_index >= 0) {
+      timestamp_writes.end_of_pass_write_index = end_of_pass_write_index;
+    }
+  }
+  if (!wrapper->Begin(*command_buffer, timestamp_writes)) {
     return tonic::ToDart("Failed to begin RenderPass");
   }
   return Dart_Null();

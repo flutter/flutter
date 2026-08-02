@@ -47,6 +47,8 @@ impeller_component("metal") {
     "swapchain_transients_mtl.h",
     "swapchain_transients_mtl.mm",
     "texture_mtl.h",
+    "timestamp_query_pool_mtl.h",
+    "timestamp_query_pool_mtl.mm",
     "texture_mtl.mm",
     "texture_wrapper_mtl.h",
     "texture_wrapper_mtl.mm",
