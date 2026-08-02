@@ -452,6 +452,20 @@ void mockDrawElementsInstanced(GLenum mode,
 static_assert(CheckSameSignature<decltype(mockDrawElementsInstanced),  //
                                  decltype(glDrawElementsInstanced)>::value);
 
+void mockDrawArraysIndirect(GLenum mode, const void* indirect) {
+  CallMockMethod(&IMockGLESImpl::DrawArraysIndirect, mode, indirect);
+}
+
+static_assert(CheckSameSignature<decltype(mockDrawArraysIndirect),  //
+                                 decltype(glDrawArraysIndirect)>::value);
+
+void mockDrawElementsIndirect(GLenum mode, GLenum type, const void* indirect) {
+  CallMockMethod(&IMockGLESImpl::DrawElementsIndirect, mode, type, indirect);
+}
+
+static_assert(CheckSameSignature<decltype(mockDrawElementsIndirect),  //
+                                 decltype(glDrawElementsIndirect)>::value);
+
 void mockVertexAttribDivisor(GLuint index, GLuint divisor) {
   CallMockMethod(&IMockGLESImpl::VertexAttribDivisor, index, divisor);
 }
@@ -581,6 +595,10 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockDrawArraysInstanced);
   } else if (strcmp(name, "glDrawElementsInstanced") == 0) {
     return reinterpret_cast<void*>(mockDrawElementsInstanced);
+  } else if (strcmp(name, "glDrawArraysIndirect") == 0) {
+    return reinterpret_cast<void*>(mockDrawArraysIndirect);
+  } else if (strcmp(name, "glDrawElementsIndirect") == 0) {
+    return reinterpret_cast<void*>(mockDrawElementsIndirect);
   } else if (strcmp(name, "glVertexAttribDivisor") == 0) {
     return reinterpret_cast<void*>(mockVertexAttribDivisor);
   } else if (strcmp(name, "glBindBufferRange") == 0) {
@@ -609,6 +627,15 @@ const ProcTableGLES::Resolver kMockResolverGLESWithoutInstancing =
       strcmp(name, "glDrawElementsInstanced") == 0 ||
       strcmp(name, "glVertexAttribDivisorEXT") == 0 ||
       strcmp(name, "glVertexAttribDivisor") == 0) {
+    return nullptr;
+  }
+  return kMockResolverGLES(name);
+};
+
+const ProcTableGLES::Resolver kMockResolverGLESWithoutIndirectDraw =
+    [](const char* name) -> void* {
+  if (strcmp(name, "glDrawArraysIndirect") == 0 ||
+      strcmp(name, "glDrawElementsIndirect") == 0) {
     return nullptr;
   }
   return kMockResolverGLES(name);

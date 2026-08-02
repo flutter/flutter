@@ -89,6 +89,15 @@ class Capabilities {
   /// @brief Whether primitive restart is supported.
   virtual bool SupportsPrimitiveRestart() const = 0;
 
+  /// @brief Whether a draw can source its element, instance, and offset
+  ///        counts from a buffer the GPU wrote, via
+  ///        `RenderPass::SetIndirectBuffer`.
+  ///
+  ///        Core on Vulkan and available on every Metal device Impeller
+  ///        targets. On OpenGL ES it needs the ES 3.1 entry points (desktop
+  ///        GL 4.0), so it is false on older drivers.
+  virtual bool SupportsIndirectDraw() const = 0;
+
   /// @brief Whether 32-bit values are supported in index buffers used to draw
   ///        primitives.
   virtual bool Supports32BitPrimitiveIndices() const = 0;
@@ -212,6 +221,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsTriangleFan(bool value);
 
+  CapabilitiesBuilder& SetSupportsIndirectDraw(bool value);
+
   CapabilitiesBuilder& SetMaximumRenderPassAttachmentSize(ISize size);
 
   CapabilitiesBuilder& SetMaxSamplerAnisotropy(uint32_t value);
@@ -233,6 +244,7 @@ class CapabilitiesBuilder {
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_device_transient_textures_ = false;
   bool supports_triangle_fan_ = false;
+  bool supports_indirect_draw_ = false;
   bool supports_extended_range_formats_ = false;
   bool needs_partitioned_host_buffer_ = false;
   bool supports_texture_compression_bc_ = false;

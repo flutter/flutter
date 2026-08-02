@@ -226,13 +226,7 @@ RenderPass::GetOrCreatePipeline() {
   return pipeline;
 }
 
-bool RenderPass::Draw(size_t element_count,
-                      size_t instance_count,
-                      bool indexed) {
-  if (element_count == 0u || instance_count == 0u) {
-    return true;
-  }
-
+bool RenderPass::BindStateForDraw(bool indexed) {
   if (indexed && index_buffer_type == impeller::IndexType::kNone) {
     // drawIndexed was called without an index buffer bound.
     return false;
@@ -285,8 +279,6 @@ bool RenderPass::Draw(size_t element_count,
     render_pass_->SetIndexBuffer(impeller::BufferView{},
                                  impeller::IndexType::kNone);
   }
-  render_pass_->SetElementCount(element_count);
-  render_pass_->SetInstanceCount(instance_count);
 
   render_pass_->SetStencilReference(stencil_reference);
 
@@ -298,9 +290,54 @@ bool RenderPass::Draw(size_t element_count,
     render_pass_->SetScissor(scissor.value());
   }
 
-  bool result = render_pass_->Draw().ok();
+  return true;
+}
 
-  return result;
+bool RenderPass::Draw(size_t element_count,
+                      size_t instance_count,
+                      bool indexed) {
+  if (element_count == 0u || instance_count == 0u) {
+    return true;
+  }
+
+  if (!BindStateForDraw(indexed)) {
+    return false;
+  }
+
+  render_pass_->SetElementCount(element_count);
+  render_pass_->SetInstanceCount(instance_count);
+
+  return render_pass_->Draw().ok();
+}
+
+bool RenderPass::DrawIndirect(const impeller::BufferView& indirect_args,
+                              bool indexed) {
+  // Checked before any state is pushed onto the underlying pass, so a
+  // rejected call leaves no half-recorded command behind. The argument values
+  // themselves are never inspected; a bad argument is the caller's bug, the
+  // same as a bad index.
+  if (!indirect_args || indirect_args.GetRange().offset % 4u != 0u) {
+    return false;
+  }
+  const size_t required_size = indexed
+                                   ? sizeof(impeller::DrawIndexedIndirectArgs)
+                                   : sizeof(impeller::DrawIndirectArgs);
+  if (indirect_args.GetRange().length < required_size) {
+    return false;
+  }
+  if (!GetContext()->GetCapabilities()->SupportsIndirectDraw()) {
+    return false;
+  }
+
+  if (!BindStateForDraw(indexed)) {
+    return false;
+  }
+
+  if (!render_pass_->SetIndirectBuffer(indirect_args)) {
+    return false;
+  }
+
+  return render_pass_->Draw().ok();
 }
 
 }  // namespace gpu
@@ -775,4 +812,37 @@ bool InternalFlutterGpu_RenderPass_DrawIndexed(
   // Guard the casts to size_t; a negative value would wrap.
   return index_count >= 0 && instance_count >= 0 &&
          wrapper->Draw(index_count, instance_count, /*indexed=*/true);
+}
+
+static bool DrawIndirect(flutter::gpu::RenderPass* wrapper,
+                         flutter::gpu::DeviceBuffer* indirect_buffer,
+                         int offset_in_bytes,
+                         int length_in_bytes,
+                         bool indexed) {
+  // Guard the casts to size_t; a negative value would wrap.
+  if (offset_in_bytes < 0 || length_in_bytes < 0) {
+    return false;
+  }
+  return wrapper->DrawIndirect(
+      impeller::BufferView(indirect_buffer->GetBuffer(),
+                           impeller::Range(offset_in_bytes, length_in_bytes)),
+      indexed);
+}
+
+bool InternalFlutterGpu_RenderPass_DrawIndirect(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::DeviceBuffer* indirect_buffer,
+    int offset_in_bytes,
+    int length_in_bytes) {
+  return DrawIndirect(wrapper, indirect_buffer, offset_in_bytes,
+                      length_in_bytes, /*indexed=*/false);
+}
+
+bool InternalFlutterGpu_RenderPass_DrawIndexedIndirect(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::DeviceBuffer* indirect_buffer,
+    int offset_in_bytes,
+    int length_in_bytes) {
+  return DrawIndirect(wrapper, indirect_buffer, offset_in_bytes,
+                      length_in_bytes, /*indexed=*/true);
 }

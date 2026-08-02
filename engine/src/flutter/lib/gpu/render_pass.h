@@ -61,6 +61,12 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   /// [indexed] is true. [instance_count] is the number of instances to draw.
   bool Draw(size_t element_count, size_t instance_count, bool indexed);
 
+  /// Append a draw whose parameters the GPU reads out of [indirect_args].
+  /// The view holds a `DrawIndirectArgs`, or a `DrawIndexedIndirectArgs` when
+  /// [indexed] is true. Fails when the backend does not support indirect
+  /// draws or the view cannot hold the arguments.
+  bool DrawIndirect(const impeller::BufferView& indirect_args, bool indexed);
+
   /// Whether the next draw must rebuild its backend pipeline. Exposed for
   /// testing the memoization's dirty tracking.
   bool IsPipelineStateDirtyForTesting() const;
@@ -104,6 +110,12 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   std::optional<impeller::Viewport> viewport;
 
  private:
+  /// Push the pipeline, bindings, buffers, and pass state for the pending
+  /// draw. Returns false when the pipeline could not be built or an indexed
+  /// draw was requested with no index buffer bound; nothing is recorded in
+  /// that case.
+  bool BindStateForDraw(bool indexed);
+
   /// Lookup an Impeller pipeline by building a descriptor based on the current
   /// command state, or return the memoized pipeline when that state is
   /// unchanged since the last draw. Returns null (after a validation log)
@@ -351,6 +363,20 @@ extern bool InternalFlutterGpu_RenderPass_DrawIndexed(
     flutter::gpu::RenderPass* wrapper,
     int index_count,
     int instance_count);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_DrawIndirect(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::DeviceBuffer* indirect_buffer,
+    int offset_in_bytes,
+    int length_in_bytes);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_DrawIndexedIndirect(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::DeviceBuffer* indirect_buffer,
+    int offset_in_bytes,
+    int length_in_bytes);
 
 }  // extern "C"
 

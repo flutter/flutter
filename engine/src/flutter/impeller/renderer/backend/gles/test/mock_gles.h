@@ -21,6 +21,11 @@ extern const ProcTableGLES::Resolver kMockResolverGLES;
 /// instanced-draw emulation fallback.
 extern const ProcTableGLES::Resolver kMockResolverGLESWithoutInstancing;
 
+/// A resolver that behaves like |kMockResolverGLES| but hides the indirect
+/// draw entry points, so the OpenGL ES backend reports indirect draw as
+/// unsupported even on a context that advertises ES 3.1.
+extern const ProcTableGLES::Resolver kMockResolverGLESWithoutIndirectDraw;
+
 class IMockGLESImpl {
  public:
   virtual ~IMockGLESImpl() = default;
@@ -124,6 +129,10 @@ class IMockGLESImpl {
                                      GLenum type,
                                      const void* indices,
                                      GLsizei instancecount) {}
+  virtual void DrawArraysIndirect(GLenum mode, const void* indirect) {}
+  virtual void DrawElementsIndirect(GLenum mode,
+                                    GLenum type,
+                                    const void* indirect) {}
   virtual void VertexAttribDivisor(GLuint index, GLuint divisor) {}
   virtual void BindBufferRange(GLenum target,
                                GLuint index,
@@ -313,6 +322,14 @@ class MockGLESImpl : public IMockGLESImpl {
                GLenum type,
                const void* indices,
                GLsizei instancecount),
+              (override));
+  MOCK_METHOD(void,
+              DrawArraysIndirect,
+              (GLenum mode, const void* indirect),
+              (override));
+  MOCK_METHOD(void,
+              DrawElementsIndirect,
+              (GLenum mode, GLenum type, const void* indirect),
               (override));
   MOCK_METHOD(void,
               VertexAttribDivisor,

@@ -545,6 +545,13 @@ bool CapabilitiesVK::Supports32BitPrimitiveIndices() const {
   return true;
 }
 
+bool CapabilitiesVK::SupportsIndirectDraw() const {
+  // vkCmdDrawIndirect and vkCmdDrawIndexedIndirect are core Vulkan 1.0 for a
+  // single draw. Only a draw count above one needs the multiDrawIndirect
+  // device feature.
+  return true;
+}
+
 bool CapabilitiesVK::SupportsManuallyMippedTextures() const {
   return true;
 }

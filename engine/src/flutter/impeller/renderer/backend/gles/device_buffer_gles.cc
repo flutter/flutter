@@ -84,6 +84,8 @@ static GLenum ToTarget(DeviceBufferGLES::BindingType type) {
       return GL_ELEMENT_ARRAY_BUFFER;
     case DeviceBufferGLES::BindingType::kUniformBuffer:
       return GL_UNIFORM_BUFFER;
+    case DeviceBufferGLES::BindingType::kDrawIndirectBuffer:
+      return IMPELLER_GL_DRAW_INDIRECT_BUFFER;
   }
   FML_UNREACHABLE();
 }
