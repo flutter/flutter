@@ -59,9 +59,9 @@ import Foundation
     #endif
   }
 
-  public func log(level: LogLevel, _ message: String) {
+  public func log(level: LogLevel, _ message: @autoclosure () -> String) {
     if level.rawValue >= logLevel.rawValue {
-      outputWriter.writeLine(level: level, message)
+      outputWriter.writeLine(level: level, message())
     }
   }
 }
@@ -80,34 +80,65 @@ extension Logger {
   }
 
   /// Logs a message at `LogLevel.info`.
-  @objc public static func logInfo(_ message: String) {
+  @objc(logInfo:) public static func objcLogInfo(_ message: String) {
     shared.log(level: .info, message)
   }
 
+  /// Logs a message at `LogLevel.info`.
+  public static func logInfo(_ message: @autoclosure () -> String) {
+    shared.log(level: .info, message())
+  }
+
   /// Logs a message at `LogLevel.important`.
-  @objc public static func logImportant(_ message: String) {
+  @objc(logImportant:) public static func objcLogImportant(_ message: String) {
     shared.log(level: .important, message)
   }
 
+  /// Logs a message at `LogLevel.important`.
+  public static func logImportant(_ message: @autoclosure () -> String) {
+    shared.log(level: .important, message())
+  }
+
   /// Logs a message at `LogLevel.warning`.
-  @objc public static func logWarning(_ message: String) {
+  @objc(logWarning:) public static func objcLogWarning(_ message: String) {
     shared.log(level: .warning, message)
   }
 
+  /// Logs a message at `LogLevel.warning`.
+  public static func logWarning(_ message: @autoclosure () -> String) {
+    shared.log(level: .warning, message())
+  }
+
   /// Logs a message at `LogLevel.error`.
-  @objc public static func logError(_ message: String) {
+  @objc(logError:) public static func objcLogError(_ message: String) {
     shared.log(level: .error, message)
   }
 
+  /// Logs a message at `LogLevel.error`.
+  public static func logError(_ message: @autoclosure () -> String) {
+    shared.log(level: .error, message())
+  }
+
   /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
-  @objc public static func logFatal(_ message: String) {
+  @objc(logFatal:) public static func objcLogFatal(_ message: String) {
     shared.log(level: .fatal, message)
     abort()
   }
 
+  /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
+  public static func logFatal(_ message: @autoclosure () -> String) {
+    shared.log(level: .fatal, message())
+    abort()
+  }
+
   /// Logs a message unconditionally.
-  @objc public static func logDirect(_ message: String) {
+  @objc(logDirect:) public static func objcLogDirect(_ message: String) {
     shared.outputWriter.writeLine(level: .important, message)
+  }
+
+  /// Logs a message unconditionally.
+  public static func logDirect(_ message: @autoclosure () -> String) {
+    shared.outputWriter.writeLine(level: .important, message())
   }
 }
 
