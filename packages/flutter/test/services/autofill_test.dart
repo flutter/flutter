@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -91,11 +92,12 @@ void main() {
       },
     );
 
-    test('updateEditingStateWithTag is delivered via the last connection after it closes', () async {
-      // A browser password manager can autofill a field in the brief window
-      // after the text input connection is torn down (so TextInput's
-      // _currentConnection is null) but before it is re-established. The value
-      // must still reach the client, routed through the last connection.
+    test('updateEditingStateWithTag routes autofill to the last connection on web', () async {
+      // A browser password manager can autofill a field in the brief window after
+      // the text input connection is torn down (so TextInput's _currentConnection is
+      // null) but before it is re-established. On the web the value must still reach
+      // the client, routed through the last connection; on native platforms the
+      // fallback is not used, matching upstream behavior.
       final client1 = FakeAutofillClient(const TextEditingValue(text: 'test1'));
       final client2 = FakeAutofillClient(const TextEditingValue(text: 'test2'));
 
@@ -131,7 +133,13 @@ void main() {
         ]),
       );
 
-      expect(client2.currentTextEditingValue, filled);
+      if (kIsWeb) {
+        expect(client2.currentTextEditingValue, filled);
+      } else {
+        // Native: the last-connection fallback is not used, so the value is dropped
+        // and the client keeps its original editing state.
+        expect(client2.currentTextEditingValue, const TextEditingValue(text: 'test2'));
+      }
     });
   });
 

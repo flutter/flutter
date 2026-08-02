@@ -2205,7 +2205,12 @@ class TextInput {
     // text field that doesn't have an active connection.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
       final args = methodCall.arguments as List<dynamic>;
-      final TextInputConnection? connection = _currentConnection ?? _lastConnection;
+      // The last-connection fallback is a web-only workaround: a browser password
+      // manager can autofill in the brief window after the connection is torn down.
+      // Native platforms keep the upstream behavior of using the current connection.
+      final TextInputConnection? connection = kIsWeb
+          ? (_currentConnection ?? _lastConnection)
+          : _currentConnection;
       final AutofillScope? scope = connection?._client.currentAutofillScope;
       final editingValue = args[1] as Map<String, dynamic>;
       for (final String tag in editingValue.keys) {
