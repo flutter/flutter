@@ -541,6 +541,30 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     }
   }
 
+  /// Set the bytes read by the bound pipeline's `layout(push_constant)`
+  /// block.
+  ///
+  /// A pipeline has a single block of push constant memory. Both stages may
+  /// declare a block against it, in which case they read the same bytes, so
+  /// one call feeds both. Use [Shader.pushConstantSizeInBytes] and
+  /// [Shader.getPushConstantMemberOffsetInBytes] to lay [data] out.
+  ///
+  /// The value persists for the rest of the pass, or until it is set again or
+  /// [clearBindings] is called. [data] must be at least as long as the block
+  /// the shader declares, and no longer than
+  /// [GpuContext.maxPushConstantSizeInBytes].
+  void setPushConstants(ByteData data) {
+    if (data.lengthInBytes > gpuContext.maxPushConstantSizeInBytes) {
+      throw Exception(
+        "Push constant data is ${data.lengthInBytes} bytes, but this device "
+        "supports at most ${gpuContext.maxPushConstantSizeInBytes} bytes",
+      );
+    }
+    if (!_setPushConstants(data)) {
+      throw Exception("Failed to set push constants");
+    }
+  }
+
   void clearBindings() {
     _clearBindings();
     _boundVertexSlotsMask = 0;
@@ -863,6 +887,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     int heightAddressMode,
     int maxAnisotropy,
   );
+
+  @Native<Bool Function(Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_RenderPass_SetPushConstants',
+  )
+  external bool _setPushConstants(ByteData data);
 
   @Native<Void Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_RenderPass_ClearBindings',

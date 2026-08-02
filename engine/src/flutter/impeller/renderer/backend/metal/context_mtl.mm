@@ -90,6 +90,9 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       // Anisotropic filtering with a clamp in the range [1, 16] is supported
       // on all Metal devices.
       .SetMaxSamplerAnisotropy(16)
+      // `setBytes` copies inline up to 4 KB; past that Metal allocates a
+      // buffer anyway, which defeats the point.
+      .SetMaxPushConstantSize(kDefaultMaxPushConstantSize)
       .SetSupportsExtendedRangeFormats(
           DeviceSupportsExtendedRangeFormats(device))
       .SetSupportsTextureCompression(CompressedTextureFamily::kBC,
