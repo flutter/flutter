@@ -52,6 +52,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding.OnSaveInstanceStateListener;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -398,6 +399,21 @@ public class FlutterActivityTest {
     FlutterActivity flutterActivity = activityController.get();
 
     assertNull(flutterActivity.getDartEntrypointArgs());
+  }
+
+  @Test
+  public void itAcceptsDartEntrypointArgsThatAreNotAnArrayList() {
+    // Any Serializable List must work, not just java.util.ArrayList: Arrays.asList returns
+    // Arrays$ArrayList, and callers may pass other implementations.
+    Intent intent =
+        new Intent(ctx, FlutterActivity.class)
+            .putExtra(EXTRA_DART_ENTRYPOINT_ARGS, (Serializable) Arrays.asList("foo", "bar"));
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    assertArrayEquals(
+        new String[] {"foo", "bar"}, flutterActivity.getDartEntrypointArgs().toArray());
   }
 
   @Test

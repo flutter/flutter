@@ -1153,14 +1153,14 @@ public class FlutterActivity extends Activity
     if (isRemotelyOriginatedIntent()) {
       return null;
     }
-    // Deliberately does not use the untyped getSerializableExtra(String) overload. On an exported
-    // Activity that deserializes an arbitrary sender's object graph, and an unchecked cast of the
-    // result then crashes the app before it draws a frame if the value is not a List.
+    // This Activity is exported by the default project template, so it deserializes an object graph
+    // supplied by an arbitrary sender. An unchecked cast of the result crashes the app before it
+    // draws a frame whenever the value is not a List, so the type is checked instead.
     try {
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
-        return getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS, ArrayList.class);
-      }
-      final Serializable extra = getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+      final Serializable extra =
+          Build.VERSION.SDK_INT >= API_LEVELS.API_33
+              ? getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS, Serializable.class)
+              : getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
       return extra instanceof List ? (List<String>) extra : null;
     } catch (Exception e) {
       Log.w(TAG, "Ignoring malformed " + EXTRA_DART_ENTRYPOINT_ARGS + " extra.", e);

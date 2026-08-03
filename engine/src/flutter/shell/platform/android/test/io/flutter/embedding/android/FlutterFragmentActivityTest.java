@@ -39,6 +39,8 @@ import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.junit.After;
@@ -77,6 +79,18 @@ public class FlutterFragmentActivityTest {
     Intent intent =
         new Intent(ctx, FlutterFragmentActivity.class)
             .putExtra(EXTRA_DART_ENTRYPOINT_ARGS, new HashMap<String, String>());
+    FlutterFragmentActivity activity =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent).get();
+
+    assertNull(activity.getDartEntrypointArgs());
+  }
+
+  @Test
+  public void itIgnoresDartEntrypointArgsFromBrowserOriginatedIntent() {
+    Intent intent =
+        new Intent(ctx, FlutterFragmentActivity.class)
+            .addCategory(Intent.CATEGORY_BROWSABLE)
+            .putExtra(EXTRA_DART_ENTRYPOINT_ARGS, new ArrayList<String>(Arrays.asList("foo")));
     FlutterFragmentActivity activity =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent).get();
 

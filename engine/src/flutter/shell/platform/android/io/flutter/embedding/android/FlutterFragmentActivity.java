@@ -843,19 +843,38 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    // Deliberately does not use the untyped getSerializableExtra(String) overload: this Activity can
-    // be exported, so an arbitrary caller could otherwise supply a non-List Serializable and crash
-    // the app on launch via the unchecked cast.
+    if (isRemotelyOriginatedIntent()) {
+      return null;
+    }
+    // This Activity can be exported, so it deserializes an object graph supplied by an arbitrary
+    // sender. An unchecked cast of the result crashes the app before it draws a frame whenever the
+    // value is not a List, so the type is checked instead.
     try {
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
-        return getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS, ArrayList.class);
-      }
-      final Serializable extra = getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+      final Serializable extra =
+          Build.VERSION.SDK_INT >= API_LEVELS.API_33
+              ? getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS, Serializable.class)
+              : getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
       return extra instanceof List ? (List<String>) extra : null;
     } catch (Exception e) {
       Log.w(TAG, "Ignoring malformed " + EXTRA_DART_ENTRYPOINT_ARGS + " extra.", e);
       return null;
     }
+  }
+
+  /**
+   * Whether the {@code Intent} that launched this {@code Activity} came from a web context.
+   *
+   * <p>Android's {@code intent://} URL scheme lets a web page construct an {@code Intent} carrying
+   * arbitrary string extras and deliver it to any exported {@code Activity} that declares {@link
+   * Intent#CATEGORY_BROWSABLE}. Browsers add {@code CATEGORY_BROWSABLE} to such {@code Intent}s.
+   *
+   * <p>Extras that configure how the application executes must not be honoured from that source.
+   * Configuration supplied by the app itself is unaffected, because an app launching its own {@code
+   * Activity} does not set this category.
+   */
+  private boolean isRemotelyOriginatedIntent() {
+    final Intent intent = getIntent();
+    return intent != null && intent.hasCategory(Intent.CATEGORY_BROWSABLE);
   }
 
   /**
