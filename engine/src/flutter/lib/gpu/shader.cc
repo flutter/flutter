@@ -170,6 +170,10 @@ impeller::ShaderStage Shader::GetShaderStage() const {
   return stage_;
 }
 
+const std::string& Shader::GetEntrypoint() const {
+  return entrypoint_;
+}
+
 const std::vector<impeller::DescriptorSetLayout>&
 Shader::GetDescriptorSetLayouts() const {
   return descriptor_set_layouts_;

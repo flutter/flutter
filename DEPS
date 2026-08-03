@@ -10,13 +10,12 @@
 vars = {
   'android_git': 'https://android.googlesource.com',
   'chromium_git': 'https://chromium.googlesource.com',
-  'swiftshader_git': 'https://swiftshader.googlesource.com',
   'dart_git': 'https://dart.googlesource.com',
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': 'f73c4510d12da77512253d3a00d72275b45427c7',
+  'skia_revision': 'abecb0dc02c1d1bf8085783eb465df828c4063b1',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -186,7 +185,6 @@ vars = {
   "upstream_shelf": "https://github.com/dart-lang/shelf.git",
   "upstream_skia": "https://skia.googlesource.com/skia.git",
   "upstream_sqlite": "https://github.com/sqlite/sqlite.git",
-  "upstream_SwiftShader": "https://swiftshader.googlesource.com/SwiftShader.git",
   "upstream_tar": "https://github.com/simolus3/tar.git",
   "upstream_test": "https://github.com/dart-lang/test.git",
   "upstream_usage": "https://github.com/dart-lang/usage.git",
@@ -224,7 +222,6 @@ allowed_hosts = [
   'flutter.googlesource.com',
   'llvm.googlesource.com',
   'skia.googlesource.com',
-  'swiftshader.googlesource.com',
 ]
 
 deps = {
@@ -544,7 +541,7 @@ deps = {
    Var('flutter_git') + '/third_party/pyyaml.git' + '@' + '03c67afd452cdff45b41bfe65e19a2fb5b80a0e8',
 
   'engine/src/flutter/third_party/swiftshader':
-  Var('swiftshader_git') + '/SwiftShader.git' + '@' + '794b0cfce1d828d187637e6d932bae484fbe0976',
+  Var('flutter_git') + '/third_party/swiftshader.git' + '@' + '1be9f83618f8ba258431c0c13d7a083eb193df11',
 
   'engine/src/flutter/third_party/angle':
   Var('flutter_git') + '/third_party/angle' + '@' + 'cc08479fbcc181697fa837069ce1103c58c15528',
