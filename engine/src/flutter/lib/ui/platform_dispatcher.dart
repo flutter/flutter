@@ -679,7 +679,9 @@ class PlatformDispatcher {
   /// re-render all of its views.
   ///
   /// On the next [onBeginFrame] or [onDrawFrame], the application should
-  /// invoke [FlutterView.render] on all of its [views].
+  /// invoke [FlutterView.render] on all of its [views]. This callback
+  /// can be ignored if the application always renders all views on each
+  /// frame.
   MarkAllViewsNeedRenderCallback? get onMarkAllViewsNeedRender => _onMarkAllViewsNeedRender;
   MarkAllViewsNeedRenderCallback? _onMarkAllViewsNeedRender;
   Zone _onMarkAllViewsNeedRenderZone = Zone.root;
