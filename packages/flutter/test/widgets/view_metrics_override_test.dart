@@ -35,6 +35,9 @@ class ViewMetricsOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding 
     }
     return (await extensions[name]!(arguments)).cast<String, Object?>();
   }
+
+  /// Exposes the protected pointer conversion ratio hook to tests.
+  double? testDevicePixelRatioForView(int viewId) => devicePixelRatioForView(viewId);
 }
 
 void main() {
@@ -43,6 +46,28 @@ void main() {
   tearDown(() {
     debugClearViewMetricsOverrides();
   });
+
+  /// Dispatches a down/up pair at [physicalPosition], in physical pixels,
+  /// through the real [ui.PointerDataPacket] path.
+  ///
+  /// [WidgetTester]'s own gestures take logical pixels and bypass
+  /// [PointerEventConverter], so they cannot exercise the physical -> logical
+  /// conversion this is meant to cover.
+  Future<void> sendTapAt(WidgetTester tester, Offset physicalPosition) async {
+    final int viewId = tester.view.viewId;
+    ui.PointerData data(ui.PointerChange change) => ui.PointerData(
+      viewId: viewId,
+      change: change,
+      physicalX: physicalPosition.dx,
+      physicalY: physicalPosition.dy,
+    );
+    tester.binding.platformDispatcher.onPointerDataPacket!(
+      ui.PointerDataPacket(
+        data: <ui.PointerData>[data(ui.PointerChange.down), data(ui.PointerChange.up)],
+      ),
+    );
+    await tester.pump();
+  }
 
   /// Pumps a widget that reports the ambient [MediaQueryData] into [sink].
   Future<void> pumpProbe(WidgetTester tester, void Function(MediaQueryData) sink) {
@@ -106,6 +131,7 @@ void main() {
         boldText: true,
         highContrast: false,
         onOffSwitchLabels: true,
+        supportsAnnounce: true,
       );
       expect(ViewMetricsOverride.fromJson(original.toJson()), equals(original));
     });
@@ -171,6 +197,31 @@ void main() {
         () => ViewMetricsOverride.fromJson(const <String, Object?>{'textScaleFactor': -1}),
         throwsFormatException,
       );
+    });
+
+    test('fromJson rejects negative or non-finite insets', () {
+      // Insets feed straight into layout, so a bad component would produce
+      // negative or NaN geometry instead of a visibly wrong screen.
+      for (final key in <String>['padding', 'viewPadding', 'viewInsets']) {
+        for (final bad in <double>[-1, double.infinity, double.nan]) {
+          for (final edge in <String>['left', 'top', 'right', 'bottom']) {
+            expect(
+              () => ViewMetricsOverride.fromJson(<String, Object?>{
+                key: <String, Object?>{'left': 0, 'top': 0, 'right': 0, 'bottom': 0, edge: bad},
+              }),
+              throwsFormatException,
+              reason: '$key.$edge of $bad should be rejected',
+            );
+          }
+        }
+        // Zero and positive components remain valid.
+        expect(
+          ViewMetricsOverride.fromJson(<String, Object?>{
+            key: const <String, Object?>{'left': 0, 'top': 12, 'right': 0, 'bottom': 34},
+          }),
+          isA<ViewMetricsOverride>(),
+        );
+      }
     });
 
     test('asserts on an invalid devicePixelRatio passed directly', () {
@@ -256,12 +307,16 @@ void main() {
       // The unoverridden scaler is a SystemTextScaler, so compare behaviour
       // rather than identity.
       expect(data.textScaler.scale(10), 10.0);
+      // The platform reports supportsAnnounce as true by default, so
+      // overriding it to false is observable.
+      expect(data.supportsAnnounce, isTrue);
 
       debugSetViewMetricsOverride(
         tester.view.viewId,
         const ViewMetricsOverride(
           boldText: true,
           highContrast: true,
+          supportsAnnounce: false,
           textScaler: TextScaler.linear(2.0),
         ),
       );
@@ -270,12 +325,14 @@ void main() {
       expect(data.boldText, isTrue);
       expect(data.highContrast, isTrue);
       expect(data.textScaler, const TextScaler.linear(2.0));
+      expect(data.supportsAnnounce, isFalse);
 
       debugSetViewMetricsOverride(tester.view.viewId, null);
       await tester.pump();
 
       expect(data.boldText, isFalse);
       expect(data.highContrast, isFalse);
+      expect(data.supportsAnnounce, isTrue);
       expect(data.textScaler.scale(10), 10.0);
     });
 
@@ -500,6 +557,108 @@ void main() {
     });
   });
 
+  group('metrics notifications', () {
+    testWidgets('only layout-affecting overrides report a metrics change', (
+      WidgetTester tester,
+    ) async {
+      // didChangeMetrics is the platform's "the window changed" signal. Tooling
+      // toggling boldText must not make applications believe that happened.
+      final observer = _MetricsObserver();
+      tester.binding.addObserver(observer);
+      addTearDown(() => tester.binding.removeObserver(observer));
+
+      late MediaQueryData data;
+      await pumpProbe(tester, (MediaQueryData value) => data = value);
+      expect(observer.changeCount, 0);
+
+      debugSetViewMetricsOverride(tester.view.viewId, const ViewMetricsOverride(boldText: true));
+      await tester.pumpAndSettle();
+
+      // The view still rebuilt and picked the override up...
+      expect(data.boldText, isTrue);
+      // ...but no false platform-metrics event reached the application.
+      expect(observer.changeCount, 0);
+
+      debugClearViewMetricsOverrides();
+      await tester.pumpAndSettle();
+      expect(observer.changeCount, 0);
+    });
+  });
+
+  group('pointer conversion', () {
+    test('devicePixelRatioForView reports the overridden ratio', () {
+      final int viewId = binding.platformDispatcher.implicitView!.viewId;
+      final double realRatio = binding.platformDispatcher.implicitView!.devicePixelRatio;
+
+      expect(binding.testDevicePixelRatioForView(viewId), realRatio);
+
+      debugSetViewMetricsOverride(viewId, const ViewMetricsOverride(devicePixelRatio: 4.0));
+      expect(binding.testDevicePixelRatioForView(viewId), 4.0);
+
+      // An override that does not touch the ratio leaves conversion alone.
+      debugSetViewMetricsOverride(viewId, const ViewMetricsOverride(boldText: true));
+      expect(binding.testDevicePixelRatioForView(viewId), realRatio);
+
+      debugClearViewMetricsOverrides();
+      expect(binding.testDevicePixelRatioForView(viewId), realRatio);
+
+      // Unknown views still convert to null so their pointer data is dropped.
+      expect(binding.testDevicePixelRatioForView(viewId + 1000), isNull);
+    });
+
+    testWidgets('a tap lands on the widget it was aimed at under a DPR override', (
+      WidgetTester tester,
+    ) async {
+      // WidgetTester gestures are already in logical pixels, so they cannot
+      // expose this: the bug is in the physical -> logical conversion that only
+      // raw pointer packets go through.
+      tester.view.physicalSize = const ui.Size(1200, 1200);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.reset);
+
+      final tapped = <String>[];
+      Widget buildProbe() {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              for (final String name in <String>['first', 'second'])
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => tapped.add(name),
+                  child: const SizedBox(width: 100, height: 100),
+                ),
+            ],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildProbe());
+
+      // Aim at physical y = 250. At the real ratio of 2 that is logical y = 125,
+      // which is inside 'second' (logical y 100..200).
+      await sendTapAt(tester, const Offset(50, 250));
+      expect(tapped, <String>['second']);
+      tapped.clear();
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const ViewMetricsOverride(devicePixelRatio: 4.0),
+      );
+      await tester.pumpAndSettle();
+
+      // The view now lays out at ratio 4, so physical y = 250 is logical
+      // y = 62.5, which is inside 'first'. Before the pointer converter honored
+      // the override it still divided by 2 and hit 'second'.
+      await sendTapAt(tester, const Offset(50, 250));
+      expect(tapped, <String>['first']);
+
+      debugClearViewMetricsOverrides();
+      await tester.pumpAndSettle();
+    });
+  });
+
   group('viewMetricsOverride service extension', () {
     final String extensionName = WidgetsServiceExtensions.viewMetricsOverride.name;
 
@@ -580,4 +739,13 @@ void main() {
       expect(debugViewMetricsOverrides, isEmpty);
     });
   });
+}
+
+class _MetricsObserver with WidgetsBindingObserver {
+  int changeCount = 0;
+
+  @override
+  void didChangeMetrics() {
+    changeCount += 1;
+  }
 }

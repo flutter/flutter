@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/semantics.dart';
 /// @docImport 'package:flutter/widgets.dart';
 ///
 /// @docImport 'binding.dart';
 /// @docImport 'box.dart';
+/// @docImport 'debug.dart';
 /// @docImport 'view.dart';
 library;
 
@@ -34,6 +36,19 @@ import 'package:flutter/painting.dart';
 /// changing any real device settings.
 ///
 /// This class has no effect in release mode.
+///
+/// ## Limitations
+///
+/// Overrides are applied where the framework consumes view metrics: the
+/// [MediaQuery] a [View] creates, the [ViewConfiguration] of its [RenderView],
+/// and the conversion of incoming pointer events. They do not reach back into
+/// `dart:ui`, so code that reads the platform objects directly — for example
+/// [SemanticsBinding.accessibilityFeatures], image resolution
+/// selection based on [ui.FlutterView.devicePixelRatio], or the keyboard inset
+/// calculations that consult [ui.FlutterView.viewInsets] for the real keyboard
+/// — continues to see the real values. Content composited by the engine rather
+/// than the framework, such as platform views and system UI, is likewise
+/// unaffected.
 ///
 /// See also:
 ///
@@ -70,6 +85,7 @@ class ViewMetricsOverride with Diagnosticable {
     this.boldText,
     this.highContrast,
     this.onOffSwitchLabels,
+    this.supportsAnnounce,
   }) : assert(
          devicePixelRatio == null || (devicePixelRatio > 0 && devicePixelRatio < double.infinity),
          'devicePixelRatio must be finite and greater than zero.',
@@ -113,6 +129,7 @@ class ViewMetricsOverride with Diagnosticable {
       boldText: _boolFromJson(json, 'boldText'),
       highContrast: _boolFromJson(json, 'highContrast'),
       onOffSwitchLabels: _boolFromJson(json, 'onOffSwitchLabels'),
+      supportsAnnounce: _boolFromJson(json, 'supportsAnnounce'),
     );
   }
 
@@ -179,6 +196,9 @@ class ViewMetricsOverride with Diagnosticable {
   /// Overrides [ui.AccessibilityFeatures.onOffSwitchLabels].
   final bool? onOffSwitchLabels;
 
+  /// Overrides [ui.AccessibilityFeatures.supportsAnnounce].
+  final bool? supportsAnnounce;
+
   /// Whether this instance overrides nothing at all.
   bool get isEmpty =>
       devicePixelRatio == null &&
@@ -194,7 +214,8 @@ class ViewMetricsOverride with Diagnosticable {
       disableAnimations == null &&
       boldText == null &&
       highContrast == null &&
-      onOffSwitchLabels == null;
+      onOffSwitchLabels == null &&
+      supportsAnnounce == null;
 
   /// Whether this instance overrides a metric that participates in layout, and
   /// therefore requires the [RenderView]'s [ViewConfiguration] to be rebuilt.
@@ -220,6 +241,7 @@ class ViewMetricsOverride with Diagnosticable {
     bool? boldText,
     bool? highContrast,
     bool? onOffSwitchLabels,
+    bool? supportsAnnounce,
   }) {
     return ViewMetricsOverride(
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
@@ -236,6 +258,7 @@ class ViewMetricsOverride with Diagnosticable {
       boldText: boldText ?? this.boldText,
       highContrast: highContrast ?? this.highContrast,
       onOffSwitchLabels: onOffSwitchLabels ?? this.onOffSwitchLabels,
+      supportsAnnounce: supportsAnnounce ?? this.supportsAnnounce,
     );
   }
 
@@ -266,6 +289,7 @@ class ViewMetricsOverride with Diagnosticable {
       if (boldText != null) 'boldText': boldText,
       if (highContrast != null) 'highContrast': highContrast,
       if (onOffSwitchLabels != null) 'onOffSwitchLabels': onOffSwitchLabels,
+      if (supportsAnnounce != null) 'supportsAnnounce': supportsAnnounce,
     };
   }
 
@@ -333,11 +357,27 @@ class ViewMetricsOverride with Diagnosticable {
         'right': final num right,
         'bottom': final num bottom,
       } =>
-        EdgeInsets.fromLTRB(left.toDouble(), top.toDouble(), right.toDouble(), bottom.toDouble()),
+        EdgeInsets.fromLTRB(
+          _checkedInsetComponent(left, key, 'left'),
+          _checkedInsetComponent(top, key, 'top'),
+          _checkedInsetComponent(right, key, 'right'),
+          _checkedInsetComponent(bottom, key, 'bottom'),
+        ),
       final Object value => throw FormatException(
         'Expected {"left": num, "top": num, "right": num, "bottom": num} for $key, got $value.',
       ),
     };
+  }
+
+  // Insets are platform-reported distances that feed straight into layout, so
+  // a negative or non-finite component from tooling would produce negative or
+  // NaN geometry rather than an obviously wrong-looking screen.
+  static double _checkedInsetComponent(num value, String key, String edge) {
+    final double component = value.toDouble();
+    if (!component.isFinite || component < 0) {
+      throw FormatException('$key.$edge must be finite and non-negative, got $component.');
+    }
+    return component;
   }
 
   @override
@@ -359,7 +399,8 @@ class ViewMetricsOverride with Diagnosticable {
         other.disableAnimations == disableAnimations &&
         other.boldText == boldText &&
         other.highContrast == highContrast &&
-        other.onOffSwitchLabels == onOffSwitchLabels;
+        other.onOffSwitchLabels == onOffSwitchLabels &&
+        other.supportsAnnounce == supportsAnnounce;
   }
 
   @override
@@ -378,6 +419,7 @@ class ViewMetricsOverride with Diagnosticable {
     boldText,
     highContrast,
     onOffSwitchLabels,
+    supportsAnnounce,
   );
 
   @override
@@ -399,6 +441,7 @@ class ViewMetricsOverride with Diagnosticable {
     _addFlag(properties, 'boldText', boldText);
     _addFlag(properties, 'highContrast', highContrast);
     _addFlag(properties, 'onOffSwitchLabels', onOffSwitchLabels);
+    _addFlag(properties, 'supportsAnnounce', supportsAnnounce);
   }
 
   static void _addFlag(DiagnosticPropertiesBuilder properties, String name, bool? value) {

@@ -88,6 +88,61 @@ void main() {
     },
   );
 
+  testWidgets('accessibilityEvaluations service extension honors a device pixel ratio override', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 40.0,
+            child: Semantics(label: 'small button', onTap: () {}),
+          ),
+        ),
+      ),
+    );
+
+    bool hasTapTargetViolation(Map<String, Object?> result) {
+      final violations = result['result']! as List<Object?>;
+      return violations.any(
+        (Object? v) =>
+            (v! as Map<String, Object?>)['message'].toString().contains('expected tap target size'),
+      );
+    }
+
+    // Baseline: a 40x40 target violates a 48x48 minimum.
+    Map<String, Object?> result = await _runEvaluation(tester, <String, String>{
+      'type': 'MinimumTapTargetEvaluation',
+      'targetSize': '48.0',
+    });
+    expect(hasTapTargetViolation(result), isTrue);
+
+    // Doubling the device pixel ratio doubles the semantics tree's
+    // physical-space paint bounds. The evaluation must divide by the
+    // effective ratio rather than the raw FlutterView one, or the same
+    // 40x40 target would measure as 80x80 and the violation would
+    // silently disappear.
+    debugSetViewMetricsOverride(
+      tester.view.viewId,
+      ViewMetricsOverride(devicePixelRatio: tester.view.devicePixelRatio * 2),
+    );
+    await tester.pumpAndSettle();
+
+    result = await _runEvaluation(tester, <String, String>{
+      'type': 'MinimumTapTargetEvaluation',
+      'targetSize': '48.0',
+    });
+    expect(hasTapTargetViolation(result), isTrue);
+
+    // Rendering debug variables must be reset before the test body ends.
+    debugClearViewMetricsOverrides();
+    await tester.pumpAndSettle();
+
+    handle.dispose();
+  });
+
   testWidgets(
     'accessibilityEvaluations service extension returns violations for LabeledTapTargetEvaluation',
     (WidgetTester tester) async {

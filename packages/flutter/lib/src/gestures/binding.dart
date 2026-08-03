@@ -304,7 +304,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     // defined in a device-independent manner.
     try {
       _pendingPointerEvents.addAll(
-        PointerEventConverter.expand(packet.data, _devicePixelRatioForView),
+        PointerEventConverter.expand(packet.data, devicePixelRatioForView),
       );
       if (!locked) {
         _flushPointerEventQueue();
@@ -329,7 +329,20 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     return ui.HitTestResponse(hasPlatformView: hasPlatformView);
   }
 
-  double? _devicePixelRatioForView(int viewId) {
+  /// The device pixel ratio used to convert incoming pointer data for the view
+  /// with the given `viewId` from physical to logical pixels.
+  ///
+  /// Returns null if there is no view with that id, in which case pointer data
+  /// for it is discarded.
+  ///
+  /// Bindings can override this to keep pointer coordinates in the same
+  /// coordinate space as layout when they also change the ratio a view lays out
+  /// at. [RendererBinding] does this so that a device pixel ratio overridden
+  /// through [debugViewMetricsOverrides] moves taps along with the widgets they
+  /// land on, instead of leaving them displaced by the ratio between the real
+  /// and the overridden value.
+  @protected
+  double? devicePixelRatioForView(int viewId) {
     return platformDispatcher.view(id: viewId)?.devicePixelRatio;
   }
 

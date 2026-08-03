@@ -391,16 +391,49 @@ mixin RendererBinding
     return ViewConfiguration.fromView(view);
   }
 
-  /// Rebuilds the [ViewConfiguration] of every [RenderView] whose view metrics
-  /// are overridden, and schedules a frame.
+  @override
+  double? devicePixelRatioForView(int viewId) {
+    final double? devicePixelRatio = super.devicePixelRatioForView(viewId);
+    if (!kReleaseMode && devicePixelRatio != null) {
+      // Pointer data arrives in physical pixels and is converted to logical
+      // pixels with this ratio. The view lays out at the overridden ratio, so
+      // pointers have to use it too, otherwise a tap would land a factor of
+      // (real ratio / overridden ratio) away from the widget it was aimed at.
+      return debugViewMetricsOverrides[viewId]?.devicePixelRatio ?? devicePixelRatio;
+    }
+    return devicePixelRatio;
+  }
+
+  /// Applies any [debugViewMetricsOverrides] change to the [ViewConfiguration]
+  /// of every [RenderView], and schedules a frame if one actually changed.
   ///
-  /// Called when [debugViewMetricsOverrides] changes an entry that affects
-  /// layout. Has no effect in release mode.
+  /// Overrides that do not affect layout, such as [ViewMetricsOverride.boldText],
+  /// leave every configuration untouched and schedule nothing here; the views
+  /// that report them rebuild through [MediaQuery] instead.
+  ///
+  /// This deliberately does not call [handleMetricsChanged]. That method is the
+  /// platform's "the window changed" notification, and [WidgetsBinding]
+  /// forwards it to every [WidgetsBindingObserver] as
+  /// [WidgetsBindingObserver.didChangeMetrics]. Reusing it here would tell
+  /// applications that the real window changed whenever tooling toggled an
+  /// unrelated setting.
+  ///
+  /// Has no effect in release mode.
   void _handleViewMetricsOverridesChanged() {
     if (kReleaseMode) {
       return;
     }
-    handleMetricsChanged();
+    var forceFrame = false;
+    for (final RenderView renderView in renderViews) {
+      final ViewConfiguration configuration = createViewConfigurationFor(renderView);
+      if (!renderView.hasConfiguration || renderView.configuration != configuration) {
+        renderView.configuration = configuration;
+        forceFrame = forceFrame || renderView.child != null;
+      }
+    }
+    if (forceFrame) {
+      scheduleForcedFrame();
+    }
   }
 
   /// Create a [SceneBuilder].

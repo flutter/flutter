@@ -2584,6 +2584,7 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
       boldText: override.boldText,
       highContrast: override.highContrast,
       onOffSwitchLabels: override.onOffSwitchLabels,
+      supportsAnnounce: override.supportsAnnounce,
     );
   }
 
