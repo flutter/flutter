@@ -736,14 +736,12 @@ public class TextInputChannel {
     public final boolean isDecimal;
     public final boolean isPassword;
 
-    /**
-     * Legacy 3-argument constructor kept for source compatibility with existing callsites (e.g.
-     * unit tests). Delegates to the 4-argument constructor with {@code isPassword = false}.
-     */
+    /** Convenience overload equivalent to {@code new InputType(type, isSigned, isDecimal, false)}. */
     public InputType(@NonNull TextInputType type, boolean isSigned, boolean isDecimal) {
       this(type, isSigned, isDecimal, false);
     }
 
+    /** Constructs an {@code InputType} for {@code type} with the given NUMBER-variation flags. */
     public InputType(
         @NonNull TextInputType type, boolean isSigned, boolean isDecimal, boolean isPassword) {
       this.type = type;
