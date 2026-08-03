@@ -16,9 +16,9 @@ Hotfix releases don't require any changes, since the auto-roller will update the
   `dart run script/tool/bin/flutter_plugin_tools.dart update-min-sdk --flutter-min=3.44.0`
 
   * Per [repo policy](../contributing/README.md#version), we do not version-bump these changes, so the associated `update-release-info` command should use `--version=next`. A convenient way to run the `update-release-info` command on only the necessary packages is to make the `update-min-sdk` run its own commit, then use a command like:
-  
+
     `dart run script/tool/bin/flutter_plugin_tools.dart update-release-info --version=next --changelog="Updates minimum supported SDK version to Flutter 3.44/Dart 3.12." --base-branch HEAD^ --run-on-changed-packages`
-  
+
     to target only the packages changed in that commit. Some manual cleanup will be needed to remove SDK bump lines from the previous `stable` in packages that have not released in the meantime, to avoid having multiple SDK bumps in the same changelog entry.
   * This must be done in the same PR as the previous step, or CI will fail.
 * The [release action](https://github.com/flutter/packages/blob/e7d812cefce083fa09762d25cd42303737d05b9f/.github/workflows/release.yml#L34) should be updated to use the new stable.
