@@ -1803,8 +1803,8 @@ extern const int32_t kFlutterSemanticsCustomActionIdBatchEnd;
 ///                 will be added to this struct. New fields will continue to
 ///                 be added to `FlutterSemanticsCustomAction2`.
 ///
-/// Frozen because adding members would break the ABI of
-/// `FlutterSemanticsUpdate`.
+// Frozen because adding members would break the ABI of
+// `FlutterSemanticsUpdate`.
 typedef struct {
   /// The size of the struct. Must be sizeof(FlutterSemanticsCustomAction).
   size_t struct_size;
