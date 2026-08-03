@@ -25,9 +25,18 @@ Future<void> _tapOutside(WidgetTester tester, Key regionKey) async {
   final RenderBox renderBox =
       tester.renderObject<RenderBox>(find.byKey(regionKey));
   final Rect rect = renderBox.localToGlobal(Offset.zero) & renderBox.size;
-  // Sanity-check: the tap target must actually be outside the region.
-  assert(!rect.contains(rect.bottomRight + const Offset(1, 1)));
-  await tester.tapAt(rect.bottomRight + const Offset(1, 1));
+  final Offset tapPoint = rect.bottomRight + const Offset(1, 1);
+  // Sanity-check: the tap must land within the default flutter_test surface
+  // (800×600). If the region under test is positioned so close to the
+  // bottom-right corner that the "just outside" tap escapes the surface,
+  // flutter_test won't dispatch a real hit — silently no-oping the whole
+  // test. Asserting the surface bound catches that layout mistake loudly.
+  assert(
+    const Rect.fromLTWH(0, 0, 800, 600).contains(tapPoint),
+    'Tap target $tapPoint is outside the default 800x600 test surface; the '
+    'widget under test is positioned too close to the bottom-right edge.',
+  );
+  await tester.tapAt(tapPoint);
   await tester.pump();
 }
 
