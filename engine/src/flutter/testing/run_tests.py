@@ -880,9 +880,7 @@ def run_objc_tests(
   ]
   if ios_runtime is not None:
     create_simulator.append(ios_runtime)
-  simulator_id = subprocess.check_output(
-      create_simulator, text=True
-  ).strip()
+  simulator_id = subprocess.check_output(create_simulator, text=True).strip()
 
   try:
     ios_unit_test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosUnitTests')
