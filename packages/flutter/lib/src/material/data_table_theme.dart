@@ -15,6 +15,19 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
+///// Signature for a builder function that returns a widget to use as a sorting
+/// indicator icon in a [DataTable] header cell.
+///
+/// The [visible] parameter indicates whether the sort icon should be visible
+/// (i.e. whether the column is the active sort column).
+///
+/// The [ascending] parameter indicates whether the sort order is ascending.
+typedef DataTableSortIconBuilder = Widget Function(
+  BuildContext context,
+  bool visible,
+  bool ascending,
+);
+
 /// Defines default property values for descendant [DataTable]
 /// widgets.
 ///
@@ -59,17 +72,18 @@ class DataTableThemeData with Diagnosticable {
     this.headingCellCursor,
     this.dataRowCursor,
     this.headingRowAlignment,
+    this.sortIconBuilder,
   }) : assert(
          dataRowMinHeight == null ||
              dataRowMaxHeight == null ||
              dataRowMaxHeight >= dataRowMinHeight,
        ),
-       assert(
-         dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
-         'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.',
-       ),
-       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
-       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
+        assert(
+          dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
+          'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.',
+        ),
+        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
+        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
 
   /// {@macro flutter.material.dataTable.decoration}
   final Decoration? decoration;
@@ -125,6 +139,9 @@ class DataTableThemeData with Diagnosticable {
   /// If specified, overrides the default value of [DataColumn.headingRowAlignment].
   final MainAxisAlignment? headingRowAlignment;
 
+  /// {@macro flutter.material.dataTable.sortIconBuilder}
+  final DataTableSortIconBuilder? sortIconBuilder;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
@@ -148,6 +165,7 @@ class DataTableThemeData with Diagnosticable {
     WidgetStateProperty<MouseCursor?>? headingCellCursor,
     WidgetStateProperty<MouseCursor?>? dataRowCursor,
     MainAxisAlignment? headingRowAlignment,
+    DataTableSortIconBuilder? sortIconBuilder,
   }) {
     assert(
       dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
@@ -172,6 +190,7 @@ class DataTableThemeData with Diagnosticable {
       headingCellCursor: headingCellCursor ?? this.headingCellCursor,
       dataRowCursor: dataRowCursor ?? this.dataRowCursor,
       headingRowAlignment: headingRowAlignment ?? this.headingRowAlignment,
+      sortIconBuilder: sortIconBuilder ?? this.sortIconBuilder,
     );
   }
 
@@ -207,6 +226,7 @@ class DataTableThemeData with Diagnosticable {
       headingCellCursor: t < 0.5 ? a.headingCellCursor : b.headingCellCursor,
       dataRowCursor: t < 0.5 ? a.dataRowCursor : b.dataRowCursor,
       headingRowAlignment: t < 0.5 ? a.headingRowAlignment : b.headingRowAlignment,
+      sortIconBuilder: t < 0.5 ? a.sortIconBuilder : b.sortIconBuilder,
     );
   }
 
@@ -227,6 +247,7 @@ class DataTableThemeData with Diagnosticable {
     headingCellCursor,
     dataRowCursor,
     headingRowAlignment,
+    sortIconBuilder,
   );
 
   @override
@@ -252,7 +273,8 @@ class DataTableThemeData with Diagnosticable {
         other.checkboxHorizontalMargin == checkboxHorizontalMargin &&
         other.headingCellCursor == headingCellCursor &&
         other.dataRowCursor == dataRowCursor &&
-        other.headingRowAlignment == headingRowAlignment;
+        other.headingRowAlignment == headingRowAlignment &&
+        other.sortIconBuilder == sortIconBuilder;
   }
 
   @override
@@ -307,6 +329,12 @@ class DataTableThemeData with Diagnosticable {
         'headingRowAlignment',
         headingRowAlignment,
         defaultValue: null,
+      ),
+    );
+    properties.add(
+      ObjectFlagProperty<DataTableSortIconBuilder>.has(
+        'sortIconBuilder',
+        sortIconBuilder,
       ),
     );
   }

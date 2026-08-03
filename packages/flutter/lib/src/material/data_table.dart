@@ -496,7 +496,7 @@ class DataTable extends StatelessWidget {
     this.checkboxHorizontalMargin,
     this.border,
     this.clipBehavior = Clip.none,
-    this.sortIconWidget,
+    this.sortIconBuilder,
   }) : assert(columns.isNotEmpty),
        assert(
          sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length),
@@ -551,15 +551,14 @@ class DataTable extends StatelessWidget {
   /// Ascending order is represented by an upwards-facing arrow.
   final bool sortAscending;
 
-  /// A widget to use as the sorting indicator icon for the table's header cells.
+  /// {@template flutter.material.dataTable.sortIconBuilder}
+  /// A builder function that returns a widget to use as the sorting indicator
+  /// icon for the table's header cells.
   ///
-  /// If null, the default Material design arrow icon ([Icons.arrow_upward]) is
-  /// used with a framework default size of 16.0.
-  ///
-  /// If this widget is an [Icon], the framework will automatically apply the
-  /// default size of 16.0 unless a custom size is explicitly specified on the
-  /// icon itself.
-  final Widget? sortIconWidget;
+  /// If null, [DataTableThemeData.sortIconBuilder] is used. If that is also null,
+  /// the default Material design sort arrow animation is used.
+  /// {@endtemplate}
+  final DataTableSortIconBuilder? sortIconBuilder;
 
   /// Invoked when the user selects or unselects every row, using the
   /// checkbox in the heading row.
@@ -902,6 +901,11 @@ class DataTable extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
+    final DataTableSortIconBuilder? effectiveSortIconBuilder =
+        sortIconBuilder ??
+        dataTableTheme.sortIconBuilder ??
+        themeData.dataTableTheme.sortIconBuilder;
+
     label = Semantics(
       role: SemanticsRole.columnHeader,
       child: Row(
@@ -912,12 +916,14 @@ class DataTable extends StatelessWidget {
             const SizedBox(width: _SortArrowState._arrowIconSize + _sortArrowPadding),
           label,
           if (onSort != null) ...<Widget>[
-            _SortArrow(
-              visible: sorted,
-              up: sorted ? ascending : null,
-              duration: _sortArrowAnimationDuration,
-              sortIconWidget: sortIconWidget,
-            ),
+            if (effectiveSortIconBuilder != null)
+              effectiveSortIconBuilder(context, sorted, ascending)
+            else
+              _SortArrow(
+                visible: sorted,
+                up: sorted ? ascending : null,
+                duration: _sortArrowAnimationDuration,
+              ),
             const SizedBox(width: _sortArrowPadding),
           ],
         ],
@@ -1343,7 +1349,6 @@ class _SortArrow extends StatefulWidget {
     required this.visible,
     required this.up,
     required this.duration,
-    this.sortIconWidget,
   });
 
   final bool visible;
@@ -1351,8 +1356,6 @@ class _SortArrow extends StatefulWidget {
   final bool? up;
 
   final Duration duration;
-
-  final Widget? sortIconWidget;
 
   @override
   _SortArrowState createState() => _SortArrowState();
@@ -1446,20 +1449,13 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // If the user provided a custom widget, use it.
-    // Otherwise, instantly fall back to the standard Material arrow icon.
-    final Widget iconWidget = widget.sortIconWidget ?? const Icon(Icons.arrow_upward);
-
     return FadeTransition(
       opacity: _opacityAnimation,
       child: Transform(
         transform: Matrix4.rotationZ(_orientationOffset + _orientationAnimation.value)
           ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),
         alignment: Alignment.center,
-        child: IconTheme.merge(
-          data: const IconThemeData(size: _arrowIconSize),
-          child: iconWidget,
-        ),
+        child: const Icon(Icons.arrow_upward, size: _arrowIconSize),
       ),
     );
   }
