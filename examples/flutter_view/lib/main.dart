@@ -24,6 +24,7 @@ class FlutterView extends StatelessWidget {
     return WidgetsApp(
       title: 'Flutter View',
       color: _grey,
+      textStyle: const TextStyle(color: _black, decoration: TextDecoration.none),
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return PageRouteBuilder<T>(
           settings: settings,
@@ -90,11 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Center(
                   child: Text(
                     'Platform button tapped $_counter time${_counter == 1 ? '' : 's'}.',
-                    style: const TextStyle(
-                      color: _black,
-                      fontSize: 17.0,
-                      decoration: TextDecoration.none,
-                    ),
+                    style: const TextStyle(fontSize: 17.0),
                   ),
                 ),
               ),
@@ -103,14 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Row(
                   children: <Widget>[
                     Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
-                    const Text(
-                      'Flutter',
-                      style: TextStyle(
-                        color: _black,
-                        fontSize: 30.0,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
+                    const Text('Flutter', style: TextStyle(fontSize: 30.0)),
                   ],
                 ),
               ),
@@ -119,16 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
           Positioned(
             bottom: 16.0,
             right: 16.0,
-            child: _Button(
+            child: Button(
               onPressed: _sendFlutterIncrement,
               icon: const Text(
                 '+',
-                style: TextStyle(
-                  color: _white,
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.none,
-                ),
+                style: TextStyle(color: _white, fontSize: 28.0, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -138,8 +123,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class _Button extends StatelessWidget {
-  const _Button({required this.onPressed, required this.icon});
+class Button extends StatelessWidget {
+  const Button({super.key, required this.onPressed, required this.icon});
 
   final VoidCallback onPressed;
   final Widget icon;
