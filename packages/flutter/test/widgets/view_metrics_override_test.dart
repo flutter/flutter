@@ -129,11 +129,70 @@ void main() {
         invertColors: false,
         disableAnimations: true,
         boldText: true,
+        reduceMotion: true,
         highContrast: false,
         onOffSwitchLabels: true,
         supportsAnnounce: true,
       );
       expect(ViewMetricsOverride.fromJson(original.toJson()), equals(original));
+    });
+
+    test('every metric survives copyWith and JSON, so none can be silently dropped', () {
+      // Guard against a metric that is threaded through the constructor but
+      // forgotten in copyWith, toJson, fromJson or ==. When a metric is added to
+      // ViewMetricsOverride, add it here; these assertions then fail until the
+      // rest of the class learns about it.
+      //
+      // The set below is every boolean AccessibilityFeatures flag that
+      // MediaQueryData surfaces, plus the non-accessibility metrics from
+      // flutter.dev/go/view-metrics-overrides. Deliberately excluded:
+      // MediaQueryData.supportsShowingSystemContextMenu (a platform capability,
+      // not a user setting), and the dart:ui flags MediaQueryData does not carry
+      // at all (autoPlayAnimatedImages, autoPlayVideos, deterministicCursor),
+      // which cannot be overridden through MediaQuery until it exposes them.
+      const everything = ViewMetricsOverride(
+        devicePixelRatio: 2.5,
+        physicalSize: ui.Size(1000, 500),
+        textScaler: TextScaler.linear(1.5),
+        platformBrightness: ui.Brightness.dark,
+        padding: EdgeInsets.only(top: 24),
+        viewPadding: EdgeInsets.only(top: 24, bottom: 8),
+        viewInsets: EdgeInsets.only(bottom: 300),
+        alwaysUse24HourFormat: true,
+        accessibleNavigation: true,
+        invertColors: true,
+        disableAnimations: true,
+        boldText: true,
+        reduceMotion: true,
+        highContrast: true,
+        onOffSwitchLabels: true,
+        supportsAnnounce: false,
+      );
+
+      expect(everything.toJson().keys.toSet(), <String>{
+        'devicePixelRatio',
+        'physicalSize',
+        'textScaleFactor',
+        'platformBrightness',
+        'padding',
+        'viewPadding',
+        'viewInsets',
+        'alwaysUse24HourFormat',
+        'accessibleNavigation',
+        'invertColors',
+        'disableAnimations',
+        'boldText',
+        'reduceMotion',
+        'highContrast',
+        'onOffSwitchLabels',
+        'supportsAnnounce',
+      });
+      // A field missing from copyWith's body would come back null here.
+      expect(everything.copyWith(), equals(everything));
+      // A field missing from toJson or fromJson would break the round trip.
+      expect(ViewMetricsOverride.fromJson(everything.toJson()), equals(everything));
+      // A field missing from isEmpty would not be noticed by either check above.
+      expect(everything.isEmpty, isFalse);
     });
 
     test('toJson omits metrics that are not overridden', () {
@@ -310,12 +369,16 @@ void main() {
       // The platform reports supportsAnnounce as true by default, so
       // overriding it to false is observable.
       expect(data.supportsAnnounce, isTrue);
+      // reduceMotion is a separate platform setting from disableAnimations.
+      expect(data.reduceMotion, isFalse);
+      expect(data.disableAnimations, isFalse);
 
       debugSetViewMetricsOverride(
         tester.view.viewId,
         const ViewMetricsOverride(
           boldText: true,
           highContrast: true,
+          reduceMotion: true,
           supportsAnnounce: false,
           textScaler: TextScaler.linear(2.0),
         ),
@@ -326,6 +389,9 @@ void main() {
       expect(data.highContrast, isTrue);
       expect(data.textScaler, const TextScaler.linear(2.0));
       expect(data.supportsAnnounce, isFalse);
+      expect(data.reduceMotion, isTrue);
+      // Overriding reduceMotion must not imply disableAnimations.
+      expect(data.disableAnimations, isFalse);
 
       debugSetViewMetricsOverride(tester.view.viewId, null);
       await tester.pump();
@@ -333,6 +399,7 @@ void main() {
       expect(data.boldText, isFalse);
       expect(data.highContrast, isFalse);
       expect(data.supportsAnnounce, isTrue);
+      expect(data.reduceMotion, isFalse);
       expect(data.textScaler.scale(10), 10.0);
     });
 

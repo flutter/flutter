@@ -83,6 +83,7 @@ class ViewMetricsOverride with Diagnosticable {
     this.invertColors,
     this.disableAnimations,
     this.boldText,
+    this.reduceMotion,
     this.highContrast,
     this.onOffSwitchLabels,
     this.supportsAnnounce,
@@ -127,6 +128,7 @@ class ViewMetricsOverride with Diagnosticable {
       invertColors: _boolFromJson(json, 'invertColors'),
       disableAnimations: _boolFromJson(json, 'disableAnimations'),
       boldText: _boolFromJson(json, 'boldText'),
+      reduceMotion: _boolFromJson(json, 'reduceMotion'),
       highContrast: _boolFromJson(json, 'highContrast'),
       onOffSwitchLabels: _boolFromJson(json, 'onOffSwitchLabels'),
       supportsAnnounce: _boolFromJson(json, 'supportsAnnounce'),
@@ -190,6 +192,13 @@ class ViewMetricsOverride with Diagnosticable {
   /// Overrides [ui.AccessibilityFeatures.boldText].
   final bool? boldText;
 
+  /// Overrides [ui.AccessibilityFeatures.reduceMotion].
+  ///
+  /// This is a separate platform setting from [disableAnimations] (on iOS it is
+  /// "Reduce Motion" rather than "Prefer Cross-Fade Transitions"), so overriding
+  /// one does not imply the other.
+  final bool? reduceMotion;
+
   /// Overrides [ui.AccessibilityFeatures.highContrast].
   final bool? highContrast;
 
@@ -213,6 +222,7 @@ class ViewMetricsOverride with Diagnosticable {
       invertColors == null &&
       disableAnimations == null &&
       boldText == null &&
+      reduceMotion == null &&
       highContrast == null &&
       onOffSwitchLabels == null &&
       supportsAnnounce == null;
@@ -239,6 +249,7 @@ class ViewMetricsOverride with Diagnosticable {
     bool? invertColors,
     bool? disableAnimations,
     bool? boldText,
+    bool? reduceMotion,
     bool? highContrast,
     bool? onOffSwitchLabels,
     bool? supportsAnnounce,
@@ -256,6 +267,7 @@ class ViewMetricsOverride with Diagnosticable {
       invertColors: invertColors ?? this.invertColors,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       boldText: boldText ?? this.boldText,
+      reduceMotion: reduceMotion ?? this.reduceMotion,
       highContrast: highContrast ?? this.highContrast,
       onOffSwitchLabels: onOffSwitchLabels ?? this.onOffSwitchLabels,
       supportsAnnounce: supportsAnnounce ?? this.supportsAnnounce,
@@ -287,6 +299,7 @@ class ViewMetricsOverride with Diagnosticable {
       if (invertColors != null) 'invertColors': invertColors,
       if (disableAnimations != null) 'disableAnimations': disableAnimations,
       if (boldText != null) 'boldText': boldText,
+      if (reduceMotion != null) 'reduceMotion': reduceMotion,
       if (highContrast != null) 'highContrast': highContrast,
       if (onOffSwitchLabels != null) 'onOffSwitchLabels': onOffSwitchLabels,
       if (supportsAnnounce != null) 'supportsAnnounce': supportsAnnounce,
@@ -398,6 +411,7 @@ class ViewMetricsOverride with Diagnosticable {
         other.invertColors == invertColors &&
         other.disableAnimations == disableAnimations &&
         other.boldText == boldText &&
+        other.reduceMotion == reduceMotion &&
         other.highContrast == highContrast &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
         other.supportsAnnounce == supportsAnnounce;
@@ -417,6 +431,7 @@ class ViewMetricsOverride with Diagnosticable {
     invertColors,
     disableAnimations,
     boldText,
+    reduceMotion,
     highContrast,
     onOffSwitchLabels,
     supportsAnnounce,
@@ -439,6 +454,7 @@ class ViewMetricsOverride with Diagnosticable {
     _addFlag(properties, 'invertColors', invertColors);
     _addFlag(properties, 'disableAnimations', disableAnimations);
     _addFlag(properties, 'boldText', boldText);
+    _addFlag(properties, 'reduceMotion', reduceMotion);
     _addFlag(properties, 'highContrast', highContrast);
     _addFlag(properties, 'onOffSwitchLabels', onOffSwitchLabels);
     _addFlag(properties, 'supportsAnnounce', supportsAnnounce);
