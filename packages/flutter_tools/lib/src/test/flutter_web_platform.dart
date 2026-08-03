@@ -697,7 +697,7 @@ window.\$dartLoader.loader.nextAttempt();
 
     _logger.printStatus('>>> CHECK /dev/shm SIZE INSIDE FLUTTER_TOOLS TEST RUNNER:');
     try {
-      final ProcessResult res = Process.runSync('df', <String>['-h', '/dev/shm']);
+      final ProcessResult res = globals.processManager.runSync(<String>['df', '-h', '/dev/shm']);
       _logger.printStatus(res.stdout as String);
     } catch (e) {
       _logger.printStatus('Failed to run df: $e');
@@ -712,7 +712,7 @@ window.\$dartLoader.loader.nextAttempt();
       headless: !_config.pauseAfterLoad,
       logger: _logger,
       webBrowserFlags: <String>[
-        if (useWasm && Platform.environment['FLUTTER_TEST_USE_SHM'] != 'true')
+        if (useWasm && globals.platform.environment['FLUTTER_TEST_USE_SHM'] != 'true')
           '--disable-dev-shm-usage',
       ],
     );
