@@ -872,15 +872,16 @@ def run_objc_tests(
   delete_simulator(new_simulator_name)
 
   create_simulator = [
-      'xcrun '
-      'simctl '
-      'create '
-      f'{new_simulator_name} com.apple.CoreSimulator.SimDeviceType.iPhone-11'
+      'xcrun',
+      'simctl',
+      'create',
+      new_simulator_name,
+      'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
   ]
   if ios_runtime is not None:
-    create_simulator[0] = create_simulator[0] + f' {ios_runtime}'
+    create_simulator.append(ios_runtime)
   simulator_id = subprocess.check_output(
-      create_simulator, shell=True, text=True
+      create_simulator, text=True
   ).strip()
 
   try:
