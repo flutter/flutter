@@ -343,7 +343,7 @@ import java.util.Set;
     // developers about the new method for doing so if this was attempted.
     // TODO(camsim99): Remove this warning after a stable release has passed:
     // https://github.com/flutter/flutter/issues/179274.
-    if (useSoftwareRenderin && BuildConfig.RELEASE) {
+    if (useSoftwareRendering && BuildConfig.RELEASE) {
       Log.i(
           TAG,
           "If you are attempting to set --enable-software-rendering via Intent extras to launch a Flutter component outside of using the Flutter CLI, note that support for setting engine flags on Android via Intents in release mode will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set the "
