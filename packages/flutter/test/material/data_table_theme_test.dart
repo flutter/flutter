@@ -45,6 +45,7 @@ void main() {
     expect(themeData.headingCellCursor, null);
     expect(themeData.dataRowCursor, null);
     expect(themeData.headingRowAlignment, null);
+    expect(themeData.sortIconBuilder, null);
 
     const theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
     expect(theme.data.decoration, null);
@@ -63,6 +64,7 @@ void main() {
     expect(theme.data.headingCellCursor, null);
     expect(theme.data.dataRowCursor, null);
     expect(theme.data.headingRowAlignment, null);
+    expect(theme.data.sortIconBuilder, null);
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
@@ -99,6 +101,7 @@ void main() {
       headingCellCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.grab),
       dataRowCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden),
       headingRowAlignment: MainAxisAlignment.center,
+      sortIconBuilder: (BuildContext context, bool visible, bool ascending) => const SizedBox(),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -121,6 +124,7 @@ void main() {
     expect(description[12], 'headingCellCursor: WidgetStatePropertyAll(SystemMouseCursor(grab))');
     expect(description[13], 'dataRowCursor: WidgetStatePropertyAll(SystemMouseCursor(forbidden))');
     expect(description[14], 'headingRowAlignment: center');
+    expect(description[15], 'has sortIconBuilder');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {

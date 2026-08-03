@@ -1534,4 +1534,35 @@ void main() {
     );
     expect(tester.getSize(find.byType(PaginatedDataTable)), Size.zero);
   });
+
+  testWidgets('PaginatedDataTable custom sortIconBuilder test', (WidgetTester tester) async {
+    final TestDataSource source = TestDataSource();
+    addTearDown(source.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PaginatedDataTable(
+          sortColumnIndex: 0,
+          sortAscending: true,
+          sortIconBuilder: (BuildContext context, bool visible, bool ascending) {
+            return Text(
+              visible
+                  ? (ascending ? 'PAGINATED_ASC' : 'PAGINATED_DESC')
+                  : 'PAGINATED_INACTIVE',
+            );
+          },
+          header: const Text('Test Table'),
+          columns: <DataColumn>[
+            DataColumn(
+              label: const Text('Name'),
+              onSort: (int columnIndex, bool ascending) {},
+            ),
+          ],
+          source: source,
+        ),
+      ),
+    );
+
+    expect(find.text('PAGINATED_ASC'), findsOneWidget);
+  });
 }

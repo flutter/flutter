@@ -16,6 +16,7 @@ import 'card.dart';
 import 'constants.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
+import 'data_table_theme.dart';
 import 'debug.dart';
 import 'dropdown.dart';
 import 'icon_button.dart';
@@ -128,6 +129,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.headingRowColor,
     this.dividerThickness,
     this.showEmptyRows = true,
+    this.sortIconBuilder,
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
        assert(
@@ -328,6 +330,9 @@ class PaginatedDataTable extends StatefulWidget {
   /// last page of the table if there is not enough content.
   /// When set to `false`, empty rows will not be created.
   final bool showEmptyRows;
+
+  /// {@macro flutter.material.dataTable.sortIconBuilder}
+  final DataTableSortIconBuilder? sortIconBuilder;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -649,6 +654,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     showBottomBorder: true,
                     rows: _getRows(_firstRowIndex, widget.rowsPerPage),
                     headingRowColor: widget.headingRowColor,
+                    sortIconBuilder: widget.sortIconBuilder,
                   ),
                 ),
               ),
