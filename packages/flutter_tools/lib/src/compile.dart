@@ -359,7 +359,7 @@ class KernelCompiler {
           '--no-print-incremental-dependencies',
           for (final Object dartDefine in dartDefines) '-D$dartDefine',
           ...buildModeOptions(buildMode, dartDefines),
-          if (trackWidgetCreation) '--track-widget-creation',
+          if (trackWidgetCreation) '--track-creation-locations',
           if (!linkPlatformKernelIn) '--no-link-platform',
           if (aot) ...<String>[
             '--aot',
@@ -974,7 +974,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       if (packagesPath != null) ...<String>['--packages', packagesPath!],
       ...buildModeOptions(buildMode, dartDefines),
-      if (trackWidgetCreation) '--track-widget-creation',
+      if (trackWidgetCreation) '--track-creation-locations',
       if (includeUnsupportedPlatformLibraryStubs) '--include-unsupported-platform-library-stubs',
       for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
       if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme!],

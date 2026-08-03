@@ -273,12 +273,12 @@ mixin _ChildWindowHierarchyMixin {
     var foundPopup = false;
     for (final BaseWindowController child in _children) {
       switch (child) {
-        case final RegularWindowController regularChild:
+        case final WindowController regularChild:
           if (foundPopup) {
             // Already found a popup, skip anything else.
             break;
           }
-          activateable = (regularChild as _TestRegularWindowController).getFirstActivatableChild();
+          activateable = (regularChild as _TestWindowController).getFirstActivatableChild();
         case final DialogWindowController dialogChild:
           // Always return the first dialog found.
           return (dialogChild as _TestDialogWindowController).getFirstActivatableChild();
@@ -305,9 +305,9 @@ mixin _ChildWindowHierarchyMixin {
   }
 }
 
-class _TestRegularWindowController extends RegularWindowController with _ChildWindowHierarchyMixin {
-  _TestRegularWindowController({
-    required RegularWindowControllerDelegate delegate,
+class _TestWindowController extends WindowController with _ChildWindowHierarchyMixin {
+  _TestWindowController({
+    required WindowControllerDelegate delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     Size? size,
@@ -329,7 +329,7 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
     activate();
   }
 
-  final RegularWindowControllerDelegate _delegate;
+  final WindowControllerDelegate _delegate;
   final _TestWindowingOwner windowingOwner;
   Size _size;
   BoxConstraints _constraints;
@@ -435,8 +435,8 @@ void _addChildToParent(BaseWindowController? parent, BaseWindowController child)
     switch (parent) {
       case final DialogWindowController testParent:
         (testParent as _TestDialogWindowController).addChild(child);
-      case final RegularWindowController testParent:
-        (testParent as _TestRegularWindowController).addChild(child);
+      case final WindowController testParent:
+        (testParent as _TestWindowController).addChild(child);
       case final PopupWindowController testParent:
         (testParent as _TestPopupWindowController).addChild(child);
       case final SatelliteWindowController testParent:
@@ -452,8 +452,8 @@ void _removeChildFromParent(BaseWindowController? parent, BaseWindowController c
     switch (parent) {
       case final DialogWindowController testParent:
         (testParent as _TestDialogWindowController).removeChild(child);
-      case final RegularWindowController testParent:
-        (testParent as _TestRegularWindowController).removeChild(child);
+      case final WindowController testParent:
+        (testParent as _TestWindowController).removeChild(child);
       case final PopupWindowController testParent:
         (testParent as _TestPopupWindowController).removeChild(child);
       case final SatelliteWindowController testParent:
@@ -856,8 +856,8 @@ class _TestWindowingOwner extends WindowingOwner {
   /// Returns the activated [BaseWindowController].
   BaseWindowController activateWindowController(BaseWindowController controller) {
     switch (controller) {
-      case final RegularWindowController regularController:
-        final BaseWindowController leaf = (regularController as _TestRegularWindowController)
+      case final WindowController regularController:
+        final BaseWindowController leaf = (regularController as _TestWindowController)
             .getFirstActivatableChild();
         _activeWindowController = leaf;
         return _activeWindowController!;
@@ -887,7 +887,7 @@ class _TestWindowingOwner extends WindowingOwner {
     }
 
     switch (parent) {
-      case final RegularWindowController regularParent:
+      case final WindowController regularParent:
         regularParent.activate();
       case final DialogWindowController dialogParent:
         dialogParent.activate();
@@ -917,7 +917,7 @@ class _TestWindowingOwner extends WindowingOwner {
     }
 
     switch (controller) {
-      case final RegularWindowController _:
+      case final WindowController _:
         _activeWindowController = null;
       case final DialogWindowController dialogController:
         if (!_tryActivateParent(dialogController.parent)) {
@@ -946,14 +946,14 @@ class _TestWindowingOwner extends WindowingOwner {
 
   @internal
   @override
-  RegularWindowController createRegularWindowController({
-    required RegularWindowControllerDelegate delegate,
+  WindowController createWindowController({
+    required WindowControllerDelegate delegate,
     Size? size,
     BoxConstraints? constraints,
     required bool resizable,
     String? title,
   }) {
-    return _TestRegularWindowController(
+    return _TestWindowController(
       delegate: delegate,
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
