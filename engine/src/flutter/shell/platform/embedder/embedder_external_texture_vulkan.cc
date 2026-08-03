@@ -15,6 +15,7 @@
 #include "impeller/renderer/context.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
+#include "include/gpu/vk/VulkanTypes.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkColorType.h"
@@ -27,7 +28,41 @@
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h"
 
 namespace flutter {
+
+// Returns true if the given VkFormat is a multi-planar YUV format that
+// requires a sampler YCbCr conversion.
+static bool IsYuvFormat(VkFormat format) {
+  switch (format) {
+    // 8-bit multi-planar formats.
+    case VK_FORMAT_G8_B8R8_2PLANE_420_UNORM:
+    case VK_FORMAT_G8_B8R8_2PLANE_422_UNORM:
+    case VK_FORMAT_G8_B8R8_2PLANE_444_UNORM:
+    // 10-bit multi-planar formats.
+    case VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16:
+    case VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16:
+    case VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16:
+    case VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16:
+    case VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16:
+    case VK_FORMAT_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16:
+    // 12-bit multi-planar formats.
+    case VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16:
+    case VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16:
+    case VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16:
+    case VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16:
+    case VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16:
+    case VK_FORMAT_G12X4_B12X4R12X4_2PLANE_444_UNORM_3PACK16:
+    // 16-bit multi-planar formats.
+    case VK_FORMAT_G16_B16R16_2PLANE_420_UNORM:
+    case VK_FORMAT_G16_B16R16_2PLANE_422_UNORM:
+    case VK_FORMAT_G16_B16R16_2PLANE_444_UNORM:
+      return true;
+    default:
+      return false;
+  }
+}
+
 EmbedderExternalTextureVulkan::EmbedderExternalTextureVulkan(
+
     int64_t texture_identifier,
     const ExternalTextureCallback& callback)
     : Texture(texture_identifier), external_texture_callback_(callback) {
@@ -91,11 +126,22 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
     height = texture->height;
   }
 
+  VkFormat vk_format = static_cast<VkFormat>(texture->format);
+  bool is_yuv = IsYuvFormat(vk_format);
+
+  // Set fAlloc.fMemory from texture->image_memory. Without this, Skia's
+  // GrVkImage has a null memory handle, which can cause issues during
+  // texture creation and lifecycle management.
   GrVkImageInfo image_info = {
       .fImage = reinterpret_cast<VkImage>(texture->image),
       .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
-      .fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-      .fFormat = static_cast<VkFormat>(texture->format),
+      // The embedder has already transitioned the image to
+      // SHADER_READ_ONLY_OPTIMAL.  Reporting UNDEFINED here would cause Skia
+      // to issue a spurious UNDEFINED -> SHADER_READ_ONLY_OPTIMAL barrier that
+      // discards the image contents.
+      .fImageLayout = is_yuv ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                             : VK_IMAGE_LAYOUT_UNDEFINED,
+      .fFormat = vk_format,
       .fImageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
                           VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
                           VK_IMAGE_USAGE_TRANSFER_DST_BIT |
@@ -103,6 +149,23 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
       .fSampleCount = 1,
       .fLevelCount = 1,
   };
+
+  // For multi-planar YUV formats, populate the YCbCr conversion info so that
+  // Skia knows how to convert YUV to RGB when sampling the image.
+  if (is_yuv) {
+    image_info.fYcbcrConversionInfo = skgpu::VulkanYcbcrConversionInfo(
+        vk_format, VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_709,
+        VK_SAMPLER_YCBCR_RANGE_ITU_FULL, VK_CHROMA_LOCATION_COSITED_EVEN,
+        VK_CHROMA_LOCATION_COSITED_EVEN, VK_FILTER_LINEAR, VK_FALSE,
+        {VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY,
+         VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY},
+        VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
+            VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT |
+            VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT |
+            VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_SEPARATE_RECONSTRUCTION_FILTER_BIT |
+            VK_FORMAT_FEATURE_COSITED_CHROMA_SAMPLES_BIT |
+            VK_FORMAT_FEATURE_MIDPOINT_CHROMA_SAMPLES_BIT);
+  }
 
   auto gr_backend_texture =
       GrBackendTextures::MakeVk(width, height, image_info);

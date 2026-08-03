@@ -962,6 +962,8 @@ typedef bool (*FlutterVulkanPresentCallback)(
     const FlutterVulkanImage* /* image */);
 
 typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanTexture).
+  size_t struct_size;
   /// Handle to the VkImage that is owned by the embedder. The engine will
   /// bind this image for writing the frame.
   FlutterVulkanImageHandle image;
