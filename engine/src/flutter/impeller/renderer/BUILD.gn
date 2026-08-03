@@ -39,6 +39,8 @@ impeller_component("renderer") {
     "command.h",
     "command_buffer.cc",
     "command_buffer.h",
+    "command_buffer_scheduling_receipt.cc",
+    "command_buffer_scheduling_receipt.h",
     "command_queue.cc",
     "command_queue.h",
     "compute_pass.cc",

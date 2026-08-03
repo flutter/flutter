@@ -28,6 +28,8 @@ impeller_component("metal") {
     "gpu_tracer_mtl.mm",
     "pass_bindings_cache_mtl.h",
     "pass_bindings_cache_mtl.mm",
+    "pending_image_upload_schedule_tracker.cc",
+    "pending_image_upload_schedule_tracker.h",
     "pipeline_library_mtl.h",
     "pipeline_library_mtl.mm",
     "pipeline_mtl.h",

@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "impeller/renderer/blit_pass.h"
+#include "impeller/renderer/command_buffer_scheduling_receipt.h"
 #include "impeller/renderer/compute_pass.h"
 
 namespace impeller {
@@ -46,6 +47,11 @@ class CommandBuffer {
   friend class testing::CommandBufferMock;
 
  public:
+  struct SubmitResult {
+    bool submitted = false;
+    std::shared_ptr<CommandBufferSchedulingReceipt> scheduling_receipt;
+  };
+
   enum class Status {
     kPending,
     kError,
@@ -110,8 +116,13 @@ class CommandBuffer {
   /// @brief Submit the command buffer to the GPU for execution.
   ///
   /// See also: [SubmitCommands].
-  [[nodiscard]] virtual bool OnSubmitCommands(bool block_on_schedule,
-                                              CompletionCallback callback) = 0;
+  [[nodiscard]] virtual bool OnSubmitCommands(CompletionCallback callback) = 0;
+
+  /// Submit without blocking on GPU scheduling and return a scheduling receipt
+  /// when the backend supports one. Backends without scheduling receipts use
+  /// the default implementation, which returns a null receipt.
+  [[nodiscard]] virtual SubmitResult OnSubmitCommandsWithReceipt(
+      CompletionCallback callback);
 
   virtual void OnWaitUntilCompleted() = 0;
 
@@ -128,15 +139,12 @@ class CommandBuffer {
   ///             performed immediately on the calling thread.
   ///
   ///             A command buffer may only be committed once.
-  /// @param[in]  block_on_schedule  If true, this function will not return
-  ///             until the command buffer has been scheduled. This only impacts
-  ///             the Metal backend.
   /// @param[in]  callback  The completion callback.
   ///
-  [[nodiscard]] bool SubmitCommands(bool block_on_schedule,
-                                    const CompletionCallback& callback);
+  [[nodiscard]] bool SubmitCommands(const CompletionCallback& callback);
 
-  [[nodiscard]] bool SubmitCommands(bool block_on_schedule);
+  [[nodiscard]] SubmitResult SubmitCommandsWithReceipt(
+      const CompletionCallback& callback);
 
   CommandBuffer(const CommandBuffer&) = delete;
 
