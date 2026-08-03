@@ -125,6 +125,8 @@ class ScreenshotCommand extends FlutterCommand {
 
     try {
       await device!.takeScreenshot(outputFile);
+    } on ToolExit {
+      rethrow;
     } on Exception catch (error) {
       throwToolExit('Error taking screenshot: $error');
     }
