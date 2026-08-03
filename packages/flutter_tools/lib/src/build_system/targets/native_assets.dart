@@ -46,7 +46,7 @@ class BuildHooks extends Target {
     final FileSystem fileSystem = environment.fileSystem;
 
     final TargetPlatform targetPlatform = platform == HookPlatform.web
-        ? const TargetPlatform(.web, .unknown)
+        ? TargetPlatform.web_javascript
         : _getTargetPlatformFromEnvironment(environment, name);
     final Uri projectUri = environment.projectDir.uri;
 
@@ -193,7 +193,7 @@ class LinkHooks extends Target {
     final Uri projectUri = environment.projectDir.uri;
     final FileSystem fileSystem = environment.fileSystem;
     final TargetPlatform targetPlatform = platform == HookPlatform.web
-        ? const TargetPlatform(.web, .unknown)
+        ? TargetPlatform.web_javascript
         : _getTargetPlatformFromEnvironment(environment, name);
 
     final String? buildModeEnvironment = environment.defines[kBuildMode];

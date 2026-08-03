@@ -49,9 +49,9 @@ void main() {
   });
 
   for (final targetPlatform in <TargetPlatform>[
-    const TargetPlatform(.android, .armv7),
-    const TargetPlatform(.android, .arm64),
-    const TargetPlatform(.android, .x64),
+    TargetPlatform.android_arm,
+    TargetPlatform.android_arm64,
+    TargetPlatform.android_x64,
   ]) {
     testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
       final String arch = getCpuArchForName(targetPlatform.getName()).androidArchName;
