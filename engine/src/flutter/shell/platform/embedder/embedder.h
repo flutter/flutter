@@ -394,7 +394,7 @@ typedef struct _FlutterEngine* FLUTTER_API_SYMBOL(FlutterEngine);
 /// opaque to the engine; the engine does not interpret view IDs in any way.
 typedef int64_t FlutterViewId;
 
-/// Frozen because adding members would break the ABI of `FlutterSemanticsNode`.
+// Frozen because adding members would break the ABI of `FlutterSemanticsNode`.
 typedef struct {
   /// horizontal scale factor
   double scaleX;
