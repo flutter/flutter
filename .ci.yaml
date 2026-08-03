@@ -120,7 +120,6 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "curl", "version": "version:8.20.0"}
-          {"dependency": "gradle_dists", "version": "8.4-bin, 8.13-rc-1-bin, 8.14-bin, 9.3.1-bin, 9.3.1-all"},
         ]
       os: Ubuntu
       cores: "8"
@@ -7149,6 +7148,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "gradle_dists", "version": "8.4-bin, 8.13-rc-1-bin, 8.14-bin, 9.3.1-bin, 9.3.1-all"},
         ]
       shard: tool_tests_commands
       subshard: 2_2
