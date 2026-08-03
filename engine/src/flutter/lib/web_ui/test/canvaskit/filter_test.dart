@@ -16,64 +16,39 @@ void main() {
 }
 
 void testMain() {
-  List<CkColorFilter> createColorFilters() {
-    return <CkColorFilter>[
-      CkColorFilter(const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver)),
-      CkColorFilter(const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver)),
-      CkColorFilter(const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver)),
-      CkColorFilter(
-        const EngineColorFilter.matrix(<double>[
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-        ]),
+  List<EngineColorFilter> createColorFilters() {
+    return <EngineColorFilter>[
+      const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver),
+      const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver),
+      const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver),
+      const EngineColorFilter.matrix(<double>[
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+      ]),
+      EngineColorFilter.matrix(
+        Float32List.fromList(<double>[2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0]),
       ),
-      CkColorFilter(
-        EngineColorFilter.matrix(
-          Float32List.fromList(<double>[
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            0,
-          ]),
-        ),
-      ),
-      CkColorFilter(const EngineColorFilter.linearToSrgbGamma()),
-      CkColorFilter(const EngineColorFilter.srgbToLinearGamma()),
-      CkColorFilter(EngineColorFilter.saturation(0.5)),
+      const EngineColorFilter.linearToSrgbGamma(),
+      const EngineColorFilter.srgbToLinearGamma(),
+      EngineColorFilter.saturation(0.5),
     ];
   }
 
@@ -84,7 +59,7 @@ void testMain() {
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),
       CkImageFilter.dilate(radiusX: 5, radiusY: 6),
       CkImageFilter.erode(radiusX: 7, radiusY: 8),
-      for (final CkColorFilter colorFilter in createColorFilters())
+      for (final EngineColorFilter colorFilter in createColorFilters())
         CkImageFilter.color(colorFilter: colorFilter),
     ];
     filters.add(CkImageFilter.compose(outer: filters[0], inner: filters[1]));
