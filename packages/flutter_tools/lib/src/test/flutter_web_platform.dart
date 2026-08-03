@@ -695,6 +695,13 @@ window.\$dartLoader.loader.nextAttempt();
           },
         );
 
+    _logger.printStatus('>>> CHECK /dev/shm SIZE INSIDE FLUTTER_TOOLS TEST RUNNER:');
+    try {
+      final ProcessResult res = Process.runSync('df', <String>['-h', '/dev/shm']);
+      _logger.printStatus(res.stdout as String);
+    } catch (e) {
+      _logger.printStatus('Failed to run df: $e');
+    }
     _logger.printTrace('Serving tests at $hostUrl');
 
     return BrowserManager.start(
