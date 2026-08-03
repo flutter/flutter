@@ -39,6 +39,23 @@ sealed class ProxyRule {
   /// Defaults to an empty map (no extra headers injected).
   Map<String, String> get headers;
 
+  /// Renders [headers] with values replaced by `<redacted>` so the map can be
+  /// safely printed to logs.
+  ///
+  /// Header values are typically `Authorization` tokens (or similar secrets),
+  /// which is the whole point of the per-rule header feature; letting them
+  /// reach `flutter run -v` output means users pasting logs into GitHub bug
+  /// reports leak their tokens. Callers that log a [ProxyRule] should route
+  /// through [toString] (which uses this helper) rather than printing
+  /// [headers] directly.
+  static String redactHeadersForLog(Map<String, String> headers) {
+    if (headers.isEmpty) {
+      return '{}';
+    }
+    final String entries = headers.keys.map((k) => '$k: <redacted>').join(', ');
+    return '{$entries}';
+  }
+
   /// Parses the optional `headers` list from a proxy rule [yaml] map.
   ///
   /// Each entry in the list must be a YamlMap with `name` and `value` string
@@ -68,9 +85,10 @@ sealed class ProxyRule {
       final Object? name = item[_kName];
       final Object? value = item[_kValue];
       if (name is! String || name.isEmpty) {
-        final String found = name is String && name.isEmpty
-            ? 'an empty string'
-            : '${name.runtimeType}';
+        // Inside this branch `name` is either not a String or is an empty
+        // String; the outer check makes the second `.isEmpty` in the analyzed
+        // form redundant, so key off the type alone.
+        final found = name is String ? 'an empty string' : '${name.runtimeType}';
         logger.printError(
           '$_kLogEntryPrefix Each $_kHeaders entry must have a non-empty '
           'string "$_kName" key. Found $found.',
@@ -172,7 +190,7 @@ class RegexProxyRule extends ProxyRule {
 
   @override
   String toString() {
-    return '{${ProxyRule._kRegex}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}, ${ProxyRule._kHeaders}: $headers}';
+    return '{${ProxyRule._kRegex}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}, ${ProxyRule._kHeaders}: ${ProxyRule.redactHeadersForLog(headers)}}';
   }
 
   /// Checks if the given [yaml] can be handled by this rule.
@@ -237,7 +255,7 @@ class PrefixProxyRule extends RegexProxyRule {
 
   @override
   String toString() {
-    return '{${ProxyRule._kPrefix}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}, ${ProxyRule._kHeaders}: $headers}';
+    return '{${ProxyRule._kPrefix}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}, ${ProxyRule._kHeaders}: ${ProxyRule.redactHeadersForLog(headers)}}';
   }
 
   /// Checks if the given [yaml] can be handled by this rule.

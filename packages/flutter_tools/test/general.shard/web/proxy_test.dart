@@ -220,6 +220,30 @@ void main() {
       );
     });
 
+    // Regression test for @flutter-zl's review on #185721: verbose logs
+    // (`flutter run -v`) print the rule's toString, which in turn included
+    // the raw headers map — leaking Authorization tokens into logs users
+    // paste into GitHub bug reports. toString must redact values while
+    // keeping keys visible for debuggability.
+    test('toString redacts header values so tokens do not leak to verbose logs', () {
+      final rule = PrefixProxyRule(
+        prefix: '/api',
+        target: 'http://localhost:8080',
+        headers: const <String, String>{
+          'Authorization': 'Bearer super-secret-token-xyz',
+          'X-Api-Key': 'another-secret',
+        },
+      );
+      final serialized = rule.toString();
+      // Keys must be present so devs can see WHICH headers are being injected.
+      expect(serialized, contains('Authorization'));
+      expect(serialized, contains('X-Api-Key'));
+      // Values must be redacted.
+      expect(serialized, contains('<redacted>'));
+      expect(serialized, isNot(contains('super-secret-token-xyz')));
+      expect(serialized, isNot(contains('another-secret')));
+    });
+
     test('fromYaml returns null if target is missing', () {
       final yaml = YamlMap.wrap(<String, String>{'prefix': '/api'});
       final PrefixProxyRule? rule = PrefixProxyRule.fromYaml(yaml, logger);
