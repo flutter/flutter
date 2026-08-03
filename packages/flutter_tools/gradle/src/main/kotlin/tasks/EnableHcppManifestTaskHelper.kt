@@ -19,6 +19,11 @@ object EnableHcppManifestTaskHelper {
     private const val MANIFEST_VALUE_KEY = "android:value"
     internal const val HCPP_METADATA_NAME = "io.flutter.embedding.android.EnableHcpp"
 
+    // The flutter tool flags that set the properties this task consumes. Only used to name the
+    // flag the developer passed when warning that it was overridden by the manifest.
+    internal const val ENABLE_HCPP_FLAG = "--enable-hcpp"
+    internal const val NO_ENABLE_HCPP_FLAG = "--no-enable-hcpp"
+
     /**
      * Processes [manifestFile] and writes to [updatedManifest].
      *
@@ -61,7 +66,7 @@ object EnableHcppManifestTaskHelper {
                 }
 
             if (explicitEnableHcpp != null && (existingValueBool == null || explicitEnableHcpp != existingValueBool)) {
-                val flagName = if (explicitEnableHcpp) "--enable-hcpp" else "--no-enable-hcpp"
+                val flagName = if (explicitEnableHcpp) ENABLE_HCPP_FLAG else NO_ENABLE_HCPP_FLAG
                 logger?.warn(
                     "The merged Android manifest explicitly sets $HCPP_METADATA_NAME to \"$existingValueStr\"; " +
                         "therefore $flagName does not affect this artifact."

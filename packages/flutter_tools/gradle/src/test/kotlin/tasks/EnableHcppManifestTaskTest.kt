@@ -165,7 +165,7 @@ class EnableHcppManifestTaskTest {
             logger.warn(
                 match { message ->
                     message.contains("explicitly sets ${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME} to \"false\"") &&
-                        message.contains("--enable-hcpp does not affect this artifact")
+                        message.contains("${EnableHcppManifestTaskHelper.ENABLE_HCPP_FLAG} does not affect this artifact")
                 }
             )
         }
@@ -200,7 +200,7 @@ class EnableHcppManifestTaskTest {
             logger.warn(
                 match { message ->
                     message.contains("explicitly sets ${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME} to \"true\"") &&
-                        message.contains("--no-enable-hcpp does not affect this artifact")
+                        message.contains("${EnableHcppManifestTaskHelper.NO_ENABLE_HCPP_FLAG} does not affect this artifact")
                 }
             )
         }
@@ -263,7 +263,7 @@ class EnableHcppManifestTaskTest {
             logger.warn(
                 match { message ->
                     message.contains("explicitly sets ${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME} to \"@bool/enable_hcpp\"") &&
-                        message.contains("--enable-hcpp does not affect this artifact")
+                        message.contains("${EnableHcppManifestTaskHelper.ENABLE_HCPP_FLAG} does not affect this artifact")
                 }
             )
         }
