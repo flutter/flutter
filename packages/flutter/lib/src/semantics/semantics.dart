@@ -3263,7 +3263,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     if (_children != null) {
       for (final SemanticsNode child in _children!) {
-        child.attach(owner);
+        // The list of children may be stale and may contain nodes that have
+        // been assigned to a different parent.
+        if (child.parent == this) {
+          child.attach(owner);
+        }
       }
     }
   }
