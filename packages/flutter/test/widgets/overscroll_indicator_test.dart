@@ -744,6 +744,42 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets(
+    'StretchingOverscrollIndicator does not crash when disposed mid stretch animation',
+    // Regression test for https://github.com/flutter/flutter/issues/189589
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StretchingOverscrollIndicator(
+            axisDirection: AxisDirection.down,
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: 20,
+              itemBuilder: (BuildContext context, int index) =>
+                  SizedBox(height: 100.0, child: Text('Item $index')),
+            ),
+          ),
+        ),
+      );
+
+      // Fling at the top edge to overscroll, which starts the stretch
+      // animation via _StretchController.animate().
+      await tester.fling(find.byType(ListView), const Offset(0.0, 300.0), 1000.0);
+      await tester.pump(); // Start the fling.
+      await tester.pump(const Duration(milliseconds: 100)); // Let the animation begin.
+
+      // Tear down the widget before the animation completes. This disposes the
+      // _StretchController (and its AnimationController) while the animation's
+      // whenComplete callback is still pending, which previously dereferenced a
+      // null _controller when the stale callback fired.
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('GlowingOverscrollIndicator does not crash at zero area', (
     WidgetTester tester,
   ) async {

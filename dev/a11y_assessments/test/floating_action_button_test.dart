@@ -17,18 +17,33 @@ void main() {
   });
 
   testWidgets('floating action button can increment tap count', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
     await pumpsUseCase(tester, FloatingActionButtonUseCase());
 
     expect(find.text('Tap count: 0'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('Tap count: 0')),
+      matchesSemantics(label: 'Tap count: 0', isLiveRegion: true),
+    );
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pump();
 
     expect(find.text('Tap count: 1'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('Tap count: 1')),
+      matchesSemantics(label: 'Tap count: 1', isLiveRegion: true),
+    );
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pump();
 
     expect(find.text('Tap count: 2'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('Tap count: 2')),
+      matchesSemantics(label: 'Tap count: 2', isLiveRegion: true),
+    );
+
+    handle.dispose();
   });
 }

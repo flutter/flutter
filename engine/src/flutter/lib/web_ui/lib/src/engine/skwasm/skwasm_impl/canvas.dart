@@ -361,6 +361,7 @@ class SkwasmCanvas implements LayerCanvas {
         (blendMode ?? ui.BlendMode.src).index,
         rawCullRect,
         paintHandle,
+        paint.filterQuality.index,
       );
 
       paintDispose(paintHandle);
@@ -400,6 +401,7 @@ class SkwasmCanvas implements LayerCanvas {
         (blendMode ?? ui.BlendMode.src).index,
         rawCullRect,
         paintHandle,
+        paint.filterQuality.index,
       );
 
       paintDispose(paintHandle);

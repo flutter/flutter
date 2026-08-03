@@ -310,6 +310,9 @@ class FlutterPlatformViewsTestMockPlatformViewDelegate : public PlatformView::De
                                     bool transient) override {}
   void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
                                  flutter::AssetResolver::AssetResolverType type) override {}
+  std::shared_ptr<fml::BasicTaskRunner> OnPlatformViewGetShutdownSafeIOTaskRunner() const override {
+    return nullptr;
+  }
 
   flutter::Settings settings_;
 };
@@ -362,7 +365,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -416,7 +418,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -511,7 +512,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -589,7 +589,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -667,7 +666,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -747,7 +745,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -873,7 +870,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -1026,7 +1022,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -1327,7 +1322,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -1640,7 +1634,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -1720,7 +1713,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -1825,7 +1817,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -1886,7 +1877,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -1992,7 +1982,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2067,7 +2056,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2140,7 +2128,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2212,7 +2199,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2289,7 +2275,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2386,7 +2371,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2491,7 +2475,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2613,7 +2596,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2718,7 +2700,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2840,7 +2821,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -2895,7 +2875,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -3007,7 +2986,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -3108,7 +3086,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -3168,7 +3145,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -3251,7 +3227,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockWebViewFactory* factory =
@@ -3316,7 +3291,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockWrapperWebViewFactory* factory =
@@ -3382,7 +3356,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockNestedWrapperWebViewFactory* factory =
@@ -3447,7 +3420,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -3501,7 +3473,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
         /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
         /*platform_views_controller=*/flutterPlatformViewsController,
         /*task_runners=*/runners.taskRunners,
-        /*worker_task_runner=*/nil,
         /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
     FlutterPlatformViewsTestMockWebViewFactory* factory =
@@ -3614,7 +3585,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
         /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
         /*platform_views_controller=*/flutterPlatformViewsController,
         /*task_runners=*/runners.taskRunners,
-        /*worker_task_runner=*/nil,
         /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
     FlutterPlatformViewsTestMockWrapperWebViewFactory* factory =
@@ -3760,7 +3730,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
         /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
         /*platform_views_controller=*/flutterPlatformViewsController,
         /*task_runners=*/runners.taskRunners,
-        /*worker_task_runner=*/nil,
         /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
     FlutterPlatformViewsTestMockWebViewFactory* factory =
@@ -3913,7 +3882,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -3956,7 +3924,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -4004,7 +3971,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -4061,7 +4027,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -4118,7 +4083,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -4221,7 +4185,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -4297,7 +4260,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
@@ -4350,7 +4312,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
@@ -4417,7 +4378,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
@@ -4522,7 +4482,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
@@ -4714,7 +4673,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -4813,7 +4771,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -4899,7 +4856,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -4993,7 +4949,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
@@ -5109,7 +5064,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -5176,7 +5130,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
@@ -5245,7 +5198,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestNilFlutterPlatformFactory* factory =
@@ -5340,7 +5292,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
@@ -5422,7 +5373,6 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
