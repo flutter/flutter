@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:io';
 
@@ -40,58 +44,67 @@ class IOSDeviceSupport {
       '-destination',
       'id=$deviceId',
     ];
-    final Process process = await _processUtils.start(command);
+    try {
+      final Process process = await _processUtils.start(command);
 
-    final timer = Timer(const Duration(seconds: 10), () {
+      final timer = Timer(const Duration(seconds: 10), () {
+        _logger.printError(
+          'Xcode is taking longer than expected to start preparing Device Support symbols...\n'
+          'Connect your device via USB and try running this command manually:\n'
+          '  "${command.join(' ')}"',
+        );
+      });
+
+      var printToTrace = true;
+      final StreamSubscription<String> stdoutSubscription = process.stdout
+          .transform(utf8.decoder)
+          .listen((String text) {
+            if (text.contains('Copying')) {
+              printToTrace = false;
+              _logger.printStatus(
+                'Copying Device Support symbols. This may take several minutes to complete...\n'
+                'Please do not connect or disconnect your device until finished.',
+              );
+              timer.cancel();
+            }
+            if (printToTrace) {
+              _logger.printTrace(text);
+            } else {
+              _logger.printStatus(text, newline: false);
+            }
+          });
+
+      final StreamSubscription<String> stderrSubscription = process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) {
+            _logger.printError(line);
+          });
+
+      try {
+        // Wait for stdout and stderr to be fully processed
+        // because process.exitCode may complete first.
+        await Future.wait<void>(<Future<void>>[
+          stdoutSubscription.asFuture<void>(),
+          stderrSubscription.asFuture<void>(),
+        ]);
+        await process.exitCode.whenComplete(() async {
+          await stdoutSubscription.cancel();
+          await stderrSubscription.cancel();
+        });
+      } finally {
+        timer.cancel();
+      }
+
+      // Print an empty line so that next prints aren't inline with logs from here.
+      if (!printToTrace) {
+        _logger.printStatus('');
+      }
+    } on ProcessException catch (exception, stackTrace) {
       _logger.printError(
-        'Xcode is taking longer than expected to start preparing Device Support symbols...\n'
-        'Connect your device via USB and try running this command manually:\n'
-        '  "${command.join(' ')}"',
+        'Process exception running "xcodebuild -prepareDeviceSupport": $exception',
       );
-    });
-
-    var printToTrace = true;
-    final StreamSubscription<String> stdoutSubscription = process.stdout
-        .transform(utf8.decoder)
-        .listen((String text) {
-          if (text.contains('Copying')) {
-            printToTrace = false;
-            _logger.printStatus(
-              'Copying Device Support symbols. This may take several minutes to complete...\n'
-              'Please do not connect or disconnect your device until finished.',
-            );
-            timer.cancel();
-          }
-          if (printToTrace) {
-            _logger.printTrace(text);
-          } else {
-            _logger.printStatus(text, newline: false);
-          }
-        });
-
-    final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen((String line) {
-          _logger.printError(line);
-        });
-
-    // Wait for stdout and stderr to be fully processed
-    // because process.exitCode may complete first.
-    await Future.wait<void>(<Future<void>>[
-      stdoutSubscription.asFuture<void>(),
-      stderrSubscription.asFuture<void>(),
-    ]);
-
-    // Print an empty line so that next prints aren't inline with logs from here.
-    if (!printToTrace) {
-      _logger.printStatus('');
+      _logger.printTrace('$stackTrace');
     }
-
-    await process.exitCode.whenComplete(() async {
-      timer.cancel();
-      await stdoutSubscription.cancel();
-      await stderrSubscription.cancel();
-    });
   }
 }
