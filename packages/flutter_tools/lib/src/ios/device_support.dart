@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -88,10 +88,14 @@ class IOSDeviceSupport {
           stdoutSubscription.asFuture<void>(),
           stderrSubscription.asFuture<void>(),
         ]);
-        await process.exitCode.whenComplete(() async {
-          await stdoutSubscription.cancel();
-          await stderrSubscription.cancel();
-        });
+
+        unawaited(stdoutSubscription.cancel());
+        unawaited(stderrSubscription.cancel());
+
+        final int exitCode = await process.exitCode;
+        if (exitCode != 0) {
+          _logger.printError('xcodebuild -prepareDeviceSupport exited with code $exitCode');
+        }
       } finally {
         timer.cancel();
       }
