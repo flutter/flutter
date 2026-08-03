@@ -84,7 +84,7 @@ import InternalFlutterSwiftCommon
   @Test func jsonMethodCodecCanEncodeAndDecodeMethodCall() {
     let codec = FlutterJSONMethodCodec.sharedInstance()
     let call = FlutterMethodCall(methodName: "foo", arguments: ["bar": 42])
-    let encoded = codec.encodeMethodCall(call)
+    let encoded = codec.encode(call)
     let decoded = codec.decodeMethodCall(encoded)
     #expect(decoded.method == "foo")
     let args = decoded.arguments as? [String: Int]
