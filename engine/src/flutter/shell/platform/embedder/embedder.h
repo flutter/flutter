@@ -649,8 +649,8 @@ typedef struct {
 
 /// A structure to represent a rectangle.
 ///
-/// Frozen because adding members would break the ABI of `FlutterSemanticsNode`
-/// and `FlutterDamage`.
+// Frozen because adding members would break the ABI of `FlutterSemanticsNode`
+// and `FlutterDamage`.
 typedef struct {
   double left;
   double top;
