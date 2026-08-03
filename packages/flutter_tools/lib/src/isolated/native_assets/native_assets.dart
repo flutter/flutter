@@ -6,11 +6,13 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
+import 'package:flutter_hook_config/flutter_hook_config.dart';
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config_types.dart';
 
+import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
@@ -536,6 +538,39 @@ abstract interface class FlutterNativeAssetsBuildRunner {
   Future<void> setCCompilerConfig(CodeAssetTarget target);
 }
 
+/// Creates the [FlutterExtension] that supplies engine host-tool paths (such
+/// as `impellerc`) to build and link hooks.
+///
+/// [engineVersion] is the engine revision the invoking SDK targets, or null
+/// for local engine builds (matching `Environment.engineVersion`). Local
+/// engines have no revision, so the version is derived from the host tools
+/// themselves; a rebuilt tool then produces a different version, which
+/// invalidates the hook cache.
+FlutterExtension createFlutterExtension({
+  required Artifacts artifacts,
+  required String? engineVersion,
+}) {
+  final FileSystemEntity impellerc = artifacts.getHostArtifact(HostArtifact.impellerc);
+  final FileSystemEntity libtessellator = artifacts.getHostArtifact(HostArtifact.libtessellator);
+  return FlutterExtension(
+    engineVersion:
+        engineVersion ?? _localEngineToolsVersion(<FileSystemEntity>[impellerc, libtessellator]),
+    impellerc: Uri.file(impellerc.absolute.path),
+    libtessellator: Uri.file(libtessellator.absolute.path),
+  );
+}
+
+/// An opaque engine version for local engine builds, derived from the host
+/// tools' paths, sizes, and timestamps.
+String _localEngineToolsVersion(List<FileSystemEntity> tools) {
+  final buffer = StringBuffer('local-engine');
+  for (final tool in tools) {
+    final FileStat stat = tool.statSync();
+    buffer.write(';${tool.absolute.path};${stat.size};${stat.modified.millisecondsSinceEpoch}');
+  }
+  return buffer.toString();
+}
+
 /// Uses `package:hooks_runner` for its implementation.
 class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunner {
   FlutterNativeAssetsBuildRunnerImpl(
@@ -546,6 +581,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.runPackageName,
     this.pubspecPath, {
     required this.includeDevDependencies,
+    required this.flutterExtension,
   });
 
   final String pubspecPath;
@@ -557,6 +593,13 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
 
   /// Include the dev dependencies of [runPackageName].
   final bool includeDevDependencies;
+
+  /// Supplies engine host-tool paths to hooks.
+  ///
+  /// Appended to the extensions of every build and link hook invocation, so
+  /// hooks can locate tools like `impellerc` through the same artifact
+  /// resolution the tool uses itself, including under `--local-engine`.
+  final FlutterExtension flutterExtension;
 
   late final _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
@@ -614,7 +657,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }) async {
     final Result<BuildResult, HooksRunnerFailure> result = await _buildRunner.build(
       linkingEnabled: linkingEnabled,
-      extensions: extensions,
+      extensions: <ProtocolExtension>[...extensions, flutterExtension],
     );
     if (result.isSuccess) {
       return result.success;
@@ -630,7 +673,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required File? recordedUsesFile,
   }) async {
     final Result<LinkResult, HooksRunnerFailure> result = await _buildRunner.link(
-      extensions: extensions,
+      extensions: <ProtocolExtension>[...extensions, flutterExtension],
       buildResult: buildResult,
       resourceIdentifiers: recordedUsesFile?.uri,
     );
