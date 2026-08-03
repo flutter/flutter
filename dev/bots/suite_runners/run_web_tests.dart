@@ -178,6 +178,9 @@ class WebTestsSuite {
         useWasm: false,
       ),
 
+      () => _runWebE2eTest('deferred_loading_integration', buildMode: 'release', useWasm: false),
+      () => _runWebE2eTest('deferred_loading_integration', buildMode: 'release', useWasm: true),
+
       () => _runWebTreeshakeTest(),
 
       () => _runFlutterDriverWebTest(
