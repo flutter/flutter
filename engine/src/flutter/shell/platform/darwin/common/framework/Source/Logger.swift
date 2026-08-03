@@ -80,6 +80,7 @@ extension Logger {
   }
 
   /// Logs a message at `LogLevel.info`.
+  @available(swift, obsoleted: 1.0)
   @objc(logInfo:) public static func objcLogInfo(_ message: String) {
     shared.log(level: .info, message)
   }
@@ -90,6 +91,7 @@ extension Logger {
   }
 
   /// Logs a message at `LogLevel.important`.
+  @available(swift, obsoleted: 1.0)
   @objc(logImportant:) public static func objcLogImportant(_ message: String) {
     shared.log(level: .important, message)
   }
@@ -100,6 +102,7 @@ extension Logger {
   }
 
   /// Logs a message at `LogLevel.warning`.
+  @available(swift, obsoleted: 1.0)
   @objc(logWarning:) public static func objcLogWarning(_ message: String) {
     shared.log(level: .warning, message)
   }
@@ -110,6 +113,7 @@ extension Logger {
   }
 
   /// Logs a message at `LogLevel.error`.
+  @available(swift, obsoleted: 1.0)
   @objc(logError:) public static func objcLogError(_ message: String) {
     shared.log(level: .error, message)
   }
@@ -120,6 +124,7 @@ extension Logger {
   }
 
   /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
+  @available(swift, obsoleted: 1.0)
   @objc(logFatal:) public static func objcLogFatal(_ message: String) {
     shared.log(level: .fatal, message)
     abort()
@@ -132,13 +137,8 @@ extension Logger {
   }
 
   /// Logs a message unconditionally.
-  @objc(logDirect:) public static func objcLogDirect(_ message: String) {
+  @objc public static func logDirect(_ message: String) {
     shared.outputWriter.writeLine(level: .important, message)
-  }
-
-  /// Logs a message unconditionally.
-  public static func logDirect(_ message: @autoclosure () -> String) {
-    shared.outputWriter.writeLine(level: .important, message())
   }
 }
 
