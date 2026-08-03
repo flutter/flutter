@@ -1907,6 +1907,13 @@ class OverlayPortal extends StatefulWidget {
   /// at the same time resize itself base on how close it is to the edges of
   /// the [Overlay].
   ///
+  /// {@tool dartpad}
+  /// This example uses [OverlayPortal.overlayChildLayoutBuilder] to build a
+  /// tooltip that becomes visible when the user taps on the [child] widget.
+  ///
+  /// ** See code in examples/api/lib/widgets/overlay/overlay_portal.1.dart **
+  /// {@end-tool}
+  ///
   /// The `overlayChildBuilder` callback is called during layout. To ensure the
   /// paint transform of [OverlayPortal.child] in relation to the target
   /// [Overlay] is up-to-date by then, all [RenderObject]s between the

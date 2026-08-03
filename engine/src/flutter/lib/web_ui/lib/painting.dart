@@ -690,8 +690,12 @@ class ImageFilter {
   factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) =>
       engine.renderer.composeImageFilters(outer: outer, inner: inner);
 
-  // ignore: avoid_unused_constructor_parameters
-  factory ImageFilter.shader(FragmentShader shader) {
+  factory ImageFilter.shader(
+    // ignore: avoid_unused_constructor_parameters
+    FragmentShader shader, {
+    // ignore: avoid_unused_constructor_parameters
+    FilterQuality filterQuality = FilterQuality.none,
+  }) {
     throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
   }
 
@@ -741,9 +745,9 @@ Future<Codec> instantiateImageCodecFromBuffer(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) {
+}) async {
   try {
-    return engine.renderer.instantiateImageCodec(
+    return await engine.renderer.instantiateImageCodec(
       buffer._list!,
       targetWidth: targetWidth,
       targetHeight: targetHeight,

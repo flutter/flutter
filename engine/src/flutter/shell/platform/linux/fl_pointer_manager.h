@@ -36,6 +36,8 @@ FlPointerManager* fl_pointer_manager_new(FlutterViewId view_id,
  * @x: x co-ordinate of event.
  * @y: y co-ordinate of event.
  * @gdk_button: button being pressed.
+ * @rotation: rotation of the pointer device in degrees.
+ * @pressure: pressure of the pointer device.
  *
  * Returns %TRUE if this event was handled.
  */
@@ -45,7 +47,9 @@ gboolean fl_pointer_manager_handle_button_press(
     FlutterPointerDeviceKind device_kind,
     gdouble x,
     gdouble y,
-    guint gdk_button);
+    guint gdk_button,
+    gdouble rotation,
+    gdouble pressure);
 
 /**
  * fl_pointer_manager_handle_button_release:
@@ -55,6 +59,8 @@ gboolean fl_pointer_manager_handle_button_press(
  * @x: x co-ordinate of event.
  * @y: y co-ordinate of event.
  * @gdk_button: button being released.
+ * @rotation: rotation of the pointer device in degrees.
+ * @pressure: pressure of the pointer device.
  *
  * Returns %TRUE if this event was handled.
  */
@@ -64,7 +70,9 @@ gboolean fl_pointer_manager_handle_button_release(
     FlutterPointerDeviceKind device_kind,
     gdouble x,
     gdouble y,
-    guint gdk_button);
+    guint gdk_button,
+    gdouble rotation,
+    gdouble pressure);
 
 /**
  * fl_pointer_manager_handle_motion:
@@ -73,6 +81,8 @@ gboolean fl_pointer_manager_handle_button_release(
  * @device_kind: kind of device generating the event.
  * @x: x co-ordinate of event.
  * @y: y co-ordinate of event.
+ * @rotation: rotation of the pointer device in degrees.
+ * @pressure: pressure of the pointer device.
  *
  * Returns %TRUE if this event was handled.
  */
@@ -80,7 +90,9 @@ gboolean fl_pointer_manager_handle_motion(FlPointerManager* manager,
                                           guint event_time,
                                           FlutterPointerDeviceKind device_kind,
                                           gdouble x,
-                                          gdouble y);
+                                          gdouble y,
+                                          gdouble rotation,
+                                          gdouble pressure);
 
 /**
  * fl_pointer_manager_handle_enter:
@@ -89,6 +101,8 @@ gboolean fl_pointer_manager_handle_motion(FlPointerManager* manager,
  * @device_kind: kind of device generating the event.
  * @x: x co-ordinate of event.
  * @y: y co-ordinate of event.
+ * @rotation: rotation of the pointer device in degrees.
+ * @pressure: pressure of the pointer device.
  *
  * Returns %TRUE if this event was handled.
  */
@@ -96,7 +110,9 @@ gboolean fl_pointer_manager_handle_enter(FlPointerManager* manager,
                                          guint event_time,
                                          FlutterPointerDeviceKind device_kind,
                                          gdouble x,
-                                         gdouble y);
+                                         gdouble y,
+                                         gdouble rotation,
+                                         gdouble pressure);
 
 /**
  * fl_pointer_manager_handle_leave:
@@ -105,6 +121,8 @@ gboolean fl_pointer_manager_handle_enter(FlPointerManager* manager,
  * @device_kind: kind of device generating the event.
  * @x: x co-ordinate of event.
  * @y: y co-ordinate of event.
+ * @rotation: rotation of the pointer device in degrees.
+ * @pressure: pressure of the pointer device.
  *
  * Returns %TRUE if this event was handled.
  */
@@ -112,7 +130,9 @@ gboolean fl_pointer_manager_handle_leave(FlPointerManager* manager,
                                          guint event_time,
                                          FlutterPointerDeviceKind device_kind,
                                          gdouble x,
-                                         gdouble y);
+                                         gdouble y,
+                                         gdouble rotation,
+                                         gdouble pressure);
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_POINTER_MANAGER_H_
