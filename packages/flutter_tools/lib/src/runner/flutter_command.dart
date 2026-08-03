@@ -1321,10 +1321,10 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
       help:
           'Enable the use of the HCPP platform view rendering mode on the Impeller rendering '
-          'backend. An explicit value takes priority over the '
-          'io.flutter.embedding.android.EnableHcpp metadata in AndroidManifest.xml: build '
-          'commands write it into the manifest of the artifact they produce, and "run", "test", '
-          'and "drive" additionally apply it at launch. Without the flag, the manifest decides.',
+          'backend. An explicit value takes priority over the EnableHcpp metadata in '
+          'AndroidManifest.xml: build commands write it into the manifest of the artifact they '
+          'produce, and "run", "test", and "drive" additionally apply it at launch. Without the '
+          'flag, the manifest decides.',
     );
   }
 
