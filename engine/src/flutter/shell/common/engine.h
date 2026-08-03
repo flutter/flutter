@@ -898,7 +898,7 @@ class Engine final : public RuntimeDelegate {
   //----------------------------------------------------------------------------
   /// @brief      Notifies the framework that all views should be marked dirty.
   ///
-  ///             This is called when the engine needs to force full repaint of
+  ///             This is called when the engine needs to force full re-render of
   ///             all views on the next frame, for example during lifecycle
   ///             events.
   ///
