@@ -1199,6 +1199,16 @@ TEST_F(FlutterEngineTest, HandleLifecycleStates) API_AVAILABLE(macos(10.9)) {
         [invocation setReturnValue:&visibility];
       });
 
+  // handleWillBecomeActive derives visibility from the windows (not from the
+  // occlusion state, which can latch stale), so provide a window whose visibility
+  // we can toggle independently.
+  __block BOOL windowVisible = YES;
+  id mockWindow = OCMClassMock([NSWindow class]);
+  OCMStub([mockWindow isVisible]).andDo(^(NSInvocation* invocation) {
+    [invocation setReturnValue:&windowVisible];
+  });
+  OCMStub([mockApplication windows]).andReturn(@[ mockWindow ]);
+
   NSNotification* willBecomeActive =
       [[NSNotification alloc] initWithName:NSApplicationWillBecomeActiveNotification
                                     object:nil
@@ -1227,12 +1237,30 @@ TEST_F(FlutterEngineTest, HandleLifecycleStates) API_AVAILABLE(macos(10.9)) {
   [engineMock handleDidChangeOcclusionState:didChangeOcclusionState];
   EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
 
+  // Becoming active with an on-screen window resumes even though occlusionState still
+  // reads not-visible (the stale-latch case). Regression test for #155977.
+  [engineMock handleWillBecomeActive:willBecomeActive];
+  EXPECT_EQ(sentState, flutter::AppLifecycleState::kResumed);
+
+  // The app is now active and considered visible, so resigning active makes it
+  // inactive (not hidden) until a real occlusion notification hides it.
+  [engineMock handleWillResignActive:willResignActive];
+  EXPECT_EQ(sentState, flutter::AppLifecycleState::kInactive);
+
+  // Occlusion stays authoritative after a becomeActive resume: a genuine
+  // not-visible occlusion notification still hides the app.
+  visibility = 0;
+  [engineMock handleDidChangeOcclusionState:didChangeOcclusionState];
+  EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
+
+  // Becoming active while no window is visible (e.g. activated with all windows
+  // minimized, which does not deminiaturize) must not resume: visibility is
+  // derived from the windows, not from the activation itself.
+  windowVisible = NO;
   [engineMock handleWillBecomeActive:willBecomeActive];
   EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
 
-  [engineMock handleWillResignActive:willResignActive];
-  EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
-
+  [mockWindow stopMocking];
   [mockApplication stopMocking];
 }
 
