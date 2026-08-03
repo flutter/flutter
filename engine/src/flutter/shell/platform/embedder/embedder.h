@@ -660,7 +660,7 @@ typedef struct {
 
 /// A structure to represent a 2D point.
 ///
-/// Frozen because adding members would break the ABI of `FlutterLayer`.
+// Frozen because adding members would break the ABI of `FlutterLayer`.
 typedef struct {
   double x;
   double y;
