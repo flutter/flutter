@@ -11,7 +11,6 @@
 #include <emscripten/html5_webgl.h>
 #include <emscripten/threading.h>
 #include <webgl/webgl1.h>
-#include <atomic>
 #include <cassert>
 #include <optional>
 #include "export.h"
@@ -93,9 +92,8 @@ class Surface {
 
   CallbackHandler* callback_handler_ = nullptr;
 
-  // Incremented from both the main thread and the raster worker
-  // (ReceiveCanvasOnWorker).
-  std::atomic<uint32_t> current_callback_id_ = 0;
+  // Main thread only
+  uint32_t current_callback_id_ = 0;
 
   int canvas_width_ = 0;
   int canvas_height_ = 0;

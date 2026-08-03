@@ -39,8 +39,7 @@ extern uint32_t skwasm_getGlContextForCanvas(SkwasmObject canvas,
                                              bool antialias,
                                              Skwasm::Surface* surface);
 extern void skwasm_reportInitialized(Skwasm::Surface* surface,
-                                     uint32_t callback_id,
-                                     uint32_t context_lost_callback_id);
+                                     uint32_t callback_id);
 extern void skwasm_reportResizeComplete(Skwasm::Surface* surface,
                                         uint32_t callback_id);
 extern void skwasm_dispatchResizeSurface(unsigned long thread_id,

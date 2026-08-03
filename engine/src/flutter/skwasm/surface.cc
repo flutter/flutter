@@ -41,6 +41,16 @@
 //    the Dart code, which will complete the future that was returned by the
 //    original Dart method call.
 
+// See https://github.com/flutter/flutter/pull/190048
+extern bool
+    gSkUseThreadLocalStrikeCaches_IAcknowledgeThisIsIncrediblyExperimental;
+
+namespace {
+__attribute__((constructor)) void UseThreadLocalStrikeCaches() {
+  gSkUseThreadLocalStrikeCaches_IAcknowledgeThisIsIncrediblyExperimental = true;
+}
+}  // namespace
+
 unsigned long Skwasm::GetRasterThread() {
   static unsigned long thread = []() {
     if (skwasm_isSingleThreaded()) {
@@ -86,6 +96,11 @@ void Skwasm::Surface::Dispose() {
 uint32_t Skwasm::Surface::SetCanvas(SkwasmObject canvas) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callback_id = ++current_callback_id_;
+
+  // Allocated here instead of on the worker so that current_callback_id_ is
+  // only ever modified on the main thread.
+  context_lost_callback_id_ = ++current_callback_id_;
+
   skwasm_dispatchTransferCanvas(GetRasterThread(), this, canvas, callback_id);
   return callback_id;
 }
@@ -133,9 +148,7 @@ void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
     render_context_->SetResourceCacheLimit(*resource_cache_limit_);
   }
 
-  context_lost_callback_id_ = ++current_callback_id_;
-
-  skwasm_reportInitialized(this, context_lost_callback_id_, callback_id);
+  skwasm_reportInitialized(this, callback_id);
 }
 
 // Resizing

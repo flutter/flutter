@@ -140,7 +140,6 @@ template("skwasm_toolchain") {
 
       # skwasm is multithreaded
       wasm_use_workers = true
-      wasm_use_pthreads = true
       wasm_prioritize_size = true
     }
   }

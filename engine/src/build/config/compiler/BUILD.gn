@@ -302,15 +302,6 @@ config("compiler") {
       cflags += [ "-sWASM_WORKERS=1" ]
       ldflags += [ "-sWASM_WORKERS=1" ]
     }
-    if (wasm_use_pthreads) {
-      cflags += [ "-pthread" ]
-      ldflags += [
-        "-pthread",
-
-        # skwasm links -sALLOW_MEMORY_GROWTH.
-        "-Wno-pthreads-mem-growth",
-      ]
-    }
     if (wasm_shared_memory) {
       cflags += [ "-sSHARED_MEMORY=1" ]
       ldflags += [ "-sSHARED_MEMORY=1" ]

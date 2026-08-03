@@ -213,11 +213,10 @@ mergeInto(LibraryManager.library, {
         callbackId,
       }, [canvas], threadId);
     };
-    _skwasm_reportInitialized = function (surfaceHandle, contextLostCallbackId, callbackId) {
+    _skwasm_reportInitialized = function (surfaceHandle, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'onInitialized',
         surface: surfaceHandle,
-        contextLostCallbackId,
         callbackId,
       }, []);
     };
