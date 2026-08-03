@@ -98,7 +98,9 @@ class FlutterErrorFormatter {
   /// is `false`.
   void _writeNode(_ErrorNode node, {int indent = 0, bool recursive = true}) {
     if (node.type == _DiagnosticsNodeType.ErrorSummary) {
-      errorSummary = node.description;
+      // Probably there is only one error summary, but keep the first
+      // (outer-most) if not.
+      errorSummary ??= node.description;
     } else if (node.type == _DiagnosticsNodeType.DevToolsDeepLinkProperty) {
       _parseDevToolsDeepLink(node);
     }
@@ -158,7 +160,9 @@ class FlutterErrorFormatter {
   void _parseDevToolsDeepLink(_ErrorNode node) {
     assert(node.type == _DiagnosticsNodeType.DevToolsDeepLinkProperty);
     if (node.value case final url?) {
-      devToolsDeepLinkUrl = url;
+      // Probably there is only one deep link, but keep the first
+      // (outer-most) if not.
+      devToolsDeepLinkUrl ??= url;
     }
   }
 }
