@@ -11,7 +11,7 @@ aapt2 = "$android_buildtools/aapt2"
 zipalign = "$android_buildtools/zipalign"
 apksigner = "$android_buildtools/apksigner"
 android_jar =
-    "//flutter/third_party/android_tools/sdk/platforms/android-37/android.jar"
+    "//flutter/third_party/android_tools/sdk/platforms/android-37.0/android.jar"
 src_root = "//flutter/testing/android/native_activity"
 
 # A drop in replacement for an executable or shared library target. Providing a
