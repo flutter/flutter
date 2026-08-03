@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const kWasmMoreInfo = 'See https://flutter.dev/to/wasm for more information.';
+const String kWasmMoreInfo = 'See https://flutter.dev/to/wasm for more information.';
+const String kWasmErrorsMoreInfo =
+    'See https://flutter.dev/to/wasm-errors for diagnostic and migration guidance.';
 
 /// Headers required to run Wasm-compiled applications with multi-threading.
 ///

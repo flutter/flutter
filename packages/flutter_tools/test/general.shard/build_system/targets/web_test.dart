@@ -8,6 +8,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -1406,6 +1407,71 @@ _flutter.loader.load();
       }
     }
   }
+
+  test(
+    'Dart2WasmTarget prints JS interop migration footer on legacy import failures',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'profile';
+
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            ..._kDart2WasmLinuxArgs,
+            '-Ddart.vm.profile=true',
+            '-Ddart.vm.product=false',
+            '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+            '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
+            '--extra-compiler-option=--import-shared-memory',
+            '--extra-compiler-option=--shared-memory-max-pages=32768',
+            '-DFLUTTER_WEB_USE_SKIA=false',
+            '-DFLUTTER_WEB_USE_SKWASM=true',
+            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--extra-compiler-option=--depfile=' +
+                environment.buildDir.childFile('dart2wasm.d').absolute.path,
+            '--recorded-uses=' +
+                environment.buildDir.childFile('recorded_uses_wasm.json').absolute.path,
+            '--enable-experiment=record-use',
+            '-O2',
+            '--no-strip-wasm',
+            '--no-source-maps',
+            '--no-minify',
+            '-o',
+            environment.buildDir.childFile('main.dart.wasm').absolute.path,
+            environment.buildDir.childFile('main.dart').absolute.path,
+          ],
+          exitCode: 254,
+          stderr: 'Error: Cannot use dart:html from WebAssembly.',
+        ),
+      );
+
+      try {
+        await Dart2WasmTarget(
+          const WasmCompilerConfig(
+            optimizationLevel: 2,
+            stripWasm: false,
+            sourceMaps: false,
+            minify: false,
+          ),
+          const NoOpAnalytics(),
+        ).build(environment);
+        fail('Expected exception');
+      } catch (e) {
+        expect(e.toString(), contains('Failed to compile application for the Web.'));
+      }
+
+      final BufferLogger logger = globals.logger as BufferLogger;
+      expect(
+        logger.statusText,
+        contains('Note: WebAssembly compilation failed due to legacy web imports.'),
+      );
+      expect(
+        logger.statusText,
+        contains(
+          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.',
+        ),
+      );
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+  );
 
   test('Dart2WasmTarget.buildFiles respects compilerConfig.sourceMaps and matches modules', () {
     final File wasmFile = environment.buildDir.childFile('main.dart.wasm')..createSync();

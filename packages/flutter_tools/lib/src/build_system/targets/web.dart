@@ -27,6 +27,7 @@ import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
+import '../../web/web_constants.dart';
 import '../../web_template.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -388,12 +389,23 @@ class Dart2WasmTarget extends Dart2WebTarget {
       processManager: environment.processManager,
     );
 
-    final RunResult runResult = await processUtils.run(
-      throwOnError: !compilerConfig.dryRun,
-      compilationArgs,
-    );
+    final RunResult runResult = await processUtils.run(throwOnError: false, compilationArgs);
     if (compilerConfig.dryRun) {
       await _handleDryRunResult(environment, runResult);
+    } else if (runResult.exitCode != 0) {
+      environment.logger.printStatus(runResult.stdout);
+      environment.logger.printError(runResult.stderr);
+      if (runResult.stdout.contains('dart:html') ||
+          runResult.stderr.contains('dart:html') ||
+          runResult.stdout.contains('package:js') ||
+          runResult.stderr.contains('package:js')) {
+        environment.logger.printStatus(
+          'Note: WebAssembly compilation failed due to legacy web imports.\n'
+          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
+          '$kWasmErrorsMoreInfo',
+        );
+      }
+      throwToolExit('Failed to compile application for the Web.');
     }
     final File recordedUsesFile = environment.buildDir.childFile(
       LinkHooks.recordedUsesWasmFileName,
@@ -575,6 +587,17 @@ class Dart2WasmTarget extends Dart2WebTarget {
       });
     }
     result ??= 'unknown';
+
+    if (stdout.contains('dart:html') ||
+        stderr.contains('dart:html') ||
+        stdout.contains('package:js') ||
+        stderr.contains('package:js')) {
+      environment.logger.printStatus(
+        'Note: WebAssembly compilation failed due to legacy web imports.\n'
+        'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
+        '$kWasmErrorsMoreInfo',
+      );
+    }
 
     environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
 

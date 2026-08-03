@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -173,6 +174,18 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
       );
       final Dart2WasmTarget target = createTarget();
       await target.build(environment);
+
+      final BufferLogger logger = environment.logger as BufferLogger;
+      expect(
+        logger.statusText,
+        contains('Note: WebAssembly compilation failed due to legacy web imports.'),
+      );
+      expect(
+        logger.statusText,
+        contains(
+          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.',
+        ),
+      );
 
       expect(fakeAnalytics.sentEvents, hasLength(1));
 
