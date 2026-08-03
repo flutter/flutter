@@ -452,9 +452,9 @@ class AndroidBuildInfo {
   final Iterable<CpuArch> targetArchs;
 
   /// Engine shell arguments to be injected into the application's AndroidManifest.xml.
-  /// 
-  /// This is exclusively used in release mode to allow the FlutterLoader to pass debugging
-  /// options to the engine without relying on intent extras. It is only applicable when building 
+  ///
+  /// This is exclusively used in release mode to allow the Flutter CLI to pass debugging
+  /// options to the engine without relying on Intent extras. It is only relevant when building
   /// from source (i.e., not using a prebuilt application binary).
   final List<String>? releaseManifestEngineShellArgs;
 }

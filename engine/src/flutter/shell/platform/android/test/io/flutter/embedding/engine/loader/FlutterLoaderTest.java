@@ -18,6 +18,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1371,8 +1372,8 @@ public class FlutterLoaderTest {
   public void
       itSetsMultipleCommandLineFlagsWithSpecialCharactersFromManifestMetadataInReleaseMode() {
     testMultipleFlagsFromManifestMetadata(
-        "[\"--flutter-assets-dir=\\\"path/to/a file\\\"\",\"--enable-impeller=true\"]",
-        new String[] {"--flutter-assets-dir=\"path/to/a file\"", "--enable-impeller=true"},
+        "[\"--flutter-assets-dir=\\\"path/<to>/'a'& file\\\"\",\"--enable-impeller=true\"]",
+        new String[] {"--flutter-assets-dir=\"path/<to>/'a'& file\"", "--enable-impeller=true"},
         true,
         true);
   }
@@ -1381,6 +1382,40 @@ public class FlutterLoaderTest {
   public void itIgnoresCommandLineFlagsFromManifestMetadataInDebugMode() {
     testMultipleFlagsFromManifestMetadata(
         "[\"--enable-impeller=true\"]", new String[] {"--enable-impeller=true"}, false, false);
+  }
+
+  @Test
+  public void itDoesNotReadAndroidEngineShellArgsFromManifestInDebugMode() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = spy(new Bundle());
+
+    metadata.putString(
+        "io.flutter.app.androidEngineShellArgs",
+        "[\"--enable-impeller=true\",\"--enable-dart-profiling\"]");
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null, false);
+    shadowOf(getMainLooper()).idle();
+
+    verify(metadata, never()).getString("io.flutter.app.androidEngineShellArgs");
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertFalse(arguments.contains("--enable-impeller=true"));
+    assertFalse(arguments.contains("--enable-dart-profiling"));
   }
 
   @Test

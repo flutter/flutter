@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:archive/archive.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
@@ -11,8 +13,8 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
-import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -30,7 +32,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/context.dart' as test_context;
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -83,7 +84,7 @@ void main() {
       dynamic Function() body, {
       Map<Type, Generator> overrides = const <Type, Generator>{},
     }) {
-      test_context.testUsingContext(
+      testUsingContext(
         description,
         body,
         overrides: <Type, Generator>{
@@ -288,6 +289,9 @@ void main() {
     testUsingContext(
       'build apk passes releaseManifestEngineShellArgs to gradle as a base64 encoded JSON string',
       () async {
+        const engineShellArgs = <String>['--enable-impeller=true', '--trace-skia'];
+        final String base64EngineShellArgs = base64Encode(utf8.encode(jsonEncode(engineShellArgs)));
+
         final builder = AndroidGradleBuilder(
           java: FakeJava(),
           logger: logger,
@@ -306,7 +310,7 @@ void main() {
               'gradlew',
               '-q',
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Pflutter.engineShellArgs=WyItLWVuYWJsZS1pbXBlbGxlcj10cnVlIiwiLS10cmFjZS1za2lhIl0=',
+              '-Pflutter.engineShellArgs=$base64EngineShellArgs',
               '-Ptarget=lib/main.dart',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-obfuscation=false',
@@ -349,7 +353,7 @@ void main() {
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
             ),
-            releaseManifestEngineShellArgs: <String>['--enable-impeller=true', '--trace-skia'],
+            releaseManifestEngineShellArgs: engineShellArgs,
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,

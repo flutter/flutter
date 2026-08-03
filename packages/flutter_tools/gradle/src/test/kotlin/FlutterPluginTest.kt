@@ -29,7 +29,9 @@ import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.io.TempDir
+import java.nio.charset.StandardCharsets
 import java.nio.file.Path
+import java.util.Base64
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -371,7 +373,9 @@ class FlutterPluginTest {
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
         every { project.projectDir } returns projectDir.toFile()
         every { project.findProperty("flutter.sdk") } returns fakeFlutterSdkDir.toString()
-        every { project.findProperty("flutter.engineShellArgs") } returns "eyJpbS5mbHV0dGVyLmVtYmVkZGluZy5hbmRyb2lkLmVuYWJsZS1pbXBlbGxlciI6InRydWUifQ=="
+        val engineShellArgsJson = """["--enable-impeller=true"]"""
+        val base64EngineShellArgs = Base64.getEncoder().encodeToString(engineShellArgsJson.toByteArray(StandardCharsets.UTF_8))
+        every { project.findProperty("flutter.engineShellArgs") } returns base64EngineShellArgs
         every { project.file(fakeFlutterSdkDir.toString()) } returns fakeFlutterSdkDir.toFile()
         val flutterExtension = FlutterExtension()
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension

@@ -415,8 +415,9 @@ public class FlutterLoader {
           }
         }
 
-        // 2/2: Add engine flags specified by the command line. These settings will take precedent
-        // over any flag configurations specified by appplication manifest metadata.
+        // 2/2: Add engine flags specified by the command line that have been injected into
+        // the manifest. These settings will take precedent over any flag configurations
+        // specified by appplication manifest metadata.
         if (isRelease) {
           String androidEngineShellArgsValue =
               applicationMetaData.getString(ANDROID_ENGINE_SHELL_ARGS_KEY);

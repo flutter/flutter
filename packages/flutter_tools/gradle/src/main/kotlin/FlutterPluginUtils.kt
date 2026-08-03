@@ -1159,8 +1159,8 @@ object FlutterPluginUtils {
     }
 
     /**
-     * Creates a task to generate an AndroidManifest.xml containing the engine shell arguments as
-     * `<meta-data>` tags, and adds it to the variant's manifests.
+     * Creates a task to generate an AndroidManifest.xml containing the engine shell arguments
+     * and adds it to the variant's manifests.
      */
     @JvmStatic
     @JvmName("addTaskForGeneratingEngineShellArgumentManifest")
@@ -1168,8 +1168,8 @@ object FlutterPluginUtils {
         project: Project
     ) {
         val engineShellArgsJson = project.findProperty("flutter.engineShellArgs") as? String ?: return
-
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+
         androidComponents.onVariants { variant ->
             val capitalizeVariantName = capitalize(variant.name)
             val generateManifestTaskProvider = project.tasks.register(

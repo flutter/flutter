@@ -7,7 +7,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class GenerateEngineFlagsManifestTaskTest {
-
     private fun setupTask(): Pair<GenerateEngineFlagsManifestTask, File> {
         val project = ProjectBuilder.builder().build()
         val task = project.tasks.register(
@@ -68,7 +67,7 @@ class GenerateEngineFlagsManifestTaskTest {
     @Test
     fun generateHandlesMultipleArgsCorrectly() {
         val (task, outputFile) = setupTask()
-        val jsonStr = """["--enable-impeller","--trace-systrace"]"""
+        val jsonStr = """["--enable-impeller=true","--trace-systrace","--old-gen-heap-size=100"]"""
         task.engineShellArgsJson.set(encodeJsonMap(jsonStr))
         task.manifestOutputFile.set(outputFile)
 
@@ -78,7 +77,7 @@ class GenerateEngineFlagsManifestTaskTest {
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android">
                 <application>
-                    <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--enable-impeller&quot;,&quot;--trace-systrace&quot;]" />
+                    <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--enable-impeller=true&quot;,&quot;--trace-systrace&quot;,&quot;--old-gen-heap-size=100&quot;]" />
                 </application>
             </manifest>
         """.trimIndent()
@@ -87,7 +86,7 @@ class GenerateEngineFlagsManifestTaskTest {
     }
 
     @Test
-    fun generateHandlesArgsWithSpecialCharacters() {
+    fun generateHandlesArgsWithBackSlashes() {
         val (task, outputFile) = setupTask()
         val jsonStr = """["--trace-to-file=\"path/to/a file\""]"""
         task.engineShellArgsJson.set(encodeJsonMap(jsonStr))

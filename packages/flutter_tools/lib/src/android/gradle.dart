@@ -582,7 +582,11 @@ To fix this, you can either:
       options.add('-Ptarget-platform=$targetPlatforms');
     }
     if (androidBuildInfo.releaseManifestEngineShellArgs != null) {
-      final String base64JsonArgs = base64Encode(utf8.encode(jsonEncode(androidBuildInfo.releaseManifestEngineShellArgs)));
+      // Base64-encode the JSON string to prevent shell or Gradle argument parser
+      // from splitting or stripping double quotes and spaces across operating systems.
+      final String base64JsonArgs = base64Encode(
+        utf8.encode(jsonEncode(androidBuildInfo.releaseManifestEngineShellArgs)),
+      );
       options.add('-Pflutter.engineShellArgs=$base64JsonArgs');
     }
     options.add('-Ptarget=$target');

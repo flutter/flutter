@@ -347,7 +347,6 @@ class FlutterPlugin : Plugin<Project> {
                 copyJniLibsTaskProvider,
                 CopyFlutterJniLibsTask::destinationDir
             )
-
         }
 
         val flutterPlugin = this

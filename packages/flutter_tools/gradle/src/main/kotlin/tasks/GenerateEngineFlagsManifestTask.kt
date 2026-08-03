@@ -21,15 +21,14 @@ abstract class GenerateEngineFlagsManifestTask : DefaultTask() {
     fun generateManifest() {
         val base64Encoded = engineShellArgsJson.get()
         val decodedJsonStr = String(Base64.getDecoder().decode(base64Encoded), StandardCharsets.UTF_8)
-        
         val escapedValue = escapeXml(decodedJsonStr)
-        val metaDataTags = "                    <meta-data android:name=\"io.flutter.app.androidEngineShellArgs\" android:value=\"$escapedValue\" />"
+        val metaDataTags = "<meta-data android:name=\"io.flutter.app.androidEngineShellArgs\" android:value=\"$escapedValue\" />"
 
         val manifestContent = """
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android">
                 <application>
-$metaDataTags
+                    $metaDataTags
                 </application>
             </manifest>
         """.trimIndent()

@@ -568,18 +568,12 @@ class AndroidDevice extends Device {
       _logger.printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
 
-      List<String>? engineShellArgs;
-      final bool isReleaseMode = debuggingOptions.buildInfo.mode == BuildMode.release;
-      if (isReleaseMode) {
-        final List<String> shellArgs = debuggingOptions.getAndroidLaunchArguments().toList();
-        if (platformArgs['trace-startup'] as bool? ?? false) {
-          shellArgs.add('--trace-startup');
-        }
-
-        if (shellArgs.isNotEmpty) {
-          engineShellArgs = shellArgs;
-        }
-      }
+      final releaseManifestEngineShellArgs = <String>[
+        if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
+          ...debuggingOptions.getAndroidLaunchArguments(),
+          if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+        ],
+      ];
 
       await androidBuilder!.buildApk(
         project: project,
@@ -587,7 +581,9 @@ class AndroidDevice extends Device {
         androidBuildInfo: AndroidBuildInfo(
           debuggingOptions.buildInfo,
           targetArchs: <CpuArch>[cpuArch],
-          releaseManifestEngineShellArgs: engineShellArgs,
+          releaseManifestEngineShellArgs: releaseManifestEngineShellArgs.isEmpty
+              ? null
+              : releaseManifestEngineShellArgs,
         ),
       );
       // Package has been built, so we can get the updated application ID and
@@ -628,10 +624,6 @@ class AndroidDevice extends Device {
       );
     }
 
-    final String? traceAllowlist = debuggingOptions.traceAllowlist;
-    final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
-    final String? traceToFile = debuggingOptions.traceToFile;
-
     final cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
@@ -640,7 +632,10 @@ class AndroidDevice extends Device {
       ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
       if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null) ...<String>['--es', 'route', route],
-      if (userIdentifier != null) ...<String>['--user', userIdentifier],
+      if (debuggingOptions.debuggingEnabled && userIdentifier != null) ...<String>[
+        '--user',
+        userIdentifier,
+      ],
       builtPackage.launchActivity,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
@@ -841,8 +836,6 @@ class AndroidDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.android.existsSync();
   }
-
-
 
   @override
   Future<void> dispose() async {

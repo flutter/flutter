@@ -1453,10 +1453,6 @@ class DebuggingOptions {
 
   /// Retrieves Android engine shell arguments from the debugging options based on the
   /// command line flags that are passed to the engine via the manifest as Intent extras.
-  ///
-  /// Only to be used in the case where Fluter Android embedding flags must be communicated
-  /// to the engine via Intent extras, i.e. when the Flutter application is not a Gradle
-  /// project.
   List<String> getAndroidLaunchArgumentsAsIntentExtras() {
     return <String>[
       if (enableDartProfiling) ...<String>['--ez', 'enable-dart-profiling', 'true'],

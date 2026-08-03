@@ -957,10 +957,11 @@ void main() {
   });
 
   group('Get Android launch arguments from DebuggingOptions', () {
-    testWithoutContext('Get launch arguments (Manifest) - top level flags', () {
-      final DebuggingOptions original = DebuggingOptions.enabled(
-        BuildInfo.debug,
-        enableDartProfiling: true,
+    testWithoutContext(
+      'Get launch arguments for manifest injection with debugging enabled - top level flags',
+      () {
+        final original = DebuggingOptions.enabled(
+          BuildInfo.debug,
         profileStartup: true,
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,
@@ -1003,8 +1004,10 @@ void main() {
       );
     });
 
-    testWithoutContext('Get launch arguments (Manifest) - debugging enabled', () {
-      final DebuggingOptions original = DebuggingOptions.enabled(
+    testWithoutContext(
+      'Get launch arguments for manifest injection with debugging enabled - debug-mode specific flags',
+      () {
+        final original = DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
         disableServiceAuthCodes: true,
@@ -1033,8 +1036,8 @@ void main() {
       );
     });
 
-    testWithoutContext('Get launch arguments (Manifest) - debugging disabled', () {
-      final DebuggingOptions original = DebuggingOptions.disabled(
+    testWithoutContext('Get launch arguments for manifest injection - debugging disabled', () {
+      final original = DebuggingOptions.disabled(
         BuildInfo.release,
       );
 
@@ -1051,10 +1054,9 @@ void main() {
       expect(launchArguments.contains('--test-flag'), isFalse);
     });
 
-    testWithoutContext('Get launch arguments (Intent) - top level flags', () {
-      final DebuggingOptions original = DebuggingOptions.enabled(
+    testWithoutContext('Get Intent launch arguments when debugging enabled - top level flags', () {
+      final original = DebuggingOptions.enabled(
         BuildInfo.debug,
-        enableDartProfiling: true,
         profileStartup: true,
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,
@@ -1097,8 +1099,10 @@ void main() {
       );
     });
 
-    testWithoutContext('Get launch arguments (Intent) - debugging enabled', () {
-      final DebuggingOptions original = DebuggingOptions.enabled(
+    testWithoutContext(
+      'Get Intent launch arguments when debugging enabled - debug-mode specific flags',
+      () {
+        final original = DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
         disableServiceAuthCodes: true,
@@ -1127,8 +1131,8 @@ void main() {
       );
     });
 
-    testWithoutContext('Get launch arguments (Intent) - debugging disabled', () {
-      final DebuggingOptions original = DebuggingOptions.disabled(
+    testWithoutContext('Get Intent launch arguments - debugging disabled', () {
+      final original = DebuggingOptions.disabled(
         BuildInfo.release,
       );
 
