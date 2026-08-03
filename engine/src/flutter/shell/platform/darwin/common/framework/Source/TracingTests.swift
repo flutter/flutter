@@ -6,7 +6,7 @@ import Foundation
 import InternalFlutterSwiftCommon
 import Testing
 
-@Suite struct TracingTest {
+@Suite struct TracingTests {
 
   @Test func testTracePlatformVsyncDoesNotCrash() {
     Tracing.tracePlatformVsync(
@@ -41,7 +41,7 @@ import Testing
 
   @Test func testTraceScopeTokenDoesNotCrash() {
     let scope = Tracing.beginScope("TestScope")
-    defer { scope.end() }
+    scope.end()
   }
 }
 
