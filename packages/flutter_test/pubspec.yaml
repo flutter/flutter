@@ -17,8 +17,8 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test_api: 0.7.11
-  matcher: 0.12.19
+  test_api: ^0.7.13
+  matcher: ^0.12.20
 
   # Used by golden file comparator
   path: 1.9.1
@@ -33,13 +33,13 @@ dependencies:
   stack_trace: 1.12.1
 
   # Used by globalToLocal et al.
-  vector_math: 2.2.0
+  vector_math: ^2.4.0
 
   # Used to detect memory leaks with `testWidgets`.
   leak_tracker_flutter_testing: 3.0.10
 
   collection: 1.19.1
-  meta: 1.18.0
+  meta: ^1.18.3
   stream_channel: 2.1.4
 
 dev_dependencies:
