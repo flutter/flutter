@@ -677,7 +677,7 @@ typedef struct {
 
 /// A structure to represent a damage region.
 ///
-/// Frozen because adding members would break the ABI of `FlutterPresentInfo`.
+// Frozen because adding members would break the ABI of `FlutterPresentInfo`.
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterDamage).
   size_t struct_size;
