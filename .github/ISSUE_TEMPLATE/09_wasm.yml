@@ -1,0 +1,60 @@
+name: Report a Flutter WebAssembly (Wasm) issue
+description: |
+  You hit a compilation, packaging, or runtime blocker while targeting WebAssembly (Wasm) in Flutter Web.
+labels: ['platform-web', 'e: wasm']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for testing Flutter Web with WebAssembly! 🚀
+        Please provide relevant build logs, browser details, and package dependencies so engineering leads can rapidly triage your issue.
+  - type: textarea
+    id: build_command_output
+    attributes:
+      label: Build Command & Compile Logs
+      description: |
+        Paste the exact build command (e.g., `flutter build web --wasm`) and any resulting terminal errors or stack traces. **Note: If reporting a runtime bug where compilation succeeded cleanly, simply list your build command without full terminal output.**
+      placeholder: |
+        $ flutter build web --wasm
+        Target wasm_module failed: ...
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: browser_version
+    attributes:
+      label: Target Browser & Version
+      description: Specify the browser and version where the Wasm runtime or visual bug occurred (e.g., Chrome 145.0.0.0, Safari 18.2). **Optional if reporting a compilation or build failure.**
+      placeholder: Chrome 145.0
+    validations:
+      required: false
+  - type: textarea
+    id: blocking_packages
+    attributes:
+      label: Blocking Packages / Dependencies
+      description: |
+        List any third-party packages from your `pubspec.yaml` causing Wasm compilation failures or missing FFI bindings. Leave blank if standard SDK code.
+      placeholder: |
+        package:sqlite3_web 2.1.0
+        package:js_bindings 1.4.2
+    validations:
+      required: false
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Steps to reproduce & Actual Behavior
+      description: Provide specific code snippets or minimal reproduction steps describing what went wrong versus expected results. If reporting a runtime exception, include console DevTools stack traces here.
+      placeholder: |
+        1. Create default demo app with `--wasm` flag.
+        2. Import package X and call `init()`.
+        3. Observe console exception in browser DevTools.
+    validations:
+      required: true
+  - type: textarea
+    id: flutter_doctor
+    attributes:
+      label: Flutter Doctor Output
+      description: Paste the complete output of `flutter doctor -v` from your local terminal.
+      render: shell
+    validations:
+      required: true
