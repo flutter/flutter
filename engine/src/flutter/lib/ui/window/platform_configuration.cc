@@ -91,7 +91,7 @@ void PlatformConfiguration::DidCreateIsolate() {
   notify_texture_frame_available_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_notifyTextureFrameAvailable")));
-  mark_all_views_dirty_.Set(
+  mark_all_views_need_render_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_markAllViewsNeedRender")));
 }
@@ -540,14 +540,14 @@ void PlatformConfiguration::NotifyTextureFrameAvailable(int64_t texture_id) {
 
 void PlatformConfiguration::MarkAllViewsNeedRender() {
   std::shared_ptr<tonic::DartState> dart_state =
-      mark_all_views_dirty_.dart_state().lock();
+      mark_all_views_need_render_.dart_state().lock();
   if (!dart_state) {
     return;
   }
   tonic::DartState::Scope scope(dart_state);
 
   tonic::CheckAndHandleError(
-      tonic::DartInvoke(mark_all_views_dirty_.Get(), {}));
+      tonic::DartInvoke(mark_all_views_need_render_.Get(), {}));
 }
 
 const ViewportMetrics* PlatformConfiguration::GetMetrics(int view_id) {
