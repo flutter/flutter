@@ -9,6 +9,7 @@
 /// @docImport 'view.dart';
 library;
 
+import 'dart:collection';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -332,12 +333,7 @@ class ViewMetricsOverride with Diagnosticable {
         'right': final num right,
         'bottom': final num bottom,
       } =>
-        EdgeInsets.fromLTRB(
-          left.toDouble(),
-          top.toDouble(),
-          right.toDouble(),
-          bottom.toDouble(),
-        ),
+        EdgeInsets.fromLTRB(left.toDouble(), top.toDouble(), right.toDouble(), bottom.toDouble()),
       final Object value => throw FormatException(
         'Expected {"left": num, "top": num, "right": num, "bottom": num} for $key, got $value.',
       ),
@@ -406,27 +402,29 @@ class ViewMetricsOverride with Diagnosticable {
   }
 
   static void _addFlag(DiagnosticPropertiesBuilder properties, String name, bool? value) {
-    properties.add(
-      FlagProperty(name, value: value, ifTrue: name, ifFalse: 'not $name'),
-    );
+    properties.add(FlagProperty(name, value: value, ifTrue: name, ifFalse: 'not $name'));
   }
 }
 
 /// Debug-only view metric overrides, keyed by [ui.FlutterView.viewId].
 ///
-/// Developer tooling writes into this map — normally through the
+/// Developer tooling installs entries here — normally through the
 /// `ext.flutter.viewMetricsOverride` service extension rather than directly —
 /// to make an application render as though the platform reported different
 /// settings. Entries are read by [MediaQuery] and by
 /// [RendererBinding.createViewConfigurationFor].
 ///
-/// After mutating this map, call
-/// [debugViewMetricsOverridesNotifier.notifyListeners] (or use
-/// [debugSetViewMetricsOverride], which does it for you) so that affected views
-/// rebuild.
+/// This map is read-only. Modifying it has to notify the views that depend on
+/// it, so use [debugSetViewMetricsOverride] and
+/// [debugClearViewMetricsOverrides] instead; mutating the map directly throws
+/// an [UnsupportedError] rather than silently leaving views stale.
 ///
 /// This map is ignored in release mode.
-final Map<int, ViewMetricsOverride> debugViewMetricsOverrides = <int, ViewMetricsOverride>{};
+Map<int, ViewMetricsOverride> get debugViewMetricsOverrides => _unmodifiableViewMetricsOverrides;
+
+final Map<int, ViewMetricsOverride> _viewMetricsOverrides = <int, ViewMetricsOverride>{};
+final Map<int, ViewMetricsOverride> _unmodifiableViewMetricsOverrides =
+    UnmodifiableMapView<int, ViewMetricsOverride>(_viewMetricsOverrides);
 
 /// Notifies listeners when [debugViewMetricsOverrides] changes.
 ///
@@ -467,17 +465,17 @@ bool debugSetViewMetricsOverride(int viewId, ViewMetricsOverride? override) {
   if (kReleaseMode) {
     return false;
   }
-  final ViewMetricsOverride? previous = debugViewMetricsOverrides[viewId];
+  final ViewMetricsOverride? previous = _viewMetricsOverrides[viewId];
   if (override == null || override.isEmpty) {
     if (previous == null) {
       return false;
     }
-    debugViewMetricsOverrides.remove(viewId);
+    _viewMetricsOverrides.remove(viewId);
   } else {
     if (previous == override) {
       return false;
     }
-    debugViewMetricsOverrides[viewId] = override;
+    _viewMetricsOverrides[viewId] = override;
   }
   _overridesNotifier.notify();
   return true;
@@ -487,10 +485,10 @@ bool debugSetViewMetricsOverride(int viewId, ViewMetricsOverride? override) {
 ///
 /// Returns true if anything was removed.
 bool debugClearViewMetricsOverrides() {
-  if (kReleaseMode || debugViewMetricsOverrides.isEmpty) {
+  if (kReleaseMode || _viewMetricsOverrides.isEmpty) {
     return false;
   }
-  debugViewMetricsOverrides.clear();
+  _viewMetricsOverrides.clear();
   _overridesNotifier.notify();
   return true;
 }

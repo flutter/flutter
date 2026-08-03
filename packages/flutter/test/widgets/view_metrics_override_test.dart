@@ -38,8 +38,7 @@ class ViewMetricsOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding 
 }
 
 void main() {
-  final ViewMetricsOverrideTestBinding binding =
-      ViewMetricsOverrideTestBinding.ensureInitialized();
+  final ViewMetricsOverrideTestBinding binding = ViewMetricsOverrideTestBinding.ensureInitialized();
 
   tearDown(() {
     debugClearViewMetricsOverrides();
@@ -119,9 +118,7 @@ void main() {
     });
 
     test('fromJson treats absent keys as not overridden', () {
-      final override = ViewMetricsOverride.fromJson(const <String, Object?>{
-        'boldText': true,
-      });
+      final override = ViewMetricsOverride.fromJson(const <String, Object?>{'boldText': true});
       expect(override.boldText, isTrue);
       expect(override.textScaler, isNull);
       expect(override.physicalSize, isNull);
@@ -210,6 +207,18 @@ void main() {
       expect(debugSetViewMetricsOverride(7, null), isTrue);
       expect(debugViewMetricsOverrides, isEmpty);
       expect(debugSetViewMetricsOverride(7, null), isFalse);
+    });
+
+    test('the exposed map is read-only', () {
+      // Direct mutation cannot notify listeners, so it must fail loudly rather
+      // than silently leaving views stale.
+      expect(
+        () => debugViewMetricsOverrides[7] = const ViewMetricsOverride(boldText: true),
+        throwsUnsupportedError,
+      );
+      expect(() => debugViewMetricsOverrides.remove(7), throwsUnsupportedError);
+      expect(debugViewMetricsOverrides.clear, throwsUnsupportedError);
+      expect(debugViewMetricsOverrides, isEmpty);
     });
 
     test('an empty override removes the entry', () {
@@ -357,6 +366,134 @@ void main() {
       expect(data.devicePixelRatio, originalRatio * 2);
       expect(data.size, originalSize / 2);
       expect(tester.getSize(find.byType(SizedBox)), originalSize / 2);
+
+      debugClearViewMetricsOverrides();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('overriding devicePixelRatio rescales every DPR-derived metric', (
+      WidgetTester tester,
+    ) async {
+      // The platform reports these in physical pixels; MediaQueryData divides
+      // each by the device pixel ratio. Overriding the ratio must rescale all
+      // of them, not just the size.
+      tester.view.physicalSize = const ui.Size(1200, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      tester.view.padding = const FakeViewPadding(top: 40, bottom: 20);
+      tester.view.viewPadding = const FakeViewPadding(top: 40, bottom: 60);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 600);
+      tester.view.systemGestureInsets = const FakeViewPadding(left: 80, right: 80);
+      tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 36);
+      addTearDown(tester.view.reset);
+
+      late MediaQueryData data;
+      await pumpProbe(tester, (MediaQueryData value) => data = value);
+
+      // At DPR 2: 40 physical -> 20 logical.
+      expect(data.size, const ui.Size(600, 1200));
+      expect(data.padding, const EdgeInsets.only(top: 20, bottom: 10));
+      expect(data.viewPadding, const EdgeInsets.only(top: 20, bottom: 30));
+      expect(data.viewInsets, const EdgeInsets.only(bottom: 300));
+      expect(data.systemGestureInsets, const EdgeInsets.only(left: 40, right: 40));
+      expect(data.gestureSettings.touchSlop, 18);
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const ViewMetricsOverride(devicePixelRatio: 4.0),
+      );
+      await tester.pumpAndSettle();
+
+      // At DPR 4 the same physical values are half as many logical pixels.
+      expect(data.devicePixelRatio, 4.0);
+      expect(data.size, const ui.Size(300, 600));
+      expect(data.padding, const EdgeInsets.only(top: 10, bottom: 5));
+      expect(data.viewPadding, const EdgeInsets.only(top: 10, bottom: 15));
+      expect(data.viewInsets, const EdgeInsets.only(bottom: 150));
+      expect(data.systemGestureInsets, const EdgeInsets.only(left: 20, right: 20));
+      expect(data.gestureSettings.touchSlop, 9);
+
+      debugClearViewMetricsOverrides();
+      await tester.pumpAndSettle();
+
+      expect(data.padding, const EdgeInsets.only(top: 20, bottom: 10));
+      expect(data.gestureSettings.touchSlop, 18);
+    });
+
+    testWidgets('reported size matches the laid out size at a non-integer ratio', (
+      WidgetTester tester,
+    ) async {
+      // Regression test: deriving the logical size by rescaling the existing
+      // logical size divides twice and lands a float away from the constraints
+      // RendererBinding derives from the physical size, so MediaQuery.sizeOf
+      // would disagree with the size the view actually lays out at. Ratios that
+      // are powers of two do not expose this.
+      tester.view.physicalSize = const ui.Size(1000, 1000);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      late MediaQueryData data;
+      await pumpProbe(tester, (MediaQueryData value) => data = value);
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const ViewMetricsOverride(devicePixelRatio: 7.0),
+      );
+      await tester.pumpAndSettle();
+
+      expect(data.size, const ui.Size(1000 / 7, 1000 / 7));
+      expect(tester.getSize(find.byType(SizedBox)), data.size);
+
+      debugClearViewMetricsOverrides();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('an explicit padding override wins over DPR rescaling', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const ui.Size(1200, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      tester.view.padding = const FakeViewPadding(top: 40);
+      addTearDown(tester.view.reset);
+
+      late MediaQueryData data;
+      await pumpProbe(tester, (MediaQueryData value) => data = value);
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const ViewMetricsOverride(devicePixelRatio: 4.0, padding: EdgeInsets.only(top: 99)),
+      );
+      await tester.pumpAndSettle();
+
+      // The explicit value is already logical, so it is used verbatim rather
+      // than rescaled to 49.5.
+      expect(data.padding, const EdgeInsets.only(top: 99));
+      // Unoverridden metrics still rescale.
+      expect(data.size, const ui.Size(300, 600));
+
+      debugClearViewMetricsOverrides();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('overriding only physicalSize leaves padding untouched', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const ui.Size(1200, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      tester.view.padding = const FakeViewPadding(top: 40);
+      addTearDown(tester.view.reset);
+
+      late MediaQueryData data;
+      await pumpProbe(tester, (MediaQueryData value) => data = value);
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const ViewMetricsOverride(physicalSize: ui.Size(600, 1200)),
+      );
+      await tester.pumpAndSettle();
+
+      // The ratio did not change, so logical padding must not change either.
+      expect(data.size, const ui.Size(300, 600));
+      expect(data.padding, const EdgeInsets.only(top: 20));
 
       debugClearViewMetricsOverrides();
       await tester.pumpAndSettle();
