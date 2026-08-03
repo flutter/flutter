@@ -91,6 +91,14 @@ void main() {
   testWidgets('accessibilityEvaluations service extension honors a device pixel ratio override', (
     WidgetTester tester,
   ) async {
+    // Mutating and resetting tester.view in tearDown replaces the root
+    // TransformLayer created during the test body with one created during test
+    // tearDown (which leak_tracker exempts), preventing false-positive leak
+    // reports across subsequent tests.
+    addTearDown(() {
+      tester.view.devicePixelRatio = tester.view.devicePixelRatio * 2;
+      tester.view.reset();
+    });
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
