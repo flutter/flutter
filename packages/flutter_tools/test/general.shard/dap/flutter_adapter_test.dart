@@ -907,6 +907,47 @@ stdout "The relevant error-causing widget was:\n    MyWidget:file:///path/to/wid
 stderr "════════════════════════════════════════════════════════════════════════════════\n"
 ''');
       });
+
+      test('extracts the error summary', () {
+        final formatter = FlutterErrorFormatter()
+          ..formatError(<String, Object?>{
+            'type': 'NotErrorSummary',
+            'description': 'xxx',
+            'properties': <Map<String, Object?>>[
+              <String, Object>{'description': 'yyy'},
+              <String, Object?>{
+                'type': 'ErrorSummary',
+                'description': 'my error summary',
+                'children': <Map<String, Object>>[
+                  <String, Object>{'type': 'NotErrorSummary2', 'description': 'zzz'},
+                ],
+              },
+            ],
+          });
+
+        expect(formatter.errorSummary, 'my error summary');
+      });
+
+      test('extracts a DevTools Deep Link', () {
+        final formatter = FlutterErrorFormatter()
+          ..formatError(<String, Object?>{
+            'type': 'NotErrorSummary',
+            'description': 'xxx',
+            'properties': <Map<String, Object?>>[
+              <String, Object>{'description': 'yyy'},
+              <String, Object?>{
+                'type': 'DevToolsDeepLinkProperty',
+                'description': 'Click to open the inspector',
+                'value': 'http://127.0.0.1:9100/inspector?uri=x&inspectorRef=y',
+              },
+            ],
+          });
+
+        expect(
+          formatter.devToolsDeepLinkUrl,
+          'http://127.0.0.1:9100/inspector?uri=x&inspectorRef=y',
+        );
+      });
     });
   });
 }

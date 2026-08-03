@@ -228,9 +228,22 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       return;
     }
 
-    FlutterErrorFormatter()
+    final formatter = FlutterErrorFormatter()
       ..formatError(errorData)
       ..sendOutput(sendOutput);
+
+    // Forward any DevTools deep-links in a 'dart.flutter.devToolsDeepLink'
+    // event.
+    final String? errorSummary = formatter.errorSummary;
+    final String? deepLinkUrl = formatter.devToolsDeepLinkUrl;
+    if (errorSummary != null && deepLinkUrl != null) {
+      // This event is interpreted by IDEs extensions like like Dart-Code and
+      // should not be changed in breaking ways without coordination.
+      sendEvent(
+        RawEventBody({'summary': errorSummary, 'deepLinkUrl': deepLinkUrl}),
+        eventType: 'dart.flutter.devToolsDeepLink',
+      );
+    }
   }
 
   /// Called by [launchRequest] to request that we actually start the app to be run/debugged.
