@@ -24,6 +24,12 @@
     return entrypoint;                                                      \
   })()
 
+/// A macro that converts a lambda into a function pointer that can be called
+/// through Dart FFI.
+///
+/// Note: The lambda is stored in a global static variable. To avoid memory
+/// leaks and teardown crashes, the lambda should only capture variables by
+/// reference.
 #define CREATE_FFI_LAMBDA(lambda)                                       \
   ([&]() {                                                              \
     using FfiWrapper = ::flutter::testing::FfiLambda<decltype(lambda)>; \
@@ -69,16 +75,12 @@ struct FfiLambdaFunction {};
 /// Wraps a lambda in a function pointer that can be called through Dart FFI.
 template <typename ReturnType, typename ClassType, typename... Args>
 struct FfiLambdaFunction<ReturnType (ClassType::*)(Args...) const> {
-  static std::function<ReturnType(Args...)> function;
+  inline static std::function<ReturnType(Args...)> function;
 
   static ReturnType FfiFunction(Args... args) {
     return function(std::forward<Args>(args)...);
   }
 };
-
-template <typename ReturnType, typename ClassType, typename... Args>
-std::function<ReturnType(Args...)>
-    FfiLambdaFunction<ReturnType (ClassType::*)(Args...) const>::function;
 
 template <typename LambdaType>
 using FfiLambda = FfiLambdaFunction<decltype(&LambdaType::operator())>;

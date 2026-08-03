@@ -329,7 +329,6 @@ TEST_F(ShellTest, CanCorrectlyPipePointerPacket) {
   std::vector<int64_t> result_sequence;
   auto nativeOnPointerDataPacket = [&reportLatch,
                                     &result_sequence](Dart_Handle sequences) {
-    Dart_Handle exception = nullptr;
     result_sequence =
         tonic::DartConverter<std::vector<int64_t>>::FromDart(sequences);
     reportLatch.Signal();
@@ -394,7 +393,6 @@ TEST_F(ShellTest, CanCorrectlySynthesizePointerPacket) {
   std::vector<int64_t> result_sequence;
   auto nativeOnPointerDataPacket = [&reportLatch,
                                     &result_sequence](Dart_Handle sequences) {
-    Dart_Handle exception = nullptr;
     result_sequence =
         tonic::DartConverter<std::vector<int64_t>>::FromDart(sequences);
     reportLatch.Signal();

@@ -3976,17 +3976,17 @@ TEST_F(ShellTest, SpawnWorksWithOnError) {
 
   AddFfiNativeCallback(
       "NotifyErrorA", CREATE_FFI_LAMBDA([&](Dart_Handle string_handle) {
-        const char* c_str;
-        Dart_StringToCString(string_handle, &c_str);
-        EXPECT_STREQ(c_str, "Exception: I should be coming from A");
+        const auto message =
+            tonic::DartConverter<std::string>::FromDart(string_handle);
+        EXPECT_EQ(message, "Exception: I should be coming from A");
         latch.CountDown();
       }));
 
   AddFfiNativeCallback(
       "NotifyErrorB", CREATE_FFI_LAMBDA([&](Dart_Handle string_handle) {
-        const char* c_str;
-        Dart_StringToCString(string_handle, &c_str);
-        EXPECT_STREQ(c_str, "Exception: I should be coming from B");
+        const auto message =
+            tonic::DartConverter<std::string>::FromDart(string_handle);
+        EXPECT_EQ(message, "Exception: I should be coming from B");
         latch.CountDown();
       }));
 
