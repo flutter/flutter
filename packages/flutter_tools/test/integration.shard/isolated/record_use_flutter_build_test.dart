@@ -51,7 +51,7 @@ void main() {
             contains('Expected to find fontFamily for constant IconData with codepoint: 4660'),
           );
         }
-        if (target.length == 2 && target[0] == 'web' && target[1] == '--wasm') {
+        if (target case ['web', '--wasm']) {
           // Verify that both wasm (Icons.fastfood: 57946) and js (Icons.favorite: 57947)
           // codepoints are retained when merging recorded uses.
           expect(stdout, contains('57946'));

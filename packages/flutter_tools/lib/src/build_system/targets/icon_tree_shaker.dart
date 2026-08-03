@@ -154,11 +154,11 @@ class IconTreeShaker {
 
     final result = <String, _IconTreeShakerData>{};
     const kSpacePoint = 32;
-    for (final MapEntry<String, String> entry in fonts.entries) {
-      final List<int>? codePoints = iconData[entry.key];
+    for (final MapEntry(:key, :value) in fonts.entries) {
+      final List<int>? codePoints = iconData[key];
       if (codePoints == null) {
         throw IconTreeShakerException._(
-          'Expected to font code points for ${entry.key}, but none were found.',
+          'Expected to font code points for $key, but none were found.',
         );
       }
 
@@ -166,9 +166,9 @@ class IconTreeShaker {
       final optionalCodePoints = _targetPlatform == TargetPlatform.web_javascript
           ? <int>[kSpacePoint]
           : <int>[];
-      result[entry.value] = _IconTreeShakerData(
-        family: entry.key,
-        relativePath: entry.value,
+      result[value] = _IconTreeShakerData(
+        family: key,
+        relativePath: value,
         codePoints: codePoints,
         optionalCodePoints: optionalCodePoints,
       );
@@ -335,12 +335,10 @@ class IconTreeShaker {
     final result = <String, List<int>>{};
     var hasNonConstant = false;
 
-    for (final MapEntry<DefinitionWithInstances, List<InstanceReference>> entry
-        in recordings.instances.entries) {
-      if (_isIconDataDefinition(entry.key)) {
-        for (final InstanceReference reference in entry.value) {
-          final ({Constant? codePoint, Constant? fontFamily, Constant? fontPackage})? constants =
-              _extractIconDataConstants(reference);
+    for (final MapEntry(:key, :value) in recordings.instances.entries) {
+      if (_isIconDataDefinition(key)) {
+        for (final reference in value) {
+          final _IconDataConstants? constants = _extractIconDataConstants(reference);
           if (constants == null) {
             hasNonConstant = true;
             continue;
@@ -398,23 +396,19 @@ class IconTreeShaker {
         str.startsWith('package:flutter/src/widgets/icon_data.dart::IconData.');
   }
 
-  ({Constant? codePoint, Constant? fontFamily, Constant? fontPackage})? _extractIconDataConstants(
-    InstanceReference reference,
-  ) {
-    if (reference is InstanceConstantReference) {
-      final Constant instanceConstant = reference.instanceConstant;
-      if (instanceConstant is InstanceConstant) {
-        final Map<String, Constant> fields = instanceConstant.fields;
-        return (
-          codePoint: fields[_codePointFieldName],
-          fontFamily: fields[_fontFamilyFieldName],
-          fontPackage: fields[_fontPackageFieldName],
-        );
-      }
-    } else if (reference is InstanceCreationReference) {
-      final List<MaybeConstant> positional = reference.positionalArguments;
-      final Map<String, MaybeConstant> named = reference.namedArguments;
-
+  _IconDataConstants? _extractIconDataConstants(InstanceReference reference) {
+    if (reference case InstanceConstantReference(
+      instanceConstant: InstanceConstant(:final fields),
+    )) {
+      return (
+        codePoint: fields[_codePointFieldName],
+        fontFamily: fields[_fontFamilyFieldName],
+        fontPackage: fields[_fontPackageFieldName],
+      );
+    } else if (reference case InstanceCreationReference(
+      positionalArguments: final positional,
+      namedArguments: final named,
+    )) {
       final bool hasNonConstantArg =
           positional.any((MaybeConstant arg) => arg is! Constant) ||
           named.values.any((MaybeConstant arg) => arg is! Constant);
@@ -429,6 +423,8 @@ class IconTreeShaker {
     return null;
   }
 }
+
+typedef _IconDataConstants = ({Constant? codePoint, Constant? fontFamily, Constant? fontPackage});
 
 /// The font family name, relative path to font file, and list of code points
 /// the application is using.
@@ -478,22 +474,19 @@ extension on Recordings {
   /// are combined in the returned [Recordings].
   Recordings merge(Recordings other) {
     final newCalls = <DefinitionWithStaticCalls, List<CallReference>>{};
-    for (final MapEntry<DefinitionWithStaticCalls, List<CallReference>> entry in calls.entries) {
-      newCalls[entry.key] = <CallReference>[...entry.value];
+    for (final MapEntry(:key, :value) in calls.entries) {
+      newCalls[key] = <CallReference>[...value];
     }
-    for (final MapEntry<DefinitionWithStaticCalls, List<CallReference>> entry
-        in other.calls.entries) {
-      newCalls.putIfAbsent(entry.key, () => <CallReference>[]).addAll(entry.value);
+    for (final MapEntry(:key, :value) in other.calls.entries) {
+      newCalls.putIfAbsent(key, () => <CallReference>[]).addAll(value);
     }
 
     final newInstances = <DefinitionWithInstances, List<InstanceReference>>{};
-    for (final MapEntry<DefinitionWithInstances, List<InstanceReference>> entry
-        in instances.entries) {
-      newInstances[entry.key] = <InstanceReference>[...entry.value];
+    for (final MapEntry(:key, :value) in instances.entries) {
+      newInstances[key] = <InstanceReference>[...value];
     }
-    for (final MapEntry<DefinitionWithInstances, List<InstanceReference>> entry
-        in other.instances.entries) {
-      newInstances.putIfAbsent(entry.key, () => <InstanceReference>[]).addAll(entry.value);
+    for (final MapEntry(:key, :value) in other.instances.entries) {
+      newInstances.putIfAbsent(key, () => <InstanceReference>[]).addAll(value);
     }
 
     return Recordings(calls: newCalls, instances: newInstances);
