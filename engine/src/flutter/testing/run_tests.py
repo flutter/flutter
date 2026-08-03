@@ -581,7 +581,7 @@ def run_cc_tests(
     else:
       workers_flag = []
     mac_impeller_unittests_flags = repeat_flags + workers_flag + [
-        '--gtest_filter=-*OpenGLES:-*OpenGLESSDF',  # These are covered in the golden tests.
+        '--gtest_filter=-*OpenGLES:*OpenGLESSDF',  # These are covered in the golden tests.
         '--',
         '--enable_vulkan_validation',
     ]
