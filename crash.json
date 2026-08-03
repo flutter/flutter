@@ -1,0 +1,3219 @@
+{
+  "app_name": "flutter_desktop_darwin_unittests",
+  "timestamp": "2026-10-16 05:05:41.00 -0700",
+  "app_version": "",
+  "slice_uuid": "4c4c4490-5555-3144-a100-9853fd16813d",
+  "build_version": "",
+  "platform": 1,
+  "share_with_app_devs": 0,
+  "is_first_party": 1,
+  "bug_type": "309",
+  "os_version": "macOS 26.6.2 (25G83)",
+  "roots_installed": 0,
+  "incident_id": "718179D1-421C-4BEC-B95A-37A4E0D491DC",
+  "name": "flutter_desktop_darwin_unittests"
+}
+{
+  "uptime": 14000,
+  "procRole": "Unspecified",
+  "version": 2,
+  "userID": 502,
+  "deployVersion": 210,
+  "modelCode": "Macmini9,1",
+  "coalitionID": 633,
+  "osVersion": {
+    "train": "macOS 26.6.2",
+    "build": "25G83",
+    "releaseType": "User"
+  },
+  "captureTime": "2026-10-16 05:05:23.7446 -0700",
+  "codeSigningMonitor": 1,
+  "incident": "718179D1-421C-4BEC-B95A-37A4E0D491DC",
+  "pid": 62598,
+  "translated": false,
+  "cpuType": "ARM-64",
+  "procLaunch": "2026-10-16 05:05:06.6476 -0700",
+  "procStartAbsTime": 354429840946,
+  "procExitAbsTime": 354840136208,
+  "procName": "flutter_desktop_darwin_unittests",
+  "procPath": "\/Volumes\/VOLUME\/*\/flutter_desktop_darwin_unittests",
+  "parentProc": "python3",
+  "parentPid": 56550,
+  "coalitionName": "org.swarm.bot",
+  "crashReporterKey": "8C51D928-C25A-A3F9-5604-8360058F2934",
+  "appleIntelligenceStatus": {
+    "reasons": [
+      "assetIsNotReady",
+      "notOptedIn"
+    ],
+    "state": "unavailable"
+  },
+  "developerMode": 1,
+  "bootProgressRegister": "0x2f000000",
+  "responsiblePid": 550,
+  "responsibleProc": "python3",
+  "codeSigningID": "flutter_desktop_darwin_unittests",
+  "codeSigningTeamID": "",
+  "codeSigningFlags": 570556929,
+  "codeSigningValidationCategory": 10,
+  "codeSigningTrustLevel": 4294967295,
+  "codeSigningAuxiliaryInfo": 0,
+  "instructionByteStream": {
+    "beforePC": "\/w9f1ugDBKr0V7+p1AAA0JT2JpF1CjWwteIVkbQGAPmoHgD59FfBqA==",
+    "atPC": "IAAg1Ij5\/1QfHUjy6GA28AixMJEIAUC5AAlCeuknnxo\/AQBxKQCAUg=="
+  },
+  "bootSessionUUID": "4BA1EA99-56A7-4613-9931-6AB2DC782F1E",
+  "sip": "enabled",
+  "exception": {
+    "codes": "0x0000000000000001, 0x0000000181f6a9f8",
+    "rawCodes": [
+      1,
+      6475393528
+    ],
+    "type": "EXC_BREAKPOINT",
+    "signal": "SIGTRAP"
+  },
+  "termination": {
+    "flags": 0,
+    "code": 5,
+    "namespace": "SIGNAL",
+    "indicator": "Trace\/BPT trap: 5",
+    "byProc": "exc handler",
+    "byPid": 62598
+  },
+  "os_fault": {
+    "process": "flutter_desktop_darwin_unittests"
+  },
+  "asi": {
+    "libsystem_malloc.dylib": [
+      "BUG IN CLIENT OF LIBMALLOC: memory corruption of free block",
+      "Abort Cause 52455624576"
+    ]
+  },
+  "extMods": {
+    "caller": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "system": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 4
+    },
+    "targeted": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "warnings": 0
+  },
+  "faultingThread": 0,
+  "threads": [
+    {
+      "triggered": true,
+      "id": 450011,
+      "threadState": {
+        "x": [
+          {
+            "value": 4358832128
+          },
+          {
+            "value": 4358835232
+          },
+          {
+            "value": 1
+          },
+          {
+            "value": 4358864416
+          },
+          {
+            "value": 52455624576
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 18446744072631617535
+          },
+          {
+            "value": 18446726482597246976
+          },
+          {
+            "value": 52455624576
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 40378946063542520
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 15234646215071165018
+          },
+          {
+            "value": 4359607888
+          },
+          {
+            "value": 52455620608
+          },
+          {
+            "value": 10776664164
+          },
+          {
+            "value": 18446744072367376383
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 8300221088,
+            "symbolLocation": 0,
+            "symbol": "OBJC_CLASS_$_NSConcreteHashTable"
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 49232
+          },
+          {
+            "value": 8256294912,
+            "symbolLocation": 0,
+            "symbol": "OBJC_IVAR_$_NSConcretePrintOperation._graphicsContextCompletionGroup"
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 8256294912,
+            "symbolLocation": 0,
+            "symbol": "OBJC_IVAR_$_NSConcretePrintOperation._graphicsContextCompletionGroup"
+          },
+          {
+            "value": 8256294912,
+            "symbolLocation": 0,
+            "symbol": "OBJC_IVAR_$_NSConcretePrintOperation._graphicsContextCompletionGroup"
+          },
+          {
+            "value": 808
+          },
+          {
+            "value": 52457680608
+          },
+          {
+            "value": 52457680464
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6472710108
+        },
+        "cpsr": {
+          "value": 2684358656
+        },
+        "fp": {
+          "value": 6134651552
+        },
+        "sp": {
+          "value": 6134651456
+        },
+        "esr": {
+          "value": 4060086273,
+          "description": "(Breakpoint) brk 1"
+        },
+        "pc": {
+          "value": 6475393528,
+          "matchesCrashFrame": 1
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "queue": "com.apple.main-thread",
+      "frames": [
+        {
+          "imageOffset": 203256,
+          "symbol": "_xzm_xzone_malloc_freelist_outlined",
+          "symbolLocation": 856,
+          "imageIndex": 3
+        },
+        {
+          "imageOffset": 30684,
+          "symbol": "class_createInstance",
+          "symbolLocation": 76,
+          "imageIndex": 4
+        },
+        {
+          "imageOffset": 12200,
+          "symbol": "NSAllocateObject",
+          "symbolLocation": 28,
+          "imageIndex": 5
+        },
+        {
+          "imageOffset": 261084,
+          "symbol": "objc_alloc_init",
+          "symbolLocation": 80,
+          "imageIndex": 4
+        },
+        {
+          "imageOffset": 13168184,
+          "symbol": "-[_NSTextSelectionView initWithTextView:]",
+          "symbolLocation": 104,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 13074908,
+          "symbol": "-[NSTextView _configureViewportSupport]",
+          "symbolLocation": 268,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 1128184,
+          "symbol": "-[NSTextView setTextContainer:]",
+          "symbolLocation": 272,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 85092,
+          "symbol": "-[NSTextContainer setTextView:]",
+          "symbolLocation": 452,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 1111736,
+          "symbol": "-[NSTextView initWithFrame:textContainer:]",
+          "symbolLocation": 80,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 13075524,
+          "symbol": "-[NSTextView _initWithFrame:usingTextLayoutManager:]",
+          "symbolLocation": 300,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 1261232,
+          "symbol": "-[FlutterTextInputPlugin initWithDelegate:]",
+          "symbolLocation": 104,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 763136,
+          "symbol": "-[FlutterInputPluginTestObjc testFirstRectForCharacterRangeAtInfinity]",
+          "symbolLocation": 1068,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 819028,
+          "symbol": "flutter::testing::FlutterTextInputPluginTest_TestFirstRectForCharacterRangeAtInfinity_Test::TestBody()",
+          "symbolLocation": 60,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 13440688,
+          "symbol": "testing::Test::Run()",
+          "symbolLocation": 276,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 13444296,
+          "symbol": "testing::TestInfo::Run()",
+          "symbolLocation": 468,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 13447916,
+          "symbol": "testing::TestSuite::Run()",
+          "symbolLocation": 876,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 13514404,
+          "symbol": "testing::internal::UnitTestImpl::RunAllTests()",
+          "symbolLocation": 1756,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 13512496,
+          "symbol": "testing::UnitTest::Run()",
+          "symbolLocation": 136,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1687928,
+          "symbol": "main",
+          "symbolLocation": 480,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 132324,
+          "symbol": "start",
+          "symbolLocation": 6992,
+          "imageIndex": 8
+        }
+      ]
+    },
+    {
+      "id": 450019,
+      "name": "test_timeout_listener",
+      "threadState": {
+        "x": [
+          {
+            "value": 268451845
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 24202140712960
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 24202140712960
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 17179869184
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 5635
+          },
+          {
+            "value": 150633093040384
+          },
+          {
+            "value": 18446744073709551569
+          },
+          {
+            "value": 8323365480
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 24202140712960
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 24202140712960
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 6136782808
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 18446744073709550527
+          },
+          {
+            "value": 4412409862
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477145508
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 6136782656
+        },
+        "sp": {
+          "value": 6136782576
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477069364
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 3124,
+          "symbol": "mach_msg2_trap",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 79268,
+          "symbol": "mach_msg2_internal",
+          "symbolLocation": 76,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 39360,
+          "symbol": "mach_msg_overwrite",
+          "symbolLocation": 480,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 4032,
+          "symbol": "mach_msg",
+          "symbolLocation": 24,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 516360,
+          "symbol": "__CFRunLoopServiceMachPort",
+          "symbolLocation": 160,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 510452,
+          "symbol": "__CFRunLoopRun",
+          "symbolLocation": 1188,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1372772,
+          "symbol": "_CFRunLoopRunSpecificWithOptions",
+          "symbolLocation": 532,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1414184,
+          "symbol": "fml::MessageLoopDarwin::Run()",
+          "symbolLocation": 140,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1367952,
+          "symbol": "fml::MessageLoopImpl::DoRun()",
+          "symbolLocation": 100,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1405228,
+          "symbol": "std::__fl::__function::__func<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0, std::__fl::allocator<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0>, void ()>::operator()()",
+          "symbolLocation": 200,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1403216,
+          "symbol": "fml::ThreadHandle::ThreadHandle(std::__fl::function<void ()>&&)::$_0::__invoke(void*)",
+          "symbolLocation": 56,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450020,
+      "frames": [],
+      "threadState": {
+        "x": [
+          {
+            "value": 6137360384
+          },
+          {
+            "value": 8707
+          },
+          {
+            "value": 6136823808
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 409604
+          },
+          {
+            "value": 18446744073709551615
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 0
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 0
+        },
+        "sp": {
+          "value": 6137360384
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477327368
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 450021,
+      "frames": [],
+      "threadState": {
+        "x": [
+          {
+            "value": 6137933824
+          },
+          {
+            "value": 9987
+          },
+          {
+            "value": 6137397248
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 409602
+          },
+          {
+            "value": 18446744073709551615
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 0
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 0
+        },
+        "sp": {
+          "value": 6137933824
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477327368
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 450042,
+      "name": "com.apple.NSEventThread",
+      "threadState": {
+        "x": [
+          {
+            "value": 268451845
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 129755256979456
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 129755256979456
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 17179869184
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 30211
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 18446744073709551569
+          },
+          {
+            "value": 8323365480
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 129755256979456
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 129755256979456
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 6138503304
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 18446744073709550527
+          },
+          {
+            "value": 4412409862
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477145508
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 6138503152
+        },
+        "sp": {
+          "value": 6138503072
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477069364
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 3124,
+          "symbol": "mach_msg2_trap",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 79268,
+          "symbol": "mach_msg2_internal",
+          "symbolLocation": 76,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 39360,
+          "symbol": "mach_msg_overwrite",
+          "symbolLocation": 480,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 4032,
+          "symbol": "mach_msg",
+          "symbolLocation": 24,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 516360,
+          "symbol": "__CFRunLoopServiceMachPort",
+          "symbolLocation": 160,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 510452,
+          "symbol": "__CFRunLoopRun",
+          "symbolLocation": 1188,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1372772,
+          "symbol": "_CFRunLoopRunSpecificWithOptions",
+          "symbolLocation": 532,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1420460,
+          "symbol": "_NSEventThread",
+          "symbolLocation": 184,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450044,
+      "frames": [],
+      "threadState": {
+        "x": [
+          {
+            "value": 6139080704
+          },
+          {
+            "value": 34051
+          },
+          {
+            "value": 6138544128
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 409604
+          },
+          {
+            "value": 18446744073709551615
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 0
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 0
+        },
+        "sp": {
+          "value": 6139080704
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477327368
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 450045,
+      "frames": [],
+      "threadState": {
+        "x": [
+          {
+            "value": 6139654144
+          },
+          {
+            "value": 46595
+          },
+          {
+            "value": 6139117568
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 409604
+          },
+          {
+            "value": 18446744073709551615
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 0
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 0
+        },
+        "sp": {
+          "value": 6139654144
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477327368
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 450066,
+      "frames": [],
+      "threadState": {
+        "x": [
+          {
+            "value": 6147911680
+          },
+          {
+            "value": 44571
+          },
+          {
+            "value": 6147375104
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 409604
+          },
+          {
+            "value": 18446744073709551615
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 0
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 0
+        },
+        "sp": {
+          "value": 6147911680
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477327368
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 450498,
+      "name": "io.flutter.raster",
+      "threadState": {
+        "x": [
+          {
+            "value": 268451845
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 321070280212480
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 321070280212480
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 17179869184
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 74755
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 18446744073709551569
+          },
+          {
+            "value": 8323365480
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 321070280212480
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 321070280212480
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 6141796312
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 18446744073709550527
+          },
+          {
+            "value": 4412409862
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477145508
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 6141796160
+        },
+        "sp": {
+          "value": 6141796080
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477069364
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 3124,
+          "symbol": "mach_msg2_trap",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 79268,
+          "symbol": "mach_msg2_internal",
+          "symbolLocation": 76,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 39360,
+          "symbol": "mach_msg_overwrite",
+          "symbolLocation": 480,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 4032,
+          "symbol": "mach_msg",
+          "symbolLocation": 24,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 516360,
+          "symbol": "__CFRunLoopServiceMachPort",
+          "symbolLocation": 160,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 510452,
+          "symbol": "__CFRunLoopRun",
+          "symbolLocation": 1188,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1372772,
+          "symbol": "_CFRunLoopRunSpecificWithOptions",
+          "symbolLocation": 532,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1414184,
+          "symbol": "fml::MessageLoopDarwin::Run()",
+          "symbolLocation": 140,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1367952,
+          "symbol": "fml::MessageLoopImpl::DoRun()",
+          "symbolLocation": 100,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1405228,
+          "symbol": "std::__fl::__function::__func<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0, std::__fl::allocator<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0>, void ()>::operator()()",
+          "symbolLocation": 200,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1403216,
+          "symbol": "fml::ThreadHandle::ThreadHandle(std::__fl::function<void ()>&&)::$_0::__invoke(void*)",
+          "symbolLocation": 56,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450499,
+      "name": "io.flutter.io",
+      "threadState": {
+        "x": [
+          {
+            "value": 268451845
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 333164908118016
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 333164908118016
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 17179869184
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 77571
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 18446744073709551569
+          },
+          {
+            "value": 8323365480
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 333164908118016
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 333164908118016
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 6143942616
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 18446744073709550527
+          },
+          {
+            "value": 4412409862
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477145508
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 6143942464
+        },
+        "sp": {
+          "value": 6143942384
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477069364
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 3124,
+          "symbol": "mach_msg2_trap",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 79268,
+          "symbol": "mach_msg2_internal",
+          "symbolLocation": 76,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 39360,
+          "symbol": "mach_msg_overwrite",
+          "symbolLocation": 480,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 4032,
+          "symbol": "mach_msg",
+          "symbolLocation": 24,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 516360,
+          "symbol": "__CFRunLoopServiceMachPort",
+          "symbolLocation": 160,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 510452,
+          "symbol": "__CFRunLoopRun",
+          "symbolLocation": 1188,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1372772,
+          "symbol": "_CFRunLoopRunSpecificWithOptions",
+          "symbolLocation": 532,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1414184,
+          "symbol": "fml::MessageLoopDarwin::Run()",
+          "symbolLocation": 140,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1367952,
+          "symbol": "fml::MessageLoopImpl::DoRun()",
+          "symbolLocation": 100,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1405228,
+          "symbol": "std::__fl::__function::__func<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0, std::__fl::allocator<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0>, void ()>::operator()()",
+          "symbolLocation": 200,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1403216,
+          "symbol": "fml::ThreadHandle::ThreadHandle(std::__fl::function<void ()>&&)::$_0::__invoke(void*)",
+          "symbolLocation": 56,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450500,
+      "name": "io.worker.1",
+      "threadState": {
+        "x": [
+          {
+            "value": 4
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 160
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6144519640
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 305
+          },
+          {
+            "value": 8323363600
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 52532453240
+          },
+          {
+            "value": 52532453304
+          },
+          {
+            "value": 6144520416
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 1025
+          },
+          {
+            "value": 1280
+          },
+          {
+            "value": 52486476160
+          },
+          {
+            "value": 8
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477349160
+        },
+        "cpsr": {
+          "value": 1610616832
+        },
+        "fp": {
+          "value": 6144519760
+        },
+        "sp": {
+          "value": 6144519616
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477083916
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 17676,
+          "symbol": "__psynch_cvwait",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 28968,
+          "symbol": "_pthread_cond_wait",
+          "symbolLocation": 980,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 1730432,
+          "symbol": "std::__fl::condition_variable::wait(std::__fl::unique_lock<std::__fl::mutex>&)",
+          "symbolLocation": 44,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1346384,
+          "symbol": "fml::ConcurrentMessageLoop::WorkerMain()",
+          "symbolLocation": 144,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1348884,
+          "symbol": "void* std::__fl::__thread_proxy[abi:nn210000]<std::__fl::tuple<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0>>(void*)",
+          "symbolLocation": 560,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450501,
+      "name": "io.worker.2",
+      "threadState": {
+        "x": [
+          {
+            "value": 4
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 160
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6145093080
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 305
+          },
+          {
+            "value": 8323363600
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 52532453240
+          },
+          {
+            "value": 52532453304
+          },
+          {
+            "value": 6145093856
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 1536
+          },
+          {
+            "value": 52486476192
+          },
+          {
+            "value": 8
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477349160
+        },
+        "cpsr": {
+          "value": 1610616832
+        },
+        "fp": {
+          "value": 6145093200
+        },
+        "sp": {
+          "value": 6145093056
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477083916
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 17676,
+          "symbol": "__psynch_cvwait",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 28968,
+          "symbol": "_pthread_cond_wait",
+          "symbolLocation": 980,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 1730432,
+          "symbol": "std::__fl::condition_variable::wait(std::__fl::unique_lock<std::__fl::mutex>&)",
+          "symbolLocation": 44,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1346384,
+          "symbol": "fml::ConcurrentMessageLoop::WorkerMain()",
+          "symbolLocation": 144,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1348884,
+          "symbol": "void* std::__fl::__thread_proxy[abi:nn210000]<std::__fl::tuple<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0>>(void*)",
+          "symbolLocation": 560,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450502,
+      "name": "io.worker.3",
+      "threadState": {
+        "x": [
+          {
+            "value": 4
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 160
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6145666520
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 305
+          },
+          {
+            "value": 8323363600
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 52532453240
+          },
+          {
+            "value": 52532453304
+          },
+          {
+            "value": 6145667296
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 2048
+          },
+          {
+            "value": 52486476224
+          },
+          {
+            "value": 8
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477349160
+        },
+        "cpsr": {
+          "value": 1610616832
+        },
+        "fp": {
+          "value": 6145666640
+        },
+        "sp": {
+          "value": 6145666496
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477083916
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 17676,
+          "symbol": "__psynch_cvwait",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 28968,
+          "symbol": "_pthread_cond_wait",
+          "symbolLocation": 980,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 1730432,
+          "symbol": "std::__fl::condition_variable::wait(std::__fl::unique_lock<std::__fl::mutex>&)",
+          "symbolLocation": 44,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1346384,
+          "symbol": "fml::ConcurrentMessageLoop::WorkerMain()",
+          "symbolLocation": 144,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1348884,
+          "symbol": "void* std::__fl::__thread_proxy[abi:nn210000]<std::__fl::tuple<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0>>(void*)",
+          "symbolLocation": 560,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450503,
+      "name": "io.worker.4",
+      "threadState": {
+        "x": [
+          {
+            "value": 260
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 160
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6146239960
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 305
+          },
+          {
+            "value": 8323363600
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 52532453240
+          },
+          {
+            "value": 52532453304
+          },
+          {
+            "value": 6146240736
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 1024
+          },
+          {
+            "value": 1792
+          },
+          {
+            "value": 52486476256
+          },
+          {
+            "value": 8
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477349160
+        },
+        "cpsr": {
+          "value": 1610616832
+        },
+        "fp": {
+          "value": 6146240080
+        },
+        "sp": {
+          "value": 6146239936
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477083916
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 17676,
+          "symbol": "__psynch_cvwait",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 28968,
+          "symbol": "_pthread_cond_wait",
+          "symbolLocation": 980,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 1730432,
+          "symbol": "std::__fl::condition_variable::wait(std::__fl::unique_lock<std::__fl::mutex>&)",
+          "symbolLocation": 44,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1346384,
+          "symbol": "fml::ConcurrentMessageLoop::WorkerMain()",
+          "symbolLocation": 144,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1348884,
+          "symbol": "void* std::__fl::__thread_proxy[abi:nn210000]<std::__fl::tuple<std::__fl::unique_ptr<std::__fl::__thread_struct, std::__fl::default_delete<std::__fl::__thread_struct>>, fml::ConcurrentMessageLoop::ConcurrentMessageLoop(unsigned long)::$_0>>(void*)",
+          "symbolLocation": 560,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450504,
+      "name": "dart:io EventHandler",
+      "threadState": {
+        "x": [
+          {
+            "value": 4
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6147337496
+          },
+          {
+            "value": 16
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 8300077400,
+            "symbolLocation": 0,
+            "symbol": "_current_pid"
+          },
+          {
+            "value": 15
+          },
+          {
+            "value": 20
+          },
+          {
+            "value": 6147336976
+          },
+          {
+            "value": 20
+          },
+          {
+            "value": 16
+          },
+          {
+            "value": 11
+          },
+          {
+            "value": 363
+          },
+          {
+            "value": 8323363688
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 52555890976
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 67108864
+          },
+          {
+            "value": 2147483647
+          },
+          {
+            "value": 274877907
+          },
+          {
+            "value": 4294966296
+          },
+          {
+            "value": 1000000
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 4343328904
+        },
+        "cpsr": {
+          "value": 536875008
+        },
+        "fp": {
+          "value": 6147338096
+        },
+        "sp": {
+          "value": 6147336432
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477094852
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 28612,
+          "symbol": "kevent",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 11104392,
+          "symbol": "dart::bin::EventHandlerImplementation::EventHandlerEntry(unsigned long)",
+          "symbolLocation": 300,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 11265584,
+          "symbol": "dart::bin::ThreadStart(void*)",
+          "symbolLocation": 92,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450518,
+      "frames": [],
+      "threadState": {
+        "x": [
+          {
+            "value": 6153351168
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6152814592
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 278532
+          },
+          {
+            "value": 18446744073709551615
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 0
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 0
+        },
+        "sp": {
+          "value": 6153351168
+        },
+        "esr": {
+          "value": 0
+        },
+        "pc": {
+          "value": 6477327368
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 450739,
+      "name": "io.flutter.raster",
+      "threadState": {
+        "x": [
+          {
+            "value": 268451845
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 440504730779648
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 440504730779648
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 17179869184
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 102563
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 18446744073709551569
+          },
+          {
+            "value": 8323365480
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 440504730779648
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 440504730779648
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 6150053848
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 18446744073709550527
+          },
+          {
+            "value": 4412409862
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477145508
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 6150053696
+        },
+        "sp": {
+          "value": 6150053616
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477069364
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 3124,
+          "symbol": "mach_msg2_trap",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 79268,
+          "symbol": "mach_msg2_internal",
+          "symbolLocation": 76,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 39360,
+          "symbol": "mach_msg_overwrite",
+          "symbolLocation": 480,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 4032,
+          "symbol": "mach_msg",
+          "symbolLocation": 24,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 516360,
+          "symbol": "__CFRunLoopServiceMachPort",
+          "symbolLocation": 160,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 510452,
+          "symbol": "__CFRunLoopRun",
+          "symbolLocation": 1188,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1372772,
+          "symbol": "_CFRunLoopRunSpecificWithOptions",
+          "symbolLocation": 532,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1414184,
+          "symbol": "fml::MessageLoopDarwin::Run()",
+          "symbolLocation": 140,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1367952,
+          "symbol": "fml::MessageLoopImpl::DoRun()",
+          "symbolLocation": 100,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1405228,
+          "symbol": "std::__fl::__function::__func<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0, std::__fl::allocator<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0>, void ()>::operator()()",
+          "symbolLocation": 200,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1403216,
+          "symbol": "fml::ThreadHandle::ThreadHandle(std::__fl::function<void ()>&&)::$_0::__invoke(void*)",
+          "symbolLocation": 56,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    },
+    {
+      "id": 450740,
+      "name": "io.flutter.io",
+      "threadState": {
+        "x": [
+          {
+            "value": 268451845
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 438907002945536
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 438907002945536
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 17179869184
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 102191
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 18446744073709551569
+          },
+          {
+            "value": 8323365480
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 438907002945536
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 438907002945536
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 6152200152
+          },
+          {
+            "value": 8589934592,
+            "objc-selector": ""
+          },
+          {
+            "value": 18446744073709550527
+          },
+          {
+            "value": 4412409862
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6477145508
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 6152200000
+        },
+        "sp": {
+          "value": 6152199920
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6477069364
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 3124,
+          "symbol": "mach_msg2_trap",
+          "symbolLocation": 8,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 79268,
+          "symbol": "mach_msg2_internal",
+          "symbolLocation": 76,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 39360,
+          "symbol": "mach_msg_overwrite",
+          "symbolLocation": 480,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 4032,
+          "symbol": "mach_msg",
+          "symbolLocation": 24,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 516360,
+          "symbol": "__CFRunLoopServiceMachPort",
+          "symbolLocation": 160,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 510452,
+          "symbol": "__CFRunLoopRun",
+          "symbolLocation": 1188,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1372772,
+          "symbol": "_CFRunLoopRunSpecificWithOptions",
+          "symbolLocation": 532,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1414184,
+          "symbol": "fml::MessageLoopDarwin::Run()",
+          "symbolLocation": 140,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1367952,
+          "symbol": "fml::MessageLoopImpl::DoRun()",
+          "symbolLocation": 100,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1405228,
+          "symbol": "std::__fl::__function::__func<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0, std::__fl::allocator<fml::Thread::Thread(std::__fl::function<void (fml::Thread::ThreadConfig const&)> const&, fml::Thread::ThreadConfig const&)::$_0>, void ()>::operator()()",
+          "symbolLocation": 200,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 1403216,
+          "symbol": "fml::ThreadHandle::ThreadHandle(std::__fl::function<void ()>&&)::$_0::__invoke(void*)",
+          "symbolLocation": 56,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 12
+        }
+      ]
+    }
+  ],
+  "usedImages": [
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4332224512,
+      "size": 15450112,
+      "uuid": "4c4c4490-5555-3144-a100-9853fd16813d",
+      "path": "\/Volumes\/VOLUME\/*\/flutter_desktop_darwin_unittests",
+      "name": "flutter_desktop_darwin_unittests"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 4509974528,
+      "CFBundleShortVersionString": "353.14",
+      "CFBundleIdentifier": "com.apple.AGXMetal13-3",
+      "size": 7913472,
+      "uuid": "d3386611-8dba-3736-b1e8-0002ef21beff",
+      "path": "\/System\/Library\/Extensions\/AGXMetal13_3.bundle\/Contents\/MacOS\/AGXMetal13_3",
+      "name": "AGXMetal13_3",
+      "CFBundleVersion": "353.14"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 4493541376,
+      "size": 49152,
+      "uuid": "690edff1-56be-3018-bec2-9f63287ceb2d",
+      "path": "\/usr\/lib\/libobjc-trampolines.dylib",
+      "name": "libobjc-trampolines.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6475190272,
+      "size": 328280,
+      "uuid": "d969a907-3e43-3951-9365-8c2db3812e9d",
+      "path": "\/usr\/lib\/system\/libsystem_malloc.dylib",
+      "name": "libsystem_malloc.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6472679424,
+      "size": 338764,
+      "uuid": "03bd9e32-cf0a-37b0-898a-3ce8de06d842",
+      "path": "\/usr\/lib\/libobjc.A.dylib",
+      "name": "libobjc.A.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6503227392,
+      "CFBundleShortVersionString": "6.9",
+      "CFBundleIdentifier": "com.apple.Foundation",
+      "size": 16661152,
+      "uuid": "91dace39-fa28-3191-818d-1fcc6a0e615a",
+      "path": "\/System\/Library\/Frameworks\/Foundation.framework\/Versions\/C\/Foundation",
+      "name": "Foundation",
+      "CFBundleVersion": "5026.6.7"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6549409792,
+      "CFBundleShortVersionString": "6.9",
+      "CFBundleIdentifier": "com.apple.AppKit",
+      "size": 24261792,
+      "uuid": "b6b4bdad-6428-3e64-8747-275700109b46",
+      "path": "\/System\/Library\/Frameworks\/AppKit.framework\/Versions\/C\/AppKit",
+      "name": "AppKit",
+      "CFBundleVersion": "2685.70.101"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6573674496,
+      "CFBundleShortVersionString": "1.0",
+      "CFBundleIdentifier": "com.apple.UIFoundation",
+      "size": 1804576,
+      "uuid": "659afbbd-e22e-3474-bcfe-298da57b1464",
+      "path": "\/System\/Library\/PrivateFrameworks\/UIFoundation.framework\/Versions\/A\/UIFoundation",
+      "name": "UIFoundation",
+      "CFBundleVersion": "1019.1"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6473236480,
+      "size": 734464,
+      "uuid": "74e52480-c2bd-3c8d-812d-95fe2b74a096",
+      "path": "\/usr\/lib\/dyld",
+      "name": "dyld"
+    },
+    {
+      "size": 0,
+      "source": "A",
+      "base": 0,
+      "uuid": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6477066240,
+      "size": 250600,
+      "uuid": "c6a4a4cb-92e6-3baf-aae0-e8306259209a",
+      "path": "\/usr\/lib\/system\/libsystem_kernel.dylib",
+      "name": "libsystem_kernel.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6477606912,
+      "CFBundleShortVersionString": "6.9",
+      "CFBundleIdentifier": "com.apple.CoreFoundation",
+      "size": 5629376,
+      "uuid": "9b672762-7b1f-30bc-96de-f176b372d66d",
+      "path": "\/System\/Library\/Frameworks\/CoreFoundation.framework\/Versions\/A\/CoreFoundation",
+      "name": "CoreFoundation",
+      "CFBundleVersion": "5026.6.7"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6477320192,
+      "size": 52028,
+      "uuid": "a373f0b0-9880-326a-88b4-dd8be4e33072",
+      "path": "\/usr\/lib\/system\/libsystem_pthread.dylib",
+      "name": "libsystem_pthread.dylib"
+    }
+  ],
+  "sharedCache": {
+    "base": 6472105984,
+    "size": 6010847232,
+    "uuid": "f2e86c53-6052-388b-ba71-5a0c9b569413"
+  },
+  "vmSummary": "ReadOnly portion of Libraries: Total=1.8G resident=0K(0%) swapped_out_or_unallocated=1.8G(100%)\nWritable regions: Total=245.4M written=658K(0%) resident=658K(0%) swapped_out=0K(0%) unallocated=244.8M(100%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nAccelerate framework               128K        1 \nActivity Tracing                   256K        1 \nAttributeGraph Data               1024K        1 \nCoreAnimation                      176K       11 \nCoreGraphics                        96K        6 \nCoreUI image data                  176K        3 \nFoundation                          32K        2 \nKernel Alloc Once                   32K        1 \nMALLOC                           145.6M       45 \nMALLOC guard page                 4048K        4 \nMemory Tag 22                     64.0M        1 \nSTACK GUARD                       56.3M       18 \nStack                             25.0M       18 \nVM_ALLOCATE                       12.6M       33 \n__AUTH                            5964K      627 \n__AUTH_CONST                      88.7M     1010 \n__CTF                               824        1 \n__DATA                            34.3M      961 \n__DATA_CONST                      34.8M     1017 \n__DATA_DIRTY                      8310K      867 \n__FONT_DATA                        2352        1 \n__LINKEDIT                       582.1M        4 \n__OBJC_RO                         79.2M        1 \n__OBJC_RW                         2599K        1 \n__TEXT                             1.2G     1039 \n__TPRO_CONST                       128K        2 \nmapped file                      278.0M       77 \npage table in kernel               658K        1 \nshared memory                     1296K       40 \n===========                     =======  ======= \nTOTAL                              2.6G     5794 \n",
+  "legacyInfo": {
+    "threadTriggered": {
+      "queue": "com.apple.main-thread"
+    }
+  },
+  "logWritingSignature": "593e136547a9e0ed6fc35ed68ae3a3d180b0b030",
+  "roots_installed": 0,
+  "bug_type": "309",
+  "trmStatus": 8200,
+  "trialInfo": {
+    "rollouts": [
+      {
+        "rolloutId": "645eb1d0417dab722a215927",
+        "factorPackIds": [],
+        "deploymentId": 240000005
+      },
+      {
+        "rolloutId": "699d4a6bb3c59721f0815d4a",
+        "factorPackIds": [
+          "6a1e847dfae8a60fe3d88f20",
+          "6a1e847ffae8a60fe3d88f21",
+          "6a1e847fe5700036461dd986",
+          "6a1e848059a97e607a107573"
+        ],
+        "deploymentId": 240000059
+      }
+    ],
+    "experiments": []
+  }
+}

@@ -1,0 +1,370 @@
+[]
+
+
+═══════════════════╡ ••• Running task "plugin_lint_mac" ••• ╞═══════════════════
+
+Starting process for task: [plugin_lint_mac]
+Executing "/Users/vashworth/Development/flutter/bin/cache/dart-sdk/bin/dart --enable-vm-service=0 --no-pause-isolates-on-exit -DbuildMode=profile bin/tasks/plugin_lint_mac.dart" in "/Users/vashworth/Development/flutter/dev/devicelab" with environment {ANDROID_NDK_PATH: /Users/vashworth/Library/Android/sdk/ndk/28.2.13676358, BOT: true, LANG: en_US.UTF-8}
+[2026-10-16 15:54:38.764161] [STDOUT] The Dart VM service is listening on http://127.0.0.1:59239/rssxYHrte1o=/
+[2026-10-16 15:54:38.765279] [STDOUT] The Dart DevTools debugger and profiler is available at: http://127.0.0.1:59239/rssxYHrte1o=/devtools/?uri=ws://127.0.0.1:59239/rssxYHrte1o=/ws
+[plugin_lint_mac] Connected to VM server.
+[2026-10-16 15:54:39.183545] [STDOUT] Running task with a timeout of null.
+[2026-10-16 15:54:39.183676] [STDOUT] Enabling configs for macOS and Linux...
+[2026-10-16 15:54:39.194946] [STDOUT] Executing "/Users/vashworth/Development/flutter/bin/flutter config -v --enable-macos-desktop --enable-linux-desktop" in "/Users/vashworth/Development/flutter/dev/devicelab" with environment {ANDROID_NDK_PATH: /Users/vashworth/Library/Android/sdk/ndk/28.2.13676358, BOT: true, LANG: en_US.UTF-8}
+[2026-10-16 15:54:39.485614] [STDOUT] stdout: [   +2 ms] executing: [/Users/vashworth/Development/flutter/] git -c log.showSignature=false log -n 1 --pretty=format:%H
+[2026-10-16 15:54:39.495297] [STDOUT] stdout: [  +12 ms] Exit code 0 from: git -c log.showSignature=false log -n 1 --pretty=format:%H
+[2026-10-16 15:54:39.495346] [STDOUT] stdout: [        ] 7d9fb76702e17358d9d70d3d88c888f633f1343b
+[2026-10-16 15:54:39.495396] [STDOUT] stdout: [        ] executing: [/Users/vashworth/Development/flutter/] git tag --points-at 7d9fb76702e17358d9d70d3d88c888f633f1343b
+[2026-10-16 15:54:39.519695] [STDOUT] stdout: [  +24 ms] Exit code 0 from: git tag --points-at 7d9fb76702e17358d9d70d3d88c888f633f1343b
+[2026-10-16 15:54:39.519796] [STDOUT] stdout: [        ] executing: [/Users/vashworth/Development/flutter/] git for-each-ref --sort=-v:refname --count=1 --format=%(refname:short) refs/tags/[0-9]*.*.*
+[2026-10-16 15:54:39.550563] [STDOUT] stdout: [  +30 ms] Exit code 0 from: git for-each-ref --sort=-v:refname --count=1 --format=%(refname:short) refs/tags/[0-9]*.*.*
+[2026-10-16 15:54:39.550625] [STDOUT] stdout: [        ] 3.50.0-0.1.pre
+[2026-10-16 15:54:39.550652] [STDOUT] stdout: [        ] executing: [/Users/vashworth/Development/flutter/] git merge-base 7d9fb76702e17358d9d70d3d88c888f633f1343b 3.50.0-0.1.pre
+[2026-10-16 15:54:39.565467] [STDOUT] stdout: [  +14 ms] Exit code 0 from: git merge-base 7d9fb76702e17358d9d70d3d88c888f633f1343b 3.50.0-0.1.pre
+[2026-10-16 15:54:39.565542] [STDOUT] stdout: [        ] 0e4dea427d51a91ccac1f3cbd01bffa927fe6409
+[2026-10-16 15:54:39.565641] [STDOUT] stdout: [        ] executing: [/Users/vashworth/Development/flutter/] git rev-list --count 0e4dea427d51a91ccac1f3cbd01bffa927fe6409..7d9fb76702e17358d9d70d3d88c888f633f1343b
+[2026-10-16 15:54:39.579771] [STDOUT] stdout: [  +13 ms] Exit code 0 from: git rev-list --count 0e4dea427d51a91ccac1f3cbd01bffa927fe6409..7d9fb76702e17358d9d70d3d88c888f633f1343b
+[2026-10-16 15:54:39.579838] [STDOUT] stdout: [        ] 91
+[2026-10-16 15:54:39.582221] [STDOUT] stdout: [   +2 ms] executing: [/Users/vashworth/Development/flutter/] git symbolic-ref --short HEAD
+[2026-10-16 15:54:39.582283] [STDOUT] stdout: [        ] executing: [/Users/vashworth/Development/flutter/] git symbolic-ref --short HEAD
+[2026-10-16 15:54:39.593263] [STDOUT] stdout: [  +10 ms] Exit code 0 from: git symbolic-ref --short HEAD
+[2026-10-16 15:54:39.593303] [STDOUT] stdout: [        ] flutter_desktop_darwin_unittests_crash
+[2026-10-16 15:54:39.604021] [STDOUT] stdout: [  +10 ms] Exit code 0 from: git symbolic-ref --short HEAD
+[2026-10-16 15:54:39.604075] [STDOUT] stdout: [        ] flutter_desktop_darwin_unittests_crash
+[2026-10-16 15:54:39.610009] [STDOUT] stdout: [   +5 ms] executing: sysctl hw.optional.arm64
+[2026-10-16 15:54:39.614267] [STDOUT] stdout: [   +4 ms] Exit code 0 from: sysctl hw.optional.arm64
+[2026-10-16 15:54:39.614322] [STDOUT] stdout: [        ] hw.optional.arm64: 1
+[2026-10-16 15:54:39.620337] [STDOUT] stdout: [   +5 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[2026-10-16 15:54:39.620508] [STDOUT] stdout: [        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[2026-10-16 15:54:39.620590] [STDOUT] stdout: [        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.620614] [STDOUT] stdout: [        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.620642] [STDOUT] stdout: [        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.620665] [STDOUT] stdout: [        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[2026-10-16 15:54:39.621041] [STDOUT] stdout: [        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[2026-10-16 15:54:39.621093] [STDOUT] stdout: [        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[2026-10-16 15:54:39.621136] [STDOUT] stdout: [        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621158] [STDOUT] stdout: [        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621177] [STDOUT] stdout: [        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621196] [STDOUT] stdout: [        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621215] [STDOUT] stdout: [        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621247] [STDOUT] stdout: [        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621266] [STDOUT] stdout: [        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[2026-10-16 15:54:39.621285] [STDOUT] stdout: [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621304] [STDOUT] stdout: [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621321] [STDOUT] stdout: [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621340] [STDOUT] stdout: [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621369] [STDOUT] stdout: [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621389] [STDOUT] stdout: [        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621407] [STDOUT] stdout: [        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[2026-10-16 15:54:39.621425] [STDOUT] stdout: [        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[2026-10-16 15:54:39.621593] [STDOUT] stdout: [        ] executing: [/Users/vashworth/Development/flutter/] git rev-parse --abbrev-ref --symbolic @{upstream}
+[2026-10-16 15:54:39.631287] [STDOUT] stdout: [   +9 ms] Exit code 0 from: git rev-parse --abbrev-ref --symbolic @{upstream}
+[2026-10-16 15:54:39.631358] [STDOUT] stdout: [        ] origin/flutter_desktop_darwin_unittests_crash
+[2026-10-16 15:54:39.631413] [STDOUT] stdout: [        ] executing: [/Users/vashworth/Development/flutter/] git ls-remote --get-url origin
+[2026-10-16 15:54:39.642032] [STDOUT] stdout: [  +10 ms] Exit code 0 from: git ls-remote --get-url origin
+[2026-10-16 15:54:39.642087] [STDOUT] stdout: [        ] git@github.com:vashworth/flutter.git
+[2026-10-16 15:54:39.642127] [STDOUT] stdout: [        ] executing: [/Users/vashworth/Development/flutter/] git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[2026-10-16 15:54:39.656321] [STDOUT] stdout: [  +14 ms] Exit code 0 from: git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[2026-10-16 15:54:39.656389] [STDOUT] stdout: [        ] 2026-10-16 13:36:34 -0500
+[2026-10-16 15:54:39.667833] [STDOUT] stdout: [  +11 ms] Setting "enable-linux-desktop" value to "true".
+[2026-10-16 15:54:39.668135] [STDOUT] stdout: [        ] Setting "enable-macos-desktop" value to "true".
+[2026-10-16 15:54:39.668360] [STDOUT] stdout: [        ] 
+[2026-10-16 15:54:39.668403] [STDOUT] stdout:            You may need to restart any open editors for them to read new settings.
+[2026-10-16 15:54:39.668750] [STDOUT] stdout: [        ] "flutter config" took 9ms.
+[2026-10-16 15:54:39.668785] [STDOUT] stdout: [        ] Running 2 shutdown hooks
+[2026-10-16 15:54:39.668953] [STDOUT] stdout: [        ] Shutdown hooks complete
+[2026-10-16 15:54:39.669] [STDOUT] stdout: [        ] exiting with code 0
+[2026-10-16 15:54:39.676047] [STDOUT] Executing "/Users/vashworth/Library/Android/sdk/platform-tools/adb devices -l" in "/Users/vashworth/Development/flutter/dev/devicelab" with environment {ANDROID_NDK_PATH: /Users/vashworth/Library/Android/sdk/ndk/28.2.13676358, BOT: true, LANG: en_US.UTF-8}
+[2026-10-16 15:54:39.692878] [STDOUT] stdout: List of devices attached
+[2026-10-16 15:54:39.692919] [STDOUT] stdout: 
+[2026-10-16 15:54:39.700869] [STDOUT] Found FLUTTER_LOGS_DIR dump directory /Users/vashworth/Development/flutter/victoria_debug/derived_data
+[2026-10-16 15:54:39.700956] [STDOUT] Executing "/Users/vashworth/Development/flutter/bin/flutter config --no-enable-swift-package-manager --ci --debug-logs-dir=/Users/vashworth/Development/flutter/victoria_debug/derived_data" in "/Users/vashworth/Development/flutter/dev/devicelab" with environment {ANDROID_NDK_PATH: /Users/vashworth/Library/Android/sdk/ndk/28.2.13676358, BOT: true, LANG: en_US.UTF-8}
+[2026-10-16 15:54:40.123847] [STDOUT] stdout: Setting "enable-swift-package-manager" value to "false".
+[2026-10-16 15:54:40.124557] [STDOUT] stderr: Enabling Swift Package Manager will be required in a future version of Flutter.
+[2026-10-16 15:54:40.124612] [STDOUT] stdout: 
+[2026-10-16 15:54:40.124630] [STDOUT] stdout: You may need to restart any open editors for them to read new settings.
+[2026-10-16 15:54:40.130557] [STDOUT] 
+[2026-10-16 15:54:40.130589] [STDOUT] 
+[2026-10-16 15:54:40.130642] [STDOUT] ═══════════════════════╡ ••• Lint integration_test ••• ╞════════════════════════
+[2026-10-16 15:54:40.130715] [STDOUT] 
+[2026-10-16 15:54:40.130766] [STDOUT] Executing "pod repo update" in "/var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/flutter_plugin_test.diCUib" with environment {ANDROID_NDK_PATH: /Users/vashworth/Library/Android/sdk/ndk/28.2.13676358, BOT: true, LANG: en_US.UTF-8}
+[2026-10-16 15:54:40.260339] [STDOUT] stderr: Ignoring ffi-1.16.3 because its extensions are not built. Try: gem pristine ffi --version 1.16.3
+[2026-10-16 15:54:46.031105] [STDOUT] stdout: Updating spec repo `trunk`
+[2026-10-16 15:54:57.114932] [STDOUT] Flutter root at /Users/vashworth/Development/flutter
+[2026-10-16 15:54:57.115192] [STDOUT] Executing "pod lib lint /Users/vashworth/Development/flutter/packages/integration_test/ios/integration_test.podspec --use-libraries --quick" in "/var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/flutter_plugin_test.diCUib" with environment {ANDROID_NDK_PATH: /Users/vashworth/Library/Android/sdk/ndk/28.2.13676358, BOT: true, LANG: en_US.UTF-8}
+[2026-10-16 15:54:57.293137] [STDOUT] stderr: Ignoring ffi-1.16.3 because its extensions are not built. Try: gem pristine ffi --version 1.16.3
+[2026-10-16 15:54:57.653270] [STDOUT] stdout: 
+[2026-10-16 15:54:57.653375] [STDOUT] stdout:  -> integration_test
+[2026-10-16 15:54:57.656008] [STDOUT] stdout:  -> integration_test (0.0.1)
+[2026-10-16 15:54:57.656069] [STDOUT] stdout: 
+[2026-10-16 15:54:57.656091] [STDOUT] stdout: integration_test passed validation.
+[2026-10-16 15:54:57.658401] [STDOUT] Executing "pod lib lint /Users/vashworth/Development/flutter/packages/integration_test/integration_test_macos/macos/integration_test_macos.podspec --verbose" in "/var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/flutter_plugin_test.diCUib" with environment {ANDROID_NDK_PATH: /Users/vashworth/Library/Android/sdk/ndk/28.2.13676358, BOT: true, LANG: en_US.UTF-8}
+[2026-10-16 15:54:57.806068] [STDOUT] stderr: Ignoring ffi-1.16.3 because its extensions are not built. Try: gem pristine ffi --version 1.16.3
+[2026-10-16 15:54:58.190171] [STDOUT] stdout: 
+[2026-10-16 15:54:58.190260] [STDOUT] stdout:   CDN: trunk Relative path: CocoaPods-version.yml exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:58.190293] [STDOUT] stdout:  -> integration_test_macos
+[2026-10-16 15:54:58.955646] [STDOUT] stdout:   integration_test_macos (0.0.1) - Analyzing on macOS 12.0 platform.
+[2026-10-16 15:54:58.955737] [STDOUT] stdout:   - Generating Info.plist file at `../../../../../../../var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/App/App-Info.plist`
+[2026-10-16 15:54:58.955770] [STDOUT] stdout:   Preparing
+[2026-10-16 15:54:58.955787] [STDOUT] stdout: 
+[2026-10-16 15:54:58.955829] [STDOUT] stdout: Analyzing dependencies
+[2026-10-16 15:54:58.955848] [STDOUT] stdout: 
+[2026-10-16 15:54:58.955862] [STDOUT] stdout: Inspecting targets to integrate
+[2026-10-16 15:54:58.955878] [STDOUT] stdout:   Using `ARCHS` setting to build architectures of target `Pods-App`: (``)
+[2026-10-16 15:54:58.955894] [STDOUT] stdout: 
+[2026-10-16 15:54:58.955909] [STDOUT] stdout: Fetching external sources
+[2026-10-16 15:54:58.955926] [STDOUT] stdout: -> Fetching podspec for `integration_test_macos` from `/Users/vashworth/Development/flutter/packages/integration_test/integration_test_macos/macos`
+[2026-10-16 15:54:59.007459] [STDOUT] stdout: 
+[2026-10-16 15:54:59.007509] [STDOUT] stdout: Resolving dependencies of 
+[2026-10-16 15:54:59.007530] [STDOUT] stdout:   CDN: trunk Relative path: CocoaPods-version.yml exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007552] [STDOUT] stdout:   CDN: trunk Relative path: all_pods_versions_4_2_c.txt exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007576] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/3.16.0/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007600] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/3.16.0/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007629] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/3.13.2/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007654] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/3.13.0/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007685] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/3.0.0/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007708] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/2.10.2/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007752] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/2.5/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007777] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/2.2.2/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007819] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/2.0.0/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007846] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/1.22.4/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007871] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/1.17.0/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007896] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/1.12.1303/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007922] [STDOUT] stdout:   CDN: trunk Relative path: Specs/4/2/c/FlutterMacOS/1.9.102/FlutterMacOS.podspec.json exists! Returning local because checking is only performed in repo update
+[2026-10-16 15:54:59.007944] [STDOUT] stdout: 
+[2026-10-16 15:54:59.007961] [STDOUT] stdout: Comparing resolved specification to the sandbox manifest
+[2026-10-16 15:54:59.007980] [STDOUT] stdout:   A FlutterMacOS
+[2026-10-16 15:54:59.007995] [STDOUT] stdout:   A integration_test_macos
+[2026-10-16 15:54:59.008012] [STDOUT] stdout: 
+[2026-10-16 15:54:59.008028] [STDOUT] stdout: Downloading dependencies
+[2026-10-16 15:54:59.008050] [STDOUT] stdout: 
+[2026-10-16 15:54:59.008064] [STDOUT] stdout: -> Installing FlutterMacOS (3.16.0)
+[2026-10-16 15:54:59.008079] [STDOUT] stdout:  > Http download
+[2026-10-16 15:54:59.008099] [STDOUT] stdout:    $ /usr/bin/curl -f -L -o /var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/d20261016-69224-4t531u/file.zip https://storage.googleapis.com/flutter_infra_release/flutter/74d16627b940bb15e50891f82cad6c3e3465bd6d/darwin-x64-release/FlutterMacOS.framework.zip --create-dirs --netrc-optional --retry 2 -A 'CocoaPods/1.16.2 cocoapods-downloader/2.1'
+[2026-10-16 15:54:59.027888] [STDOUT] stderr:      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+[2026-10-16 15:54:59.028050] [STDOUT] stderr:                                     Dload  Upload   Total   Spent    Left  Speed
+[2026-10-16 15:54:59.028082] [STDOUT] stderr:    
+[2026-10-16 15:54:59.311498] [STDOUT] stderr:      0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+[2026-10-16 15:54:59.666810] [STDOUT] stderr:      0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+[2026-10-16 15:54:59.667225] [STDOUT] stderr:    100 10.6M  100 10.6M    0     0  16.7M      0 --:--:-- --:--:-- --:--:-- 16.7M
+[2026-10-16 15:54:59.681816] [STDOUT] stdout:    $ /usr/bin/unzip /var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/d20261016-69224-4t531u/file.zip -d /var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/d20261016-69224-4t531u
+[2026-10-16 15:54:59.773846] [STDOUT] stdout:    Archive:  /var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/d20261016-69224-4t531u/file.zip
+[2026-10-16 15:54:59.773908] [STDOUT] stdout:     extracting: /var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/d20261016-69224-4t531u/FlutterMacOS.framework.zip  
+[2026-10-16 15:54:59.773926] [STDOUT] stdout:   $ /usr/bin/rsync -a --exclude=.git --delete /var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/d20261016-69224-4t531u/ /Users/vashworth/Library/Caches/CocoaPods/Pods/Release/FlutterMacOS/3.16.0-e3a77
+[2026-10-16 15:54:59.860888] [STDOUT] stdout:  > Running prepare command
+[2026-10-16 15:54:59.860955] [STDOUT] stdout:    $ /bin/bash -c  set -e unzip FlutterMacOS.framework -d FlutterMacOS.framework
+[2026-10-16 15:55:00.254616] [STDOUT] stdout:    Archive:  FlutterMacOS.framework.zip
+[2026-10-16 15:55:00.254685] [STDOUT] stdout:        linking: FlutterMacOS.framework/Resources  -> Versions/Current/Resources 
+[2026-10-16 15:55:00.254706] [STDOUT] stdout:       creating: FlutterMacOS.framework/Versions
+[2026-10-16 15:55:00.254718] [STDOUT] stdout:       creating: FlutterMacOS.framework/Versions/A
+[2026-10-16 15:55:00.254738] [STDOUT] stdout:       creating: FlutterMacOS.framework/Versions/A/_CodeSignature
+[2026-10-16 15:55:00.254750] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/_CodeSignature/CodeResources  
+[2026-10-16 15:55:00.254790] [STDOUT] stdout:       creating: FlutterMacOS.framework/Versions/A/Resources
+[2026-10-16 15:55:00.254807] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Resources/icudtl.dat  
+[2026-10-16 15:55:00.254818] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Resources/Info.plist  
+[2026-10-16 15:55:00.254828] [STDOUT] stdout:       creating: FlutterMacOS.framework/Versions/A/Headers
+[2026-10-16 15:55:00.254838] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterEngine.h  
+[2026-10-16 15:55:00.254848] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterChannels.h  
+[2026-10-16 15:55:00.254858] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterAppDelegate.h  
+[2026-10-16 15:55:00.254868] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterMacOS.h  
+[2026-10-16 15:55:00.254879] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterTexture.h  
+[2026-10-16 15:55:00.254889] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterPluginMacOS.h  
+[2026-10-16 15:55:00.254899] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterAppLifecycleDelegate.h  
+[2026-10-16 15:55:00.254912] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterPlatformViews.h  
+[2026-10-16 15:55:00.254923] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterPluginRegistrarMacOS.h  
+[2026-10-16 15:55:00.254934] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterCodecs.h  
+[2026-10-16 15:55:00.254944] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterViewController.h  
+[2026-10-16 15:55:00.254971] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterMacros.h  
+[2026-10-16 15:55:00.254982] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterDartProject.h  
+[2026-10-16 15:55:00.254992] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Headers/FlutterBinaryMessenger.h  
+[2026-10-16 15:55:00.255003] [STDOUT] stdout:       creating: FlutterMacOS.framework/Versions/A/Modules
+[2026-10-16 15:55:00.255012] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/Modules/module.modulemap  
+[2026-10-16 15:55:00.255025] [STDOUT] stdout:      inflating: FlutterMacOS.framework/Versions/A/FlutterMacOS  
+[2026-10-16 15:55:00.255035] [STDOUT] stdout:        linking: FlutterMacOS.framework/Versions/Current  -> A 
+[2026-10-16 15:55:00.255044] [STDOUT] stdout:        linking: FlutterMacOS.framework/Headers  -> Versions/Current/Headers 
+[2026-10-16 15:55:00.255054] [STDOUT] stdout:        linking: FlutterMacOS.framework/Modules  -> Versions/Current/Modules 
+[2026-10-16 15:55:00.255064] [STDOUT] stdout:        linking: FlutterMacOS.framework/FlutterMacOS  -> Versions/Current/FlutterMacOS 
+[2026-10-16 15:55:00.255086] [STDOUT] stdout:    finishing deferred symbolic links:
+[2026-10-16 15:55:00.255097] [STDOUT] stdout:      FlutterMacOS.framework/Resources -> Versions/Current/Resources
+[2026-10-16 15:55:00.255106] [STDOUT] stdout:      FlutterMacOS.framework/Versions/Current -> A
+[2026-10-16 15:55:00.255118] [STDOUT] stdout:      FlutterMacOS.framework/Headers -> Versions/Current/Headers
+[2026-10-16 15:55:00.255128] [STDOUT] stdout:      FlutterMacOS.framework/Modules -> Versions/Current/Modules
+[2026-10-16 15:55:00.255137] [STDOUT] stdout:      FlutterMacOS.framework/FlutterMacOS -> Versions/Current/FlutterMacOS
+[2026-10-16 15:55:00.255147] [STDOUT] stdout:   > Copying FlutterMacOS from `/Users/vashworth/Library/Caches/CocoaPods/Pods/Release/FlutterMacOS/3.16.0-e3a77` to `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/FlutterMacOS`
+[2026-10-16 15:55:00.255161] [STDOUT] stdout: 
+[2026-10-16 15:55:00.255171] [STDOUT] stdout: -> Installing integration_test_macos (0.0.1)
+[2026-10-16 15:55:00.255180] [STDOUT] stdout:   - Running pre install hooks
+[2026-10-16 15:55:00.255190] [STDOUT] stdout:   - Writing Lockfile in `../../../../../../../var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Podfile.lock`
+[2026-10-16 15:55:00.255201] [STDOUT] stdout:   - Writing Manifest in `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Manifest.lock`
+[2026-10-16 15:55:00.255212] [STDOUT] stdout: 
+[2026-10-16 15:55:00.255222] [STDOUT] stdout: Generating Pods project
+[2026-10-16 15:55:00.255231] [STDOUT] stdout:   - Creating Pods project
+[2026-10-16 15:55:00.255241] [STDOUT] stdout:   - Installing files into Pods project
+[2026-10-16 15:55:00.255264] [STDOUT] stdout:     - Adding source files
+[2026-10-16 15:55:00.255274] [STDOUT] stdout:     - Adding frameworks
+[2026-10-16 15:55:00.255283] [STDOUT] stdout:     - Adding libraries
+[2026-10-16 15:55:00.255293] [STDOUT] stdout:     - Adding resources
+[2026-10-16 15:55:00.255302] [STDOUT] stdout:     - Adding development pod helper files
+[2026-10-16 15:55:00.255313] [STDOUT] stdout:     - Linking headers
+[2026-10-16 15:55:00.255323] [STDOUT] stdout:   - Installing Pod Targets
+[2026-10-16 15:55:00.255332] [STDOUT] stdout:     - Installing target `FlutterMacOS` macOS 10.14
+[2026-10-16 15:55:00.255342] [STDOUT] stdout:     - Installing target `integration_test_macos` macOS 12.0
+[2026-10-16 15:55:00.255351] [STDOUT] stdout:       - Generating module map file at `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Target Support Files/integration_test_macos/integration_test_macos.modulemap`
+[2026-10-16 15:55:00.255361] [STDOUT] stdout:       - Generating umbrella header at `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Target Support Files/integration_test_macos/integration_test_macos-umbrella.h`
+[2026-10-16 15:55:00.255372] [STDOUT] stdout:       - Generating Info.plist file at `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Target Support Files/integration_test_macos/integration_test_macos-Info.plist`
+[2026-10-16 15:55:00.255382] [STDOUT] stdout:       - Generating dummy source at `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Target Support Files/integration_test_macos/integration_test_macos-dummy.m`
+[2026-10-16 15:55:00.255392] [STDOUT] stdout:   - Installing Aggregate Targets
+[2026-10-16 15:55:00.255403] [STDOUT] stdout:     - Installing target `Pods-App` macOS 12.0
+[2026-10-16 15:55:00.255413] [STDOUT] stdout:       - Generating Info.plist file at `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Target Support Files/Pods-App/Pods-App-Info.plist`
+[2026-10-16 15:55:00.255423] [STDOUT] stdout:       - Generating module map file at `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Target Support Files/Pods-App/Pods-App.modulemap`
+[2026-10-16 15:55:00.255433] [STDOUT] stdout:       - Generating umbrella header at `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Target Support Files/Pods-App/Pods-App-umbrella.h`
+[2026-10-16 15:55:00.255443] [STDOUT] stdout:       - Generating dummy source at `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Target Support Files/Pods-App/Pods-App-dummy.m`
+[2026-10-16 15:55:00.255453] [STDOUT] stdout:   - Stabilizing target UUIDs
+[2026-10-16 15:55:00.255462] [STDOUT] stdout:   - Running post install hooks
+[2026-10-16 15:55:00.255472] [STDOUT] stdout:   - Writing Xcode project file to `../CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Pods.xcodeproj`
+[2026-10-16 15:55:00.255501] [STDOUT] stdout:   Cleaning up sandbox directory
+[2026-10-16 15:55:00.255511] [STDOUT] stdout: 
+[2026-10-16 15:55:00.255521] [STDOUT] stdout: Integrating client project
+[2026-10-16 15:55:00.255533] [STDOUT] stdout: 
+[2026-10-16 15:55:00.255543] [STDOUT] stdout: [!] Please close any current Xcode sessions and use `App.xcworkspace` for this project from now on.
+[2026-10-16 15:55:00.255553] [STDOUT] stdout: 
+[2026-10-16 15:55:00.255562] [STDOUT] stdout: Integrating target `Pods-App` (`../../../../../../../var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/App.xcodeproj` project)
+[2026-10-16 15:55:00.255571] [STDOUT] stdout:   Adding Build Phase '[CP] Embed Pods Frameworks' to project.
+[2026-10-16 15:55:00.255581] [STDOUT] stdout:   Adding Build Phase '[CP] Check Pods Manifest.lock' to project.
+[2026-10-16 15:55:00.255591] [STDOUT] stdout:   - Running post integrate hooks
+[2026-10-16 15:55:00.255600] [STDOUT] stdout: 
+[2026-10-16 15:55:00.255610] [STDOUT] stdout: -> Pod installation complete! There is 1 dependency from the Podfile and 2 total pods installed.
+[2026-10-16 15:55:00.255620] [STDOUT] stdout:   Building with `xcodebuild`.
+[2026-10-16 15:55:00.255630] [STDOUT] stdout:     $ /usr/bin/xcodebuild clean build -workspace /var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/App.xcworkspace -scheme App -configuration Release CODE_SIGN_IDENTITY=
+[2026-10-16 15:55:01.180486] [STDOUT] stderr:     --- xcodebuild: WARNING: Using the first of multiple matching destinations:
+[2026-10-16 15:55:01.180547] [STDOUT] stderr:     { platform:macOS, arch:arm64, id:00006022-000868640E90A01E, name:My Mac }
+[2026-10-16 15:55:01.180563] [STDOUT] stderr:     { platform:macOS, arch:x86_64, id:00006022-000868640E90A01E, name:My Mac }
+[2026-10-16 15:55:01.180577] [STDOUT] stderr:     { platform:macOS, name:Any Mac }
+[2026-10-16 15:55:01.823381] [STDOUT] stderr:     --- xcodebuild: WARNING: Using the first of multiple matching destinations:
+[2026-10-16 15:55:01.823456] [STDOUT] stderr:     { platform:macOS, arch:arm64, id:00006022-000868640E90A01E, name:My Mac }
+[2026-10-16 15:55:01.823474] [STDOUT] stderr:     { platform:macOS, arch:x86_64, id:00006022-000868640E90A01E, name:My Mac }
+[2026-10-16 15:55:01.823486] [STDOUT] stderr:     { platform:macOS, name:Any Mac }
+[2026-10-16 15:55:02.283175] [STDOUT] stderr:     ** BUILD FAILED **
+[2026-10-16 15:55:02.283235] [STDOUT] stderr:     
+[2026-10-16 15:55:02.283251] [STDOUT] stderr:     
+[2026-10-16 15:55:02.283262] [STDOUT] stderr:     The following build commands failed:
+[2026-10-16 15:55:02.283278] [STDOUT] stderr:     	Building workspace App with scheme App and configuration Release
+[2026-10-16 15:55:02.283290] [STDOUT] stderr:     (1 failure)
+[2026-10-16 15:55:02.325765] [STDOUT] stdout:     Command line invocation:
+[2026-10-16 15:55:02.325817] [STDOUT] stdout:         /Applications/Xcode-beta-27.2.app/Contents/Developer/usr/bin/xcodebuild clean build -workspace /var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/App.xcworkspace -scheme App -configuration Release CODE_SIGN_IDENTITY=
+[2026-10-16 15:55:02.325834] [STDOUT] stdout:     
+[2026-10-16 15:55:02.325845] [STDOUT] stdout:     Build settings from command line:
+[2026-10-16 15:55:02.325856] [STDOUT] stdout:         CODE_SIGN_IDENTITY = 
+[2026-10-16 15:55:02.325890] [STDOUT] stdout:     
+[2026-10-16 15:55:02.325904] [STDOUT] stdout:     note: Using codesigning identity override: 
+[2026-10-16 15:55:02.325915] [STDOUT] stdout:     CreateBuildRequest
+[2026-10-16 15:55:02.325924] [STDOUT] stdout:     
+[2026-10-16 15:55:02.325935] [STDOUT] stdout:     SendProjectDescription
+[2026-10-16 15:55:02.325945] [STDOUT] stdout:     
+[2026-10-16 15:55:02.325954] [STDOUT] stdout:     CreateBuildOperation
+[2026-10-16 15:55:02.325964] [STDOUT] stdout:     
+[2026-10-16 15:55:02.325974] [STDOUT] stdout:     ** CLEAN SUCCEEDED **
+[2026-10-16 15:55:02.325984] [STDOUT] stdout:     
+[2026-10-16 15:55:02.325994] [STDOUT] stdout:     note: Using codesigning identity override: 
+[2026-10-16 15:55:02.326003] [STDOUT] stdout:     ComputePackagePrebuildTargetDependencyGraph
+[2026-10-16 15:55:02.326025] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326038] [STDOUT] stdout:     Prepare packages
+[2026-10-16 15:55:02.326048] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326057] [STDOUT] stdout:     CreateBuildRequest
+[2026-10-16 15:55:02.326067] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326076] [STDOUT] stdout:     SendProjectDescription
+[2026-10-16 15:55:02.326086] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326213] [STDOUT] stdout:     CreateBuildOperation
+[2026-10-16 15:55:02.326226] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326237] [STDOUT] stdout:     ComputeTargetDependencyGraph
+[2026-10-16 15:55:02.326247] [STDOUT] stdout:     note: Building targets in dependency order
+[2026-10-16 15:55:02.326257] [STDOUT] stdout:     note: Target dependency graph (4 targets)
+[2026-10-16 15:55:02.326267] [STDOUT] stdout:         Target 'App' in project 'App'
+[2026-10-16 15:55:02.326276] [STDOUT] stdout:             ➜ Implicit dependency on target 'Pods-App' in project 'Pods' via file 'Pods_App.framework' in build phase 'Link Binary'
+[2026-10-16 15:55:02.326290] [STDOUT] stdout:             ➜ Implicit dependency on target 'integration_test_macos' in project 'Pods' via options '-framework integration_test_macos' in build setting 'OTHER_LDFLAGS'
+[2026-10-16 15:55:02.326301] [STDOUT] stdout:         Target 'Pods-App' in project 'Pods'
+[2026-10-16 15:55:02.326310] [STDOUT] stdout:             ➜ Explicit dependency on target 'FlutterMacOS' in project 'Pods'
+[2026-10-16 15:55:02.326320] [STDOUT] stdout:             ➜ Explicit dependency on target 'integration_test_macos' in project 'Pods'
+[2026-10-16 15:55:02.326330] [STDOUT] stdout:         Target 'integration_test_macos' in project 'Pods'
+[2026-10-16 15:55:02.326340] [STDOUT] stdout:             ➜ Explicit dependency on target 'FlutterMacOS' in project 'Pods'
+[2026-10-16 15:55:02.326350] [STDOUT] stdout:         Target 'FlutterMacOS' in project 'Pods' (no dependencies)
+[2026-10-16 15:55:02.326360] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326370] [STDOUT] stdout:     GatherProvisioningInputs
+[2026-10-16 15:55:02.326379] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326389] [STDOUT] stdout:     CreateBuildDescription
+[2026-10-16 15:55:02.326398] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326408] [STDOUT] stdout:     ExecuteExternalTool /Applications/Xcode-beta-27.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode-beta-27.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.2.sdk -x c -c /dev/null
+[2026-10-16 15:55:02.326419] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326429] [STDOUT] stdout:     ExecuteExternalTool /Applications/Xcode-beta-27.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+[2026-10-16 15:55:02.326438] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326450] [STDOUT] stdout:     ExecuteExternalTool /Applications/Xcode-beta-27.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode-beta-27.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.2.sdk -x c -c /dev/null
+[2026-10-16 15:55:02.326462] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326472] [STDOUT] stdout:     ExecuteExternalTool /Applications/Xcode-beta-27.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode-beta-27.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.2.sdk -x objective-c -c /dev/null
+[2026-10-16 15:55:02.326482] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326492] [STDOUT] stdout:     ExecuteExternalTool /Applications/Xcode-beta-27.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -V
+[2026-10-16 15:55:02.326502] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326528] [STDOUT] stdout:     ExecuteExternalTool /Applications/Xcode-beta-27.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch x86_64 -isysroot /Applications/Xcode-beta-27.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.2.sdk -x c -c /dev/null
+[2026-10-16 15:55:02.326546] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326558] [STDOUT] stdout:     ExecuteExternalTool /Applications/Xcode-beta-27.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch x86_64 -isysroot /Applications/Xcode-beta-27.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.2.sdk -x objective-c -c /dev/null
+[2026-10-16 15:55:02.326568] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326578] [STDOUT] stdout:     ExecuteExternalTool /Applications/Xcode-beta-27.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+[2026-10-16 15:55:02.326588] [STDOUT] stdout:     
+[2026-10-16 15:55:02.326597] [STDOUT] stdout:     Build description signature: ccdcd2df41904a54c3a7e7819b820b54
+[2026-10-16 15:55:02.326608] [STDOUT] stdout:     Build description path: /Users/vashworth/Library/Developer/Xcode/DerivedData/App-gumzjjfugqwxjsgjgbkelyxhsjod/Build/Intermediates.noindex/XCBuildData/ccdcd2df41904a54c3a7e7819b820b54.xcbuilddata
+[2026-10-16 15:55:02.326621] [STDOUT] stdout:     /var/folders/xw/ky8z400d5ys67zy99pr42lyw011smf/T/CocoaPods-Lint-20261016-69224-6gzy3i-integration_test_macos/Pods/Pods.xcodeproj: error: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.14, but the range of supported deployment target versions is 12.0 to 27.2.x. (in target 'FlutterMacOS' from project 'Pods')
+[2026-10-16 15:55:02.326638] [STDOUT] stdout:   Testing with `xcodebuild`.
+[2026-10-16 15:55:02.326648] [STDOUT] stdout:  -> integration_test_macos (0.0.1)
+[2026-10-16 15:55:02.326657] [STDOUT] stdout:     - ERROR | [OSX] xcodebuild: Returned an unsuccessful exit code.
+[2026-10-16 15:55:02.326666] [STDOUT] stdout:     - NOTE  | xcodebuild:  note: Using codesigning identity override: 
+[2026-10-16 15:55:02.326676] [STDOUT] stdout:     - NOTE  | [OSX] xcodebuild:  note: Building targets in dependency order
+[2026-10-16 15:55:02.326685] [STDOUT] stdout:     - NOTE  | [OSX] xcodebuild:  note: Target dependency graph (4 targets)
+[2026-10-16 15:55:02.326696] [STDOUT] stdout:     - NOTE  | [OSX] xcodebuild:  Pods.xcodeproj: error: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.14, but the range of supported deployment target versions is 12.0 to 27.2.x. (in target 'FlutterMacOS' from project 'Pods')
+[2026-10-16 15:55:02.326730] [STDOUT] stdout: 
+[2026-10-16 15:55:02.326750] [STDOUT] stdout: [!] integration_test_macos did not pass validation, due to 1 error.
+[2026-10-16 15:55:02.326761] [STDOUT] stdout: You can use the `--no-clean` option to inspect any issue.
+[2026-10-16 15:55:02.326773] [STDOUT] stdout: 
+[2026-10-16 15:55:02.326785] [STDOUT] stdout: /Library/Ruby/Gems/2.6.0/gems/cocoapods-1.16.2/lib/cocoapods/command/lib/lint.rb:116:in `block in run'
+[2026-10-16 15:55:02.326797] [STDOUT] stdout: /Library/Ruby/Gems/2.6.0/gems/cocoapods-1.16.2/lib/cocoapods/command/lib/lint.rb:77:in `each'
+[2026-10-16 15:55:02.326809] [STDOUT] stdout: /Library/Ruby/Gems/2.6.0/gems/cocoapods-1.16.2/lib/cocoapods/command/lib/lint.rb:77:in `run'
+[2026-10-16 15:55:02.326818] [STDOUT] stdout: /Library/Ruby/Gems/2.6.0/gems/claide-1.1.0/lib/claide/command.rb:334:in `run'
+[2026-10-16 15:55:02.326828] [STDOUT] stdout: /Library/Ruby/Gems/2.6.0/gems/cocoapods-1.16.2/lib/cocoapods/command.rb:52:in `run'
+[2026-10-16 15:55:02.326838] [STDOUT] stdout: /Library/Ruby/Gems/2.6.0/gems/cocoapods-1.16.2/bin/pod:55:in `<top (required)>'
+[2026-10-16 15:55:02.326847] [STDOUT] stdout: /usr/local/bin/pod:23:in `load'
+[2026-10-16 15:55:02.326856] [STDOUT] stdout: /usr/local/bin/pod:23:in `<main>'
+[2026-10-16 15:55:02.330539] [STDOUT] Task exception stack trace:
+[2026-10-16 15:55:02.330570] [STDOUT] #0      fail (package:flutter_devicelab/framework/utils.dart:111:3)
+[2026-10-16 15:55:02.330590] [STDOUT] #1      _execute (package:flutter_devicelab/framework/utils.dart:395:5)
+[2026-10-16 15:55:02.330602] [STDOUT] <asynchronous suspension>
+[2026-10-16 15:55:02.330614] [STDOUT] #2      eval (package:flutter_devicelab/framework/utils.dart:462:3)
+[2026-10-16 15:55:02.330633] [STDOUT] <asynchronous suspension>
+[2026-10-16 15:55:02.330646] [STDOUT] #3      _tryMacOSLint (file:///Users/vashworth/Development/flutter/dev/devicelab/bin/tasks/plugin_lint_mac.dart:362:3)
+[2026-10-16 15:55:02.330657] [STDOUT] <asynchronous suspension>
+[2026-10-16 15:55:02.330667] [STDOUT] #4      main.<anonymous closure>.<anonymous closure> (file:///Users/vashworth/Development/flutter/dev/devicelab/bin/tasks/plugin_lint_mac.dart:113:9)
+[2026-10-16 15:55:02.330677] [STDOUT] <asynchronous suspension>
+[2026-10-16 15:55:02.330686] [STDOUT] #5      inDirectory (package:flutter_devicelab/framework/utils.dart:703:12)
+[2026-10-16 15:55:02.330732] [STDOUT] <asynchronous suspension>
+[2026-10-16 15:55:02.330749] [STDOUT] #6      main.<anonymous closure> (file:///Users/vashworth/Development/flutter/dev/devicelab/bin/tasks/plugin_lint_mac.dart:79:7)
+[2026-10-16 15:55:02.330759] [STDOUT] <asynchronous suspension>
+[2026-10-16 15:55:02.330769] [STDOUT] #7      _TaskRunner._performTask.<anonymous closure> (package:flutter_devicelab/framework/framework.dart:308:28)
+[2026-10-16 15:55:02.330778] [STDOUT] <asynchronous suspension>
+[2026-10-16 15:55:02.330787] [STDOUT] 
+[2026-10-16 15:55:02.331523] [STDOUT] Checking for reboot
+[2026-10-16 15:55:02.331825] [STDOUT] Executing "/Users/vashworth/Library/Android/sdk/platform-tools/adb devices -l" in "/Users/vashworth/Development/flutter/dev/devicelab" with environment {ANDROID_NDK_PATH: /Users/vashworth/Library/Android/sdk/ndk/28.2.13676358, BOT: true, LANG: en_US.UTF-8}
+[2026-10-16 15:55:02.350925] [STDOUT] stdout: List of devices attached
+[2026-10-16 15:55:02.350977] [STDOUT] stdout: 
+[plugin_lint_mac] Process terminated with exit code 0.
+Task result:
+{
+  "success": false,
+  "reason": "Executable \"pod\" failed with exit code 1."
+}
+
+
+══════════════════╡ ••• Finished task "plugin_lint_mac" ••• ╞═══════════════════
+
+
+
+═════════════════╡ ••• Flaky status for "plugin_lint_mac" ••• ╞═════════════════
+
+Consistently failed across all 1 executions.
+flaky: false

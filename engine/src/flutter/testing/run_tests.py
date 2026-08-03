@@ -569,7 +569,7 @@ def run_cc_tests(
     extra_env = metal_validation_env()
     extra_env.update(vulkan_validation_env(build_dir))
     mac_impeller_unittests_flags = repeat_flags + [
-        '--gtest_filter=-*OpenGLES',  # These are covered in the golden tests.
+        '--gtest_filter=-*OpenGLES:*OpenGLESSDF',  # These are covered in the golden tests.
         '--',
         '--enable_vulkan_validation',
     ]

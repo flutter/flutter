@@ -1,0 +1,1972 @@
+
+Running command "/Volumes/Work/s/w/ir/cache/builder/engine/src/out/ci/host_profile_arm64_tests/flutter_desktop_darwin_unittests --gtest_repeat=2 --gtest_shuffle" in "/Volumes/Work/s/w/ir/cache/builder/engine/src"
+[INFO:flutter/testing/test_timeout_listener.cc(75)] Test timeout of 300 seconds per test case will be enforced.
+
+Repeating all tests (iteration 1) . . .
+
+Note: Randomizing tests' orders with a seed of 40556 .
+[==========] Running 235 tests from 26 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from AccessibilityBridgeMacWindowTest
+[ RUN      ] AccessibilityBridgeMacWindowTest.NonZeroRootNodeId
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacWindowTest.NonZeroRootNodeId (94 ms)
+[ RUN      ] AccessibilityBridgeMacWindowTest.SendsAccessibilityCreateNotificationFlutterViewWindow
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacWindowTest.SendsAccessibilityCreateNotificationFlutterViewWindow (1 ms)
+[----------] 2 tests from AccessibilityBridgeMacWindowTest (96 ms total)
+
+[----------] 7 tests from FlutterViewControllerTest
+[ RUN      ] FlutterViewControllerTest.FlutterViewAcceptsFirstMouse
+[       OK ] FlutterViewControllerTest.FlutterViewAcceptsFirstMouse (13 ms)
+[ RUN      ] FlutterViewControllerTest.testLookupKeyAssetsWithPackage
+[       OK ] FlutterViewControllerTest.testLookupKeyAssetsWithPackage (100 ms)
+[ RUN      ] FlutterViewControllerTest.CanSetMouseTrackingModeBeforeViewLoaded
+[       OK ] FlutterViewControllerTest.CanSetMouseTrackingModeBeforeViewLoaded (0 ms)
+[ RUN      ] FlutterViewControllerTest.testLookupKeyAssets
+[       OK ] FlutterViewControllerTest.testLookupKeyAssets (0 ms)
+[ RUN      ] FlutterViewControllerTest.testViewControllerIsReleased
+[       OK ] FlutterViewControllerTest.testViewControllerIsReleased (1 ms)
+[ RUN      ] FlutterViewControllerTest.HasViewThatHidesOtherViewsInAccessibility
+[       OK ] FlutterViewControllerTest.HasViewThatHidesOtherViewsInAccessibility (12 ms)
+[ RUN      ] FlutterViewControllerTest.ReparentsPluginWhenAccessibilityDisabled
+[       OK ] FlutterViewControllerTest.ReparentsPluginWhenAccessibilityDisabled (6 ms)
+[----------] 7 tests from FlutterViewControllerTest (135 ms total)
+
+[----------] 1 test from FlutterTextInputSemanticsObjectTest
+[ RUN      ] FlutterTextInputSemanticsObjectTest.DoesInitialize
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterTextInputSemanticsObjectTest.DoesInitialize (151 ms)
+[----------] 1 test from FlutterTextInputSemanticsObjectTest (151 ms total)
+
+[----------] 14 tests from FlutterEmbedderKeyResponderUnittests
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.MultipleCharacters
+[       OK ] FlutterEmbedderKeyResponderUnittests.MultipleCharacters (1 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ConvertAbruptRepeatEventsToDown
+[       OK ] FlutterEmbedderKeyResponderUnittests.ConvertAbruptRepeatEventsToDown (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.BasicKeyEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.BasicKeyEvent (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ConvertCapsLockEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.ConvertCapsLockEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.IgnoreDuplicateUpEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.IgnoreDuplicateUpEvent (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ToggleModifiersDuringKeyTap
+[       OK ] FlutterEmbedderKeyResponderUnittests.ToggleModifiersDuringKeyTap (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SpecialModiferFlags
+[       OK ] FlutterEmbedderKeyResponderUnittests.SpecialModiferFlags (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.IdentifyLeftAndRightModifiers
+[       OK ] FlutterEmbedderKeyResponderUnittests.IdentifyLeftAndRightModifiers (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.NonAsciiCharacters
+[       OK ] FlutterEmbedderKeyResponderUnittests.NonAsciiCharacters (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEventsInNormalEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEventsInNormalEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnCapsLock
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnCapsLock (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnNormalKey
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnNormalKey (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeForDuplicateDownEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeForDuplicateDownEvent (0 ms)
+[----------] 14 tests from FlutterEmbedderKeyResponderUnittests (2 ms total)
+
+[----------] 2 tests from AccessibilityBridgeMacTest
+[ RUN      ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenHeadless
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenHeadless (1 ms)
+[ RUN      ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenNoWindow
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenNoWindow (0 ms)
+[----------] 2 tests from AccessibilityBridgeMacTest (2 ms total)
+
+[----------] 2 tests from FlutterWindowControllerSizeTest
+[ RUN      ] FlutterWindowControllerSizeTest.SizedToContentNotResizable
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49872/2rd48pIDung=/
+[       OK ] FlutterWindowControllerSizeTest.SizedToContentNotResizable (102 ms)
+[ RUN      ] FlutterWindowControllerSizeTest.SizedToContentResizable
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49873/Sv-WQ-bq8wU=/
+[       OK ] FlutterWindowControllerSizeTest.SizedToContentResizable (54 ms)
+[----------] 2 tests from FlutterWindowControllerSizeTest (157 ms total)
+
+[----------] 7 tests from FlutterPlatformNodeDelegateMac
+[ RUN      ] FlutterPlatformNodeDelegateMac.Basics
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.Basics (0 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.ChangingFlagsUpdatesNativeViewAccessible
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.ChangingFlagsUpdatesNativeViewAccessible (1 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.SelectableTextWithoutSelectionReturnZeroRange
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.SelectableTextWithoutSelectionReturnZeroRange (0 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.TextFieldUsesFlutterTextField
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.TextFieldUsesFlutterTextField (38 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.CanPerformAction
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.CanPerformAction (2 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.DisabledTextFieldDoesNotUseFlutterTextField
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.DisabledTextFieldDoesNotUseFlutterTextField (0 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.SelectableTextHasCorrectSemantics
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.SelectableTextHasCorrectSemantics (0 ms)
+[----------] 7 tests from FlutterPlatformNodeDelegateMac (44 ms total)
+
+[----------] 10 tests from FlutterWindowControllerTest
+[ RUN      ] FlutterWindowControllerTest.CreateTooltipWindow
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49874/4gU7q_wNppU=/
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.CreateTooltipWindow (140 ms)
+[ RUN      ] FlutterWindowControllerTest.ViewMetricsRespectPositionCallbackConstraints
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49875/yZm55puVVG0=/
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.ViewMetricsRespectPositionCallbackConstraints (424 ms)
+[ RUN      ] FlutterWindowControllerTest.DestroyRegularWindow
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49876/rXa0zlxnQsE=/
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.DestroyRegularWindow (166 ms)
+[ RUN      ] FlutterWindowControllerTest.GetOffsetInParent
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49877/UqpoG6OzeqA=/
+[       OK ] FlutterWindowControllerTest.GetOffsetInParent (243 ms)
+[ RUN      ] FlutterWindowControllerTest.FixMoveRunLoopMode
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49878/32Otqy2ZK48=/
+Communicating on a dead channel.
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.FixMoveRunLoopMode (315 ms)
+[ RUN      ] FlutterWindowControllerTest.InternalFlutterWindowGetHandle
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49879/06gJ7o8QRfo=/
+[       OK ] FlutterWindowControllerTest.InternalFlutterWindowGetHandle (261 ms)
+[ RUN      ] FlutterWindowControllerTest.WindowStates
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49880/b2IL3Cal684=/
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.WindowStates (2071 ms)
+[ RUN      ] FlutterWindowControllerTest.CreateRegularWindow
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49881/rhv_Ej1oczA=/
+[       OK ] FlutterWindowControllerTest.CreateRegularWindow (306 ms)
+[ RUN      ] FlutterWindowControllerTest.CreatePopupWindow
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49882/QUmgcG2yRvE=/
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.CreatePopupWindow (320 ms)
+[ RUN      ] FlutterWindowControllerTest.ClosesAllWindowsOnEngineRestart
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49883/z_bKWKhvySw=/
+[       OK ] FlutterWindowControllerTest.ClosesAllWindowsOnEngineRestart (204 ms)
+[----------] 10 tests from FlutterWindowControllerTest (4454 ms total)
+
+[----------] 3 tests from FlutterVSyncWaiterTest
+[ RUN      ] FlutterVSyncWaiterTest.VSyncWorks
+Communicating on a dead channel.
+[       OK ] FlutterVSyncWaiterTest.VSyncWorks (273 ms)
+[ RUN      ] FlutterVSyncWaiterTest.RequestsInitialVSync
+[       OK ] FlutterVSyncWaiterTest.RequestsInitialVSync (0 ms)
+[ RUN      ] FlutterVSyncWaiterTest.FirstVSyncIsSynthesized
+Communicating on a dead channel.
+[       OK ] FlutterVSyncWaiterTest.FirstVSyncIsSynthesized (241 ms)
+[----------] 3 tests from FlutterVSyncWaiterTest (515 ms total)
+
+[----------] 10 tests from FlutterPlatformViewController
+[ RUN      ] FlutterPlatformViewController.TestReset
+[       OK ] FlutterPlatformViewController.TestReset (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestAcceptGesture
+[       OK ] FlutterPlatformViewController.TestAcceptGesture (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreatePlatformViewInvalidViewType
+[       OK ] FlutterPlatformViewController.TestCreatePlatformViewInvalidViewType (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestDisposeOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestDisposeOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRejectGestureOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestRejectGestureOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestAcceptGestureOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestAcceptGestureOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreateAndDispose
+[       OK ] FlutterPlatformViewController.TestCreateAndDispose (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreatePlatformViewNoMatchingViewType
+[       OK ] FlutterPlatformViewController.TestCreatePlatformViewNoMatchingViewType (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRegisterPlatformViewFactoryAndCreate
+[       OK ] FlutterPlatformViewController.TestRegisterPlatformViewFactoryAndCreate (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRejectGesture
+[       OK ] FlutterPlatformViewController.TestRejectGesture (0 ms)
+[----------] 10 tests from FlutterPlatformViewController (2 ms total)
+
+[----------] 1 test from FlutterMenuPluginTest
+[ RUN      ] FlutterMenuPluginTest.TestSetMenu
+[       OK ] FlutterMenuPluginTest.TestSetMenu (15 ms)
+[----------] 1 test from FlutterMenuPluginTest (15 ms total)
+
+[----------] 41 tests from FlutterTextInputPluginTest
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenAutofillNotSet
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenAutofillNotSet (5 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestEmptyCompositionRange
+[       OK ] FlutterTextInputPluginTest.TestEmptyCompositionRange (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestPerformKeyEquivalent
+[       OK ] FlutterTextInputPluginTest.TestPerformKeyEquivalent (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.IsAddedAndRemovedFromViewHierarchy
+[       OK ] FlutterTextInputPluginTest.IsAddedAndRemovedFromViewHierarchy (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.FirstResponderIsCorrect
+[       OK ] FlutterTextInputPluginTest.FirstResponderIsCorrect (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteEnabledWhenAutofillSet
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteEnabledWhenAutofillSet (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetMarkedTextWithSelectionChange
+[       OK ] FlutterTextInputPluginTest.TestSetMarkedTextWithSelectionChange (3 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenObscureTextSet
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenObscureTextSet (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetEditingStateWithTextEditingDelta
+[       OK ] FlutterTextInputPluginTest.TestSetEditingStateWithTextEditingDelta (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.InsertTextWithCollapsedSelectionInsideComposing
+[       OK ] FlutterTextInputPluginTest.InsertTextWithCollapsedSelectionInsideComposing (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.InsertTextWithReversedReplacementRange
+[       OK ] FlutterTextInputPluginTest.InsertTextWithReversedReplacementRange (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestComposingRegionRemovedByFramework
+[       OK ] FlutterTextInputPluginTest.TestComposingRegionRemovedByFramework (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestComposingWithDelta
+[       OK ] FlutterTextInputPluginTest.TestComposingWithDelta (5 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetMarkedTextWithOutOfBoundsRanges
+[       OK ] FlutterTextInputPluginTest.TestSetMarkedTextWithOutOfBoundsRanges (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.HasZeroSizeAndClipsToBounds
+[       OK ] FlutterTextInputPluginTest.HasZeroSizeAndClipsToBounds (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeWithEsotericAffineTransform
+[       OK ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeWithEsotericAffineTransform (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.UnhandledKeyEquivalent
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:20.266 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+[       OK ] FlutterTextInputPluginTest.UnhandledKeyEquivalent (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestLocalTextAndSelectionUpdateAfterDelta
+[       OK ] FlutterTextInputPluginTest.TestLocalTextAndSelectionUpdateAfterDelta (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetEditingStateWithOutOfBoundsSelection
+[       OK ] FlutterTextInputPluginTest.TestSetEditingStateWithOutOfBoundsSelection (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.WorksWithoutViewId
+[       OK ] FlutterTextInputPluginTest.WorksWithoutViewId (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSelectorsNotForwardedToFrameworkIfNoClient
+[       OK ] FlutterTextInputPluginTest.TestSelectorsNotForwardedToFrameworkIfNoClient (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSelectorsAreForwardedToFramework
+[       OK ] FlutterTextInputPluginTest.TestSelectorsAreForwardedToFramework (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeAtInfinity
+[       OK ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeAtInfinity (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.CanNotBecomeResponderIfNoViewController
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterTextInputPluginTest.CanNotBecomeResponderIfNoViewController (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAttributedSubstringOutOfRange
+[       OK ] FlutterTextInputPluginTest.TestAttributedSubstringOutOfRange (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.WillUseParentControllerIfCanNotBecomeKey
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49884/6lQsH8bd-ds=/
+[       OK ] FlutterTextInputPluginTest.WillUseParentControllerIfCanNotBecomeKey (21 ms)
+[ RUN      ] FlutterTextInputPluginTest.HandleArrowKeyWhenImePopoverIsActive
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:20.311 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+[       OK ] FlutterTextInputPluginTest.HandleArrowKeyWhenImePopoverIsActive (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetMarkedTextWithReplacementRange
+[       OK ] FlutterTextInputPluginTest.TestSetMarkedTextWithReplacementRange (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetMarkedTextWithSelectedRangeNotFound
+[       OK ] FlutterTextInputPluginTest.TestSetMarkedTextWithSelectedRangeNotFound (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestComposingWithDeltasWhenSelectionIsActive
+[       OK ] FlutterTextInputPluginTest.TestComposingWithDeltasWhenSelectionIsActive (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestInsertNewLine
+[       OK ] FlutterTextInputPluginTest.TestInsertNewLine (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.InsertTextHandlesEmptyAttributedString
+[       OK ] FlutterTextInputPluginTest.InsertTextHandlesEmptyAttributedString (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenAutofillGroupIncludesPassword
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenAutofillGroupIncludesPassword (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestOperationsThatTriggerDelta
+[       OK ] FlutterTextInputPluginTest.TestOperationsThatTriggerDelta (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSendActionDoNotInsertNewLine
+2026-10-12 13:28:20.323 flutter_desktop_darwin_unittests[29041:181533] ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPluginTest.mm:2064 OCProtocolMockObject(FlutterBinaryMessenger): Method `sendOnChannel:@"flutter/textinput" message:<OCMBlockConstraint: 0x969e750b0>` was not invoked; but was expected at least once.
+[       OK ] FlutterTextInputPluginTest.TestSendActionDoNotInsertNewLine (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.InsertTextHandlesNSAttributedString
+[       OK ] FlutterTextInputPluginTest.InsertTextHandlesNSAttributedString (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenPasswordAutofillSet
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenPasswordAutofillSet (0 ms)
+[ RUN      ] FlutterTextInputPluginTest.CanWorkWithFlutterTextField
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterTextInputPluginTest.CanWorkWithFlutterTextField (108 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestClearClientDuringComposing
+[       OK ] FlutterTextInputPluginTest.TestClearClientDuringComposing (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestFirstRectForCharacterRange
+[       OK ] FlutterTextInputPluginTest.TestFirstRectForCharacterRange (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteEnabledWhenAutofillSetNoHint
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteEnabledWhenAutofillSetNoHint (1 ms)
+[----------] 41 tests from FlutterTextInputPluginTest (227 ms total)
+
+[----------] 19 tests from FlutterSurfaceManager
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchFromStandardToWideGamut
+[       OK ] FlutterSurfaceManager.DynamicSwitchFromStandardToWideGamut (1 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.StandardGamutSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectColorSpace
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectColorSpace (0 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchNoOpWhenSameValue
+[       OK ] FlutterSurfaceManager.DynamicSwitchNoOpWhenSameValue (0 ms)
+[ RUN      ] FlutterSurfaceManager.SurfacesAreRecycled
+[       OK ] FlutterSurfaceManager.SurfacesAreRecycled (0 ms)
+[ RUN      ] FlutterSurfaceManager.BackBufferCacheDoesNotLeak
+[       OK ] FlutterSurfaceManager.BackBufferCacheDoesNotLeak (1 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectColorSpace
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectColorSpace (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.LayerManagement
+[       OK ] FlutterSurfaceManager.LayerManagement (0 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectBytesPerElement
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectBytesPerElement (0 ms)
+[ RUN      ] FlutterSurfaceManager.SurfaceCacheDoesNotMixGamutModes
+[       OK ] FlutterSurfaceManager.SurfaceCacheDoesNotMixGamutModes (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectBytesPerElement
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectBytesPerElement (0 ms)
+[ RUN      ] FlutterSurfaceManager.MetalTextureSizeMatchesSurfaceSize
+[       OK ] FlutterSurfaceManager.MetalTextureSizeMatchesSurfaceSize (0 ms)
+[ RUN      ] FlutterSurfaceManager.TestSurfaceLookupFromTexture
+[       OK ] FlutterSurfaceManager.TestSurfaceLookupFromTexture (0 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchFromWideToStandardGamut
+[       OK ] FlutterSurfaceManager.DynamicSwitchFromWideToStandardGamut (0 ms)
+[ RUN      ] FlutterSurfaceManager.BackingStoreCacheSurfaceStuckInUse
+[       OK ] FlutterSurfaceManager.BackingStoreCacheSurfaceStuckInUse (1 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.WideGamutSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutLayerWorksWithoutExplicitContentsFormat
+[       OK ] FlutterSurfaceManager.WideGamutLayerWorksWithoutExplicitContentsFormat (0 ms)
+[----------] 19 tests from FlutterSurfaceManager (10 ms total)
+
+[----------] 4 tests from FlutterDisplayLinkTest
+[ RUN      ] FlutterDisplayLinkTest.ViewAddedToWindowFirst
+[       OK ] FlutterDisplayLinkTest.ViewAddedToWindowFirst (28 ms)
+[ RUN      ] FlutterDisplayLinkTest.ViewRemovedFromWindow
+[       OK ] FlutterDisplayLinkTest.ViewRemovedFromWindow (245 ms)
+[ RUN      ] FlutterDisplayLinkTest.CVDisplayLinkInterval
+2026-10-12 13:28:20.911 flutter_desktop_darwin_unittests[29041:181533] CVDisplayLink Interval: Average: 0.016667s, Max: 0.016682s, Min: 0.016635s
+[       OK ] FlutterDisplayLinkTest.CVDisplayLinkInterval (188 ms)
+[ RUN      ] FlutterDisplayLinkTest.ViewAddedToWindowLater
+[       OK ] FlutterDisplayLinkTest.ViewAddedToWindowLater (33 ms)
+[----------] 4 tests from FlutterDisplayLinkTest (495 ms total)
+
+[----------] 10 tests from FlutterEmbedderExternalTextureTest
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTexture
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTexture (22 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestTextureResolutionImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestTextureResolutionImpeller (10 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTexture
+2026-10-12 13:28:20.978 flutter_desktop_darwin_unittests[29041:181533] Unsupported pixel format: 1714696752
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTexture (2 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVAImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVAImpeller (9 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2 (5 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2Impeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2Impeller (7 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureImpeller (6 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTextureImpeller
+2026-10-12 13:28:21.014 flutter_desktop_darwin_unittests[29041:181533] Unsupported pixel format: 1714696752
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTextureImpeller (5 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestTextureResolution
+[       OK ] FlutterEmbedderExternalTextureTest.TestTextureResolution (2 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA (7 ms)
+[----------] 10 tests from FlutterEmbedderExternalTextureTest (80 ms total)
+
+[----------] 3 tests from FlutterView
+[ RUN      ] FlutterView.CursorUpdateDoesHitTest
+[       OK ] FlutterView.CursorUpdateDoesHitTest (2 ms)
+[ RUN      ] FlutterView.ShouldInheritContentsScaleReturnsYes
+[       OK ] FlutterView.ShouldInheritContentsScaleReturnsYes (0 ms)
+[ RUN      ] FlutterView.CursorUpdateDoesNotOverridePlatformView
+[       OK ] FlutterView.CursorUpdateDoesNotOverridePlatformView (1 ms)
+[----------] 3 tests from FlutterView (4 ms total)
+
+[----------] 3 tests from FlutterChannelKeyResponderTest
+[ RUN      ] FlutterChannelKeyResponderTest.FollowsLayoutMap
+[       OK ] FlutterChannelKeyResponderTest.FollowsLayoutMap (0 ms)
+[ RUN      ] FlutterChannelKeyResponderTest.BasicKeyEvent
+[       OK ] FlutterChannelKeyResponderTest.BasicKeyEvent (0 ms)
+[ RUN      ] FlutterChannelKeyResponderTest.EmptyResponseIsTakenAsHandled
+[       OK ] FlutterChannelKeyResponderTest.EmptyResponseIsTakenAsHandled (0 ms)
+[----------] 3 tests from FlutterChannelKeyResponderTest (0 ms total)
+
+[----------] 1 test from FlutterWindowControllerRetainTest
+[ RUN      ] FlutterWindowControllerRetainTest.WindowControllerDoesNotRetainEngine
+2026-10-12 13:28:21.029 flutter_desktop_darwin_unittests[29041:181533] Fixtures path: /Volumes/Work/s/w/ir/cache/builder/engine/src/out/ci/host_profile_arm64_tests/gen/flutter/shell/platform/darwin/macos/assets
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerRetainTest.WindowControllerDoesNotRetainEngine (2277 ms)
+[----------] 1 test from FlutterWindowControllerRetainTest (2277 ms total)
+
+[----------] 1 test from FlutterViewEngineProviderUnittests
+[ RUN      ] FlutterViewEngineProviderUnittests.GetViewReturnsTheCorrectView
+[       OK ] FlutterViewEngineProviderUnittests.GetViewReturnsTheCorrectView (4 ms)
+[----------] 1 test from FlutterViewEngineProviderUnittests (4 ms total)
+
+[----------] 1 test from KeyMappingTest
+[ RUN      ] KeyMappingTest.HasExpectedValues
+[       OK ] KeyMappingTest.HasExpectedValues (0 ms)
+[----------] 1 test from KeyMappingTest (0 ms total)
+
+[----------] 3 tests from FlutterAppDelegateTest
+[ RUN      ] FlutterAppDelegateTest.OperURLsStopsAfterHandled
+[       OK ] FlutterAppDelegateTest.OperURLsStopsAfterHandled (0 ms)
+[ RUN      ] FlutterAppDelegateTest.ReceivesOpenURLs
+[       OK ] FlutterAppDelegateTest.ReceivesOpenURLs (0 ms)
+[ RUN      ] FlutterAppDelegateTest.DoesNotCallDelegatesWithoutHandler
+[       OK ] FlutterAppDelegateTest.DoesNotCallDelegatesWithoutHandler (0 ms)
+[----------] 3 tests from FlutterAppDelegateTest (0 ms total)
+
+[----------] 14 tests from FlutterAppLifecycleDelegateTest
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillTerminate
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillTerminate (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidBecomeActive
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidBecomeActive (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidChangeOcclusionState
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidChangeOcclusionState (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillHide
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillHide (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidHide
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidHide (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.ReleasesDelegateOnDealloc
+[       OK ] FlutterAppLifecycleDelegateTest.ReleasesDelegateOnDealloc (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidResignActive
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidResignActive (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidChangeScreenParameters
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidChangeScreenParameters (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillResignActive
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillResignActive (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillBecomeActive
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillBecomeActive (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillUnhide
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillUnhide (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillFinishLaunching
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillFinishLaunching (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidFinishLaunching
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidFinishLaunching (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidUnhide
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidUnhide (0 ms)
+[----------] 14 tests from FlutterAppLifecycleDelegateTest (1 ms total)
+
+[----------] 40 tests from FlutterEngineTest
+[ RUN      ] FlutterEngineTest.DisplaySizeIsInPhysicalPixel
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.DisplaySizeIsInPhysicalPixel (21 ms)
+[ RUN      ] FlutterEngineTest.ProducesAccessibilityTreeWhenAddingViews
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.ProducesAccessibilityTreeWhenAddingViews (14 ms)
+[ RUN      ] FlutterEngineTest.CompositorIgnoresUnknownView
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CompositorIgnoresUnknownView (11 ms)
+[ RUN      ] FlutterEngineTest.ResponseAfterEngineDied
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.ResponseAfterEngineDied (231 ms)
+[ RUN      ] FlutterEngineTest.HasNonNullExecutableName
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.HasNonNullExecutableName (26 ms)
+[ RUN      ] FlutterEngineTest.PublishedValueNSNullIfNoPublishedValue
+[       OK ] FlutterEngineTest.PublishedValueNSNullIfNoPublishedValue (1 ms)
+[ RUN      ] FlutterEngineTest.CanLogToStdout
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanLogToStdout (15 ms)
+[ RUN      ] FlutterEngineTest.CanToggleAccessibilityWhenHeadless
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanToggleAccessibilityWhenHeadless (12 ms)
+[ DISABLED ] FlutterEngineTest.DISABLED_BackgroundIsBlack
+[ RUN      ] FlutterEngineTest.PublishedValueNilForUnknownPlugin
+[       OK ] FlutterEngineTest.PublishedValueNilForUnknownPlugin (1 ms)
+[ RUN      ] FlutterEngineTest.DartEntrypointArguments
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.DartEntrypointArguments (10 ms)
+[ RUN      ] FlutterEngineTest.ForwardsPluginDelegateRegistration
+[       OK ] FlutterEngineTest.ForwardsPluginDelegateRegistration (1 ms)
+[ RUN      ] FlutterEngineTest.ManageControllersIfInitiatedByEngine
+[       OK ] FlutterEngineTest.ManageControllersIfInitiatedByEngine (236 ms)
+[ RUN      ] FlutterEngineTest.FlutterBinaryMessengerDoesNotRetainEngine
+[       OK ] FlutterEngineTest.FlutterBinaryMessengerDoesNotRetainEngine (0 ms)
+[ RUN      ] FlutterEngineTest.EnableSDFsAlwaysReturnsYes
+[       OK ] FlutterEngineTest.EnableSDFsAlwaysReturnsYes (0 ms)
+[ RUN      ] FlutterEngineTest.NotificationsUpdateDisplays
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.NotificationsUpdateDisplays (9 ms)
+[ RUN      ] FlutterEngineTest.RemovingViewDisposesCompositorResources
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.RemovingViewDisposesCompositorResources (7 ms)
+[ RUN      ] FlutterEngineTest.RunWithEntrypointUpdatesDisplayConfig
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.RunWithEntrypointUpdatesDisplayConfig (8 ms)
+[ RUN      ] FlutterEngineTest.HandleLifecycleStates
+[       OK ] FlutterEngineTest.HandleLifecycleStates (17 ms)
+[ RUN      ] FlutterEngineTest.MessengerSend
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.MessengerSend (6 ms)
+[ RUN      ] FlutterEngineTest.HandlesTerminationRequest
+2026-10-12 13:28:23.953 flutter_desktop_darwin_unittests[29041:181533] Method call returned error[Error]: Failed Details
+[       OK ] FlutterEngineTest.HandlesTerminationRequest (1 ms)
+[ RUN      ] FlutterEngineTest.Switches
+[       OK ] FlutterEngineTest.Switches (0 ms)
+[ DISABLED ] FlutterEngineTest.DISABLED_CanOverrideBackgroundColor
+[ RUN      ] FlutterEngineTest.RegistrarCanReadValuePublishedByAnotherPlugin
+[       OK ] FlutterEngineTest.RegistrarCanReadValuePublishedByAnotherPlugin (0 ms)
+[ RUN      ] FlutterEngineTest.HasStringsWhenPasteboardEmpty
+[       OK ] FlutterEngineTest.HasStringsWhenPasteboardEmpty (1 ms)
+[ RUN      ] FlutterEngineTest.CanGetEngineForId
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanGetEngineForId (6 ms)
+[ RUN      ] FlutterEngineTest.RegistrarForwardViewControllerLookUpToEngine
+[       OK ] FlutterEngineTest.RegistrarForwardViewControllerLookUpToEngine (0 ms)
+[ RUN      ] FlutterEngineTest.CanToggleAccessibility
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanToggleAccessibility (7 ms)
+[ RUN      ] FlutterEngineTest.NativeCallbacks
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.NativeCallbacks (6 ms)
+[ RUN      ] FlutterEngineTest.CanLaunch
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanLaunch (6 ms)
+[ RUN      ] FlutterEngineTest.HasStringsWhenPasteboardFull
+[       OK ] FlutterEngineTest.HasStringsWhenPasteboardFull (1 ms)
+[ RUN      ] FlutterEngineTest.HandleAccessibilityEvent
+[       OK ] FlutterEngineTest.HandleAccessibilityEvent (1 ms)
+[ RUN      ] FlutterEngineTest.ResponseFromBackgroundThread
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.ResponseFromBackgroundThread (251 ms)
+[ RUN      ] FlutterEngineTest.MessengerCleanupConnectionWorks
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.MessengerCleanupConnectionWorks (22 ms)
+[ RUN      ] FlutterEngineTest.UnregistersPluginsOnEngineDestruction
+[       OK ] FlutterEngineTest.UnregistersPluginsOnEngineDestruction (4 ms)
+[ RUN      ] FlutterEngineTest.ReportsHourFormat
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+objc[29041]: Weak reference loaded from 0x16f5e8950 contains 0x9673dee00 which is not in the weak references table
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+objc[29041]: Weak reference loaded from 0x16f5e8950 contains 0x9673df980 which is not in the weak references table
+[       OK ] FlutterEngineTest.ReportsHourFormat (29 ms)
+[ RUN      ] FlutterEngineTest.ManageControllersIfInitiatedByController
+[       OK ] FlutterEngineTest.ManageControllersIfInitiatedByController (1 ms)
+[ RUN      ] FlutterEngineTest.ResizeSynchronizerNotBlockingRasterThreadAfterShutdown
+[       OK ] FlutterEngineTest.ResizeSynchronizerNotBlockingRasterThreadAfterShutdown (0 ms)
+[ RUN      ] FlutterEngineTest.PublishedValueReturnsLastPublished
+[       OK ] FlutterEngineTest.PublishedValueReturnsLastPublished (0 ms)
+[ RUN      ] FlutterEngineTest.Compositor
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.Compositor (13 ms)
+[ RUN      ] FlutterEngineTest.IgnoresTerminationRequestIfNotFlutterAppDelegate
+[       OK ] FlutterEngineTest.IgnoresTerminationRequestIfNotFlutterAppDelegate (1 ms)
+[ RUN      ] FlutterEngineTest.FlutterTextureRegistryDoesNotReturnEngine
+[       OK ] FlutterEngineTest.FlutterTextureRegistryDoesNotReturnEngine (0 ms)
+[----------] 40 tests from FlutterEngineTest (999 ms total)
+
+[----------] 14 tests from FlutterMutatorViewTest
+[ RUN      ] FlutterMutatorViewTest.BasicFrameIsCorrect
+[       OK ] FlutterMutatorViewTest.BasicFrameIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.PathClipViewsAreAddedAndRemoved
+[       OK ] FlutterMutatorViewTest.PathClipViewsAreAddedAndRemoved (0 ms)
+[ RUN      ] FlutterMutatorViewTest.FrameWithTightClipAndTransformIsCorrect
+[       OK ] FlutterMutatorViewTest.FrameWithTightClipAndTransformIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.RoundRectClipsToSimpleRectangle
+[       OK ] FlutterMutatorViewTest.RoundRectClipsToSimpleRectangle (0 ms)
+[ RUN      ] FlutterMutatorViewTest.ViewsSetIsFlipped
+[       OK ] FlutterMutatorViewTest.ViewsSetIsFlipped (0 ms)
+[ RUN      ] FlutterMutatorViewTest.FrameWithLooseClipIsCorrect
+[       OK ] FlutterMutatorViewTest.FrameWithLooseClipIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.FrameWithTightClipIsCorrect
+[       OK ] FlutterMutatorViewTest.FrameWithTightClipIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.CursorCoordinator
+[       OK ] FlutterMutatorViewTest.CursorCoordinator (503 ms)
+[ RUN      ] FlutterMutatorViewTest.RectsClipsToPathWhenRotated
+[       OK ] FlutterMutatorViewTest.RectsClipsToPathWhenRotated (1 ms)
+[ RUN      ] FlutterMutatorViewTest.HitTestIgnoreRegion
+[       OK ] FlutterMutatorViewTest.HitTestIgnoreRegion (0 ms)
+[ RUN      ] FlutterMutatorViewTest.TransformedFrameIsCorrect
+[       OK ] FlutterMutatorViewTest.TransformedFrameIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.ReparentingPlatformView
+[       OK ] FlutterMutatorViewTest.ReparentingPlatformView (0 ms)
+[ RUN      ] FlutterMutatorViewTest.RoundRectClipsToPath
+[       OK ] FlutterMutatorViewTest.RoundRectClipsToPath (1 ms)
+[ RUN      ] FlutterMutatorViewTest.ClipsToBounds
+[       OK ] FlutterMutatorViewTest.ClipsToBounds (0 ms)
+[----------] 14 tests from FlutterMutatorViewTest (511 ms total)
+
+[----------] 9 tests from FlutterKeyboardManagerUnittests
+[ RUN      ] FlutterKeyboardManagerUnittests.DoublePrimaryResponder
+[       OK ] FlutterKeyboardManagerUnittests.DoublePrimaryResponder (15 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.SingleFinalResponder
+[       OK ] FlutterKeyboardManagerUnittests.SingleFinalResponder (12 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.CorrectLogicalKeyForLayouts
+[       OK ] FlutterKeyboardManagerUnittests.CorrectLogicalKeyForLayouts (30 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.KeyboardChannelGetPressedState
+[       OK ] FlutterKeyboardManagerUnittests.KeyboardChannelGetPressedState (5 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.EmptyNextResponder
+[       OK ] FlutterKeyboardManagerUnittests.EmptyNextResponder (4 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.RacingConditionBetweenKeyAndText
+[       OK ] FlutterKeyboardManagerUnittests.RacingConditionBetweenKeyAndText (5 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.SinglePrimaryResponder
+[       OK ] FlutterKeyboardManagerUnittests.SinglePrimaryResponder (4 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.GetPressedState
+[       OK ] FlutterKeyboardManagerUnittests.GetPressedState (3 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.ShouldNotHoldStrongReferenceToDelegate
+[       OK ] FlutterKeyboardManagerUnittests.ShouldNotHoldStrongReferenceToDelegate (0 ms)
+[----------] 9 tests from FlutterKeyboardManagerUnittests (80 ms total)
+
+[----------] 13 tests from FlutterViewControllerMockEngineTest
+[ RUN      ] FlutterViewControllerMockEngineTest.TestCtrlTabKeyEventIsPropagated
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestCtrlTabKeyEventIsPropagated (11 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsAreSentToFramework
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsAreSentToFramework (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsArePropagatedIfNotHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsArePropagatedIfNotHandled (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.testFlutterViewIsConfigured
+[       OK ] FlutterViewControllerMockEngineTest.testFlutterViewIsConfigured (1 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyboardIsRestartedOnEngineRestart
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyboardIsRestartedOnEngineRestart (7 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestTrackpadGesturesAreSentToFramework
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:24.944 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:24.945 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+[       OK ] FlutterViewControllerMockEngineTest.TestTrackpadGesturesAreSentToFramework (7 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestFlagsChangedEventsArePropagatedIfNotHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestFlagsChangedEventsArePropagatedIfNotHandled (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsAreNotPropagatedIfHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsAreNotPropagatedIfHandled (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestMouseDownUpEventsSentToNextResponder
+[       OK ] FlutterViewControllerMockEngineTest.TestMouseDownUpEventsSentToNextResponder (0 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestmouseAndGestureEventsAreHandledSeparately
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+[       OK ] FlutterViewControllerMockEngineTest.TestmouseAndGestureEventsAreHandledSeparately (1 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEquivalentIsPassedToTextInputPlugin
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEquivalentIsPassedToTextInputPlugin (9 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestModifierKeysAreSynthesizedOnMouseMove
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestModifierKeysAreSynthesizedOnMouseMove (10 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.testViewWillAppearCalledMultipleTimes
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.testViewWillAppearCalledMultipleTimes (7 ms)
+[----------] 13 tests from FlutterViewControllerMockEngineTest (91 ms total)
+
+[==========] 235 tests from 26 test suites ran. (10362 ms total)
+[  PASSED  ] 235 tests.
+
+  YOU HAVE 2 DISABLED TESTS
+
+
+Repeating all tests (iteration 2) . . .
+
+Note: Randomizing tests' orders with a seed of 40557 .
+[==========] Running 235 tests from 26 test suites.
+[----------] 2 tests from AccessibilityBridgeMacTest
+[ RUN      ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenNoWindow
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenNoWindow (0 ms)
+[ RUN      ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenHeadless
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenHeadless (0 ms)
+[----------] 2 tests from AccessibilityBridgeMacTest (0 ms total)
+
+[----------] 3 tests from FlutterView
+[ RUN      ] FlutterView.CursorUpdateDoesNotOverridePlatformView
+[       OK ] FlutterView.CursorUpdateDoesNotOverridePlatformView (1 ms)
+[ RUN      ] FlutterView.CursorUpdateDoesHitTest
+[       OK ] FlutterView.CursorUpdateDoesHitTest (0 ms)
+[ RUN      ] FlutterView.ShouldInheritContentsScaleReturnsYes
+[       OK ] FlutterView.ShouldInheritContentsScaleReturnsYes (0 ms)
+[----------] 3 tests from FlutterView (2 ms total)
+
+[----------] 2 tests from FlutterWindowControllerSizeTest
+[ RUN      ] FlutterWindowControllerSizeTest.SizedToContentResizable
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterWindowControllerSizeTest.SizedToContentResizable (41 ms)
+[ RUN      ] FlutterWindowControllerSizeTest.SizedToContentNotResizable
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterWindowControllerSizeTest.SizedToContentNotResizable (51 ms)
+[----------] 2 tests from FlutterWindowControllerSizeTest (92 ms total)
+
+[----------] 4 tests from FlutterDisplayLinkTest
+[ RUN      ] FlutterDisplayLinkTest.ViewAddedToWindowLater
+[       OK ] FlutterDisplayLinkTest.ViewAddedToWindowLater (18 ms)
+[ RUN      ] FlutterDisplayLinkTest.CVDisplayLinkInterval
+2026-10-12 13:28:25.294 flutter_desktop_darwin_unittests[29041:181533] CVDisplayLink Interval: Average: 0.016666s, Max: 0.016683s, Min: 0.016655s
+[       OK ] FlutterDisplayLinkTest.CVDisplayLinkInterval (183 ms)
+[ RUN      ] FlutterDisplayLinkTest.ViewAddedToWindowFirst
+[       OK ] FlutterDisplayLinkTest.ViewAddedToWindowFirst (31 ms)
+[ RUN      ] FlutterDisplayLinkTest.ViewRemovedFromWindow
+[       OK ] FlutterDisplayLinkTest.ViewRemovedFromWindow (180 ms)
+[----------] 4 tests from FlutterDisplayLinkTest (414 ms total)
+
+[----------] 9 tests from FlutterKeyboardManagerUnittests
+[ RUN      ] FlutterKeyboardManagerUnittests.GetPressedState
+[       OK ] FlutterKeyboardManagerUnittests.GetPressedState (16 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.ShouldNotHoldStrongReferenceToDelegate
+[       OK ] FlutterKeyboardManagerUnittests.ShouldNotHoldStrongReferenceToDelegate (0 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.SinglePrimaryResponder
+[       OK ] FlutterKeyboardManagerUnittests.SinglePrimaryResponder (9 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.CorrectLogicalKeyForLayouts
+[       OK ] FlutterKeyboardManagerUnittests.CorrectLogicalKeyForLayouts (33 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.SingleFinalResponder
+[       OK ] FlutterKeyboardManagerUnittests.SingleFinalResponder (5 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.DoublePrimaryResponder
+[       OK ] FlutterKeyboardManagerUnittests.DoublePrimaryResponder (5 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.RacingConditionBetweenKeyAndText
+[       OK ] FlutterKeyboardManagerUnittests.RacingConditionBetweenKeyAndText (4 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.KeyboardChannelGetPressedState
+[       OK ] FlutterKeyboardManagerUnittests.KeyboardChannelGetPressedState (4 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.EmptyNextResponder
+[       OK ] FlutterKeyboardManagerUnittests.EmptyNextResponder (3 ms)
+[----------] 9 tests from FlutterKeyboardManagerUnittests (83 ms total)
+
+[----------] 10 tests from FlutterPlatformViewController
+[ RUN      ] FlutterPlatformViewController.TestReset
+[       OK ] FlutterPlatformViewController.TestReset (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreateAndDispose
+[       OK ] FlutterPlatformViewController.TestCreateAndDispose (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreatePlatformViewNoMatchingViewType
+[       OK ] FlutterPlatformViewController.TestCreatePlatformViewNoMatchingViewType (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestAcceptGesture
+[       OK ] FlutterPlatformViewController.TestAcceptGesture (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRegisterPlatformViewFactoryAndCreate
+[       OK ] FlutterPlatformViewController.TestRegisterPlatformViewFactoryAndCreate (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestAcceptGestureOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestAcceptGestureOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRejectGesture
+[       OK ] FlutterPlatformViewController.TestRejectGesture (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRejectGestureOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestRejectGestureOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestDisposeOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestDisposeOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreatePlatformViewInvalidViewType
+[       OK ] FlutterPlatformViewController.TestCreatePlatformViewInvalidViewType (0 ms)
+[----------] 10 tests from FlutterPlatformViewController (0 ms total)
+
+[----------] 1 test from FlutterMenuPluginTest
+[ RUN      ] FlutterMenuPluginTest.TestSetMenu
+[       OK ] FlutterMenuPluginTest.TestSetMenu (1 ms)
+[----------] 1 test from FlutterMenuPluginTest (1 ms total)
+
+[----------] 1 test from FlutterWindowControllerRetainTest
+[ RUN      ] FlutterWindowControllerRetainTest.WindowControllerDoesNotRetainEngine
+2026-10-12 13:28:25.592 flutter_desktop_darwin_unittests[29041:181533] Fixtures path: /Volumes/Work/s/w/ir/cache/builder/engine/src/out/ci/host_profile_arm64_tests/gen/flutter/shell/platform/darwin/macos/assets
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterWindowControllerRetainTest.WindowControllerDoesNotRetainEngine (2090 ms)
+[----------] 1 test from FlutterWindowControllerRetainTest (2090 ms total)
+
+[----------] 7 tests from FlutterViewControllerTest
+[ RUN      ] FlutterViewControllerTest.testLookupKeyAssets
+[       OK ] FlutterViewControllerTest.testLookupKeyAssets (6 ms)
+[ RUN      ] FlutterViewControllerTest.ReparentsPluginWhenAccessibilityDisabled
+[       OK ] FlutterViewControllerTest.ReparentsPluginWhenAccessibilityDisabled (4 ms)
+[ RUN      ] FlutterViewControllerTest.testLookupKeyAssetsWithPackage
+[       OK ] FlutterViewControllerTest.testLookupKeyAssetsWithPackage (4 ms)
+[ RUN      ] FlutterViewControllerTest.CanSetMouseTrackingModeBeforeViewLoaded
+[       OK ] FlutterViewControllerTest.CanSetMouseTrackingModeBeforeViewLoaded (0 ms)
+[ RUN      ] FlutterViewControllerTest.HasViewThatHidesOtherViewsInAccessibility
+[       OK ] FlutterViewControllerTest.HasViewThatHidesOtherViewsInAccessibility (26 ms)
+[ RUN      ] FlutterViewControllerTest.FlutterViewAcceptsFirstMouse
+[       OK ] FlutterViewControllerTest.FlutterViewAcceptsFirstMouse (17 ms)
+[ RUN      ] FlutterViewControllerTest.testViewControllerIsReleased
+[       OK ] FlutterViewControllerTest.testViewControllerIsReleased (1 ms)
+[----------] 7 tests from FlutterViewControllerTest (62 ms total)
+
+[----------] 10 tests from FlutterEmbedderExternalTextureTest
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2Impeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2Impeller (5 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTexture
+2026-10-12 13:28:27.751 flutter_desktop_darwin_unittests[29041:181533] Unsupported pixel format: 1714696752
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTexture (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTexture
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTexture (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTextureImpeller
+2026-10-12 13:28:27.757 flutter_desktop_darwin_unittests[29041:181533] Unsupported pixel format: 1714696752
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTextureImpeller (4 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureImpeller (3 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVAImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVAImpeller (3 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2 (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestTextureResolution
+[       OK ] FlutterEmbedderExternalTextureTest.TestTextureResolution (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestTextureResolutionImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestTextureResolutionImpeller (3 ms)
+[----------] 10 tests from FlutterEmbedderExternalTextureTest (28 ms total)
+
+[----------] 3 tests from FlutterVSyncWaiterTest
+[ RUN      ] FlutterVSyncWaiterTest.VSyncWorks
+[       OK ] FlutterVSyncWaiterTest.VSyncWorks (243 ms)
+[ RUN      ] FlutterVSyncWaiterTest.FirstVSyncIsSynthesized
+[       OK ] FlutterVSyncWaiterTest.FirstVSyncIsSynthesized (272 ms)
+[ RUN      ] FlutterVSyncWaiterTest.RequestsInitialVSync
+[       OK ] FlutterVSyncWaiterTest.RequestsInitialVSync (0 ms)
+[----------] 3 tests from FlutterVSyncWaiterTest (516 ms total)
+
+[----------] 19 tests from FlutterSurfaceManager
+[ RUN      ] FlutterSurfaceManager.MetalTextureSizeMatchesSurfaceSize
+[       OK ] FlutterSurfaceManager.MetalTextureSizeMatchesSurfaceSize (2 ms)
+[ RUN      ] FlutterSurfaceManager.BackBufferCacheDoesNotLeak
+[       OK ] FlutterSurfaceManager.BackBufferCacheDoesNotLeak (5 ms)
+[ RUN      ] FlutterSurfaceManager.BackingStoreCacheSurfaceStuckInUse
+[       OK ] FlutterSurfaceManager.BackingStoreCacheSurfaceStuckInUse (5 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectPixelFormat (1 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.WideGamutSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchFromStandardToWideGamut
+[       OK ] FlutterSurfaceManager.DynamicSwitchFromStandardToWideGamut (1 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectBytesPerElement
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectBytesPerElement (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectBytesPerElement
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectBytesPerElement (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectColorSpace
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectColorSpace (0 ms)
+[ RUN      ] FlutterSurfaceManager.TestSurfaceLookupFromTexture
+[       OK ] FlutterSurfaceManager.TestSurfaceLookupFromTexture (0 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.StandardGamutSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutLayerWorksWithoutExplicitContentsFormat
+[       OK ] FlutterSurfaceManager.WideGamutLayerWorksWithoutExplicitContentsFormat (1 ms)
+[ RUN      ] FlutterSurfaceManager.SurfacesAreRecycled
+[       OK ] FlutterSurfaceManager.SurfacesAreRecycled (1 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchNoOpWhenSameValue
+[       OK ] FlutterSurfaceManager.DynamicSwitchNoOpWhenSameValue (1 ms)
+[ RUN      ] FlutterSurfaceManager.SurfaceCacheDoesNotMixGamutModes
+[       OK ] FlutterSurfaceManager.SurfaceCacheDoesNotMixGamutModes (1 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectColorSpace
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectColorSpace (0 ms)
+[ RUN      ] FlutterSurfaceManager.LayerManagement
+[       OK ] FlutterSurfaceManager.LayerManagement (1 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchFromWideToStandardGamut
+[       OK ] FlutterSurfaceManager.DynamicSwitchFromWideToStandardGamut (1 ms)
+[----------] 19 tests from FlutterSurfaceManager (31 ms total)
+
+[----------] 14 tests from FlutterEmbedderKeyResponderUnittests
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SpecialModiferFlags
+[       OK ] FlutterEmbedderKeyResponderUnittests.SpecialModiferFlags (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeForDuplicateDownEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeForDuplicateDownEvent (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ConvertAbruptRepeatEventsToDown
+[       OK ] FlutterEmbedderKeyResponderUnittests.ConvertAbruptRepeatEventsToDown (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnCapsLock
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnCapsLock (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.MultipleCharacters
+[       OK ] FlutterEmbedderKeyResponderUnittests.MultipleCharacters (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEventsInNormalEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEventsInNormalEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.IgnoreDuplicateUpEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.IgnoreDuplicateUpEvent (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.NonAsciiCharacters
+[       OK ] FlutterEmbedderKeyResponderUnittests.NonAsciiCharacters (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.IdentifyLeftAndRightModifiers
+[       OK ] FlutterEmbedderKeyResponderUnittests.IdentifyLeftAndRightModifiers (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ToggleModifiersDuringKeyTap
+[       OK ] FlutterEmbedderKeyResponderUnittests.ToggleModifiersDuringKeyTap (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnNormalKey
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnNormalKey (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ConvertCapsLockEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.ConvertCapsLockEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.BasicKeyEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.BasicKeyEvent (0 ms)
+[----------] 14 tests from FlutterEmbedderKeyResponderUnittests (1 ms total)
+
+[----------] 13 tests from FlutterViewControllerMockEngineTest
+[ RUN      ] FlutterViewControllerMockEngineTest.TestmouseAndGestureEventsAreHandledSeparately
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+[       OK ] FlutterViewControllerMockEngineTest.TestmouseAndGestureEventsAreHandledSeparately (3 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsArePropagatedIfNotHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsArePropagatedIfNotHandled (17 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyboardIsRestartedOnEngineRestart
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyboardIsRestartedOnEngineRestart (12 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestFlagsChangedEventsArePropagatedIfNotHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestFlagsChangedEventsArePropagatedIfNotHandled (10 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestModifierKeysAreSynthesizedOnMouseMove
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestModifierKeysAreSynthesizedOnMouseMove (11 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.testFlutterViewIsConfigured
+[       OK ] FlutterViewControllerMockEngineTest.testFlutterViewIsConfigured (1 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEquivalentIsPassedToTextInputPlugin
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEquivalentIsPassedToTextInputPlugin (9 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestMouseDownUpEventsSentToNextResponder
+[       OK ] FlutterViewControllerMockEngineTest.TestMouseDownUpEventsSentToNextResponder (1 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsAreNotPropagatedIfHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsAreNotPropagatedIfHandled (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.testViewWillAppearCalledMultipleTimes
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.testViewWillAppearCalledMultipleTimes (7 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsAreSentToFramework
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsAreSentToFramework (7 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestCtrlTabKeyEventIsPropagated
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestCtrlTabKeyEventIsPropagated (9 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestTrackpadGesturesAreSentToFramework
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:28.430 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:28.430 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+[       OK ] FlutterViewControllerMockEngineTest.TestTrackpadGesturesAreSentToFramework (6 ms)
+[----------] 13 tests from FlutterViewControllerMockEngineTest (110 ms total)
+
+[----------] 41 tests from FlutterTextInputPluginTest
+[ RUN      ] FlutterTextInputPluginTest.InsertTextWithCollapsedSelectionInsideComposing
+[       OK ] FlutterTextInputPluginTest.InsertTextWithCollapsedSelectionInsideComposing (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestComposingRegionRemovedByFramework
+[       OK ] FlutterTextInputPluginTest.TestComposingRegionRemovedByFramework (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeWithEsotericAffineTransform
+[       OK ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeWithEsotericAffineTransform (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.CanWorkWithFlutterTextField
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+Failed Command:
+
+/Volumes/Work/s/w/ir/cache/builder/engine/src/out/ci/host_profile_arm64_tests/flutter_desktop_darwin_unittests --gtest_repeat=2 --gtest_shuffle
+
+Exit Code: -5
+
+Output:
+[INFO:flutter/testing/test_timeout_listener.cc(75)] Test timeout of 300 seconds per test case will be enforced.
+
+Repeating all tests (iteration 1) . . .
+
+Note: Randomizing tests' orders with a seed of 40556 .
+[==========] Running 235 tests from 26 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from AccessibilityBridgeMacWindowTest
+[ RUN      ] AccessibilityBridgeMacWindowTest.NonZeroRootNodeId
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacWindowTest.NonZeroRootNodeId (94 ms)
+[ RUN      ] AccessibilityBridgeMacWindowTest.SendsAccessibilityCreateNotificationFlutterViewWindow
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacWindowTest.SendsAccessibilityCreateNotificationFlutterViewWindow (1 ms)
+[----------] 2 tests from AccessibilityBridgeMacWindowTest (96 ms total)
+
+[----------] 7 tests from FlutterViewControllerTest
+[ RUN      ] FlutterViewControllerTest.FlutterViewAcceptsFirstMouse
+[       OK ] FlutterViewControllerTest.FlutterViewAcceptsFirstMouse (13 ms)
+[ RUN      ] FlutterViewControllerTest.testLookupKeyAssetsWithPackage
+[       OK ] FlutterViewControllerTest.testLookupKeyAssetsWithPackage (100 ms)
+[ RUN      ] FlutterViewControllerTest.CanSetMouseTrackingModeBeforeViewLoaded
+[       OK ] FlutterViewControllerTest.CanSetMouseTrackingModeBeforeViewLoaded (0 ms)
+[ RUN      ] FlutterViewControllerTest.testLookupKeyAssets
+[       OK ] FlutterViewControllerTest.testLookupKeyAssets (0 ms)
+[ RUN      ] FlutterViewControllerTest.testViewControllerIsReleased
+[       OK ] FlutterViewControllerTest.testViewControllerIsReleased (1 ms)
+[ RUN      ] FlutterViewControllerTest.HasViewThatHidesOtherViewsInAccessibility
+[       OK ] FlutterViewControllerTest.HasViewThatHidesOtherViewsInAccessibility (12 ms)
+[ RUN      ] FlutterViewControllerTest.ReparentsPluginWhenAccessibilityDisabled
+[       OK ] FlutterViewControllerTest.ReparentsPluginWhenAccessibilityDisabled (6 ms)
+[----------] 7 tests from FlutterViewControllerTest (135 ms total)
+
+[----------] 1 test from FlutterTextInputSemanticsObjectTest
+[ RUN      ] FlutterTextInputSemanticsObjectTest.DoesInitialize
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterTextInputSemanticsObjectTest.DoesInitialize (151 ms)
+[----------] 1 test from FlutterTextInputSemanticsObjectTest (151 ms total)
+
+[----------] 14 tests from FlutterEmbedderKeyResponderUnittests
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.MultipleCharacters
+[       OK ] FlutterEmbedderKeyResponderUnittests.MultipleCharacters (1 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ConvertAbruptRepeatEventsToDown
+[       OK ] FlutterEmbedderKeyResponderUnittests.ConvertAbruptRepeatEventsToDown (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.BasicKeyEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.BasicKeyEvent (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ConvertCapsLockEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.ConvertCapsLockEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.IgnoreDuplicateUpEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.IgnoreDuplicateUpEvent (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ToggleModifiersDuringKeyTap
+[       OK ] FlutterEmbedderKeyResponderUnittests.ToggleModifiersDuringKeyTap (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SpecialModiferFlags
+[       OK ] FlutterEmbedderKeyResponderUnittests.SpecialModiferFlags (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.IdentifyLeftAndRightModifiers
+[       OK ] FlutterEmbedderKeyResponderUnittests.IdentifyLeftAndRightModifiers (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.NonAsciiCharacters
+[       OK ] FlutterEmbedderKeyResponderUnittests.NonAsciiCharacters (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEventsInNormalEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEventsInNormalEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnCapsLock
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnCapsLock (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnNormalKey
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnNormalKey (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeForDuplicateDownEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeForDuplicateDownEvent (0 ms)
+[----------] 14 tests from FlutterEmbedderKeyResponderUnittests (2 ms total)
+
+[----------] 2 tests from AccessibilityBridgeMacTest
+[ RUN      ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenHeadless
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenHeadless (1 ms)
+[ RUN      ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenNoWindow
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenNoWindow (0 ms)
+[----------] 2 tests from AccessibilityBridgeMacTest (2 ms total)
+
+[----------] 2 tests from FlutterWindowControllerSizeTest
+[ RUN      ] FlutterWindowControllerSizeTest.SizedToContentNotResizable
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49872/2rd48pIDung=/
+[       OK ] FlutterWindowControllerSizeTest.SizedToContentNotResizable (102 ms)
+[ RUN      ] FlutterWindowControllerSizeTest.SizedToContentResizable
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49873/Sv-WQ-bq8wU=/
+[       OK ] FlutterWindowControllerSizeTest.SizedToContentResizable (54 ms)
+[----------] 2 tests from FlutterWindowControllerSizeTest (157 ms total)
+
+[----------] 7 tests from FlutterPlatformNodeDelegateMac
+[ RUN      ] FlutterPlatformNodeDelegateMac.Basics
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.Basics (0 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.ChangingFlagsUpdatesNativeViewAccessible
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.ChangingFlagsUpdatesNativeViewAccessible (1 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.SelectableTextWithoutSelectionReturnZeroRange
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.SelectableTextWithoutSelectionReturnZeroRange (0 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.TextFieldUsesFlutterTextField
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.TextFieldUsesFlutterTextField (38 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.CanPerformAction
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.CanPerformAction (2 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.DisabledTextFieldDoesNotUseFlutterTextField
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.DisabledTextFieldDoesNotUseFlutterTextField (0 ms)
+[ RUN      ] FlutterPlatformNodeDelegateMac.SelectableTextHasCorrectSemantics
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterPlatformNodeDelegateMac.SelectableTextHasCorrectSemantics (0 ms)
+[----------] 7 tests from FlutterPlatformNodeDelegateMac (44 ms total)
+
+[----------] 10 tests from FlutterWindowControllerTest
+[ RUN      ] FlutterWindowControllerTest.CreateTooltipWindow
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49874/4gU7q_wNppU=/
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.CreateTooltipWindow (140 ms)
+[ RUN      ] FlutterWindowControllerTest.ViewMetricsRespectPositionCallbackConstraints
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49875/yZm55puVVG0=/
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.ViewMetricsRespectPositionCallbackConstraints (424 ms)
+[ RUN      ] FlutterWindowControllerTest.DestroyRegularWindow
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49876/rXa0zlxnQsE=/
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.DestroyRegularWindow (166 ms)
+[ RUN      ] FlutterWindowControllerTest.GetOffsetInParent
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49877/UqpoG6OzeqA=/
+[       OK ] FlutterWindowControllerTest.GetOffsetInParent (243 ms)
+[ RUN      ] FlutterWindowControllerTest.FixMoveRunLoopMode
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49878/32Otqy2ZK48=/
+Communicating on a dead channel.
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.FixMoveRunLoopMode (315 ms)
+[ RUN      ] FlutterWindowControllerTest.InternalFlutterWindowGetHandle
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49879/06gJ7o8QRfo=/
+[       OK ] FlutterWindowControllerTest.InternalFlutterWindowGetHandle (261 ms)
+[ RUN      ] FlutterWindowControllerTest.WindowStates
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49880/b2IL3Cal684=/
+Communicating on a dead channel.
+Communicating on a dead channel.
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.WindowStates (2071 ms)
+[ RUN      ] FlutterWindowControllerTest.CreateRegularWindow
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49881/rhv_Ej1oczA=/
+[       OK ] FlutterWindowControllerTest.CreateRegularWindow (306 ms)
+[ RUN      ] FlutterWindowControllerTest.CreatePopupWindow
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49882/QUmgcG2yRvE=/
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerTest.CreatePopupWindow (320 ms)
+[ RUN      ] FlutterWindowControllerTest.ClosesAllWindowsOnEngineRestart
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49883/z_bKWKhvySw=/
+[       OK ] FlutterWindowControllerTest.ClosesAllWindowsOnEngineRestart (204 ms)
+[----------] 10 tests from FlutterWindowControllerTest (4454 ms total)
+
+[----------] 3 tests from FlutterVSyncWaiterTest
+[ RUN      ] FlutterVSyncWaiterTest.VSyncWorks
+Communicating on a dead channel.
+[       OK ] FlutterVSyncWaiterTest.VSyncWorks (273 ms)
+[ RUN      ] FlutterVSyncWaiterTest.RequestsInitialVSync
+[       OK ] FlutterVSyncWaiterTest.RequestsInitialVSync (0 ms)
+[ RUN      ] FlutterVSyncWaiterTest.FirstVSyncIsSynthesized
+Communicating on a dead channel.
+[       OK ] FlutterVSyncWaiterTest.FirstVSyncIsSynthesized (241 ms)
+[----------] 3 tests from FlutterVSyncWaiterTest (515 ms total)
+
+[----------] 10 tests from FlutterPlatformViewController
+[ RUN      ] FlutterPlatformViewController.TestReset
+[       OK ] FlutterPlatformViewController.TestReset (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestAcceptGesture
+[       OK ] FlutterPlatformViewController.TestAcceptGesture (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreatePlatformViewInvalidViewType
+[       OK ] FlutterPlatformViewController.TestCreatePlatformViewInvalidViewType (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestDisposeOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestDisposeOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRejectGestureOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestRejectGestureOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestAcceptGestureOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestAcceptGestureOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreateAndDispose
+[       OK ] FlutterPlatformViewController.TestCreateAndDispose (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreatePlatformViewNoMatchingViewType
+[       OK ] FlutterPlatformViewController.TestCreatePlatformViewNoMatchingViewType (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRegisterPlatformViewFactoryAndCreate
+[       OK ] FlutterPlatformViewController.TestRegisterPlatformViewFactoryAndCreate (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRejectGesture
+[       OK ] FlutterPlatformViewController.TestRejectGesture (0 ms)
+[----------] 10 tests from FlutterPlatformViewController (2 ms total)
+
+[----------] 1 test from FlutterMenuPluginTest
+[ RUN      ] FlutterMenuPluginTest.TestSetMenu
+[       OK ] FlutterMenuPluginTest.TestSetMenu (15 ms)
+[----------] 1 test from FlutterMenuPluginTest (15 ms total)
+
+[----------] 41 tests from FlutterTextInputPluginTest
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenAutofillNotSet
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenAutofillNotSet (5 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestEmptyCompositionRange
+[       OK ] FlutterTextInputPluginTest.TestEmptyCompositionRange (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestPerformKeyEquivalent
+[       OK ] FlutterTextInputPluginTest.TestPerformKeyEquivalent (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.IsAddedAndRemovedFromViewHierarchy
+[       OK ] FlutterTextInputPluginTest.IsAddedAndRemovedFromViewHierarchy (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.FirstResponderIsCorrect
+[       OK ] FlutterTextInputPluginTest.FirstResponderIsCorrect (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteEnabledWhenAutofillSet
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteEnabledWhenAutofillSet (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetMarkedTextWithSelectionChange
+[       OK ] FlutterTextInputPluginTest.TestSetMarkedTextWithSelectionChange (3 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenObscureTextSet
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenObscureTextSet (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetEditingStateWithTextEditingDelta
+[       OK ] FlutterTextInputPluginTest.TestSetEditingStateWithTextEditingDelta (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.InsertTextWithCollapsedSelectionInsideComposing
+[       OK ] FlutterTextInputPluginTest.InsertTextWithCollapsedSelectionInsideComposing (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.InsertTextWithReversedReplacementRange
+[       OK ] FlutterTextInputPluginTest.InsertTextWithReversedReplacementRange (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestComposingRegionRemovedByFramework
+[       OK ] FlutterTextInputPluginTest.TestComposingRegionRemovedByFramework (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestComposingWithDelta
+[       OK ] FlutterTextInputPluginTest.TestComposingWithDelta (5 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetMarkedTextWithOutOfBoundsRanges
+[       OK ] FlutterTextInputPluginTest.TestSetMarkedTextWithOutOfBoundsRanges (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.HasZeroSizeAndClipsToBounds
+[       OK ] FlutterTextInputPluginTest.HasZeroSizeAndClipsToBounds (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeWithEsotericAffineTransform
+[       OK ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeWithEsotericAffineTransform (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.UnhandledKeyEquivalent
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:20.266 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+[       OK ] FlutterTextInputPluginTest.UnhandledKeyEquivalent (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestLocalTextAndSelectionUpdateAfterDelta
+[       OK ] FlutterTextInputPluginTest.TestLocalTextAndSelectionUpdateAfterDelta (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetEditingStateWithOutOfBoundsSelection
+[       OK ] FlutterTextInputPluginTest.TestSetEditingStateWithOutOfBoundsSelection (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.WorksWithoutViewId
+[       OK ] FlutterTextInputPluginTest.WorksWithoutViewId (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSelectorsNotForwardedToFrameworkIfNoClient
+[       OK ] FlutterTextInputPluginTest.TestSelectorsNotForwardedToFrameworkIfNoClient (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSelectorsAreForwardedToFramework
+[       OK ] FlutterTextInputPluginTest.TestSelectorsAreForwardedToFramework (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeAtInfinity
+[       OK ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeAtInfinity (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.CanNotBecomeResponderIfNoViewController
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterTextInputPluginTest.CanNotBecomeResponderIfNoViewController (4 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAttributedSubstringOutOfRange
+[       OK ] FlutterTextInputPluginTest.TestAttributedSubstringOutOfRange (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.WillUseParentControllerIfCanNotBecomeKey
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:49884/6lQsH8bd-ds=/
+[       OK ] FlutterTextInputPluginTest.WillUseParentControllerIfCanNotBecomeKey (21 ms)
+[ RUN      ] FlutterTextInputPluginTest.HandleArrowKeyWhenImePopoverIsActive
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:20.311 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+[       OK ] FlutterTextInputPluginTest.HandleArrowKeyWhenImePopoverIsActive (2 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetMarkedTextWithReplacementRange
+[       OK ] FlutterTextInputPluginTest.TestSetMarkedTextWithReplacementRange (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSetMarkedTextWithSelectedRangeNotFound
+[       OK ] FlutterTextInputPluginTest.TestSetMarkedTextWithSelectedRangeNotFound (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestComposingWithDeltasWhenSelectionIsActive
+[       OK ] FlutterTextInputPluginTest.TestComposingWithDeltasWhenSelectionIsActive (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestInsertNewLine
+[       OK ] FlutterTextInputPluginTest.TestInsertNewLine (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.InsertTextHandlesEmptyAttributedString
+[       OK ] FlutterTextInputPluginTest.InsertTextHandlesEmptyAttributedString (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenAutofillGroupIncludesPassword
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenAutofillGroupIncludesPassword (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestOperationsThatTriggerDelta
+[       OK ] FlutterTextInputPluginTest.TestOperationsThatTriggerDelta (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestSendActionDoNotInsertNewLine
+2026-10-12 13:28:20.323 flutter_desktop_darwin_unittests[29041:181533] ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPluginTest.mm:2064 OCProtocolMockObject(FlutterBinaryMessenger): Method `sendOnChannel:@"flutter/textinput" message:<OCMBlockConstraint: 0x969e750b0>` was not invoked; but was expected at least once.
+[       OK ] FlutterTextInputPluginTest.TestSendActionDoNotInsertNewLine (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.InsertTextHandlesNSAttributedString
+[       OK ] FlutterTextInputPluginTest.InsertTextHandlesNSAttributedString (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenPasswordAutofillSet
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteDisabledWhenPasswordAutofillSet (0 ms)
+[ RUN      ] FlutterTextInputPluginTest.CanWorkWithFlutterTextField
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] FlutterTextInputPluginTest.CanWorkWithFlutterTextField (108 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestClearClientDuringComposing
+[       OK ] FlutterTextInputPluginTest.TestClearClientDuringComposing (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestFirstRectForCharacterRange
+[       OK ] FlutterTextInputPluginTest.TestFirstRectForCharacterRange (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestAutocompleteEnabledWhenAutofillSetNoHint
+[       OK ] FlutterTextInputPluginTest.TestAutocompleteEnabledWhenAutofillSetNoHint (1 ms)
+[----------] 41 tests from FlutterTextInputPluginTest (227 ms total)
+
+[----------] 19 tests from FlutterSurfaceManager
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchFromStandardToWideGamut
+[       OK ] FlutterSurfaceManager.DynamicSwitchFromStandardToWideGamut (1 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.StandardGamutSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectColorSpace
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectColorSpace (0 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchNoOpWhenSameValue
+[       OK ] FlutterSurfaceManager.DynamicSwitchNoOpWhenSameValue (0 ms)
+[ RUN      ] FlutterSurfaceManager.SurfacesAreRecycled
+[       OK ] FlutterSurfaceManager.SurfacesAreRecycled (0 ms)
+[ RUN      ] FlutterSurfaceManager.BackBufferCacheDoesNotLeak
+[       OK ] FlutterSurfaceManager.BackBufferCacheDoesNotLeak (1 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectColorSpace
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectColorSpace (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.LayerManagement
+[       OK ] FlutterSurfaceManager.LayerManagement (0 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectBytesPerElement
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectBytesPerElement (0 ms)
+[ RUN      ] FlutterSurfaceManager.SurfaceCacheDoesNotMixGamutModes
+[       OK ] FlutterSurfaceManager.SurfaceCacheDoesNotMixGamutModes (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectBytesPerElement
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectBytesPerElement (0 ms)
+[ RUN      ] FlutterSurfaceManager.MetalTextureSizeMatchesSurfaceSize
+[       OK ] FlutterSurfaceManager.MetalTextureSizeMatchesSurfaceSize (0 ms)
+[ RUN      ] FlutterSurfaceManager.TestSurfaceLookupFromTexture
+[       OK ] FlutterSurfaceManager.TestSurfaceLookupFromTexture (0 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchFromWideToStandardGamut
+[       OK ] FlutterSurfaceManager.DynamicSwitchFromWideToStandardGamut (0 ms)
+[ RUN      ] FlutterSurfaceManager.BackingStoreCacheSurfaceStuckInUse
+[       OK ] FlutterSurfaceManager.BackingStoreCacheSurfaceStuckInUse (1 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.WideGamutSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutLayerWorksWithoutExplicitContentsFormat
+[       OK ] FlutterSurfaceManager.WideGamutLayerWorksWithoutExplicitContentsFormat (0 ms)
+[----------] 19 tests from FlutterSurfaceManager (10 ms total)
+
+[----------] 4 tests from FlutterDisplayLinkTest
+[ RUN      ] FlutterDisplayLinkTest.ViewAddedToWindowFirst
+[       OK ] FlutterDisplayLinkTest.ViewAddedToWindowFirst (28 ms)
+[ RUN      ] FlutterDisplayLinkTest.ViewRemovedFromWindow
+[       OK ] FlutterDisplayLinkTest.ViewRemovedFromWindow (245 ms)
+[ RUN      ] FlutterDisplayLinkTest.CVDisplayLinkInterval
+2026-10-12 13:28:20.911 flutter_desktop_darwin_unittests[29041:181533] CVDisplayLink Interval: Average: 0.016667s, Max: 0.016682s, Min: 0.016635s
+[       OK ] FlutterDisplayLinkTest.CVDisplayLinkInterval (188 ms)
+[ RUN      ] FlutterDisplayLinkTest.ViewAddedToWindowLater
+[       OK ] FlutterDisplayLinkTest.ViewAddedToWindowLater (33 ms)
+[----------] 4 tests from FlutterDisplayLinkTest (495 ms total)
+
+[----------] 10 tests from FlutterEmbedderExternalTextureTest
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTexture
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTexture (22 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestTextureResolutionImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestTextureResolutionImpeller (10 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTexture
+2026-10-12 13:28:20.978 flutter_desktop_darwin_unittests[29041:181533] Unsupported pixel format: 1714696752
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTexture (2 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVAImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVAImpeller (9 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2 (5 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2Impeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2Impeller (7 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureImpeller (6 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTextureImpeller
+2026-10-12 13:28:21.014 flutter_desktop_darwin_unittests[29041:181533] Unsupported pixel format: 1714696752
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTextureImpeller (5 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestTextureResolution
+[       OK ] FlutterEmbedderExternalTextureTest.TestTextureResolution (2 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA (7 ms)
+[----------] 10 tests from FlutterEmbedderExternalTextureTest (80 ms total)
+
+[----------] 3 tests from FlutterView
+[ RUN      ] FlutterView.CursorUpdateDoesHitTest
+[       OK ] FlutterView.CursorUpdateDoesHitTest (2 ms)
+[ RUN      ] FlutterView.ShouldInheritContentsScaleReturnsYes
+[       OK ] FlutterView.ShouldInheritContentsScaleReturnsYes (0 ms)
+[ RUN      ] FlutterView.CursorUpdateDoesNotOverridePlatformView
+[       OK ] FlutterView.CursorUpdateDoesNotOverridePlatformView (1 ms)
+[----------] 3 tests from FlutterView (4 ms total)
+
+[----------] 3 tests from FlutterChannelKeyResponderTest
+[ RUN      ] FlutterChannelKeyResponderTest.FollowsLayoutMap
+[       OK ] FlutterChannelKeyResponderTest.FollowsLayoutMap (0 ms)
+[ RUN      ] FlutterChannelKeyResponderTest.BasicKeyEvent
+[       OK ] FlutterChannelKeyResponderTest.BasicKeyEvent (0 ms)
+[ RUN      ] FlutterChannelKeyResponderTest.EmptyResponseIsTakenAsHandled
+[       OK ] FlutterChannelKeyResponderTest.EmptyResponseIsTakenAsHandled (0 ms)
+[----------] 3 tests from FlutterChannelKeyResponderTest (0 ms total)
+
+[----------] 1 test from FlutterWindowControllerRetainTest
+[ RUN      ] FlutterWindowControllerRetainTest.WindowControllerDoesNotRetainEngine
+2026-10-12 13:28:21.029 flutter_desktop_darwin_unittests[29041:181533] Fixtures path: /Volumes/Work/s/w/ir/cache/builder/engine/src/out/ci/host_profile_arm64_tests/gen/flutter/shell/platform/darwin/macos/assets
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+Communicating on a dead channel.
+[       OK ] FlutterWindowControllerRetainTest.WindowControllerDoesNotRetainEngine (2277 ms)
+[----------] 1 test from FlutterWindowControllerRetainTest (2277 ms total)
+
+[----------] 1 test from FlutterViewEngineProviderUnittests
+[ RUN      ] FlutterViewEngineProviderUnittests.GetViewReturnsTheCorrectView
+[       OK ] FlutterViewEngineProviderUnittests.GetViewReturnsTheCorrectView (4 ms)
+[----------] 1 test from FlutterViewEngineProviderUnittests (4 ms total)
+
+[----------] 1 test from KeyMappingTest
+[ RUN      ] KeyMappingTest.HasExpectedValues
+[       OK ] KeyMappingTest.HasExpectedValues (0 ms)
+[----------] 1 test from KeyMappingTest (0 ms total)
+
+[----------] 3 tests from FlutterAppDelegateTest
+[ RUN      ] FlutterAppDelegateTest.OperURLsStopsAfterHandled
+[       OK ] FlutterAppDelegateTest.OperURLsStopsAfterHandled (0 ms)
+[ RUN      ] FlutterAppDelegateTest.ReceivesOpenURLs
+[       OK ] FlutterAppDelegateTest.ReceivesOpenURLs (0 ms)
+[ RUN      ] FlutterAppDelegateTest.DoesNotCallDelegatesWithoutHandler
+[       OK ] FlutterAppDelegateTest.DoesNotCallDelegatesWithoutHandler (0 ms)
+[----------] 3 tests from FlutterAppDelegateTest (0 ms total)
+
+[----------] 14 tests from FlutterAppLifecycleDelegateTest
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillTerminate
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillTerminate (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidBecomeActive
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidBecomeActive (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidChangeOcclusionState
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidChangeOcclusionState (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillHide
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillHide (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidHide
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidHide (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.ReleasesDelegateOnDealloc
+[       OK ] FlutterAppLifecycleDelegateTest.ReleasesDelegateOnDealloc (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidResignActive
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidResignActive (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidChangeScreenParameters
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidChangeScreenParameters (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillResignActive
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillResignActive (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillBecomeActive
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillBecomeActive (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillUnhide
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillUnhide (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToWillFinishLaunching
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToWillFinishLaunching (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidFinishLaunching
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidFinishLaunching (0 ms)
+[ RUN      ] FlutterAppLifecycleDelegateTest.RespondsToDidUnhide
+[       OK ] FlutterAppLifecycleDelegateTest.RespondsToDidUnhide (0 ms)
+[----------] 14 tests from FlutterAppLifecycleDelegateTest (1 ms total)
+
+[----------] 40 tests from FlutterEngineTest
+[ RUN      ] FlutterEngineTest.DisplaySizeIsInPhysicalPixel
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.DisplaySizeIsInPhysicalPixel (21 ms)
+[ RUN      ] FlutterEngineTest.ProducesAccessibilityTreeWhenAddingViews
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.ProducesAccessibilityTreeWhenAddingViews (14 ms)
+[ RUN      ] FlutterEngineTest.CompositorIgnoresUnknownView
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CompositorIgnoresUnknownView (11 ms)
+[ RUN      ] FlutterEngineTest.ResponseAfterEngineDied
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.ResponseAfterEngineDied (231 ms)
+[ RUN      ] FlutterEngineTest.HasNonNullExecutableName
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.HasNonNullExecutableName (26 ms)
+[ RUN      ] FlutterEngineTest.PublishedValueNSNullIfNoPublishedValue
+[       OK ] FlutterEngineTest.PublishedValueNSNullIfNoPublishedValue (1 ms)
+[ RUN      ] FlutterEngineTest.CanLogToStdout
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanLogToStdout (15 ms)
+[ RUN      ] FlutterEngineTest.CanToggleAccessibilityWhenHeadless
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanToggleAccessibilityWhenHeadless (12 ms)
+[ DISABLED ] FlutterEngineTest.DISABLED_BackgroundIsBlack
+[ RUN      ] FlutterEngineTest.PublishedValueNilForUnknownPlugin
+[       OK ] FlutterEngineTest.PublishedValueNilForUnknownPlugin (1 ms)
+[ RUN      ] FlutterEngineTest.DartEntrypointArguments
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.DartEntrypointArguments (10 ms)
+[ RUN      ] FlutterEngineTest.ForwardsPluginDelegateRegistration
+[       OK ] FlutterEngineTest.ForwardsPluginDelegateRegistration (1 ms)
+[ RUN      ] FlutterEngineTest.ManageControllersIfInitiatedByEngine
+[       OK ] FlutterEngineTest.ManageControllersIfInitiatedByEngine (236 ms)
+[ RUN      ] FlutterEngineTest.FlutterBinaryMessengerDoesNotRetainEngine
+[       OK ] FlutterEngineTest.FlutterBinaryMessengerDoesNotRetainEngine (0 ms)
+[ RUN      ] FlutterEngineTest.EnableSDFsAlwaysReturnsYes
+[       OK ] FlutterEngineTest.EnableSDFsAlwaysReturnsYes (0 ms)
+[ RUN      ] FlutterEngineTest.NotificationsUpdateDisplays
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.NotificationsUpdateDisplays (9 ms)
+[ RUN      ] FlutterEngineTest.RemovingViewDisposesCompositorResources
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.RemovingViewDisposesCompositorResources (7 ms)
+[ RUN      ] FlutterEngineTest.RunWithEntrypointUpdatesDisplayConfig
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.RunWithEntrypointUpdatesDisplayConfig (8 ms)
+[ RUN      ] FlutterEngineTest.HandleLifecycleStates
+[       OK ] FlutterEngineTest.HandleLifecycleStates (17 ms)
+[ RUN      ] FlutterEngineTest.MessengerSend
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.MessengerSend (6 ms)
+[ RUN      ] FlutterEngineTest.HandlesTerminationRequest
+2026-10-12 13:28:23.953 flutter_desktop_darwin_unittests[29041:181533] Method call returned error[Error]: Failed Details
+[       OK ] FlutterEngineTest.HandlesTerminationRequest (1 ms)
+[ RUN      ] FlutterEngineTest.Switches
+[       OK ] FlutterEngineTest.Switches (0 ms)
+[ DISABLED ] FlutterEngineTest.DISABLED_CanOverrideBackgroundColor
+[ RUN      ] FlutterEngineTest.RegistrarCanReadValuePublishedByAnotherPlugin
+[       OK ] FlutterEngineTest.RegistrarCanReadValuePublishedByAnotherPlugin (0 ms)
+[ RUN      ] FlutterEngineTest.HasStringsWhenPasteboardEmpty
+[       OK ] FlutterEngineTest.HasStringsWhenPasteboardEmpty (1 ms)
+[ RUN      ] FlutterEngineTest.CanGetEngineForId
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanGetEngineForId (6 ms)
+[ RUN      ] FlutterEngineTest.RegistrarForwardViewControllerLookUpToEngine
+[       OK ] FlutterEngineTest.RegistrarForwardViewControllerLookUpToEngine (0 ms)
+[ RUN      ] FlutterEngineTest.CanToggleAccessibility
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanToggleAccessibility (7 ms)
+[ RUN      ] FlutterEngineTest.NativeCallbacks
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.NativeCallbacks (6 ms)
+[ RUN      ] FlutterEngineTest.CanLaunch
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.CanLaunch (6 ms)
+[ RUN      ] FlutterEngineTest.HasStringsWhenPasteboardFull
+[       OK ] FlutterEngineTest.HasStringsWhenPasteboardFull (1 ms)
+[ RUN      ] FlutterEngineTest.HandleAccessibilityEvent
+[       OK ] FlutterEngineTest.HandleAccessibilityEvent (1 ms)
+[ RUN      ] FlutterEngineTest.ResponseFromBackgroundThread
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.ResponseFromBackgroundThread (251 ms)
+[ RUN      ] FlutterEngineTest.MessengerCleanupConnectionWorks
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.MessengerCleanupConnectionWorks (22 ms)
+[ RUN      ] FlutterEngineTest.UnregistersPluginsOnEngineDestruction
+[       OK ] FlutterEngineTest.UnregistersPluginsOnEngineDestruction (4 ms)
+[ RUN      ] FlutterEngineTest.ReportsHourFormat
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+objc[29041]: Weak reference loaded from 0x16f5e8950 contains 0x9673dee00 which is not in the weak references table
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+objc[29041]: Weak reference loaded from 0x16f5e8950 contains 0x9673df980 which is not in the weak references table
+[       OK ] FlutterEngineTest.ReportsHourFormat (29 ms)
+[ RUN      ] FlutterEngineTest.ManageControllersIfInitiatedByController
+[       OK ] FlutterEngineTest.ManageControllersIfInitiatedByController (1 ms)
+[ RUN      ] FlutterEngineTest.ResizeSynchronizerNotBlockingRasterThreadAfterShutdown
+[       OK ] FlutterEngineTest.ResizeSynchronizerNotBlockingRasterThreadAfterShutdown (0 ms)
+[ RUN      ] FlutterEngineTest.PublishedValueReturnsLastPublished
+[       OK ] FlutterEngineTest.PublishedValueReturnsLastPublished (0 ms)
+[ RUN      ] FlutterEngineTest.Compositor
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterEngineTest.Compositor (13 ms)
+[ RUN      ] FlutterEngineTest.IgnoresTerminationRequestIfNotFlutterAppDelegate
+[       OK ] FlutterEngineTest.IgnoresTerminationRequestIfNotFlutterAppDelegate (1 ms)
+[ RUN      ] FlutterEngineTest.FlutterTextureRegistryDoesNotReturnEngine
+[       OK ] FlutterEngineTest.FlutterTextureRegistryDoesNotReturnEngine (0 ms)
+[----------] 40 tests from FlutterEngineTest (999 ms total)
+
+[----------] 14 tests from FlutterMutatorViewTest
+[ RUN      ] FlutterMutatorViewTest.BasicFrameIsCorrect
+[       OK ] FlutterMutatorViewTest.BasicFrameIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.PathClipViewsAreAddedAndRemoved
+[       OK ] FlutterMutatorViewTest.PathClipViewsAreAddedAndRemoved (0 ms)
+[ RUN      ] FlutterMutatorViewTest.FrameWithTightClipAndTransformIsCorrect
+[       OK ] FlutterMutatorViewTest.FrameWithTightClipAndTransformIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.RoundRectClipsToSimpleRectangle
+[       OK ] FlutterMutatorViewTest.RoundRectClipsToSimpleRectangle (0 ms)
+[ RUN      ] FlutterMutatorViewTest.ViewsSetIsFlipped
+[       OK ] FlutterMutatorViewTest.ViewsSetIsFlipped (0 ms)
+[ RUN      ] FlutterMutatorViewTest.FrameWithLooseClipIsCorrect
+[       OK ] FlutterMutatorViewTest.FrameWithLooseClipIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.FrameWithTightClipIsCorrect
+[       OK ] FlutterMutatorViewTest.FrameWithTightClipIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.CursorCoordinator
+[       OK ] FlutterMutatorViewTest.CursorCoordinator (503 ms)
+[ RUN      ] FlutterMutatorViewTest.RectsClipsToPathWhenRotated
+[       OK ] FlutterMutatorViewTest.RectsClipsToPathWhenRotated (1 ms)
+[ RUN      ] FlutterMutatorViewTest.HitTestIgnoreRegion
+[       OK ] FlutterMutatorViewTest.HitTestIgnoreRegion (0 ms)
+[ RUN      ] FlutterMutatorViewTest.TransformedFrameIsCorrect
+[       OK ] FlutterMutatorViewTest.TransformedFrameIsCorrect (0 ms)
+[ RUN      ] FlutterMutatorViewTest.ReparentingPlatformView
+[       OK ] FlutterMutatorViewTest.ReparentingPlatformView (0 ms)
+[ RUN      ] FlutterMutatorViewTest.RoundRectClipsToPath
+[       OK ] FlutterMutatorViewTest.RoundRectClipsToPath (1 ms)
+[ RUN      ] FlutterMutatorViewTest.ClipsToBounds
+[       OK ] FlutterMutatorViewTest.ClipsToBounds (0 ms)
+[----------] 14 tests from FlutterMutatorViewTest (511 ms total)
+
+[----------] 9 tests from FlutterKeyboardManagerUnittests
+[ RUN      ] FlutterKeyboardManagerUnittests.DoublePrimaryResponder
+[       OK ] FlutterKeyboardManagerUnittests.DoublePrimaryResponder (15 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.SingleFinalResponder
+[       OK ] FlutterKeyboardManagerUnittests.SingleFinalResponder (12 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.CorrectLogicalKeyForLayouts
+[       OK ] FlutterKeyboardManagerUnittests.CorrectLogicalKeyForLayouts (30 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.KeyboardChannelGetPressedState
+[       OK ] FlutterKeyboardManagerUnittests.KeyboardChannelGetPressedState (5 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.EmptyNextResponder
+[       OK ] FlutterKeyboardManagerUnittests.EmptyNextResponder (4 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.RacingConditionBetweenKeyAndText
+[       OK ] FlutterKeyboardManagerUnittests.RacingConditionBetweenKeyAndText (5 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.SinglePrimaryResponder
+[       OK ] FlutterKeyboardManagerUnittests.SinglePrimaryResponder (4 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.GetPressedState
+[       OK ] FlutterKeyboardManagerUnittests.GetPressedState (3 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.ShouldNotHoldStrongReferenceToDelegate
+[       OK ] FlutterKeyboardManagerUnittests.ShouldNotHoldStrongReferenceToDelegate (0 ms)
+[----------] 9 tests from FlutterKeyboardManagerUnittests (80 ms total)
+
+[----------] 13 tests from FlutterViewControllerMockEngineTest
+[ RUN      ] FlutterViewControllerMockEngineTest.TestCtrlTabKeyEventIsPropagated
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestCtrlTabKeyEventIsPropagated (11 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsAreSentToFramework
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsAreSentToFramework (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsArePropagatedIfNotHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsArePropagatedIfNotHandled (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.testFlutterViewIsConfigured
+[       OK ] FlutterViewControllerMockEngineTest.testFlutterViewIsConfigured (1 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyboardIsRestartedOnEngineRestart
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyboardIsRestartedOnEngineRestart (7 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestTrackpadGesturesAreSentToFramework
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:24.944 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:24.945 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+[       OK ] FlutterViewControllerMockEngineTest.TestTrackpadGesturesAreSentToFramework (7 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestFlagsChangedEventsArePropagatedIfNotHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestFlagsChangedEventsArePropagatedIfNotHandled (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsAreNotPropagatedIfHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsAreNotPropagatedIfHandled (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestMouseDownUpEventsSentToNextResponder
+[       OK ] FlutterViewControllerMockEngineTest.TestMouseDownUpEventsSentToNextResponder (0 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestmouseAndGestureEventsAreHandledSeparately
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+[       OK ] FlutterViewControllerMockEngineTest.TestmouseAndGestureEventsAreHandledSeparately (1 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEquivalentIsPassedToTextInputPlugin
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEquivalentIsPassedToTextInputPlugin (9 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestModifierKeysAreSynthesizedOnMouseMove
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestModifierKeysAreSynthesizedOnMouseMove (10 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.testViewWillAppearCalledMultipleTimes
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.testViewWillAppearCalledMultipleTimes (7 ms)
+[----------] 13 tests from FlutterViewControllerMockEngineTest (91 ms total)
+
+[==========] 235 tests from 26 test suites ran. (10362 ms total)
+[  PASSED  ] 235 tests.
+
+  YOU HAVE 2 DISABLED TESTS
+
+
+Repeating all tests (iteration 2) . . .
+
+Note: Randomizing tests' orders with a seed of 40557 .
+[==========] Running 235 tests from 26 test suites.
+[----------] 2 tests from AccessibilityBridgeMacTest
+[ RUN      ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenNoWindow
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenNoWindow (0 ms)
+[ RUN      ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenHeadless
+embedder.cc (3242): 'FlutterEngineUpdateSemanticsEnabled' returned 'kInvalidArguments'. Invalid engine handle.
+[       OK ] AccessibilityBridgeMacTest.DoesNotSendAccessibilityCreateNotificationWhenHeadless (0 ms)
+[----------] 2 tests from AccessibilityBridgeMacTest (0 ms total)
+
+[----------] 3 tests from FlutterView
+[ RUN      ] FlutterView.CursorUpdateDoesNotOverridePlatformView
+[       OK ] FlutterView.CursorUpdateDoesNotOverridePlatformView (1 ms)
+[ RUN      ] FlutterView.CursorUpdateDoesHitTest
+[       OK ] FlutterView.CursorUpdateDoesHitTest (0 ms)
+[ RUN      ] FlutterView.ShouldInheritContentsScaleReturnsYes
+[       OK ] FlutterView.ShouldInheritContentsScaleReturnsYes (0 ms)
+[----------] 3 tests from FlutterView (2 ms total)
+
+[----------] 2 tests from FlutterWindowControllerSizeTest
+[ RUN      ] FlutterWindowControllerSizeTest.SizedToContentResizable
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterWindowControllerSizeTest.SizedToContentResizable (41 ms)
+[ RUN      ] FlutterWindowControllerSizeTest.SizedToContentNotResizable
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterWindowControllerSizeTest.SizedToContentNotResizable (51 ms)
+[----------] 2 tests from FlutterWindowControllerSizeTest (92 ms total)
+
+[----------] 4 tests from FlutterDisplayLinkTest
+[ RUN      ] FlutterDisplayLinkTest.ViewAddedToWindowLater
+[       OK ] FlutterDisplayLinkTest.ViewAddedToWindowLater (18 ms)
+[ RUN      ] FlutterDisplayLinkTest.CVDisplayLinkInterval
+2026-10-12 13:28:25.294 flutter_desktop_darwin_unittests[29041:181533] CVDisplayLink Interval: Average: 0.016666s, Max: 0.016683s, Min: 0.016655s
+[       OK ] FlutterDisplayLinkTest.CVDisplayLinkInterval (183 ms)
+[ RUN      ] FlutterDisplayLinkTest.ViewAddedToWindowFirst
+[       OK ] FlutterDisplayLinkTest.ViewAddedToWindowFirst (31 ms)
+[ RUN      ] FlutterDisplayLinkTest.ViewRemovedFromWindow
+[       OK ] FlutterDisplayLinkTest.ViewRemovedFromWindow (180 ms)
+[----------] 4 tests from FlutterDisplayLinkTest (414 ms total)
+
+[----------] 9 tests from FlutterKeyboardManagerUnittests
+[ RUN      ] FlutterKeyboardManagerUnittests.GetPressedState
+[       OK ] FlutterKeyboardManagerUnittests.GetPressedState (16 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.ShouldNotHoldStrongReferenceToDelegate
+[       OK ] FlutterKeyboardManagerUnittests.ShouldNotHoldStrongReferenceToDelegate (0 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.SinglePrimaryResponder
+[       OK ] FlutterKeyboardManagerUnittests.SinglePrimaryResponder (9 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.CorrectLogicalKeyForLayouts
+[       OK ] FlutterKeyboardManagerUnittests.CorrectLogicalKeyForLayouts (33 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.SingleFinalResponder
+[       OK ] FlutterKeyboardManagerUnittests.SingleFinalResponder (5 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.DoublePrimaryResponder
+[       OK ] FlutterKeyboardManagerUnittests.DoublePrimaryResponder (5 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.RacingConditionBetweenKeyAndText
+[       OK ] FlutterKeyboardManagerUnittests.RacingConditionBetweenKeyAndText (4 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.KeyboardChannelGetPressedState
+[       OK ] FlutterKeyboardManagerUnittests.KeyboardChannelGetPressedState (4 ms)
+[ RUN      ] FlutterKeyboardManagerUnittests.EmptyNextResponder
+[       OK ] FlutterKeyboardManagerUnittests.EmptyNextResponder (3 ms)
+[----------] 9 tests from FlutterKeyboardManagerUnittests (83 ms total)
+
+[----------] 10 tests from FlutterPlatformViewController
+[ RUN      ] FlutterPlatformViewController.TestReset
+[       OK ] FlutterPlatformViewController.TestReset (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreateAndDispose
+[       OK ] FlutterPlatformViewController.TestCreateAndDispose (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreatePlatformViewNoMatchingViewType
+[       OK ] FlutterPlatformViewController.TestCreatePlatformViewNoMatchingViewType (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestAcceptGesture
+[       OK ] FlutterPlatformViewController.TestAcceptGesture (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRegisterPlatformViewFactoryAndCreate
+[       OK ] FlutterPlatformViewController.TestRegisterPlatformViewFactoryAndCreate (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestAcceptGestureOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestAcceptGestureOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRejectGesture
+[       OK ] FlutterPlatformViewController.TestRejectGesture (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestRejectGestureOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestRejectGestureOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestDisposeOnMissingViewId
+[       OK ] FlutterPlatformViewController.TestDisposeOnMissingViewId (0 ms)
+[ RUN      ] FlutterPlatformViewController.TestCreatePlatformViewInvalidViewType
+[       OK ] FlutterPlatformViewController.TestCreatePlatformViewInvalidViewType (0 ms)
+[----------] 10 tests from FlutterPlatformViewController (0 ms total)
+
+[----------] 1 test from FlutterMenuPluginTest
+[ RUN      ] FlutterMenuPluginTest.TestSetMenu
+[       OK ] FlutterMenuPluginTest.TestSetMenu (1 ms)
+[----------] 1 test from FlutterMenuPluginTest (1 ms total)
+
+[----------] 1 test from FlutterWindowControllerRetainTest
+[ RUN      ] FlutterWindowControllerRetainTest.WindowControllerDoesNotRetainEngine
+2026-10-12 13:28:25.592 flutter_desktop_darwin_unittests[29041:181533] Fixtures path: /Volumes/Work/s/w/ir/cache/builder/engine/src/out/ci/host_profile_arm64_tests/gen/flutter/shell/platform/darwin/macos/assets
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterWindowControllerRetainTest.WindowControllerDoesNotRetainEngine (2090 ms)
+[----------] 1 test from FlutterWindowControllerRetainTest (2090 ms total)
+
+[----------] 7 tests from FlutterViewControllerTest
+[ RUN      ] FlutterViewControllerTest.testLookupKeyAssets
+[       OK ] FlutterViewControllerTest.testLookupKeyAssets (6 ms)
+[ RUN      ] FlutterViewControllerTest.ReparentsPluginWhenAccessibilityDisabled
+[       OK ] FlutterViewControllerTest.ReparentsPluginWhenAccessibilityDisabled (4 ms)
+[ RUN      ] FlutterViewControllerTest.testLookupKeyAssetsWithPackage
+[       OK ] FlutterViewControllerTest.testLookupKeyAssetsWithPackage (4 ms)
+[ RUN      ] FlutterViewControllerTest.CanSetMouseTrackingModeBeforeViewLoaded
+[       OK ] FlutterViewControllerTest.CanSetMouseTrackingModeBeforeViewLoaded (0 ms)
+[ RUN      ] FlutterViewControllerTest.HasViewThatHidesOtherViewsInAccessibility
+[       OK ] FlutterViewControllerTest.HasViewThatHidesOtherViewsInAccessibility (26 ms)
+[ RUN      ] FlutterViewControllerTest.FlutterViewAcceptsFirstMouse
+[       OK ] FlutterViewControllerTest.FlutterViewAcceptsFirstMouse (17 ms)
+[ RUN      ] FlutterViewControllerTest.testViewControllerIsReleased
+[       OK ] FlutterViewControllerTest.testViewControllerIsReleased (1 ms)
+[----------] 7 tests from FlutterViewControllerTest (62 ms total)
+
+[----------] 10 tests from FlutterEmbedderExternalTextureTest
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2Impeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2Impeller (5 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTexture
+2026-10-12 13:28:27.751 flutter_desktop_darwin_unittests[29041:181533] Unsupported pixel format: 1714696752
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTexture (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTexture
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTexture (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTextureImpeller
+2026-10-12 13:28:27.757 flutter_desktop_darwin_unittests[29041:181533] Unsupported pixel format: 1714696752
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateUnsupportedExternalTextureImpeller (4 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureImpeller (3 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVAImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVAImpeller (3 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2
+[       OK ] FlutterEmbedderExternalTextureTest.TestPopulateExternalTextureYUVA2 (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestTextureResolution
+[       OK ] FlutterEmbedderExternalTextureTest.TestTextureResolution (1 ms)
+[ RUN      ] FlutterEmbedderExternalTextureTest.TestTextureResolutionImpeller
+[       OK ] FlutterEmbedderExternalTextureTest.TestTextureResolutionImpeller (3 ms)
+[----------] 10 tests from FlutterEmbedderExternalTextureTest (28 ms total)
+
+[----------] 3 tests from FlutterVSyncWaiterTest
+[ RUN      ] FlutterVSyncWaiterTest.VSyncWorks
+[       OK ] FlutterVSyncWaiterTest.VSyncWorks (243 ms)
+[ RUN      ] FlutterVSyncWaiterTest.FirstVSyncIsSynthesized
+[       OK ] FlutterVSyncWaiterTest.FirstVSyncIsSynthesized (272 ms)
+[ RUN      ] FlutterVSyncWaiterTest.RequestsInitialVSync
+[       OK ] FlutterVSyncWaiterTest.RequestsInitialVSync (0 ms)
+[----------] 3 tests from FlutterVSyncWaiterTest (516 ms total)
+
+[----------] 19 tests from FlutterSurfaceManager
+[ RUN      ] FlutterSurfaceManager.MetalTextureSizeMatchesSurfaceSize
+[       OK ] FlutterSurfaceManager.MetalTextureSizeMatchesSurfaceSize (2 ms)
+[ RUN      ] FlutterSurfaceManager.BackBufferCacheDoesNotLeak
+[       OK ] FlutterSurfaceManager.BackBufferCacheDoesNotLeak (5 ms)
+[ RUN      ] FlutterSurfaceManager.BackingStoreCacheSurfaceStuckInUse
+[       OK ] FlutterSurfaceManager.BackingStoreCacheSurfaceStuckInUse (5 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectPixelFormat (1 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.WideGamutSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchFromStandardToWideGamut
+[       OK ] FlutterSurfaceManager.DynamicSwitchFromStandardToWideGamut (1 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectBytesPerElement
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectBytesPerElement (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectBytesPerElement
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectBytesPerElement (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectColorSpace
+[       OK ] FlutterSurfaceManager.WideGamutIOSurfaceHasCorrectColorSpace (0 ms)
+[ RUN      ] FlutterSurfaceManager.TestSurfaceLookupFromTexture
+[       OK ] FlutterSurfaceManager.TestSurfaceLookupFromTexture (0 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutSurfaceHasCorrectPixelFormat
+[       OK ] FlutterSurfaceManager.StandardGamutSurfaceHasCorrectPixelFormat (0 ms)
+[ RUN      ] FlutterSurfaceManager.WideGamutLayerWorksWithoutExplicitContentsFormat
+[       OK ] FlutterSurfaceManager.WideGamutLayerWorksWithoutExplicitContentsFormat (1 ms)
+[ RUN      ] FlutterSurfaceManager.SurfacesAreRecycled
+[       OK ] FlutterSurfaceManager.SurfacesAreRecycled (1 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchNoOpWhenSameValue
+[       OK ] FlutterSurfaceManager.DynamicSwitchNoOpWhenSameValue (1 ms)
+[ RUN      ] FlutterSurfaceManager.SurfaceCacheDoesNotMixGamutModes
+[       OK ] FlutterSurfaceManager.SurfaceCacheDoesNotMixGamutModes (1 ms)
+[ RUN      ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectColorSpace
+[       OK ] FlutterSurfaceManager.StandardGamutIOSurfaceHasCorrectColorSpace (0 ms)
+[ RUN      ] FlutterSurfaceManager.LayerManagement
+[       OK ] FlutterSurfaceManager.LayerManagement (1 ms)
+[ RUN      ] FlutterSurfaceManager.DynamicSwitchFromWideToStandardGamut
+[       OK ] FlutterSurfaceManager.DynamicSwitchFromWideToStandardGamut (1 ms)
+[----------] 19 tests from FlutterSurfaceManager (31 ms total)
+
+[----------] 14 tests from FlutterEmbedderKeyResponderUnittests
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SpecialModiferFlags
+[       OK ] FlutterEmbedderKeyResponderUnittests.SpecialModiferFlags (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeForDuplicateDownEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeForDuplicateDownEvent (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ConvertAbruptRepeatEventsToDown
+[       OK ] FlutterEmbedderKeyResponderUnittests.ConvertAbruptRepeatEventsToDown (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnCapsLock
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnCapsLock (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.MultipleCharacters
+[       OK ] FlutterEmbedderKeyResponderUnittests.MultipleCharacters (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEventsInNormalEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynthesizeMissedModifierEventsInNormalEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.IgnoreDuplicateUpEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.IgnoreDuplicateUpEvent (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.NonAsciiCharacters
+[       OK ] FlutterEmbedderKeyResponderUnittests.NonAsciiCharacters (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.IdentifyLeftAndRightModifiers
+[       OK ] FlutterEmbedderKeyResponderUnittests.IdentifyLeftAndRightModifiers (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ToggleModifiersDuringKeyTap
+[       OK ] FlutterEmbedderKeyResponderUnittests.ToggleModifiersDuringKeyTap (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnNormalKey
+[       OK ] FlutterEmbedderKeyResponderUnittests.SynchronizeCapsLockStateOnNormalKey (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.ConvertCapsLockEvents
+[       OK ] FlutterEmbedderKeyResponderUnittests.ConvertCapsLockEvents (0 ms)
+[ RUN      ] FlutterEmbedderKeyResponderUnittests.BasicKeyEvent
+[       OK ] FlutterEmbedderKeyResponderUnittests.BasicKeyEvent (0 ms)
+[----------] 14 tests from FlutterEmbedderKeyResponderUnittests (1 ms total)
+
+[----------] 13 tests from FlutterViewControllerMockEngineTest
+[ RUN      ] FlutterViewControllerMockEngineTest.TestmouseAndGestureEventsAreHandledSeparately
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (2841): 'FlutterEngineSendPointerEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+[       OK ] FlutterViewControllerMockEngineTest.TestmouseAndGestureEventsAreHandledSeparately (3 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsArePropagatedIfNotHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsArePropagatedIfNotHandled (17 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyboardIsRestartedOnEngineRestart
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyboardIsRestartedOnEngineRestart (12 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestFlagsChangedEventsArePropagatedIfNotHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestFlagsChangedEventsArePropagatedIfNotHandled (10 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestModifierKeysAreSynthesizedOnMouseMove
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestModifierKeysAreSynthesizedOnMouseMove (11 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.testFlutterViewIsConfigured
+[       OK ] FlutterViewControllerMockEngineTest.testFlutterViewIsConfigured (1 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEquivalentIsPassedToTextInputPlugin
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEquivalentIsPassedToTextInputPlugin (9 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestMouseDownUpEventsSentToNextResponder
+[       OK ] FlutterViewControllerMockEngineTest.TestMouseDownUpEventsSentToNextResponder (1 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsAreNotPropagatedIfHandled
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsAreNotPropagatedIfHandled (8 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.testViewWillAppearCalledMultipleTimes
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.testViewWillAppearCalledMultipleTimes (7 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestKeyEventsAreSentToFramework
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestKeyEventsAreSentToFramework (7 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestCtrlTabKeyEventIsPropagated
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+[       OK ] FlutterViewControllerMockEngineTest.TestCtrlTabKeyEventIsPropagated (9 ms)
+[ RUN      ] FlutterViewControllerMockEngineTest.TestTrackpadGesturesAreSentToFramework
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:28.430 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+embedder.cc (2997): 'FlutterEngineSendKeyEvent' returned 'kInvalidArguments'. Engine handle was invalid.
+embedder.cc (3104): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-12 13:28:28.430 flutter_desktop_darwin_unittests[29041:181533] Failed to create a FlutterPlatformMessageResponseHandle (2)
+[       OK ] FlutterViewControllerMockEngineTest.TestTrackpadGesturesAreSentToFramework (6 ms)
+[----------] 13 tests from FlutterViewControllerMockEngineTest (110 ms total)
+
+[----------] 41 tests from FlutterTextInputPluginTest
+[ RUN      ] FlutterTextInputPluginTest.InsertTextWithCollapsedSelectionInsideComposing
+[       OK ] FlutterTextInputPluginTest.InsertTextWithCollapsedSelectionInsideComposing (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestComposingRegionRemovedByFramework
+[       OK ] FlutterTextInputPluginTest.TestComposingRegionRemovedByFramework (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeWithEsotericAffineTransform
+[       OK ] FlutterTextInputPluginTest.TestFirstRectForCharacterRangeWithEsotericAffineTransform (1 ms)
+[ RUN      ] FlutterTextInputPluginTest.CanWorkWithFlutterTextField
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+Traceback (most recent call last):
+  File "/Volumes/Work/s/w/ir/cache/builder/engine/src/flutter/testing/run_tests.py", line 1516, in <module>
+    sys_exit(main())
+             ^^^^^^
+  File "/Volumes/Work/s/w/ir/cache/builder/engine/src/flutter/testing/run_tests.py", line 1435, in main
+    run_cc_tests(build_dir, engine_filter, args.coverage, args.engine_capture_core_dump)
+  File "/Volumes/Work/s/w/ir/cache/builder/engine/src/flutter/testing/run_tests.py", line 562, in run_cc_tests
+    run_engine_executable(
+  File "/Volumes/Work/s/w/ir/cache/builder/engine/src/flutter/testing/run_tests.py", line 332, in run_engine_executable
+    run_cmd(
+  File "/Volumes/Work/s/w/ir/cache/builder/engine/src/flutter/testing/run_tests.py", line 135, in run_cmd
+    raise RuntimeError(
+RuntimeError: Command "/Volumes/Work/s/w/ir/cache/builder/engine/src/out/ci/host_profile_arm64_tests/flutter_desktop_darwin_unittests --gtest_repeat=2 --gtest_shuffle" (in /Volumes/Work/s/w/ir/cache/builder/engine/src) exited with code -5.
+
+
+
+This is LogDog
+Rendering took 0.17s
