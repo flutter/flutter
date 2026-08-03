@@ -634,7 +634,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
   tonic::DartPersistentValue notify_texture_frame_available_;
-  tonic::DartPersistentValue mark_all_views_dirty_;
+  tonic::DartPersistentValue mark_all_views_need_render_;
 
   uint64_t last_frame_number_ = 0;
   int64_t last_microseconds_ = 0;
