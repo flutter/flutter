@@ -198,6 +198,64 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
   );
 
   test(
+    'dry run prints JS interop migration footer on dart:svg and dart:js_util unsupported findings',
+    () => testbed.run(() async {
+      processManager.addCommand(
+        FakeCommand(
+          command: commandArgs,
+          exitCode: 254,
+          stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:foo/some/path.dart 6:1 - dart:svg unsupported (5)
+package:bar/some/path.dart 12:4 - dart:js_util unsupported (6)
+''',
+        ),
+      );
+      final Dart2WasmTarget target = createTarget();
+      await target.build(environment);
+
+      final logger = environment.logger as BufferLogger;
+      expect(
+        logger.statusText,
+        contains('Note: WebAssembly compilation failed due to legacy web imports.'),
+      );
+      expect(
+        logger.statusText,
+        contains(
+          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.',
+        ),
+      );
+    }),
+  );
+
+  test(
+    'dry run does not print JS interop migration footer on non-web unsupported libraries like dart:ffi or incidental filenames',
+    () => testbed.run(() async {
+      processManager.addCommand(
+        FakeCommand(
+          command: commandArgs,
+          exitCode: 254,
+          stdout: '''
+Found incompatibilities with WebAssembly.
+
+package:fizz/some/path.dart 80:2 - dart:ffi unsupported (3)
+package:foo/some/my_dart_html_wrapper.dart 103:20 - dart:io unsupported (4)
+''',
+        ),
+      );
+      final Dart2WasmTarget target = createTarget();
+      await target.build(environment);
+
+      final logger = environment.logger as BufferLogger;
+      expect(
+        logger.statusText,
+        isNot(contains('Note: WebAssembly compilation failed due to legacy web imports.')),
+      );
+    }),
+  );
+
+  test(
     'dry run findings public packages',
     () => testbed.run(() async {
       processManager.addCommand(

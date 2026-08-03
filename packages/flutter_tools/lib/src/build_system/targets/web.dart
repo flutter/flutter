@@ -592,11 +592,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
     );
   }
 
+  static final RegExp _kLegacyImportErrorPattern = RegExp(
+    "(?:Dart library|The unavailable library) '(${kLegacyWebLibraries.join('|')})'|"
+    '(${kLegacyWebLibraries.join('|')}) unsupported',
+  );
+
   void _checkForLegacyWebImports(Environment environment, String stdout, String stderr) {
-    if (stdout.contains('dart:html') ||
-        stderr.contains('dart:html') ||
-        stdout.contains('package:js') ||
-        stderr.contains('package:js')) {
+    if (_kLegacyImportErrorPattern.hasMatch(stdout) ||
+        _kLegacyImportErrorPattern.hasMatch(stderr)) {
       environment.logger.printStatus(
         'Note: WebAssembly compilation failed due to legacy web imports.\n'
         'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
