@@ -234,6 +234,7 @@ TaskFunction createPrimitiveShapeTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/primitive_shape_test',
     'integration_test/primitive_shape_test.dart',
+    createPlatforms: <String>['windows'],
   ).call;
 }
 
