@@ -469,8 +469,9 @@ void ContextMTL::DrainPendingImageUploads() {
   if (pending_count == 0u) {
     return;
   }
+  const std::string pending_count_string = std::to_string(pending_count);
   TRACE_EVENT1("impeller", "ImpellerMetalImageUploadScheduleDrain",
-               "PendingCount", std::to_string(pending_count).c_str());
+               "PendingCount", pending_count_string.c_str());
   pending_image_uploads_.WaitUntilScheduled();
 }
 
