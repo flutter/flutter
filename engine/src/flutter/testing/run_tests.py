@@ -1335,7 +1335,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       action='store',
       default=None,
       help='The iOS simulator runtime to run tests on '
-           '(example: "com.apple.CoreSimulator.SimRuntime.iOS-26-5")'
+      '(example: "com.apple.CoreSimulator.SimRuntime.iOS-26-5")'
   )
   parser.add_argument(
       '--verbose-dart-snapshot',
