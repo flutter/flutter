@@ -1593,8 +1593,8 @@ typedef struct {
 ///                 added to this struct. New fields will continue to be added
 ///                 to `FlutterSemanticsNode2`.
 ///
-/// Frozen because adding members would break the ABI of
-/// `FlutterSemanticsUpdate`.
+// Frozen because adding members would break the ABI of
+// `FlutterSemanticsUpdate`.
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterSemanticsNode).
   size_t struct_size;
