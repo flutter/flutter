@@ -699,7 +699,7 @@ window.\$dartLoader.loader.nextAttempt();
     try {
       final ProcessResult res = globals.processManager.runSync(<String>['df', '-h', '/dev/shm']);
       _logger.printStatus(res.stdout as String);
-    } catch (e) {
+    } on Object catch (e) {
       _logger.printStatus('Failed to run df: $e');
     }
     _logger.printTrace('Serving tests at $hostUrl');
