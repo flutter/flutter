@@ -7,6 +7,7 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../macos/xcode.dart';
 
+/// A class to handle preparing the device support for iOS devices.
 class IOSDeviceSupport {
   IOSDeviceSupport({
     required Logger logger,
@@ -20,20 +21,35 @@ class IOSDeviceSupport {
   final ProcessUtils _processUtils;
   final Xcode? _xcode;
 
+  /// Calls `xcodebuild -prepareDeviceSupport` for the given [deviceId] and streams the logs when
+  /// copying is in progress.
+  ///
+  /// The command copies symbols from the iOS device to the host machine and stores them in
+  /// $HOME/Library/Developer/Xcode/iOS DeviceSupport. Without these symbols, debugging is
+  /// extremely slow.
   Future<void> prepareDeviceSupport(String deviceId) async {
     final Version? xcodeVersion = _xcode?.currentVersion;
     if (xcodeVersion == null || xcodeVersion < Version(16, 3, 0)) {
       // The prepareDeviceSupport command is only available on Xcode 16.3+
       return;
     }
-
-    final Process process = await _processUtils.start([
+    final command = [
       'xcrun',
       'xcodebuild',
       '-prepareDeviceSupport',
       '-destination',
       'id=$deviceId',
-    ]);
+    ];
+    final Process process = await _processUtils.start(command);
+
+    final timer = Timer(const Duration(seconds: 10), () {
+      _logger.printError(
+        'Xcode is taking longer than expected to start preparing Device Support symbols...\n'
+        'Connect your device via USB and try running this command manually:\n'
+        '  "${command.join(' ')}"',
+      );
+    });
+
     var printToTrace = true;
     final StreamSubscription<String> stdoutSubscription = process.stdout
         .transform(utf8.decoder)
@@ -44,6 +60,7 @@ class IOSDeviceSupport {
               'Copying Device Support symbols. This may take several minutes to complete...\n'
               'Please do not connect or disconnect your device until finished.',
             );
+            timer.cancel();
           }
           if (printToTrace) {
             _logger.printTrace(text);
@@ -54,6 +71,7 @@ class IOSDeviceSupport {
 
     final StreamSubscription<String> stderrSubscription = process.stderr
         .transform(utf8.decoder)
+        .transform(const LineSplitter())
         .listen((String line) {
           _logger.printError(line);
         });
@@ -71,6 +89,7 @@ class IOSDeviceSupport {
     }
 
     await process.exitCode.whenComplete(() async {
+      timer.cancel();
       await stdoutSubscription.cancel();
       await stderrSubscription.cancel();
     });

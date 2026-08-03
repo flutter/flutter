@@ -570,6 +570,15 @@ class IOSDevice extends Device {
       return LaunchResult.failed();
     }
 
+    final bool shouldAttachDebugger = shouldAttachLLDBDebugger(debuggingOptions);
+    if (shouldAttachDebugger) {
+      await IOSDeviceSupport(
+        logger: _logger,
+        processUtils: _processUtils,
+        xcode: _xcode,
+      ).prepareDeviceSupport(id);
+    }
+
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
       EnvironmentType.physical,
@@ -618,6 +627,7 @@ class IOSDevice extends Device {
           mainPath: mainPath,
           discoveryTimeout: discoveryTimeout,
           shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
+          shouldAttachDebugger: shouldAttachDebugger,
         );
         installationResult = result ? 0 : 1;
         deploymentMethod = coreDeviceDeploymentMethod;
@@ -1025,7 +1035,11 @@ class IOSDevice extends Device {
     );
   }
 
-  bool shouldAttachDebugger(DebuggingOptions debuggingOptions) {
+  /// Whether the LLDB debugger should be attached.
+  ///
+  /// The LLDB debugger should only be attached in debug mode or if the user uses the
+  /// `--ios-profile-debugger` flag in profile mode.
+  bool shouldAttachLLDBDebugger(DebuggingOptions debuggingOptions) {
     return debuggingOptions.buildInfo.isDebug ||
         (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
   }
@@ -1053,6 +1067,7 @@ class IOSDevice extends Device {
     required IOSApp package,
     required List<String> launchArguments,
     required String? mainPath,
+    required bool shouldAttachDebugger,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
@@ -1081,15 +1096,6 @@ class IOSDevice extends Device {
 
     IOSDeploymentMethod? deploymentMethod;
 
-    final bool attachDebugger = shouldAttachDebugger(debuggingOptions);
-    if (attachDebugger) {
-      await IOSDeviceSupport(
-        logger: _logger,
-        processUtils: _processUtils,
-        xcode: _xcode,
-      ).prepareDeviceSupport(id);
-    }
-
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
@@ -1104,7 +1110,7 @@ class IOSDevice extends Device {
         await deviceLogReader.listenToCoreDeviceLauncher(_coreDeviceLauncher);
       }
 
-      if (attachDebugger) {
+      if (shouldAttachDebugger) {
         final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
           deviceId: id,
           bundlePath: package.deviceBundlePath,
