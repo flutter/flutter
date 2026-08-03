@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -1426,10 +1426,8 @@ _flutter.loader.load();
             '-DFLUTTER_WEB_USE_SKIA=false',
             '-DFLUTTER_WEB_USE_SKWASM=true',
             '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--extra-compiler-option=--depfile=' +
-                environment.buildDir.childFile('dart2wasm.d').absolute.path,
-            '--recorded-uses=' +
-                environment.buildDir.childFile('recorded_uses_wasm.json').absolute.path,
+            '--extra-compiler-option=--depfile=${environment.buildDir.childFile('dart2wasm.d').absolute.path}',
+            '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').absolute.path}',
             '--enable-experiment=record-use',
             '-O2',
             '--no-strip-wasm',
@@ -1455,11 +1453,11 @@ _flutter.loader.load();
           const NoOpAnalytics(),
         ).build(environment);
         fail('Expected exception');
-      } catch (e) {
+      } on Exception catch (e) {
         expect(e.toString(), contains('Failed to compile application for the Web.'));
       }
 
-      final BufferLogger logger = globals.logger as BufferLogger;
+      final logger = globals.logger as BufferLogger;
       expect(
         logger.statusText,
         contains('Note: WebAssembly compilation failed due to legacy web imports.'),

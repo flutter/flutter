@@ -389,22 +389,13 @@ class Dart2WasmTarget extends Dart2WebTarget {
       processManager: environment.processManager,
     );
 
-    final RunResult runResult = await processUtils.run(throwOnError: false, compilationArgs);
+    final RunResult runResult = await processUtils.run(compilationArgs);
     if (compilerConfig.dryRun) {
       await _handleDryRunResult(environment, runResult);
     } else if (runResult.exitCode != 0) {
       environment.logger.printStatus(runResult.stdout);
       environment.logger.printError(runResult.stderr);
-      if (runResult.stdout.contains('dart:html') ||
-          runResult.stderr.contains('dart:html') ||
-          runResult.stdout.contains('package:js') ||
-          runResult.stderr.contains('package:js')) {
-        environment.logger.printStatus(
-          'Note: WebAssembly compilation failed due to legacy web imports.\n'
-          'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
-          '$kWasmErrorsMoreInfo',
-        );
-      }
+      _checkForLegacyWebImports(environment, runResult.stdout, runResult.stderr);
       throwToolExit('Failed to compile application for the Web.');
     }
     final File recordedUsesFile = environment.buildDir.childFile(
@@ -588,16 +579,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     }
     result ??= 'unknown';
 
-    if (stdout.contains('dart:html') ||
-        stderr.contains('dart:html') ||
-        stdout.contains('package:js') ||
-        stderr.contains('package:js')) {
-      environment.logger.printStatus(
-        'Note: WebAssembly compilation failed due to legacy web imports.\n'
-        'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
-        '$kWasmErrorsMoreInfo',
-      );
-    }
+    _checkForLegacyWebImports(environment, stdout, stderr);
 
     environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
 
@@ -608,6 +590,19 @@ class Dart2WasmTarget extends Dart2WebTarget {
         findingsInfo: findingsInfo,
       ),
     );
+  }
+
+  void _checkForLegacyWebImports(Environment environment, String stdout, String stderr) {
+    if (stdout.contains('dart:html') ||
+        stderr.contains('dart:html') ||
+        stdout.contains('package:js') ||
+        stderr.contains('package:js')) {
+      environment.logger.printStatus(
+        'Note: WebAssembly compilation failed due to legacy web imports.\n'
+        'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
+        '$kWasmErrorsMoreInfo',
+      );
+    }
   }
 }
 

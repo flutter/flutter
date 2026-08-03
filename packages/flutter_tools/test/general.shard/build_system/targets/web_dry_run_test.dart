@@ -175,7 +175,7 @@ package:foo/some/path.dart 6:1 - dart:html unsupported (0)
       final Dart2WasmTarget target = createTarget();
       await target.build(environment);
 
-      final BufferLogger logger = environment.logger as BufferLogger;
+      final logger = environment.logger as BufferLogger;
       expect(
         logger.statusText,
         contains('Note: WebAssembly compilation failed due to legacy web imports.'),
