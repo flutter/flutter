@@ -51,26 +51,28 @@ void main() {
 
   test('TextureBox becomes dirty when its textureId fires', () {
     final _TextureScene scene = buildScene(textureId: 42);
+    addTearDown(() => tearDownScene(scene.renderView));
+
     expect(scene.owner.needsPaint, isFalse);
 
     binding.handleTextureFrameAvailable(42);
     expect(scene.owner.needsPaint, isTrue);
-
-    tearDownScene(scene.renderView);
   });
 
   test('TextureBox ignores frames for other textures', () {
     final _TextureScene scene = buildScene(textureId: 42);
+    addTearDown(() => tearDownScene(scene.renderView));
+
     expect(scene.owner.needsPaint, isFalse);
 
     binding.handleTextureFrameAvailable(99);
     expect(scene.owner.needsPaint, isFalse);
-
-    tearDownScene(scene.renderView);
   });
 
   test('Changing textureId re-targets the handler', () {
     final _TextureScene scene = buildScene(textureId: 1);
+    addTearDown(() => tearDownScene(scene.renderView));
+
     scene.textureBox.textureId = 2;
     // Setting textureId marks the box for paint — drain that frame.
     binding.handleBeginFrame(Duration.zero);
@@ -82,26 +84,26 @@ void main() {
 
     binding.handleTextureFrameAvailable(2);
     expect(scene.owner.needsPaint, isTrue);
-
-    tearDownScene(scene.renderView);
   });
 
   test('Multiple TextureBoxes sharing an id are all dirtied', () {
     final _TextureScene scene1 = buildScene(textureId: 99);
+    addTearDown(() => tearDownScene(scene1.renderView));
     final _TextureScene scene2 = buildScene(textureId: 99);
+    addTearDown(() => tearDownScene(scene2.renderView));
+
     expect(scene1.owner.needsPaint, isFalse);
     expect(scene2.owner.needsPaint, isFalse);
 
     binding.handleTextureFrameAvailable(99);
     expect(scene1.owner.needsPaint, isTrue);
     expect(scene2.owner.needsPaint, isTrue);
-
-    tearDownScene(scene1.renderView);
-    tearDownScene(scene2.renderView);
   });
 
   test('handleTextureFrameAvailable triggers a rendered scene end-to-end', () {
     final _TextureScene scene = buildScene(textureId: 100);
+    addTearDown(() => tearDownScene(scene.renderView));
+
     expect(scene.flutterView.renderedScenes, hasLength(1));
 
     binding.handleBeginFrame(Duration.zero);
@@ -114,8 +116,6 @@ void main() {
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
     expect(scene.flutterView.renderedScenes, hasLength(2));
-
-    tearDownScene(scene.renderView);
   });
 
   test('addTextureFrameAvailableCallback / removeTextureFrameAvailableCallback', () {

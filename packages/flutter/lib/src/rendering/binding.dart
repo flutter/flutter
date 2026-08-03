@@ -65,7 +65,7 @@ mixin RendererBinding
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onTextureFrameAvailable = handleTextureFrameAvailable
-      ..onMarkAllViewsNeedRender = markAllViewsNeedRender;
+      ..onMarkAllViewsNeedRender = handleMarkAllViewsNeedRender;
 
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
@@ -113,11 +113,13 @@ mixin RendererBinding
     }
   }
 
-  /// Marks all views to require compositing, which will force them to repaint
+  /// Marks all views to require compositing, which will force them to re-render
   /// on the next frame.
+  ///
+  /// See [dart:ui.PlatformDispatcher.onMarkAllViewsNeedRender].
   @protected
   @visibleForTesting
-  void markAllViewsNeedRender() {
+  void handleMarkAllViewsNeedRender() {
     for (final RenderView view in renderViews) {
       view.markNeedsCompositeFrame();
     }
