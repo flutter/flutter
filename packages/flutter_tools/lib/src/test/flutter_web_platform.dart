@@ -704,7 +704,10 @@ window.\$dartLoader.loader.nextAttempt();
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
-      webBrowserFlags: <String>[if (useWasm) '--disable-dev-shm-usage'],
+      webBrowserFlags: <String>[
+        if (useWasm && Platform.environment['FLUTTER_TEST_USE_SHM'] != 'true')
+          '--disable-dev-shm-usage',
+      ],
     );
   }
 
