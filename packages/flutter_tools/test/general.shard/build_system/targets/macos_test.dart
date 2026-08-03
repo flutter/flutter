@@ -251,10 +251,7 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         copyFrameworkCommand,
         lipoInfoFatCommand,
-        FakeCommand(
-          command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64'],
-          exitCode: 1,
-        ),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64'], exitCode: 1),
       ]);
 
       await expectLater(
@@ -264,7 +261,7 @@ void main() {
             (Exception exception) => exception.toString(),
             'description',
             contains(
-              'does not contain architectures "arm64 x86_64".\n\nlipo -info:\nArchitectures in the fat file:',
+              'does not contain architecture "arm64" (expected "arm64 x86_64").\n\nlipo -info:\nArchitectures in the fat file:',
             ),
           ),
         ),
