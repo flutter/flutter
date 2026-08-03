@@ -20,20 +20,26 @@ object EnableHcppManifestTaskHelper {
     internal const val HCPP_METADATA_NAME = "io.flutter.embedding.android.EnableHcpp"
 
     // The flutter tool flags that set the properties this task consumes. Only used to name the
-    // flag the developer passed when warning that it was overridden by the manifest.
+    // flag the developer passed when reporting that it overrode the manifest.
     internal const val ENABLE_HCPP_FLAG = "--enable-hcpp"
     internal const val NO_ENABLE_HCPP_FLAG = "--no-enable-hcpp"
 
     /**
      * Processes [manifestFile] and writes to [updatedManifest].
      *
-     * If [requestedEnableHcpp] is true and no `EnableHcpp` metadata is present, injects:
-     * `<meta-data android:name="io.flutter.embedding.android.EnableHcpp" android:value="true"/>`.
+     * [explicitEnableHcpp] is the value of an explicit `--[no-]enable-hcpp`, or null when the
+     * developer did not pass the flag. When it is non-null it is written to the merged manifest,
+     * replacing any value already there: a flag passed at invocation time takes priority over
+     * checked in configuration, matching how the same flag behaves at launch for
+     * `flutter run`/`test`/`drive`, and how Gradle orders `-P` properties ahead of
+     * `gradle.properties`.
      *
-     * If [explicitEnableHcpp] is specified (non-null) and conflicts with an existing metadata
-     * value in the merged manifest, logs a warning via [logger].
+     * With no explicit flag, [requestedEnableHcpp] is only a default: it is injected when the
+     * merged manifest does not set `EnableHcpp` at all, so an entry in the manifest wins.
      *
-     * Note that the manifest is re-serialized from the parsed tree when metadata is injected,
+     * The resulting precedence is `--[no-]enable-hcpp` > AndroidManifest.xml > the tool's default.
+     *
+     * Note that the manifest is re-serialized from the parsed tree whenever it is modified,
      * which drops XML comments (including the provenance comments the manifest merger emits).
      * This is invisible to aapt2, but does affect the merged manifest as read by a human.
      */
@@ -56,37 +62,40 @@ object EnableHcppManifestTaskHelper {
                 node.name() == "meta-data" && node.attribute(MANIFEST_NAME_KEY) == HCPP_METADATA_NAME
             }
 
-        if (metaDataNode != null) {
-            val existingValueStr = metaDataNode.attribute(MANIFEST_VALUE_KEY)?.toString()
-            val existingValueBool =
-                when (existingValueStr?.trim()?.lowercase()) {
-                    "true" -> true
-                    "false" -> false
-                    else -> null
-                }
-
-            if (explicitEnableHcpp != null && (existingValueBool == null || explicitEnableHcpp != existingValueBool)) {
-                val flagName = if (explicitEnableHcpp) ENABLE_HCPP_FLAG else NO_ENABLE_HCPP_FLAG
-                logger?.warn(
-                    "The merged Android manifest explicitly sets $HCPP_METADATA_NAME to \"$existingValueStr\"; " +
-                        "therefore $flagName does not affect this artifact."
-                )
+        val valueToWrite: String? =
+            when {
+                // An explicit flag always wins, whether or not the manifest already says something.
+                explicitEnableHcpp != null -> explicitEnableHcpp.toString()
+                // Otherwise only supply a default, and only when the manifest is silent.
+                metaDataNode == null && requestedEnableHcpp -> true.toString()
+                else -> null
             }
+        if (valueToWrite == null) {
             manifestFile.copyTo(updatedManifest, overwrite = true)
             return
         }
 
-        if (requestedEnableHcpp) {
+        if (metaDataNode != null) {
+            val existingValue = metaDataNode.attribute(MANIFEST_VALUE_KEY)?.toString()
+            if (existingValue == valueToWrite) {
+                manifestFile.copyTo(updatedManifest, overwrite = true)
+                return
+            }
+            val flagName = if (explicitEnableHcpp == true) ENABLE_HCPP_FLAG else NO_ENABLE_HCPP_FLAG
+            logger?.lifecycle(
+                "$flagName overrides the merged Android manifest, which sets $HCPP_METADATA_NAME " +
+                    "to \"$existingValue\". This artifact is built with $HCPP_METADATA_NAME=$valueToWrite."
+            )
+            metaDataNode.attributes()[MANIFEST_VALUE_KEY] = valueToWrite
+        } else {
             applicationNode.appendNode(
                 "meta-data",
-                mapOf(MANIFEST_NAME_KEY to HCPP_METADATA_NAME, MANIFEST_VALUE_KEY to "true")
+                mapOf(MANIFEST_NAME_KEY to HCPP_METADATA_NAME, MANIFEST_VALUE_KEY to valueToWrite)
             )
-            updatedManifest.printWriter().use { writer: PrintWriter ->
-                writer.println("""<?xml version="1.0" encoding="utf-8"?>""")
-                XmlNodePrinter(writer).print(manifest)
-            }
-        } else {
-            manifestFile.copyTo(updatedManifest, overwrite = true)
+        }
+        updatedManifest.printWriter().use { writer: PrintWriter ->
+            writer.println("""<?xml version="1.0" encoding="utf-8"?>""")
+            XmlNodePrinter(writer).print(manifest)
         }
     }
 }

@@ -20,13 +20,13 @@ import org.gradle.api.tasks.TaskAction
  * Manages the `io.flutter.embedding.android.EnableHcpp` meta-data in the merged
  * AndroidManifest.
  *
- * If [requestedEnableHcpp] is true, injects the metadata element if absent.
- * If [explicitEnableHcpp] is provided and conflicts with an explicit metadata value
- * in the merged manifest, logs a warning.
+ * If [explicitEnableHcpp] is provided it is written to the manifest, replacing any value already
+ * there. Otherwise [requestedEnableHcpp] is injected only when the manifest does not set the
+ * metadata at all. See [EnableHcppManifestTaskHelper.processHcppManifest] for the precedence.
  *
- * The conflict warning is emitted from the task action, so it is only printed when the task
- * actually runs. A subsequent up-to-date or cached build repeats the same (correct) output
- * without repeating the warning.
+ * The message reporting that the flag overrode the manifest is emitted from the task action, so it
+ * is only printed when the task actually runs. A subsequent up-to-date or cached build produces the
+ * same (correct) manifest without repeating the message.
  */
 @CacheableTask
 abstract class EnableHcppManifestTask : DefaultTask() {

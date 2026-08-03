@@ -653,30 +653,37 @@ void main() {
     );
 
     testUsingContext(
-      'only reports an explicit --enable-hcpp to gradle for commands that produce an artifact',
+      'reports an explicit --[no-]enable-hcpp to gradle so it overrides the manifest',
       () async {
-        // On run/test/drive the explicit flag is applied at launch and does override the
-        // manifest, so gradle must not be told to warn that it was ignored.
-        final launchingCommand = DummyHcppFlutterCommand(warnOnHcppManifestConflict: false);
-        await createTestCommandRunner(launchingCommand).run(<String>['dummy', '--enable-hcpp']);
-        final BuildInfo launchingBuildInfo = await launchingCommand.getBuildInfo(
+        final enabledCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(enabledCommand).run(<String>['dummy', '--enable-hcpp']);
+        final BuildInfo enabledBuildInfo = await enabledCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
-        expect(launchingBuildInfo.androidEnableHcpp, isTrue);
-        expect(launchingBuildInfo.explicitAndroidEnableHcpp, isNull);
+        expect(enabledBuildInfo.explicitAndroidEnableHcpp, isTrue);
+        expect(enabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+
+        // The negation has to be reported too, otherwise gradle cannot tell it apart from the
+        // flag being absent and would leave a manifest value of true in place.
+        final disabledCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(disabledCommand).run(<String>['dummy', '--no-enable-hcpp']);
+        final BuildInfo disabledBuildInfo = await disabledCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(disabledBuildInfo.explicitAndroidEnableHcpp, isFalse);
+        expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
+
+        // Without the flag nothing is reported, so the manifest decides.
+        final defaultCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(defaultCommand).run(<String>['dummy']);
+        final BuildInfo defaultBuildInfo = await defaultCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(defaultBuildInfo.explicitAndroidEnableHcpp, isNull);
         expect(
-          launchingBuildInfo.toGradleConfig(),
+          defaultBuildInfo.toGradleConfig(),
           isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
         );
-
-        final buildingCommand = DummyHcppFlutterCommand(warnOnHcppManifestConflict: true);
-        await createTestCommandRunner(buildingCommand).run(<String>['dummy', '--enable-hcpp']);
-        final BuildInfo buildingBuildInfo = await buildingCommand.getBuildInfo(
-          forcedBuildMode: BuildMode.debug,
-        );
-        expect(buildingBuildInfo.androidEnableHcpp, isTrue);
-        expect(buildingBuildInfo.explicitAndroidEnableHcpp, isTrue);
-        expect(buildingBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -2142,10 +2149,7 @@ class DummyMachineFlutterCommand extends DummyFlutterCommand {
 }
 
 class DummyHcppFlutterCommand extends DummyFlutterCommand {
-  DummyHcppFlutterCommand({required this.warnOnHcppManifestConflict}) : super(name: 'dummy') {
+  DummyHcppFlutterCommand() : super(name: 'dummy') {
     addEnableHcppFlag(verboseHelp: false);
   }
-
-  @override
-  final bool warnOnHcppManifestConflict;
 }

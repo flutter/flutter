@@ -110,14 +110,11 @@ class BuildAppBundleCommand extends BuildSubCommand {
       commandHasTerminal: hasTerminal,
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
-      buildBundleEnableHcpp: FlutterProject.current().android.computeHcppEnabled(
-        ifAbsent: enableHcpp,
-      ),
+      buildBundleEnableHcpp:
+          explicitEnableHcpp ??
+          FlutterProject.current().android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   }
-
-  @override
-  bool get warnOnHcppManifestConflict => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

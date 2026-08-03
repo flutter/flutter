@@ -77,7 +77,7 @@ class EnableHcppManifestTaskTest {
     }
 
     @Test
-    fun doesNotOverrideExplicitlyDisabledMetadata() {
+    fun manifestFalseWinsOverDefaultWhenNoExplicitFlag() {
         val manifestFile =
             createTempManifestFile(
                 """
@@ -102,12 +102,12 @@ class EnableHcppManifestTaskTest {
         assertEquals(
             manifestFile.readText(),
             updatedManifest.readText(),
-            "Manifest with an explicit value should be copied unmodified"
+            "A manifest that sets the value should be copied unmodified when no flag was passed"
         )
     }
 
     @Test
-    fun leavesExplicitlyEnabledMetadataUnmodified() {
+    fun manifestTrueWinsOverDefaultWhenNoExplicitFlag() {
         val manifestFile =
             createTempManifestFile(
                 """
@@ -132,12 +132,12 @@ class EnableHcppManifestTaskTest {
         assertEquals(
             manifestFile.readText(),
             updatedManifest.readText(),
-            "Manifest with an explicit value should be copied unmodified"
+            "A manifest that sets the value should be copied unmodified when no flag was passed"
         )
     }
 
     @Test
-    fun warnsWhenExplicitEnableHcppConflictsWithManifestFalse() {
+    fun explicitEnableHcppOverridesManifestFalse() {
         val manifestFile =
             createTempManifestFile(
                 """
@@ -161,18 +161,19 @@ class EnableHcppManifestTaskTest {
             logger = logger
         )
 
+        assertEquals("true", findHcppMetadataValue(updatedManifest))
         verify(exactly = 1) {
-            logger.warn(
+            logger.lifecycle(
                 match { message ->
-                    message.contains("explicitly sets ${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME} to \"false\"") &&
-                        message.contains("${EnableHcppManifestTaskHelper.ENABLE_HCPP_FLAG} does not affect this artifact")
+                    message.contains("${EnableHcppManifestTaskHelper.ENABLE_HCPP_FLAG} overrides") &&
+                        message.contains("to \"false\"")
                 }
             )
         }
     }
 
     @Test
-    fun warnsWhenExplicitNoEnableHcppConflictsWithManifestTrue() {
+    fun explicitNoEnableHcppOverridesManifestTrue() {
         val manifestFile =
             createTempManifestFile(
                 """
@@ -196,18 +197,19 @@ class EnableHcppManifestTaskTest {
             logger = logger
         )
 
+        assertEquals("false", findHcppMetadataValue(updatedManifest))
         verify(exactly = 1) {
-            logger.warn(
+            logger.lifecycle(
                 match { message ->
-                    message.contains("explicitly sets ${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME} to \"true\"") &&
-                        message.contains("${EnableHcppManifestTaskHelper.NO_ENABLE_HCPP_FLAG} does not affect this artifact")
+                    message.contains("${EnableHcppManifestTaskHelper.NO_ENABLE_HCPP_FLAG} overrides") &&
+                        message.contains("to \"true\"")
                 }
             )
         }
     }
 
     @Test
-    fun doesNotWarnWhenExplicitFlagMatchesManifest() {
+    fun saysNothingWhenExplicitFlagMatchesManifest() {
         val manifestFile =
             createTempManifestFile(
                 """
@@ -231,11 +233,20 @@ class EnableHcppManifestTaskTest {
             logger = logger
         )
 
+        assertEquals("true", findHcppMetadataValue(updatedManifest))
+        assertEquals(
+            manifestFile.readText(),
+            updatedManifest.readText(),
+            "A manifest that already agrees with the flag should be copied unmodified"
+        )
+        verify(exactly = 0) { logger.lifecycle(any()) }
         verify(exactly = 0) { logger.warn(any()) }
     }
 
     @Test
-    fun warnsWhenExplicitFlagConflictsWithResourceRef() {
+    fun explicitFlagOverridesResourceRef() {
+        // A resource reference cannot be resolved here, so the flag replaces it outright rather
+        // than trying to guess what it evaluates to.
         val manifestFile =
             createTempManifestFile(
                 """
@@ -259,11 +270,12 @@ class EnableHcppManifestTaskTest {
             logger = logger
         )
 
+        assertEquals("true", findHcppMetadataValue(updatedManifest))
         verify(exactly = 1) {
-            logger.warn(
+            logger.lifecycle(
                 match { message ->
-                    message.contains("explicitly sets ${EnableHcppManifestTaskHelper.HCPP_METADATA_NAME} to \"@bool/enable_hcpp\"") &&
-                        message.contains("${EnableHcppManifestTaskHelper.ENABLE_HCPP_FLAG} does not affect this artifact")
+                    message.contains("${EnableHcppManifestTaskHelper.ENABLE_HCPP_FLAG} overrides") &&
+                        message.contains("to \"@bool/enable_hcpp\"")
                 }
             )
         }

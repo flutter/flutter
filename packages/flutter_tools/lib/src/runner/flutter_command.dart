@@ -1321,28 +1321,20 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
       help:
           'Enable the use of the HCPP platform view rendering mode on the Impeller rendering '
-          'backend. On "run", "test", and "drive", "--enable-hcpp" turns HCPP on at launch '
-          'regardless of the AndroidManifest.xml metadata. On build commands there is no '
-          'launch-time override, so an explicit value only selects the default that is baked '
-          'into the manifest when the manifest does not already set EnableHcpp; an explicit '
-          'manifest entry always wins for the built artifact.',
+          'backend. An explicit value takes priority over the '
+          'io.flutter.embedding.android.EnableHcpp metadata in AndroidManifest.xml: build '
+          'commands write it into the manifest of the artifact they produce, and "run", "test", '
+          'and "drive" additionally apply it at launch. Without the flag, the manifest decides.',
     );
   }
-
-  /// Whether an explicit `--[no-]enable-hcpp` should be reported to Gradle so
-  /// that the build can warn when it conflicts with the merged manifest.
-  ///
-  /// Only true for commands whose output is a final artifact. "run", "test",
-  /// and "drive" send `--enable-hcpp` to the device at launch, where it does
-  /// take effect, so warning that the flag was ignored would be wrong.
-  bool get warnOnHcppManifestConflict => false;
 
   /// The explicit `--[no-]enable-hcpp` value, or null when the flag was not
   /// passed (or the command does not define it).
   ///
-  /// Commands that launch the app (run/test/drive) forward `--enable-hcpp` to
-  /// the device as a runtime override, which takes priority over the built
-  /// manifest.
+  /// This takes priority over the `io.flutter.embedding.android.EnableHcpp`
+  /// manifest entry: it is passed to Gradle, which writes it into the merged
+  /// manifest over any value already there. Commands that launch the app
+  /// (run/test/drive) additionally forward it to the device.
   bool? get explicitEnableHcpp {
     final ArgResults? results = argResults;
     if (results == null ||
@@ -1353,13 +1345,12 @@ abstract class FlutterCommand extends Command<void> {
     return boolArg('enable-hcpp');
   }
 
-  /// The requested HCPP default for an Android artifact:
-  /// [explicitEnableHcpp] if supplied, otherwise defaults to false.
-  /// A pre-existing value in the merged manifest still wins.
+  /// The HCPP value for an Android artifact when the developer did not pass
+  /// `--[no-]enable-hcpp`: currently always false.
   ///
-  /// This is the value passed to gradle builds, where it is injected into the
-  /// manifest only when the manifest does not already contain an explicit
-  /// `io.flutter.embedding.android.EnableHcpp` entry.
+  /// This is only a default. Gradle injects it when the merged manifest does
+  /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
+  /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
   bool get enableHcpp => explicitEnableHcpp ?? false;
 
   void addTestFlag({required bool verboseHelp}) {
@@ -1564,7 +1555,7 @@ abstract class FlutterCommand extends Command<void> {
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       androidEnableHcpp: enableHcpp,
-      explicitAndroidEnableHcpp: warnOnHcppManifestConflict ? explicitEnableHcpp : null,
+      explicitAndroidEnableHcpp: explicitEnableHcpp,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,

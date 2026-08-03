@@ -205,21 +205,24 @@ class BuildInfo {
   /// dependencies.
   final bool androidSkipBuildDependencyValidation;
 
-  /// The requested `enable-hcpp` default value (explicit CLI flag, or false
-  /// if not provided), passed to Gradle so the Flutter Gradle Plugin can inject the
+  /// The default `enable-hcpp` value (currently false unless the CLI flag was
+  /// passed), given to Gradle so the Flutter Gradle Plugin can inject the
   /// corresponding manifest metadata if absent.
   ///
   /// The injection only happens for application projects, and only when the
   /// merged manifest does not already contain the
-  /// `io.flutter.embedding.android.EnableHcpp` metadata, so an explicit value
-  /// in the app's manifest always takes priority. Module (aar) manifests are
+  /// `io.flutter.embedding.android.EnableHcpp` metadata, so a value in the
+  /// app's manifest takes priority over this one. Module (aar) manifests are
   /// never injected; the add-to-app host's manifest is the source of truth.
   /// When null, no property is passed and no injection happens.
   final bool? androidEnableHcpp;
 
-  /// The explicit `--[no-]enable-hcpp` value passed by the user on the CLI,
-  /// or null if the user did not pass the flag explicitly. Passed to Gradle
-  /// to enable warning when an explicit CLI setting conflicts with the merged manifest.
+  /// The explicit `--[no-]enable-hcpp` value passed by the user on the CLI, or
+  /// null if the user did not pass the flag explicitly.
+  ///
+  /// Passed to Gradle, which writes it into the merged manifest over any value
+  /// already there, so it takes priority over both [androidEnableHcpp] and the
+  /// app's manifest. When null, the manifest decides.
   final bool? explicitAndroidEnableHcpp;
 
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`

@@ -232,7 +232,7 @@ void main() {
     );
 
     testUsingContext(
-      'reports hcpp analytics from an explicit manifest value over the default and --enable-hcpp',
+      'reports hcpp analytics from an explicit --enable-hcpp over a manifest value',
       () async {
         final String projectPath = await createProject(
           tempDir,
@@ -250,10 +250,8 @@ void main() {
           ),
         );
 
-        // An explicit manifest value also wins over an explicit --enable-hcpp
-        // on build commands: unlike run/test, builds have no runtime override
-        // channel, and the manifest injection never replaces an existing
-        // entry. The build flag only overrides the tool's default.
+        // The flag is passed at invocation time, so it wins over the checked in manifest value
+        // and gradle writes true into the merged manifest. Analytics reports what is packaged.
         await runBuildApkCommand(projectPath, arguments: <String>['--enable-hcpp']);
         expect(
           fakeAnalytics.sentEvents,
@@ -264,7 +262,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
-              buildApkEnableHcpp: false,
+              buildApkEnableHcpp: true,
             ),
           ),
         );
