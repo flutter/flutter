@@ -74,6 +74,10 @@ class BuildWebCommand extends BuildSubCommand {
           'to view and debug the original source code of a compiled and minified Dart '
           'application.',
     );
+    argParser.addFlag(
+      'web-content-hash',
+      help: 'Include a content hash in the filename of web output files.',
+    );
 
     //
     // JavaScript compilation options
@@ -194,6 +198,7 @@ class BuildWebCommand extends BuildSubCommand {
     final webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
     final bool sourceMaps = boolArg('source-maps');
+    final bool webContentHash = boolArg('web-content-hash');
     final bool? minifyJs = argResults!.wasParsed('minify-js') ? boolArg('minify-js') : null;
     final bool? minifyWasm = argResults!.wasParsed('minify-wasm') ? boolArg('minify-wasm') : null;
 
@@ -214,6 +219,7 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: optimizationLevel,
           stripWasm: boolArg('strip-wasm'),
           sourceMaps: sourceMaps,
+          webContentHash: webContentHash,
           minify: minifyWasm,
           enableWasmDeferredLoading: boolArg('enable-wasm-deferred-loading'),
         ),
@@ -225,6 +231,7 @@ class BuildWebCommand extends BuildSubCommand {
           useFrequencyBasedMinification: !boolArg('no-frequency-based-minification'),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
+          webContentHash: webContentHash,
         ),
       ];
     } else {
@@ -237,6 +244,7 @@ class BuildWebCommand extends BuildSubCommand {
           useFrequencyBasedMinification: !boolArg('no-frequency-based-minification'),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
+          webContentHash: webContentHash,
           renderer: webRenderer,
         ),
         if (boolArg('wasm-dry-run'))
@@ -244,6 +252,7 @@ class BuildWebCommand extends BuildSubCommand {
             optimizationLevel: optimizationLevel,
             stripWasm: boolArg('strip-wasm'),
             sourceMaps: sourceMaps,
+            webContentHash: webContentHash,
             minify: minifyWasm,
             enableWasmDeferredLoading: boolArg('enable-wasm-deferred-loading'),
             dryRun: true,
