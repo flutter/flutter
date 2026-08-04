@@ -23,9 +23,10 @@ export 'package:flutter/rendering.dart' show ClipOverlapBehavior;
 ///
 ///  * [ClipOverlapBehavior.followEdge] (default): the clip rectangle is
 ///    truncated at the overlap boundary.
-///  * [ClipOverlapBehavior.preserveShape]: the entire rounded rectangle shifts
-///    inward so that corners are never hidden by the overlap. This produces a
-///    smoother visual when items scroll underneath a pinned header.
+///  * [ClipOverlapBehavior.preserveShape]: behaves exactly like
+///    [ClipOverlapBehavior.followEdge] here, because a plain rectangle has no
+///    rounded corners to preserve. Use [SliverClipRRect] to get the shifting
+///    behavior.
 ///  * [ClipOverlapBehavior.none]: the overlap is ignored and no additional
 ///    clipping is applied.
 /// {@endtemplate}
@@ -102,9 +103,10 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
   /// rectangle is truncated at the overlap boundary defined by
   /// [SliverConstraints.overlap].
   ///
-  /// When set to [ClipOverlapBehavior.preserveShape], the entire rounded
-  /// rectangle is shifted inward so that corners remain fully visible,
-  /// producing a smoother visual effect as items scroll under a pinned header.
+  /// [ClipOverlapBehavior.preserveShape] produces the same clip rectangle as
+  /// [ClipOverlapBehavior.followEdge], since a plain rectangle has no rounded
+  /// corners to keep visible. See [SliverClipRRect.clipOverlap] for the mode
+  /// where the shape is shifted inward instead of being truncated.
   ///
   /// When set to [ClipOverlapBehavior.none], no overlap clipping is applied
   /// and content may render underneath translucent pinned slivers.
