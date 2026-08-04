@@ -16,14 +16,7 @@ enum class IOSRenderingAPI {
   kMetal,
 };
 
-enum class IOSRenderingBackend {
-  kSkia,
-  kImpeller,
-};
-
-// Pass force_software to force software rendering. This is only respected on
-// simulators.
-IOSRenderingAPI GetRenderingAPIForProcess(bool force_software);
+IOSRenderingAPI GetRenderingAPIForProcess();
 
 Class GetCoreAnimationLayerClassForRenderingAPI(IOSRenderingAPI rendering_api);
 

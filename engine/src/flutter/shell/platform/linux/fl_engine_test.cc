@@ -125,9 +125,34 @@ TEST_F(FlEngineTest, MousePointer) {
   StartEngine();
   fl_engine_send_mouse_pointer_event(engine, 1, kDown, 1234567890, 800, 600,
                                      kFlutterPointerDeviceKindMouse, 1.2, -3.4,
-                                     kFlutterPointerButtonMouseSecondary);
+                                     kFlutterPointerButtonMouseSecondary, 0, 0);
 
   EXPECT_TRUE(called);
+}
+
+// Checks sending mouse pointer events includes device state.
+TEST_F(FlEngineTest, MousePointerDeviceState) {
+  bool device_state_sent = false;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&device_state_sent](auto engine, const FlutterPointerEvent* events,
+                            size_t events_count) {
+        device_state_sent = true;
+        EXPECT_EQ(events_count, static_cast<size_t>(1));
+        EXPECT_DOUBLE_EQ(events[0].pressure, 0.5);
+        EXPECT_DOUBLE_EQ(events[0].pressure_min, 0.0);
+        EXPECT_DOUBLE_EQ(events[0].pressure_max, 1.0);
+        EXPECT_DOUBLE_EQ(events[0].rotation, G_PI / 2.0);
+
+        return kSuccess;
+      }));
+
+  StartEngine();
+  fl_engine_send_mouse_pointer_event(
+      engine, 1, kDown, 1234567890, 800, 600, kFlutterPointerDeviceKindMouse,
+      1.2, -3.4, kFlutterPointerButtonMouseSecondary, 90.0, 0.5);
+
+  EXPECT_TRUE(device_state_sent);
 }
 
 // Checks sending pan/zoom events works.
