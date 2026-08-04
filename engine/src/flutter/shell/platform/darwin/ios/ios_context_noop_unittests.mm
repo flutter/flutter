@@ -18,7 +18,7 @@ FLUTTER_ASSERT_ARC
 - (void)testCreateNoop {
   flutter::IOSContextNoop noop;
 
-  XCTAssertTrue(noop.GetBackend() == flutter::IOSRenderingBackend::kImpeller);
+  XCTAssertTrue(noop.GetImpellerContext() == nullptr);
 }
 
 @end

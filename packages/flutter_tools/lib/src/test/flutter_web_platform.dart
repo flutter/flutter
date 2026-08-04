@@ -542,6 +542,7 @@ window.\$dartLoader.loader.nextAttempt();
       headers: <String, Object>{
         HttpHeaders.contentTypeHeader: contentType,
         HttpHeaders.cacheControlHeader: 'public, max-age=3600',
+        HttpHeaders.contentLengthHeader: canvasKitFile.lengthSync().toString(),
       },
     );
   }
