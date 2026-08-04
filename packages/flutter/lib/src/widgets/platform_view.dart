@@ -723,6 +723,7 @@ class _AndroidViewState extends State<AndroidView> {
     return Focus(
       focusNode: _focusNode,
       onFocusChange: _onFocusChange,
+      onKeyEvent: (FocusNode node, KeyEvent event) => KeyEventResult.skipRemainingHandlers,
       child: _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
@@ -885,6 +886,7 @@ abstract class _DarwinViewState<
     return Focus(
       focusNode: focusNode,
       onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
+      onKeyEvent: (FocusNode node, KeyEvent event) => KeyEventResult.skipRemainingHandlers,
       child: childPlatformView(),
     );
   }
@@ -1288,6 +1290,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     return Focus(
       focusNode: _focusNode,
       onFocusChange: _handleFrameworkFocusChanged,
+      onKeyEvent: (FocusNode node, KeyEvent event) => KeyEventResult.skipRemainingHandlers,
       child: _surface!,
     );
   }
@@ -1335,6 +1338,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void _handleFrameworkFocusChanged(bool isFocused) {
     if (!isFocused) {
       _controller?.clearFocus();
+      return;
     }
     SystemChannels.textInput
         .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{

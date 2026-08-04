@@ -162,4 +162,32 @@ Future<void> main() async {
       );
     }, timeout: Timeout.none);
   });
+
+  group('Keyboard Navigation', () {
+    setUpAll(() async {
+      final SerializableFinder tile = find.byValueKey('KeyboardNavigationTile');
+      await driver.tap(tile);
+    });
+
+    tearDownAll(() async {
+      await driver.waitFor(find.pageBack());
+      await driver.tap(find.pageBack());
+    });
+
+    test(
+      'Tab key moves focus from Flutter widget into PlatformView editable text field and typed characters enter the EditText',
+      () async {
+        final SerializableFinder testButton = find.byValueKey('TestTabKey');
+        await driver.waitFor(testButton);
+        await driver.tap(testButton);
+        var status = 'Pending';
+        while (status == 'Pending') {
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          status = await driver.getText(find.byValueKey('KeyboardNavigationStatus'));
+        }
+        expect(status, 'Success');
+      },
+      timeout: Timeout.none,
+    );
+  });
 }
