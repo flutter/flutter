@@ -541,7 +541,7 @@ void main() {
           crossAxisPosition: 400.0,
         ),
         isFalse,
-        reason: 'Should NOT hit at local 15 because it is below the header (clip starts at 20)',
+        reason: 'Should NOT hit at local 15 because it is below the header (clip starts at 50)',
       );
     });
 
