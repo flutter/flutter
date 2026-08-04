@@ -109,6 +109,7 @@ static uint32_t get_generated_id(_FlTouchManager* self, uint32_t number) {
          self->min_touch_device_id < kMaxTouchDeviceId) {
     ++self->min_touch_device_id;
   }
+  g_list_free(values);
   if (self->min_touch_device_id >= kMaxTouchDeviceId) {
     self->min_touch_device_id = kMinTouchDeviceId;
   }
