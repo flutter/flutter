@@ -15,6 +15,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
+import 'build_info.dart';
 import 'device.dart';
 import 'ios/ios_emulators.dart';
 

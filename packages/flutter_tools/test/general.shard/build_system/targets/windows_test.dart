@@ -38,17 +38,17 @@ void main() {
 
       final String windowsDesktopPath = artifacts.getArtifactPath(
         Artifact.windowsDesktopPath,
-        platform: TargetPlatform.windows_x64,
+        platform: const TargetPlatform(.windows, .x64),
         mode: BuildMode.debug,
       );
       final String windowsCppClientWrapper = artifacts.getArtifactPath(
         Artifact.windowsCppClientWrapper,
-        platform: TargetPlatform.windows_x64,
+        platform: const TargetPlatform(.windows, .x64),
         mode: BuildMode.debug,
       );
       final String icuData = artifacts.getArtifactPath(
         Artifact.icuData,
-        platform: TargetPlatform.windows_x64,
+        platform: const TargetPlatform(.windows, .x64),
       );
       final requiredFiles = <String>[
         '$windowsDesktopPath\\flutter_export.h',
@@ -70,7 +70,7 @@ void main() {
       }
       fileSystem.directory('windows').createSync();
 
-      await const UnpackWindows(TargetPlatform.windows_x64).build(environment);
+      await const UnpackWindows(TargetPlatform(.windows, .x64)).build(environment);
 
       // Output files are copied correctly.
       expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_export.h'), exists);
@@ -165,7 +165,7 @@ void main() {
       environment.buildDir.childFile('app.dill').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const DebugBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
+      await const DebugBundleWindowsAssets(TargetPlatform(.windows, .x64)).build(environment);
 
       // Depfile is created and dill is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
@@ -214,7 +214,7 @@ flutter:
       flavorFileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
       writePackageConfigFiles(directory: flavorFileSystem.currentDirectory, mainLibName: 'example');
 
-      await const DebugBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
+      await const DebugBundleWindowsAssets(TargetPlatform(.windows, .x64)).build(environment);
 
       final Uint8List assetManifestData = environment.outputDir
           .childDirectory('flutter_assets')
@@ -249,8 +249,10 @@ flutter:
       environment.buildDir.childFile('app.so').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
-      await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
+      await const WindowsAotBundle(
+        AotElfProfile(TargetPlatform(.windows, .x64)),
+      ).build(environment);
+      await const ProfileBundleWindowsAssets(TargetPlatform(.windows, .x64)).build(environment);
 
       // Depfile is created and so is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
@@ -278,8 +280,10 @@ flutter:
       environment.buildDir.childFile('app.so').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
-      await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
+      await const WindowsAotBundle(
+        AotElfRelease(TargetPlatform(.windows, .x64)),
+      ).build(environment);
+      await const ReleaseBundleWindowsAssets(TargetPlatform(.windows, .x64)).build(environment);
 
       // Depfile is created and so is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);

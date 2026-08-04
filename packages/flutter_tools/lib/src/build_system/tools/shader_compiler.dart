@@ -175,16 +175,10 @@ class ShaderCompiler {
   bool _hasLoggedSecurityBlockError = false;
 
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
-    switch (targetPlatform) {
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
+    switch (targetPlatform.type) {
+      case .android:
+      case .linux:
+      case .windows:
         return <String>[
           '--sksl',
           '--runtime-stage-gles',
@@ -192,20 +186,20 @@ class ShaderCompiler {
           '--runtime-stage-vulkan',
         ];
 
-      case TargetPlatform.ios:
+      case .ios:
         return <String>['--runtime-stage-metal'];
-      case TargetPlatform.darwin:
+      case .macos:
         return <String>['--sksl', '--runtime-stage-metal'];
 
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.tester:
+      case .fuchsia:
+      case .tester:
         return <String>['--sksl', '--runtime-stage-vulkan'];
 
-      case TargetPlatform.web_javascript:
+      case .web:
         return <String>['--sksl'];
 
-      case TargetPlatform.unsupported:
+      case .custom:
+      case .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
   }
@@ -248,7 +242,7 @@ class ShaderCompiler {
       impellerc.path,
       ...targets,
       '--iplr',
-      if (targetPlatform == TargetPlatform.web_javascript) '--json',
+      if (targetPlatform.type == .web) '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',

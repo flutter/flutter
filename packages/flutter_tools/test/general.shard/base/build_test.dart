@@ -43,7 +43,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: TargetPlatform.android_x64,
+              platform: const TargetPlatform(.android, .x64),
               mode: BuildMode.release,
             ),
             '--additional_arg',
@@ -52,7 +52,7 @@ void main() {
       );
 
       final int result = await genSnapshot.run(
-        snapshotType: SnapshotType(TargetPlatform.android_x64, BuildMode.release),
+        snapshotType: SnapshotType(const TargetPlatform(.android, .x64), BuildMode.release),
         additionalArgs: <String>['--additional_arg'],
       );
       expect(result, 0);
@@ -61,7 +61,7 @@ void main() {
     testWithoutContext('iOS arm64', () async {
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         mode: BuildMode.release,
       );
       processManager.addCommand(
@@ -69,8 +69,7 @@ void main() {
       );
 
       final int result = await genSnapshot.run(
-        snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
-        cpuArch: CpuArch.arm64,
+        snapshotType: SnapshotType(const TargetPlatform(.ios, .arm64), BuildMode.release),
         additionalArgs: <String>['--additional_arg'],
       );
       expect(result, 0);
@@ -82,7 +81,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: TargetPlatform.android_x64,
+              platform: const TargetPlatform(.android, .x64),
               mode: BuildMode.release,
             ),
             '--strip',
@@ -92,7 +91,7 @@ void main() {
       );
 
       final int result = await genSnapshot.run(
-        snapshotType: SnapshotType(TargetPlatform.android_x64, BuildMode.release),
+        snapshotType: SnapshotType(const TargetPlatform(.android, .x64), BuildMode.release),
         additionalArgs: <String>['--strip'],
       );
 
@@ -129,8 +128,7 @@ void main() {
 
       expect(
         await snapshotter.build(
-          platform: TargetPlatform.ios,
-          cpuArch: CpuArch.arm64,
+          platform: const TargetPlatform(.ios, .arm64),
           sdkRoot: 'path/to/sdk',
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
@@ -146,7 +144,7 @@ void main() {
 
       expect(
         await snapshotter.build(
-          platform: TargetPlatform.android_arm,
+          platform: const TargetPlatform(.android, .armv7),
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
           outputPath: outputPath,
@@ -161,7 +159,7 @@ void main() {
 
       expect(
         await snapshotter.build(
-          platform: TargetPlatform.android_arm64,
+          platform: const TargetPlatform(.android, .arm64),
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
           outputPath: outputPath,
@@ -176,7 +174,7 @@ void main() {
       final String debugPath = fileSystem.path.join('foo', 'app.ios-arm64.symbols');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         mode: BuildMode.profile,
       );
       processManager.addCommands(<FakeCommand>[
@@ -220,11 +218,10 @@ void main() {
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         splitDebugInfo: 'foo',
         dartObfuscation: false,
@@ -234,11 +231,79 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
+    testWithoutContext(
+      'builds macOS snapshot with dwarfStackTraces using Darwin arch name for symbols',
+      () async {
+        final String outputPath = fileSystem.path.join('build', 'foo');
+        // The symbol file must use the Darwin architecture name (`x86_64`),
+        // not the Dart architecture name (`x64`).
+        // See https://github.com/flutter/flutter/issues/190252.
+        final String debugPath = fileSystem.path.join('foo', 'app.darwin-x86_64.symbols');
+        final String genSnapshotPath = artifacts.getArtifactPath(
+          Artifact.genSnapshotX64,
+          platform: const TargetPlatform(.macos, .x64),
+          mode: BuildMode.profile,
+        );
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              genSnapshotPath,
+              '--deterministic',
+              '--snapshot_kind=app-aot-macho-dylib',
+              '--macho=$outputPath/App.framework/App',
+              '--macho-object=$outputPath/app.o',
+              '--macho-min-os-version=12.0',
+              '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+              '--macho-install-name=@rpath/App.framework/App',
+              '--dwarf-stack-traces',
+              '--resolve-dwarf-paths',
+              '--save-debugging-info=$debugPath',
+              'main.dill',
+            ],
+          ),
+          kWhichSysctlCommand,
+          kx64CheckCommand,
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'dsymutil',
+              '-o',
+              '$outputPath/App.framework.dSYM',
+              '$outputPath/App.framework/App',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'strip',
+              '-x',
+              '$outputPath/App.framework/App',
+              '-o',
+              '$outputPath/App.framework/App',
+            ],
+          ),
+        ]);
+
+        final int genSnapshotExitCode = await snapshotter.build(
+          platform: const TargetPlatform(.macos, .x64),
+          buildMode: BuildMode.profile,
+          mainPath: 'main.dill',
+          outputPath: outputPath,
+          sdkRoot: 'path/to/sdk',
+          splitDebugInfo: 'foo',
+          dartObfuscation: false,
+        );
+
+        expect(genSnapshotExitCode, 0);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
     testWithoutContext('builds iOS snapshot with obfuscate', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         mode: BuildMode.profile,
       );
       processManager.addCommands(<FakeCommand>[
@@ -280,11 +345,10 @@ void main() {
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         dartObfuscation: true,
       );
@@ -297,7 +361,7 @@ void main() {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         mode: BuildMode.release,
       );
       processManager.addCommands(<FakeCommand>[
@@ -338,11 +402,10 @@ void main() {
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         dartObfuscation: false,
       );
@@ -358,7 +421,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: TargetPlatform.android_arm,
+              platform: const TargetPlatform(.android, .armv7),
               mode: BuildMode.release,
             ),
             '--deterministic',
@@ -372,7 +435,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm,
+        platform: const TargetPlatform(.android, .armv7),
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -391,7 +454,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: TargetPlatform.android_arm,
+              platform: const TargetPlatform(.android, .armv7),
               mode: BuildMode.release,
             ),
             '--deterministic',
@@ -408,7 +471,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm,
+        platform: const TargetPlatform(.android, .armv7),
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -427,7 +490,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: TargetPlatform.android_arm,
+              platform: const TargetPlatform(.android, .armv7),
               mode: BuildMode.release,
             ),
             '--deterministic',
@@ -442,7 +505,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm,
+        platform: const TargetPlatform(.android, .armv7),
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -462,7 +525,7 @@ void main() {
             command: <String>[
               artifacts.getArtifactPath(
                 Artifact.genSnapshot,
-                platform: TargetPlatform.android_arm,
+                platform: const TargetPlatform(.android, .armv7),
                 mode: BuildMode.release,
               ),
               '--deterministic',
@@ -476,7 +539,7 @@ void main() {
         );
 
         final int genSnapshotExitCode = await snapshotter.build(
-          platform: TargetPlatform.android_arm,
+          platform: const TargetPlatform(.android, .armv7),
           buildMode: BuildMode.release,
           mainPath: 'main.dill',
           outputPath: outputPath,
@@ -496,7 +559,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: TargetPlatform.android_arm64,
+              platform: const TargetPlatform(.android, .arm64),
               mode: BuildMode.release,
             ),
             '--deterministic',
@@ -508,7 +571,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm64,
+        platform: const TargetPlatform(.android, .arm64),
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -526,7 +589,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: TargetPlatform.android_arm64,
+              platform: const TargetPlatform(.android, .arm64),
               mode: BuildMode.release,
             ),
             '--deterministic',
@@ -538,7 +601,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm64,
+        platform: const TargetPlatform(.android, .arm64),
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,

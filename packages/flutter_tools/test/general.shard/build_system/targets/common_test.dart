@@ -49,7 +49,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: TargetPlatform.android_arm.getName(),
+        kTargetPlatform: const TargetPlatform(.android, .armv7).getName(),
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -62,7 +62,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: TargetPlatform.ios.getName(),
+        kTargetPlatform: const TargetPlatform(.ios, .arm64).getName(),
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -88,7 +88,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
-      platform: TargetPlatform.android_arm,
+      platform: const TargetPlatform(.android, .armv7),
       mode: BuildMode.profile,
     );
     processManager.addCommands(<FakeCommand>[
@@ -130,7 +130,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
-      platform: TargetPlatform.android_arm,
+      platform: const TargetPlatform(.android, .armv7),
       mode: BuildMode.profile,
     );
     processManager.addCommands(<FakeCommand>[
@@ -175,7 +175,7 @@ void main() {
       final String build = androidEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.android_arm,
+        platform: const TargetPlatform(.android, .armv7),
         mode: BuildMode.profile,
       );
       processManager.addCommands(<FakeCommand>[
@@ -220,7 +220,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
-      platform: TargetPlatform.android_arm,
+      platform: const TargetPlatform(.android, .armv7),
       mode: BuildMode.profile,
     );
     processManager.addCommands(<FakeCommand>[
@@ -266,7 +266,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
-      platform: TargetPlatform.android_arm,
+      platform: const TargetPlatform(.android, .armv7),
       mode: BuildMode.profile,
     );
     processManager.addCommands(<FakeCommand>[
@@ -314,7 +314,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
-      platform: TargetPlatform.android_arm,
+      platform: const TargetPlatform(.android, .armv7),
       mode: BuildMode.debug,
     );
     processManager.addCommands(<FakeCommand>[
@@ -362,7 +362,7 @@ void main() {
       final String build = androidEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.darwin,
+        platform: const TargetPlatform(.macos, .x64),
         mode: BuildMode.debug,
       );
       processManager.addCommands(<FakeCommand>[
@@ -393,7 +393,7 @@ void main() {
 
       await const KernelSnapshot().build(
         androidEnvironment
-          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
+          ..defines[kTargetPlatform] = const TargetPlatform(.macos, .x64).getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kTrackWidgetCreation] = 'false',
       );
@@ -411,7 +411,7 @@ void main() {
       final String build = androidEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.android,
+        platform: const TargetPlatform(.android, .unknown),
         mode: BuildMode.debug,
       );
       processManager.addCommands(<FakeCommand>[
@@ -453,7 +453,7 @@ void main() {
       final String build = iosEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.ios,
+        platform: const TargetPlatform(.ios, .arm64),
         mode: BuildMode.debug,
       );
       fileSystem.directory('/ios/Runner.xcodeproj').createSync(recursive: true);
@@ -487,7 +487,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = TargetPlatform.ios.getName()
+          ..defines[kTargetPlatform] = const TargetPlatform(.ios, .arm64).getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
           ..defines[kXcodeConfiguration] = 'Debug-chocolate'
@@ -511,7 +511,7 @@ void main() {
       final String build = iosEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.darwin,
+        platform: const TargetPlatform(.macos, .x64),
         mode: BuildMode.debug,
       );
       fileSystem.directory('/macos/Runner.xcodeproj').createSync(recursive: true);
@@ -544,7 +544,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
+          ..defines[kTargetPlatform] = const TargetPlatform(.macos, .x64).getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
           ..defines[kXcodeConfiguration] = 'Debug-chocolate'
@@ -568,7 +568,7 @@ void main() {
       final String build = iosEnvironment.buildDir.path;
       final String flutterPatchedSdkPath = artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.darwin,
+        platform: const TargetPlatform(.macos, .x64),
         mode: BuildMode.debug,
       );
       processManager.addCommands(<FakeCommand>[
@@ -600,7 +600,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
+          ..defines[kTargetPlatform] = const TargetPlatform(.macos, .x64).getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kDartDefines] = base64Encode(utf8.encode('FLUTTER_APP_FLAVOR=vanilla'))
           ..defines[kFlavor] = 'strawberry'
@@ -624,7 +624,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,
-        kTargetPlatform: TargetPlatform.android_arm.getName(),
+        kTargetPlatform: const TargetPlatform(.android, .armv7).getName(),
       },
       processManager: processManager,
       artifacts: artifacts,
@@ -634,7 +634,7 @@ void main() {
     final String build = testEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
-      platform: TargetPlatform.android_arm,
+      platform: const TargetPlatform(.android, .armv7),
       mode: BuildMode.debug,
     );
     processManager.addCommands(<FakeCommand>[
@@ -678,7 +678,7 @@ void main() {
         command: <String>[
           artifacts.getArtifactPath(
             Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm,
+            platform: const TargetPlatform(.android, .armv7),
             mode: BuildMode.profile,
           ),
           '--deterministic',
@@ -693,7 +693,7 @@ void main() {
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
     androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-    await const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment);
+    await const AotElfProfile(TargetPlatform(.android, .armv7)).build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -706,7 +706,7 @@ void main() {
         command: <String>[
           artifacts.getArtifactPath(
             Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm,
+            platform: const TargetPlatform(.android, .armv7),
             mode: BuildMode.profile,
           ),
           '--deterministic',
@@ -723,7 +723,7 @@ void main() {
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
     androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
+    await const AotElfRelease(TargetPlatform(.android, .armv7)).build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -732,7 +732,7 @@ void main() {
     androidEnvironment.defines.remove(kBuildMode);
 
     expect(
-      const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
+      const AotElfProfile(TargetPlatform(.android, .armv7)).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
   });
@@ -741,7 +741,7 @@ void main() {
     androidEnvironment.defines.remove(kTargetPlatform);
 
     expect(
-      const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
+      const AotElfProfile(TargetPlatform(.android, .armv7)).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
   });
@@ -803,7 +803,7 @@ void main() {
         FakeCommand(
           command: <String>[
             // This path is not known by the cache due to the iOS gen_snapshot split.
-            'Artifact.genSnapshotArm64.TargetPlatform.ios.profile',
+            'Artifact.genSnapshotArm64.ios.profile',
             '--deterministic',
             '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64.json',
             '--trace-precompiler-to=code_size_1/trace.arm64.json',
@@ -867,7 +867,7 @@ void main() {
         command: <String>[
           artifacts.getArtifactPath(
             Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm,
+            platform: const TargetPlatform(.android, .armv7),
             mode: BuildMode.profile,
           ),
           '--deterministic',
@@ -883,7 +883,7 @@ void main() {
       ),
     ]);
 
-    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
+    await const AotElfRelease(TargetPlatform(.android, .armv7)).build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
   });

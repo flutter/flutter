@@ -58,7 +58,7 @@ void main() {
       expect(
         () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-          targetPlatform: TargetPlatform.windows_x64,
+          targetPlatform: const TargetPlatform(.windows, .x64),
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
@@ -100,7 +100,7 @@ void main() {
         expect(
           () async => runFlutterSpecificHooks(
             environmentDefines: <String, String>{kBuildMode: buildMode.cliName},
-            targetPlatform: TargetPlatform.linux_x64,
+            targetPlatform: const TargetPlatform(.linux, .x64),
             projectUri: projectUri,
             buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
             buildDataAssets: true,

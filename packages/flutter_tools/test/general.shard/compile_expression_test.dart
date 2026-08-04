@@ -36,7 +36,7 @@ void main() {
     fileSystem = MemoryFileSystem.test()
       ..file(Artifact.flutterPatchedSdkPath.toString()).createSync();
     generator = const ResidentCompilerFactory().create(
-      targetPlatform: .tester,
+      targetPlatform: const TargetPlatform(.tester, .unknown),
       buildInfo: BuildInfo.debug,
       artifacts: Artifacts.test(fileSystem: fileSystem),
       processManager: processManager,
