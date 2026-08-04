@@ -22,16 +22,10 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
 
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
     if ([layer isKindOfClass:[CAMetalLayer class]]) {
-      switch (context->GetBackend()) {
-        case IOSRenderingBackend::kSkia:
-          [FlutterLogger logFatal:@"Impeller opt-out unavailable."];
-          return nullptr;
-        case IOSRenderingBackend::kImpeller:
-          return std::make_unique<IOSSurfaceMetalImpeller>(
-              static_cast<CAMetalLayer*>(layer),  // Metal layer
-              std::move(context)                  // context
-          );
-      }
+      return std::make_unique<IOSSurfaceMetalImpeller>(
+          static_cast<CAMetalLayer*>(layer),  // Metal layer
+          std::move(context)                  // context
+      );
     }
   }
   return std::make_unique<IOSSurfaceNoop>(std::move(context));

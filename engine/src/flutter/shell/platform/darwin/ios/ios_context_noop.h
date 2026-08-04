@@ -21,8 +21,6 @@ class IOSContextNoop final : public IOSContext {
   std::unique_ptr<Texture> CreateExternalTexture(int64_t texture_id,
                                                  NSObject<FlutterTexture>* texture) override;
 
-  IOSRenderingBackend GetBackend() const override;
-
  private:
   IOSContextNoop(const IOSContextNoop&) = delete;
 
