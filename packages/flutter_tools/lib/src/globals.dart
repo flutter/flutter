@@ -8,6 +8,7 @@ library;
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'android/android_environment_resolver.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/gradle_utils.dart';
@@ -71,6 +72,8 @@ OperatingSystemUtils get os => context.get<OperatingSystemUtils>()!;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
+AndroidEnvironmentResolver? get androidEnvironmentResolver =>
+    context.get<AndroidEnvironmentResolver>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();

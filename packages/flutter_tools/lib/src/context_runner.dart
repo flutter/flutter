@@ -8,6 +8,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_builder.dart';
+import 'android/android_environment_resolver.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -101,6 +102,32 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         androidStudio: globals.androidStudio,
         androidSdk: globals.androidSdk,
+      ),
+      AndroidEnvironmentResolver: () => AndroidEnvironmentResolver(
+        javaLocator: JavaCandidateLocator(
+          config: globals.config,
+          androidStudio: globals.androidStudio,
+          platform: globals.platform,
+        ),
+        sdkLocator: SdkCandidateLocator(
+          config: globals.config,
+          platform: globals.platform,
+          fileSystem: globals.fs,
+          operatingSystemUtils: globals.os,
+          fileSystemUtils: globals.fsUtils,
+        ),
+        compatibilityChecker: AndroidCompatibilityChecker(
+          fileSystem: globals.fs,
+          processManager: globals.processManager,
+          platform: globals.platform,
+          operatingSystemUtils: globals.os,
+          logger: globals.logger,
+        ),
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         platform: globals.platform,

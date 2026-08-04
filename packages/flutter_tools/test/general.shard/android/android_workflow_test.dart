@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_environment_resolver.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
@@ -753,6 +754,40 @@ Android sdkmanager tool was found, but failed to run
   });
 
   testUsingContext(
+    'Mentions skipped incompatible Java candidates in validation messages',
+    () async {
+      sdk
+        ..licensesAvailable = true
+        ..platformToolsAvailable = true
+        ..cmdlineToolsAvailable = true
+        ..directory = fileSystem.directory('/foo/bar')
+        ..sdkManagerPath = '/foo/bar/sdkmanager'
+        ..emulatorPath = 'path/to/emulator';
+
+      final ValidationResult validationResult = await AndroidValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        logger: logger,
+        platform: FakePlatform(),
+        userMessages: UserMessages(),
+        processManager: processManager,
+        osUtils: FakeOperatingSystemUtils(),
+      ).validate();
+
+      expect(
+        validationResult.messages.any(
+          (ValidationMessage message) =>
+              message.message.contains('incompatible with Android SDK command-line tools.'),
+        ),
+        true,
+      );
+    },
+    overrides: <Type, Generator>{
+      AndroidEnvironmentResolver: () => _FakeResolverWithIncompatibleCandidate(),
+    },
+  );
+
+  testUsingContext(
     "Mentions that JDK is provided by user's JAVA_HOME environment variable",
     () async {
       // Mock a pass through scenario to reach _checkJavaVersion()
@@ -1032,4 +1067,17 @@ class IgnoringStdin extends Fake implements IOSink {
 
   @override
   Future<void> get done async {}
+}
+
+class _FakeResolverWithIncompatibleCandidate extends Fake implements AndroidEnvironmentResolver {
+  @override
+  ResolvedAndroidEnvironment? resolve({bool force = false}) {
+    return const ResolvedAndroidEnvironment(
+      sdk: null,
+      java: null,
+      incompatibleJavaCandidates: <JavaHomeCandidate>[
+        (path: '/jdk22', source: JavaSource.javaHome),
+      ],
+    );
+  }
 }
