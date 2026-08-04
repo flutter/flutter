@@ -145,10 +145,6 @@ Future<bool> _runRetryLoop(String testDir) async {
       io.stderr.writeln(
         'attempt $attempt of $maxAttempts: detected retryable EGL initialization warning. Retrying...',
       );
-    } else {
-      io.stderr.writeln(
-        'attempt $attempt of $maxAttempts failed with retryable EGL initialization warning.',
-      );
     }
   }
 

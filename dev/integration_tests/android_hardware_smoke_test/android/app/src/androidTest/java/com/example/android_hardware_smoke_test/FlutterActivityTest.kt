@@ -137,10 +137,11 @@ class FlutterActivityTest {
             } catch (e: Throwable) {
                 lastException = e
                 Log.w(TAG, "Attempt $currentAttempt failed: ${e.message}")
+
+                if (e is org.junit.AssumptionViolatedException) {
+                    throw e
+                }
                 if (!isBlankScreenshotException(e)) {
-                    if (e is org.junit.AssumptionViolatedException) {
-                        throw e
-                    }
                     throw RuntimeException(
                         "Test '$testName' failed on attempt $currentAttempt with a non-retryable error: ${e.message}",
                         e
@@ -150,15 +151,10 @@ class FlutterActivityTest {
                 if (currentAttempt < maxAttempts) {
                     Log.i(TAG, "Recreating activity for next attempt...")
                     rule.scenario.recreate()
-                } else {
-                    Log.w(TAG, "Attempt $currentAttempt of $maxAttempts failed with retryable screenshot error.")
                 }
             }
         }
 
-        if (lastException is org.junit.AssumptionViolatedException) {
-            throw lastException
-        }
         throw RuntimeException(
             "Test '$testName' failed to capture a valid screenshot after $maxAttempts attempts.",
             lastException
