@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:args/args.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
@@ -435,16 +437,19 @@ class PackagesGetCommand extends FlutterCommand {
   /// transitively, according to the resolved package [graph].
   static bool _dependsOnFlutter(PackageGraph graph, String packageName) {
     final visited = <String>{};
-    final toVisit = <String>[packageName];
+    final toVisit = Queue<String>.of(<String>[packageName]);
     while (toVisit.isNotEmpty) {
-      final String current = toVisit.removeLast();
+      final String current = toVisit.removeFirst();
       if (!visited.add(current)) {
         continue;
       }
       if (current == 'flutter') {
         return true;
       }
-      toVisit.addAll(graph.dependencies[current] ?? const <String>[]);
+      final List<String>? dependencies = graph.dependencies[current];
+      if (dependencies != null) {
+        toVisit.addAll(dependencies);
+      }
     }
     return false;
   }
