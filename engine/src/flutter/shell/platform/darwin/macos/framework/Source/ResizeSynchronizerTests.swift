@@ -11,7 +11,7 @@ import Testing
 // in effect, a source of implicit shared state/behaviour. Because `beginResize` is a blocking call
 // performed on the main thread, we serialise to avoid potential interactions between tests.
 @Suite("ResizeSynchronizer tests", .serialized)
-struct ResizeSynchronizerTest {
+struct ResizeSynchronizerTests {
 
   @MainActor
   @Test("performCommit callback executes when no resize is active")

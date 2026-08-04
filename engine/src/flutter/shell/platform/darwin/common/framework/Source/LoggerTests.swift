@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import Foundation
-import Testing
-
 import InternalFlutterSwiftCommon
+import Testing
 import test_utils_swift
 
-@Suite struct LoggerTest {
+@Suite struct LoggerTests {
 
   @Test func testInitialization() {
     let writer = StringOutputWriter()
@@ -53,6 +52,57 @@ import test_utils_swift
     #expect(writer.didLog)
     #expect(writer.lastLevel == .important)
     #expect(writer.lastLine == "Hello world")
+  }
+
+  @Test func testAutoclosureDoesNotEvaluateMessageBelowLogLevel() {
+    let writer = StringOutputWriter()
+    let logger = Logger(outputWriter: writer, logLevel: .warning)
+    var wasEvaluated = false
+
+    logger.log(
+      level: .info,
+      {
+        wasEvaluated = true
+        return "Hello world"
+      }())
+    #expect(!writer.didLog)
+    #expect(!wasEvaluated)
+  }
+
+  @Test func testAutoclosureEvaluatesMessageAtOrAboveLogLevel() {
+    let writer = StringOutputWriter()
+    let logger = Logger(outputWriter: writer, logLevel: .info)
+    var wasEvaluated = false
+
+    logger.log(
+      level: .info,
+      {
+        wasEvaluated = true
+        return "Hello world"
+      }())
+    #expect(writer.didLog)
+    #expect(wasEvaluated)
+  }
+
+  @Test func testStaticLogInfoDoesNotEvaluateMessageBelowLogLevel() {
+    let writer = StringOutputWriter()
+    let oldWriter = Logger.outputWriter
+    let oldLevel = Logger.logLevel
+    defer {
+      Logger.outputWriter = oldWriter
+      Logger.logLevel = oldLevel
+    }
+    Logger.outputWriter = writer
+    Logger.logLevel = .warning
+    var wasEvaluated = false
+
+    Logger.logInfo(
+      {
+        wasEvaluated = true
+        return "Hello world"
+      }())
+    #expect(!writer.didLog)
+    #expect(!wasEvaluated)
   }
 
 }
