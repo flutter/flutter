@@ -149,7 +149,6 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
     return YES;
   }
 
-  // Relaying to the system here will case an infinite loop, so we don't do it here.
   return [self handleOpenURL:url options:options];
 }
 
@@ -217,10 +216,6 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
     return YES;
   }
 
-  // Since iOS 13+, continuing a user activity on scenes returns void and the system does not expect
-  // the app to fallback to Safari if it cannot handle a Universal Link.
-  // Bouncing back to the browser on failure creates a bad user experience.
-  // See: https://github.com/flutter/flutter/issues/170665
   return [self handleOpenURL:userActivity.webpageURL options:@{}];
 }
 

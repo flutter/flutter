@@ -435,7 +435,6 @@ FLUTTER_ASSERT_ARC
   //  universal link to the scene(_:willConnectTo:options:) delegate method after launch, and to
   //  scene(_:continue:) when the universal link is tapped while your app is running or suspended in
   //  memory.
-  //  See: https://github.com/flutter/flutter/issues/170665
   for (NSUserActivity* userActivity in connectionOptions.userActivities) {
     if ([self handleDeeplink:userActivity.webpageURL flutterEngine:engine]) {
       return;
