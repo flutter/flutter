@@ -137,14 +137,20 @@ void main() {
           ),
           isTrue,
         );
-        expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.profile)), isFalse);
+        expect(
+          device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.profile)),
+          isFalse,
+        );
         expect(
           device.shouldAttachLLDBDebugger(
             DebuggingOptions.enabled(BuildInfo.profile, iosProfileDebugger: false),
           ),
           isFalse,
         );
-        expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.release)), isFalse);
+        expect(
+          device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.release)),
+          isFalse,
+        );
       });
     });
 
