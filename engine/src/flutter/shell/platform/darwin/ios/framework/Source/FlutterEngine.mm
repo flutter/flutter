@@ -1534,13 +1534,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   [self.statusBarChannel invokeMethod:@"handleScrollToTop" arguments:nil];
 }
 
-- (void)waitForFirstFrameSync:(NSTimeInterval)timeout
-                     callback:(NS_NOESCAPE void (^_Nonnull)(BOOL didTimeout))callback {
-  fml::TimeDelta waitTime = fml::TimeDelta::FromMilliseconds(timeout * 1000);
-  fml::Status status = self.shell.WaitForFirstFrame(waitTime);
-  callback(status.code() == fml::StatusCode::kDeadlineExceeded);
-}
-
 - (void)waitForFirstFrame:(NSTimeInterval)timeout
                  callback:(void (^_Nonnull)(BOOL didTimeout))callback {
   dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
