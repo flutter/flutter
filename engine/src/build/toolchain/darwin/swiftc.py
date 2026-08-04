@@ -410,7 +410,9 @@ def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map):
 
   # Sets the minimum access level of declarations to include in a generated header file.
   if args.emit_clang_header_min_access:
-    swiftc_args.extend(('-emit-clang-header-min-access', args.emit_clang_header_min_access))
+    swiftc_args.extend(
+        ('-Xfrontend', '-emit-clang-header-min-access', '-Xfrontend', args.emit_clang_header_min_access)
+    )
 
   # Handle swift const values extraction.
   swiftc_args.extend(['-emit-const-values'])
