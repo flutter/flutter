@@ -61,6 +61,7 @@ dependencies:
   hooks: 2.1.0
   code_assets: 1.2.1
   data_assets: 0.20.0
+  record_use: 1.0.0
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -128,4 +129,4 @@ dartdoc:
   nodoc: true
 
 
-# PUBSPEC CHECKSUM: qi12j
+# PUBSPEC CHECKSUM: 81k1ci

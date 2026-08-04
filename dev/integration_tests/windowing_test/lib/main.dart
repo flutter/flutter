@@ -14,7 +14,7 @@ import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
-late final RegularWindowController controller;
+late final WindowController controller;
 final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(null);
 
 /// A generic "secondary" window used by the `isDestroyed` end-to-end tests.
@@ -180,7 +180,7 @@ void main() {
           try {
             switch (windowType) {
               case 'regular':
-                secondaryController = RegularWindowController(
+                secondaryController = WindowController(
                   size: const Size(200, 200),
                   title: 'Secondary',
                 );
@@ -228,13 +228,13 @@ void main() {
       }
     },
   );
-  controller = RegularWindowController(
+  controller = WindowController(
     size: const Size(640, 480),
     title: 'Integration Test',
-    delegate: RegularWindowControllerDelegate(),
+    delegate: WindowControllerDelegate(),
   );
 
-  runWidget(RegularWindow(controller: controller, child: const MyApp()));
+  runWidget(Window(controller: controller, child: const MyApp()));
   windowCreated.complete();
 }
 
