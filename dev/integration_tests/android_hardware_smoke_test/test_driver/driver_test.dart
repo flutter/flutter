@@ -80,10 +80,9 @@ void main() async {
       final h = reply[keyHeight]! as int;
 
       img.Image? cropped;
-      var attempt = 1;
       const maxAttempts = 3;
 
-      while (attempt <= maxAttempts) {
+      for (var attempt = 1; attempt <= maxAttempts; attempt++) {
         final NativeScreenshot fullScreenshot = await nativeDriver.screenshot();
         final Uint8List fullBytes = await fullScreenshot.readAsBytes();
 
@@ -107,7 +106,6 @@ void main() async {
         if (attempt < maxAttempts) {
           await Future<void>.delayed(const Duration(milliseconds: 200));
         }
-        attempt++;
       }
 
       if (cropped == null) {

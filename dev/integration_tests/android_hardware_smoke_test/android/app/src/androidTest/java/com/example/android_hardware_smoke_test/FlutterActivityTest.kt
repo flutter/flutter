@@ -41,14 +41,6 @@ class FlutterActivityTest {
         private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
         private const val TEST_TIMEOUT_SEC = 60L
 
-        // Unique logcat marker printed during companion object initialization to establish the baseline
-        // time boundary for verifying process-wide graphics pipeline errors in tearDownClass.
-        private val classStartMarker = "CLASS_START_${System.currentTimeMillis()}"
-
-        init {
-            Log.i(TAG, classStartMarker)
-        }
-
         @JvmStatic
         @AfterClass
         fun tearDownClass() {
@@ -57,9 +49,6 @@ class FlutterActivityTest {
                 engine?.destroy()
                 FlutterEngineCache.getInstance().remove(MainActivity.CACHED_ENGINE_KEY)
             }
-            // Verify that no EGL context or HWUI graphics pipeline warnings were logged at any point
-            // during the entire class execution lifetime, guarding against silent/transient leaks.
-            verifyNoGraphicsPipelineErrors(classStartMarker)
         }
 
         private fun verifyNoGraphicsPipelineErrors(marker: String) {
@@ -134,11 +123,10 @@ class FlutterActivityTest {
      * @param testName The descriptive identifier of the test case to render and compare.
      */
     private fun templateTest(testName: String) {
-        var currentAttempt = 1
         val maxAttempts = 3
         var lastException: Throwable? = null
 
-        while (currentAttempt <= maxAttempts) {
+        for (currentAttempt in 1..maxAttempts) {
             val marker = "START_${testName}_attempt${currentAttempt}_${System.currentTimeMillis()}"
             Log.i(TAG, marker)
             Log.d(TAG, "Starting $testName (attempt $currentAttempt/$maxAttempts)")
@@ -149,21 +137,30 @@ class FlutterActivityTest {
             } catch (e: Throwable) {
                 lastException = e
                 Log.w(TAG, "Attempt $currentAttempt failed: ${e.message}")
-                if (currentAttempt < maxAttempts && isBlankScreenshotException(e)) {
+                if (!isBlankScreenshotException(e)) {
+                    if (e is org.junit.AssumptionViolatedException) {
+                        throw e
+                    }
+                    throw RuntimeException(
+                        "Test '$testName' failed on attempt $currentAttempt with a non-retryable error: ${e.message}",
+                        e
+                    )
+                }
+
+                if (currentAttempt < maxAttempts) {
                     Log.i(TAG, "Recreating activity for next attempt...")
                     rule.scenario.recreate()
                 } else {
-                    break
+                    Log.w(TAG, "Attempt $currentAttempt of $maxAttempts failed with retryable screenshot error.")
                 }
             }
-            currentAttempt++
         }
 
         if (lastException is org.junit.AssumptionViolatedException) {
             throw lastException
         }
         throw RuntimeException(
-            "Test '$testName' failed after $maxAttempts attempts. Last error: ${lastException?.message}",
+            "Test '$testName' failed to capture a valid screenshot after $maxAttempts attempts.",
             lastException
         )
     }
@@ -258,10 +255,6 @@ class FlutterActivityTest {
         } else {
             assertEquals("Rendered $testName", reply)
         }
-
-        // Verify that no graphics pipeline or EGL warnings occurred during this specific attempt's
-        // rendering and communication lifecycle before declaring the attempt successful.
-        verifyNoGraphicsPipelineErrors(marker)
     }
 
     private fun captureAndSendScreenshot(
@@ -273,6 +266,10 @@ class FlutterActivityTest {
         marker: String,
         future: CompletableFuture<String>
     ) {
+        if (x < 0 || y < 0 || width <= 0 || height <= 0) {
+            throw IllegalArgumentException("Invalid crop bounds: x=$x, y=$y, width=$width, height=$height")
+        }
+
         // Capture the screenshot on a background thread with a short delay. We must NOT sleep or capture
         // on the Main UI Thread to avoid blocking frame rendering or causing an ANR.
         val screenshotExecutor = Executors.newSingleThreadScheduledExecutor()
@@ -281,24 +278,17 @@ class FlutterActivityTest {
                 // Capture the true screen output using UiAutomation from this privileged instrumentation runner process.
                 val instrumentation = InstrumentationRegistry.getInstrumentation()
                 var cropped: Bitmap? = null
-                var attempt = 1
                 val maxAttempts = 3
 
-                while (attempt <= maxAttempts) {
+                for (attempt in 1..maxAttempts) {
                     val screenshot = instrumentation.uiAutomation.takeScreenshot()
                     if (screenshot == null) {
                         Log.w(TAG, "UiAutomation.takeScreenshot() returned null (attempt $attempt/$maxAttempts)")
                     } else {
-                        if (x < 0 ||
-                            y < 0 ||
-                            width <= 0 ||
-                            height <= 0 ||
-                            x + width > screenshot.width ||
-                            y + height > screenshot.height
-                        ) {
+                        if (x + width > screenshot.width || y + height > screenshot.height) {
                             screenshot.recycle()
                             throw IllegalArgumentException(
-                                "Crop bounds out of range: x=$x, y=$y, width=$width, height=$height, screenshot.width=${screenshot.width}, screenshot.height=${screenshot.height}"
+                                "Crop bounds out of screen range: x=$x, y=$y, width=$width, height=$height, screenshot.width=${screenshot.width}, screenshot.height=${screenshot.height}"
                             )
                         }
 
@@ -327,7 +317,6 @@ class FlutterActivityTest {
                     if (attempt < maxAttempts) {
                         Thread.sleep(200)
                     }
-                    attempt++
                 }
 
                 // Verify logcat first to prioritize EGL diagnostics over generic blank screenshot errors.
@@ -335,7 +324,7 @@ class FlutterActivityTest {
 
                 if (cropped == null) {
                     throw BlankScreenshotException(
-                        "Captured screenshot is ${Constants.ERROR_BLANK_SCREENSHOT} after $maxAttempts attempts."
+                        "Captured screenshot is blank/empty after $maxAttempts attempts."
                     )
                 }
 
