@@ -4,6 +4,9 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 
+#include <signal.h>
+
+#include "gtest/gtest-death-test.h"
 #include "gtest/gtest.h"
 
 FLUTTER_ASSERT_ARC
@@ -16,8 +19,8 @@ TEST(FlutterStringCodec, CanEncodeAndDecodeNil) {
 
 TEST(FlutterStringCodec, CanEncodeAndDecodeEmptyString) {
   FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
-  ASSERT_TRUE([[codec encode:@""] isEqualTo:[NSData data]]);
-  ASSERT_TRUE([[codec decode:[NSData data]] isEqualTo:@""]);
+  ASSERT_TRUE([[codec encode:@""] isEqual:[NSData data]]);
+  ASSERT_TRUE([[codec decode:[NSData data]] isEqual:@""]);
 }
 
 TEST(FlutterStringCodec, CanEncodeAndDecodeAsciiString) {
@@ -25,7 +28,7 @@ TEST(FlutterStringCodec, CanEncodeAndDecodeAsciiString) {
   FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   NSString* decoded = [codec decode:encoded];
-  ASSERT_TRUE([value isEqualTo:decoded]);
+  ASSERT_TRUE([value isEqual:decoded]);
 }
 
 TEST(FlutterStringCodec, CanEncodeAndDecodeNonAsciiString) {
@@ -33,7 +36,7 @@ TEST(FlutterStringCodec, CanEncodeAndDecodeNonAsciiString) {
   FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   NSString* decoded = [codec decode:encoded];
-  ASSERT_TRUE([value isEqualTo:decoded]);
+  ASSERT_TRUE([value isEqual:decoded]);
 }
 
 TEST(FlutterStringCodec, CanEncodeAndDecodeNonBMPString) {
@@ -41,9 +44,10 @@ TEST(FlutterStringCodec, CanEncodeAndDecodeNonBMPString) {
   FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   NSString* decoded = [codec decode:encoded];
-  ASSERT_TRUE([value isEqualTo:decoded]);
+  ASSERT_TRUE([value isEqual:decoded]);
 }
 
+#if defined(GTEST_HAS_DEATH_TEST)
 TEST(FlutterJSONCodec, ThrowsOnInvalidEncode) {
   NSString* value = [[NSString alloc] initWithBytes:"\xdf\xff"
                                              length:2
@@ -51,18 +55,21 @@ TEST(FlutterJSONCodec, ThrowsOnInvalidEncode) {
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   EXPECT_EXIT([codec encode:value], testing::KilledBySignal(SIGABRT), "failed to convert to UTF8");
 }
+#endif
 
 TEST(FlutterJSONCodec, CanDecodeZeroLength) {
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   ASSERT_TRUE([codec decode:[NSData data]] == nil);
 }
 
+#if defined(GTEST_HAS_DEATH_TEST)
 TEST(FlutterJSONCodec, ThrowsOnInvalidDecode) {
   NSString* value = @"{{{";
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   EXPECT_EXIT([codec decode:[value dataUsingEncoding:value.fastestEncoding]],
               testing::KilledBySignal(SIGABRT), "No string key for value in object around line 1");
 }
+#endif
 
 TEST(FlutterJSONCodec, CanEncodeAndDecodeNil) {
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
@@ -75,7 +82,7 @@ TEST(FlutterJSONCodec, CanEncodeAndDecodeArray) {
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   NSArray* decoded = [codec decode:encoded];
-  ASSERT_TRUE([value isEqualTo:decoded]);
+  ASSERT_TRUE([value isEqual:decoded]);
 }
 
 TEST(FlutterJSONCodec, CanEncodeAndDecodeDictionary) {
@@ -83,5 +90,5 @@ TEST(FlutterJSONCodec, CanEncodeAndDecodeDictionary) {
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   NSDictionary* decoded = [codec decode:encoded];
-  ASSERT_TRUE([value isEqualTo:decoded]);
+  ASSERT_TRUE([value isEqual:decoded]);
 }

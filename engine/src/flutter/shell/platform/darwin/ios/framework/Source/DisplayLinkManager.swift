@@ -31,7 +31,7 @@ import UIKit
 /// while holding a lock; every other stored property is immutable, so instances are safe to share
 /// and read from any thread once constructed.
 @objc(FlutterDisplayLinkManager)
-public final class DisplayLinkManager: NSObject, @unchecked Sendable {
+final class DisplayLinkManager: NSObject, @unchecked Sendable {
 
   /// The shared DisplayLinkManager.
   ///
@@ -40,13 +40,13 @@ public final class DisplayLinkManager: NSObject, @unchecked Sendable {
   /// callers remain responsible for calling from the main thread themselves.
   @MainActor
   @objc
-  public static let shared = DisplayLinkManager()
+  static let shared = DisplayLinkManager()
 
   /// Info.plist key enabling the full range of ProMotion refresh rates for CADisplayLink callbacks
   /// and CAAnimation animations in the app.
   ///
   /// - SeeAlso: https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro#3885321
-  internal static let disableMinimumFrameDurationOnPhoneKey = "CADisableMinimumFrameDurationOnPhone"
+  static let disableMinimumFrameDurationOnPhoneKey = "CADisableMinimumFrameDurationOnPhone"
 
   /// Whether the max refresh rate on iPhone ProMotion devices is enabled.
   ///
@@ -56,11 +56,11 @@ public final class DisplayLinkManager: NSObject, @unchecked Sendable {
   ///
   /// - Returns: `true` if the max refresh rate on ProMotion devices is enabled.
   @objc
-  public let maxRefreshRateEnabledOnIPhone: Bool
+  let maxRefreshRateEnabledOnIPhone: Bool
 
   /// The maximum display refresh rate, in frames per second.
   @objc
-  public internal(set) var displayRefreshRate: Double {
+  var displayRefreshRate: Double {
     get {
       // We cache the refresh rate rather than query from UIKit on every read, since this can be
       // read from background engine threads. The value is kept up-to-date by observing

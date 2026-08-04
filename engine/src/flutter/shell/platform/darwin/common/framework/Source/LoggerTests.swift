@@ -5,8 +5,8 @@
 import Foundation
 import Testing
 
-import InternalFlutterSwiftCommon
-import test_utils_swift
+@testable import InternalFlutterSwiftCommon
+@testable import test_utils_swift
 
 @Suite struct LoggerTests {
 

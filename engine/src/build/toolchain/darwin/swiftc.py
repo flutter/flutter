@@ -408,6 +408,19 @@ def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map):
   if args.import_objc_header:
     swiftc_args.extend(('-import-objc-header', args.import_objc_header))
 
+  # Handle optional -package-name flag.
+  if args.package_name:
+    swiftc_args.extend(('-package-name', args.package_name))
+
+  # Handle optional -emit-clang-header-min-access flag.
+  if args.emit_clang_header_min_access:
+    swiftc_args.extend(('-emit-clang-header-min-access', args.emit_clang_header_min_access))
+
+  # Handle optional -Xfrontend flags.
+  if args.frontend_args:
+    for arg in args.frontend_args:
+      swiftc_args.extend(('-Xfrontend', arg))
+
   # Handle swift const values extraction.
   swiftc_args.extend(['-emit-const-values'])
   swiftc_args.extend([
@@ -648,6 +661,22 @@ def main(args):
   parser.add_argument(
       '-file-prefix-map',
       help='remap source paths in debug, coverage, and index info')
+
+  parser.add_argument(
+      '-package-name',
+      dest='package_name',
+      help='name of the Swift package')
+
+  parser.add_argument(
+      '-emit-clang-header-min-access',
+      dest='emit_clang_header_min_access',
+      help='minimum access level for emitted clang header')
+
+  parser.add_argument(
+      '-Xfrontend',
+      action='append',
+      dest='frontend_args',
+      help='pass option to swift frontend')
 
   # Positional arguments.
   parser.add_argument('sources',
