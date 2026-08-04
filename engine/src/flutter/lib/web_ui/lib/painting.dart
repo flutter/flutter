@@ -474,7 +474,8 @@ enum BlurStyle {
 }
 
 abstract class MaskFilter {
-  const factory MaskFilter.blur(BlurStyle style, double sigma) = engine.EngineMaskFilter.blur;
+  // ignore: no_leading_underscores_for_local_identifiers
+  const factory MaskFilter.blur(BlurStyle _style, double _sigma) = engine.EngineMaskFilter.blur;
 
   double get webOnlySigma;
   BlurStyle get webOnlyBlurStyle;
