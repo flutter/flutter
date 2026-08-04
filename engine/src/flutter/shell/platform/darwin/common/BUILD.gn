@@ -219,6 +219,9 @@ source_set("test_utils_swift") {
     ":config",
     ":test_config",
   ]
+  # Speficying a bridging header forces the swift compiler to add even internal
+  # members of this library in test_utils_swift.h
+  bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
   sources = [ "framework/Source/LoggerTestUtils.swift" ]
   deps = [ ":framework_common" ]
 }

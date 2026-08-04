@@ -15,13 +15,6 @@
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
-
-@interface FlutterStringOutputWriter : NSObject <FlutterOutputWriter>
-@property(nonatomic, assign) BOOL didLog;
-@property(nonatomic, nullable, copy) NSString* lastLine;
-@property(nonatomic, nullable, copy) NSString* expectedOutput;
-@property(nonatomic, assign) BOOL gotExpectedOutput;
-@end
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
