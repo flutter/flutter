@@ -696,6 +696,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
         );
 
         expect(device.supportsScreenshot, isFalse);
@@ -724,6 +726,8 @@ void main() {
             isPaired: true,
             devModeEnabled: true,
             isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
           );
 
           final fakeXcode = globals.xcode! as FakeXcode;
@@ -757,6 +761,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
         );
 
         fakeCoreDeviceControl.takeScreenshotSuccess = true;
@@ -789,6 +795,8 @@ void main() {
             isPaired: true,
             devModeEnabled: true,
             isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
           );
 
           fakeCoreDeviceControl.takeScreenshotException = Exception(
@@ -826,6 +834,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
         );
 
         expect(
