@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
@@ -154,7 +155,7 @@ class CleanCommand extends FlutterCommand {
   @visibleForTesting
   Future<void> deleteFile(FileSystemEntity file, [FlutterProject? project]) async {
     try {
-      await _deleteFile(file, project);
+      await ErrorHandlingFileSystem.noExitOnFailure(() => _deleteFile(file, project));
     } on Exception catch (e) {
       globals.printError('Failed to remove ${file.path}: $e');
     }
