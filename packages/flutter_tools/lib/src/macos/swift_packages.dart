@@ -125,6 +125,8 @@ class SwiftPackage {
           .childDirectory(target.name);
       if (generateEmptySources) {
         final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
+        // Skip creating placeholder sources if sources already exist in the
+        // target directory to avoid unnecessary file writes during build.
         final bool hasSources =
             requiredSwiftFile.existsSync() ||
             (targetDirectory.existsSync() && targetDirectory.listSync().isNotEmpty);
@@ -140,6 +142,10 @@ class SwiftPackage {
       _templateContext,
     );
 
+    // Skip writing Package.swift if the existing file content is identical to
+    // renderedTemplate. Preserving file modification time (mtime) prevents
+    // Xcode and Swift Package Manager from invalidating caches and re-resolving
+    // dependencies during parallel builds.
     var shouldWrite = true;
     try {
       if (_manifest.existsSync() && _manifest.readAsStringSync() == renderedTemplate) {
