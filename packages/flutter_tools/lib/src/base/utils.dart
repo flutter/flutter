@@ -6,7 +6,9 @@
 library;
 
 import 'dart:async';
+import 'dart:convert' as cnv show utf8;
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:intl/intl.dart' as intl;
@@ -646,4 +648,55 @@ List<String> formatTable(List<List<String>> table, {String separator = ' • ', 
         .join(separator);
     return '$indentString$formatted';
   }).toList();
+}
+
+/// Decodes a list of bytes into a string, supporting UTF-8 (with or without
+/// BOM) and UTF-16 LE/BE (with BOM).
+///
+/// This method uses Dart 3 list pattern matching on [bytes] to inspect leading
+/// Byte Order Mark (BOM) signatures:
+///
+/// * **UTF-16 LE** (`0xFF, 0xFE`): Strips the 2-byte BOM and decodes the
+///   remaining payload as 16-bit little-endian code units using [_decodeUtf16].
+/// * **UTF-16 BE** (`0xFE, 0xFF`): Strips the 2-byte BOM and decodes the
+///   remaining payload as 16-bit big-endian code units using [_decodeUtf16].
+/// * **UTF-8 with BOM** (`0xEF, 0xBB, 0xBF`): Strips the 3-byte BOM and decodes
+///   the remaining payload as strict UTF-8 (`allowMalformed: false`).
+/// * **Default UTF-8** (no BOM): Decodes the entire byte list as strict UTF-8.
+///
+/// Throws a [FormatException] if UTF-8 or UTF-16 decoding fails, or if a UTF-16
+/// byte payload has an odd length after stripping the BOM.
+String decodeUtf8OrUtf16(List<int> bytes) {
+  return switch (bytes) {
+    [0xFF, 0xFE, ...final List<int> payload] => _decodeUtf16(payload, Endian.little),
+    [0xFE, 0xFF, ...final List<int> payload] => _decodeUtf16(payload, Endian.big),
+    [0xEF, 0xBB, 0xBF, ...final List<int> payload] => cnv.utf8.decode(
+      payload,
+      allowMalformed: false,
+    ),
+    _ => cnv.utf8.decode(bytes, allowMalformed: false),
+  };
+}
+
+/// Helper method to decode a UTF-16 byte [payload] after its BOM has been
+/// stripped.
+///
+/// Uses [ByteData.sublistView] to read 16-bit integers according to the
+/// specified byte [endian] (either [Endian.little] or [Endian.big]).
+///
+/// Throws a [FormatException] if [payload] has an odd number of bytes, as each
+/// UTF-16 code unit requires exactly 2 bytes.
+String _decodeUtf16(List<int> payload, Endian endian) {
+  if (payload.length.isOdd) {
+    throw const FormatException('UTF-16 data length must be even after BOM');
+  }
+  final Uint8List bytes = payload is Uint8List ? payload : Uint8List.fromList(payload);
+  final byteData = ByteData.sublistView(bytes);
+  final int count = payload.length ~/ 2;
+  final codeUnits = List<int>.generate(
+    count,
+    (int i) => byteData.getUint16(i * 2, endian),
+    growable: false,
+  );
+  return String.fromCharCodes(codeUnits);
 }
