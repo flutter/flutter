@@ -1536,27 +1536,21 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable custom sortIconBuilder test', (WidgetTester tester) async {
-    final TestDataSource source = TestDataSource();
-    addTearDown(source.dispose);
-
     await tester.pumpWidget(
       MaterialApp(
         home: PaginatedDataTable(
           sortColumnIndex: 0,
-          sortAscending: true,
           sortIconBuilder: (BuildContext context, bool visible, bool ascending) {
             return Text(
-              visible
-                  ? (ascending ? 'PAGINATED_ASC' : 'PAGINATED_DESC')
-                  : 'PAGINATED_INACTIVE',
+              visible ? (ascending ? 'PAGINATED_ASC' : 'PAGINATED_DESC') : 'PAGINATED_INACTIVE',
             );
           },
           header: const Text('Test Table'),
+          rowsPerPage: 2,
           columns: <DataColumn>[
-            DataColumn(
-              label: const Text('Name'),
-              onSort: (int columnIndex, bool ascending) {},
-            ),
+            DataColumn(label: const Text('Name'), onSort: (int columnIndex, bool ascending) {}),
+            const DataColumn(label: Text('Calories'), numeric: true),
+            const DataColumn(label: Text('Generation')),
           ],
           source: source,
         ),

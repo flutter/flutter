@@ -22,11 +22,8 @@ import 'theme.dart';
 /// (i.e. whether the column is the active sort column).
 ///
 /// The [ascending] parameter indicates whether the sort order is ascending.
-typedef DataTableSortIconBuilder = Widget Function(
-  BuildContext context,
-  bool visible,
-  bool ascending,
-);
+typedef DataTableSortIconBuilder =
+    Widget Function(BuildContext context, bool visible, bool ascending);
 
 /// Defines default property values for descendant [DataTable]
 /// widgets.
@@ -78,12 +75,12 @@ class DataTableThemeData with Diagnosticable {
              dataRowMaxHeight == null ||
              dataRowMaxHeight >= dataRowMinHeight,
        ),
-        assert(
-          dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
-          'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.',
-        ),
-        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
-        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
+       assert(
+         dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
+         'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.',
+       ),
+       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
+       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
 
   /// {@macro flutter.material.dataTable.decoration}
   final Decoration? decoration;
@@ -332,10 +329,7 @@ class DataTableThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      ObjectFlagProperty<DataTableSortIconBuilder>.has(
-        'sortIconBuilder',
-        sortIconBuilder,
-      ),
+      ObjectFlagProperty<DataTableSortIconBuilder>.has('sortIconBuilder', sortIconBuilder),
     );
   }
 }
