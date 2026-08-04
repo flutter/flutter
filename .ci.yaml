@@ -14,6 +14,7 @@
 enabled_branches:
   - master
   - flutter-\d+\.\d+-candidate\.\d+
+  - experimental/agp-gradle-api
 
 platform_properties:
   staging_build_linux:
@@ -560,6 +561,7 @@ targets:
     # calling the dev/bots/test.dart script.
     enabled_branches:
       - master
+      - experimental/agp-gradle-api
     recipe: flutter/flutter_drone
     # Timeout in minutes for the whole task.
     timeout: 60
@@ -4165,6 +4167,7 @@ targets:
   - name: Mac customer_testing
     enabled_branches:
       - master
+      - experimental/agp-gradle-api
     recipe: flutter/flutter_drone
     # Timeout in minutes for the whole task.
     timeout: 60
@@ -6312,6 +6315,7 @@ targets:
   - name: Windows customer_testing
     enabled_branches:
       - master
+      - experimental/agp-gradle-api
     recipe: flutter/flutter_drone
     # Timeout in minutes for the whole task.
     timeout: 60
