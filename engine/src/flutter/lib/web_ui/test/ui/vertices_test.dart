@@ -41,6 +41,17 @@ void testMain() {
       vertices.dispose();
       expect(vertices.debugDisposed, isTrue);
     });
+
+    test('raw can be empty', () {
+      final vertices = ui.Vertices.raw(ui.VertexMode.triangles, Float32List(0));
+      expect(vertices.debugDisposed, isFalse);
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      canvas.drawVertices(vertices, ui.BlendMode.srcOver, ui.Paint());
+      vertices.dispose();
+      expect(vertices.debugDisposed, isTrue);
+    });
   });
 
   test('Vertices are not anti-aliased by default', () async {

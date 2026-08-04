@@ -308,8 +308,8 @@ class CkCanvas implements LayerCanvas {
 
   @override
   void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
-    final ckVertices = vertices as CkVertices;
-    if (ckVertices.hasNoPoints) {
+    final ckVertices = (vertices as EngineVertices).delegate as CkVertices?;
+    if (ckVertices == null) {
       return;
     }
     final SkPaint skPaint = (paint as CkPaint).toSkPaint();
