@@ -210,4 +210,89 @@ void main() {
       Logger: () => logger,
     },
   );
+
+  testUsingContext(
+    'FlutterWebPlatform serves .wasm files with correct headers',
+    () async {
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+        logger: logger,
+      );
+      final server = FakeServer();
+      final Directory buildDir = fileSystem.directory('build')..createSync(recursive: true);
+      buildDir.childFile('main.dart.wasm').writeAsStringSync('wasm_content');
+
+      final Directory testDir = fileSystem.directory('test')..createSync(recursive: true);
+      testDir.childFile('foo.wasm').writeAsStringSync('foo_wasm');
+
+      final Directory canvasKitPath = fileSystem.directory(
+        fileSystem.path.join(
+          artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
+          'canvaskit',
+        ),
+      )..createSync(recursive: true);
+      canvasKitPath.childFile('skwasm.wasm').writeAsStringSync('skwasm');
+
+      final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
+        'ProjectRoot',
+        flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+        buildInfo: const BuildInfo(
+          BuildMode.debug,
+          '',
+          packageConfigPath: '.dart_tool/package_config.json',
+          treeShakeIcons: false,
+          extraFrontEndOptions: <String>[],
+          webEnableHotReload: true,
+        ),
+        webMemoryFS: WebMemoryFS(),
+        fileSystem: fileSystem,
+        buildDirectory: buildDir,
+        logger: logger,
+        chromiumLauncher: chromiumLauncher,
+        flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
+        artifacts: artifacts,
+        processManager: processManager,
+        webRenderer: WebRendererMode.skwasm,
+        useWasm: true,
+        serverFactory: () async => server,
+        testPackageUri: Uri.parse('test'),
+        crossOriginIsolation: true,
+      );
+      final shelf.Handler? handler = server.mountedHandler;
+      expect(handler, isNotNull);
+      handler!;
+      shelf.Response response = await handler(
+        shelf.Request('GET', Uri.parse('http://localhost/main.dart.wasm')),
+      );
+      expect(response.headers['content-type'], 'application/wasm');
+      expect(response.headers['content-length'], '12');
+      expect(response.headers['cache-control'], 'public, max-age=3600');
+      expect(response.headers['cross-origin-embedder-policy'], 'credentialless');
+
+      response = await handler(
+        shelf.Request('GET', Uri.parse('http://localhost/canvaskit/skwasm.wasm')),
+      );
+      expect(response.headers['content-type'], 'application/wasm');
+      expect(response.headers['content-length'], '6');
+      expect(response.headers['cache-control'], 'public, max-age=3600');
+      expect(response.headers['cross-origin-embedder-policy'], 'credentialless');
+
+      response = await handler(shelf.Request('GET', Uri.parse('http://localhost/foo.wasm')));
+      expect(response.headers['content-type'], 'application/wasm');
+      expect(response.headers['content-length'], '8');
+      expect(response.headers['cache-control'], 'public, max-age=3600');
+      expect(response.headers['cross-origin-embedder-policy'], 'credentialless');
+
+      await webPlatform.close();
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Logger: () => logger,
+    },
+  );
 }

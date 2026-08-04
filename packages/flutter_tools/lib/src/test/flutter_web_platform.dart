@@ -40,6 +40,23 @@ import 'test_compiler.dart';
 import 'test_golden_comparator.dart';
 import 'test_time_recorder.dart';
 
+shelf.Response _serveFile(File file, {String? contentType, bool crossOriginIsolated = false}) {
+  final headers = <String, String>{
+    if (contentType != null) HttpHeaders.contentTypeHeader: contentType,
+  };
+  final bool isWasm = file.path.endsWith('.wasm');
+  if (isWasm) {
+    headers[HttpHeaders.contentTypeHeader] ??= 'application/wasm';
+    headers[HttpHeaders.contentLengthHeader] = file.lengthSync().toString();
+    headers[HttpHeaders.cacheControlHeader] = 'public, max-age=3600';
+  }
+  if (crossOriginIsolated && (isWasm || file.path.endsWith('.html'))) {
+    headers.addAll(kCrossOriginIsolationHeaders);
+  }
+
+  return shelf.Response.ok(file.openRead(), headers: headers);
+}
+
 shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOriginIsolated}) {
   final resolver = mime.MimeTypeResolver();
   final FileSystem fileSystem = directory.fileSystem;
@@ -56,14 +73,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
       return shelf.Response.notFound('Not Found');
     }
     final String? contentType = resolver.lookup(file.path);
-    final bool needsCrossOriginIsolated = crossOriginIsolated && uriPath.endsWith('.html');
-    return shelf.Response.ok(
-      file.openRead(),
-      headers: <String, String>{
-        'Content-Type': ?contentType,
-        if (needsCrossOriginIsolated) ...kCrossOriginIsolationHeaders,
-      },
-    );
+    return _serveFile(file, contentType: contentType, crossOriginIsolated: crossOriginIsolated);
   };
 }
 
@@ -402,56 +412,30 @@ window.\$dartLoader.loader.nextAttempt();
 
   Future<shelf.Response> _handleStaticArtifact(shelf.Request request) async {
     if (request.requestedUri.path.contains('require.js')) {
-      return shelf.Response.ok(
-        _requireJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return _serveFile(_requireJs, contentType: 'text/javascript');
     } else if (request.requestedUri.path.contains('ddc_module_loader.js')) {
-      return shelf.Response.ok(
-        _ddcModuleLoaderJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return _serveFile(_ddcModuleLoaderJs, contentType: 'text/javascript');
     } else if (request.requestedUri.path.contains('ahem.ttf')) {
-      return shelf.Response.ok(_ahem.openRead());
+      return _serveFile(_ahem);
     } else if (request.requestedUri.path.contains('dart_sdk.js')) {
-      return shelf.Response.ok(
-        _dartSdk.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return _serveFile(_dartSdk, contentType: 'text/javascript');
     } else if (request.requestedUri.path.contains('dart_sdk.js.map')) {
-      return shelf.Response.ok(
-        _dartSdkSourcemaps.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return _serveFile(_dartSdkSourcemaps, contentType: 'text/javascript');
     } else if (request.requestedUri.path.contains('dart_stack_trace_mapper.js')) {
-      return shelf.Response.ok(
-        _stackTraceMapper.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return _serveFile(_stackTraceMapper, contentType: 'text/javascript');
     } else if (request.requestedUri.path.contains('static/dart.js')) {
-      return shelf.Response.ok(
-        _testDartJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return _serveFile(_testDartJs, contentType: 'text/javascript');
     } else if (request.requestedUri.path.contains('host.dart.js')) {
-      return shelf.Response.ok(
-        _testHostDartJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return _serveFile(_testHostDartJs, contentType: 'text/javascript');
     } else if (request.requestedUri.path.contains('flutter.js')) {
-      return shelf.Response.ok(
-        _flutterJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return _serveFile(_flutterJs, contentType: 'text/javascript');
     } else if (request.requestedUri.path.contains('main.dart.mjs')) {
-      return shelf.Response.ok(
-        _buildDirectory.childFile('main.dart.mjs').openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return _serveFile(_buildDirectory.childFile('main.dart.mjs'), contentType: 'text/javascript');
     } else if (request.requestedUri.path.contains('main.dart.wasm')) {
-      return shelf.Response.ok(
-        _buildDirectory.childFile('main.dart.wasm').openRead(),
-        headers: <String, String>{'Content-Type': 'application/wasm'},
+      return _serveFile(
+        _buildDirectory.childFile('main.dart.wasm'),
+        contentType: 'application/wasm',
+        crossOriginIsolated: crossOriginIsolation,
       );
     } else {
       return shelf.Response.notFound('Not Found');
@@ -537,13 +521,10 @@ window.\$dartLoader.loader.nextAttempt();
     }
 
     final File canvasKitFile = _canvasKitFile(relativePath);
-    return shelf.Response.ok(
-      canvasKitFile.openRead(),
-      headers: <String, Object>{
-        HttpHeaders.contentTypeHeader: contentType,
-        HttpHeaders.cacheControlHeader: 'public, max-age=3600',
-        HttpHeaders.contentLengthHeader: canvasKitFile.lengthSync().toString(),
-      },
+    return _serveFile(
+      canvasKitFile,
+      contentType: contentType,
+      crossOriginIsolated: crossOriginIsolation,
     );
   }
 
