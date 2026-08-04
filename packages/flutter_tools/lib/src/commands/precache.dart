@@ -8,7 +8,6 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../cache.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// The flutter precache command allows downloading of cache artifacts without
@@ -20,12 +19,10 @@ class PrecacheCommand extends FlutterCommand {
     required Platform platform,
     required Logger logger,
     required FeatureFlags featureFlags,
-    OperatingSystemUtils? os,
   }) : _cache = cache,
        _platform = platform,
        _logger = logger,
-       _featureFlags = featureFlags,
-       _os = os ?? globals.os {
+       _featureFlags = featureFlags {
     argParser.addFlag(
       'all-platforms',
       abbr: 'a',
@@ -99,7 +96,6 @@ class PrecacheCommand extends FlutterCommand {
   final Logger _logger;
   final Platform _platform;
   final FeatureFlags _featureFlags;
-  final OperatingSystemUtils _os;
 
   @override
   final name = 'precache';
@@ -195,7 +191,6 @@ class PrecacheCommand extends FlutterCommand {
           'Unsupported host architecture "$hostArch" for OS "${_platform.operatingSystem}"',
         ),
       };
-      _os.hostPlatformOverride = overridePlatform;
       _cache.osUtils.hostPlatformOverride = overridePlatform;
     }
     final Set<String> explicitlyEnabled = _explicitArtifactSelections();

@@ -506,18 +506,15 @@ void main() {
     );
   });
 
-  testUsingContext('precache --host-arch overrides cache and os hostPlatformOverride', () async {
-    final os = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64);
-    final PrecacheCommand command = PrecacheCommand(
+  testUsingContext('precache --host-arch overrides cache hostPlatformOverride', () async {
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(operatingSystem: 'macos', environment: <String, String>{}),
-      os: os,
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--host-arch=x64']);
 
-    expect(os.hostPlatformOverride, HostPlatform.darwin_x64);
     expect(cache.osUtils.hostPlatformOverride, HostPlatform.darwin_x64);
   });
 }

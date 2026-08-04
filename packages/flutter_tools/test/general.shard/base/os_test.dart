@@ -200,17 +200,13 @@ void main() {
 
     testWithoutContext('Linux x64 with FLUTTER_HOST_ARCH=arm64 override', () async {
       final OperatingSystemUtils utils = createOSUtils(
-        FakePlatform(
-          operatingSystem: 'linux',
-          environment: <String, String>{'FLUTTER_HOST_ARCH': 'arm64'},
-        ),
+        FakePlatform(environment: <String, String>{'FLUTTER_HOST_ARCH': 'arm64'}),
         currentAbi: Abi.linuxX64,
       );
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
     testWithoutContext('hostPlatformOverride property takes precedence', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kARMCheckCommand]);
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
         currentAbi: Abi.macosArm64,
