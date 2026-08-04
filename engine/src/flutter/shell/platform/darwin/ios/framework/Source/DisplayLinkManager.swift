@@ -111,7 +111,7 @@ final class DisplayLinkManager: NSObject, @unchecked Sendable {
   /// Testing initializer that injects configuration values.
   ///
   /// Unlike the standard initializer, this does not start observing system notifications.
-  internal init(maxRefreshRateEnabled: Bool, refreshRate: Double) {
+  init(maxRefreshRateEnabled: Bool, refreshRate: Double) {
     self.maxRefreshRateEnabledOnIPhone = maxRefreshRateEnabled
     self._displayRefreshRate = refreshRate
     super.init()
