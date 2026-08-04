@@ -17,10 +17,7 @@ config("config") {
     lib_dirs = mac_swift_lib_paths
   }
 
-  swiftflags = [
-    "-emit-clang-header-min-access",
-    "internal",
-  ]
+  swiftflags = []
 
   # Allow use of @testable imports in debug builds and when tests are enabled.
   if ((is_ios && enable_ios_unittests) || (is_mac && enable_unittests)) {

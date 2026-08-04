@@ -408,12 +408,6 @@ def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map):
   if args.import_objc_header:
     swiftc_args.extend(('-import-objc-header', args.import_objc_header))
 
-  # Sets the minimum access level of declarations to include in a generated header file.
-  if args.emit_clang_header_min_access:
-    swiftc_args.extend(
-        ('-Xfrontend', '-emit-clang-header-min-access', '-Xfrontend', args.emit_clang_header_min_access)
-    )
-
   # Handle swift const values extraction.
   swiftc_args.extend(['-emit-const-values'])
   swiftc_args.extend([
@@ -654,11 +648,6 @@ def main(args):
   parser.add_argument(
       '-file-prefix-map',
       help='remap source paths in debug, coverage, and index info')
-
-  parser.add_argument(
-      '-emit-clang-header-min-access',
-      dest='emit_clang_header_min_access',
-      help='minimum access level for emitted clang header')
 
   # Positional arguments.
   parser.add_argument('sources',
