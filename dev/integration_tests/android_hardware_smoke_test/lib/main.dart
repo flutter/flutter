@@ -35,9 +35,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter android hardware smoke test',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
       home: MyWidget(imageLoader: imageLoader),
     );
   }
@@ -56,10 +54,7 @@ class MyWidget extends StatefulWidget {
 
 class _MyState extends State<MyWidget> {
   static const _nativeChannel = MethodChannel(nativeSupportChannelName);
-  static const _testChannel = BasicMessageChannel<Object?>(
-    testChannelName,
-    JSONMessageCodec(),
-  );
+  static const _testChannel = BasicMessageChannel<Object?>(testChannelName, JSONMessageCodec());
 
   String _message = 'Waiting for message...';
   late Future<String?> _goldenVariantFuture;
@@ -80,10 +75,6 @@ class _MyState extends State<MyWidget> {
       // Handle the out-of-band comparison request. This is triggered by the on-device test runner
       // once it has captured and cropped the platform view screenshot using UiAutomation.
       final testName = messageMap![keyTestName]! as String;
-      if (testName == 'simulatedEglFailureTest' ||
-          testName.contains('Simulated')) {
-        return <String, Object?>{keyMessage: 'Comparison Success'};
-      }
       final imageBase64 = messageMap[keyImageBytes]! as String;
       final Uint8List imageBytes = base64.decode(imageBase64);
       final String? goldenVariantValue = await _goldenVariantFuture;
@@ -94,29 +85,17 @@ class _MyState extends State<MyWidget> {
         goldenVariantValue,
       );
 
-      return <String, Object?>{
-        keyMessage: failureMessage ?? 'Comparison Success',
-      };
+      return <String, Object?>{keyMessage: failureMessage ?? 'Comparison Success'};
     }
 
     final testName = messageMap?[keyTestName] as String?;
-    if (testName == 'simulatedHostEglFailureTest') {
-      try {
-        await _nativeChannel.invokeMethod<void>('simulated_host_egl_failure');
-      } catch (e) {
-        return <String, Object?>{
-          keyMessage: 'Failed simulatedHostEglFailureTest: $e',
-        };
-      }
-    }
     final bool performAppSideGoldenCompare =
         messageMap?[keyPerformAppSideGoldenCompare] as bool? ?? true;
 
     // Widget tests pass captureScreenshot: false.
     // Image.toByteData runs async on a native thread, which results in an unresolvable deadlock in the widget test's FakeAsync zone.
     // Comparing pixels is not a responsibility of widget tests anyway, that should be reserved for the integration tests.
-    final bool captureScreenshot =
-        messageMap?[keyCaptureScreenshot] as bool? ?? true;
+    final bool captureScreenshot = messageMap?[keyCaptureScreenshot] as bool? ?? true;
 
     if (testName == kPlatformViewHybridCompositionPlusPlusTest) {
       final bool isHcpp = await HybridAndroidViewController.checkIfSupported();
@@ -148,16 +127,13 @@ class _MyState extends State<MyWidget> {
           _loadedImage = img;
         });
       } catch (e, stackTrace) {
-        return <String, Object?>{
-          keyMessage: 'Failed to load image asset: $e\n$stackTrace',
-        };
+        return <String, Object?>{keyMessage: 'Failed to load image asset: $e\n$stackTrace'};
       }
     }
 
     final completer = Completer<Map<String, Object?>>();
 
-    final bool isPlatformView =
-        testName?.startsWith(platformViewPrefix) ?? false;
+    final bool isPlatformView = testName?.startsWith(platformViewPrefix) ?? false;
     if (isPlatformView) {
       _platformViewDrawnCompleter = Completer<void>();
     } else {
@@ -193,9 +169,7 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(
-      methodImpellerBackend,
-    );
+    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(methodImpellerBackend);
     _nativeChannel.setMethodCallHandler((MethodCall call) async {
       if (call.method == 'onDraw') {
         if (_platformViewDrawnCompleter?.isCompleted == false) {
