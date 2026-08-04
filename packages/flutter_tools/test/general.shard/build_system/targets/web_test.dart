@@ -41,6 +41,7 @@ const _kStandardFlutterWebDefines = <String>[
   '-DFLUTTER_WEB_USE_SKWASM=false',
   '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
   '--write-resources',
+  '--enable-experiment=record-use',
 ];
 
 const _kDart2WasmLinuxArgs = <String>[
@@ -1366,6 +1367,7 @@ _flutter.loader.load();
                           '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
                           '--extra-compiler-option=--depfile=${depFile.absolute.path}',
                           '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').absolute.path}',
+                          '--enable-experiment=record-use',
                           '-O$expectedLevel',
                           if (strip && buildMode == 'release')
                             '--strip-wasm'
