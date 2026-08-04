@@ -244,8 +244,8 @@ executable("framework_common_swift_unittests") {
     ":swift_testing_config",
   ]
   sources = [
-    "framework/Source/LoggerTest.swift",
-    "framework/Source/TracingTest.swift",
+    "framework/Source/LoggerTests.swift",
+    "framework/Source/TracingTests.swift",
   ]
   deps = [
     ":framework_common",
