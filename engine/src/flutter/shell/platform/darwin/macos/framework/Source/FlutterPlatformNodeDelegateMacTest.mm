@@ -320,6 +320,85 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   EXPECT_EQ([native_text_field.stringValue isEqualToString:@"textfield"], YES);
 }
 
+// A disabled (but otherwise editable) text field must be exposed as static text
+// rather than a `FlutterTextField`. This exercises the `!IsReadOnlyOrDisabled()`
+// guard in `Init`: the `GetData()` override rewrites the role to `kStaticText`,
+// but the node retains its `kEditableRoot` attribute, so `GetData().IsTextField()`
+// still returns true. The restriction check is what keeps a disabled field from
+// being instantiated as an editable `FlutterTextField`.
+TEST(FlutterPlatformNodeDelegateMac, DisabledTextFieldDoesNotUseFlutterTextField) {
+  FlutterViewController* viewController = CreateTestViewController();
+  FlutterEngine* engine = viewController.engine;
+  [viewController loadView];
+
+  // Creates a NSWindow so that the native accessibility element has a hosting view.
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                 styleMask:NSBorderlessWindowMask
+                                                   backing:NSBackingStoreBuffered
+                                                     defer:NO];
+  window.contentView = viewController.view;
+  engine.semanticsEnabled = YES;
+
+  auto bridge = viewController.accessibilityBridge.lock();
+  // Initialize ax node data.
+  FlutterSemanticsNode2 root = {};
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  // A text field that is editable (not read-only) but disabled.
+  FlutterSemanticsFlags child_flags =
+      FlutterSemanticsFlags{.is_enabled = FlutterTristate::kFlutterTristateFalse,
+                            .is_text_field = true,
+                            .is_read_only = false};
+  root.id = 0;
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  root.actions = static_cast<FlutterSemanticsAction>(0);
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.tooltip = "";
+  root.child_count = 1;
+  int32_t children[] = {1};
+  root.children_in_traversal_order = children;
+  root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
+  root.rect = {0, 0, 100, 100};  // LTRB
+  root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+
+  FlutterSemanticsNode2 child1 = {};
+  child1.id = 1;
+  child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+  child1.actions = static_cast<FlutterSemanticsAction>(0);
+  child1.label = "";
+  child1.hint = "";
+  child1.value = "disabled textfield";
+  child1.increased_value = "";
+  child1.decreased_value = "";
+  child1.tooltip = "";
+  child1.text_selection_base = -1;
+  child1.text_selection_extent = -1;
+  child1.child_count = 0;
+  child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
+  child1.rect = {0, 0, 50, 50};  // LTRB
+  child1.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(child1);
+
+  bridge->CommitUpdates();
+
+  auto child_platform_node_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  // The disabled text field must not be backed by a `FlutterTextField`.
+  id native_accessibility = child_platform_node_delegate->GetNativeViewAccessible();
+  EXPECT_FALSE([native_accessibility isKindOfClass:[FlutterTextField class]]);
+  EXPECT_TRUE(
+      [[native_accessibility accessibilityRole] isEqualToString:NSAccessibilityStaticTextRole]);
+
+  [engine shutDownEngine];
+}
+
 TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;

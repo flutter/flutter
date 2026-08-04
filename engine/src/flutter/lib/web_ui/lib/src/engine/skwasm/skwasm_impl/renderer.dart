@@ -14,7 +14,11 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer extends Renderer {
+  @override
   bool get isMultiThreaded => skwasmIsMultiThreaded();
+
+  @override
+  bool get supportsResizingAnimatedImages => true;
 
   bool get isWimp => skwasmIsWimp();
 
@@ -295,29 +299,16 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  void decodeImageFromPixels(
-    Uint8List pixels,
-    int width,
-    int height,
-    ui.PixelFormat format,
-    ui.ImageDecoderCallback callback, {
+  BackendImage decodeBackendImageFromPixels(
+    Uint8List pixels, {
+    required int width,
+    required int height,
+    required ui.PixelFormat format,
     int? rowBytes,
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
-  }) {
-    final EngineImage pixelImage = createSkwasmImageFromPixels(pixels, width, height, format);
-    final ui.Image scaledImage = scaleImageIfNeeded(
-      pixelImage,
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
-      allowUpscaling: allowUpscaling,
-    );
-    callback(scaledImage);
-  }
+  }) => createSkwasmImageFromPixels(pixels, width, height, format, rowBytes: rowBytes);
 
   @override
-  FutureOr<void> initialize() async {
+  FutureOr<void> initialize() {
     rasterizer = OffscreenCanvasRasterizer(
       (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
     );
@@ -325,74 +316,19 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  Future<ui.Codec> instantiateImageCodec(
-    Uint8List list, {
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
-  }) async {
-    final ImageType? contentType = detectImageType(list);
-    if (contentType == null) {
-      throw Exception('Could not determine content type of image from data');
-    }
-    if (browserSupportsImageDecoder) {
-      final baseDecoder = SkwasmBrowserImageDecoder(
-        contentType: contentType.mimeType,
-        dataSource: list.toJS,
-        debugSource: 'encoded image bytes',
-      );
-      await baseDecoder.initialize();
-      if (targetWidth == null && targetHeight == null) {
-        return baseDecoder;
-      }
-      return ResizingCodec(
-        baseDecoder,
-        targetWidth: targetWidth,
-        targetHeight: targetHeight,
-        allowUpscaling: allowUpscaling,
-      );
-    } else {
-      if (contentType.isAnimated) {
-        return SkwasmAnimatedImageDecoder(list, targetWidth, targetHeight);
-      } else {
-        final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
-        return SkwasmDomImageDecoder(blob, targetWidth, targetHeight);
-      }
-    }
+  BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight}) {
+    return SkwasmAnimatedImageDecoder(bytes, targetWidth, targetHeight);
   }
 
   @override
-  Future<ui.Codec> instantiateImageCodecFromUrl(
-    Uri uri, {
-    ui_web.ImageCodecChunkCallback? chunkCallback,
-  }) async {
-    final DomResponse response = await rawHttpGet(uri.toString());
-    final String? contentType = response.headers.get('Content-Type');
-    if (contentType == null) {
-      throw Exception('Could not determine content type of image at url $uri');
-    }
-    if (browserSupportsImageDecoder) {
-      final decoder = SkwasmBrowserImageDecoder(
-        contentType: contentType,
-        dataSource: response.body,
-        debugSource: uri.toString(),
-      );
-      await decoder.initialize();
-      return decoder;
-    } else {
-      final ByteBuffer buffer = await response.arrayBuffer();
-      final Uint8List data = buffer.asUint8List();
-      final ImageType? parsedContentType = detectImageType(data);
-      if (parsedContentType == null) {
-        throw Exception('Could not determine content type of image from data');
-      }
-      if (parsedContentType.isAnimated) {
-        return SkwasmAnimatedImageDecoder(data);
-      } else {
-        final DomBlob blob = createDomBlob(<ByteBuffer>[buffer]);
-        return SkwasmDomImageDecoder(blob);
-      }
-    }
+  BackendImage createImageFromImageSource(ImageSource source) {
+    final ImageHandle handle = imageCreateFromTextureSource(
+      source.canvasImageSource as JSObject,
+      source.width,
+      source.height,
+      (pictureToImageSurface as SkwasmSurface).handle,
+    );
+    return SkwasmImage(handle);
   }
 
   @override
@@ -438,57 +374,6 @@ class SkwasmRenderer extends Renderer {
     baseline: baseline,
     lineNumber: lineNumber,
   );
-
-  @override
-  ui.Image createImageFromImageBitmap(DomImageBitmap imageSource) {
-    // Cache the dimensions before passing the image to the texture source creator,
-    // which may transfer ownership of the bitmap to a web worker and detach it.
-    final int width = imageSource.width;
-    final int height = imageSource.height;
-
-    final ImageHandle handle = imageCreateFromTextureSource(
-      imageSource,
-      width,
-      height,
-      (pictureToImageSurface as SkwasmSurface).handle,
-    );
-    return EngineImage(
-      SkwasmImage(handle),
-      width,
-      height,
-      imageSource: ImageBitmapImageSource(imageSource),
-    );
-  }
-
-  @override
-  FutureOr<ui.Image> createImageFromTextureSource(
-    JSAny textureSource, {
-    required int width,
-    required int height,
-    required bool transferOwnership,
-  }) async {
-    // If the caller does not wish to transfer ownership, or if the runtime environment
-    // is multi-threaded and the provided texture type cannot be natively transferred
-    // between threads, convert the texture to a transferable DomImageBitmap first.
-    if (!transferOwnership || (isMultiThreaded && !_isTransferable(textureSource))) {
-      textureSource = (await createImageBitmap(textureSource, (
-        x: 0,
-        y: 0,
-        width: width,
-        height: height,
-      ))).toJSAnyShallow;
-    }
-    final ImageHandle handle = imageCreateFromTextureSource(
-      textureSource as JSObject,
-      width,
-      height,
-      (pictureToImageSurface as SkwasmSurface).handle,
-    );
-    return EngineImage(SkwasmImage(handle), width, height);
-  }
-
-  bool _isTransferable(JSAny object) =>
-      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
 
   @override
   void dumpDebugInfo() {
