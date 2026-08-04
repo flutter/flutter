@@ -173,7 +173,10 @@ void main() {
       // Initial state: no overlap
       // Header 0..100, Spacer 100..200, ClipRect 200..300.
       expect(renderSliver.constraints.overlap, 0.0);
-      expect(renderSliver.getClip()!.top, 0.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)),
+      );
 
       // Scroll by 150.
       // Spacer is scrolled off. ClipRect starts at y=50.
@@ -184,7 +187,10 @@ void main() {
       expect(renderSliver.constraints.overlap, 50.0);
       // This should fail if the bug exists because the ClipRect is still fully visible (paintExtent=100),
       // so its geometry didn't change, and _clip was not nulled.
-      expect(renderSliver.getClip()!.top, 50.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 50.0, 800.0, 100.0)),
+      );
     });
 
     testWidgets('changing clipBehavior or clipOverlap invalidates the cached clip', (
@@ -225,23 +231,30 @@ void main() {
       expect(renderSliver.clipOverlap, ClipOverlapBehavior.followEdge);
       expect(renderSliver.clipBehavior, Clip.hardEdge);
 
-      // getClip() should be cached and have top = 50.0.
-      Rect clip = renderSliver.getClip()!;
-      expect(clip.top, 50.0);
+      // The clip is cached and truncated by the overlap (top = 50.0).
+      expect(
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 50.0, 800.0, 100.0)),
+      );
 
       // Mutate clipOverlap -> should call _markNeedsClip() and invalidate cache.
       renderSliver.clipOverlap = .none;
-      clip = renderSliver.getClip()!;
-      expect(clip.top, 0.0); // should not be truncated by overlap anymore
+      expect(
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)),
+        reason: 'The clip should not be truncated by the overlap anymore',
+      );
 
-      // Mutate clipBehavior to Clip.none -> getClip() should return null.
+      // Mutate clipBehavior to Clip.none -> no clip should be pushed at all.
       renderSliver.clipBehavior = .none;
-      expect(renderSliver.getClip(), isNull);
+      expect(renderSliver.paint, isNot(paints..clipRect()));
 
       // Mutate clipBehavior back to non-none and check that clip is rebuilt.
       renderSliver.clipBehavior = .hardEdge;
-      clip = renderSliver.getClip()!;
-      expect(clip.top, 0.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)),
+      );
     });
 
     testWidgets('custom clipper boundaries are not incorrectly expanded during overlap', (
@@ -284,7 +297,10 @@ void main() {
       expect(renderSliver.constraints.overlap, 10.0);
       // Top inset from custom clipper is 30.0. Since overlap (10.0) is less than 30.0,
       // the clip top should still be 30.0 (and not 10.0 which would expand the clip boundary).
-      expect(renderSliver.getClip()!.top, 30.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 30.0, 800.0, 200.0)),
+      );
 
       // Now scroll more to create an overlap of 50px (jumpTo 100.0):
       // ClipRect layoutOffset is 150 - 100 = 50.0.
@@ -294,7 +310,10 @@ void main() {
       await tester.pump();
 
       expect(renderSliver.constraints.overlap, 50.0);
-      expect(renderSliver.getClip()!.top, 50.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 50.0, 800.0, 200.0)),
+      );
     });
 
     // ---- Overlap hit testing: (clipOverlap × axis × reverse) matrix ----
@@ -555,7 +574,10 @@ void main() {
       // at y=30. The extent that can slide under the leading edge before it
       // moves is 400 - 30 = 370 (insideClipExtent).
       expect(renderSliver.constraints.scrollOffset, 0.0);
-      expect(renderSliver.getClip()!.top, 30.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 30.0, 800.0, 400.0)),
+      );
 
       // While insideClipExtent (370px) has not been fully consumed by the
       // scroll, the leading edge stays pinned at the viewport's leading edge (0)
@@ -565,8 +587,8 @@ void main() {
 
       expect(renderSliver.constraints.scrollOffset, 100.0);
       expect(
-        renderSliver.getClip()!.top,
-        0.0,
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 300.0)),
         reason: 'Leading clip should stay pinned while insideClipExtent is not consumed',
       );
 
@@ -577,8 +599,8 @@ void main() {
 
       expect(renderSliver.constraints.scrollOffset, 385.0);
       expect(
-        renderSliver.getClip()!.top,
-        -15.0,
+        renderSliver.paint,
+        paints..clipRect(rect: const Rect.fromLTRB(0.0, -15.0, 800.0, 15.0)),
         reason: 'Leading clip should follow the content once insideClipExtent is consumed',
       );
     });
