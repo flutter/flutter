@@ -720,7 +720,7 @@ Future<Codec> instantiateImageCodec(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) => engine.renderer.instantiateImageCodec(
+}) => engine.engineInstantiateImageCodec(
   list,
   targetWidth: targetWidth,
   targetHeight: targetHeight,
@@ -734,7 +734,7 @@ Future<Codec> instantiateImageCodecFromBuffer(
   bool allowUpscaling = true,
 }) async {
   try {
-    return await engine.renderer.instantiateImageCodec(
+    return await engine.engineInstantiateImageCodec(
       buffer._list!,
       targetWidth: targetWidth,
       targetHeight: targetHeight,
@@ -753,14 +753,14 @@ Future<Codec> instantiateImageCodecWithSize(
   FrameInfo? info;
   try {
     if (getTargetSize == null) {
-      return await engine.renderer.instantiateImageCodec(buffer._list!);
+      return await engine.engineInstantiateImageCodec(buffer._list!);
     } else {
-      codec = await engine.renderer.instantiateImageCodec(buffer._list!);
+      codec = await engine.engineInstantiateImageCodec(buffer._list!);
       info = await codec.getNextFrame();
       final int width = info.image.width;
       final int height = info.image.height;
       final TargetImageSize targetSize = getTargetSize(width, height);
-      return await engine.renderer.instantiateImageCodec(
+      return await engine.engineInstantiateImageCodec(
         buffer._list!,
         targetWidth: targetSize.width,
         targetHeight: targetSize.height,
