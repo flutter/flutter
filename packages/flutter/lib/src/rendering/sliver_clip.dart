@@ -115,7 +115,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
       return;
     }
 
-    final Rect? clipRect = getClip();
+    final Rect? clipRect = _getClip();
     if (clipRect != null) {
       if (!clipRect.isEmpty) {
         layer = context.pushClipRect(
@@ -250,7 +250,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
       return;
     }
 
-    final RRect? clip = getClip();
+    final RRect? clip = _getClip();
     if (clip != null) {
       if (!clip.isEmpty) {
         layer = context.pushClipRRect(
@@ -338,12 +338,13 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
   T? _clip;
 
   /// Builds the clip to apply to the child. This method is called lazily from
-  /// [getClip] and the result is cached until the next time the render object is marked as needing paint.
+  /// [_getClip] and the result is cached until the next time the render object
+  /// is marked as needing paint.
   @protected
   T buildClip();
 
   /// Returns the clip to apply to the child, or null if no clipping is necessary.
-  T? getClip() {
+  T? _getClip() {
     if (clipBehavior == Clip.none) {
       _clip = null;
     } else {
@@ -399,7 +400,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
         AxisDirection.left => Offset(geometry!.paintExtent - mainAxisPosition, crossAxisPosition),
       };
 
-      final T? clip = getClip();
+      final T? clip = _getClip();
       if (clip != null && !clipContains(hitOffset, clip)) {
         return false;
       }

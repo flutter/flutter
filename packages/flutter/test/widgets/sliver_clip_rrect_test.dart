@@ -171,28 +171,64 @@ void main() {
       final RenderSliverClipRRect renderObject = tester.renderObject(find.byType(SliverClipRRect));
 
       // LTR: topStart is topLeft.
-      RRect clip = renderObject.getClip()!;
-      expect(clip.tlRadius, const Radius.circular(10.0));
-      expect(clip.trRadius, Radius.zero);
+      expect(
+        renderObject.paint,
+        paints..clipRRect(
+          rrect: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            800.0,
+            100.0,
+            topLeft: const Radius.circular(10.0),
+          ),
+        ),
+      );
 
-      // Change borderRadius and check if getClip() returns the updated clip geometry.
+      // Change borderRadius and check that the painted clip geometry is updated.
       renderObject.borderRadius = const BorderRadius.only(topRight: .circular(20.0));
-      clip = renderObject.getClip()!;
-      expect(clip.tlRadius, Radius.zero);
-      expect(clip.trRadius, const Radius.circular(20.0));
+      expect(
+        renderObject.paint,
+        paints..clipRRect(
+          rrect: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            800.0,
+            100.0,
+            topRight: const Radius.circular(20.0),
+          ),
+        ),
+      );
 
       // Revert to directional border radius to test textDirection.
       renderObject.borderRadius = const BorderRadiusDirectional.only(topStart: .circular(10.0));
-      clip = renderObject.getClip()!;
-      expect(clip.tlRadius, const Radius.circular(10.0));
-      expect(clip.trRadius, Radius.zero);
+      expect(
+        renderObject.paint,
+        paints..clipRRect(
+          rrect: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            800.0,
+            100.0,
+            topLeft: const Radius.circular(10.0),
+          ),
+        ),
+      );
 
-      // Change textDirection and check if getClip() returns the updated clip geometry.
+      // Change textDirection and check that the painted clip geometry is updated.
       // RTL: topStart is topRight.
       renderObject.textDirection = TextDirection.rtl;
-      clip = renderObject.getClip()!;
-      expect(clip.tlRadius, Radius.zero);
-      expect(clip.trRadius, const Radius.circular(10.0));
+      expect(
+        renderObject.paint,
+        paints..clipRRect(
+          rrect: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            800.0,
+            100.0,
+            topRight: const Radius.circular(10.0),
+          ),
+        ),
+      );
     });
 
     testWidgets('updates clip when overlap changes even if geometry is same', (
@@ -228,7 +264,12 @@ void main() {
       // Initial state: no overlap
       // Header 0..100, Spacer 100..200, ClipRect 200..300.
       expect(renderSliver.constraints.overlap, 0.0);
-      expect(renderSliver.getClip()!.top, 0.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0), Radius.zero),
+        ),
+      );
 
       // Scroll by 150.
       // Spacer is scrolled off. ClipRect starts at y=50.
@@ -239,7 +280,12 @@ void main() {
       expect(renderSliver.constraints.overlap, 50.0);
       // This should fail if the bug exists because the ClipRect is still fully visible (paintExtent=100.0),
       // so its geometry didn't change, and _clip was not nulled.
-      expect(renderSliver.getClip()!.top, 50.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, 50.0, 800.0, 100.0), Radius.zero),
+        ),
+      );
     });
 
     testWidgets('changing clipBehavior or clipOverlap invalidates the cached clip', (
@@ -280,23 +326,36 @@ void main() {
       expect(renderSliver.clipOverlap, ClipOverlapBehavior.followEdge);
       expect(renderSliver.clipBehavior, Clip.antiAlias);
 
-      // getClip() should be cached and have top = 50.0.
-      RRect clip = renderSliver.getClip()!;
-      expect(clip.top, 50.0);
+      // The clip is cached and truncated by the overlap (top = 50.0).
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, 50.0, 800.0, 100.0), Radius.zero),
+        ),
+      );
 
       // Mutate clipOverlap -> should call _markNeedsClip() and invalidate cache.
       renderSliver.clipOverlap = .none;
-      clip = renderSliver.getClip()!;
-      expect(clip.top, 0.0); // should not be truncated by overlap anymore
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0), Radius.zero),
+        ),
+        reason: 'The clip should not be truncated by the overlap anymore',
+      );
 
-      // Mutate clipBehavior to Clip.none -> getClip() should return null.
+      // Mutate clipBehavior to Clip.none -> no clip should be pushed at all.
       renderSliver.clipBehavior = .none;
-      expect(renderSliver.getClip(), isNull);
+      expect(renderSliver.paint, isNot(paints..clipRRect()));
 
       // Mutate clipBehavior back to non-none and check that clip is rebuilt.
       renderSliver.clipBehavior = .antiAlias;
-      clip = renderSliver.getClip()!;
-      expect(clip.top, 0.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0), Radius.zero),
+        ),
+      );
     });
 
     testWidgets('custom clipper boundaries are not incorrectly expanded during overlap', (
@@ -339,7 +398,12 @@ void main() {
       expect(renderSliver.constraints.overlap, 10.0);
       // Top inset from custom clipper is 30.0. Since overlap (10.0) is less than 30.0,
       // the clip top should still be 30.0 (and not 10.0 which would expand the clip boundary).
-      expect(renderSliver.getClip()!.top, 30.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, 30.0, 800.0, 200.0), Radius.zero),
+        ),
+      );
 
       // Now scroll more to create an overlap of 50px (jumpTo 100.0):
       // ClipRect layoutOffset is 150 - 100 = 50.0.
@@ -349,7 +413,12 @@ void main() {
       await tester.pump();
 
       expect(renderSliver.constraints.overlap, 50.0);
-      expect(renderSliver.getClip()!.top, 50.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, 50.0, 800.0, 200.0), Radius.zero),
+        ),
+      );
     });
 
     // ---- Overlap hit testing: (clipOverlap × axis × reverse) matrix ----
@@ -555,7 +624,16 @@ void main() {
       await tester.pump();
 
       final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
-      expect(renderSliver.getClip()!.top, 50.0, reason: 'clip.top should equal the overlap');
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(0.0, 50.0, 800.0, 100.0),
+            const Radius.circular(40.0),
+          ),
+        ),
+        reason: 'clip.top should equal the overlap',
+      );
     });
 
     testWidgets('preserves visual content integrity at overlap cut', (WidgetTester tester) async {
@@ -588,7 +666,16 @@ void main() {
 
       final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
       expect(renderSliver.constraints.overlap, 50.0);
-      expect(renderSliver.getClip()!.bottom, 50.0, reason: 'Reverse scroll clip is incorrect.');
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0),
+            const Radius.circular(40.0),
+          ),
+        ),
+        reason: 'Reverse scroll clip is incorrect.',
+      );
     });
 
     // ---- preserveShape clip geometry ----
@@ -614,18 +701,19 @@ void main() {
         final RenderSliverClipRRect renderSliver = tester.renderObject(
           find.byType(SliverClipRRect),
         );
-        final RRect clip = renderSliver.getClip()!;
-        final double overlap = renderSliver.constraints.overlap;
+        expect(renderSliver.constraints.overlap, 50.0);
 
+        // The clip top (20.0) is above the overlap (50.0) so the corner arc,
+        // which ends at 20.0 + 40.0 = 60.0, extends past the overlap into the
+        // visible area instead of being sheared off by it.
         expect(
-          clip.top,
-          lessThan(overlap),
-          reason: 'preserveShape clip.top should be less than the overlap',
-        );
-        expect(
-          clip.top + clip.tlRadiusY,
-          greaterThan(overlap),
-          reason: 'Corner arc should extend past the overlap into the visible area',
+          renderSliver.paint,
+          paints..clipRRect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTRB(0.0, 20.0, 800.0, 100.0),
+              const Radius.circular(40.0),
+            ),
+          ),
         );
       });
 
@@ -649,8 +737,13 @@ void main() {
           find.byType(SliverClipRRect),
         );
         expect(
-          renderSliver.getClip()!.left,
-          lessThan(50.0),
+          renderSliver.paint,
+          paints..clipRRect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTRB(20.0, 0.0, 100.0, 600.0),
+              const Radius.circular(40.0),
+            ),
+          ),
           reason: 'preserveShape clip.left should be less than the overlap',
         );
       });
@@ -678,8 +771,13 @@ void main() {
         // With followEdge in reverse, clip.bottom = 50.0.
         // preserveShape should produce a different value.
         expect(
-          renderSliver.getClip()!.bottom,
-          isNot(equals(50.0)),
+          renderSliver.paint,
+          paints..clipRRect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTRB(0.0, 0.0, 800.0, 80.0),
+              const Radius.circular(40.0),
+            ),
+          ),
           reason: 'preserveShape should produce a different bottom clip in reverse',
         );
       });
@@ -781,7 +879,12 @@ void main() {
       // at y=30. The extent that can slide under the leading edge before it
       // moves is 400 - 30 = 370 (insideClipExtent).
       expect(renderSliver.constraints.scrollOffset, 0.0);
-      expect(renderSliver.getClip()!.top, 30.0);
+      expect(
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, 30.0, 800.0, 400.0), Radius.zero),
+        ),
+      );
 
       // While insideClipExtent (370px) has not been fully consumed by the
       // scroll, the leading edge stays pinned at the viewport's leading edge (0)
@@ -791,8 +894,10 @@ void main() {
 
       expect(renderSliver.constraints.scrollOffset, 100.0);
       expect(
-        renderSliver.getClip()!.top,
-        0.0,
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, 0.0, 800.0, 300.0), Radius.zero),
+        ),
         reason: 'Leading clip should stay pinned while insideClipExtent is not consumed',
       );
 
@@ -803,8 +908,10 @@ void main() {
 
       expect(renderSliver.constraints.scrollOffset, 385.0);
       expect(
-        renderSliver.getClip()!.top,
-        -15.0,
+        renderSliver.paint,
+        paints..clipRRect(
+          rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(0.0, -15.0, 800.0, 15.0), Radius.zero),
+        ),
         reason: 'Leading clip should follow the content once insideClipExtent is consumed',
       );
     });
