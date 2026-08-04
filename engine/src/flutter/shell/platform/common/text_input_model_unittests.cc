@@ -855,6 +855,72 @@ TEST(TextInputModel, DeleteSurroundingReverseSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCE");
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/190046.
+// Deleting across a non-BMP code point must not leave a lone surrogate behind,
+// which would abort the process on the next UTF-16 to UTF-8 conversion.
+TEST(TextInputModel, DeleteSurroundingWideCharacterAfterCursor) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄B");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "B");
+}
+
+TEST(TextInputModel, DeleteSurroundingWideCharacterBeforeCursor) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄");
+  EXPECT_TRUE(model->SetSelection(TextRange(3)));
+  EXPECT_TRUE(model->DeleteSurrounding(-2, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "");
+}
+
+// The same defect over-deletes when the first code point is non-BMP and a
+// later one is not.
+TEST(TextInputModel, DeleteSurroundingWideCharacterFirst) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("😄AB");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "B");
+}
+
+TEST(TextInputModel, DeleteSurroundingWideCharactersAfterCursorOffset) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄🙃B");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_TRUE(model->DeleteSurrounding(1, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "AB");
+}
+
+TEST(TextInputModel, DeleteSurroundingWideCharacterGreedy) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 5));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "");
+}
+
+TEST(TextInputModel, DeleteSurroundingWideCharacterComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄B");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(0, 3), 0));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0, 0));
+  EXPECT_STREQ(model->GetText().c_str(), "B");
+}
+
 TEST(TextInputModel, BackspaceStart) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
