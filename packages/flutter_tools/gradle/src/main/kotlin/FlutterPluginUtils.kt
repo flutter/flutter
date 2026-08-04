@@ -1164,26 +1164,25 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("addTaskForGeneratingEngineShellArgumentManifest")
-    internal fun addTaskForGeneratingEngineShellArgumentManifest(
-        project: Project
-    ) {
+    internal fun addTaskForGeneratingEngineShellArgumentManifest(project: Project) {
         val engineShellArgsJson = project.findProperty("flutter.engineShellArgs") as? String ?: return
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
 
         androidComponents.onVariants { variant ->
             val capitalizeVariantName = capitalize(variant.name)
-            val generateManifestTaskProvider = project.tasks.register(
-                "generateEngineFlagsManifest$capitalizeVariantName",
-                GenerateEngineFlagsManifestTask::class.java
-            ) {
-                this.engineShellArgsJson.set(engineShellArgsJson)
-                this.manifestOutputFile.set(
-                    project.layout.buildDirectory.file(
-                        "intermediates/flutter/${variant.name}/AndroidManifest.xml"
+            val generateManifestTaskProvider =
+                project.tasks.register(
+                    "generateEngineFlagsManifest$capitalizeVariantName",
+                    GenerateEngineFlagsManifestTask::class.java
+                ) {
+                    this.engineShellArgsJson.set(engineShellArgsJson)
+                    this.manifestOutputFile.set(
+                        project.layout.buildDirectory.file(
+                            "intermediates/flutter/${variant.name}/AndroidManifest.xml"
+                        )
                     )
-                )
-            }
-            
+                }
+
             variant.sources.manifests?.addGeneratedManifestFile(
                 generateManifestTaskProvider,
                 GenerateEngineFlagsManifestTask::manifestOutputFile

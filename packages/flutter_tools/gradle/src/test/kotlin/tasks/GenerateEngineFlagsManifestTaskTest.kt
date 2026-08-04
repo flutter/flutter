@@ -9,18 +9,18 @@ import kotlin.test.assertEquals
 class GenerateEngineFlagsManifestTaskTest {
     private fun setupTask(): Pair<GenerateEngineFlagsManifestTask, File> {
         val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register(
-            "generateEngineFlagsManifestTest",
-            GenerateEngineFlagsManifestTask::class.java
-        ).get()
+        val task =
+            project.tasks
+                .register(
+                    "generateEngineFlagsManifestTest",
+                    GenerateEngineFlagsManifestTask::class.java
+                ).get()
         val outputFile = File.createTempFile("AndroidManifest", ".xml")
         outputFile.deleteOnExit()
         return Pair(task, outputFile)
     }
 
-    private fun encodeJsonMap(json: String): String {
-        return Base64.getEncoder().encodeToString(json.toByteArray(Charsets.UTF_8))
-    }
+    private fun encodeJsonMap(json: String): String = Base64.getEncoder().encodeToString(json.toByteArray(Charsets.UTF_8))
 
     @Test
     fun generateHandlesNoArgsCorrectly() {
@@ -31,15 +31,16 @@ class GenerateEngineFlagsManifestTaskTest {
 
         task.generateManifest()
 
-        val expectedContent = """
+        val expectedContent =
+            """
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android">
                 <application>
                     <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[]" />
                 </application>
             </manifest>
-        """.trimIndent()
-        
+            """.trimIndent()
+
         assertEquals(expectedContent, outputFile.readText())
     }
 
@@ -52,14 +53,15 @@ class GenerateEngineFlagsManifestTaskTest {
 
         task.generateManifest()
 
-        val expectedContent = """
+        val expectedContent =
+            """
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android">
                 <application>
                     <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--enable-impeller&quot;]" />
                 </application>
             </manifest>
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expectedContent, outputFile.readText())
     }
@@ -73,14 +75,15 @@ class GenerateEngineFlagsManifestTaskTest {
 
         task.generateManifest()
 
-        val expectedContent = """
+        val expectedContent =
+            """
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android">
                 <application>
                     <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--enable-impeller=true&quot;,&quot;--trace-systrace&quot;,&quot;--old-gen-heap-size=100&quot;]" />
                 </application>
             </manifest>
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expectedContent, outputFile.readText())
     }
@@ -94,14 +97,15 @@ class GenerateEngineFlagsManifestTaskTest {
 
         task.generateManifest()
 
-        val expectedContent = """
+        val expectedContent =
+            """
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android">
                 <application>
                     <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--trace-to-file=\&quot;path/to/a file\&quot;&quot;]" />
                 </application>
             </manifest>
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expectedContent, outputFile.readText())
     }
@@ -115,14 +119,15 @@ class GenerateEngineFlagsManifestTaskTest {
 
         task.generateManifest()
 
-        val expectedContent = """
+        val expectedContent =
+            """
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android">
                 <application>
                     <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--some-arg=a&amp;b&quot;]" />
                 </application>
             </manifest>
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expectedContent, outputFile.readText())
     }
@@ -136,14 +141,15 @@ class GenerateEngineFlagsManifestTaskTest {
 
         task.generateManifest()
 
-        val expectedContent = """
+        val expectedContent =
+            """
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android">
                 <application>
                     <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--some-arg=&lt;a&gt;&quot;]" />
                 </application>
             </manifest>
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expectedContent, outputFile.readText())
     }
@@ -157,14 +163,15 @@ class GenerateEngineFlagsManifestTaskTest {
 
         task.generateManifest()
 
-        val expectedContent = """
+        val expectedContent =
+            """
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android">
                 <application>
                     <meta-data android:name="io.flutter.app.androidEngineShellArgs" android:value="[&quot;--some-arg=&apos;a&apos;&quot;]" />
                 </application>
             </manifest>
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals(expectedContent, outputFile.readText())
     }
