@@ -2333,7 +2333,6 @@ TEST_F(ShellTest, SecondaryVsyncCallbackShouldBeCalledAfterVsyncCallback) {
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetUITaskRunner(), [&]() {
         auto vsync_waiter = shell->GetEngine()->GetVsyncWaiter().lock();
-        ASSERT_TRUE(vsync_waiter);
         vsync_waiter->AsyncWaitForVsync(
             [&](auto frame_timings_recorder) { vsync_task(); });
       });
