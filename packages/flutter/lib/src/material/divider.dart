@@ -120,8 +120,8 @@ class Divider extends StatelessWidget {
   ///
   /// If this is null, then the [DividerThemeData.color] is used. If that is
   /// also null, then [ThemeData.dividerColor] is used when 
-  /// [ThemeData.useMaterial3] is false and 
-  /// [ThemeData.colorScheme.outlineVariant] is used when material3 is true.
+  /// [ThemeData.useMaterial3] is false and [ColorScheme.outlineVariant]
+  /// is used when [ThemeData.useMaterial3] is true.
   /// {@endtemplate}
   ///
   /// {@tool snippet}
