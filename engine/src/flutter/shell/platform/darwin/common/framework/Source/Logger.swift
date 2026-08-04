@@ -9,7 +9,7 @@ import Foundation
 ///
 /// These levels are used by `Logger` to determine if a message should be output.
 /// They are ordered by increasing severity.
-@objc(FlutterLogLevel) enum LogLevel: Int {
+@objc(FlutterLogLevel) enum LogLevel: Int, Sendable {
   /// Informational messages that are helpful for tracing application flow.
   case info
 
@@ -38,14 +38,38 @@ import Foundation
 /// Logger.logLevel = .warning  // Only show warnings and above
 /// Logger.logError("Failed to load asset: \(assetKey)")
 /// ```
-@objc(FlutterLogger) final class Logger: NSObject {
-  private static var shared = Logger()
-  private let outputWriter: OutputWriter
-  let logLevel: LogLevel
+@objc(FlutterLogger) final class Logger: NSObject, @unchecked Sendable {
+  private static let shared = Logger()
+  private let lock = NSLock()
+  private var _outputWriter: OutputWriter
+  private var _logLevel: LogLevel
+
+  var outputWriter: OutputWriter {
+    get {
+      return lock.withLock { _outputWriter }
+    }
+    set {
+      lock.withLock {
+        _outputWriter = newValue
+      }
+    }
+  }
+
+  var logLevel: LogLevel {
+    get {
+      return lock.withLock { _logLevel }
+    }
+    set {
+      lock.withLock {
+        _logLevel = newValue
+      }
+    }
+  }
 
   init(outputWriter: OutputWriter, logLevel: LogLevel) {
-    self.outputWriter = outputWriter
-    self.logLevel = logLevel
+    self._outputWriter = outputWriter
+    self._logLevel = logLevel
+    super.init()
   }
 
   override convenience init() {
@@ -60,8 +84,19 @@ import Foundation
   }
 
   func log(level: LogLevel, _ message: @autoclosure () -> String) {
-    if level.rawValue >= logLevel.rawValue {
-      outputWriter.writeLine(level: level, message())
+    guard level.rawValue >= logLevel.rawValue else { return }
+
+    // Evaluate outside the lock keep lock time minimal and to guard against the possibility of
+    // someone accidentally calling the Logger from within the autoclosure.
+    let line = message()
+    lock.withLock {
+      _outputWriter.writeLine(level: level, line)
+    }
+  }
+
+  func logDirect(_ message: String) {
+    lock.withLock {
+      _outputWriter.writeLine(level: .important, message)
     }
   }
 }
@@ -70,13 +105,13 @@ extension Logger {
   /// Sets the minimum log level.
   @objc static var outputWriter: OutputWriter {
     get { return shared.outputWriter }
-    set(newValue) { shared = Logger(outputWriter: newValue, logLevel: shared.logLevel) }
+    set(newValue) { shared.outputWriter = newValue }
   }
 
   /// Sets the minimum log level.
   @objc static var logLevel: LogLevel {
     get { return shared.logLevel }
-    set(newValue) { shared = Logger(outputWriter: shared.outputWriter, logLevel: newValue) }
+    set(newValue) { shared.logLevel = newValue }
   }
 
   /// Logs a message at `LogLevel.info`.
@@ -138,16 +173,16 @@ extension Logger {
 
   /// Logs a message unconditionally.
   @objc static func logDirect(_ message: String) {
-    shared.outputWriter.writeLine(level: .important, message)
+    shared.logDirect(message)
   }
 }
 
 @objc(FlutterOutputWriter)
-protocol OutputWriter {
+protocol OutputWriter: Sendable {
   func writeLine(level: LogLevel, _ message: String)
 }
 
-final class SyslogOutputWriter: OutputWriter {
+final class SyslogOutputWriter: OutputWriter, Sendable {
   func writeLine(level: LogLevel, _ message: String) {
     // TODO(cbracken): replace this with os_log-based approach.
     // https://github.com/flutter/flutter/issues/44030
@@ -155,7 +190,7 @@ final class SyslogOutputWriter: OutputWriter {
   }
 }
 
-final class StdoutOutputWriter: OutputWriter {
+final class StdoutOutputWriter: OutputWriter, Sendable {
   func writeLine(level: LogLevel, _ message: String) {
     fputs(message, stdout)
     fputs("\n", stdout)
