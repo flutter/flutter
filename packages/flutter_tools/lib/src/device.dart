@@ -1435,6 +1435,7 @@ class DebuggingOptions {
       if (enableFlutterGpu) ...<String>['--enable-flutter-gpu'],
       if (enableVulkanValidation) ...<String>['--enable-vulkan-validation'],
       if (enableHcpp) ...<String>['--enable-hcpp-and-surface-control'],
+      if (testFlag) ...<String>['--test-flag'],
       if (debuggingEnabled) ...<String>[
         if (buildInfo.isDebug) ...<String>[
           ...<String>['--enable-checked-mode'],
@@ -1446,7 +1447,6 @@ class DebuggingOptions {
         if (dartFlags.isNotEmpty) ...<String>['--dart-flags=$dartFlags'],
         if (useTestFonts) ...<String>['--use-test-fonts'],
         if (verboseSystemLogs) ...<String>['--verbose-logging'],
-        if (testFlag) ...<String>['--test-flag'],
       ],
     };
   }
@@ -1491,7 +1491,6 @@ class DebuggingOptions {
         if (dartFlags.isNotEmpty) ...<String>['--es', 'dart-flags', dartFlags],
         if (useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
         if (verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
-        if (testFlag) ...<String>['--ez', 'test-flag', 'true'],
       ],
     ];
   }

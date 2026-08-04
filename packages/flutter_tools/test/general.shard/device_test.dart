@@ -1125,8 +1125,9 @@ void main() {
           '--ez', 'disable-service-origin-check', 'true',
           '--es', 'dart-flags', 'baz',
           '--ez', 'use-test-fonts', 'true',
-          '--ez', 'verbose-logging', 'true',
-          '--ez', 'test-flag', 'true',
+            '--ez',
+            'verbose-logging',
+            'true',
         ]),
       );
     });

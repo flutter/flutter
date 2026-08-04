@@ -668,6 +668,7 @@ void main() {
             BuildInfo.release,
             enableImpeller: ImpellerStatus.enabled,
             traceSystrace: true,
+            testFlag: true,
           ),
           platformArgs: <String, dynamic>{},
         );
@@ -681,6 +682,7 @@ void main() {
             '--enable-impeller=true',
             '--enable-dart-profiling',
             '--trace-systrace',
+            '--test-flag',
           ]),
         );
       },
@@ -692,7 +694,7 @@ void main() {
     );
 
     testWithoutContext(
-      'AndroidDevice.startApp passes debugging options via intent when --use-application-binary is used in release mode',
+      'AndroidDevice.startApp passes debugging options via Intent when --use-application-binary is used in release mode',
       () async {
         final device = AndroidDevice(
           '1234',
