@@ -1289,7 +1289,7 @@ Future<bool> _handleIssues(
   } else if (modifiedPrecompiledSource) {
     logger.printError(
       '════════════════════════════════════════════════════════════════════════════════\n'
-      'A precompiled file has been changed since last built. Please run "flutter clean" to clear '
+      'A precompiled file has been changed since last built. Please run "flutter clean --include-xcode-workspace" to clear '
       'the cache.\n'
       '════════════════════════════════════════════════════════════════════════════════',
     );
@@ -1557,7 +1557,7 @@ class _XCResultIssueHandlingResult {
   final String? missingModule;
 
   /// An issue indicates that a source file, such as a header in the Flutter framework, has
-  /// changed since last built. This requires "flutter clean" to resolve.
+  /// changed since last built. This requires "flutter clean --include-xcode-workspace" to resolve.
   final bool modifiedPrecompiledSource;
 
   final bool unableToFindArmDestination;

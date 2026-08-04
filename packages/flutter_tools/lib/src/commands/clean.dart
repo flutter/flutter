@@ -30,10 +30,11 @@ class CleanCommand extends FlutterCommand {
           'Useful when developing in a package project.',
     );
     argParser.addFlag(
-      'clean-xcode-workspace',
+      'include-xcode-workspace',
+      negatable: false,
       help:
-          'Whether to run "xcodebuild clean" on the Xcode workspace. '
-          'Skipping this prevents Xcode from unnecessarily downloading Swift packages.',
+          'Whether to run "xcodebuild clean" on the Xcode workspace for iOS and macOS projects. '
+          "This removes build products and intermediate files from Xcode's build cache and can be slow to complete.",
     );
   }
 
@@ -56,7 +57,7 @@ class CleanCommand extends FlutterCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final Xcode? xcode = globals.xcode;
     final bool userWantsXcodeClean =
-        boolArg('clean-xcode-workspace') || (argResults?.wasParsed('scheme') ?? false);
+        boolArg('include-xcode-workspace') || (argResults?.wasParsed('scheme') ?? false);
     final bool cleanXcode =
         xcode != null && xcode.isInstalledAndMeetsVersionCheck && userWantsXcodeClean;
 
@@ -133,9 +134,6 @@ class CleanCommand extends FlutterCommand {
         );
       } else {
         for (final String scheme in projectInfo.schemes) {
-          if (!xcodeProject.xcodeProjectSchemeFile(scheme: scheme).existsSync()) {
-            continue;
-          }
           await xcodeProjectInterpreter.cleanWorkspace(
             xcodeProject,
             xcodeWorkspace.path,

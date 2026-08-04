@@ -1037,12 +1037,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
         continue;
       }
 
-      // SwiftPM package schemes can't be a watch companion. Only consider
-      // schemes declared in the host .xcodeproj.
-      if (!xcodeProjectSchemeFile(scheme: scheme).existsSync()) {
-        continue;
-      }
-
       final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(
         buildInfo,
         scheme: scheme,

@@ -58,7 +58,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
           final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
-          await runner.run(<String>['clean', '--clean-xcode-workspace']);
+          await runner.run(<String>['clean', '--include-xcode-workspace']);
 
           expect(buildDirectory, isNot(exists));
           expect(projectUnderTest.dartTool, isNot(exists));
@@ -115,7 +115,7 @@ void main() {
           expect(projectUnderTest.android.ephemeralDirectory, isNot(exists));
           expect(projectUnderTest.ios.ephemeralDirectory, isNot(exists));
 
-          // The workspaces should be empty since we didn't pass --clean-xcode-workspace.
+          // The workspaces should be empty since we didn't pass --include-xcode-workspace.
           expect(xcodeProjectInterpreter.workspaces, isEmpty);
         },
         overrides: <Type, Generator>{
@@ -140,7 +140,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
           final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
-          await runner.run(<String>['clean', '--clean-xcode-workspace']);
+          await runner.run(<String>['clean', '--include-xcode-workspace']);
 
           expect(buildDirectory, isNot(exists));
 
@@ -183,7 +183,7 @@ void main() {
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
           final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
-          await runner.run(<String>['clean', '--include-example', '--clean-xcode-workspace']);
+          await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
 
           expect(buildDirectory, isNot(exists));
           expect(projectUnderTest.dartTool, isNot(exists));
@@ -233,7 +233,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
           final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
-          await runner.run(<String>['clean', '--include-example', '--clean-xcode-workspace']);
+          await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
 
           expect(testLogger.statusText, contains('No example app found'));
         },
@@ -326,7 +326,7 @@ void main() {
 
           final command = CleanCommand(verbose: true);
           final CommandRunner<void> runner = createTestCommandRunner(command);
-          await runner.run(<String>['clean', '--clean-xcode-workspace']);
+          await runner.run(<String>['clean', '--include-xcode-workspace']);
 
           expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
             CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', true),
@@ -421,14 +421,6 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcode
         .createSync(recursive: true);
     projectUnderTest.macos.hostAppRoot
         .childDirectory('Runner.xcworkspace')
-        .createSync(recursive: true);
-    projectUnderTest.ios.xcodeProjectSchemeFile(scheme: 'Runner').createSync(recursive: true);
-    projectUnderTest.ios
-        .xcodeProjectSchemeFile(scheme: 'custom-scheme')
-        .createSync(recursive: true);
-    projectUnderTest.macos.xcodeProjectSchemeFile(scheme: 'Runner').createSync(recursive: true);
-    projectUnderTest.macos
-        .xcodeProjectSchemeFile(scheme: 'custom-scheme')
         .createSync(recursive: true);
   }
   projectUnderTest.dartTool.createSync(recursive: true);
