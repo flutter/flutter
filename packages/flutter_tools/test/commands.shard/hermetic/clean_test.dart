@@ -489,11 +489,57 @@ void main() {
           AnsiTerminal: () => FakeTerminal(),
         },
       );
+
+      testUsingContext(
+        '$CleanCommand prompts user but skips gradlew --stop when user declines prompt',
+        () async {
+          xcodeProjectInterpreter.isInstalled = false;
+
+          fileSystem = MemoryFileSystem.test(
+            opHandle: (String path, FileSystemOp op) {
+              if (op == FileSystemOp.delete && path.endsWith('build')) {
+                throw const FileSystemException('Locked');
+              }
+            },
+          );
+          fileSystem.file('pubspec.yaml').createSync(recursive: true);
+
+          final FlutterProject project = setupProjectUnderTest(fileSystem.currentDirectory, false);
+          project.android.hostAppGradleRoot.childFile('gradlew.bat').createSync(recursive: true);
+
+          final Directory buildDir = project.directory.childDirectory('build')
+            ..createSync(recursive: true);
+          buildDir.childFile('locked').createSync(recursive: true);
+
+          processManager = FakeProcessManager.empty();
+
+          final command = CleanCommand();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          await runner.run(<String>['clean']);
+
+          expect(testLogger.statusText, isNot(contains('Stopping Gradle daemons')));
+          expect(
+            testLogger.errorText,
+            contains('A background process (e.g. Gradle daemon or Java) is locking files'),
+          );
+        },
+        overrides: <Type, Generator>{
+          Platform: () => windowsPlatform,
+          Xcode: () => xcode,
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          AnsiTerminal: () => FakeTerminal(response: 'n'),
+        },
+      );
     });
   });
 }
 
 class FakeTerminal extends Fake implements AnsiTerminal {
+  FakeTerminal({this.response = 'y'});
+
+  final String response;
+
   @override
   bool get stdinHasTerminal => true;
 
@@ -508,7 +554,7 @@ class FakeTerminal extends Fake implements AnsiTerminal {
     int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) async {
-    return 'y';
+    return response;
   }
 }
 
