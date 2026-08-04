@@ -224,10 +224,10 @@ void main() {
         expect(buildInfo.flavor, isNull);
         expect(buildInfo.splitDebugInfoPath, isNull);
         expect(buildInfo.dartObfuscation, isFalse);
-        expect(androidBuildInfo.targetArchs, <AndroidArch>[
-          AndroidArch.armeabi_v7a,
-          AndroidArch.arm64_v8a,
-          AndroidArch.x86_64,
+        expect(androidBuildInfo.targetArchs, <CpuArch>[
+          CpuArch.armv7,
+          CpuArch.arm64,
+          CpuArch.x64,
         ]);
       }
       expect(buildModes, hasLength(3));
@@ -272,7 +272,7 @@ void main() {
 
       final AndroidBuildInfo androidBuildInfo =
           (buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>).single;
-      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86_64]);
+      expect(androidBuildInfo.targetArchs, <CpuArch>[CpuArch.x64]);
 
       final BuildInfo buildInfo = androidBuildInfo.buildInfo;
       expect(buildInfo.mode, BuildMode.release);
@@ -363,6 +363,30 @@ void main() {
           tempDir,
           arguments: <String>['--no-pub', '--template=module'],
         );
+        final AndroidSdk androidSdk = globals.androidSdk!;
+        final List<String> installedNdkVersions =
+            androidSdk.directory
+                .childDirectory('ndk')
+                .listSync()
+                .whereType<Directory>()
+                .map((Directory dir) => dir.basename)
+                .where(
+                  (String version) => androidSdk.directory
+                      .childDirectory('ndk')
+                      .childDirectory(version)
+                      .childFile('source.properties')
+                      .existsSync(),
+                )
+                .toList()
+              ..sort();
+        final ndkProvisioningProperties = <String>[
+          '-Pflutter.androidSdkRoot=${androidSdk.directory.path}',
+          '-Pflutter.installedNdkVersions=${installedNdkVersions.join(',')}',
+          if (androidSdk.sdkManagerPath != null &&
+              androidSdk.cmdlineToolsAvailable &&
+              androidSdk.licensesAvailable)
+            '-Pflutter.sdkManagerPath=${androidSdk.sdkManagerPath!}',
+        ];
 
         processManager.addCommand(
           FakeCommand(
@@ -376,6 +400,8 @@ void main() {
               '-q',
               '-Ptarget=${globals.fs.path.join('lib', 'main.dart')}',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -387,6 +413,7 @@ void main() {
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              ...ndkProvisioningProperties,
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               'assembleAarRelease',
             ],

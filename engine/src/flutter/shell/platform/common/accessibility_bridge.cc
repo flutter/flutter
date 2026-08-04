@@ -373,6 +373,11 @@ void AccessibilityBridge::SetStateFromFlutterUpdate(ui::AXNodeData& node_data,
   if (flags->is_text_field && !flags->is_read_only) {
     node_data.AddState(ax::mojom::State::kEditable);
   }
+  if (flags->is_enabled == FlutterTristate::kFlutterTristateFalse) {
+    node_data.SetRestriction(ax::mojom::Restriction::kDisabled);
+  } else if (flags->is_read_only) {
+    node_data.SetRestriction(ax::mojom::Restriction::kReadOnly);
+  }
   if (node_data.role == ax::mojom::Role::kStaticText &&
       (actions & kHasScrollingAction) == 0 && node.value.empty() &&
       node.label.empty() && node.hint.empty()) {

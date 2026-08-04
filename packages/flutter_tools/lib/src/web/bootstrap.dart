@@ -161,8 +161,6 @@ const _currentDirectory = (function () {
 $_simpleLoaderScript
 
 (function() {
-  let appName = "org-dartlang-app:/$entrypoint";
-
   // Load pre-requisite DDC scripts. We intentionally use invalid names to avoid
   // namespace clashes.
   let prerequisiteScripts = [
@@ -464,7 +462,7 @@ String generateDDCLibraryBundleMainModule({
 /* ENTRYPOINT_EXTENTION_MARKER */
 
 (function() {
-  const appName = "org-dartlang-app:/$entrypoint";
+  const appName = "org-dartlang-app:///$entrypoint";
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
 

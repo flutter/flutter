@@ -359,6 +359,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         printStatusWhenWriting: verbose,
       );
       if (customPreviewScaffoldOutput != null) {
+        _copyHostWebDirToScaffold(widgetPreviewScaffold);
         return FlutterCommandResult.success();
       }
       _previewManifest.generate();
@@ -387,6 +388,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       }
       await _previewPubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
     }
+
+    _copyHostWebDirToScaffold(widgetPreviewScaffold);
 
     if (!widgetPreviewScaffoldProject.dartTool.existsSync()) {
       await _previewPubspecBuilder.generatePackageConfig(
@@ -449,6 +452,21 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
 
     return FlutterCommandResult.success();
+  }
+
+  void _copyHostWebDirToScaffold(Directory scaffoldDirectory) {
+    final Directory hostWebDir = rootProject.directory.childDirectory('web');
+    if (hostWebDir.existsSync()) {
+      final Directory scaffoldWebDir = scaffoldDirectory.childDirectory('web');
+      if (scaffoldWebDir.existsSync()) {
+        logger.printTrace('Deleting scaffold web directory: ${scaffoldWebDir.path}');
+        scaffoldWebDir.deleteSync(recursive: true);
+      }
+      logger.printTrace(
+        'Copying host web directory to scaffold web directory: ${hostWebDir.path} -> ${scaffoldWebDir.path}',
+      );
+      copyDirectory(hostWebDir, scaffoldWebDir);
+    }
   }
 
   void onLegacyChangeDetected(PreviewDependencyGraph previews) {

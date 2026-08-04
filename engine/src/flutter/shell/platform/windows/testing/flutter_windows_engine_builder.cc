@@ -51,7 +51,7 @@ FlutterWindowsEngineBuilder::FlutterWindowsEngineBuilder(
   properties_.assets_path = context.GetAssetsPath().c_str();
   properties_.icu_data_path = context.GetIcuDataPath().c_str();
   properties_.aot_library_path = context.GetAotLibraryPath().c_str();
-  properties_.impeller_switch = DisabledImpeller;
+  properties_.impeller_switch = DefaultImpeller;
 }
 
 FlutterWindowsEngineBuilder::~FlutterWindowsEngineBuilder() = default;
