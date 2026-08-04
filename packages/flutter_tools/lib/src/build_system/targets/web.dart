@@ -27,6 +27,7 @@ import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
+import '../../web/web_constants.dart';
 import '../../web_template.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -54,10 +55,16 @@ class WebEntrypointTarget extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{PROJECT_DIR}/.flutter-plugins-dependencies', optional: true),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/main.dart')];
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/main.dart'),
+    Source.pattern('{BUILD_DIR}/web_plugin_registrant.dart'),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -382,12 +389,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
       processManager: environment.processManager,
     );
 
-    final RunResult runResult = await processUtils.run(
-      throwOnError: !compilerConfig.dryRun,
-      compilationArgs,
-    );
+    final RunResult runResult = await processUtils.run(compilationArgs);
     if (compilerConfig.dryRun) {
       await _handleDryRunResult(environment, runResult);
+    } else if (runResult.exitCode != 0) {
+      environment.logger.printStatus(runResult.stdout);
+      environment.logger.printError(runResult.stderr);
+      _checkForLegacyWebImports(environment, runResult.stdout, runResult.stderr);
+      throwToolExit('Failed to compile application for the Web.');
     }
     final File recordedUsesFile = environment.buildDir.childFile(
       LinkHooks.recordedUsesWasmFileName,
@@ -413,27 +422,39 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'jsSupportRuntimePath': 'main.dart.mjs',
         };
 
+  static final RegExp _partWasmRegex = RegExp(r'^main\.dart_module[0-9].*\.wasm$');
+  static final RegExp _partWasmMapRegex = RegExp(r'^main\.dart_module[0-9].*\.wasm\.map$');
+
   @override
   Iterable<File> buildFiles(Environment environment) => compilerConfig.dryRun
       ? const <File>[]
-      : environment.buildDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where(
-              (File file) => switch (file.basename) {
-                'main.dart.wasm' || 'main.dart.mjs' => true,
-                'main.dart.wasm.map' => compilerConfig.sourceMaps,
-                _ => false,
-              },
-            );
+      : environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
+          if (file.basename == 'main.dart.wasm' || file.basename == 'main.dart.mjs') {
+            return true;
+          }
+          if (compilerConfig.sourceMaps && file.basename == 'main.dart.wasm.map') {
+            return true;
+          }
+          if (_partWasmRegex.hasMatch(file.basename)) {
+            return true;
+          }
+          if (compilerConfig.sourceMaps && _partWasmMapRegex.hasMatch(file.basename)) {
+            return true;
+          }
+          return false;
+        });
 
   @override
   Iterable<String> get buildPatternStems => compilerConfig.dryRun
       ? const <String>[]
       : <String>[
           'main.dart.wasm',
+          'main.dart_module*.wasm',
           'main.dart.mjs',
-          if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
+          if (compilerConfig.sourceMaps) ...<String>[
+            'main.dart.wasm.map',
+            'main.dart_module*.wasm.map',
+          ],
           if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesWasmFileName,
         ];
 
@@ -558,6 +579,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
     }
     result ??= 'unknown';
 
+    _checkForLegacyWebImports(environment, stdout, stderr);
+
     environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
 
     _analytics.send(
@@ -567,6 +590,22 @@ class Dart2WasmTarget extends Dart2WebTarget {
         findingsInfo: findingsInfo,
       ),
     );
+  }
+
+  static final RegExp _kLegacyImportErrorPattern = RegExp(
+    "(?:Dart library|The unavailable library) '(${kLegacyWebLibraries.join('|')})'|"
+    '(${kLegacyWebLibraries.join('|')}) unsupported',
+  );
+
+  void _checkForLegacyWebImports(Environment environment, String stdout, String stderr) {
+    if (_kLegacyImportErrorPattern.hasMatch(stdout) ||
+        _kLegacyImportErrorPattern.hasMatch(stderr)) {
+      environment.logger.printStatus(
+        'Note: WebAssembly compilation failed due to legacy web imports.\n'
+        'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
+        '$kWasmErrorsMoreInfo',
+      );
+    }
   }
 }
 
