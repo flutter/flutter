@@ -287,10 +287,12 @@ INSTANTIATE_PLAYGROUND_SUITE(RendererDartTest);
 
 TEST_P(RendererDartTest, CanRunDartInPlaygroundFrame) {
   SinglePassCallback callback = [&](RenderPass& pass) {
-    ImGui::Begin("Dart test", nullptr);
-    ImGui::Text(
-        "This test executes Dart code during the playground frame callback.");
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Dart test", nullptr);
+      ImGui::Text(
+          "This test executes Dart code during the playground frame callback.");
+      ImGui::End();
+    }
 
     return RunDartFunction("sayHi");
   };

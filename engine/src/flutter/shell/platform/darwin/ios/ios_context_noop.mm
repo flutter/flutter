@@ -16,11 +16,6 @@ IOSContextNoop::IOSContextNoop() = default;
 IOSContextNoop::~IOSContextNoop() = default;
 
 // |IOSContext|
-IOSRenderingBackend IOSContextNoop::GetBackend() const {
-  return IOSRenderingBackend::kImpeller;
-}
-
-// |IOSContext|
 std::unique_ptr<Texture> IOSContextNoop::CreateExternalTexture(int64_t texture_id,
                                                                NSObject<FlutterTexture>* texture) {
   // Don't use FML for logging as it will contain engine specific details. This is a user facing
