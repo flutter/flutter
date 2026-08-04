@@ -7,7 +7,7 @@
 if (is_android) {
   if (!defined(default_android_sdk_root)) {
     default_android_sdk_root = "//flutter/third_party/android_tools/sdk"
-    default_android_sdk_version = "37"
+    default_android_sdk_version = "37.0"
     default_android_sdk_build_tools_version = "37.0.0"
   }
 
