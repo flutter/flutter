@@ -9,6 +9,7 @@ enabled_branches:
   - master
   - flutter-\d+\.\d+-candidate\.\d+
   - fuchsia_f\d+[a-z]*
+  - experimental/agp-gradle-api
 
 platform_properties:
   linux:
