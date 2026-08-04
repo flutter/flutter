@@ -652,7 +652,6 @@ class AndroidDevice extends Device {
               .file(
                 _artifacts.getArtifactPath(
                   Artifact.vmserviceKernelDill,
-                  platform: await targetPlatform,
                   mode: BuildMode.debug,
                 ),
               )
