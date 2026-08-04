@@ -13,7 +13,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show registerHotRestartListener;
-import 'browser_detection.dart' show isIosSafari;
+import 'browser_detection.dart' show isIosSafari, isMacOS;
 import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding/event_position_helper.dart';
@@ -743,6 +743,29 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     // to pixels.
     double deltaX = event.deltaX;
     double deltaY = event.deltaY;
+
+    // When mouse input is received while shift is pressed (regardless of
+    // any other pressed keys), Mac automatically flips the axis. Other
+    // platforms do not do this, so we flip it back to normalize the input
+    // received by the framework. The keyboard+mouse-scroll mechanism is exposed
+    // in the ScrollBehavior of the framework so developers can customize the
+    // behavior.
+    // At time of change, Apple does not expose any other type of API or signal
+    // that the X/Y axes have been flipped.
+    //
+    // The same conversion happens on the native side, see:
+    // https://github.com/flutter/flutter/commit/be9ae4793d1e6aff6ad108200c4319fb1c82db96
+    if (isMacOS && kind == ui.PointerDeviceKind.mouse) {
+      final shiftKeyPressed =
+          (_keyboardConverter?.keyIsPressed(kPhysicalShiftLeft) ?? false) ||
+          (_keyboardConverter?.keyIsPressed(kPhysicalShiftRight) ?? false);
+      if (shiftKeyPressed) {
+        final double temp = deltaX;
+        deltaX = deltaY;
+        deltaY = temp;
+      }
+    }
+
     switch (event.deltaMode.toInt()) {
       case domDeltaLine:
         _defaultScrollLineHeight ??= _computeDefaultScrollLineHeight();
@@ -752,7 +775,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         deltaX *= _view.physicalSize.width;
         deltaY *= _view.physicalSize.height;
       case domDeltaPixel:
-        if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
+        if (isMacOS) {
           // Safari and Firefox seem to report delta in logical pixels while
           // Chrome uses physical pixels.
           deltaX *= _view.devicePixelRatio;
@@ -765,7 +788,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     final data = <ui.PointerData>[];
     final ui.Offset offset = computeEventOffsetToTarget(event, _view);
     var ignoreCtrlKey = false;
-    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
+    if (isMacOS) {
       ignoreCtrlKey =
           (_keyboardConverter?.keyIsPressed(kPhysicalControlLeft) ?? false) ||
           (_keyboardConverter?.keyIsPressed(kPhysicalControlRight) ?? false);

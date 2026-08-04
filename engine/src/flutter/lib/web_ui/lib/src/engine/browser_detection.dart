@@ -37,11 +37,15 @@ bool get isWasm => ui_web.browser.isWasm;
 // Whether the detected `operatingSystem` is `OperatingSystem.iOs`.
 bool get _isIOS => ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs;
 
+/// Returns true if the browser is on macOS, false otherwise.
+bool get isMacOS =>
+    debugEmulateMacOs || ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
+
 /// Whether the browser is running on macOS or iOS.
 ///
 /// - See [operatingSystem].
 /// - See [OperatingSystem].
-bool get isMacOrIOS => _isIOS || ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
+bool get isMacOrIOS => _isIOS || isMacOS;
 
 /// Detect iOS 15.
 bool get isIOS15 => debugIsIOS15 ?? _isIOS && ui_web.browser.userAgent.contains('OS 15_');
@@ -91,6 +95,12 @@ bool get _isActualIosSafari =>
 /// Useful for tests. Do not use in production code.
 @visibleForTesting
 bool debugEmulateIosSafari = false;
+
+/// If set to true pretends that the current browser is macOS.
+///
+/// Useful for tests. Do not use in production code.
+@visibleForTesting
+bool debugEmulateMacOs = false;
 
 /// html webgl version qualifier constants.
 abstract class WebGLVersion {
