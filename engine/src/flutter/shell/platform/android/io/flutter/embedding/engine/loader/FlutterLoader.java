@@ -43,6 +43,7 @@ public class FlutterLoader {
   private static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   private static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME =
       "aot-vmservice-shared-library-name";
+  private static final String VMSERVICE_KERNEL_PATH = "vmservice-kernel-path";
 
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
