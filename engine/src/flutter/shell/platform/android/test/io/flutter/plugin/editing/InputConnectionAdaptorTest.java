@@ -643,53 +643,53 @@ public class InputConnectionAdaptorTest {
     // Normal Character
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 74);
+    assertEquals(74, Selection.getSelectionStart(editable));
 
     // Non-Spacing Mark
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 73);
+    assertEquals(73, Selection.getSelectionStart(editable));
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 72);
+    assertEquals(72, Selection.getSelectionStart(editable));
 
     // Keycap
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 69);
+    assertEquals(69, Selection.getSelectionStart(editable));
 
     // Keycap with invalid base
     adaptor.setSelection(68, 68);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 66);
+    assertEquals(66, Selection.getSelectionStart(editable));
     adaptor.setSelection(67, 67);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 66);
+    assertEquals(66, Selection.getSelectionStart(editable));
 
     // Zero Width Joiner
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 55);
+    assertEquals(55, Selection.getSelectionStart(editable));
 
     // Zero Width Joiner with invalid base
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 53);
+    assertEquals(53, Selection.getSelectionStart(editable));
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 52);
+    assertEquals(52, Selection.getSelectionStart(editable));
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 51);
+    assertEquals(51, Selection.getSelectionStart(editable));
 
     // ----- Start Emoji Tag Sequence with invalid base testing ----
     // Delete base tag
     adaptor.setSelection(39, 39);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 37);
+    assertEquals(37, Selection.getSelectionStart(editable));
 
     // Delete the sequence
     adaptor.setSelection(49, 49);
@@ -697,80 +697,80 @@ public class InputConnectionAdaptorTest {
       didConsume = adaptor.handleKeyEvent(downKeyDown);
       assertTrue(didConsume);
     }
-    assertEquals(Selection.getSelectionStart(editable), 37);
+    assertEquals(37, Selection.getSelectionStart(editable));
     // ----- End Emoji Tag Sequence with invalid base testing ----
 
     // Emoji Tag Sequence
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 23);
+    assertEquals(23, Selection.getSelectionStart(editable));
 
     // Variation Selector with invalid base
     adaptor.setSelection(22, 22);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 21);
+    assertEquals(21, Selection.getSelectionStart(editable));
     adaptor.setSelection(22, 22);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 21);
+    assertEquals(21, Selection.getSelectionStart(editable));
 
     // Variation Selector
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 19);
+    assertEquals(19, Selection.getSelectionStart(editable));
 
     // Emoji Modifier
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 16);
+    assertEquals(16, Selection.getSelectionStart(editable));
 
     // Emoji Modifier with invalid base
     adaptor.setSelection(14, 14);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 13);
+    assertEquals(13, Selection.getSelectionStart(editable));
     adaptor.setSelection(14, 14);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 13);
+    assertEquals(13, Selection.getSelectionStart(editable));
 
     // Line Feed
     adaptor.setSelection(12, 12);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 11);
+    assertEquals(11, Selection.getSelectionStart(editable));
 
     // Carriage Return
     adaptor.setSelection(12, 12);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 11);
+    assertEquals(11, Selection.getSelectionStart(editable));
 
     // Carriage Return and Line Feed
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 9);
+    assertEquals(9, Selection.getSelectionStart(editable));
 
     // Regional Indicator Symbol odd
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 7);
+    assertEquals(7, Selection.getSelectionStart(editable));
 
     // Regional Indicator Symbol even
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 3);
+    assertEquals(3, Selection.getSelectionStart(editable));
 
     // Simple Emoji
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 1);
+    assertEquals(1, Selection.getSelectionStart(editable));
 
     // First CodePoint
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 0);
+    assertEquals(0, Selection.getSelectionStart(editable));
   }
 
   @Test
@@ -834,26 +834,26 @@ public class InputConnectionAdaptorTest {
     // The cursor moves over two region indicators at a time.
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 4);
+    assertEquals(4, Selection.getSelectionStart(editable));
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 8);
+    assertEquals(8, Selection.getSelectionStart(editable));
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 12);
+    assertEquals(12, Selection.getSelectionStart(editable));
 
     // When there is only one region indicator left with no pair, the cursor
     // moves over that single region indicator.
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 14);
+    assertEquals(14, Selection.getSelectionStart(editable));
 
     // If the cursor is placed in the middle of a region indicator pair, it
     // moves over only the second half of the pair.
     adaptor.setSelection(6, 6);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 8);
+    assertEquals(8, Selection.getSelectionStart(editable));
   }
 
   @Test
@@ -868,65 +868,65 @@ public class InputConnectionAdaptorTest {
     // First CodePoint
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 1);
+    assertEquals(1, Selection.getSelectionStart(editable));
 
     // Simple Emoji
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 3);
+    assertEquals(3, Selection.getSelectionStart(editable));
 
     // Regional Indicator Symbol even
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 7);
+    assertEquals(7, Selection.getSelectionStart(editable));
 
     // Regional Indicator Symbol odd
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 9);
+    assertEquals(9, Selection.getSelectionStart(editable));
 
     // Carriage Return
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 10);
+    assertEquals(10, Selection.getSelectionStart(editable));
 
     // Line Feed and Carriage Return
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 12);
+    assertEquals(12, Selection.getSelectionStart(editable));
 
     // Line Feed
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 13);
+    assertEquals(13, Selection.getSelectionStart(editable));
 
     // Modified Emoji
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 16);
+    assertEquals(16, Selection.getSelectionStart(editable));
 
     // Emoji Modifier
     adaptor.setSelection(14, 14);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 16);
+    assertEquals(16, Selection.getSelectionStart(editable));
 
     // Emoji Modifier with invalid base
     adaptor.setSelection(18, 18);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 19);
+    assertEquals(19, Selection.getSelectionStart(editable));
 
     // Variation Selector
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 21);
+    assertEquals(21, Selection.getSelectionStart(editable));
 
     // Variation Selector with invalid base
     adaptor.setSelection(22, 22);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 23);
+    assertEquals(23, Selection.getSelectionStart(editable));
 
     // Emoji Tag Sequence
     for (int i = 0; i < 7; i++) {
@@ -934,7 +934,7 @@ public class InputConnectionAdaptorTest {
       assertTrue(didConsume);
       assertEquals(Selection.getSelectionStart(editable), 25 + 2 * i);
     }
-    assertEquals(Selection.getSelectionStart(editable), 37);
+    assertEquals(37, Selection.getSelectionStart(editable));
 
     // ----- Start Emoji Tag Sequence with invalid base testing ----
     // Pass the sequence
@@ -944,51 +944,51 @@ public class InputConnectionAdaptorTest {
       assertTrue(didConsume);
       assertEquals(Selection.getSelectionStart(editable), 41 + 2 * i);
     }
-    assertEquals(Selection.getSelectionStart(editable), 51);
+    assertEquals(51, Selection.getSelectionStart(editable));
     // ----- End Emoji Tag Sequence with invalid base testing ----
 
     // Zero Width Joiner with invalid base
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 52);
+    assertEquals(52, Selection.getSelectionStart(editable));
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 53);
+    assertEquals(53, Selection.getSelectionStart(editable));
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 55);
+    assertEquals(55, Selection.getSelectionStart(editable));
 
     // Zero Width Joiner
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 66);
+    assertEquals(66, Selection.getSelectionStart(editable));
 
     // Keycap with invalid base
     adaptor.setSelection(67, 67);
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 68);
+    assertEquals(68, Selection.getSelectionStart(editable));
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 69);
+    assertEquals(69, Selection.getSelectionStart(editable));
 
     // Keycap
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 72);
+    assertEquals(72, Selection.getSelectionStart(editable));
 
     // Non-Spacing Mark
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 73);
+    assertEquals(73, Selection.getSelectionStart(editable));
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 74);
+    assertEquals(74, Selection.getSelectionStart(editable));
 
     // Normal Character
     didConsume = adaptor.handleKeyEvent(downKeyDown);
     assertTrue(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), 75);
+    assertEquals(75, Selection.getSelectionStart(editable));
   }
 
   @Test
@@ -1061,26 +1061,26 @@ public class InputConnectionAdaptorTest {
     KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN);
     boolean didConsume = adaptor.handleKeyEvent(keyEvent);
     assertFalse(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), -1);
-    assertEquals(Selection.getSelectionEnd(editable), -1);
+    assertEquals(-1, Selection.getSelectionStart(editable));
+    assertEquals(-1, Selection.getSelectionEnd(editable));
 
     keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP);
     didConsume = adaptor.handleKeyEvent(keyEvent);
     assertFalse(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), -1);
-    assertEquals(Selection.getSelectionEnd(editable), -1);
+    assertEquals(-1, Selection.getSelectionStart(editable));
+    assertEquals(-1, Selection.getSelectionEnd(editable));
 
     keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT);
     didConsume = adaptor.handleKeyEvent(keyEvent);
     assertFalse(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), -1);
-    assertEquals(Selection.getSelectionEnd(editable), -1);
+    assertEquals(-1, Selection.getSelectionStart(editable));
+    assertEquals(-1, Selection.getSelectionEnd(editable));
 
     keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT);
     didConsume = adaptor.handleKeyEvent(keyEvent);
     assertFalse(didConsume);
-    assertEquals(Selection.getSelectionStart(editable), -1);
-    assertEquals(Selection.getSelectionEnd(editable), -1);
+    assertEquals(-1, Selection.getSelectionStart(editable));
+    assertEquals(-1, Selection.getSelectionEnd(editable));
   }
 
   @Test
@@ -1092,9 +1092,9 @@ public class InputConnectionAdaptorTest {
 
     ExtractedText extractedText = adaptor.getExtractedText(null, 0);
 
-    assertEquals(extractedText.text, SAMPLE_TEXT);
-    assertEquals(extractedText.selectionStart, selStart);
-    assertEquals(extractedText.selectionEnd, selStart);
+    assertEquals(SAMPLE_TEXT, extractedText.text);
+    assertEquals(selStart, extractedText.selectionStart);
+    assertEquals(selStart, extractedText.selectionEnd);
   }
 
   @Test
