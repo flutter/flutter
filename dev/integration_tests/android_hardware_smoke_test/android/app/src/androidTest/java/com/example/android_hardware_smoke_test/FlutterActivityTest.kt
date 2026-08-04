@@ -25,6 +25,14 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+private class BlankScreenshotException(
+    message: String
+) : IllegalStateException(message)
+
+private class EglInitializationException(
+    message: String
+) : IllegalStateException(message)
+
 @RunWith(AndroidJUnit4::class)
 class FlutterActivityTest {
     companion object {
@@ -57,7 +65,7 @@ class FlutterActivityTest {
         private fun verifyNoGraphicsPipelineErrors(marker: String) {
             val errors = getGraphicsPipelineErrors(marker)
             if (errors.isNotEmpty()) {
-                throw IllegalStateException(
+                throw EglInitializationException(
                     "Graphics pipeline/EGL failure detected in process logcat:\n${errors.joinToString("\n")}"
                 )
             }
@@ -141,8 +149,7 @@ class FlutterActivityTest {
             } catch (e: Throwable) {
                 lastException = e
                 Log.w(TAG, "Attempt $currentAttempt failed: ${e.message}")
-                val isBlankScreenshot = e is IllegalStateException && e.message?.contains(Constants.ERROR_BLANK_SCREENSHOT) == true
-                if (currentAttempt < maxAttempts && isBlankScreenshot) {
+                if (currentAttempt < maxAttempts && isBlankScreenshotException(e)) {
                     Log.i(TAG, "Recreating activity for next attempt...")
                     rule.scenario.recreate()
                 } else {
@@ -159,6 +166,12 @@ class FlutterActivityTest {
             "Test '$testName' failed after $maxAttempts attempts. Last error: ${lastException?.message}",
             lastException
         )
+    }
+
+    private fun isBlankScreenshotException(e: Throwable?): Boolean {
+        if (e == null) return false
+        if (e is BlankScreenshotException) return true
+        return isBlankScreenshotException(e.cause)
     }
 
     private fun runAttempt(
@@ -321,7 +334,9 @@ class FlutterActivityTest {
                 verifyNoGraphicsPipelineErrors(marker)
 
                 if (cropped == null) {
-                    throw IllegalStateException("Captured screenshot is ${Constants.ERROR_BLANK_SCREENSHOT} after $maxAttempts attempts.")
+                    throw BlankScreenshotException(
+                        "Captured screenshot is ${Constants.ERROR_BLANK_SCREENSHOT} after $maxAttempts attempts."
+                    )
                 }
 
                 val stream = ByteArrayOutputStream()

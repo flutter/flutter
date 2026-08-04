@@ -54,7 +54,6 @@ Future<void> runAndroidHardwareSmokeTests({
     // 1. Run driver tests to generate reference screenshots (with retry loop)
     final bool success = await _runRetryLoop(testDir);
     if (!success) {
-      foundError(<String>['Android Hardware Smoke Tests driver run failed after 3 attempts.']);
       return;
     }
 
@@ -73,11 +72,6 @@ Future<void> runAndroidHardwareSmokeTests({
   } finally {
     // Restore original contents.
     androidManifestXml.writeAsStringSync(androidManifestContents);
-    try {
-      await _deleteRetryAttemptSetting();
-    } catch (e) {
-      io.stderr.writeln('Warning: Failed to delete retry attempt setting: $e');
-    }
 
     // Clean up copied goldens to keep Git worktree completely clean
     _cleanGoldensDirectory(destinationDir);
@@ -106,10 +100,10 @@ void _setAndroidManifestBackend(File file, String contents, ImpellerBackend back
 }
 
 Future<bool> _runRetryLoop(String testDir) async {
-  var attempt = 1;
   const maxAttempts = 3;
+  var exitCode = 0;
 
-  while (attempt <= maxAttempts) {
+  for (var attempt = 1; attempt <= maxAttempts; attempt++) {
     // Clear logcat buffer before running
     await runCommand('adb', <String>['logcat', '-c']);
 
@@ -125,10 +119,8 @@ Future<bool> _runRetryLoop(String testDir) async {
       driveArgs.add('--no-build');
     }
 
-    await _setRetryAttemptSetting(attempt - 1);
-
     final Command command = await startCommand('flutter', driveArgs, workingDirectory: testDir);
-    final int exitCode = await command.process.exitCode;
+    exitCode = await command.process.exitCode;
     if (exitCode == 0) {
       return true;
     }
@@ -140,43 +132,31 @@ Future<bool> _runRetryLoop(String testDir) async {
     // Inspect the process logcat on failure to detect if a transient EGL/graphics context
     // negotiation error occurred during startup, enabling a safe activity/process level retry.
     final bool hasEglWarning = await _checkForTransientEglFailure();
-    if (hasEglWarning) {
-      io.stderr.writeln('Detected EGL initialization/warning in logcat. Retrying...');
-    } else {
-      io.stderr.writeln('No transient EGL failure detected in logcat.');
-      if (attempt == maxAttempts) {
-        break;
-      }
+    if (!hasEglWarning) {
+      // Non-retryable error: exit immediately and log specific failure
       foundError(<String>[
-        'flutter drive failed on attempt $attempt with exit code $exitCode and no transient EGL warning was found in logcat.',
+        'Android Hardware Smoke Tests driver run failed with exit code $exitCode and no transient EGL warning was found in logcat.',
       ]);
       return false;
     }
 
-    attempt++;
+    // Retryable EGL warning: log progress and continue if attempts remain
+    if (attempt < maxAttempts) {
+      io.stderr.writeln(
+        'attempt $attempt of $maxAttempts: detected retryable EGL initialization warning. Retrying...',
+      );
+    } else {
+      io.stderr.writeln(
+        'attempt $attempt of $maxAttempts failed with retryable EGL initialization warning.',
+      );
+    }
   }
+
+  // Loop finished: exhausted all attempts
+  foundError(<String>[
+    'Android Hardware Smoke Tests driver run failed to initialize EGL after $maxAttempts attempts.',
+  ]);
   return false;
-}
-
-Future<void> _setRetryAttemptSetting(int attemptIndex) async {
-  await runCommand('adb', <String>[
-    'shell',
-    'settings',
-    'put',
-    'global',
-    'smoke_test_retry_attempt',
-    '$attemptIndex',
-  ]);
-}
-
-Future<void> _deleteRetryAttemptSetting() async {
-  await runCommand('adb', <String>[
-    'shell',
-    'settings',
-    'delete',
-    'global',
-    'smoke_test_retry_attempt',
-  ]);
 }
 
 Future<bool> _checkForTransientEglFailure() async {
