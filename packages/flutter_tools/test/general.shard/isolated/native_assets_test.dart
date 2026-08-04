@@ -395,7 +395,8 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
   );
 
   testUsingContext(
-    'installCodeAssets cleans up existing stale files in target directory without crashing',
+    'installCodeAssets cleans up existing stale files in target directory without crashing '
+    '(regression test for https://github.com/flutter/flutter/issues/190234)',
     overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
