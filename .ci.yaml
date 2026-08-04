@@ -14,7 +14,7 @@
 enabled_branches:
   - master
   - flutter-\d+\.\d+-candidate\.\d+
-  - agp-gradle-api-flutter
+  - agp-gradle-api-[a-z]*
 
 platform_properties:
   staging_build_linux:
