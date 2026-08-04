@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -51,13 +50,11 @@ void main() {
     late IOSCoreDeviceControl coreDeviceControl;
     late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
-    late ProcessUtils processUtils;
 
     setUp(() {
       final artifacts = Artifacts.test();
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
-      processUtils = ProcessUtils(processManager: FakeProcessManager.any(), logger: logger);
       fileSystem = MemoryFileSystem.test();
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
@@ -98,54 +95,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       );
       expect(await device.isSupported(), isTrue);
-    });
-
-    group('shouldAttachLLDBDebugger', () {
-      testWithoutContext('returns expected values for different BuildInfo and options', () {
-        final device = IOSDevice(
-          'device-123',
-          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: macPlatform,
-          iosDeploy: iosDeploy,
-          analytics: FakeAnalytics(),
-          iMobileDevice: iMobileDevice,
-          coreDeviceControl: coreDeviceControl,
-          coreDeviceLauncher: coreDeviceLauncher,
-          xcodeDebug: xcodeDebug,
-          name: 'iPhone 1',
-          sdkVersion: '13.3',
-          cpuArch: .arm64,
-          connectionInterface: DeviceConnectionInterface.attached,
-          isConnected: true,
-          isPaired: true,
-          devModeEnabled: true,
-          isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
-        );
-
-        expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.debug)), isTrue);
-        expect(
-          device.shouldAttachLLDBDebugger(
-            DebuggingOptions.enabled(BuildInfo.profile, iosProfileDebugger: true),
-          ),
-          isTrue,
-        );
-        expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.profile)), isFalse);
-        expect(
-          device.shouldAttachLLDBDebugger(
-            DebuggingOptions.enabled(BuildInfo.profile, iosProfileDebugger: false),
-          ),
-          isFalse,
-        );
-        expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.release)), isFalse);
-      });
     });
 
     testWithoutContext('32-bit devices are unsupported', () async {
@@ -168,8 +119,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       );
       expect(await device.isSupported(), isFalse);
     });
@@ -196,8 +145,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
         ).majorSdkVersion,
         1,
       );
@@ -222,8 +169,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
         ).majorSdkVersion,
         13,
       );
@@ -248,8 +193,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
         ).majorSdkVersion,
         10,
       );
@@ -274,8 +217,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
         ).majorSdkVersion,
         0,
       );
@@ -300,8 +241,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
         ).majorSdkVersion,
         0,
       );
@@ -328,8 +267,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       ).sdkVersion;
       var expectedVersion = Version(13, 3, 1, text: '13.3.1');
       expect(sdkVersion, isNotNull);
@@ -356,8 +293,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       ).sdkVersion;
       expectedVersion = Version(13, 3, 1, text: '13.3.1 (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -384,8 +319,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       ).sdkVersion;
       expectedVersion = Version(16, 4, 1, text: '16.4.1(a) (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -412,8 +345,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       ).sdkVersion;
       expectedVersion = Version(0, 0, 0, text: '0');
       expect(sdkVersion, isNotNull);
@@ -439,8 +370,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
 
@@ -464,8 +393,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
     });
@@ -491,8 +418,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       );
 
       expect(await device.sdkNameAndVersion, 'iOS 13.3 17C54');
@@ -519,8 +444,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        xcode: null,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -554,8 +477,6 @@ void main() {
               isPaired: true,
               devModeEnabled: true,
               isCoreDevice: false,
-              processUtils: processUtils,
-              xcode: null,
             );
           }, throwsAssertionError);
         },
@@ -647,8 +568,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          xcode: null,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -894,8 +813,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        xcode: null,
       );
 
       device2 = IOSDevice(
@@ -918,8 +835,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        xcode: null,
       );
     });
 
@@ -1250,8 +1165,6 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        xcode: null,
       );
     });
 

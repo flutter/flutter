@@ -38,7 +38,6 @@ import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'application_package.dart';
 import 'core_devices.dart';
-import 'device_support.dart';
 import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
@@ -309,7 +308,6 @@ class IOSDevice extends Device {
   IOSDevice(
     super.id, {
     required FileSystem fileSystem,
-    required ProcessUtils processUtils,
     required this.name,
     required CpuArch cpuArch,
     required this.connectionInterface,
@@ -327,7 +325,6 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required super.logger,
     required Analytics analytics,
-    required Xcode? xcode,
   }) : _cpuArch = cpuArch,
        _sdkVersion = sdkVersion,
        _iosDeploy = iosDeploy,
@@ -335,10 +332,8 @@ class IOSDevice extends Device {
        _coreDeviceControl = coreDeviceControl,
        _coreDeviceLauncher = coreDeviceLauncher,
        _xcodeDebug = xcodeDebug,
-       _xcode = xcode,
        _iproxy = iProxy,
        _fileSystem = fileSystem,
-       _processUtils = processUtils,
        _logger = logger,
        _analytics = analytics,
        _platform = platform,
@@ -353,14 +348,12 @@ class IOSDevice extends Device {
   final IOSDeploy _iosDeploy;
   final Analytics _analytics;
   final FileSystem _fileSystem;
-  final ProcessUtils _processUtils;
   final Logger _logger;
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
-  final Xcode? _xcode;
   final IProxy _iproxy;
 
   Version? get sdkVersion {
@@ -570,15 +563,6 @@ class IOSDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final bool shouldAttachDebugger = shouldAttachLLDBDebugger(debuggingOptions);
-    if (shouldAttachDebugger) {
-      await IOSDeviceSupport(
-        logger: _logger,
-        processUtils: _processUtils,
-        xcode: _xcode,
-      ).prepareDeviceSupport(id);
-    }
-
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
       EnvironmentType.physical,
@@ -627,7 +611,6 @@ class IOSDevice extends Device {
           mainPath: mainPath,
           discoveryTimeout: discoveryTimeout,
           shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
-          shouldAttachDebugger: shouldAttachDebugger,
         );
         installationResult = result ? 0 : 1;
         deploymentMethod = coreDeviceDeploymentMethod;
@@ -1035,15 +1018,6 @@ class IOSDevice extends Device {
     );
   }
 
-  /// Whether the LLDB debugger should be attached.
-  ///
-  /// The LLDB debugger should only be attached in debug mode or if the user uses the
-  /// `--ios-profile-debugger` flag in profile mode.
-  bool shouldAttachLLDBDebugger(DebuggingOptions debuggingOptions) {
-    return debuggingOptions.buildInfo.isDebug ||
-        (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
-  }
-
   /// Uses either `devicectl` or Xcode automation to install, launch, and debug
   /// apps on physical iOS devices.
   ///
@@ -1067,7 +1041,6 @@ class IOSDevice extends Device {
     required IOSApp package,
     required List<String> launchArguments,
     required String? mainPath,
-    required bool shouldAttachDebugger,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
@@ -1108,6 +1081,10 @@ class IOSDevice extends Device {
       if (deviceLogReader is IOSDeviceLogReader) {
         await deviceLogReader.listenToCoreDeviceLauncher(_coreDeviceLauncher);
       }
+
+      final bool shouldAttachDebugger =
+          debuggingOptions.buildInfo.isDebug ||
+          (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
 
       if (shouldAttachDebugger) {
         final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(

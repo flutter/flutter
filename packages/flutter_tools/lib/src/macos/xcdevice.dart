@@ -652,12 +652,10 @@ class XCDevice {
             xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
           ),
           xcodeDebug: _xcodeDebug,
-          xcode: _xcode,
           platform: globals.platform,
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
           isCoreDevice: coreDevice != null,
-          processUtils: _processUtils,
         );
       }
     }
