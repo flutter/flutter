@@ -309,10 +309,7 @@ Target 0: (Runner) stopped.
 
     final processManager = FakeLLDBProcessManager([lldbCommand]);
     final processUtils = ProcessUtils(processManager: processManager, logger: logger);
-    final lldb = LLDB(
-      logger: logger,
-      processUtils: processUtils,
-    );
+    final lldb = LLDB(logger: logger, processUtils: processUtils);
     final expectedInputs = [
       'device select $deviceId',
       r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
