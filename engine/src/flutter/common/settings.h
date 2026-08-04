@@ -161,7 +161,6 @@ struct Settings {
   bool enable_dart_profiling = false;
   bool profile_startup = false;
   bool disable_dart_asserts = false;
-  bool enable_serial_gc = false;
   bool profile_microtasks = false;
 
   // Whether embedder only allows secure connections.
