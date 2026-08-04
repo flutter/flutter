@@ -18,6 +18,7 @@ import '../base/template.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/targets/darwin.dart' show printXcodeWarning;
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
@@ -662,12 +663,16 @@ class FlutterFrameworkDependency {
           copiedPath,
         ]);
         if (chmodResult.exitCode != 0) {
-          throwToolExit(
-            'Failed to explicitly make XCFramework writable at $copiedPath: ${chmodResult.stderr}',
+          printXcodeWarning(
+            'Failed to make the XCFramework writable. This may cause the build to '
+            'fail when using lipo.\nError: $copiedPath: ${chmodResult.stderr}',
           );
         }
       } on ProcessException catch (e) {
-        throwToolExit('Failed to run chmod for $copiedPath: $e');
+        printXcodeWarning(
+          'Failed to make the XCFramework writable. This may cause the build to '
+          'fail when using lipo.\nError: $copiedPath: $e',
+        );
       }
       if (codesignIdentity != null) {
         final Directory copiedXCFramework = xcframeworkOutput.childDirectory(

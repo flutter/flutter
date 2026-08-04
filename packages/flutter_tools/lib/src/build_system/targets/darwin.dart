@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import '../../artifacts.dart';
-import '../../base/common.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
@@ -69,12 +68,16 @@ abstract class UnpackDarwin extends Target {
         copiedPath,
       ]);
       if (chmodResult.exitCode != 0) {
-        throwToolExit(
-          'Failed to explicitly make framework writable at $copiedPath: ${chmodResult.stderr}',
+        printXcodeWarning(
+          'Failed to make the framework writable. This may cause the build to '
+          'fail when using lipo.\nError: $copiedPath: ${chmodResult.stderr}',
         );
       }
     } on ProcessException catch (e) {
-      throwToolExit('Failed to run chmod for $copiedPath: $e');
+      printXcodeWarning(
+        'Failed to make the framework writable. This may cause the build to '
+        'fail when using lipo.\nError: $copiedPath: $e',
+      );
     }
   }
 
