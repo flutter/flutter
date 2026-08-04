@@ -831,7 +831,8 @@ void main() {
     );
 
     testWithoutContext(
-      'compileShader throws ToolExit and logs friendly message when impellerc is blocked by WDAC (4551)',
+      'compileShader throws ToolExit and logs friendly message when impellerc is blocked by WDAC (4551) '
+      '(regression test for https://github.com/flutter/flutter/issues/190232)',
       () async {
         final blockedException = ProcessException(
           impellerc,
