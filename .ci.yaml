@@ -7282,7 +7282,7 @@ targets:
 
   - name: Windows windows_primitive_shape_golden_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     bringup: true
     timeout: 60
     properties:
