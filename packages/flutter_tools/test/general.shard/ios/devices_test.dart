@@ -137,14 +137,20 @@ void main() {
           ),
           isTrue,
         );
-        expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.profile)), isFalse);
+        expect(
+          device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.profile)),
+          isFalse,
+        );
         expect(
           device.shouldAttachLLDBDebugger(
             DebuggingOptions.enabled(BuildInfo.profile, iosProfileDebugger: false),
           ),
           isFalse,
         );
-        expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.release)), isFalse);
+        expect(
+          device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.release)),
+          isFalse,
+        );
       });
     });
 
@@ -696,6 +702,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
         );
 
         expect(device.supportsScreenshot, isFalse);
@@ -724,6 +732,8 @@ void main() {
             isPaired: true,
             devModeEnabled: true,
             isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
           );
 
           final fakeXcode = globals.xcode! as FakeXcode;
@@ -757,6 +767,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
         );
 
         fakeCoreDeviceControl.takeScreenshotSuccess = true;
@@ -789,6 +801,8 @@ void main() {
             isPaired: true,
             devModeEnabled: true,
             isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
           );
 
           fakeCoreDeviceControl.takeScreenshotException = Exception(
@@ -826,6 +840,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
         );
 
         expect(
