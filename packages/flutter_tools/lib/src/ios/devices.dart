@@ -309,7 +309,7 @@ class IOSDevice extends Device {
     super.id, {
     required FileSystem fileSystem,
     required this.name,
-    required this.cpuArchitecture,
+    required CpuArch cpuArch,
     required this.connectionInterface,
     required this.isConnected,
     required this.isPaired,
@@ -325,7 +325,8 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required super.logger,
     required Analytics analytics,
-  }) : _sdkVersion = sdkVersion,
+  }) : _cpuArch = cpuArch,
+       _sdkVersion = sdkVersion,
        _iosDeploy = iosDeploy,
        _iMobileDevice = iMobileDevice,
        _coreDeviceControl = coreDeviceControl,
@@ -370,7 +371,10 @@ class IOSDevice extends Device {
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
-  final DarwinArch cpuArchitecture;
+  final CpuArch _cpuArch;
+
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
 
   @override
   /// The [connectionInterface] provided from `XCDevice.getAvailableIOSDevices`
@@ -495,7 +499,7 @@ class IOSDevice extends Device {
 
   @override
   // 32-bit devices are not supported.
-  Future<bool> isSupported() async => cpuArchitecture == DarwinArch.arm64;
+  Future<bool> isSupported() async => _cpuArch == .arm64;
 
   @override
   Future<LaunchResult> startApp(
@@ -528,7 +532,7 @@ class IOSDevice extends Device {
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
         targetOverride: mainPath,
-        activeArch: cpuArchitecture,
+        activeArch: _cpuArch,
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
@@ -1069,8 +1073,7 @@ class IOSDevice extends Device {
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
-    if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
@@ -1319,17 +1322,42 @@ class IOSDevice extends Device {
 
   @override
   bool get supportsScreenshot {
-    if (isCoreDevice) {
-      // `idevicescreenshot` stopped working with iOS 17 / Xcode 15
-      // (https://github.com/flutter/flutter/issues/128598).
-      return false;
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      return globals.xcode!.isDevicectlInstalled;
     }
-    return _iMobileDevice.isInstalled;
+    return false;
   }
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      var success = false;
+      try {
+        success = await _coreDeviceControl.takeScreenshot(
+          deviceId: id,
+          destination: outputFile.path,
+        );
+      } on Exception catch (error) {
+        final errorMessage = error.toString();
+        if (errorMessage.contains('CoreDeviceError error 4000') ||
+            errorMessage.contains('CoreDeviceError error 4016') ||
+            errorMessage.contains('RemotePairingError error 2') ||
+            errorMessage.contains('Connection was invalidated')) {
+          throwToolExit(
+            'Failed to establish a connection to the device. '
+            'Please make sure the device is available and try again.',
+          );
+        }
+        throwToolExit('Failed to take screenshot with devicectl: $error');
+      }
+      if (success) {
+        return;
+      }
+      throwToolExit('Failed to take screenshot with devicectl.');
+    }
+    throwToolExit('flutter screenshot requires Xcode 27 or higher.');
   }
 
   @override

@@ -331,16 +331,11 @@ String? parseGradleVersionFromDistributionUrl(String? distributionUrl) {
   return zipParts[1];
 }
 
-/// Returns either the gradle-wrapper.properties value from the passed in
-/// [directory] or if not present the version available in local path.
+/// Returns the gradle-wrapper.properties value from the passed in [directory].
 ///
-/// If gradle version is not found null is returned.
-/// [directory] should be an android directory with a build.gradle file.
-Future<String?> getGradleVersion(
-  Directory directory,
-  Logger logger,
-  ProcessManager processManager,
-) async {
+/// If gradle version is not found in the file, null is returned.
+/// [directory] should be an android directory.
+Future<String?> getGradleVersionFromFile(Directory directory, Logger logger) async {
   final File propertiesFile = getGradleWrapperFile(directory);
 
   if (propertiesFile.existsSync()) {
@@ -357,14 +352,30 @@ Future<String?> getGradleVersion(
       }
     } else {
       // If no distributionUrl log then treat as if there was no propertiesFile.
-      logger.printTrace(
-        '$propertiesFile does not provide a Gradle version falling back to system gradle.',
-      );
+      logger.printTrace('$propertiesFile does not provide a Gradle version.');
     }
   } else {
     // Could not find properties file.
-    logger.printTrace('$propertiesFile does not exist falling back to system gradle');
+    logger.printTrace('$propertiesFile does not exist.');
   }
+  return null;
+}
+
+/// Returns either the gradle-wrapper.properties value from the passed in
+/// [directory] or if not present the version available in local path.
+///
+/// If gradle version is not found null is returned.
+/// [directory] should be an android directory with a build.gradle file.
+Future<String?> getGradleVersion(
+  Directory directory,
+  Logger logger,
+  ProcessManager processManager,
+) async {
+  final String? gradleVersion = await getGradleVersionFromFile(directory, logger);
+  if (gradleVersion != null) {
+    return gradleVersion;
+  }
+  logger.printTrace('Falling back to system gradle');
   // System installed Gradle version.
   // TODO(reidbaker): Modify this gradle execution to use gradlew.
   if (processManager.canRun('gradle')) {
@@ -1122,9 +1133,9 @@ String getGradleVersionFor(String agpV) {
     GradleForAgp(agpMin: '8.8.0', agpMax: '8.8.99', minRequiredGradle: '8.10.2'),
     GradleForAgp(agpMin: '8.9.0', agpMax: '8.9.99', minRequiredGradle: '8.11.1'),
     GradleForAgp(agpMin: '8.10.0', agpMax: '8.10.99', minRequiredGradle: '8.11.1'),
-    GradleForAgp(agpMin: '8.11.0', agpMax: '8.11.99', minRequiredGradle: '8.13'),
-    GradleForAgp(agpMin: '8.12.0', agpMax: '8.12.99', minRequiredGradle: '8.13'),
-    GradleForAgp(agpMin: '8.13.0', agpMax: '8.13.99', minRequiredGradle: '8.13'),
+    GradleForAgp(agpMin: '8.11.0', agpMax: '8.11.99', minRequiredGradle: '8.14'),
+    GradleForAgp(agpMin: '8.12.0', agpMax: '8.12.99', minRequiredGradle: '8.14'),
+    GradleForAgp(agpMin: '8.13.0', agpMax: '8.13.99', minRequiredGradle: '8.14'),
     GradleForAgp(agpMin: '9.0', agpMax: '9.0.99', minRequiredGradle: '9.1.0'),
     GradleForAgp(agpMin: '9.1.0', agpMax: '9.1.99', minRequiredGradle: '9.3.1'),
     // Assume if AGP is newer than this code knows about return the highest gradle
