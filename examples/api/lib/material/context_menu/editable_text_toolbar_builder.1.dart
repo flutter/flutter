@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// #region body
 // This example demonstrates showing a custom context menu only when some
 // narrowly defined text is selected.
 
@@ -113,3 +114,4 @@ bool _isValidEmail(String text) {
     r'(?<topLevelDomain>[a-zA-Z0-9]+)',
   ).hasMatch(text);
 }
+// #endregion body

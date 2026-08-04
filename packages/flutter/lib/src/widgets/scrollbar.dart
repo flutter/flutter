@@ -898,7 +898,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// [Scrollable] in this case to prevent having multiple ScrollPositions
 /// attached to the PrimaryScrollController.
 ///
-/// {@tool dartpad}
+/// <callout-box>
+///
 /// This sample shows an app with two scrollables in the same route. Since by
 /// default, there is one [PrimaryScrollController] per route, and they both have a
 /// scroll direction of [Axis.vertical], they would both try to attach to that
@@ -912,8 +913,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// Alternatively, a new PrimaryScrollController could be created above one of
 /// the [ListView]s.
 ///
-/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.0.dart **
-/// {@end-tool}
+// TODO(framework): Replace the following block with a @dartpad directive
+// when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+/// {@macro flutter.dartpad_guide}
+///
+/// {@example /examples/api/lib/widgets/scrollbar/raw_scrollbar.0.dart#body}
+///
+/// </callout-box>
 ///
 /// ### Automatic Scrollbars on Desktop Platforms
 ///
@@ -937,7 +943,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 /// Default Scrollbars can be disabled for the whole app by setting a
 /// [ScrollBehavior] with `scrollbars` set to false.
 ///
-/// {@tool snippet}
+/// <callout-box>
+///
+// TODO(framework): Add unit tests to this code snippet.
+// https://github.com/flutter/flutter/issues/188530
+///
 /// ```dart
 /// MaterialApp(
 ///   scrollBehavior: const MaterialScrollBehavior()
@@ -947,14 +957,21 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///   ),
 /// )
 /// ```
-/// {@end-tool}
 ///
-/// {@tool dartpad}
+/// </callout-box>
+///
+/// <callout-box>
+///
 /// This sample shows how to disable the default Scrollbar for a [Scrollable]
 /// widget to avoid duplicate Scrollbars when running on desktop platforms.
 ///
-/// ** See code in examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart **
-/// {@end-tool}
+// TODO(framework): Replace the following block with a @dartpad directive
+// when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+/// {@macro flutter.dartpad_guide}
+///
+/// {@example /examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart#body}
+///
+/// </callout-box>
 /// {@endtemplate}
 ///
 /// {@tool dartpad}
@@ -1044,9 +1061,13 @@ class RawScrollbar extends StatefulWidget {
   /// of this widget needs to manage the ScrollController and either pass it to
   /// a scrollable descendant or use a PrimaryScrollController to share it.
   ///
-  /// {@tool snippet}
+  /// <callout-box>
+  ///
   /// Here is an example of using the [controller] attribute to enable
   /// scrollbar dragging for multiple independent ListViews:
+  ///
+  // TODO(framework): Add unit tests to this code snippet.
+  // https://github.com/flutter/flutter/issues/188530
   ///
   /// ```dart
   /// // (e.g. in a stateful widget)
@@ -1084,7 +1105,8 @@ class RawScrollbar extends StatefulWidget {
   ///   );
   /// }
   /// ```
-  /// {@end-tool}
+  ///
+  /// </callout-box>
   /// {@endtemplate}
   final ScrollController? controller;
 
@@ -1110,7 +1132,10 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// Defaults to false when null.
   ///
-  /// {@tool snippet}
+  /// <callout-box>
+  ///
+  // TODO(framework): Add unit tests to this code snippet.
+  // https://github.com/flutter/flutter/issues/188530
   ///
   /// ```dart
   /// // (e.g. in a stateful widget)
@@ -1155,7 +1180,8 @@ class RawScrollbar extends StatefulWidget {
   ///   );
   /// }
   /// ```
-  /// {@end-tool}
+  ///
+  /// </callout-box>
   ///
   /// See also:
   ///
