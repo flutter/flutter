@@ -2,4 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export 'environment/environment.dart';
+export 'android_environment.dart';
+export 'android_ndk.dart';
+export 'candidate_locator.dart';
+export 'compatibility_checker.dart';

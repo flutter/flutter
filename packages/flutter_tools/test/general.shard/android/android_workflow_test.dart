@@ -1075,6 +1075,7 @@ class _FakeResolverWithIncompatibleCandidate extends Fake implements AndroidEnvi
     return const ResolvedAndroidEnvironment(
       sdk: null,
       java: null,
+      ndk: null,
       incompatibleJavaCandidates: <JavaHomeCandidate>[
         (path: '/jdk22', source: JavaSource.javaHome),
       ],

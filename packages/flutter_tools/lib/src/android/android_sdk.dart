@@ -278,77 +278,35 @@ class AndroidSdk {
   String? getAvdManagerPath() =>
       getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
-  /// From https://developer.android.com/ndk/guides/other_build_systems.
-  static const _llvmHostDirectoryName = <String, String>{
-    'macos': 'darwin-x86_64',
-    'linux': 'linux-x86_64',
-    'windows': 'windows-x86_64',
-  };
-
   /// Locates the binary path for an NDK binary.
-  ///
-  /// The order of resolution is as follows:
-  ///
-  /// 1. If [globals.config] defines an `'android-ndk'` use that.
-  /// 2. If the environment variable `ANDROID_NDK_HOME` is defined, use that.
-  /// 3. If the environment variable `ANDROID_NDK_PATH` is defined, use that.
-  /// 4. If the environment variable `ANDROID_NDK_ROOT` is defined, use that.
-  /// 5. Look for the default install location inside the Android SDK:
-  ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
-  ///    newest.
   Iterable<Directory> getNdkDirectoriesInResolutionOrder({Platform? platform, Config? config}) {
     platform ??= globals.platform;
     config ??= globals.config;
     return NdkCandidateLocator(sdkRoot: directory, config: config, platform: platform).candidates;
   }
 
+  AndroidNdk? _resolveNdk(Platform? platform, Config? config) {
+    return AndroidNdk.locate(
+      config: config ?? globals.config,
+      platform: platform ?? globals.platform,
+      sdkDir: directory,
+    );
+  }
+
   String? getNdkBinaryPath(String binaryName, {Platform? platform, Config? config}) {
-    platform ??= globals.platform;
-    config ??= globals.config;
-    for (final Directory androidNdkHomeDir in getNdkDirectoriesInResolutionOrder(
-      platform: platform,
-      config: config,
-    )) {
-      final File executable = androidNdkHomeDir
-          .childDirectory('toolchains')
-          .childDirectory('llvm')
-          .childDirectory('prebuilt')
-          .childDirectory(_llvmHostDirectoryName[platform.operatingSystem]!)
-          .childDirectory('bin')
-          .childFile(binaryName);
-      if (executable.existsSync()) {
-        // LLVM missing in this NDK version.
-        return executable.path;
-      }
-    }
-    return null;
+    return _resolveNdk(platform, config)?.getBinaryPath(binaryName);
   }
 
   String? getNdkClangPath({Platform? platform, Config? config}) {
-    platform ??= globals.platform;
-    return getNdkBinaryPath(
-      platform.isWindows ? 'clang.exe' : 'clang',
-      platform: platform,
-      config: config,
-    );
+    return _resolveNdk(platform, config)?.clangPath;
   }
 
   String? getNdkArPath({Platform? platform, Config? config}) {
-    platform ??= globals.platform;
-    return getNdkBinaryPath(
-      platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar',
-      platform: platform,
-      config: config,
-    );
+    return _resolveNdk(platform, config)?.arPath;
   }
 
   String? getNdkLdPath({Platform? platform, Config? config}) {
-    platform ??= globals.platform;
-    return getNdkBinaryPath(
-      platform.isWindows ? 'ld.lld.exe' : 'ld.lld',
-      platform: platform,
-      config: config,
-    );
+    return _resolveNdk(platform, config)?.ldPath;
   }
 
   /// Sets up various paths used internally.
