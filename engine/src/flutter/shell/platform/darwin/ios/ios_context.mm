@@ -22,7 +22,6 @@ IOSContext::~IOSContext() = default;
 
 std::unique_ptr<IOSContext> IOSContext::Create(
     IOSRenderingAPI api,
-    IOSRenderingBackend backend,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
     const Settings& settings) {
   switch (api) {
@@ -34,23 +33,10 @@ std::unique_ptr<IOSContext> IOSContext::Create(
                                    "this."];
       return std::make_unique<IOSContextNoop>();
     case IOSRenderingAPI::kMetal:
-      switch (backend) {
-        case IOSRenderingBackend::kSkia:
-          [FlutterLogger logFatal:@"Impeller opt-out unavailable."];
-          return nullptr;
-        case IOSRenderingBackend::kImpeller:
-          return std::make_unique<IOSContextMetalImpeller>(settings, is_gpu_disabled_sync_switch);
-      }
-    default:
-      break;
+      return std::make_unique<IOSContextMetalImpeller>(settings, is_gpu_disabled_sync_switch);
   }
   FML_CHECK(false);
   return nullptr;
-}
-
-IOSRenderingBackend IOSContext::GetBackend() const {
-  // Overridden by Impeller subclasses.
-  return IOSRenderingBackend::kSkia;
 }
 
 std::shared_ptr<impeller::Context> IOSContext::GetImpellerContext() const {
