@@ -311,9 +311,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   settings.trace_startup =
       command_line.HasOption(FlagForSwitch(Switch::TraceStartup));
 
-  settings.enable_serial_gc =
-      command_line.HasOption(FlagForSwitch(Switch::EnableSerialGC));
-
 #if !FLUTTER_RELEASE
   settings.trace_skia = true;
 
@@ -558,8 +555,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
       command_line.HasOption(FlagForSwitch(Switch::EnableFlutterGPU));
   settings.impeller_enable_lazy_shader_mode =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerLazyShaderMode));
-  settings.impeller_antialiased_lines =
-      command_line.HasOption(FlagForSwitch(Switch::ImpellerAntialiasLines));
   settings.impeller_use_sdfs =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerUseSDFs));
 
