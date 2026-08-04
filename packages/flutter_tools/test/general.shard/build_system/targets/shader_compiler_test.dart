@@ -1202,7 +1202,8 @@ void main() {
     });
 
     testWithoutContext(
-      'Windows and exit code 3 with Unicode path adds Unicode path warning',
+      'Windows and exit code 3 with Unicode path adds Unicode path warning '
+      '(regression test for https://github.com/flutter/flutter/issues/190233)',
       () async {
         const unicodeFragPath = '/shaders/my_shåder.frag';
         const unicodeOutputPath = '/output/shaders/my_shåder.frag';
