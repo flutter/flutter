@@ -1319,9 +1319,35 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'enable-hcpp',
       hide: !verboseHelp,
-      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
+      help:
+          'Enable the use of the HCPP platform view rendering mode on the Impeller rendering '
+          'backend. On "run", "test", and "drive" an explicit value overrides the '
+          'AndroidManifest.xml metadata at launch. On build commands there is no launch-time '
+          'override, so an explicit value only selects the default that is baked into the '
+          'manifest when the manifest does not already set '
+          'EnableHcpp; an explicit manifest entry always wins for '
+          'the built artifact.',
     );
   }
+
+  /// The explicit `--[no-]enable-hcpp` value, or null when the flag was not
+  /// passed (or the command does not define it).
+  ///
+  /// Commands that launch the app (run/test/drive) forward this to the device
+  /// as a runtime override, which takes priority over the built manifest.
+  bool? get explicitEnableHcpp =>
+      (argResults?.options.contains('enable-hcpp') ?? false) && argResults!.wasParsed('enable-hcpp')
+      ? boolArg('enable-hcpp')
+      : null;
+
+  /// The requested HCPP default for an Android artifact:
+  /// [explicitEnableHcpp] if supplied, otherwise the `enable-hcpp` feature
+  /// flag. A pre-existing value in the merged manifest still wins.
+  ///
+  /// This is the value passed to gradle builds, where it is injected into the
+  /// manifest only when the manifest does not already contain an explicit
+  /// `io.flutter.embedding.android.EnableHcpp` entry.
+  bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
@@ -1524,6 +1550,8 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+      androidEnableHcpp: enableHcpp,
+      explicitAndroidEnableHcpp: explicitEnableHcpp,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,

@@ -34,6 +34,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addIgnoreDeprecationOption();
+    addEnableHcppFlag(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
         'split-per-abi',
@@ -110,7 +111,7 @@ class BuildApkCommand extends BuildSubCommand {
       buildApkTargetPlatform: _targetArchs.join(','),
       buildApkBuildMode: _buildMode.cliName,
       buildApkSplitPerAbi: boolArg('split-per-abi'),
-      buildApkEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
+      buildApkEnableHcpp: FlutterProject.current().android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   }
 

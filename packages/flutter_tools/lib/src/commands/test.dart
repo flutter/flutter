@@ -495,7 +495,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           : null,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
-      enableHcpp: boolArg('enable-hcpp'),
+      // Only forward an explicit value; when unset the built manifest (which
+      // may include a value injected from the enable-hcpp feature flag)
+      // determines the behavior.
+      enableHcpp: explicitEnableHcpp,
       uninstallApp: boolArg('uninstall'),
     );
 
