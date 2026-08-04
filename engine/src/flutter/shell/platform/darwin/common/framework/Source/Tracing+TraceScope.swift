@@ -13,7 +13,7 @@ import Foundation
 /// will fire in debug builds, and the scope will be ended automatically to
 /// prevent timeline corruption.
 @objc(FlutterTraceScope)
-@usableFromInline final class TraceScope: NSObject {
+final class TraceScope: NSObject {
   private let name: String
   private var isEnded = false
 
@@ -25,7 +25,7 @@ import Foundation
   /// Ends the tracing scope.
   ///
   /// This method must be called exactly once. Calling it multiple times has no effect.
-  @objc @usableFromInline func end() {
+  @objc func end() {
     guard !isEnded else { return }
     isEnded = true
     Tracing.endSection(name)
@@ -68,7 +68,6 @@ extension Tracing {
   ///   - name: The name of the tracing scope.
   ///   - work: The block of work to synchronously execute, optionally returning a value.
   /// - Returns: The value returned by the `work` block.
-  @inlinable
   static func withTrace<T>(_ name: String, _ work: () throws -> T) rethrows -> T {
     let scope = beginScope(name)
     defer { scope.end() }
@@ -86,7 +85,7 @@ extension Tracing {
   ///
   /// - Parameter name: The name of the tracing scope.
   /// - Returns: A `TraceScope` token that must be ended.
-  @usableFromInline static func beginScope(_ name: String) -> TraceScope {
+  static func beginScope(_ name: String) -> TraceScope {
     return TraceScope(name: name)
   }
 }
