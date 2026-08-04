@@ -918,7 +918,15 @@ class _DragAvatar<T extends Object> extends Drag {
     }
 
     // If everything's the same, report moves, and bail early.
-    if (listsMatch) {
+    //
+    // The prefix match in `listsMatch` is only sufficient to bail when a target
+    // has already accepted the drag (`_activeTarget != null`), because deeper
+    // targets below the active one are correctly ignored. When nothing has
+    // accepted yet, `_enteredTargets` holds every hit target, so a longer
+    // `targets` list means a new (lower) target has appeared under the pointer
+    // and must be given a chance to be entered. Requiring an exact-length match
+    // in that case avoids missing it.
+    if (listsMatch && (_activeTarget != null || targets.length == _enteredTargets.length)) {
       for (final _DragTargetState<Object> target in _enteredTargets) {
         target.didMove(this);
       }

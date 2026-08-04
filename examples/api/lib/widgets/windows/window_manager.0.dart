@@ -12,12 +12,17 @@ import 'package:flutter/src/widgets/_window.dart';
 void main() {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    final RegularWindowController controller = RegularWindowController(
+    final WindowController controller = WindowController(
       size: const Size(800, 600),
     );
     runWidget(
       WindowManager(
-        child: RegularWindow(controller: controller, child: const MainWindow()),
+        initialWindows: [
+          WindowEntry(
+            controller: controller,
+            builder: (context) => const MainWindow(),
+          ),
+        ],
       ),
     );
   } on UnsupportedError catch (e) {

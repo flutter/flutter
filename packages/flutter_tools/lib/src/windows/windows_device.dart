@@ -47,6 +47,9 @@ class WindowsDevice extends DesktopDevice {
   };
 
   @override
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+
+  @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.windows.existsSync();
   }
