@@ -61,7 +61,7 @@ See: https://github.com/flutter/flutter/issues/30701.
 ///
 /// See also:
 ///
-///  * [RegularWindowController], the controller for regular top-level windows.
+///  * [WindowController], the controller for regular top-level windows.
 @internal
 sealed class BaseWindowController extends ChangeNotifier {
   /// The current size of the drawable area of the window.
@@ -111,10 +111,10 @@ sealed class BaseWindowController extends ChangeNotifier {
 ///
 /// See also:
 ///
-///  * [RegularWindowController], the controller that creates and manages regular windows.
-///  * [RegularWindow], the widget for a regular window.
+///  * [WindowController], the controller that creates and manages regular windows.
+///  * [Window], the widget for a regular window.
 @internal
-mixin class RegularWindowControllerDelegate {
+mixin class WindowControllerDelegate {
   /// Invoked when the user attempts to close the window.
   ///
   /// The default implementation destroys the window. Subclasses
@@ -126,7 +126,7 @@ mixin class RegularWindowControllerDelegate {
   ///
   /// * [onWindowDestroyed], which is invoked after the window is closed.
   @internal
-  void onWindowCloseRequested(RegularWindowController controller) {
+  void onWindowCloseRequested(WindowController controller) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
@@ -156,7 +156,7 @@ mixin class RegularWindowControllerDelegate {
 /// platform with the provided properties.
 ///
 /// This class does not interact with the widget tree. Instead, it is typically
-/// provided to the [RegularWindow] widget, who does the work of rendering the
+/// provided to the [Window] widget, who does the work of rendering the
 /// content inside of this window.
 ///
 /// The user of this class is responsible for managing the lifecycle of the window.
@@ -176,8 +176,8 @@ mixin class RegularWindowControllerDelegate {
 ///
 /// void main() {
 ///   runWidget(
-///     RegularWindow(
-///       controller: RegularWindowController(
+///     Window(
+///       controller: WindowController(
 ///         size: const Size(800, 600),
 ///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
@@ -189,13 +189,13 @@ mixin class RegularWindowControllerDelegate {
 /// ```
 /// {@end-tool}
 ///
-/// Children of a [RegularWindow] widget can access the [RegularWindowController]
+/// Children of a [Window] widget can access the [WindowController]
 /// via the [WindowScope] inherited widget.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-abstract class RegularWindowController extends BaseWindowController {
-  /// Creates a [RegularWindowController] with a specific size.
+abstract class WindowController extends BaseWindowController {
+  /// Creates a [WindowController] with a specific size.
   ///
   /// Upon construction, the window is created by the platform with the
   /// given [size].
@@ -217,7 +217,7 @@ abstract class RegularWindowController extends BaseWindowController {
   /// {@endtemplate}
   ///
   /// To create a window that is sized to its content instead, use
-  /// [RegularWindowController.sizedToContent].
+  /// [WindowController.shrinkWrap].
   ///
   /// {@template flutter.widgets.windowing.shared}
   /// The [title] argument configures the window's title.
@@ -230,11 +230,11 @@ abstract class RegularWindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  factory RegularWindowController({
+  factory WindowController({
     required Size size,
     BoxConstraints? constraints,
     String? title,
-    RegularWindowControllerDelegate? delegate,
+    WindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -245,8 +245,8 @@ abstract class RegularWindowController extends BaseWindowController {
     }
 
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
-    return owner.createRegularWindowController(
-      delegate: delegate ?? RegularWindowControllerDelegate(),
+    return owner.createWindowController(
+      delegate: delegate ?? WindowControllerDelegate(),
       size: size,
       constraints: constraints,
       title: title,
@@ -254,9 +254,9 @@ abstract class RegularWindowController extends BaseWindowController {
     );
   }
 
-  /// Creates a [RegularWindowController] that sizes the window to its content.
+  /// Creates a [WindowController] that sizes the window to its content.
   ///
-  /// {@template flutter.widgets.windowing.sizedToContentConstructor}
+  /// {@template flutter.widgets.windowing.shrinkWrapConstructor}
   /// The window is created by the platform and initially
   /// sized to fit its content.
   ///
@@ -279,17 +279,17 @@ abstract class RegularWindowController extends BaseWindowController {
   /// {@endtemplate}
   ///
   /// To create a window with a specific size instead, use the default
-  /// [RegularWindowController] constructor.
+  /// [WindowController] constructor.
   ///
   /// {@macro flutter.widgets.windowing.shared}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  factory RegularWindowController.sizedToContent({
+  factory WindowController.shrinkWrap({
     bool resizable = false,
     BoxConstraints? constraints,
     String? title,
-    RegularWindowControllerDelegate? delegate,
+    WindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -298,27 +298,27 @@ abstract class RegularWindowController extends BaseWindowController {
     WidgetsFlutterBinding.ensureInitialized();
 
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
-    return owner.createRegularWindowController(
-      delegate: delegate ?? RegularWindowControllerDelegate(),
+    return owner.createWindowController(
+      delegate: delegate ?? WindowControllerDelegate(),
       constraints: constraints,
       resizable: resizable,
       title: title,
     );
   }
 
-  /// Creates an empty [RegularWindowController].
+  /// Creates an empty [WindowController].
   ///
   /// This method is only intended to be used by subclasses of the
-  /// [RegularWindowController].
+  /// [WindowController].
   ///
-  /// Users who want to instantiate a new [RegularWindowController] should
+  /// Users who want to instantiate a new [WindowController] should
   /// always use the factory method to create a controller that is valid
   /// for their particular platform.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @protected
-  RegularWindowController.empty();
+  WindowController.empty();
 
   /// The current title of the window.
   ///
@@ -445,7 +445,7 @@ abstract class RegularWindowController extends BaseWindowController {
 ///
 ///  * [DialogWindowController], the controller that creates and manages dialog windows.
 ///  * [DialogWindow], the widget for a dialog window.
-///  * [RegularWindowControllerDelegate], the delegate for regular window controllers.
+///  * [WindowControllerDelegate], the delegate for regular window controllers.
 @internal
 mixin class DialogWindowControllerDelegate {
   /// Invoked when the user attempts to close the window.
@@ -511,8 +511,8 @@ mixin class DialogWindowControllerDelegate {
 ///
 /// void main() {
 ///   runWidget(
-///     RegularWindow(
-///       controller: RegularWindowController(
+///     Window(
+///       controller: WindowController(
 ///         size: const Size(800, 600),
 ///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
@@ -555,7 +555,7 @@ abstract class DialogWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.sizedConstructor}
   ///
   /// To create a dialog that is sized to its content instead, use
-  /// [DialogWindowController.sizedToContent].
+  /// [DialogWindowController.shrinkWrap].
   ///
   /// {@template flutter.widgets.windowing.dialogParent}
   /// The [parent] argument specifies the parent window of this dialog.
@@ -601,7 +601,7 @@ abstract class DialogWindowController extends BaseWindowController {
 
   /// Creates a [DialogWindowController] that sizes the window to its content.
   ///
-  /// {@macro flutter.widgets.windowing.sizedToContentConstructor}
+  /// {@macro flutter.widgets.windowing.shrinkWrapConstructor}
   ///
   /// To create a dialog with a specific size instead, use the default
   /// [DialogWindowController] constructor.
@@ -611,7 +611,7 @@ abstract class DialogWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.shared}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
-  factory DialogWindowController.sizedToContent({
+  factory DialogWindowController.shrinkWrap({
     bool resizable = false,
     BoxConstraints? constraints,
     BaseWindowController? parent,
@@ -738,7 +738,7 @@ abstract class DialogWindowController extends BaseWindowController {
 ///
 /// * [TooltipWindowController], the controller that creates and manages tooltip windows.
 /// * [TooltipWindow], the widget for a tooltip window.
-/// * [RegularWindowControllerDelegate], the delegate for regular window controllers.
+/// * [WindowControllerDelegate], the delegate for regular window controllers.
 mixin class TooltipWindowControllerDelegate {
   /// Invoked after the window is closed.
   ///
@@ -883,7 +883,7 @@ abstract class TooltipWindowController extends BaseWindowController {
 ///
 /// * [PopupWindowController], the controller that creates and manages popup windows.
 /// * [PopupWindow], the widget for a popup window.
-/// * [RegularWindowControllerDelegate], the delegate for regular window controllers.
+/// * [WindowControllerDelegate], the delegate for regular window controllers.
 mixin class PopupWindowControllerDelegate {
   /// Invoked after the window is closed.
   ///
@@ -1025,7 +1025,7 @@ abstract class PopupWindowController extends BaseWindowController {
   void activate() {
     BaseWindowController parent = this.parent;
     while (true) {
-      if (parent is RegularWindowController) {
+      if (parent is WindowController) {
         parent.activate();
         break;
       } else if (parent is DialogWindowController) {
@@ -1046,7 +1046,7 @@ abstract class PopupWindowController extends BaseWindowController {
   bool get isActivated {
     BaseWindowController parent = this.parent;
     while (true) {
-      if (parent is RegularWindowController) {
+      if (parent is WindowController) {
         return parent.isActivated;
       } else if (parent is DialogWindowController) {
         return parent.isActivated;
@@ -1217,15 +1217,15 @@ abstract class SatelliteWindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.satelliteConstructorCommon}
   ///
-  /// {@macro flutter.widgets.windowing.sizedToContentConstructor}
+  /// {@macro flutter.widgets.windowing.shrinkWrapConstructor}
   ///
-  /// To create a dialog with a specific size instead, use the default
+  /// To create a satellite window with a specific size instead, use the default
   /// [SatelliteWindowController] constructor.
   ///
   /// {@macro flutter.widgets.windowing.shared}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
-  factory SatelliteWindowController.sizedToContent({
+  factory SatelliteWindowController.shrinkWrap({
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
@@ -1346,16 +1346,16 @@ abstract class SatelliteWindowController extends BaseWindowController {
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
 abstract class WindowingOwner {
-  /// Creates a [RegularWindowController] with the provided properties.
+  /// Creates a [WindowController] with the provided properties.
   ///
-  /// Most app developers should use [RegularWindowController]'s constructor
+  /// Most app developers should use [WindowController]'s constructor
   /// instead of calling this method directly. This method allows platforms
   /// to inject platform-specific logic.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  RegularWindowController createRegularWindowController({
-    required RegularWindowControllerDelegate delegate,
+  WindowController createWindowController({
+    required WindowControllerDelegate delegate,
     Size? size,
     BoxConstraints? constraints,
     required bool resizable,
@@ -1455,8 +1455,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   final String errorMessage;
 
   @override
-  RegularWindowController createRegularWindowController({
-    required RegularWindowControllerDelegate delegate,
+  WindowController createWindowController({
+    required WindowControllerDelegate delegate,
     Size? size,
     BoxConstraints? constraints,
     bool resizable = true,
@@ -1514,18 +1514,18 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   }
 }
 
-/// The [RegularWindow] widget provides a way to render a regular window in the
+/// The [Window] widget provides a way to render a regular window in the
 /// widget tree.
 ///
 /// The provided [controller] creates the native window that backs
 /// the widget. The [child] widget is rendered into this newly created window.
 ///
-/// When a [RegularWindow] widget is removed from the tree, the window that was created
+/// When a [Window] widget is removed from the tree, the window that was created
 /// by the [controller] remains valid until the caller destroys it by calling
-/// [RegularWindowController.destroy].
+/// [WindowController.destroy].
 ///
 /// Widgets in the same tree as the [child] widget will have access to the
-/// [RegularWindowController] via the [WindowScope] widget.
+/// [WindowController] via the [WindowScope] widget.
 ///
 /// {@tool snippet}
 /// An example usage might look like:
@@ -1539,8 +1539,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 ///
 /// void main() {
 ///   runWidget(
-///     RegularWindow(
-///       controller: RegularWindowController(
+///     Window(
+///       controller: WindowController(
 ///         size: const Size(800, 600),
 ///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
@@ -1554,18 +1554,18 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-class RegularWindow extends StatelessWidget {
+class Window extends StatelessWidget {
   /// Creates a regular window widget.
   ///
   /// The [controller] creates the native backing window into which the
   /// [child] widget is rendered.
   ///
   /// It is up to the caller to destroy the window by calling
-  /// [RegularWindowController.destroy] when the window is no longer needed.
+  /// [WindowController.destroy] when the window is no longer needed.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  RegularWindow({super.key, required this.controller, required this.child}) {
+  Window({super.key, required this.controller, required this.child}) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
@@ -1575,7 +1575,7 @@ class RegularWindow extends StatelessWidget {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  final RegularWindowController controller;
+  final WindowController controller;
 
   /// The content rendered into this window.
   ///
@@ -1622,8 +1622,8 @@ class RegularWindow extends StatelessWidget {
 ///
 /// void main() {
 ///   runWidget(
-///     RegularWindow(
-///       controller: RegularWindowController(
+///     Window(
+///       controller: WindowController(
 ///         size: const Size(800, 600),
 ///         constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///         title: 'Example Window',
@@ -1887,7 +1887,7 @@ enum _WindowControllerAspect {
 ///
 /// See also:
 ///
-///  * [RegularWindow], the widget to create a regular window.
+///  * [Window], the widget to create a regular window.
 ///  * [DialogWindow], the widget to create a dialog window.
 @internal
 class WindowScope extends InheritedModel<_WindowControllerAspect> {
@@ -1960,9 +1960,9 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController], the controller for regular top-level windows.
+  /// * [WindowController], the controller for regular top-level windows.
   /// * [DialogWindowController], the controller for dialog windows.
-  /// * [RegularWindow], the widget for a regular window.
+  /// * [Window], the widget for a regular window.
   /// * [DialogWindow], the widget for a dialog window.
   /// * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///   [WindowScope] ancestor. It returns null instead.
@@ -1977,9 +1977,9 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController], the controller for regular top-level windows.
+  /// * [WindowController], the controller for regular top-level windows.
   /// * [DialogWindowController], the controller for dialog windows.
-  /// * [RegularWindow], the widget for a regular window.
+  /// * [Window], the widget for a regular window.
   /// * [DialogWindow], the widget for a dialog window.
   /// * [of], which will throw if it doesn't find a [WindowScope] ancestor,
   ///   instead of returning null.
@@ -2026,7 +2026,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.title], which returns the current title of the window.
+  /// * [WindowController.title], which returns the current title of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static String titleOf(BuildContext context) {
@@ -2039,7 +2039,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.title], which returns the current title of the window.
+  /// * [WindowController.title], which returns the current title of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static String? maybeTitleOf(BuildContext context) {
@@ -2062,7 +2062,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.isActivated], which returns the current activation status of the window.
+  /// * [WindowController.isActivated], which returns the current activation status of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isActivatedOf(BuildContext context) {
@@ -2076,7 +2076,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.isActivated], which returns the current activation status of the window.
+  /// * [WindowController.isActivated], which returns the current activation status of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsActivatedOf(BuildContext context) {
@@ -2099,7 +2099,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.isMinimized], which returns the current minimized status of the window.
+  /// * [WindowController.isMinimized], which returns the current minimized status of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isMinimizedOf(BuildContext context) {
@@ -2113,7 +2113,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.isMinimized], which returns the current minimized status of the window.
+  /// * [WindowController.isMinimized], which returns the current minimized status of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsMinimizedOf(BuildContext context) {
@@ -2136,7 +2136,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.isMaximized], which returns the current maximized status of the window.
+  /// * [WindowController.isMaximized], which returns the current maximized status of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isMaximizedOf(BuildContext context) {
@@ -2150,7 +2150,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.isMaximized], which returns the current maximized status of the window.
+  /// * [WindowController.isMaximized], which returns the current maximized status of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsMaximizedOf(BuildContext context) {
@@ -2173,7 +2173,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.isFullscreen], which returns the current fullscreen status of the window.
+  /// * [WindowController.isFullscreen], which returns the current fullscreen status of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isFullscreenOf(BuildContext context) {
@@ -2187,7 +2187,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// See also:
   ///
-  /// * [RegularWindowController.isFullscreen], which returns the current fullscreen status of the window.
+  /// * [WindowController.isFullscreen], which returns the current fullscreen status of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsFullscreenOf(BuildContext context) {
@@ -2234,7 +2234,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// given [controller]. Controllers that do not support titles report an empty
   /// string.
   static String _titleValue(BaseWindowController controller) => switch (controller) {
-    RegularWindowController() => controller.title,
+    WindowController() => controller.title,
     DialogWindowController() => controller.title,
     TooltipWindowController() => '',
     PopupWindowController() => '',
@@ -2244,7 +2244,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   // Computes the value of the [_WindowControllerAspect.activated] aspect for the
   // given [controller]. Controllers that do not support activation report false.
   static bool _isActivatedValue(BaseWindowController controller) => switch (controller) {
-    RegularWindowController() => controller.isActivated,
+    WindowController() => controller.isActivated,
     DialogWindowController() => controller.isActivated,
     TooltipWindowController() => false,
     PopupWindowController() => controller.isActivated,
@@ -2255,7 +2255,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// given [controller]. Controllers that do not support maximization report
   /// false.
   static bool _isMaximizedValue(BaseWindowController controller) => switch (controller) {
-    RegularWindowController() => controller.isMaximized,
+    WindowController() => controller.isMaximized,
     DialogWindowController() => false,
     TooltipWindowController() => false,
     PopupWindowController() => false,
@@ -2266,7 +2266,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// given [controller]. Controllers that do not support minimization report
   /// false.
   static bool _isMinimizedValue(BaseWindowController controller) => switch (controller) {
-    RegularWindowController() => controller.isMinimized,
+    WindowController() => controller.isMinimized,
     DialogWindowController() => controller.isMinimized,
     TooltipWindowController() => false,
     PopupWindowController() => false,
@@ -2277,7 +2277,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// the given [controller]. Controllers that do not support fullscreen report
   /// false.
   static bool _isFullscreenValue(BaseWindowController controller) => switch (controller) {
-    RegularWindowController() => controller.isFullscreen,
+    WindowController() => controller.isFullscreen,
     DialogWindowController() => false,
     TooltipWindowController() => false,
     PopupWindowController() => false,
@@ -2314,7 +2314,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
           ErrorHint(
             'No WindowScope ancestor could be found starting from the context '
             'that was passed to WindowScope.of(). This can happen because the '
-            'context used is not a descendant of a RegularWindow widget, which introduces '
+            'context used is not a descendant of a Window widget, which introduces '
             'a WindowScope.',
           ),
         ]);
@@ -2549,7 +2549,7 @@ class WindowEntry {
 /// {@tool dartpad}
 /// An example usage might look like this, where the window manager wraps
 /// the root of the widget tree so that dialogs can be rendered at the same level
-/// as a [RegularWindow].
+/// as a [Window].
 ///
 /// ** See code in examples/api/lib/widgets/windows/window_manager.0.dart **
 /// {@end-tool}
@@ -2598,7 +2598,7 @@ class _WindowManagerState extends State<WindowManager> {
                 controller: dialog,
                 child: entry.builder(context),
               ),
-              final RegularWindowController regular => RegularWindow(
+              final WindowController regular => Window(
                 controller: regular,
                 child: entry.builder(context),
               ),
