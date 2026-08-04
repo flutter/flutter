@@ -1971,7 +1971,8 @@ flutter:
       );
 
       testUsingContext(
-        'createPluginSymlinks repairs broken links',
+        'createPluginSymlinks repairs broken links '
+        '(regression test for https://github.com/flutter/flutter/issues/190235)',
         () async {
           linuxProject.exists = true;
           windowsProject.exists = true;
