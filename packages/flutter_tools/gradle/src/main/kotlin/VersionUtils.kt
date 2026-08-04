@@ -38,17 +38,10 @@ object VersionUtils {
                         return if (v1Num > v2Num) version1 else version2
                     }
                 }
-
-                v1Num != null && v2Num == null -> {
-                    return version1
-                }
-
-                // v1 is a number, v2 is not, so v1 is newer.
-                v1Num == null && v2Num != null -> {
-                    return version2
-                }
-
-                // v1 is not a number, v2 is, so v2 is newer.
+                v1Num != null && v2Num == null ->
+                    return version1 // v1 is a number, v2 is not, so v1 is newer.
+                v1Num == null && v2Num != null ->
+                    return version2 // v1 is not a number, v2 is, so v2 is newer.
                 else -> { // Both are not numbers (pre-release identifiers)
                     if (v1Part != v2Part) {
                         return if (comparePreReleaseIdentifiers(v1Part, v2Part)) version1 else version2
