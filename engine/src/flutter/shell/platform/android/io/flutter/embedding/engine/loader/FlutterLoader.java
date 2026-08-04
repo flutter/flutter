@@ -461,7 +461,7 @@ public class FlutterLoader {
                 + flutterApplicationInfo.isolateSnapshotData);
         shellArgs.add(
             "--"
-                + FlutterShellArgs.ARG_KEY_VMSERVICE_KERNEL_PATH
+                + VMSERVICE_KERNEL_PATH
                 + "="
                 + snapshotAssetPath
                 + File.separator
