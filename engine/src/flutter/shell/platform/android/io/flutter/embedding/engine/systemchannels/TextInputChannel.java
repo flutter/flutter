@@ -736,7 +736,9 @@ public class TextInputChannel {
     public final boolean isDecimal;
     public final boolean isPassword;
 
-    /** Convenience overload equivalent to {@code new InputType(type, isSigned, isDecimal, false)}. */
+    /**
+     * Convenience overload equivalent to {@code new InputType(type, isSigned, isDecimal, false)}.
+     */
     public InputType(@NonNull TextInputType type, boolean isSigned, boolean isDecimal) {
       this(type, isSigned, isDecimal, false);
     }

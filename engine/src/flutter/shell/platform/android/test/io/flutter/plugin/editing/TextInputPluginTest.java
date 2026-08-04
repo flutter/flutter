@@ -3088,15 +3088,13 @@ public class TextInputPluginTest {
 
   @Test
   public void inputType_number() {
-    EditorInfo editorInfo =
-        editorInfoForNumberConfig(false, false, false, false, true, null);
+    EditorInfo editorInfo = editorInfoForNumberConfig(false, false, false, false, true, null);
     assertEquals(InputType.TYPE_CLASS_NUMBER, editorInfo.inputType);
   }
 
   @Test
   public void inputType_numberWithPassword() {
-    EditorInfo editorInfo =
-        editorInfoForNumberConfig(false, false, true, false, true, null);
+    EditorInfo editorInfo = editorInfoForNumberConfig(false, false, true, false, true, null);
     assertEquals(
         InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD,
         editorInfo.inputType);
@@ -3104,24 +3102,21 @@ public class TextInputPluginTest {
 
   @Test
   public void inputType_numberWithSigned() {
-    EditorInfo editorInfo =
-        editorInfoForNumberConfig(true, false, false, false, true, null);
+    EditorInfo editorInfo = editorInfoForNumberConfig(true, false, false, false, true, null);
     assertEquals(
         InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED, editorInfo.inputType);
   }
 
   @Test
   public void inputType_numberWithDecimal() {
-    EditorInfo editorInfo =
-        editorInfoForNumberConfig(false, true, false, false, true, null);
+    EditorInfo editorInfo = editorInfoForNumberConfig(false, true, false, false, true, null);
     assertEquals(
         InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, editorInfo.inputType);
   }
 
   @Test
   public void inputType_numberWithSignedAndPassword() {
-    EditorInfo editorInfo =
-        editorInfoForNumberConfig(true, false, true, false, true, null);
+    EditorInfo editorInfo = editorInfoForNumberConfig(true, false, true, false, true, null);
     assertEquals(
         InputType.TYPE_CLASS_NUMBER
             | InputType.TYPE_NUMBER_FLAG_SIGNED
@@ -3131,8 +3126,7 @@ public class TextInputPluginTest {
 
   @Test
   public void inputType_numberWithDecimalAndPassword() {
-    EditorInfo editorInfo =
-        editorInfoForNumberConfig(false, true, true, false, true, null);
+    EditorInfo editorInfo = editorInfoForNumberConfig(false, true, true, false, true, null);
     assertEquals(
         InputType.TYPE_CLASS_NUMBER
             | InputType.TYPE_NUMBER_FLAG_DECIMAL
@@ -3146,15 +3140,14 @@ public class TextInputPluginTest {
     // TYPE_NUMBER_VARIATION_PASSWORD on a NUMBER field. This test is load-bearing because the
     // obscureText branch lives in the same inputTypeFromTextInputType() function as the NUMBER
     // branch — the two are the most plausible place for accidental coupling.
-    EditorInfo editorInfo =
-        editorInfoForNumberConfig(false, false, false, true, true, null);
+    EditorInfo editorInfo = editorInfoForNumberConfig(false, false, false, true, true, null);
     assertEquals(InputType.TYPE_CLASS_NUMBER, editorInfo.inputType);
-    assertEquals(
-        0, editorInfo.inputType & InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+    assertEquals(0, editorInfo.inputType & InputType.TYPE_NUMBER_VARIATION_PASSWORD);
   }
 
   @Test
-  public void inputType_numberWithPasswordJsonRoundTrip() throws JSONException, NoSuchFieldException {
+  public void inputType_numberWithPasswordJsonRoundTrip()
+      throws JSONException, NoSuchFieldException {
     // End-to-end coverage from JSON through Configuration.fromJson -> InputType.fromJson ->
     // setTextInputClient -> createInputConnection. Catches typos in the "password" JSON key,
     // gaps in Configuration.fromJson's recursive inputType handling, and any break in the
