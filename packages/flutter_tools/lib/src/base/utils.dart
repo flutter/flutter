@@ -6,7 +6,6 @@
 library;
 
 import 'dart:async';
-import 'dart:convert' as cnv show utf8;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -670,11 +669,8 @@ String decodeUtf8OrUtf16(List<int> bytes) {
   return switch (bytes) {
     [0xFF, 0xFE, ...final List<int> payload] => _decodeUtf16(payload, Endian.little),
     [0xFE, 0xFF, ...final List<int> payload] => _decodeUtf16(payload, Endian.big),
-    [0xEF, 0xBB, 0xBF, ...final List<int> payload] => cnv.utf8.decode(
-      payload,
-      allowMalformed: false,
-    ),
-    _ => cnv.utf8.decode(bytes, allowMalformed: false),
+    [0xEF, 0xBB, 0xBF, ...final List<int> payload] => utf8.decode(payload),
+    _ => utf8.decode(bytes),
   };
 }
 

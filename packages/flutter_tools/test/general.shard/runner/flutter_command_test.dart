@@ -1282,8 +1282,7 @@ void main() {
             throwsToolExit(
               message:
                   'Unable to decode the file at path "config.json". '
-                  'Ensure that the file is encoded in UTF-8 or UTF-16.\n'
-                  'Error details: FormatException: Invalid UTF-8 byte (at offset 0)',
+                  'Ensure that the file is encoded in UTF-8 or UTF-16.\n',
             ),
           );
         },

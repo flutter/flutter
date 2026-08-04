@@ -93,8 +93,8 @@ void main() {
       expect(() => decodeUtf8OrUtf16(bytes), throwsFormatException);
     });
 
-    test('throws FormatException on invalid UTF-8 bytes', () {
-      expect(() => decodeUtf8OrUtf16(<int>[0xFF, 0xFF, 0xFF]), throwsFormatException);
+    test('throws ToolExit on invalid UTF-8 bytes', () {
+      expect(() => decodeUtf8OrUtf16(<int>[0xFF, 0xFF, 0xFF]), throwsToolExit());
     });
   });
 }
