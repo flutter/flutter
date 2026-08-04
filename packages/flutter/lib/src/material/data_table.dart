@@ -1345,11 +1345,7 @@ class TableRowInkWell extends InkResponse {
 }
 
 class _SortArrow extends StatefulWidget {
-  const _SortArrow({
-    required this.visible,
-    required this.up,
-    required this.duration,
-  });
+  const _SortArrow({required this.visible, required this.up, required this.duration});
 
   final bool visible;
 

@@ -433,11 +433,6 @@ void main() {
   });
 
   testWidgets('DataTable custom sortIconBuilder test', (WidgetTester tester) async {
-    bool? capturedVisibleColumn0;
-    bool? capturedAscendingColumn0;
-    bool? capturedVisibleColumn1;
-    bool? capturedAscendingColumn1;
-
     Widget buildTable({
       DataTableSortIconBuilder? sortIconBuilder,
       DataTableThemeData? themeData,
@@ -449,20 +444,13 @@ void main() {
         sortAscending: sortAscending,
         sortIconBuilder: sortIconBuilder,
         columns: <DataColumn>[
-          DataColumn(
-            label: const Text('Name'),
-            onSort: (int columnIndex, bool ascending) {},
-          ),
-          DataColumn(
-            label: const Text('Calories'),
-            onSort: (int columnIndex, bool ascending) {},
-          ),
+          DataColumn(label: const Text('Name'), onSort: (int columnIndex, bool ascending) {}),
+          DataColumn(label: const Text('Calories'), onSort: (int columnIndex, bool ascending) {}),
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
-          return DataRow(cells: <DataCell>[
-            DataCell(Text(dessert.name)),
-            DataCell(Text('${dessert.calories}')),
-          ]);
+          return DataRow(
+            cells: <DataCell>[DataCell(Text(dessert.name)), DataCell(Text('${dessert.calories}'))],
+          );
         }).toList(),
       );
 
@@ -479,7 +467,7 @@ void main() {
       of: find.byType(DataTable),
       matching: find.byIcon(Icons.arrow_upward),
     );
-    expect(defaultIconFinder, findsOneWidget);
+    expect(defaultIconFinder, findsNWidgets(2));
 
     // Custom sortIconBuilder on DataTable.
     await tester.pumpWidget(
@@ -508,7 +496,6 @@ void main() {
     await tester.pumpWidget(
       buildTable(
         sortColumnIndex: 1,
-        sortAscending: true,
         sortIconBuilder: (BuildContext context, bool visible, bool ascending) {
           return Text(visible ? 'SORTED_COL1' : 'UNSORTED_COL0');
         },
