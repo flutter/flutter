@@ -29,6 +29,7 @@
                     "realm": "production"
                 }
             ],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Windows-10"
@@ -74,6 +75,7 @@
                     "realm": "production"
                 }
             ],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Windows-10"
@@ -115,6 +117,7 @@
                     "realm": "production"
                 }
             ],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Windows-10"

@@ -23,6 +23,7 @@
                     "realm": "production"
                 }
             ],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-15.7",
@@ -81,6 +82,7 @@
                     "realm": "production"
                 }
             ],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-15.7",
@@ -141,6 +143,7 @@
                     "realm": "production"
                 }
             ],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-15.7",
@@ -201,6 +204,7 @@
                     "realm": "production"
                 }
             ],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-15.7",
@@ -259,6 +263,7 @@
                     "realm": "production"
                 }
             ],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-15.7",
@@ -319,6 +324,7 @@
                     "realm": "production"
                 }
             ],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-15.7",
