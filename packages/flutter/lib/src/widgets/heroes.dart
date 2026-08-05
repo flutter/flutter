@@ -443,7 +443,6 @@ class _HeroFlightManifest {
   _HeroFlightManifest({
     required this.type,
     required this.overlay,
-    required this.navigatorSize,
     required this.fromRoute,
     required this.toRoute,
     required this.fromHero,
@@ -456,7 +455,6 @@ class _HeroFlightManifest {
 
   final HeroFlightDirection type;
   final OverlayState overlay;
-  final Size navigatorSize;
   final PageRoute<dynamic> fromRoute;
   final PageRoute<dynamic> toRoute;
   final _HeroState fromHero;
@@ -992,17 +990,6 @@ class HeroController extends NavigatorObserver {
       return;
     }
 
-    final RenderObject? navigatorRenderObject = navigator.context.findRenderObject();
-
-    if (navigatorRenderObject is! RenderBox) {
-      assert(
-        false,
-        'Navigator $navigator has an invalid RenderObject type ${navigatorRenderObject.runtimeType}.',
-      );
-      return;
-    }
-    assert(navigatorRenderObject.hasSize);
-
     // At this point, the toHeroes may have been built and laid out for the first time.
     //
     // If `fromSubtreeContext` is null, call endFlight on all toHeroes, for good measure.
@@ -1026,7 +1013,6 @@ class HeroController extends NavigatorObserver {
           : _HeroFlightManifest(
               type: flightType,
               overlay: overlay,
-              navigatorSize: navigatorRenderObject.size,
               fromRoute: from,
               toRoute: to,
               fromHero: fromHero,
