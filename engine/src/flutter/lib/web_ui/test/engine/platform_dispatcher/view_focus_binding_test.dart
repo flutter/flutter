@@ -24,6 +24,7 @@ void testMain() {
 
     tearDown(() {
       EngineSemantics.instance.semanticsEnabled = false;
+      endFakeTextEditing();
     });
 
     test('The view is focusable and reachable by keyboard when registered', () async {
@@ -277,10 +278,10 @@ void testMain() {
     test('drops the deferred view-unfocused report when the editing input '
         'refocuses on iOS', () async {
       final EngineFlutterView view = createAndRegisterView(dispatcher);
-      final DomElement input = createDomElement('input')
-        ..classList.add(HybridTextEditing.textEditingClass);
+      final DomHTMLInputElement input = createDomHTMLInputElement();
       view.dom.rootElement.append(input);
       input.focusWithoutScroll();
+      beginFakeTextEditing(input);
       dispatchedViewFocusEvents.clear();
 
       debugEmulateIosSafari = true;
@@ -303,10 +304,10 @@ void testMain() {
     test('reports the view unfocused on iOS when the editing input does not '
         'refocus', () async {
       final EngineFlutterView view = createAndRegisterView(dispatcher);
-      final DomElement input = createDomElement('input')
-        ..classList.add(HybridTextEditing.textEditingClass);
+      final DomHTMLInputElement input = createDomHTMLInputElement();
       view.dom.rootElement.append(input);
       input.focusWithoutScroll();
+      beginFakeTextEditing(input);
       dispatchedViewFocusEvents.clear();
 
       debugEmulateIosSafari = true;
@@ -337,6 +338,11 @@ void testMain() {
       dispatchedViewFocusEvents.clear();
 
       debugEmulateIosSafari = true;
+      // Report the document as focused so the only condition failing is that
+      // `other` is not the active editing element. Without this the test could
+      // pass because the headless browser reported the document unfocused,
+      // which is a different branch than the one under test.
+      debugViewFocusDocumentHasFocusOverride = true;
       try {
         other.blur();
         // Not deferred: the unfocused event is present synchronously.
@@ -348,6 +354,7 @@ void testMain() {
         );
       } finally {
         debugEmulateIosSafari = false;
+        debugViewFocusDocumentHasFocusOverride = null;
       }
     });
 
@@ -358,10 +365,10 @@ void testMain() {
     // Regression test for https://github.com/flutter/flutter/issues/189744
     test('reports immediately when the document is not focused on iOS', () {
       final EngineFlutterView view = createAndRegisterView(dispatcher);
-      final DomElement input = createDomElement('input')
-        ..classList.add(HybridTextEditing.textEditingClass);
+      final DomHTMLInputElement input = createDomHTMLInputElement();
       view.dom.rootElement.append(input);
       input.focusWithoutScroll();
+      beginFakeTextEditing(input);
       dispatchedViewFocusEvents.clear();
 
       debugEmulateIosSafari = true;
@@ -381,7 +388,58 @@ void testMain() {
         debugViewFocusDocumentHasFocusOverride = null;
       }
     });
+
+    // The deferral must key off the engine's editing state, not the
+    // `flt-text-editing` class. That class is applied by
+    // `DefaultTextEditingStrategy.initializeTextEditing`, which
+    // `SemanticsTextEditingStrategy` overrides without calling `super`, so with
+    // semantics enabled the live editing element never carries it. Keying off
+    // the class left the fix dead under VoiceOver.
+    // Regression test for https://github.com/flutter/flutter/issues/189744
+    test('defers on iOS for an editing element with no flt-text-editing class', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomHTMLInputElement input = createDomHTMLInputElement();
+      view.dom.rootElement.append(input);
+      input.focusWithoutScroll();
+      beginFakeTextEditing(input);
+      expect(
+        input.classList.contains(HybridTextEditing.textEditingClass),
+        isFalse,
+        reason: 'the semantics path never applies this class',
+      );
+      dispatchedViewFocusEvents.clear();
+
+      debugEmulateIosSafari = true;
+      debugViewFocusDocumentHasFocusOverride = true;
+      try {
+        input.blur();
+        input.focusWithoutScroll();
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        expect(dispatchedViewFocusEvents, isEmpty);
+      } finally {
+        debugEmulateIosSafari = false;
+        debugViewFocusDocumentHasFocusOverride = null;
+      }
+    });
   });
+}
+
+/// Makes [element] the engine's active text-editing element, which is what
+/// [HybridTextEditing.isActiveTextEditingElement] reports to [ViewFocusBinding].
+///
+/// Sets the real singleton state rather than applying
+/// [HybridTextEditing.textEditingClass], so these tests exercise the same signal
+/// production code reads. The class is only applied by
+/// `DefaultTextEditingStrategy.initializeTextEditing`, so keying tests off it
+/// would not cover the semantics path.
+void beginFakeTextEditing(DomHTMLElement element) {
+  textEditing.isEditing = true;
+  textEditing.strategy.domElement = element;
+}
+
+void endFakeTextEditing() {
+  textEditing.isEditing = false;
+  textEditing.strategy.domElement = null;
 }
 
 EngineFlutterView createAndRegisterView(EnginePlatformDispatcher dispatcher) {

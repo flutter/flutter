@@ -51,6 +51,18 @@ bool browserHasAutofillOverlay() =>
 /// transparent.
 const String transparentTextEditingClass = 'transparentTextEditing';
 
+/// How long to wait before treating a blur that named no incoming element as a
+/// real focus loss.
+///
+/// Several browser behaviors blur transiently and restore focus a moment later:
+/// backgrounding a tab fires blur before `visibilitychange`, and on iOS a
+/// native caret or selection drag blurs the input mid-gesture before WebKit
+/// refocuses it. Waiting this long lets those settle before the engine acts.
+///
+/// Shared by [DefaultTextEditingStrategy.handleBlur] and [ViewFocusBinding],
+/// which defer the same gesture and must not disagree about the window.
+const Duration kTransientBlurSettleDelay = Duration(milliseconds: 100);
+
 void _emptyCallback(dynamic _) {}
 
 /// These style attributes are constant throughout the life time of an input
@@ -1863,7 +1875,7 @@ abstract class DefaultTextEditingStrategy
         // When a browser tab is backgrounded, the input blur arrives before
         // visibilitychange. Wait briefly so tab switches can keep the text
         // connection alive, while ordinary window/iframe blurs still close it.
-        _pendingBlurConnectionCloseTimer = Timer(const Duration(milliseconds: 100), () {
+        _pendingBlurConnectionCloseTimer = Timer(kTransientBlurSettleDelay, () {
           _pendingBlurConnectionCloseTimer = null;
           if (_documentVisibilityState == 'hidden' || _documentHasFocus) {
             return;
@@ -1883,7 +1895,7 @@ abstract class DefaultTextEditingStrategy
       // https://github.com/flutter/flutter/issues/189744
       if (isIosSafari) {
         _pendingBlurConnectionCloseTimer?.cancel();
-        _pendingBlurConnectionCloseTimer = Timer(const Duration(milliseconds: 100), () {
+        _pendingBlurConnectionCloseTimer = Timer(kTransientBlurSettleDelay, () {
           _pendingBlurConnectionCloseTimer = null;
           if (domDocument.activeElement == activeDomElement) {
             // The input refocused: this was the transient mid-gesture blur.
@@ -2771,10 +2783,7 @@ class HybridTextEditing {
   late final TextEditingChannel channel = TextEditingChannel(this);
 
   /// A CSS class name used to identify all elements used for text editing.
-  ///
-  /// [ViewFocusBinding] also matches on this class to detect blurs originating
-  /// from the text-editing element, so it is a production contract, not just a
-  /// testing hook.
+  @visibleForTesting
   static const String textEditingClass = 'flt-text-editing';
 
   int? _clientId;
@@ -2783,6 +2792,20 @@ class HybridTextEditing {
   ///
   /// Also used to define if a keyboard is needed.
   bool isEditing = false;
+
+  /// Whether [element] is the DOM element currently receiving text input.
+  ///
+  /// [ViewFocusBinding] uses this to recognize a `focusout` that originated
+  /// from the active text-editing element.
+  ///
+  /// Prefer this over matching on [textEditingClass]. That class is applied by
+  /// `_setStaticStyleAttributes`, which only runs from
+  /// [DefaultTextEditingStrategy.initializeTextEditing]. When semantics is
+  /// enabled, [SemanticsTextEditingStrategy] overrides that method without
+  /// calling `super`, so its element never carries the class even though it is
+  /// the live editing element.
+  bool isActiveTextEditingElement(DomElement? element) =>
+      isEditing && element != null && element == strategy.domElement;
 
   InputConfiguration? configuration;
 

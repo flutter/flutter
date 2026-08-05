@@ -34,6 +34,13 @@ final class ViewFocusBinding {
   /// See: https://github.com/flutter/flutter/issues/189744
   Timer? _pendingFocusoutTimer;
 
+  /// Whether the document itself still has focus.
+  ///
+  /// Reads [debugViewFocusDocumentHasFocusOverride] when set, so tests do not
+  /// depend on the headless browser reporting the test document as focused.
+  /// Mirrors `DefaultTextEditingStrategy._documentHasFocus`.
+  bool get _documentHasFocus => debugViewFocusDocumentHasFocusOverride ?? domDocument.hasFocus();
+
   void init() {
     // We need a global listener here to know if the user was pressing "shift"
     // when the Flutter view receives focus, to move the Flutter focus to the
@@ -102,10 +109,10 @@ final class ViewFocusBinding {
     // https://github.com/flutter/flutter/issues/189744
     if (isIosSafari &&
         willGainFocus == null &&
-        (debugViewFocusDocumentHasFocusOverride ?? domDocument.hasFocus()) &&
-        (target?.classList.contains(HybridTextEditing.textEditingClass) ?? false)) {
+        _documentHasFocus &&
+        textEditing.isActiveTextEditingElement(target)) {
       _pendingFocusoutTimer?.cancel();
-      _pendingFocusoutTimer = Timer(const Duration(milliseconds: 100), () {
+      _pendingFocusoutTimer = Timer(kTransientBlurSettleDelay, () {
         _pendingFocusoutTimer = null;
         _handleFocusChange(domDocument.activeElement);
       });
