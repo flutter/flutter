@@ -336,7 +336,9 @@ class ShaderCompiler {
       return false;
     }
     const winErrorAccessDisabledByPolicy = 1260;
-    return exception.errorCode == winErrorAccessDisabledByPolicy;
+    const winErrorSystemIntegrityPolicyViolation = 4551;
+    return exception.errorCode == winErrorAccessDisabledByPolicy ||
+        exception.errorCode == winErrorSystemIntegrityPolicyViolation;
   }
 
   void _logSecurityBlockError(String impellercPath) {

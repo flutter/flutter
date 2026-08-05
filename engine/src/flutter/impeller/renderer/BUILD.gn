@@ -98,6 +98,7 @@ impeller_component("renderer") {
 
   deps = [
     "//flutter/fml",
+    "//third_party/abseil-cpp/absl/container:linked_hash_map",
     "//third_party/abseil-cpp/absl/strings",
   ]
 }

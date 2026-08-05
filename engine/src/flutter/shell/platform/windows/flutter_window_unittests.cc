@@ -927,6 +927,42 @@ TEST_F(FlutterWindowTest, MouseButtonCaptureReleasedAfterAllButtonsReleased) {
   EXPECT_EQ(GetCapture(), nullptr);
 }
 
+TEST_F(FlutterWindowTest, MouseMoveWithButtonIgnoredWithoutCapture) {
+  MockFlutterWindow win32window(100, 100);
+  MockWindowBindingHandlerDelegate delegate;
+  EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
+  EXPECT_CALL(delegate, OnWindowStateEvent).Times(AnyNumber());
+  win32window.SetView(&delegate);
+
+  ReleaseCapture();
+  ASSERT_EQ(GetCapture(), nullptr);
+
+  EXPECT_CALL(delegate, OnPointerMove).Times(0);
+  win32window.InjectWindowMessage(WM_MOUSEMOVE, MK_LBUTTON, MAKELPARAM(10, 10));
+}
+
+TEST_F(FlutterWindowTest, MouseMoveWithButtonDispatchedWithCapture) {
+  MockFlutterWindow win32window(100, 100);
+  MockWindowBindingHandlerDelegate delegate;
+  EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
+  EXPECT_CALL(delegate, OnWindowStateEvent).Times(AnyNumber());
+  win32window.SetView(&delegate);
+
+  HWND window_handle = win32window.FlutterWindow::GetWindowHandle();
+  ASSERT_NE(window_handle, nullptr);
+  SetCapture(window_handle);
+  ASSERT_EQ(GetCapture(), window_handle);
+
+  EXPECT_CALL(delegate,
+              OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0, 0))
+      .Times(1);
+  win32window.InjectWindowMessage(WM_MOUSEMOVE, MK_LBUTTON, MAKELPARAM(10, 10));
+
+  ReleaseCapture();
+}
+
 TEST_F(FlutterWindowTest, OnTouchPointerDown) {
   auto mock_proc_table = std::make_shared<MockWindowsProcTable>();
 
