@@ -50,7 +50,6 @@
 'd: api docs':
   - changed-files:
     - any-glob-to-any-file:
-      - examples/**/*
       - packages/flutter/examples/api/**/*
 
 'd: docs/':
