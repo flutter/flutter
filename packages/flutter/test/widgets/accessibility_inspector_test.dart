@@ -58,7 +58,9 @@ void main() {
     });
 
     Future<Map<String, Object?>> callExtension(String name) async {
-      return json.decode(json.encode(await accessibilityExtensions[name]!(<String, String>{})))
+      return json.decode(
+            json.encode(await accessibilityExtensions[name]!(const <String, String>{})),
+          )
           as Map<String, Object?>;
     }
 
@@ -103,7 +105,7 @@ void main() {
           return node;
         }
       }
-      return <String, Object?>{};
+      return const <String, Object?>{};
     }
 
     final Map<String, Object?> rootNode = findNodeWithLabel(nodes, 'Root Node');

@@ -44,12 +44,12 @@ class AccessibilityInspector {
 
   Future<Map<String, Object?>> _enableSemantics(Map<String, String> parameters) async {
     _semanticsHandle ??= SemanticsBinding.instance.ensureSemantics();
-    return <String, Object?>{};
+    return const <String, Object?>{};
   }
 
   Future<Map<String, Object?>> _disposeSemantics(Map<String, String> parameters) async {
     resetAllState();
-    return <String, Object?>{};
+    return const <String, Object?>{};
   }
 
   Future<Map<String, Object?>> _getSemanticsTree(Map<String, String> parameters) async {
