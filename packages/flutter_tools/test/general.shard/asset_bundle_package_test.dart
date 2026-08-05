@@ -177,7 +177,7 @@ $assetsSection
         // directory. Without containment this would read a file outside the package on the
         // build machine and bundle its contents into the consuming app's NOTICES, which the
         // consuming app never declared.
-        globals.fs.file('p/p/pubspec.yaml')
+        globals.fs.file(fixPath('p/p/pubspec.yaml'))
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: test_package
