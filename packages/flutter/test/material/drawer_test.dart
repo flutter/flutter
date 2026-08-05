@@ -1034,7 +1034,7 @@ void main() {
     await pumpDrawerWithTheme(TargetPlatform.iOS);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Drawer control test', (WidgetTester tester) async {
+  testWidgets('Drawer programmatic control test', (WidgetTester tester) async {
     final scaffoldKey = GlobalKey<ScaffoldState>();
     late BuildContext savedContext;
     await tester.pumpWidget(
