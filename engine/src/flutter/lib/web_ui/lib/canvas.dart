@@ -130,6 +130,7 @@ abstract class Picture {
 }
 
 enum PathFillType { nonZero, evenOdd }
+
 // Must be kept in sync with SkPathOp
 
 enum PathOperation { difference, intersect, union, xor, reverseDifference }

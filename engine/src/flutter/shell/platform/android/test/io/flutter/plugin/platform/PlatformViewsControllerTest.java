@@ -256,8 +256,8 @@ public class PlatformViewsControllerTest {
 
     fakeVdController1.resize(10, 10, null);
 
-    assertEquals(fakeVdController1.presentation != presentation, true);
-    assertEquals(presentation.isShowing(), false);
+    assertNotSame(fakeVdController1.presentation, presentation);
+    assertFalse(presentation.isShowing());
   }
 
   @Test
@@ -1020,8 +1020,8 @@ public class PlatformViewsControllerTest {
     verify(androidView, times(2)).setLayoutParams(layoutParamsCaptor.capture());
 
     List<FrameLayout.LayoutParams> capturedLayoutParams = layoutParamsCaptor.getAllValues();
-    assertEquals(capturedLayoutParams.get(0).width, 1);
-    assertEquals(capturedLayoutParams.get(0).height, 1);
+    assertEquals(1, capturedLayoutParams.get(0).width);
+    assertEquals(1, capturedLayoutParams.get(0).height);
   }
 
   @Test
@@ -1073,7 +1073,7 @@ public class PlatformViewsControllerTest {
     // Simulate create call from the framework.
     createPlatformView(
         jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertFalse(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
@@ -1098,7 +1098,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertFalse(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
@@ -1192,7 +1192,7 @@ public class PlatformViewsControllerTest {
     // Simulate create call from the framework.
     createPlatformView(
         jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertThrows(
         IllegalStateException.class,
@@ -1222,7 +1222,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertThrows(
         IllegalStateException.class,
@@ -1253,7 +1253,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     // Simulate set direction call from the framework.
     setLayoutDirection(jni, platformViewsController, platformViewId, 1);
@@ -1262,7 +1262,7 @@ public class PlatformViewsControllerTest {
     // The limit value of reply message will be equal to 2 if the layout direction is set
     // successfully, otherwise it will be much more than 2 due to the reply message contains
     // an error message wrapped with exception detail information.
-    assertEquals(ShadowFlutterJNI.getResponses().get(0).limit(), 2);
+    assertEquals(2, ShadowFlutterJNI.getResponses().get(0).limit());
   }
 
   @Test
@@ -1299,8 +1299,8 @@ public class PlatformViewsControllerTest {
         ArgumentCaptor.forClass(FrameLayout.LayoutParams.class);
     verify(androidView, times(1)).setLayoutParams(layoutParamsCaptor.capture());
 
-    assertEquals(layoutParamsCaptor.getValue().width, 10);
-    assertEquals(layoutParamsCaptor.getValue().height, 20);
+    assertEquals(10, layoutParamsCaptor.getValue().width);
+    assertEquals(20, layoutParamsCaptor.getValue().height);
   }
 
   @Test
@@ -1512,7 +1512,7 @@ public class PlatformViewsControllerTest {
     // Simulate create call from the framework.
     createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
     assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
-    assertEquals(flutterView.getChildCount(), 2);
+    assertEquals(2, flutterView.getChildCount());
 
     // Simulate first frame from the framework.
     jni.onFirstFrame();
@@ -1521,7 +1521,7 @@ public class PlatformViewsControllerTest {
 
     // Simulate dispose call from the framework.
     disposePlatformView(jni, platformViewsController, platformViewId);
-    assertEquals(flutterView.getChildCount(), 1);
+    assertEquals(1, flutterView.getChildCount());
   }
 
   @Test
@@ -1740,7 +1740,7 @@ public class PlatformViewsControllerTest {
         /* viewHeight=*/ 10,
         /* mutatorsStack=*/ new FlutterMutatorsStack());
 
-    assertEquals(flutterView.getChildCount(), 3);
+    assertEquals(3, flutterView.getChildCount());
 
     final View view = flutterView.getChildAt(1);
     assertTrue(view instanceof FlutterImageView);
@@ -1790,8 +1790,8 @@ public class PlatformViewsControllerTest {
         /* viewHeight=*/ 10,
         /* mutatorsStack=*/ new FlutterMutatorsStack());
 
-    assertEquals(flutterView.getChildCount(), 2);
-    assertTrue(!(flutterView.getChildAt(0) instanceof PlatformOverlayView));
+    assertEquals(2, flutterView.getChildCount());
+    assertFalse(flutterView.getChildAt(0) instanceof PlatformOverlayView);
     assertTrue(flutterView.getChildAt(1) instanceof FlutterMutatorView);
 
     // Simulate dispose call from the framework.
@@ -1868,18 +1868,18 @@ public class PlatformViewsControllerTest {
     platformViewsController.onDisplayOverlaySurface(platformViewId, 0, 0, 10, 10);
 
     // This will contain three views: Background ImageView、PlatformView、Overlay ImageView
-    assertEquals(flutterView.getChildCount(), 3);
+    assertEquals(3, flutterView.getChildCount());
 
     FlutterImageView imageView = flutterView.getCurrentImageSurface();
 
     // Make sure the ImageView is inside the current FlutterView.
-    assertTrue(imageView != null);
+    assertNotNull(imageView);
     assertTrue(flutterView.indexOfChild(imageView) != -1);
 
     // Make sure the overlayView is inside the current FlutterView
     assertTrue(platformViewsController.getOverlayLayerViews().size() != 0);
     PlatformOverlayView overlayView = platformViewsController.getOverlayLayerViews().get(0);
-    assertTrue(overlayView != null);
+    assertNotNull(overlayView);
     assertTrue(flutterView.indexOfChild(overlayView) != -1);
 
     // Simulate in a new frame, there's no PlatformView, which is called
@@ -1891,13 +1891,13 @@ public class PlatformViewsControllerTest {
     // Invoke all registered `FlutterUiDisplayListener` callback
     jni.onFirstFrame();
 
-    assertEquals(null, flutterView.getCurrentImageSurface());
+    assertNull(flutterView.getCurrentImageSurface());
 
     // Make sure the background ImageVIew is not in the FlutterView
-    assertTrue(flutterView.indexOfChild(imageView) == -1);
+    assertEquals(-1, flutterView.indexOfChild(imageView));
 
     // Make sure the overlay ImageVIew is not in the FlutterView
-    assertTrue(flutterView.indexOfChild(overlayView) == -1);
+    assertEquals(-1, flutterView.indexOfChild(overlayView));
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {

@@ -488,6 +488,7 @@ class Scrollable extends StatefulWidget {
   /// If a [Scrollable] enclosing the provided [BuildContext] is a
   /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
   /// the target is made visible.
+  @awaitNotRequired
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
@@ -1704,10 +1705,11 @@ class _RenderScrollSemantics extends RenderProxyBox {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = true;
+    config
+      ..isSemanticBoundary = true
+      ..hasImplicitScrolling = allowImplicitScrolling;
     if (position.haveDimensions) {
       config
-        ..hasImplicitScrolling = allowImplicitScrolling
         ..scrollPosition = _position.pixels
         ..scrollExtentMax = _position.maxScrollExtent
         ..scrollExtentMin = _position.minScrollExtent

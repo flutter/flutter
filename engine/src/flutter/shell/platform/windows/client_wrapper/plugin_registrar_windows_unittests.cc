@@ -46,6 +46,11 @@ class TestWindowsApi : public testing::StubFlutterWindowsApi {
 
   void* last_registered_user_data() { return last_registered_user_data_; }
 
+  bool PluginRegistrarGetGraphicsAdapter(IDXGIAdapter** adapter_out) override {
+    *adapter_out = reinterpret_cast<IDXGIAdapter*>(10);
+    return true;
+  }
+
  private:
   int registered_delegate_count_ = 0;
   FlutterDesktopWindowProcCallback last_registered_delegate_ = nullptr;
@@ -103,6 +108,19 @@ TEST(PluginRegistrarWindowsTest, GetViewById) {
   EXPECT_EQ(registrar.GetView(), nullptr);
   EXPECT_NE(registrar.GetViewById(123).get(), nullptr);
   EXPECT_EQ(registrar.GetViewById(456).get(), nullptr);
+}
+
+TEST(PluginRegistrarWindowsTest, GetGraphicsAdapter) {
+  auto windows_api = std::make_unique<TestWindowsApi>();
+  EXPECT_CALL(*windows_api, PluginRegistrarGetView)
+      .WillRepeatedly(Return(nullptr));
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(std::move(windows_api));
+  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
+  PluginRegistrarWindows registrar(
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
+  IDXGIAdapter* adapter = nullptr;
+  EXPECT_TRUE(registrar.GetGraphicsAdapter(&adapter));
+  EXPECT_EQ(adapter, reinterpret_cast<IDXGIAdapter*>(10));
 }
 
 // Tests that the registrar runs plugin destructors before its own teardown.

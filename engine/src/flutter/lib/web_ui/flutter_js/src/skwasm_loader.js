@@ -15,8 +15,23 @@ export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
   if (deps.flutterTT.policy) {
     skwasmUrl = deps.flutterTT.policy.createScriptURL(skwasmUrl);
   }
-  const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`));
+  const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`), `${fileStem}.wasm`);
   const skwasm = await import(skwasmUrl);
+  if (!browserEnvironment.crossOriginIsolated
+      && !config.forceSingleThreadedSkwasm
+      && !config.suppressMultithreadingWarning) {
+    console.warn(
+      'Flutter Web: Skwasm uses multi-threading and web workers for better ' +
+      'performance, but your page needs to be cross-origin isolated to support ' +
+      'multi-threading. Skwasm will run in single-threaded mode.\n' +
+      'To enable multithreading, serve your app with these HTTP response headers:\n' +
+      '  Cross-Origin-Opener-Policy: same-origin\n' +
+      '  Cross-Origin-Embedder-Policy: require-corp\n' +
+      'See https://web.dev/articles/coop-coep for guidance.\n' +
+      'To silence this warning, set `suppressMultithreadingWarning: true` in ' +
+      'your Flutter configuration.'
+    );
+  }
   return await skwasm.default({
     // Chrome extensions enforce strict CSP that blocks the dynamic script
     // loading required for multi-threaded workers. We force single-threaded

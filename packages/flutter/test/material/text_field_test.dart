@@ -26,11 +26,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/feedback_tester.dart';
-import '../widgets/process_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
 import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
+import 'process_text_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -5221,7 +5221,7 @@ void main() {
   testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
 
-    Widget builder(int? maxLines, final String hintMsg) {
+    Widget builder(int? maxLines, String hintMsg) {
       return boilerplate(
         child: TextField(
           key: textFieldKey,

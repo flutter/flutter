@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:ffi' show Abi;
 import 'dart:math' show max;
 
 import 'package:crypto/crypto.dart';
@@ -15,7 +16,9 @@ import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'artifacts.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart'
@@ -179,6 +182,7 @@ class Cache {
     Platform? platform,
     Stdio? stdio,
     required ProcessManager processManager,
+    Abi? currentAbi,
   }) {
     if (rootOverride?.fileSystem != null &&
         fileSystem != null &&
@@ -204,6 +208,7 @@ class Cache {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: currentAbi,
       ),
     );
   }
@@ -758,10 +763,17 @@ class Cache {
     Set<DevelopmentArtifact> requiredArtifacts,
   ) async {
     final artifactsToUpdate = <ArtifactSet>[];
+    final isLocalEngine = context.get<Artifacts>()?.localEngineInfo != null;
 
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
+        continue;
+      }
+      if (isLocalEngine && (artifact is EngineCachedArtifact || artifact.name == 'engine_stamp')) {
+        _logger.printTrace(
+          'Artifact $artifact is an engine artifact or stamp and local engine is provided, skipping update.',
+        );
         continue;
       }
       if (await artifact.isUpToDate(_fileSystem)) {

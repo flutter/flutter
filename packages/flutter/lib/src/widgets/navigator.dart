@@ -641,6 +641,28 @@ abstract class Route<T> extends _RoutePlaceholder {
     return _navigator?._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ??
         false;
   }
+
+  /// Asserts that the given [result] is of a type that can be consumed by this route.
+  ///
+  /// This is used by [Navigator] to provide a clear error message when a route is popped with a mismatched result type.
+  bool _debugCheckCanConsumeResult(Object? result, {required String methodName}) {
+    if (result is! T?) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'A request was made to pop a route with a result of type ${result.runtimeType}, but the route expected a value of type $T.',
+        ),
+        ErrorDescription(
+          'This usually happens when the type provided to Navigator.$methodName() '
+          'is not a subtype of the type expected by the Route (e.g. DialogRoute<Null>), '
+          'or when a generic type is explicitly provided to a route creation method '
+          '(such as showDialog<T>()) but the popped value does not match this type.',
+        ),
+        DiagnosticsProperty<Route<Object?>>('The route was', this),
+        DiagnosticsProperty<Object?>('The provided result was', result),
+      ]);
+    }
+    return true;
+  }
 }
 
 /// Data that might be useful in constructing a [Route].
@@ -1301,7 +1323,7 @@ const TraversalEdgeBehavior kDefaultRouteDirectionalTraversalEdgeBehavior =
 /// such as Android, the system UI will provide a back button (outside the
 /// bounds of your application) that will allow the user to navigate back
 /// to earlier routes in your application's stack. On platforms that don't
-/// have this build-in navigation mechanism, the use of an [AppBar] (typically
+/// have this built-in navigation mechanism, the use of an [AppBar] (typically
 /// used in the [Scaffold.appBar] property) can automatically add a back
 /// button for user navigation.
 ///
@@ -1899,6 +1921,7 @@ class Navigator extends StatefulWidget {
   ///
   ///  * [restorablePushNamed], which pushes a route that can be restored
   ///    during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   static Future<T?> pushNamed<T extends Object?>(
     BuildContext context,
@@ -2016,6 +2039,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushReplacementNamed], which pushes a replacement route that
   ///    can be restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> pushReplacementNamed<T extends Object?, TO extends Object?>(
     BuildContext context,
     String routeName, {
@@ -2112,6 +2136,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePopAndPushNamed], which pushes a new route that can be
   ///    restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> popAndPushNamed<T extends Object?, TO extends Object?>(
     BuildContext context,
     String routeName, {
@@ -2219,6 +2244,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushNamedAndRemoveUntil], which pushes a new route that can
   ///    be restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> pushNamedAndRemoveUntil<T extends Object?>(
     BuildContext context,
     String newRouteName,
@@ -2306,6 +2332,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> push<T extends Object?>(BuildContext context, Route<T> route) {
     return Navigator.of(context).push(route);
   }
@@ -2397,6 +2424,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushReplacement], which pushes a replacement route that can
   ///    be restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> pushReplacement<T extends Object?, TO extends Object?>(
     BuildContext context,
     Route<T> newRoute, {
@@ -2492,6 +2520,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushAndRemoveUntil], which pushes a route that can be
   ///    restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> pushAndRemoveUntil<T extends Object?>(
     BuildContext context,
     Route<T> newRoute,
@@ -2723,6 +2752,7 @@ class Navigator extends StatefulWidget {
   ///  * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<bool> maybePop<T extends Object?>(BuildContext context, [T? result]) {
     return Navigator.of(context).maybePop<T>(result);
   }
@@ -3741,20 +3771,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
   void _handleHistoryChanged() {
-    final bool navigatorCanPop = canPop();
-    final bool routeBlocksPop;
-    if (!navigatorCanPop) {
-      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
-      routeBlocksPop =
-          lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
-    } else {
-      routeBlocksPop = false;
-    }
-    final notification = NavigationNotification(canHandlePop: navigatorCanPop || routeBlocksPop);
     // Avoid dispatching a notification in the middle of a build.
     switch (SchedulerBinding.instance.schedulerPhase) {
       case SchedulerPhase.postFrameCallbacks:
-        notification.dispatch(context);
+        NavigationNotification(canHandlePop: _getNavigatorCanHandlePop()).dispatch(context);
       case SchedulerPhase.idle:
       case SchedulerPhase.midFrameMicrotasks:
       case SchedulerPhase.persistentCallbacks:
@@ -3763,9 +3783,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           if (!mounted) {
             return;
           }
-          notification.dispatch(context);
+          NavigationNotification(canHandlePop: _getNavigatorCanHandlePop()).dispatch(context);
         }, debugLabel: 'Navigator.dispatchNotification');
     }
+  }
+
+  bool _getNavigatorCanHandlePop() {
+    if (canPop()) {
+      return true;
+    }
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    return lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
   }
 
   bool _debugCheckPageApiParameters() {
@@ -4742,6 +4770,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushNamed], which pushes a route that can be restored
   ///    during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushNamed<T extends Object?>(String routeName, {Object? arguments}) {
     return push<T?>(_routeNamed<T>(routeName, arguments: arguments)!);
@@ -4807,6 +4836,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushReplacementNamed], which pushes a replacement route that
   ///  can be restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushReplacementNamed<T extends Object?, TO extends Object?>(
     String routeName, {
@@ -4884,6 +4914,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePopAndPushNamed], which pushes a new route that can be
   ///    restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> popAndPushNamed<T extends Object?, TO extends Object?>(
     String routeName, {
@@ -4949,6 +4980,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushNamedAndRemoveUntil], which pushes a new route that can
   ///    be restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushNamedAndRemoveUntil<T extends Object?>(
     String newRouteName,
@@ -5023,6 +5055,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> push<T extends Object?>(Route<T> route) {
     _pushEntry(_RouteEntry(route, pageBased: false, initialState: _RouteLifecycle.push));
@@ -5155,6 +5188,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushReplacement], which pushes a replacement route that can
   ///    be restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushReplacement<T extends Object?, TO extends Object?>(
     Route<T> newRoute, {
@@ -5259,6 +5293,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushAndRemoveUntil], which pushes a route that can be
   ///    restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushAndRemoveUntil<T extends Object?>(Route<T> newRoute, RoutePredicate predicate) {
     assert(!newRoute._installed);
@@ -5543,13 +5578,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [ModalRoute], which provides a `scopedOnPopCallback` that can be used
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
+  @awaitNotRequired
   Future<bool> maybePop<T extends Object?>([T? result]) async {
     final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry == null) {
       return false;
     }
     assert(lastEntry.route._isInstalledIn(this));
-
+    assert(lastEntry.route._debugCheckCanConsumeResult(result, methodName: 'maybePop'));
     // TODO(justinmc): When the deprecated willPop method is removed, delete
     // this code and use only popDisposition, below.
     if (await lastEntry.route.willPop() == RoutePopDisposition.doNotPop) {
@@ -5605,6 +5641,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   void pop<T extends Object?>([T? result]) {
     assert(!_debugLocked);
+    assert(() {
+      final _RouteEntry? entry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      return entry?.route._debugCheckCanConsumeResult(result, methodName: 'pop') ?? true;
+    }());
     assert(() {
       _debugLocked = true;
       return true;
@@ -5917,7 +5957,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         onNotification: (NavigationNotification notification) {
           // If the state of this Navigator does not change whether or not the
           // whole framework can pop, propagate the Notification as-is.
-          if (notification.canHandlePop || !canPop()) {
+          if (notification.canHandlePop || !_getNavigatorCanHandlePop()) {
             return false;
           }
           // Otherwise, dispatch a new Notification with the correct canPop and

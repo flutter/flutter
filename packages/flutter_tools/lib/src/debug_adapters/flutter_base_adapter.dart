@@ -167,7 +167,8 @@ abstract class FlutterBaseDebugAdapter
     this.process = process;
 
     process.stdout.transformWithCallSite(ByteToLineTransformer()).listen(handleStdout);
-    process.stderr.transformWithCallSite(utf8.decoder).listen(handleStderr);
+    // Use permissive decoder for debugger stderr which may contain invalid UTF-8
+    process.stderr.transformWithCallSite(utf8AllowMalformed.decoder).listen(handleStderr);
     unawaited(process.exitCode.then(handleExitCode));
   }
 

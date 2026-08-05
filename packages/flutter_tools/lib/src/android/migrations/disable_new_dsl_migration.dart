@@ -52,12 +52,7 @@ class DisableNewDslMigration extends ProjectMigrator {
       return;
     }
 
-    // TODO(jesswon): Remove once try/catch is added to the write processFile: https://github.com/flutter/flutter/issues/184595
-    try {
-      processFileLines(_gradlePropertiesFile);
-    } on FileSystemException catch (e) {
-      logger.printError('Failed to process/migrate the gradle.properties during migration: $e');
-    }
+    processFileLines(_gradlePropertiesFile);
   }
 
   @override

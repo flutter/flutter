@@ -168,7 +168,15 @@ class LspPreviewDetector {
     // Only process one FileSystemEntity at a time so we don't invalidate an AnalysisSession that's
     // in use when we call context.changeFile(...).
     await mutex.runGuarded(() async {
-      await _fileAddedOrUpdated(filePath: event.path);
+      final String eventPath = event.path;
+      // Ignore any files under .dart_tool, .widget_preview, or ephemeral directories created by
+      // the tool (e.g., build/, plugin directories, etc.).
+      if (eventPath.doesContainDartTool ||
+          eventPath.doesContainWidgetPreview ||
+          project.ephemeralDirectories.any((dir) => eventPath.contains(dir.path))) {
+        return;
+      }
+      await _fileAddedOrUpdated(filePath: eventPath);
     });
   }
 
@@ -184,6 +192,11 @@ class LspPreviewDetector {
     } catch (e) {
       if (_disposed || shutdownHooks.isShuttingDown) {
         logger.printTrace('Failed to get widget previews during shutdown: $e');
+      } else if (e is StateError || e is Exception) {
+        logger.printWarning(
+          'Lost connection to the Dart Tooling Daemon (DTD). '
+          'Live preview updates are paused. Details: $e',
+        );
       } else {
         rethrow;
       }

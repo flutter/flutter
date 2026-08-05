@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// We use `print` for logging here.
+// ignore_for_file: avoid_print
+
 /// @docImport 'dart:io';
 library;
 

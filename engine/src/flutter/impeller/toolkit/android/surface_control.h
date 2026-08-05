@@ -5,7 +5,8 @@
 #ifndef FLUTTER_IMPELLER_TOOLKIT_ANDROID_SURFACE_CONTROL_H_
 #define FLUTTER_IMPELLER_TOOLKIT_ANDROID_SURFACE_CONTROL_H_
 
-#include "flutter/fml/unique_object.h"
+#include <memory>
+
 #include "impeller/toolkit/android/proc_table.h"
 
 namespace impeller::android {
@@ -37,8 +38,9 @@ class SurfaceControl {
   ///                         other control properties. If no debug name is
   ///                         specified, the value "Impeller Layer" is used.
   ///
-  explicit SurfaceControl(ANativeWindow* window,
-                          const char* debug_name = nullptr);
+  static std::unique_ptr<SurfaceControl> Create(
+      ANativeWindow* window,
+      const char* debug_name = nullptr);
 
   //----------------------------------------------------------------------------
   /// @brief      Removes the surface control from the presentation hierarchy
@@ -46,15 +48,11 @@ class SurfaceControl {
   ///             reference to the control. At this point, it may be collected
   ///             when the compositor is also done using it.
   ///
-  ~SurfaceControl();
+  virtual ~SurfaceControl() = default;
 
-  SurfaceControl(const SurfaceControl&) = delete;
+  virtual bool IsValid() const = 0;
 
-  SurfaceControl& operator=(const SurfaceControl&) = delete;
-
-  bool IsValid() const;
-
-  ASurfaceControl* GetHandle() const;
+  virtual ASurfaceControl* GetHandle() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Remove the surface control from the hierarchy of nodes
@@ -66,22 +64,7 @@ class SurfaceControl {
   /// @return     `true` If the control will be removed from the hierarchy of
   ///             nodes presented by the system compositor.
   ///
-  bool RemoveFromParent() const;
-
- private:
-  struct UniqueASurfaceControlTraits {
-    static ASurfaceControl* InvalidValue() { return nullptr; }
-
-    static bool IsValid(ASurfaceControl* value) {
-      return value != InvalidValue();
-    }
-
-    static void Free(ASurfaceControl* value) {
-      GetProcTable().ASurfaceControl_release(value);
-    }
-  };
-
-  fml::UniqueObject<ASurfaceControl*, UniqueASurfaceControlTraits> control_;
+  virtual bool RemoveFromParent() const = 0;
 };
 
 }  // namespace impeller::android

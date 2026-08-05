@@ -28,6 +28,7 @@ import static org.robolectric.Shadows.shadowOf;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.hardware.SyncFence;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Looper;
@@ -779,8 +780,8 @@ public class FlutterRendererTest {
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
 
     // Default values.
-    assertEquals(producer.getWidth(), 1);
-    assertEquals(producer.getHeight(), 1);
+    assertEquals(1, producer.getWidth());
+    assertEquals(1, producer.getHeight());
 
     // Try setting width and height to 0.
     producer.setSize(0, 0);
@@ -789,8 +790,8 @@ public class FlutterRendererTest {
     assertNotNull(producer.getSurface());
 
     // Expect clamp to 1.
-    assertEquals(producer.getWidth(), 1);
-    assertEquals(producer.getHeight(), 1);
+    assertEquals(1, producer.getWidth());
+    assertEquals(1, producer.getHeight());
   }
 
   @Test
@@ -805,7 +806,7 @@ public class FlutterRendererTest {
       flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
       // Verify behavior under test.
-      assertEquals(producer.id(), 0);
+      assertEquals(0, producer.id());
       verify(fakeFlutterJNI, times(1)).registerTexture(eq(producer.id()), any());
     } finally {
       FlutterRenderer.debugForceSurfaceProducerGlTextures = false;
@@ -1073,5 +1074,17 @@ public class FlutterRendererTest {
     verify(imageReaderProducer2.callback).onSurfaceAvailable();
     assertFalse(imageReaderProducer1.notifiedDestroy);
     assertFalse(imageReaderProducer2.notifiedDestroy);
+  }
+
+  @Test
+  public void waitOnFence_closesFence() throws Exception {
+    FlutterRenderer.ImageReaderSurfaceProducer producer =
+        (FlutterRenderer.ImageReaderSurfaceProducer)
+            engineRule.getFlutterEngine().getRenderer().createSurfaceProducer();
+    Image image = mock(Image.class);
+    SyncFence fence = mock(SyncFence.class);
+    when(image.getFence()).thenReturn(fence);
+    producer.waitOnFence(image);
+    verify(fence, times(1)).close();
   }
 }
