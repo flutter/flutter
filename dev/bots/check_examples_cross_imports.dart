@@ -975,7 +975,8 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
               relativePath.startsWith('examples/api/test/widgets') =>
         _ApiExampleLibrary(relativePath),
       _
-          when relativePath.startsWith('examples/hello_world') ||
+          when relativePath.startsWith('examples/flutter_view') ||
+              relativePath.startsWith('examples/hello_world') ||
               relativePath.startsWith('examples/image_list') ||
               relativePath.startsWith('examples/layers') ||
               relativePath.startsWith('examples/multiple_windows') ||
