@@ -585,7 +585,6 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/test/widgets/scrollbar/raw_scrollbar.1_test.dart',
     'packages/flutter/examples/api/test/widgets/inherited_notifier/inherited_notifier.0_test.dart',
     'packages/flutter/examples/api/test/widgets/text_magnifier/text_magnifier.0_test.dart',
-    'examples/flutter_view/lib/main.dart',
     'examples/texture/lib/main.dart',
   };
 
@@ -1000,8 +999,7 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
               relativePath.startsWith('packages/flutter/examples/api/test/widgets') =>
         _ApiExampleLibrary(relativePath),
       _
-          when relativePath.startsWith('examples/flutter_view') ||
-              relativePath.startsWith('examples/hello_world') ||
+          when relativePath.startsWith('examples/hello_world') ||
               relativePath.startsWith('examples/image_list') ||
               relativePath.startsWith('examples/layers') ||
               relativePath.startsWith('examples/multiple_windows') ||
