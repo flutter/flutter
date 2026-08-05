@@ -40,6 +40,8 @@ const _flutterRoot = '/path/to/flutter';
 const String _engineVersion = '1234567890abcdef1234567890abcdef12345678';
 const String _iosSdkRoot =
     '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk';
+const _flutterCachePath = '/path/to/flutter/bin/cache';
+const _engineArtifactPath = '$_flutterCachePath/artifacts/engine/ios/Flutter.xcframework';
 
 void main() {
   const flutterAppDartToolPath = '$_flutterAppPath/.dart_tool';
@@ -61,8 +63,6 @@ void main() {
   const scriptsDirectoryPath = 'output/Scripts';
   const debugCocoapodCache = '$cacheDirectoryPath/Debug/CocoaPods';
   const pluginsDirectoryPath = '$nativeIntegrationSwiftPackagePath/.plugins';
-  const flutterCachePath = '/path/to/flutter/bin/cache';
-  const engineArtifactPath = '$flutterCachePath/artifacts/engine/ios/Flutter.xcframework';
   const codesignIdentity = 'Apple Development: Company (TEAM_ID)';
   const codesignIdentityFile = '$cacheDirectoryPath/.codesign_identity';
 
@@ -74,7 +74,7 @@ void main() {
         final processManager = FakeProcessManager.list([]);
         final command = BuildSwiftPackage(
           analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(engineArtifactPath),
+          artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(),
           cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
@@ -110,7 +110,7 @@ void main() {
         final processManager = FakeProcessManager.list([]);
         final command = BuildSwiftPackage(
           analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(engineArtifactPath),
+          artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(),
           cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
@@ -154,7 +154,7 @@ void main() {
             final logger = BufferLogger.test();
             final command = BuildSwiftPackage(
               analytics: FakeAnalytics(),
-              artifacts: FakeArtifacts(engineArtifactPath),
+              artifacts: FakeArtifacts(_engineArtifactPath),
               buildSystem: FakeBuildSystem(),
               cache: FakeCache(fs, _flutterRoot),
               fileSystem: fs,
@@ -210,7 +210,7 @@ void main() {
             final logger = BufferLogger.test();
             final command = BuildSwiftPackage(
               analytics: FakeAnalytics(),
-              artifacts: FakeArtifacts(engineArtifactPath),
+              artifacts: FakeArtifacts(_engineArtifactPath),
               buildSystem: FakeBuildSystem(),
               cache: FakeCache(fs, _flutterRoot),
               fileSystem: fs,
@@ -268,7 +268,7 @@ void main() {
       final processManager = FakeProcessManager.list([]);
       final command = BuildSwiftPackage(
         analytics: FakeAnalytics(),
-        artifacts: FakeArtifacts(engineArtifactPath),
+        artifacts: FakeArtifacts(_engineArtifactPath),
         buildSystem: FakeBuildSystem(),
         cache: FakeCache(fs, _flutterRoot),
         fileSystem: fs,
@@ -296,7 +296,7 @@ void main() {
       final processManager = FakeProcessManager.list([]);
       final command = BuildSwiftPackage(
         analytics: FakeAnalytics(),
-        artifacts: FakeArtifacts(engineArtifactPath),
+        artifacts: FakeArtifacts(_engineArtifactPath),
         buildSystem: FakeBuildSystem(),
         cache: FakeCache(fs, _flutterRoot),
         fileSystem: fs,
@@ -494,7 +494,7 @@ import PluginB
               '--filter',
               '- .DS_Store/',
               '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-              engineArtifactPath,
+              _engineArtifactPath,
               xcframeworkOutput.path,
             ],
           ),
@@ -534,7 +534,7 @@ import PluginB
               '--filter',
               '- .DS_Store/',
               '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-              engineArtifactPath,
+              _engineArtifactPath,
               xcframeworkOutput.path,
             ],
           ),
@@ -686,7 +686,7 @@ let package = Package(
         const FlutterDarwinPlatform targetPlatform = .macos;
         final testUtils = BuildSwiftPackageUtils(
           analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(engineArtifactPath),
+          artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(
             expectations: [
               BuildExpectations(
@@ -695,7 +695,7 @@ let package = Package(
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/macosx',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
-                expectedCacheDirPath: flutterCachePath,
+                expectedCacheDirPath: _flutterCachePath,
                 expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
@@ -794,7 +794,7 @@ let package = Package(
         const FlutterDarwinPlatform targetPlatform = .macos;
         final testUtils = BuildSwiftPackageUtils(
           analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(engineArtifactPath),
+          artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(
             expectations: [
               BuildExpectations(
@@ -803,7 +803,7 @@ let package = Package(
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Release/macosx',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
-                expectedCacheDirPath: flutterCachePath,
+                expectedCacheDirPath: _flutterCachePath,
                 expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
@@ -920,7 +920,7 @@ let package = Package(
         const FlutterDarwinPlatform targetPlatform = .macos;
         final testUtils = BuildSwiftPackageUtils(
           analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(engineArtifactPath),
+          artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(
             expectations: [
               BuildExpectations(
@@ -929,7 +929,7 @@ let package = Package(
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Release/macosx',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
-                expectedCacheDirPath: flutterCachePath,
+                expectedCacheDirPath: _flutterCachePath,
                 expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
@@ -1031,7 +1031,7 @@ let package = Package(
         const FlutterDarwinPlatform targetPlatform = .ios;
         final testUtils = BuildSwiftPackageUtils(
           analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(engineArtifactPath),
+          artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(
             expectations: [
               BuildExpectations(
@@ -1040,7 +1040,7 @@ let package = Package(
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphoneos',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
-                expectedCacheDirPath: flutterCachePath,
+                expectedCacheDirPath: _flutterCachePath,
                 expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
@@ -1062,7 +1062,7 @@ let package = Package(
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphonesimulator',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
-                expectedCacheDirPath: flutterCachePath,
+                expectedCacheDirPath: _flutterCachePath,
                 expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
@@ -1165,7 +1165,7 @@ let package = Package(
           const FlutterDarwinPlatform targetPlatform = .ios;
           final testUtils = BuildSwiftPackageUtils(
             analytics: FakeAnalytics(),
-            artifacts: FakeArtifacts(engineArtifactPath),
+            artifacts: FakeArtifacts(_engineArtifactPath),
             buildSystem: FakeBuildSystem(
               expectations: [
                 BuildExpectations(
@@ -1174,7 +1174,7 @@ let package = Package(
                   expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                   expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphoneos',
                   expectedBuildDirPath: '$flutterAppBuildPath/',
-                  expectedCacheDirPath: flutterCachePath,
+                  expectedCacheDirPath: _flutterCachePath,
                   expectedFlutterRootDirPath: _flutterRoot,
                   expectedEngineVersion: _engineVersion,
                   expectedDefines: <String, String>{
@@ -1196,7 +1196,7 @@ let package = Package(
                   expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                   expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphonesimulator',
                   expectedBuildDirPath: '$flutterAppBuildPath/',
-                  expectedCacheDirPath: flutterCachePath,
+                  expectedCacheDirPath: _flutterCachePath,
                   expectedFlutterRootDirPath: _flutterRoot,
                   expectedEngineVersion: _engineVersion,
                   expectedDefines: <String, String>{
@@ -1520,7 +1520,7 @@ let package = Package(
 
         final testUtils = BuildSwiftPackageUtils(
           analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(engineArtifactPath),
+          artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(),
           cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
@@ -1618,7 +1618,7 @@ let package = Package(
 
         final testUtils = BuildSwiftPackageUtils(
           analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(engineArtifactPath),
+          artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(),
           cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
@@ -2793,7 +2793,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         const FlutterDarwinPlatform targetPlatform = .ios;
         final testUtils = BuildSwiftPackageUtils(
           analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(engineArtifactPath),
+          artifacts: FakeArtifacts(_engineArtifactPath),
           buildSystem: FakeBuildSystem(
             expectations: [
               BuildExpectations(
@@ -2802,7 +2802,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphoneos',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
-                expectedCacheDirPath: flutterCachePath,
+                expectedCacheDirPath: _flutterCachePath,
                 expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
@@ -2824,7 +2824,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphonesimulator',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
-                expectedCacheDirPath: flutterCachePath,
+                expectedCacheDirPath: _flutterCachePath,
                 expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
@@ -3615,11 +3615,10 @@ BuildSwiftPackageUtils _createTestUtils({
   required FileSystem fs,
   required Logger logger,
   required ProcessManager processManager,
-  String engineArtifactPath = '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
 }) {
   return BuildSwiftPackageUtils(
     analytics: FakeAnalytics(),
-    artifacts: FakeArtifacts(engineArtifactPath),
+    artifacts: FakeArtifacts(_engineArtifactPath),
     buildSystem: FakeBuildSystem(),
     cache: FakeCache(fs, _flutterRoot),
     fileSystem: fs,
