@@ -95,17 +95,13 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    return child?.getDistanceToActualBaseline(baseline) ??
-        super.computeDistanceToActualBaseline(baseline);
+    return child?.getDistanceToActualBaseline(baseline);
   }
 
   @override
   @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final RenderBox? child = this.child;
-    return child == null
-        ? super.computeDryBaseline(constraints, baseline)
-        : child.getDryBaseline(constraints, baseline);
+    return child?.getDryBaseline(constraints, baseline);
   }
 
   @override
