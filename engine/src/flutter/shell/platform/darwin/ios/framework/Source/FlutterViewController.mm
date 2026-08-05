@@ -1393,27 +1393,12 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self updateViewportMetricsIfNeeded];
 
   // There is no guarantee that UIKit will layout subviews when the application/scene is active.
-  // Creating the surface when inactive will cause GPU accesses from the background. Only wait for
-  // the first frame to render when the application/scene is actually active.
+  // Creating the surface when inactive will cause GPU accesses from the background, so only
+  // create the surface when the application/scene is actually active.
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
   if (firstViewBoundsUpdate && self.stateIsActive && self.engine) {
     [self surfaceUpdated:YES];
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-    NSTimeInterval timeout = 0.2;
-#else
-    NSTimeInterval timeout = 0.1;
-#endif
-    [self.engine
-        waitForFirstFrameSync:timeout
-                     callback:^(BOOL didTimeout) {
-                       if (didTimeout) {
-                         [FlutterLogger logInfo:@"Timeout waiting for the first frame to render. "
-                                                 "This may happen in unoptimized builds. If this is"
-                                                 "a release build, you should load a less complex "
-                                                 "frame to avoid the timeout."];
-                       }
-                     }];
   }
 }
 
