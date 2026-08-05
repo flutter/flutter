@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const PrimitiveShapeApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class PrimitiveShapeApp extends StatelessWidget {
+  const PrimitiveShapeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
