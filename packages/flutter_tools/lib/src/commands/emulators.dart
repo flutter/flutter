@@ -130,12 +130,9 @@ class EmulatorsCommand extends FlutterCommand {
     if (showRunInstruction || showCreateInstruction) {
       globals.printStatus('');
     }
-    // TODO(dantup): Update this link to flutter.dev if/when we have a better page.
-    // That page can then link out to these places if required.
     globals.printStatus(
       'You can find more information on managing emulators at the links below:\n'
-      '  https://developer.android.com/studio/run/managing-avds\n'
-      '  https://developer.android.com/studio/command-line/avdmanager',
+      '  https://docs.flutter.dev/platform-integration/android/setup',
     );
   }
 }
