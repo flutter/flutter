@@ -160,7 +160,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// This sample demonstrates how to create an adapter widget that makes any
 /// child widget selectable.
 ///
-/// ** See code in examples/api/lib/material/selectable_region/selectable_region.0.dart **
+/// ** See code in examples/api/lib/widgets/selectable_region/selectable_region.0.dart **
 /// {@end-tool}
 ///
 /// ## Complex layout
@@ -173,7 +173,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// In the case where a group of widgets should be excluded from selection under
@@ -183,7 +183,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text in a Column.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// To create a separate selection system from its parent selection area,
@@ -525,7 +525,11 @@ class SelectableRegionState extends State<SelectableRegion>
 
   void _handleFocusChanged() {
     if (!_focusNode.hasFocus) {
-      if (_webContextMenuEnabled) {
+      if (kIsWeb) {
+        // Detach regardless of the current (dynamic) _webContextMenuEnabled
+        // value: the browser context menu may have been disabled after this
+        // delegate attached, and detach is a no-op for a client that was
+        // never the active one.
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
       if (SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
@@ -540,8 +544,7 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
       }
-    }
-    if (_webContextMenuEnabled) {
+    } else if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
@@ -1935,6 +1938,9 @@ class SelectableRegionState extends State<SelectableRegion>
   void dispose() {
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
+    if (kIsWeb) {
+      PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
+    }
     _selectionDelegate.dispose();
     _selectionStatusNotifier.dispose();
     // In case dispose was triggered before gesture end, remove the magnifier
@@ -2002,8 +2008,8 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
-    if (callingAction != null) {
-      return callingAction!.invoke(intent);
+    if (callingAction case final callingAction?) {
+      return callingAction.invoke(intent);
     }
     return invokeAction(intent, context);
   }

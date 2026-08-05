@@ -17,17 +17,21 @@ jobs:
       # defaults to `fetch-depth:1` which only checks out the current branch
       # since the action runs on master, it will only checkout master.
       - name: Setup Repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           repository: flutteractionsbot/flutter
           token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           ref: master
+          persist-credentials: false
 
       - name: Configure git
         run: |
-          git config user.name "flutteractionsbot"
-          git config user.email "<flutter-actions-bot@google.com>"
+          gh auth setup-git
+          git config --global user.name "flutteractionsbot"
+          git config --global user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       # avoid downloading hundreds of other branches/history
       # utilizing `fetch-depth:0` in actions/checkout would clone everything.
@@ -35,11 +39,11 @@ jobs:
         run: |
           git fetch upstream stable:stable --depth=1
           git fetch upstream master --depth=1
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       - name: Prepare PR branch and commit changes
         id: prepare_pr_branch
-        env:
-          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
           PR_BRANCH="sync-changelog-stable-to-master-$(date +%s)"
           echo "pr_branch_name=$PR_BRANCH" >> "$GITHUB_OUTPUT"
@@ -61,12 +65,11 @@ jobs:
           git add CHANGELOG.md
           git commit -m "Sync CHANGELOG.md from stable"
           git push origin "$PR_BRANCH"
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       - name: Create Pull Request
         if: steps.prepare_pr_branch.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          PR_BRANCH_NAME: ${{ steps.prepare_pr_branch.outputs.pr_branch_name }}
         run: |
           gh pr create \
             --base master \
@@ -75,3 +78,6 @@ jobs:
             --title "Sync CHANGELOG.md from stable" \
             --body "This PR automates the synchronization of \`CHANGELOG.md\` from the \`stable\` branch to the \`master\` branch." \
             --label autosubmit
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          PR_BRANCH_NAME: ${{ steps.prepare_pr_branch.outputs.pr_branch_name }}

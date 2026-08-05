@@ -21,7 +21,6 @@ extension type RasterResult._(JSObject _) implements JSObject {
   external JSArray<JSAny> get imageBitmaps;
 }
 
-@pragma('wasm:export')
 WasmVoid callbackHandler(WasmI32 callbackId, WasmI32 context, WasmExternRef? jsContext) {
   // Actually hide this call behind whether skwasm is enabled. Otherwise, the SkwasmCallbackHandler
   // won't actually be tree-shaken, and we end up with skwasm imports in non-skwasm builds.
@@ -99,6 +98,9 @@ class SkwasmSurface implements OffscreenSurface {
   }
 
   final OffscreenCanvasProvider _canvasProvider;
+
+  @override
+  bool get supportsPngEncoding => false;
   late DomOffscreenCanvas _canvas;
   late SurfaceHandle handle;
   double _currentDevicePixelRatio = -1;
@@ -148,12 +150,14 @@ class SkwasmSurface implements OffscreenSurface {
   Future<ByteData> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
     await initialized;
 
-    final engineImage = image as EngineImage;
-    assert(
-      engineImage.backendImage is SkwasmImage,
-      'The image being rasterized must be a Skwasm image.',
-    );
-    final skwasmImage = engineImage.backendImage as SkwasmImage;
+    final EngineImage engineImage;
+    final SkwasmImage skwasmImage;
+    if (image case EngineImage(backendImage: final SkwasmImage delegate)) {
+      engineImage = image;
+      skwasmImage = delegate;
+    } else {
+      throw ArgumentError('The image being rasterized must be a Skwasm image.');
+    }
 
     await setSize(BitmapSize(engineImage.width, engineImage.height));
 

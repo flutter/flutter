@@ -25,8 +25,10 @@ class SkwasmImage implements BackendImage {
     imageDispose(handle);
   }
 
+  @override
   int get width => imageGetWidth(handle);
 
+  @override
   int get height => imageGetHeight(handle);
 
   @override
@@ -42,7 +44,7 @@ class SkwasmImage implements BackendImage {
 /// The [width] and [height] are the dimensions of the image.
 /// The [format] specifies the layout of color channels in the buffer.
 /// The optional [rowBytes] defines the step length between two scan lines.
-EngineImage createSkwasmImageFromPixels(
+SkwasmImage createSkwasmImageFromPixels(
   Uint8List pixels,
   int width,
   int height,
@@ -50,20 +52,25 @@ EngineImage createSkwasmImageFromPixels(
   int? rowBytes,
 }) {
   final SkDataHandle dataHandle = skDataCreate(pixels.length);
-  final int dataAddress = skDataGetPointer(dataHandle).cast<Uint8>().address;
+  try {
+    final int dataAddress = skDataGetPointer(dataHandle).cast<Uint8>().address;
 
-  final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
-  wasmMemory.set(pixels.toJS, dataAddress);
+    // To avoid a slow element-by-element copy in Dart, we obtain the raw memory
+    // address of the WASM buffer, create a JSUint8Array view pointing directly
+    // to the Skwasm WASM linear memory heap, and perform a high-performance,
+    // browser-native bulk copy (memcpy) of the pixel bytes.
+    final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
+    wasmMemory.set(pixels.toJS, dataAddress);
 
-  final ImageHandle imageHandle = imageCreateFromPixels(
-    dataHandle,
-    width,
-    height,
-    format.index,
-    rowBytes ?? 4 * width,
-  );
-
-  skDataDispose(dataHandle);
-
-  return EngineImage(SkwasmImage(imageHandle), width, height);
+    final ImageHandle imageHandle = imageCreateFromPixels(
+      dataHandle,
+      width,
+      height,
+      format.index,
+      rowBytes ?? 4 * width,
+    );
+    return SkwasmImage(imageHandle);
+  } finally {
+    skDataDispose(dataHandle);
+  }
 }

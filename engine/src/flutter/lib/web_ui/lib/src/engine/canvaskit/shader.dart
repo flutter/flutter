@@ -245,10 +245,9 @@ class CkGradientConical extends GradientCkShader implements ui.Gradient {
 class CkImageShader implements ui.ImageShader, CkShader {
   CkImageShader(ui.Image image, this.tileModeX, this.tileModeY, this.matrix4, this.filterQuality)
     : _image = image as EngineImage {
-    assert(
-      _image.backendImage is CkImageDelegate,
-      'The image used in this ImageShader must be a CanvasKit image.',
-    );
+    if (_image.backendImage is! CkImageDelegate) {
+      throw ArgumentError('The image used in this ImageShader must be a CanvasKit image.');
+    }
     _initializeSkImageShader(filterQuality ?? ui.FilterQuality.none);
   }
 
@@ -287,9 +286,10 @@ class CkImageShader implements ui.ImageShader, CkShader {
   bool get isGradient => false;
 
   void _initializeSkImageShader(ui.FilterQuality quality) {
+    final CkImageDelegate(:skImage) = _image.backendImage as CkImageDelegate;
     final SkShader skShader;
     if (quality == ui.FilterQuality.high) {
-      skShader = (_image.backendImage as CkImageDelegate).skImage.makeShaderCubic(
+      skShader = skImage.makeShaderCubic(
         toSkTileMode(tileModeX),
         toSkTileMode(tileModeY),
         1.0 / 3.0,
@@ -297,7 +297,7 @@ class CkImageShader implements ui.ImageShader, CkShader {
         toSkMatrixFromFloat64(matrix4),
       );
     } else {
-      skShader = (_image.backendImage as CkImageDelegate).skImage.makeShaderOptions(
+      skShader = skImage.makeShaderOptions(
         toSkTileMode(tileModeX),
         toSkTileMode(tileModeY),
         toSkFilterMode(quality),

@@ -184,10 +184,12 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
     Float64List? matrix4,
     ui.FilterQuality? filterQuality,
   ) {
-    assert(
-      image is EngineImage && image.backendImage is SkwasmImage,
-      'The image used in this ImageShader must be a Skwasm image.',
-    );
+    final ImageHandle imageHandle;
+    if (image case EngineImage(backendImage: SkwasmImage(handle: final handle))) {
+      imageHandle = handle;
+    } else {
+      throw ArgumentError('The image used in this ImageShader must be a Skwasm image.');
+    }
 
     if (matrix4 != null) {
       return withStackScope((StackScope scope) {
@@ -195,7 +197,7 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
 
         return SkwasmImageShader._(
           shaderCreateFromImage(
-            ((image as EngineImage).backendImage as SkwasmImage).handle,
+            imageHandle,
             tmx.index,
             tmy.index,
             (filterQuality ?? ui.FilterQuality.none).index,
@@ -206,7 +208,7 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
     } else {
       return SkwasmImageShader._(
         shaderCreateFromImage(
-          ((image as EngineImage).backendImage as SkwasmImage).handle,
+          imageHandle,
           tmx.index,
           tmy.index,
           (filterQuality ?? ui.FilterQuality.none).index,
