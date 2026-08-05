@@ -107,6 +107,11 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     return settings_;
   }
   // |flutter::PlatformView::Delegate|
+  std::shared_ptr<fml::BasicTaskRunner>
+  OnPlatformViewGetShutdownSafeIOTaskRunner() const {
+    return nullptr;
+  }
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message) {
     message_ = std::move(message);

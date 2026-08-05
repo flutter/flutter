@@ -67,6 +67,10 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
 
   auto settings = flutter::SettingsFromCommandLine(command_line, true);
 
+  FML_CHECK(settings.merged_platform_ui_thread !=
+            flutter::Settings::MergedPlatformUIThread::kMergeAfterLaunch)
+      << "merged-platform-ui-thread=mergeAfterLaunch is not supported on iOS.";
+
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
     fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
     fml::MessageLoopTaskQueues::GetInstance()->AddTaskObserver(queue_id, key, callback);
@@ -180,9 +184,6 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
       (nsEnableWideGamut ? nsEnableWideGamut.boolValue : YES) && DoesHardwareSupportWideGamut();
   settings.enable_wide_gamut = enableWideGamut;
 #endif
-
-  NSNumber* nsAntialiasLines = [mainBundle objectForInfoDictionaryKey:@"FLTAntialiasLines"];
-  settings.impeller_antialiased_lines = (nsAntialiasLines ? nsAntialiasLines.boolValue : NO);
 
   settings.warn_on_impeller_opt_out = true;
 
