@@ -1523,6 +1523,40 @@ dev_dependencies:
     );
 
     testUsingContext(
+      'forwards an explicit --[no-]enable-hcpp as a launch override',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub', '--no-enable-hcpp']);
+        expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'sends no hcpp launch override when --enable-hcpp was not passed',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub']);
+        expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'uninstallApp defaults to true',
       () async {
         final testRunner = FakeFlutterTestRunner(0);

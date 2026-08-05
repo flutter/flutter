@@ -670,10 +670,14 @@ class AndroidDevice extends Device {
         'enable-vulkan-validation',
         'true',
       ],
-      if (debuggingOptions.enableHcpp) ...<String>[
+      // Only sent when `--[no-]enable-hcpp` was passed explicitly, so that the
+      // value in the manifest of the installed artifact (which the developer
+      // may have set, or the build may have injected from the enable-hcpp
+      // feature flag) decides otherwise.
+      if (debuggingOptions.enableHcpp != null) ...<String>[
         '--ez',
         'enable-hcpp-and-surface-control',
-        'true',
+        '${debuggingOptions.enableHcpp}',
       ],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
