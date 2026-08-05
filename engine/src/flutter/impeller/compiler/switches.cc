@@ -32,7 +32,7 @@ static const std::vector<std::pair<std::string, TargetPlatform>>
         {"runtime-stage-gles", TargetPlatform::kRuntimeStageGLES},
         {"runtime-stage-gles3", TargetPlatform::kRuntimeStageGLES3},
         {"runtime-stage-vulkan", TargetPlatform::kRuntimeStageVulkan},
-    };
+};
 
 static const std::map<std::string, SourceType> kKnownSourceTypes = {
     {"vert", SourceType::kVertexShader},
