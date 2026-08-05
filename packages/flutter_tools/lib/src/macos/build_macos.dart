@@ -18,6 +18,7 @@ import '../darwin/darwin.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
+import '../ios/plist_parser.dart';
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
@@ -86,15 +87,20 @@ Future<void> buildMacOS({
   SizeAnalyzer? sizeAnalyzer,
   bool usingCISystem = false,
 }) async {
-  final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
-  if (xcodeWorkspace == null) {
+  final Directory xcodeProject = flutterProject.macos.xcodeProject;
+  if (!xcodeProject.existsSync()) {
     throwToolExit(
       'No macOS desktop project configured. '
       'See https://flutter.dev/to/add-desktop-support '
       'to learn about adding macOS support to a project.',
     );
   }
-  const FlutterDarwinPlatform darwinPlatform = FlutterDarwinPlatform.macos;
+
+  // The .xcworkspace may not exist (e.g. a project using Swift Package Manager
+  // without CocoaPods). When absent, xcodebuild builds the .xcodeproj directly.
+  final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
+
+  const FlutterDarwinPlatform darwinPlatform = .macos;
   final migrators = <ProjectMigrator>[
     RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       flutterProject.macos,
@@ -139,8 +145,6 @@ Future<void> buildMacOS({
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
-
-  final Directory xcodeProject = flutterProject.macos.xcodeProject;
 
   // If the standard project exists, specify it to getInfo to handle the case where there are
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
@@ -245,10 +249,24 @@ Future<void> buildMacOS({
     final String excludedArches => excludedArches,
   };
 
+  final bool binaryContainsX86Slice =
+      archs == null && (excludedArchs == null || !excludedArchs.contains('x86_64'));
+  final bool allowsArm64Only = switch (globals.xcodeProjectInterpreter!.version?.major) {
+    null || < 27 => false,
+    _ => true,
+  };
+  if (buildInfo.isRelease && binaryContainsX86Slice && allowsArm64Only) {
+    globals.logger.printWarning(
+      'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
+      'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
+      'This will become the default behavior in a future Flutter release.',
+    );
+  }
+
   var hasMacOSMinDeploymentTargetIssue = false;
   String? macOSMinDeploymentTarget;
   try {
-    if (archs != null && excludedArchs != null && excludedArchs.contains('arm64')) {
+    if (archs != null && excludedArchs != null && excludedArchs.contains(archs)) {
       throwToolExit(
         'No Valid Target Arch: '
         'You have enabled the macOSArm64Only feature flag but '
@@ -266,8 +284,10 @@ Future<void> buildMacOS({
       <String>[
         '/usr/bin/env',
         ...xcodebuildCommandArgs,
-        '-workspace',
-        xcodeWorkspace.path,
+        if (xcodeWorkspace != null) ...<String>['-workspace', xcodeWorkspace.path] else ...<String>[
+          '-project',
+          xcodeProject.path,
+        ],
         '-configuration',
         configuration,
         '-scheme',
@@ -294,9 +314,7 @@ Future<void> buildMacOS({
         if (line.contains("deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to") &&
             line.contains('but the range of supported deployment target versions is')) {
           hasMacOSMinDeploymentTargetIssue = true;
-          final pattern = RegExp(
-            r'range of supported deployment target versions is ([0-9.]+) to',
-          );
+          final pattern = RegExp(r'range of supported deployment target versions is ([0-9.]+) to');
           final RegExpMatch? match = pattern.firstMatch(line);
           if (match != null) {
             macOSMinDeploymentTarget = match.group(1);
@@ -336,6 +354,22 @@ Future<void> buildMacOS({
       'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
       color: TerminalColor.green,
     );
+
+    final File builtInfoPlist = globals.fs.file(
+      globals.fs.path.join(outputDirectory.path, 'Contents', 'Info.plist'),
+    );
+    final String plistPath = builtInfoPlist.existsSync()
+        ? builtInfoPlist.path
+        : flutterProject.macos.defaultHostInfoPlist.path;
+    final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
+      plistPath,
+      PlistParser.kFLTEnableImpellerKey,
+    );
+
+    final buildLabel = impellerEnabled == false
+        ? 'plist-impeller-disabled'
+        : 'plist-impeller-enabled';
+    globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'macos'));
   }
   await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
   final Duration elapsedDuration = sw.elapsed;
@@ -358,11 +392,11 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
   if (buildInfo.codeSizeDirectory == null || sizeAnalyzer == null) {
     return;
   }
-  final File? aotSnapshot = DarwinArch.values
-      .map<File?>((DarwinArch arch) {
+  final File? aotSnapshot = const <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]
+      .map<File?>((CpuArch arch) {
         return globals.fs
             .directory(buildInfo.codeSizeDirectory)
-            .childFile('snapshot.${arch.name}.json');
+            .childFile('snapshot.${arch.darwinArchName}.json');
         // Pick the first if there are multiple for simplicity
       })
       .firstWhere((File? file) => file!.existsSync(), orElse: () => null);
@@ -371,11 +405,11 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
       'No code size snapshot file (snapshot.<ARCH>.json) found in ${buildInfo.codeSizeDirectory}',
     );
   }
-  final File? precompilerTrace = DarwinArch.values
-      .map<File?>((DarwinArch arch) {
+  final File? precompilerTrace = const <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]
+      .map<File?>((CpuArch arch) {
         return globals.fs
             .directory(buildInfo.codeSizeDirectory)
-            .childFile('trace.${arch.name}.json');
+            .childFile('trace.${arch.darwinArchName}.json');
       })
       .firstWhere((File? file) => file!.existsSync(), orElse: () => null);
   if (precompilerTrace == null) {

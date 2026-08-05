@@ -131,6 +131,7 @@ class FlutterPluginTest {
         assertContains(registeredPrintTasks, "javaVersion")
         assertContains(registeredPrintTasks, "kgpVersion")
         assertContains(registeredPrintTasks, "printBuildVariants")
+        assertContains(registeredPrintTasks, "printNdkVersion")
     }
 
     @Test
