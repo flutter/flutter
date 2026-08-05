@@ -8,11 +8,15 @@
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
+#include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
 #include "impeller/renderer/command.h"
 
 namespace impeller {
 namespace testing {
+namespace {
+const GLint kBlockDataSize = 16;
+}
 
 using ::testing::_;
 
@@ -263,6 +267,98 @@ TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
   EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
                                             /*binding=*/1, /*vertex_offset=*/0,
                                             /*instance=*/0));
+}
+
+namespace {
+class TestWorker : public ReactorGLES::Worker {
+ public:
+  bool CanReactorReactOnCurrentThreadNow(
+      const ReactorGLES& reactor) const override {
+    return true;
+  }
+};
+}  // namespace
+
+void TestBindUniformBufferRange(size_t buffer_view_length,
+                                size_t expected_bound_size) {
+  BufferBindingsGLES bindings;
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+
+  const GLuint kProgram = 1;
+
+  ON_CALL(*mock_gles_impl,
+          GetProgramiv(/*program=*/kProgram,
+                       /*pname=*/GL_ACTIVE_UNIFORM_BLOCKS, /*params=*/_))
+      .WillByDefault(::testing::SetArgPointee<2>(1));
+  ON_CALL(*mock_gles_impl,
+          GetActiveUniformBlockiv(/*program=*/kProgram,
+                                  /*uniformBlockIndex=*/0,
+                                  /*pname=*/GL_UNIFORM_BLOCK_NAME_LENGTH,
+                                  /*params=*/_))
+      .WillByDefault(::testing::SetArgPointee<3>(9));
+  ON_CALL(*mock_gles_impl,
+          GetActiveUniformBlockName(/*program=*/kProgram,
+                                    /*uniformBlockIndex=*/0,
+                                    /*bufSize=*/9, /*length=*/_,
+                                    /*uniformBlockName=*/_))
+      .WillByDefault([](GLuint program, GLuint index, GLsizei bufSize,
+                        GLsizei* length, GLchar* name) {
+        *length = 8;
+        std::memcpy(name, "FragInfo", 9);
+      });
+  ON_CALL(
+      *mock_gles_impl,
+      GetUniformBlockIndex(/*program=*/kProgram,
+                           /*uniformBlockName=*/::testing::StrEq("FragInfo")))
+      .WillByDefault(::testing::Return(0));
+  ON_CALL(*mock_gles_impl,
+          GetActiveUniformBlockiv(/*program=*/kProgram,
+                                  /*uniformBlockIndex=*/0,
+                                  /*pname=*/GL_UNIFORM_BLOCK_DATA_SIZE,
+                                  /*params=*/_))
+      .WillByDefault(::testing::SetArgPointee<3>(kBlockDataSize));
+
+  EXPECT_CALL(*mock_gles_impl,
+              BindBufferRange(/*target=*/GL_UNIFORM_BUFFER, /*index=*/0,
+                              /*buffer=*/_, /*offset=*/0,
+                              /*size=*/expected_bound_size))
+      .Times(1);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  ASSERT_TRUE(bindings.ReadUniformsBindings(mock_gl->GetProcTable(), kProgram));
+
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  std::vector<BufferResource> bound_buffers;
+  std::vector<TextureAndSampler> bound_textures;
+
+  ShaderMetadata shader_metadata = {.name = "FragInfo"};
+  auto backing_store = std::make_unique<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{1024}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = 1024}, reactor,
+                                 std::move(backing_store));
+  BufferView buffer_view(&device_buffer, Range(0, buffer_view_length));
+  bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
+
+  EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
+                                       bound_buffers, Range{0, 0},
+                                       Range{0, 1}));
+}
+
+TEST(BufferBindingsGLESTest,
+     BindUniformBufferUsesMaxOfBufferViewAndBlockDataSize) {
+  TestBindUniformBufferRange(/*buffer_view_length=*/4,
+                             /*expected_bound_size=*/kBlockDataSize);
+}
+
+TEST(BufferBindingsGLESTest,
+     BindUniformBufferUsesBufferViewLengthWhenGreaterThanBlockDataSize) {
+  TestBindUniformBufferRange(/*buffer_view_length=*/32,
+                             /*expected_bound_size=*/32);
 }
 
 }  // namespace testing

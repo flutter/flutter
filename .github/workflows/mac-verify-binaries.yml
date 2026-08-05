@@ -5,6 +5,7 @@ on:
     branches: [master]
   merge_group:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   check-engine-changes:
@@ -45,7 +46,7 @@ jobs:
         uses: ./.github/actions/wait-for-engine-build
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          check-name: 'Mac mac_host_engine'
+          check-name: 'Mac mac_host_engine,Mac mac_ios_engine,Linux linux_host_engine'
 
       - uses: ./.github/actions/composite-flutter-setup
 
