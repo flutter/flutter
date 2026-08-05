@@ -234,9 +234,10 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
 
     // Forward any DevTools deep-links in a 'dart.flutter.devToolsDeepLink'
     // event.
-    final String? errorSummary = formatter.errorSummary;
-    final String? deepLinkUrl = formatter.devToolsDeepLinkUrl;
-    if (errorSummary != null && deepLinkUrl != null) {
+    if ((formatter.errorSummary, formatter.devToolsDeepLinkUrl) case (
+      final errorSummary?,
+      final deepLinkUrl?,
+    )) {
       // This event is interpreted by IDEs extensions like like Dart-Code and
       // should not be changed in breaking ways without coordination.
       sendEvent(
