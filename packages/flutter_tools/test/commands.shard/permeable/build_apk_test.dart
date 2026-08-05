@@ -729,6 +729,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -783,6 +784,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -837,6 +839,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -887,6 +890,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -954,6 +958,7 @@ void main() {
         ProcessManager: () => processManager,
         Analytics: () => analytics,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -1026,6 +1031,7 @@ void main() {
         ProcessManager: () => processManager,
         Analytics: () => analytics,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -1079,6 +1085,7 @@ void main() {
         ProcessManager: () => processManager,
         Analytics: () => analytics,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
   });
