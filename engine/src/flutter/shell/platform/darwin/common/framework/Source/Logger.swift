@@ -9,7 +9,7 @@ import Foundation
 ///
 /// These levels are used by `Logger` to determine if a message should be output.
 /// They are ordered by increasing severity.
-@objc(FlutterLogLevel) public enum LogLevel: Int {
+@objc(FlutterLogLevel) public enum LogLevel: Int, Sendable {
   /// Informational messages that are helpful for tracing application flow.
   case info
 
@@ -38,15 +38,38 @@ import Foundation
 /// Logger.logLevel = .warning  // Only show warnings and above
 /// Logger.logError("Failed to load asset: \(assetKey)")
 /// ```
-@objc(FlutterLogger) public final class Logger: NSObject {
-  // This is only mutated in tests.
-  nonisolated(unsafe) private static var shared = Logger()
-  private let outputWriter: OutputWriter
-  public let logLevel: LogLevel
+@objc(FlutterLogger) public final class Logger: NSObject, @unchecked Sendable {
+  private static let shared = Logger()
+  private let lock = NSLock()
+  private var _outputWriter: OutputWriter
+  private var _logLevel: LogLevel
 
-  init(outputWriter: OutputWriter, logLevel: LogLevel) {
-    self.outputWriter = outputWriter
-    self.logLevel = logLevel
+  public var outputWriter: OutputWriter {
+    get {
+      return lock.withLock { _outputWriter }
+    }
+    set {
+      lock.withLock {
+        _outputWriter = newValue
+      }
+    }
+  }
+
+  public var logLevel: LogLevel {
+    get {
+      return lock.withLock { _logLevel }
+    }
+    set {
+      lock.withLock {
+        _logLevel = newValue
+      }
+    }
+  }
+
+  public init(outputWriter: OutputWriter, logLevel: LogLevel) {
+    self._outputWriter = outputWriter
+    self._logLevel = logLevel
+    super.init()
   }
 
   override convenience init() {
@@ -60,9 +83,20 @@ import Foundation
     #endif
   }
 
-  public func log(level: LogLevel, _ message: String) {
-    if level.rawValue >= logLevel.rawValue {
-      outputWriter.writeLine(level: level, message)
+  public func log(level: LogLevel, _ message: @autoclosure () -> String) {
+    guard level.rawValue >= logLevel.rawValue else { return }
+
+    // Evaluate outside the lock keep lock time minimal and to guard against the possibility of
+    // someone accidentally calling the Logger from within the autoclosure.
+    let line = message()
+    lock.withLock {
+      _outputWriter.writeLine(level: level, line)
+    }
+  }
+
+  public func logDirect(_ message: String) {
+    lock.withLock {
+      _outputWriter.writeLine(level: .important, message)
     }
   }
 }
@@ -72,53 +106,86 @@ extension Logger {
   /// Sets the OutputWriter.
   @objc static var outputWriter: OutputWriter {
     get { return shared.outputWriter }
-    set(newValue) { shared = Logger(outputWriter: newValue, logLevel: shared.logLevel) }
+    set(newValue) { shared.outputWriter = newValue }
   }
 
-  @objc static var logLevel: LogLevel {
-    shared.logLevel
+  /// Sets the minimum log level.
+  @objc public static var logLevel: LogLevel {
+    get { return shared.logLevel }
+    set(newValue) { shared.logLevel = newValue }
   }
 }
 
 extension Logger {
   /// Logs a message at `LogLevel.info`.
-  @objc public static func logInfo(_ message: String) {
+  @available(swift, obsoleted: 1.0)
+  @objc(logInfo:) public static func objcLogInfo(_ message: String) {
     shared.log(level: .info, message)
   }
 
+  /// Logs a message at `LogLevel.info`.
+  public static func logInfo(_ message: @autoclosure () -> String) {
+    shared.log(level: .info, message())
+  }
+
   /// Logs a message at `LogLevel.important`.
-  @objc public static func logImportant(_ message: String) {
+  @available(swift, obsoleted: 1.0)
+  @objc(logImportant:) public static func objcLogImportant(_ message: String) {
     shared.log(level: .important, message)
   }
 
+  /// Logs a message at `LogLevel.important`.
+  public static func logImportant(_ message: @autoclosure () -> String) {
+    shared.log(level: .important, message())
+  }
+
   /// Logs a message at `LogLevel.warning`.
-  @objc public static func logWarning(_ message: String) {
+  @available(swift, obsoleted: 1.0)
+  @objc(logWarning:) public static func objcLogWarning(_ message: String) {
     shared.log(level: .warning, message)
   }
 
+  /// Logs a message at `LogLevel.warning`.
+  public static func logWarning(_ message: @autoclosure () -> String) {
+    shared.log(level: .warning, message())
+  }
+
   /// Logs a message at `LogLevel.error`.
-  @objc public static func logError(_ message: String) {
+  @available(swift, obsoleted: 1.0)
+  @objc(logError:) public static func objcLogError(_ message: String) {
     shared.log(level: .error, message)
   }
 
+  /// Logs a message at `LogLevel.error`.
+  public static func logError(_ message: @autoclosure () -> String) {
+    shared.log(level: .error, message())
+  }
+
   /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
-  @objc public static func logFatal(_ message: String) {
+  @available(swift, obsoleted: 1.0)
+  @objc(logFatal:) public static func objcLogFatal(_ message: String) {
     shared.log(level: .fatal, message)
+    abort()
+  }
+
+  /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
+  public static func logFatal(_ message: @autoclosure () -> String) {
+    shared.log(level: .fatal, message())
     abort()
   }
 
   /// Logs a message unconditionally.
   @objc public static func logDirect(_ message: String) {
-    shared.outputWriter.writeLine(level: .important, message)
+    shared.logDirect(message)
   }
 }
 
 @objc(FlutterOutputWriter)
-public protocol OutputWriter {
+public protocol OutputWriter: Sendable {
   func writeLine(level: LogLevel, _ message: String)
 }
 
-final class SyslogOutputWriter: OutputWriter {
+final class SyslogOutputWriter: OutputWriter, Sendable {
   func writeLine(level: LogLevel, _ message: String) {
     // TODO(cbracken): replace this with os_log-based approach.
     // https://github.com/flutter/flutter/issues/44030
@@ -126,7 +193,7 @@ final class SyslogOutputWriter: OutputWriter {
   }
 }
 
-final class StdoutOutputWriter: OutputWriter {
+final class StdoutOutputWriter: OutputWriter, Sendable {
   func writeLine(level: LogLevel, _ message: String) {
     fputs(message, stdout)
     fputs("\n", stdout)
