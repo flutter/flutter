@@ -214,6 +214,45 @@ void main() {
     expect(logs, equals(<String>['down $b']));
   });
 
+  testWidgets('WidgetTester.startHover and startHoverAt must respect buttons and kinds', (
+    WidgetTester tester,
+  ) async {
+    final List<String> logs = <String>[];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Listener(
+          onPointerHover: (PointerHoverEvent event) =>
+              logs.add('hover ${event.buttons} ${event.kind.name}'),
+          child: const Text('test'),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startHover(
+      find.text('test'),
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    expect(logs, equals(<String>['hover $kSecondaryMouseButton mouse']));
+    logs.clear();
+
+    await gesture.removePointer();
+    await tester.pump();
+
+    final TestGesture gestureAt = await tester.startHoverAt(
+      tester.getCenter(find.text('test')),
+      buttons: kPrimaryMouseButton,
+      kind: PointerDeviceKind.stylus,
+    );
+    await tester.pump();
+    expect(logs, equals(<String>['hover $kPrimaryMouseButton stylus']));
+
+    await gestureAt.removePointer();
+    await tester.pump();
+  });
+
   testWidgets('WidgetTester.longPress must respect buttons', (WidgetTester tester) async {
     final logs = <String>[];
 
