@@ -4859,10 +4859,15 @@ class Stack extends MultiChildRenderObjectWidget {
 
 /// A widget that controls where a child of a [Stack] is positioned.
 ///
-/// A [Positioned] widget must be a descendant of a [Stack] or of an [Overlay],
-/// which lays its entries out with the same stack layout, and the path from the
-/// [Positioned] widget to that ancestor must contain only [StatelessWidget]s or
-/// [StatefulWidget]s (not other kinds of widgets, like [RenderObjectWidget]s).
+/// A [Positioned] widget must be a descendant of a [Stack], and the path from
+/// the [Positioned] widget to its enclosing [Stack] must contain only
+/// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
+/// [RenderObjectWidget]s).
+///
+/// An [Overlay] lays its entries out using the same stack layout, so the
+/// widget built by an [OverlayEntry] can also be a [Positioned], with the
+/// same restriction on the path from the [Positioned] widget to the
+/// [OverlayEntry].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EgtPleVwxBQ}
 ///
@@ -4891,8 +4896,8 @@ class Stack extends MultiChildRenderObjectWidget {
 ///  * [PositionedTransition], which takes a provided [Animation] to transition
 ///    changes in the child's position over a given duration.
 ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
-///  * [Overlay], which uses a stack layout, so an [OverlayEntry] can position
-///    its contents with a [Positioned].
+///  * [Overlay], which lays its entries out using the same stack layout, so
+///    that an [OverlayEntry] can position its contents with a [Positioned].
 class Positioned extends ParentDataWidget<StackParentData> {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
@@ -5115,11 +5120,15 @@ class Positioned extends ParentDataWidget<StackParentData> {
 /// The ambient [Directionality] is used to determine whether [start] is to the
 /// left or to the right.
 ///
-/// A [PositionedDirectional] widget must be a descendant of a [Stack] or of an
-/// [Overlay], which lays its entries out with the same stack layout, and the
-/// path from the [PositionedDirectional] widget to that ancestor must contain
-/// only [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets,
-/// like [RenderObjectWidget]s).
+/// A [PositionedDirectional] widget must be a descendant of a [Stack], and the
+/// path from the [PositionedDirectional] widget to its enclosing [Stack] must
+/// contain only [StatelessWidget]s or [StatefulWidget]s (not other kinds of
+/// widgets, like [RenderObjectWidget]s).
+///
+/// An [Overlay] lays its entries out using the same stack layout, so the
+/// widget built by an [OverlayEntry] can also be a [PositionedDirectional],
+/// with the same restriction on the path from the [PositionedDirectional]
+/// widget to the [OverlayEntry].
 ///
 /// If a widget is wrapped in a [PositionedDirectional], then it is a
 /// _positioned_ widget in its [Stack]. If the [top] property is non-null, the
