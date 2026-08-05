@@ -362,7 +362,11 @@ class ShaderCompiler {
 
   Future<ProcessResult> _runCommand(List<String> command) async {
     try {
-      return await _processManager.run(command, stdoutEncoding: utf8, stderrEncoding: utf8);
+      return await _processManager.run(
+        command,
+        stdoutEncoding: utf8AllowMalformed,
+        stderrEncoding: utf8AllowMalformed,
+      );
     } on ProcessException catch (e) {
       if (_isBlockedBySecurityPolicy(e)) {
         throw _SecurityPolicyBlockException(e);
@@ -415,11 +419,11 @@ class ShaderCompilerException implements Exception {
     buffer.write('ShaderCompilerException: $message\n');
     if (stdout != null && stdout!.trim().isNotEmpty) {
       buffer.writeln('Stdout:');
-      buffer.writeln(stdout);
+      buffer.writeln(stdout!.trim());
     }
     if (stderr != null && stderr!.trim().isNotEmpty) {
       buffer.writeln('Stderr:');
-      buffer.writeln(stderr);
+      buffer.writeln(stderr!.trim());
     }
     return buffer.toString();
   }
