@@ -22,15 +22,15 @@ class AccessibilityInspector {
     registerServiceExtension,
   ) {
     registerServiceExtension(
-      name: 'accessibility.${AccessibilityServiceExtensions.getSemanticsTree.name}',
+      name: AccessibilityServiceExtensions.getSemanticsTree.extensionName,
       callback: _getSemanticsTree,
     );
     registerServiceExtension(
-      name: 'accessibility.${AccessibilityServiceExtensions.enableSemantics.name}',
+      name: AccessibilityServiceExtensions.enableSemantics.extensionName,
       callback: _enableSemantics,
     );
     registerServiceExtension(
-      name: 'accessibility.${AccessibilityServiceExtensions.disposeSemantics.name}',
+      name: AccessibilityServiceExtensions.disposeSemantics.extensionName,
       callback: _disposeSemantics,
     );
   }
@@ -42,32 +42,32 @@ class AccessibilityInspector {
     _semanticsHandle = null;
   }
 
-  Future<Map<String, dynamic>> _enableSemantics(Map<String, String> parameters) async {
+  Future<Map<String, Object?>> _enableSemantics(Map<String, String> parameters) async {
     _semanticsHandle ??= SemanticsBinding.instance.ensureSemantics();
-    return <String, dynamic>{};
+    return <String, Object?>{};
   }
 
-  Future<Map<String, dynamic>> _disposeSemantics(Map<String, String> parameters) async {
+  Future<Map<String, Object?>> _disposeSemantics(Map<String, String> parameters) async {
     resetAllState();
-    return <String, dynamic>{};
+    return <String, Object?>{};
   }
 
-  Future<Map<String, dynamic>> _getSemanticsTree(Map<String, String> parameters) async {
+  Future<Map<String, Object?>> _getSemanticsTree(Map<String, String> parameters) async {
     if (!SemanticsBinding.instance.semanticsEnabled) {
-      return <String, dynamic>{'error': 'Semantics not enabled.'};
+      return <String, Object?>{'error': 'Semantics not enabled.'};
     }
     final PipelineOwner? pipelineOwner = _findPipelineOwner();
     final SemanticsOwner? semanticsOwner = pipelineOwner?.semanticsOwner;
     if (semanticsOwner == null) {
-      return <String, dynamic>{'error': 'No PipelineOwner with SemanticsOwner found'};
+      return <String, Object?>{'error': 'No PipelineOwner with SemanticsOwner found'};
     }
     final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
     if (root == null) {
       RendererBinding.instance.ensureVisualUpdate();
-      return <String, dynamic>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
+      return <String, Object?>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
     }
 
-    final nodes = <String, dynamic>{};
+    final nodes = <String, Object?>{};
     final visited = <int>{};
     final queue = <SemanticsNode>[root];
     while (queue.isNotEmpty) {
@@ -92,7 +92,7 @@ class AccessibilityInspector {
       }
     }
 
-    return <String, dynamic>{'data': nodes};
+    return <String, Object?>{'data': nodes};
   }
 
   // TODO(hannahjin): This returns the first SemanticsOwner of any RenderView.

@@ -1356,7 +1356,7 @@ void main() {
       );
 
     final SemanticsData data = node.getSemanticsData();
-    final Map<String, dynamic> dataJsonMap = data.toJson();
+    final Map<String, Object?> dataJsonMap = data.toJson();
     expect(dataJsonMap['label'], 'Test Label');
     expect(dataJsonMap['value'], 'Test Value');
     expect(dataJsonMap['hint'], 'Test Hint');
@@ -1368,7 +1368,7 @@ void main() {
       'height': 50.0,
     });
 
-    final Map<String, dynamic> nodeJsonMap = node.toJson();
+    final Map<String, Object?> nodeJsonMap = node.toJson();
     expect(nodeJsonMap['id'], node.id);
     expect(nodeJsonMap['label'], 'Test Label');
     expect(nodeJsonMap['value'], 'Test Value');

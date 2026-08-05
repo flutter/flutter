@@ -546,7 +546,7 @@ enum WidgetInspectorServiceExtensions {
 /// service extensions.
 ///
 /// The String value for each of these extension names should be accessed by
-/// calling the `.name` property on the enum value.
+/// calling the [extensionName] property on the enum value.
 enum AccessibilityServiceExtensions {
   /// Name of service extension that, when called, returns the JSON serialized
   /// semantics tree.
@@ -576,5 +576,8 @@ enum AccessibilityServiceExtensions {
   ///
   /// * [AccessibilityInspector.initServiceExtensions], where the service
   ///   extension is registered.
-  disposeSemantics,
+  disposeSemantics;
+
+  /// The full name of the service extension, including the `accessibility.` prefix.
+  String get extensionName => 'accessibility.$name';
 }

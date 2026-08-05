@@ -64,17 +64,21 @@ void main() {
 
     // Calling getSemanticsTree before semantics is enabled returns an error.
     final Map<String, Object?> disabledResult = await callExtension(
-      'accessibility.getSemanticsTree',
+      AccessibilityServiceExtensions.getSemanticsTree.extensionName,
     );
     expect(disabledResult['error'], equals('Semantics not enabled.'));
     expect(disabledResult['needsFrame'], isNull);
 
     // Calling enableSemantics enables semantics without returning the tree.
-    final Map<String, Object?> enableResult = await callExtension('accessibility.enableSemantics');
+    final Map<String, Object?> enableResult = await callExtension(
+      AccessibilityServiceExtensions.enableSemantics.extensionName,
+    );
     expect(enableResult, isEmpty);
 
     // Calling getSemanticsTree schedules a frame and returns an error map indicating root is null.
-    final Map<String, Object?> result1 = await callExtension('accessibility.getSemanticsTree');
+    final Map<String, Object?> result1 = await callExtension(
+      AccessibilityServiceExtensions.getSemanticsTree.extensionName,
+    );
 
     expect(result1['error'], equals('rootSemanticsNode is null'));
     expect(result1['needsFrame'], isTrue);
@@ -83,7 +87,9 @@ void main() {
     await tester.pump();
 
     // The second call returns the populated semantics tree.
-    final Map<String, Object?> result2 = await callExtension('accessibility.getSemanticsTree');
+    final Map<String, Object?> result2 = await callExtension(
+      AccessibilityServiceExtensions.getSemanticsTree.extensionName,
+    );
 
     expect(result2['error'], isNull);
     expect(result2['data'], isA<Map<String, Object?>>());
@@ -135,7 +141,7 @@ void main() {
 
     // Calling disposeSemantics succeeds and cleans up semantics handle.
     final Map<String, Object?> disposeResult = await callExtension(
-      'accessibility.disposeSemantics',
+      AccessibilityServiceExtensions.disposeSemantics.extensionName,
     );
     expect(disposeResult, isEmpty);
 
