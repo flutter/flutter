@@ -357,8 +357,7 @@ TEST_F(FlAccessibleNodeTest, ExposesTextViaAtkText) {
   g_autofree gchar* substring = atk_text_get_text(ATK_TEXT(node), 0, 7);
   EXPECT_STREQ(substring, "Section");
 
-  EXPECT_EQ(atk_text_get_character_at_offset(ATK_TEXT(node), 0),
-            gunichar('S'));
+  EXPECT_EQ(atk_text_get_character_at_offset(ATK_TEXT(node), 0), gunichar('S'));
 
   EXPECT_EQ(atk_text_get_caret_offset(ATK_TEXT(node)), -1);
   EXPECT_EQ(atk_text_get_n_selections(ATK_TEXT(node)), 0);
@@ -374,8 +373,7 @@ TEST_F(FlAccessibleNodeTest, ExposesTextViaAtkText) {
   start_offset = -1;
   end_offset = -1;
   g_autofree gchar* text_at_offset = atk_text_get_string_at_offset(
-      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_CHAR, &start_offset,
-      &end_offset);
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_CHAR, &start_offset, &end_offset);
   EXPECT_STREQ(text_at_offset, "S");
   EXPECT_EQ(start_offset, 0);
   EXPECT_EQ(end_offset, 1);
@@ -383,8 +381,7 @@ TEST_F(FlAccessibleNodeTest, ExposesTextViaAtkText) {
   start_offset = -1;
   end_offset = -1;
   g_autofree gchar* text_at_line_offset = atk_text_get_string_at_offset(
-      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_LINE, &start_offset,
-      &end_offset);
+      ATK_TEXT(node), 0, ATK_TEXT_GRANULARITY_LINE, &start_offset, &end_offset);
   EXPECT_STREQ(text_at_line_offset, "Section One");
   EXPECT_EQ(start_offset, 0);
   EXPECT_EQ(end_offset, 11);
