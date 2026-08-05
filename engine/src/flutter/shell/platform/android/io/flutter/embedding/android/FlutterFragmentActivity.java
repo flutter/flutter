@@ -823,6 +823,10 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @NonNull
   public String getDartEntrypointFunctionName() {
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_DART_ENTRYPOINT);
+    }
+
     try {
       Bundle metaData = getMetaData();
       String desiredDartEntrypoint =
