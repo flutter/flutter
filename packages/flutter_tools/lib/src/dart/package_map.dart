@@ -145,26 +145,24 @@ extension PackageConfigWorkspaceExtension on PackageConfig {
     }
     final path = fileUri.toString();
     Package? bestMatch;
-    var bestMatchLength = -1;
+    String? bestMatchRoot;
 
     for (final Package package in packages) {
       final rootPath = package.packageUriRoot.toString();
       final rootPathWithSlash = rootPath.endsWith('/') ? rootPath : '$rootPath/';
       if (path.startsWith(rootPathWithSlash)) {
-        if (rootPathWithSlash.length > bestMatchLength) {
+        if (bestMatchRoot == null || rootPathWithSlash.length > bestMatchRoot.length) {
           bestMatch = package;
-          bestMatchLength = rootPathWithSlash.length;
+          bestMatchRoot = rootPathWithSlash;
         }
       }
     }
 
-    if (bestMatch == null) {
+    if (bestMatch == null || bestMatchRoot == null) {
       return null;
     }
 
-    final rootPath = bestMatch.packageUriRoot.toString();
-    final rootPathWithSlash = rootPath.endsWith('/') ? rootPath : '$rootPath/';
-    final String rest = path.substring(rootPathWithSlash.length);
+    final String rest = path.substring(bestMatchRoot.length);
     return Uri(scheme: 'package', path: '${bestMatch.name}/$rest');
   }
 }
