@@ -77,7 +77,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -1396,7 +1395,7 @@ public class FlutterViewTest {
   @SuppressWarnings("deprecation")
   private void setExpectedDisplayRotation(int rotation) {
     ShadowDisplay myDisplay =
-        Shadows.shadowOf(
+        ShadowDisplay.shadowOf(
             ((DisplayManager) ctx.getSystemService(Context.DISPLAY_SERVICE)).getDisplay(0));
     myDisplay.setRotation(rotation);
   }
