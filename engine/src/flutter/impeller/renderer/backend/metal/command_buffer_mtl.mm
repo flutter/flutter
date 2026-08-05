@@ -179,7 +179,7 @@ CommandBuffer::SubmitResult CommandBufferMTL::SubmitCommandsInternal(
     CompletionCallback callback) {
   auto context = context_.lock();
   if (!context) {
-    return {};
+    return SubmitResult(false);
   }
 #ifdef IMPELLER_DEBUG
   ContextMTL::Cast(*context).GetGPUTracer()->RecordCmdBuffer(buffer_);
@@ -210,23 +210,20 @@ CommandBuffer::SubmitResult CommandBufferMTL::SubmitCommandsInternal(
   }];
 
   if (callback) {
-    CompletionCallback callback_copy = std::move(callback);
+    // The block copies the callback to keep it alive until completion.
     [buffer_
         addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
           [[maybe_unused]] auto result =
               LogMTLCommandBufferErrorIfPresent(buffer);
           FML_DCHECK(result)
               << "Must not have errors during command buffer submission.";
-          callback_copy(ToCommitResult(buffer.status));
+          callback(ToCommitResult(buffer.status));
         }];
   }
 
   [buffer_ commit];
   buffer_ = nil;
-  return {
-      .submitted = true,
-      .scheduling_receipt = std::move(scheduling_receipt),
-  };
+  return SubmitResult(true, std::move(scheduling_receipt));
 }
 
 void CommandBufferMTL::OnWaitUntilCompleted() {}

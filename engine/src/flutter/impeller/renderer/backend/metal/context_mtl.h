@@ -194,6 +194,7 @@ class ContextMTL final : public Context,
   Mutex tasks_awaiting_gpu_mutex_;
   std::deque<PendingTasks> tasks_awaiting_gpu_
       IPLR_GUARDED_BY(tasks_awaiting_gpu_mutex_);
+  /// Tracks image uploads that have not reached a scheduled or terminal state.
   PendingImageUploadScheduleTracker pending_image_uploads_;
   std::unique_ptr<SyncSwitchObserver> sync_switch_observer_;
   std::shared_ptr<CommandQueue> command_queue_ip_;
@@ -213,6 +214,7 @@ class ContextMTL final : public Context,
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
       id<MTLCommandQueue> queue) const;
 
+  /// Waits for pending image uploads to become scheduled or terminal.
   void DrainPendingImageUploads();
 
   ContextMTL(const ContextMTL&) = delete;

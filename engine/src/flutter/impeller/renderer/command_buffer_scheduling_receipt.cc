@@ -14,7 +14,7 @@ CommandBufferSchedulingReceiptState::CommandBufferSchedulingReceiptState() =
 CommandBufferSchedulingReceiptState::~CommandBufferSchedulingReceiptState() =
     default;
 
-void CommandBufferSchedulingReceiptState::WaitUntilScheduled() const {
+void CommandBufferSchedulingReceiptState::WaitUntilScheduled() {
   Lock lock(mutex_);
   condition_.Wait(mutex_, [this]() IPLR_REQUIRES(mutex_) {
     return state_ != State::kPending;
@@ -28,17 +28,20 @@ bool CommandBufferSchedulingReceiptState::IsScheduledOrTerminal() const {
 
 void CommandBufferSchedulingReceiptState::AddScheduledOrTerminalCallback(
     fml::closure callback) {
-  if (!callback) {
-    return;
-  }
-  {
-    Lock lock(mutex_);
-    if (state_ == State::kPending) {
-      callbacks_.push_back(std::move(callback));
-      return;
+  if (callback) {
+    bool invoke_callback = false;
+    {
+      Lock lock(mutex_);
+      if (state_ == State::kPending) {
+        callbacks_.push_back(std::move(callback));
+      } else {
+        invoke_callback = true;
+      }
+    }
+    if (invoke_callback) {
+      callback();
     }
   }
-  callback();
 }
 
 void CommandBufferSchedulingReceiptState::MarkScheduled() {

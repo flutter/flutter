@@ -18,14 +18,16 @@ namespace {
 
 class TestSchedulingReceipt final : public CommandBufferSchedulingReceipt {
  public:
+  /// When `satisfy_when_waited` is true, waiting satisfies the receipt before
+  /// blocking.
   explicit TestSchedulingReceipt(bool satisfy_when_waited = false)
       : satisfy_when_waited_(satisfy_when_waited) {}
 
-  void WaitUntilScheduled() const override {
+  void WaitUntilScheduled() override {
     wait_count_++;
     wait_started_.Signal();
     if (satisfy_when_waited_) {
-      const_cast<TestSchedulingReceipt*>(this)->Satisfy();
+      Satisfy();
     }
     satisfied_event_.Wait();
   }
@@ -75,9 +77,9 @@ class TestSchedulingReceipt final : public CommandBufferSchedulingReceipt {
   mutable std::mutex mutex_;
   bool satisfied_ = false;
   std::vector<fml::closure> callbacks_;
-  mutable fml::ManualResetWaitableEvent wait_started_;
-  mutable fml::ManualResetWaitableEvent satisfied_event_;
-  mutable std::atomic_size_t wait_count_ = 0u;
+  fml::ManualResetWaitableEvent wait_started_;
+  fml::ManualResetWaitableEvent satisfied_event_;
+  std::atomic_size_t wait_count_ = 0u;
 };
 
 }  // namespace

@@ -27,13 +27,14 @@ namespace testing {
 
 namespace {
 
+/// A test receipt whose wait blocks until it is marked scheduled or terminal.
 class BlockingSchedulingReceipt final : public CommandBufferSchedulingReceipt {
  public:
   explicit BlockingSchedulingReceipt(
       fml::CountDownLatch* any_wait_started = nullptr)
       : any_wait_started_(any_wait_started) {}
 
-  void WaitUntilScheduled() const override {
+  void WaitUntilScheduled() override {
     wait_count_++;
     if (any_wait_started_) {
       any_wait_started_->CountDown();
@@ -61,8 +62,8 @@ class BlockingSchedulingReceipt final : public CommandBufferSchedulingReceipt {
  private:
   fml::CountDownLatch* const any_wait_started_;
   CommandBufferSchedulingReceiptState state_;
-  mutable std::atomic_size_t wait_count_ = 0u;
-  mutable fml::ManualResetWaitableEvent wait_started_;
+  std::atomic_size_t wait_count_ = 0u;
+  fml::ManualResetWaitableEvent wait_started_;
 };
 
 }  // namespace
@@ -141,6 +142,8 @@ TEST_P(ContextMTLTest, GpuDisableWaitsForAllPendingImageUploads) {
       std::make_shared<BlockingSchedulingReceipt>(&any_wait_started);
   context_mtl.TrackPendingImageUpload(scheduled_receipt);
   context_mtl.TrackPendingImageUpload(terminal_receipt);
+  EXPECT_EQ(scheduled_receipt->GetWaitCount(), 0u);
+  EXPECT_EQ(terminal_receipt->GetWaitCount(), 0u);
 
   fml::ManualResetWaitableEvent transition_started;
   fml::ManualResetWaitableEvent transition_returned;

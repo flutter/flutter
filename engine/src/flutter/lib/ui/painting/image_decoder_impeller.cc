@@ -550,11 +550,13 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
       return std::make_pair(nullptr, decode_error);
     }
 
-    // UploadTextureToPrivate calls this method while holding the shared side
-    // of the GPU SyncSwitch. Registering before returning ensures that a
-    // concurrent disable transition cannot pass the switch's unique lock and
-    // miss a committed upload.
-    context->TrackPendingImageUpload(submit_result.scheduling_receipt);
+    if (submit_result.scheduling_receipt) {
+      // UploadTextureToPrivate calls this method while holding the shared side
+      // of the GPU SyncSwitch. Registering before returning ensures that a
+      // concurrent disable transition cannot pass the switch's unique lock and
+      // miss a committed upload.
+      context->TrackPendingImageUpload(submit_result.scheduling_receipt);
+    }
   }
 
   // Flush the pending command buffer to ensure that its output becomes visible

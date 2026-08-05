@@ -32,16 +32,14 @@ CommandBuffer::SubmitResult CommandBuffer::SubmitCommandsWithReceipt(
     if (callback) {
       callback(Status::kError);
     }
-    return {};
+    return SubmitResult(false);
   }
   return OnSubmitCommandsWithReceipt(callback);
 }
 
 CommandBuffer::SubmitResult CommandBuffer::OnSubmitCommandsWithReceipt(
     CompletionCallback callback) {
-  return {
-      .submitted = OnSubmitCommands(std::move(callback)),
-  };
+  return SubmitResult(OnSubmitCommands(std::move(callback)));
 }
 
 void CommandBuffer::WaitUntilCompleted() {

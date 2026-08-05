@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <memory>
+#include <utility>
 
 #include "impeller/renderer/blit_pass.h"
 #include "impeller/renderer/command_buffer_scheduling_receipt.h"
@@ -48,7 +49,13 @@ class CommandBuffer {
 
  public:
   struct SubmitResult {
-    bool submitted = false;
+    explicit SubmitResult(bool submitted,
+                          std::shared_ptr<CommandBufferSchedulingReceipt>
+                              scheduling_receipt = nullptr)
+        : submitted(submitted),
+          scheduling_receipt(std::move(scheduling_receipt)) {}
+
+    bool submitted;
     std::shared_ptr<CommandBufferSchedulingReceipt> scheduling_receipt;
   };
 

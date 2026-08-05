@@ -18,11 +18,13 @@ namespace impeller {
 /// A terminal command buffer has completed or failed and therefore cannot
 /// begin executing GPU work later. Waiting is safe from multiple threads and
 /// returns once either the scheduled or terminal state is reached.
+/// Receipts do not expose which state was reached because the iOS lifecycle
+/// barrier only needs to know that one of them has occurred.
 class CommandBufferSchedulingReceipt {
  public:
   virtual ~CommandBufferSchedulingReceipt();
 
-  virtual void WaitUntilScheduled() const = 0;
+  virtual void WaitUntilScheduled() = 0;
 
   virtual bool IsScheduledOrTerminal() const = 0;
 
@@ -41,7 +43,7 @@ class CommandBufferSchedulingReceiptState final
   ~CommandBufferSchedulingReceiptState() override;
 
   // |CommandBufferSchedulingReceipt|
-  void WaitUntilScheduled() const override;
+  void WaitUntilScheduled() override;
 
   // |CommandBufferSchedulingReceipt|
   bool IsScheduledOrTerminal() const override;
@@ -65,7 +67,7 @@ class CommandBufferSchedulingReceiptState final
   void MarkSatisfied(State state);
 
   mutable Mutex mutex_;
-  mutable ConditionVariable condition_;
+  ConditionVariable condition_;
   State state_ IPLR_GUARDED_BY(mutex_) = State::kPending;
   std::vector<fml::closure> callbacks_ IPLR_GUARDED_BY(mutex_);
 

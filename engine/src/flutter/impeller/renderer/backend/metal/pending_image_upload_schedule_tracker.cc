@@ -22,16 +22,15 @@ void PendingImageUploadScheduleTracker::Track(
     return;
   }
 
-  const std::shared_ptr<State> state = state_;
-  uint64_t receipt_id;
+  ReceiptID receipt_id;
   {
-    Lock lock(state->mutex);
-    receipt_id = state->next_id++;
-    state->pending.emplace(receipt_id, receipt);
+    Lock lock(state_->mutex);
+    receipt_id = state_->next_id++;
+    state_->pending.emplace(receipt_id, receipt);
   }
 
   receipt->AddScheduledOrTerminalCallback(
-      [weak_state = std::weak_ptr<State>(state), receipt_id]() {
+      [weak_state = std::weak_ptr<State>(state_), receipt_id]() {
         const std::shared_ptr<State> state = weak_state.lock();
         if (!state) {
           return;

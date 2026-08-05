@@ -8,10 +8,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <unordered_map>
 
 #include "impeller/base/thread.h"
 #include "impeller/renderer/command_buffer_scheduling_receipt.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
 
@@ -32,11 +32,13 @@ class PendingImageUploadScheduleTracker {
   size_t GetPendingCount() const;
 
  private:
+  using ReceiptID = uint64_t;
+
   struct State {
     Mutex mutex;
-    uint64_t next_id IPLR_GUARDED_BY(mutex) = 1u;
-    std::unordered_map<uint64_t,
-                       std::shared_ptr<CommandBufferSchedulingReceipt>>
+    ReceiptID next_id IPLR_GUARDED_BY(mutex) = 1u;
+    absl::flat_hash_map<ReceiptID,
+                        std::shared_ptr<CommandBufferSchedulingReceipt>>
         pending IPLR_GUARDED_BY(mutex);
   };
 

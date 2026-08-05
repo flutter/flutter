@@ -59,6 +59,7 @@ impeller_component("metal") {
   public_deps = [
     "../../:renderer",
     "//flutter/fml",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
   ]
 
   frameworks = [
