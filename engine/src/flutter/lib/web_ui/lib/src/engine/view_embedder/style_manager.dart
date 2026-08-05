@@ -59,7 +59,7 @@ class StyleManager {
       // semantic element horizontally so taps on text fields land off the
       // <input> and the keyboard never opens. Blink and Gecko resolve the same
       // static position to 0, so this is a no-op there.
-      // See: https://github.com/flutter/flutter/issues/129324
+      // See: https://github.com/flutter/flutter/issues/190483
       ..left = '0'
       ..top = '0'
       ..transformOrigin = '0 0 0';

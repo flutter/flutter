@@ -64,7 +64,7 @@ void doTests() {
       // The host must be anchored at the view origin. Without an explicit
       // left/top it falls back to a static position flowed after its sibling
       // hosts, offsetting the whole semantics tree. See:
-      // https://github.com/flutter/flutter/issues/129324
+      // https://github.com/flutter/flutter/issues/190483
       expect(semanticsHost.style.left, '0px');
       expect(semanticsHost.style.top, '0px');
       expect(semanticsHost.style.transformOrigin, anyOf('0px 0px 0px', '0px 0px'));
