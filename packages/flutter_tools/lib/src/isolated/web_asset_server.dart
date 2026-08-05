@@ -344,6 +344,7 @@ class WebAssetServer implements AssetReader {
             ? FrontendServerDdcLibraryBundleStrategyProvider(
                 ReloadConfiguration.none,
                 server,
+                null, // PathResolver
                 digestProvider,
                 BuildSettings(
                   appEntrypoint: packageConfig.toPackageUri(
@@ -357,6 +358,7 @@ class WebAssetServer implements AssetReader {
             : FrontendServerRequireStrategyProvider(
                 ReloadConfiguration.none,
                 server,
+                null, // PathResolver
                 digestProvider,
                 BuildSettings(
                   appEntrypoint: packageConfig.toPackageUri(
@@ -431,6 +433,9 @@ class WebAssetServer implements AssetReader {
   @visibleForTesting
   @override
   String basePath;
+
+  @override
+  AssetScheme get assetScheme => const FrontendServerAssetScheme();
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting

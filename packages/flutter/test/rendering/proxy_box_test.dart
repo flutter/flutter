@@ -78,6 +78,25 @@ void main() {
     expect(root.needsCompositing, isFalse);
   });
 
+  test('RenderPhysicalModel paints shadow only for non-zero elevation', () {
+    final root = RenderPhysicalModel(
+      color: const Color(0xffff00ff),
+      child: RenderSizedBox(const Size(10.0, 10.0)),
+    );
+    layout(root, phase: EnginePhase.paint);
+    expect(
+      (PaintingContext context, Offset offset) => root.paint(context, offset),
+      paintsExactlyCountTimes(#drawShadow, 0),
+    );
+
+    root.elevation = 1.0;
+    pumpFrame(phase: EnginePhase.paint);
+    expect(
+      (PaintingContext context, Offset offset) => root.paint(context, offset),
+      paintsExactlyCountTimes(#drawShadow, 1),
+    );
+  });
+
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
     final renderObj = RenderSemanticsGestureHandler(
       onTap: () {},
@@ -1070,6 +1089,23 @@ void main() {
     expect(backdropFilter.filterConfig, equals(filterConfig1));
     expect(() => backdropFilter.filter, throwsAssertionError);
   });
+
+  test('RenderProxyBoxMixin.computeDryBaseline returns null when the child has no baseline', () {
+    // Regression test for https://github.com/flutter/flutter/issues/189711
+    final child = _RenderNoBaseline();
+    final proxy = RenderSemanticsAnnotations(
+      child: child,
+      properties: const SemanticsProperties(),
+    );
+    layout(proxy);
+    expect(
+      proxy.getDryBaseline(
+        const BoxConstraints.tightFor(width: 40.0, height: 20.0),
+        TextBaseline.alphabetic,
+      ),
+      isNull,
+    );
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -1204,5 +1240,22 @@ class RenderBoxWithTestConstraints extends RenderProxyBox {
   @override
   Size computeDryLayout(TestConstraints constraints) {
     return constraints.constrain(Size.square(constraints.testValue));
+  }
+}
+
+class _RenderNoBaseline extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.constrain(const Size(40.0, 20.0));
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(const Size(40.0, 20.0));
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return null;
   }
 }
