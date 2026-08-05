@@ -7,7 +7,7 @@ import InternalFlutterSwiftCommon
 
 /// An `OutputWriter` that stores the most recently logged output in a string.
 @objc(FlutterStringOutputWriter)
-public final class StringOutputWriter: NSObject, OutputWriter {
+public final class StringOutputWriter: NSObject, OutputWriter, @unchecked Sendable {
   @objc public var didLog = false
   public var lastLevel: LogLevel!
   @objc public var lastLine: String!
