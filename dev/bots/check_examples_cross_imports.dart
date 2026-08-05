@@ -593,9 +593,7 @@ class ExamplesCrossImportChecker {
     'examples/texture/lib/main.dart',
   };
 
-  static final RegExp _examplesPrefix =
-    RegExp(r'packages[/\]flutter[/\]examples[/\]api|examples',
-  );
+  static final RegExp _examplesPrefix = RegExp(r'packages[/\]flutter[/\]examples[/\]api|examples');
 
   /// Find the `packages/flutter/examples/api/lib` and
   /// `packages/flutter/examples/api/test` directories which contain the API

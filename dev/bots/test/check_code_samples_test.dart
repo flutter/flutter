@@ -48,13 +48,14 @@ void main() {
     bool missingTests = false,
     bool malformedLinks = false,
   }) {
-    final Directory examplesLib = packages
-      .childDirectory('flutter')
-      .childDirectory('examples')
-      .childDirectory('api')
-      .childDirectory('lib')
-      .childDirectory('layer')
-      ..createSync(recursive: true);
+    final Directory examplesLib =
+        packages
+            .childDirectory('flutter')
+            .childDirectory('examples')
+            .childDirectory('api')
+            .childDirectory('lib')
+            .childDirectory('layer')
+          ..createSync(recursive: true);
     final File fooExample = examplesLib.childFile('foo_example.0.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('// Example for foo');
@@ -66,13 +67,14 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('// Example that is not linked');
     }
-    final Directory examplesTests = packages
-      .childDirectory('flutter')
-      .childDirectory('examples')
-      .childDirectory('api')
-      .childDirectory('test')
-      .childDirectory('layer')
-      ..createSync(recursive: true);
+    final Directory examplesTests =
+        packages
+            .childDirectory('flutter')
+            .childDirectory('examples')
+            .childDirectory('api')
+            .childDirectory('test')
+            .childDirectory('layer')
+          ..createSync(recursive: true);
     examplesTests.childFile('foo_example.0_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('// test for foo example');

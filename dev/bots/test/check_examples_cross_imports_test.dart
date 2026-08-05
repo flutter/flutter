@@ -978,8 +978,7 @@ bool isExamplesRoot(String libraryName) {
 class _CrossImportsExamplesDirectories {
   factory _CrossImportsExamplesDirectories(Directory examplesDirectory) {
     return _CrossImportsExamplesDirectories._(
-      examplesSlashApiDirectory: examplesDirectory
-          .parent
+      examplesSlashApiDirectory: examplesDirectory.parent
           .childDirectory('packages')
           .childDirectory('flutter')
           .childDirectory('examples')
