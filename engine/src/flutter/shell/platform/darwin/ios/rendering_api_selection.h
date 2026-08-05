@@ -12,7 +12,6 @@
 namespace flutter {
 
 enum class IOSRenderingAPI {
-  kSoftware,
   kMetal,
 };
 
