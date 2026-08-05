@@ -41,6 +41,9 @@ abstract class WebDevice extends Device {
   Uri? _devToolsUri;
 
   set devToolsUri(Uri? uri) => _devToolsUri = uri;
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.unknown;
 }
 
 /// A web device that supports a chromium browser.

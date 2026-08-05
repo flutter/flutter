@@ -74,6 +74,7 @@
 ^flutter/third_party/vulkan-deps/spirv-headers/.*
 ^flutter/third_party/vulkan-deps/vulkan-headers/src/LICENSE\.md$
 ^flutter/third_party/vulkan-deps/vulkan-loader/.*
+^flutter/third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSES/CC-BY-4.0.txt
 ^flutter/third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSE.md$
 ^flutter/third_party/vulkan-deps/vulkan-utility-libraries/src/scripts/.*
 ^flutter/tools/android_sdk/packages\.txt$

@@ -22,6 +22,7 @@ import '../src/fakes.dart' hide FakeProcess;
 
 const kChromeArgs = <String>[
   '--disable-background-timer-throttling',
+  '--disable-renderer-backgrounding',
   '--disable-extensions',
   '--disable-popup-blocking',
   '--bwsi',
@@ -29,6 +30,8 @@ const kChromeArgs = <String>[
   '--no-default-browser-check',
   '--disable-default-apps',
   '--disable-translate',
+  '--password-store=basic',
+  '--use-mock-keychain',
   '--disable-search-engine-choice-screen',
 ];
 
@@ -126,7 +129,8 @@ void main() {
       'Using Chromium 115\n'
       '[CHROME]: \n'
       '[CHROME]: \n'
-      '[CHROME]: DevTools listening',
+      '[CHROME]: DevTools listening\n'
+      '[CHROME]:',
     );
   });
 
@@ -410,74 +414,111 @@ void main() {
     await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
   });
 
-  testWithoutContext('can launch x86_64 Chrome on ARM macOS', () async {
-    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
-      hostPlatform: HostPlatform.darwin_arm64,
+  testWithoutContext(
+    'can launch Chrome on ARM macOS and appends --use-angle=metal in headless mode',
+    () async {
+      final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
+        hostPlatform: HostPlatform.darwin_arm64,
+      );
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: macOSUtils,
+        browserFinder: findChromeExecutable,
+        logger: BufferLogger.test(),
+      );
+
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=12345',
+            ...kChromeArgs,
+            '--use-angle=metal',
+            '--no-sandbox',
+            '--headless',
+            '--window-size=1024,1024',
+            '--disable-background-networking',
+            '--disable-sync',
+            '--disable-client-side-phishing-detection',
+            '--disable-notifications',
+            '--disable-features=GCM',
+            'example_url',
+          ],
+          stderr: kDevtoolsStderr,
+        ),
+      );
+
+      await expectReturnsNormallyLater(
+        chromiumLauncher.launch('example_url', headless: true, skipCheck: true),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'can launch Chrome on ARM macOS in headed mode and does not append --use-angle=metal',
+    () async {
+      final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
+        hostPlatform: HostPlatform.darwin_arm64,
+      );
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: macOSUtils,
+        browserFinder: findChromeExecutable,
+        logger: BufferLogger.test(),
+      );
+
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=12345',
+            ...kChromeArgs,
+            'example_url',
+          ],
+          stderr: kDevtoolsStderr,
+        ),
+      );
+
+      await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
+    },
+  );
+
+  testWithoutContext('does not append --use-mock-keychain on non-macOS platforms', () async {
+    final Platform linuxPlatform = FakePlatform(
+      environment: <String, String>{kChromeEnvironment: 'example_chrome'},
     );
     final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
-      platform: platform,
+      platform: linuxPlatform,
       processManager: processManager,
-      operatingSystemUtils: macOSUtils,
+      operatingSystemUtils: operatingSystemUtils,
       browserFinder: findChromeExecutable,
       logger: BufferLogger.test(),
     );
 
-    processManager.addCommands(<FakeCommand>[
-      const FakeCommand(
-        command: <String>['file', 'example_chrome'],
-        stdout: 'Mach-O 64-bit executable x86_64',
-      ),
-      const FakeCommand(
+    final List<String> kChromeArgsLinux = kChromeArgs.toList()..remove('--use-mock-keychain');
+
+    processManager.addCommand(
+      FakeCommand(
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
           '--remote-debugging-port=12345',
-          ...kChromeArgs,
+          ...kChromeArgsLinux,
           'example_url',
         ],
         stderr: kDevtoolsStderr,
       ),
-    ]);
+    );
 
     await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
   });
-
-  testWithoutContext('can launch ARM Chrome natively on ARM macOS when installed', () async {
-    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
-      hostPlatform: HostPlatform.darwin_arm64,
-    );
-    final chromiumLauncher = ChromiumLauncher(
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-      operatingSystemUtils: macOSUtils,
-      browserFinder: findChromeExecutable,
-      logger: BufferLogger.test(),
-    );
-
-    processManager.addCommands(<FakeCommand>[
-      const FakeCommand(
-        command: <String>['file', 'example_chrome'],
-        stdout: 'Mach-O 64-bit executable arm64',
-      ),
-      const FakeCommand(
-        command: <String>[
-          '/usr/bin/arch',
-          '-arm64',
-          'example_chrome',
-          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
-          ...kChromeArgs,
-          'example_url',
-        ],
-        stderr: kDevtoolsStderr,
-      ),
-    ]);
-
-    await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
-  });
-
   testWithoutContext('can launch chrome with a custom debug port', () async {
     processManager.addCommand(
       const FakeCommand(
@@ -537,7 +578,12 @@ void main() {
           ...kChromeArgs,
           '--no-sandbox',
           '--headless',
-          '--window-size=2400,1800',
+          '--window-size=1024,1024',
+          '--disable-background-networking',
+          '--disable-sync',
+          '--disable-client-side-phishing-detection',
+          '--disable-notifications',
+          '--disable-features=GCM',
           'example_url',
         ],
         stderr: kDevtoolsStderr,
@@ -615,22 +661,42 @@ void main() {
   );
 
   testWithoutContext('can retry launch when glibc bug happens', () async {
-    const args = <String>[
+    final Platform linuxPlatform = FakePlatform(
+      environment: <String, String>{kChromeEnvironment: 'example_chrome'},
+    );
+    final linuxLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: linuxPlatform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+    final expectedArgs = <String>[
       'example_chrome',
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
-      ...kChromeArgs,
+      ...kChromeArgs.where((String arg) => arg != '--use-mock-keychain'),
       '--no-sandbox',
       '--headless',
-      '--window-size=2400,1800',
+      '--window-size=1024,1024',
+      '--disable-background-networking',
+      '--disable-sync',
+      '--disable-client-side-phishing-detection',
+      '--disable-notifications',
+      '--disable-features=GCM',
+      '--use-gl=angle',
+      '--use-angle=swiftshader',
+      '--enable-unsafe-swiftshader',
+      '--disable-gpu-sandbox',
       'example_url',
     ];
 
     // Pretend to hit glibc bug 3 times.
     for (var i = 0; i < 3; i++) {
       processManager.addCommand(
-        const FakeCommand(
-          command: args,
+        FakeCommand(
+          command: expectedArgs,
           stderr:
               'Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: '
               '_dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen '
@@ -640,10 +706,10 @@ void main() {
     }
 
     // Succeed on the 4th try.
-    processManager.addCommand(const FakeCommand(command: args, stderr: kDevtoolsStderr));
+    processManager.addCommand(FakeCommand(command: expectedArgs, stderr: kDevtoolsStderr));
 
     await expectReturnsNormallyLater(
-      chromeLauncher.launch('example_url', skipCheck: true, headless: true),
+      linuxLauncher.launch('example_url', skipCheck: true, headless: true),
     );
   });
 
@@ -655,7 +721,12 @@ void main() {
       ...kChromeArgs,
       '--no-sandbox',
       '--headless',
-      '--window-size=2400,1800',
+      '--window-size=1024,1024',
+      '--disable-background-networking',
+      '--disable-sync',
+      '--disable-client-side-phishing-detection',
+      '--disable-notifications',
+      '--disable-features=GCM',
       'example_url',
     ];
 
@@ -692,7 +763,12 @@ void main() {
             ...kChromeArgs,
             '--no-sandbox',
             '--headless',
-            '--window-size=2400,1800',
+            '--window-size=1024,1024',
+            '--disable-background-networking',
+            '--disable-sync',
+            '--disable-client-side-phishing-detection',
+            '--disable-notifications',
+            '--disable-features=GCM',
             'example_url',
           ],
           stderr: 'nothing in the std error indicating glibc error',

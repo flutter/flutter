@@ -186,7 +186,7 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeLinuxApp extends Fake implements LinuxApp {
   @override
-  String executable(BuildMode buildMode) => switch (buildMode) {
+  String executable(BuildMode buildMode, [String? flavor]) => switch (buildMode) {
     BuildMode.debug => 'debug/executable',
     BuildMode.profile => 'profile/executable',
     BuildMode.release => 'release/executable',
