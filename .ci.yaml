@@ -861,7 +861,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - dev/**
-      - examples/api/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -4330,7 +4329,6 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - dev/**
-      - examples/api/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -4361,7 +4359,6 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - dev/**
-      - examples/api/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -6395,7 +6392,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     runIf:
       - dev/**
-      - examples/api/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**

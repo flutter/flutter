@@ -13,8 +13,11 @@ import '../cross_imports_checker_utils.dart';
 import 'common.dart';
 import 'cross_imports_checker_test_utils.dart';
 
-// A pattern that matches `examples/api/lib/**` and `examples/api/test/**`, for use in tests.
-final _kExamplesSlashApiLibraryPattern = RegExp(r'^examples/api/(lib|test)/[a-z_]+');
+// A pattern that matches `packages/flutter/examples/api/lib/**` and
+// `packages/flutter/examples/api/test/**`, for use in tests.
+final _kExamplesSlashApiLibraryPattern = RegExp(
+  r'^packages/flutter/examples/api/(lib|test)/[a-z_]+',
+);
 
 void main() {
   late ExamplesCrossImportChecker checker;
@@ -58,9 +61,17 @@ void main() {
     fs.currentDirectory = flutterRoot;
 
     final Directory examplesDirectory = flutterRoot.childDirectory('examples')..createSync();
+    final Directory apiDocDirectory =
+        flutterRoot
+            .childDirectory('packages')
+            .childDirectory('flutter')
+            .childDirectory('examples')
+            .childDirectory('api')
+          ..createSync(recursive: true);
 
     checker = ExamplesCrossImportChecker(
       examplesDirectory: examplesDirectory,
+      apiDocDirectory: apiDocDirectory,
       flutterRoot: flutterRoot,
       filesystem: fs,
     );
@@ -125,8 +136,7 @@ void main() {
   });
 
   test('examples/api/lib/sample_templates templates produce no violations when valid', () async {
-    final Directory sampleTemplatesDirectory = checker.examplesDirectory
-        .childDirectory('api')
+    final Directory sampleTemplatesDirectory = checker.apiDocDirectory
         .childDirectory('lib')
         .childDirectory('sample_templates');
 
@@ -152,8 +162,7 @@ void main() {
   });
 
   test('examples/api/lib/sample_templates templates produce violations when invalid', () async {
-    final Directory sampleTemplatesDirectory = checker.examplesDirectory
-        .childDirectory('api')
+    final Directory sampleTemplatesDirectory = checker.apiDocDirectory
         .childDirectory('lib')
         .childDirectory('sample_templates');
 
@@ -175,16 +184,16 @@ void main() {
 
     final String lines = <String>[
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in examples/api/lib/sample_templates has a disallowed import of Material. Refactor it or move it to the Material examples.',
-      '║   examples/api/lib/sample_templates/cupertino.0.dart',
+      '║ The following file in packages/flutter/examples/api/lib/sample_templates has a disallowed import of Material. Refactor it or move it to the Material examples.',
+      '║   packages/flutter/examples/api/lib/sample_templates/cupertino.0.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
-      '║   examples/api/lib/sample_templates/material.0.dart',
+      '║ The following file in packages/flutter/examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+      '║   packages/flutter/examples/api/lib/sample_templates/material.0.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR #3╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
-      '║   examples/api/lib/sample_templates/widgets.0.dart',
+      '║ The following file in packages/flutter/examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+      '║   packages/flutter/examples/api/lib/sample_templates/widgets.0.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
     ].join('\n');
     expect(result, equals('$lines\n'));
@@ -192,8 +201,7 @@ void main() {
   });
 
   test('examples/api/test/sample_templates templates produce no violations when valid', () async {
-    final Directory sampleTemplatesDirectory = checker.examplesDirectory
-        .childDirectory('api')
+    final Directory sampleTemplatesDirectory = checker.apiDocDirectory
         .childDirectory('test')
         .childDirectory('sample_templates');
 
@@ -219,8 +227,7 @@ void main() {
   });
 
   test('examples/api/test/sample_templates templates produce violations when invalid', () async {
-    final Directory sampleTemplatesDirectory = checker.examplesDirectory
-        .childDirectory('api')
+    final Directory sampleTemplatesDirectory = checker.apiDocDirectory
         .childDirectory('test')
         .childDirectory('sample_templates');
 
@@ -242,16 +249,16 @@ void main() {
 
     final String lines = <String>[
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in examples/api/test/sample_templates has a disallowed import of Material. Refactor it or move it to the Material examples.',
-      '║   examples/api/test/sample_templates/cupertino.0_test.dart',
+      '║ The following file in packages/flutter/examples/api/test/sample_templates has a disallowed import of Material. Refactor it or move it to the Material examples.',
+      '║   packages/flutter/examples/api/test/sample_templates/cupertino.0_test.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
-      '║   examples/api/test/sample_templates/material.0_test.dart',
+      '║ The following file in packages/flutter/examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+      '║   packages/flutter/examples/api/test/sample_templates/material.0_test.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
       '╔═╡ERROR #3╞════════════════════════════════════════════════════════════════════',
-      '║ The following file in examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
-      '║   examples/api/test/sample_templates/widgets.0_test.dart',
+      '║ The following file in packages/flutter/examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+      '║   packages/flutter/examples/api/test/sample_templates/widgets.0_test.dart',
       '╚═══════════════════════════════════════════════════════════════════════════════',
     ].join('\n');
     expect(result, equals('$lines\n'));
@@ -802,8 +809,8 @@ void main() {
 
     buildKnownCrossImportExamplesFiles();
 
-    const examplesApiMaterialLibraryName = 'examples/api/lib/material';
-    const examplesApiMaterialTestLibraryName = 'examples/api/test/material';
+    const examplesApiMaterialLibraryName = 'packages/flutter/examples/api/lib/material';
+    const examplesApiMaterialTestLibraryName = 'packages/flutter/examples/api/test/material';
     const LibraryCrossImportStatementType importStatement = .cupertino;
 
     final Directory examplesMaterialLibFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
@@ -817,13 +824,19 @@ void main() {
     );
 
     writeImportInFiles(
-      {'examples/api/lib/material/qux.dart', 'examples/api/lib/material/baz/foo.dart'},
+      {
+        'packages/flutter/examples/api/lib/material/qux.dart',
+        'packages/flutter/examples/api/lib/material/baz/foo.dart',
+      },
       inDirectory: examplesMaterialLibFilesDirectory,
       importString: importStatement.importString,
     );
 
     writeImportInFiles(
-      {'examples/api/test/material/qux_test.dart', 'examples/api/test/material/baz/foo_test.dart'},
+      {
+        'packages/flutter/examples/api/test/material/qux_test.dart',
+        'packages/flutter/examples/api/test/material/baz/foo_test.dart',
+      },
       inDirectory: examplesMaterialTestFilesDirectory,
       importString: importStatement.importString,
     );
@@ -844,8 +857,8 @@ void main() {
 
     buildKnownCrossImportExamplesFiles();
 
-    const examplesApiCupertinoLibraryName = 'examples/api/lib/cupertino';
-    const examplesApiCupertinoTestLibraryName = 'examples/api/test/cupertino';
+    const examplesApiCupertinoLibraryName = 'packages/flutter/examples/api/lib/cupertino';
+    const examplesApiCupertinoTestLibraryName = 'packages/flutter/examples/api/test/cupertino';
     const LibraryCrossImportStatementType importStatement = .material;
 
     final Directory examplesCupertinoLibFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
@@ -859,15 +872,18 @@ void main() {
     );
 
     writeImportInFiles(
-      {'examples/api/lib/cupertino/qux.dart', 'examples/api/lib/cupertino/baz/foo.dart'},
+      {
+        'packages/flutter/examples/api/lib/cupertino/qux.dart',
+        'packages/flutter/examples/api/lib/cupertino/baz/foo.dart',
+      },
       inDirectory: examplesCupertinoLibFilesDirectory,
       importString: importStatement.importString,
     );
 
     writeImportInFiles(
       {
-        'examples/api/test/cupertino/qux_test.dart',
-        'examples/api/test/cupertino/baz/foo_test.dart',
+        'packages/flutter/examples/api/test/cupertino/qux_test.dart',
+        'packages/flutter/examples/api/test/cupertino/baz/foo_test.dart',
       },
       inDirectory: examplesCupertinoTestFilesDirectory,
       importString: importStatement.importString,
@@ -891,13 +907,13 @@ void main() {
 /// Returns [LibraryCrossImportStatementType.material] for any other library,
 /// such as `examples/layers/rendering/spinning_square.dart`.
 LibraryCrossImportStatementType getCrossImportStatementForExamplesLibraryFile(String filePath) {
-  if (filePath.startsWith('examples/api/lib/material/') ||
-      filePath.startsWith('examples/api/test/material/')) {
+  if (filePath.startsWith('packages/flutter/examples/api/lib/material/') ||
+      filePath.startsWith('packages/flutter/examples/api/test/material/')) {
     return LibraryCrossImportStatementType.cupertino;
   }
 
-  if (filePath.startsWith('examples/api/lib/cupertino/') ||
-      filePath.startsWith('examples/api/test/cupertino/')) {
+  if (filePath.startsWith('packages/flutter/examples/api/lib/cupertino/') ||
+      filePath.startsWith('packages/flutter/examples/api/test/cupertino/')) {
     return LibraryCrossImportStatementType.material;
   }
 
@@ -941,19 +957,20 @@ bool hasNoKnownCrossImports(String libraryName) {
 
 /// Returns whether the given [libraryName] matches the Material examples under `examples/api`.
 bool isMaterialExample(String libraryName) {
-  return libraryName == 'examples/api/lib/material' || libraryName == 'examples/api/test/material';
+  return libraryName == 'packages/flutter/examples/api/lib/material' ||
+      libraryName == 'packages/flutter/examples/api/test/material';
 }
 
 /// Returns whether the given [libraryName] matches the Cupertino examples under `examples/api`.
 bool isCupertinoExample(String libraryName) {
-  return libraryName == 'examples/api/lib/cupertino' ||
-      libraryName == 'examples/api/test/cupertino';
+  return libraryName == 'packages/flutter/examples/api/lib/cupertino' ||
+      libraryName == 'packages/flutter/examples/api/test/cupertino';
 }
 
 /// Returns whether the given [libraryName] matches the root `examples` or `examples/api` directories,
 /// which contain subdirectories with examples, but should themselves be void of examples.
 bool isExamplesRoot(String libraryName) {
-  return libraryName == 'examples' || libraryName == 'examples/api';
+  return libraryName == 'examples' || libraryName == 'packages/flutter/examples/api';
 }
 
 // A utility that keeps track of the directories under test,
@@ -961,7 +978,12 @@ bool isExamplesRoot(String libraryName) {
 class _CrossImportsExamplesDirectories {
   factory _CrossImportsExamplesDirectories(Directory examplesDirectory) {
     return _CrossImportsExamplesDirectories._(
-      examplesSlashApiDirectory: examplesDirectory.childDirectory('api'),
+      examplesSlashApiDirectory: examplesDirectory
+          .parent
+          .childDirectory('packages')
+          .childDirectory('flutter')
+          .childDirectory('examples')
+          .childDirectory('api'),
       examplesFlutterViewDirectory: examplesDirectory.childDirectory('flutter_view'),
       examplesHelloWorldDirectory: examplesDirectory.childDirectory('hello_world'),
       examplesImageListDirectory: examplesDirectory.childDirectory('image_list'),
@@ -1064,7 +1086,7 @@ class _CrossImportsExamplesDirectories {
 
   /// Get the examples directory for the given [libraryName].
   Directory examplesFilesDirectoryFor(String libraryName, Directory examplesDirectory) {
-    const unsupportedPrefix = 'examples/api';
+    const unsupportedPrefix = 'packages/flutter/examples/api';
 
     if (libraryName.startsWith(unsupportedPrefix) &&
         libraryName.length > unsupportedPrefix.length) {
@@ -1076,7 +1098,7 @@ class _CrossImportsExamplesDirectories {
 
     return switch (libraryName) {
       'examples' => examplesDirectory,
-      'examples/api' => examplesSlashApiDirectory,
+      'packages/flutter/examples/api' => examplesSlashApiDirectory,
       'examples/flutter_view' => examplesFlutterViewDirectory,
       'examples/hello_world' => examplesHelloWorldDirectory,
       'examples/image_list' => examplesImageListDirectory,
@@ -1095,7 +1117,7 @@ class _CrossImportsExamplesDirectories {
 // A mapping of `examples/**` test cases for the cross imports checker, excluding `examples/api/**`.
 const crossImportsGenericExamplesTestCases = <String>[
   'examples',
-  'examples/api',
+  'packages/flutter/examples/api',
   'examples/flutter_view',
   'examples/hello_world',
   'examples/image_list',
@@ -1111,20 +1133,20 @@ const crossImportsGenericExamplesTestCases = <String>[
 // A mapping of `examples/api/lib/**` and `examples/api/test/**` test cases for the cross imports checker,
 // excluding `examples/api/lib/sample_templates` and `examples/api/test/sample_templates`.
 const crossImportsExamplesApiTestCases = <String>[
-  'examples/api/lib/animation',
-  'examples/api/lib/foundation',
-  'examples/api/lib/gestures',
-  'examples/api/lib/painting',
-  'examples/api/lib/rendering',
-  'examples/api/lib/services',
-  'examples/api/lib/ui',
-  'examples/api/lib/widgets',
-  'examples/api/test/animation',
-  'examples/api/test/foundation',
-  'examples/api/test/gestures',
-  'examples/api/test/painting',
-  'examples/api/test/rendering',
-  'examples/api/test/services',
-  'examples/api/test/ui',
-  'examples/api/test/widgets',
+  'packages/flutter/examples/api/lib/animation',
+  'packages/flutter/examples/api/lib/foundation',
+  'packages/flutter/examples/api/lib/gestures',
+  'packages/flutter/examples/api/lib/painting',
+  'packages/flutter/examples/api/lib/rendering',
+  'packages/flutter/examples/api/lib/services',
+  'packages/flutter/examples/api/lib/ui',
+  'packages/flutter/examples/api/lib/widgets',
+  'packages/flutter/examples/api/test/animation',
+  'packages/flutter/examples/api/test/foundation',
+  'packages/flutter/examples/api/test/gestures',
+  'packages/flutter/examples/api/test/painting',
+  'packages/flutter/examples/api/test/rendering',
+  'packages/flutter/examples/api/test/services',
+  'packages/flutter/examples/api/test/ui',
+  'packages/flutter/examples/api/test/widgets',
 ];
