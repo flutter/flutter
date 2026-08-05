@@ -38,9 +38,6 @@ PlatformViewIOS::PlatformViewIOS(
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
     : PlatformViewIOS(delegate,
                       IOSContext::Create(rendering_api,
-                                         delegate.OnPlatformViewGetSettings().enable_impeller
-                                             ? IOSRenderingBackend::kImpeller
-                                             : IOSRenderingBackend::kSkia,
                                          is_gpu_disabled_sync_switch,
                                          delegate.OnPlatformViewGetSettings()),
                       platform_views_controller,

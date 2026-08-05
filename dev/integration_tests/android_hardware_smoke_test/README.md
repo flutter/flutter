@@ -479,3 +479,38 @@ a single step, the test suite executes exactly once,
 remains low maintenance across AGP upgrades, and
 cleanly bubbles up any legitimate compiler or runner
 errors without silent try-catch blocks.
+
+---
+
+## 7. Graphics Initialization & Screenshot Retry Mechanisms
+
+To guarantee high stability against flakiness on emulators and physical hardware, the test suite implements a two-layered retry mechanism:
+
+### A. Process & Activity-Level Retries (Graphics Context Initialization)
+* **Goal**: Recovers from transient EGL or graphics context negotiation errors (e.g., `Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED` or HWUI startup warnings) that occur globally when the Flutter Engine boots up.
+* **Mechanism**:
+  * **On Host (CI)**: If the `flutter drive` run fails, the host suite runner
+    ([`run_android_hardware_smoke_tests.dart`](dev/bots/suite_runners/run_android_hardware_smoke_tests.dart))
+    checks the device logcat. If transient EGL errors are detected, it restarts
+    the test run process (up to 3 attempts) to initialize a new EGL context in
+    a fresh process.
+  * **On Device (JUnit)**: If an attempt fails, the JUnit runner
+    ([`FlutterActivityTest.kt`](android/app/src/androidTest/java/com/example/android_hardware_smoke_test/FlutterActivityTest.kt))
+    recreates the Activity scenario and retries **only** on blank screenshot
+    failures (up to 3 attempts). It does **not** retry on EGL/graphics errors,
+    as recreating the activity within the same application process cannot
+    recover from process-level EGL initialization failures; these fail
+    immediately on the device to bubble up to the host runner. Standard test
+    failures (e.g., golden pixel mismatches) also fail immediately.
+
+### B. Screenshot-Level Retries (Blank Platform View Capture)
+* **Goal**: Prevents race conditions where a screenshot is taken before native platform view compositing has fully settled, resulting in a blank/transparent frame.
+* **Mechanism**:
+  * **Both Modes**: The screenshot capture loop (both native `UiAutomation` and
+    host-side `NativeDriver`) checks the cropped image. If the cropped image is
+    completely transparent or solid black, it retries the capture up to 3
+    times, sleeping 200ms between attempts.
+  * **Short-circuiting**: If an EGL/graphics error is detected in the logcat
+    during screenshot attempts, the loop is terminated early (bypassing
+    remaining screenshot retries) to fail the test immediately and bubble the
+    failure up to the host runner as quickly as possible.

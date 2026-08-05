@@ -332,6 +332,7 @@
 /dev/devicelab/bin/tasks/windowing_test_windows.dart @mattkae @flutter/desktop
 /dev/devicelab/bin/tasks/windows_desktop_impeller.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/windows_primitive_shape_golden_test.dart @b-luk @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
 ## Host only framework tests
@@ -339,6 +340,8 @@
 # Linux docs_generate_release
 # Linux docs_publish
 /dev/bots/docs.sh @Piinks @flutter/framework
+# Linux snippets
+/dev/snippets @dkwingsmt @flutter/framework
 # Linux packages_autoroller
 /dev/conductor/core @christopherfujino @flutter/tool
 # Linux web_e2e_test
@@ -373,6 +376,7 @@
 # coverage @christopherfujino @flutter/infra
 # customer_testing @Piinks @flutter/framework
 # docs @Piinks @flutter/framework
+# snippets @Piinks @flutter/framework
 # flutter_packaging @christopherfujino @flutter/infra
 # flutter_plugins @stuartmorgan-g @flutter/plugin
 # framework_tests @Piinks @flutter/framework
