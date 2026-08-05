@@ -39,11 +39,6 @@ class FakeIOSContext : public flutter::IOSContext {
   ~FakeIOSContext() override = default;
 
   // |IOSContext|
-  flutter::IOSRenderingBackend GetBackend() const override {
-    return flutter::IOSRenderingBackend::kImpeller;
-  }
-
-  // |IOSContext|
   std::unique_ptr<flutter::Texture> CreateExternalTexture(
       int64_t texture_id,
       NSObject<FlutterTexture>* texture) override {
