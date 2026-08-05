@@ -1,5 +1,5 @@
-name: primitive_shape_test
-description: Integration test to capture primitive shape rendering snapshots and upload to Skia Gold.
+name: engine_integration_golden_test
+description: Integration tests that capture rendering snapshots and upload them to Skia Gold for engine-based render tests.
 publish_to: none
 
 environment:
