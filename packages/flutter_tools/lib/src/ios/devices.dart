@@ -38,6 +38,7 @@ import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'application_package.dart';
 import 'core_devices.dart';
+import 'device_support.dart';
 import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
@@ -309,6 +310,7 @@ class IOSDevice extends Device {
     super.id, {
     required FileSystem fileSystem,
     required FileSystemUtils fileSystemUtils,
+    required ProcessUtils processUtils,
     required this.name,
     required CpuArch cpuArch,
     String? cpuArchitectureString,
@@ -329,6 +331,7 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required super.logger,
     required Analytics analytics,
+    required Xcode? xcode,
   }) : _cpuArch = cpuArch,
        _sdkVersion = sdkVersion,
        _modelCode = modelCode,
@@ -339,9 +342,11 @@ class IOSDevice extends Device {
        _coreDeviceControl = coreDeviceControl,
        _coreDeviceLauncher = coreDeviceLauncher,
        _xcodeDebug = xcodeDebug,
+       _xcode = xcode,
        _iproxy = iProxy,
        _fileSystem = fileSystem,
        _fileSystemUtils = fileSystemUtils,
+       _processUtils = processUtils,
        _logger = logger,
        _analytics = analytics,
        _platform = platform,
@@ -359,12 +364,14 @@ class IOSDevice extends Device {
   final Analytics _analytics;
   final FileSystem _fileSystem;
   final FileSystemUtils _fileSystemUtils;
+  final ProcessUtils _processUtils;
   final Logger _logger;
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
+  final Xcode? _xcode;
   final IProxy _iproxy;
 
   Version? get sdkVersion {
@@ -585,6 +592,15 @@ class IOSDevice extends Device {
       return LaunchResult.failed();
     }
 
+    final bool shouldAttachDebugger = shouldAttachLLDBDebugger(debuggingOptions);
+    if (shouldAttachDebugger) {
+      await IOSDeviceSupport(
+        logger: _logger,
+        processUtils: _processUtils,
+        xcode: _xcode,
+      ).prepareDeviceSupport(id);
+    }
+
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
       EnvironmentType.physical,
@@ -633,6 +649,7 @@ class IOSDevice extends Device {
           mainPath: mainPath,
           discoveryTimeout: discoveryTimeout,
           shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
+          shouldAttachDebugger: shouldAttachDebugger,
         );
         installationResult = result ? 0 : 1;
         deploymentMethod = coreDeviceDeploymentMethod;
@@ -1058,6 +1075,15 @@ class IOSDevice extends Device {
     );
   }
 
+  /// Whether the LLDB debugger should be attached.
+  ///
+  /// The LLDB debugger should only be attached in debug mode or if the user uses the
+  /// `--ios-profile-debugger` flag in profile mode.
+  bool shouldAttachLLDBDebugger(DebuggingOptions debuggingOptions) {
+    return debuggingOptions.buildInfo.isDebug ||
+        (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
+  }
+
   /// Uses either `devicectl` or Xcode automation to install, launch, and debug
   /// apps on physical iOS devices.
   ///
@@ -1081,6 +1107,7 @@ class IOSDevice extends Device {
     required IOSApp package,
     required List<String> launchArguments,
     required String? mainPath,
+    required bool shouldAttachDebugger,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
@@ -1113,8 +1140,7 @@ class IOSDevice extends Device {
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
-    if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
@@ -1122,10 +1148,6 @@ class IOSDevice extends Device {
       if (deviceLogReader is IOSDeviceLogReader) {
         await deviceLogReader.listenToCoreDeviceLauncher(_coreDeviceLauncher);
       }
-
-      final bool shouldAttachDebugger =
-          debuggingOptions.buildInfo.isDebug ||
-          (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
 
       if (shouldAttachDebugger) {
         final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
@@ -1367,17 +1389,42 @@ class IOSDevice extends Device {
 
   @override
   bool get supportsScreenshot {
-    if (isCoreDevice) {
-      // `idevicescreenshot` stopped working with iOS 17 / Xcode 15
-      // (https://github.com/flutter/flutter/issues/128598).
-      return false;
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      return globals.xcode!.isDevicectlInstalled;
     }
-    return _iMobileDevice.isInstalled;
+    return false;
   }
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      var success = false;
+      try {
+        success = await _coreDeviceControl.takeScreenshot(
+          deviceId: id,
+          destination: outputFile.path,
+        );
+      } on Exception catch (error) {
+        final errorMessage = error.toString();
+        if (errorMessage.contains('CoreDeviceError error 4000') ||
+            errorMessage.contains('CoreDeviceError error 4016') ||
+            errorMessage.contains('RemotePairingError error 2') ||
+            errorMessage.contains('Connection was invalidated')) {
+          throwToolExit(
+            'Failed to establish a connection to the device. '
+            'Please make sure the device is available and try again.',
+          );
+        }
+        throwToolExit('Failed to take screenshot with devicectl: $error');
+      }
+      if (success) {
+        return;
+      }
+      throwToolExit('Failed to take screenshot with devicectl.');
+    }
+    throwToolExit('flutter screenshot requires Xcode 27 or higher.');
   }
 
   @override

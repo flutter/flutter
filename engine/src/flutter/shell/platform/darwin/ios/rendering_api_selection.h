@@ -12,13 +12,7 @@
 namespace flutter {
 
 enum class IOSRenderingAPI {
-  kSoftware,
   kMetal,
-};
-
-enum class IOSRenderingBackend {
-  kSkia,
-  kImpeller,
 };
 
 IOSRenderingAPI GetRenderingAPIForProcess();

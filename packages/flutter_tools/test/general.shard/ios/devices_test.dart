@@ -12,11 +12,13 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -31,7 +33,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 
 void main() {
   final macPlatform = FakePlatform(operatingSystem: 'macos');
@@ -49,11 +51,13 @@ void main() {
     late IOSCoreDeviceControl coreDeviceControl;
     late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
+    late ProcessUtils processUtils;
 
     setUp(() {
       final artifacts = Artifacts.test();
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
+      processUtils = ProcessUtils(processManager: FakeProcessManager.any(), logger: logger);
       fileSystem = MemoryFileSystem.test();
       fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: macPlatform);
       iosDeploy = IOSDeploy(
@@ -96,6 +100,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
       expect(await device.isSupported(), isTrue);
     });
@@ -130,6 +136,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
 
       expect(
@@ -165,9 +173,62 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
 
       expect(device.deviceSupportDirectory, isNull);
+    });
+
+    group('shouldAttachLLDBDebugger', () {
+      testWithoutContext('returns expected values for different BuildInfo and options', () {
+        final device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: coreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '13.3',
+          cpuArch: .arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
+        );
+
+        expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.debug)), isTrue);
+        expect(
+          device.shouldAttachLLDBDebugger(
+            DebuggingOptions.enabled(BuildInfo.profile, iosProfileDebugger: true),
+          ),
+          isTrue,
+        );
+        expect(
+          device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.profile)),
+          isFalse,
+        );
+        expect(
+          device.shouldAttachLLDBDebugger(
+            DebuggingOptions.enabled(BuildInfo.profile, iosProfileDebugger: false),
+          ),
+          isFalse,
+        );
+        expect(
+          device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.release)),
+          isFalse,
+        );
+      });
     });
 
     testWithoutContext('32-bit devices are unsupported', () async {
@@ -191,6 +252,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
       expect(await device.isSupported(), isFalse);
     });
@@ -218,6 +281,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         1,
       );
@@ -243,6 +308,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         13,
       );
@@ -268,6 +335,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         10,
       );
@@ -293,6 +362,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         0,
       );
@@ -318,6 +389,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         0,
       );
@@ -345,6 +418,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       var expectedVersion = Version(13, 3, 1, text: '13.3.1');
       expect(sdkVersion, isNotNull);
@@ -372,6 +447,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expectedVersion = Version(13, 3, 1, text: '13.3.1 (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -399,6 +476,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expectedVersion = Version(16, 4, 1, text: '16.4.1(a) (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -426,6 +505,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expectedVersion = Version(0, 0, 0, text: '0');
       expect(sdkVersion, isNotNull);
@@ -452,6 +533,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
 
@@ -476,6 +559,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
     });
@@ -502,6 +587,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
 
       expect(await device.sdkNameAndVersion, 'iOS 13.3 17C54');
@@ -529,6 +616,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -563,6 +652,8 @@ void main() {
               isPaired: true,
               devModeEnabled: true,
               isCoreDevice: false,
+              processUtils: processUtils,
+              xcode: null,
             );
           }, throwsAssertionError);
         },
@@ -655,6 +746,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -669,6 +762,203 @@ void main() {
         expect(process2.killed, true);
         expect(process3.killed, true);
       });
+    });
+
+    group('screenshot', () {
+      late FakeIOSCoreDeviceControl fakeCoreDeviceControl;
+      late IOSDevice device;
+      late File outputFile;
+
+      setUp(() {
+        fakeCoreDeviceControl = coreDeviceControl as FakeIOSCoreDeviceControl;
+        outputFile = fileSystem.file('screenshot.png');
+      });
+
+      testUsingContext(
+        'supportsScreenshot is false on CoreDevice with Xcode < 27',
+        () async {
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '17.0',
+            cpuArch: CpuArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
+          );
+
+          expect(device.supportsScreenshot, isFalse);
+        },
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(15, 0, 0))},
+      );
+
+      testUsingContext(
+        'supportsScreenshot is true on CoreDevice with Xcode 27+ and devicectl installed',
+        () async {
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '17.0',
+            cpuArch: CpuArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
+          );
+
+          final fakeXcode = globals.xcode! as FakeXcode;
+          fakeXcode.isDevicectlInstalled = true;
+          expect(device.supportsScreenshot, isTrue);
+
+          fakeXcode.isDevicectlInstalled = false;
+          expect(device.supportsScreenshot, isFalse);
+        },
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
+      );
+
+      testUsingContext(
+        'takeScreenshot uses devicectl on CoreDevice with Xcode 27+',
+        () async {
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '17.0',
+            cpuArch: CpuArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
+          );
+
+          fakeCoreDeviceControl.takeScreenshotSuccess = true;
+          await device.takeScreenshot(outputFile);
+
+          fakeCoreDeviceControl.takeScreenshotSuccess = false;
+          expect(() => device.takeScreenshot(outputFile), throwsToolExit());
+        },
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
+      );
+
+      testUsingContext(
+        'takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable',
+        () async {
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '17.0',
+            cpuArch: CpuArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
+          );
+
+          fakeCoreDeviceControl.takeScreenshotException = Exception(
+            'ERROR: A connection to this device could not be established. (com.apple.dt.CoreDeviceError error 4000 (0xFA0))',
+          );
+          expect(
+            () => device.takeScreenshot(outputFile),
+            throwsToolExit(
+              message:
+                  'Failed to establish a connection to the device. Please make sure the device is available and try again.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
+      );
+
+      testUsingContext(
+        'takeScreenshot throws ToolExit on CoreDevice with Xcode < 27',
+        () async {
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '17.0',
+            cpuArch: CpuArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
+          );
+
+          expect(
+            () => device.takeScreenshot(outputFile),
+            throwsToolExit(message: 'flutter screenshot requires Xcode 27 or higher.'),
+          );
+        },
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))},
+      );
     });
   });
 
@@ -737,6 +1027,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        xcode: null,
       );
 
       device2 = IOSDevice(
@@ -760,6 +1052,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        xcode: null,
       );
     });
 
@@ -1096,6 +1390,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        xcode: null,
       );
     });
 
@@ -1263,10 +1559,29 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   bool get debugStarted => false;
 }
 
-class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
+class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
+  bool takeScreenshotSuccess = true;
+  Exception? takeScreenshotException;
+
+  @override
+  Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
+    if (takeScreenshotException != null) {
+      throw takeScreenshotException!;
+    }
+    return takeScreenshotSuccess;
+  }
+}
 
 class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
 
 class FakeAnalytics extends Fake implements Analytics {}
 
-class FakeXcode extends Fake implements Xcode {}
+class FakeXcode extends Fake implements Xcode {
+  FakeXcode({this.currentVersion, this.isDevicectlInstalled = true});
+
+  @override
+  final Version? currentVersion;
+
+  @override
+  bool isDevicectlInstalled;
+}

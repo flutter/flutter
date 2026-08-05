@@ -1562,6 +1562,11 @@ IOSDevice setUpIOSDevice({
     fileSystem: testFileSystem,
     fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: macPlatform),
     platform: macPlatform,
+    processUtils: ProcessUtils(
+      processManager: processManager ?? FakeProcessManager.any(),
+      logger: logger,
+    ),
+    xcode: null,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,
     iosDeploy: IOSDeploy(
