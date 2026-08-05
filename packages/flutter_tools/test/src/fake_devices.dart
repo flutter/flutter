@@ -22,6 +22,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
       'id': 'ephemeral',
       'isSupported': true,
       'targetPlatform': 'android-arm',
+      'cpuArch': 'armv7',
       'emulator': true,
       'sdk': 'Test SDK (1.2.3)',
       'capabilities': <String, Object>{
@@ -37,12 +38,14 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   FakeDeviceJsonData(
     FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript)
+      ..cpuArch = Future<CpuArch>.value(CpuArch.unknown)
       ..sdkNameAndVersion = Future<String>.value('Web SDK (1.2.4)'),
     <String, Object>{
       'name': 'webby',
       'id': 'webby',
       'isSupported': true,
       'targetPlatform': 'web-javascript',
+      'cpuArch': 'unknown',
       'emulator': true,
       'sdk': 'Web SDK (1.2.4)',
       'capabilities': <String, Object>{
@@ -67,6 +70,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
       'id': 'wireless-android',
       'isSupported': true,
       'targetPlatform': 'android-arm',
+      'cpuArch': 'armv7',
       'emulator': true,
       'sdk': 'Test SDK (1.2.3)',
       'capabilities': <String, Object>{
@@ -87,12 +91,14 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         connectionInterface: DeviceConnectionInterface.wireless,
       )
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios)
+      ..cpuArch = Future<CpuArch>.value(CpuArch.arm64)
       ..sdkNameAndVersion = Future<String>.value('iOS 16'),
     <String, Object>{
       'name': 'wireless ios',
       'id': 'wireless-ios',
       'isSupported': true,
       'targetPlatform': 'ios',
+      'cpuArch': 'arm64',
       'emulator': true,
       'sdk': 'iOS 16',
       'capabilities': <String, Object>{
@@ -162,6 +168,9 @@ class FakeDevice extends Device {
 
   @override
   Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
+
+  @override
+  Future<CpuArch> cpuArch = Future<CpuArch>.value(CpuArch.armv7);
 
   @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

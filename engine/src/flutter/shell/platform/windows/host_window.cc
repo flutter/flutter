@@ -353,6 +353,30 @@ void HostWindow::FocusRootViewOf(HostWindow* window) {
   }
 };
 
+void HostWindow::HandleWindowActivation(HWND hwnd, WPARAM wparam) {
+  if (LOWORD(wparam) == WA_INACTIVE) {
+    // The window is being deactivated; leave focus untouched. Focusing this
+    // window's view would call SetFocus on its content, which reactivates the
+    // window (SetFocus activates the parent of the focused window) and pulls it
+    // back to the top of the z-order, taking activation from the window that is
+    // being activated.
+    return;
+  }
+
+  if (!IsWindowEnabled(hwnd)) {
+    // Prevent a disabled window (e.g. the owner of a modal dialog) from being
+    // activated using the task switcher by redirecting focus and activation to
+    // the first enabled descendant.
+    if (HostWindow* const enabled_descendant = FindFirstEnabledDescendant()) {
+      SetActiveWindow(enabled_descendant->GetWindowHandle());
+      FocusRootViewOf(this);
+    }
+    return;
+  }
+
+  FocusRootViewOf(this);
+}
+
 LRESULT HostWindow::WndProc(HWND hwnd,
                             UINT message,
                             WPARAM wparam,
@@ -460,7 +484,7 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
     }
 
     case WM_ACTIVATE:
-      FocusRootViewOf(this);
+      HandleWindowActivation(hwnd, wparam);
       return 0;
 
     case WM_DWMCOLORIZATIONCOLORCHANGED:

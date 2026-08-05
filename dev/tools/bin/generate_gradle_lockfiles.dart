@@ -222,7 +222,6 @@ void main(List<String> arguments) {
       } else {
         settingsGradle.writeAsStringSync(settingGradleFileContent);
       }
-
       wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
     }
 
@@ -331,8 +330,8 @@ buildscript {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "9.0.1" apply false
-    id "org.jetbrains.kotlin.android" version "2.3.20" apply false
+    id "com.android.application" version "9.1.0" apply false
+    id "org.jetbrains.kotlin.android" version "2.4.0" apply false
 }
 
 include ":app"
@@ -428,8 +427,8 @@ buildscript {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "9.0.1" apply false
-    id("org.jetbrains.kotlin.android") version "2.3.20" apply false
+    id("com.android.application") version "9.1.0" apply false
+    id("org.jetbrains.kotlin.android") version "2.4.0" apply false
 }
 
 include(":app")
@@ -440,7 +439,7 @@ distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.3.1-all.zip
 ''';
 
 Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {

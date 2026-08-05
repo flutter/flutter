@@ -15,13 +15,10 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 void main() {
   try {
     runWidget(
-      RegularWindow(
-        controller: RegularWindowController(
-          preferredSize: const Size(800, 600),
-          preferredConstraints: const BoxConstraints(
-            minWidth: 640,
-            minHeight: 480,
-          ),
+      Window(
+        controller: WindowController(
+          size: const Size(800, 600),
+          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
           title: 'Example Window',
         ),
         child: const MaterialApp(home: MyApp()),
