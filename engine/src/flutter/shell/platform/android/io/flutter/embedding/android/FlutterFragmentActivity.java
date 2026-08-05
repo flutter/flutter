@@ -925,12 +925,18 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Nullable
   protected String getCachedEngineId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_ID) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    }
+    return null;
   }
 
   @Nullable
   protected String getCachedEngineGroupId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    }
+    return null;
   }
 
   /**

@@ -121,4 +121,55 @@ public class IntentUtilsTest {
 
     assertTrue(IntentUtils.isIntentValidForDeeplinking(intent, mockActivity));
   }
+
+  @Test
+  @Config(sdk = 33)
+  public void testCheckIntentSource_returnsTrueForNonExportedActivity_legacy() {
+    mockActivityInfo.exported = false;
+    assertTrue(IntentUtils.checkIntentSource(mockActivity));
+  }
+
+  @Test
+  @Config(sdk = 33)
+  public void testCheckIntentSource_returnsFalseForExportedActivityWithoutCallingPackage_legacy() {
+    mockActivityInfo.exported = true;
+    when(mockActivity.getCallingPackage()).thenReturn(null);
+    assertFalse(IntentUtils.checkIntentSource(mockActivity));
+  }
+
+  @Test
+  @Config(sdk = 33)
+  public void
+      testCheckIntentSource_returnsTrueForExportedActivityWithMatchingCallingPackage_legacy() {
+    mockActivityInfo.exported = true;
+    when(mockActivity.getCallingPackage()).thenReturn("com.test");
+    assertTrue(IntentUtils.checkIntentSource(mockActivity));
+  }
+
+  @Test
+  @Config(sdk = 33)
+  public void
+      testCheckIntentSource_returnsFalseForExportedActivityWithMismatchCallingPackage_legacy() {
+    mockActivityInfo.exported = true;
+    when(mockActivity.getCallingPackage()).thenReturn("com.other");
+    assertFalse(IntentUtils.checkIntentSource(mockActivity));
+  }
+
+  @Test
+  @Config(sdk = 34)
+  public void testCheckIntentSource_returnsTrueForExportedActivityWithMatchingUid_api34() {
+    mockActivityInfo.exported = true;
+    int myUid = android.os.Process.myUid();
+    when(mockActivity.getLaunchedFromUid()).thenReturn(myUid);
+    assertTrue(IntentUtils.checkIntentSource(mockActivity));
+  }
+
+  @Test
+  @Config(sdk = 34)
+  public void testCheckIntentSource_returnsFalseForExportedActivityWithMismatchUid_api34() {
+    mockActivityInfo.exported = true;
+    int myUid = android.os.Process.myUid();
+    when(mockActivity.getLaunchedFromUid()).thenReturn(myUid + 1);
+    assertFalse(IntentUtils.checkIntentSource(mockActivity));
+  }
 }

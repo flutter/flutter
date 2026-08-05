@@ -6,9 +6,9 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import io.flutter.Build.API_LEVELS;
-import android.util.Log;
 import java.util.List;
 
 class IntentUtils {
@@ -16,8 +16,8 @@ class IntentUtils {
   private static final String TAG = "IntentUtils";
 
   /**
-   * Verify that the source of the Intent is self-sent for security purposes.
-   * Debug/profile builds are allowed to bypass the verification for testing purposes.
+   * Verify that the source of the Intent is self-sent for security purposes. Debug/profile builds
+   * are allowed to bypass the verification for testing purposes.
    */
   static boolean isIntentSelfSent(@NonNull Activity activity) {
     boolean isSelfSent = checkIntentSource(activity);
@@ -37,7 +37,7 @@ class IntentUtils {
     return isSelfSent;
   }
 
-  private static boolean checkIntentSource(@NonNull Activity activity) {
+  static boolean checkIntentSource(@NonNull Activity activity) {
     // If the Activity is not exported, then automatically trust it. Non-exported
     // Activities can only be launched by components of the same app, apps with the
     // same user ID, or priviliged system components.

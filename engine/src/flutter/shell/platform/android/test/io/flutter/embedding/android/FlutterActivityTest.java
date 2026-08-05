@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -56,6 +57,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -625,6 +627,64 @@ public class FlutterActivityTest {
     flutterActivity.onFlutterUiDisplayed();
     assertTrue("reportFullyDrawn is used", flutterActivity.isFullyDrawn());
     flutterActivity.resetFullyDrawn();
+  }
+
+  @Test
+  public void getCachedEngineId_returnsIdWhenSelfSent() {
+    Intent intent = FlutterActivity.withCachedEngine("my_cached_engine").build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(true);
+      assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
+    }
+  }
+
+  @Test
+  public void getCachedEngineId_returnsNullWhenNotSelfSent() {
+    Intent intent = FlutterActivity.withCachedEngine("my_cached_engine").build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      assertNull(flutterActivity.getCachedEngineId());
+    }
+  }
+
+  @Test
+  public void getCachedEngineGroupId_returnsIdWhenSelfSent() {
+    Intent intent =
+        FlutterActivity.withNewEngineInGroup("my_cached_engine_group")
+            .dartEntrypoint("main")
+            .build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(true);
+      assertEquals("my_cached_engine_group", flutterActivity.getCachedEngineGroupId());
+    }
+  }
+
+  @Test
+  public void getCachedEngineGroupId_returnsNullWhenNotSelfSent() {
+    Intent intent =
+        FlutterActivity.withNewEngineInGroup("my_cached_engine_group")
+            .dartEntrypoint("main")
+            .build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    try (MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      assertNull(flutterActivity.getCachedEngineGroupId());
+    }
   }
 
   static class FlutterActivityWithProvidedEngine extends FlutterActivity {

@@ -1054,7 +1054,10 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_ID) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    }
+    return null;
   }
 
   /**
@@ -1065,7 +1068,10 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineGroupId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    }
+    return null;
   }
 
   /**
