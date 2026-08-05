@@ -7,8 +7,8 @@
 
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'dialog_window_content.dart';
 import 'models.dart';
