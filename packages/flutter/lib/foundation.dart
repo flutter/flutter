@@ -39,6 +39,7 @@ export 'src/foundation/debug.dart';
 export 'src/foundation/diagnostics.dart';
 export 'src/foundation/error_dumper.dart';
 export 'src/foundation/isolates.dart';
+export 'src/foundation/json.dart';
 export 'src/foundation/key.dart';
 export 'src/foundation/licenses.dart';
 export 'src/foundation/memory_allocations.dart';
