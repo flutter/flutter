@@ -2296,23 +2296,34 @@ TEST_F(ShellTest, SecondaryVsyncCallbackShouldBeCalledAfterVsyncCallback) {
   // Wait for the application to attach the listener.
   latch.Wait();
 
+  auto vsync_task = [&]() {
+    shell->GetEngine()->ScheduleSecondaryVsyncCallback(0, [&]() {
+      if (!test_started) {
+        return;
+      }
+      EXPECT_TRUE(is_on_begin_frame_called);
+      EXPECT_FALSE(is_secondary_callback_called);
+      is_secondary_callback_called = true;
+      count_down_latch.CountDown();
+    });
+    shell->GetEngine()->ScheduleFrame();
+    test_started = true;
+  };
+
+  // Run the test task after a vsync occurs so that the
+  // ScheduleSecondaryVsyncCallback and ScheduleFrame calls will happen within
+  // the same vsync interval.
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetUITaskRunner(), [&]() {
-        shell->GetEngine()->ScheduleSecondaryVsyncCallback(0, [&]() {
-          if (!test_started) {
-            return;
-          }
-          EXPECT_TRUE(is_on_begin_frame_called);
-          EXPECT_FALSE(is_secondary_callback_called);
-          is_secondary_callback_called = true;
-          count_down_latch.CountDown();
-        });
-        shell->GetEngine()->ScheduleFrame();
-        test_started = true;
+        auto vsync_waiter = shell->GetEngine()->GetVsyncWaiter().lock();
+        vsync_waiter->AsyncWaitForVsync(
+            [&](auto frame_timings_recorder) { vsync_task(); });
       });
+
   count_down_latch.Wait();
   EXPECT_TRUE(is_on_begin_frame_called);
   EXPECT_TRUE(is_secondary_callback_called);
+
   DestroyShell(std::move(shell), task_runners);
 }
 
