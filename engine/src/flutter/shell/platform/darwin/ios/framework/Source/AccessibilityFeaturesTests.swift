@@ -10,7 +10,7 @@ import Testing
 
 /// A mock subclass of `AccessibilityFeatures` that allows override the
 /// values returned by the functions.
-class MockAccessibilityFeatures: AccessibilityFeatures {
+final class MockAccessibilityFeatures: AccessibilityFeatures {
     var mockVoiceOverRunning = false
     var mockSwitchControlRunning = false
     var mockInvertColorsEnabled = false

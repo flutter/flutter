@@ -72,7 +72,7 @@ import Foundation
     super.init()
   }
 
-  public override convenience init() {
+  override convenience init() {
     #if os(iOS)
       // On iOS, the user has no access to stdout.
       // Output can be read from the log by the user or the `flutter` tool.
@@ -101,9 +101,10 @@ import Foundation
   }
 }
 
+// This extension
 extension Logger {
-  /// Sets the minimum log level.
-  @objc public static var outputWriter: OutputWriter {
+  /// Sets the OutputWriter.
+  @objc static var outputWriter: OutputWriter {
     get { return shared.outputWriter }
     set(newValue) { shared.outputWriter = newValue }
   }
@@ -113,7 +114,9 @@ extension Logger {
     get { return shared.logLevel }
     set(newValue) { shared.logLevel = newValue }
   }
+}
 
+extension Logger {
   /// Logs a message at `LogLevel.info`.
   @available(swift, obsoleted: 1.0)
   @objc(logInfo:) public static func objcLogInfo(_ message: String) {

@@ -30,6 +30,7 @@ struct AccessibilityFeatureFlag: OptionSet {
 @objc(FlutterAccessibilityFeatures)
 public class AccessibilityFeatures: NSObject {
     /// Returns the current accessibility flags as a bitmask.
+    @MainActor
     @objc public var flags: Int32 {
         var flags: AccessibilityFeatureFlag = []
         
@@ -95,6 +96,7 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Whether `VoiceOver` is running.
+    @MainActor
     @objc public func isVoiceOverRunning() -> Bool {
         return UIAccessibility.isVoiceOverRunning
     }
@@ -105,6 +107,7 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Whether `Switch Control` is running.
+    @MainActor
     @objc public func isSwitchControlRunning() -> Bool {
         return UIAccessibility.isSwitchControlRunning
     }
@@ -115,6 +118,7 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Whether `Speak Screen` setting is enabled.
+    @MainActor
     @objc public func isSpeakScreenEnabled() -> Bool {
         return UIAccessibility.isSpeakScreenEnabled
     }
@@ -125,6 +129,7 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Whether `Classic Invert` setting is enabled.
+    @MainActor
     @objc public func isInvertColorsEnabled() -> Bool {
         return UIAccessibility.isInvertColorsEnabled
     }
@@ -135,6 +140,7 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Whether `Reduce Motion` setting is enabled.
+    @MainActor
     @objc public func isReduceMotionEnabled() -> Bool {
         return UIAccessibility.isReduceMotionEnabled
     }
@@ -145,6 +151,7 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Whether `Bold Text` setting is enabled.
+    @MainActor
     @objc public func isBoldTextEnabled() -> Bool {
         return UIAccessibility.isBoldTextEnabled
     }
@@ -155,6 +162,7 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Whether `Increase Contrast` setting is enabled.
+    @MainActor
     @objc public func isDarkerSystemColorsEnabled() -> Bool {
         return UIAccessibility.isDarkerSystemColorsEnabled
     }
@@ -165,6 +173,7 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Whether `On/Off Labels` setting is enabled.
+    @MainActor
     @objc public func isOnOffSwitchLabelsEnabled() -> Bool {
         return UIAccessibility.isOnOffSwitchLabelsEnabled
     }
@@ -191,6 +200,7 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Whether `Auto-Play Video Previews` setting is enabled.
+    @MainActor
     @objc public func isVideosAutoPlayEnabled() -> Bool {
         return UIAccessibility.isVideoAutoplayEnabled
     }
@@ -204,6 +214,7 @@ public class AccessibilityFeatures: NSObject {
     /// Whether `Prefer Non-Blinking Cursor` setting is enabled.
     ///
     /// Defaults to `false` on iOS versions earlier than 18.
+    @MainActor
     @objc public func isDeterministicCursorEnabled() -> Bool {
         if #available(iOS 18.0, *) {
             return AccessibilitySettings.prefersNonBlinkingTextInsertionIndicator
