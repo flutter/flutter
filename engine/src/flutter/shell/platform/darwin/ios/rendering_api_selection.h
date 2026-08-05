@@ -16,11 +16,6 @@ enum class IOSRenderingAPI {
   kMetal,
 };
 
-enum class IOSRenderingBackend {
-  kSkia,
-  kImpeller,
-};
-
 IOSRenderingAPI GetRenderingAPIForProcess();
 
 Class GetCoreAnimationLayerClassForRenderingAPI(IOSRenderingAPI rendering_api);
