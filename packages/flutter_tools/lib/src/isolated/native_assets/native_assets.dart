@@ -831,7 +831,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   if (!targetDir.existsSync()) {
     targetDir.createSync(recursive: true);
   }
-  await for (final FileSystemEntity entity in targetDir.list()) {
+  for (final FileSystemEntity entity in await targetDir.list().toList()) {
     ErrorHandlingFileSystem.deleteIfExists(entity, recursive: true);
   }
 
