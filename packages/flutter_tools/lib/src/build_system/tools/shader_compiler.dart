@@ -417,13 +417,15 @@ class ShaderCompilerException implements Exception {
   String toString() {
     final buffer = StringBuffer();
     buffer.write('ShaderCompilerException: $message\n');
-    if (stdout != null && stdout!.trim().isNotEmpty) {
+    final String? stdout = this.stdout;
+    if (stdout != null && stdout.trim().isNotEmpty) {
       buffer.writeln('Stdout:');
-      buffer.writeln(stdout!.trim());
+      buffer.writeln(stdout.trim());
     }
-    if (stderr != null && stderr!.trim().isNotEmpty) {
+    final String? stderr = this.stderr;
+    if (stderr != null && stderr.trim().isNotEmpty) {
       buffer.writeln('Stderr:');
-      buffer.writeln(stderr!.trim());
+      buffer.writeln(stderr.trim());
     }
     return buffer.toString();
   }

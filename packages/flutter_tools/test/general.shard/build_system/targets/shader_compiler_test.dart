@@ -1038,6 +1038,28 @@ void main() {
   });
 
   group('ShaderCompiler hints and diagnostics', () {
+    Future<void> expectShaderCompilerException({
+      required ShaderCompiler shaderCompiler,
+      required String inputPath,
+      required String outputPath,
+      required List<Matcher> matchers,
+    }) async {
+      await expectLater(
+        shaderCompiler.compileShader(
+          input: fileSystem.file(inputPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.web_javascript,
+        ),
+        throwsA(
+          isA<ShaderCompilerException>().having(
+            (ShaderCompilerException e) => e.toString(),
+            'toString()',
+            allOf(matchers),
+          ),
+        ),
+      );
+    }
+
     testWithoutContext('macOS and exit code -9 adds Gatekeeper/OOM hint', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
@@ -1064,17 +1086,15 @@ void main() {
         platform: FakePlatform(operatingSystem: 'macos'),
       );
 
-      try {
-        await shaderCompiler.compileShader(
-          input: fileSystem.file(notFragPath),
-          outputPath: outputPath,
-          targetPlatform: TargetPlatform.web_javascript,
-        );
-        fail('unreachable');
-      } on ShaderCompilerException catch (e) {
-        expect(e.toString(), contains('blocked by macOS Gatekeeper or run out of memory (OOM)'));
-        expect(e.toString(), contains('xattr -d com.apple.quarantine'));
-      }
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
+          contains('blocked by macOS Gatekeeper or run out of memory (OOM)'),
+          contains('xattr -d com.apple.quarantine'),
+        ],
+      );
     });
 
     testWithoutContext('macOS and exit code -6 adds abort hint', () async {
@@ -1103,19 +1123,14 @@ void main() {
         platform: FakePlatform(operatingSystem: 'macos'),
       );
 
-      try {
-        await shaderCompiler.compileShader(
-          input: fileSystem.file(notFragPath),
-          outputPath: outputPath,
-          targetPlatform: TargetPlatform.web_javascript,
-        );
-        fail('unreachable');
-      } on ShaderCompilerException catch (e) {
-        expect(
-          e.toString(),
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
           contains('The shader compiler (impellerc) aborted during compilation.'),
-        );
-      }
+        ],
+      );
     });
 
     testWithoutContext('Linux and exit code -6 adds abort hint', () async {
@@ -1144,19 +1159,14 @@ void main() {
         platform: FakePlatform(),
       );
 
-      try {
-        await shaderCompiler.compileShader(
-          input: fileSystem.file(notFragPath),
-          outputPath: outputPath,
-          targetPlatform: TargetPlatform.web_javascript,
-        );
-        fail('unreachable');
-      } on ShaderCompilerException catch (e) {
-        expect(
-          e.toString(),
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
           contains('The shader compiler (impellerc) aborted during compilation.'),
-        );
-      }
+        ],
+      );
     });
 
     testWithoutContext('Windows and exit code 3 adds abort hint', () async {
@@ -1185,20 +1195,15 @@ void main() {
         platform: FakePlatform(operatingSystem: 'windows'),
       );
 
-      try {
-        await shaderCompiler.compileShader(
-          input: fileSystem.file(notFragPath),
-          outputPath: outputPath,
-          targetPlatform: TargetPlatform.web_javascript,
-        );
-        fail('unreachable');
-      } on ShaderCompilerException catch (e) {
-        expect(
-          e.toString(),
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
           contains('The shader compiler (impellerc) aborted during compilation.'),
-        );
-        expect(e.toString(), isNot(contains('Warning: The path contains non-ASCII characters')));
-      }
+          isNot(contains('Warning: The path contains non-ASCII characters')),
+        ],
+      );
     });
 
     testWithoutContext(
@@ -1235,20 +1240,15 @@ void main() {
           platform: FakePlatform(operatingSystem: 'windows'),
         );
 
-        try {
-          await shaderCompiler.compileShader(
-            input: fileSystem.file(unicodeFragPath),
-            outputPath: unicodeOutputPath,
-            targetPlatform: TargetPlatform.web_javascript,
-          );
-          fail('unreachable');
-        } on ShaderCompilerException catch (e) {
-          expect(
-            e.toString(),
+        await expectShaderCompilerException(
+          shaderCompiler: shaderCompiler,
+          inputPath: unicodeFragPath,
+          outputPath: unicodeOutputPath,
+          matchers: <Matcher>[
             contains('The shader compiler (impellerc) aborted during compilation.'),
-          );
-          expect(e.toString(), contains('Warning: The path contains non-ASCII characters'));
-        }
+            contains('Warning: The path contains non-ASCII characters'),
+          ],
+        );
       },
     );
   });
