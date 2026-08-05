@@ -8,17 +8,39 @@ import android.content.pm.ResolveInfo;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import io.flutter.Build.API_LEVELS;
+import android.util.Log;
 import java.util.List;
 
 class IntentUtils {
 
-  /** Verify the source of the Intent. */
+  private static final String TAG = "IntentUtils";
+
+  /**
+   * Verify that the source of the Intent is self-sent for security purposes.
+   * Debug/profile builds are allowed to bypass the verification for testing purposes.
+   */
   static boolean isIntentSelfSent(@NonNull Activity activity) {
+    boolean isSelfSent = checkIntentSource(activity);
+
+    // Trust Intent in debug/profile modes.
     if (io.flutter.BuildConfig.DEBUG || io.flutter.BuildConfig.PROFILE) {
-      return true; // Trusted unconditionally in debug/profile mode
+      if (!isSelfSent) {
+        Log.w(
+            TAG,
+            "Intent verification failed: the intent was not sent by this app. "
+                + "This intent will be IGNORED in release builds to prevent security vulnerabilities. "
+                + "If this launch was internal, see TODO(camsim99) for migration options.");
+      }
+      return true;
     }
 
-    // Sandbox Check: Non-exported activities are implicitly trusted by the OS.
+    return isSelfSent;
+  }
+
+  private static boolean checkIntentSource(@NonNull Activity activity) {
+    // If the Activity is not exported, then automatically trust it. Non-exported
+    // Activities can only be launched by components of the same app, apps with the
+    // same user ID, or priviliged system components.
     try {
       ActivityInfo activityInfo =
           activity.getPackageManager().getActivityInfo(activity.getComponentName(), 0);
@@ -28,12 +50,15 @@ class IntentUtils {
     } catch (PackageManager.NameNotFoundException e) {
     }
 
-    // Android 14+ (API 34): Secure, OS-level verification for exported activities.
+    // Android API 34+: Verify directly that the uinque user ID of the launcher
+    // is the same as the app's.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
       return activity.getLaunchedFromUid() == android.os.Process.myUid();
     }
 
-    // Legacy verification fallback (API 21-33)
+    // Legacy verification fallback: Verify the launching Activity is within the
+    // same application package or is result-expecting (started with
+    // startActivityForResult or startActivityIfNeeded).
     String callingPackage = activity.getCallingPackage();
     if (callingPackage != null) {
       return callingPackage.equals(activity.getPackageName());
@@ -45,15 +70,14 @@ class IntentUtils {
   static boolean isIntentValidForDeeplinking(@NonNull Intent intent, @NonNull Activity activity) {
     if (intent.getData() == null) return false;
 
-    // Enforce ACTION_VIEW for all external deep links.
+    // ACTION_VIEW is the required Intent action for deeplinks.
     if (intent.getAction() == null || !intent.getAction().equals(Intent.ACTION_VIEW)) {
       return false;
     }
 
     // Create an implicit intent with the same action, data, and type to check if it
-    // matches any of our declared intent-filters inside the manifest.
+    // matches any of the declared intent-filters inside the app manifest.
     Intent implicitIntent = new Intent(Intent.ACTION_VIEW).setPackage(activity.getPackageName());
-
     if (intent.getType() != null) {
       implicitIntent.setDataAndType(intent.getData(), intent.getType());
     } else {
@@ -63,13 +87,13 @@ class IntentUtils {
     List<ResolveInfo> resolveInfos =
         activity.getPackageManager().queryIntentActivities(implicitIntent, 0);
 
-    for (ResolveInfo info : resolveInfos) {
-      if (info.activityInfo.name.equals(activity.getClass().getName())) {
+    for (ResolveInfo resolveInfo : resolveInfos) {
+      if (resolveInfo.activityInfo.name.equals(activity.getClass().getName())) {
         return true;
       }
-      // Check if it matches an activity-alias target
-      if (info.activityInfo.targetActivity != null
-          && info.activityInfo.targetActivity.equals(activity.getClass().getName())) {
+      // Check if it matches an activity-alias target.
+      if (resolveInfo.activityInfo.targetActivity != null
+          && resolveInfo.activityInfo.targetActivity.equals(activity.getClass().getName())) {
         return true;
       }
     }

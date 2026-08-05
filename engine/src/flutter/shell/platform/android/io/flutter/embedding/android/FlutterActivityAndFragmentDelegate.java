@@ -551,12 +551,10 @@ import java.util.Set;
   private String maybeGetInitialRouteFromIntent(Intent intent) {
     if (host.shouldHandleDeeplinking()) {
       Uri data = intent.getData();
-      if (data != null) {
-        if (host.getActivity() != null && IntentUtils.isIntentSelfSent(host.getActivity())) {
+      if (data != null && host.getActivity() != null) {
+        if (IntentUtils.isIntentSelfSent(host.getActivity())) {
           return data.toString();
-        }
-        if (host.getActivity() != null
-            && IntentUtils.isIntentValidForDeeplinking(intent, host.getActivity())) {
+        } else if (IntentUtils.isIntentValidForDeeplinking(intent, host.getActivity())) {
           return data.toString();
         }
       }
