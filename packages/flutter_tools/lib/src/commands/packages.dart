@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:args/args.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
@@ -397,12 +399,20 @@ class PackagesGetCommand extends FlutterCommand {
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         // We need to regenerate the platform specific tooling for both the
         // project itself and example (if present).
-        await project.regeneratePlatformSpecificTooling(
-          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
-          pubspecCache: pubspecCache,
-          packageGraph: graph,
-          packageConfig: packageConfig,
-        );
+        //
+        // Workspace packages that do not depend on Flutter (such as a pub
+        // workspace root that is a plain Dart package) are skipped, so that a
+        // stray ios/ or android/ directory in one of them is not populated
+        // with Flutter project files.
+        // See https://github.com/flutter/flutter/issues/189550.
+        if (_dependsOnFlutter(graph, workspaceRootName)) {
+          await project.regeneratePlatformSpecificTooling(
+            releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+            pubspecCache: pubspecCache,
+            packageGraph: graph,
+            packageConfig: packageConfig,
+          );
+        }
         if (example && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
           final FlutterProject exampleProject = project.example;
           // Skip if the example is already a workspace root — it will be
@@ -421,6 +431,27 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     return FlutterCommandResult.success();
+  }
+
+  /// Whether [packageName] depends on the `flutter` package, directly or
+  /// transitively, according to the resolved package [graph].
+  static bool _dependsOnFlutter(PackageGraph graph, String packageName) {
+    final visited = <String>{};
+    final toVisit = Queue<String>.of(<String>[packageName]);
+    while (toVisit.isNotEmpty) {
+      final String current = toVisit.removeFirst();
+      if (!visited.add(current)) {
+        continue;
+      }
+      if (current == 'flutter') {
+        return true;
+      }
+      final List<String>? dependencies = graph.dependencies[current];
+      if (dependencies != null) {
+        toVisit.addAll(dependencies);
+      }
+    }
+    return false;
   }
 
   late final Future<List<Plugin>> _pluginsFound = (() async {

@@ -18,8 +18,9 @@
 FLUTTER_ASSERT_ARC
 
 namespace flutter {
+namespace {
 
-bool ShouldUseMetalRenderer() {
+bool IsMetalAvailable() {
   bool ios_version_supports_metal = false;
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
@@ -28,38 +29,20 @@ bool ShouldUseMetalRenderer() {
   return ios_version_supports_metal;
 }
 
-IOSRenderingAPI GetRenderingAPIForProcess(bool force_software) {
-#if TARGET_OS_SIMULATOR
-  if (force_software) {
-    return IOSRenderingAPI::kSoftware;
-  }
-#else
-  if (force_software) {
-    [FlutterLogger logWarning:@"The --enable-software-rendering is only supported on simulator "
-                               "targets and will be ignored."];
-  }
-#endif  // TARGET_OS_SIMULATOR
+}  // namespace
 
-  static bool should_use_metal = ShouldUseMetalRenderer();
-  if (should_use_metal) {
+IOSRenderingAPI GetRenderingAPIForProcess() {
+  static bool metal_available = IsMetalAvailable();
+  if (metal_available) {
     return IOSRenderingAPI::kMetal;
   }
-
-  // When Metal isn't available we use Skia software rendering since it performs
-  // a little better than emulated OpenGL. Also, omitting an OpenGL backend
-  // reduces binary footprint.
-#if TARGET_OS_SIMULATOR
-  return IOSRenderingAPI::kSoftware;
-#else
-  FML_CHECK(false) << "Metal may only be unavailable on simulators";
-  return IOSRenderingAPI::kSoftware;
-#endif  // TARGET_OS_SIMULATOR
+  FML_CHECK(false) << "Metal is unavailable. On a simulator this means the host environment "
+                      "does not expose a Metal device; enabling GPU passthrough may fix this.";
+  FML_UNREACHABLE();
 }
 
 Class GetCoreAnimationLayerClassForRenderingAPI(IOSRenderingAPI rendering_api) {
   switch (rendering_api) {
-    case IOSRenderingAPI::kSoftware:
-      return [CALayer class];
     case IOSRenderingAPI::kMetal:
       if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
         if ([FlutterMetalLayer enabled]) {
