@@ -47,14 +47,11 @@ class IOSContext {
   ///
   /// @param[in]  api       A client rendering API supported by the
   ///                       engine/platform.
-  /// @param[in]  backend   A client rendering backend supported by the
-  ///                       engine/platform.
   ///
   /// @return     A valid context on success. `nullptr` on failure.
   ///
   static std::unique_ptr<IOSContext> Create(
       IOSRenderingAPI api,
-      IOSRenderingBackend backend,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
       const Settings& settings);
 
@@ -63,13 +60,6 @@ class IOSContext {
   ///             which this object was created.
   ///
   virtual ~IOSContext();
-
-  //----------------------------------------------------------------------------
-  /// @brief      Get the rendering backend used by this context.
-  ///
-  /// @return     The rendering backend.
-  ///
-  virtual IOSRenderingBackend GetBackend() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Creates an external texture proxy of the appropriate client

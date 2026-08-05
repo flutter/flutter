@@ -95,15 +95,13 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    return child?.getDistanceToActualBaseline(baseline) ??
-        super.computeDistanceToActualBaseline(baseline);
+    return child?.getDistanceToActualBaseline(baseline);
   }
 
   @override
   @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final double? result = child?.getDryBaseline(constraints, baseline);
-    return result ?? super.computeDryBaseline(constraints, baseline);
+    return child?.getDryBaseline(constraints, baseline);
   }
 
   @override
@@ -2210,7 +2208,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     _updateClip();
     final RRect offsetRRect = _clip!.shift(offset);
-    final offsetRRectAsPath = Path()..addRRect(offsetRRect);
     var paintShadows = true;
     assert(() {
       if (debugDisableShadows) {
@@ -2230,6 +2227,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
+      final offsetRRectAsPath = Path()..addRRect(offsetRRect);
       canvas.drawShadow(offsetRRectAsPath, shadowColor, elevation, color.alpha != 0xFF);
     }
     final usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
