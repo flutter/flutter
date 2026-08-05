@@ -678,7 +678,10 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: enableImpeller.asBool,
       runIOSInterfaceType: iOSInterfaceType,
       runIsTest: targetFile.endsWith('_test.dart'),
-      runEnableHcpp: enableHcpp,
+      // Same estimate of the packaged value as the build commands make: an explicit flag is
+      // applied at launch, otherwise the manifest decides, and the build injects the
+      // enable-hcpp feature flag when the manifest is silent.
+      runEnableHcpp: explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   })();
 
