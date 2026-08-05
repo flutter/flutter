@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Positioned(
             bottom: 16.0,
             right: 16.0,
-            child: Button(
+            child: _Button(
               onPressed: _sendFlutterIncrement,
               icon: const Text(
                 '+',
@@ -123,8 +123,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class Button extends StatelessWidget {
-  const Button({super.key, required this.onPressed, required this.icon});
+class _Button extends StatelessWidget {
+  const _Button({super.key, required this.onPressed, required this.icon});
 
   final VoidCallback onPressed;
   final Widget icon;
