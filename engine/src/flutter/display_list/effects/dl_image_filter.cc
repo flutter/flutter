@@ -34,9 +34,11 @@ std::shared_ptr<DlImageFilter> DlImageFilter::MakeMatrix(
 std::shared_ptr<DlImageFilter> DlImageFilter::MakeRuntimeEffect(
     sk_sp<DlRuntimeEffect> runtime_effect,
     std::vector<std::shared_ptr<DlColorSource>> samplers,
-    std::shared_ptr<std::vector<uint8_t>> uniform_data) {
+    std::shared_ptr<std::vector<uint8_t>> uniform_data,
+    DlImageSampling input_sampling) {
   return DlRuntimeEffectImageFilter::Make(
-      std::move(runtime_effect), std::move(samplers), std::move(uniform_data));
+      std::move(runtime_effect), std::move(samplers), std::move(uniform_data),
+      input_sampling);
 }
 
 std::shared_ptr<DlImageFilter> DlImageFilter::MakeColorFilter(
