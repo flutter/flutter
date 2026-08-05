@@ -309,6 +309,80 @@ void main() {
     );
   });
 
+  testWithoutContext('Device logger distinguishes stdout and stderr', () async {
+    final exitCompleter = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        exitCode: -1,
+        stdout: 'Flutter\n',
+        stderr: 'Oops\n',
+        completer: exitCompleter,
+        outputFollowsExit: true,
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    unawaited(
+      Future<void>(() {
+        exitCompleter.complete();
+      }),
+    );
+
+    // Start listening to the streams before starting the app.
+    final logReader = device.getLogReader() as DesktopLogReader;
+    expect(logReader.logLines, emitsInAnyOrder(<String>['Flutter', 'Oops']));
+    expect(logReader.outputLines, emitsInOrder(<Object>['Flutter', emitsDone]));
+    expect(logReader.errorLines, emitsInOrder(<Object>['Oops', emitsDone]));
+
+    final package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+  });
+
+  testWithoutContext('Device logger decodes each stream once and shares it', () async {
+    final exitCompleter = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        exitCode: -1,
+        stdout: 'Flutter\n',
+        stderr: 'Oops\n',
+        completer: exitCompleter,
+        outputFollowsExit: true,
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final logReader = device.getLogReader() as DesktopLogReader;
+
+    // Each stream is decoded once and handed out again on later access, rather
+    // than decoding the same bytes per caller.
+    expect(logReader.outputLines, same(logReader.outputLines));
+    expect(logReader.errorLines, same(logReader.errorLines));
+    expect(logReader.logLines, same(logReader.logLines));
+
+    // Because they are shared, they must also accept more than one subscriber.
+    final Stream<String> outputLines = logReader.outputLines;
+    expect(outputLines, emitsInOrder(<Object>['Flutter', emitsDone]));
+    expect(outputLines, emitsInOrder(<Object>['Flutter', emitsDone]));
+    expect(logReader.errorLines, emitsInOrder(<Object>['Oops', emitsDone]));
+
+    unawaited(
+      Future<void>(() {
+        exitCompleter.complete();
+      }),
+    );
+
+    final package = FakeApplicationPackage();
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+  });
+
   testWithoutContext('Desktop devices pass through the enable-impeller flag', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(

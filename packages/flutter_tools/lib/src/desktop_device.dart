@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
@@ -343,12 +344,13 @@ abstract class DesktopDevice extends Device {
 /// A log reader for desktop applications that delegates to a [Process] stdout
 /// and stderr streams.
 class DesktopLogReader extends DeviceLogReader {
-  final _inputController = StreamController<List<int>>.broadcast();
+  final _stdoutController = StreamController<List<int>>.broadcast();
+  final _stderrController = StreamController<List<int>>.broadcast();
 
   /// Begin listening to the stdout and stderr streams of the provided [process].
   void initializeProcess(Process process) {
-    final StreamSubscription<List<int>> stdoutSub = process.stdout.listen(_inputController.add);
-    final StreamSubscription<List<int>> stderrSub = process.stderr.listen(_inputController.add);
+    final StreamSubscription<List<int>> stdoutSub = process.stdout.listen(_stdoutController.add);
+    final StreamSubscription<List<int>> stderrSub = process.stderr.listen(_stderrController.add);
     final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
       stdoutSub.asFuture<void>(),
       stderrSub.asFuture<void>(),
@@ -360,14 +362,31 @@ class DesktopLogReader extends DeviceLogReader {
       // cancellation to complete is not needed.
       unawaited(stdoutSub.cancel());
       unawaited(stderrSub.cancel());
-      await _inputController.close();
+      await _stdoutController.close();
+      await _stderrController.close();
     });
   }
 
+  /// The lines the process wrote to stdout.
+  ///
+  /// Decoded once and shared: [outputLines], [errorLines] and [logLines] are
+  /// commonly listened to at the same time, and a broadcast stream can also be
+  /// listened to again after an earlier subscription was cancelled, which
+  /// happens when device log echoing is stopped and restarted.
+  late final Stream<String> outputLines = _stdoutController.stream
+      .transform(utf8LineDecoder)
+      .asBroadcastStream();
+
+  /// The lines the process wrote to stderr.
+  late final Stream<String> errorLines = _stderrController.stream
+      .transform(utf8LineDecoder)
+      .asBroadcastStream();
+
   @override
-  Stream<String> get logLines {
-    return _inputController.stream.transform(utf8LineDecoder);
-  }
+  late final Stream<String> logLines = StreamGroup.mergeBroadcast(<Stream<String>>[
+    outputLines,
+    errorLines,
+  ]);
 
   @override
   String get name => 'desktop';
