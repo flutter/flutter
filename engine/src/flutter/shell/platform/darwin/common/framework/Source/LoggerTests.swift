@@ -105,4 +105,34 @@ import test_utils_swift
     #expect(!wasEvaluated)
   }
 
+  // Hammers the shared `Logger` from concurrent tasks so that unsynchronised access to mutable
+  // state is caught under TSan.
+  @Test func testConcurrentLoggingAndLevelMutation() async {
+    let writer = StringOutputWriter()
+    let oldWriter = Logger.outputWriter
+    let oldLevel = Logger.logLevel
+    defer {
+      Logger.outputWriter = oldWriter
+      Logger.logLevel = oldLevel
+    }
+    Logger.outputWriter = writer
+    Logger.logLevel = .info
+
+    await withTaskGroup(of: Void.self) { group in
+      for i in 0..<100 {
+        group.addTask {
+          if i % 2 == 0 {
+            Logger.logLevel = .warning
+          } else {
+            Logger.logLevel = .info
+          }
+          Logger.logInfo("Message \(i)")
+        }
+      }
+    }
+
+    // After concurrent mutations and logging, Logger should remain in a valid state without data
+    // races or crashes.
+    #expect(Logger.logLevel == .info || Logger.logLevel == .warning)
+  }
 }
