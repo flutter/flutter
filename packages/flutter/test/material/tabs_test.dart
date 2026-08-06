@@ -3712,7 +3712,8 @@ void main() {
 
   testWidgets(
     'TabBar throws indicatorWeight: 0 with the default underline indicator',
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       // With no indicator on the widget or the theme, the TabBar falls back to the
       // default underline indicator, which requires a positive indicatorWeight.
