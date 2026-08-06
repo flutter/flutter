@@ -71,7 +71,7 @@ If a roller is failing, check the recent runs to see why, and take action to ens
 
 ### Stable release
 
-If there is a stable release (a full new release, not a hotfix release), both flutter/packages and flutter/core-packages need to be updated to ensure that they are testing the new set of `stable`, N-1, and N-2 release. See [these instructions][update for stable release] for steps to follow.
+If there is a stable release (a full new release, not a hotfix release), both flutter/packages and flutter/core-packages need to be updated to ensure that they are testing the new set of `stable`, N-1, and N-2 releases. See [these instructions][update for stable release] for steps to follow.
 
 ### Deprecations
 

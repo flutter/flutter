@@ -28,7 +28,7 @@ Many of these steps can be done separately, but it's often easiest to combine th
 ## flutter/core-packages
 
 flutter/core-packages needs the same conceptual changes as flutter/packages, but the CI configuration is different:
-* There is not a single `stable` pin, or separate tasks for N-1/N-2 testing. Instead, each GitHub Action that references a specific Dart version needs to be updated. For example:
+* There is no single `stable` pin, nor separate tasks for N-1/N-2 testing. Instead, each GitHub Action that references a specific Dart version needs to be updated. For example:
   * [The multi-version Dart analysis and test matrix](https://github.com/flutter/core-packages/blob/6e41b6679caec9c229e65a71169a6fee1e3e3825/.github/workflows/multi_version_tasks.yaml#L31), which should include the corresponding stable, N-1, and N-2 Dart versions for each of the Flutter versions in flutter/packages.
   * [Dart unit tests on Windows](https://github.com/flutter/core-packages/blob/6e41b6679caec9c229e65a71169a6fee1e3e3825/.github/workflows/windows_unit_tests.yaml#L36)
   * [The release action](https://github.com/flutter/core-packages/blob/6e41b6679caec9c229e65a71169a6fee1e3e3825/.github/workflows/release.yml#L31)
