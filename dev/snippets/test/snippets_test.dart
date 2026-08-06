@@ -325,7 +325,7 @@ void main() {
         platform: platform,
       );
       FlutterInformation.instance = flutterInformation;
-      var mockSnippetGenerator = MockSnippetGenerator();
+      final mockSnippetGenerator = MockSnippetGenerator();
       snippets_main.snippetGenerator = mockSnippetGenerator;
       var errorMessage = '';
       errorExit = (String message) {
@@ -369,16 +369,6 @@ void main() {
       expect(errorMessage, equals(''));
       errorMessage = '';
 
-      mockSnippetGenerator = MockSnippetGenerator();
-      snippets_main.snippetGenerator = mockSnippetGenerator;
-      snippets_main.main(<String>[
-        '--input=${input.absolute.path}',
-        '--type=snippet',
-        '--no-format-output',
-      ]);
-      expect(mockSnippetGenerator.formatOutput, equals(false));
-      errorMessage = '';
-
       input.deleteSync();
       snippets_main.main(<String>['--input=${input.absolute.path}']);
       expect(errorMessage, equals('The input file ${input.absolute.path} does not exist.'));
@@ -392,8 +382,6 @@ class MockSnippetGenerator extends SnippetGenerator {
   File? output;
   String? copyright;
   String? description;
-  late bool formatOutput;
-  late bool addSectionMarkers;
   late bool includeAssumptions;
 
   @override
@@ -402,16 +390,12 @@ class MockSnippetGenerator extends SnippetGenerator {
     File? output,
     String? copyright,
     String? description,
-    bool formatOutput = true,
-    bool addSectionMarkers = false,
     bool includeAssumptions = false,
   }) {
     this.sample = sample;
     this.output = output;
     this.copyright = copyright;
     this.description = description;
-    this.formatOutput = formatOutput;
-    this.addSectionMarkers = addSectionMarkers;
     this.includeAssumptions = includeAssumptions;
 
     return '';
