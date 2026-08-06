@@ -105,7 +105,7 @@ bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
 }
 
 void RenderPass::RetainShader(Shader* shader) {
-  for (const fml::RefPtr<Shader>& retained : retained_shaders_) {
+  for (const auto& retained : retained_shaders_) {
     if (retained.get() == shader) {
       return;
     }
@@ -513,7 +513,7 @@ constexpr size_t kInitialBindingCapacity = 8;
 /// in is the order they were first bound.
 template <typename List, typename Key>
 typename List::value_type& GetOrAppendBinding(List& list, const Key* binding) {
-  for (typename List::value_type& entry : list) {
+  for (auto& entry : list) {
     if (entry.binding == binding) {
       return entry;
     }
@@ -521,7 +521,7 @@ typename List::value_type& GetOrAppendBinding(List& list, const Key* binding) {
   if (list.empty()) {
     list.reserve(kInitialBindingCapacity);
   }
-  list.push_back(typename List::value_type{.binding = binding});
+  list.push_back({.binding = binding});
   return list.back();
 }
 

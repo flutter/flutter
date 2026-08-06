@@ -26,6 +26,7 @@ namespace flutter::gpu {
 namespace {
 
 using ::impeller::testing::MockCommandBuffer;
+using ::impeller::testing::MockCommandQueue;
 using ::impeller::testing::MockDeviceBuffer;
 using ::impeller::testing::MockImpellerContext;
 using ::impeller::testing::MockRenderPass;
@@ -257,6 +258,37 @@ TEST(FlutterGpuRenderPassTest, CommandBufferRetainsTheRecordingPass) {
 
   EXPECT_TRUE(render_pass->Begin(command_buffer));
   EXPECT_FALSE(render_pass->HasOneRef());
+}
+
+// Command buffers are collected by the Dart GC, so holding the pass past the
+// encode would keep it and its shaders alive for an unbounded stretch.
+TEST(FlutterGpuRenderPassTest, SubmitReleasesTheRecordingPass) {
+  auto context = std::make_shared<MockImpellerContext>();
+  auto command_queue = std::make_shared<MockCommandQueue>();
+  auto impeller_command_buffer = std::make_shared<MockCommandBuffer>(context);
+  auto impeller_render_pass =
+      std::make_shared<MockRenderPass>(context, impeller::RenderTarget());
+  EXPECT_CALL(*impeller_render_pass, IsValid).WillRepeatedly(Return(true));
+  EXPECT_CALL(*impeller_render_pass, OnSetLabel(_)).Times(AnyNumber());
+  EXPECT_CALL(*impeller_render_pass, OnEncodeCommands(_))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*impeller_command_buffer, OnCreateRenderPass(_))
+      .WillOnce(Return(impeller_render_pass));
+  // Not GLES, so the encode happens inside `Submit` instead of being posted to
+  // the raster thread.
+  EXPECT_CALL(*context, GetBackendType)
+      .WillRepeatedly(Return(impeller::Context::BackendType::kMetal));
+  EXPECT_CALL(*context, GetCommandQueue).WillRepeatedly(Return(command_queue));
+  EXPECT_CALL(*command_queue, Submit).WillOnce(Return(fml::Status()));
+
+  CommandBuffer command_buffer(context, impeller_command_buffer);
+  auto render_pass = fml::MakeRefCounted<RenderPass>();
+
+  EXPECT_TRUE(render_pass->Begin(command_buffer));
+  EXPECT_FALSE(render_pass->HasOneRef());
+
+  EXPECT_TRUE(command_buffer.Submit());
+  EXPECT_TRUE(render_pass->HasOneRef());
 }
 
 }  // namespace

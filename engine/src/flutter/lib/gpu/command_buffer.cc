@@ -146,7 +146,11 @@ bool CommandBuffer::Submit(
   }
 
   // For the GLES backend, command queue submission just flushes the reactor,
-  // which needs to happen on the raster thread.
+  // which needs to happen on the raster thread. Encoding then outlives this
+  // call, so `retained_render_passes_` keeps holding the metadata the encode
+  // reads. It stays on the command buffer instead of moving into the task
+  // because dropping the last reference to a Dart wrappable off the UI thread
+  // enters the isolate from the raster thread.
   if (context_->GetBackendType() == impeller::Context::BackendType::kOpenGLES) {
     auto dart_state = flutter::UIDartState::Current();
     auto& task_runners = dart_state->GetTaskRunners();
@@ -180,6 +184,10 @@ bool CommandBuffer::Submit(
       return false;
     }
   }
+  // Encoding is the last read of the borrowed shader metadata, so the passes
+  // owning it can be released now rather than waiting for this command buffer
+  // to be collected.
+  retained_render_passes_.clear();
 
   auto status = context_->GetCommandQueue()->Submit(
       {command_buffer_}, combined_completion_callback);
