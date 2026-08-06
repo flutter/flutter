@@ -15,27 +15,28 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('Carousel auto-plays and pauses on interaction', (
+  testWidgets('Carousel auto-plays and pauses on interaction (unweighted)', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const example.CarouselAutoPlayExampleApp());
 
     expect(find.byType(CarouselView), findsOneWidget);
+    await tester.pumpAndSettle();
 
-    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    // initialItem is 1. The offset for item 1 in a standard carousel depends on itemExtent.
-    // We just capture the initial offset.
+    final ScrollableState scrollable = tester.state(
+      find.descendant(
+        of: find.byType(CarouselView),
+        matching: find.byType(Scrollable),
+      ),
+    );
     final double offset0 = scrollable.position.pixels;
 
-    // Timer is 2 seconds. Wait for it to trigger.
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
 
-    // Should have auto-scrolled to the next item.
     expect(scrollable.position.pixels, greaterThan(offset0));
     final double offset1 = scrollable.position.pixels;
 
-    // Test pause on hover.
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
@@ -43,22 +44,61 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(CarouselView)));
     await tester.pump();
 
-    // Wait for what would be the next interval.
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
 
-    // Should not have auto-scrolled because the mouse is hovering.
     expect(scrollable.position.pixels, offset1);
 
-    // Exit hover.
     await gesture.moveTo(Offset.zero);
     await tester.pump();
+    await gesture.removePointer();
 
-    // Wait for the next interval.
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
 
-    // Should have auto-scrolled to the next item.
     expect(scrollable.position.pixels, greaterThan(offset1));
+  });
+
+  testWidgets('Carousel auto-plays and pauses on interaction (weighted)', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.CarouselAutoPlayExampleApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Weighted'));
+    await tester.pumpAndSettle();
+
+    final ScrollableState scrollable = tester.state(
+      find.descendant(
+        of: find.byType(CarouselView),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    final double offset0 = scrollable.position.pixels;
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, greaterThan(offset0));
+    final double offset1 = scrollable.position.pixels;
+
+    final TestGesture touchGesture = await tester.startGesture(
+      tester.getCenter(find.byType(CarouselView)),
+    );
+    await touchGesture.moveBy(const Offset(-50, 0));
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, lessThan(offset1 + 100));
+
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, greaterThan(offset1 + 50));
   });
 }

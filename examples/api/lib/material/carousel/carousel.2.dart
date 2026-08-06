@@ -11,6 +11,8 @@ import 'package:flutter/rendering.dart';
 
 void main() => runApp(const CarouselAutoPlayExampleApp());
 
+enum CarouselType { unweighted, weighted }
+
 class CarouselAutoPlayExampleApp extends StatelessWidget {
   const CarouselAutoPlayExampleApp({super.key});
 
@@ -44,6 +46,7 @@ class CarouselAutoPlayExample extends StatefulWidget {
 }
 
 class _CarouselAutoPlayExampleState extends State<CarouselAutoPlayExample> {
+  static const int _itemCount = 10;
   final CarouselController _controller = CarouselController(initialItem: 1);
   Timer? _timer;
   int _targetIndex = 1; // Since initialItem is 1
@@ -51,6 +54,7 @@ class _CarouselAutoPlayExampleState extends State<CarouselAutoPlayExample> {
   bool _infinite = false;
   bool _isHovering = false;
   bool _isScrolling = false;
+  CarouselType _carouselType = CarouselType.unweighted;
 
   @override
   void initState() {
@@ -79,7 +83,7 @@ class _CarouselAutoPlayExampleState extends State<CarouselAutoPlayExample> {
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 2), (Timer timer) {
       if (_controller.hasClients) {
-        int nextIndex = (_targetIndex + 1) % ImageInfo.values.length;
+        int nextIndex = (_targetIndex + 1) % _itemCount;
         if (!_infinite &&
             _controller.offset >= _controller.position.maxScrollExtent) {
           nextIndex = 0;
@@ -97,6 +101,16 @@ class _CarouselAutoPlayExampleState extends State<CarouselAutoPlayExample> {
   @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.sizeOf(context).height;
+    final List<Widget> children = List<Widget>.generate(_itemCount, (
+      int index,
+    ) {
+      return Card(
+        color: Colors.primaries[index % Colors.primaries.length],
+        child: Center(
+          child: Text('Item $index', style: const TextStyle(fontSize: 24)),
+        ),
+      );
+    });
 
     return Column(
       children: <Widget>[
@@ -125,21 +139,51 @@ class _CarouselAutoPlayExampleState extends State<CarouselAutoPlayExample> {
                 }
                 return false;
               },
-              child: CarouselView(
-                controller: _controller,
-                itemExtent: 330,
-                shrinkExtent: 200,
-                itemSnapping: true,
-                infinite: _infinite,
-                onIndexChanged: (int index) {
-                  _lastReportedIndex = index;
-                },
-                children: ImageInfo.values.map((ImageInfo image) {
-                  return HeroLayoutCard(imageInfo: image);
-                }).toList(),
-              ),
+              child: _carouselType == CarouselType.unweighted
+                  ? CarouselView(
+                      key: ValueKey<CarouselType>(_carouselType),
+                      controller: _controller,
+                      itemExtent: 330,
+                      shrinkExtent: 200,
+                      itemSnapping: true,
+                      infinite: _infinite,
+                      onIndexChanged: (int index) {
+                        _lastReportedIndex = index;
+                      },
+                      children: children,
+                    )
+                  : CarouselView.weighted(
+                      key: ValueKey<CarouselType>(_carouselType),
+                      controller: _controller,
+                      itemSnapping: true,
+                      infinite: _infinite,
+                      flexWeights: const <int>[1, 7, 1],
+                      onIndexChanged: (int index) {
+                        _lastReportedIndex = index;
+                      },
+                      children: children,
+                    ),
             ),
           ),
+        ),
+        const SizedBox(height: 20),
+        SegmentedButton<CarouselType>(
+          segments: const <ButtonSegment<CarouselType>>[
+            ButtonSegment<CarouselType>(
+              value: CarouselType.unweighted,
+              label: Text('Unweighted'),
+            ),
+            ButtonSegment<CarouselType>(
+              value: CarouselType.weighted,
+              label: Text('Weighted'),
+            ),
+          ],
+          selected: <CarouselType>{_carouselType},
+          onSelectionChanged: (Set<CarouselType> newSelection) {
+            setState(() {
+              _carouselType = newSelection.first;
+            });
+          },
         ),
         const SizedBox(height: 20),
         Row(
@@ -165,96 +209,4 @@ class _CarouselAutoPlayExampleState extends State<CarouselAutoPlayExample> {
       ],
     );
   }
-}
-
-class HeroLayoutCard extends StatelessWidget {
-  const HeroLayoutCard({super.key, required this.imageInfo});
-
-  final ImageInfo imageInfo;
-
-  @override
-  Widget build(BuildContext context) {
-    final double width = MediaQuery.sizeOf(context).width;
-    return Stack(
-      alignment: AlignmentDirectional.bottomStart,
-      children: <Widget>[
-        ClipRect(
-          child: OverflowBox(
-            maxWidth: width * 7 / 8,
-            minWidth: width * 7 / 8,
-            child: Image(
-              fit: BoxFit.cover,
-              image: NetworkImage(
-                'https://flutter.github.io/assets-for-api-docs/assets/material/${imageInfo.url}',
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                imageInfo.title,
-                overflow: TextOverflow.clip,
-                softWrap: false,
-                style: Theme.of(
-                  context,
-                ).textTheme.headlineLarge?.copyWith(color: Colors.white),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                imageInfo.subtitle,
-                overflow: TextOverflow.clip,
-                softWrap: false,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-enum ImageInfo {
-  image0(
-    'The Flow',
-    'Sponsored | Season 1 Now Streaming',
-    'content_based_color_scheme_1.png',
-  ),
-  image1(
-    'Through the Pane',
-    'Sponsored | Season 1 Now Streaming',
-    'content_based_color_scheme_2.png',
-  ),
-  image2(
-    'Iridescence',
-    'Sponsored | Season 1 Now Streaming',
-    'content_based_color_scheme_3.png',
-  ),
-  image3(
-    'Sea Change',
-    'Sponsored | Season 1 Now Streaming',
-    'content_based_color_scheme_4.png',
-  ),
-  image4(
-    'Blue Symphony',
-    'Sponsored | Season 1 Now Streaming',
-    'content_based_color_scheme_5.png',
-  ),
-  image5(
-    'When It Rains',
-    'Sponsored | Season 1 Now Streaming',
-    'content_based_color_scheme_6.png',
-  );
-
-  const ImageInfo(this.title, this.subtitle, this.url);
-  final String title;
-  final String subtitle;
-  final String url;
 }
