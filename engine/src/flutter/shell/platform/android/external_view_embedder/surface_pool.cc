@@ -33,7 +33,7 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
       // The overlay surface is persistent, so resize it in place. Nothing else
       // resizes the swapchain: |Surface::AcquireFrame| ignores the size it is
       // handed.
-      for (const auto& layer : layers_) {
+      for (const std::shared_ptr<OverlayLayer>& layer : layers_) {
         layer->android_surface->OnScreenSurfaceResize(requested_frame_size_);
       }
     } else {
