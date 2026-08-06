@@ -227,9 +227,10 @@ FLUTTER_ASSERT_ARC
                                             enableWideGamut:enableWideGamut];
   // Add to a real window so layoutSubviews has access to screen. The host app uses the UIScene
   // life cycle, so the window only has a screen once it is attached to the connected scene.
-  UIWindow* window = [[UIWindow alloc]
-      initWithWindowScene:(UIWindowScene*)
-                              UIApplication.sharedApplication.connectedScenes.anyObject];
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
   window.frame = CGRectMake(0, 0, 100, 100);
   [window addSubview:view];
   view.frame = window.bounds;
