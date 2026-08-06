@@ -746,19 +746,19 @@ void main() {
       await tester.pumpWidget(
         const TestWidgetsApp(
           home: Placeholder(),
-          localeListResolutionCallback: testLocalResulutionCallback,
+          localeListResolutionCallback: testLocalResolutionCallback,
         ),
       );
 
       final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
       expect(
-        identical(widgetsApp.localeListResolutionCallback, testLocalResulutionCallback),
+        identical(widgetsApp.localeListResolutionCallback, testLocalResolutionCallback),
         isTrue,
       );
     });
   });
 }
 
-Locale? testLocalResulutionCallback(List<Locale>? locales, Iterable<Locale> supportedLocales) {
+Locale? testLocalResolutionCallback(List<Locale>? locales, Iterable<Locale> supportedLocales) {
   return null;
 }
