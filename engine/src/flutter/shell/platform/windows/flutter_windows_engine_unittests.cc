@@ -534,6 +534,68 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableImpeller) {
   modifier.ReleaseEGLManager();
 }
 
+TEST_F(FlutterWindowsEngineTest, VulkanBackendDoesNotEnableSdfs) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  // Request the Vulkan Impeller backend. It is only activated when a device
+  // capable of Direct3D 11 interop is present.
+  builder.SetSwitches({"--enable-impeller=true", "--impeller-backend=vulkan"});
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  if (!engine->vulkan_manager()) {
+    GTEST_SKIP() << "Vulkan with D3D11 interop is not available.";
+  }
+  EngineModifier modifier(engine.get());
+
+  modifier.embedder_api().NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate,
+                       ([](FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
+                           const FlutterEngineDisplaysUpdateType update_type,
+                           const FlutterEngineDisplay* embedder_displays,
+                           size_t display_count) { return kSuccess; }));
+
+  modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures,
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+         FlutterAccessibilityFeature flags) { return kSuccess; });
+
+  modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([](auto engine, const FlutterLocale** locales,
+                         size_t locales_count) { return kSuccess; }));
+
+  modifier.embedder_api().SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, auto message) { return kSuccess; }));
+
+  bool run_called = false;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
+                          const FlutterProjectArgs* args, void* user_data,
+                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        run_called = true;
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+
+        // SDF rendering is an ANGLE/OpenGL Impeller default. The Vulkan
+        // backend must not enable it (it is unsupported there), so the
+        // switch must be absent even though Impeller is enabled.
+        bool has_sdf_switch = false;
+        for (int i = 0; i < args->command_line_argc; ++i) {
+          if (strcmp(args->command_line_argv[i], "--impeller-use-sdfs=true") ==
+              0) {
+            has_sdf_switch = true;
+          }
+        }
+        EXPECT_FALSE(has_sdf_switch);
+        EXPECT_EQ(config->type, kVulkan);
+        return kSuccess;
+      }));
+
+  // The Vulkan backend renders without ANGLE, so no EGL manager is set.
+  engine->Run();
+
+  EXPECT_TRUE(run_called);
+
+  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+}
+
 TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagDisableImpeller) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   builder.SetImpellerSwitch(DisabledImpeller);
@@ -932,6 +994,37 @@ TEST_F(FlutterWindowsEngineTest, GetExecutableName) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
   EXPECT_EQ(engine->GetExecutableName(), "flutter_windows_unittests.exe");
+}
+
+// The Vulkan backend must never initialize without an explicit
+// --impeller-backend=vulkan request; ANGLE remains the Impeller default.
+TEST_F(FlutterWindowsEngineTest, VulkanRequiresExplicitBackendSwitch) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetSwitches({"--enable-impeller=true"});
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EXPECT_EQ(engine->vulkan_manager(), nullptr);
+}
+
+// The Vulkan backend request only takes effect when Impeller is enabled.
+TEST_F(FlutterWindowsEngineTest, VulkanBackendIgnoredWithoutImpeller) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetSwitches({"--enable-impeller=false", "--impeller-backend=vulkan"});
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EXPECT_EQ(engine->vulkan_manager(), nullptr);
+}
+
+// When the Vulkan backend is requested, either the Vulkan manager comes up
+// (and ANGLE is skipped entirely) or the engine falls back to the existing
+// paths without failing engine construction.
+TEST_F(FlutterWindowsEngineTest, VulkanBackendSelectsVulkanOrFallsBack) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetSwitches({"--enable-impeller=true", "--impeller-backend=vulkan"});
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  ASSERT_NE(engine, nullptr);
+  if (engine->vulkan_manager() != nullptr) {
+    // Vulkan is active: the ANGLE path must not be initialized.
+    EXPECT_EQ(engine->egl_manager(), nullptr);
+  }
 }
 
 // Ensure that after setting or resetting the high contrast feature,

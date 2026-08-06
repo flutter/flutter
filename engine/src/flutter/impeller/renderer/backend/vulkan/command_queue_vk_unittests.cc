@@ -38,5 +38,31 @@ TEST(CommandQueueVKTest, SubmitAfterFenceWaiterTerminated) {
             called->end());
 }
 
+TEST(CommandQueueVKTest, SubmitAfterDeviceLostIsCancelled) {
+  const auto context = MockVulkanContextBuilder().Build();
+  auto buffer = context->CreateCommandBuffer();
+  context->MarkDeviceLost();
+  auto status = context->GetCommandQueue()->Submit({buffer});
+  EXPECT_EQ(status.code(), fml::StatusCode::kCancelled);
+
+  // No submission may reach the queue once the device is lost; any Vulkan
+  // call on a driver in a corrupted state can crash inside the ICD.
+  const auto called = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(std::find(called->begin(), called->end(), "vkQueueSubmit"),
+            called->end());
+}
+
+TEST(CommandQueueVKTest, ThrottleAllowsSustainedSubmissions) {
+  const auto context = MockVulkanContextBuilder().Build();
+  // Submit more batches than kMaxInFlightSubmissions. If in-flight slots
+  // were not released when submissions complete, this would exhaust the
+  // slots and fail on the slot timeout.
+  for (int i = 0; i < 10; i++) {
+    auto buffer = context->CreateCommandBuffer();
+    ASSERT_TRUE(buffer);
+    ASSERT_TRUE(context->GetCommandQueue()->Submit({buffer}).ok());
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -66,7 +66,13 @@ class DeathRattle final {
   DeathRattle(DeathRattle&&) = default;
   DeathRattle& operator=(DeathRattle&&) = default;
 
-  ~DeathRattle() { callback_(); }
+  // The callback may be empty when this instance has been moved from; the
+  // moved-from local still runs this destructor.
+  ~DeathRattle() {
+    if (callback_) {
+      callback_();
+    }
+  }
 
  private:
   std::function<void()> callback_;
