@@ -1368,7 +1368,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   if ([NSThread isMainThread]) {
     block();
   } else {
-    [FlutterRunLoop.mainRunLoop performBlock:block];
+    [_mainRunLoop performBlock:block];
   }
 }
 
@@ -1847,7 +1847,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   __weak FlutterEngine* weakSelf = self;
 
   const auto engine_time = _embedderAPI.GetCurrentTime();
-  [FlutterRunLoop.mainRunLoop
+  [_mainRunLoop
       performAfterDelay:(targetTime - (double)engine_time) / NSEC_PER_SEC
                   block:^{
                     FlutterEngine* self = weakSelf;
