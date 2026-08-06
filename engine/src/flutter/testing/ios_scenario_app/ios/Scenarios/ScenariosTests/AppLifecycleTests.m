@@ -72,7 +72,7 @@ FLUTTER_ASSERT_ARC
   }];
   [self waitForExpectationsWithTimeout:5 handler:nil];
 
-  UIWindow* window = SceneDelegate.mainWindow;
+  UIWindow* window = SceneDelegate.mainWindowOfFirstConnectedScene;
   XCTAssertNotNil(window, @"The host app must have a connected scene for test");
   window.rootViewController = rootVC;
   FlutterEngine* engine = rootVC.engine;
@@ -210,7 +210,7 @@ FLUTTER_ASSERT_ARC
 
   [self waitForExpectationsWithTimeout:5 handler:nil];
 
-  UIWindow* window = SceneDelegate.mainWindow;
+  UIWindow* window = SceneDelegate.mainWindowOfFirstConnectedScene;
   XCTAssertNotNil(window, @"The host app must have a connected scene for test");
   window.rootViewController = rootVC;
   FlutterEngine* engine = rootVC.engine;

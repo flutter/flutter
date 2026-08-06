@@ -11,12 +11,13 @@
 @interface SceneDelegate : FlutterSceneDelegate
 
 /**
- * The window of the app's connected scene, or nil if no scene is connected.
+ * The main window of the first connected scene, or nil if no scene is connected.
  *
- * Under the UIScene life cycle the window belongs to the scene delegate rather than the
- * application delegate. Tests use this to reach the root view controller.
+ * Under the UIScene life cycle a window belongs to a scene rather than to the application
+ * delegate, and a single scene delegate may serve more than one scene. The scenario app only
+ * ever has one scene, so tests use this to reach its root view controller.
  */
-@property(class, nonatomic, readonly, nullable) UIWindow* mainWindow;
+@property(class, nonatomic, readonly, nullable) UIWindow* mainWindowOfFirstConnectedScene;
 
 @end
 

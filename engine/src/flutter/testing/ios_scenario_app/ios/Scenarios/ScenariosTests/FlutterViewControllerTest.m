@@ -53,7 +53,7 @@ FLUTTER_ASSERT_ARC
     [firstFrameRendered fulfill];
   }];
 
-  UIWindow* window = SceneDelegate.mainWindow;
+  UIWindow* window = SceneDelegate.mainWindowOfFirstConnectedScene;
   XCTAssertNotNil(window, @"The host app must have a connected scene for test");
   UIViewController* rootVC = window.rootViewController;
   [rootVC presentViewController:self.flutterViewController animated:NO completion:nil];
@@ -87,7 +87,7 @@ FLUTTER_ASSERT_ARC
     [firstFrameRendered fulfill];
   }];
 
-  UIWindow* window = SceneDelegate.mainWindow;
+  UIWindow* window = SceneDelegate.mainWindowOfFirstConnectedScene;
   XCTAssertNotNil(window, @"The host app must have a connected scene for test");
   UIViewController* rootVC = window.rootViewController;
   [rootVC presentViewController:self.flutterViewController animated:NO completion:nil];

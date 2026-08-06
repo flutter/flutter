@@ -38,7 +38,7 @@
 
 @implementation SceneDelegate
 
-+ (UIWindow*)mainWindow {
++ (UIWindow*)mainWindowOfFirstConnectedScene {
   for (UIScene* scene in UIApplication.sharedApplication.connectedScenes) {
     if ([scene.delegate isKindOfClass:[SceneDelegate class]]) {
       return ((SceneDelegate*)scene.delegate).window;
