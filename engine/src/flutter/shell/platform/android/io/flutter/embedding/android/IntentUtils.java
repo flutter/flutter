@@ -6,9 +6,9 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import io.flutter.Build.API_LEVELS;
+import io.flutter.Log;
 import java.util.List;
 
 class IntentUtils {
