@@ -13,15 +13,6 @@ import 'package:stream_channel/stream_channel.dart';
 // ignore: implementation_imports
 import 'package:ui/src/engine/dom.dart';
 
-/// A class defined in content shell, used to control its behavior.
-extension type _TestRunner(JSObject _) implements JSObject {
-  external void waitUntilDone();
-}
-
-/// Returns the current content shell runner, or `null` if none exists.
-@JS('testRunner')
-external _TestRunner? get testRunner; // ignore: library_private_types_in_public_api
-
 /// A class that exposes the test API to JS.
 ///
 /// These are exposed so that tools like IDEs can interact with them via remote
@@ -107,10 +98,6 @@ final Uri _currentUrl = Uri.parse(domWindow.location.href);
 /// does mean that the server needs to be sure to nest its [MultiChannel]s at
 /// the same place the client does.
 void main() {
-  // This tells content_shell not to close immediately after the page has
-  // rendered.
-  testRunner?.waitUntilDone();
-
   if (_currentUrl.queryParameters['debug'] == 'true') {
     domDocument.body!.classList.add('debug');
   }
@@ -120,9 +107,9 @@ void main() {
       final MultiChannel<dynamic> serverChannel = _connectToServer();
       serverChannel.stream.listen((dynamic message) {
         if (message['command'] == 'loadSuite') {
-          final channelId = message['channel'] as int;
+          final int channelId = (message['channel'] as num).toInt();
           final url = message['url'] as String;
-          final messageId = message['id'] as int;
+          final int messageId = (message['id'] as num).toInt();
           final VirtualChannel<dynamic> suiteChannel = serverChannel.virtualChannel(channelId);
           final StreamChannel<dynamic> iframeChannel = _connectToIframe(url, messageId);
           suiteChannel.pipe(iframeChannel);
@@ -132,15 +119,21 @@ void main() {
           domDocument.body!.classList.remove('paused');
         } else {
           assert(message['command'] == 'closeSuite');
-          _iframes.remove(message['id'])!.remove();
+          final int id = (message['id'] as num).toInt();
+          _iframes.remove(id)?.remove();
 
-          for (final DomSubscription subscription in _domSubscriptions.remove(message['id'])!) {
-            subscription.cancel();
+          final List<DomSubscription>? domSubscriptions = _domSubscriptions.remove(id);
+          if (domSubscriptions != null) {
+            for (final DomSubscription subscription in domSubscriptions) {
+              subscription.cancel();
+            }
           }
-          for (final StreamSubscription<dynamic> subscription in _streamSubscriptions.remove(
-            message['id'],
-          )!) {
-            subscription.cancel();
+          final List<StreamSubscription<dynamic>>? streamSubscriptions = _streamSubscriptions
+              .remove(id);
+          if (streamSubscriptions != null) {
+            for (final StreamSubscription<dynamic> subscription in streamSubscriptions) {
+              subscription.cancel();
+            }
           }
         }
       });
@@ -206,62 +199,70 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
   final streamSubscriptions = <StreamSubscription<dynamic>>[];
   _domSubscriptions[id] = domSubscriptions;
   _streamSubscriptions[id] = streamSubscriptions;
-  domSubscriptions.add(
-    DomSubscription(
-      domWindow,
-      'message',
-      createDomEventListener((DomEvent event) {
-        final message = event as DomMessageEvent;
-        // A message on the Window can theoretically come from any website. It's
-        // very unlikely that a malicious site would care about hacking someone's
-        // unit tests, let alone be able to find the test server while it's
-        // running, but it's good practice to check the origin anyway.
-        if (message.origin != domWindow.location.origin) {
-          return;
-        }
-        message.stopPropagation();
 
-        if (message.data == 'port') {
-          final DomMessagePort port = message.ports[0];
-          domSubscriptions.add(
-            DomSubscription(
-              port,
-              'message',
-              createDomEventListener((DomEvent event) {
-                controller.local.sink.add((event as DomMessageEvent).data);
-              }),
-            ),
-          );
-          port.start();
-          streamSubscriptions.add(controller.local.stream.listen(port.postMessage));
-        } else if (message.data['ready'] == true) {
-          // This message indicates that the iframe is actively listening for
-          // events, so the message channel's second port can now be transferred.
-          final DomMessageChannel channel = createDomMessageChannel();
-          channel.port1.start();
-          channel.port2.start();
-          iframe.contentWindow.postMessage('port', domWindow.location.origin, <DomMessagePort>[
-            channel.port2,
-          ]);
-          domSubscriptions.add(
-            DomSubscription(
-              channel.port1,
-              'message',
-              createDomEventListener((DomEvent message) {
-                controller.local.sink.add((message as DomMessageEvent).data['data']);
-              }),
-            ),
-          );
+  late final DomSubscription windowSubscription;
+  windowSubscription = DomSubscription(
+    domWindow,
+    'message',
+    createDomEventListener((DomEvent event) {
+      final message = event as DomMessageEvent;
+      // A message on the Window can theoretically come from any website. It's
+      // very unlikely that a malicious site would care about hacking someone's
+      // unit tests, let alone be able to find the test server while it's
+      // running, but it's good practice to check the origin anyway.
+      if (message.origin != domWindow.location.origin) {
+        return;
+      }
+      if (message.source != iframe.contentWindow) {
+        return;
+      }
+      message.stopPropagation();
 
-          streamSubscriptions.add(controller.local.stream.listen(channel.port1.postMessage));
-        } else if (message.data['exception'] == true) {
-          // This message from `dart.js` indicates that an exception occurred
-          // loading the test.
-          controller.local.sink.add(message.data['data']);
-        }
-      }),
-    ),
+      if (message.data == 'port') {
+        final DomMessagePort port = message.ports[0];
+        domSubscriptions.add(
+          DomSubscription(
+            port,
+            'message',
+            createDomEventListener((DomEvent event) {
+              controller.local.sink.add((event as DomMessageEvent).data);
+            }),
+          ),
+        );
+        port.start();
+        streamSubscriptions.add(controller.local.stream.listen(port.postMessage));
+        windowSubscription.cancel();
+        domSubscriptions.remove(windowSubscription);
+      } else if (message.data['ready'] == true) {
+        // This message indicates that the iframe is actively listening for
+        // events, so the message channel's second port can now be transferred.
+        final DomMessageChannel channel = createDomMessageChannel();
+        channel.port1.start();
+        channel.port2.start();
+        iframe.contentWindow.postMessage('port', domWindow.location.origin, <DomMessagePort>[
+          channel.port2,
+        ]);
+        domSubscriptions.add(
+          DomSubscription(
+            channel.port1,
+            'message',
+            createDomEventListener((DomEvent message) {
+              controller.local.sink.add((message as DomMessageEvent).data['data']);
+            }),
+          ),
+        );
+
+        streamSubscriptions.add(controller.local.stream.listen(channel.port1.postMessage));
+        windowSubscription.cancel();
+        domSubscriptions.remove(windowSubscription);
+      } else if (message.data['exception'] == true) {
+        // This message from `dart.js` indicates that an exception occurred
+        // loading the test.
+        controller.local.sink.add(message.data['data']);
+      }
+    }),
   );
+  domSubscriptions.add(windowSubscription);
 
   iframe
     ..src = url
