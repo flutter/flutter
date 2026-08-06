@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import Foundation
-import InternalFlutterSwiftCommon
+@testable import InternalFlutterSwiftCommon
 import Testing
-import test_utils_swift
+@testable import test_utils_swift
 
-@Suite struct LoggerTests {
+// Several tests mutate shared `Logger` singleton properties (`outputWriter`, `logLevel`).
+// Even though those mutations are all lock-guarded and thread-safe, we serialize the tests to keep
+// them from racing each other.
+@Suite(.serialized) struct LoggerTests {
 
   @Test func testInitialization() {
     let writer = StringOutputWriter()
@@ -134,5 +137,11 @@ import test_utils_swift
     // After concurrent mutations and logging, Logger should remain in a valid state without data
     // races or crashes.
     #expect(Logger.logLevel == .info || Logger.logLevel == .warning)
+  }
+
+  @Test func testDefaultInitialization() {
+    let logger = Logger()
+    #expect(logger.logLevel == .info)
+    logger.log(level: .info, "Test default logger")
   }
 }

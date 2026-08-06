@@ -42,7 +42,7 @@ import Foundation
 ///     actions between the platform thread and the raster thread.
 @objc(FlutterResizeSynchronizer)
 @MainActor
-public final class ResizeSynchronizer: NSObject {
+final class ResizeSynchronizer: NSObject, @unchecked Sendable {
   private static let invalidSize = CGSize(width: -1, height: -1)
 
   // Synchronizes access to _isInResize_unsafe: isInResize is accessed from
@@ -75,7 +75,7 @@ public final class ResizeSynchronizer: NSObject {
   /// Blocks the thread until `performCommit(forSize:notify:delay:)` with the same size is called.
   /// While the thread is blocked, Flutter messages are being pumped.
   /// See `FlutterRunLoop.mainRunLoop.pollFlutterMessagesOnce()`.
-  @objc public func beginResize(
+  @objc func beginResize(
     forSize size: CGSize,
     notify: @MainActor () -> Void,
     onTimeout: (@MainActor () -> Void)? = nil
@@ -122,7 +122,7 @@ public final class ResizeSynchronizer: NSObject {
   ///
   /// Called from the raster thread on frame present. The `notify` callback will
   /// be invoked on the platform thread.
-  @objc public nonisolated func performCommit(
+  @objc func performCommit(
     forSize size: CGSize,
     afterDelay delay: TimeInterval,
     notify: @MainActor @escaping () -> Void
@@ -141,7 +141,7 @@ public final class ResizeSynchronizer: NSObject {
   /// Notifies the synchronizer that the Flutter view is being shut down.
   ///
   /// Unblocks the platform thread if blocked.
-  @objc public nonisolated func shutDown() {
+  @objc func shutDown() {
     mainRunLoop.perform {
       self.isShuttingDown = true
     }

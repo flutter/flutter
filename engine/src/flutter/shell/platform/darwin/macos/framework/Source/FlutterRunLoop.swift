@@ -12,7 +12,7 @@ import InternalFlutterSwiftCommon
 /// schedules the task in both common run loop mode and a private run loop mode,
 /// which allows it to run in a mode where it only processes Flutter messages
 /// (`pollFlutterMessagesOnce()`).
-@objc public final class FlutterRunLoop: NSObject, @unchecked Sendable {
+@objc final class FlutterRunLoop: NSObject, @unchecked Sendable {
   private static let flutterRunLoopMode = CFRunLoopMode("FlutterRunLoopMode" as CFString)
 
   @MainActor
@@ -92,14 +92,13 @@ import InternalFlutterSwiftCommon
 
   // The `FlutterRunLoop` for the main thread.
   @MainActor
-  @objc public static var mainRunLoop: FlutterRunLoop {
+  @objc static var mainRunLoop: FlutterRunLoop {
     assert(Thread.isMainThread, "Must be called on the main thread.")
     return _mainRunLoop ??= FlutterRunLoop()
   }
 
   // Schedules a block to be executed on the main thread.
-  @objc public func perform(afterDelay delay: TimeInterval, block: @MainActor @escaping () -> Void)
-  {
+  @objc func perform(afterDelay delay: TimeInterval, block: @MainActor @escaping () -> Void) {
     let nextFireTime = taskQueue.add(
       task: TaskQueue.Task(block: block, targetTime: CFAbsoluteTimeGetCurrent() + delay))
     if delay > 0 {
@@ -112,13 +111,13 @@ import InternalFlutterSwiftCommon
 
   // Schedules a block to be executed on the main thread after a delay.
   @objc(performBlock:)
-  public func perform(_ block: @MainActor @escaping () -> Void) {
+  func perform(_ block: @MainActor @escaping () -> Void) {
     perform(afterDelay: 0, block: block)
   }
 
   /// Executes single iteration of the run loop in the mode where only Flutter
   /// messages are processed.
-  @objc public func pollFlutterMessagesOnce() {
+  @objc func pollFlutterMessagesOnce() {
     CFRunLoopRunInMode(Self.flutterRunLoopMode, 0.1, true)
   }
 }
