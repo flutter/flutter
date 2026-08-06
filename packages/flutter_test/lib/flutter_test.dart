@@ -89,6 +89,7 @@ export 'src/test_default_binary_messenger.dart';
 export 'src/test_exception_reporter.dart';
 export 'src/test_pointer.dart';
 export 'src/test_text_input.dart';
+export 'src/test_variant.dart';
 export 'src/test_vsync.dart';
 export 'src/test_widgets_app.dart';
 export 'src/tree_traversal.dart';
