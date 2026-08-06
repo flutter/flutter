@@ -65,10 +65,24 @@
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/command_buffer.h"
+#include "third_party/abseil-cpp/absl/hash/hash.h"
 
 namespace impeller {
 
 namespace {
+
+size_t HashTextFrame(const TextFrame& text_frame) {
+  size_t hash = 0;
+  for (const TextRun& run : text_frame.GetRuns()) {
+    hash = absl::HashOf(hash, run.GetFont().GetHash());
+    for (const TextRun::GlyphPosition& glyph_pos : run.GetGlyphPositions()) {
+      hash = absl::HashOf(hash, static_cast<uint32_t>(glyph_pos.glyph.type),
+                          glyph_pos.glyph.index, glyph_pos.position.x,
+                          glyph_pos.position.y);
+    }
+  }
+  return hash;
+}
 
 constexpr Scalar kAntialiasPadding = 1.0f;
 
@@ -2103,7 +2117,7 @@ bool Canvas::AttemptBlurredTextOptimization(
   std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
   int64_t identifier = maybe_glyph.has_value()
                            ? maybe_glyph.value().index
-                           : reinterpret_cast<int64_t>(text_frame.get());
+                           : static_cast<int64_t>(HashTextFrame(*text_frame));
   TextShadowCache::TextShadowCacheKey cache_key(
       /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
       /*p_identifier=*/identifier,
