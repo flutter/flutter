@@ -8,7 +8,10 @@ void main() {
   runApp(const TextRenderingApp());
 }
 
+/// A test application that renders text with various font weights and colors
+/// to validate text rendering in integration tests.
 class TextRenderingApp extends StatelessWidget {
+  /// Creates a [TextRenderingApp].
   const TextRenderingApp({super.key});
 
   static const String _testText =
