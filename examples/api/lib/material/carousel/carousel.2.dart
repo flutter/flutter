@@ -21,7 +21,7 @@ class CarouselAutoPlayExampleApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           leading: const Icon(Icons.cast),
-          title: const Text('Flutter TV - Auto-play'),
+          title: const Text('Flutter Sample - Auto-play'),
           actions: const <Widget>[
             Padding(
               padding: EdgeInsetsDirectional.only(end: 16.0),
