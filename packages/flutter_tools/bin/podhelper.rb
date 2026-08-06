@@ -130,8 +130,9 @@ def flutter_additional_macos_build_settings(target)
                                   (deployment_target_major.to_i < 10) ||
                                   (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 11)
 
-  # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 12.0).
-  # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
+  # Suppress warning/error when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 12.0).
+  # Xcode 27+ produces an error while previous versions produced a warning.
+  # When it's just a warning, it's harmless but confusing--it's not a bad thing for dependencies to support a lower version.
   inherit_deployment_target = !target.deployment_target.blank? &&
     (deployment_target_major.to_i < 12)
 
