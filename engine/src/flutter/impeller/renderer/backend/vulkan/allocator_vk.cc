@@ -470,12 +470,14 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
       view_info.subresourceRange.levelCount = 1u;
       view_info.subresourceRange.layerCount = ToArrayLayerCount(desc);
       auto [base_result, base_view] = device.createImageViewUnique(view_info);
-      if (base_result != vk::Result::eSuccess) {
+      if (base_result == vk::Result::eSuccess) {
+        base_mip_image_view = std::move(base_view);
+      } else {
+        // The texture stays usable without it, so keep it rather than failing
+        // the allocation.
         VALIDATION_LOG << "Unable to create a base mip image view: "
                        << vk::to_string(base_result);
-        return;
       }
-      base_mip_image_view = std::move(base_view);
     }
 
     resource_.Swap(ImageResource(
