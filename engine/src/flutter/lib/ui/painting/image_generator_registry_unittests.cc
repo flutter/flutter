@@ -4,7 +4,12 @@
 
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 
+#include <thread>
+#include <vector>
+
+#include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/message_loop.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/testing/testing.h"
 
@@ -148,6 +153,74 @@ TEST_F(ShellTest, ImageGeneratorsWithSamePriorityCascadeChronologically) {
   // won't.
   auto result = registry.CreateCompatibleGenerator(SkData::MakeEmpty());
   ASSERT_EQ(result->GetInfo().width(), 1337);
+}
+
+TEST_F(ShellTest, AsyncResolutionPreservesOrderAcrossTaskRunners) {
+  ImageGeneratorRegistry registry;
+  const std::thread::id callback_thread = std::this_thread::get_id();
+  std::vector<std::thread::id> factory_threads;
+  std::thread::id result_callback_thread;
+  bool callback_called = false;
+
+  // Alternate between the callback and concurrent task runners. The first
+  // concurrent factory rejects the data; the second accepts it and stops the
+  // search before the final factory.
+  registry.AddFactory(
+      [&](const sk_sp<SkData>&) {
+        factory_threads.push_back(std::this_thread::get_id());
+        return nullptr;
+      },
+      100);
+  registry.AddFactory(
+      [&](const sk_sp<SkData>&) {
+        factory_threads.push_back(std::this_thread::get_id());
+        return nullptr;
+      },
+      99, ImageGeneratorFactoryExecution::kConcurrentTaskRunner);
+  registry.AddFactory(
+      [&](const sk_sp<SkData>&) {
+        factory_threads.push_back(std::this_thread::get_id());
+        return nullptr;
+      },
+      98);
+  registry.AddFactory(
+      [&](const sk_sp<SkData>&) {
+        factory_threads.push_back(std::this_thread::get_id());
+        return std::make_unique<FakeImageGenerator>(7331);
+      },
+      97, ImageGeneratorFactoryExecution::kConcurrentTaskRunner);
+  registry.AddFactory(
+      [&](const sk_sp<SkData>&) {
+        factory_threads.push_back(std::this_thread::get_id());
+        return std::make_unique<FakeImageGenerator>(1337);
+      },
+      96);
+
+  auto concurrent_loop = fml::ConcurrentMessageLoop::Create(1u);
+  auto ui_task_runner = GetCurrentTaskRunner();
+  registry.CreateCompatibleGeneratorAsync(
+      SkData::MakeEmpty(), concurrent_loop->GetTaskRunner(), ui_task_runner,
+      [&](const std::shared_ptr<ImageGenerator>& result) {
+        callback_called = true;
+        result_callback_thread = std::this_thread::get_id();
+        if (result) {
+          EXPECT_EQ(result->GetInfo().width(), 7331);
+        } else {
+          ADD_FAILURE() << "Expected an image generator";
+        }
+        fml::MessageLoop::GetCurrent().Terminate();
+      });
+
+  EXPECT_FALSE(callback_called);
+  fml::MessageLoop::GetCurrent().Run();
+
+  EXPECT_TRUE(callback_called);
+  ASSERT_EQ(factory_threads.size(), 4u);
+  EXPECT_EQ(factory_threads[0], callback_thread);
+  EXPECT_NE(factory_threads[1], callback_thread);
+  EXPECT_EQ(factory_threads[2], callback_thread);
+  EXPECT_NE(factory_threads[3], callback_thread);
+  EXPECT_EQ(result_callback_thread, callback_thread);
 }
 
 }  // namespace testing
