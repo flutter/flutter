@@ -638,9 +638,8 @@ const String _kGlibcError = 'Inconsistency detected by ld.so';
 /// and `dbus/object_proxy.cc`.
 ///
 /// We filter out these benign D-Bus lines to prevent stderr log noise in CI,
-/// following the industry standard pattern used by web test runners such as Cypress
-/// (see https://github.com/cypress-io/cypress/issues/29521 and
-/// https://github.com/cypress-io/cypress/blob/develop/cli/lib/exec/spawn.ts#L252-L282).
+/// following the industry standard pattern used by open source projects to filter
+/// E2E test logs (e.g. https://github.com/kitelev/exocortex/blob/master/packages/obsidian-plugin/docker-entrypoint-e2e.sh).
 bool _isDbusError(String line) {
   return line.contains('ERROR:dbus/bus.cc') ||
       line.contains('ERROR:dbus/object_proxy.cc') ||
