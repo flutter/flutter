@@ -68,6 +68,7 @@ class TestWidgetsApp extends StatelessWidget {
     this.home,
     this.initialRoute,
     this.onGenerateRoute,
+    this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
@@ -139,6 +140,14 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   ///  * [WidgetsApp.onGenerateRoute], the equivalent property in [WidgetsApp].
   final RouteFactory? onGenerateRoute;
+
+  /// Called when [onGenerateRoute] fails to generate a route, except for the
+  /// [initialRoute].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.onUnknownRoute], the equivalent property in [WidgetsApp].
+  final RouteFactory? onUnknownRoute;
 
   /// A list of [NavigatorObserver] for the app's [Navigator].
   ///
@@ -279,6 +288,7 @@ class TestWidgetsApp extends StatelessWidget {
       home: home,
       initialRoute: initialRoute,
       onGenerateRoute: onGenerateRoute,
+      onUnknownRoute: onUnknownRoute,
       routes: routes,
       pageRouteBuilder: pageRouteBuilder,
       builder: builder,

@@ -698,5 +698,21 @@ void main() {
       final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
       expect(widgetsApp.onGenerateRoute, isNull);
     });
+
+    testWidgets('onUnknownRoute defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.onUnknownRoute, isNull);
+    });
+
+    testWidgets('onUnknownRoute is passed to WidgetsApp', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(home: const Placeholder(), onUnknownRoute: (settings) => null),
+      );
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.onUnknownRoute, isNotNull);
+    });
   });
 }
