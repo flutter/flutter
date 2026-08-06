@@ -196,42 +196,54 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
   return result;
 }
 
+/// The field of `Shader` that holds the compiled shader for `platform`, or
+/// nullptr when the platform has no place in a shader bundle.
+static std::unique_ptr<fb::shaderbundle::BackendShaderT>* GetBackendShaderSlot(
+    TargetPlatform platform,
+    fb::shaderbundle::ShaderT& shader) {
+  switch (platform) {
+    case TargetPlatform::kMetalIOS:
+      return &shader.metal_ios;
+    case TargetPlatform::kMetalDesktop:
+      return &shader.metal_desktop;
+    case TargetPlatform::kOpenGLES:
+      return &shader.opengl_es;
+    case TargetPlatform::kOpenGLDesktop:
+      return &shader.opengl_desktop;
+    case TargetPlatform::kVulkan:
+      return &shader.vulkan;
+    case TargetPlatform::kSkSL:
+    case TargetPlatform::kRuntimeStageMetal:
+    case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
+    case TargetPlatform::kRuntimeStageVulkan:
+    case TargetPlatform::kUnknown:
+      return nullptr;
+  }
+  return nullptr;
+}
+
 static std::unique_ptr<fb::shaderbundle::ShaderT> GenerateShaderFB(
     SourceOptions options,
     const std::string& shader_name,
     const ShaderConfig& shader_config,
+    const std::vector<TargetPlatform>& target_platforms,
     std::set<std::string>* out_dependencies) {
   auto result = std::make_unique<fb::shaderbundle::ShaderT>();
   result->name = shader_name;
-  result->metal_ios =
-      GenerateShaderBackendFB(TargetPlatform::kMetalIOS, options, shader_name,
-                              shader_config, out_dependencies);
-  if (!result->metal_ios) {
-    return nullptr;
-  }
-  result->metal_desktop =
-      GenerateShaderBackendFB(TargetPlatform::kMetalDesktop, options,
-                              shader_name, shader_config, out_dependencies);
-  if (!result->metal_desktop) {
-    return nullptr;
-  }
-  result->opengl_es =
-      GenerateShaderBackendFB(TargetPlatform::kOpenGLES, options, shader_name,
-                              shader_config, out_dependencies);
-  if (!result->opengl_es) {
-    return nullptr;
-  }
-  result->opengl_desktop =
-      GenerateShaderBackendFB(TargetPlatform::kOpenGLDesktop, options,
-                              shader_name, shader_config, out_dependencies);
-  if (!result->opengl_desktop) {
-    return nullptr;
-  }
-  result->vulkan =
-      GenerateShaderBackendFB(TargetPlatform::kVulkan, options, shader_name,
-                              shader_config, out_dependencies);
-  if (!result->vulkan) {
-    return nullptr;
+  for (TargetPlatform platform : target_platforms) {
+    std::unique_ptr<fb::shaderbundle::BackendShaderT>* slot =
+        GetBackendShaderSlot(platform, *result);
+    if (!slot) {
+      std::cerr << "Target platform \"" << TargetPlatformToString(platform)
+                << "\" cannot be stored in a shader bundle." << std::endl;
+      return nullptr;
+    }
+    *slot = GenerateShaderBackendFB(platform, options, shader_name,
+                                    shader_config, out_dependencies);
+    if (!*slot) {
+      return nullptr;
+    }
   }
   return result;
 }
@@ -239,6 +251,7 @@ static std::unique_ptr<fb::shaderbundle::ShaderT> GenerateShaderFB(
 std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
     const std::string& bundle_config_json,
     const SourceOptions& options,
+    const std::vector<TargetPlatform>& target_platforms,
     std::set<std::string>* out_dependencies) {
   // --------------------------------------------------------------------------
   /// 1. Parse the bundle configuration.
@@ -260,7 +273,8 @@ std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
 
   for (const auto& [shader_name, shader_config] : bundle_config.value()) {
     std::unique_ptr<fb::shaderbundle::ShaderT> shader =
-        GenerateShaderFB(options, shader_name, shader_config, out_dependencies);
+        GenerateShaderFB(options, shader_name, shader_config, target_platforms,
+                         out_dependencies);
     if (!shader) {
       return std::nullopt;
     }
@@ -319,7 +333,7 @@ bool GenerateShaderBundle(Switches& switches) {
   const bool want_depfile = !switches.depfile_path.empty();
   auto shader_bundle = GenerateShaderBundleFlatbuffer(
       switches.shader_bundle, switches.CreateSourceOptions(),
-      want_depfile ? &dependencies : nullptr);
+      switches.PlatformsToBundle(), want_depfile ? &dependencies : nullptr);
   if (!shader_bundle.has_value()) {
     // Specific error messages are already handled by
     // GenerateShaderBundleFlatbuffer.
