@@ -244,15 +244,37 @@ to your `AndroidManifest.xml` file under the `<application>` tag:
     android:value="opengles" />
 ```
 
-### macOS Desktop
+### macOS
 
-Impeller is the **default** on macOS Desktop.
+Impeller is the **default** on macOS.
 
 To explicitly opt out of using Impeller, add the following to your `Info.plist` file under the top-level `<dict>` tag:
 
 ```xml
   <key>FLTEnableImpeller</key>
   <false/>
+```
+
+### Linux
+
+Impeller is the **default** on Linux.
+
+To disable Impeller on Linux when deploying your app, add the following setup to
+your project in `linux/runner/my_application.cc`.
+
+```c
+fl_dart_project_set_enable_impeller(project, FALSE);
+```
+
+### Windows
+
+Impeller is the **default** on Windows.
+
+To disable Impeller on Windows when deploying your app, add the following setup to
+your project in `windows\runner\main.cpp`.
+
+```c++Expand commentComment on line R143
+project.set_impeller_switch(flutter::ImpellerSwitch::Disabled);
 ```
 
 ### Custom Embedders
