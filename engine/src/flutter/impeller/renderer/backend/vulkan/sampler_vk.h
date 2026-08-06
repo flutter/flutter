@@ -31,13 +31,22 @@ class SamplerVK final : public Sampler, public BackendCast<SamplerVK, Sampler> {
 
   const std::shared_ptr<YUVConversionVK>& GetYUVConversion() const;
 
+  /// A copy of this sampler clamped to the base mip level, or null when there
+  /// is nothing to clamp.
+  ///
+  /// Only populated on devices where mipmap generation is broken. Passes
+  /// substitute it for textures whose mip levels came from that generation, so
+  /// the corrupt levels go unread while every other texture keeps the filtering
+  /// it asked for.
+  const SamplerVK* GetBaseMipClampedVariant() const;
+
  private:
   friend SamplerLibraryVK;
 
   const vk::Device device_;
   SharedHandleVK<vk::Sampler> sampler_;
   std::shared_ptr<YUVConversionVK> yuv_conversion_;
-  bool mips_disabled_workaround_ = false;
+  std::shared_ptr<SamplerVK> base_mip_clamped_variant_;
   bool is_valid_ = false;
 
   SamplerVK(const SamplerVK&) = delete;
