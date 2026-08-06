@@ -4,9 +4,12 @@
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createEndToEndKeyboardTest());
+  await testWithNewIOSSimulator('integration_ui_ios_keyboard_resize', (String deviceId) async {
+    await task(createEndToEndKeyboardTest(deviceIdOverride: deviceId));
+  });
 }

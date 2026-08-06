@@ -5585,8 +5585,9 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
 
-  - name: Mac_ios integration_ui_ios_driver
+  - name: Mac integration_ui_ios_driver
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5594,8 +5595,9 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver
 
-  - name: Mac_ios integration_ui_ios_frame_number
+  - name: Mac integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5603,8 +5605,9 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_frame_number
 
-  - name: Mac_ios integration_ui_ios_keyboard_resize
+  - name: Mac integration_ui_ios_keyboard_resize
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5612,8 +5615,9 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_keyboard_resize
 
-  - name: Mac_ios integration_ui_ios_textfield
+  - name: Mac integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
