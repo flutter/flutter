@@ -71,17 +71,45 @@ namespace impeller {
 
 namespace {
 
-size_t HashTextFrame(const TextFrame& text_frame) {
-  size_t hash = 0;
-  for (const TextRun& run : text_frame.GetRuns()) {
+uint32_t PackGlyphId(const Glyph& glyph) {
+  return (static_cast<uint32_t>(glyph.type) << 16) | glyph.index;
+}
+
+TextFrameFingerprint ComputeTextFrameFingerprint(const TextFrame& text_frame) {
+  TextFrameFingerprint fp;
+  const std::vector<TextRun>& runs = text_frame.GetRuns();
+  fp.run_count = runs.size();
+
+  size_t hash = absl::HashOf(text_frame.HasColor(),
+                             text_frame.GetEnableGammaCorrection());
+
+  for (const TextRun& run : runs) {
     hash = absl::HashOf(hash, run.GetFont().GetHash());
-    for (const TextRun::GlyphPosition& glyph_pos : run.GetGlyphPositions()) {
+    const std::vector<TextRun::GlyphPosition>& glyphs = run.GetGlyphPositions();
+    fp.total_glyph_count += glyphs.size();
+
+    for (const TextRun::GlyphPosition& glyph_pos : glyphs) {
       hash = absl::HashOf(hash, static_cast<uint32_t>(glyph_pos.glyph.type),
                           glyph_pos.glyph.index, glyph_pos.position.x,
                           glyph_pos.position.y);
     }
   }
-  return hash;
+
+  if (!runs.empty()) {
+    const std::vector<TextRun::GlyphPosition>& first_glyphs =
+        runs.front().GetGlyphPositions();
+    if (!first_glyphs.empty()) {
+      fp.first_glyph_id = PackGlyphId(first_glyphs.front().glyph);
+    }
+    const std::vector<TextRun::GlyphPosition>& last_glyphs =
+        runs.back().GetGlyphPositions();
+    if (!last_glyphs.empty()) {
+      fp.last_glyph_id = PackGlyphId(last_glyphs.back().glyph);
+    }
+  }
+
+  fp.full_hash = hash;
+  return fp;
 }
 
 constexpr Scalar kAntialiasPadding = 1.0f;
@@ -2115,9 +2143,12 @@ bool Canvas::AttemptBlurredTextOptimization(
           /*is_solid_color=*/true, GetCurrentTransform());
 
   std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
+  TextFrameFingerprint fingerprint =
+      maybe_glyph.has_value() ? TextFrameFingerprint{}
+                              : ComputeTextFrameFingerprint(*text_frame);
   int64_t identifier = maybe_glyph.has_value()
                            ? maybe_glyph.value().index
-                           : static_cast<int64_t>(HashTextFrame(*text_frame));
+                           : static_cast<int64_t>(fingerprint.full_hash);
   TextShadowCache::TextShadowCacheKey cache_key(
       /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
       /*p_identifier=*/identifier,
@@ -2125,7 +2156,7 @@ bool Canvas::AttemptBlurredTextOptimization(
       /*p_font=*/text_frame->GetFont(),
       /*p_sigma=*/paint.mask_blur_descriptor->sigma,
       /*p_color=*/paint.color,
-      /*p_text_frame=*/text_frame);
+      /*p_fingerprint=*/fingerprint);
 
   std::optional<Entity> result = renderer_.GetTextShadowCache().Lookup(
       renderer_, entity, filter, cache_key);

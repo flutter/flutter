@@ -917,16 +917,30 @@ TEST_P(AiksTest, DuplicateTextWithShadowCache) {
 
 TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
   SkFont font = flutter::testing::CreateTestFontOfSize(12);
-  auto blob1 = SkTextBlob::MakeFromString("Text A", font);
-  auto blob2 = SkTextBlob::MakeFromString("Text B", font);
 
-  auto frame1 = MakeTextFrameFromTextBlobSkia(blob1);
-  auto frame2 = MakeTextFrameFromTextBlobSkia(blob2);
+  Font impeller_font(
+      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("Text A", font))
+          ->GetFont());
 
-  Font impeller_font(frame1->GetFont());
+  TextFrameFingerprint fp1{
+      .run_count = 1,
+      .total_glyph_count = 6,
+      .first_glyph_id = 10,
+      .last_glyph_id = 20,
+      .full_hash = 12345,
+  };
 
-  // Construct two keys with the exact same identifier (simulating a hash collision)
-  // but with different TextFrame contents.
+  TextFrameFingerprint fp2{
+      .run_count = 1,
+      .total_glyph_count = 6,
+      .first_glyph_id = 10,
+      .last_glyph_id = 21,  // Different last glyph ID
+      .full_hash = 12345,   // Simulated hash collision on full_hash!
+  };
+
+  // Construct two keys with the exact same identifier & full_hash (simulating a
+  // hash collision) but with different fingerprints (e.g. different
+  // last_glyph_id).
   TextShadowCache::TextShadowCacheKey key1(
       /*p_max_basis=*/1.0f,
       /*p_identifier=*/12345,
@@ -934,7 +948,7 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
       /*p_font=*/impeller_font,
       /*p_sigma=*/Sigma{4.0f},
       /*p_color=*/Color::Blue(),
-      /*p_text_frame=*/frame1);
+      /*p_fingerprint=*/fp1);
 
   TextShadowCache::TextShadowCacheKey key2(
       /*p_max_basis=*/1.0f,
@@ -943,10 +957,11 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
       /*p_font=*/impeller_font,
       /*p_sigma=*/Sigma{4.0f},
       /*p_color=*/Color::Blue(),
-      /*p_text_frame=*/frame2);
+      /*p_fingerprint=*/fp2);
 
   TextShadowCache::TextShadowCacheKey::Equal equal;
-  // Key comparison must fail because the text frames are different despite identical hash identifier.
+  // Key comparison must fail because fingerprints differ despite identical hash
+  // identifier.
   EXPECT_FALSE(equal(key1, key2));
 
   TextShadowCache::TextShadowCacheKey key3(
@@ -956,9 +971,9 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
       /*p_font=*/impeller_font,
       /*p_sigma=*/Sigma{4.0f},
       /*p_color=*/Color::Blue(),
-      /*p_text_frame=*/MakeTextFrameFromTextBlobSkia(blob1));
+      /*p_fingerprint=*/fp1);
 
-  // Key comparison must succeed for identical text frame content.
+  // Key comparison must succeed for identical fingerprints.
   EXPECT_TRUE(equal(key1, key3));
 }
 
