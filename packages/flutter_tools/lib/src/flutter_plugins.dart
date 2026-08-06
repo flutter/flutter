@@ -229,6 +229,7 @@ const _kFlutterPluginsDependenciesKey = 'dependencies';
 const _kFlutterPluginsHasNativeBuildKey = 'native_build';
 const _kFlutterPluginsSharedDarwinSource = 'shared_darwin_source';
 const _kFlutterPluginsDevDependencyKey = 'dev_dependency';
+const int _kFileExistsErrorCode = 17;
 
 /// Writes the .flutter-plugins-dependencies file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
@@ -1269,12 +1270,42 @@ void _createPlatformPluginSymlinks(
     final name = pluginInfo[_kFlutterPluginsNameKey]! as String;
     final path = pluginInfo[_kFlutterPluginsPathKey]! as String;
     final Link link = symlinkDirectory.childLink(name);
-    if (link.existsSync()) {
+    final FileSystemEntityType type = link.fileSystem.typeSync(link.path, followLinks: false);
+    var skipCreation = false;
+    if (type == FileSystemEntityType.link) {
+      try {
+        if (link.targetSync() == path) {
+          skipCreation = true;
+        }
+      } on FileSystemException catch (_) {
+        // If targetSync fails (e.g. broken link), proceed to delete.
+      }
+    }
+
+    if (skipCreation) {
       continue;
     }
+
+    ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
+
     try {
       link.createSync(path);
     } on FileSystemException catch (e) {
+      if (e.osError?.errorCode == _kFileExistsErrorCode) {
+        // OS Error: File exists, errno = 17
+        final FileSystemEntityType postCrashType = link.fileSystem.typeSync(
+          link.path,
+          followLinks: false,
+        );
+        if (postCrashType == FileSystemEntityType.link) {
+          try {
+            if (link.targetSync() == path) {
+              // Concurrently created by another process, and points to the correct target.
+              continue;
+            }
+          } on FileSystemException catch (_) {}
+        }
+      }
       handleSymlinkException(
         e,
         platform: globals.platform,
