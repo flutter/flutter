@@ -28,6 +28,7 @@ static bool IsDepthStencilFormat(PixelFormat format) {
       return true;
     case PixelFormat::kUnknown:
     case PixelFormat::kA8UNormInt:
+    case PixelFormat::kGray8UNormInt:
     case PixelFormat::kR8UNormInt:
     case PixelFormat::kR8G8UNormInt:
     case PixelFormat::kR8G8B8A8UNormInt:
@@ -407,6 +408,7 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
       return GL_DEPTH32F_STENCIL8;
     case PixelFormat::kUnknown:
     case PixelFormat::kA8UNormInt:
+    case PixelFormat::kGray8UNormInt:
     case PixelFormat::kR8UNormInt:
     case PixelFormat::kR8G8UNormInt:
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
@@ -630,6 +632,14 @@ bool TextureGLES::Bind() {
         return false;
       }
       gl.BindTexture(target.value(), handle.value());
+      if (GetTextureDescriptor().format == PixelFormat::kGray8UNormInt &&
+          !gray8_swizzle_configured_) {
+        gl.TexParameteri(target.value(), GL_TEXTURE_SWIZZLE_R, GL_RED);
+        gl.TexParameteri(target.value(), GL_TEXTURE_SWIZZLE_G, GL_RED);
+        gl.TexParameteri(target.value(), GL_TEXTURE_SWIZZLE_B, GL_RED);
+        gl.TexParameteri(target.value(), GL_TEXTURE_SWIZZLE_A, GL_ONE);
+        gray8_swizzle_configured_ = true;
+      }
     } break;
     case Type::kRenderBuffer:
     case Type::kRenderBufferMultisampled:

@@ -201,6 +201,7 @@ class TextureGLES final : public Texture,
   UniqueHandleGLES cached_fbo_;
   uint32_t cached_fbo_mip_level_ = 0;
   uint32_t cached_fbo_slice_ = 0;
+  bool gray8_swizzle_configured_ = false;
   bool is_valid_ = false;
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,

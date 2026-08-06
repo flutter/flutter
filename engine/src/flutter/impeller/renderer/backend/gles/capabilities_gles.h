@@ -142,6 +142,9 @@ class CapabilitiesGLES final
   bool SupportsManuallyMippedTextures() const override;
 
   // |Capabilities|
+  bool SupportsGray8Textures() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|
@@ -181,6 +184,7 @@ class CapabilitiesGLES final
   bool supports_32bit_primitive_indices_ = false;
   bool supports_texture_max_level_ = false;
   bool supports_texture_array_ = false;
+  bool supports_gray8_textures_ = false;
   bool is_angle_ = false;
   bool is_es_ = false;
   bool supports_texture_compression_bc_ = false;

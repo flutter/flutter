@@ -23,5 +23,16 @@ TEST(FormatsVKTest, DescriptorMapping) {
             vk::DescriptorType::eInputAttachment);
 }
 
+TEST(FormatsVKTest, Gray8Mapping) {
+  EXPECT_EQ(ToVKImageFormat(PixelFormat::kGray8UNormInt), vk::Format::eR8Unorm);
+
+  const vk::ComponentMapping mapping =
+      ToVKComponentMapping(PixelFormat::kGray8UNormInt);
+  EXPECT_EQ(mapping.r, vk::ComponentSwizzle::eR);
+  EXPECT_EQ(mapping.g, vk::ComponentSwizzle::eR);
+  EXPECT_EQ(mapping.b, vk::ComponentSwizzle::eR);
+  EXPECT_EQ(mapping.a, vk::ComponentSwizzle::eOne);
+}
+
 }  // namespace testing
 }  // namespace impeller

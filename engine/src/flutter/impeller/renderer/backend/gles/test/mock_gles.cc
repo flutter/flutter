@@ -305,6 +305,12 @@ void mockBindTexture(GLenum target, GLuint texture) {
 static_assert(CheckSameSignature<decltype(mockBindTexture),  //
                                  decltype(glBindTexture)>::value);
 
+void mockTexParameteri(GLenum target, GLenum pname, GLint param) {
+  CallMockMethod(&IMockGLESImpl::TexParameteri, target, pname, param);
+}
+static_assert(CheckSameSignature<decltype(mockTexParameteri),  //
+                                 decltype(glTexParameteri)>::value);
+
 void mockBindBufferRange(GLenum target,
                          GLuint index,
                          GLuint buffer,
@@ -553,6 +559,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockTexImage2D);
   } else if (strcmp(name, "glBindTexture") == 0) {
     return reinterpret_cast<void*>(mockBindTexture);
+  } else if (strcmp(name, "glTexParameteri") == 0) {
+    return reinterpret_cast<void*>(mockTexParameteri);
   } else if (strcmp(name, "glObjectLabelKHR") == 0) {
     return reinterpret_cast<void*>(mockObjectLabelKHR);
   } else if (strcmp(name, "glGenBuffers") == 0) {

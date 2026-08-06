@@ -154,6 +154,8 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
     case PixelFormat::kA8UNormInt:
       // TODO(csg): This is incorrect. Don't depend on swizzle support for GLES.
       return vk::Format::eR8Unorm;
+    case PixelFormat::kGray8UNormInt:
+      return vk::Format::eR8Unorm;
     case PixelFormat::kR8G8B8A8UNormInt:
       return vk::Format::eR8G8B8A8Unorm;
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
@@ -215,6 +217,28 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
   }
 
   FML_UNREACHABLE();
+}
+
+constexpr vk::ComponentMapping ToVKComponentMapping(PixelFormat format) {
+  vk::ComponentMapping mapping;
+  switch (format) {
+    case PixelFormat::kA8UNormInt:
+      // Vulkan has no alpha-only image format, so A8 is stored as R8 and
+      // swizzled back to alpha. See
+      // https://github.com/flutter/flutter/issues/115461.
+      mapping.a = vk::ComponentSwizzle::eR;
+      mapping.r = vk::ComponentSwizzle::eA;
+      break;
+    case PixelFormat::kGray8UNormInt:
+      mapping.r = vk::ComponentSwizzle::eR;
+      mapping.g = vk::ComponentSwizzle::eR;
+      mapping.b = vk::ComponentSwizzle::eR;
+      mapping.a = vk::ComponentSwizzle::eOne;
+      break;
+    default:
+      break;
+  }
+  return mapping;
 }
 
 constexpr PixelFormat ToPixelFormat(vk::Format format) {
@@ -452,6 +476,7 @@ constexpr bool PixelFormatIsDepthStencil(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
     case PixelFormat::kA8UNormInt:
+    case PixelFormat::kGray8UNormInt:
     case PixelFormat::kR8UNormInt:
     case PixelFormat::kR8G8UNormInt:
     case PixelFormat::kR8G8B8A8UNormInt:
@@ -569,6 +594,7 @@ constexpr vk::ImageAspectFlags ToVKImageAspectFlags(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
     case PixelFormat::kA8UNormInt:
+    case PixelFormat::kGray8UNormInt:
     case PixelFormat::kR8UNormInt:
     case PixelFormat::kR8G8UNormInt:
     case PixelFormat::kR8G8B8A8UNormInt:
@@ -666,6 +692,7 @@ constexpr vk::ImageAspectFlags ToImageAspectFlags(PixelFormat format) {
     case PixelFormat::kUnknown:
       return {};
     case PixelFormat::kA8UNormInt:
+    case PixelFormat::kGray8UNormInt:
     case PixelFormat::kR8UNormInt:
     case PixelFormat::kR8G8UNormInt:
     case PixelFormat::kR8G8B8A8UNormInt:

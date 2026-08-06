@@ -554,6 +554,71 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
   EXPECT_TRUE(did_call);
 }
 
+TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImageGray8) {
+  sk_sp<MockDlImage> image(new MockDlImage());
+  EXPECT_CALL(*image, GetSize).WillRepeatedly(Return(DlISize(2, 2)));
+
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kGray8UNormInt;
+  desc.size = impeller::ISize(2, 2);
+  auto texture = std::make_shared<MockTexture>(desc);
+  EXPECT_CALL(*texture, GetSize).WillRepeatedly(Return(desc.size));
+  EXPECT_CALL(*image, GetImpellerTexture(::testing::_))
+      .WillOnce(Return(texture));
+  std::vector<uint8_t> buffer = {0x00, 0x40, 0x80, 0xFF};
+  auto context = MakeConvertDlImageToSkImageContext(buffer);
+  bool did_call = false;
+  MockSnapshotDelegate snapshot_delegate;
+  EXPECT_CALL(snapshot_delegate, MakeRenderContextCurrent)
+      .WillRepeatedly(Return(true));
+  ImageEncodingImpeller::ConvertDlImageToSkImage(
+      image,
+      [&did_call, &buffer](const fml::StatusOr<sk_sp<SkImage>>& result) {
+        did_call = true;
+        ASSERT_TRUE(result.ok());
+        ASSERT_TRUE(result.value());
+        EXPECT_EQ(result.value()->colorType(), kGray_8_SkColorType);
+        EXPECT_EQ(result.value()->alphaType(), kOpaque_SkAlphaType);
+
+        SkPixmap pixels;
+        ASSERT_TRUE(result.value()->peekPixels(&pixels));
+        for (int y = 0; y < 2; y++) {
+          for (int x = 0; x < 2; x++) {
+            EXPECT_EQ(*pixels.addr8(x, y), buffer[y * 2 + x]);
+          }
+        }
+
+        fml::StatusOr<sk_sp<SkData>> raw_unmodified =
+            EncodeImage(result.value(), ImageByteFormat::kRawUnmodified);
+        ASSERT_TRUE(raw_unmodified.ok());
+        ASSERT_EQ(raw_unmodified.value()->size(), buffer.size());
+        const auto* gray =
+            static_cast<const uint8_t*>(raw_unmodified.value()->data());
+        for (size_t i = 0u; i < buffer.size(); i++) {
+          EXPECT_EQ(gray[i], buffer[i]);
+        }
+
+        fml::StatusOr<sk_sp<SkData>> raw_rgba =
+            EncodeImage(result.value(), ImageByteFormat::kRawRGBA);
+        ASSERT_TRUE(raw_rgba.ok());
+        ASSERT_EQ(raw_rgba.value()->size(), buffer.size() * 4u);
+        const auto* rgba =
+            static_cast<const uint8_t*>(raw_rgba.value()->data());
+        for (size_t i = 0u; i < buffer.size(); i++) {
+          EXPECT_EQ(rgba[i * 4u], buffer[i]);
+          EXPECT_EQ(rgba[i * 4u + 1u], buffer[i]);
+          EXPECT_EQ(rgba[i * 4u + 2u], buffer[i]);
+          EXPECT_EQ(rgba[i * 4u + 3u], 0xFFu);
+        }
+
+        fml::StatusOr<sk_sp<SkData>> png =
+            EncodeImage(result.value(), ImageByteFormat::kPNG);
+        EXPECT_TRUE(png.ok());
+      },
+      snapshot_delegate.GetWeakPtr(), context);
+  EXPECT_TRUE(did_call);
+}
+
 TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImageTextureSizeMismatch) {
   DlISize dl_image_size(100, 100);
   sk_sp<MockDlImage> image(new MockDlImage());
