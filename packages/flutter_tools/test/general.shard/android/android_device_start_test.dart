@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -63,6 +64,7 @@ void main() {
         logger: BufferLogger.test(),
         platform: FakePlatform(),
         androidSdk: androidSdk,
+        artifacts: FakeArtifacts(),
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -136,6 +138,7 @@ void main() {
         logger: BufferLogger.test(),
         platform: FakePlatform(),
         androidSdk: androidSdk,
+        artifacts: FakeArtifacts(),
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -216,6 +219,7 @@ void main() {
       logger: BufferLogger.test(),
       platform: FakePlatform(),
       androidSdk: androidSdk,
+      artifacts: FakeArtifacts(),
     );
     final File apkFile = fileSystem.file('app-release.apk')..createSync();
     final apk = AndroidApk(
@@ -282,6 +286,88 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext(
+    'AndroidDevice.startApp forwards aot-vmservice-shared-library-name as basename in profile mode',
+    () async {
+      final String artifactPath = fileSystem.path.join('path', 'to', 'libvmservice_snapshot.so');
+      final device = AndroidDevice(
+        '1234',
+        modelID: 'TestModel',
+        fileSystem: fileSystem,
+        processManager: processManager,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        androidSdk: androidSdk,
+        artifacts: FakeArtifacts(artifactPath),
+      );
+      final File apkFile = fileSystem.file('app-profile.apk')..createSync();
+      final apk = AndroidApk(
+        id: 'FlutterApp',
+        applicationPackage: apkFile,
+        launchActivity: 'FlutterActivity',
+        versionCode: 1,
+      );
+
+      // Create the artifact file on the host to pass the existsSync() check.
+      fileSystem.file(artifactPath).createSync(recursive: true);
+
+      processManager.addCommand(kAdbVersionCommand);
+      processManager.addCommand(kStartServer);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+          stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+        ),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+        ),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-profile.apk'],
+        ),
+      );
+      processManager.addCommand(kShaCommand);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'adb',
+            '-s',
+            '1234',
+            'shell',
+            'am',
+            'start',
+            '-a',
+            'android.intent.action.MAIN',
+            '-c',
+            'android.intent.category.LAUNCHER',
+            '-f',
+            '0x20000000',
+            '--ez',
+            'experimental-vm-service',
+            'true',
+            '--es',
+            'aot-vmservice-shared-library-name',
+            'libvmservice_snapshot.so', // Should be basename, not full path!
+            'FlutterActivity',
+          ],
+        ),
+      );
+
+      final LaunchResult launchResult = await device.startApp(
+        apk,
+        prebuiltApplication: true,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.profile, enableDartProfiling: false),
+        platformArgs: <String, dynamic>{},
+      );
+
+      expect(launchResult.started, true);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
   testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
     final device = AndroidDevice(
       '1234',
@@ -291,6 +377,7 @@ void main() {
       logger: BufferLogger.test(),
       platform: FakePlatform(),
       androidSdk: androidSdk,
+      artifacts: FakeArtifacts(),
     );
     final File apkFile = fileSystem.file('app-debug.apk')..createSync();
     final apk = AndroidApk(
@@ -299,6 +386,8 @@ void main() {
       launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
+
+    fileSystem.file('dummy_path').createSync(recursive: true);
 
     // These commands are required to install and start the app
     processManager.addCommand(kAdbVersionCommand);
@@ -363,6 +452,9 @@ void main() {
           'android.intent.category.LAUNCHER',
           '-f',
           '0x20000000',
+          '--ez',
+          'experimental-vm-service',
+          'true',
           // The DebuggingOptions arguments go here.
           '--ez', 'enable-dart-profiling', 'true',
           '--ez', 'profile-startup', 'true',
@@ -435,6 +527,7 @@ void main() {
       logger: BufferLogger.test(),
       platform: FakePlatform(),
       androidSdk: androidSdk,
+      artifacts: FakeArtifacts(),
     );
     final File apkFile = fileSystem.file('app-release.apk')..createSync();
     final apk = AndroidApk(
@@ -506,6 +599,7 @@ void main() {
         logger: BufferLogger.test(),
         platform: FakePlatform(),
         androidSdk: androidSdk,
+        artifacts: FakeArtifacts(),
       );
       final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
@@ -514,6 +608,8 @@ void main() {
         launchActivity: 'FlutterActivity',
         versionCode: 1,
       );
+
+      fileSystem.file('dummy_path').createSync(recursive: true);
 
       processManager.addCommand(kAdbVersionCommand);
       processManager.addCommand(kStartServer);
@@ -574,4 +670,18 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   bool get licensesAvailable => false;
+}
+
+class FakeArtifacts extends Fake implements Artifacts {
+  FakeArtifacts([this.path = 'dummy_path']);
+
+  final String path;
+
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) => path;
 }

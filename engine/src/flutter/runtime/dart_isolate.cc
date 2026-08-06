@@ -1018,7 +1018,26 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     return nullptr;
   }
 
+  if (!settings.vmservice_kernel_path.empty()) {
+    std::unique_ptr<fml::Mapping> kernel =
+        fml::FileMapping::CreateReadOnly(settings.vmservice_kernel_path);
+    if (!kernel) {
+      *error = fml::strdup("Could not load VM service kernel.");
+      return nullptr;
+    }
+    auto config = IsolateConfiguration::CreateForKernel(std::move(kernel));
+    if (!config->PrepareIsolate(*service_isolate)) {
+      *error = fml::strdup("Could not prepare custom VM service isolate.");
+      return nullptr;
+    }
+  }
+
   tonic::DartState::Scope scope(service_isolate);
+
+  bool is_experimental_vmservice =
+      !settings.vmservice_kernel_path.empty() ||
+      !settings.vmservice_snapshot_library_path.empty();
+
   if (!DartServiceIsolate::Startup(
           settings.vm_service_host,            // server IP address
           settings.vm_service_port,            // server VM service port
@@ -1028,10 +1047,11 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           settings.disable_service_auth_codes,  // disable VM service auth codes
           settings.enable_service_port_fallback,  // enable fallback to port 0
                                                   // when bind fails.
+          is_experimental_vmservice,              // use custom vm service
           error                                   // error (out)
           )) {
     // Error is populated by call to startup.
-    FML_DLOG(ERROR) << *error;
+    FML_LOG(ERROR) << "DartServiceIsolate::Startup failed: " << *error;
     return nullptr;
   }
 

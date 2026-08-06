@@ -43,11 +43,13 @@ public class FlutterLoader {
   private static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   private static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME =
       "aot-vmservice-shared-library-name";
+  private static final String VMSERVICE_KERNEL_PATH = "vmservice-kernel-path";
 
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
   private static final String VMSERVICE_SNAPSHOT_LIBRARY = "libvmservice_snapshot.so";
+  private static final String VMSERVICE_SNAPSHOT_KERNEL = "vmservice_snapshot.dill";
 
   private static FlutterLoader instance;
 
@@ -457,6 +459,13 @@ public class FlutterLoader {
         shellArgs.add(
             FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.engineArgument
                 + flutterApplicationInfo.isolateSnapshotData);
+        shellArgs.add(
+            "--"
+                + VMSERVICE_KERNEL_PATH
+                + "="
+                + snapshotAssetPath
+                + File.separator
+                + VMSERVICE_SNAPSHOT_KERNEL);
       } else {
         // Add default AOT shared library name arg. Note that if a different library
         // is set in the manifest, that value will take precedence and the default
@@ -692,7 +701,8 @@ public class FlutterLoader {
       resourceExtractor
           .addResource(fullAssetPathFrom(flutterApplicationInfo.vmSnapshotData))
           .addResource(fullAssetPathFrom(flutterApplicationInfo.isolateSnapshotData))
-          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB));
+          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB))
+          .addResource(fullAssetPathFrom(VMSERVICE_SNAPSHOT_KERNEL));
 
       resourceExtractor.start();
     }

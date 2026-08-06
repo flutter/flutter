@@ -102,6 +102,12 @@ group("flutter") {
   # If enabled, compile the SDK / snapshot.
   if (!is_fuchsia && !is_qnx) {
     public_deps += [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
+    if (flutter_runtime_mode == "debug" ||
+        flutter_runtime_mode == "debug_unopt") {
+      public_deps += [ "//flutter/shell/vmservice:vmservice_snapshot_dill" ]
+    } else {
+      public_deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+    }
 
     if (build_engine_artifacts) {
       public_deps += [

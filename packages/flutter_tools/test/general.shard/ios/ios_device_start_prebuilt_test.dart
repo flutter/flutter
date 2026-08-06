@@ -68,7 +68,7 @@ const kLaunchDebugCommand = FakeCommand(
     '--no-wifi',
     '--justlaunch',
     '--args',
-    '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
+    '--enable-dart-profiling --enable-checked-mode --verify-entry-points --experimental-vm-service',
   ],
   environment: <String, String>{'PATH': '/usr/bin:null', 'DYLD_LIBRARY_PATH': '/path/to/libraries'},
 );
@@ -99,9 +99,9 @@ FakeCommand attachDebuggerCommand({
       if (!isWirelessDevice) '--no-wifi',
       '--args',
       if (isWirelessDevice)
-        '--enable-dart-profiling --enable-checked-mode --verify-entry-points --vm-service-host=0.0.0.0'
+        '--enable-dart-profiling --enable-checked-mode --verify-entry-points --experimental-vm-service --vm-service-host=0.0.0.0'
       else
-        '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
+        '--enable-dart-profiling --enable-checked-mode --verify-entry-points --experimental-vm-service',
     ],
     completer: completer,
     environment: const <String, String>{
@@ -608,6 +608,7 @@ void main() {
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
+            '--experimental-vm-service',
             '--enable-software-rendering',
             '--trace-systrace',
             '--trace-to-file="path/to/trace.binpb"',
@@ -714,6 +715,7 @@ void main() {
             '--enable-dart-profiling',
             '--enable-checked-mode',
             '--verify-entry-points',
+            '--experimental-vm-service',
             // The --route argument below is determined by what is passed into
             // route argument to startApp.
             '--route=/animation',
@@ -790,6 +792,7 @@ void main() {
             '--enable-dart-profiling',
             '--enable-checked-mode',
             '--verify-entry-points',
+            '--experimental-vm-service',
             // The --trace-startup argument below is determined by what is passed into
             // platformArgs argument to startApp.
             '--trace-startup',
@@ -995,7 +998,10 @@ void main() {
               hostAppProjectName: 'Runner',
             ),
             expectedDeviceId: '123',
-            expectedLaunchArguments: <String>['--enable-dart-profiling'],
+            expectedLaunchArguments: <String>[
+              '--enable-dart-profiling',
+              '--experimental-vm-service',
+            ],
             expectedBundlePath: bundleLocation.path,
           ),
           coreDeviceLauncher: fakeLauncher,
@@ -1041,67 +1047,74 @@ void main() {
         ]);
       }, overrides: {Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))});
 
-      testUsingContext('uses Xcode if less than Xcode 26', () async {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final processManager = FakeProcessManager.empty();
-        final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
-            .childDirectory('flutter_empty_xcode.rand0');
-        final Directory bundleLocation = fileSystem.currentDirectory;
-        final fakeAnalytics = FakeAnalytics();
-        final fakeLauncher = FakeIOSCoreDeviceLauncher();
-        final IOSDevice device = setUpIOSDevice(
-          processManager: processManager,
-          fileSystem: fileSystem,
-          isCoreDevice: true,
-          coreDeviceControl: FakeIOSCoreDeviceControl(),
-          xcodeDebug: FakeXcodeDebug(
-            expectedProject: XcodeDebugProject(
-              scheme: 'Runner',
-              xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
-              xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
-              hostAppProjectName: 'Runner',
+      testUsingContext(
+        'uses Xcode if less than Xcode 26',
+        () async {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final processManager = FakeProcessManager.empty();
+          final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
+              .childDirectory('flutter_empty_xcode.rand0');
+          final Directory bundleLocation = fileSystem.currentDirectory;
+          final fakeAnalytics = FakeAnalytics();
+          final fakeLauncher = FakeIOSCoreDeviceLauncher();
+          final IOSDevice device = setUpIOSDevice(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            isCoreDevice: true,
+            coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcodeDebug: FakeXcodeDebug(
+              expectedProject: XcodeDebugProject(
+                scheme: 'Runner',
+                xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
+                xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
+                hostAppProjectName: 'Runner',
+              ),
+              expectedDeviceId: '123',
+              expectedLaunchArguments: <String>[
+                '--enable-dart-profiling',
+                '--experimental-vm-service',
+              ],
+              expectedBundlePath: bundleLocation.path,
             ),
-            expectedDeviceId: '123',
-            expectedLaunchArguments: <String>['--enable-dart-profiling'],
-            expectedBundlePath: bundleLocation.path,
-          ),
-          coreDeviceLauncher: fakeLauncher,
-          analytics: fakeAnalytics,
-        );
-        final IOSApp iosApp = PrebuiltIOSApp(
-          projectBundleId: 'app',
-          bundleName: 'Runner',
-          uncompressedBundle: bundleLocation,
-          applicationPackage: bundleLocation,
-        );
-        final deviceLogReader = FakeDeviceLogReader();
+            coreDeviceLauncher: fakeLauncher,
+            analytics: fakeAnalytics,
+          );
+          final IOSApp iosApp = PrebuiltIOSApp(
+            projectBundleId: 'app',
+            bundleName: 'Runner',
+            uncompressedBundle: bundleLocation,
+            applicationPackage: bundleLocation,
+          );
+          final deviceLogReader = FakeDeviceLogReader();
 
-        device.portForwarder = const NoOpDevicePortForwarder();
-        device.setLogReader(iosApp, deviceLogReader);
+          device.portForwarder = const NoOpDevicePortForwarder();
+          device.setLogReader(iosApp, deviceLogReader);
 
-        // Start writing messages to the log reader.
-        Timer.run(() {
-          deviceLogReader.addLine('Foo');
-          deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
-        });
+          // Start writing messages to the log reader.
+          Timer.run(() {
+            deviceLogReader.addLine('Foo');
+            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+          });
 
-        final LaunchResult launchResult = await device.startApp(
-          iosApp,
-          prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          platformArgs: <String, dynamic>{},
-        );
+          final LaunchResult launchResult = await device.startApp(
+            iosApp,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+            platformArgs: <String, dynamic>{},
+          );
 
-        expect(launchResult.started, true);
-        expect(fakeLauncher.launchedWithLLDB, false);
-        expect(fakeAnalytics.sentEvents, [
-          Event.appleUsageEvent(
-            workflow: 'ios-physical-deployment',
-            parameter: IOSDeploymentMethod.coreDeviceWithXcode.name,
-            result: 'debugging success',
-          ),
-        ]);
-      }, overrides: {Xcode: () => FakeXcode(currentVersion: Version(16, 0, 0))});
+          expect(launchResult.started, true);
+          expect(fakeLauncher.launchedWithLLDB, false);
+          expect(fakeAnalytics.sentEvents, [
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithXcode.name,
+              result: 'debugging success',
+            ),
+          ]);
+        },
+        overrides: {Xcode: () => FakeXcode(currentVersion: Version(16, 0, 0))},
+      );
 
       testUsingContext('succeeds', () async {
         final FileSystem fileSystem = MemoryFileSystem.test();
@@ -1123,7 +1136,10 @@ void main() {
               hostAppProjectName: 'Runner',
             ),
             expectedDeviceId: '123',
-            expectedLaunchArguments: <String>['--enable-dart-profiling'],
+            expectedLaunchArguments: <String>[
+              '--enable-dart-profiling',
+              '--experimental-vm-service',
+            ],
             expectedBundlePath: bundleLocation.path,
           ),
           analytics: fakeAnalytics,
@@ -1178,7 +1194,7 @@ void main() {
             hostAppProjectName: 'Runner',
           ),
           expectedDeviceId: '123',
-          expectedLaunchArguments: <String>['--enable-dart-profiling'],
+          expectedLaunchArguments: <String>['--enable-dart-profiling', '--experimental-vm-service'],
           expectedBundlePath: bundleLocation.path,
           completer: completer,
         );
@@ -1248,7 +1264,10 @@ void main() {
               hostAppProjectName: 'Runner',
             ),
             expectedDeviceId: '123',
-            expectedLaunchArguments: <String>['--enable-dart-profiling'],
+            expectedLaunchArguments: <String>[
+              '--enable-dart-profiling',
+              '--experimental-vm-service',
+            ],
             expectedBundlePath: bundleLocation.path,
           ),
           analytics: fakeAnalytics,
@@ -1315,7 +1334,10 @@ void main() {
                 hostAppProjectName: 'Runner',
               ),
               expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedLaunchArguments: <String>[
+                '--enable-dart-profiling',
+                '--experimental-vm-service',
+              ],
               expectedBundlePath: bundleLocation.path,
             ),
           );
@@ -1461,7 +1483,10 @@ void main() {
                 hostAppProjectName: 'Runner',
               ),
               expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedLaunchArguments: <String>[
+                '--enable-dart-profiling',
+                '--experimental-vm-service',
+              ],
               expectedBundlePath: bundleLocation.path,
             ),
             analytics: fakeAnalytics,
@@ -1538,7 +1563,10 @@ void main() {
                 hostAppProjectName: 'Runner',
               ),
               expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedLaunchArguments: <String>[
+                '--enable-dart-profiling',
+                '--experimental-vm-service',
+              ],
               expectedBundlePath: bundleLocation.path,
             ),
             platform: FakePlatform(
@@ -1615,7 +1643,10 @@ void main() {
                 hostAppProjectName: 'Runner',
               ),
               expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedLaunchArguments: <String>[
+                '--enable-dart-profiling',
+                '--experimental-vm-service',
+              ],
               expectedBundlePath: bundleLocation.path,
             ),
           );
@@ -1690,7 +1721,10 @@ void main() {
                   hostAppProjectName: 'Runner',
                 ),
                 expectedDeviceId: '123',
-                expectedLaunchArguments: <String>['--enable-dart-profiling'],
+                expectedLaunchArguments: <String>[
+                  '--enable-dart-profiling',
+                  '--experimental-vm-service',
+                ],
                 expectedBundlePath: bundleLocation.path,
               ),
             );
@@ -1750,7 +1784,10 @@ void main() {
                   hostAppProjectName: 'Runner',
                 ),
                 expectedDeviceId: '123',
-                expectedLaunchArguments: <String>['--enable-dart-profiling'],
+                expectedLaunchArguments: <String>[
+                  '--enable-dart-profiling',
+                  '--experimental-vm-service',
+                ],
                 expectedBundlePath: bundleLocation.path,
               ),
             );
@@ -2014,7 +2051,10 @@ void main() {
                 hostAppProjectName: 'Runner',
               ),
               expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedLaunchArguments: <String>[
+                '--enable-dart-profiling',
+                '--experimental-vm-service',
+              ],
               expectedBundlePath: bundleLocation.path,
             ),
             coreDeviceLauncher: fakeLauncher,

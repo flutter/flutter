@@ -79,7 +79,7 @@ void main() {
       expect(await device.stopApp(package), true);
     });
 
-    testWithoutContext('Can run from prebuilt application', () async {
+    testUsingContext('Can run from prebuilt application', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final completer = Completer<void>();
       final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -126,7 +126,7 @@ void main() {
       expect(logger.errorText, contains('Unable to find executable to run'));
     });
 
-    testWithoutContext('stopApp kills process started by startApp', () async {
+    testUsingContext('stopApp kills process started by startApp', () async {
       final completer = Completer<void>();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
@@ -148,7 +148,7 @@ void main() {
     });
   });
 
-  testWithoutContext(
+  testUsingContext(
     'startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables',
     () async {
       final completer = Completer<void>();
@@ -171,13 +171,14 @@ void main() {
             'FLUTTER_ENGINE_SWITCH_11': 'endless-trace-buffer=true',
             'FLUTTER_ENGINE_SWITCH_12': 'profile-microtasks=true',
             'FLUTTER_ENGINE_SWITCH_13': 'purge-persistent-cache=true',
-            'FLUTTER_ENGINE_SWITCH_14': 'enable-checked-mode=true',
-            'FLUTTER_ENGINE_SWITCH_15': 'verify-entry-points=true',
-            'FLUTTER_ENGINE_SWITCH_16': 'start-paused=true',
-            'FLUTTER_ENGINE_SWITCH_17': 'disable-service-auth-codes=true',
-            'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
-            'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-            'FLUTTER_ENGINE_SWITCHES': '19',
+            'FLUTTER_ENGINE_SWITCH_14': 'experimental-vm-service=true',
+            'FLUTTER_ENGINE_SWITCH_15': 'enable-checked-mode=true',
+            'FLUTTER_ENGINE_SWITCH_16': 'verify-entry-points=true',
+            'FLUTTER_ENGINE_SWITCH_17': 'start-paused=true',
+            'FLUTTER_ENGINE_SWITCH_18': 'disable-service-auth-codes=true',
+            'FLUTTER_ENGINE_SWITCH_19': 'use-test-fonts=true',
+            'FLUTTER_ENGINE_SWITCH_20': 'verbose-logging=true',
+            'FLUTTER_ENGINE_SWITCHES': '20',
           },
         ),
       ]);
@@ -256,7 +257,7 @@ void main() {
     expect(device.createDevFSWriter(FakeApplicationPackage(), ''), isA<LocalDevFSWriter>());
   });
 
-  testWithoutContext('startApp supports dartEntrypointArgs', () async {
+  testUsingContext('startApp supports dartEntrypointArgs', () async {
     final completer = Completer<void>();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -279,7 +280,7 @@ void main() {
     expect(result.started, true);
   });
 
-  testWithoutContext('Device logger captures all output', () async {
+  testUsingContext('Device logger captures all output', () async {
     final exitCompleter = Completer<void>();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -311,7 +312,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Desktop devices pass through the enable-impeller flag', () async {
+  testUsingContext('Desktop devices pass through the enable-impeller flag', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
@@ -319,9 +320,10 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
           'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
-          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCHES': '4',
+          'FLUTTER_ENGINE_SWITCH_3': 'experimental-vm-service=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '5',
         },
       ),
     ]);
@@ -339,7 +341,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Desktop devices pass through the --no-enable-impeller flag', () async {
+  testUsingContext('Desktop devices pass through the --no-enable-impeller flag', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
@@ -347,9 +349,10 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
           'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=false',
-          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCHES': '4',
+          'FLUTTER_ENGINE_SWITCH_3': 'experimental-vm-service=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '5',
         },
       ),
     ]);
@@ -367,7 +370,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Desktop devices pass through the enable-flutter-gpu flag', () async {
+  testUsingContext('Desktop devices pass through the enable-flutter-gpu flag', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
@@ -376,9 +379,10 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
           'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
           'FLUTTER_ENGINE_SWITCH_3': 'enable-flutter-gpu=true',
-          'FLUTTER_ENGINE_SWITCH_4': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_5': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCHES': '5',
+          'FLUTTER_ENGINE_SWITCH_4': 'experimental-vm-service=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_6': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '6',
         },
       ),
     ]);
