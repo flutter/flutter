@@ -169,7 +169,8 @@ flowchart TD
 ## Try Impeller in Flutter
 
 Impeller is available under the `--enable-impeller` flag on iOS, Android, and
-macOS Desktop. This flag can be specified to `flutter run`.
+macOS Desktop. This flag can be specified to `flutter run`. For a breakdown of
+platform and release support, see [Impeller Availability](availability.md).
 
 If the application needs to be launched with Impeller enabled without using the
 Flutter tool, follow the platform specific steps below.
@@ -263,4 +264,5 @@ examples, are available](toolkit/interop/README.md).
 * [Android CPU Profiling](/docs/engine/impeller/docs/android_cpu_profile.md)
 * [Android Rendering Backend Selection](/docs/engine/impeller/docs/android.md)
 * [Using Impeller as a Standalone Rendering Library (with OpenGL ES)](/docs/engine/impeller/docs/standalone_gles.md)
+* [Impeller Availability](availability.md)
 * [Glossary](/docs/engine/impeller/docs/glossary.md)
