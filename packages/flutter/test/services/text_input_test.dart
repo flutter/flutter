@@ -620,6 +620,19 @@ void main() {
       expect(json['actionLabel'], 'xyzzy');
     });
 
+    test('numeric password serializes to JSON', () {
+      const configuration = TextInputConfiguration(
+        inputType: TextInputType.numberWithOptions(password: true),
+      );
+      final Map<String, dynamic> json = configuration.toJson();
+      expect(json['inputType'], <String, dynamic>{
+        'name': 'TextInputType.number',
+        'signed': false,
+        'decimal': false,
+        'password': true,
+      });
+    });
+
     test('basic structure', () async {
       const TextInputType text = TextInputType.text;
       const TextInputType number = TextInputType.number;
