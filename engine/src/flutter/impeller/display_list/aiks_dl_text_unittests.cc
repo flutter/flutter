@@ -915,6 +915,53 @@ TEST_P(AiksTest, DuplicateTextWithShadowCache) {
             1u);
 }
 
+TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
+  SkFont font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob1 = SkTextBlob::MakeFromString("Text A", font);
+  auto blob2 = SkTextBlob::MakeFromString("Text B", font);
+
+  auto frame1 = MakeTextFrameFromTextBlobSkia(blob1);
+  auto frame2 = MakeTextFrameFromTextBlobSkia(blob2);
+
+  Font impeller_font(frame1->GetFont());
+
+  // Construct two keys with the exact same identifier (simulating a hash collision)
+  // but with different TextFrame contents.
+  TextShadowCache::TextShadowCacheKey key1(
+      /*p_max_basis=*/1.0f,
+      /*p_identifier=*/12345,
+      /*p_is_single_glyph=*/false,
+      /*p_font=*/impeller_font,
+      /*p_sigma=*/Sigma{4.0f},
+      /*p_color=*/Color::Blue(),
+      /*p_text_frame=*/frame1);
+
+  TextShadowCache::TextShadowCacheKey key2(
+      /*p_max_basis=*/1.0f,
+      /*p_identifier=*/12345,
+      /*p_is_single_glyph=*/false,
+      /*p_font=*/impeller_font,
+      /*p_sigma=*/Sigma{4.0f},
+      /*p_color=*/Color::Blue(),
+      /*p_text_frame=*/frame2);
+
+  TextShadowCache::TextShadowCacheKey::Equal equal;
+  // Key comparison must fail because the text frames are different despite identical hash identifier.
+  EXPECT_FALSE(equal(key1, key2));
+
+  TextShadowCache::TextShadowCacheKey key3(
+      /*p_max_basis=*/1.0f,
+      /*p_identifier=*/12345,
+      /*p_is_single_glyph=*/false,
+      /*p_font=*/impeller_font,
+      /*p_sigma=*/Sigma{4.0f},
+      /*p_color=*/Color::Blue(),
+      /*p_text_frame=*/MakeTextFrameFromTextBlobSkia(blob1));
+
+  // Key comparison must succeed for identical text frame content.
+  EXPECT_TRUE(equal(key1, key3));
+}
+
 TEST_P(AiksTest, MultipleColorWithShadowCache) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
