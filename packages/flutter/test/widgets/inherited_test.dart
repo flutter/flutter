@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
+
+const _kWhite = Color(0xFFFFFFFF);
+const _kBlack = Color(0xFF000000);
 
 class TestInherited extends InheritedWidget {
   const TestInherited({super.key, required super.child, this.shouldNotify = true});
@@ -55,6 +58,55 @@ class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
   const ChangeNotifierInherited({super.key, required super.child, super.notifier});
 }
 
+@immutable
+class CardThemeData {
+  const CardThemeData({
+    this.color,
+    this.elevation,
+    this.shadowColor,
+    this.shape,
+    this.clipBehavior,
+  });
+
+  final Color? color;
+  final double? elevation;
+  final Color? shadowColor;
+  final ShapeBorder? shape;
+  final Clip? clipBehavior;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is CardThemeData &&
+        other.color == color &&
+        other.elevation == elevation &&
+        other.shadowColor == shadowColor &&
+        other.shape == shape &&
+        other.clipBehavior == clipBehavior;
+  }
+
+  @override
+  int get hashCode => Object.hash(color, elevation, shadowColor, shape, clipBehavior);
+}
+
+class CardTheme extends InheritedWidget {
+  const CardTheme({super.key, required super.child, required this.data});
+
+  final CardThemeData data;
+
+  static CardThemeData of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<CardTheme>()?.data ?? const CardThemeData();
+  }
+
+  @override
+  bool updateShouldNotify(CardTheme oldWidget) => data != oldWidget.data;
+}
+
 class ThemedCard extends SingleChildRenderObjectWidget {
   const ThemedCard({super.key}) : super(child: const SizedBox.expand());
 
@@ -65,9 +117,9 @@ class ThemedCard extends SingleChildRenderObjectWidget {
     return RenderPhysicalShape(
       clipper: ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder()),
       clipBehavior: cardTheme.clipBehavior ?? Clip.antiAlias,
-      color: cardTheme.color ?? Colors.white,
+      color: cardTheme.color ?? _kWhite,
       elevation: cardTheme.elevation ?? 0.0,
-      shadowColor: cardTheme.shadowColor ?? Colors.black,
+      shadowColor: cardTheme.shadowColor ?? _kBlack,
     );
   }
 
@@ -78,9 +130,9 @@ class ThemedCard extends SingleChildRenderObjectWidget {
     renderObject
       ..clipper = ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder())
       ..clipBehavior = cardTheme.clipBehavior ?? Clip.antiAlias
-      ..color = cardTheme.color ?? Colors.white
+      ..color = cardTheme.color ?? _kWhite
       ..elevation = cardTheme.elevation ?? 0.0
-      ..shadowColor = cardTheme.shadowColor ?? Colors.black;
+      ..shadowColor = cardTheme.shadowColor ?? _kBlack;
   }
 }
 
@@ -523,7 +575,7 @@ void main() {
   });
 
   testWidgets('InheritedWidgets can trigger RenderObject updates', (WidgetTester tester) async {
-    var cardThemeData = const CardThemeData(color: Colors.white);
+    var cardThemeData = const CardThemeData(color: _kWhite);
     late StateSetter setState;
 
     // Verifies that the "themed card" is rendered
@@ -554,10 +606,7 @@ void main() {
       StatefulBuilder(
         builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
-          return Theme(
-            data: ThemeData(cardTheme: cardThemeData),
-            child: const ThemedCard(),
-          );
+          return CardTheme(data: cardThemeData, child: const ThemedCard());
         },
       ),
     );
@@ -580,7 +629,7 @@ void main() {
     setState(() {
       cardThemeData = const CardThemeData(
         elevation: 5.0,
-        shadowColor: Colors.blueGrey,
+        shadowColor: Color(0xFF0000FF),
         shape: ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         clipBehavior: Clip.antiAliasWithSaveLayer,
       );
