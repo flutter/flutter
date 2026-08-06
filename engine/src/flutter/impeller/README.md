@@ -246,13 +246,13 @@ to your `AndroidManifest.xml` file under the `<application>` tag:
 
 ### macOS Desktop
 
-Impeller is in preview on macOS Desktop.
+Impeller is the **default** on macOS Desktop.
 
-To your `Info.plist` file, add under the top-level `<dict>` tag:
+To explicitly opt out of using Impeller, add the following to your `Info.plist` file under the top-level `<dict>` tag:
 
 ```xml
   <key>FLTEnableImpeller</key>
-  <true/>
+  <false/>
 ```
 
 ### Custom Embedders
