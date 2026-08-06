@@ -17,6 +17,9 @@ TaskFunction androidIntentSecurityTest({Map<String, String>? environment}) {
     final tests = <TaskFunction>[
       _testReleaseNonPrebuiltEntrypointInjection(environment: environment),
       _testReleaseNonPrebuiltRouteInjection(environment: environment),
+      _testReleaseNonPrebuiltEntrypointSelfSent(environment: environment),
+      _testReleaseNonPrebuiltRouteSelfSent(environment: environment),
+      _testReleaseNonPrebuiltRouteIntentFilter(environment: environment),
     ];
 
     for (final test in tests) {
@@ -38,6 +41,7 @@ TaskFunction _testReleaseNonPrebuiltEntrypointInjection({Map<String, String>? en
   );
   return () async {
     try {
+      section('TEST: RELEASE NON-PREBUILT ENTRYPOINT INJECTION');
       section('Create app for entrypoint test');
       await _createApp(tempDir, org, environment);
 
@@ -136,6 +140,7 @@ TaskFunction _testReleaseNonPrebuiltRouteInjection({Map<String, String>? environ
   );
   return () async {
     try {
+      section('TEST: RELEASE NON-PREBUILT ROUTE INJECTION');
       section('Create app for route test');
       await _createApp(tempDir, org, environment);
 
@@ -267,6 +272,458 @@ void main() {
       if (routeInjectedNonActionView) {
         return TaskResult.failure(
           'Route injection via malicious non-ACTION_VIEW intent was successful! The vulnerability is still present.',
+        );
+      }
+
+      return TaskResult.success(null);
+    } catch (e) {
+      return TaskResult.failure(e.toString());
+    } finally {
+      rmTree(tempDir);
+    }
+  };
+}
+
+/// Tests entrypoint injection in release mode when self-sent.
+TaskFunction _testReleaseNonPrebuiltEntrypointSelfSent({Map<String, String>? environment}) {
+  const org = 'com.example.intentsec';
+  final Directory tempDir = Directory.systemTemp.createTempSync(
+    'flutter_devicelab_intent_security_entrypoint_self.',
+  );
+  return () async {
+    try {
+      section('TEST: RELEASE NON-PREBUILT ENTRYPOINT SELF-SENT');
+      section('Create app for self-sent entrypoint test');
+      await _createApp(tempDir, org, environment);
+
+      final mainDart = File(path.join(tempDir.absolute.path, 'app', 'lib', 'main.dart'));
+      const customEntrypointName = 'customEntry';
+      const successLog = '==== SUCCESS: customEntry executed ====';
+
+      section('Patch lib/main.dart for entrypoint test');
+      await mainDart.writeAsString('''
+import 'package:flutter/material.dart';
+
+@pragma('vm:entry-point')
+void $customEntrypointName() {
+  print('$successLog');
+}
+
+void main() {
+  print('==== SAFE: main executed ====');
+  runApp(
+    MaterialApp(
+      home: Scaffold(body: Text('Intent Security Test')),
+    )
+  );
+}
+''', flush: true);
+
+      section('Add TestActivity for self-sent intent');
+      final testActivityFile = File(
+        path.join(
+          tempDir.absolute.path,
+          'app',
+          'android',
+          'app',
+          'src',
+          'main',
+          'kotlin',
+          'com',
+          'example',
+          'intentsec',
+          'app',
+          'TestActivity.kt',
+        ),
+      );
+      await testActivityFile.parent.create(recursive: true);
+      await testActivityFile.writeAsString('''
+package com.example.intentsec.app
+
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+
+class TestActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val selfIntent = Intent(this, MainActivity::class.java)
+        selfIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (intent.hasExtra("dart_entrypoint")) {
+            selfIntent.putExtra("dart_entrypoint", intent.getStringExtra("dart_entrypoint"))
+        }
+        startActivity(selfIntent)
+        finish()
+    }
+}
+''', flush: true);
+
+      final manifestFile = File(
+        path.join(
+          tempDir.absolute.path,
+          'app',
+          'android',
+          'app',
+          'src',
+          'main',
+          'AndroidManifest.xml',
+        ),
+      );
+      String manifestContent = await manifestFile.readAsString();
+      manifestContent = manifestContent.replaceFirst('</application>', '''
+        <activity android:name=".TestActivity" android:exported="true" />
+    </application>
+''');
+      await manifestFile.writeAsString(manifestContent, flush: true);
+
+      final device = await devices.workingDevice as AndroidDevice;
+      await device.unlock();
+
+      section('Build APK for self-sent entrypoint test');
+      await _buildApk(tempDir, 'release');
+
+      final String apkPath = path.join(
+        tempDir.path,
+        'app',
+        'build',
+        'app',
+        'outputs',
+        'flutter-apk',
+        'app-release.apk',
+      );
+      await _installApk(device, org, apkPath);
+
+      section('Test self-sent entrypoint injection via cold start');
+      await device.shellExec('am', <String>['force-stop', '$org.app']);
+      await device.adb(<String>['logcat', '-c']);
+
+      final appStarted = Completer<void>();
+      var entrypointInjected = false;
+      final StreamSubscription<String> logcat = device.logcat.listen((String log) {
+        if (log.contains(successLog)) {
+          entrypointInjected = true;
+          if (!appStarted.isCompleted) {
+            appStarted.complete();
+          }
+        } else if (log.contains('==== SAFE: main executed ====')) {
+          if (!appStarted.isCompleted) {
+            appStarted.complete();
+          }
+        }
+      });
+
+      // Send start to trigger self-sent Intent
+      await device.shellExec('am', <String>[
+        'start',
+        '-n',
+        '$org.app/.TestActivity',
+        '--es',
+        'dart_entrypoint',
+        customEntrypointName,
+      ]);
+
+      try {
+        await appStarted.future.timeout(const Duration(seconds: 30));
+      } catch (_) {
+        return TaskResult.failure('App did not start within 30 seconds.');
+      } finally {
+        await logcat.cancel();
+      }
+
+      await device.shellExec('am', <String>['force-stop', '$org.app']);
+
+      if (!entrypointInjected) {
+        return TaskResult.failure(
+          'Self-sent entrypoint injection failed! It should have been allowed.',
+        );
+      }
+
+      return TaskResult.success(null);
+    } catch (e) {
+      return TaskResult.failure(e.toString());
+    } finally {
+      rmTree(tempDir);
+    }
+  };
+}
+
+/// Tests route injection in release mode when self-sent.
+TaskFunction _testReleaseNonPrebuiltRouteSelfSent({Map<String, String>? environment}) {
+  const org = 'com.example.intentsec';
+  final Directory tempDir = Directory.systemTemp.createTempSync(
+    'flutter_devicelab_intent_security_route_self.',
+  );
+  return () async {
+    try {
+      section('TEST: RELEASE NON-PREBUILT ROUTE SELF-SENT');
+      section('Create app for self-sent route test');
+      await _createApp(tempDir, org, environment);
+
+      final mainDart = File(path.join(tempDir.absolute.path, 'app', 'lib', 'main.dart'));
+
+      section('Patch lib/main.dart for route test');
+      await mainDart.writeAsString(r'''
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(
+    MaterialApp(
+      onGenerateRoute: (settings) {
+        print('==== ROUTE: ${settings.name} ====');
+        return MaterialPageRoute(
+          builder: (context) => Scaffold(body: Text('Intent Security Test'))
+        );
+      },
+    )
+  );
+}
+''', flush: true);
+
+      section('Add TestActivity for self-sent intent');
+      final testActivityFile = File(
+        path.join(
+          tempDir.absolute.path,
+          'app',
+          'android',
+          'app',
+          'src',
+          'main',
+          'kotlin',
+          'com',
+          'example',
+          'intentsec',
+          'app',
+          'TestActivity.kt',
+        ),
+      );
+      await testActivityFile.parent.create(recursive: true);
+      await testActivityFile.writeAsString('''
+package com.example.intentsec.app
+
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+
+class TestActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val selfIntent = Intent(this, MainActivity::class.java)
+        selfIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (intent.hasExtra("route_data")) {
+            selfIntent.action = Intent.ACTION_VIEW
+            selfIntent.data = Uri.parse(intent.getStringExtra("route_data"))
+        }
+        startActivity(selfIntent)
+        finish()
+    }
+}
+''', flush: true);
+
+      final manifestFile = File(
+        path.join(
+          tempDir.absolute.path,
+          'app',
+          'android',
+          'app',
+          'src',
+          'main',
+          'AndroidManifest.xml',
+        ),
+      );
+      String manifestContent = await manifestFile.readAsString();
+      manifestContent = manifestContent.replaceFirst('</application>', '''
+        <activity android:name=".TestActivity" android:exported="true" />
+    </application>
+''');
+      await manifestFile.writeAsString(manifestContent, flush: true);
+
+      final device = await devices.workingDevice as AndroidDevice;
+      await device.unlock();
+
+      section('Build APK for self-sent route test');
+      await _buildApk(tempDir, 'release');
+
+      final String apkPath = path.join(
+        tempDir.path,
+        'app',
+        'build',
+        'app',
+        'outputs',
+        'flutter-apk',
+        'app-release.apk',
+      );
+      await _installApk(device, org, apkPath);
+
+      section('Test self-sent route injection via cold start');
+      const testRoute = 'http://testsite.com/admin/wipe';
+
+      await device.shellExec('am', <String>['force-stop', '$org.app']);
+      await device.adb(<String>['logcat', '-c']);
+
+      final routeCompleter = Completer<void>();
+      var routeInjected = false;
+      final StreamSubscription<String> logcat = device.logcat.listen((String log) {
+        if (log.contains('==== ROUTE: $testRoute ====')) {
+          routeInjected = true;
+          if (!routeCompleter.isCompleted) {
+            routeCompleter.complete();
+          }
+        } else if (log.contains('==== ROUTE: / ====')) {
+          if (!routeCompleter.isCompleted) {
+            routeCompleter.complete();
+          }
+        }
+      });
+
+      await device.shellExec('am', <String>[
+        'start',
+        '-n',
+        '$org.app/.TestActivity',
+        '--es',
+        'route_data',
+        testRoute,
+      ]);
+
+      try {
+        await routeCompleter.future.timeout(const Duration(seconds: 30));
+      } catch (_) {
+        return TaskResult.failure('App did not start or route within 30 seconds.');
+      } finally {
+        await logcat.cancel();
+      }
+
+      await device.shellExec('am', <String>['force-stop', '$org.app']);
+
+      if (!routeInjected) {
+        return TaskResult.failure('Self-sent route injection failed! It should have been allowed.');
+      }
+
+      return TaskResult.success(null);
+    } catch (e) {
+      return TaskResult.failure(e.toString());
+    } finally {
+      rmTree(tempDir);
+    }
+  };
+}
+
+/// Tests route injection in release mode when route matches an intent filter.
+TaskFunction _testReleaseNonPrebuiltRouteIntentFilter({Map<String, String>? environment}) {
+  const org = 'com.example.intentsec';
+  final Directory tempDir = Directory.systemTemp.createTempSync(
+    'flutter_devicelab_intent_security_route_filter.',
+  );
+  return () async {
+    try {
+      section('TEST: RELEASE NON-PREBUILT ROUTE INTENT FILTER');
+      section('Create app for route intent-filter test');
+      await _createApp(tempDir, org, environment);
+
+      final mainDart = File(path.join(tempDir.absolute.path, 'app', 'lib', 'main.dart'));
+
+      section('Patch lib/main.dart for route test');
+      await mainDart.writeAsString(r'''
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(
+    MaterialApp(
+      onGenerateRoute: (settings) {
+        print('==== ROUTE: ${settings.name} ====');
+        return MaterialPageRoute(
+          builder: (context) => Scaffold(body: Text('Intent Security Test'))
+        );
+      },
+    )
+  );
+}
+''', flush: true);
+
+      final manifestFile = File(
+        path.join(
+          tempDir.absolute.path,
+          'app',
+          'android',
+          'app',
+          'src',
+          'main',
+          'AndroidManifest.xml',
+        ),
+      );
+      String manifestContent = await manifestFile.readAsString();
+      manifestContent = manifestContent.replaceFirst('</activity>', '''
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="safesite.com" android:pathPrefix="/admin" />
+            </intent-filter>
+        </activity>
+''');
+      await manifestFile.writeAsString(manifestContent, flush: true);
+
+      final device = await devices.workingDevice as AndroidDevice;
+      await device.unlock();
+
+      section('Build APK for route intent-filter test');
+      await _buildApk(tempDir, 'release');
+
+      final String apkPath = path.join(
+        tempDir.path,
+        'app',
+        'build',
+        'app',
+        'outputs',
+        'flutter-apk',
+        'app-release.apk',
+      );
+      await _installApk(device, org, apkPath);
+
+      section('Test route via intent filter via cold start');
+      const testRoute = 'http://safesite.com/admin/wipe';
+
+      await device.shellExec('am', <String>['force-stop', '$org.app']);
+      await device.adb(<String>['logcat', '-c']);
+
+      final routeCompleter = Completer<void>();
+      var routeInjected = false;
+      final StreamSubscription<String> logcat = device.logcat.listen((String log) {
+        if (log.contains('==== ROUTE: $testRoute ====')) {
+          routeInjected = true;
+          if (!routeCompleter.isCompleted) {
+            routeCompleter.complete();
+          }
+        } else if (log.contains('==== ROUTE: / ====')) {
+          if (!routeCompleter.isCompleted) {
+            routeCompleter.complete();
+          }
+        }
+      });
+
+      await device.shellExec('am', <String>[
+        'start',
+        '-a',
+        'android.intent.action.VIEW',
+        '-n',
+        '$org.app/.MainActivity',
+        '-d',
+        testRoute,
+      ]);
+
+      try {
+        await routeCompleter.future.timeout(const Duration(seconds: 30));
+      } catch (_) {
+        return TaskResult.failure('App did not start or route within 30 seconds.');
+      } finally {
+        await logcat.cancel();
+      }
+
+      await device.shellExec('am', <String>['force-stop', '$org.app']);
+
+      if (!routeInjected) {
+        return TaskResult.failure(
+          'Route injection via matching intent-filter failed! It should have been allowed.',
         );
       }
 
