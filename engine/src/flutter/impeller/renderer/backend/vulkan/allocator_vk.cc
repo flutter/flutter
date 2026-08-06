@@ -457,10 +457,31 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
       }
     }
 
+    // Drivers that generate corrupt mip levels leave only the base level
+    // trustworthy. Keep a view that stops there so those textures can still be
+    // sampled. See `TextureVK::GetSampledImageView`.
+    vk::UniqueImageView base_mip_image_view;
+    if (context.GetWorkarounds().broken_mipmap_generation &&
+        image_info.mipLevels > 1u &&
+        !!(desc.usage & TextureUsage::kShaderRead)) {
+      view_info.viewType = ToVKImageViewType(desc.type);
+      view_info.subresourceRange.baseMipLevel = 0u;
+      view_info.subresourceRange.baseArrayLayer = 0u;
+      view_info.subresourceRange.levelCount = 1u;
+      view_info.subresourceRange.layerCount = ToArrayLayerCount(desc);
+      auto [base_result, base_view] = device.createImageViewUnique(view_info);
+      if (base_result != vk::Result::eSuccess) {
+        VALIDATION_LOG << "Unable to create a base mip image view: "
+                       << vk::to_string(base_result);
+        return;
+      }
+      base_mip_image_view = std::move(base_view);
+    }
+
     resource_.Swap(ImageResource(
         ImageVMA{allocator, allocation, image}, std::move(image_view),
-        std::move(rt_image_views), context.GetResourceAllocator(),
-        context.GetDeviceHolder()));
+        std::move(base_mip_image_view), std::move(rt_image_views),
+        context.GetResourceAllocator(), context.GetDeviceHolder()));
     is_valid_ = true;
   }
 
@@ -472,6 +493,10 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
   vk::ImageView GetImageView() const override {
     return resource_->image_view.get();
+  }
+
+  vk::ImageView GetBaseMipImageView() const override {
+    return resource_->base_mip_image_view.get();
   }
 
   vk::ImageView GetRenderTargetView(uint32_t mip_level,
@@ -494,6 +519,9 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     std::shared_ptr<Allocator> allocator;
     UniqueImageVMA image;
     vk::UniqueImageView image_view;
+    // Covers the base mip level only. Null unless the driver generates corrupt
+    // mip levels.
+    vk::UniqueImageView base_mip_image_view;
     // One attachment view per (mip level, array layer), row-major by mip.
     std::vector<vk::UniqueImageView> rt_image_views;
 
@@ -501,6 +529,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
     ImageResource(ImageVMA p_image,
                   vk::UniqueImageView p_image_view,
+                  vk::UniqueImageView p_base_mip_image_view,
                   std::vector<vk::UniqueImageView> p_rt_image_views,
                   std::shared_ptr<Allocator> allocator,
                   std::shared_ptr<DeviceHolderVK> device_holder)
@@ -508,6 +537,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
           allocator(std::move(allocator)),
           image(p_image),
           image_view(std::move(p_image_view)),
+          base_mip_image_view(std::move(p_base_mip_image_view)),
           rt_image_views(std::move(p_rt_image_views)) {}
 
     ImageResource(ImageResource&& o) = default;

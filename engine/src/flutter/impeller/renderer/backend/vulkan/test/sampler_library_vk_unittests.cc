@@ -9,84 +9,10 @@
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
-#include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
-#include "impeller/renderer/backend/vulkan/workarounds_vk.h"
 
 namespace impeller {
 namespace testing {
-
-TEST(SamplerLibraryVK, SamplersHaveNoBaseMipClampWithoutWorkarounds) {
-  auto const context = MockVulkanContextBuilder().Build();
-
-  std::shared_ptr<SamplerLibrary> library = std::make_shared<SamplerLibraryVK>(
-      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1u);
-
-  SamplerDescriptor desc;
-  desc.mip_filter = MipFilter::kLinear;
-
-  auto sampler = library->GetSampler(desc);
-  EXPECT_EQ(sampler->GetDescriptor().mip_filter, MipFilter::kLinear);
-  EXPECT_EQ(SamplerVK::Cast(*sampler).GetBaseMipClampedVariant(), nullptr);
-}
-
-TEST(SamplerLibraryVK, WorkaroundsAddABaseMipClampedVariant) {
-  auto const context = MockVulkanContextBuilder().Build();
-
-  auto library_vk = std::make_shared<SamplerLibraryVK>(
-      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1u);
-  std::shared_ptr<SamplerLibrary> library = library_vk;
-
-  library_vk->ApplyWorkarounds(WorkaroundsVK{.broken_mipmap_generation = true});
-
-  SamplerDescriptor desc;
-  desc.mip_filter = MipFilter::kLinear;
-
-  // The sampler itself still filters as asked. Only textures mipped by the
-  // broken generation path get the clamped variant, which passes pick at bind
-  // time.
-  auto sampler = library->GetSampler(desc);
-  EXPECT_EQ(sampler->GetDescriptor().mip_filter, MipFilter::kLinear);
-
-  const SamplerVK* clamped =
-      SamplerVK::Cast(*sampler).GetBaseMipClampedVariant();
-  ASSERT_NE(clamped, nullptr);
-  EXPECT_EQ(clamped->GetDescriptor().mip_filter, MipFilter::kBase);
-  EXPECT_EQ(clamped->GetDescriptor().min_filter, desc.min_filter);
-  EXPECT_EQ(clamped->GetDescriptor().mag_filter, desc.mag_filter);
-}
-
-TEST(SamplerLibraryVK, WorkaroundsClampSamplersHandedOutEarlier) {
-  auto const context = MockVulkanContextBuilder().Build();
-
-  auto library_vk = std::make_shared<SamplerLibraryVK>(
-      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1u);
-  std::shared_ptr<SamplerLibrary> library = library_vk;
-
-  SamplerDescriptor desc;
-  desc.mip_filter = MipFilter::kLinear;
-  auto sampler = library->GetSampler(desc);
-
-  library_vk->ApplyWorkarounds(WorkaroundsVK{.broken_mipmap_generation = true});
-
-  EXPECT_NE(SamplerVK::Cast(*sampler).GetBaseMipClampedVariant(), nullptr);
-}
-
-TEST(SamplerLibraryVK, BaseMipSamplersNeedNoClampedVariant) {
-  auto const context = MockVulkanContextBuilder().Build();
-
-  auto library_vk = std::make_shared<SamplerLibraryVK>(
-      context->GetDeviceHolder(), /*max_sampler_anisotropy=*/1u);
-  std::shared_ptr<SamplerLibrary> library = library_vk;
-
-  library_vk->ApplyWorkarounds(WorkaroundsVK{.broken_mipmap_generation = true});
-
-  SamplerDescriptor desc;
-  desc.mip_filter = MipFilter::kBase;
-
-  auto sampler = library->GetSampler(desc);
-  EXPECT_EQ(SamplerVK::Cast(*sampler).GetBaseMipClampedVariant(), nullptr);
-}
 
 TEST(SamplerLibraryVK, MaxAnisotropyIsClampedToTheDeviceLimit) {
   auto const context = MockVulkanContextBuilder().Build();

@@ -133,8 +133,4 @@ const std::shared_ptr<YUVConversionVK>& SamplerVK::GetYUVConversion() const {
   return yuv_conversion_;
 }
 
-const SamplerVK* SamplerVK::GetBaseMipClampedVariant() const {
-  return base_mip_clamped_variant_.get();
-}
-
 }  // namespace impeller
