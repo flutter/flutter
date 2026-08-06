@@ -302,16 +302,7 @@ abstract class BindingBase {
   void _initListenable() {
     Listenable.onError = (Object error, StackTrace? stackTrace, ErrorContext context) {
       switch (context) {
-        case ErrorContext.listener:
-          FlutterError.reportError(
-            FlutterErrorDetails(
-              exception: error,
-              stack: stackTrace,
-              library: 'foundation library',
-              context: ErrorDescription('while dispatching notifications for $Listenable'),
-            ),
-          );
-        default:
+        case ErrorContext.assertion:
           if (error is FlutterError) {
             throw error;
           }
@@ -321,6 +312,15 @@ abstract class BindingBase {
             _ => error.toString(),
           };
           throw FlutterError(message);
+        case ErrorContext.listener:
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stackTrace,
+              library: 'foundation library',
+              context: ErrorDescription('while dispatching notifications for $Listenable'),
+            ),
+          );
       }
     };
   }
