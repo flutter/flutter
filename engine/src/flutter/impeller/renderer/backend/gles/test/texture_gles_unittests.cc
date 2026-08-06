@@ -10,10 +10,10 @@
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/base/validation.h"
-#include "impeller/core/formats.h"
-#include "impeller/core/texture_descriptor.h"
 #include "impeller/core/buffer_view.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/range.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
@@ -204,8 +204,10 @@ TEST_P(TextureGLESTest, CanCreateAndUpload2DArrayTexture) {
                                    /*mip_level=*/0, slice));
   }
   EXPECT_TRUE(blit_pass->EncodeCommands());
-  EXPECT_TRUE(
-      GetContext()->GetCommandQueue()->Submit({std::move(command_buffer)}).ok());
+  EXPECT_TRUE(GetContext()
+                  ->GetCommandQueue()
+                  ->Submit({std::move(command_buffer)})
+                  .ok());
   EXPECT_TRUE(context_gles.GetReactor()->React());
 }
 
