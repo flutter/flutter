@@ -1592,7 +1592,7 @@ void main() async {
 
     // A fullscreen quad. Each vertex is position (vec3), texture_coords
     // (vec2), and a white color (vec4) so the sampled texel passes through.
-    final List<double> quad = <double>[
+    final quad = <double>[
       -1, -1, 0, 0, 0, 1, 1, 1, 1, //
       1, -1, 0, 1, 0, 1, 1, 1, 1, //
       1, 1, 0, 1, 1, 1, 1, 1, 1, //
