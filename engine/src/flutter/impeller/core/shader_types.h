@@ -292,7 +292,7 @@ struct ShaderStageIOSlot {
   constexpr size_t GetHash() const {
     return fml::HashCombine(
         name, location, set, binding, type, bit_width, vec_size, columns,
-        offset, relaxed_precision,
+        offset, relaxed_precision, vertex_format.has_value(),
         vertex_format.value_or(VertexAttributeFormat::kInvalid));
   }
 
