@@ -112,8 +112,9 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 ///
 /// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
 /// value.
-typedef ChildSemanticsConfigurationsDelegate =
-    ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
+typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(
+  List<SemanticsConfiguration>,
+);
 
 /// Controls how accessibility focus is blocked.
 ///
