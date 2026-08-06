@@ -54,11 +54,14 @@ const _kGlibcError = 'Inconsistency detected by ld.so';
 /// Headless Linux Chrome attempts to query Linux D-Bus desktop services (such as
 /// system theme, desktop notifications, and keyrings) when `DBUS_SESSION_BUS_ADDRESS`
 /// is missing or disabled. Chromium logs non-fatal fallback notices to stderr via
-/// `LOG(ERROR)` in `dbus/bus.cc` and `dbus/object_proxy.cc`.
+/// `LOG(ERROR)` in `dbus/bus.cc` (see
+/// https://chromium.googlesource.com/chromium/src/+/refs/heads/main/dbus/bus.cc#405)
+/// and `dbus/object_proxy.cc`.
 ///
 /// We filter out these benign D-Bus lines to prevent stderr log noise in CI,
-/// following the industry standard pattern used by web test runners such as Cypress:
-/// https://github.com/cypress-io/cypress/blob/main/packages/server/lib/browsers/chrome.ts
+/// following the industry standard pattern used by web test runners such as Cypress
+/// (see https://github.com/cypress-io/cypress/issues/29521 and
+/// https://github.com/cypress-io/cypress/blob/develop/cli/lib/exec/spawn.ts#L252-L282).
 bool _isDbusError(String line) {
   return line.contains('ERROR:dbus/bus.cc') ||
       line.contains('ERROR:dbus/object_proxy.cc') ||
