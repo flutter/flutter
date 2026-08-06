@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:dds/dap.dart' hide PidTracker;
+import 'package:dap_adapters/dap_adapters.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/io.dart';
