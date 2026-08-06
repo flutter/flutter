@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -968,6 +969,72 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Verify that the navigation channel was given the push route message.
     verify(mockFlutterEngine.getNavigationChannel(), times(1)).pushRouteInformation(expected);
+  }
+
+  @Test
+  public void itSendsPushRouteInformationMessageWhenIntentIsSelfSent() {
+    when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+
+    String expected = "http://myApp/custom/route?query=test";
+    Intent mockIntent = mock(Intent.class);
+    when(mockIntent.getData()).thenReturn(Uri.parse(expected));
+    when(mockHost.getActivity()).thenReturn(mock(Activity.class));
+
+    try (org.mockito.MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(true);
+
+      delegate.onNewIntent(mockIntent);
+
+      verify(mockFlutterEngine.getNavigationChannel(), times(1)).pushRouteInformation(expected);
+    }
+  }
+
+  @Test
+  public void itSendsPushRouteInformationMessageWhenIntentIsValidForDeeplinking() {
+    when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+
+    String expected = "http://myApp/custom/route?query=test";
+    Intent mockIntent = mock(Intent.class);
+    when(mockIntent.getData()).thenReturn(Uri.parse(expected));
+    when(mockHost.getActivity()).thenReturn(mock(Activity.class));
+
+    try (org.mockito.MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(() -> IntentUtils.isIntentValidForDeeplinking(any(), any()))
+          .thenReturn(true);
+
+      delegate.onNewIntent(mockIntent);
+
+      verify(mockFlutterEngine.getNavigationChannel(), times(1)).pushRouteInformation(expected);
+    }
+  }
+
+  @Test
+  public void itDoesNotSendPushRouteInformationMessageWhenIntentIsNotSelfSentAndNotValid() {
+    when(mockHost.shouldHandleDeeplinking()).thenReturn(true);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+
+    String expected = "http://myApp/custom/route?query=test";
+    Intent mockIntent = mock(Intent.class);
+    when(mockIntent.getData()).thenReturn(Uri.parse(expected));
+    when(mockHost.getActivity()).thenReturn(mock(Activity.class));
+
+    try (org.mockito.MockedStatic<IntentUtils> mockedIntentUtils = mockStatic(IntentUtils.class)) {
+      mockedIntentUtils.when(() -> IntentUtils.isIntentSelfSent(any())).thenReturn(false);
+      mockedIntentUtils
+          .when(() -> IntentUtils.isIntentValidForDeeplinking(any(), any()))
+          .thenReturn(false);
+
+      delegate.onNewIntent(mockIntent);
+
+      verify(mockFlutterEngine.getNavigationChannel(), never()).pushRouteInformation(expected);
+    }
   }
 
   @Test

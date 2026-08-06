@@ -25,6 +25,7 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class IntentUtilsTest {
+  private static final String APP_PACKAGE_NAME = "com.test";
   private Activity mockActivity;
   private PackageManager mockPackageManager;
   private ActivityInfo mockActivityInfo;
@@ -36,33 +37,34 @@ public class IntentUtilsTest {
     mockActivityInfo = new ActivityInfo();
 
     when(mockActivity.getPackageManager()).thenReturn(mockPackageManager);
-    when(mockActivity.getComponentName()).thenReturn(new ComponentName("com.test", "TestActivity"));
+    when(mockActivity.getComponentName())
+        .thenReturn(new ComponentName(APP_PACKAGE_NAME, "TestActivity"));
     when(mockPackageManager.getActivityInfo(any(ComponentName.class), anyInt()))
         .thenReturn(mockActivityInfo);
-    when(mockActivity.getPackageName()).thenReturn("com.test");
+    when(mockActivity.getPackageName()).thenReturn(APP_PACKAGE_NAME);
   }
 
   @Test
-  public void testIsIntentValidForDeeplinking_returnsFalseForMissingData() {
+  public void isIntentValidForDeeplinking_returnsFalseForMissingData() {
     Intent intent = new Intent(Intent.ACTION_VIEW);
     assertFalse(IntentUtils.isIntentValidForDeeplinking(intent, mockActivity));
   }
 
   @Test
-  public void testIsIntentValidForDeeplinking_returnsFalseForNonActionView() {
+  public void isIntentValidForDeeplinking_returnsFalseForNonActionView() {
     Intent intent = new Intent("com.custom.ACTION").setData(Uri.parse("http://test.com"));
     assertFalse(IntentUtils.isIntentValidForDeeplinking(intent, mockActivity));
   }
 
   @Test
-  public void testIsIntentValidForDeeplinking_returnsFalseForNullAction() {
+  public void isIntentValidForDeeplinking_returnsFalseForNullAction() {
     Intent intent = new Intent().setData(Uri.parse("http://test.com"));
     intent.setAction(null);
     assertFalse(IntentUtils.isIntentValidForDeeplinking(intent, mockActivity));
   }
 
   @Test
-  public void testIsIntentValidForDeeplinking_returnsTrueWhenMatchesManifest() {
+  public void isIntentValidForDeeplinking_returnsTrueWhenMatchesManifest() {
     Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://test.com"));
 
     ResolveInfo mockResolveInfo = new ResolveInfo();
@@ -79,12 +81,12 @@ public class IntentUtilsTest {
   }
 
   @Test
-  public void testIsIntentValidForDeeplinking_returnsTrueForActivityAlias() {
+  public void isIntentValidForDeeplinking_returnsTrueForActivityAlias() {
     Intent intent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://test.com"));
 
     ResolveInfo mockResolveInfo = new ResolveInfo();
     mockResolveInfo.activityInfo = new ActivityInfo();
-    mockResolveInfo.activityInfo.name = "com.test.SomeAlias";
+    mockResolveInfo.activityInfo.name = APP_PACKAGE_NAME + ".SomeAlias";
     mockResolveInfo.activityInfo.targetActivity = mockActivity.getClass().getName();
 
     List<ResolveInfo> resolveInfos = new ArrayList<>();
@@ -97,7 +99,7 @@ public class IntentUtilsTest {
   }
 
   @Test
-  public void testIsIntentValidForDeeplinking_handlesType() {
+  public void isIntentValidForDeeplinking_handlesType() {
     Intent intent =
         new Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse("content://test"), "text/plain");
 
@@ -108,7 +110,7 @@ public class IntentUtilsTest {
     List<ResolveInfo> resolveInfos = new ArrayList<>();
     resolveInfos.add(mockResolveInfo);
 
-    // queryIntentActivities should be called with an intent that has the type
+    // queryIntentActivities should be called with an Intent that has the type
     when(mockPackageManager.queryIntentActivities(any(Intent.class), anyInt()))
         .thenAnswer(
             invocation -> {
@@ -124,14 +126,14 @@ public class IntentUtilsTest {
 
   @Test
   @Config(sdk = 33)
-  public void testCheckIntentSource_returnsTrueForNonExportedActivity_legacy() {
+  public void checkIntentSource_returnsTrueForNonExportedActivity_legacy() {
     mockActivityInfo.exported = false;
     assertTrue(IntentUtils.checkIntentSource(mockActivity));
   }
 
   @Test
   @Config(sdk = 33)
-  public void testCheckIntentSource_returnsFalseForExportedActivityWithoutCallingPackage_legacy() {
+  public void checkIntentSource_returnsFalseForExportedActivityWithoutCallingPackage_legacy() {
     mockActivityInfo.exported = true;
     when(mockActivity.getCallingPackage()).thenReturn(null);
     assertFalse(IntentUtils.checkIntentSource(mockActivity));
@@ -139,17 +141,15 @@ public class IntentUtilsTest {
 
   @Test
   @Config(sdk = 33)
-  public void
-      testCheckIntentSource_returnsTrueForExportedActivityWithMatchingCallingPackage_legacy() {
+  public void checkIntentSource_returnsTrueForExportedActivityWithMatchingCallingPackage_legacy() {
     mockActivityInfo.exported = true;
-    when(mockActivity.getCallingPackage()).thenReturn("com.test");
+    when(mockActivity.getCallingPackage()).thenReturn(APP_PACKAGE_NAME);
     assertTrue(IntentUtils.checkIntentSource(mockActivity));
   }
 
   @Test
   @Config(sdk = 33)
-  public void
-      testCheckIntentSource_returnsFalseForExportedActivityWithMismatchCallingPackage_legacy() {
+  public void checkIntentSource_returnsFalseForExportedActivityWithMismatchCallingPackage_legacy() {
     mockActivityInfo.exported = true;
     when(mockActivity.getCallingPackage()).thenReturn("com.other");
     assertFalse(IntentUtils.checkIntentSource(mockActivity));
@@ -157,7 +157,7 @@ public class IntentUtilsTest {
 
   @Test
   @Config(sdk = 34)
-  public void testCheckIntentSource_returnsTrueForExportedActivityWithMatchingUid_api34() {
+  public void checkIntentSource_returnsTrueForExportedActivityWithMatchingUid_api34() {
     mockActivityInfo.exported = true;
     int myUid = android.os.Process.myUid();
     when(mockActivity.getLaunchedFromUid()).thenReturn(myUid);
@@ -166,7 +166,7 @@ public class IntentUtilsTest {
 
   @Test
   @Config(sdk = 34)
-  public void testCheckIntentSource_returnsFalseForExportedActivityWithMismatchUid_api34() {
+  public void checkIntentSource_returnsFalseForExportedActivityWithMismatchUid_api34() {
     mockActivityInfo.exported = true;
     int myUid = android.os.Process.myUid();
     when(mockActivity.getLaunchedFromUid()).thenReturn(myUid + 1);

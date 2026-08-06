@@ -1,3 +1,7 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package io.flutter.embedding.android;
 
 import android.app.Activity;
@@ -7,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Build.API_LEVELS;
 import io.flutter.Log;
 import java.util.List;
@@ -17,7 +22,7 @@ class IntentUtils {
 
   /**
    * Verify that the source of the Intent is self-sent for security purposes. Debug/profile builds
-   * are allowed to bypass the verification for testing purposes.
+   * are allowed to bypass the verification.
    */
   static boolean isIntentSelfSent(@NonNull Activity activity) {
     boolean isSelfSent = checkIntentSource(activity);
@@ -37,6 +42,7 @@ class IntentUtils {
     return isSelfSent;
   }
 
+  @VisibleForTesting
   static boolean checkIntentSource(@NonNull Activity activity) {
     // If the Activity is not exported, then automatically trust it. Non-exported
     // Activities can only be launched by components of the same app, apps with the
@@ -66,7 +72,10 @@ class IntentUtils {
     return false;
   }
 
-  /** Verify that an external Intent with a route matches a publicly declared filter. */
+  /**
+   * Verify that an external Intent representing a valid deep link matches a publicly declared
+   * filter.
+   */
   static boolean isIntentValidForDeeplinking(@NonNull Intent intent, @NonNull Activity activity) {
     if (intent.getData() == null) return false;
 
