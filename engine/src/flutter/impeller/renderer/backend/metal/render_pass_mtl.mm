@@ -323,12 +323,40 @@ bool RenderPassMTL::SetIndexBuffer(BufferView index_buffer,
 }
 
 // |RenderPass|
+bool RenderPassMTL::SetIndirectBuffer(BufferView indirect_args) {
+  if (!ValidateIndirectBuffer(indirect_args)) {
+    return false;
+  }
+
+  indirect_buffer_ = std::move(indirect_args);
+  return true;
+}
+
+// |RenderPass|
 fml::Status RenderPassMTL::Draw() {
   if (!has_valid_pipeline_) {
     return fml::Status(fml::StatusCode::kCancelled, "Invalid pipeline.");
   }
 
-  if (!index_buffer_) {
+  if (indirect_buffer_) {
+    id<MTLBuffer> mtl_indirect_buffer =
+        DeviceBufferMTL::Cast(*indirect_buffer_.GetBuffer()).GetMTLBuffer();
+    NSUInteger indirect_offset = indirect_buffer_.GetRange().offset;
+    if (!index_buffer_) {
+      [encoder_ drawPrimitives:ToMTLPrimitiveType(primitive_type_)
+                indirectBuffer:mtl_indirect_buffer
+          indirectBufferOffset:indirect_offset];
+    } else {
+      [encoder_ drawIndexedPrimitives:ToMTLPrimitiveType(primitive_type_)
+                            indexType:index_type_
+                          indexBuffer:DeviceBufferMTL::Cast(
+                                          *index_buffer_.GetBuffer())
+                                          .GetMTLBuffer()
+                    indexBufferOffset:index_buffer_.GetRange().offset
+                       indirectBuffer:mtl_indirect_buffer
+                 indirectBufferOffset:indirect_offset];
+    }
+  } else if (!index_buffer_) {
     if (instance_count_ != 1u) {
       [encoder_ drawPrimitives:ToMTLPrimitiveType(primitive_type_)
                    vertexStart:base_vertex_
@@ -371,6 +399,7 @@ fml::Status RenderPassMTL::Draw() {
   base_vertex_ = 0u;
   instance_count_ = 1u;
   index_buffer_ = {};
+  indirect_buffer_ = {};
   has_valid_pipeline_ = false;
   has_label_ = false;
 

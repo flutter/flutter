@@ -49,6 +49,14 @@ static bool DeviceSupportsExtendedRangeFormats(id<MTLDevice> device) {
   return [device supportsFamily:MTLGPUFamilyApple3];
 }
 
+// See "Indirect Draw Calls" in the Metal Feature Set Tables:
+// https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+// Reading draw arguments out of a buffer needs Apple3 (A9) or the Mac family.
+static bool DeviceSupportsIndirectDraw(id<MTLDevice> device) {
+  return [device supportsFamily:MTLGPUFamilyApple3] ||
+         [device supportsFamily:MTLGPUFamilyMac2];
+}
+
 // See "Pixel Format Capabilities" in the Metal Feature Set Tables:
 // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
 // BC formats are available on the Mac family and on Apple7+ (A14/M1 and newer).
@@ -86,6 +94,7 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsDeviceTransientTextures(true)
       .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
       .SetSupportsTriangleFan(false)
+      .SetSupportsIndirectDraw(DeviceSupportsIndirectDraw(device))
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
       // Anisotropic filtering with a clamp in the range [1, 16] is supported
       // on all Metal devices.
