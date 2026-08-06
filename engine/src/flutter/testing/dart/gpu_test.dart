@@ -1610,6 +1610,18 @@ void main() async {
 
   test('2D array textures can be created and uploaded per layer', () async {
     if (!gpu.gpuContext.doesSupportTextureArrays) {
+      // Creating an array texture on a backend that does not support them
+      // fails fast at creation instead of later at upload.
+      expect(
+        () => gpu.gpuContext.createTexture(
+          gpu.StorageMode.hostVisible,
+          4,
+          4,
+          textureType: gpu.TextureType.texture2DArray,
+          layerCount: 2,
+        ),
+        throwsArgumentError,
+      );
       return;
     }
 
