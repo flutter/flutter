@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const TextRenderingApp());
@@ -36,8 +37,7 @@ class TextRenderingApp extends StatelessWidget {
             ])
               Text(
                 _testText,
-                style: TextStyle(
-                  fontFamily: 'Roboto',
+                style: GoogleFonts.roboto(
                   color: textColor,
                   fontSize: 20.0,
                   fontWeight: weight,

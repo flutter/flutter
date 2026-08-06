@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
+  google_fonts: any
   integration_test:
     sdk: flutter
   path: any
@@ -22,11 +23,5 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   test: any
-
-flutter:
-  fonts:
-    - family: Roboto
-      fonts:
-        - asset: fonts/Roboto-VariableFont_wdth,wght.ttf
 
 # PUBSPEC CHECKSUM: fp4cre
