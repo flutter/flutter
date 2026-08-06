@@ -28,19 +28,19 @@ bool CommandBufferSchedulingReceiptState::IsScheduledOrTerminal() const {
 
 void CommandBufferSchedulingReceiptState::AddScheduledOrTerminalCallback(
     fml::closure callback) {
+  fml::closure callback_to_invoke;
   if (callback) {
-    bool invoke_callback = false;
     {
       Lock lock(mutex_);
       if (state_ == State::kPending) {
         callbacks_.push_back(std::move(callback));
       } else {
-        invoke_callback = true;
+        callback_to_invoke = std::move(callback);
       }
     }
-    if (invoke_callback) {
-      callback();
-    }
+  }
+  if (callback_to_invoke) {
+    callback_to_invoke();
   }
 }
 

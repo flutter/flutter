@@ -38,17 +38,19 @@ class TestSchedulingReceipt final : public CommandBufferSchedulingReceipt {
   }
 
   void AddScheduledOrTerminalCallback(fml::closure callback) override {
-    bool run_now = false;
-    {
-      std::scoped_lock lock(mutex_);
-      if (satisfied_) {
-        run_now = true;
-      } else {
-        callbacks_.push_back(std::move(callback));
+    fml::closure callback_to_invoke;
+    if (callback) {
+      {
+        std::scoped_lock lock(mutex_);
+        if (satisfied_) {
+          callback_to_invoke = std::move(callback);
+        } else {
+          callbacks_.push_back(std::move(callback));
+        }
       }
     }
-    if (run_now) {
-      callback();
+    if (callback_to_invoke) {
+      callback_to_invoke();
     }
   }
 
