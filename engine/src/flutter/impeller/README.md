@@ -273,7 +273,7 @@ Impeller is the **default** on Windows.
 To disable Impeller on Windows when deploying your app, add the following setup to
 your project in `windows\runner\main.cpp`.
 
-```c++Expand commentComment on line R143
+```c++
 project.set_impeller_switch(flutter::ImpellerSwitch::Disabled);
 ```
 
