@@ -182,9 +182,9 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
       texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice;
       break;
     case TextureType::kTexture2DArray:
-      // TODO(bdero): Surface array-texture support up to the Flutter GPU Dart
-      // API so callers get a clear error at texture creation instead of a
-      // failed upload on contexts without array support.
+      // The Flutter GPU Dart API gates array-texture creation on
+      // GpuContext.doesSupportTextureArrays, so this is a backstop for
+      // contexts without array support (e.g. OpenGL ES 2.0).
       if (!reactor.GetProcTable().GetCapabilities()->SupportsTextureArrays()) {
         VALIDATION_LOG
             << "2D array textures are not supported on this context.";

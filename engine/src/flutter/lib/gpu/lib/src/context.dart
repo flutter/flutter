@@ -226,6 +226,13 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     if (resolvedTextureType == TextureType.texture2DArray && sampleCount != 1) {
       throw ArgumentError('2D array textures do not support multisampling');
     }
+    if (resolvedTextureType == TextureType.texture2DArray &&
+        !doesSupportTextureArrays) {
+      throw ArgumentError(
+        '2D array textures are not supported by this GpuContext. Check '
+        'GpuContext.doesSupportTextureArrays before creating one.',
+      );
+    }
     if (format.isCompressed) {
       if (enableRenderTargetUsage ||
           enableShaderWriteUsage ||
