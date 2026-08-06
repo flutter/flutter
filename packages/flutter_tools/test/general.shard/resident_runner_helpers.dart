@@ -153,7 +153,7 @@ class FakeDartDevelopmentService extends Fake
   Future<void> handleHotRestart(FlutterDevice? device) async {}
 
   @override
-  void shutdown() {}
+  Future<void> shutdown() async {}
 }
 
 class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {
@@ -206,8 +206,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
   Exception? reportError;
   Exception? runColdError;
+  Exception? connectError;
   int runHotCode = 0;
   int runColdCode = 0;
+
+  @override
+  Duration logFlushDelay = Duration.zero;
 
   @override
   ResidentCompiler? generator;
@@ -266,7 +270,11 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
     bool? ipv6 = false,
-  }) async {}
+  }) async {
+    if (connectError != null) {
+      throw connectError!;
+    }
+  }
 
   @override
   Future<UpdateFSReport> updateDevFS({
@@ -532,4 +540,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

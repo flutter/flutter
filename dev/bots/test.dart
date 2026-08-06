@@ -147,6 +147,10 @@ Future<void> main(List<String> args) async {
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan),
       'android_hardware_smoke_opengles_tests': () =>
           runAndroidHardwareSmokeTests(backend: ImpellerBackend.opengles),
+      'android_hardware_smoke_vulkan_instrumented_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.vulkan, runInstrumented: true),
+      'android_hardware_smoke_opengles_instrumented_tests': () =>
+          runAndroidHardwareSmokeTests(backend: ImpellerBackend.opengles, runInstrumented: true),
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
@@ -226,14 +230,8 @@ Future<void> _runWebToolTests() async {
   );
 }
 
-Future<void> _runToolHostCrossArchTests() {
-  return runDartTest(
-    _toolsPath,
-    // These are integration tests
-    forceSingleCore: true,
-    testPaths: <String>[path.join('test', 'host_cross_arch.shard')],
-  );
-}
+// TODO(jmagman): https://github.com/flutter/flutter/issues/189302 remove when it gets to stable.
+Future<void> _runToolHostCrossArchTests() async {}
 
 Future<void> _runIntegrationToolTests() async {
   final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))

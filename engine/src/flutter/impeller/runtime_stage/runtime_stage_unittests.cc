@@ -72,6 +72,27 @@ TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
   ASSERT_FALSE(stages.ok());
 }
 
+TEST_P(RuntimeStageTest, RejectsCorruptBufferWithValidIdentifier) {
+  ScopedValidationDisable disable_validation;
+  // Construct a buffer with a valid "IPLR" file identifier at bytes 4-7
+  // but a root table offset that points beyond the buffer. This passes
+  // the identifier check but fails FlatBuffer structural verification.
+  auto data = std::make_shared<std::vector<uint8_t>>(32, 0);
+  (*data)[4] = 'I';
+  (*data)[5] = 'P';
+  (*data)[6] = 'L';
+  (*data)[7] = 'R';
+  // Root offset (little-endian uint32 at offset 0) pointing out of bounds.
+  (*data)[0] = 0xFF;
+  (*data)[1] = 0xFF;
+
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      data->data(), data->size(), [data](auto, auto) {});
+  auto stages = RuntimeStage::DecodeRuntimeStages(mapping);
+  ASSERT_FALSE(stages.ok());
+  EXPECT_EQ(stages.status().code(), absl::StatusCode::kInvalidArgument);
+}
+
 TEST_P(RuntimeStageTest, CanReadUniforms) {
   const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping(

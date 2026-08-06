@@ -106,17 +106,29 @@ class Chrome {
       if (options.userDataDirectory != null) '--user-data-dir=${options.userDataDirectory}',
       ?options.url,
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true') '--no-sandbox',
-      if (options.headless ?? false) '--headless',
+      if (options.headless ?? false) ...<String>[
+        '--headless',
+        if (io.Platform.isLinux) ...<String>[
+          '--use-gl=angle',
+          '--use-angle=swiftshader',
+          '--enable-unsafe-swiftshader',
+          '--disable-gpu-sandbox',
+        ],
+      ],
       if (withDebugging) '--remote-debugging-port=${options.debugPort}',
       '--window-size=${options.windowWidth},${options.windowHeight}',
       '--disable-extensions',
       '--disable-popup-blocking',
+      '--disable-renderer-backgrounding',
       // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
       '--bwsi',
       '--no-first-run',
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      '--password-store=basic',
+      '--disable-search-engine-choice-screen',
+      if (io.Platform.isMacOS) '--use-mock-keychain',
       if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
     ];
 

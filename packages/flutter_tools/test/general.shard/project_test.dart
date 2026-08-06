@@ -145,6 +145,37 @@ void main() {
         );
         expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
+      _testInMemory('does nothing in a project with no platform directories', () async {
+        // A project (e.g. a pure-Dart package or the flutter framework's own
+        // packages) with no android/ios/linux/macos/windows/web directories
+        // has nothing for refreshPluginsList or injectPlugins to do — every
+        // consumer of `.flutter-plugins-dependencies` and the plugin symlinks
+        // gates on the matching platform directory existing. The plugin
+        // dependency below ensures the file would be written without the
+        // early-return.
+        await aPluginProject(legacy: false);
+        final Directory directory = globals.fs.directory('some_project');
+        writePackageConfigFiles(
+          directory: directory,
+          mainLibName: 'app_name',
+          packages: <String, String>{'my_plugin': '/plugin_project'},
+        );
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: app_name
+flutter:
+
+dependencies:
+  my_plugin:
+    sdk: flutter
+''');
+        final FlutterProject project = FlutterProject.fromDirectory(directory);
+
+        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+
+        expectNotExists(project.flutterPluginsDependenciesFile);
+      });
       _testInMemory('works if there is an "example" folder', () async {
         final FlutterProject project = await someProject();
         // The presence of an "example" folder used to be used as an indicator
