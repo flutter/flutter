@@ -5,6 +5,7 @@
 #include "flutter/lib/gpu/texture.h"
 
 #include <cstring>
+#include <limits>
 
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/painting/image.h"
@@ -219,6 +220,7 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
   if (layer_count < 1) {
     return false;
   }
+  FML_DCHECK(layer_count <= std::numeric_limits<uint16_t>::max());
   impeller::TextureDescriptor desc;
   desc.storage_mode = flutter::gpu::ToImpellerStorageMode(storage_mode);
   desc.size = {width, height};
