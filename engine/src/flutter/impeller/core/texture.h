@@ -60,6 +60,11 @@ class Texture {
   /// `array_layer_count` for 2D array textures).
   bool IsSliceValid(size_t slice) const;
 
+  /// Returns true if the mip levels of this texture were produced by
+  /// `BlitPass::GenerateMipmap`. Levels of a texture that returns false were
+  /// either uploaded by hand or never written at all.
+  bool HasGeneratedMipmaps() const;
+
  protected:
   explicit Texture(TextureDescriptor desc);
 

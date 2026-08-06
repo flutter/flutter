@@ -21,17 +21,33 @@ SamplerLibraryVK::~SamplerLibraryVK() = default;
 
 void SamplerLibraryVK::ApplyWorkarounds(const WorkaroundsVK& workarounds) {
   mips_disabled_workaround_ = workarounds.broken_mipmap_generation;
+  if (!mips_disabled_workaround_) {
+    return;
+  }
+  // Samplers handed out before the driver was known still need a clamped copy.
+  for (const auto& entry : samplers_) {
+    AttachBaseMipClampedVariant(*entry.second);
+  }
+}
+
+void SamplerLibraryVK::AttachBaseMipClampedVariant(SamplerVK& sampler) {
+  if (sampler.base_mip_clamped_variant_ ||
+      sampler.GetDescriptor().mip_filter == MipFilter::kBase) {
+    return;
+  }
+  auto device_holder = device_holder_.lock();
+  if (!device_holder || !device_holder->GetDevice()) {
+    return;
+  }
+  SamplerDescriptor desc = sampler.GetDescriptor();
+  desc.mip_filter = MipFilter::kBase;
+  sampler.base_mip_clamped_variant_ =
+      std::make_shared<SamplerVK>(device_holder->GetDevice(), desc);
 }
 
 raw_ptr<const Sampler> SamplerLibraryVK::GetSampler(
     const SamplerDescriptor& desc) {
   SamplerDescriptor desc_copy = desc;
-  // The workaround exists because blit-generated mip chains are corrupt on
-  // Adreno. Textures whose mips were uploaded by hand are unaffected, so honor
-  // their requested mip filtering instead of collapsing to the base level.
-  if (mips_disabled_workaround_ && !desc_copy.allow_manual_mip_sampling) {
-    desc_copy.mip_filter = MipFilter::kBase;
-  }
   // Clamp to the device limit before keying the cache so that all values
   // beyond the limit share one sampler. The limit is 1 (disabled) when the
   // samplerAnisotropy feature is unavailable. The upper bound is floored at 1
@@ -43,17 +59,20 @@ raw_ptr<const Sampler> SamplerLibraryVK::GetSampler(
   uint64_t p_key = SamplerDescriptor::ToKey(desc_copy);
   for (const auto& [key, value] : samplers_) {
     if (key == p_key) {
-      return raw_ptr(value);
+      return raw_ptr<const Sampler>(value);
     }
   }
   auto device_holder = device_holder_.lock();
   if (!device_holder || !device_holder->GetDevice()) {
     return raw_ptr<const Sampler>(nullptr);
   }
-  samplers_.push_back(std::make_pair(
-      p_key,
-      std::make_shared<SamplerVK>(device_holder->GetDevice(), desc_copy)));
-  return raw_ptr(samplers_.back().second);
+  auto sampler =
+      std::make_shared<SamplerVK>(device_holder->GetDevice(), desc_copy);
+  if (mips_disabled_workaround_) {
+    AttachBaseMipClampedVariant(*sampler);
+  }
+  samplers_.push_back(std::make_pair(p_key, std::move(sampler)));
+  return raw_ptr<const Sampler>(samplers_.back().second);
 }
 
 }  // namespace impeller
