@@ -65,6 +65,42 @@ void main() {
       expect(logger.errorText, isEmpty);
     });
 
+    testWithoutContext('does nothing when existingDeviceSupportSymbols is non-null', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory homeDir = fileSystem.directory('/Users/username');
+      final Directory supportDir = homeDir
+          .childDirectory('Library')
+          .childDirectory('Developer')
+          .childDirectory('Xcode')
+          .childDirectory('iOS DeviceSupport');
+      supportDir
+          .childDirectory('iPhone15,2 17.0')
+          .childDirectory('Symbols')
+          .createSync(recursive: true);
+
+      final processManager = FakeProcessManager.empty();
+      final logger = BufferLogger.test();
+      final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+
+      final deviceSupport = IOSDeviceSupport(
+        logger: logger,
+        processUtils: processUtils,
+        xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
+        homeDirectory: homeDir,
+        modelCode: 'iPhone15,2',
+        operatingSystemVersion: '17.0',
+        cpuArchitectureString: 'arm64e',
+        deviceId: 'id-123',
+      );
+
+      await deviceSupport.prepareDeviceSupport();
+
+      expect(processManager, hasNoRemainingExpectations);
+      expect(logger.statusText, isEmpty);
+      expect(logger.traceText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    });
+
     testWithoutContext(
       'runs prepareDeviceSupport and logs stdout to trace when Copying is not present',
       () async {

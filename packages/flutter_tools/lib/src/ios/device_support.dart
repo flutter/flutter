@@ -69,13 +69,26 @@ class IOSDeviceSupport {
     return true;
   }();
 
+  /// Returns the directory for existing Device Support symbols. If there is not an existing
+  /// directory, returns null.
+  late final Directory? existingDeviceSupportSymbols = () {
+    final (Directory? symbolDirectory, Directory? archSymbolDirectory) = _findSymbolDirectories();
+    if (archSymbolDirectory != null && archSymbolDirectory.existsSync()) {
+      return archSymbolDirectory;
+    }
+    if (symbolDirectory != null && symbolDirectory.existsSync()) {
+      return symbolDirectory;
+    }
+    return null;
+  }();
+
   /// Calls `xcodebuild -prepareDeviceSupport` and streams the logs when copying is in progress.
   ///
   /// The command copies symbols from the iOS device to the host machine and stores them in
   /// $HOME/Library/Developer/Xcode/iOS DeviceSupport. Without these symbols, debugging is
   /// extremely slow.
   Future<void> prepareDeviceSupport() async {
-    if (!_prepareDeviceSupportCommandAvailable) {
+    if (!_prepareDeviceSupportCommandAvailable || existingDeviceSupportSymbols != null) {
       return;
     }
 
@@ -146,19 +159,6 @@ class IOSDeviceSupport {
       _logger.printTrace('$stackTrace');
     }
   }
-
-  /// Returns the directory for existing Device Support symbols. If there is not an existing
-  /// directory, returns null.
-  late final Directory? existingDeviceSupportSymbols = () {
-    final (Directory? symbolDirectory, Directory? archSymbolDirectory) = _findSymbolDirectories();
-    if (archSymbolDirectory != null && archSymbolDirectory.existsSync()) {
-      return archSymbolDirectory;
-    }
-    if (symbolDirectory != null && symbolDirectory.existsSync()) {
-      return symbolDirectory;
-    }
-    return null;
-  }();
 
   /// Returns a warning describing the status of Device Support symbols and guided actions to
   /// resolve issues.
