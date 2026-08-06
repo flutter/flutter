@@ -55,6 +55,7 @@ void $maliciousEntrypointName() {
 }
 
 void main() {
+  print('==== SAFE: main executed ====');
   runApp(
     MaterialApp(
       home: Scaffold(body: Text('Intent Security Test')),
@@ -76,10 +77,18 @@ void main() {
       await device.shellExec('am', <String>['force-stop', '$org.app']);
       await device.adb(<String>['logcat', '-c']);
 
+      final appStarted = Completer<void>();
       var entrypointInjected = false;
       final StreamSubscription<String> logcat = device.logcat.listen((String log) {
         if (log.contains(vulnerableLog)) {
           entrypointInjected = true;
+          if (!appStarted.isCompleted) {
+            appStarted.complete();
+          }
+        } else if (log.contains('==== SAFE: main executed ====')) {
+          if (!appStarted.isCompleted) {
+            appStarted.complete();
+          }
         }
       });
 
@@ -93,8 +102,13 @@ void main() {
         maliciousEntrypointName,
       ]);
 
-      await Future<void>.delayed(const Duration(seconds: 5));
-      await logcat.cancel();
+      try {
+        await appStarted.future.timeout(const Duration(seconds: 30));
+      } catch (_) {
+        return TaskResult.failure('App did not start within 30 seconds.');
+      } finally {
+        await logcat.cancel();
+      }
 
       // Ensure app is dead at the end.
       await device.shellExec('am', <String>['force-stop', '$org.app']);
@@ -136,9 +150,10 @@ void main() {
     MaterialApp(
       onGenerateRoute: (settings) {
         print('==== ROUTE: ${settings.name} ====');
-        return null;
+        return MaterialPageRoute(
+          builder: (context) => Scaffold(body: Text('Intent Security Test'))
+        );
       },
-      home: Scaffold(body: Text('Intent Security Test')),
     )
   );
 }
@@ -169,22 +184,38 @@ void main() {
       await device.shellExec('am', <String>['force-stop', '$org.app']);
       await device.adb(<String>['logcat', '-c']);
 
+      final routeCompleter1 = Completer<void>();
       var routeInjectedActionView = false;
       final StreamSubscription<String> logcat1 = device.logcat.listen((String log) {
         if (log.contains('==== ROUTE: $maliciousRoute ====')) {
           routeInjectedActionView = true;
+          if (!routeCompleter1.isCompleted) {
+            routeCompleter1.complete();
+          }
+        } else if (log.contains('==== ROUTE: / ====')) {
+          if (!routeCompleter1.isCompleted) {
+            routeCompleter1.complete();
+          }
         }
       });
 
       await device.shellExec('am', <String>[
         'start',
-        '-a', 'android.intent.action.VIEW',
-        '-n', '$org.app/.MainActivity',
-        '-d', maliciousRoute,
+        '-a',
+        'android.intent.action.VIEW',
+        '-n',
+        '$org.app/.MainActivity',
+        '-d',
+        maliciousRoute,
       ]);
 
-      await Future<void>.delayed(const Duration(seconds: 5));
-      await logcat1.cancel();
+      try {
+        await routeCompleter1.future.timeout(const Duration(seconds: 30));
+      } catch (_) {
+        return TaskResult.failure('App did not start or route within 30 seconds.');
+      } finally {
+        await logcat1.cancel();
+      }
 
       if (routeInjectedActionView) {
         return TaskResult.failure(
@@ -197,22 +228,38 @@ void main() {
       await device.shellExec('am', <String>['force-stop', '$org.app']);
       await device.adb(<String>['logcat', '-c']);
 
+      final routeCompleter2 = Completer<void>();
       var routeInjectedNonActionView = false;
       final StreamSubscription<String> logcat2 = device.logcat.listen((String log) {
         if (log.contains('==== ROUTE: $maliciousRoute ====')) {
           routeInjectedNonActionView = true;
+          if (!routeCompleter2.isCompleted) {
+            routeCompleter2.complete();
+          }
+        } else if (log.contains('==== ROUTE: / ====')) {
+          if (!routeCompleter2.isCompleted) {
+            routeCompleter2.complete();
+          }
         }
       });
 
       await device.shellExec('am', <String>[
         'start',
-        '-a', 'android.intent.action.MAIN',
-        '-n', '$org.app/.MainActivity',
-        '-d', maliciousRoute,
+        '-a',
+        'android.intent.action.MAIN',
+        '-n',
+        '$org.app/.MainActivity',
+        '-d',
+        maliciousRoute,
       ]);
 
-      await Future<void>.delayed(const Duration(seconds: 5));
-      await logcat2.cancel();
+      try {
+        await routeCompleter2.future.timeout(const Duration(seconds: 30));
+      } catch (_) {
+        return TaskResult.failure('App did not start or route within 30 seconds.');
+      } finally {
+        await logcat2.cancel();
+      }
 
       // Ensure app is dead at the end
       await device.shellExec('am', <String>['force-stop', '$org.app']);
@@ -250,7 +297,7 @@ Future<void> _buildApk(Directory tempDir, String buildMode) async {
 
 Future<void> _installApk(AndroidDevice device, String org, String apkPath) async {
   section('Install APK');
-  // Uninstall first just in case
-  await device.shellExec('pm', <String>['uninstall', '$org.app'], silent: true);
-  await device.shellExec('pm', <String>['install', '-r', apkPath]);
+  // Uninstall first just in case. This is allowed to fail if the app isn't already installed.
+  await device.adb(<String>['shell', 'pm', 'uninstall', '$org.app'], silent: true, canFail: true);
+  await device.adb(<String>['install', '-r', apkPath]);
 }
