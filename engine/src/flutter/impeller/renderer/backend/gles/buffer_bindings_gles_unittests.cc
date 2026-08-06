@@ -24,27 +24,88 @@ const GLint kBlockDataSize = 16;
 using ::testing::_;
 using ::testing::NiceMock;
 
-TEST(BufferBindingsGLESTest, ToVertexAttribTypeSupportedFormats) {
-  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kFloat32x3),
-            std::optional<GLenum>(GL_FLOAT));
-  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kSInt8x4),
-            std::optional<GLenum>(GL_BYTE));
-  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kUInt8),
-            std::optional<GLenum>(GL_UNSIGNED_BYTE));
-  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kSInt16x2),
-            std::optional<GLenum>(GL_SHORT));
-  EXPECT_EQ(ToVertexAttribType(VertexAttributeFormat::kUInt16),
-            std::optional<GLenum>(GL_UNSIGNED_SHORT));
+namespace {
+// A context that supports every format tier.
+constexpr VertexFormatSupportGLES kFullVertexFormatSupport = {
+    .half_float_type = GL_HALF_FLOAT,
+    .integer = true,
+    .packed_2_10_10_10 = true,
+    .bgra = true,
+};
+}  // namespace
+
+TEST(BufferBindingsGLESTest, ToVertexAttribGLESFloats) {
+  auto attrib = ToVertexAttribGLES(VertexAttributeFormat::kFloat32x3,
+                                   kFullVertexFormatSupport);
+  ASSERT_TRUE(attrib.has_value());
+  EXPECT_EQ(attrib->size, 3);
+  EXPECT_EQ(attrib->type, static_cast<GLenum>(GL_FLOAT));
+  EXPECT_EQ(attrib->normalized, GL_FALSE);
+  EXPECT_FALSE(attrib->integer);
 }
 
-TEST(BufferBindingsGLESTest, ToVertexAttribTypeRejectsUnsupportedFormats) {
-  // Half-float and 32-bit integer vertex attributes are not available on the
-  // GLES 2.0 floor.
-  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kFloat16).has_value());
-  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kSInt32).has_value());
+TEST(BufferBindingsGLESTest, ToVertexAttribGLESNormalized) {
+  auto attrib = ToVertexAttribGLES(VertexAttributeFormat::kUNorm8x4,
+                                   kFullVertexFormatSupport);
+  ASSERT_TRUE(attrib.has_value());
+  EXPECT_EQ(attrib->size, 4);
+  EXPECT_EQ(attrib->type, static_cast<GLenum>(GL_UNSIGNED_BYTE));
+  EXPECT_EQ(attrib->normalized, GL_TRUE);
+  EXPECT_FALSE(attrib->integer);
+}
+
+TEST(BufferBindingsGLESTest, ToVertexAttribGLESIntegersTakeTheIPointerPath) {
+  auto attrib = ToVertexAttribGLES(VertexAttributeFormat::kUInt32x2,
+                                   kFullVertexFormatSupport);
+  ASSERT_TRUE(attrib.has_value());
+  EXPECT_EQ(attrib->size, 2);
+  EXPECT_EQ(attrib->type, static_cast<GLenum>(GL_UNSIGNED_INT));
+  EXPECT_EQ(attrib->normalized, GL_FALSE);
+  EXPECT_TRUE(attrib->integer);
+}
+
+TEST(BufferBindingsGLESTest, ToVertexAttribGLESPackedFormats) {
+  auto bgra = ToVertexAttribGLES(VertexAttributeFormat::kUNorm8x4BGRA,
+                                 kFullVertexFormatSupport);
+  ASSERT_TRUE(bgra.has_value());
+  // Byte ordering is expressed by passing GL_BGRA_EXT as the component count.
+  EXPECT_EQ(bgra->size, GL_BGRA_EXT);
+  EXPECT_EQ(bgra->type, static_cast<GLenum>(GL_UNSIGNED_BYTE));
+  EXPECT_EQ(bgra->normalized, GL_TRUE);
+
+  auto packed = ToVertexAttribGLES(VertexAttributeFormat::kUNorm10_10_10_2,
+                                   kFullVertexFormatSupport);
+  ASSERT_TRUE(packed.has_value());
+  EXPECT_EQ(packed->size, 4);
+  EXPECT_EQ(packed->type, static_cast<GLenum>(GL_UNSIGNED_INT_2_10_10_10_REV));
+  EXPECT_EQ(packed->normalized, GL_TRUE);
+}
+
+TEST(BufferBindingsGLESTest, ToVertexAttribGLESHonorsTheHalfFloatEnum) {
+  VertexFormatSupportGLES support = kFullVertexFormatSupport;
+  support.half_float_type = GL_HALF_FLOAT_OES;
+  auto attrib = ToVertexAttribGLES(VertexAttributeFormat::kFloat16x2, support);
+  ASSERT_TRUE(attrib.has_value());
+  EXPECT_EQ(attrib->type, static_cast<GLenum>(GL_HALF_FLOAT_OES));
+}
+
+TEST(BufferBindingsGLESTest, ToVertexAttribGLESRejectsUnsupportedFormats) {
+  // The OpenGL ES 2.0 floor: normalized and 32-bit float formats only.
+  constexpr VertexFormatSupportGLES kFloor = {};
+  EXPECT_TRUE(
+      ToVertexAttribGLES(VertexAttributeFormat::kUNorm8x4, kFloor).has_value());
   EXPECT_FALSE(
-      ToVertexAttribType(VertexAttributeFormat::kUInt32x4).has_value());
-  EXPECT_FALSE(ToVertexAttribType(VertexAttributeFormat::kInvalid).has_value());
+      ToVertexAttribGLES(VertexAttributeFormat::kFloat16, kFloor).has_value());
+  EXPECT_FALSE(
+      ToVertexAttribGLES(VertexAttributeFormat::kSInt32, kFloor).has_value());
+  EXPECT_FALSE(ToVertexAttribGLES(VertexAttributeFormat::kUNorm8x4BGRA, kFloor)
+                   .has_value());
+  EXPECT_FALSE(
+      ToVertexAttribGLES(VertexAttributeFormat::kUNorm10_10_10_2, kFloor)
+          .has_value());
+  EXPECT_FALSE(ToVertexAttribGLES(VertexAttributeFormat::kInvalid,
+                                  kFullVertexFormatSupport)
+                   .has_value());
 }
 
 TEST(BufferBindingsGLESTest, BindUniformData) {
@@ -271,6 +332,112 @@ TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
   EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
                                             /*binding=*/1, /*vertex_offset=*/0,
                                             /*instance=*/0));
+}
+
+// A normalized attribute reaches glVertexAttribPointer with the normalized
+// flag set, so the hardware converts the stored bytes to floats on read.
+TEST(BufferBindingsGLESTest, BindVertexAttributesNormalizesPackedColors) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  EXPECT_CALL(*mock_gles_impl, VertexAttribPointer(/*index=*/0, /*size=*/4,
+                                                   GL_UNSIGNED_BYTE, GL_TRUE,
+                                                   /*stride=*/4, _))
+      .Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribIPointer(_, _, _, _, _)).Times(0);
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+
+  BufferBindingsGLES bindings;
+  // The shader declares a vec4; only the explicit format says the buffer holds
+  // four normalized bytes.
+  ShaderStageIOSlot input = {
+      .name = "color",
+      .location = 0,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 4,
+      .columns = 1,
+      .offset = 0,
+      .vertex_format = VertexAttributeFormat::kUNorm8x4,
+  };
+  std::vector<ShaderStageIOSlot> inputs = {input};
+  std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{
+          .stride = 4, .binding = 0, .input_rate = VertexInputRate::kVertex},
+  };
+
+  ASSERT_TRUE(bindings.RegisterVertexStageInput(mock_gl->GetProcTable(), inputs,
+                                                layouts));
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/0, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+}
+
+// An integer-typed input must go through glVertexAttribIPointer, which hands
+// the value to the shader unconverted.
+TEST(BufferBindingsGLESTest, BindVertexAttributesUsesIPointerForIntegers) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  EXPECT_CALL(*mock_gles_impl,
+              VertexAttribIPointer(/*index=*/0, /*size=*/1, GL_UNSIGNED_INT,
+                                   /*stride=*/4, _))
+      .Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribPointer(_, _, _, _, _, _)).Times(0);
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+
+  BufferBindingsGLES bindings;
+  ShaderStageIOSlot input = {
+      .name = "packed_color",
+      .location = 0,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kUnsignedInt,
+      .bit_width = 32,
+      .vec_size = 1,
+      .columns = 1,
+      .offset = 0,
+  };
+  std::vector<ShaderStageIOSlot> inputs = {input};
+  std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{
+          .stride = 4, .binding = 0, .input_rate = VertexInputRate::kVertex},
+  };
+
+  ASSERT_TRUE(bindings.RegisterVertexStageInput(mock_gl->GetProcTable(), inputs,
+                                                layouts));
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/0, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+}
+
+// Registering a pipeline whose vertex layout the device cannot read fails at
+// pipeline creation rather than at draw time.
+TEST(BufferBindingsGLESTest, RegisterVertexStageInputRejectsUnusableFormat) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  std::shared_ptr<MockGLES> mock_gl =
+      MockGLES::Init(std::move(mock_gles_impl),
+                     std::vector<const char*>{"GL_KHR_debug"}, "OpenGL ES 2.0");
+
+  BufferBindingsGLES bindings;
+  ShaderStageIOSlot input = {
+      .name = "packed_normal",
+      .location = 0,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 4,
+      .columns = 1,
+      .offset = 0,
+      .vertex_format = VertexAttributeFormat::kUNorm10_10_10_2,
+  };
+  std::vector<ShaderStageIOSlot> inputs = {input};
+  std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{
+          .stride = 4, .binding = 0, .input_rate = VertexInputRate::kVertex},
+  };
+
+  EXPECT_FALSE(bindings.RegisterVertexStageInput(mock_gl->GetProcTable(),
+                                                 inputs, layouts));
 }
 
 namespace {
