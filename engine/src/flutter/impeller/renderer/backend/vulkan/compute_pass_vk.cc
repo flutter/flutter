@@ -139,15 +139,7 @@ bool ComputePassVK::BindResource(ShaderStage stage,
     return false;
   }
   const TextureVK& texture_vk = TextureVK::Cast(*texture);
-  const SamplerVK* sampler_vk = &SamplerVK::Cast(*sampler);
-
-  // Drivers with broken mipmap generation hand out a base-mip-clamped copy of
-  // every sampler. Use it for textures that were mipped by that generation so
-  // the corrupt levels go unread.
-  if (const SamplerVK* clamped = sampler_vk->GetBaseMipClampedVariant();
-      clamped && texture->HasGeneratedMipmaps()) {
-    sampler_vk = clamped;
-  }
+  const SamplerVK& sampler_vk = SamplerVK::Cast(*sampler);
 
   if (!command_buffer_->Track(texture)) {
     return false;
@@ -155,8 +147,8 @@ bool ComputePassVK::BindResource(ShaderStage stage,
 
   vk::DescriptorImageInfo image_info;
   image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-  image_info.sampler = sampler_vk->GetSampler();
-  image_info.imageView = texture_vk.GetImageView();
+  image_info.sampler = sampler_vk.GetSampler();
+  image_info.imageView = texture_vk.GetSampledImageView();
   image_workspace_[bound_image_offset_++] = image_info;
 
   vk::WriteDescriptorSet write_set;
