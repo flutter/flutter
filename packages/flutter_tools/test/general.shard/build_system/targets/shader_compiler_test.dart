@@ -244,6 +244,8 @@ void main() {
           '"/output/shaders/my_shader.frag" failed with exit code 1.',
         ),
       );
+      expect(e.stdout, 'impellerc stdout');
+      expect(e.stderr, 'impellerc stderr');
     }
 
     expect(fileSystem.file(outputPath).existsSync(), false);
@@ -1081,5 +1083,221 @@ void main() {
 
       expect(headerLine.allMatches(logger.errorText).length, 2);
     });
+  });
+
+  group('ShaderCompiler hints and diagnostics', () {
+    Future<void> expectShaderCompilerException({
+      required ShaderCompiler shaderCompiler,
+      required String inputPath,
+      required String outputPath,
+      required List<Matcher> matchers,
+    }) async {
+      await expectLater(
+        shaderCompiler.compileShader(
+          input: fileSystem.file(inputPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.web_javascript,
+        ),
+        throwsA(
+          isA<ShaderCompilerException>().having(
+            (ShaderCompilerException e) => e.toString(),
+            'toString()',
+            allOf(matchers),
+          ),
+        ),
+      );
+    }
+
+    testWithoutContext('macOS and exit code -9 adds Gatekeeper/OOM hint', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$notFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exitCode: -9,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'macos'),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
+          contains('blocked by macOS Gatekeeper or run out of memory (OOM)'),
+          contains('xattr -d com.apple.quarantine'),
+        ],
+      );
+    });
+
+    testWithoutContext('macOS and exit code -6 adds abort hint', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$notFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exitCode: -6,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'macos'),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
+          contains('The shader compiler (impellerc) aborted during compilation.'),
+        ],
+      );
+    });
+
+    testWithoutContext('Linux and exit code -6 adds abort hint', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$notFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exitCode: -6,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
+          contains('The shader compiler (impellerc) aborted during compilation.'),
+        ],
+      );
+    });
+
+    testWithoutContext('Windows and exit code 3 adds abort hint', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$notFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exitCode: 3,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
+          contains('The shader compiler (impellerc) aborted during compilation.'),
+          isNot(contains('Warning: The path contains non-ASCII characters')),
+        ],
+      );
+    });
+
+    testWithoutContext(
+      'Windows and exit code 3 with Unicode path adds Unicode path warning '
+      '(regression test for https://github.com/flutter/flutter/issues/190233)',
+      () async {
+        const unicodeFragPath = '/shaders/my_shåder.frag';
+        const unicodeOutputPath = '/output/shaders/my_shåder.frag';
+        const unicodeOutputSpirvPath = '/output/shaders/my_shåder.frag.spirv';
+        fileSystem.file(unicodeFragPath).createSync(recursive: true);
+
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=$unicodeOutputPath',
+              '--spirv=$unicodeOutputSpirvPath',
+              '--input=$unicodeFragPath',
+              '--input-type=frag',
+              '--include=$fragDir',
+              '--include=$shaderLibDir',
+            ],
+            exitCode: 3,
+          ),
+        ]);
+        final shaderCompiler = ShaderCompiler(
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+          platform: FakePlatform(operatingSystem: 'windows'),
+        );
+
+        await expectShaderCompilerException(
+          shaderCompiler: shaderCompiler,
+          inputPath: unicodeFragPath,
+          outputPath: unicodeOutputPath,
+          matchers: <Matcher>[
+            contains('The shader compiler (impellerc) aborted during compilation.'),
+            contains('Warning: The path contains non-ASCII characters'),
+          ],
+        );
+      },
+    );
   });
 }
