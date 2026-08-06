@@ -61,8 +61,11 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
     exit 1
   }
 
-  # `uname -m` may be running in Rosetta mode, instead query sysctl
-  if [ "$OS" = 'Darwin' ]; then
+  if [ -n "$FLUTTER_HOST_ARCH" ]; then
+    # FLUTTER_HOST_ARCH can be set to override the host architecture detection.
+    ARCH="$FLUTTER_HOST_ARCH"
+  elif [ "$OS" = 'Darwin' ]; then
+    # `uname -m` may be running in Rosetta mode, instead query sysctl
     # Allow non-zero exit so we can do control flow
     set +e
     # -n means only print value, not key
