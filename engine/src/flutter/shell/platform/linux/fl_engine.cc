@@ -838,6 +838,21 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
     g_ptr_array_add(command_line_args, g_strdup("--enable-impeller"));
   }
 
+  // Forward the project's Flutter GPU setting unless an environment switch
+  // already carries it (the switch is presence based, so it is only ever
+  // added, never negated).
+  gboolean has_enable_flutter_gpu = FALSE;
+  for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
+    if (env_switch == "--enable-flutter-gpu" ||
+        env_switch == "--enable-flutter-gpu=true") {
+      has_enable_flutter_gpu = TRUE;
+    }
+  }
+  if (fl_dart_project_get_enable_flutter_gpu(self->project) &&
+      !has_enable_flutter_gpu) {
+    g_ptr_array_add(command_line_args, g_strdup("--enable-flutter-gpu"));
+  }
+
   gchar** dart_entrypoint_args =
       fl_dart_project_get_dart_entrypoint_arguments(self->project);
 
