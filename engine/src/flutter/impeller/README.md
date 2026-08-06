@@ -178,32 +178,32 @@ macOS Desktop. This flag can be specified to `flutter run`.
 
 | Releases | iOS | Android | Embedder API (Metal) | Embedder API (Vulkan) | Embedder API (OpenGL) | macOS | Windows | Linux | Web |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **main** | Exclusive | Default | Preview | Experimental | Experimental | Default | Default | Default | Unavailable |
-| **3.47** | Exclusive | Default | Preview | Experimental | Experimental | Default | Default | Default | Unavailable |
-| **3.44** | Exclusive | Default | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.41** | Exclusive | Default | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.38** | Exclusive | Default | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.35** | Exclusive | Default | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.32** | Exclusive | Default | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.29** | Exclusive | Default | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.27** | Default | Default | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.24** | Default | Preview | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.22** | Default | Preview | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.19** | Default | Preview | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.16** | Default | Preview | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.13** | Default | Unavailable | Preview | Experimental | Experimental | Preview | Experimental | Experimental | Unavailable |
-| **3.10** | Default | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable |
-| **3.70** | Preview | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable |
-| **3.30** | Preview | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable |
-| **3.00** | Preview | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable |
-| **2.10** | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable | Unavailable |
+| **main** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | ✅ | ✅ | ✅ | 🚫 |
+| **3.47** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | ✅ | ✅ | ✅ | 🚫 |
+| **3.44** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.41** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.38** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.35** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.32** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.29** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.27** | ✅ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.24** | ✅ | 🧪 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.22** | ✅ | 🧪 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.19** | ✅ | 🧪 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.16** | ✅ | 🧪 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.13** | ✅ | 🚫 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.10** | ✅ | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
+| **3.70** | 🧪 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
+| **3.30** | 🧪 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
+| **3.00** | 🧪 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
+| **2.10** | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
 
 #### Key
-- **Exclusive** — Only Impeller is available.
-- **Default** — Impeller is the default option, Skia is available.
-- **Preview** — Can use Impeller with flags/manifest options. But, Skia is the default with no action.
-- **Experimental** — Skia is the default. Impeller may or may not work. The team is not actively working on this and doesn't recommend using it.
-- **Unavailable** — Only Skia is available.
+- **⭐ Exclusive** — Only Impeller is available.
+- **✅ Default** — Impeller is the default option, Skia is available.
+- **🧪 Preview** — Can use Impeller with flags/manifest options. But, Skia is the default with no action.
+- **🚧 Experimental** — Skia is the default. Impeller may or may not work. The team is not actively working on this and doesn't recommend using it.
+- **🚫 Unavailable** — Only Skia is available.
 
 If the application needs to be launched with Impeller enabled without using the
 Flutter tool, follow the platform specific steps below.
