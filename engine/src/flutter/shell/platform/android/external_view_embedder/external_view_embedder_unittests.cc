@@ -1221,19 +1221,18 @@ TEST(AndroidExternalViewEmbedder2, FrameSizeChangeDoesNotDestroySurfaces) {
           [](const SurfaceFrame&) { return true; }, frame_size2))));
 
   auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>(
-      fml::MakeCopyable(
-          [frame_size2, surface_mock = std::move(surface_mock)]() mutable {
-            auto android_surface = std::make_unique<AndroidSurfaceMock>();
-            EXPECT_CALL(*android_surface, IsValid())
-                .WillRepeatedly(Return(true));
-            EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
-                .WillRepeatedly(Return(true));
-            EXPECT_CALL(*android_surface, CreateGPUSurface(_))
-                .WillOnce(Return(ByMove(std::move(surface_mock))));
-            EXPECT_CALL(*android_surface, OnScreenSurfaceResize(frame_size2))
-                .Times(1);
-            return android_surface;
-          }));
+      fml::MakeCopyable([frame_size2,
+                         surface_mock = std::move(surface_mock)]() mutable {
+        auto android_surface = std::make_unique<AndroidSurfaceMock>();
+        EXPECT_CALL(*android_surface, IsValid()).WillRepeatedly(Return(true));
+        EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
+            .WillRepeatedly(Return(true));
+        EXPECT_CALL(*android_surface, CreateGPUSurface(_))
+            .WillOnce(Return(ByMove(std::move(surface_mock))));
+        EXPECT_CALL(*android_surface, OnScreenSurfaceResize(frame_size2))
+            .Times(1);
+        return android_surface;
+      }));
 
   fml::RefPtr<AndroidNativeWindow> window =
       fml::MakeRefCounted<AndroidNativeWindow>(nullptr);
