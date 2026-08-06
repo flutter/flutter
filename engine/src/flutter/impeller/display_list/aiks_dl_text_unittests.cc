@@ -867,6 +867,39 @@ TEST_P(AiksTest, MultipleTextWithShadowCache) {
 
   for (auto i = 0; i < 5; i++) {
     ASSERT_TRUE(RenderTextInCanvasSkia(
+        GetContext(), builder,
+        (std::string("Hello World ") + std::to_string(i)).c_str(), kFontFixture,
+        TextRenderOptions{
+            .color = DlColor::kBlue(),
+            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)}));
+  }
+
+  DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
+
+  // Each distinct text gets its own cache entry.
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            5u);
+}
+
+TEST_P(AiksTest, DuplicateTextWithShadowCache) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  // Cache empty
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            0u);
+
+  for (auto i = 0; i < 5; i++) {
+    ASSERT_TRUE(RenderTextInCanvasSkia(
         GetContext(), builder, "Hello World", kFontFixture,
         TextRenderOptions{
             .color = DlColor::kBlue(),
@@ -875,12 +908,11 @@ TEST_P(AiksTest, MultipleTextWithShadowCache) {
 
   DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
 
-  // Text should be cached. Each text gets its own entry as we don't analyze the
-  // strings.
+  // Duplicate text frames with identical layout share the single cache entry.
   EXPECT_EQ(aiks_context.GetContentContext()
                 .GetTextShadowCache()
                 .GetCacheSizeForTesting(),
-            5u);
+            1u);
 }
 
 TEST_P(AiksTest, MultipleColorWithShadowCache) {
