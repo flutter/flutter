@@ -20,6 +20,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -352,18 +353,17 @@ class MediaQueryData {
       paragraphSpacingOverride =
           platformData?.paragraphSpacingOverride ??
           view.platformDispatcher.paragraphSpacingOverride,
-      displayCornerRadii = _displayCornerRadiiFromView(view);
+      displayCornerRadii = _displayCornerRadiiFromView(view, view.devicePixelRatio);
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
   }
 
-  static BorderRadius? _displayCornerRadiiFromView(ui.FlutterView view) {
+  static BorderRadius? _displayCornerRadiiFromView(ui.FlutterView view, double devicePixelRatio) {
     final ui.DisplayCornerRadii? displayCornerRadii = view.displayCornerRadii;
     if (displayCornerRadii == null) {
       return null;
     }
-    final double devicePixelRatio = view.devicePixelRatio;
     return BorderRadius.only(
       topLeft: Radius.circular(displayCornerRadii.topLeft / devicePixelRatio),
       topRight: Radius.circular(displayCornerRadii.topRight / devicePixelRatio),
@@ -890,6 +890,7 @@ class MediaQueryData {
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
     bool? supportsShowingSystemContextMenu,
+    BorderRadius? displayCornerRadii,
   }) {
     assert(textScaleFactor == null || textScaler == null);
     if (textScaleFactor != null) {
@@ -922,7 +923,7 @@ class MediaQueryData {
       letterSpacingOverride: letterSpacingOverride,
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
-      displayCornerRadii: displayCornerRadii,
+      displayCornerRadii: displayCornerRadii ?? this.displayCornerRadii,
     );
   }
 
@@ -2417,6 +2418,15 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (!kReleaseMode) {
+      debugViewMetricsOverridesNotifier.addListener(_handleViewMetricsOverridesChanged);
+    }
+  }
+
+  void _handleViewMetricsOverridesChanged() {
+    // The override is read in build(), so an empty setState is enough to pick
+    // up the new value.
+    setState(() {});
   }
 
   @override
@@ -2493,6 +2503,9 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void dispose() {
+    if (!kReleaseMode) {
+      debugViewMetricsOverridesNotifier.removeListener(_handleViewMetricsOverridesChanged);
+    }
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -2500,6 +2513,7 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   @override
   Widget build(BuildContext context) {
     MediaQueryData effectiveData = _data!;
+    // TODO(victorsanni): Remove this so all overrides are handled by debugViewMetricsOverrides.
     // If we get our platformBrightness from the PlatformDispatcher (i.e. we have no parentData) replace it
     // with the debugBrightnessOverride in non-release mode.
     if (!kReleaseMode &&
@@ -2507,7 +2521,96 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
         effectiveData.platformBrightness != debugBrightnessOverride) {
       effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
     }
+    // Developer tooling can override the metrics of an individual view. Unlike
+    // debugBrightnessOverride above, this applies even when there is a parent
+    // MediaQuery, because the override explicitly names the view it targets.
+    if (!kReleaseMode) {
+      final ViewMetricsOverride? override = debugViewMetricsOverrides[widget.view.viewId];
+      if (override != null) {
+        effectiveData = _applyViewMetricsOverride(widget.view, effectiveData, override);
+      }
+    }
     return MediaQuery(data: effectiveData, child: widget.child);
+  }
+
+  static MediaQueryData _applyViewMetricsOverride(
+    ui.FlutterView view,
+    MediaQueryData data,
+    ViewMetricsOverride override,
+  ) {
+    // devicePixelRatio and physicalSize are also applied to the RenderView's
+    // ViewConfiguration by RendererBinding.createViewConfigurationFor, so that
+    // the app really lays out at the overridden size instead of merely
+    // reporting it here.
+    var rescaled = data;
+    if (override.devicePixelRatio != null || override.physicalSize != null) {
+      final double devicePixelRatio = override.devicePixelRatio ?? view.devicePixelRatio;
+      final ui.Size physicalSize = override.physicalSize ?? view.physicalSize;
+      // Every logical metric below is a physical value reported by the platform
+      // divided by the device pixel ratio, so overriding the ratio has to
+      // recompute all of them, not just the size. Otherwise the application
+      // would be told that the window shrank while its padding, insets and
+      // touch slop stayed put.
+      rescaled = data.copyWith(
+        devicePixelRatio: devicePixelRatio,
+        size: physicalSize / devicePixelRatio,
+        padding: EdgeInsets.fromViewPadding(view.padding, devicePixelRatio),
+        viewPadding: EdgeInsets.fromViewPadding(view.viewPadding, devicePixelRatio),
+        viewInsets: EdgeInsets.fromViewPadding(view.viewInsets, devicePixelRatio),
+        systemGestureInsets: EdgeInsets.fromViewPadding(view.systemGestureInsets, devicePixelRatio),
+        gestureSettings: switch (view.gestureSettings.physicalTouchSlop) {
+          final double touchSlop => DeviceGestureSettings(touchSlop: touchSlop / devicePixelRatio),
+          null => data.gestureSettings,
+        },
+        // DisplayFeature bounds are the one metric dart:ui already reports in
+        // logical pixels, so they are scaled rather than recomputed.
+        displayFeatures: _scaleDisplayFeatures(
+          view.displayFeatures,
+          view.devicePixelRatio / devicePixelRatio,
+        ),
+        displayCornerRadii: MediaQueryData._displayCornerRadiiFromView(view, devicePixelRatio),
+      );
+    }
+    return rescaled.copyWith(
+      textScaler: override.textScaler,
+      platformBrightness: override.platformBrightness,
+      padding: override.padding,
+      viewPadding: override.viewPadding,
+      viewInsets: override.viewInsets,
+      alwaysUse24HourFormat: override.alwaysUse24HourFormat,
+      accessibleNavigation: override.accessibleNavigation,
+      invertColors: override.invertColors,
+      disableAnimations: override.disableAnimations,
+      boldText: override.boldText,
+      reduceMotion: override.reduceMotion,
+      highContrast: override.highContrast,
+      onOffSwitchLabels: override.onOffSwitchLabels,
+      supportsAnnounce: override.supportsAnnounce,
+    );
+  }
+
+  // DisplayFeature bounds are reported in logical pixels, so they move with the
+  // device pixel ratio like every other logical metric.
+  static List<ui.DisplayFeature> _scaleDisplayFeatures(
+    List<ui.DisplayFeature> displayFeatures,
+    double scale,
+  ) {
+    if (scale == 1.0 || displayFeatures.isEmpty) {
+      return displayFeatures;
+    }
+    return <ui.DisplayFeature>[
+      for (final ui.DisplayFeature feature in displayFeatures)
+        ui.DisplayFeature(
+          bounds: Rect.fromLTRB(
+            feature.bounds.left * scale,
+            feature.bounds.top * scale,
+            feature.bounds.right * scale,
+            feature.bounds.bottom * scale,
+          ),
+          type: feature.type,
+          state: feature.state,
+        ),
+    ];
   }
 }
 

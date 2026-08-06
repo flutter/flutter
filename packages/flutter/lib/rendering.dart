@@ -80,6 +80,7 @@ export 'src/rendering/table_border.dart';
 export 'src/rendering/texture.dart';
 export 'src/rendering/tweens.dart';
 export 'src/rendering/view.dart';
+export 'src/rendering/view_metrics_override.dart';
 export 'src/rendering/viewport.dart';
 export 'src/rendering/viewport_offset.dart';
 export 'src/rendering/wrap.dart';
