@@ -57,7 +57,8 @@ const _kGlibcError = 'Inconsistency detected by ld.so';
 /// `LOG(ERROR)` in `dbus/bus.cc` and `dbus/object_proxy.cc`.
 ///
 /// We filter out these benign D-Bus lines to prevent stderr log noise in CI,
-/// following the industry standard pattern used by web test runners such as Cypress.
+/// following the industry standard pattern used by web test runners such as Cypress:
+/// https://github.com/cypress-io/cypress/blob/main/packages/server/lib/browsers/chrome.ts
 bool _isDbusError(String line) {
   return line.contains('ERROR:dbus/bus.cc') ||
       line.contains('ERROR:dbus/object_proxy.cc') ||
