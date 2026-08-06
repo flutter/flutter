@@ -714,5 +714,51 @@ void main() {
       final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
       expect(widgetsApp.onUnknownRoute, isNotNull);
     });
+
+    testWidgets('localizationsDelegates defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.localizationsDelegates, isNull);
+    });
+
+    testWidgets('localizationsDelegates is passed to WidgetsApp', (WidgetTester tester) async {
+      final delegates = <LocalizationsDelegate<Object?>>[];
+
+      await tester.pumpWidget(
+        TestWidgetsApp(home: const Placeholder(), localizationsDelegates: delegates),
+      );
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(identical(widgetsApp.localizationsDelegates, delegates), isTrue);
+    });
+
+    testWidgets('localeListResolutionCallback defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.localeListResolutionCallback, isNull);
+    });
+
+    testWidgets('localeListResolutionCallback is passed to WidgetsApp', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWidgetsApp(
+          home: Placeholder(),
+          localeListResolutionCallback: testLocalResulutionCallback,
+        ),
+      );
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(
+        identical(widgetsApp.localeListResolutionCallback, testLocalResulutionCallback),
+        isTrue,
+      );
+    });
   });
+}
+
+Locale? testLocalResulutionCallback(List<Locale>? locales, Iterable<Locale> supportedLocales) {
+  return null;
 }

@@ -78,6 +78,8 @@ class TestWidgetsApp extends StatelessWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.localizationsDelegates,
+    this.localeListResolutionCallback,
   });
 
   /// A key to use when building the [Navigator].
@@ -259,6 +261,23 @@ class TestWidgetsApp extends StatelessWidget {
   ///  * [WidgetsApp.restorationScopeId], the equivalent property in [WidgetsApp].
   final String? restorationScopeId;
 
+  /// The delegates for this app's [Localizations] widget.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.localizationsDelegates], the equivalent property in [WidgetsApp].
+  final Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates;
+
+  /// The callback responsible for choosing the app's locale
+  /// when the app is started, and when the user changes the
+  /// device's locale.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.localeListResolutionCallback], the equivalent property in [WidgetsApp].
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final LocaleListResolutionCallback? localeListResolutionCallback;
+
   static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
     return PageRouteBuilder<T>(
       settings: settings,
@@ -295,6 +314,8 @@ class TestWidgetsApp extends StatelessWidget {
       shortcuts: shortcuts,
       actions: actions,
       restorationScopeId: restorationScopeId,
+      localizationsDelegates: localizationsDelegates,
+      localeListResolutionCallback: localeListResolutionCallback,
     );
   }
 }
