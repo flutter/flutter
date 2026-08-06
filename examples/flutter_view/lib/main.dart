@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class _Button extends StatelessWidget {
-  const _Button({super.key, required this.onPressed, required this.icon});
+  const _Button({required this.onPressed, required this.icon});
 
   final VoidCallback onPressed;
   final Widget icon;
