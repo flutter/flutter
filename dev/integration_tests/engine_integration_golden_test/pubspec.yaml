@@ -23,4 +23,10 @@ dev_dependencies:
     sdk: flutter
   test: any
 
+flutter:
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-VariableFont_wdth,wght.ttf
+
 # PUBSPEC CHECKSUM: fp4cre
