@@ -5,8 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 void main() {
   testWidgets('Toggleable exists in widget layer', (WidgetTester tester) async {
     final testPainter = TestPainter();

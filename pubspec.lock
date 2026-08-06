@@ -218,6 +218,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
+  cupertino_ui:
+    dependency: transitive
+    description:
+      name: cupertino_ui
+      sha256: "427360789a03b76eaf659c37131570d2fc98e381f80d55f252bd9e30f37e7126"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   dap:
     dependency: transitive
     description:
@@ -246,11 +254,11 @@ packages:
     dependency: transitive
     description:
       path: "tool/dart_skills_lint"
-      ref: e4497873950727ee781fa411c1a2f624b1ec50c6
-      resolved-ref: e4497873950727ee781fa411c1a2f624b1ec50c6
+      ref: "05e5a45fa412ddbdd1d694eee0c71f4bbaea2617"
+      resolved-ref: "05e5a45fa412ddbdd1d694eee0c71f4bbaea2617"
       url: "https://github.com/flutter/skills"
     source: git
-    version: "0.3.0"
+    version: "0.4.0"
   dart_style:
     dependency: "direct main"
     description:
@@ -271,10 +279,10 @@ packages:
     dependency: transitive
     description:
       name: dds
-      sha256: "6673c5b29e502fd44dbf5836685e7c7c16b11c0fa7f91ef241e0cbf0638c8794"
+      sha256: f8e875dcd7b5e5073a7bfe54095144c70487f18e2f8e47fa51c09dd67eccfb0c
       url: "https://pub.dev"
     source: hosted
-    version: "5.3.0"
+    version: "5.4.0"
   dds_service_extensions:
     dependency: transitive
     description:
@@ -287,10 +295,10 @@ packages:
     dependency: transitive
     description:
       name: devtools_shared
-      sha256: "2daf7a9fba6a470668b26ecbd04200f7bf992aad81a2c31d12457c7791419dea"
+      sha256: "13df2c17d5f21dd7c92d08145386d45e1153364c04e531e994afb0ee7b67554b"
       url: "https://pub.dev"
     source: hosted
-    version: "12.1.0"
+    version: "13.1.0"
   dtd:
     dependency: transitive
     description:
@@ -438,10 +446,10 @@ packages:
     dependency: transitive
     description:
       name: google_cloud
-      sha256: fbcde933b2d8600c3cdb2328f8f4c47628ec29a39e9cef85dee535c7868993c4
+      sha256: b385e20726ef5315d302c5933bfb728103116c5be2d3d17094b01a82da538c1f
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.1"
+    version: "0.5.0"
   google_fonts:
     dependency: "direct main"
     description:
@@ -494,18 +502,18 @@ packages:
     dependency: "direct main"
     description:
       name: hooks
-      sha256: "9a62a50b50b769a737bc0a8ff381f333529df3ab746b2f6b02e83760231455ba"
+      sha256: "03a564c3704524ee0f7fc56fc621e8796cc2eb8c24d1f1a33b34979815b285c4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
+    version: "2.1.0"
   hooks_runner:
     dependency: transitive
     description:
       name: hooks_runner
-      sha256: a67ab8106545fcffcf5c43edf84b4be222fc95a9fbec8baef1bcaf4534540cfc
+      sha256: e5af5628be2fbe3bbb195ded03e6c6f739b0c92db43d1e2a95620678fd844458
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.6.1"
   html:
     dependency: "direct main"
     description:
@@ -666,6 +674,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  material_ui:
+    dependency: transitive
+    description:
+      name: material_ui
+      sha256: e1fa67393d807bd1841e5ece1ec260ed84f440ae7351e40b6406f733e4fe31cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   meta:
     dependency: "direct main"
     description:
@@ -902,10 +918,10 @@ packages:
     dependency: "direct main"
     description:
       name: record_use
-      sha256: "2551bd8eecfe95d14ae75f6021ad0248be5c27f138c2ec12fcb52b500b3ba1ed"
+      sha256: af37186ff9ede46fa32f152526c48f46c5b3ad7d3d5a566140cb5df3dc4ed737
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "1.0.0"
   retry:
     dependency: "direct main"
     description:
