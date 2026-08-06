@@ -200,18 +200,18 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
 /// nullptr when the platform has no place in a shader bundle.
 static std::unique_ptr<fb::shaderbundle::BackendShaderT>* GetBackendShaderSlot(
     TargetPlatform platform,
-    fb::shaderbundle::ShaderT& shader) {
+    fb::shaderbundle::ShaderT* shader) {
   switch (platform) {
     case TargetPlatform::kMetalIOS:
-      return &shader.metal_ios;
+      return &shader->metal_ios;
     case TargetPlatform::kMetalDesktop:
-      return &shader.metal_desktop;
+      return &shader->metal_desktop;
     case TargetPlatform::kOpenGLES:
-      return &shader.opengl_es;
+      return &shader->opengl_es;
     case TargetPlatform::kOpenGLDesktop:
-      return &shader.opengl_desktop;
+      return &shader->opengl_desktop;
     case TargetPlatform::kVulkan:
-      return &shader.vulkan;
+      return &shader->vulkan;
     case TargetPlatform::kSkSL:
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kRuntimeStageGLES:
@@ -233,7 +233,7 @@ static std::unique_ptr<fb::shaderbundle::ShaderT> GenerateShaderFB(
   result->name = shader_name;
   for (TargetPlatform platform : target_platforms) {
     std::unique_ptr<fb::shaderbundle::BackendShaderT>* slot =
-        GetBackendShaderSlot(platform, *result);
+        GetBackendShaderSlot(platform, result.get());
     if (!slot) {
       std::cerr << "Target platform \"" << TargetPlatformToString(platform)
                 << "\" cannot be stored in a shader bundle." << std::endl;
