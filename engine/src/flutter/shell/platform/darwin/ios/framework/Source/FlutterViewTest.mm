@@ -225,8 +225,12 @@ FLUTTER_ASSERT_ARC
   FlutterView* view = [[FlutterView alloc] initWithDelegate:delegate
                                                      opaque:NO
                                             enableWideGamut:enableWideGamut];
-  // Add to a real window so layoutSubviews has access to screen.
-  UIWindow* window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+  // Add to a real window so layoutSubviews has access to screen. The host app uses the UIScene
+  // life cycle, so the window only has a screen once it is attached to the connected scene.
+  UIWindow* window = [[UIWindow alloc]
+      initWithWindowScene:(UIWindowScene*)
+                              UIApplication.sharedApplication.connectedScenes.anyObject];
+  window.frame = CGRectMake(0, 0, 100, 100);
   [window addSubview:view];
   view.frame = window.bounds;
   [view layoutSubviews];
