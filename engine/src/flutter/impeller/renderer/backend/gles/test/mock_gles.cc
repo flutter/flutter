@@ -459,6 +459,31 @@ void mockVertexAttribDivisor(GLuint index, GLuint divisor) {
 static_assert(CheckSameSignature<decltype(mockVertexAttribDivisor),  //
                                  decltype(glVertexAttribDivisor)>::value);
 
+void mockVertexAttribPointer(GLuint index,
+                             GLint size,
+                             GLenum type,
+                             GLboolean normalized,
+                             GLsizei stride,
+                             const void* pointer) {
+  CallMockMethod(&IMockGLESImpl::VertexAttribPointer, index, size, type,
+                 normalized, stride, pointer);
+}
+
+static_assert(CheckSameSignature<decltype(mockVertexAttribPointer),  //
+                                 decltype(glVertexAttribPointer)>::value);
+
+void mockVertexAttribIPointer(GLuint index,
+                              GLint size,
+                              GLenum type,
+                              GLsizei stride,
+                              const void* pointer) {
+  CallMockMethod(&IMockGLESImpl::VertexAttribIPointer, index, size, type,
+                 stride, pointer);
+}
+
+static_assert(CheckSameSignature<decltype(mockVertexAttribIPointer),  //
+                                 decltype(glVertexAttribIPointer)>::value);
+
 // static
 std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
@@ -583,6 +608,10 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockDrawElementsInstanced);
   } else if (strcmp(name, "glVertexAttribDivisor") == 0) {
     return reinterpret_cast<void*>(mockVertexAttribDivisor);
+  } else if (strcmp(name, "glVertexAttribPointer") == 0) {
+    return reinterpret_cast<void*>(mockVertexAttribPointer);
+  } else if (strcmp(name, "glVertexAttribIPointer") == 0) {
+    return reinterpret_cast<void*>(mockVertexAttribIPointer);
   } else if (strcmp(name, "glBindBufferRange") == 0) {
     return reinterpret_cast<void*>(mockBindBufferRange);
   } else if (strcmp(name, "glGetProgramiv") == 0) {

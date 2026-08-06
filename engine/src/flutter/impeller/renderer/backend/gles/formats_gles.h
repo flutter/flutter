@@ -137,51 +137,177 @@ constexpr GLenum ToBlendOperation(BlendOperation op) {
   FML_UNREACHABLE();
 }
 
-/// Returns the GL scalar type for a vertex attribute, or `std::nullopt` when
-/// the format cannot be consumed as a vertex attribute on this backend. The
-/// component count is supplied separately to `glVertexAttribPointer`, so only
-/// the scalar kind matters here. Half-float and 32-bit integer attributes are
-/// not available on the GLES 2.0 floor.
-constexpr std::optional<GLenum> ToVertexAttribType(VertexAttributeFormat type) {
-  switch (type) {
-    case VertexAttributeFormat::kSInt8:
-    case VertexAttributeFormat::kSInt8x2:
-    case VertexAttributeFormat::kSInt8x3:
-    case VertexAttributeFormat::kSInt8x4:
-      return GL_BYTE;
-    case VertexAttributeFormat::kUInt8:
-    case VertexAttributeFormat::kUInt8x2:
-    case VertexAttributeFormat::kUInt8x3:
-    case VertexAttributeFormat::kUInt8x4:
-      return GL_UNSIGNED_BYTE;
-    case VertexAttributeFormat::kSInt16:
-    case VertexAttributeFormat::kSInt16x2:
-    case VertexAttributeFormat::kSInt16x3:
-    case VertexAttributeFormat::kSInt16x4:
-      return GL_SHORT;
-    case VertexAttributeFormat::kUInt16:
-    case VertexAttributeFormat::kUInt16x2:
-    case VertexAttributeFormat::kUInt16x3:
-    case VertexAttributeFormat::kUInt16x4:
-      return GL_UNSIGNED_SHORT;
+/// Which of the vertex attribute formats beyond the GLES 2.0 floor the current
+/// context can consume. Computed once by `CapabilitiesGLES` and consulted when
+/// translating a `VertexAttributeFormat`.
+struct VertexFormatSupportGLES {
+  /// The GL type to bind half-float attributes with, or `GL_NONE` when they
+  /// are unavailable. Core GLES 3.0 spells this `GL_HALF_FLOAT`; the GLES 2.0
+  /// extension spells the same layout `GL_HALF_FLOAT_OES`.
+  GLenum half_float_type = GL_NONE;
+
+  /// Whether `glVertexAttribIPointer` is available, which every integer-typed
+  /// vertex input needs. GLES 3.0 only, since GLSL ES 1.00 has no integer
+  /// vertex inputs.
+  bool integer = false;
+
+  /// Whether `GL_UNSIGNED_INT_2_10_10_10_REV` is accepted as a vertex type.
+  bool packed_2_10_10_10 = false;
+
+  /// Whether `GL_BGRA_EXT` is accepted as a vertex attribute size, which is
+  /// how blue/green/red/alpha byte ordering is expressed.
+  bool bgra = false;
+};
+
+/// How a vertex attribute is described to `glVertexAttribPointer` or, when
+/// `integer` is set, to `glVertexAttribIPointer`.
+struct VertexAttribGLES {
+  /// The component count, or `GL_BGRA_EXT` for the swizzled byte format.
+  GLint size = 0;
+  GLenum type = GL_NONE;
+  GLboolean normalized = GL_FALSE;
+  bool integer = false;
+};
+
+/// Returns how to bind a vertex attribute of the given format, or
+/// `std::nullopt` when the current context cannot consume it.
+constexpr std::optional<VertexAttribGLES> ToVertexAttribGLES(
+    VertexAttributeFormat format,
+    const VertexFormatSupportGLES& support) {
+  auto floating = [](GLint size, GLenum type) {
+    return VertexAttribGLES{.size = size, .type = type};
+  };
+  auto normalized = [](GLint size, GLenum type) {
+    return VertexAttribGLES{.size = size, .type = type, .normalized = GL_TRUE};
+  };
+  auto integer = [&support](GLint size,
+                            GLenum type) -> std::optional<VertexAttribGLES> {
+    if (!support.integer) {
+      return std::nullopt;
+    }
+    return VertexAttribGLES{.size = size, .type = type, .integer = true};
+  };
+  auto half = [&support](GLint size) -> std::optional<VertexAttribGLES> {
+    if (support.half_float_type == GL_NONE) {
+      return std::nullopt;
+    }
+    return VertexAttribGLES{.size = size, .type = support.half_float_type};
+  };
+
+  switch (format) {
     case VertexAttributeFormat::kFloat32:
+      return floating(1, GL_FLOAT);
     case VertexAttributeFormat::kFloat32x2:
+      return floating(2, GL_FLOAT);
     case VertexAttributeFormat::kFloat32x3:
+      return floating(3, GL_FLOAT);
     case VertexAttributeFormat::kFloat32x4:
-      return GL_FLOAT;
-    case VertexAttributeFormat::kInvalid:
+      return floating(4, GL_FLOAT);
+
     case VertexAttributeFormat::kFloat16:
+      return half(1);
     case VertexAttributeFormat::kFloat16x2:
+      return half(2);
     case VertexAttributeFormat::kFloat16x3:
+      return half(3);
     case VertexAttributeFormat::kFloat16x4:
+      return half(4);
+
+    case VertexAttributeFormat::kSInt8:
+      return integer(1, GL_BYTE);
+    case VertexAttributeFormat::kSInt8x2:
+      return integer(2, GL_BYTE);
+    case VertexAttributeFormat::kSInt8x3:
+      return integer(3, GL_BYTE);
+    case VertexAttributeFormat::kSInt8x4:
+      return integer(4, GL_BYTE);
+
+    case VertexAttributeFormat::kUInt8:
+      return integer(1, GL_UNSIGNED_BYTE);
+    case VertexAttributeFormat::kUInt8x2:
+      return integer(2, GL_UNSIGNED_BYTE);
+    case VertexAttributeFormat::kUInt8x3:
+      return integer(3, GL_UNSIGNED_BYTE);
+    case VertexAttributeFormat::kUInt8x4:
+      return integer(4, GL_UNSIGNED_BYTE);
+
+    case VertexAttributeFormat::kSNorm8:
+      return normalized(1, GL_BYTE);
+    case VertexAttributeFormat::kSNorm8x2:
+      return normalized(2, GL_BYTE);
+    case VertexAttributeFormat::kSNorm8x4:
+      return normalized(4, GL_BYTE);
+
+    case VertexAttributeFormat::kUNorm8:
+      return normalized(1, GL_UNSIGNED_BYTE);
+    case VertexAttributeFormat::kUNorm8x2:
+      return normalized(2, GL_UNSIGNED_BYTE);
+    case VertexAttributeFormat::kUNorm8x4:
+      return normalized(4, GL_UNSIGNED_BYTE);
+
+    case VertexAttributeFormat::kUNorm8x4BGRA:
+      if (!support.bgra) {
+        return std::nullopt;
+      }
+      return normalized(GL_BGRA_EXT, GL_UNSIGNED_BYTE);
+
+    case VertexAttributeFormat::kSInt16:
+      return integer(1, GL_SHORT);
+    case VertexAttributeFormat::kSInt16x2:
+      return integer(2, GL_SHORT);
+    case VertexAttributeFormat::kSInt16x3:
+      return integer(3, GL_SHORT);
+    case VertexAttributeFormat::kSInt16x4:
+      return integer(4, GL_SHORT);
+
+    case VertexAttributeFormat::kUInt16:
+      return integer(1, GL_UNSIGNED_SHORT);
+    case VertexAttributeFormat::kUInt16x2:
+      return integer(2, GL_UNSIGNED_SHORT);
+    case VertexAttributeFormat::kUInt16x3:
+      return integer(3, GL_UNSIGNED_SHORT);
+    case VertexAttributeFormat::kUInt16x4:
+      return integer(4, GL_UNSIGNED_SHORT);
+
+    case VertexAttributeFormat::kSNorm16:
+      return normalized(1, GL_SHORT);
+    case VertexAttributeFormat::kSNorm16x2:
+      return normalized(2, GL_SHORT);
+    case VertexAttributeFormat::kSNorm16x4:
+      return normalized(4, GL_SHORT);
+
+    case VertexAttributeFormat::kUNorm16:
+      return normalized(1, GL_UNSIGNED_SHORT);
+    case VertexAttributeFormat::kUNorm16x2:
+      return normalized(2, GL_UNSIGNED_SHORT);
+    case VertexAttributeFormat::kUNorm16x4:
+      return normalized(4, GL_UNSIGNED_SHORT);
+
     case VertexAttributeFormat::kSInt32:
+      return integer(1, GL_INT);
     case VertexAttributeFormat::kSInt32x2:
+      return integer(2, GL_INT);
     case VertexAttributeFormat::kSInt32x3:
+      return integer(3, GL_INT);
     case VertexAttributeFormat::kSInt32x4:
+      return integer(4, GL_INT);
+
     case VertexAttributeFormat::kUInt32:
+      return integer(1, GL_UNSIGNED_INT);
     case VertexAttributeFormat::kUInt32x2:
+      return integer(2, GL_UNSIGNED_INT);
     case VertexAttributeFormat::kUInt32x3:
+      return integer(3, GL_UNSIGNED_INT);
     case VertexAttributeFormat::kUInt32x4:
+      return integer(4, GL_UNSIGNED_INT);
+
+    case VertexAttributeFormat::kUNorm10_10_10_2:
+      if (!support.packed_2_10_10_10) {
+        return std::nullopt;
+      }
+      return normalized(4, GL_UNSIGNED_INT_2_10_10_10_REV);
+
+    case VertexAttributeFormat::kInvalid:
       return std::nullopt;
   }
   FML_UNREACHABLE();

@@ -269,7 +269,8 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(WaitSync);                          \
   PROC(RenderbufferStorageMultisample);    \
   PROC(BlitFramebuffer);                   \
-  PROC(InvalidateFramebuffer);
+  PROC(InvalidateFramebuffer);             \
+  PROC(VertexAttribIPointer);
 
 // 3D texture entry points, used by 2D array textures. These are core on
 // GL/GLES 3.0 and also reachable below it: desktop GL 2.x exposes these exact
