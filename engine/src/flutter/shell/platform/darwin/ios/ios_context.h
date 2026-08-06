@@ -14,7 +14,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
-#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "impeller/display_list/aiks_context.h"
 
 namespace impeller {
@@ -42,16 +41,9 @@ class IOSContext {
   /// @brief      Create an iOS context object capable of creating the on-screen
   ///             and off-screen GPU context for use by Impeller.
   ///
-  ///             In case the engine does not support the specified client
-  ///             rendering API, this a `nullptr` may be returned.
-  ///
-  /// @param[in]  api       A client rendering API supported by the
-  ///                       engine/platform.
-  ///
   /// @return     A valid context on success. `nullptr` on failure.
   ///
   static std::unique_ptr<IOSContext> Create(
-      IOSRenderingAPI api,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
       const Settings& settings);
 
