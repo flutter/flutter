@@ -11,6 +11,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
+#include "impeller/typographer/text_frame.h"
 #include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
@@ -42,13 +43,15 @@ class TextShadowCache {
     Font font;
     Rational rounded_sigma;
     Color color;
+    std::shared_ptr<TextFrame> text_frame;
 
     TextShadowCacheKey(Scalar p_max_basis,
                        int64_t p_identifier,
                        bool p_is_single_glyph,
                        const Font& p_font,
                        Sigma p_sigma,
-                       Color p_color);
+                       Color p_color,
+                       std::shared_ptr<TextFrame> p_text_frame = nullptr);
 
     struct Hash {
       std::size_t operator()(const TextShadowCacheKey& key) const {
@@ -60,14 +63,8 @@ class TextShadowCache {
     };
 
     struct Equal {
-      constexpr bool operator()(const TextShadowCacheKey& lhs,
-                                const TextShadowCacheKey& rhs) const {
-        return lhs.max_basis == rhs.max_basis &&
-               lhs.identifier == rhs.identifier &&
-               lhs.is_single_glyph == rhs.is_single_glyph &&
-               lhs.font.IsEqual(rhs.font) &&
-               lhs.rounded_sigma == rhs.rounded_sigma && lhs.color == rhs.color;
-      }
+      bool operator()(const TextShadowCacheKey& lhs,
+                      const TextShadowCacheKey& rhs) const;
     };
   };
 

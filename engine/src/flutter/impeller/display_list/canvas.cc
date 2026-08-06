@@ -2124,7 +2124,8 @@ bool Canvas::AttemptBlurredTextOptimization(
       /*p_is_single_glyph=*/maybe_glyph.has_value(),
       /*p_font=*/text_frame->GetFont(),
       /*p_sigma=*/paint.mask_blur_descriptor->sigma,
-      /*p_color=*/paint.color);
+      /*p_color=*/paint.color,
+      /*p_text_frame=*/text_frame);
 
   std::optional<Entity> result = renderer_.GetTextShadowCache().Lookup(
       renderer_, entity, filter, cache_key);
