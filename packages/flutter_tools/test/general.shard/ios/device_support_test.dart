@@ -26,7 +26,7 @@ void main() {
         logger: logger,
         processUtils: processUtils,
         xcode: null,
-        deviceSupportDirectory: null,
+        homeDirectory: null,
         modelCode: null,
         operatingSystemVersion: null,
         cpuArchitectureString: null,
@@ -50,7 +50,7 @@ void main() {
         logger: logger,
         processUtils: processUtils,
         xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-        deviceSupportDirectory: null,
+        homeDirectory: null,
         modelCode: null,
         operatingSystemVersion: null,
         cpuArchitectureString: null,
@@ -89,7 +89,7 @@ void main() {
           logger: logger,
           processUtils: processUtils,
           xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-          deviceSupportDirectory: null,
+          homeDirectory: null,
           modelCode: null,
           operatingSystemVersion: null,
           cpuArchitectureString: null,
@@ -127,7 +127,7 @@ void main() {
         logger: logger,
         processUtils: processUtils,
         xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-        deviceSupportDirectory: null,
+        homeDirectory: null,
         modelCode: null,
         operatingSystemVersion: null,
         cpuArchitectureString: null,
@@ -175,7 +175,7 @@ void main() {
         logger: logger,
         processUtils: processUtils,
         xcode: FakeXcode(currentVersion: Version(17, 0, 0)),
-        deviceSupportDirectory: null,
+        homeDirectory: null,
         modelCode: null,
         operatingSystemVersion: null,
         cpuArchitectureString: null,
@@ -213,7 +213,7 @@ void main() {
             logger: logger,
             processUtils: processUtils,
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-            deviceSupportDirectory: null,
+            homeDirectory: null,
             modelCode: null,
             operatingSystemVersion: null,
             cpuArchitectureString: null,
@@ -262,7 +262,7 @@ void main() {
           logger: logger,
           processUtils: processUtils,
           xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-          deviceSupportDirectory: null,
+          homeDirectory: null,
           modelCode: null,
           operatingSystemVersion: null,
           cpuArchitectureString: null,
@@ -287,7 +287,7 @@ void main() {
               logger: BufferLogger.test(),
             ),
             xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-            deviceSupportDirectory: null,
+            homeDirectory: null,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -308,9 +308,7 @@ void main() {
 
         testWithoutContext('returns unable to find warning when device directory does not exist', () {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final Directory supportDir = fileSystem.directory(
-            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-          );
+          final Directory homeDir = fileSystem.directory('/Users/username');
           final deviceSupport = IOSDeviceSupport(
             logger: BufferLogger.test(),
             processUtils: ProcessUtils(
@@ -318,7 +316,7 @@ void main() {
               logger: BufferLogger.test(),
             ),
             xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-            deviceSupportDirectory: supportDir,
+            homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -342,9 +340,12 @@ void main() {
           'returns incomplete copy warning when device directory exists but symbols folder does not',
           () {
             final FileSystem fileSystem = MemoryFileSystem.test();
-            final Directory supportDir = fileSystem.directory(
-              '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-            );
+            final Directory homeDir = fileSystem.directory('/Users/username');
+            final Directory supportDir = homeDir
+                .childDirectory('Library')
+                .childDirectory('Developer')
+                .childDirectory('Xcode')
+                .childDirectory('iOS DeviceSupport');
             supportDir.childDirectory('iPhone15,2 17.0').createSync(recursive: true);
 
             final deviceSupport = IOSDeviceSupport(
@@ -354,7 +355,7 @@ void main() {
                 logger: BufferLogger.test(),
               ),
               xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-              deviceSupportDirectory: supportDir,
+              homeDirectory: homeDir,
               modelCode: 'iPhone15,2',
               operatingSystemVersion: '17.0',
               cpuArchitectureString: 'arm64e',
@@ -378,9 +379,12 @@ void main() {
 
         testWithoutContext('returns null when symbol directory exists', () {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final Directory supportDir = fileSystem.directory(
-            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-          );
+          final Directory homeDir = fileSystem.directory('/Users/username');
+          final Directory supportDir = homeDir
+              .childDirectory('Library')
+              .childDirectory('Developer')
+              .childDirectory('Xcode')
+              .childDirectory('iOS DeviceSupport');
           supportDir
               .childDirectory('iPhone15,2 17.0')
               .childDirectory('Symbols')
@@ -393,7 +397,7 @@ void main() {
               logger: BufferLogger.test(),
             ),
             xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-            deviceSupportDirectory: supportDir,
+            homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -405,9 +409,12 @@ void main() {
 
         testWithoutContext('returns null when architecture symbol directory exists', () {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final Directory supportDir = fileSystem.directory(
-            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-          );
+          final Directory homeDir = fileSystem.directory('/Users/username');
+          final Directory supportDir = homeDir
+              .childDirectory('Library')
+              .childDirectory('Developer')
+              .childDirectory('Xcode')
+              .childDirectory('iOS DeviceSupport');
           supportDir
               .childDirectory('iPhone15,2 17.0')
               .childDirectory('arm64e')
@@ -421,7 +428,7 @@ void main() {
               logger: BufferLogger.test(),
             ),
             xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-            deviceSupportDirectory: supportDir,
+            homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -435,9 +442,12 @@ void main() {
           'returns warning when symbol directory exists and warnWhenSymbolsExist is true',
           () {
             final FileSystem fileSystem = MemoryFileSystem.test();
-            final Directory supportDir = fileSystem.directory(
-              '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-            );
+            final Directory homeDir = fileSystem.directory('/Users/username');
+            final Directory supportDir = homeDir
+                .childDirectory('Library')
+                .childDirectory('Developer')
+                .childDirectory('Xcode')
+                .childDirectory('iOS DeviceSupport');
             supportDir
                 .childDirectory('iPhone15,2 17.0')
                 .childDirectory('Symbols')
@@ -450,7 +460,7 @@ void main() {
                 logger: BufferLogger.test(),
               ),
               xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-              deviceSupportDirectory: supportDir,
+              homeDirectory: homeDir,
               modelCode: 'iPhone15,2',
               operatingSystemVersion: '17.0',
               cpuArchitectureString: 'arm64e',
@@ -481,7 +491,7 @@ void main() {
               logger: BufferLogger.test(),
             ),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-            deviceSupportDirectory: null,
+            homeDirectory: null,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -502,9 +512,7 @@ void main() {
 
         testWithoutContext('returns unable to find warning when device directory does not exist', () {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final Directory supportDir = fileSystem.directory(
-            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-          );
+          final Directory homeDir = fileSystem.directory('/Users/username');
           final deviceSupport = IOSDeviceSupport(
             logger: BufferLogger.test(),
             processUtils: ProcessUtils(
@@ -512,7 +520,7 @@ void main() {
               logger: BufferLogger.test(),
             ),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-            deviceSupportDirectory: supportDir,
+            homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -536,9 +544,12 @@ void main() {
           'returns incomplete copy warning when device directory exists but symbols folder does not',
           () {
             final FileSystem fileSystem = MemoryFileSystem.test();
-            final Directory supportDir = fileSystem.directory(
-              '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-            );
+            final Directory homeDir = fileSystem.directory('/Users/username');
+            final Directory supportDir = homeDir
+                .childDirectory('Library')
+                .childDirectory('Developer')
+                .childDirectory('Xcode')
+                .childDirectory('iOS DeviceSupport');
             supportDir.childDirectory('iPhone15,2 17.0').createSync(recursive: true);
 
             final deviceSupport = IOSDeviceSupport(
@@ -548,7 +559,7 @@ void main() {
                 logger: BufferLogger.test(),
               ),
               xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-              deviceSupportDirectory: supportDir,
+              homeDirectory: homeDir,
               modelCode: 'iPhone15,2',
               operatingSystemVersion: '17.0',
               cpuArchitectureString: 'arm64e',
@@ -572,9 +583,12 @@ void main() {
 
         testWithoutContext('returns null when symbol directory exists', () {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final Directory supportDir = fileSystem.directory(
-            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-          );
+          final Directory homeDir = fileSystem.directory('/Users/username');
+          final Directory supportDir = homeDir
+              .childDirectory('Library')
+              .childDirectory('Developer')
+              .childDirectory('Xcode')
+              .childDirectory('iOS DeviceSupport');
           supportDir
               .childDirectory('iPhone15,2 17.0')
               .childDirectory('Symbols')
@@ -587,7 +601,7 @@ void main() {
               logger: BufferLogger.test(),
             ),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-            deviceSupportDirectory: supportDir,
+            homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -599,9 +613,12 @@ void main() {
 
         testWithoutContext('returns null when architecture symbol directory exists', () {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final Directory supportDir = fileSystem.directory(
-            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-          );
+          final Directory homeDir = fileSystem.directory('/Users/username');
+          final Directory supportDir = homeDir
+              .childDirectory('Library')
+              .childDirectory('Developer')
+              .childDirectory('Xcode')
+              .childDirectory('iOS DeviceSupport');
           supportDir
               .childDirectory('iPhone15,2 17.0')
               .childDirectory('arm64e')
@@ -615,7 +632,7 @@ void main() {
               logger: BufferLogger.test(),
             ),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-            deviceSupportDirectory: supportDir,
+            homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -629,9 +646,12 @@ void main() {
           'returns warning when symbol directory exists and warnWhenSymbolsExist is true',
           () {
             final FileSystem fileSystem = MemoryFileSystem.test();
-            final Directory supportDir = fileSystem.directory(
-              '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-            );
+            final Directory homeDir = fileSystem.directory('/Users/username');
+            final Directory supportDir = homeDir
+                .childDirectory('Library')
+                .childDirectory('Developer')
+                .childDirectory('Xcode')
+                .childDirectory('iOS DeviceSupport');
             supportDir
                 .childDirectory('iPhone15,2 17.0')
                 .childDirectory('Symbols')
@@ -644,7 +664,7 @@ void main() {
                 logger: BufferLogger.test(),
               ),
               xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-              deviceSupportDirectory: supportDir,
+              homeDirectory: homeDir,
               modelCode: 'iPhone15,2',
               operatingSystemVersion: '17.0',
               cpuArchitectureString: 'arm64e',
@@ -669,9 +689,7 @@ void main() {
     group('existingDeviceSupportSymbols', () {
       testWithoutContext('returns null when neither directory exists', () {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final Directory supportDir = fileSystem.directory(
-          '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-        );
+        final Directory homeDir = fileSystem.directory('/Users/username');
         final deviceSupport = IOSDeviceSupport(
           logger: BufferLogger.test(),
           processUtils: ProcessUtils(
@@ -679,7 +697,7 @@ void main() {
             logger: BufferLogger.test(),
           ),
           xcode: null,
-          deviceSupportDirectory: supportDir,
+          homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
           operatingSystemVersion: '17.0',
           cpuArchitectureString: 'arm64e',
@@ -690,9 +708,12 @@ void main() {
 
       testWithoutContext('returns symbolDirectory when symbolDirectory exists', () {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final Directory supportDir = fileSystem.directory(
-          '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-        );
+        final Directory homeDir = fileSystem.directory('/Users/username');
+        final Directory supportDir = homeDir
+            .childDirectory('Library')
+            .childDirectory('Developer')
+            .childDirectory('Xcode')
+            .childDirectory('iOS DeviceSupport');
         final Directory symbolDir =
             supportDir.childDirectory('iPhone15,2 17.0').childDirectory('Symbols')
               ..createSync(recursive: true);
@@ -704,7 +725,7 @@ void main() {
             logger: BufferLogger.test(),
           ),
           xcode: null,
-          deviceSupportDirectory: supportDir,
+          homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
           operatingSystemVersion: '17.0',
           cpuArchitectureString: 'arm64e',
@@ -715,9 +736,12 @@ void main() {
 
       testWithoutContext('returns archSymbolDirectory when archSymbolDirectory exists', () {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final Directory supportDir = fileSystem.directory(
-          '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-        );
+        final Directory homeDir = fileSystem.directory('/Users/username');
+        final Directory supportDir = homeDir
+            .childDirectory('Library')
+            .childDirectory('Developer')
+            .childDirectory('Xcode')
+            .childDirectory('iOS DeviceSupport');
         supportDir
             .childDirectory('iPhone15,2 17.0')
             .childDirectory('Symbols')
@@ -736,7 +760,7 @@ void main() {
             logger: BufferLogger.test(),
           ),
           xcode: null,
-          deviceSupportDirectory: supportDir,
+          homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
           operatingSystemVersion: '17.0',
           cpuArchitectureString: 'arm64e',

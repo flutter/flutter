@@ -4375,7 +4375,7 @@ class FakeShutdownHooks extends Fake implements ShutdownHooks {
 IOSDeviceSupport createDeviceSupport({
   Logger? logger,
   ProcessUtils? processUtils,
-  Directory? deviceSupportDirectory,
+  Directory? homeDirectory,
   String? modelCode,
   String? operatingSystemVersion,
   String? cpuArchitectureString,
@@ -4388,7 +4388,7 @@ IOSDeviceSupport createDeviceSupport({
         processUtils ??
         ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
     xcode: null,
-    deviceSupportDirectory: deviceSupportDirectory,
+    homeDirectory: homeDirectory,
     modelCode: modelCode,
     operatingSystemVersion: operatingSystemVersion,
     cpuArchitectureString: cpuArchitectureString,

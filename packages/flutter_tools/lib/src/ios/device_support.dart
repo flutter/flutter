@@ -19,28 +19,38 @@ class IOSDeviceSupport {
     required Logger logger,
     required ProcessUtils processUtils,
     required Xcode? xcode,
-    required Directory? deviceSupportDirectory,
+    required String deviceId,
+    required Directory? homeDirectory,
     required String? modelCode,
     required String? operatingSystemVersion,
     required String? cpuArchitectureString,
-    required String deviceId,
   }) : _xcode = xcode,
        _logger = logger,
        _processUtils = processUtils,
-       _deviceSupportDirectory = deviceSupportDirectory,
+       _deviceId = deviceId,
+       _homeDirectory = homeDirectory,
        _modelCode = modelCode,
        _operatingSystemVersion = operatingSystemVersion,
-       _cpuArchitectureString = cpuArchitectureString,
-       _deviceId = deviceId;
+       _cpuArchitectureString = cpuArchitectureString;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
   final Xcode? _xcode;
-  final Directory? _deviceSupportDirectory;
+
+  final String _deviceId;
+  final Directory? _homeDirectory;
   final String? _modelCode;
   final String? _operatingSystemVersion;
   final String? _cpuArchitectureString;
-  final String _deviceId;
+
+  /// The directory that contains iOS Device Support symbols for all devices.
+  ///
+  /// Return null if the $HOME directory cannot be found.
+  late final Directory? _deviceSupportDirectory = _homeDirectory
+      ?.childDirectory('Library')
+      .childDirectory('Developer')
+      .childDirectory('Xcode')
+      .childDirectory('iOS DeviceSupport');
 
   /// Command to copy device support symbols from device to host machine.
   List<String> get _prepareDeviceSupportCommand => [

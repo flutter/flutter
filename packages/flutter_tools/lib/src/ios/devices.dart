@@ -383,20 +383,13 @@ class IOSDevice extends Device {
     return sdkVersion?.major ?? 0;
   }
 
-  late final Directory? deviceSupportDirectory = _fileSystemUtils.homeDirPath == null
-      ? null
-      : _fileSystem
-            .directory(_fileSystemUtils.homeDirPath)
-            .childDirectory('Library')
-            .childDirectory('Developer')
-            .childDirectory('Xcode')
-            .childDirectory('iOS DeviceSupport');
-
   late final IOSDeviceSupport deviceSupport = IOSDeviceSupport(
     logger: _logger,
     processUtils: _processUtils,
     xcode: _xcode,
-    deviceSupportDirectory: deviceSupportDirectory,
+    homeDirectory: _fileSystemUtils.homeDirPath == null
+        ? null
+        : _fileSystem.directory(_fileSystemUtils.homeDirPath),
     modelCode: _modelCode,
     operatingSystemVersion: _operatingSystemVersion,
     cpuArchitectureString: _cpuArchitectureString,

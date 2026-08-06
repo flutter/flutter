@@ -630,9 +630,13 @@ Target 0: (Runner) stopped.
       'sends platform select remote-ios sysroot for arch symbol directory',
       () async {
         final fileSystem = MemoryFileSystem.test();
-        final Directory supportDir = fileSystem.directory('/iOS DeviceSupport');
+        final Directory homeDir = fileSystem.directory('/Users/username');
         final Directory archSymbols =
-            supportDir
+            homeDir
+                .childDirectory('Library')
+                .childDirectory('Developer')
+                .childDirectory('Xcode')
+                .childDirectory('iOS DeviceSupport')
                 .childDirectory('iPhone15,2 17.0')
                 .childDirectory('arm64e')
                 .childDirectory('Symbols')
@@ -723,7 +727,7 @@ Target 0: (Runner) stopped.
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
-            deviceSupportDirectory: supportDir,
+            homeDirectory: homeDir,
           ),
         );
 
@@ -736,9 +740,15 @@ Target 0: (Runner) stopped.
       'sends platform select remote-ios sysroot for non-arch symbol directory',
       () async {
         final fileSystem = MemoryFileSystem.test();
-        final Directory supportDir = fileSystem.directory('/iOS DeviceSupport');
+        final Directory homeDir = fileSystem.directory('/Users/username');
         final Directory symbols =
-            supportDir.childDirectory('iPhone15,2 17.0').childDirectory('Symbols')
+            homeDir
+                .childDirectory('Library')
+                .childDirectory('Developer')
+                .childDirectory('Xcode')
+                .childDirectory('iOS DeviceSupport')
+                .childDirectory('iPhone15,2 17.0')
+                .childDirectory('Symbols')
               ..createSync(recursive: true);
 
         const deviceId = '123';
@@ -826,7 +836,7 @@ Target 0: (Runner) stopped.
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
-            deviceSupportDirectory: supportDir,
+            homeDirectory: homeDir,
           ),
         );
 
@@ -1072,7 +1082,7 @@ class FakeLLDBLogForwarder extends Fake implements LLDBLogForwarder {
 IOSDeviceSupport createDeviceSupport({
   Logger? logger,
   ProcessUtils? processUtils,
-  Directory? deviceSupportDirectory,
+  Directory? homeDirectory,
   String? modelCode,
   String? operatingSystemVersion,
   String? cpuArchitectureString,
@@ -1085,7 +1095,7 @@ IOSDeviceSupport createDeviceSupport({
         processUtils ??
         ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
     xcode: null,
-    deviceSupportDirectory: deviceSupportDirectory,
+    homeDirectory: homeDirectory,
     modelCode: modelCode,
     operatingSystemVersion: operatingSystemVersion,
     cpuArchitectureString: cpuArchitectureString,
