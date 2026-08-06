@@ -111,6 +111,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
       children: <Widget>[
         MenuAnchor(
           animated: true,
+          semanticLabel: 'Cascading application menu',
           onAnimationStatusChanged: (AnimationStatus status) {
             // Store the animation status so that it can be used to determine
             // whether the menu is opening or closing when the button is
