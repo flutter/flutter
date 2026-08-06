@@ -20,6 +20,7 @@ import '../device.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import 'application_package.dart';
+import 'device_support.dart';
 import 'lldb.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
@@ -101,10 +102,7 @@ class IOSCoreDeviceLauncher {
   /// Requires Xcode 16+.
   Future<bool> launchAppWithLLDBDebugger({
     required String deviceId,
-    required String? deviceOperatingSystemVersion,
-    required String? deviceModelCode,
-    required String? deviceArchitectureString,
-    required Directory? deviceSupportDirectory,
+    required IOSDeviceSupport deviceSupport,
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
@@ -169,10 +167,7 @@ class IOSCoreDeviceLauncher {
       appProcessId: processId,
       lldbLogForwarder: lldbLogForwarder,
       mode: mode,
-      deviceSupportDirectory: deviceSupportDirectory,
-      deviceOperatingSystemVersion: deviceOperatingSystemVersion,
-      deviceModelCode: deviceModelCode,
-      deviceArchitectureString: deviceArchitectureString,
+      deviceSupport: deviceSupport,
     );
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.

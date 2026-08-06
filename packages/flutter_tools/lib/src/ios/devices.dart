@@ -392,6 +392,17 @@ class IOSDevice extends Device {
             .childDirectory('Xcode')
             .childDirectory('iOS DeviceSupport');
 
+  late final IOSDeviceSupport deviceSupport = IOSDeviceSupport(
+    logger: _logger,
+    processUtils: _processUtils,
+    xcode: _xcode,
+    deviceSupportDirectory: deviceSupportDirectory,
+    modelCode: _modelCode,
+    operatingSystemVersion: _operatingSystemVersion,
+    cpuArchitectureString: _cpuArchitectureString,
+    deviceId: id,
+  );
+
   @override
   final String name;
 
@@ -594,11 +605,7 @@ class IOSDevice extends Device {
 
     final bool shouldAttachDebugger = shouldAttachLLDBDebugger(debuggingOptions);
     if (shouldAttachDebugger) {
-      await IOSDeviceSupport(
-        logger: _logger,
-        processUtils: _processUtils,
-        xcode: _xcode,
-      ).prepareDeviceSupport(id);
+      await deviceSupport.prepareDeviceSupport();
     }
 
     // Step 3: Attempt to install the application on the device.
@@ -906,7 +913,7 @@ class IOSDevice extends Device {
         pattern: RegExp(
           '`UIScene` lifecycle will soon be required|This process does not adopt UIScene lifecycle',
         ),
-        action: () {
+        action: (String message) {
           _logger.printWarning(uisceneWarning);
         },
         excludeFromStream: true,
@@ -917,7 +924,7 @@ class IOSDevice extends Device {
     final uisceneCrashInterceptor = LogInterceptor(
       identifier: 'uiscene_crash',
       pattern: RegExp(r'UIScene life\s?cycle is required'),
-      action: () {
+      action: (String message) {
         throwToolExit(kUISceneMigrationRequiredError);
       },
       excludeFromStream: false,
@@ -932,7 +939,7 @@ class IOSDevice extends Device {
     final appTerminatedInterceptor = LogInterceptor(
       identifier: 'app_terminated',
       pattern: RegExp('^App terminated due to signal'),
-      action: () {
+      action: (String message) {
         if (!appTerminatedCompleter.isCompleted) {
           appTerminatedCompleter.complete();
         }
@@ -944,18 +951,14 @@ class IOSDevice extends Device {
     final missingSymbolsInterceptor = LogInterceptor(
       identifier: 'missing_symbols',
       pattern: LLDB.missingSymbolsPattern,
-      action: () {
-        final String? warning = LLDB.missingSymbolsWarning(
-          deviceSupportDirectory,
-          _modelCode,
-          _operatingSystemVersion,
-          _cpuArchitectureString,
-        );
+      action: (String message) {
+        _logger.printTrace(message);
+        final String? warning = deviceSupport.missingSymbolsWarning(warnWhenSymbolsExist: true);
         if (warning != null) {
           _logger.printWarning(warning);
         }
       },
-      excludeFromStream: false,
+      excludeFromStream: true,
     );
     deviceLogReader.addLogInterceptor(missingSymbolsInterceptor);
   }
@@ -1029,7 +1032,7 @@ class IOSDevice extends Device {
     return LogInterceptor(
       identifier: kJITCrashLogInterceptorIdentifier,
       pattern: kJITCrashFailureMessage,
-      action: () {
+      action: (String message) {
         throwToolExit(jitCrashFailureInstructions(deviceSdkVersion));
       },
       excludeFromStream: false,
@@ -1152,10 +1155,7 @@ class IOSDevice extends Device {
       if (shouldAttachDebugger) {
         final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
           deviceId: id,
-          deviceSupportDirectory: deviceSupportDirectory,
-          deviceModelCode: _modelCode,
-          deviceOperatingSystemVersion: _operatingSystemVersion,
-          deviceArchitectureString: _cpuArchitectureString,
+          deviceSupport: deviceSupport,
           bundlePath: package.deviceBundlePath,
           bundleId: package.id,
           launchArguments: launchArguments,
@@ -1519,7 +1519,7 @@ class LogInterceptor {
   final Pattern pattern;
 
   /// If the log contain the [pattern], the [action] will be called.
-  final void Function() action;
+  final void Function(String message) action;
 
   /// If `true`, the log will be excluded from being added to the stream.
   final bool excludeFromStream;
@@ -1557,7 +1557,7 @@ abstract class SharedIOSDeviceLogReader extends DeviceLogReader {
   bool _interceptLog(String message) {
     for (final LogInterceptor interceptor in _logInterceptors) {
       if (message.contains(interceptor.pattern)) {
-        interceptor.action();
+        interceptor.action(message);
         if (interceptor.excludeFromStream) {
           return true;
         }

@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
+import 'package:flutter_tools/src/ios/device_support.dart';
 import 'package:flutter_tools/src/ios/lldb.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -225,10 +226,7 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
-          deviceOperatingSystemVersion: null,
-          deviceModelCode: null,
-          deviceArchitectureString: null,
-          deviceSupportDirectory: null,
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -281,10 +279,11 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
-          deviceOperatingSystemVersion: '17.0',
-          deviceModelCode: 'iPhone15,2',
-          deviceArchitectureString: 'arm64e',
-          deviceSupportDirectory: null,
+          deviceSupport: createDeviceSupport(
+            operatingSystemVersion: '17.0',
+            modelCode: 'iPhone15,2',
+            cpuArchitectureString: 'arm64e',
+          ),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -349,10 +348,7 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
-          deviceOperatingSystemVersion: null,
-          deviceModelCode: null,
-          deviceArchitectureString: null,
-          deviceSupportDirectory: null,
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -406,10 +402,7 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
-          deviceOperatingSystemVersion: null,
-          deviceModelCode: null,
-          deviceArchitectureString: null,
-          deviceSupportDirectory: null,
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -456,10 +449,7 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
-          deviceOperatingSystemVersion: null,
-          deviceModelCode: null,
-          deviceArchitectureString: null,
-          deviceSupportDirectory: null,
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -512,10 +502,7 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
-          deviceOperatingSystemVersion: null,
-          deviceModelCode: null,
-          deviceArchitectureString: null,
-          deviceSupportDirectory: null,
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -562,10 +549,7 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
-          deviceOperatingSystemVersion: null,
-          deviceModelCode: null,
-          deviceArchitectureString: null,
-          deviceSupportDirectory: null,
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -614,10 +598,7 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
-          deviceOperatingSystemVersion: null,
-          deviceModelCode: null,
-          deviceArchitectureString: null,
-          deviceSupportDirectory: null,
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -668,10 +649,7 @@ void main() {
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
-          deviceOperatingSystemVersion: null,
-          deviceModelCode: null,
-          deviceArchitectureString: null,
-          deviceSupportDirectory: null,
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
@@ -4275,10 +4253,7 @@ class FakeLLDB extends Fake implements LLDB {
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
     required BuildMode mode,
-    required String? deviceOperatingSystemVersion,
-    required String? deviceModelCode,
-    required String? deviceArchitectureString,
-    required Directory? deviceSupportDirectory,
+    required IOSDeviceSupport deviceSupport,
   }) async {
     attemptedToAttach = true;
     attachedProcessId = appProcessId;
@@ -4395,4 +4370,28 @@ class FakeShutdownHooks extends Fake implements ShutdownHooks {
   Future<void> runShutdownHooks(Logger logger) async {
     _isShuttingDown = true;
   }
+}
+
+IOSDeviceSupport createDeviceSupport({
+  Logger? logger,
+  ProcessUtils? processUtils,
+  Directory? deviceSupportDirectory,
+  String? modelCode,
+  String? operatingSystemVersion,
+  String? cpuArchitectureString,
+  String deviceId = 'device-id',
+}) {
+  final Logger testLogger = logger ?? BufferLogger.test();
+  return IOSDeviceSupport(
+    logger: testLogger,
+    processUtils:
+        processUtils ??
+        ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
+    xcode: null,
+    deviceSupportDirectory: deviceSupportDirectory,
+    modelCode: modelCode,
+    operatingSystemVersion: operatingSystemVersion,
+    cpuArchitectureString: cpuArchitectureString,
+    deviceId: deviceId,
+  );
 }

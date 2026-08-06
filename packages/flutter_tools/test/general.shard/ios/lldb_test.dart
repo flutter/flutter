@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/ios/device_support.dart';
 import 'package:flutter_tools/src/ios/lldb.dart';
 import 'package:test/fake.dart';
 
@@ -51,10 +52,7 @@ void main() {
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.debug,
-      deviceModelCode: null,
-      deviceOperatingSystemVersion: null,
-      deviceArchitectureString: null,
-      deviceSupportDirectory: null,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
@@ -159,10 +157,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.debug,
-      deviceModelCode: null,
-      deviceOperatingSystemVersion: null,
-      deviceArchitectureString: null,
-      deviceSupportDirectory: null,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isTrue);
     expect(lldb.isRunning, isTrue);
@@ -256,10 +251,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.profile,
-      deviceModelCode: null,
-      deviceOperatingSystemVersion: null,
-      deviceArchitectureString: null,
-      deviceSupportDirectory: null,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isTrue);
     expect(lldb.isRunning, isTrue);
@@ -319,10 +311,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.debug,
-      deviceModelCode: null,
-      deviceOperatingSystemVersion: null,
-      deviceArchitectureString: null,
-      deviceSupportDirectory: null,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
@@ -383,10 +372,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.debug,
-      deviceModelCode: null,
-      deviceOperatingSystemVersion: null,
-      deviceArchitectureString: null,
-      deviceSupportDirectory: null,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
@@ -437,10 +423,7 @@ Target 0: (Runner) stopped.
         appProcessId: appProcessId,
         lldbLogForwarder: FakeLLDBLogForwarder(),
         mode: BuildMode.debug,
-        deviceModelCode: null,
-        deviceOperatingSystemVersion: null,
-        deviceArchitectureString: null,
-        deviceSupportDirectory: null,
+        deviceSupport: createDeviceSupport(),
       );
       time.elapse(const Duration(minutes: 2));
       time.flushMicrotasks();
@@ -555,10 +538,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: lldbLogForwarder,
       mode: BuildMode.debug,
-      deviceModelCode: null,
-      deviceOperatingSystemVersion: null,
-      deviceArchitectureString: null,
-      deviceSupportDirectory: null,
+      deviceSupport: createDeviceSupport(),
     );
 
     logAfterAttachCompleter.complete(utf8.encode('$ignoreLog\n$expectedForwardedLog\n'));
@@ -615,10 +595,7 @@ Target 0: (Runner) stopped.
         appProcessId: appProcessId,
         lldbLogForwarder: FakeLLDBLogForwarder(),
         mode: BuildMode.debug,
-        deviceModelCode: null,
-        deviceOperatingSystemVersion: null,
-        deviceArchitectureString: null,
-        deviceSupportDirectory: null,
+        deviceSupport: createDeviceSupport(),
       ),
     );
 
@@ -646,117 +623,6 @@ Target 0: (Runner) stopped.
     expect(exitStatus, isTrue);
     expect(lldb.isRunning, isFalse);
     expect(lldb.appProcessId, isNull);
-  });
-
-  group('missingSymbolsWarning', () {
-    late MemoryFileSystem fileSystem;
-
-    setUp(() {
-      fileSystem = MemoryFileSystem.test();
-    });
-
-    testWithoutContext('returns unable to find warning when supportDir is null', () {
-      final String? warning = LLDB.missingSymbolsWarning(null, 'iPhone15,2', '17.0', 'arm64e');
-      expect(
-        warning,
-        'Xcode Device Support was not found for this device. This will likely reduce debugging '
-        'performance and may cause the app to hang on a white screen during launch.\n'
-        'To trigger Device Symbols to be copied, connect the device via USB, close and then '
-        're-open Xcode. It may take several minutes for Xcode to copy symbols from the device.\n'
-        'Once Device Support symbols are finished being copied, they are expected to be found at '
-        '\$HOME/Library/Developer/Xcode/iOS DeviceSupport\n'
-        'Please retry "flutter run" once symbols are finished being copied.',
-      );
-    });
-
-    testWithoutContext('returns unable to find warning when device directory does not exist', () {
-      final Directory supportDir = fileSystem.directory(
-        '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-      );
-      final String? warning = LLDB.missingSymbolsWarning(
-        supportDir,
-        'iPhone15,2',
-        '17.0',
-        'arm64e',
-      );
-      expect(
-        warning,
-        'Xcode Device Support was not found for this device. This will likely reduce debugging '
-        'performance and may cause the app to hang on a white screen during launch.\n'
-        'To trigger Device Symbols to be copied, connect the device via USB, close and then '
-        're-open Xcode. It may take several minutes for Xcode to copy symbols from the device.\n'
-        'Once Device Support symbols are finished being copied, they are expected to be found at '
-        '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/Symbols or '
-        '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/arm64e/Symbols\n'
-        'Please retry "flutter run" once symbols are finished being copied.',
-      );
-    });
-
-    testWithoutContext(
-      'returns incomplete copy warning when device directory exists but symbols folder does not',
-      () {
-        final Directory supportDir = fileSystem.directory(
-          '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-        );
-        supportDir.childDirectory('iPhone15,2 17.0').createSync(recursive: true);
-
-        final String? warning = LLDB.missingSymbolsWarning(
-          supportDir,
-          'iPhone15,2',
-          '17.0',
-          'arm64e',
-        );
-        expect(
-          warning,
-          'Xcode has not finished copying Device Support symbols for this device. This will '
-          'likely reduce debugging performance and may cause the app to hang on a white screen '
-          'during launch.\n'
-          'Please ensure Xcode is open. It may take several minutes for Xcode to copy symbols '
-          'from the device.\n'
-          'Once Device Support symbols are finished being copied, they are expected to be found at '
-          '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/Symbols or '
-          '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/arm64e/Symbols\n'
-          'Please retry "flutter run" once symbols are finished being copied.',
-        );
-      },
-    );
-
-    testWithoutContext('returns null when symbol directory exists', () {
-      final Directory supportDir = fileSystem.directory(
-        '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-      );
-      supportDir
-          .childDirectory('iPhone15,2 17.0')
-          .childDirectory('Symbols')
-          .createSync(recursive: true);
-
-      final String? warning = LLDB.missingSymbolsWarning(
-        supportDir,
-        'iPhone15,2',
-        '17.0',
-        'arm64e',
-      );
-      expect(warning, isNull);
-    });
-
-    testWithoutContext('returns null when architecture symbol directory exists', () {
-      final Directory supportDir = fileSystem.directory(
-        '/Users/username/Library/Developer/Xcode/iOS DeviceSupport',
-      );
-      supportDir
-          .childDirectory('iPhone15,2 17.0')
-          .childDirectory('arm64e')
-          .childDirectory('Symbols')
-          .createSync(recursive: true);
-
-      final String? warning = LLDB.missingSymbolsWarning(
-        supportDir,
-        'iPhone15,2',
-        '17.0',
-        'arm64e',
-      );
-      expect(warning, isNull);
-    });
   });
 
   group('addSymbolSearchPaths', () {
@@ -853,10 +719,12 @@ Target 0: (Runner) stopped.
           appProcessId: appProcessId,
           lldbLogForwarder: FakeLLDBLogForwarder(),
           mode: BuildMode.profile,
-          deviceModelCode: 'iPhone15,2',
-          deviceOperatingSystemVersion: '17.0',
-          deviceArchitectureString: 'arm64e',
-          deviceSupportDirectory: supportDir,
+          deviceSupport: createDeviceSupport(
+            modelCode: 'iPhone15,2',
+            operatingSystemVersion: '17.0',
+            cpuArchitectureString: 'arm64e',
+            deviceSupportDirectory: supportDir,
+          ),
         );
 
         expect(success, isTrue);
@@ -954,10 +822,12 @@ Target 0: (Runner) stopped.
           appProcessId: appProcessId,
           lldbLogForwarder: FakeLLDBLogForwarder(),
           mode: BuildMode.profile,
-          deviceModelCode: 'iPhone15,2',
-          deviceOperatingSystemVersion: '17.0',
-          deviceArchitectureString: 'arm64e',
-          deviceSupportDirectory: supportDir,
+          deviceSupport: createDeviceSupport(
+            modelCode: 'iPhone15,2',
+            operatingSystemVersion: '17.0',
+            cpuArchitectureString: 'arm64e',
+            deviceSupportDirectory: supportDir,
+          ),
         );
 
         expect(success, isTrue);
@@ -1197,4 +1067,28 @@ class FakeLLDBLogForwarder extends Fake implements LLDBLogForwarder {
       expectedLogCompleter.complete();
     }
   }
+}
+
+IOSDeviceSupport createDeviceSupport({
+  Logger? logger,
+  ProcessUtils? processUtils,
+  Directory? deviceSupportDirectory,
+  String? modelCode,
+  String? operatingSystemVersion,
+  String? cpuArchitectureString,
+  String deviceId = '123',
+}) {
+  final Logger testLogger = logger ?? BufferLogger.test();
+  return IOSDeviceSupport(
+    logger: testLogger,
+    processUtils:
+        processUtils ??
+        ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
+    xcode: null,
+    deviceSupportDirectory: deviceSupportDirectory,
+    modelCode: modelCode,
+    operatingSystemVersion: operatingSystemVersion,
+    cpuArchitectureString: cpuArchitectureString,
+    deviceId: deviceId,
+  );
 }
