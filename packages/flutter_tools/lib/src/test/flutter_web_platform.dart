@@ -539,7 +539,11 @@ window.\$dartLoader.loader.nextAttempt();
     final File canvasKitFile = _canvasKitFile(relativePath);
     return shelf.Response.ok(
       canvasKitFile.openRead(),
-      headers: <String, Object>{HttpHeaders.contentTypeHeader: contentType},
+      headers: <String, Object>{
+        HttpHeaders.contentTypeHeader: contentType,
+        HttpHeaders.cacheControlHeader: 'public, max-age=3600',
+        HttpHeaders.contentLengthHeader: canvasKitFile.lengthSync().toString(),
+      },
     );
   }
 
@@ -700,7 +704,6 @@ window.\$dartLoader.loader.nextAttempt();
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
-      webBrowserFlags: <String>[if (useWasm) '--disable-dev-shm-usage'],
     );
   }
 

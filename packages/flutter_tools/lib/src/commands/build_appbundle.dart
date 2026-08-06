@@ -38,6 +38,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addIgnoreDeprecationOption();
+    addEnableHcppFlag(verboseHelp: verboseHelp);
     argParser.addMultiOption(
       'target-platform',
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -109,7 +110,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
       commandHasTerminal: hasTerminal,
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
-      buildBundleEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
+      buildBundleEnableHcpp:
+          explicitEnableHcpp ??
+          FlutterProject.current().android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   }
 
@@ -120,7 +123,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     }
     final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
-      targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      targetArchs: stringsArg('target-platform').map<CpuArch>(getCpuArchForName),
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.

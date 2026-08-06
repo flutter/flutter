@@ -4,13 +4,13 @@
 
 import UIKit
 
-@objc public enum FlutterKeyboardMode: Int {
+@objc enum FlutterKeyboardMode: Int {
   case hidden
   case docked
   case floating
 }
 
-public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> Void
+typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterval) -> Void
 
 /// @brief Coordinates the animation of the bottom viewport inset in response to system keyboard
 /// visibility changes.
@@ -53,7 +53,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
 ///   active view controller.
 ///
 /// @see [FlutterViewController], which owns this manager and acts as its delegate.
-@objc public protocol FlutterKeyboardInsetManagerDelegate: NSObjectProtocol {
+@objc protocol FlutterKeyboardInsetManagerDelegate: NSObjectProtocol {
   @objc(updateViewportMetricsWithInset:)
   func updateViewportMetrics(withInset inset: CGFloat)
   func physicalViewInsetBottom() -> CGFloat
@@ -67,7 +67,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
   func isViewLoaded() -> Bool
 }
 
-@objc public protocol FlutterKeyboardInsetManagerProtocol: NSObjectProtocol {
+@objc protocol FlutterKeyboardInsetManagerProtocol: NSObjectProtocol {
   var delegate: FlutterKeyboardInsetManagerDelegate? { get set }
   var targetViewInsetBottom: CGFloat { get set }
   var isKeyboardInOrTransitioningFromBackground: Bool { get set }
@@ -87,24 +87,29 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
   func ensureViewportMetricsIsCorrect()
 }
 
-@objc open class FlutterKeyboardInsetManager: NSObject, FlutterKeyboardInsetManagerProtocol {
-  @objc public weak var delegate: FlutterKeyboardInsetManagerDelegate?
-  @objc public var targetViewInsetBottom: CGFloat = 0
+@objc class FlutterKeyboardInsetManager: NSObject, FlutterKeyboardInsetManagerProtocol {
+  @objc weak var delegate: FlutterKeyboardInsetManagerDelegate?
+  @objc var targetViewInsetBottom: CGFloat = 0
 
   private var originalViewInsetBottom: CGFloat = 0
-  @objc public var keyboardAnimationVSyncClient: VSyncClient?
-  @objc public var keyboardAnimationIsShowing: Bool = false
+  @objc var keyboardAnimationVSyncClient: VSyncClient?
+  @objc var keyboardAnimationIsShowing: Bool = false
   private var keyboardAnimationStartTime: CFTimeInterval = 0
-  @objc public var keyboardAnimationView: UIView?
-  @objc public var keyboardSpringAnimation: SpringAnimation?
-  @objc public var isKeyboardInOrTransitioningFromBackground: Bool = false
+  @objc var keyboardAnimationView: UIView?
+  @objc var keyboardSpringAnimation: SpringAnimation?
+  @objc var isKeyboardInOrTransitioningFromBackground: Bool = false
 
-  @objc public init(delegate: FlutterKeyboardInsetManagerDelegate) {
+  private let displayLinkManager: DisplayLinkManager
+
+  @objc init(
+    delegate: FlutterKeyboardInsetManagerDelegate, displayLinkManager: DisplayLinkManager
+  ) {
     self.delegate = delegate
+    self.displayLinkManager = displayLinkManager
     super.init()
   }
 
-  @objc public func handleKeyboardNotification(_ notification: Notification) {
+  @objc func handleKeyboardNotification(_ notification: Notification) {
     // See https://flutter.dev/go/ios-keyboard-calculating-inset for more details on why
     // notifications are used and how things are calculated.
     guard delegate != nil else { return }
@@ -157,7 +162,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
     }
   }
 
-  @objc public func shouldIgnoreKeyboardNotification(_ notification: Notification) -> Bool {
+  @objc func shouldIgnoreKeyboardNotification(_ notification: Notification) -> Bool {
     // Don't ignore UIKeyboardWillHideNotification notifications.
     // Even if the notification is triggered in the background or by a different app/view
     // controller, we want to always handle this notification to avoid inaccurate inset when in a
@@ -194,7 +199,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
     return false
   }
 
-  @objc public func isKeyboardNotificationForDifferentView(_ notification: Notification) -> Bool {
+  @objc func isKeyboardNotificationForDifferentView(_ notification: Notification) -> Bool {
     let info = notification.userInfo
     // Keyboard notifications related to other apps (e.g. in split view mode on iPad).
     // If the UIKeyboardIsLocalUserInfoKey key doesn't exist (this should not happen after iOS 8),
@@ -206,7 +211,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
     return delegate.engine()?.viewController !== (delegate as AnyObject)
   }
 
-  @objc public func calculateKeyboardAttachMode(_ notification: Notification) -> FlutterKeyboardMode
+  @objc func calculateKeyboardAttachMode(_ notification: Notification) -> FlutterKeyboardMode
   {
     // There are multiple types of keyboard: docked, undocked, split, split docked,
     // floating, expanded shortcuts bar, minimized shortcuts bar.
@@ -268,7 +273,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
     return .hidden
   }
 
-  @objc public func calculateMultitaskingAdjustment(_ screenRect: CGRect, keyboardFrame: CGRect)
+  @objc func calculateMultitaskingAdjustment(_ screenRect: CGRect, keyboardFrame: CGRect)
     -> CGFloat
   {
     guard let delegate else { return 0 }
@@ -297,7 +302,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
     return 0
   }
 
-  @objc public func calculateKeyboardInset(
+  @objc func calculateKeyboardInset(
     _ keyboardFrame: CGRect, keyboardMode: FlutterKeyboardMode
   ) -> CGFloat {
     // Only docked keyboards will have an inset.
@@ -317,7 +322,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
     return portionOfKeyboardInView * scale
   }
 
-  @objc public func startKeyBoardAnimation(_ duration: TimeInterval) {
+  @objc func startKeyBoardAnimation(_ duration: TimeInterval) {
     guard let delegate, delegate.isViewLoaded() else { return }
     let view = delegate.view()
 
@@ -380,7 +385,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
       })
   }
 
-  @objc public func handleKeyboardAnimationCallback(withTargetTime targetTime: CFTimeInterval) {
+  @objc func handleKeyboardAnimationCallback(withTargetTime targetTime: CFTimeInterval) {
     guard let delegate else { return }
     if !delegate.isViewLoaded() { return }
 
@@ -406,7 +411,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
     delegate.updateViewportMetrics(withInset: currentInset)
   }
 
-  @objc public func hideKeyboardImmediately() {
+  @objc func hideKeyboardImmediately() {
     invalidateKeyboardAnimationVSyncClient()
     if let keyboardAnimationView = keyboardAnimationView {
       keyboardAnimationView.layer.removeAllAnimations()
@@ -418,23 +423,23 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
     ensureViewportMetricsIsCorrect()
   }
 
-  @objc public func invalidate() {
+  @objc func invalidate() {
     invalidateKeyboardAnimationVSyncClient()
     removeKeyboardAnimationView()
   }
 
-  @objc public func invalidateKeyboardAnimationVSyncClient() {
+  @objc func invalidateKeyboardAnimationVSyncClient() {
     keyboardAnimationVSyncClient?.invalidate()
     keyboardAnimationVSyncClient = nil
   }
 
-  @objc public func removeKeyboardAnimationView() {
+  @objc func removeKeyboardAnimationView() {
     if keyboardAnimationView?.superview != nil {
       keyboardAnimationView?.removeFromSuperview()
     }
   }
 
-  @objc public func setUpKeyboardSpringAnimationIfNeeded(_ keyboardAnimation: CAAnimation?) {
+  @objc func setUpKeyboardSpringAnimationIfNeeded(_ keyboardAnimation: CAAnimation?) {
     // If keyboard animation is nil or not a spring animation, fallback to DisplayLink tracking.
     guard let keyboardCASpringAnimation = keyboardAnimation as? CASpringAnimation else {
       keyboardSpringAnimation = nil
@@ -452,7 +457,7 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
     )
   }
 
-  @objc public func setUpKeyboardAnimationVsyncClient(
+  @objc func setUpKeyboardAnimationVsyncClient(
     _ animationCallback: FlutterKeyboardAnimationCallback?
   ) {
     guard let animationCallback = animationCallback else { return }
@@ -473,14 +478,14 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
 
     keyboardAnimationVSyncClient = VSyncClient(
       taskRunner: taskRunner,
-      isVariableRefreshRateEnabled: DisplayLinkManager.maxRefreshRateEnabledOnIPhone,
-      maxRefreshRate: DisplayLinkManager.displayRefreshRate,
+      isVariableRefreshRateEnabled: displayLinkManager.maxRefreshRateEnabledOnIPhone,
+      maxRefreshRate: displayLinkManager.displayRefreshRate,
       callback: vsyncCallback)
     keyboardAnimationVSyncClient?.allowPauseAfterVsync = false
     keyboardAnimationVSyncClient?.await()
   }
 
-  @objc public func ensureViewportMetricsIsCorrect() {
+  @objc func ensureViewportMetricsIsCorrect() {
     delegate?.updateViewportMetrics(withInset: targetViewInsetBottom)
   }
 }
