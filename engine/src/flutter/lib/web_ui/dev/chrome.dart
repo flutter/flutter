@@ -289,6 +289,13 @@ class Chrome extends Browser {
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const String _kGlibcError = 'Inconsistency detected by ld.so';
 
+bool _isDbusError(String line) {
+  return line.contains('ERROR:dbus/bus.cc') ||
+      line.contains('ERROR:dbus/object_proxy.cc') ||
+      line.contains('Failed to connect to the bus') ||
+      line.contains('org.freedesktop.DBus');
+}
+
 Future<Process> _spawnChromiumProcess(String executable, List<String> args) async {
   // Keep attempting to launch the browser until one of:
   // - Chrome launched successfully, in which case we just return from the loop.
@@ -306,6 +313,7 @@ Future<Process> _spawnChromiumProcess(String executable, List<String> args) asyn
     await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
+        .where((String line) => !_isDbusError(line))
         .map((String line) {
           print('[CHROME STDERR]:$line');
           if (line.contains(_kGlibcError)) {

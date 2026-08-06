@@ -49,6 +49,13 @@ const kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const _kGlibcError = 'Inconsistency detected by ld.so';
 
+bool _isDbusError(String line) {
+  return line.contains('ERROR:dbus/bus.cc') ||
+      line.contains('ERROR:dbus/object_proxy.cc') ||
+      line.contains('Failed to connect to the bus') ||
+      line.contains('org.freedesktop.DBus');
+}
+
 typedef BrowserFinder = String Function(Platform, FileSystem);
 
 /// Find the chrome executable on the current platform.
@@ -342,6 +349,9 @@ class ChromiumLauncher {
 
       final StreamSubscription<String> stderrSub = process.stderr.transform(utf8LineDecoder).listen(
         (String line) {
+          if (_isDbusError(line)) {
+            return;
+          }
           addLog('CHROME STDERR', line);
           if (line.contains(_kGlibcError)) {
             hitGlibcBug = true;
