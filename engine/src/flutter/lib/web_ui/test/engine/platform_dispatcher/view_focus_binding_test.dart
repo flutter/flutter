@@ -390,11 +390,9 @@ void testMain() {
     });
 
     // The deferral must key off the engine's editing state, not the
-    // `flt-text-editing` class. That class is applied by
-    // `DefaultTextEditingStrategy.initializeTextEditing`, which
-    // `SemanticsTextEditingStrategy` overrides without calling `super`, so with
-    // semantics enabled the live editing element never carries it. Keying off
-    // the class left the fix dead under VoiceOver.
+    // `flt-text-editing` class, which is not guaranteed to be applied by all
+    // text editing strategies. An earlier revision matched on the class, which
+    // left the deferral dead for strategies that do not apply it.
     // Regression test for https://github.com/flutter/flutter/issues/189744
     test('defers on iOS for an editing element with no flt-text-editing class', () async {
       final EngineFlutterView view = createAndRegisterView(dispatcher);
@@ -429,9 +427,9 @@ void testMain() {
 ///
 /// Sets the real singleton state rather than applying
 /// [HybridTextEditing.textEditingClass], so these tests exercise the same signal
-/// production code reads. The class is only applied by
-/// `DefaultTextEditingStrategy.initializeTextEditing`, so keying tests off it
-/// would not cover the semantics path.
+/// production code reads. The class is not guaranteed to be applied by all text
+/// editing strategies, so keying tests off it would not reflect the production
+/// code.
 void beginFakeTextEditing(DomHTMLElement element) {
   textEditing.isEditing = true;
   textEditing.strategy.domElement = element;

@@ -2798,12 +2798,8 @@ class HybridTextEditing {
   /// [ViewFocusBinding] uses this to recognize a `focusout` that originated
   /// from the active text-editing element.
   ///
-  /// Prefer this over matching on [textEditingClass]. That class is applied by
-  /// `_setStaticStyleAttributes`, which only runs from
-  /// [DefaultTextEditingStrategy.initializeTextEditing]. When semantics is
-  /// enabled, [SemanticsTextEditingStrategy] overrides that method without
-  /// calling `super`, so its element never carries the class even though it is
-  /// the live editing element.
+  /// Prefer this over matching on [textEditingClass]. That class is
+  /// not guaranteed to be applied by all strategies.
   bool isActiveTextEditingElement(DomElement? element) =>
       isEditing && element != null && element == strategy.domElement;
 
