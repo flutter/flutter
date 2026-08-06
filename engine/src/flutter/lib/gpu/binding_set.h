@@ -50,6 +50,9 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
     impeller::SampledImageSlot slot;
     const impeller::ShaderMetadata* metadata;
     std::shared_ptr<const impeller::Texture> texture;
+    /// Owned by the context's sampler library, which caches it for the
+    /// context's lifetime. The Dart wrapper holds the context that resolved
+    /// this binding, so the sampler outlives the set.
     impeller::raw_ptr<const impeller::Sampler> sampler;
   };
 

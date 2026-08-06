@@ -11,6 +11,7 @@ part of flutter_gpu;
 base class TextureBinding {
   const TextureBinding(this.texture, {this.sampler});
 
+  /// The texture to read.
   final Texture texture;
 
   /// The sampler to read [texture] with. Defaults to the same nearest
