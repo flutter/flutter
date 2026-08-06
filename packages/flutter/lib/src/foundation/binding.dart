@@ -290,22 +290,12 @@ abstract class BindingBase {
       _debugBindingZone = Zone.current;
       return true;
     }());
-    _setupListenableHooks();
+    _initListenable();
   }
 
-  void _setupListenableHooks() {
+  void _initListenable() {
     Listenable.onError = (Object error, StackTrace? stackTrace, ErrorContext context) {
       switch (context) {
-        case ErrorContext.assertion:
-          if (error is FlutterError) {
-            throw error;
-          }
-          final String message = switch (error) {
-            StateError(message: final String msg) => msg,
-            AssertionError(message: final Object? msg) => msg?.toString() ?? error.toString(),
-            _ => error.toString(),
-          };
-          throw FlutterError(message);
         case ErrorContext.listener:
           FlutterError.reportError(
             FlutterErrorDetails(
@@ -315,6 +305,16 @@ abstract class BindingBase {
               context: ErrorDescription('while dispatching notifications for $Listenable'),
             ),
           );
+        default:
+          if (error is FlutterError) {
+            throw error;
+          }
+          final String message = switch (error) {
+            StateError(message: final String msg) => msg,
+            AssertionError(message: final Object? msg) => msg?.toString() ?? error.toString(),
+            _ => error.toString(),
+          };
+          throw FlutterError(message);
       }
     };
   }
