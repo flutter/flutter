@@ -587,7 +587,6 @@ class ExamplesCrossImportChecker {
     'examples/multiple_windows/test/multiple_windows_test.dart',
     'examples/splash/lib/main.dart',
     'examples/splash/test/splash_test.dart',
-    'examples/texture/lib/main.dart',
   };
 
   static final RegExp _examplesPrefix = RegExp(r'examples');

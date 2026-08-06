@@ -670,10 +670,10 @@ packages:
     dependency: transitive
     description:
       name: material_ui
-      sha256: e1fa67393d807bd1841e5ece1ec260ed84f440ae7351e40b6406f733e4fe31cf
+      sha256: "849f45c20f47b0e432c603b1f3468e20feb5598e34f9cd3eb0656bbea965ce17"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.2"
+    version: "0.0.3"
   meta:
     dependency: "direct main"
     description:
