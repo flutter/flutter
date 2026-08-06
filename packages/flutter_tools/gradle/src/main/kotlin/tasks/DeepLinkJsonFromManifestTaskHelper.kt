@@ -126,18 +126,36 @@ object DeepLinkJsonFromManifestTaskHelper {
                 dataItems.forEach { data ->
                     data.attributes().forEach { entry ->
                         when (entry.key) {
-                            "android:scheme" -> schemes.add(entry.value.toString())
-                            "android:host" -> hosts.add(entry.value.toString())
+                            "android:scheme" -> {
+                                schemes.add(entry.value.toString())
+                            }
+
+                            "android:host" -> {
+                                hosts.add(entry.value.toString())
+                            }
+
                             // All path patterns add to paths.
-                            "android:pathAdvancedPattern" ->
+                            "android:pathAdvancedPattern" -> {
                                 paths.add(
                                     entry.value.toString()
                                 )
+                            }
 
-                            "android:pathPattern" -> paths.add(entry.value.toString())
-                            "android:path" -> paths.add(entry.value.toString())
-                            "android:pathPrefix" -> paths.add(entry.value.toString() + ".*")
-                            "android:pathSuffix" -> paths.add(".*" + entry.value.toString())
+                            "android:pathPattern" -> {
+                                paths.add(entry.value.toString())
+                            }
+
+                            "android:path" -> {
+                                paths.add(entry.value.toString())
+                            }
+
+                            "android:pathPrefix" -> {
+                                paths.add(entry.value.toString() + ".*")
+                            }
+
+                            "android:pathSuffix" -> {
+                                paths.add(".*" + entry.value.toString())
+                            }
                         }
                     }
                 }
