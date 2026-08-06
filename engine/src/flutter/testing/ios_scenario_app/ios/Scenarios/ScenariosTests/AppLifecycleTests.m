@@ -5,6 +5,7 @@
 #import <Flutter/Flutter.h>
 #import <XCTest/XCTest.h>
 
+#import "SceneDelegate.h"
 #import "ScreenBeforeFlutter.h"
 
 FLUTTER_ASSERT_ARC
@@ -71,8 +72,9 @@ FLUTTER_ASSERT_ARC
   }];
   [self waitForExpectationsWithTimeout:5 handler:nil];
 
-  UIApplication* application = UIApplication.sharedApplication;
-  application.delegate.window.rootViewController = rootVC;
+  UIWindow* window = SceneDelegate.mainWindow;
+  XCTAssertNotNil(window, @"The host app must have a connected scene for test");
+  window.rootViewController = rootVC;
   FlutterEngine* engine = rootVC.engine;
 
   NSMutableArray* lifecycleExpectations = [NSMutableArray arrayWithCapacity:10];
@@ -208,8 +210,9 @@ FLUTTER_ASSERT_ARC
 
   [self waitForExpectationsWithTimeout:5 handler:nil];
 
-  UIApplication* application = UIApplication.sharedApplication;
-  application.delegate.window.rootViewController = rootVC;
+  UIWindow* window = SceneDelegate.mainWindow;
+  XCTAssertNotNil(window, @"The host app must have a connected scene for test");
+  window.rootViewController = rootVC;
   FlutterEngine* engine = rootVC.engine;
 
   NSMutableArray* lifecycleExpectations = [NSMutableArray arrayWithCapacity:10];

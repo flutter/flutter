@@ -5,7 +5,7 @@
 #import <Flutter/Flutter.h>
 #import <XCTest/XCTest.h>
 
-#import "AppDelegate.h"
+#import "SceneDelegate.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -53,8 +53,9 @@ FLUTTER_ASSERT_ARC
     [firstFrameRendered fulfill];
   }];
 
-  AppDelegate* appDelegate = (AppDelegate*)UIApplication.sharedApplication.delegate;
-  UIViewController* rootVC = appDelegate.window.rootViewController;
+  UIWindow* window = SceneDelegate.mainWindow;
+  XCTAssertNotNil(window, @"The host app must have a connected scene for test");
+  UIViewController* rootVC = window.rootViewController;
   [rootVC presentViewController:self.flutterViewController animated:NO completion:nil];
 
   [self waitForExpectationsWithTimeout:30.0 handler:nil];
@@ -86,8 +87,9 @@ FLUTTER_ASSERT_ARC
     [firstFrameRendered fulfill];
   }];
 
-  AppDelegate* appDelegate = (AppDelegate*)UIApplication.sharedApplication.delegate;
-  UIViewController* rootVC = appDelegate.window.rootViewController;
+  UIWindow* window = SceneDelegate.mainWindow;
+  XCTAssertNotNil(window, @"The host app must have a connected scene for test");
+  UIViewController* rootVC = window.rootViewController;
   [rootVC presentViewController:self.flutterViewController animated:NO completion:nil];
 
   CGColorSpaceRef color_space = CGColorSpaceCreateDeviceRGB();
@@ -96,7 +98,7 @@ FLUTTER_ASSERT_ARC
     CGContextRef context =
         CGBitmapContextCreate(nil, width, width, 8, 4 * width, color_space,
                               kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
-    [appDelegate.window.layer renderInContext:context];
+    [window.layer renderInContext:context];
     uint32_t* image_data = (uint32_t*)CGBitmapContextGetData(context);
     if (image_data[20] == 0xFF0000FF) {
       [imageRendered fulfill];
