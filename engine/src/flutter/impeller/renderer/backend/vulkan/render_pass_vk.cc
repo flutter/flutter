@@ -102,19 +102,20 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
   }
 
   RenderPassBuilderVK builder;
-  render_target_.IterateAllColorAttachments([&](size_t bind_point,
-                                                const ColorAttachment&
-                                                    attachment) -> bool {
-    builder.SetColorAttachment(
-        bind_point,                                                           //
-        attachment.texture->GetTextureDescriptor().format,                    //
-        attachment.texture->GetTextureDescriptor().sample_count,              //
-        attachment.load_action,                                               //
-        attachment.store_action,                                              //
-        /*current_layout=*/TextureVK::Cast(*attachment.texture).GetLayout(),  //
-        /*is_swapchain=*/is_swapchain);
-    return true;
-  });
+  render_target_.IterateAllColorAttachments(
+      [&](size_t bind_point, const ColorAttachment& attachment) -> bool {
+        builder.SetColorAttachment(
+            bind_point,                                               //
+            attachment.texture->GetTextureDescriptor().format,        //
+            attachment.texture->GetTextureDescriptor().sample_count,  //
+            attachment.load_action,                                   //
+            attachment.store_action,                                  //
+            /*current_layout=*/
+            TextureVK::Cast(*attachment.texture)
+                .GetLayout(attachment.mip_level, attachment.slice),  //
+            /*is_swapchain=*/is_swapchain);
+        return true;
+      });
 
   if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
     builder.SetDepthStencilAttachment(
@@ -240,11 +241,16 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   command_buffer_vk_.beginRenderPass(pass_info, vk::SubpassContents::eInline);
 
+  // The render pass's implicit finalLayout applies only to the attached
+  // (mip_level, slice) subresource, so mirror it there rather than across the
+  // whole image (which matters when rendering into a single mip level).
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_)
         .SetLayoutWithoutEncoding(
             is_swapchain ? vk::ImageLayout::eGeneral
-                         : vk::ImageLayout::eShaderReadOnlyOptimal);
+                         : vk::ImageLayout::eShaderReadOnlyOptimal,
+            cache_mip_level, /*level_count=*/1u, cache_slice,
+            /*layer_count=*/1u);
   }
   if (color_image_vk_) {
     // Mirror the Vulkan render pass's `finalLayout` for the color attachment
@@ -258,7 +264,9 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
         .SetLayoutWithoutEncoding(
             (is_swapchain || sample_count != SampleCount::kCount1)
                 ? vk::ImageLayout::eGeneral
-                : vk::ImageLayout::eShaderReadOnlyOptimal);
+                : vk::ImageLayout::eShaderReadOnlyOptimal,
+            cache_mip_level, /*level_count=*/1u, cache_slice,
+            /*layer_count=*/1u);
   }
 
   // Set the initial viewport.

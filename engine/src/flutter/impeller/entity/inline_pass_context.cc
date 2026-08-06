@@ -11,9 +11,9 @@
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity_pass_target.h"
+#include "impeller/entity/mipmap_generator.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/texture_util.h"
 
 namespace impeller {
 
@@ -56,7 +56,8 @@ bool InlinePassContext::EndPass(bool is_onscreen) {
       GetPassTarget().GetRenderTarget().GetRenderTargetTexture();
   if (target_texture->GetMipCount() > 1) {
     fml::Status mip_status = AddMipmapGeneration(
-        command_buffer_, renderer_.GetContext(), target_texture);
+        command_buffer_, renderer_.GetContext(), target_texture,
+        *renderer_.GetRenderTargetCache(), renderer_.GetTransientsDataBuffer());
     if (!mip_status.ok()) {
       return false;
     }

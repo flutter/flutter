@@ -248,6 +248,8 @@ impeller_component("entity") {
     "geometry/vertices_geometry.h",
     "inline_pass_context.cc",
     "inline_pass_context.h",
+    "mipmap_generator.cc",
+    "mipmap_generator.h",
     "render_target_cache.cc",
     "render_target_cache.h",
     "save_layer_utils.cc",

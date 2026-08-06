@@ -11,6 +11,7 @@
 
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "fml/logging.h"
 #include "gtest/gtest.h"
 #include "impeller/core/device_buffer.h"
@@ -44,6 +45,9 @@
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/geometry/superellipse_geometry.h"
 #include "impeller/entity/geometry/uber_sdf_geometry.h"
+#include "impeller/entity/mipmap_generator.h"
+#include "impeller/entity/texture_fill.frag.h"
+#include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/point.h"
@@ -52,6 +56,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/command.h"
+#include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
@@ -3000,6 +3005,321 @@ TEST_P(EntityTest, RoundSuperellipseGetPositionBufferFlushes) {
   auto device_buffer = reinterpret_cast<const FlushTestDeviceBuffer*>(
       result.vertex_buffer.vertex_buffer.GetBuffer());
   EXPECT_TRUE(device_buffer->flush_called());
+}
+
+namespace {
+
+// Returns no functions, so pipeline construction fails after dispatch.
+class EmptyShaderLibrary : public ShaderLibrary {
+ public:
+  bool IsValid() const override { return true; }
+  std::shared_ptr<const ShaderFunction> GetFunction(
+      std::string_view name,
+      ShaderStage stage) override {
+    return nullptr;
+  }
+  void UnregisterFunction(std::string name, ShaderStage stage) override {}
+};
+
+struct MipmapDispatchHarness {
+  std::shared_ptr<::testing::NiceMock<MockCapabilities>> capabilities;
+  std::shared_ptr<const Capabilities> capabilities_base;
+  std::shared_ptr<::testing::NiceMock<MockImpellerContext>> context;
+  std::shared_ptr<::testing::NiceMock<MockAllocator>> allocator;
+  std::shared_ptr<::testing::NiceMock<MockCommandBuffer>> command_buffer;
+  std::shared_ptr<::testing::NiceMock<MockBlitPass>> blit_pass;
+  std::shared_ptr<HostBuffer> data_host_buffer;
+  std::unique_ptr<RenderTargetAllocator> render_target_allocator;
+
+  explicit MipmapDispatchHarness(bool blit_generation_supported) {
+    using ::testing::NiceMock;
+    using ::testing::Return;
+    using ::testing::ReturnRef;
+    capabilities = std::make_shared<NiceMock<MockCapabilities>>();
+    ON_CALL(*capabilities, SupportsBlitMipmapGeneration)
+        .WillByDefault(Return(blit_generation_supported));
+    capabilities_base = capabilities;
+    context = std::make_shared<NiceMock<MockImpellerContext>>();
+    ON_CALL(*context, GetCapabilities)
+        .WillByDefault(ReturnRef(capabilities_base));
+    ON_CALL(*context, GetShaderLibrary).WillByDefault([]() {
+      return std::make_shared<EmptyShaderLibrary>();
+    });
+    allocator = std::make_shared<NiceMock<MockAllocator>>();
+    ON_CALL(*allocator, OnCreateBuffer)
+        .WillByDefault([](const DeviceBufferDescriptor& desc) {
+          return std::make_shared<NiceMock<MockDeviceBuffer>>(desc);
+        });
+    command_buffer = std::make_shared<NiceMock<MockCommandBuffer>>(context);
+    blit_pass = std::make_shared<NiceMock<MockBlitPass>>();
+    ON_CALL(*command_buffer, OnCreateBlitPass).WillByDefault(Return(blit_pass));
+    // CreateBlitPass drops passes that report invalid.
+    ON_CALL(*blit_pass, IsValid).WillByDefault(Return(true));
+    ON_CALL(*blit_pass, EncodeCommands).WillByDefault(Return(true));
+    data_host_buffer = HostBuffer::Create(allocator, /*idle_waiter=*/nullptr,
+                                          /*minimum_uniform_alignment=*/16u);
+    render_target_allocator =
+        std::make_unique<RenderTargetAllocator>(allocator);
+  }
+
+  std::shared_ptr<Texture> MakeTexture(TextureType type) {
+    TextureDescriptor desc;
+    desc.size = {8, 8};
+    desc.mip_count = 4;
+    desc.type = type;
+    return std::make_shared<::testing::NiceMock<MockTexture>>(desc);
+  }
+};
+
+}  // namespace
+
+TEST(MipmapGeneratorTest, DispatchesToBlitGenerationWhenSupported) {
+  MipmapDispatchHarness harness(/*blit_generation_supported=*/true);
+  EXPECT_CALL(*harness.blit_pass, OnGenerateMipmapCommand)
+      .WillOnce(::testing::Return(true));
+  EXPECT_TRUE(AddMipmapGeneration(harness.command_buffer, harness.context,
+                                  harness.MakeTexture(TextureType::kTexture2D),
+                                  *harness.render_target_allocator,
+                                  *harness.data_host_buffer)
+                  .ok());
+}
+
+TEST(MipmapGeneratorTest, DoesNotBlitWhereBlitGenerationIsBroken) {
+  MipmapDispatchHarness harness(/*blit_generation_supported=*/false);
+  // Routed to the render-pass generator, which fails on the empty shader
+  // library before recording anything. No blit pass may be created.
+  EXPECT_CALL(*harness.command_buffer, OnCreateBlitPass).Times(0);
+  EXPECT_FALSE(AddMipmapGeneration(harness.command_buffer, harness.context,
+                                   harness.MakeTexture(TextureType::kTexture2D),
+                                   *harness.render_target_allocator,
+                                   *harness.data_host_buffer)
+                   .ok());
+}
+
+TEST(MipmapGeneratorTest, NonTwoDimensionalTexturesKeepBlitGeneration) {
+  MipmapDispatchHarness harness(/*blit_generation_supported=*/false);
+  EXPECT_CALL(*harness.blit_pass, OnGenerateMipmapCommand)
+      .WillOnce(::testing::Return(true));
+  EXPECT_TRUE(AddMipmapGeneration(
+                  harness.command_buffer, harness.context,
+                  harness.MakeTexture(TextureType::kTextureCube),
+                  *harness.render_target_allocator, *harness.data_host_buffer)
+                  .ok());
+}
+
+TEST_P(EntityTest, GenerateMipmapRenderPassDownsamples) {
+  // Renders the mip chain instead of blitting it. Runs on backends whose
+  // render passes execute on the host GPU (Metal, GLES); the Vulkan playground
+  // is skipped where MoltenVK is unavailable.
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
+    GTEST_SKIP() << "Render-pass mipmap generation targets Vulkan and Metal.";
+  }
+  ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
+  const std::shared_ptr<Context>& context = content_context.GetContext();
+
+  // 8x8 base split black (left) and white (right). A correct mip chain
+  // averages toward mid-gray; a broken or absent chain does not.
+  constexpr int kSize = 8;
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {kSize, kSize};
+  desc.mip_count = desc.size.MipCount();
+  // No render-target usage. The generated levels are stored with copies, so
+  // generation must work on sample-only textures like decoded images.
+  desc.usage = TextureUsage::kShaderRead;
+  std::shared_ptr<Texture> texture =
+      context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+
+  std::vector<uint8_t> base(kSize * kSize * 4, 0);
+  for (int y = 0; y < kSize; y++) {
+    for (int x = 0; x < kSize; x++) {
+      uint8_t v = ((x + y) % 2 == 0) ? 0 : 255;
+      int o = (y * kSize + x) * 4;
+      base[o] = base[o + 1] = base[o + 2] = v;
+      base[o + 3] = 255;
+    }
+  }
+  auto base_mapping =
+      std::make_shared<fml::NonOwnedMapping>(base.data(), base.size());
+  auto base_buffer =
+      context->GetResourceAllocator()->CreateBufferWithCopy(*base_mapping);
+
+  auto cmd = context->CreateCommandBuffer();
+  auto blit = cmd->CreateBlitPass();
+  blit->AddCopy(DeviceBuffer::AsBufferView(base_buffer), texture);
+  ASSERT_TRUE(blit->EncodeCommands());
+  ASSERT_TRUE(
+      AddRenderPassMipmapGeneration(cmd, context, texture,
+                                    *content_context.GetRenderTargetCache(),
+                                    content_context.GetTransientsDataBuffer())
+          .ok());
+  ASSERT_TRUE(context->GetCommandQueue()->Submit({cmd}).ok());
+  EXPECT_FALSE(texture->NeedsMipmapGeneration());
+
+  DeviceBufferDescriptor readback_desc;
+  readback_desc.storage_mode = StorageMode::kHostVisible;
+  readback_desc.size = 8u;
+  std::shared_ptr<DeviceBuffer> readback =
+      context->GetResourceAllocator()->CreateBuffer(readback_desc);
+
+  auto cmd2 = context->CreateCommandBuffer();
+  auto blit2 = cmd2->CreateBlitPass();
+  // Read a mip-1 (4x4) texel. Each averages a 2x2 checker block, so a correct
+  // downsample is ~mid gray; a base copy would be pure 0 or 255.
+  blit2->AddCopy(texture, readback, IRect::MakeXYWH(1, 1, 1, 1),
+                 /*destination_offset=*/0u, /*label=*/"",
+                 /*source_mip_level=*/1u);
+  // Read the deepest (1x1) level, the average of the whole image.
+  const uint32_t deepest_mip = desc.mip_count - 1u;
+  blit2->AddCopy(texture, readback, IRect::MakeXYWH(0, 0, 1, 1),
+                 /*destination_offset=*/4u, /*label=*/"",
+                 /*source_mip_level=*/deepest_mip);
+  ASSERT_TRUE(blit2->EncodeCommands());
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit({cmd2}, [&latch](CommandBuffer::Status) { latch.Signal(); })
+          .ok());
+  latch.Wait();
+
+  const uint8_t* pixels = readback->OnGetContents();
+  ASSERT_NE(pixels, nullptr);
+  for (int offset : {0, 4}) {
+    EXPECT_NEAR(pixels[offset + 0], 128, 48) << "at offset " << offset;
+    EXPECT_NEAR(pixels[offset + 1], 128, 48) << "at offset " << offset;
+    EXPECT_NEAR(pixels[offset + 2], 128, 48) << "at offset " << offset;
+  }
+}
+
+TEST_P(EntityTest, RenderPassGeneratedMipsSampleCorrectly) {
+  // Samples a render-pass generated chain through a minifying mip sampler,
+  // the path the sampler workaround used to clamp to the base level.
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
+    GTEST_SKIP() << "Render-pass mipmap generation targets Vulkan and Metal.";
+  }
+  using VS = TextureFillVertexShader;
+  using FS = TextureFillFragmentShader;
+  ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
+  const std::shared_ptr<Context>& context = content_context.GetContext();
+
+  constexpr int kSize = 8;
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {kSize, kSize};
+  desc.mip_count = desc.size.MipCount();
+  desc.usage = TextureUsage::kShaderRead;
+  std::shared_ptr<Texture> texture =
+      context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+
+  std::vector<uint8_t> base(kSize * kSize * 4, 0);
+  for (int y = 0; y < kSize; y++) {
+    for (int x = 0; x < kSize; x++) {
+      uint8_t v = ((x + y) % 2 == 0) ? 0 : 255;
+      int o = (y * kSize + x) * 4;
+      base[o] = base[o + 1] = base[o + 2] = v;
+      base[o + 3] = 255;
+    }
+  }
+  auto base_mapping =
+      std::make_shared<fml::NonOwnedMapping>(base.data(), base.size());
+  auto base_buffer =
+      context->GetResourceAllocator()->CreateBufferWithCopy(*base_mapping);
+
+  auto cmd = context->CreateCommandBuffer();
+  auto blit = cmd->CreateBlitPass();
+  blit->AddCopy(DeviceBuffer::AsBufferView(base_buffer), texture);
+  ASSERT_TRUE(blit->EncodeCommands());
+  ASSERT_TRUE(
+      AddRenderPassMipmapGeneration(cmd, context, texture,
+                                    *content_context.GetRenderTargetCache(),
+                                    content_context.GetTransientsDataBuffer())
+          .ok());
+
+  // Draw the whole 8x8 texture into a 2x2 target. Minification selects a deep
+  // mip, so a correct chain lands near mid-gray while base-only sampling
+  // yields checker extremes.
+  std::optional<PipelineDescriptor> pipeline_desc =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  ColorAttachmentDescriptor color0;
+  color0.format = desc.format;
+  color0.blending_enabled = false;
+  pipeline_desc->SetColorAttachmentDescriptor(0u, color0);
+  pipeline_desc->ClearDepthAttachment();
+  pipeline_desc->ClearStencilAttachments();
+  pipeline_desc->SetSampleCount(SampleCount::kCount1);
+  pipeline_desc->SetPrimitiveType(PrimitiveType::kTriangleStrip);
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline =
+      context->GetPipelineLibrary()
+          ->GetPipeline(std::move(pipeline_desc), /*async=*/false)
+          .Get();
+  ASSERT_TRUE(pipeline && pipeline->IsValid());
+
+  RenderTarget target = content_context.GetRenderTargetCache()->CreateOffscreen(
+      *context, ISize(2, 2), /*mip_count=*/1, "Minified Sample",
+      RenderTarget::AttachmentConfig{
+          .storage_mode = StorageMode::kDevicePrivate,
+          .load_action = LoadAction::kDontCare,
+          .store_action = StoreAction::kStore,
+      },
+      /*stencil_attachment_config=*/std::nullopt,
+      /*existing_color_texture=*/nullptr,
+      /*existing_depth_stencil_texture=*/nullptr,
+      /*target_pixel_format=*/desc.format);
+  ASSERT_TRUE(target.IsValid());
+  std::shared_ptr<RenderPass> pass = cmd->CreateRenderPass(target);
+  ASSERT_TRUE(pass);
+  pass->SetPipeline(pipeline);
+  HostBuffer& host_buffer = content_context.GetTransientsDataBuffer();
+  VS::FrameInfo frame_info;
+  frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+  FS::FragInfo frag_info;
+  frag_info.alpha = 1.0f;
+  std::array<VS::PerVertexData, 4> vertices = {
+      VS::PerVertexData{Point(0, 0), Point(0, 0)},
+      VS::PerVertexData{Point(1, 0), Point(1, 0)},
+      VS::PerVertexData{Point(0, 1), Point(0, 1)},
+      VS::PerVertexData{Point(1, 1), Point(1, 1)},
+  };
+  pass->SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
+  SamplerDescriptor sampler_desc;
+  sampler_desc.min_filter = MinMagFilter::kLinear;
+  sampler_desc.mag_filter = MinMagFilter::kLinear;
+  sampler_desc.mip_filter = MipFilter::kLinear;
+  VS::BindFrameInfo(*pass, host_buffer.EmplaceUniform(frame_info));
+  FS::BindFragInfo(*pass, host_buffer.EmplaceUniform(frag_info));
+  FS::BindTextureSampler(
+      *pass, texture, context->GetSamplerLibrary()->GetSampler(sampler_desc));
+  ASSERT_TRUE(pass->Draw().ok());
+  ASSERT_TRUE(pass->EncodeCommands());
+
+  DeviceBufferDescriptor readback_desc;
+  readback_desc.storage_mode = StorageMode::kHostVisible;
+  readback_desc.size = 4u;
+  std::shared_ptr<DeviceBuffer> readback =
+      context->GetResourceAllocator()->CreateBuffer(readback_desc);
+  auto blit2 = cmd->CreateBlitPass();
+  blit2->AddCopy(target.GetRenderTargetTexture(), readback,
+                 IRect::MakeXYWH(0, 0, 1, 1));
+  ASSERT_TRUE(blit2->EncodeCommands());
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit({cmd}, [&latch](CommandBuffer::Status) { latch.Signal(); })
+          .ok());
+  latch.Wait();
+
+  const uint8_t* pixel = readback->OnGetContents();
+  ASSERT_NE(pixel, nullptr);
+  EXPECT_NEAR(pixel[0], 128, 48);
+  EXPECT_NEAR(pixel[1], 128, 48);
+  EXPECT_NEAR(pixel[2], 128, 48);
 }
 
 }  // namespace testing

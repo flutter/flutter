@@ -77,7 +77,8 @@ class MockBlitPass : public BlitPass {
                std::shared_ptr<Texture> destination,
                IRect source_region,
                IPoint destination_origin,
-               std::string_view label),
+               std::string_view label,
+               uint32_t destination_mip_level),
               (override));
 
   MOCK_METHOD(bool,
@@ -86,7 +87,8 @@ class MockBlitPass : public BlitPass {
                std::shared_ptr<DeviceBuffer> destination,
                IRect source_region,
                size_t destination_offset,
-               std::string_view label),
+               std::string_view label,
+               uint32_t source_mip_level),
               (override));
   MOCK_METHOD(bool,
               OnCopyBufferToTextureCommand,
@@ -252,6 +254,7 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(bool, SupportsPrimitiveRestart, (), (const override));
   MOCK_METHOD(bool, Supports32BitPrimitiveIndices, (), (const override));
   MOCK_METHOD(bool, SupportsManuallyMippedTextures, (), (const override));
+  MOCK_METHOD(bool, SupportsBlitMipmapGeneration, (), (const override));
   MOCK_METHOD(bool, SupportsExtendedRangeFormats, (), (const override));
   MOCK_METHOD(bool, SupportsFramebufferRenderMipmap, (), (const override));
   MOCK_METHOD(bool,

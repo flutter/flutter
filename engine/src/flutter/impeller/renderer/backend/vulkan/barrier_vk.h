@@ -50,6 +50,17 @@ struct BarrierVK {
 
   /// The base mip level to apply the barrier to in the subresource range.
   uint32_t base_mip_level = 0;
+
+  /// The number of mip levels to apply the barrier to. 0 means "to the last
+  /// level" (`mip_count - base_mip_level`).
+  uint32_t mip_level_count = 0;
+
+  /// The base array layer to apply the barrier to.
+  uint32_t base_array_layer = 0;
+
+  /// The number of array layers to apply the barrier to. 0 means "all layers"
+  /// (`layer_count - base_array_layer`).
+  uint32_t array_layer_count = 0;
 };
 
 }  // namespace impeller
