@@ -241,9 +241,6 @@ void AndroidExternalViewEmbedder2::PrepareFlutterView(
 
   // The singular overlay surface is persistent, so it is resized in place by
   // |SurfacePool::GetLayer| rather than destroyed and recreated here.
-  // Destroying it would block the raster thread on the platform thread, which
-  // deadlocks against |PlatformViewAndroid::NotifyChanged| when the platform
-  // thread is inside a layout traversal.
   if (frame_size_ != frame_size) {
     // This should not block to prevent deadlocks with
     // setViewportMetrics.
