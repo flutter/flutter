@@ -15,6 +15,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
