@@ -82,8 +82,9 @@ def flutter_additional_ios_build_settings(target)
     # ARC code targeting iOS 8 does not build on Xcode 14.3. Force to at least iOS 9.
     build_configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0' if force_to_arc_supported_min
 
-    # Suppress warning when pod supports a version lower than the minimum supported by Xcode (Xcode 12 - iOS 9).
-    # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
+    # Suppress warning/error when pod supports a version lower than the minimum supported by Xcode.
+    # Xcode 27+ produces an error while previous versions produced a warning.
+    # When it's just a warning, it's harmless but confusing--it's not a bad thing for dependencies to support a lower version.
     # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
     # If the pod only supports a higher version, do not delete to correctly produce an error.
     build_configuration.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET' if inherit_deployment_target
