@@ -1348,47 +1348,46 @@ void main() {
       bool? firstReturnValue;
       bool? secondReturnValue;
 
+      Widget buildPage(String id, VoidCallback? onTap) {
+        return GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Center(child: Text(id, textDirection: TextDirection.ltr)),
+        );
+      }
+
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           initialRoute: '/',
           onGenerateRoute: (RouteSettings settings) {
             final String? routeName = settings.name;
 
             switch (routeName) {
               case '/':
-                return MaterialPageRoute<bool>(
-                  builder: (BuildContext context) => OnTapPage(
-                    id: '/',
-                    onTap: () async {
-                      ModalRoute.of(context)!.addLocalHistoryEntry(LocalHistoryEntry());
-                      firstReturnValue = await Navigator.pushNamed(context, '/A');
-                    },
-                  ),
+                return TestRoute<bool>(
                   settings: settings,
+                  builder: (BuildContext context) => buildPage('/', () async {
+                    ModalRoute.of(context)!.addLocalHistoryEntry(LocalHistoryEntry());
+                    firstReturnValue = await Navigator.pushNamed(context, '/A');
+                  }),
                 );
               case '/A':
-                return MaterialPageRoute<bool>(
-                  builder: (BuildContext context) => OnTapPage(
-                    id: 'A',
-                    onTap: () async {
-                      secondReturnValue = await Navigator.pushNamed(context, '/B');
-                    },
-                  ),
+                return TestRoute<bool>(
                   settings: settings,
+                  builder: (BuildContext context) => buildPage('A', () async {
+                    secondReturnValue = await Navigator.pushNamed(context, '/B');
+                  }),
                 );
               case '/B':
-                return MaterialPageRoute<bool>(
-                  builder: (BuildContext context) => OnTapPage(
-                    id: 'B',
-                    onTap: () async {
-                      Navigator.popUntilWithResult<bool>(
-                        context,
-                        (Route<dynamic> route) => route.isFirst,
-                        true,
-                      );
-                    },
-                  ),
+                return TestRoute<bool>(
                   settings: settings,
+                  builder: (BuildContext context) => buildPage('B', () async {
+                    Navigator.popUntilWithResult<bool>(
+                      context,
+                      (Route<dynamic> route) => route.isFirst,
+                      true,
+                    );
+                  }),
                 );
               default:
                 return null;
