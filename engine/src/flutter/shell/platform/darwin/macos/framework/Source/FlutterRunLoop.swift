@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
+import InternalFlutterSwiftCommon
 
 /// Interface for scheduling tasks on the run loop.
 ///
@@ -11,20 +12,19 @@ import Foundation
 /// schedules the task in both common run loop mode and a private run loop mode,
 /// which allows it to run in a mode where it only processes Flutter messages
 /// (`pollFlutterMessagesOnce()`).
-@objc public final class FlutterRunLoop: NSObject {
+@objc public final class FlutterRunLoop: NSObject, @unchecked Sendable {
   private static let flutterRunLoopMode = CFRunLoopMode("FlutterRunLoopMode" as CFString)
-  
-  // The `ensureMainLoopInitialized` method must be called on the main thread
-  // before using this class to set this variable.
-  private static nonisolated(unsafe) var _mainRunLoop: FlutterRunLoop?
-  
+
+  @MainActor
+  private static var _mainRunLoop: FlutterRunLoop?
+
   private let runLoop: CFRunLoop = CFRunLoopGetCurrent()
   private let taskQueue = TaskQueue()
   // This keeps the SourceContextInfo alive.
   private let sourceContextInfo: SourceContextInfo
   private let source: CFRunLoopSource
   private let timer: CFRunLoopTimer
-  
+
   private override init() {
     var timerContext = CFRunLoopTimerContext(
       version: 0,
@@ -33,7 +33,7 @@ import Foundation
       release: nil,
       copyDescription: nil
     )
-    
+
     guard
       let createdTimer = CFRunLoopTimerCreate(
         kCFAllocatorDefault,
@@ -52,7 +52,7 @@ import Foundation
     }
     self.timer = createdTimer
     self.sourceContextInfo = SourceContextInfo(taskQueue: taskQueue, timer: timer)
-    
+
     var sourceContext = CFRunLoopSourceContext(
       version: 0,
       info: Unmanaged.passUnretained(sourceContextInfo).toOpaque(),
@@ -73,14 +73,14 @@ import Foundation
     }
     self.source = createdSource
     super.init()
-    
+
     CFRunLoopAddSource(runLoop, source, .commonModes)
     CFRunLoopAddSource(runLoop, source, Self.flutterRunLoopMode)
-    
+
     CFRunLoopAddTimer(runLoop, timer, .commonModes)
     CFRunLoopAddTimer(runLoop, timer, Self.flutterRunLoopMode)
   }
-  
+
   deinit {
     CFRunLoopTimerInvalidate(timer)
     CFRunLoopRemoveTimer(runLoop, timer, .commonModes)
@@ -89,30 +89,19 @@ import Foundation
     CFRunLoopRemoveSource(runLoop, source, .commonModes)
     CFRunLoopRemoveSource(runLoop, source, Self.flutterRunLoopMode)
   }
-  
-  // Ensures that the `FlutterRunLoop` for main thread is initialized. Only
-  // needs to be called once and must be called on the main thread.
-  @MainActor
-  @objc public static func ensureMainLoopInitialized() {
-    assert(Thread.isMainThread, "Must be called on the main thread.")
-    if _mainRunLoop == nil {
-      _mainRunLoop = FlutterRunLoop()
-    }
-  }
-  
+
   // The `FlutterRunLoop` for the main thread.
+  @MainActor
   @objc public static var mainRunLoop: FlutterRunLoop {
-    guard let runLoop = _mainRunLoop else {
-      fatalError(
-        "Main run loop has not been initialized. Call ensureMainLoopInitialized() first."
-      );
-    }
-    return runLoop;
+    assert(Thread.isMainThread, "Must be called on the main thread.")
+    return _mainRunLoop ??= FlutterRunLoop()
   }
-  
+
   // Schedules a block to be executed on the main thread.
-  @objc public func perform(afterDelay delay: TimeInterval, block: @MainActor @escaping () -> Void) {
-    let nextFireTime = taskQueue.add(task: TaskQueue.Task(block: block, targetTime: CFAbsoluteTimeGetCurrent() + delay))
+  @objc public func perform(afterDelay delay: TimeInterval, block: @MainActor @escaping () -> Void)
+  {
+    let nextFireTime = taskQueue.add(
+      task: TaskQueue.Task(block: block, targetTime: CFAbsoluteTimeGetCurrent() + delay))
     if delay > 0 {
       CFRunLoopTimerSetNextFireDate(timer, nextFireTime)
     } else {
@@ -120,13 +109,13 @@ import Foundation
       CFRunLoopWakeUp(runLoop)
     }
   }
-  
+
   // Schedules a block to be executed on the main thread after a delay.
   @objc(performBlock:)
   public func perform(_ block: @MainActor @escaping () -> Void) {
     perform(afterDelay: 0, block: block)
   }
-  
+
   /// Executes single iteration of the run loop in the mode where only Flutter
   /// messages are processed.
   @objc public func pollFlutterMessagesOnce() {
@@ -134,18 +123,20 @@ import Foundation
   }
 }
 
-private final class TaskQueue {
+// The internal interface of this TaskQueue is Sendable because
+// all mutable variables are protected by a NSLock.
+private final class TaskQueue: @unchecked Sendable {
   private let lock = NSLock()
-  
+
   struct Task {
     let block: @MainActor () -> Void
     let targetTime: CFAbsoluteTime
   }
-  
+
   // (target time of the first task to expire, unsorted task queue)
   private var tasks: [Task] = []
   private var earliestDeadline = CFAbsoluteTime.greatestFiniteMagnitude
-  
+
   func add(task: Task) -> CFAbsoluteTime {
     lock.withLock {
       tasks.append(task)
@@ -153,7 +144,7 @@ private final class TaskQueue {
       return earliestDeadline
     }
   }
-  
+
   // Returns a tuple representing the new earliest deadline
   // and an unordered list of expired tasks.
   private func popTasks(expiringBy time: CFAbsoluteTime) -> (CFAbsoluteTime, [Task]) {
@@ -161,11 +152,11 @@ private final class TaskQueue {
       guard time >= earliestDeadline else {
         return (earliestDeadline, [])
       }
-      
+
       var newQueue: [Task] = []
       var newEarliestDeadline = CFAbsoluteTime.greatestFiniteMagnitude
       var expiredTasks: [Task] = []
-      
+
       for task in tasks {
         if task.targetTime <= time {
           expiredTasks.append(task)
@@ -174,16 +165,16 @@ private final class TaskQueue {
           newEarliestDeadline = min(newEarliestDeadline, task.targetTime)
         }
       }
-      
+
       earliestDeadline = newEarliestDeadline
       tasks = newQueue
       return (newEarliestDeadline, expiredTasks)
     }
   }
-  
+
   func runExpiredTasksAndRearm(timer: CFRunLoopTimer) {
     let (nextFireDate, expiredTasks) = popTasks(expiringBy: CFAbsoluteTimeGetCurrent())
-    
+
     CFRunLoopTimerSetNextFireDate(timer, nextFireDate)
     MainActor.assumeIsolated {
       for task in expiredTasks {
@@ -198,8 +189,7 @@ private final class SourceContextInfo {
     self.taskQueue = taskQueue
     self.timer = timer
   }
-  
+
   let taskQueue: TaskQueue
   let timer: CFRunLoopTimer
 }
-

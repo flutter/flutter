@@ -16,16 +16,16 @@ struct ResizeSynchronizerTests {
   @MainActor
   @Test("performCommit callback executes when no resize is active")
   func testNotBlocked() async {
-    FlutterRunLoop.ensureMainLoopInitialized()
-
     let synchronizer = ResizeSynchronizer()
     var didReceiveFrame = false
 
     // Call performCommit from raster thread during frame present.
+    let notify = { @MainActor in
+      didReceiveFrame = true
+    }
     Thread.detachNewThread {
-      synchronizer.performCommit(forSize: CGSize(width: 100, height: 100), afterDelay: 0) {
-        didReceiveFrame = true
-      }
+      synchronizer.performCommit(
+        forSize: CGSize(width: 100, height: 100), afterDelay: 0, notify: notify)
     }
 
     // Ensure the task is processed within the timeout.
@@ -41,8 +41,6 @@ struct ResizeSynchronizerTests {
   @MainActor
   @Test("beginResize does not invoke onTimeout if performCommit called with matching frame size")
   func testBeginResizeDoesNotTimeOutWithMatchingPerformCommit() async {
-    FlutterRunLoop.ensureMainLoopInitialized()
-
     // Resize synchronizer must have presented a frame in order to block.
     let synchronizer = ResizeSynchronizer()
     var didReceiveFrame = false
@@ -63,19 +61,19 @@ struct ResizeSynchronizerTests {
     let latch = DispatchSemaphore(value: 0)
 
     // Call performCommit from raster thread during frame present.
+    let notify1: @MainActor @Sendable () -> Void = { commit1 = true }
+    let notify2: @MainActor @Sendable () -> Void = { commit2 = true }
     Thread.detachNewThread {
       // Block until `beginResize` has been called.
       latch.wait()
 
       // First commit size DOES NOT match that passed to beginResize.
-      synchronizer.performCommit(forSize: CGSize(width: 50, height: 100), afterDelay: 0) {
-        commit1 = true
-      }
+      synchronizer.performCommit(
+        forSize: CGSize(width: 50, height: 100), afterDelay: 0, notify: notify1)
 
       // Second commit size DOES match that passed to beginResize.
-      synchronizer.performCommit(forSize: CGSize(width: 100, height: 100), afterDelay: 0) {
-        commit2 = true
-      }
+      synchronizer.performCommit(
+        forSize: CGSize(width: 100, height: 100), afterDelay: 0, notify: notify2)
     }
 
     // This call blocks until performCommit is called with matching size, or times out.
@@ -99,8 +97,6 @@ struct ResizeSynchronizerTests {
   @MainActor
   @Test("beginResize invokes onTimeout if performCommit not called with matching frame size")
   func testBeginResizeDoesTimeOutWithoutMatchingPerformCommit() async {
-    FlutterRunLoop.ensureMainLoopInitialized()
-
     // Resize synchronizer must have presented a frame in order to block.
     let synchronizer = ResizeSynchronizer()
     var didReceiveFrame = false
@@ -120,14 +116,16 @@ struct ResizeSynchronizerTests {
     let latch = DispatchSemaphore(value: 0)
 
     // Call performCommit from raster thread during frame present.
+    let notify = { @MainActor in
+      didReceiveFrame = true
+    }
     Thread.detachNewThread {
       // Block until `beginResize` has been called.
       latch.wait()
 
       // First commit size DOES NOT match that passed to beginResize.
-      synchronizer.performCommit(forSize: CGSize(width: 50, height: 100), afterDelay: 0) {
-        didReceiveFrame = true
-      }
+      synchronizer.performCommit(
+        forSize: CGSize(width: 50, height: 100), afterDelay: 0, notify: notify)
     }
 
     // This call blocks until performCommit is called with matching size, or times out.
@@ -150,7 +148,6 @@ struct ResizeSynchronizerTests {
   @MainActor
   @Test("shutDown unblocks an active beginResize and prevents future blocking")
   func testUnblocksOnShutdown() async {
-    FlutterRunLoop.ensureMainLoopInitialized()
     let synchronizer = ResizeSynchronizer()
 
     // Resize synchronizer must have received one frame in order to block.

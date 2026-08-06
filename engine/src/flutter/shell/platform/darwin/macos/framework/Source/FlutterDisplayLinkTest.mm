@@ -35,10 +35,7 @@
 
 @end
 
-class FlutterDisplayLinkTest : public testing::Test {
- public:
-  void SetUp() override { [FlutterRunLoop ensureMainLoopInitialized]; }
-};
+using FlutterDisplayLinkTest = testing::Test;
 
 TEST_F(FlutterDisplayLinkTest, ViewAddedToWindowFirst) {
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 100, 100)
