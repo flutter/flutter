@@ -391,8 +391,8 @@ void testMain() {
 
     // The deferral must key off the engine's editing state, not the
     // `flt-text-editing` class, which is not guaranteed to be applied by all
-    // text editing strategies. An earlier revision matched on the class, which
-    // left the deferral dead for strategies that do not apply it.
+    // text editing strategies. Matching on the class would leave the deferral
+    // dead for strategies that do not apply it.
     // Regression test for https://github.com/flutter/flutter/issues/189744
     test('defers on iOS for an editing element with no flt-text-editing class', () async {
       final EngineFlutterView view = createAndRegisterView(dispatcher);
