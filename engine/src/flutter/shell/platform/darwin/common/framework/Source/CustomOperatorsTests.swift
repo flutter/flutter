@@ -2,31 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import Foundation
 import InternalFlutterSwiftCommon
 import Testing
 
-@Suite struct CustomOperatorsTests {
-
-  @Test func testAssignsWhenNilAndReturnsNewValue() {
-    var value: String? = nil
+@Suite struct `??= Operator Test` {
+  @Test func `The operator assigns and has a return value`() {
+    var value: String?
     let evaluated = value ??= "hello"
     #expect(value == "hello")
     #expect(evaluated == "hello")
   }
 
-  @Test func testDoesNotAssignWhenNonNilAndEvaluatesLazily() {
-    var value: String? = "existing"
-    var sideEffectRun = false
-
-    func computeValue() -> String {
-      sideEffectRun = true
-      return "new"
+  @Test func `rhs is only evaluated if lhs is nil`() {
+    var evaluationCount = 0
+    func evaluate() -> String {
+      evaluationCount += 1
+      return "rhs"
     }
 
-    let result = value ??= computeValue()
-    #expect(value == "existing")
-    #expect(result == "existing")
-    #expect(!sideEffectRun)
+    var lhs: String? = "lhs"
+    #expect((lhs ??= evaluate()) == "lhs")
+    #expect(evaluationCount == 0)
+
+    lhs = nil
+    #expect((lhs ??= evaluate()) == "rhs")
+    #expect(evaluationCount == 1)
   }
 }
