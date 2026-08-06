@@ -4,7 +4,8 @@
 
 infix operator ??= : AssignmentPrecedence
 
-/// The dart nil-assignment operator: https://dart.dev/language/operators#assignment-operators.
+/// The dart -aware assignment operator.
+///
 /// If `lhs` is `nil`, assigns the result of evaluating `rhs` to `lhs` and returns the new value.
 /// If `lhs` is non-`nil`, returns the existing unwrapped value of `lhs` without evaluating `rhs`.
 @discardableResult
