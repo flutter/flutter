@@ -4,7 +4,6 @@
 
 import Darwin
 import Foundation
-import os
 
 /// The level of logging severity.
 ///
@@ -77,7 +76,7 @@ import os
     #if os(iOS)
       // On iOS, the user has no access to stdout.
       // Output can be read from the log by the user or the `flutter` tool.
-      self.init(outputWriter: OSLogOutputWriter(), logLevel: .info)
+      self.init(outputWriter: SyslogOutputWriter(), logLevel: .info)
     #elseif os(macOS)
       // On macOS, both the user and the tool read from stdout.
       self.init(outputWriter: StdoutOutputWriter(), logLevel: .info)
@@ -183,34 +182,11 @@ protocol OutputWriter: Sendable {
   func writeLine(level: LogLevel, _ message: String)
 }
 
-private extension LogLevel {
-  /// The `OSLogType` used to emit a message at this level via `os_log`.
-  ///
-  /// `OSLogType` is not a strict severity ladder like `LogLevel`. It's a small set of categories
-  /// with differing persistence and display behavior. Each level therefore maps to the type with
-  /// the closest semantics rather than a matching severity.
-  ///
-  /// - `.info` is buffered in memory and not written to persistent store by default.
-  /// - `.warning` is written to persistent store.
-  /// - `.error` is logged with error metadata and is written to persistent store.
-  /// - `.important` is used by Dart `print` output, so is written to persistent store.
-  /// - `.fatal` is logged with fault metadata and is written to persistent store.
-  var osLogType: OSLogType {
-    switch self {
-    case .info: return .info
-    case .warning: return .default
-    case .error: return .error
-    case .important: return .default
-    case .fatal: return .fault
-    }
-  }
-}
-
-final class OSLogOutputWriter: OutputWriter, Sendable {
-  private let osLog = OSLog(subsystem: "io.flutter.flutter", category: "flutter")
-
+final class SyslogOutputWriter: OutputWriter, Sendable {
   func writeLine(level: LogLevel, _ message: String) {
-    os_log("%{public}@", log: osLog, type: level.osLogType, message)
+    // TODO(cbracken): replace this with os_log-based approach.
+    // https://github.com/flutter/flutter/issues/44030
+    message.withCString { vsyslog(LOG_ALERT, "%s", getVaList([$0])) }
   }
 }
 
