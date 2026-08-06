@@ -338,11 +338,10 @@ class Container extends StatelessWidget {
   /// The [child] is not clipped to the decoration. To clip a child to the shape
   /// of a particular [ShapeDecoration], consider using a [ClipPath] widget.
   ///
-  /// A child that clips itself to the same corner radius as the decoration
-  /// does not line up with the inside of a border painted by that decoration.
-  /// The child is inset by the rectangular [Decoration.padding], so its
-  /// corners curve away from the border and leave gaps. Reducing the child's
-  /// corner radius by that inset aligns them. Moving the border to
+  /// A child that clips itself to the same corner radius as the decoration can
+  /// leave gaps along the inside of a border because [Decoration.padding]
+  /// insets the child. Reducing the child's corner radii by the corresponding
+  /// per-axis padding insets aligns the curves. Moving the border to
   /// [foregroundDecoration] avoids the mismatch.
   final Decoration? decoration;
 
@@ -388,7 +387,8 @@ class Container extends StatelessWidget {
   ///
   /// For a border that must remain visible on top of the child, consider
   /// painting it with a border-only [foregroundDecoration] of the same
-  /// geometry, keeping [decoration] to define the clip path.
+  /// geometry, keeping [decoration] (without the border) to define the clip
+  /// path.
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
