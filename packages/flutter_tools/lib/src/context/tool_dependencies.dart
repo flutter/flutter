@@ -406,22 +406,9 @@ class ToolDependencies {
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
-    final AndroidStudio? finalAndroidStudio =
-        androidStudio ??
-        AndroidStudio.latestValid(
-          platform: finalPlatform,
-          fileSystem: finalFS,
-          processManager: finalProcessManager,
-          config: finalConfig,
-        );
+    final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();
 
-    final AndroidSdk? finalAndroidSdk =
-        androidSdk ??
-        AndroidSdk.locateAndroidSdk(
-          fileSystem: finalFS,
-          platform: finalPlatform,
-          config: finalConfig,
-        );
+    final AndroidSdk? finalAndroidSdk = androidSdk ?? AndroidSdk.locateAndroidSdk();
 
     final Java? finalJava =
         java ??

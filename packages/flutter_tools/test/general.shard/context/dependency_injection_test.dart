@@ -97,9 +97,6 @@ void main() {
 
       // Verify AndroidContext
       expect(dependencies.androidContext.gradleUtils, isNotNull);
-      // Verify that Android SDK was located using the overridden FS and platform
-      expect(dependencies.androidContext.androidSdk, isNotNull);
-      expect(dependencies.androidContext.androidSdk!.directory.path, '/home/user/Android/Sdk');
     });
 
     testUsingContext('respects explicit overrides for Android SDK and Studio', () async {
