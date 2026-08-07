@@ -19,6 +19,8 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
+import 'android_environment_resolver.dart';
 import 'android_sdk.dart';
 import 'gradle_utils.dart' as gradle_utils;
 import 'java.dart';
@@ -161,6 +163,17 @@ class AndroidValidator extends DoctorValidator {
       messages.add(
         ValidationMessage(_androidJdkLocationMessage(_java!.binaryPath, _java.javaSource)),
       );
+      final AndroidEnvironmentResolver? resolver = globals.androidEnvironmentResolver;
+      final List<JavaHomeCandidate> incompatible =
+          resolver?.resolve()?.incompatibleJavaCandidates ?? <JavaHomeCandidate>[];
+      for (final candidate in incompatible) {
+        messages.add(
+          ValidationMessage.hint(
+            'Skipped Java candidate ${candidate.path ?? "PATH"} (${candidate.source.name}): '
+            'incompatible with Android SDK command-line tools.',
+          ),
+        );
+      }
       if (!_java.canRun()) {
         messages.add(ValidationMessage.error(androidCantRunJavaBinary(_java.binaryPath)));
         return false;
