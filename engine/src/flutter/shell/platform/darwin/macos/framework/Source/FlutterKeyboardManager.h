@@ -56,6 +56,18 @@
  */
 - (BOOL)onTextInputKeyEvent:(nonnull NSEvent*)event;
 
+/**
+ * Whether the text input plugin has an active IME composition (marked
+ * text).
+ *
+ * While composing, key-down events are offered to the text input system
+ * before the responders, so that keys consumed by the input method do not
+ * also trigger the framework's keyboard handling.
+ *
+ * This method typically forwards to |TextInputPlugin.hasMarkedText|.
+ */
+- (BOOL)isComposing;
+
 @end
 
 /**
@@ -67,6 +79,8 @@
  * event, and only unhandled events can move to the next section:
  *
  * - Pre-filtering: Events during IME are sent to the system immediately.
+ * - Composing: While the IME has marked text, key-down events are offered to
+ *   |TextInputPlugin| first; keys it consumes (and their key-ups) stop here.
  * - Keyboard: Dispatch to the embedder responder and the channel responder
  *   simultaneously. After both responders have responded (asynchronously), the
  *   event is considered handled if either responder handles.
