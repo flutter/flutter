@@ -22,10 +22,7 @@ const _kSkiaType = 'skia';
 class ScreenshotCommand extends FlutterCommand {
   ScreenshotCommand({required ToolContext toolContext})
     : _toolContext = toolContext,
-      _fsUtils = FileSystemUtils(
-        fileSystem: toolContext.fs,
-        platform: toolContext.platform,
-      ) {
+      _fsUtils = FileSystemUtils(fileSystem: toolContext.fs, platform: toolContext.platform) {
     argParser.addOption(
       _kOut,
       abbr: 'o',

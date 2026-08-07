@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/screenshot.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';

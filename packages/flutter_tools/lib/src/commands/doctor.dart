@@ -4,13 +4,11 @@
 
 import '../android/android_workflow.dart';
 import '../base/common.dart';
-import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
-  DoctorCommand({required Doctor doctor, this.verbose = false})
-    : _doctor = doctor {
+  DoctorCommand({required Doctor doctor, this.verbose = false}) : _doctor = doctor {
     argParser.addFlag(
       'android-licenses',
       negatable: false,

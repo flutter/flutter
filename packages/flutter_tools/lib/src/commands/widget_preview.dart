@@ -236,12 +236,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final ShutdownHooks shutdownHooks;
 
-  @override
   final OperatingSystemUtils os;
 
   final ProcessManager processManager;
 
-  @override
   final Artifacts artifacts;
 
   final Terminal terminal;

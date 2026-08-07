@@ -16,7 +16,9 @@ class LogsCommand extends FlutterCommand {
     required DeviceManager deviceManager,
     required this.sigint,
     required this.sigterm,
-  }) : _deviceManager = deviceManager {
+    required ToolContext toolContext,
+  }) : _deviceManager = deviceManager,
+       _toolContext = toolContext {
     argParser.addFlag(
       'clear',
       negatable: false,
@@ -28,6 +30,7 @@ class LogsCommand extends FlutterCommand {
   }
 
   final DeviceManager _deviceManager;
+  final ToolContext _toolContext;
 
   DeviceManager get deviceManager => _deviceManager;
 
@@ -72,7 +75,7 @@ class LogsCommand extends FlutterCommand {
 
     final DeviceLogReader logReader = await cachedDevice.getLogReader(app: app);
 
-    logger.printStatus('Showing $logReader logs:');
+    _toolContext.logger.printStatus('Showing $logReader logs:');
 
     final exitCompleter = Completer<int>();
 
@@ -87,7 +90,7 @@ class LogsCommand extends FlutterCommand {
 
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(
-      (String message) => logger.printStatus(message, wrap: false),
+      (String message) => _toolContext.logger.printStatus(message, wrap: false),
       onDone: () => maybeComplete(),
       onError: (dynamic error) => maybeComplete(error is int ? error : 1),
     );
@@ -96,7 +99,7 @@ class LogsCommand extends FlutterCommand {
     sigint.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       maybeComplete();
-      logger.printStatus('');
+      _toolContext.logger.printStatus('');
     });
     sigterm.watch().listen((ProcessSignal signal) {
       subscription.cancel();

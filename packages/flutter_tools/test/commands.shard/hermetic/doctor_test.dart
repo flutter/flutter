@@ -15,12 +15,10 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:test/fake.dart';
@@ -824,30 +822,25 @@ void main() {
   });
 
   group('DoctorCommand DI', () {
-    testUsingContext('resolves doctor from the injected Doctor rather than the Zone', () {
+    testWithoutContext('resolves doctor from the injected Doctor rather than the Zone', () {
       final mockDoctor = MockDoctor();
-      final command = DoctorCommand(doctor: mockDoctor, toolContext: FakeToolContext());
+      final command = DoctorCommand(doctor: mockDoctor);
 
       expect(command.doctor, same(mockDoctor));
-      expect(command.doctor, isNot(same(globals.doctor)));
-    }, overrides: <Type, Generator>{Doctor: () => MockDoctor()});
+    });
 
-    testUsingContext('runs diagnose on the injected Doctor', () async {
+    testWithoutContext('runs diagnose on the injected Doctor', () async {
       final mockDoctor = MockDoctor();
-      final command = DoctorCommand(doctor: mockDoctor, toolContext: FakeToolContext());
+      final command = DoctorCommand(doctor: mockDoctor);
 
       await createTestCommandRunner(command).run(<String>['doctor']);
 
       expect(mockDoctor.diagnoseCalled, isTrue);
     });
 
-    testUsingContext('runs checkRemoteArtifacts on the injected Doctor', () async {
+    testWithoutContext('runs checkRemoteArtifacts on the injected Doctor', () async {
       final mockDoctor = MockDoctor();
-      final command = DoctorCommand(
-        doctor: mockDoctor,
-        toolContext: FakeToolContext(),
-        verbose: true,
-      );
+      final command = DoctorCommand(doctor: mockDoctor, verbose: true);
 
       await expectLater(
         () => createTestCommandRunner(
@@ -886,8 +879,6 @@ class MockDoctor extends Fake implements Doctor {
     return true;
   }
 }
-
-class FakeToolContext extends Fake implements ToolContext {}
 
 class PassingValidator extends DoctorValidator {
   PassingValidator(super.title);

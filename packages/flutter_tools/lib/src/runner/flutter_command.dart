@@ -9,7 +9,6 @@ import 'package:package_config/package_config_types.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -24,8 +23,6 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
-import '../doctor.dart';
-import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';

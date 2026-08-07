@@ -79,8 +79,6 @@ void main() {
         verboseHelp: false,
       );
 
-      expect(command.fileSystem, same(mockFileSystem));
-      expect(command.logger, same(mockLogger));
       expect(command.deviceManager, same(mockDeviceManager));
     });
 

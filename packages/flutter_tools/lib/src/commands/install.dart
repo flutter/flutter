@@ -18,7 +18,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     required ToolContext toolContext,
     required bool verboseHelp,
   }) : _deviceManager = deviceManager,
-       super(toolContext: toolContext) {
+       _toolContext = toolContext {
     addBuildModeFlags(verboseHelp: verboseHelp);
     requiresPubspecYaml();
     usesApplicationBinaryOption();
@@ -33,8 +33,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 
   final DeviceManager _deviceManager;
+  final ToolContext _toolContext;
 
-  @override
   DeviceManager get deviceManager => _deviceManager;
 
   @override
@@ -56,7 +56,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 
   String? get _applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   File? get _applicationBinary =>
-      _applicationBinaryPath == null ? null : fileSystem.file(_applicationBinaryPath);
+      _applicationBinaryPath == null ? null : _toolContext.fs.file(_applicationBinaryPath);
 
   @override
   Future<void> validateCommand() async {
@@ -95,19 +95,24 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 
   Future<void> _uninstallApp(ApplicationPackage package, Device device) async {
     if (await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
-      logger.printStatus('Uninstalling $package from $device...');
+      _toolContext.logger.printStatus('Uninstalling $package from $device...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
-        logger.printError('Uninstalling old version failed');
+        _toolContext.logger.printError('Uninstalling old version failed');
       }
     } else {
-      logger.printStatus('$package not found on $device, skipping uninstall');
+      _toolContext.logger.printStatus('$package not found on $device, skipping uninstall');
     }
   }
 
   Future<void> _installApp(ApplicationPackage package, Device device) async {
-    logger.printStatus('Installing $package to $device...');
+    _toolContext.logger.printStatus('Installing $package to $device...');
 
-    if (!await installApp(device, package, logger: logger, userIdentifier: userIdentifier)) {
+    if (!await installApp(
+      device,
+      package,
+      logger: _toolContext.logger,
+      userIdentifier: userIdentifier,
+    )) {
       throwToolExit('Install failed');
     }
   }

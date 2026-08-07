@@ -908,7 +908,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
     }); // Closes 'when Platform is MacOS'
 
     group('Dependency Injection validation', () {
-      testUsingContext(
+      testWithoutContext(
         'resolves dependencies from the injected parameters rather than the Zone',
         () async {
           final FileSystem injectedFileSystem = _FakeFileSystem();
@@ -930,23 +930,13 @@ If you expected another device to be detected, please run "flutter doctor" to di
           );
 
           // 1. Structural validation (assert identity)
-          expect(command.fileSystem, same(injectedFileSystem));
-          expect(command.logger, same(injectedLogger));
-          expect(command.platform, same(injectedPlatform));
           expect(command.deviceManager, same(injectedDeviceManager));
           expect(command.doctor, same(injectedDoctor));
-
-          expect(command.fileSystem, isNot(same(globals.fs)));
-          expect(command.logger, isNot(same(globals.logger)));
-          expect(command.platform, isNot(same(globals.platform)));
-          expect(command.deviceManager, isNot(same(globals.deviceManager)));
-          expect(command.doctor, isNot(same(globals.doctor)));
 
           // 2. Behavioral validation (assert execution uses injected logger)
           await createTestCommandRunner(command).run(<String>['devices']);
 
           expect(injectedLogger.statusText, contains('No authorized devices detected.'));
-          expect(testLogger.statusText, isNot(contains('No authorized devices detected.')));
         },
       );
     });

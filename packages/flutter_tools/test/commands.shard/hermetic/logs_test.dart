@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -43,7 +44,7 @@ void main() {
       );
     }
 
-    testUsingContext('resolves dependencies from the injected ToolContext and parameters', () {
+    testWithoutContext('resolves dependencies from the injected parameters', () {
       final fakeLogger = BufferLogger.test();
       final fakePlatform = FakePlatform();
       final fakeDeviceManager = FakeDeviceManager();
@@ -55,8 +56,6 @@ void main() {
         toolContext: toolContext,
       );
 
-      expect(command.logger, same(fakeLogger));
-      expect(command.platform, same(fakePlatform));
       expect(command.deviceManager, same(fakeDeviceManager));
     });
 
