@@ -121,7 +121,9 @@ class EngineVertices implements ui.Vertices {
   ///
   /// This will be null if the `positions` list provided during construction was empty.
   BackendVertices? get delegate {
-    assert(!_isDisposed, 'Attempted to use a disposed Vertices.');
+    if (_isDisposed) {
+      throw StateError('Attempted to use a disposed Vertices.');
+    }
     return _delegate;
   }
 
