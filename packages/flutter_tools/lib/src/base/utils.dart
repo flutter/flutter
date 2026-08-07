@@ -667,6 +667,8 @@ List<String> formatTable(List<List<String>> table, {String separator = ' • ', 
 /// Throws a [FormatException] if a UTF-16 byte payload has an odd length after
 /// stripping the BOM, or a [ToolExit] if strict UTF-8 decoding fails.
 String decodeUtf8OrUtf16(List<int> bytes) {
+  // Avoid using list pattern matching here (e.g., `[0xFF, 0xFE, ...final payload]`)
+  // as the rest pattern allocates a copied sublist for the payload.
   if (bytes.length >= 2 && bytes[0] == 0xFF && bytes[1] == 0xFE) {
     return _decodeUtf16(bytes, 2, Endian.little);
   }
