@@ -752,7 +752,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     // that the X/Y axes have been flipped.
     //
     // The same conversion happens on Web for macOS, see:
-    // https://github.com/flutter/flutter/pull/189506
+    // https://github.com/flutter/flutter/issues/159868
     double scaledDeltaX = -event.scrollingDeltaX * pixelsPerLine * scaleFactor;
     double scaledDeltaY = -event.scrollingDeltaY * pixelsPerLine * scaleFactor;
     if (event.modifierFlags & NSShiftKeyMask) {
