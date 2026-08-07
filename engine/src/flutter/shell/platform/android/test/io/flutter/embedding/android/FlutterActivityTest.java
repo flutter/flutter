@@ -690,7 +690,7 @@ public class FlutterActivityTest {
 
   @Test
   public void getDartEntrypointFunctionName_returnsNameWhenSelfSent() {
-    Intent intent = FlutterActivity.withNewEngine().dartEntrypoint("custom_entrypoint").build(ctx);
+    Intent intent = FlutterActivity.withNewEngine().build(ctx).putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
     ActivityController<FlutterActivity> activityController =
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
@@ -703,7 +703,7 @@ public class FlutterActivityTest {
 
   @Test
   public void getDartEntrypointFunctionName_returnsDefaultWhenNotSelfSent() {
-    Intent intent = FlutterActivity.withNewEngine().dartEntrypoint("custom_entrypoint").build(ctx);
+    Intent intent = FlutterActivity.withNewEngine().build(ctx).putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
     ActivityController<FlutterActivity> activityController =
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
@@ -793,7 +793,7 @@ public class FlutterActivityTest {
   @Test
   public void getDartEntrypointFunctionName_returnsNameFromMetaDataWhenNotSelfSent()
       throws PackageManager.NameNotFoundException {
-    Intent intent = FlutterActivity.withNewEngine().dartEntrypoint("custom_entrypoint").build(ctx);
+    Intent intent = FlutterActivity.withNewEngine().build(ctx).putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
     ActivityController<FlutterActivity> activityController =
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = spy(activityController.get());

@@ -49,6 +49,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
 import org.robolectric.Robolectric;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
@@ -442,7 +443,7 @@ public class FlutterFragmentActivityTest {
   @Test
   public void getDartEntrypointFunctionName_returnsNameWhenSelfSent() {
     Intent intent =
-        FlutterFragmentActivity.withNewEngine().dartEntrypoint("custom_entrypoint").build(ctx);
+        FlutterFragmentActivity.withNewEngine().build(ctx).putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
     FlutterFragmentActivity flutterActivity = activityController.get();
@@ -456,7 +457,7 @@ public class FlutterFragmentActivityTest {
   @Test
   public void getDartEntrypointFunctionName_returnsDefaultWhenNotSelfSent() {
     Intent intent =
-        FlutterFragmentActivity.withNewEngine().dartEntrypoint("custom_entrypoint").build(ctx);
+        FlutterFragmentActivity.withNewEngine().build(ctx).putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
     FlutterFragmentActivity flutterActivity = activityController.get();
@@ -550,7 +551,7 @@ public class FlutterFragmentActivityTest {
   public void getDartEntrypointFunctionName_returnsNameFromMetaDataWhenNotSelfSent()
       throws PackageManager.NameNotFoundException {
     Intent intent =
-        FlutterFragmentActivity.withNewEngine().dartEntrypoint("custom_entrypoint").build(ctx);
+        FlutterFragmentActivity.withNewEngine().build(ctx).putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
     FlutterFragmentActivity flutterActivity = spy(activityController.get());

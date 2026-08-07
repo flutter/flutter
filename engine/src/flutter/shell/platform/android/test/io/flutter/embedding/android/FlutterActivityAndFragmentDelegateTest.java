@@ -64,6 +64,9 @@ import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,8 +91,21 @@ public class FlutterActivityAndFragmentDelegateTest {
     // being tested.
     mockFlutterEngine = mockFlutterEngine();
 
+    Activity mockActivity = mock(Activity.class);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    ActivityInfo mockActivityInfo = new ActivityInfo();
+    mockActivityInfo.exported = true;
+    ComponentName mockComponentName = new ComponentName("com.test", "TestActivity");
+    when(mockActivity.getComponentName()).thenReturn(mockComponentName);
+    try {
+        when(mockPackageManager.getActivityInfo(org.mockito.ArgumentMatchers.any(ComponentName.class), org.mockito.ArgumentMatchers.anyInt())).thenReturn(mockActivityInfo);
+    } catch (PackageManager.NameNotFoundException e) {}
+    when(mockActivity.getPackageManager()).thenReturn(mockPackageManager);
+    when(mockActivity.getPackageName()).thenReturn("com.test");
+
     // Create a mocked Host, which is required by the delegate being tested.
     mockHost = mock(FlutterActivityAndFragmentDelegate.Host.class);
+    when(mockHost.getActivity()).thenReturn(mockActivity);
     when(mockHost.getContext()).thenReturn(ctx);
     when(mockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
     when(mockHost.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
@@ -107,6 +123,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(mockHost.attachToEngineAutomatically()).thenReturn(true);
 
     mockHost2 = mock(FlutterActivityAndFragmentDelegate.Host.class);
+    when(mockHost2.getActivity()).thenReturn(mockActivity);
     when(mockHost2.getContext()).thenReturn(ctx);
     when(mockHost2.getLifecycle()).thenReturn(mock(Lifecycle.class));
     when(mockHost2.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
@@ -333,6 +350,16 @@ public class FlutterActivityAndFragmentDelegateTest {
     // ---- Test setup ----
     FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
     Activity mockActivity = mock(Activity.class);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    ActivityInfo mockActivityInfo = new ActivityInfo();
+    mockActivityInfo.exported = true;
+    ComponentName mockComponentName = new ComponentName("com.test", "TestActivity");
+    when(mockActivity.getComponentName()).thenReturn(mockComponentName);
+    try {
+        when(mockPackageManager.getActivityInfo(org.mockito.ArgumentMatchers.any(ComponentName.class), org.mockito.ArgumentMatchers.anyInt())).thenReturn(mockActivityInfo);
+    } catch (PackageManager.NameNotFoundException e) {}
+    when(mockActivity.getPackageManager()).thenReturn(mockPackageManager);
+    when(mockActivity.getPackageName()).thenReturn("com.test");
     Intent mockIntent = mock(Intent.class);
     when(mockFlutterLoader.findAppBundlePath()).thenReturn("default_flutter_assets/path");
     FlutterInjector.setInstance(

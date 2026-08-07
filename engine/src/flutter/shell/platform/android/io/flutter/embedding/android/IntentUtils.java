@@ -48,10 +48,13 @@ class IntentUtils {
     // Activities can only be launched by components of the same app, apps with the
     // same user ID, or priviliged system components.
     try {
-      ActivityInfo activityInfo =
-          activity.getPackageManager().getActivityInfo(activity.getComponentName(), 0);
-      if (!activityInfo.exported) {
-        return true;
+      PackageManager pm = activity.getPackageManager();
+      ComponentName cn = activity.getComponentName();
+      if (pm != null && cn != null) {
+        ActivityInfo activityInfo = pm.getActivityInfo(cn, 0);
+        if (!activityInfo.exported) {
+          return true;
+        }
       }
     } catch (PackageManager.NameNotFoundException e) {
     }
