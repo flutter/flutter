@@ -82,19 +82,19 @@ void main() {
 import PackageDescription
 
 let package = Package(
-    name: "FlutterGeneratedPluginSwiftPackage",
+    name: "TestAppFlutterPlugins",
     platforms: [
         $supportedPlatform
     ],
     products: [
-        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+        .library(name: "TestAppFlutterPlugins", type: .static, targets: ["TestAppFlutterPlugins"])
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
         .target(
-            name: "FlutterGeneratedPluginSwiftPackage",
+            name: "TestAppFlutterPlugins",
             dependencies: [
                 .product(name: "FlutterFramework", package: "FlutterFramework")
             ]
@@ -177,19 +177,19 @@ $_doubleIndent
 import PackageDescription
 
 let package = Package(
-    name: "FlutterGeneratedPluginSwiftPackage",
+    name: "TestAppFlutterPlugins",
     platforms: [
         $supportedPlatform
     ],
     products: [
-        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+        .library(name: "TestAppFlutterPlugins", type: .static, targets: ["TestAppFlutterPlugins"])
     ],
     dependencies: [
 $_doubleIndent
     ],
     targets: [
         .target(
-            name: "FlutterGeneratedPluginSwiftPackage"
+            name: "TestAppFlutterPlugins"
         )
     ]
 )
@@ -240,12 +240,12 @@ $_doubleIndent
 import PackageDescription
 
 let package = Package(
-    name: "FlutterGeneratedPluginSwiftPackage",
+    name: "TestAppFlutterPlugins",
     platforms: [
         $supportedPlatform
     ],
     products: [
-        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+        .library(name: "TestAppFlutterPlugins", type: .static, targets: ["TestAppFlutterPlugins"])
     ],
     dependencies: [
         .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1-1.0.0"),
@@ -253,7 +253,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "FlutterGeneratedPluginSwiftPackage",
+            name: "TestAppFlutterPlugins",
             dependencies: [
                 .product(name: "valid-plugin-1", package: "valid_plugin_1"),
                 .product(name: "FlutterFramework", package: "FlutterFramework")
@@ -347,12 +347,12 @@ let package = Package(
 import PackageDescription
 
 let package = Package(
-    name: "FlutterGeneratedPluginSwiftPackage",
+    name: "TestAppFlutterPlugins",
     platforms: [
         $supportedPlatform
     ],
     products: [
-        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+        .library(name: "TestAppFlutterPlugins", type: .static, targets: ["TestAppFlutterPlugins"])
     ],
     dependencies: [
         .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1-1.0.0"),
@@ -361,7 +361,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "FlutterGeneratedPluginSwiftPackage",
+            name: "TestAppFlutterPlugins",
             dependencies: [
                 .product(name: "valid-plugin-1", package: "valid_plugin_1"),
                 .product(name: "valid-plugin-2", package: "valid_plugin_2"),
@@ -533,12 +533,12 @@ let package = Package(
 import PackageDescription
 
 let package = Package(
-    name: "FlutterGeneratedPluginSwiftPackage",
+    name: "TestAppFlutterPlugins",
     platforms: [
         $supportedPlatform
     ],
     products: [
-        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+        .library(name: "TestAppFlutterPlugins", type: .static, targets: ["TestAppFlutterPlugins"])
     ],
     dependencies: [
         .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1-1.0.0"),
@@ -548,7 +548,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "FlutterGeneratedPluginSwiftPackage",
+            name: "TestAppFlutterPlugins",
             dependencies: [
                 .product(name: "valid-plugin-1", package: "valid_plugin_1"),
                 .product(name: "valid-plugin-2", package: "valid_plugin_2"),
@@ -744,8 +744,13 @@ let package = Package(
 }
 
 class FakeXcodeProject extends Fake implements IosProject {
-  FakeXcodeProject({required FileSystem fileSystem, required String platform})
-    : hostAppRoot = fileSystem.directory('app_name').childDirectory(platform);
+  FakeXcodeProject({
+    required FileSystem fileSystem,
+    required String platform,
+    this.appName = 'test_app',
+  }) : hostAppRoot = fileSystem.directory('app_name').childDirectory(platform);
+
+  final String appName;
 
   @override
   Directory hostAppRoot;
@@ -758,6 +763,15 @@ class FakeXcodeProject extends Fake implements IosProject {
 
   @override
   String hostAppProjectName = 'Runner';
+
+  @override
+  String get flutterPluginSwiftPackageName {
+    final pascalName = appName
+        .split('_')
+        .map((s) => s.isEmpty ? '' : '${s[0].toUpperCase()}${s.substring(1)}')
+        .join();
+    return '${pascalName}FlutterPlugins';
+  }
 
   @override
   Directory get flutterSwiftPackagesDirectory =>
@@ -773,7 +787,7 @@ class FakeXcodeProject extends Fake implements IosProject {
 
   @override
   Directory get flutterPluginSwiftPackageDirectory =>
-      flutterSwiftPackagesDirectory.childDirectory('FlutterGeneratedPluginSwiftPackage');
+      flutterSwiftPackagesDirectory.childDirectory(flutterPluginSwiftPackageName);
 
   @override
   File get flutterPluginSwiftPackageManifest =>
@@ -781,8 +795,12 @@ class FakeXcodeProject extends Fake implements IosProject {
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings {
-    return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+    if (!xcodeProjectInfoFile.existsSync()) {
+      return false;
+    }
+    final String contents = xcodeProjectInfoFile.readAsStringSync();
+    return contents.contains(flutterPluginSwiftPackageName) ||
+        contents.contains(kFlutterGeneratedPluginSwiftPackageName);
   }
 }
 

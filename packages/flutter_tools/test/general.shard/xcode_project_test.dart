@@ -75,22 +75,59 @@ void main() {
       );
     });
 
-    testWithoutContext('flutterPluginSwiftPackageDirectory', () {
+    testWithoutContext('flutterPluginSwiftPackageName includes app name', () {
       final fs = MemoryFileSystem.test();
-      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, appName: 'my_app'));
+      expect(project.flutterPluginSwiftPackageName, 'MyAppFlutterPlugins');
+    });
+
+    testWithoutContext('flutterPluginSwiftPackageName is unique per app', () {
+      final fs = MemoryFileSystem.test();
+      final mainApp = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, appName: 'main_app'),
+      );
+      final clipApp = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, appName: 'clip_app'),
+      );
+      expect(mainApp.flutterPluginSwiftPackageName, isNot(clipApp.flutterPluginSwiftPackageName));
+    });
+
+    testWithoutContext('flutterPluginSwiftPackageDirectory uses app-specific name', () {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, appName: 'my_app'));
       expect(
         project.flutterPluginSwiftPackageDirectory.path,
-        'app_name/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage',
+        'app_name/ios/Flutter/ephemeral/Packages/MyAppFlutterPlugins',
       );
     });
 
-    testWithoutContext('module flutterPluginSwiftPackageDirectory', () {
+    testWithoutContext('module flutterPluginSwiftPackageDirectory uses app-specific name', () {
       final fs = MemoryFileSystem.test();
-      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, isModule: true));
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, isModule: true, appName: 'my_app'),
+      );
       expect(
         project.flutterPluginSwiftPackageDirectory.path,
-        'app_name/.ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage',
+        'app_name/.ios/Flutter/ephemeral/Packages/MyAppFlutterPlugins',
       );
+    });
+
+    testWithoutContext('flutterPluginSwiftPackageInProjectSettings detects legacy name', () {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, appName: 'my_app'));
+      project.xcodeProjectInfoFile.createSync(recursive: true);
+      project.xcodeProjectInfoFile.writeAsStringSync(
+        'FlutterGeneratedPluginSwiftPackage in Frameworks',
+      );
+      expect(project.flutterPluginSwiftPackageInProjectSettings, isTrue);
+    });
+
+    testWithoutContext('flutterPluginSwiftPackageInProjectSettings detects new name', () {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, appName: 'my_app'));
+      project.xcodeProjectInfoFile.createSync(recursive: true);
+      project.xcodeProjectInfoFile.writeAsStringSync('MyAppFlutterPlugins in Frameworks');
+      expect(project.flutterPluginSwiftPackageInProjectSettings, isTrue);
     });
 
     testWithoutContext('xcodeConfigFor', () {
@@ -470,10 +507,12 @@ void main() {
 
     testWithoutContext('flutterPluginSwiftPackageDirectory', () {
       final fs = MemoryFileSystem.test();
-      final project = MacOSProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      final project = MacOSProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs, appName: 'my_app'),
+      );
       expect(
         project.flutterPluginSwiftPackageDirectory.path,
-        'app_name/macos/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage',
+        'app_name/macos/Flutter/ephemeral/Packages/MyAppFlutterPlugins',
       );
     });
 
@@ -808,9 +847,10 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject({required this.fileSystem, this.isModule = false});
+  FakeFlutterProject({required this.fileSystem, this.isModule = false, this.appName = 'test_app'});
 
   MemoryFileSystem fileSystem;
+  String appName;
 
   @override
   late final Directory directory = fileSystem.directory('app_name');
@@ -819,7 +859,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  FlutterManifest get manifest => FakeFlutterManifest();
+  FlutterManifest get manifest => FakeFlutterManifest(appName: appName);
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
@@ -848,7 +888,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 }
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
-  FakeFlutterManifest({this.isModule = false});
+  FakeFlutterManifest({this.isModule = false, this.appName = 'test_app'});
 
   @override
   bool isModule;
@@ -863,7 +903,7 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
   String? get iosBundleIdentifier => null;
 
   @override
-  String get appName => '';
+  final String appName;
 
   @override
   List<String> get workspace => <String>[];
