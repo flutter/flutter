@@ -138,6 +138,75 @@ $_doubleIndent
             );
           });
 
+          testWithoutContext('uses project deployment target when higher than default', () async {
+            final fs = MemoryFileSystem();
+            final processManager = FakeProcessManager.any();
+            final logger = BufferLogger.test();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+            project.xcodeProjectInfoFile.createSync(recursive: true);
+            // Set deployment target higher than Flutter's default (iOS 15.0 / macOS 12.0)
+            final deploymentKey = platform == FlutterDarwinPlatform.ios
+                ? 'IPHONEOS_DEPLOYMENT_TARGET'
+                : 'MACOSX_DEPLOYMENT_TARGET';
+            project.xcodeProjectInfoFile.writeAsStringSync('''
+78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; };
+$deploymentKey = 17.0;
+''');
+
+            final spm = SwiftPackageManager(
+              fileSystem: fs,
+              templateRenderer: const MustacheTemplateRenderer(),
+              processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              config: FakeConfig(),
+            );
+            await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
+
+            final expectedPlatform = platform == FlutterDarwinPlatform.ios
+                ? '.iOS("17.0")'
+                : '.macOS("17.0")';
+            expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
+            expect(
+              project.flutterPluginSwiftPackageManifest.readAsStringSync(),
+              contains(expectedPlatform),
+            );
+          });
+
+          testWithoutContext(
+            'uses default deployment target when project target is lower',
+            () async {
+              final fs = MemoryFileSystem();
+              final processManager = FakeProcessManager.any();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+              project.xcodeProjectInfoFile.createSync(recursive: true);
+              final deploymentKey = platform == FlutterDarwinPlatform.ios
+                  ? 'IPHONEOS_DEPLOYMENT_TARGET'
+                  : 'MACOSX_DEPLOYMENT_TARGET';
+              // Set deployment target lower than Flutter's default (iOS 15.0 / macOS 12.0)
+              project.xcodeProjectInfoFile.writeAsStringSync('''
+78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; };
+$deploymentKey = 10.0;
+''');
+
+              final spm = SwiftPackageManager(
+                fileSystem: fs,
+                templateRenderer: const MustacheTemplateRenderer(),
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                config: FakeConfig(),
+              );
+              await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
+
+              final expectedPlatform = platform == FlutterDarwinPlatform.ios
+                  ? '.iOS("15.0")'
+                  : '.macOS("12.0")';
+              expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
+              expect(
+                project.flutterPluginSwiftPackageManifest.readAsStringSync(),
+                contains(expectedPlatform),
+              );
+            },
+          );
+
           testWithoutContext(
             'generate if no dependencies, no Flutter dependency, and already migrated',
             () async {
@@ -783,6 +852,19 @@ class FakeXcodeProject extends Fake implements IosProject {
   bool get flutterPluginSwiftPackageInProjectSettings {
     return xcodeProjectInfoFile.existsSync() &&
         xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+  }
+
+  @override
+  String? deploymentTargetFromPbxproj(FlutterDarwinPlatform platform) {
+    if (!xcodeProjectInfoFile.existsSync()) {
+      return null;
+    }
+    final String key = platform == FlutterDarwinPlatform.ios
+        ? 'IPHONEOS_DEPLOYMENT_TARGET'
+        : 'MACOSX_DEPLOYMENT_TARGET';
+    final RegExp pattern = RegExp('$key\\s*=\\s*([0-9.]+)');
+    final match = pattern.firstMatch(xcodeProjectInfoFile.readAsStringSync());
+    return match?.group(1);
   }
 }
 

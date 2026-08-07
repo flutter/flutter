@@ -191,6 +191,30 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   File get flutterPluginSwiftPackageManifest =>
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
+  /// Parses the deployment target for the given [platform] from the pbxproj.
+  ///
+  /// Returns the highest `IPHONEOS_DEPLOYMENT_TARGET` or
+  /// `MACOSX_DEPLOYMENT_TARGET` value found across all build configurations,
+  /// or `null` if the file doesn't exist or no value is found.
+  String? deploymentTargetFromPbxproj(FlutterDarwinPlatform platform) {
+    if (!xcodeProjectInfoFile.existsSync()) {
+      return null;
+    }
+    final String key = platform == FlutterDarwinPlatform.ios
+        ? 'IPHONEOS_DEPLOYMENT_TARGET'
+        : 'MACOSX_DEPLOYMENT_TARGET';
+    final RegExp pattern = RegExp('$key\\s*=\\s*([0-9.]+)');
+    final String contents = xcodeProjectInfoFile.readAsStringSync();
+    Version? highest;
+    for (final RegExpMatch match in pattern.allMatches(contents)) {
+      final Version? version = Version.parse(match.group(1));
+      if (version != null && (highest == null || version > highest)) {
+        highest = version;
+      }
+    }
+    return highest?.toString();
+  }
+
   /// Checks if FlutterGeneratedPluginSwiftPackage has been added to the
   /// project's build settings by checking the contents of the pbxproj.
   bool get flutterPluginSwiftPackageInProjectSettings {
