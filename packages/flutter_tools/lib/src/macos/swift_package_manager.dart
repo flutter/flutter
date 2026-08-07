@@ -115,13 +115,67 @@ class SwiftPackageManager {
     final pluginsPackage = SwiftPackage(
       manifest: project.flutterPluginSwiftPackageManifest,
       name: kFlutterGeneratedPluginSwiftPackageName,
-      platforms: <SwiftPackageSupportedPlatform>[platform.supportedPackagePlatform],
+      platforms: <SwiftPackageSupportedPlatform>[
+        _getSupportedPlatform(platform: platform, project: project),
+      ],
       products: <SwiftPackageProduct>[generatedProduct],
       dependencies: packageDependencies,
       targets: <SwiftPackageTarget>[generatedTarget],
       templateRenderer: _templateRenderer,
     );
     pluginsPackage.createSwiftPackage();
+  }
+
+  /// Returns the [SwiftPackageSupportedPlatform] for the given [platform] and [project].
+  ///
+  /// The FlutterGeneratedPluginSwiftPackage minimum deployment target should match the app's
+  /// minimum deployment target. However, the app's build settings are not available during
+  /// non-build Flutter commands (e.g. "flutter pub get"). This makes a best effort attempt to
+  /// determine the app's minimum deployment target by inspecting the Xcode pbxproj file. If the
+  /// app's minimum deployment target can't be determined, it falls back to the default supported
+  /// platform version. The version will be updated to the correct version during
+  /// [updateMinimumDeployment].
+  SwiftPackageSupportedPlatform _getSupportedPlatform({
+    required FlutterDarwinPlatform platform,
+    required XcodeBasedProject project,
+  }) {
+    if (!project.xcodeProjectInfoFile.existsSync()) {
+      return platform.supportedPackagePlatform;
+    }
+    final String contents = project.xcodeProjectInfoFile.readAsStringSync();
+    final String targetName = switch (platform) {
+      FlutterDarwinPlatform.ios => 'IPHONEOS_DEPLOYMENT_TARGET',
+      FlutterDarwinPlatform.macos => 'MACOSX_DEPLOYMENT_TARGET',
+    };
+
+    final int targetNameCount = targetName.allMatches(contents).length;
+    if (targetNameCount == 0) {
+      return platform.supportedPackagePlatform;
+    }
+
+    final regExp = RegExp('$targetName = ([\\d.]+);');
+    final Iterable<RegExpMatch> matches = regExp.allMatches(contents);
+    if (matches.length != targetNameCount) {
+      return platform.supportedPackagePlatform;
+    }
+
+    final String? firstVersionString = matches.first.group(1);
+    final Version? firstVersion = Version.parse(firstVersionString);
+    if (firstVersion == null || firstVersion < platform.supportedPackagePlatform.version) {
+      return platform.supportedPackagePlatform;
+    }
+
+    for (final match in matches) {
+      final Version? matchVersion = Version.parse(match.group(1));
+      if (matchVersion != firstVersion) {
+        return platform.supportedPackagePlatform;
+      }
+    }
+
+    return SwiftPackageSupportedPlatform(
+      platform: platform.swiftPackagePlatform,
+      version: firstVersion,
+    );
   }
 
   (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>)
