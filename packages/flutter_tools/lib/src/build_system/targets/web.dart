@@ -529,6 +529,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
           _,
           final packageFolder,
         ] when packageFolder.startsWith('$packageName-')) {
+          // Hosted package directories in .pub-cache follow '<packageName>-<version>'.
+          // Substring past the package name and hyphen to extract the version.
           hostedPackages[packageName] = packageFolder.substring(packageName.length + 1);
         } else {
           privatePackages.add(packageName);
