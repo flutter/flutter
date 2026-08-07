@@ -217,7 +217,7 @@ List<FlutterCommand> generateCommands({
     cache: toolDependencies.toolContext.cache,
     flutterVersion: toolDependencies.toolContext.flutterVersion,
   ),
-  ChannelCommand(verboseHelp: verboseHelp),
+  ChannelCommand(verboseHelp: verboseHelp, toolContext: toolDependencies.toolContext),
   CleanCommand(
     verbose: verbose,
     toolContext: toolDependencies.toolContext,
