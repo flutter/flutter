@@ -47,24 +47,63 @@ class ToolContext {
     required this.userMessages,
   });
 
+  /// Detects whether the tool is running in a CI or automated bot environment.
   final BotDetector botDetector;
+
+  /// Manages cached SDK artifacts, binary downloads, and directory structures.
   final Cache cache;
+
+  /// Reads and writes user and persistent global configuration settings.
   final Config config;
+
+  /// Manages user-configured custom device definitions stored on disk.
   final CustomDevicesConfig customDevicesConfig;
+
+  /// Provides mockable file system operations across host and virtual environments.
   final FileSystem fs;
+
+  /// Wraps host `git` operations, tracking repository state and branch revisions.
   final Git git;
+
+  /// Locates local engine builds specified via command-line flags.
   final LocalEngineLocator localEngineLocator;
+
+  /// Formats and emits console status, trace, warning, and error logs.
   final Logger logger;
+
+  /// Builds and packages native C/C++ or Rust assets for compilation and tests.
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+
+  /// Manages formatting preferences for console output, such as line wrapping width.
   final OutputPreferences outputPreferences;
+
+  /// Provides host operating system details and environment variables.
   final Platform platform;
+
+  /// Validates environment prerequisites and file permissions before command execution.
   final PreRunValidator preRunValidator;
+
+  /// Spawns and manages external host processes.
   final ProcessManager processManager;
+
+  /// Utility helpers for executing processes, error handling, and stream capturing.
   final ProcessUtils processUtils;
+
+  /// Instantiates and caches [FlutterProject] instances for project directories.
   final FlutterProjectFactory projectFactory;
+
+  /// Manages lifecycle callbacks executed upon tool termination or interrupt signals.
   final ShutdownHooks shutdownHooks;
+
+  /// Provides standard I/O streams (`stdin`, `stdout`, `stderr`).
   final Stdio stdio;
+
+  /// Provides mockable system time interfaces for timed operations.
   final SystemClock systemClock;
+
+  /// Formats terminal text output, colorization, and ANSI terminal capabilities.
   final AnsiTerminal terminal;
+
+  /// Centralized templates for user-facing status strings and error messages.
   final UserMessages userMessages;
 }

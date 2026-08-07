@@ -16,8 +16,15 @@ class AndroidContext {
     required this.java,
   });
 
+  /// Discovers, validates, and manages the local Android SDK and platform tools.
   final AndroidSdk? androidSdk;
+
+  /// Discovers and inspects local Android Studio installations and embedded JDK paths.
   final AndroidStudio? androidStudio;
+
+  /// Utility helpers for interacting with Gradle builds and resolving project configs.
   final GradleUtils gradleUtils;
+
+  /// Discovers and validates the active Java Development Kit (JDK) binary.
   final Java? java;
 }

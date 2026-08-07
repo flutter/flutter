@@ -69,12 +69,25 @@ class ToolDependencies {
     required this.toolContext,
   });
 
+  /// Telemetry and analytics reporter for command and feature usage.
   final Analytics analytics;
+
+  /// Sub-context containing Android-specific platform services.
   final AndroidContext androidContext;
+
+  /// Sub-context containing Apple platform services.
   final AppleContext appleContext;
+
+  /// High-performance compilation and build pipeline orchestrator.
   final BuildSystem buildSystem;
+
+  /// Factory interface for constructing compile and bundle build targets.
   final BuildTargets buildTargets;
+
+  /// Captures and submits unhandled tool crash reports and stack traces.
   final CrashReporter crashReporter;
+
+  /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
 
   /// Bootstraps the dependency graph and constructs all three contexts.
