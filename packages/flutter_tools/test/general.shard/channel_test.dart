@@ -10,14 +10,12 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
-import '../src/fakes.dart' show FakeFlutterVersion;
+import '../src/fakes.dart';
 import '../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -474,34 +472,4 @@ ChannelCommand createChannelCommand({
     ),
     verboseHelp: verboseHelp,
   );
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({
-    required this.fs,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
-    required this.processUtils,
-    required this.git,
-    required this.flutterVersion,
-    Cache? cache,
-  }) : cache = cache ?? Cache.test(fileSystem: fs, processManager: processManager);
-
-  @override
-  final FileSystem fs;
-  @override
-  final Logger logger;
-  @override
-  final Platform platform;
-  @override
-  final ProcessManager processManager;
-  @override
-  final ProcessUtils processUtils;
-  @override
-  final Git git;
-  @override
-  final FlutterVersion flutterVersion;
-  @override
-  final Cache cache;
 }
