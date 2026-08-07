@@ -27,6 +27,7 @@ import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
+import '../../web/web_constants.dart';
 import '../../web_template.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -93,7 +94,7 @@ class WebEntrypointTarget extends Target {
     // does not have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
     final String importedEntrypoint =
-        packageConfig.toPackageUri(importUri)?.toString() ?? importUri.toString();
+        packageConfig.toPackageUriForWorkspace(importUri)?.toString() ?? importUri.toString();
 
     await injectBuildTimePluginFilesForWebPlatform(
       flutterProject,
@@ -198,10 +199,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       for (final String dartDefine in computeDartDefines(environment)) '-D$dartDefine',
-      if (featureFlags.isRecordUseEnabled) ...<String>[
-        '--write-resources',
-        '--enable-experiment=record-use',
-      ],
+      if (featureFlags.isRecordUseEnabled) '--write-resources',
     ];
 
     // NOTE: most args should be populated in [toSharedCommandOptions].
@@ -373,10 +371,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
-      if (featureFlags.isRecordUseEnabled) ...<String>[
+      if (featureFlags.isRecordUseEnabled)
         '--recorded-uses=${environment.buildDir.childFile(LinkHooks.recordedUsesWasmFileName).path}',
-        '--enable-experiment=record-use',
-      ],
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
       outputWasmFile.path,
@@ -388,12 +384,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
       processManager: environment.processManager,
     );
 
-    final RunResult runResult = await processUtils.run(
-      throwOnError: !compilerConfig.dryRun,
-      compilationArgs,
-    );
+    final RunResult runResult = await processUtils.run(compilationArgs);
     if (compilerConfig.dryRun) {
       await _handleDryRunResult(environment, runResult);
+    } else if (runResult.exitCode != 0) {
+      environment.logger.printStatus(runResult.stdout);
+      environment.logger.printError(runResult.stderr);
+      _checkForLegacyWebImports(environment, runResult.stdout, runResult.stderr);
+      throwToolExit('Failed to compile application for the Web.');
     }
     final File recordedUsesFile = environment.buildDir.childFile(
       LinkHooks.recordedUsesWasmFileName,
@@ -576,6 +574,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
     }
     result ??= 'unknown';
 
+    _checkForLegacyWebImports(environment, stdout, stderr);
+
     environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
 
     _analytics.send(
@@ -585,6 +585,22 @@ class Dart2WasmTarget extends Dart2WebTarget {
         findingsInfo: findingsInfo,
       ),
     );
+  }
+
+  static final RegExp _kLegacyImportErrorPattern = RegExp(
+    "(?:Dart library|The unavailable library) '(${kLegacyWebLibraries.join('|')})'|"
+    '(${kLegacyWebLibraries.join('|')}) unsupported',
+  );
+
+  void _checkForLegacyWebImports(Environment environment, String stdout, String stderr) {
+    if (_kLegacyImportErrorPattern.hasMatch(stdout) ||
+        _kLegacyImportErrorPattern.hasMatch(stderr)) {
+      environment.logger.printStatus(
+        'Note: WebAssembly compilation failed due to legacy web imports.\n'
+        'Migrate your project from dart:html and package:js to package:web and dart:js_interop.\n'
+        '$kWasmErrorsMoreInfo',
+      );
+    }
   }
 }
 
