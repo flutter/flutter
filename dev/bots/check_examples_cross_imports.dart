@@ -569,7 +569,6 @@ class ExamplesCrossImportChecker {
     'examples/api/test/widgets/inherited_notifier/inherited_notifier.0_test.dart',
     'examples/api/test/widgets/text_magnifier/text_magnifier.0_test.dart',
     'examples/flutter_view/lib/main.dart',
-    'examples/image_list/lib/main.dart',
     'examples/multiple_windows/lib/app/main_window.dart',
     'examples/multiple_windows/lib/app/tooltip_button.dart',
     'examples/multiple_windows/lib/app/tooltip_window_edit_dialog.dart',
