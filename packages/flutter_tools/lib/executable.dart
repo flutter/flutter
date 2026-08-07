@@ -296,10 +296,7 @@ List<FlutterCommand> generateCommands({
     terminal: toolDependencies.toolContext.terminal,
   ),
   UpgradeCommand(verboseHelp: verboseHelp),
-  SymbolizeCommand(
-    stdio: toolDependencies.toolContext.stdio,
-    fileSystem: toolDependencies.toolContext.fs,
-  ),
+  SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
   UpdatePackagesCommand(verboseHelp: verboseHelp),
