@@ -211,13 +211,14 @@ CommandBuffer::SubmitResult CommandBufferMTL::SubmitCommandsInternal(
 
   if (callback) {
     // The block copies the callback to keep it alive until completion.
+    CompletionCallback callback_for_block = std::move(callback);
     [buffer_
         addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
           [[maybe_unused]] auto result =
               LogMTLCommandBufferErrorIfPresent(buffer);
           FML_DCHECK(result)
               << "Must not have errors during command buffer submission.";
-          callback(ToCommitResult(buffer.status));
+          callback_for_block(ToCommitResult(buffer.status));
         }];
   }
 
