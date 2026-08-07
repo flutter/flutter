@@ -18,7 +18,6 @@ import '../base/template.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/darwin.dart' show printXcodeWarning;
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
@@ -663,13 +662,13 @@ class FlutterFrameworkDependency {
           copiedPath,
         ]);
         if (chmodResult.exitCode != 0) {
-          printXcodeWarning(
+          _utils.logger.printWarning(
             'Failed to make the XCFramework writable. This may cause the build to '
             'fail when using lipo.\nError: $copiedPath: ${chmodResult.stderr}',
           );
         }
       } on ProcessException catch (e) {
-        printXcodeWarning(
+        _utils.logger.printWarning(
           'Failed to make the XCFramework writable. This may cause the build to '
           'fail when using lipo.\nError: $copiedPath: $e',
         );
