@@ -14,6 +14,5 @@ in vec4 v_color;
 out vec4 frag_color;
 
 void main() {
-  frag_color =
-      v_color * texture(tex, vec3(v_texture_coords, frag_info.layer));
+  frag_color = v_color * texture(tex, vec3(v_texture_coords, frag_info.layer));
 }
