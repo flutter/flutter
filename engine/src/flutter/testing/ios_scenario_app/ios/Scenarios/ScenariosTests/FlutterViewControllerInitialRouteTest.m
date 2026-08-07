@@ -5,7 +5,7 @@
 #import <Flutter/Flutter.h>
 #import <XCTest/XCTest.h>
 
-#import "AppDelegate.h"
+#import "SceneDelegate.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -72,8 +72,9 @@ FLUTTER_ASSERT_ARC
                                }
                              }];
 
-  AppDelegate* appDelegate = (AppDelegate*)UIApplication.sharedApplication.delegate;
-  UIViewController* rootVC = appDelegate.window.rootViewController;
+  UIWindow* window = SceneDelegate.mainWindowOfFirstConnectedScene;
+  XCTAssertNotNil(window, @"The host app must have a connected scene for test");
+  UIViewController* rootVC = window.rootViewController;
   [rootVC presentViewController:self.flutterViewController animated:NO completion:nil];
 
   [self waitForExpectationsWithTimeout:30.0 handler:nil];
