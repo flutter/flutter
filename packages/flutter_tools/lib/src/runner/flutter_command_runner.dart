@@ -466,9 +466,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
         topLevelResults.wasParsed(FlutterGlobalOptions.kLocalEngineHostOption) ||
         topLevelResults.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ||
         topLevelResults.wasParsed(FlutterGlobalOptions.kPackagesOption);
-    final LocalEngineLocator? engineLocator =
-        localToolContext?.localEngineLocator ?? globals.localEngineLocator;
     if (hasLocalEngineOption) {
+      final LocalEngineLocator? engineLocator =
+          localToolContext != null
+              ? localToolContext.localEngineLocator
+              : globals.localEngineLocator;
       final EngineBuildPaths? engineBuildPaths = await engineLocator?.findEnginePath(
         engineSourcePath:
             topLevelResults[FlutterGlobalOptions.kLocalEngineSrcPathOption] as String?,

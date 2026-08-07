@@ -24,7 +24,8 @@ class ConfigCommand extends FlutterCommand {
   }) : _androidContext = androidContext,
        _toolContext = toolContext,
        _featureFlags = featureFlags,
-       _analytics = analytics {
+       _analytics = analytics,
+       super(toolContext: toolContext) {
     argParser.addFlag(
       'list',
       help: 'List all settings and their current values.',

@@ -17,8 +17,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
-import 'package:flutter_tools/src/context/android_context.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
@@ -414,47 +412,6 @@ class FakeFlutterVersion extends Fake implements FlutterVersion {
 
   @override
   Future<void> checkFlutterVersionFreshness() async {}
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({
-    required this.config,
-    required this.logger,
-    required this.platform,
-    required this.fs,
-    required this.processManager,
-    required this.processUtils,
-    required this.terminal,
-    required this.flutterVersion,
-  });
-
-  @override
-  final Config config;
-  @override
-  final Logger logger;
-  @override
-  final Platform platform;
-  @override
-  final FileSystem fs;
-  @override
-  final ProcessManager processManager;
-  @override
-  final ProcessUtils processUtils;
-  @override
-  final AnsiTerminal terminal;
-  @override
-  final FlutterVersion flutterVersion;
-}
-
-class FakeAndroidContext extends Fake implements AndroidContext {
-  FakeAndroidContext({this.androidSdk, this.androidStudio, this.java});
-
-  @override
-  final AndroidSdk? androidSdk;
-  @override
-  final AndroidStudio? androidStudio;
-  @override
-  final Java? java;
 }
 
 class FakeConfig extends Fake implements Config {

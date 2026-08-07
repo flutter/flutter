@@ -8,6 +8,7 @@ import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 import 'package:dds/dds_launcher.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -33,8 +34,13 @@ import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/cocoapods.dart';
+import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
+import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
@@ -1121,34 +1127,98 @@ class FakeToolContext extends Fake implements ToolContext {
 }
 
 class FakeAndroidContext extends Fake implements AndroidContext {
-  FakeAndroidContext({AndroidSdk? androidSdk}) : _androidSdk = androidSdk;
+  FakeAndroidContext({
+    AndroidSdk? androidSdk,
+    AndroidStudio? androidStudio,
+    Java? java,
+    GradleUtils? gradleUtils,
+  }) : _androidSdk = androidSdk,
+       _androidStudio = androidStudio,
+       _java = java,
+       _gradleUtils = gradleUtils;
 
   final AndroidSdk? _androidSdk;
+  final AndroidStudio? _androidStudio;
+  final Java? _java;
+  final GradleUtils? _gradleUtils;
 
   @override
-  AndroidSdk? get androidSdk => _androidSdk ?? globals.androidSdk;
+  AndroidSdk? get androidSdk => _androidSdk;
+
+  @override
+  AndroidStudio? get androidStudio => _androidStudio;
+
+  @override
+  Java? get java => _java;
+
+  @override
+  GradleUtils get gradleUtils => _gradleUtils ?? FakeGradleUtils();
 }
 
 class FakeAppleContext extends Fake implements AppleContext {
   FakeAppleContext({
-    Xcode? xcode,
+    CocoaPods? cocoaPods,
+    CocoaPodsValidator? cocoapodsValidator,
+    IOSSimulatorUtils? iosSimulatorUtils,
+    IOSWorkflow? iosWorkflow,
     PlistParser? plistParser,
+    XCDevice? xcdevice,
+    Xcode? xcode,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
-  }) : _xcode = xcode,
+  }) : _cocoaPods = cocoaPods,
+       _cocoapodsValidator = cocoapodsValidator,
+       _iosSimulatorUtils = iosSimulatorUtils,
+       _iosWorkflow = iosWorkflow,
        _plistParser = plistParser,
+       _xcdevice = xcdevice,
+       _xcode = xcode,
        _xcodeProjectInterpreter = xcodeProjectInterpreter;
 
-  final Xcode? _xcode;
+  final CocoaPods? _cocoaPods;
+  final CocoaPodsValidator? _cocoapodsValidator;
+  final IOSSimulatorUtils? _iosSimulatorUtils;
+  final IOSWorkflow? _iosWorkflow;
   final PlistParser? _plistParser;
+  final XCDevice? _xcdevice;
+  final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   @override
-  Xcode get xcode => _xcode ?? globals.xcode!;
+  CocoaPods get cocoaPods => _cocoaPods ?? FakeCocoaPods();
 
   @override
-  PlistParser get plistParser => _plistParser ?? globals.plistParser;
+  CocoaPodsValidator get cocoapodsValidator => _cocoapodsValidator ?? FakeCocoaPodsValidator();
+
+  @override
+  IOSSimulatorUtils get iosSimulatorUtils => _iosSimulatorUtils ?? FakeIOSSimulatorUtils();
+
+  @override
+  IOSWorkflow get iosWorkflow => _iosWorkflow ?? FakeIOSWorkflow();
+
+  @override
+  PlistParser get plistParser => _plistParser ?? FakePlistParser();
+
+  @override
+  XCDevice get xcdevice => _xcdevice ?? FakeXCDevice();
+
+  @override
+  Xcode get xcode => _xcode ?? FakeXcode();
 
   @override
   XcodeProjectInterpreter get xcodeProjectInterpreter =>
-      _xcodeProjectInterpreter ?? globals.xcodeProjectInterpreter!;
+      _xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter();
 }
+
+class FakeGradleUtils extends Fake implements GradleUtils {}
+
+class FakeCocoaPods extends Fake implements CocoaPods {}
+
+class FakeCocoaPodsValidator extends Fake implements CocoaPodsValidator {}
+
+class FakeIOSSimulatorUtils extends Fake implements IOSSimulatorUtils {}
+
+class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
+
+class FakeXCDevice extends Fake implements XCDevice {}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}
