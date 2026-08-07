@@ -22,7 +22,6 @@ class CarouselAutoPlayExampleApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          leading: const Icon(Icons.cast),
           title: const Text('Flutter Sample - Auto-play'),
         ),
         body: const CarouselAutoPlayExample(),
