@@ -431,7 +431,7 @@ void main() {
             ),
           ]);
 
-          final command = CleanCommand();
+          final CleanCommand command = createCleanCommand();
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['clean', '--stop-gradle']);
 
@@ -478,7 +478,7 @@ void main() {
             ),
           ]);
 
-          final command = CleanCommand();
+          final CleanCommand command = createCleanCommand();
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['clean']);
 
@@ -516,7 +516,7 @@ void main() {
 
           processManager = FakeProcessManager.empty();
 
-          final command = CleanCommand();
+          final CleanCommand command = createCleanCommand();
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['clean']);
 
