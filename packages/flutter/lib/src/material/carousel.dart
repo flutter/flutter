@@ -210,7 +210,7 @@ class CarouselView extends StatefulWidget {
   /// current item index using [onIndexChanged] to know exactly which item to
   /// animate to next.
   ///
-  /// ** See code in examples/api/lib/material/carousel/carousel.3.dart **
+  /// ** See code in examples/api/lib/material/carousel/carousel.2.dart **
   /// {@end-tool}
   const CarouselView.weighted({
     super.key,
