@@ -150,29 +150,21 @@ abstract class OperatingSystemUtils {
   ///
   /// The architecture may be overridden, in precedence order, by the
   /// [hostPlatformOverride] property or the `FLUTTER_HOST_ARCH` environment
-  /// variable. When neither is set, the host platform is determined by
-  /// [defaultHostPlatform], which subclasses may override to probe the
-  /// hardware directly.
+  /// variable. When neither is set, or the environment variable does not match
+  /// an architecture supported on the current OS, the host platform is
+  /// determined by [defaultHostPlatform], which subclasses may override to
+  /// probe the hardware directly.
   HostPlatform get hostPlatform {
-    if (hostPlatformOverride != null) {
-      return hostPlatformOverride!;
+    if (hostPlatformOverride case final HostPlatform override) {
+      return override;
     }
-    final String? overrideArch = _platform.environment['FLUTTER_HOST_ARCH'];
-    if (overrideArch == 'arm64') {
-      if (_platform.isMacOS) {
-        return HostPlatform.darwin_arm64;
-      } else if (_platform.isLinux) {
-        return HostPlatform.linux_arm64;
-      } else if (_platform.isWindows) {
-        return HostPlatform.windows_arm64;
-      }
-    } else if (overrideArch == 'x64') {
-      if (_platform.isMacOS) {
-        return HostPlatform.darwin_x64;
-      } else if (_platform.isLinux) {
-        return HostPlatform.linux_x64;
-      } else if (_platform.isWindows) {
-        return HostPlatform.windows_x64;
+    if (_platform.environment['FLUTTER_HOST_ARCH'] case final String overrideArch) {
+      final HostPlatform? overridePlatform = HostPlatform.fromOsAndArch(
+        _platform.operatingSystem,
+        overrideArch,
+      );
+      if (overridePlatform != null) {
+        return overridePlatform;
       }
     }
     return defaultHostPlatform;
@@ -652,6 +644,25 @@ enum HostPlatform {
 
   final String cliName;
   final String platformName;
+
+  /// Returns the host platform for the specified OS and architecture.
+  ///
+  /// [os] is an operating system name as returned by
+  /// [Platform.operatingSystem]. [arch] is an architecture name matching the
+  /// [platformName] of one of the values of this enum. Returns null if no match
+  /// is found.
+  static HostPlatform? fromOsAndArch(String os, String arch) {
+    return switch ((os, arch.toLowerCase())) {
+      ('macos', 'x64') => darwin_x64,
+      ('macos', 'arm64') => darwin_arm64,
+      ('linux', 'x64') => linux_x64,
+      ('linux', 'arm64') => linux_arm64,
+      ('linux', 'riscv64') => linux_riscv64,
+      ('windows', 'x64') => windows_x64,
+      ('windows', 'arm64') => windows_arm64,
+      _ => null,
+    };
+  }
 }
 
 // flutter_ignore: deprecation_syntax (see analyze.dart)

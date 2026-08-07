@@ -206,6 +206,22 @@ void main() {
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
+    testWithoutContext('FLUTTER_HOST_ARCH override is case-insensitive', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(environment: <String, String>{'FLUTTER_HOST_ARCH': 'ARM64'}),
+        currentAbi: Abi.linuxX64,
+      );
+      expect(utils.hostPlatform, HostPlatform.linux_arm64);
+    });
+
+    testWithoutContext('unrecognized FLUTTER_HOST_ARCH override is ignored', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(environment: <String, String>{'FLUTTER_HOST_ARCH': 'sparc'}),
+        currentAbi: Abi.linuxX64,
+      );
+      expect(utils.hostPlatform, HostPlatform.linux_x64);
+    });
+
     testWithoutContext('hostPlatformOverride property takes precedence', () async {
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
@@ -460,6 +476,28 @@ void main() {
         expect(fs.file('cache/windows-x64-profile/poc_marker.txt').existsSync(), isFalse);
       },
     );
+  });
+
+  group('HostPlatform.fromOsAndArch', () {
+    testWithoutContext('maps supported OS and architecture combinations', () {
+      expect(HostPlatform.fromOsAndArch('macos', 'x64'), HostPlatform.darwin_x64);
+      expect(HostPlatform.fromOsAndArch('macos', 'arm64'), HostPlatform.darwin_arm64);
+      expect(HostPlatform.fromOsAndArch('linux', 'x64'), HostPlatform.linux_x64);
+      expect(HostPlatform.fromOsAndArch('linux', 'arm64'), HostPlatform.linux_arm64);
+      expect(HostPlatform.fromOsAndArch('linux', 'riscv64'), HostPlatform.linux_riscv64);
+      expect(HostPlatform.fromOsAndArch('windows', 'x64'), HostPlatform.windows_x64);
+      expect(HostPlatform.fromOsAndArch('windows', 'arm64'), HostPlatform.windows_arm64);
+    });
+
+    testWithoutContext('matches the architecture case-insensitively', () {
+      expect(HostPlatform.fromOsAndArch('macos', 'ARM64'), HostPlatform.darwin_arm64);
+    });
+
+    testWithoutContext('returns null for unsupported combinations', () {
+      expect(HostPlatform.fromOsAndArch('macos', 'riscv64'), isNull);
+      expect(HostPlatform.fromOsAndArch('fuchsia', 'x64'), isNull);
+      expect(HostPlatform.fromOsAndArch('linux', 'sparc'), isNull);
+    });
   });
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {

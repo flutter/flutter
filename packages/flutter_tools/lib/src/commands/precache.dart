@@ -180,17 +180,15 @@ class PrecacheCommand extends FlutterCommand {
     }
     final String? hostArch = stringArg('host-arch');
     if (hostArch != null) {
-      final HostPlatform overridePlatform = switch ((hostArch, _platform.operatingSystem)) {
-        ('x64', 'macos') => HostPlatform.darwin_x64,
-        ('x64', 'linux') => HostPlatform.linux_x64,
-        ('x64', 'windows') => HostPlatform.windows_x64,
-        ('arm64', 'macos') => HostPlatform.darwin_arm64,
-        ('arm64', 'linux') => HostPlatform.linux_arm64,
-        ('arm64', 'windows') => HostPlatform.windows_arm64,
-        _ => throwToolExit(
+      final HostPlatform? overridePlatform = HostPlatform.fromOsAndArch(
+        _platform.operatingSystem,
+        hostArch,
+      );
+      if (overridePlatform == null) {
+        throwToolExit(
           'Unsupported host architecture "$hostArch" for OS "${_platform.operatingSystem}"',
-        ),
-      };
+        );
+      }
       _cache.osUtils.hostPlatformOverride = overridePlatform;
     }
     final Set<String> explicitlyEnabled = _explicitArtifactSelections();
