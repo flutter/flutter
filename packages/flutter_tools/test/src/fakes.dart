@@ -34,6 +34,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
@@ -1120,16 +1121,25 @@ class FakeAndroidContext extends Fake implements AndroidContext {
 }
 
 class FakeAppleContext extends Fake implements AppleContext {
-  FakeAppleContext({Xcode? xcode, PlistParser? plistParser})
-    : _xcode = xcode,
-      _plistParser = plistParser;
+  FakeAppleContext({
+    Xcode? xcode,
+    PlistParser? plistParser,
+    XcodeProjectInterpreter? xcodeProjectInterpreter,
+  }) : _xcode = xcode,
+       _plistParser = plistParser,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter;
 
   final Xcode? _xcode;
   final PlistParser? _plistParser;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   @override
   Xcode get xcode => _xcode ?? globals.xcode!;
 
   @override
   PlistParser get plistParser => _plistParser ?? globals.plistParser;
+
+  @override
+  XcodeProjectInterpreter get xcodeProjectInterpreter =>
+      _xcodeProjectInterpreter ?? globals.xcodeProjectInterpreter!;
 }
