@@ -23,6 +23,8 @@ class FlutterWindowsEngineBuilder {
 
   void SetDartEntrypoint(std::string entrypoint);
 
+  void SetAotLibraryPath(std::wstring path);
+
   void AddDartEntrypointArgument(std::string arg);
 
   void SetCreateKeyboardHandlerCallbacks(
@@ -42,6 +44,7 @@ class FlutterWindowsEngineBuilder {
   WindowsTestContext& context_;
   FlutterDesktopEngineProperties properties_ = {};
   std::string dart_entrypoint_;
+  std::wstring aot_library_path_;
   std::vector<std::string> dart_entrypoint_arguments_;
   std::vector<std::string> switches_;
   KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state_;

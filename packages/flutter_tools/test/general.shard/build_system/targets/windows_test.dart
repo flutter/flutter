@@ -250,7 +250,7 @@ flutter:
       environment.buildDir.childFile('app.pdb').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
+      await const WindowsAotBundle(AotDataProfile(TargetPlatform.windows_x64)).build(environment);
       await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
       // Depfile is created and so is copied.
@@ -281,7 +281,7 @@ flutter:
       environment.buildDir.childFile('app.pdb').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
+      await const WindowsAotBundle(AotDataRelease(TargetPlatform.windows_x64)).build(environment);
       await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
       // Depfile is created and so is copied.

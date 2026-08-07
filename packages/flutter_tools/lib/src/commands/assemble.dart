@@ -31,8 +31,8 @@ var _kDefaultTargets = <Target>[
   // Shared targets
   const CopyAssets(),
   const KernelSnapshot(),
-  const AotElfProfile(TargetPlatform.android_arm),
-  const AotElfRelease(TargetPlatform.android_arm),
+  const AotDataProfile(TargetPlatform.android_arm),
+  const AotDataRelease(TargetPlatform.android_arm),
   const AotAssemblyProfile(),
   const AotAssemblyRelease(),
   // macOS targets

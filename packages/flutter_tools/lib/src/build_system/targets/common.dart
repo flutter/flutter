@@ -359,8 +359,8 @@ class KernelSnapshot extends Target {
 }
 
 /// Supports compiling a dart kernel file to a native AOT binary.
-abstract class AotElfBase extends Target {
-  const AotElfBase();
+abstract class AotDataBase extends Target {
+  const AotDataBase();
 
   @override
   String get analyticsName => 'android_aot';
@@ -372,11 +372,11 @@ abstract class AotElfBase extends Target {
     final String outputPath = environment.buildDir.path;
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
-      throw MissingDefineException(kBuildMode, 'aot_elf');
+      throw MissingDefineException(kBuildMode, 'aot_data');
     }
     final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
     if (targetPlatformEnvironment == null) {
-      throw MissingDefineException(kTargetPlatform, 'aot_elf');
+      throw MissingDefineException(kTargetPlatform, 'aot_data');
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
       environment.defines,
@@ -441,12 +441,11 @@ List<Source> _aotOutputsForTarget(TargetPlatform targetPlatform) {
 }
 
 /// Generate a native AOT binary from a dart kernel file in profile mode.
-class AotElfProfile extends AotElfBase {
-  const AotElfProfile(this.targetPlatform);
+class AotDataProfile extends AotDataBase {
+  const AotDataProfile(this.targetPlatform);
 
   @override
-  String get name =>
-      targetPlatform == TargetPlatform.windows_x64 ? 'aot_pe_profile' : 'aot_elf_profile';
+  String get name => 'aot_data_profile';
 
   @override
   List<Source> get inputs => <Source>[
@@ -465,16 +464,16 @@ class AotElfProfile extends AotElfBase {
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
 
+  @override
   final TargetPlatform targetPlatform;
 }
 
 /// Generate a native AOT binary from a dart kernel file in release mode.
-class AotElfRelease extends AotElfBase {
-  const AotElfRelease(this.targetPlatform);
+class AotDataRelease extends AotDataBase {
+  const AotDataRelease(this.targetPlatform);
 
   @override
-  String get name =>
-      targetPlatform == TargetPlatform.windows_x64 ? 'aot_pe_release' : 'aot_elf_release';
+  String get name => 'aot_data_release';
 
   @override
   List<Source> get inputs => <Source>[
@@ -493,6 +492,7 @@ class AotElfRelease extends AotElfBase {
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
 
+  @override
   final TargetPlatform targetPlatform;
 }
 
