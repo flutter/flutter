@@ -94,7 +94,7 @@ class WebEntrypointTarget extends Target {
     // does not have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
     final String importedEntrypoint =
-        packageConfig.toPackageUri(importUri)?.toString() ?? importUri.toString();
+        packageConfig.toPackageUriForWorkspace(importUri)?.toString() ?? importUri.toString();
 
     await injectBuildTimePluginFilesForWebPlatform(
       flutterProject,
