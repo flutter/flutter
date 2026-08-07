@@ -525,7 +525,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
         final String packageName = package.name;
         if (package.root.toString().contains('hosted/pub.dev')) {
           final String? packageVersion = RegExp(
-            r'([0-9]+\.[0-9]+\.[0-9]+(?:-[\w\.-]+)?)',
+            'hosted/pub\\.dev/${RegExp.escape(packageName)}-([0-9]+\\.[0-9]+\\.[0-9]+(?:-[\\w\\.-]+)?)',
           ).firstMatch(package.root.toString())?.group(1);
           hostedPackages[packageName] = packageVersion ?? '?';
         } else {
