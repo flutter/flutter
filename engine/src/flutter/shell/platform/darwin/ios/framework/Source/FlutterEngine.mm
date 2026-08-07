@@ -41,7 +41,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
 
 FLUTTER_ASSERT_ARC
@@ -200,7 +199,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   // -destroyContext must wait for this group to drain before it is safe to free _shell.
   dispatch_group_t _firstFrameWaiters;
 
-  flutter::IOSRenderingAPI _renderingApi;
   std::shared_ptr<flutter::SamplingProfiler> _profiler;
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
@@ -343,12 +341,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)recreatePlatformViewsController {
-  _renderingApi = flutter::GetRenderingAPIForProcess();
   _platformViewsController = [[FlutterPlatformViewsController alloc] init];
-}
-
-- (flutter::IOSRenderingAPI)platformViewsRenderingAPI {
-  return _renderingApi;
 }
 
 - (void)dealloc {
@@ -926,9 +919,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
         [strongSelf recreatePlatformViewsController];
         strongSelf.platformViewsController.taskRunner = [[FlutterFMLTaskRunner alloc]
             initWithTaskRunner:shell.GetTaskRunners().GetPlatformTaskRunner()];
-        return std::make_unique<flutter::PlatformViewIOS>(
-            shell, strongSelf->_renderingApi, strongSelf.platformViewsController,
-            shell.GetTaskRunners(), shell.GetIsGpuDisabledSyncSwitch());
+        return std::make_unique<flutter::PlatformViewIOS>(shell, strongSelf.platformViewsController,
+                                                          shell.GetTaskRunners(),
+                                                          shell.GetIsGpuDisabledSyncSwitch());
       };
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
