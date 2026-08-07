@@ -331,8 +331,8 @@
 /dev/devicelab/bin/tasks/windowing_test_macos.dart @knopp @flutter/desktop
 /dev/devicelab/bin/tasks/windowing_test_windows.dart @mattkae @flutter/desktop
 /dev/devicelab/bin/tasks/windows_desktop_impeller.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/windows_engine_integration_golden_test.dart @b-luk @flutter/engine
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/windows_primitive_shape_golden_test.dart @b-luk @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
 ## Host only framework tests
