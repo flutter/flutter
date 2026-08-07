@@ -401,8 +401,6 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart',
     'packages/flutter/examples/api/lib/widgets/inherited_notifier/inherited_notifier.0.dart',
     'packages/flutter/examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart',
-    'packages/flutter/examples/api/test/widgets/animated_grid/animated_grid.0_test.dart',
-    'packages/flutter/examples/api/test/widgets/animated_grid/sliver_animated_grid.0_test.dart',
     'packages/flutter/examples/api/lib/widgets/expansible/expansible.0.dart',
     'packages/flutter/examples/api/lib/widgets/selection_container/selection_container.0.dart',
     'packages/flutter/examples/api/lib/widgets/selection_container/selection_container_disabled.0.dart',
@@ -411,6 +409,8 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/lib/widgets/context_menu/context_menu_controller.0.dart',
     'packages/flutter/examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart',
     'packages/flutter/examples/api/lib/widgets/selectable_region/selectable_region.0.dart',
+    'packages/flutter/examples/api/test/widgets/animated_grid/animated_grid.0_test.dart',
+    'packages/flutter/examples/api/test/widgets/animated_grid/sliver_animated_grid.0_test.dart',
     'packages/flutter/examples/api/test/widgets/navigator_pop_handler/navigator_pop_handler.1_test.dart',
     'packages/flutter/examples/api/test/widgets/navigator_pop_handler/navigator_pop_handler.0_test.dart',
     'packages/flutter/examples/api/test/widgets/editable_text/editable_text.on_content_inserted.0_test.dart',
@@ -604,7 +604,9 @@ class ExamplesCrossImportChecker {
     'examples/texture/lib/main.dart',
   };
 
-  static final RegExp _examplesPrefix = RegExp(r'packages[/\\]flutter[/\\]examples[/\\]api|examples');
+  static final RegExp _examplesPrefix = RegExp(
+    r'packages[/\\]flutter[/\\]examples[/\\]api|examples',
+  );
 
   /// Find the `packages/flutter/examples/api/lib` and
   /// `packages/flutter/examples/api/test` directories which contain the API
