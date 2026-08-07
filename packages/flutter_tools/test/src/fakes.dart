@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:dds/dds_launcher.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
@@ -33,7 +34,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -1053,13 +1053,14 @@ class FakeToolContext extends Fake implements ToolContext {
 
   @override
   CustomDevicesConfig get customDevicesConfig =>
-      _customDevicesConfig ?? globals.customDevicesConfig;
+      _customDevicesConfig ??
+      CustomDevicesConfig(fileSystem: fs, logger: logger, platform: platform);
 
   @override
   FlutterVersion get flutterVersion => _flutterVersion ?? FakeFlutterVersion();
 
   @override
-  FileSystem get fs => _fs ?? globals.fs;
+  FileSystem get fs => _fs ?? MemoryFileSystem.test();
 
   @override
   Git get git => _git ?? Git(currentPlatform: platform, runProcessWith: processUtils);
