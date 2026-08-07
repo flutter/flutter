@@ -10,25 +10,23 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/fakes.dart' as fakes;
 import '../../src/test_flutter_command_runner.dart';
 
@@ -38,44 +36,116 @@ void main() {
   late FakeAndroidSdk fakeAndroidSdk;
   late FakeFlutterVersion fakeFlutterVersion;
   late FakeAnalytics fakeAnalytics;
+  late MemoryFileSystem fs;
+  late Config config;
+  late BufferLogger logger;
 
   setUpAll(() {
     Cache.disableLocking();
   });
 
   setUp(() {
+    fs = MemoryFileSystem.test();
+    config = Config.test(directory: fs.directory('/'));
+    logger = BufferLogger.test();
     fakeJava = fakes.FakeJava();
     fakeAndroidStudio = FakeAndroidStudio();
-    fakeAndroidSdk = FakeAndroidSdk();
+    fakeAndroidSdk = FakeAndroidSdk(fileSystem: fs);
     fakeFlutterVersion = FakeFlutterVersion();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
-      fs: MemoryFileSystem.test(),
+      fs: fs,
       fakeFlutterVersion: fakes.FakeFlutterVersion(),
     );
   });
 
+  ConfigCommand createConfigCommand({
+    Config? config,
+    Logger? logger,
+    Platform? platform,
+    FileSystem? fileSystem,
+    ProcessManager? processManager,
+    ProcessUtils? processUtils,
+    AnsiTerminal? terminal,
+    FlutterVersion? flutterVersion,
+    AndroidSdk? androidSdk,
+    AndroidStudio? androidStudio,
+    Java? java,
+    FeatureFlags? featureFlags,
+    Analytics? analytics,
+    bool verboseHelp = false,
+  }) {
+    final FileSystem fs = fileSystem ?? MemoryFileSystem.test();
+    final Logger resolvedLogger = logger ?? BufferLogger.test();
+    final Platform resolvedPlatform = platform ?? FakePlatform();
+    final ProcessManager resolvedProcessManager = processManager ?? FakeProcessManager.any();
+    return ConfigCommand(
+      verboseHelp: verboseHelp,
+      featureFlags: featureFlags ?? TestFeatureFlags(),
+      analytics: analytics ?? fakeAnalytics,
+      androidContext: FakeAndroidContext(
+        androidSdk: androidSdk ?? FakeAndroidSdk(fileSystem: fs),
+        androidStudio: androidStudio ?? FakeAndroidStudio(),
+        java: java ?? fakes.FakeJava(),
+      ),
+      toolContext: FakeToolContext(
+        config: config ?? Config.test(directory: fs.directory('/')),
+        logger: resolvedLogger,
+        flutterVersion: flutterVersion ?? FakeFlutterVersion(),
+        platform: resolvedPlatform,
+        fs: fs,
+        processManager: resolvedProcessManager,
+        processUtils:
+            processUtils ??
+            ProcessUtils(processManager: resolvedProcessManager, logger: resolvedLogger),
+        terminal: terminal ?? AnsiTerminal(stdio: FakeStdio(), platform: resolvedPlatform),
+      ),
+    );
+  }
+
   group('config', () {
-    testUsingContext('prints all settings with --list', () async {
-      final ConfigCommand configCommand = createConfigCommand();
+    testWithoutContext('prints all settings with --list', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
       await commandRunner.run(<String>['config', '--list']);
+      final String channel = fakeFlutterVersion.channel;
       expect(
-        testLogger.statusText,
+        logger.statusText,
         'All Settings:\n'
-        '${featureFlags.allFeatures.where((Feature e) => e.configSetting != null).map((Feature e) => '  ${e.configSetting}: (Not set)').join('\n')}'
+        '${TestFeatureFlags().allFeatures.where((Feature e) => e.configSetting != null).map((Feature e) {
+          final FeatureChannelSetting setting = e.getSettingForChannel(channel);
+          if (!setting.available) {
+            return '  ${e.configSetting}: (Not set) (Unavailable)';
+          }
+          return '  ${e.configSetting}: (Not set)';
+        }).join('\n')}'
         '\n\n',
       );
     });
 
-    testUsingContext('prints default values with --help', () async {
-      final ConfigCommand configCommand = createConfigCommand();
+    testWithoutContext('prints default values with --help', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
       await commandRunner.run(<String>['config', '--help']);
-      expect(testLogger.statusText, contains('(defaults to on)'));
+      expect(logger.statusText, contains('(defaults to on)'));
     });
 
-    testUsingContext('throws error on excess arguments', () {
-      final ConfigCommand configCommand = createConfigCommand();
+    testWithoutContext('throws error on excess arguments', () {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
       expect(
@@ -88,152 +158,164 @@ void main() {
         throwsToolExit(),
       );
       expect(fakeAnalytics.sentEvents, isEmpty);
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext(
-      'machine flag',
-      () async {
-        final ConfigCommand command = createConfigCommand();
-        await command.handleMachine();
+    testWithoutContext('machine flag', () async {
+      final ConfigCommand command = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+        androidSdk: fakeAndroidSdk,
+        androidStudio: fakeAndroidStudio,
+        java: fakeJava,
+      );
+      await command.handleMachine();
 
-        expect(testLogger.statusText, isNotEmpty);
-        final dynamic jsonObject = json.decode(testLogger.statusText);
-        expect(jsonObject, const TypeMatcher<Map<String, dynamic>>());
-        if (jsonObject is Map<String, dynamic>) {
-          expect(jsonObject['android-studio-dir'], fakeAndroidStudio.directory);
-          expect(jsonObject['android-sdk'], fakeAndroidSdk.directory.path);
-          expect(jsonObject['jdk-dir'], fakeJava.javaHome);
-        }
-        expect(fakeAnalytics.sentEvents, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        AndroidStudio: () => fakeAndroidStudio,
-        AndroidSdk: () => fakeAndroidSdk,
-        Java: () => fakeJava,
-        Analytics: () => fakeAnalytics,
-      },
-    );
+      expect(logger.statusText, isNotEmpty);
+      final dynamic jsonObject = json.decode(logger.statusText);
+      expect(jsonObject, const TypeMatcher<Map<String, dynamic>>());
+      if (jsonObject is Map<String, dynamic>) {
+        expect(jsonObject['android-studio-dir'], fakeAndroidStudio.directory);
+        expect(jsonObject['android-sdk'], fakeAndroidSdk.directory.path);
+        expect(jsonObject['jdk-dir'], fakeJava.javaHome);
+      }
+      expect(fakeAnalytics.sentEvents, isEmpty);
+    });
 
-    testUsingContext('Can set build-dir', () async {
-      final ConfigCommand configCommand = createConfigCommand();
+    testWithoutContext('Can set build-dir', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--build-dir=foo']);
 
-      expect(getBuildDirectory(), 'foo');
+      expect(config.getValue('build-dir'), 'foo');
       expect(fakeAnalytics.sentEvents, isEmpty);
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('throws error on absolute path to build-dir', () async {
-      final ConfigCommand configCommand = createConfigCommand();
+    testWithoutContext('throws error on absolute path to build-dir', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
       expect(() => commandRunner.run(<String>['config', '--build-dir=/foo']), throwsToolExit());
       expect(fakeAnalytics.sentEvents, isEmpty);
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext(
-      'allows setting and removing feature flags',
-      () async {
-        final ConfigCommand configCommand = createConfigCommand();
-        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+    testWithoutContext('allows setting and removing feature flags', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-        await commandRunner.run(<String>[
-          'config',
-          '--enable-android',
-          '--enable-ios',
-          '--enable-web',
-          '--enable-linux-desktop',
-          '--enable-windows-desktop',
-          '--enable-macos-desktop',
-        ]);
+      await commandRunner.run(<String>[
+        'config',
+        '--enable-android',
+        '--enable-ios',
+        '--enable-web',
+        '--enable-linux-desktop',
+        '--enable-windows-desktop',
+        '--enable-macos-desktop',
+      ]);
 
-        expect(globals.config.getValue('enable-android'), true);
-        expect(globals.config.getValue('enable-ios'), true);
-        expect(globals.config.getValue('enable-web'), true);
-        expect(globals.config.getValue('enable-linux-desktop'), true);
-        expect(globals.config.getValue('enable-windows-desktop'), true);
-        expect(globals.config.getValue('enable-macos-desktop'), true);
+      expect(config.getValue('enable-android'), true);
+      expect(config.getValue('enable-ios'), true);
+      expect(config.getValue('enable-web'), true);
+      expect(config.getValue('enable-linux-desktop'), true);
+      expect(config.getValue('enable-windows-desktop'), true);
+      expect(config.getValue('enable-macos-desktop'), true);
 
-        await commandRunner.run(<String>['config', '--clear-features']);
+      await commandRunner.run(<String>['config', '--clear-features']);
 
-        expect(globals.config.getValue('enable-android'), null);
-        expect(globals.config.getValue('enable-ios'), null);
-        expect(globals.config.getValue('enable-web'), null);
-        expect(globals.config.getValue('enable-linux-desktop'), null);
-        expect(globals.config.getValue('enable-windows-desktop'), null);
-        expect(globals.config.getValue('enable-macos-desktop'), null);
+      expect(config.getValue('enable-android'), null);
+      expect(config.getValue('enable-ios'), null);
+      expect(config.getValue('enable-web'), null);
+      expect(config.getValue('enable-linux-desktop'), null);
+      expect(config.getValue('enable-windows-desktop'), null);
+      expect(config.getValue('enable-macos-desktop'), null);
 
-        await commandRunner.run(<String>[
-          'config',
-          '--no-enable-android',
-          '--no-enable-ios',
-          '--no-enable-web',
-          '--no-enable-linux-desktop',
-          '--no-enable-windows-desktop',
-          '--no-enable-macos-desktop',
-        ]);
+      await commandRunner.run(<String>[
+        'config',
+        '--no-enable-android',
+        '--no-enable-ios',
+        '--no-enable-web',
+        '--no-enable-linux-desktop',
+        '--no-enable-windows-desktop',
+        '--no-enable-macos-desktop',
+      ]);
 
-        expect(globals.config.getValue('enable-android'), false);
-        expect(globals.config.getValue('enable-ios'), false);
-        expect(globals.config.getValue('enable-web'), false);
-        expect(globals.config.getValue('enable-linux-desktop'), false);
-        expect(globals.config.getValue('enable-windows-desktop'), false);
-        expect(globals.config.getValue('enable-macos-desktop'), false);
-        expect(fakeAnalytics.sentEvents, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        AndroidStudio: () => fakeAndroidStudio,
-        AndroidSdk: () => fakeAndroidSdk,
-        Analytics: () => fakeAnalytics,
-      },
-    );
+      expect(config.getValue('enable-android'), false);
+      expect(config.getValue('enable-ios'), false);
+      expect(config.getValue('enable-web'), false);
+      expect(config.getValue('enable-linux-desktop'), false);
+      expect(config.getValue('enable-windows-desktop'), false);
+      expect(config.getValue('enable-macos-desktop'), false);
+      expect(fakeAnalytics.sentEvents, isEmpty);
+    });
 
-    testUsingContext('warns the user to reload IDE', () async {
-      final ConfigCommand configCommand = createConfigCommand();
+    testWithoutContext('warns the user to reload IDE', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--enable-web']);
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         containsIgnoringWhitespace('You may need to restart any open editors'),
       );
     });
 
-    testUsingContext(
-      'displays which config settings are available on stable',
-      () async {
-        fakeFlutterVersion.channel = 'stable';
-        final ConfigCommand configCommand = createConfigCommand();
-        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+    testWithoutContext('displays which config settings are available on stable', () async {
+      fakeFlutterVersion.channel = 'stable';
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-        await commandRunner.run(<String>[
-          'config',
-          '--enable-web',
-          '--enable-linux-desktop',
-          '--enable-windows-desktop',
-          '--enable-macos-desktop',
-        ]);
+      await commandRunner.run(<String>[
+        'config',
+        '--enable-web',
+        '--enable-linux-desktop',
+        '--enable-windows-desktop',
+        '--enable-macos-desktop',
+      ]);
 
-        await commandRunner.run(<String>['config', '--list']);
+      await commandRunner.run(<String>['config', '--list']);
 
-        expect(testLogger.statusText, containsIgnoringWhitespace('enable-web: true'));
-        expect(testLogger.statusText, containsIgnoringWhitespace('enable-linux-desktop: true'));
-        expect(testLogger.statusText, containsIgnoringWhitespace('enable-windows-desktop: true'));
-        expect(testLogger.statusText, containsIgnoringWhitespace('enable-macos-desktop: true'));
-        expect(fakeAnalytics.sentEvents, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        AndroidStudio: () => fakeAndroidStudio,
-        AndroidSdk: () => fakeAndroidSdk,
-        FlutterVersion: () => fakeFlutterVersion,
-        Analytics: () => fakeAnalytics,
-      },
-    );
+      expect(logger.statusText, containsIgnoringWhitespace('enable-web: true'));
+      expect(logger.statusText, containsIgnoringWhitespace('enable-linux-desktop: true'));
+      expect(logger.statusText, containsIgnoringWhitespace('enable-windows-desktop: true'));
+      expect(logger.statusText, containsIgnoringWhitespace('enable-macos-desktop: true'));
+      expect(fakeAnalytics.sentEvents, isEmpty);
+    });
 
-    testUsingContext('analytics flag enables/disables analytics', () async {
-      final ConfigCommand configCommand = createConfigCommand();
+    testWithoutContext('analytics flag enables/disables analytics', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
       expect(fakeAnalytics.telemetryEnabled, true);
@@ -243,10 +325,15 @@ void main() {
 
       await commandRunner.run(<String>['config', '--analytics']);
       expect(fakeAnalytics.telemetryEnabled, true);
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('analytics reported with help usages', () async {
-      final ConfigCommand configCommand = createConfigCommand();
+    testWithoutContext('analytics reported with help usages', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
       createTestCommandRunner(configCommand);
 
       await fakeAnalytics.setTelemetry(false);
@@ -260,33 +347,37 @@ void main() {
         configCommand.usage,
         containsIgnoringWhitespace('Analytics reporting is currently enabled'),
       );
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('resolves dependencies from injected ToolContext on write', () async {
-      final fakeInjectedConfig = Config.test(name: 'injected');
+    testWithoutContext('resolves dependencies from injected ToolContext on write', () async {
+      final fakeInjectedConfig = Config.test(name: 'injected', directory: fs.directory('/'));
       final fakeInjectedLogger = BufferLogger.test();
 
       final ConfigCommand configCommand = createConfigCommand(
         config: fakeInjectedConfig,
         logger: fakeInjectedLogger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
       );
 
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
       await commandRunner.run(<String>['config', '--enable-web']);
 
       expect(fakeInjectedConfig.getValue('enable-web'), true);
-      expect(globals.config.getValue('enable-web'), isNull);
+      expect(config.getValue('enable-web'), isNull);
 
       expect(fakeInjectedLogger.statusText, contains('Setting "enable-web" value to "true"'));
-      expect(testLogger.statusText, isNot(contains('Setting "enable-web" value to "true"')));
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+      expect(logger.statusText, isNot(contains('Setting "enable-web" value to "true"')));
+    });
 
-    testUsingContext('resolves dependencies from injected ToolContext on read', () async {
+    testWithoutContext('resolves dependencies from injected ToolContext on read', () async {
       final fakeLocalConfig = FakeConfig();
       final fakeLocalLogger = BufferLogger.test();
       final ConfigCommand configCommand = createConfigCommand(
         config: fakeLocalConfig,
         logger: fakeLocalLogger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
       await commandRunner.run(<String>['config', '--list']);
@@ -306,8 +397,12 @@ class FakeAndroidStudio extends Fake implements AndroidStudio, Comparable<Androi
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
+  FakeAndroidSdk({required this.fileSystem});
+
+  final FileSystem fileSystem;
+
   @override
-  Directory get directory => globals.fs.directory('path/to/android/sdk');
+  Directory get directory => fileSystem.directory('path/to/android/sdk');
 }
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
@@ -321,45 +416,6 @@ class FakeFlutterVersion extends Fake implements FlutterVersion {
   Future<void> checkFlutterVersionFreshness() async {}
 }
 
-ConfigCommand createConfigCommand({
-  Config? config,
-  Logger? logger,
-  Platform? platform,
-  FileSystem? fileSystem,
-  ProcessManager? processManager,
-  ProcessUtils? processUtils,
-  Analytics? analytics,
-  AnsiTerminal? terminal,
-  FlutterVersion? flutterVersion,
-  AndroidSdk? androidSdk,
-  AndroidStudio? androidStudio,
-  Java? java,
-}) {
-  final FileSystem fs = fileSystem ?? context.get<FileSystem>() ?? globals.fs;
-  final Logger resolvedLogger = logger ?? context.get<Logger>() ?? globals.logger;
-  final Platform resolvedPlatform = platform ?? context.get<Platform>() ?? globals.platform;
-  final ProcessManager resolvedProcessManager =
-      processManager ?? context.get<ProcessManager>() ?? globals.processManager;
-  return ConfigCommand(
-    androidContext: FakeAndroidContext(
-      androidSdk: androidSdk ?? context.get<AndroidSdk>() ?? globals.androidSdk,
-      androidStudio: androidStudio ?? context.get<AndroidStudio>() ?? globals.androidStudio,
-      java: java ?? context.get<Java>() ?? globals.java,
-    ),
-    toolContext: FakeToolContext(
-      config: config ?? context.get<Config>() ?? globals.config,
-      logger: resolvedLogger,
-
-      flutterVersion: flutterVersion ?? context.get<FlutterVersion>() ?? globals.flutterVersion,
-      platform: resolvedPlatform,
-      fs: fs,
-      processManager: resolvedProcessManager,
-      processUtils: processUtils ?? context.get<ProcessUtils>() ?? globals.processUtils,
-      terminal: terminal ?? context.get<AnsiTerminal>() ?? globals.terminal,
-    ),
-  );
-}
-
 class FakeToolContext extends Fake implements ToolContext {
   FakeToolContext({
     required this.config,
@@ -368,7 +424,6 @@ class FakeToolContext extends Fake implements ToolContext {
     required this.fs,
     required this.processManager,
     required this.processUtils,
-
     required this.terminal,
     required this.flutterVersion,
   });
@@ -385,7 +440,6 @@ class FakeToolContext extends Fake implements ToolContext {
   final ProcessManager processManager;
   @override
   final ProcessUtils processUtils;
-
   @override
   final AnsiTerminal terminal;
   @override

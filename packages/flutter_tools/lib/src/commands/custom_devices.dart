@@ -172,10 +172,8 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
   final CustomDevicesConfig customDevicesConfig;
   @protected
   final FeatureFlags featureFlags;
-  @override
   @protected
   final FileSystem fileSystem;
-  @override
   @protected
   final Logger logger;
 

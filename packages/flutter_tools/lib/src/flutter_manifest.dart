@@ -33,7 +33,11 @@ class FlutterManifest {
   FlutterManifest._({required Logger logger}) : _logger = logger;
 
   /// Returns an empty manifest.
-  factory FlutterManifest.empty({required Logger logger}) = FlutterManifest._;
+  factory FlutterManifest.empty({Logger? logger}) =>
+      FlutterManifest._(logger: logger ?? BufferLogger.test());
+
+  /// The logger used by this manifest.
+  Logger get logger => _logger;
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static FlutterManifest? createFromPath(

@@ -42,24 +42,20 @@ void main() {
       );
     });
 
-    testUsingContext(
-      'does not try to complete exitCompleter multiple times',
-      () async {
-        final fakeDevice = FakeDevice('phone', deviceId);
-        deviceManager.attachedDevices.add(fakeDevice);
-        final termSignal = FakeProcessSignal();
-        final intSignal = FakeProcessSignal();
-        final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
-        final Future<void> commandFuture = createTestCommandRunner(
-          command,
-        ).run(<String>['-d', deviceId, 'logs']);
-        intSignal.send(1);
-        termSignal.send(1);
-        await pumpEventQueue(times: 5);
-        await commandFuture;
-      },
-      overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager},
-    );
+    testUsingContext('does not try to complete exitCompleter multiple times', () async {
+      final fakeDevice = FakeDevice('phone', deviceId);
+      deviceManager.attachedDevices.add(fakeDevice);
+      final termSignal = FakeProcessSignal();
+      final intSignal = FakeProcessSignal();
+      final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
+      intSignal.send(1);
+      termSignal.send(1);
+      await pumpEventQueue(times: 5);
+      await commandFuture;
+    }, overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager});
   });
 }
 
