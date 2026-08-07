@@ -85,17 +85,22 @@ class AndroidSdk {
     FileSystem? fileSystem,
     Platform? platform,
     Config? config,
+    OperatingSystemUtils? operatingSystemUtils,
   }) {
     final FileSystem fs = fileSystem ?? globals.fs;
     final Platform plt = platform ?? globals.platform;
     final Config cfg = config ?? globals.config;
     final fsUtils = FileSystemUtils(fileSystem: fs, platform: plt);
-    final osUtils = OperatingSystemUtils(
-      fileSystem: fs,
-      logger: globals.logger,
-      platform: plt,
-      processManager: globals.processManager,
-    );
+    final OperatingSystemUtils osUtils =
+        operatingSystemUtils ??
+        ((fileSystem == null && platform == null)
+            ? globals.os
+            : OperatingSystemUtils(
+                fileSystem: fs,
+                logger: globals.logger,
+                platform: plt,
+                processManager: globals.processManager,
+              ));
 
     String? findAndroidHomeDir() {
       String? androidHomeDir;

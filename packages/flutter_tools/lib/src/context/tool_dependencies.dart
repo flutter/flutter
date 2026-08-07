@@ -421,6 +421,7 @@ class ToolDependencies {
           fileSystem: finalFS,
           platform: finalPlatform,
           config: finalConfig,
+          operatingSystemUtils: finalOS,
         );
 
     final Java? finalJava =

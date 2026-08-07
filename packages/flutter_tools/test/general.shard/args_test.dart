@@ -14,9 +14,12 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -429,9 +432,35 @@ void verifyOptions(String? command, Iterable<Option> options) {
   }
 }
 
-class FakeToolContext extends Fake implements ToolContext {}
+class FakeFlutterVersion extends Fake implements FlutterVersion {
+  @override
+  String get channel => 'master';
+}
 
-class FakeAppleContext extends Fake implements AppleContext {}
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({
+    FlutterVersion? flutterVersion,
+  }) : flutterVersion = flutterVersion ?? FakeFlutterVersion();
+
+  @override
+  final FlutterVersion flutterVersion;
+}
+
+class FakeXcode extends Fake implements Xcode {}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}
+
+class FakeAppleContext extends Fake implements AppleContext {
+  FakeAppleContext({Xcode? xcode, XcodeProjectInterpreter? xcodeProjectInterpreter})
+    : xcode = xcode ?? FakeXcode(),
+      xcodeProjectInterpreter = xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter();
+
+  @override
+  final Xcode xcode;
+
+  @override
+  final XcodeProjectInterpreter xcodeProjectInterpreter;
+}
 
 class FakeAndroidContext extends Fake implements AndroidContext {}
 

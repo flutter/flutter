@@ -245,6 +245,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final Artifacts artifacts;
 
+  @override
   final Terminal terminal;
 
   late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
