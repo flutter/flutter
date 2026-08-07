@@ -465,10 +465,10 @@ Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
     double previousValue,
     BlinkTraceEvent event,
   ) {
-    if (event.tdur == null && event.dur == null) {
-      throw FormatException('Trace event lacks "tdur" and "dur" fields: $event');
+    if (event.tdur == null) {
+      throw FormatException('Trace event lacks "tdur" field: $event');
     }
-    return previousValue + (event.tdur ?? event.dur)!;
+    return previousValue + event.tdur!;
   });
   final int sampleCount = math.min(events.length, _kMeasuredSampleCount);
   return Duration(microseconds: sum ~/ sampleCount);
@@ -512,8 +512,7 @@ class BlinkTraceEvent {
       tid = _readInt(json, 'tid'),
       ts = _readInt(json, 'ts'),
       tts = _readInt(json, 'tts'),
-      tdur = _readInt(json, 'tdur'),
-      dur = _readInt(json, 'dur');
+      tdur = _readInt(json, 'tdur');
 
   /// Event-specific data.
   final Map<String, dynamic> args;
@@ -541,9 +540,6 @@ class BlinkTraceEvent {
 
   /// Event duration in microseconds.
   final int? tdur;
-
-  /// Wall-clock event duration in microseconds.
-  final int? dur;
 
   /// A "begin frame" event contains all of the scripting time of an animation
   /// frame (JavaScript, WebAssembly), plus a negligible amount of internal
