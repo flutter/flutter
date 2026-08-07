@@ -585,8 +585,6 @@ class ExamplesCrossImportChecker {
     'examples/multiple_windows/lib/app/window_settings_dialog.dart',
     'examples/multiple_windows/lib/main.dart',
     'examples/multiple_windows/test/multiple_windows_test.dart',
-    'examples/splash/lib/main.dart',
-    'examples/splash/test/splash_test.dart',
     'examples/texture/lib/main.dart',
   };
 
