@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const _kBlue = Color(0xFF0000FF);
+
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
   Text('bar', textDirection: TextDirection.ltr),
@@ -24,9 +26,9 @@ void main() {
     testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
       addTearDown(imageCache.clear);
       await tester.pumpWidget(
-        _boilerplate(ElevatedButton(onPressed: null, child: Image(image: FileImage(File('test'))))),
+        _boilerplate(TestButton(child: Image(image: FileImage(File('test'))))),
       );
-      expect(find.widgetWithImage(ElevatedButton, FileImage(File('test'))), findsOneWidget);
+      expect(find.widgetWithImage(TestButton, FileImage(File('test'))), findsOneWidget);
     });
   });
 
@@ -170,9 +172,19 @@ void main() {
     testWidgets('finds EditableText widgets', (WidgetTester tester) async {
       final controller = TextEditingController()..text = 'this is test';
       addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: _boilerplate(TextField(controller: controller))),
+        TestWidgetsApp(
+          home: _boilerplate(
+            EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(),
+              cursorColor: const Color(0xFF000000),
+              backgroundCursorColor: _kBlue,
+            ),
+          ),
         ),
       );
 
@@ -276,7 +288,7 @@ void main() {
           Semantics(
             label: 'Add',
             button: true,
-            child: const TextButton(onPressed: null, child: Text('+')),
+            child: const TestButton(child: Text('+')),
           ),
         ),
       );
@@ -308,22 +320,20 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testWidgets(
-      'Throws StateError if semantics are not enabled (bySemanticsIdentifier)',
-      (WidgetTester tester) async {
-        expect(
-          () => find.bySemanticsIdentifier('Add'),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('Semantics are not enabled'),
-            ),
+    testWidgets('Throws StateError if semantics are not enabled (bySemanticsIdentifier)', (
+      WidgetTester tester,
+    ) async {
+      expect(
+        () => find.bySemanticsIdentifier('Add'),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Semantics are not enabled'),
           ),
-        );
-      },
-      semanticsEnabled: false,
-    );
+        ),
+      );
+    }, semanticsEnabled: false);
 
     testWidgets('finds Semantically labeled widgets by identifier', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
@@ -332,7 +342,7 @@ void main() {
           Semantics(
             identifier: 'Add',
             button: true,
-            child: const TextButton(onPressed: null, child: Text('+')),
+            child: const TestButton(child: Text('+')),
           ),
         ),
       );
@@ -825,7 +835,7 @@ void main() {
       (WidgetTester tester) async {
         var tapCount = 0;
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: ListView(
               children: <Widget>[
                 const SizedBox(height: 2000), // Push the target off-screen
@@ -854,27 +864,23 @@ void main() {
     testWidgets('tapping directly on a Sliver produces an error', (WidgetTester tester) async {
       var sliverToBoxAdapterTapped = 0;
       await tester.pumpWidget(
-        MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData(primarySwatch: Colors.blue),
-          home: Scaffold(
-            body: SafeArea(
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  SliverToBoxAdapter(
-                    child: GestureDetector(
-                      onTap: () {
-                        sliverToBoxAdapterTapped++;
-                      },
-                      child: Container(
-                        color: Colors.orange,
-                        padding: const EdgeInsets.all(16.0),
-                        child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
-                      ),
+        TestWidgetsApp(
+          home: SafeArea(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: GestureDetector(
+                    onTap: () {
+                      sliverToBoxAdapterTapped++;
+                    },
+                    child: Container(
+                      color: _kBlue,
+                      padding: const EdgeInsets.all(16.0),
+                      child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -898,27 +904,23 @@ void main() {
     ) async {
       var sliverToBoxAdapterTapped = 0;
       await tester.pumpWidget(
-        MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData(primarySwatch: Colors.blue),
-          home: Scaffold(
-            body: SafeArea(
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  SliverToBoxAdapter(
-                    child: GestureDetector(
-                      onTap: () {
-                        sliverToBoxAdapterTapped++;
-                      },
-                      child: Container(
-                        color: Colors.orange,
-                        padding: const EdgeInsets.all(16.0),
-                        child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
-                      ),
+        TestWidgetsApp(
+          home: SafeArea(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: GestureDetector(
+                    onTap: () {
+                      sliverToBoxAdapterTapped++;
+                    },
+                    child: Container(
+                      color: _kBlue,
+                      padding: const EdgeInsets.all(16.0),
+                      child: const Text('Sliver Grid Header', style: TextStyle(fontSize: 28)),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -1770,7 +1772,7 @@ void main() {
         final controller = ScrollController();
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SingleChildScrollView(
               controller: controller,
               child: const SizedBox(width: 100, height: 1000),
@@ -1788,7 +1790,7 @@ void main() {
         final controller = ScrollController(initialScrollOffset: 400);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SingleChildScrollView(
               controller: controller,
               child: const SizedBox(width: 100, height: 1000),
@@ -1806,7 +1808,7 @@ void main() {
         final controller = ScrollController();
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               controller: controller,
@@ -1825,7 +1827,7 @@ void main() {
         final controller = ScrollController(initialScrollOffset: 200);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               controller: controller,
@@ -1844,7 +1846,7 @@ void main() {
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(
+          const TestWidgetsApp(
             home: Column(
               children: <Widget>[
                 SingleChildScrollView(
@@ -1862,7 +1864,7 @@ void main() {
 
       testWidgets('can exclusively find node that scrolls vertically', (WidgetTester tester) async {
         await tester.pumpWidget(
-          const MaterialApp(
+          const TestWidgetsApp(
             home: Column(
               children: <Widget>[
                 SingleChildScrollView(
@@ -2062,7 +2064,7 @@ Widget _boilerplate(Widget child) {
     textDirection: TextDirection.ltr,
     child: Navigator(
       onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute<void>(builder: (BuildContext context) => child);
+        return TestRoute<void>(builder: (BuildContext context) => child);
       },
     ),
   );
@@ -2117,6 +2119,106 @@ Widget _deepWidgetTree({required int depth, required Widget child}) {
     tree = SizedBox(child: tree);
   }
   return tree;
+}
+
+class TestRoute<T> extends PageRoute<T> {
+  TestRoute({
+    this.child,
+    this.builder,
+    RouteSettings super.settings = const RouteSettings(),
+    this.barrierColor,
+    this.maintainState = false,
+    this.transitionDuration = Duration.zero,
+    this.reverseTransitionDuration = Duration.zero,
+    this.transitionsBuilder,
+    super.fullscreenDialog,
+    super.allowSnapshotting,
+  }) : assert(child != null || builder != null, 'Either child or builder must be provided.');
+
+  final Widget? child;
+  final WidgetBuilder? builder;
+  final PageTransitionsBuilder? transitionsBuilder;
+
+  @override
+  final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
+
+  @override
+  final Color? barrierColor;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  final bool maintainState;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return child ?? builder?.call(context) ?? const SizedBox.shrink();
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (transitionsBuilder == null) {
+      return child;
+    }
+
+    return transitionsBuilder!.buildTransitions<T>(
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
+  }
+}
+
+class TestButton extends StatelessWidget {
+  const TestButton({
+    required this.child,
+    this.focusNode,
+    this.autofocus = false,
+    this.onPressed,
+    this.behavior,
+    super.key,
+  });
+
+  final bool autofocus;
+  final FocusNode? focusNode;
+  final VoidCallback? onPressed;
+  final Widget child;
+  final HitTestBehavior? behavior;
+
+  void _onFocus() => focusNode?.requestFocus();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'button',
+      button: true,
+      enabled: onPressed != null,
+      onTap: onPressed,
+      onFocus: _onFocus,
+      focusable: true,
+      child: FocusableActionDetector(
+        enabled: onPressed != null,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        child: GestureDetector(behavior: behavior, onTap: onPressed, child: child),
+      ),
+    );
+  }
 }
 
 class _FakeFinder extends FinderBase<String> {

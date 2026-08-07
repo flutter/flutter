@@ -77,7 +77,7 @@ public class FlutterFragmentActivityTest {
   @Test
   public void createFlutterFragment_defaultRenderModeSurface() {
     final FlutterFragmentActivity activity = new FakeFlutterFragmentActivity();
-    assertEquals(activity.createFlutterFragment().getRenderMode(), RenderMode.surface);
+    assertEquals(RenderMode.surface, activity.createFlutterFragment().getRenderMode());
   }
 
   @Test
@@ -89,7 +89,7 @@ public class FlutterFragmentActivityTest {
             return BackgroundMode.transparent;
           }
         };
-    assertEquals(activity.createFlutterFragment().getRenderMode(), RenderMode.texture);
+    assertEquals(RenderMode.texture, activity.createFlutterFragment().getRenderMode());
   }
 
   @Test
@@ -101,7 +101,7 @@ public class FlutterFragmentActivityTest {
             return RenderMode.texture;
           }
         };
-    assertEquals(activity.createFlutterFragment().getRenderMode(), RenderMode.texture);
+    assertEquals(RenderMode.texture, activity.createFlutterFragment().getRenderMode());
   }
 
   @Test
@@ -114,7 +114,7 @@ public class FlutterFragmentActivityTest {
           }
         };
     assertEquals(
-        activity.createFlutterFragment().getDartEntrypointLibraryUri(), "package:foo/bar.dart");
+        "package:foo/bar.dart", activity.createFlutterFragment().getDartEntrypointLibraryUri());
   }
 
   @Test
