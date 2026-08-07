@@ -639,7 +639,7 @@ const String _kGlibcError = 'Inconsistency detected by ld.so';
 ///
 /// We filter out these benign D-Bus lines to prevent stderr log noise in CI,
 /// following the industry standard pattern used by open source projects to filter
-/// E2E test logs (e.g. https://github.com/kitelev/exocortex/blob/master/packages/obsidian-plugin/docker-entrypoint-e2e.sh).
+/// E2E test logs (e.g. https://github.com/kitelev/exocortex/blob/4290cdade669034e5f71c892fb3e1908c5a2fe12/packages/obsidian-plugin/docker-entrypoint-e2e.sh#L48-L49).
 bool _isDbusError(String line) {
   return line.contains('ERROR:dbus/bus.cc') ||
       line.contains('ERROR:dbus/object_proxy.cc') ||
