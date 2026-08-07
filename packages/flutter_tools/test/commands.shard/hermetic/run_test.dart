@@ -428,7 +428,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -438,6 +438,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -482,7 +483,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: true,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -492,6 +493,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -789,7 +791,7 @@ void main() {
                 runProjectModule: false,
                 runProjectHostLanguage: '',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -797,6 +799,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -840,7 +843,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -848,6 +851,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -896,7 +900,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -904,6 +908,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -953,7 +958,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
-                runEnableHcpp: false,
+                runEnableHcpp: true,
               ),
             ),
           );
@@ -961,6 +966,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -2239,6 +2245,10 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
 
   @override
   bool isEnabled(Feature feature) => feature.master.enabledByDefault;
+
+  // Queried by getBuildInfo.
+  @override
+  bool get isHcppEnabled => isEnabled(hcpp);
 
   @override
   List<Feature> get allFeatures => const <Feature>[];

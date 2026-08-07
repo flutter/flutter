@@ -344,7 +344,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
-        enableHcpp: enableHcpp,
+        enableHcpp: explicitEnableHcpp,
         testFlag: testFlag,
         iosProfileDebugger: iosProfileDebugger,
         traceSystrace: traceSystrace,
@@ -411,7 +411,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
-        enableHcpp: enableHcpp,
+        enableHcpp: explicitEnableHcpp,
         webDevServerConfig: webDevServerConfig,
         testFlag: testFlag,
         iosProfileDebugger: iosProfileDebugger,
@@ -678,7 +678,10 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: enableImpeller.asBool,
       runIOSInterfaceType: iOSInterfaceType,
       runIsTest: targetFile.endsWith('_test.dart'),
-      runEnableHcpp: enableHcpp,
+      // Same estimate of the packaged value as the build commands make: an explicit flag is
+      // applied at launch, otherwise the manifest decides, and the build injects the
+      // enable-hcpp feature flag when the manifest is silent.
+      runEnableHcpp: explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   })();
 

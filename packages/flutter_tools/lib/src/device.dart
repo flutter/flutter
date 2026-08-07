@@ -988,7 +988,7 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
-    this.enableHcpp = false,
+    this.enableHcpp,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1025,7 +1025,7 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
-    this.enableHcpp = false,
+    this.enableHcpp,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1161,7 +1161,14 @@ class DebuggingOptions {
   final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
-  final bool enableHcpp;
+
+  /// Whether HCPP platform views were explicitly enabled or disabled with
+  /// `--[no-]enable-hcpp`.
+  ///
+  /// When null the flag was not passed, and no override is sent to the device
+  /// at launch, so the `io.flutter.embedding.android.EnableHcpp` value in the
+  /// manifest of the installed artifact decides.
+  final bool? enableHcpp;
   final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
@@ -1397,7 +1404,7 @@ class DebuggingOptions {
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         uninstallApp: (json['uninstallApp'] as bool?) ?? true,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
-        enableHcpp: (json['enableHcpp'] as bool?) ?? false,
+        enableHcpp: json['enableHcpp'] as bool?,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,

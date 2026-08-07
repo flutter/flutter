@@ -1324,7 +1324,8 @@ abstract class FlutterCommand extends Command<void> {
           'backend. An explicit value takes priority over the EnableHcpp metadata in '
           'AndroidManifest.xml: build commands write it into the manifest of the artifact they '
           'produce, and "run", "test", and "drive" additionally apply it at launch. Without the '
-          'flag, the manifest decides.',
+          'flag, the manifest decides, and if the manifest does not set it either, the '
+          'enable-hcpp feature flag does.',
     );
   }
 
@@ -1346,12 +1347,13 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// The HCPP value for an Android artifact when the developer did not pass
-  /// `--[no-]enable-hcpp`: currently always false.
+  /// `--[no-]enable-hcpp`: the `enable-hcpp` feature flag, which is on by
+  /// default on master and beta.
   ///
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? false;
+  bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
