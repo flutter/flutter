@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:dds/dds.dart';
 import 'package:dwds/dwds.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
@@ -354,7 +355,7 @@ class ResidentWebRunner extends ResidentRunner {
             target,
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
-            compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+            compilerConfigs: _compilerConfigs,
           );
         }
         final webDevFS = flutterDevice!.devFS! as WebDevFS;
@@ -418,19 +419,50 @@ class ResidentWebRunner extends ResidentRunner {
     }
   }
 
-  WebCompilerConfig get _compilerConfig {
-    if (debuggingOptions.webUseWasm) {
-      return WasmCompilerConfig(
+  /// Compiler configurations for the [WebBuilder.buildWeb] path of
+  /// `flutter run`.
+  ///
+  /// This getter is only consulted when `flutter run` goes through
+  /// [WebBuilder.buildWeb] rather than the DDC-based [WebDevFS] path. That
+  /// happens in every mode when `--wasm` is set (DDC does not compile to
+  /// Wasm) and in profile/release mode without `--wasm`. See the branch in
+  /// `_runOnce` guarded by `isDebug && !webUseWasm`.
+  ///
+  /// | mode    | `--wasm` off                                 | `--wasm` on                        |
+  /// |---------|----------------------------------------------|------------------------------------|
+  /// | debug   | DDC via `WebDevFS` (this getter not called)  | `WasmCompilerConfig` + `JsCompilerConfig` (dart2js) |
+  /// | profile | `JsCompilerConfig` (dart2js)                 | `WasmCompilerConfig` + `JsCompilerConfig` (dart2js) |
+  /// | release | `JsCompilerConfig` (dart2js)                 | `WasmCompilerConfig` + `JsCompilerConfig` (dart2js) |
+  ///
+  /// The JS build always uses [JsCompilerConfig] (dart2js), not DDC. Hot
+  /// reload requires DDC and is therefore unavailable whenever `--wasm` is
+  /// set (see [reloadIsRestart]) — this was already the case before the JS
+  /// fallback was added; the fallback only widens browser compatibility, it
+  /// does not remove any dev tooling that would otherwise be present.
+  ///
+  /// When `--wasm` is set, the Flutter web loader picks between the two
+  /// builds at runtime: WasmGC-capable browsers load the wasm build; older
+  /// browsers fall back to the dart2js build. This matches what
+  /// `flutter build web --wasm` already emits for the same reason.
+  ///
+  /// See https://github.com/flutter/flutter/issues/172006.
+  @visibleForTesting
+  List<WebCompilerConfig> get debugCompilerConfigs => _compilerConfigs;
+
+  List<WebCompilerConfig> get _compilerConfigs => <WebCompilerConfig>[
+    // When --wasm is set, emit a Wasm config plus the JS fallback below so the
+    // loader can fall back to JS on browsers without WasmGC support.
+    if (debuggingOptions.webUseWasm)
+      WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
         renderer: debuggingOptions.webRenderer,
-      );
-    }
-    return JsCompilerConfig.run(
+      ),
+    JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
       renderer: debuggingOptions.webRenderer,
-    );
-  }
+    ),
+  ];
 
   /// Handles the no clients available scenario gracefully.
   OperationResult _handleNoClientsAvailable(Status status) {
@@ -507,7 +539,7 @@ class ResidentWebRunner extends ResidentRunner {
           target,
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
-          compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+          compilerConfigs: _compilerConfigs,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
