@@ -124,7 +124,7 @@ class EngineVertices implements ui.Vertices {
     assert(!_isDisposed, 'Attempted to use a disposed Vertices.');
     return _delegate;
   }
-  
+
   final BackendVertices? _delegate;
 
   late final UniqueRef<BackendVertices>? _ref;
