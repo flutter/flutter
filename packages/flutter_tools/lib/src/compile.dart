@@ -1079,25 +1079,25 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return null;
     }
 
-    final String inputKey = const Uuid().v4();
     server.stdin
-      ..writeln('compile-expression $inputKey')
-      ..writeln(request.expression);
-    request.definitions?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.definitionTypes?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeDefinitions?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeBounds?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeDefaults?.forEach(server.stdin.writeln);
-    server.stdin
-      ..writeln(inputKey)
-      ..writeln(request.libraryUri ?? '')
-      ..writeln(request.klass ?? '')
-      ..writeln(request.method ?? '')
-      ..writeln(request.isStatic);
+      ..writeln('JSON_INPUT')
+      ..writeln(
+        json.encode(<String, Object?>{
+          'type': 'COMPILE_EXPRESSION',
+          'data': <String, Object?>{
+            'expression': request.expression,
+            'definitions': request.definitions ?? <String>[],
+            'definitionTypes': request.definitionTypes ?? <String>[],
+            'typeDefinitions': request.typeDefinitions ?? <String>[],
+            'typeBounds': request.typeBounds ?? <String>[],
+            'typeDefaults': request.typeDefaults ?? <String>[],
+            'libraryUri': request.libraryUri ?? '',
+            'class': request.klass,
+            'method': request.method,
+            'static': request.isStatic,
+          },
+        }),
+      );
 
     return _stdoutHandler.compilerOutput?.future;
   }
