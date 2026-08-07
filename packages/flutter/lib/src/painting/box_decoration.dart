@@ -456,7 +456,7 @@ class _BoxDecorationPainter extends BoxPainter {
     final List<Paint> shadowPaints = _shadowPaints ??= <Paint>[
       for (final BoxShadow boxShadow in boxShadows) boxShadow.toPaint(),
     ];
-    for (int i = 0; i < boxShadows.length; i += 1) {
+    for (var i = 0; i < boxShadows.length; i += 1) {
       final BoxShadow boxShadow = boxShadows[i];
       final Paint paint = shadowPaints[i];
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
