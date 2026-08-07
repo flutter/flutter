@@ -14,12 +14,9 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -430,8 +427,6 @@ void verifyOptions(String? command, Iterable<Option> options) {
     // TODO(ianh): add some checking for embedded URLs to make sure we're consistent on how we format those.
     // TODO(ianh): arguably we should ban help text that starts with "Whether to..." since by definition a flag is to enable a feature, so the "whether to" is redundant.
   }
-}
-
 }
 
 class FakeAnalytics extends Fake implements Analytics {
