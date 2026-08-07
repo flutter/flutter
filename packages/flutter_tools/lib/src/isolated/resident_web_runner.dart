@@ -26,6 +26,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../dart/language_version.dart';
+import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
@@ -710,7 +711,7 @@ class ResidentWebRunner extends ResidentRunner {
       // the web_plugin_registrant.dart file alongside the generated main.dart
       const generatedImport = 'web_plugin_registrant.dart';
 
-      Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
+      Uri? importedEntrypoint = packageConfig!.toPackageUriForWorkspace(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
         final String parent = _fileSystem.file(mainUri).parent.path;
