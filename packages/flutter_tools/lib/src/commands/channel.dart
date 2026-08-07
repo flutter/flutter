@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
-import '../base/logger.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../git.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../version.dart';
@@ -188,16 +188,12 @@ class ChannelCommand extends FlutterCommand {
     );
   }
 
-  static Future<void> upgradeChannel({
-    required FlutterVersion currentVersion,
-    required Git git,
-    required Logger logger,
-  }) async {
+  static Future<void> upgradeChannel(FlutterVersion currentVersion) async {
     final String channel = currentVersion.channel;
     if (kObsoleteBranches.containsKey(channel)) {
       final String alternative = kObsoleteBranches[channel]!;
-      logger.printStatus("Transitioning from '$channel' to '$alternative'...");
-      return _checkout(alternative, git: git);
+      globals.printStatus("Transitioning from '$channel' to '$alternative'...");
+      return _checkout(alternative, git: globals.git);
     }
   }
 

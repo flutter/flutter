@@ -33,11 +33,7 @@ class FlutterManifest {
   FlutterManifest._({required Logger logger}) : _logger = logger;
 
   /// Returns an empty manifest.
-  factory FlutterManifest.empty({Logger? logger}) =>
-      FlutterManifest._(logger: logger ?? BufferLogger.test());
-
-  /// The logger used by this manifest.
-  Logger get logger => _logger;
+  factory FlutterManifest.empty({required Logger logger}) = FlutterManifest._;
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static FlutterManifest? createFromPath(
@@ -131,6 +127,9 @@ class FlutterManifest {
   }
 
   final Logger _logger;
+
+  /// The logger associated with this manifest.
+  Logger get logger => _logger;
 
   /// A map representation of the entire `pubspec.yaml` file.
   var _descriptor = <String, Object?>{};
