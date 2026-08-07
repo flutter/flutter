@@ -383,6 +383,7 @@ class ToolDependencies {
         iosSimulatorUtils ??
         IOSSimulatorUtils(
           logger: finalLogger,
+          operatingSystemUtils: finalOS,
           processManager: finalProcessManager,
           xcode: finalXcode,
         );
