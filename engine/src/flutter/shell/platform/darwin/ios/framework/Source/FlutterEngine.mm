@@ -205,7 +205,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   FlutterTextureRegistryRelay* _textureRegistry;
 
   FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
-  FlutterFMLTaskRunner* _uiTaskRunnerWrapper;
   FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
 }
 
@@ -456,7 +455,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (FlutterFMLTaskRunner*)uiTaskRunner {
-  return _uiTaskRunnerWrapper;
+  // The platform and UI threads are always merged on iOS.
+  return _platformTaskRunnerWrapper;
 }
 
 - (FlutterFMLTaskRunner*)rasterTaskRunner {
@@ -582,7 +582,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _threadHost.reset();
   _platformViewsController = nil;
   _platformTaskRunnerWrapper = nil;
-  _uiTaskRunnerWrapper = nil;
   _rasterTaskRunnerWrapper = nil;
 }
 
@@ -806,8 +805,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _shell = std::move(shell);
   _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
-  _uiTaskRunnerWrapper =
-      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:_shell->GetTaskRunners().GetUITaskRunner()];
   _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
 
@@ -835,16 +832,14 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   return [NSString stringWithFormat:@"%@.%zu", labelPrefix, ++s_shellCount];
 }
 
-static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
-                                          const flutter::Settings& settings) {
+static flutter::ThreadHost MakeThreadHost(NSString* thread_label) {
   // The current thread will be used as the platform thread. Ensure that the message loop is
   // initialized.
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
+  // No dedicated UI thread is created: on iOS the UI thread is always merged onto the platform
+  // thread. FlutterDartProject rejects any other threading configuration at startup.
   uint32_t threadHostType = flutter::ThreadHost::Type::kRaster | flutter::ThreadHost::Type::kIo;
-  if (settings.merged_platform_ui_thread != flutter::Settings::MergedPlatformUIThread::kEnabled) {
-    threadHostType |= flutter::ThreadHost::Type::kUi;
-  }
 
   if ([FlutterEngine isProfilerEnabled]) {
     threadHostType = threadHostType | flutter::ThreadHost::Type::kProfiler;
@@ -853,10 +848,6 @@ static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
   flutter::ThreadHost::ThreadHostConfig host_config(thread_label.UTF8String, threadHostType,
                                                     IOSPlatformThreadConfigSetter);
 
-  host_config.ui_config =
-      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::kUi, thread_label.UTF8String),
-                                fml::Thread::ThreadPriority::kDisplay);
   host_config.raster_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
                                     flutter::ThreadHost::Type::kRaster, thread_label.UTF8String),
@@ -907,7 +898,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   NSString* threadLabel = [FlutterEngine generateThreadLabel:self.labelPrefix];
   _threadHost = std::make_shared<flutter::ThreadHost>();
-  *_threadHost = MakeThreadHost(threadLabel, settings);
+  *_threadHost = MakeThreadHost(threadLabel);
 
   __weak FlutterEngine* weakSelf = self;
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
@@ -927,18 +918,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
       [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
-  fml::RefPtr<fml::TaskRunner> ui_runner;
-  if (settings.enable_impeller &&
-      settings.merged_platform_ui_thread == flutter::Settings::MergedPlatformUIThread::kEnabled) {
-    ui_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
-  } else {
-    ui_runner = _threadHost->ui_thread->GetTaskRunner();
-  }
-  flutter::TaskRunners task_runners(threadLabel.UTF8String,                          // label
-                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-                                    _threadHost->raster_thread->GetTaskRunner(),     // raster
-                                    ui_runner,                                       // ui
-                                    _threadHost->io_thread->GetTaskRunner()          // io
+  // The platform and UI threads are always merged on iOS, so the UI task runner is the platform
+  // thread's task runner.
+  fml::RefPtr<fml::TaskRunner> platform_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  flutter::TaskRunners task_runners(threadLabel.UTF8String,                       // label
+                                    platform_runner,                              // platform
+                                    _threadHost->raster_thread->GetTaskRunner(),  // raster
+                                    platform_runner,                              // ui
+                                    _threadHost->io_thread->GetTaskRunner()       // io
   );
 
   // Disable GPU if the app or scene is running in the background.
