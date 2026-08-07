@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -10,6 +13,78 @@ import 'package:flutter_test/flutter_test.dart';
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
 void main() {
   final binding = LiveTestWidgetsFlutterBinding();
+
+  test('showTestPointerCrosshairs defaults to true', () {
+    expect(binding.showTestPointerCrosshairs, isTrue);
+  });
+
+  testWidgets('showTestPointerCrosshairs hides crosshairs without blocking pointer events', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(() {
+      binding.showTestPointerCrosshairs = true;
+    });
+
+    var tapCount = 0;
+    await tester.pumpWidget(
+      buildTestApp(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            tapCount += 1;
+          },
+          child: const ColoredBox(
+            key: ValueKey<String>('crosshair-target'),
+            color: Color(0xFFFFFFFF),
+            child: SizedBox(width: 100, height: 100),
+          ),
+        ),
+      ),
+    );
+
+    final Offset position = tester.getCenter(
+      find.byKey(const ValueKey<String>('crosshair-target')),
+    );
+
+    binding.showTestPointerCrosshairs = false;
+    final TestGesture hiddenGesture = await tester.startGesture(position);
+    await tester.pump();
+    final ui.Image imageWithoutCrosshair = await _captureRenderView(binding);
+
+    await hiddenGesture.up();
+    await tester.pump();
+    expect(tapCount, 1);
+
+    binding.showTestPointerCrosshairs = true;
+    final TestGesture visibleGesture = await tester.startGesture(position);
+    await tester.pump();
+    final ui.Image imageWithCrosshair = await _captureRenderView(binding);
+
+    binding.showTestPointerCrosshairs = false;
+    await tester.pump();
+    final ui.Image imageAfterDisablingCrosshair = await _captureRenderView(binding);
+
+    expect(
+      await _colorAtLogicalPosition(imageWithoutCrosshair, binding.renderView, position),
+      const Color(0xFFFFFFFF),
+    );
+    expect(
+      await _colorAtLogicalPosition(imageWithCrosshair, binding.renderView, position),
+      isNot(const Color(0xFFFFFFFF)),
+    );
+    expect(
+      await _colorAtLogicalPosition(imageAfterDisablingCrosshair, binding.renderView, position),
+      const Color(0xFFFFFFFF),
+    );
+
+    imageWithoutCrosshair.dispose();
+    imageWithCrosshair.dispose();
+    imageAfterDisablingCrosshair.dispose();
+    await visibleGesture.up();
+    await tester.pump();
+    expect(tapCount, 2);
+  });
+
   testWidgets('Input PointerAddedEvent', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidgetsApp(home: Text('Test')));
     await tester.pump();
@@ -158,6 +233,34 @@ void main() {
     // Verify that root layer has been replaced
     expect(binding.renderView.debugLayer, isNot(same(currentRootLayer)));
   });
+}
+
+Future<ui.Image> _captureRenderView(LiveTestWidgetsFlutterBinding binding) async {
+  final RenderView renderView = binding.renderView;
+  final layer = renderView.debugLayer! as OffsetLayer;
+  final ui.Image? image = await binding.runAsync<ui.Image>(
+    () => layer.toImage(renderView.paintBounds),
+  );
+  return image!;
+}
+
+Future<Color> _colorAtLogicalPosition(
+  ui.Image image,
+  RenderView renderView,
+  Offset position,
+) async {
+  final ByteData data = (await image.toByteData())!;
+  final double scaleX = image.width / renderView.size.width;
+  final double scaleY = image.height / renderView.size.height;
+  final int x = (position.dx * scaleX).round().clamp(0, image.width - 1);
+  final int y = (position.dy * scaleY).round().clamp(0, image.height - 1);
+  final int offset = (y * image.width + x) * 4;
+  return Color.fromARGB(
+    data.getUint8(offset + 3),
+    data.getUint8(offset),
+    data.getUint8(offset + 1),
+    data.getUint8(offset + 2),
+  );
 }
 
 /// A widget that shows the number of times it has been tapped.
