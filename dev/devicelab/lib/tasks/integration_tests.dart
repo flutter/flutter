@@ -230,6 +230,14 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
+TaskFunction createEngineIntegrationGoldenTest() {
+  return IntegrationTest(
+    '${flutterDirectory.path}/dev/integration_tests/engine_integration_golden_test',
+    'integration_test/engine_integration_golden_test.dart',
+    createPlatforms: <String>['windows'],
+  ).call;
+}
+
 TaskFunction createWindowingDriverTest() {
   return () async {
     await flutter('config', options: const <String>['--enable-windowing']);
