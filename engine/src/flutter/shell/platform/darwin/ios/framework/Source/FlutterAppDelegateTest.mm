@@ -212,7 +212,7 @@ FLUTTER_ASSERT_ARC
         restorationHandler:^(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects){
         }];
   XCTAssertTrue(result);
-  // openURL should NOT have been called on cold start.
+  // openURL should NOT have been called.
   OCMReject([mockApplication openURL:[OCMArg any]
                              options:[OCMArg any]
                    completionHandler:[OCMArg any]]);

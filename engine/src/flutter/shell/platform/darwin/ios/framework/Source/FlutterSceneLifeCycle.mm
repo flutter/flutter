@@ -462,6 +462,7 @@ FLUTTER_ASSERT_ARC
   // if deep linking is enabled, send it to the framework
   [engine sendDeepLinkToFramework:url
                 completionHandler:^(BOOL success){
+                    // no-op.
                 }];
   return YES;
 }

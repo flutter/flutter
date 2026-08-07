@@ -167,6 +167,7 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   if (flutterViewController) {
     [flutterViewController.engine sendDeepLinkToFramework:url
                                         completionHandler:^(BOOL success){
+                                            // no-op.
                                         }];
   } else {
     [FlutterLogger logError:@"Attempting to open an URL without a Flutter RootViewController."];
