@@ -9127,7 +9127,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('When clipboard empty, no semantics paste option', (WidgetTester tester) async {
+  testWidgets('When clipboard empty, semantics paste option is available', (
+    WidgetTester tester,
+  ) async {
     const textInTextField = 'Hello';
 
     final semantics = SemanticsTester(tester);
@@ -9204,7 +9206,7 @@ void main() {
                     SemanticsAction.moveCursorBackwardByWord,
                     SemanticsAction.setSelection,
                     SemanticsAction.setText,
-                    // No paste option.
+                    SemanticsAction.paste,
                   ],
                   value: textInTextField,
                   inputType: ui.SemanticsInputType.text,
@@ -9225,11 +9227,7 @@ void main() {
     );
 
     semantics.dispose();
-
-    // On web, we don't check for pasteability because that triggers a
-    // permission dialog in the browser.
-    // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
-  }, skip: isBrowser); // [intended] see above.
+  });
 
   testWidgets('TextField throws when not descended from a Material widget', (
     WidgetTester tester,
@@ -15277,7 +15275,7 @@ void main() {
   });
 
   testWidgets(
-    'clipboard status is checked via hasStrings without getting the full clipboard contents',
+    'opening the selection menu does not access the clipboard',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -15314,13 +15312,10 @@ void main() {
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
       await tester.pump();
 
-      // getData is not called unless something is pasted.  hasStrings is used to
-      // check the status of the clipboard.
+      // Clipboard contents are only accessed after the user requests a paste.
       expect(calledGetData, false);
-      // hasStrings is checked in order to decide if the content can be pasted.
-      expect(calledHasStrings, true);
+      expect(calledHasStrings, false);
     },
-    skip: kIsWeb, // [intended] web doesn't call hasStrings.
   );
 
   testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {

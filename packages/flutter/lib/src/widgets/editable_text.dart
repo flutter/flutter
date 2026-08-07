@@ -2516,13 +2516,7 @@ class EditableTextState extends State<EditableText>
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
-  final ClipboardStatusNotifier clipboardStatus = kIsWeb
-      // Web browsers will show a permission dialog when Clipboard.hasStrings is
-      // called. In an EditableText, this will happen before the paste button is
-      // clicked, often before the context menu is even shown. To avoid this
-      // poor user experience, always show the paste button on web.
-      ? _WebClipboardStatusNotifier()
-      : ClipboardStatusNotifier();
+  final ClipboardStatusNotifier clipboardStatus = _LazyClipboardStatusNotifier();
 
   /// Detects whether the Live Text input is enabled.
   ///
@@ -6860,14 +6854,13 @@ class _PasteSelectionAction extends ContextAction<PasteTextIntent> {
   }
 }
 
-/// A [ClipboardStatusNotifier] whose [value] is hardcoded to
-/// [ClipboardStatus.pasteable].
+/// A [ClipboardStatusNotifier] that does not query the clipboard.
 ///
-/// Useful to avoid showing a permission dialog on web, which happens when
-/// [Clipboard.hasStrings] is called.
-class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
-  @override
-  ClipboardStatus value = ClipboardStatus.pasteable;
+/// This avoids accessing the clipboard before the user requests a paste. The
+/// paste action reads the clipboard and does nothing if there is no compatible
+/// content.
+class _LazyClipboardStatusNotifier extends ClipboardStatusNotifier {
+  _LazyClipboardStatusNotifier() : super(value: ClipboardStatus.pasteable);
 
   @override
   Future<void> update() {
