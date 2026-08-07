@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'common.dart';
 /// @docImport 'terminal.dart';
 library;
 
@@ -663,8 +664,8 @@ List<String> formatTable(List<List<String>> table, {String separator = ' • ', 
 ///   the remaining payload as strict UTF-8.
 /// * **Default UTF-8** (no BOM): Decodes the entire byte list as strict UTF-8.
 ///
-/// Throws a [FormatException] if UTF-8 or UTF-16 decoding fails, or if a UTF-16
-/// byte payload has an odd length after stripping the BOM.
+/// Throws a [FormatException] if a UTF-16 byte payload has an odd length after
+/// stripping the BOM, or a [ToolExit] if strict UTF-8 decoding fails.
 String decodeUtf8OrUtf16(List<int> bytes) {
   if (bytes.length >= 2 && bytes[0] == 0xFF && bytes[1] == 0xFE) {
     return _decodeUtf16(bytes, 2, Endian.little);
