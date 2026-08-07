@@ -58,10 +58,11 @@ class DoctorCommand extends FlutterCommand {
         );
       }
     }
+    final bool androidLicenses = boolArg('android-licenses');
     final bool success = await _doctor.diagnose(
-      androidLicenses: boolArg('android-licenses'),
+      androidLicenses: androidLicenses,
       verbose: verbose,
-      androidLicenseValidator: androidLicenseValidator,
+      androidLicenseValidator: androidLicenses ? androidLicenseValidator : null,
     );
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
