@@ -142,6 +142,9 @@ mixin AnimationLocalListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
+    if (_listeners.isEmpty) {
+      return;
+    }
     final List<VoidCallback> localListeners = _listeners.toList(growable: false);
     for (final listener in localListeners) {
       InformationCollector? collector;
@@ -235,6 +238,9 @@ mixin AnimationLocalStatusListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(AnimationStatus status) {
+    if (_statusListeners.isEmpty) {
+      return;
+    }
     final List<AnimationStatusListener> localListeners = _statusListeners.toList(growable: false);
     for (final listener in localListeners) {
       try {
