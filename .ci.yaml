@@ -680,6 +680,21 @@ targets:
       - DEPS
       - dartdoc_options.yaml
 
+  - name: Linux snippets
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 30
+    properties:
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      shard: snippets
+    runIf:
+      - dev/snippets/**
+      - dev/bots/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -861,7 +876,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - dev/**
-      - examples/api/**
+      - examples/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -4330,7 +4345,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - dev/**
-      - examples/api/**
+      - examples/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -4361,7 +4376,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - dev/**
-      - examples/api/**
+      - examples/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -6396,7 +6411,7 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     runIf:
       - dev/**
-      - examples/api/**
+      - examples/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -7148,7 +7163,8 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.13-rc-1-bin:8.14-bin:9.3.1-bin:9.3.1-all"}
         ]
       shard: tool_tests_commands
       subshard: 2_2
@@ -7281,7 +7297,7 @@ targets:
         ]
       task_name: windows_desktop_impeller
 
-  - name: Windows windows_primitive_shape_golden_test
+  - name: Windows windows_engine_integration_golden_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -7294,7 +7310,7 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
-      task_name: windows_primitive_shape_golden_test
+      task_name: windows_engine_integration_golden_test
 
   - name: Windows texture_impeller_windows
     recipe: devicelab/devicelab_drone

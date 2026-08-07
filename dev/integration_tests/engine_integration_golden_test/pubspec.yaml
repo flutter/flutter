@@ -1,5 +1,5 @@
-name: primitive_shape_test
-description: Integration test to capture primitive shape rendering snapshots and upload to Skia Gold.
+name: engine_integration_golden_test
+description: Integration tests that capture rendering snapshots and upload them to Skia Gold for engine-based render tests.
 publish_to: none
 
 environment:
@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
+  google_fonts: any
   integration_test:
     sdk: flutter
   path: any
@@ -23,4 +24,4 @@ dev_dependencies:
     sdk: flutter
   test: any
 
-# PUBSPEC CHECKSUM: fp4cre
+# PUBSPEC CHECKSUM: 3hii4d
