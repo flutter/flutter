@@ -37,9 +37,14 @@ Future<void> processPodsIfNeeded(
     forceCocoaPodsOnly: forceCocoaPodsOnly,
   );
 
+  final FlutterDarwinPlatform platform = xcodeProject is IosProject
+      ? FlutterDarwinPlatform.ios
+      : FlutterDarwinPlatform.macos;
+
   // If there are no plugins and if the project is a not module with an existing
   // podfile, skip processing pods
-  if (!hasPlugins(project) && !(project.isModule && xcodeProject.podfile.existsSync())) {
+  if (!hasPlugins(project) &&
+      !(platform == .ios && project.ios.isEphemeralModule && xcodeProject.podfile.existsSync())) {
     return;
   }
 
@@ -63,9 +68,6 @@ Future<void> processPodsIfNeeded(
       processUtils: globals.processUtils,
       config: globals.config,
     );
-    final FlutterDarwinPlatform platform = xcodeProject is IosProject
-        ? FlutterDarwinPlatform.ios
-        : FlutterDarwinPlatform.macos;
 
     await swiftPackageManager.generatePluginsSwiftPackage(
       const <Plugin>[],
