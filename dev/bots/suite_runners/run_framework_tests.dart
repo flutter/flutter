@@ -87,10 +87,13 @@ Future<void> frameworkTestsRunner() async {
     ], workingDirectory: flutterRoot);
     await runCommand(dart, <String>[
       path.join(flutterRoot, 'dev', 'tools', 'examples_smoke_test.dart'),
-    ], workingDirectory: path.join(flutterRoot, 'examples', 'api'));
-    for (final FileSystemEntity entity in Directory(
-      path.join(flutterRoot, 'examples'),
-    ).listSync()) {
+    ], workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'examples', 'api'));
+    final List<FileSystemEntity> allExamplesDir = [
+      ...Directory(path.join(flutterRoot, 'examples')).listSync(),
+      ...Directory(path.join(flutterRoot, 'packages', 'flutter', 'examples')).listSync(),
+    ];
+
+    for (final entity in allExamplesDir) {
       if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
         continue;
       }

@@ -77,13 +77,10 @@ ScopedObject<Context> PlaygroundTest::CreateContext() const {
     }
     case PlaygroundBackend::kVulkan:
       ImpellerContextVulkanSettings settings = {};
-      struct UserData {
-        Playground::VKProcAddressResolver resolver;
-      } user_data;
-      user_data.resolver = CreateVKProcAddressResolver();
-      settings.user_data = &user_data;
-      settings.enable_vulkan_validation =
-          GetSwitches().enable_vulkan_validation;
+      user_data_ = std::make_unique<UserData>();
+      user_data_->resolver = CreateVKProcAddressResolver();
+      settings.user_data = user_data_.get();
+      settings.enable_vulkan_validation = true;
       settings.proc_address_callback = [](void* instance,         //
                                           const char* proc_name,  //
                                           void* user_data         //
