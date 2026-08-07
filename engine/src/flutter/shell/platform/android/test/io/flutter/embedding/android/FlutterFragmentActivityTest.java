@@ -443,7 +443,9 @@ public class FlutterFragmentActivityTest {
   @Test
   public void getDartEntrypointFunctionName_returnsNameWhenSelfSent() {
     Intent intent =
-        FlutterFragmentActivity.withNewEngine().build(ctx).putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
+        FlutterFragmentActivity.withNewEngine()
+            .build(ctx)
+            .putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
     FlutterFragmentActivity flutterActivity = activityController.get();
@@ -457,7 +459,9 @@ public class FlutterFragmentActivityTest {
   @Test
   public void getDartEntrypointFunctionName_returnsDefaultWhenNotSelfSent() {
     Intent intent =
-        FlutterFragmentActivity.withNewEngine().build(ctx).putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
+        FlutterFragmentActivity.withNewEngine()
+            .build(ctx)
+            .putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
     FlutterFragmentActivity flutterActivity = activityController.get();
@@ -551,7 +555,9 @@ public class FlutterFragmentActivityTest {
   public void getDartEntrypointFunctionName_returnsNameFromMetaDataWhenNotSelfSent()
       throws PackageManager.NameNotFoundException {
     Intent intent =
-        FlutterFragmentActivity.withNewEngine().build(ctx).putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
+        FlutterFragmentActivity.withNewEngine()
+            .build(ctx)
+            .putExtra(FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT, "custom_entrypoint");
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
     FlutterFragmentActivity flutterActivity = spy(activityController.get());

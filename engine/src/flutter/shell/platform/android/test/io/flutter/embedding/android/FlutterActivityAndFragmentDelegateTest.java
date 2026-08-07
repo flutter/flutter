@@ -24,8 +24,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.view.View;
 import android.window.BackEvent;
@@ -64,9 +67,6 @@ import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import android.content.ComponentName;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,8 +98,12 @@ public class FlutterActivityAndFragmentDelegateTest {
     ComponentName mockComponentName = new ComponentName("com.test", "TestActivity");
     when(mockActivity.getComponentName()).thenReturn(mockComponentName);
     try {
-        when(mockPackageManager.getActivityInfo(org.mockito.ArgumentMatchers.any(ComponentName.class), org.mockito.ArgumentMatchers.anyInt())).thenReturn(mockActivityInfo);
-    } catch (PackageManager.NameNotFoundException e) {}
+      when(mockPackageManager.getActivityInfo(
+              org.mockito.ArgumentMatchers.any(ComponentName.class),
+              org.mockito.ArgumentMatchers.anyInt()))
+          .thenReturn(mockActivityInfo);
+    } catch (PackageManager.NameNotFoundException e) {
+    }
     when(mockActivity.getPackageManager()).thenReturn(mockPackageManager);
     when(mockActivity.getPackageName()).thenReturn("com.test");
 
@@ -356,8 +360,12 @@ public class FlutterActivityAndFragmentDelegateTest {
     ComponentName mockComponentName = new ComponentName("com.test", "TestActivity");
     when(mockActivity.getComponentName()).thenReturn(mockComponentName);
     try {
-        when(mockPackageManager.getActivityInfo(org.mockito.ArgumentMatchers.any(ComponentName.class), org.mockito.ArgumentMatchers.anyInt())).thenReturn(mockActivityInfo);
-    } catch (PackageManager.NameNotFoundException e) {}
+      when(mockPackageManager.getActivityInfo(
+              org.mockito.ArgumentMatchers.any(ComponentName.class),
+              org.mockito.ArgumentMatchers.anyInt()))
+          .thenReturn(mockActivityInfo);
+    } catch (PackageManager.NameNotFoundException e) {
+    }
     when(mockActivity.getPackageManager()).thenReturn(mockPackageManager);
     when(mockActivity.getPackageName()).thenReturn("com.test");
     Intent mockIntent = mock(Intent.class);
