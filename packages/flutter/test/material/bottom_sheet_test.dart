@@ -732,6 +732,43 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
+  testWidgets('Standard BottomSheet closes when its extent is nearly its minimum', (
+    WidgetTester tester,
+  ) async {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+    late BuildContext notificationContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
+    );
+
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
+      return Builder(
+        builder: (BuildContext context) {
+          notificationContext = context;
+          return const Text('BottomSheet');
+        },
+      );
+    });
+    await tester.pumpAndSettle();
+
+    DraggableScrollableNotification(
+      extent: 0.20000000001,
+      minExtent: 0.2,
+      maxExtent: 1.0,
+      initialExtent: 0.5,
+      context: notificationContext,
+    ).dispatch(notificationContext);
+    await tester.pumpAndSettle();
+
+    expect(find.text('BottomSheet'), findsNothing);
+  });
+
   testWidgets('modal BottomSheet has no top MediaQuery', (WidgetTester tester) async {
     late BuildContext outerContext;
     late BuildContext innerContext;
@@ -1033,6 +1070,46 @@ void main() {
       find.descendant(of: find.byType(BottomSheet), matching: find.byType(Material)),
     );
     expect(material.shadowColor, Colors.transparent);
+  });
+
+  testWidgets('Modal BottomSheet closes when its extent is nearly its minimum', (
+    WidgetTester tester,
+  ) async {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+    late BuildContext notificationContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
+    );
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      builder: (BuildContext context) {
+        return Builder(
+          builder: (BuildContext context) {
+            notificationContext = context;
+            return const Text('BottomSheet');
+          },
+        );
+      },
+    );
+    await tester.pumpAndSettle();
+
+    DraggableScrollableNotification(
+      extent: 0.20000000001,
+      minExtent: 0.2,
+      maxExtent: 1.0,
+      initialExtent: 0.5,
+      context: notificationContext,
+    ).dispatch(notificationContext);
+    await tester.pumpAndSettle();
+
+    expect(find.text('BottomSheet'), findsNothing);
   });
 
   testWidgets('Material2 - Modal BottomSheet with ScrollController has semantics', (
