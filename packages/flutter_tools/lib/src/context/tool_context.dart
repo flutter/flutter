@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/file.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -21,19 +24,23 @@ import '../native_assets.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
 import '../runner/local_engine.dart';
+import '../version.dart';
 
 /// Holds core, platform-independent dependencies.
 class ToolContext {
   ToolContext({
+    required this.artifacts,
     required this.botDetector,
     required this.cache,
     required this.config,
     required this.customDevicesConfig,
+    required this.flutterVersion,
     required this.fs,
     required this.git,
     required this.localEngineLocator,
     required this.logger,
     this.nativeAssetsBuilder,
+    required this.os,
     required this.outputPreferences,
     required this.platform,
     required this.preRunValidator,
@@ -41,11 +48,15 @@ class ToolContext {
     required this.processUtils,
     required this.projectFactory,
     required this.shutdownHooks,
+    required this.signals,
     required this.stdio,
     required this.systemClock,
     required this.terminal,
     required this.userMessages,
   });
+
+  /// Cached and host-specific binary artifacts.
+  final Artifacts artifacts;
 
   /// Detects whether the tool is running in a CI or automated bot environment.
   final BotDetector botDetector;
@@ -58,6 +69,9 @@ class ToolContext {
 
   /// Manages user-configured custom device definitions stored on disk.
   final CustomDevicesConfig customDevicesConfig;
+
+  /// Provides version and git channel info for the current Flutter SDK.
+  final FlutterVersion flutterVersion;
 
   /// Provides mockable file system operations across host and virtual environments.
   final FileSystem fs;
@@ -73,6 +87,9 @@ class ToolContext {
 
   /// Builds and packages native C/C++ or Rust assets for compilation and tests.
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+
+  /// Operating system utilities and environment queries.
+  final OperatingSystemUtils os;
 
   /// Manages formatting preferences for console output, such as line wrapping width.
   final OutputPreferences outputPreferences;
@@ -95,6 +112,9 @@ class ToolContext {
   /// Manages lifecycle callbacks executed upon tool termination or interrupt signals.
   final ShutdownHooks shutdownHooks;
 
+  /// Intercepts and dispatches process signals.
+  final Signals signals;
+
   /// Provides standard I/O streams (`stdin`, `stdout`, `stderr`).
   final Stdio stdio;
 
@@ -106,4 +126,7 @@ class ToolContext {
 
   /// Centralized templates for user-facing status strings and error messages.
   final UserMessages userMessages;
+
+  /// Common file system utilities.
+  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
 }

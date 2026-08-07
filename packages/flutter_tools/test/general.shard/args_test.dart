@@ -429,12 +429,6 @@ void verifyOptions(String? command, Iterable<Option> options) {
   }
 }
 
-class FakeToolContext extends Fake implements ToolContext {}
-
-class FakeAppleContext extends Fake implements AppleContext {}
-
-class FakeAndroidContext extends Fake implements AndroidContext {}
-
 class FakeAnalytics extends Fake implements Analytics {
   @override
   bool get telemetryEnabled => false;
