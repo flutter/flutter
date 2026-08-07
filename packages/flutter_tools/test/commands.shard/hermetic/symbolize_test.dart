@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/symbolize.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:test/fake.dart';
 
@@ -556,14 +555,4 @@ class ThrowingDwarfSymbolizationService extends Fake implements DwarfSymbolizati
   }) async {
     throwToolExit('test');
   }
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({required this.fs, required this.stdio});
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Stdio stdio;
 }
