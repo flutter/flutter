@@ -18,6 +18,12 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <!-- The viewport must be in the initial HTML. On iOS, a viewport injected
+       later by JavaScript is applied too late: Safari uses the 980px desktop
+       fallback at first paint, which mis-scales the semantics tree and keeps
+       the tap delay that stops the on-screen keyboard from opening on a
+       TextField. See https://github.com/flutter/flutter/issues/129324 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="{{description}}">
 
   <!-- iOS meta tags & icons -->

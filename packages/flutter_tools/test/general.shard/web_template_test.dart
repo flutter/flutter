@@ -82,6 +82,7 @@ const htmlSampleInlineFlutterJsBootstrapOutput = '''
   <base href="/foo/222/">
   <meta charset="utf-8">
   <link rel="icon" type="image/png" href="favicon.png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <div></div>
@@ -124,6 +125,7 @@ const htmlSampleFullFlutterBootstrapReplacementOutput = '''
   <base href="/foo/222/">
   <meta charset="utf-8">
   <link rel="icon" type="image/png" href="favicon.png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <div></div>
@@ -193,6 +195,7 @@ String htmlSample2Replaced({required String baseHref, required String serviceWor
   <base href="$baseHref">
   <meta charset="utf-8">
   <link rel="icon" type="image/png" href="favicon.png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <div></div>
@@ -263,6 +266,7 @@ String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) =>
   <base href="/">
   <meta charset="utf-8">
   <link rel="icon" type="image/png" href="favicon.png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <div></div>
@@ -591,5 +595,74 @@ void main() {
     );
 
     expect(result, contains("const value = '';"));
+  });
+
+  group('viewport meta injection', () {
+    const noViewport = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <meta charset="utf-8">
+</head>
+<body></body>
+</html>
+''';
+
+    test('injects a viewport meta when the document declares none', () {
+      final String result = WebTemplate.injectViewportMetaIfMissing(noViewport);
+      // Inserted inside <head>, immediately before </head>.
+      expect(
+        result,
+        contains(
+          '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n</head>',
+        ),
+      );
+    });
+
+    test('does not inject when a viewport meta already exists', () {
+      const withViewport = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width">
+</head>
+<body></body>
+</html>
+''';
+      expect(WebTemplate.injectViewportMetaIfMissing(withViewport), withViewport);
+    });
+
+    test('detects an existing viewport meta regardless of case and attribute order', () {
+      const withViewport = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="width=device-width" NAME="Viewport">
+</head>
+<body></body>
+</html>
+''';
+      expect(WebTemplate.injectViewportMetaIfMissing(withViewport), withViewport);
+    });
+
+    test('leaves the document unchanged when there is no head', () {
+      const noHead = '<html><body></body></html>';
+      expect(WebTemplate.injectViewportMetaIfMissing(noHead), noHead);
+    });
+
+    test('withSubstitutions injects the viewport meta into a viewport-less app', () {
+      const indexHtml = WebTemplate(noViewport);
+      final String result = indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: null,
+        flutterJsFile: flutterJs,
+        logger: logger,
+      );
+      expect(
+        result,
+        contains('<meta name="viewport" content="width=device-width, initial-scale=1.0">'),
+      );
+    });
   });
 }

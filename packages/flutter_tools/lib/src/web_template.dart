@@ -18,6 +18,18 @@ const kStaticAssetsUrlPlaceholder = r'$FLUTTER_STATIC_ASSETS_URL';
 const _kServiceWorkerDeprecationNotice =
     "Flutter's service worker is deprecated and will be removed in a future Flutter release.";
 
+/// The viewport meta tag injected into an app's `index.html` when it declares
+/// none of its own.
+///
+/// A viewport meta must be present in the initial HTML: on iOS a missing
+/// viewport makes Safari use the 980px desktop fallback at first parse, which
+/// both mis-scales the semantics tree (via a fractional devicePixelRatio) and
+/// leaves the ~350ms click delay enabled, so an in-gesture focus never reaches
+/// the on-screen keyboard. A tag injected later by JavaScript is applied too
+/// late to change either. See https://github.com/flutter/flutter/issues/129324
+const _kDefaultViewportMeta =
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+
 class WebTemplateWarning {
   WebTemplateWarning(this.warningText, this.lineNumber);
   final String warningText;
@@ -68,6 +80,29 @@ class WebTemplate {
     return stripLeadingSlash(stripTrailingSlash(baseHref));
   }
 
+  /// Returns [html] with [_kDefaultViewportMeta] inserted into its `<head>`
+  /// when the document does not already declare a `<meta name="viewport">`.
+  ///
+  /// Existing apps created before the viewport meta was added to the template
+  /// are fixed on their next rebuild without editing their `web/index.html`.
+  /// The developer's HTML is otherwise left byte-for-byte unchanged. See
+  /// https://github.com/flutter/flutter/issues/129324
+  @visibleForTesting
+  static String injectViewportMetaIfMissing(String html) {
+    final bool hasViewport = parse(html)
+        .querySelectorAll('meta')
+        .any((Element meta) => (meta.attributes['name'] ?? '').toLowerCase() == 'viewport');
+    if (hasViewport) {
+      return html;
+    }
+    final Match? headClose = RegExp('</head>', caseSensitive: false).firstMatch(html);
+    if (headClose == null) {
+      return html;
+    }
+    final int insertAt = headClose.start;
+    return '${html.substring(0, insertAt)}  $_kDefaultViewportMeta\n${html.substring(insertAt)}';
+  }
+
   List<WebTemplateWarning> getWarnings() {
     return <WebTemplateWarning>[
       ..._getWarningsForPattern(
@@ -112,6 +147,11 @@ class WebTemplate {
     Map<String, String> webDefines = const <String, String>{},
   }) {
     String newContent = _content;
+
+    // If the app's index.html declares no viewport meta, inject one so the
+    // correct devicePixelRatio and (on iOS) fast-click behavior apply from the
+    // initial parse. See https://github.com/flutter/flutter/issues/129324
+    newContent = injectViewportMetaIfMissing(newContent);
 
     if (newContent.contains(kBaseHrefPlaceholder)) {
       newContent = newContent.replaceAll(kBaseHrefPlaceholder, baseHref);
