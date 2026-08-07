@@ -125,3 +125,8 @@ skwasm_variant("wimp") {
   is_heavy = false
   use_impeller = true
 }
+
+skwasm_variant("wimp_heavy") {
+  is_heavy = true
+  use_impeller = true
+}
