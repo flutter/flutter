@@ -414,6 +414,35 @@ void main() {
                 ),
               );
             });
+            testWithoutContext(
+              'throws ToolExit when project is an ephemeral module on iOS',
+              () async {
+                final testFileSystem = MemoryFileSystem.test();
+                final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
+                  fs: testFileSystem,
+                  fakeFlutterVersion: FakeFlutterVersion(),
+                );
+                final dependencyManagement = DarwinDependencyManagement(
+                  project: FakeFlutterProject(fileSystem: testFileSystem, isModule: true),
+                  cocoapods: FakeCocoaPods(),
+                  swiftPackageManager: FakeSwiftPackageManager(),
+                  fileSystem: testFileSystem,
+                  featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+                  analytics: testAnalytics,
+                );
+                if (platform == FlutterDarwinPlatform.ios) {
+                  await expectLater(
+                    dependencyManagement.setUp(platform: platform, plugins: <Plugin>[]),
+                    throwsToolExit(
+                      message:
+                          'Swift Package Manager is enabled, but this project has an ephemeral iOS project.',
+                    ),
+                  );
+                } else {
+                  await dependencyManagement.setUp(platform: platform, plugins: <Plugin>[]);
+                }
+              },
+            );
           });
 
           group('when not using Swift Package Manager', () {
@@ -605,8 +634,13 @@ void main() {
               );
               await dependencyManagement.setUp(platform: platform, plugins: plugins);
               expect(swiftPackageManager.generated, isFalse);
-              expect(cocoaPods.podfileSetup, isFalse);
-              expect(testAnalytics.sentEvents, isEmpty);
+              if (platform == FlutterDarwinPlatform.ios) {
+                expect(cocoaPods.podfileSetup, isFalse);
+                expect(testAnalytics.sentEvents, isEmpty);
+              } else {
+                expect(cocoaPods.podfileSetup, isTrue);
+                expect(testAnalytics.sentEvents, hasLength(1));
+              }
             });
           });
         });
@@ -1476,10 +1510,17 @@ class FakeIosProject extends Fake implements IosProject {
     required MemoryFileSystem fileSystem,
     required this.usesSwiftPackageManager,
     bool? compatibleWithSwiftPackageManager,
+    bool? isModule,
     FlutterProject? parent,
   }) : _compatibleWithSwiftPackageManager = compatibleWithSwiftPackageManager,
+       _isModule = isModule,
        parent = parent ?? FakeFlutterProject(fileSystem: fileSystem),
        hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
+
+  final bool? _isModule;
+
+  @override
+  bool get isModule => _isModule ?? parent.isModule;
 
   @override
   Directory hostAppRoot;
@@ -1599,6 +1640,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
     fileSystem: fileSystem,
     usesSwiftPackageManager: usesSwiftPackageManager,
     compatibleWithSwiftPackageManager: compatibleWithSwiftPackageManager,
+    parent: this,
   );
 
   @override
@@ -1606,6 +1648,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
     fileSystem: fileSystem,
     usesSwiftPackageManager: usesSwiftPackageManager,
     compatibleWithSwiftPackageManager: compatibleWithSwiftPackageManager,
+    parent: this,
   );
 
   @override

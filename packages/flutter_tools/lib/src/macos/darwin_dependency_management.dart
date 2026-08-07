@@ -76,7 +76,7 @@ class DarwinDependencyManagement {
 
     // Skip updating Podfile if project is a module, since it will use a
     // different module-specific Podfile.
-    if (_project.isModule) {
+    if (platform == .ios && _project.ios.isModule) {
       return;
     }
     final (:int totalCount, :int swiftPackageCount, :int podCount) = await _countPluginsPerManager(
@@ -175,10 +175,29 @@ class DarwinDependencyManagement {
     required FileSystem fileSystem,
     required Logger logger,
     required CocoaPods? cocoapods,
+    // required FeatureFlags featureFlags,
   }) async {
     final bool projectUsesSwiftPM =
         xcodeProject.usesSwiftPackageManager &&
         xcodeProject.flutterPluginSwiftPackageInProjectSettings;
+
+    // if (platform == .ios &&
+    //     featureFlags.isSwiftPackageManagerEnabled &&
+    //     xcodeProject.parent.ios.isModule) {
+    //   throwToolExit(
+    //     'Swift Package Manager is enabled, but this project has an ephemeral iOS project. Convert '
+    //     'to a normal iOS app by completing the following steps:\n'
+    //     '  1. Add "iosEphemeral: false" to the "flutter: module:" section in your pubspec.yaml:\n'
+    //     '     flutter:\n'
+    //     '       module:\n'
+    //     '         iosEphemeral: false\n'
+    //     '  2. Run the following command in the project root directory:\n'
+    //     '     flutter create .\n\n'
+    //     'After converting, to integrate into your native iOS app, see the following instructions:\n'
+    //     '  https://docs.flutter.dev/add-to-app/ios/project-setup\n\n'
+    //     '$kDisableSwiftPMInstructions',
+    //   );
+    // }
 
     final swiftPackageOnlyPlugins = <String>[];
     final cocoapodOnlyPlugins = <String>[];

@@ -267,9 +267,8 @@ void main() {
         <String>[
           '.android/app/',
           '.gitignore',
-          '.ios/Flutter',
-          '.ios/Runner/AppDelegate.h',
-          '.ios/Runner/AppDelegate.m',
+          'ios/Flutter',
+          'ios/Runner/AppDelegate.swift',
           '.metadata',
           'analysis_options.yaml',
           'lib/main.dart',
@@ -277,7 +276,7 @@ void main() {
           'README.md',
           'test/widget_test.dart',
         ],
-        unexpectedPaths: <String>['android/', 'ios/'],
+        unexpectedPaths: <String>['android/', '.ios/'],
         expectedGitignoreLines: flutterPluginsIgnores,
       );
       return _runFlutterTest(projectDir);
@@ -1335,7 +1334,7 @@ void main() {
     );
 
     // Generated Xcode settings
-    final String xcodeConfigPath = globals.fs.path.join('.ios', 'Flutter', 'Generated.xcconfig');
+    final String xcodeConfigPath = globals.fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
     expectExists(xcodeConfigPath);
     final File xcodeConfigFile = globals.fs.file(
       globals.fs.path.join(projectDir.path, xcodeConfigPath),
@@ -1351,7 +1350,7 @@ void main() {
 
     // Generated export environment variables script
     final String buildPhaseScriptPath = globals.fs.path.join(
-      '.ios',
+      'ios',
       'Flutter',
       'flutter_export_environment.sh',
     );
@@ -1369,7 +1368,7 @@ void main() {
 
     // App identification
     final String xcodeProjectPath = globals.fs.path.join(
-      '.ios',
+      'ios',
       'Runner.xcodeproj',
       'project.pbxproj',
     );
@@ -1382,13 +1381,13 @@ void main() {
     expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(
-      globals.fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata'),
+      globals.fs.path.join('ios', 'Runner.xcworkspace', 'xcshareddata'),
     );
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
     expectExists(workspaceSharedData.childFile('IDEWorkspaceChecks.plist').path);
     // Xcode project shared data
     final Directory projectSharedData = globals.fs.directory(
-      globals.fs.path.join('.ios', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
+      globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'),
     );
     expectExists(projectSharedData.childFile('WorkspaceSettings.xcsettings').path);
     expectExists(projectSharedData.childFile('IDEWorkspaceChecks.plist').path);
@@ -1660,7 +1659,7 @@ void main() {
         projectDir.path,
       ]);
 
-      final String plistPath = globals.fs.path.join('.ios', 'Runner', 'Info.plist');
+      final String plistPath = globals.fs.path.join('ios', 'Runner', 'Info.plist');
       final File plistFile = globals.fs.file(globals.fs.path.join(projectDir.path, plistPath));
       expect(plistFile, exists);
       final bool disabled = _getBooleanValueFromPlist(
@@ -2002,6 +2001,34 @@ void main() {
   );
 
   testUsingContext(
+    'can re-gen module ios/ folder, reusing custom org',
+    () async {
+      await _createProject(projectDir, <String>[
+        '--template=module',
+        '--org',
+        'com.bar.foo',
+      ], <String>[]);
+      projectDir.childDirectory('ios').deleteSync(recursive: true);
+      await _createProject(projectDir, <String>[], <String>[]);
+      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+      expect(
+        await project.ios.productBundleIdentifier(BuildInfo.debug),
+        'com.bar.foo.flutterproject.flutterProject',
+      );
+    },
+    overrides: {
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
+    },
+  );
+
+  testUsingContext(
     'can re-gen module .ios/ folder, reusing custom org',
     () async {
       await _createProject(projectDir, <String>[
@@ -2009,8 +2036,14 @@ void main() {
         '--org',
         'com.bar.foo',
       ], <String>[]);
-      projectDir.childDirectory('.ios').deleteSync(recursive: true);
+      final File pubspec = projectDir.childFile('pubspec.yaml');
+      final String content = pubspec.readAsStringSync();
+      pubspec.writeAsStringSync(content.replaceFirst('iosEphemeral: false', 'iosEphemeral: true'));
+      if (projectDir.childDirectory('ios').existsSync()) {
+        projectDir.childDirectory('ios').deleteSync(recursive: true);
+      }
       await _createProject(projectDir, <String>[], <String>[]);
+      expect(projectDir.childDirectory('.ios').existsSync(), isTrue);
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       expect(
         await project.ios.productBundleIdentifier(BuildInfo.debug),
@@ -2018,6 +2051,7 @@ void main() {
       );
     },
     overrides: {
+      FeatureFlags: () => TestFeatureFlags(),
       Pub: () => Pub.test(
         fileSystem: globals.fs,
         logger: globals.logger,
