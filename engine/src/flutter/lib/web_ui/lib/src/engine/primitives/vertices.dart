@@ -78,7 +78,7 @@ class EngineVertices implements ui.Vertices {
     Uint16List? indices,
   }) {
     if (positions.length % 2 != 0) {
-      throw ArgumentError('"positions" length must be a multiple of 2.');
+      throw ArgumentError('"positions" length must be even.');
     }
     if (textureCoordinates != null && textureCoordinates.length != positions.length) {
       throw ArgumentError('"positions" and "textureCoordinates" lengths must match.');
@@ -86,7 +86,7 @@ class EngineVertices implements ui.Vertices {
     if (colors != null && colors.length * 2 != positions.length) {
       throw ArgumentError('"positions" and "colors" lengths must match.');
     }
-    if (indices != null && indices.any((int i) => i < 0 || i * 2 >= positions.length)) {
+    if (indices != null && indices.any((int i) => i < 0 || i >= positions.length ~/ 2)) {
       throw ArgumentError('"indices" values must be valid indices in the positions list.');
     }
 
@@ -104,11 +104,11 @@ class EngineVertices implements ui.Vertices {
     return EngineVertices._(delegate);
   }
 
-  EngineVertices._(this.delegate) {
-    if (delegate != null) {
+  EngineVertices._(this._delegate) {
+    if (_delegate != null) {
       _ref = UniqueRef<BackendVertices>(
         this,
-        delegate!,
+        _delegate,
         'Vertices',
         onDispose: (BackendVertices v) => v.dispose(),
       );
@@ -120,7 +120,12 @@ class EngineVertices implements ui.Vertices {
   /// The backend delegate that manages the native resources.
   ///
   /// This will be null if the `positions` list provided during construction was empty.
-  final BackendVertices? delegate;
+  BackendVertices? get delegate {
+    assert(!_isDisposed, 'Attempted to use a disposed Vertices.');
+    return _delegate;
+  }
+  
+  final BackendVertices? _delegate;
 
   late final UniqueRef<BackendVertices>? _ref;
   bool _isDisposed = false;
