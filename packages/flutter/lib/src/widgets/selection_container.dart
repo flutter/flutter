@@ -34,7 +34,7 @@ import 'framework.dart';
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -60,7 +60,7 @@ class SelectionContainer extends StatefulWidget {
   /// This sample demonstrates how to disable selection for a Text under a
   /// SelectionArea.
   ///
-  /// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
+  /// ** See code in examples/api/lib/widgets/selection_container/selection_container_disabled.0.dart **
   /// {@end-tool}
   const SelectionContainer.disabled({super.key, required this.child})
     : registrar = null,
