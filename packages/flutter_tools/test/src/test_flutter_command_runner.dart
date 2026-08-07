@@ -9,7 +9,6 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -21,7 +20,7 @@ import 'context.dart';
 export 'package:test/test.dart' hide isInstanceOf, test;
 
 CommandRunner<void> createTestCommandRunner([FlutterCommand? command]) {
-  final FlutterCommandRunner runner = TestFlutterCommandRunner();
+  final FlutterCommandRunner runner = TestFlutterCommandRunner(toolContext: command?.toolContext);
   if (command != null) {
     runner.addCommand(command);
   }
@@ -45,14 +44,11 @@ Future<String> createProject(
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
+  TestFlutterCommandRunner({super.toolDependencies, super.toolContext});
+
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    Logger? topLevelLogger;
-    try {
-      topLevelLogger = globals.logger;
-    } on UnsupportedError {
-      // In testWithoutContext, globals.logger is not available.
-    }
+    final Logger? topLevelLogger = toolContext?.logger;
     final contextOverrides = <Type, dynamic>{
       if (topLevelLogger != null && (topLevelResults['verbose'] as bool))
         Logger: VerboseLogger(topLevelLogger),
@@ -62,18 +58,15 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        try {
+        if (toolContext != null) {
           Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-            platform: globals.platform,
-            fileSystem: globals.fs,
-            userMessages: UserMessages(),
+            platform: toolContext!.platform,
+            fileSystem: toolContext!.fs,
+            userMessages: toolContext!.userMessages,
           );
-          // For compatibility with tests that set this to a relative path.
-          Cache.flutterRoot = globals.fs.path.normalize(
-            globals.fs.path.absolute(Cache.flutterRoot!),
+          Cache.flutterRoot = toolContext!.fs.path.normalize(
+            toolContext!.fs.path.absolute(Cache.flutterRoot!),
           );
-        } on UnsupportedError {
-          // In testWithoutContext, globals.platform/fs is not available.
         }
         return super.runCommand(topLevelResults);
       },
@@ -82,6 +75,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   @override
   void printUsage() {
-    testLogger.printStatus(usage);
+    (toolContext?.logger ?? testLogger).printStatus(usage);
   }
 }

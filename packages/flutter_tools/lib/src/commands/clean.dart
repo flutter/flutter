@@ -24,7 +24,8 @@ class CleanCommand extends FlutterCommand {
   }) : _toolContext = toolContext,
        _xcode = xcode,
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _verbose = verbose {
+       _verbose = verbose,
+       super(toolContext: toolContext) {
     requiresPubspecYaml();
     argParser.addOption(
       'scheme',

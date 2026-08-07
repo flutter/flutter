@@ -42,8 +42,9 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
+
+import 'fake_process_manager.dart';
 
 /// Environment with DYLD_LIBRARY_PATH=/path/to/libraries
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
@@ -1026,29 +1027,36 @@ class FakeToolContext extends Fake implements ToolContext {
   final UserMessages? _userMessages;
 
   @override
-  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+  Artifacts get artifacts => _artifacts ?? Artifacts.test();
 
   @override
-  BotDetector get botDetector => _botDetector ?? globals.botDetector;
+  BotDetector get botDetector => _botDetector ?? const FakeBotDetector(false);
 
   @override
-  Cache get cache => _cache ?? globals.cache;
+  Cache get cache =>
+      _cache ??
+      Cache.test(
+        fileSystem: fs,
+        processManager: processManager,
+        platform: platform,
+        logger: logger,
+      );
 
   @override
-  Config get config => _config ?? globals.config;
+  Config get config => _config ?? Config.test(directory: fs.directory('/'));
 
   @override
   CustomDevicesConfig get customDevicesConfig =>
       _customDevicesConfig ?? globals.customDevicesConfig;
 
   @override
-  FlutterVersion get flutterVersion => _flutterVersion ?? globals.flutterVersion;
+  FlutterVersion get flutterVersion => _flutterVersion ?? FakeFlutterVersion();
 
   @override
   FileSystem get fs => _fs ?? globals.fs;
 
   @override
-  Git get git => _git ?? globals.git;
+  Git get git => _git ?? Git(currentPlatform: platform, runProcessWith: processUtils);
 
   @override
   LocalEngineLocator get localEngineLocator =>
@@ -1062,50 +1070,51 @@ class FakeToolContext extends Fake implements ToolContext {
       );
 
   @override
-  Logger get logger => _logger ?? globals.logger;
+  Logger get logger => _logger ?? BufferLogger.test();
 
   @override
-  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder =>
-      _nativeAssetsBuilder ?? globals.nativeAssetsBuilder;
+  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => _nativeAssetsBuilder;
 
   @override
-  OperatingSystemUtils get os => _os ?? globals.os;
+  OperatingSystemUtils get os => _os ?? FakeOperatingSystemUtils();
 
   @override
-  OutputPreferences get outputPreferences => _outputPreferences ?? globals.outputPreferences;
+  OutputPreferences get outputPreferences => _outputPreferences ?? OutputPreferences.test();
 
   @override
-  Platform get platform => _platform ?? globals.platform;
+  Platform get platform => _platform ?? FakePlatform();
 
   @override
-  PreRunValidator get preRunValidator => _preRunValidator ?? globals.preRunValidator;
+  PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
 
   @override
-  ProcessManager get processManager => _processManager ?? globals.processManager;
+  ProcessManager get processManager => _processManager ?? FakeProcessManager.any();
 
   @override
-  ProcessUtils get processUtils => _processUtils ?? globals.processUtils;
+  ProcessUtils get processUtils =>
+      _processUtils ?? ProcessUtils(processManager: processManager, logger: logger);
 
   @override
-  FlutterProjectFactory get projectFactory => _projectFactory ?? globals.projectFactory;
+  FlutterProjectFactory get projectFactory =>
+      _projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger);
 
   @override
-  ShutdownHooks get shutdownHooks => _shutdownHooks ?? globals.shutdownHooks;
+  ShutdownHooks get shutdownHooks => _shutdownHooks ?? ShutdownHooks();
 
   @override
-  Signals get signals => _signals ?? globals.signals;
+  Signals get signals => _signals ?? Signals.test();
 
   @override
-  Stdio get stdio => _stdio ?? globals.stdio;
+  Stdio get stdio => _stdio ?? FakeStdio();
 
   @override
-  SystemClock get systemClock => _systemClock ?? globals.systemClock;
+  SystemClock get systemClock => _systemClock ?? const SystemClock();
 
   @override
-  AnsiTerminal get terminal => _terminal ?? globals.terminal;
+  AnsiTerminal get terminal => _terminal ?? AnsiTerminal(stdio: stdio, platform: platform);
 
   @override
-  UserMessages get userMessages => _userMessages ?? globals.userMessages;
+  UserMessages get userMessages => _userMessages ?? UserMessages();
 
   @override
   FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);

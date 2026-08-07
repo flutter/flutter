@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -681,46 +680,10 @@ CleanCommand createCleanCommand({
       terminal: terminal ?? AnsiTerminal(stdio: FakeStdio(), platform: resolvedPlatform),
       userMessages: userMessages ?? UserMessages(),
       config: config ?? Config.test(directory: resolvedFs.directory('/')),
+      stdio: FakeStdio(),
     ),
     verbose: verbose,
     xcode: xcode ?? Xcode.test(processManager: resolvedProcessManager),
     xcodeProjectInterpreter: xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter(),
   );
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({
-    required this.fs,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
-    required this.processUtils,
-    required this.systemClock,
-    required this.terminal,
-    required this.userMessages,
-    Config? config,
-    FlutterProjectFactory? projectFactory,
-  }) : config = config ?? Config.test(directory: fs.directory('/')),
-       projectFactory = projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger);
-
-  @override
-  final FileSystem fs;
-  @override
-  final Logger logger;
-  @override
-  final Platform platform;
-  @override
-  final ProcessManager processManager;
-  @override
-  final ProcessUtils processUtils;
-  @override
-  final SystemClock systemClock;
-  @override
-  final AnsiTerminal terminal;
-  @override
-  final UserMessages userMessages;
-  @override
-  final Config config;
-  @override
-  final FlutterProjectFactory projectFactory;
 }

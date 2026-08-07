@@ -95,6 +95,7 @@ class ToolDependencies {
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidStudio? androidStudio,
+    Artifacts? artifacts,
     BotDetector? botDetector,
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
@@ -105,6 +106,7 @@ class ToolDependencies {
     CrashReporter? crashReporter,
     CustomDevicesConfig? customDevicesConfig,
     FileSystem? fs,
+    FlutterVersion? flutterVersion,
     Git? git,
     GradleUtils? gradleUtils,
     IOSSimulatorUtils? iosSimulatorUtils,
@@ -238,14 +240,15 @@ class ToolDependencies {
         );
     Cache.flutterRoot ??= flutterRoot;
 
-    final flutterVersion = FlutterVersion(fs: finalFS, flutterRoot: flutterRoot, git: finalGit);
+    final FlutterVersion finalFlutterVersion =
+        flutterVersion ?? FlutterVersion(fs: finalFS, flutterRoot: flutterRoot, git: finalGit);
 
     // 8. Analytics
     finalAnalytics =
         analytics ??
         getAnalytics(
           runningOnBot: isBot,
-          flutterVersion: flutterVersion,
+          flutterVersion: finalFlutterVersion,
           environment: finalPlatform.environment,
           clientIde: finalPlatform.environment['FLUTTER_HOST'],
           config: finalConfig,
@@ -344,12 +347,14 @@ class ToolDependencies {
     final CocoaPodsValidator finalCocoapodsValidator =
         cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
-    final finalArtifacts = CachedArtifacts(
-      fileSystem: finalFS,
-      cache: finalCache,
-      platform: finalPlatform,
-      operatingSystemUtils: finalOS,
-    );
+    final Artifacts finalArtifacts =
+        artifacts ??
+        CachedArtifacts(
+          fileSystem: finalFS,
+          cache: finalCache,
+          platform: finalPlatform,
+          operatingSystemUtils: finalOS,
+        );
 
     final XCDevice finalXCDevice =
         xcdevice ??
@@ -379,7 +384,7 @@ class ToolDependencies {
     );
 
     final featureFlags = FlutterFeatureFlags(
-      flutterVersion: flutterVersion,
+      flutterVersion: finalFlutterVersion,
       featuresConfig: FlutterFeaturesConfig(
         globalConfig: finalConfig,
         platform: finalPlatform,
@@ -457,7 +462,7 @@ class ToolDependencies {
         cache: finalCache,
         config: finalConfig,
         customDevicesConfig: finalCustomDevicesConfig,
-        flutterVersion: flutterVersion,
+        flutterVersion: finalFlutterVersion,
         fs: finalFS,
         git: finalGit,
         localEngineLocator: finalLocalEngineLocator,
