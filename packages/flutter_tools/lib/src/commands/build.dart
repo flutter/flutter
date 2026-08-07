@@ -179,7 +179,6 @@ abstract class BuildSubCommand extends FlutterCommand {
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
-  @override
   @protected
   final Logger logger;
 

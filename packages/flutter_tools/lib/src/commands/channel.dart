@@ -16,7 +16,7 @@ import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
   ChannelCommand({required ToolContext toolContext, bool verboseHelp = false})
-    : super(toolContext: toolContext) {
+    : _toolContext = toolContext {
     argParser.addFlag(
       'all',
       abbr: 'a',
@@ -31,6 +31,8 @@ class ChannelCommand extends FlutterCommand {
       defaultsTo: true,
     );
   }
+
+  final ToolContext _toolContext;
 
   @override
   String get name => 'channel';
@@ -76,19 +78,20 @@ class ChannelCommand extends FlutterCommand {
 
   Future<void> _listChannels({required bool showAll, required bool verbose}) async {
     // Beware: currentBranch could contain PII. See getBranchName().
-    final String currentChannel = flutterVersion.channel; // limited to known branch names
+    final String currentChannel =
+        _toolContext.flutterVersion.channel; // limited to known branch names
     assert(
       kOfficialChannels.contains(currentChannel) ||
           kObsoleteBranches.containsKey(currentChannel) ||
           currentChannel == kUserBranch,
       'potential PII leak in channel name: "$currentChannel"',
     );
-    final String currentBranch = flutterVersion.getBranchName();
+    final String currentBranch = _toolContext.flutterVersion.getBranchName();
     final seenUnofficialChannels = <String>{};
     final rawOutput = <String>[];
 
-    logger.printStatus('Flutter channels:');
-    final int result = await git.stream(
+    _toolContext.logger.printStatus('Flutter channels:');
+    final int result = await _toolContext.git.stream(
       ['branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
@@ -128,7 +131,9 @@ class ChannelCommand extends FlutterCommand {
           currentIndicator = '*';
           currentChannelIsOfficial = true;
         }
-        logger.printStatus('$currentIndicator $channel (${kChannelDescriptions[channel]})');
+        _toolContext.logger.printStatus(
+          '$currentIndicator $channel (${kChannelDescriptions[channel]})',
+        );
       }
     }
 
@@ -136,13 +141,13 @@ class ChannelCommand extends FlutterCommand {
     if (showAll) {
       for (final branch in seenUnofficialChannels) {
         if (currentBranch == branch) {
-          logger.printStatus('* $branch');
+          _toolContext.logger.printStatus('* $branch');
         } else if (!branch.startsWith('HEAD ')) {
-          logger.printStatus('  $branch');
+          _toolContext.logger.printStatus('  $branch');
         }
       }
     } else if (!currentChannelIsOfficial) {
-      logger.printStatus('* $currentBranch');
+      _toolContext.logger.printStatus('* $currentBranch');
     }
 
     if (!currentChannelIsOfficial) {
@@ -150,29 +155,35 @@ class ChannelCommand extends FlutterCommand {
         currentChannel == kUserBranch,
         'Current channel is "$currentChannel", which is not an official branch. (Current branch is "$currentBranch".)',
       );
-      logger.printStatus('');
-      logger.printStatus('Currently not on an official channel.');
+      _toolContext.logger.printStatus('');
+      _toolContext.logger.printStatus('Currently not on an official channel.');
     }
   }
 
   Future<void> _switchChannel(String branchName) async {
-    logger.printStatus("Switching to flutter channel '$branchName'...");
+    _toolContext.logger.printStatus("Switching to flutter channel '$branchName'...");
     if (kObsoleteBranches.containsKey(branchName)) {
       final String alternative = kObsoleteBranches[branchName]!;
-      logger.printStatus(
+      _toolContext.logger.printStatus(
         "This channel is obsolete. Consider switching to the '$alternative' channel instead.",
       );
     } else if (!kOfficialChannels.contains(branchName)) {
-      logger.printStatus(
+      _toolContext.logger.printStatus(
         'This is not an official channel. For a list of available channels, try "flutter channel".',
       );
     }
-    await _checkout(branchName, git: git);
+    await _checkout(branchName, git: _toolContext.git, cache: _toolContext.cache);
     if (boolArg('cache-artifacts')) {
-      await precacheArtifacts(Cache.flutterRoot);
+      await precacheArtifacts(
+        workingDirectory: Cache.flutterRoot,
+        logger: _toolContext.logger,
+        processUtils: _toolContext.processUtils,
+        fileSystem: _toolContext.fs,
+        platform: _toolContext.platform,
+      );
     }
-    logger.printStatus("Successfully switched to flutter channel '$branchName'.");
-    logger.printStatus(
+    _toolContext.logger.printStatus("Successfully switched to flutter channel '$branchName'.");
+    _toolContext.logger.printStatus(
       "To ensure that you're on the latest build from this channel, run 'flutter upgrade'",
     );
   }
@@ -190,7 +201,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  static Future<void> _checkout(String branchName, {required Git git}) async {
+  static Future<void> _checkout(String branchName, {required Git git, Cache? cache}) async {
     // Get latest refs from upstream.
     RunResult runResult = await git.run(<String>['fetch'], workingDirectory: Cache.flutterRoot);
 
@@ -227,7 +238,7 @@ class ChannelCommand extends FlutterCommand {
     } else {
       // Remove the version check stamp, since it could contain out-of-date
       // information that pertains to the previous channel.
-      await FlutterVersion.resetFlutterVersionFreshnessCheck();
+      await FlutterVersion.resetFlutterVersionFreshnessCheck(cache);
     }
   }
 }

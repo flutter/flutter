@@ -21,10 +21,10 @@ class CleanCommand extends FlutterCommand {
     required Xcode xcode,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     bool verbose = false,
-  }) : _xcode = xcode,
+  }) : _toolContext = toolContext,
+       _xcode = xcode,
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _verbose = verbose,
-       super(toolContext: toolContext) {
+       _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
       'scheme',
@@ -46,6 +46,7 @@ class CleanCommand extends FlutterCommand {
     );
   }
 
+  final ToolContext _toolContext;
   final Xcode _xcode;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final bool _verbose;
@@ -64,7 +65,9 @@ class CleanCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = _toolContext.projectFactory.fromDirectory(
+      _toolContext.fs.currentDirectory,
+    );
     final Xcode xcode = _xcode;
     final bool cleanXcode = xcode.isInstalledAndMeetsVersionCheck;
 
@@ -73,7 +76,7 @@ class CleanCommand extends FlutterCommand {
       if (flutterProject.hasExampleApp) {
         await _cleanProject(flutterProject.example, cleanXcode: cleanXcode);
       } else {
-        logger.printStatus('No example app found, skipping example cleaning.');
+        _toolContext.logger.printStatus('No example app found, skipping example cleaning.');
       }
     }
 
@@ -91,7 +94,9 @@ class CleanCommand extends FlutterCommand {
       await _cleanXcode(flutterProject.macos);
     }
 
-    final Directory buildDir = flutterProject.directory.childDirectory(getBuildDirectory());
+    final Directory buildDir = flutterProject.directory.childDirectory(
+      getBuildDirectory(_toolContext.config, _toolContext.fs),
+    );
     await deleteFile(buildDir, flutterProject);
 
     await deleteFile(flutterProject.dartTool, flutterProject);
@@ -117,12 +122,17 @@ class CleanCommand extends FlutterCommand {
     if (xcodeWorkspace == null) {
       return;
     }
-    final Status xcodeStatus = logger.startProgress('Cleaning Xcode workspace...');
+    final Status xcodeStatus = _toolContext.logger.startProgress('Cleaning Xcode workspace...');
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = _xcodeProjectInterpreter;
       final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
         xcodeProject,
-        buildDirectory: fileSystem.directory(xcodeProject.darwinPlatform.buildDirectory()),
+        buildDirectory: _toolContext.fs.directory(
+          xcodeProject.darwinPlatform.buildDirectory(
+            config: _toolContext.config,
+            fileSystem: _toolContext.fs,
+          ),
+        ),
       ))!;
       if (argResults?.wasParsed('scheme') ?? false) {
         final scheme = argResults!['scheme'] as String;
@@ -137,7 +147,12 @@ class CleanCommand extends FlutterCommand {
           xcodeWorkspace.path,
           scheme,
           verbose: _verbose,
-          buildDirectory: fileSystem.directory(xcodeProject.darwinPlatform.buildDirectory()),
+          buildDirectory: _toolContext.fs.directory(
+            xcodeProject.darwinPlatform.buildDirectory(
+              config: _toolContext.config,
+              fileSystem: _toolContext.fs,
+            ),
+          ),
         );
       } else {
         for (final String scheme in projectInfo.schemes) {
@@ -146,7 +161,12 @@ class CleanCommand extends FlutterCommand {
             xcodeWorkspace.path,
             scheme,
             verbose: _verbose,
-            buildDirectory: fileSystem.directory(xcodeProject.darwinPlatform.buildDirectory()),
+            buildDirectory: _toolContext.fs.directory(
+              xcodeProject.darwinPlatform.buildDirectory(
+                config: _toolContext.config,
+                fileSystem: _toolContext.fs,
+              ),
+            ),
           );
         }
       }
@@ -155,7 +175,7 @@ class CleanCommand extends FlutterCommand {
       if (argResults?.wasParsed('scheme') ?? false) {
         throwToolExit(message);
       } else {
-        logger.printTrace(message);
+        _toolContext.logger.printTrace(message);
       }
     } finally {
       xcodeStatus.stop();
@@ -167,7 +187,7 @@ class CleanCommand extends FlutterCommand {
     try {
       await ErrorHandlingFileSystem.noExitOnFailure(() => _deleteFile(file, project));
     } on Exception catch (e) {
-      logger.printError('Failed to remove ${file.path}: $e');
+      _toolContext.logger.printError('Failed to remove ${file.path}: $e');
     }
   }
 
@@ -178,21 +198,21 @@ class CleanCommand extends FlutterCommand {
         return;
       }
     } on FileSystemException catch (err) {
-      logger.printError('Cannot clean ${file.path}.\n$err');
+      _toolContext.logger.printError('Cannot clean ${file.path}.\n$err');
       return;
     }
-    final Status deletionStatus = logger.startProgress('Deleting ${file.basename}...');
+    final Status deletionStatus = _toolContext.logger.startProgress('Deleting ${file.basename}...');
     try {
       file.deleteSync(recursive: true);
     } on FileSystemException catch (error) {
       deletionStatus.stop();
       final String path = file.path;
-      if (platform.isWindows) {
+      if (_toolContext.platform.isWindows) {
         if (await _tryStopGradleAndRetryDelete(file, project)) {
           return;
         }
 
-        logger.printError(
+        _toolContext.logger.printError(
           'Failed to remove $path. '
           'A background process (e.g. Gradle daemon or Java) is locking files in the directory.\n'
           'To automatically stop Gradle daemons during clean, run:\n'
@@ -201,7 +221,7 @@ class CleanCommand extends FlutterCommand {
           '  cd android && ./gradlew --stop',
         );
       } else {
-        logger.printError('Failed to remove $path: $error');
+        _toolContext.logger.printError('Failed to remove $path: $error');
       }
     }
   }
@@ -213,14 +233,15 @@ class CleanCommand extends FlutterCommand {
   Future<bool> _tryStopGradleAndRetryDelete(FileSystemEntity file, FlutterProject? project) async {
     final bool stopGradleFlag =
         (argResults?.wasParsed('stop-gradle') ?? false) && boolArg('stop-gradle');
-    final bool isInteractive = terminal.stdinHasTerminal && terminal.usesTerminalUi;
+    final bool isInteractive =
+        _toolContext.terminal.stdinHasTerminal && _toolContext.terminal.usesTerminalUi;
     var shouldStopGradle = stopGradleFlag;
 
     if (!stopGradleFlag && isInteractive) {
       try {
-        final String choice = await terminal.promptForCharInput(
+        final String choice = await _toolContext.terminal.promptForCharInput(
           <String>['y', 'n'],
-          logger: logger,
+          logger: _toolContext.logger,
           prompt:
               'Files in build/ are locked by background processes (likely Gradle).\n'
               'Stop active Gradle daemons ("gradlew --stop") and retry clean? [y/N]',
@@ -236,20 +257,21 @@ class CleanCommand extends FlutterCommand {
       return false;
     }
 
-    final FlutterProject flutterProject = project ?? FlutterProject.current();
+    final FlutterProject flutterProject =
+        project ?? FlutterProject.fromDirectory(_toolContext.fs.currentDirectory);
     final File gradlewFile = flutterProject.android.hostAppGradleRoot.childFile('gradlew.bat');
     if (!gradlewFile.existsSync()) {
       return false;
     }
 
-    final Status stopStatus = logger.startProgress('Stopping Gradle daemons...');
+    final Status stopStatus = _toolContext.logger.startProgress('Stopping Gradle daemons...');
     try {
-      await processUtils.run(<String>[
+      await _toolContext.processUtils.run(<String>[
         gradlewFile.path,
         '--stop',
       ], workingDirectory: gradlewFile.parent.path);
     } on Exception catch (e) {
-      logger.printTrace('Failed to stop Gradle daemons: $e');
+      _toolContext.logger.printTrace('Failed to stop Gradle daemons: $e');
     } finally {
       stopStatus.stop();
     }
