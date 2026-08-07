@@ -587,8 +587,6 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/test/widgets/text_magnifier/text_magnifier.0_test.dart',
     'examples/flutter_view/lib/main.dart',
     'examples/image_list/lib/main.dart',
-    'examples/splash/lib/main.dart',
-    'examples/splash/test/splash_test.dart',
     'examples/texture/lib/main.dart',
   };
 
