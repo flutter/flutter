@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_tester.dart' show testTextSelectionHandleControls;
 import 'keyboard_utils.dart';
-import 'widgets_app_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
