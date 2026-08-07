@@ -1023,9 +1023,8 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityAnnouncement) {
   builder.SetDartEntrypoint("sendAccessibilityAnnouncement");
 
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   EnginePtr engine{builder.RunHeadless()};
   ASSERT_NE(engine, nullptr);
@@ -1061,9 +1060,8 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityAnnouncementHeadless) {
   builder.SetDartEntrypoint("sendAccessibilityAnnouncement");
 
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   EnginePtr engine{builder.RunHeadless()};
   ASSERT_NE(engine, nullptr);
@@ -1087,9 +1085,8 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityTooltip) {
   builder.SetDartEntrypoint("sendAccessibilityTooltipEvent");
 
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
@@ -1701,10 +1698,9 @@ TEST_F(FlutterWindowsEngineTest, MergedUIThread) {
 
   std::optional<std::thread::id> ui_thread_id;
 
-  auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-    ui_thread_id = std::this_thread::get_id();
-  });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry =
+      CREATE_FFI_LAMBDA([&]() { ui_thread_id = std::this_thread::get_id(); });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   EnginePtr engine{builder.RunHeadless()};
   while (!ui_thread_id) {
@@ -1737,9 +1733,8 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
 
   // Setup: a signal for when we have send out all of our semantics updates
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   // Setup: Create the engine and two views + enable semantics
   EnginePtr engine{builder.RunHeadless()};
