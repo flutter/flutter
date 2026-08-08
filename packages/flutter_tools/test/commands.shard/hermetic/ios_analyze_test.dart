@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/ios_analyze.dart';
@@ -22,6 +21,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -30,7 +30,6 @@ void main() {
     late FileSystem fileSystem;
     late Platform platform;
     late FakeProcessManager processManager;
-    late Terminal terminal;
     late AnalyzeCommand command;
     late CommandRunner<void> runner;
 
@@ -43,22 +42,21 @@ void main() {
       fileSystem = MemoryFileSystem.test();
       platform = FakePlatform();
       processManager = FakeProcessManager.empty();
-      terminal = Terminal.test();
       command = AnalyzeCommand(
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        terminal: terminal,
         allProjectValidators: <ProjectValidator>[],
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       );
       runner = createTestCommandRunner(command);
 
       // Setup repo roots
       const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
       for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }

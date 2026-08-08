@@ -7,11 +7,13 @@ library;
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/context.dart' as app_context show context;
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
@@ -114,10 +116,44 @@ abstract class Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
+    Stdio? stdio,
+    Cache? cache,
+    String? flutterRoot,
+  }) {
+    if (stdio != null) {
+      return _DefaultPub.test(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        platform: platform,
+        botDetector: botDetector,
+        stdio: stdio,
+        cache: cache,
+        flutterRoot: flutterRoot,
+      );
+    }
+    return _DefaultPub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      platform: platform,
+      botDetector: botDetector,
+      cache: cache,
+      flutterRoot: flutterRoot,
+    );
+  }
+
+  factory Pub.defaultInstance({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Platform platform,
+    required BotDetector botDetector,
+    Cache? cache,
+    String? flutterRoot,
   }) = _DefaultPub;
 
-  /// Create a [Pub] instance with a mocked [stdio].
-  @visibleForTesting
+  /// Create a [Pub] instance for testing.
   factory Pub.test({
     required FileSystem fileSystem,
     required Logger logger,
@@ -125,6 +161,8 @@ abstract class Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Stdio stdio,
+    Cache? cache,
+    String? flutterRoot,
   }) = _DefaultPub.test;
 
   /// Runs `pub get` for [project].
@@ -203,10 +241,16 @@ class _DefaultPub implements Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
+    Cache? cache,
+    String? flutterRoot,
+    FlutterVersion? flutterVersion,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
+       _cache = cache,
+       _flutterRoot = flutterRoot,
+       _flutterVersion = flutterVersion,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _stdio = null {
@@ -221,10 +265,16 @@ class _DefaultPub implements Pub {
     required Platform platform,
     required BotDetector botDetector,
     required Stdio stdio,
+    Cache? cache,
+    String? flutterRoot,
+    FlutterVersion? flutterVersion,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
+       _cache = cache,
+       _flutterRoot = flutterRoot,
+       _flutterVersion = flutterVersion,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _stdio = stdio {
@@ -238,7 +288,28 @@ class _DefaultPub implements Pub {
   final BotDetector _botDetector;
   final ProcessManager _processManager;
   final Stdio? _stdio;
+  final Cache? _cache;
+  final String? _flutterRoot;
+  final FlutterVersion? _flutterVersion;
   late final Git _git;
+
+  FlutterVersion get _resolvedFlutterVersion =>
+      _flutterVersion ?? FlutterVersion(flutterRoot: _flutterRootPath, fs: _fileSystem, git: _git);
+
+  String get _flutterRootPath {
+    if (_flutterRoot != null) {
+      return _flutterRoot;
+    }
+    if (_cache != null) {
+      return _cache.flutterRoot;
+    }
+    final Cache? contextCache = app_context.context.get<Cache>();
+    if (contextCache != null &&
+        (_fileSystem is MemoryFileSystem) == (contextCache.fileSystem is MemoryFileSystem)) {
+      return contextCache.flutterRoot;
+    }
+    return '';
+  }
 
   @override
   Future<void> get({
@@ -291,11 +362,7 @@ class _DefaultPub implements Pub {
     if (packageConfigFile.existsSync()) {
       final Directory workspaceRoot = packageConfigFile.parent.parent;
       final File lastVersion = workspaceRoot.childDirectory('.dart_tool').childFile('version');
-      final versionFromFile = FlutterVersion(
-        flutterRoot: Cache.flutterRoot!,
-        fs: _fileSystem,
-        git: _git,
-      );
+      final FlutterVersion versionFromFile = _resolvedFlutterVersion;
       final File pubspecYaml = project.pubspecFile;
       final File pubLockFile = workspaceRoot.childFile('pubspec.lock');
 
@@ -574,7 +641,7 @@ class _DefaultPub implements Pub {
   List<String> _computePubCommand() {
     // TODO(zanderso): refactor to use artifacts.
     final String sdkPath = _fileSystem.path.joinAll(<String>[
-      Cache.flutterRoot!,
+      _flutterRootPath,
       'bin',
       'cache',
       'dart-sdk',
@@ -631,7 +698,7 @@ class _DefaultPub implements Pub {
   ///
   /// Deletes the `.pub-preload-cache` directory.
   void _preloadPubCache() {
-    final String flutterRootPath = Cache.flutterRoot!;
+    final String flutterRootPath = _flutterRootPath;
     final Directory flutterRoot = _fileSystem.directory(flutterRootPath);
     final Directory preloadCacheDir = flutterRoot.childDirectory('.pub-preload-cache');
     if (preloadCacheDir.existsSync()) {
@@ -657,7 +724,7 @@ class _DefaultPub implements Pub {
     bool? summaryOnly = false,
   }) async {
     final environment = <String, String>{
-      'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot!,
+      'FLUTTER_ROOT': flutterRootOverride ?? _flutterRootPath,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
       if (summaryOnly ?? false) 'PUB_SUMMARY_ONLY': '1',
     };
@@ -683,12 +750,8 @@ class _DefaultPub implements Pub {
     final File lastVersion = _fileSystem.file(
       _fileSystem.path.join(packageConfig.parent.path, 'version'),
     );
-    final versionFromFile = FlutterVersion(
-      flutterRoot: Cache.flutterRoot!,
-      fs: _fileSystem,
-      git: _git,
-    );
-    lastVersion.writeAsStringSync(versionFromFile.frameworkVersion);
+    final String versionString = _resolvedFlutterVersion.frameworkVersion;
+    lastVersion.writeAsStringSync(versionString);
 
     if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
       final File? examplePackageConfig = findPackageConfigFile(project.example.directory);

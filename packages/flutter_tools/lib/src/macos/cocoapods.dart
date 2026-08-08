@@ -8,6 +8,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -104,11 +105,15 @@ class CocoaPods {
     required Platform platform,
     required Analytics analytics,
     Abi? currentAbi,
+    Cache? cache,
+    String? flutterRoot,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
        _logger = logger,
        _analytics = analytics,
+       _cache = cache,
+       _flutterRoot = flutterRoot,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _operatingSystemUtils = OperatingSystemUtils(
          fileSystem: fileSystem,
@@ -125,6 +130,11 @@ class CocoaPods {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
   final Analytics _analytics;
+  final Cache? _cache;
+  final String? _flutterRoot;
+
+  String get _flutterRootPath =>
+      _flutterRoot ?? _cache?.flutterRoot ?? context.get<Cache>()?.flutterRoot ?? '';
 
   Future<String?>? _versionText;
 
@@ -271,7 +281,7 @@ class CocoaPods {
     final podfileTemplateName = (xcodeProject is MacOSProject) ? 'Podfile-macos' : 'Podfile-ios';
     return _fileSystem.file(
       _fileSystem.path.join(
-        Cache.flutterRoot!,
+        _flutterRootPath,
         'packages',
         'flutter_tools',
         'templates',

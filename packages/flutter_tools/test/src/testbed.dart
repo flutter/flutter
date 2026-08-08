@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -122,8 +121,6 @@ class TestBed {
     if (testOverrides.containsKey(ProcessUtils)) {
       throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
     }
-    // Cache the original flutter root to restore after the test case.
-    final String? originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
     final timers = <Timer, StackTrace>{};
 
@@ -158,12 +155,10 @@ class TestBed {
                 },
           ),
           body: () async {
-            Cache.flutterRoot = '';
             if (_setup != null) {
               await _setup.call();
             }
             await test();
-            Cache.flutterRoot = originalFlutterRoot;
             for (final MapEntry<Timer, StackTrace> entry in timers.entries) {
               if (entry.key.isActive) {
                 throw StateError('A Timer was active at the end of a test: ${entry.value}');

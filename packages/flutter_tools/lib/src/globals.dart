@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:file/memory.dart';
+@Deprecated('Use ToolContext and constructor injection instead.')
 library;
 
 import 'package:process/process.dart';
@@ -35,11 +36,13 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
+import 'emulator.dart';
 import 'git.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
+import 'isolated/mustache_template.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
@@ -64,6 +67,7 @@ Config get config => context.get<Config>()!;
 CrashReporter? get crashReporter => context.get<CrashReporter>();
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 Doctor? get doctor => context.get<Doctor>();
+EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 HttpClientFactory? get httpClientFactory => context.get<HttpClientFactory>();
 IOSSimulatorUtils? get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 Logger get logger => context.get<Logger>()!;
@@ -254,7 +258,8 @@ PlistParser get plistParser =>
 PlistParser? _plistInstance;
 
 /// The global template renderer.
-TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
+TemplateRenderer get templateRenderer =>
+    context.get<TemplateRenderer>() ?? const MustacheTemplateRenderer();
 
 /// Global [ShutdownHooks] that should be run before the tool process exits.
 ///

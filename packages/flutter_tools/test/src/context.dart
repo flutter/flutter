@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
@@ -25,6 +26,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -32,6 +34,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
+import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -85,38 +88,48 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    return Config.test(name: Config.kFlutterSettings, directory: configDir, logger: globals.logger);
+    configDir ??= LocalFileSystem.instance.systemTempDirectory.createTempSync(
+      'flutter_config_dir_test.',
+    );
+    return Config.test(
+      name: Config.kFlutterSettings,
+      directory: configDir,
+      logger: BufferLogger.test(),
+    );
   }
 
   PersistentToolState buildPersistentToolState(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    return PersistentToolState.test(directory: configDir!, logger: globals.logger);
+    configDir ??= LocalFileSystem.instance.systemTempDirectory.createTempSync(
+      'flutter_config_dir_test.',
+    );
+    return PersistentToolState.test(directory: configDir!, logger: BufferLogger.test());
   }
 
   test(
     description,
     () async {
+      Cache.disableLocking();
       await runInContext<dynamic>(
         () {
           return context.run<dynamic>(
             name: 'mocks',
             overrides: <Type, Generator>{
-              AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
-              Config: () => buildConfig(globals.fs),
+              AnsiTerminal: () => AnsiTerminal(platform: FakePlatform(), stdio: FakeStdio()),
+              Config: () => buildConfig(LocalFileSystem.instance),
               DeviceManager: () => FakeDeviceManager(),
-              Doctor: () => FakeDoctor(globals.logger),
+              Doctor: () => FakeDoctor(BufferLogger.test()),
               FlutterVersion: () => FakeFlutterVersion(),
               HttpClient: () => FakeHttpClient.any(),
               IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
               OutputPreferences: () => OutputPreferences.test(),
-              Logger: () => BufferLogger.test(),
+              Logger: () => BufferLogger.test(outputPreferences: context.get<OutputPreferences>()),
               OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-              PersistentToolState: () => buildPersistentToolState(globals.fs),
+              PersistentToolState: () => buildPersistentToolState(LocalFileSystem.instance),
               XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
               FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
               PlistParser: () => FakePlistParser(),
               Signals: () => FakeSignals(),
+              PreRunValidator: () => const NoOpPreRunValidator(),
               Pub: () => const ThrowingPub(), // prevent accidentally using pub.
               CrashReporter: () => const NoopCrashReporter(),
               TemplateRenderer: () => const MustacheTemplateRenderer(),
@@ -138,14 +151,30 @@ void testUsingContext(
                     return await context.run<dynamic>(
                       // Apply the overrides to the test context in the zone since their
                       // instantiation may reference items already stored on the context.
-                      overrides: overrides,
+                      overrides: <Type, Generator>{
+                        if (!overrides.containsKey(Cache) && overrides.containsKey(FileSystem))
+                          Cache: () => Cache.test(
+                            fileSystem: globals.fs,
+                            platform: globals.platform,
+                            logger: globals.logger,
+                            processManager: globals.processManager,
+                            osUtils: globals.os,
+                            flutterRoot: initializeFlutterRoot ? getFlutterRoot() : null,
+                          )
+                        else if (!overrides.containsKey(Cache) && initializeFlutterRoot)
+                          Cache: () => FlutterCache(
+                            fileSystem: globals.fs,
+                            logger: globals.logger,
+                            platform: globals.platform,
+                            osUtils: globals.os,
+                            projectFactory: globals.projectFactory,
+                            stdio: globals.stdio,
+                            flutterRoot: getFlutterRoot(),
+                          ),
+                        ...overrides,
+                      },
                       name: 'test-specific overrides',
                       body: () async {
-                        if (initializeFlutterRoot) {
-                          // Provide a sane default for the flutterRoot directory. Individual
-                          // tests can override this either in the test or during setup.
-                          Cache.flutterRoot ??= getFlutterRoot();
-                        }
                         return await testMethod();
                       },
                     );
@@ -366,7 +395,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    XcodeProjectBuildContext? buildContext,
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -390,7 +419,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(
+  Future<XcodeProjectInfo?> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,

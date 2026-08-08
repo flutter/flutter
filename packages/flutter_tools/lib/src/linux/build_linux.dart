@@ -42,6 +42,7 @@ Future<void> buildLinux(
   required TargetPlatform targetPlatform,
   String targetSysroot = '/',
   required Logger logger,
+  Cache? cache,
   bool configOnly = false,
 }) async {
   target ??= 'lib/main.dart';
@@ -75,7 +76,13 @@ Future<void> buildLinux(
     environmentConfig['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
     environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, buildInfo, environmentConfig, logger);
+  writeGeneratedCmakeConfig(
+    cache?.flutterRoot ?? globals.cache.flutterRoot,
+    linuxProject,
+    buildInfo,
+    environmentConfig,
+    logger,
+  );
 
   createPluginSymlinks(linuxProject.parent);
 

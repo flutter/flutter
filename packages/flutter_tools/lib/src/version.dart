@@ -142,10 +142,11 @@ abstract class FlutterVersion {
     required String frameworkRevision,
     required FileSystem fs,
     required Git git,
+    Platform? platform,
     bool fetchTags = false,
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      globals.platform,
+      platform ?? globals.platform,
       git: git,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,
@@ -417,12 +418,8 @@ abstract class FlutterVersion {
   Future<String> _fetchRemoteFrameworkCommitDate() async {
     try {
       // Fetch upstream branch's commit and tags
-      await _run(_git, ['fetch', '--tags']);
-      return _gitCommitDate(
-        git: _git,
-        gitRef: kGitTrackingUpstream,
-        workingDirectory: Cache.flutterRoot,
-      );
+      await _run(_git, ['fetch', '--tags'], flutterRoot: flutterRoot);
+      return _gitCommitDate(git: _git, gitRef: kGitTrackingUpstream, workingDirectory: flutterRoot);
     } on VersionCheckError catch (error) {
       globals.printError(error.message);
       rethrow;
@@ -469,11 +466,14 @@ abstract class FlutterVersion {
   /// [checkFlutterVersionFreshness] is called after this. This is typically
   /// used when switching channels so that stale information from another
   /// channel doesn't linger.
-  static Future<void> resetFlutterVersionFreshnessCheck() async {
+  static Future<void> resetFlutterVersionFreshnessCheck([Cache? cache]) async {
     try {
-      await globals.cache.getStampFileFor(VersionCheckStamp.flutterVersionCheckStampFile).delete();
+      final Cache effectiveCache = cache ?? globals.cache;
+      await effectiveCache.getStampFileFor(VersionCheckStamp.flutterVersionCheckStampFile).delete();
     } on FileSystemException {
       // Ignore, since we don't mind if the file didn't exist in the first place.
+    } on UnsupportedError {
+      // In testWithoutContext.
     }
   }
 }
@@ -969,9 +969,9 @@ class VersionCheckError implements Exception {
 /// standard output as a string.
 ///
 /// If the command fails, throws a [ToolExit] exception.
-Future<String> _run(Git git, List<String> command) async {
+Future<String> _run(Git git, List<String> command, {String? flutterRoot}) async {
   // TODO(matanlurey): Inline this in the single place it's called in this file.
-  final RunResult results = await git.run(command, workingDirectory: Cache.flutterRoot);
+  final RunResult results = await git.run(command, workingDirectory: flutterRoot);
 
   if (results.exitCode == 0) {
     return results.stdout.trim();

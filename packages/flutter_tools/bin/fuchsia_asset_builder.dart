@@ -5,17 +5,15 @@
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/asset.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:unified_analytics/unified_analytics.dart';
 
 const _kOptionPackages = 'packages';
@@ -31,11 +29,11 @@ const _kRequiredOptions = <String>[
   _kOptionComponentName,
 ];
 
-Future<void> main(List<String> args) {
-  return runInContext<void>(
-    () => run(args),
-    overrides: <Type, Generator>{Analytics: () => const NoOpAnalytics()},
+Future<void> main(List<String> args) async {
+  final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
+    analytics: const NoOpAnalytics(),
   );
+  await run(args, toolContext: toolDeps.toolContext);
 }
 
 Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async {
@@ -44,7 +42,7 @@ Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async
   outputFile.writeAsBytesSync(data);
 }
 
-Future<void> run(List<String> args) async {
+Future<void> run(List<String> args, {required ToolContext toolContext}) async {
   final parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config file')
     ..addOption(_kOptionAsset, help: 'The directory where to put temporary files')
@@ -54,18 +52,16 @@ Future<void> run(List<String> args) async {
     ..addOption(_kOptionDepfile);
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
-    globals.printError('Missing option! All options must be specified.');
+    toolContext.logger.printError('Missing option! All options must be specified.');
     exit(1);
   }
-  Cache.flutterRoot = globals.platform.environment['FLUTTER_ROOT'];
-
   final assetDir = argResults[_kOptionAsset] as String;
   final AssetBundle? assets = await buildAssets(
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
     assetDirPath: assetDir,
     packageConfigPath:
         argResults[_kOptionPackages] as String? ??
-        findPackageConfigFileOrDefault(globals.fs.currentDirectory).path,
+        findPackageConfigFileOrDefault(toolContext.fs.currentDirectory).path,
     targetPlatform: TargetPlatform.fuchsia_arm64, // This is not arch specific.
   );
 
@@ -75,7 +71,7 @@ Future<void> run(List<String> args) async {
 
   final calls = <Future<void>>[];
   assets.entries.forEach((String fileName, AssetBundleEntry entry) {
-    final libfs.File outputFile = globals.fs.file(globals.fs.path.join(assetDir, fileName));
+    final libfs.File outputFile = toolContext.fs.file(toolContext.fs.path.join(assetDir, fileName));
     calls.add(writeAssetFile(outputFile, entry));
   });
   await Future.wait<void>(calls);
@@ -86,19 +82,27 @@ Future<void> run(List<String> args) async {
     argResults[_kOptionAsset] as String,
     outputMan,
     argResults[_kOptionComponentName] as String,
+    toolContext: toolContext,
   );
 
   final depfilePath = argResults[_kOptionDepfile] as String?;
   if (depfilePath != null) {
-    await writeDepfile(assets, outputMan, depfilePath);
+    await writeDepfile(assets, outputMan, depfilePath, toolContext: toolContext);
   }
 }
 
-Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depfilePath) async {
-  final depfileContent = Depfile(assets.inputFiles, <libfs.File>[globals.fs.file(outputManifest)]);
-  final depfileService = DepfileService(fileSystem: globals.fs, logger: globals.logger);
+Future<void> writeDepfile(
+  AssetBundle assets,
+  String outputManifest,
+  String depfilePath, {
+  required ToolContext toolContext,
+}) async {
+  final depfileContent = Depfile(assets.inputFiles, <libfs.File>[
+    toolContext.fs.file(outputManifest),
+  ]);
+  final depfileService = DepfileService(fileSystem: toolContext.fs, logger: toolContext.logger);
 
-  final libfs.File depfile = globals.fs.file(depfilePath);
+  final libfs.File depfile = toolContext.fs.file(depfilePath);
   await depfile.create(recursive: true);
   depfileService.writeToFile(depfileContent, depfile);
 }
@@ -107,9 +111,10 @@ Future<void> writeFuchsiaManifest(
   AssetBundle assets,
   String outputBase,
   String fileDest,
-  String componentName,
-) async {
-  final libfs.File destFile = globals.fs.file(fileDest);
+  String componentName, {
+  required ToolContext toolContext,
+}) async {
+  final libfs.File destFile = toolContext.fs.file(fileDest);
   await destFile.create(recursive: true);
   final libfs.IOSink outFile = destFile.openWrite();
 
