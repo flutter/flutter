@@ -898,6 +898,145 @@ void main() {
       );
     });
 
+    testWidgets('submenu with topStart alignment opens to the left in LTR', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/181895.
+      // A SubmenuButton inside a vertical menu with topStart alignment should
+      // position the submenu to the left of the parent menu, not overlapping it.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                menuChildren: <Widget>[
+                  const MenuItemButton(child: Text('Item A')),
+                  SubmenuButton(
+                    menuStyle: const MenuStyle(
+                      alignment: AlignmentDirectional.topStart,
+                    ),
+                    menuChildren: const <Widget>[
+                      MenuItemButton(child: Text('Sub 1')),
+                      MenuItemButton(child: Text('Sub 2')),
+                    ],
+                    child: const Text('Group'),
+                  ),
+                  const MenuItemButton(child: Text('Item B')),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('Open'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the parent menu.
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+
+      // Hover over the submenu button to open the submenu.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(tester.getCenter(find.text('Group')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      final Rect parentMenuRect = tester.getRect(
+        find.ancestor(of: find.text('Item A'), matching: find.byType(FocusScope)).first,
+      );
+      final Rect submenuRect = tester.getRect(
+        find.ancestor(of: find.text('Sub 1'), matching: find.byType(FocusScope)).first,
+      );
+
+      // The submenu's right edge should be at or to the left of the parent
+      // menu's left edge (opens to the left, no overlap).
+      expect(
+        submenuRect.right,
+        lessThanOrEqualTo(parentMenuRect.left),
+        reason: 'Submenu with topStart alignment should open to the left of the parent menu',
+      );
+    });
+
+    testWidgets('submenu with topStart alignment opens to the right in RTL', (WidgetTester tester) async {
+      // In RTL, topStart resolves to the right side, so the submenu should
+      // open to the right of the parent menu.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Material(
+              child: Center(
+                child: MenuAnchor(
+                  menuChildren: <Widget>[
+                    const MenuItemButton(child: Text('Item A')),
+                    SubmenuButton(
+                      menuStyle: const MenuStyle(
+                        alignment: AlignmentDirectional.topStart,
+                      ),
+                      menuChildren: const <Widget>[
+                        MenuItemButton(child: Text('Sub 1')),
+                        MenuItemButton(child: Text('Sub 2')),
+                      ],
+                      child: const Text('Group'),
+                    ),
+                    const MenuItemButton(child: Text('Item B')),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: const Text('Open'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the parent menu.
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+
+      // Hover over the submenu button to open the submenu.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(tester.getCenter(find.text('Group')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      final Rect parentMenuRect = tester.getRect(
+        find.ancestor(of: find.text('Item A'), matching: find.byType(FocusScope)).first,
+      );
+      final Rect submenuRect = tester.getRect(
+        find.ancestor(of: find.text('Sub 1'), matching: find.byType(FocusScope)).first,
+      );
+
+      // In RTL, topStart means the right side, so submenu should open to the
+      // right. The submenu's left edge should be at or to the right of the
+      // parent menu's right edge.
+      expect(
+        submenuRect.left,
+        greaterThanOrEqualTo(parentMenuRect.right),
+        reason: 'Submenu with topStart alignment in RTL should open to the right of the parent menu',
+      );
+    });
+
     testWidgets('menu position in LTR', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestApp(alignmentOffset: const Offset(100, 50)));
 
