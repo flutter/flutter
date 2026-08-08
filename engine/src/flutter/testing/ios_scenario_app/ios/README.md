@@ -24,7 +24,7 @@ To run or debug in Xcode, open the xcodeproj file located in
 
 ## CI Configuration
 
-See [`ci/builders/mac_unopt.json`](../../../../ci/builders/mac_unopt.json), and
+See [`ci/builders/mac_unopt.json`](../../../ci/builders/mac_unopt.json), and
 grep for `run_ios_tests.sh`.
 
 ## iOS Platform View Tests
