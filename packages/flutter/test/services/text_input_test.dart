@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonDecode;
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -830,6 +831,44 @@ void main() {
 
       expect(client.latestMethodCall, 'commitContent');
     });
+
+    test(
+      'TextInputClient insertContent is called via the binary content insertion channel',
+      () async {
+        final client = FakeTextInputClient(TextEditingValue.empty);
+        const configuration = TextInputConfiguration();
+        TextInput.attach(client, configuration);
+
+        expect(client.latestMethodCall, isEmpty);
+
+        // Send commitContent over the binary 'flutter/contentinsertion' channel,
+        // which uses StandardMethodCodec so the bytes are transferred as a blob
+        // rather than a per-element JSON array. See
+        // https://github.com/flutter/flutter/issues/188977.
+        final data = Uint8List.fromList(<int>[0, 1, 0, 1, 0, 1, 0, 0, 0]);
+        final ByteData? messageBytes = const StandardMethodCodec().encodeMethodCall(
+          MethodCall('commitContent', <String, dynamic>{
+            'mimeType': 'image/gif',
+            'uri': 'content://com.google.android.inputmethod.latin.fileprovider/test.gif',
+            'data': data,
+          }),
+        );
+        await binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/contentinsertion',
+          messageBytes,
+          (ByteData? _) {},
+        );
+
+        expect(client.latestMethodCall, 'commitContent');
+        expect(client.latestInsertedContent, isNotNull);
+        expect(client.latestInsertedContent!.mimeType, 'image/gif');
+        expect(
+          client.latestInsertedContent!.uri,
+          'content://com.google.android.inputmethod.latin.fileprovider/test.gif',
+        );
+        expect(client.latestInsertedContent!.data, data);
+      },
+    );
 
     test('TextInputClient performSelectors method is called', () async {
       final client = FakeTextInputClient(TextEditingValue.empty);
@@ -2159,6 +2198,7 @@ class FakeTextInputClient with TextInputClient {
   String latestMethodCall = '';
   final List<String> performedSelectors = <String>[];
   late Map<String, dynamic>? latestPrivateCommandData;
+  KeyboardInsertedContent? latestInsertedContent;
 
   @override
   TextEditingValue currentTextEditingValue;
@@ -2180,6 +2220,7 @@ class FakeTextInputClient with TextInputClient {
   @override
   void insertContent(KeyboardInsertedContent content) {
     latestMethodCall = 'commitContent';
+    latestInsertedContent = content;
   }
 
   @override
