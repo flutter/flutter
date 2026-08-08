@@ -10,6 +10,7 @@ import 'package:native_stack_traces/native_stack_traces.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/utils.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -73,7 +74,8 @@ class SymbolizeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   File _handleDSYM(String fileName) {
-    final FileSystemEntityType type = _toolContext.fs.typeSync(fileName);
+    final FileSystem fs = _toolContext.fs;
+    final FileSystemEntityType type = fs.typeSync(fileName);
     final bool isDSYM = fileName.endsWith('.dSYM');
     if (type == FileSystemEntityType.notFound) {
       throw FileNotFoundException(fileName);
@@ -82,7 +84,7 @@ class SymbolizeCommand extends FlutterCommand {
       if (!isDSYM) {
         throw StateError('$fileName is a directory, not a file');
       }
-      final Directory dwarfDir = _toolContext.fs
+      final Directory dwarfDir = fs
           .directory(fileName)
           .childDirectory('Contents')
           .childDirectory('Resources')
@@ -93,7 +95,7 @@ class SymbolizeCommand extends FlutterCommand {
     if (isDSYM) {
       throw StateError('$fileName is not a dSYM package directory');
     }
-    return _toolContext.fs.file(fileName);
+    return fs.file(fileName);
   }
 
   Map<int, File> _unitDebugInfoPathMap() {
@@ -164,10 +166,13 @@ class SymbolizeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final FileSystem fs = _toolContext.fs;
+    final Stdio stdio = _toolContext.stdio;
+
     // Configure output to either specified file or stdout.
     late final IOSink output;
     if (argResults?.wasParsed('output') ?? false) {
-      final File outputFile = _toolContext.fs.file(stringArg('output'));
+      final File outputFile = fs.file(stringArg('output'));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
@@ -176,14 +181,14 @@ class SymbolizeCommand extends FlutterCommand {
       final outputController = StreamController<List<int>>();
       outputController.stream
           .transformWithCallSite(utf8.decoder)
-          .listen(_toolContext.stdio.stdoutWrite);
+          .listen(stdio.stdoutWrite);
       output = IOSink(outputController);
     }
 
     // Configure input from either specified file or stdin.
     final Stream<List<int>> input = (argResults?.wasParsed('input') ?? false)
-        ? _toolContext.fs.file(stringArg('input')).openRead()
-        : _toolContext.stdio.stdin;
+        ? fs.file(stringArg('input')).openRead()
+        : stdio.stdin;
 
     final unitSymbols = <int, Uint8List>{
       for (final MapEntry<int, File> entry in _unitDebugInfoPathMap().entries)
