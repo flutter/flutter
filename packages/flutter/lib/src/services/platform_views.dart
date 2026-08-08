@@ -571,15 +571,31 @@ enum _AndroidViewState { waitingForSize, creating, created, disposed }
 class _AndroidMotionEventConverter {
   _AndroidMotionEventConverter();
 
+  // These values must match the values in the engine's AndroidTouchProcessor.java.
+  // This flag indicates whether the original Android pointer events were batched together.
+  static const int _kPointerDataFlagBatched = 1;
+  // This flag indicates that this event is part of a group of events representing a change
+  // that affects multiple pointers.
+  static const int _kPointerDataFlagMultiple = 2;
+
+  // Mask for extracting the flag value from the event's platformData
+  static const int _kPointerDataFlagMask = 0xff;
+  static const int _kPointerDataMultiplePointerCountShift = 8;
+
   final Map<int, AndroidPointerCoords> pointerPositions = <int, AndroidPointerCoords>{};
   final Map<int, AndroidPointerProperties> pointerProperties = <int, AndroidPointerProperties>{};
   final Set<int> usedAndroidPointerIds = <int>{};
+  final Set<int> _pendingRemovals = <int>{};
 
   late PointTransformer pointTransformer;
 
   int? downTimeMillis;
 
   void handlePointerDownEvent(PointerDownEvent event) {
+    if (_pendingRemovals.isNotEmpty) {
+      _pendingRemovals.forEach(_remove);
+      _pendingRemovals.clear();
+    }
     if (pointerProperties.isEmpty) {
       downTimeMillis = event.timeStamp.inMilliseconds;
     }
@@ -615,15 +631,33 @@ class _AndroidMotionEventConverter {
     }
   }
 
+  void _handleRemoval(PointerEvent event) {
+    final int platformDataFlag = event.platformData & _kPointerDataFlagMask;
+    if (platformDataFlag == _kPointerDataFlagMultiple) {
+      _pendingRemovals.add(event.pointer);
+      final int originalPointerCount = event.platformData >> _kPointerDataMultiplePointerCountShift;
+      if (_pendingRemovals.length >= originalPointerCount) {
+        _pendingRemovals.forEach(_remove);
+        _pendingRemovals.clear();
+      }
+    } else {
+      if (_pendingRemovals.isNotEmpty) {
+        _pendingRemovals.forEach(_remove);
+        _pendingRemovals.clear();
+      }
+      _remove(event.pointer);
+    }
+  }
+
   void handlePointerUpEvent(PointerUpEvent event) {
-    _remove(event.pointer);
+    _handleRemoval(event);
   }
 
   void handlePointerCancelEvent(PointerCancelEvent event) {
     // The pointer cancel event is handled like pointer up. Normally,
     // the difference is that pointer cancel doesn't perform any action,
     // but in this case neither up or cancel perform any action.
-    _remove(event.pointer);
+    _handleRemoval(event);
   }
 
   AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {
@@ -631,28 +665,17 @@ class _AndroidMotionEventConverter {
     final int pointerIdx = pointers.indexOf(event.pointer);
     final int numPointers = pointers.length;
 
-    // These values must match the values in the engine's AndroidTouchProcessor.java.
-    // This flag indicates whether the original Android pointer events were batched together.
-    const kPointerDataFlagBatched = 1;
-    // This flag indicates that this event is part of a group of events representing a change
-    // that affects multiple pointers.
-    const kPointerDataFlagMultiple = 2;
-
-    // Mask for extracting the flag value from the event's platformData
-    const kPointerDataFlagMask = 0xff;
-    const kPointerDataMultiplePointerCountShift = 8;
-
     // Android MotionEvent objects can batch information on multiple pointers.
     // Flutter breaks these such batched events into multiple PointerEvent objects.
     // When there are multiple active pointers we accumulate the information for all pointers
     // as we get PointerEvents, and only send it to the embedded Android view when
     // we see the last pointer. This way we achieve the same batching as Android.
-    final int platformDataFlag = event.platformData & kPointerDataFlagMask;
-    if (platformDataFlag == kPointerDataFlagBatched) {
+    final int platformDataFlag = event.platformData & _kPointerDataFlagMask;
+    if (platformDataFlag == _kPointerDataFlagBatched) {
       return null;
     }
-    if (platformDataFlag == kPointerDataFlagMultiple) {
-      final int originalPointerCount = event.platformData >> kPointerDataMultiplePointerCountShift;
+    if (platformDataFlag == _kPointerDataFlagMultiple) {
+      final int originalPointerCount = event.platformData >> _kPointerDataMultiplePointerCountShift;
       if (pointerIdx != originalPointerCount - 1) {
         return null;
       }
