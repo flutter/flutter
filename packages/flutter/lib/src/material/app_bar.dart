@@ -1068,17 +1068,7 @@ class _AppBarState extends State<AppBar> {
     if (title != null) {
       title = _AppBarTitleBox(child: title);
       if (!widget.excludeHeaderSemantics) {
-        title = Semantics(
-          namesRoute: switch (defaultTargetPlatform) {
-            TargetPlatform.android ||
-            TargetPlatform.fuchsia ||
-            TargetPlatform.linux ||
-            TargetPlatform.windows => true,
-            TargetPlatform.iOS || TargetPlatform.macOS => null,
-          },
-          header: true,
-          child: title,
-        );
+        title = Semantics(namesRoute: true, header: true, child: title);
       }
 
       title = DefaultTextStyle(
