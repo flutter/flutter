@@ -10,8 +10,8 @@ import 'package:native_stack_traces/native_stack_traces.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../runner/flutter_command.dart';
 
@@ -25,11 +25,9 @@ const rootLoadingUnitId = 1;
 /// over stdout.
 class SymbolizeCommand extends FlutterCommand {
   SymbolizeCommand({
-    required Stdio stdio,
-    required FileSystem fileSystem,
+    required ToolContext toolContext,
     DwarfSymbolizationService dwarfSymbolizationService = const DwarfSymbolizationService(),
-  }) : _stdio = stdio,
-       _fileSystem = fileSystem,
+  }) : _toolContext = toolContext,
        _dwarfSymbolizationService = dwarfSymbolizationService {
     argParser.addOption(
       'debug-info',
@@ -58,8 +56,7 @@ class SymbolizeCommand extends FlutterCommand {
     );
   }
 
-  final Stdio _stdio;
-  final FileSystem _fileSystem;
+  final ToolContext _toolContext;
   final DwarfSymbolizationService _dwarfSymbolizationService;
 
   @override
@@ -75,7 +72,7 @@ class SymbolizeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   File _handleDSYM(String fileName) {
-    final FileSystemEntityType type = _fileSystem.typeSync(fileName);
+    final FileSystemEntityType type = _toolContext.fs.typeSync(fileName);
     final bool isDSYM = fileName.endsWith('.dSYM');
     if (type == FileSystemEntityType.notFound) {
       throw FileNotFoundException(fileName);
@@ -84,7 +81,7 @@ class SymbolizeCommand extends FlutterCommand {
       if (!isDSYM) {
         throw StateError('$fileName is a directory, not a file');
       }
-      final Directory dwarfDir = _fileSystem
+      final Directory dwarfDir = _toolContext.fs
           .directory(fileName)
           .childDirectory('Contents')
           .childDirectory('Resources')
@@ -95,7 +92,7 @@ class SymbolizeCommand extends FlutterCommand {
     if (isDSYM) {
       throw StateError('$fileName is not a dSYM package directory');
     }
-    return _fileSystem.file(fileName);
+    return _toolContext.fs.file(fileName);
   }
 
   Map<int, File> _unitDebugInfoPathMap() {
@@ -158,7 +155,7 @@ class SymbolizeCommand extends FlutterCommand {
       );
     }
     if ((argResults?.wasParsed('input') ?? false) &&
-        !await _fileSystem.isFile(stringArg('input')!)) {
+        !await _toolContext.fs.isFile(stringArg('input')!)) {
       throwToolExit('${stringArg('input')} does not exist.');
     }
     return super.validateCommand();
@@ -169,21 +166,23 @@ class SymbolizeCommand extends FlutterCommand {
     // Configure output to either specified file or stdout.
     late final IOSink output;
     if (argResults?.wasParsed('output') ?? false) {
-      final File outputFile = _fileSystem.file(stringArg('output'));
+      final File outputFile = _toolContext.fs.file(stringArg('output'));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
       output = outputFile.openWrite();
     } else {
       final outputController = StreamController<List<int>>();
-      outputController.stream.transformWithCallSite(utf8.decoder).listen(_stdio.stdoutWrite);
+      outputController.stream
+          .transformWithCallSite(utf8.decoder)
+          .listen(_toolContext.stdio.stdoutWrite);
       output = IOSink(outputController);
     }
 
     // Configure input from either specified file or stdin.
     final Stream<List<int>> input = (argResults?.wasParsed('input') ?? false)
-        ? _fileSystem.file(stringArg('input')).openRead()
-        : _stdio.stdin;
+        ? _toolContext.fs.file(stringArg('input')).openRead()
+        : _toolContext.stdio.stdin;
 
     final unitSymbols = <int, Uint8List>{
       for (final MapEntry<int, File> entry in _unitDebugInfoPathMap().entries)

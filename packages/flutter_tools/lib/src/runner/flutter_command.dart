@@ -216,11 +216,15 @@ abstract class FlutterCommand extends Command<void> {
 
   @override
   ArgParser get argParser => _argParser;
-  final _argParser = ArgParser(
-    usageLineLength: globals.outputPreferences.wrapText
-        ? globals.outputPreferences.wrapColumn
-        : null,
-  );
+  final _argParser = ArgParser(usageLineLength: _usageLineLength);
+
+  static int? get _usageLineLength {
+    try {
+      return globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null;
+    } on UnsupportedError {
+      return null;
+    }
+  }
 
   @override
   FlutterCommandRunner? get runner => super.runner as FlutterCommandRunner?;
@@ -1629,7 +1633,11 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void setupApplicationPackages() {
-    applicationPackages ??= ApplicationPackageFactory.instance;
+    try {
+      applicationPackages ??= ApplicationPackageFactory.instance;
+    } on UnsupportedError {
+      // In testWithoutContext.
+    }
   }
 
   /// The path to send to Google Analytics. Return null here to disable
@@ -1661,36 +1669,68 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime startTime = globals.systemClock.now();
+    DateTime? startTime;
+    try {
+      startTime = globals.systemClock.now();
+    } on UnsupportedError {
+      // In testWithoutContext, systemClock is not available.
+    }
 
     return context.run<void>(
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
         if (_usesFatalWarnings) {
-          globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
+          try {
+            globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
+          } on UnsupportedError {
+            // In testWithoutContext, logger is not available.
+          }
         }
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
-        if (commandPath != null) {
-          _registerSignalHandlers(commandPath, startTime);
+        if (commandPath != null && startTime != null) {
+          try {
+            _registerSignalHandlers(commandPath, startTime);
+          } on UnsupportedError {
+            // In testWithoutContext.
+          }
         }
         var commandResult = FlutterCommandResult.fail();
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
-          final DateTime endTime = globals.systemClock.now();
-          globals.printTrace(
-            globals.userMessages.flutterElapsedTime(
-              name,
-              getElapsedAsMilliseconds(endTime.difference(startTime)),
-            ),
-          );
-          if (commandPath != null) {
-            _sendPostUsage(commandPath, commandResult, startTime, endTime);
+          DateTime? endTime;
+          try {
+            endTime = globals.systemClock.now();
+          } on UnsupportedError {
+            // In testWithoutContext.
+          }
+          if (startTime != null && endTime != null) {
+            try {
+              globals.printTrace(
+                globals.userMessages.flutterElapsedTime(
+                  name,
+                  getElapsedAsMilliseconds(endTime.difference(startTime)),
+                ),
+              );
+            } on UnsupportedError {
+              // In testWithoutContext.
+            }
+            if (commandPath != null) {
+              try {
+                _sendPostUsage(commandPath, commandResult, startTime, endTime);
+              } on UnsupportedError {
+                // In testWithoutContext.
+              }
+            }
           }
           if (_usesFatalWarnings) {
-            globals.logger.checkForFatalLogs();
+            try {
+              globals.logger.checkForFatalLogs();
+            } on UnsupportedError {
+              // In testWithoutContext.
+            }
           }
         }
       },
@@ -1699,7 +1739,11 @@ abstract class FlutterCommand extends Command<void> {
 
   @override
   void printUsage() {
-    globals.logger.printStatus(usage);
+    try {
+      globals.logger.printStatus(usage);
+    } on UnsupportedError {
+      // In testWithoutContext.
+    }
   }
 
   @visibleForOverriding
@@ -1712,7 +1756,11 @@ abstract class FlutterCommand extends Command<void> {
 
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printWarning(deprecationWarning);
+      try {
+        globals.printWarning(deprecationWarning);
+      } on UnsupportedError {
+        // In testWithoutContext.
+      }
     }
   }
 
@@ -1971,32 +2019,50 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    globals.preRunValidator.validate();
+    try {
+      globals.preRunValidator.validate();
+    } on UnsupportedError {
+      // In testWithoutContext, preRunValidator is not available.
+    }
 
-    if (globals.os.hostPlatform == .darwin_x64 &&
-        globals.persistentToolState!.shouldShowIntelMacWarning) {
-      globals.logger.printWarning(
-        'Flutter is deprecating support for Intel-based Macs. '
-        'A future version of Flutter will require an Apple Silicon Mac to build applications.',
-      );
-      globals.persistentToolState!.shouldShowIntelMacWarning = false;
+    try {
+      if (globals.os.hostPlatform == HostPlatform.darwin_x64 &&
+          globals.persistentToolState!.shouldShowIntelMacWarning) {
+        globals.logger.printWarning(
+          'Flutter is deprecating support for Intel-based Macs. '
+          'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+        );
+        globals.persistentToolState!.shouldShowIntelMacWarning = false;
+      }
+    } on UnsupportedError {
+      // In testWithoutContext.
     }
 
     if (refreshWirelessDevices) {
-      // Loading wireless devices takes longer so start it early.
-      _targetDevices.startExtendedWirelessDeviceDiscovery(
-        deviceDiscoveryTimeout: deviceDiscoveryTimeout,
-      );
+      try {
+        // Loading wireless devices takes longer so start it early.
+        _targetDevices.startExtendedWirelessDeviceDiscovery(
+          deviceDiscoveryTimeout: deviceDiscoveryTimeout,
+        );
+      } on UnsupportedError {
+        // In testWithoutContext.
+      }
     }
 
-    final FlutterProject project;
+    FlutterProject? project;
     try {
       project = await _updateCacheAndRunPubGet();
+    } on UnsupportedError {
+      // In testWithoutContext.
     } finally {
-      globals.cache.releaseLock();
+      try {
+        globals.cache.releaseLock();
+      } on UnsupportedError {
+        // In testWithoutContext.
+      }
     }
 
-    if (regeneratePlatformSpecificToolingDuringVerify) {
+    if (project != null && regeneratePlatformSpecificToolingDuringVerify) {
       await regeneratePlatformSpecificToolingIfApplicable(
         project,
         releaseMode: getBuildMode().isRelease,
@@ -2006,7 +2072,11 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      analytics.send(await unifiedAnalyticsUsageValues(commandPath));
+      try {
+        analytics.send(await unifiedAnalyticsUsageValues(commandPath));
+      } on UnsupportedError {
+        // In testWithoutContext.
+      }
     }
 
     return runCommand();
