@@ -16,6 +16,9 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
@@ -51,19 +54,26 @@ abstract final class FlutterGlobalOptions {
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
-  FlutterCommandRunner({bool verboseHelp = false})
-    : super(
-        'flutter',
-        'Manage your Flutter app development.\n'
-            '\n'
-            'Common commands:\n'
-            '\n'
-            '  flutter create <output directory>\n'
-            '    Create a new Flutter project in the specified directory.\n'
-            '\n'
-            '  flutter run [options]\n'
-            '    Run your Flutter application on an attached device or in an emulator.',
-      ) {
+  FlutterCommandRunner({
+    AndroidContext? androidContext,
+    AppleContext? appleContext,
+    ToolContext? toolContext,
+    bool verboseHelp = false,
+  }) : _androidContext = androidContext,
+       _appleContext = appleContext,
+       _toolContext = toolContext,
+       super(
+         'flutter',
+         'Manage your Flutter app development.\n'
+             '\n'
+             'Common commands:\n'
+             '\n'
+             '  flutter create <output directory>\n'
+             '    Create a new Flutter project in the specified directory.\n'
+             '\n'
+             '  flutter run [options]\n'
+             '    Run your Flutter application on an attached device or in an emulator.',
+       ) {
     argParser.addFlag(
       FlutterGlobalOptions.kVerboseFlag,
       abbr: 'v',
@@ -281,6 +291,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
       command!.usageException(error.message);
     }
   }
+
+  final AndroidContext? _androidContext;
+  final AppleContext? _appleContext;
+  final ToolContext? _toolContext;
+
+  /// The Android context, if any.
+  AndroidContext? get androidContext => _androidContext;
+
+  /// The Apple context, if any.
+  AppleContext? get appleContext => _appleContext;
+
+  /// The tool context, if any.
+  ToolContext? get toolContext => _toolContext;
 
   // See https://github.com/flutter/flutter/issues/145158.
   late bool _machineFlagPresentInAnyCliArg;
