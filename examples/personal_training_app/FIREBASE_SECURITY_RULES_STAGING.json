@@ -1,0 +1,119 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "roles": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('roles').child(auth.uid).val() === 'instructor')",
+        ".write": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || (!data.exists() && auth.uid === $uid && newData.val() === 'client'))"
+      }
+    },
+
+    "usernameToUid": {
+      "$usernameKey": {
+        ".read": "auth != null",
+        ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
+      }
+    },
+
+    "uidToUsername": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('roles').child(auth.uid).val() === 'instructor')",
+        ".write": "auth != null && (auth.uid === $uid || root.child('roles').child(auth.uid).val() === 'instructor')"
+      }
+    },
+
+    "users": {
+      "$userKey": {
+        ".read": "auth != null && (auth.uid === $userKey || root.child('uidToUsername').child(auth.uid).val() === $userKey || root.child('roles').child(auth.uid).val() === 'instructor')",
+        ".write": "auth != null && (auth.uid === $userKey || root.child('uidToUsername').child(auth.uid).val() === $userKey || root.child('roles').child(auth.uid).val() === 'instructor')",
+        "password": {
+          ".read": "auth != null && (auth.uid === $userKey || root.child('uidToUsername').child(auth.uid).val() === $userKey || root.child('roles').child(auth.uid).val() === 'instructor')",
+          ".write": "auth != null && (auth.uid === $userKey || root.child('uidToUsername').child(auth.uid).val() === $userKey || root.child('roles').child(auth.uid).val() === 'instructor')"
+        }
+      }
+    },
+
+    "profiles": {
+      "$profileKey": {
+        ".read": "auth != null && (auth.uid === $profileKey || root.child('uidToUsername').child(auth.uid).val() === $profileKey || root.child('roles').child(auth.uid).val() === 'instructor')",
+        ".write": "auth != null && (auth.uid === $profileKey || root.child('uidToUsername').child(auth.uid).val() === $profileKey || root.child('roles').child(auth.uid).val() === 'instructor')"
+      }
+    },
+
+    "workouts": {
+      ".read": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || (query.orderByChild === 'clientUid' && query.equalTo === auth.uid) || (query.orderByChild === 'clientUsername' && ((root.child('uidToUsername').child(auth.uid).isString() && query.equalTo === root.child('uidToUsername').child(auth.uid).val()) || (root.child('uidToUsername').child(auth.uid).isString() && query.equalTo === root.child('uidToUsername').child(auth.uid).val().toLowerCase()))))",
+      "$workoutId": {
+        ".read": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || data.child('clientUid').val() === auth.uid || (data.child('clientUsername').isString() && root.child('usernameToUid').child(data.child('clientUsername').val()).val() === auth.uid) || (data.child('clientUsername').isString() && root.child('usernameToUid').child(data.child('clientUsername').val().toLowerCase()).val() === auth.uid) || (root.child('uidToUsername').child(auth.uid).isString() && data.child('clientUsername').isString() && data.child('clientUsername').val().toLowerCase() === root.child('uidToUsername').child(auth.uid).val().toLowerCase()))",
+        ".write": "auth != null && (newData.child('clientUid').val() === auth.uid || (newData.child('clientUsername').isString() && root.child('usernameToUid').child(newData.child('clientUsername').val()).val() === auth.uid) || (newData.child('clientUsername').isString() && root.child('usernameToUid').child(newData.child('clientUsername').val().toLowerCase()).val() === auth.uid) || (root.child('uidToUsername').child(auth.uid).isString() && newData.child('clientUsername').isString() && newData.child('clientUsername').val().toLowerCase() === root.child('uidToUsername').child(auth.uid).val().toLowerCase()) || root.child('roles').child(auth.uid).val() === 'instructor')"
+      }
+    },
+
+    "restDays": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).val() === 'instructor'",
+      "$restDayId": {
+        ".read": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || data.child('clientUid').val() === auth.uid || data.child('clientName').val() === root.child('uidToUsername').child(auth.uid).val())",
+        ".write": "auth != null && (newData.child('clientUid').val() === auth.uid || newData.child('clientName').val() === root.child('uidToUsername').child(auth.uid).val() || root.child('roles').child(auth.uid).val() === 'instructor')"
+      }
+    },
+
+    "clientsList": {
+      ".read": "auth != null && root.child('roles').child(auth.uid).val() === 'instructor'",
+      ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'instructor'"
+    },
+
+    "clientsListUpdatedAt": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'instructor'"
+    },
+
+    "storage": {
+      ".read": false,
+      ".write": false,
+      "loginQuote": {
+        "text": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'instructor'"
+        }
+      },
+      "workoutIndexes": {
+        "$usernameKey": {
+          ".read": "auth != null && (root.child('usernameToUid').child($usernameKey).val() === auth.uid || root.child('roles').child(auth.uid).val() === 'instructor')",
+          ".write": "auth != null && (root.child('usernameToUid').child($usernameKey).val() === auth.uid || root.child('roles').child(auth.uid).val() === 'instructor')"
+        }
+      },
+      "workoutPayloads": {
+        "$workoutId": {
+          ".read": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || root.child('workouts').child($workoutId).child('clientUid').val() === auth.uid || root.child('workouts').child($workoutId).child('clientUsername').val() === root.child('uidToUsername').child(auth.uid).val())",
+          ".write": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || root.child('workouts').child($workoutId).child('clientUid').val() === auth.uid || root.child('workouts').child($workoutId).child('clientUsername').val() === root.child('uidToUsername').child(auth.uid).val())"
+        }
+      },
+      "workoutNotifications": {
+        "$usernameKey": {
+          ".read": "auth != null && (root.child('usernameToUid').child($usernameKey).val() === auth.uid || root.child('roles').child(auth.uid).val() === 'instructor')",
+          ".write": "auth != null && (root.child('usernameToUid').child($usernameKey).val() === auth.uid || root.child('roles').child(auth.uid).val() === 'instructor')"
+        }
+      }
+    },
+
+    "instructor": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'instructor'"
+    },
+
+    "clients": {
+      "$clientKey": {
+        ".read": "auth != null && (auth.uid === $clientKey || root.child('uidToUsername').child(auth.uid).val() === $clientKey || root.child('roles').child(auth.uid).val() === 'instructor')",
+        ".write": "auth != null && (auth.uid === $clientKey || root.child('uidToUsername').child(auth.uid).val() === $clientKey || root.child('roles').child(auth.uid).val() === 'instructor')"
+      }
+    },
+
+    "stepCounts": {
+      "$clientKey": {
+        ".read": "auth != null && (auth.uid === $clientKey || root.child('uidToUsername').child(auth.uid).val() === $clientKey || root.child('roles').child(auth.uid).val() === 'instructor')",
+        ".write": "auth != null && (auth.uid === $clientKey || root.child('uidToUsername').child(auth.uid).val() === $clientKey || root.child('roles').child(auth.uid).val() === 'instructor')"
+      }
+    }
+  }
+}

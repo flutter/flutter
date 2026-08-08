@@ -1,0 +1,93 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "roles": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')",
+        ".write": "auth != null && ((root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com') || (!data.exists() && auth.uid === $uid && newData.val() === 'client') || (!data.exists() && auth.uid === $uid && auth.token.email === 'merianstephen@sim.com' && newData.val() === 'instructor'))"
+      }
+    },
+
+    "usernameToUid": {
+      "$usernameKey": {
+        ".read": true,
+        ".write": "auth != null && !data.exists()"
+      }
+    },
+
+    "profiles": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')",
+        ".write": "auth != null && (auth.uid === $uid || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')"
+      }
+        },
+        "users": {
+          "$userKey": {
+            ".read": "auth != null && (auth.uid === $userKey || root.child('uidToUsername').child(auth.uid).val() === $userKey || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')",
+            ".write": "auth != null && (auth.uid === $userKey || root.child('uidToUsername').child(auth.uid).val() === $userKey || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')",
+            "password": {
+              ".read": true,
+              ".write": "auth != null && (auth.uid === $userKey || root.child('uidToUsername').child(auth.uid).val() === $userKey || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')"
+            }
+          }
+        },
+
+    },
+
+    "workouts": {
+      ".read": "auth != null && ((root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com') || (query.orderByChild === 'clientUid' && query.equalTo === auth.uid) || (query.orderByChild === 'clientUsername' && ((root.child('uidToUsername').child(auth.uid).isString() && query.equalTo === root.child('uidToUsername').child(auth.uid).val()) || (root.child('uidToUsername').child(auth.uid).isString() && query.equalTo === root.child('uidToUsername').child(auth.uid).val().toLowerCase()))))",
+      "$workoutId": {
+        ".read": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com' || data.child('clientUid').val() === auth.uid || (data.child('clientUsername').isString() && root.child('usernameToUid').child(data.child('clientUsername').val()).val() === auth.uid) || (data.child('clientUsername').isString() && root.child('usernameToUid').child(data.child('clientUsername').val().toLowerCase()).val() === auth.uid) || (root.child('uidToUsername').child(auth.uid).isString() && data.child('clientUsername').isString() && data.child('clientUsername').val().toLowerCase() === root.child('uidToUsername').child(auth.uid).val().toLowerCase()))",
+        ".write": "auth != null && (newData.child('clientUid').val() === auth.uid || (newData.child('clientUsername').isString() && root.child('usernameToUid').child(newData.child('clientUsername').val()).val() === auth.uid) || (newData.child('clientUsername').isString() && root.child('usernameToUid').child(newData.child('clientUsername').val().toLowerCase()).val() === auth.uid) || (root.child('uidToUsername').child(auth.uid).isString() && newData.child('clientUsername').isString() && newData.child('clientUsername').val().toLowerCase() === root.child('uidToUsername').child(auth.uid).val().toLowerCase()) || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')"
+      }
+    },
+
+    "restDays": {
+      "$restDayId": {
+        ".read": "auth != null && (data.child('clientUid').val() === auth.uid || data.child('clientName').val() === root.child('uidToUsername').child(auth.uid).val() || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')",
+        ".write": "auth != null && (newData.child('clientUid').val() === auth.uid || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')"
+      }
+    },
+
+    "clientsList": {
+      ".read": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')",
+      ".write": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')"
+    },
+
+    "clientsListUpdatedAt": {
+      ".read": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')",
+      ".write": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')"
+    },
+
+    "storage": {
+      ".read": false,
+      ".write": false,
+      "loginQuote": {
+        "text": {
+          ".read": "auth != null",
+          ".write": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')"
+        }
+      },
+      "workoutIndexes": {
+        "$usernameKey": {
+          ".read": "auth != null && (root.child('usernameToUid').child($usernameKey).val() === auth.uid || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')",
+          ".write": "auth != null && (root.child('usernameToUid').child($usernameKey).val() === auth.uid || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')"
+        }
+      },
+      "workoutPayloads": {
+        "$workoutId": {
+          ".read": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com' || root.child('workouts').child($workoutId).child('clientUid').val() === auth.uid || root.child('workouts').child($workoutId).child('clientUsername').val() === root.child('uidToUsername').child(auth.uid).val())",
+          ".write": "auth != null && (root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com' || root.child('workouts').child($workoutId).child('clientUid').val() === auth.uid || root.child('workouts').child($workoutId).child('clientUsername').val() === root.child('uidToUsername').child(auth.uid).val())"
+        }
+      },
+      "workoutNotifications": {
+        "$usernameKey": {
+          ".read": "auth != null && (root.child('usernameToUid').child($usernameKey).val() === auth.uid || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')",
+          ".write": "auth != null && (root.child('usernameToUid').child($usernameKey).val() === auth.uid || root.child('roles').child(auth.uid).val() === 'instructor' || auth.token.email === 'merianstephen@sim.com')"
+        }
+      }
+    }
+  }
+}
