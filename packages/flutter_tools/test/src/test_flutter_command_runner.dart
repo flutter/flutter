@@ -47,22 +47,34 @@ Future<String> createProject(
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Logger topLevelLogger = globals.logger;
+    Logger? topLevelLogger;
+    try {
+      topLevelLogger = globals.logger;
+    } on UnsupportedError {
+      // In testWithoutContext, globals.logger is not available.
+    }
     final contextOverrides = <Type, dynamic>{
-      if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
+      if (topLevelLogger != null && (topLevelResults['verbose'] as bool))
+        Logger: VerboseLogger(topLevelLogger),
     };
     return context.run<void>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-          platform: globals.platform,
-          fileSystem: globals.fs,
-          userMessages: UserMessages(),
-        );
-        // For compatibility with tests that set this to a relative path.
-        Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot!));
+        try {
+          Cache.flutterRoot ??= Cache.defaultFlutterRoot(
+            platform: globals.platform,
+            fileSystem: globals.fs,
+            userMessages: UserMessages(),
+          );
+          // For compatibility with tests that set this to a relative path.
+          Cache.flutterRoot = globals.fs.path.normalize(
+            globals.fs.path.absolute(Cache.flutterRoot!),
+          );
+        } on UnsupportedError {
+          // In testWithoutContext, globals.platform/fs is not available.
+        }
         return super.runCommand(topLevelResults);
       },
     );

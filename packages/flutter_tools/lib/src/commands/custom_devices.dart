@@ -86,6 +86,7 @@ class CustomDevicesCommand extends FlutterCommand {
       CustomDevicesListCommand(
         customDevicesConfig: customDevicesConfig,
         featureFlags: featureFlags,
+        fileSystem: fileSystem,
         logger: logger,
       ),
     );
@@ -172,7 +173,7 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
   @protected
   final FeatureFlags featureFlags;
   @protected
-  final FileSystem? fileSystem;
+  final FileSystem fileSystem;
   @protected
   final Logger logger;
 
@@ -185,7 +186,7 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
   /// doesn't exist. (True otherwise)
   @protected
   bool backup() {
-    final File configFile = fileSystem!.file(customDevicesConfig.configPath);
+    final File configFile = fileSystem.file(customDevicesConfig.configPath);
     if (configFile.existsSync()) {
       configFile.copySync(configBackupPath);
       return true;
@@ -211,8 +212,9 @@ class CustomDevicesListCommand extends CustomDevicesCommandBase {
   CustomDevicesListCommand({
     required super.customDevicesConfig,
     required super.featureFlags,
+    required super.fileSystem,
     required super.logger,
-  }) : super(fileSystem: null);
+  });
 
   @override
   String get description => '''
@@ -254,7 +256,7 @@ class CustomDevicesResetCommand extends CustomDevicesCommandBase {
   CustomDevicesResetCommand({
     required super.customDevicesConfig,
     required super.featureFlags,
-    required FileSystem super.fileSystem,
+    required super.fileSystem,
     required super.logger,
   });
 
@@ -275,7 +277,7 @@ If a file already exists at the backup location, it will be overwritten.
 
     final bool wasBackedUp = backup();
 
-    ErrorHandlingFileSystem.deleteIfExists(fileSystem!.file(customDevicesConfig.configPath));
+    ErrorHandlingFileSystem.deleteIfExists(fileSystem.file(customDevicesConfig.configPath));
     customDevicesConfig.ensureFileExists();
 
     logger.printStatus(
@@ -296,7 +298,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     required Platform platform,
     required super.featureFlags,
     required ProcessManager processManager,
-    required FileSystem super.fileSystem,
+    required super.fileSystem,
     required super.logger,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _terminal = terminal,
@@ -388,7 +390,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       result = false;
     }
 
-    final Directory temp = await fileSystem!.systemTempDirectory.createTemp();
+    final Directory temp = await fileSystem.systemTempDirectory.createTemp();
 
     try {
       final bool ok = await device.tryInstall(localPath: temp.path, appName: temp.basename);
@@ -766,7 +768,7 @@ class CustomDevicesDeleteCommand extends CustomDevicesCommandBase {
   CustomDevicesDeleteCommand({
     required super.customDevicesConfig,
     required super.featureFlags,
-    required FileSystem super.fileSystem,
+    required super.fileSystem,
     required super.logger,
   });
 

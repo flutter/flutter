@@ -20,7 +20,7 @@ typedef Generator = dynamic Function();
 /// the context, and the instantiation of the value results in a dependency
 /// cycle.
 class ContextDependencyCycleException implements Exception {
-  ContextDependencyCycleException._(this.cycle);
+  ContextDependencyCycleException(this.cycle);
 
   /// The dependency cycle (last item depends on first item).
   final List<Type> cycle;
@@ -98,7 +98,7 @@ class AppContext {
       final int index = _reentrantChecks!.indexOf(type);
       if (index >= 0) {
         // We're already in the process of trying to generate this type.
-        throw ContextDependencyCycleException._(
+        throw ContextDependencyCycleException(
           UnmodifiableListView<Type>(_reentrantChecks!.sublist(index)),
         );
       }
