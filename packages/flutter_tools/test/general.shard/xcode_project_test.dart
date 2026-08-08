@@ -748,6 +748,48 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
         );
       });
 
+      testWithoutContext('throws exception explaining how to resolve multiple projects', () async {
+        final fs = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        const projectPath = 'path/to/project';
+        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+        final fakeProcessManager = FakeProcessManager.empty();
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+            exitCode: 78,
+            stderr: 'xcodebuild failed',
+          ),
+        ]);
+        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        iosProject.hostAppRoot.childDirectory('Runner.xcodeproj').createSync(recursive: true);
+        iosProject.hostAppRoot.childDirectory('Widget.xcodeproj').createSync(recursive: true);
+        await expectLater(
+          iosProject.prefetchSwiftPackages(
+            xcodebuildProjectCommandArguments: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+            ],
+            processUtils: processUtils,
+            logger: testLogger,
+          ),
+          throwsToolExit(
+            message: 'Found multiple Xcode projects in ios/: Runner.xcodeproj, Widget.xcodeproj.',
+          ),
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
       testWithoutContext('prefetchSwiftPackages can run for both platforms', () async {
         final fs = MemoryFileSystem.test();
         final testLogger = BufferLogger.test();

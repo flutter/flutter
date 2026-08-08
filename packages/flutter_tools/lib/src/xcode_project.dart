@@ -444,6 +444,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         await _swiftPackageFetchStderrSubscription?.cancel();
       });
       if (exitCode != 0) {
+        throwToolExitIfMultipleXcodeProjects(hostAppRoot);
         throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
       }
     } finally {

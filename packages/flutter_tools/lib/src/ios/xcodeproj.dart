@@ -415,7 +415,12 @@ class XcodeProjectInterpreter {
     const missingProjectExitCode = 66;
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const corruptedProjectExitCode = 74;
-    bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
+    // The exit code returned by 'xcodebuild -list' when no -project is passed and the directory contains more than one project.
+    const multipleProjectsExitCode = 78;
+    bool allowedFailures(int c) =>
+        c == missingProjectExitCode ||
+        c == corruptedProjectExitCode ||
+        c == multipleProjectsExitCode;
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
       xcodeProject,
       buildDirectory,
@@ -432,6 +437,9 @@ class XcodeProjectInterpreter {
     );
     if (allowedFailures(result.exitCode)) {
       // User configuration error, tool exit instead of crashing.
+      if (result.exitCode == multipleProjectsExitCode && projectFilename == null) {
+        throwToolExitIfMultipleXcodeProjects(xcodeProject.hostAppRoot);
+      }
       throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
     }
     return XcodeProjectInfo.fromXcodeBuildOutput(
@@ -504,6 +512,39 @@ class XcodeProjectInterpreter {
     }
     return schemes;
   }
+}
+
+/// Throws a [ToolExit] explaining how to resolve the ambiguity if [hostAppRoot] contains
+/// more than one `.xcodeproj`.
+///
+/// Flutter identifies the host app's project by looking for a single `.xcodeproj` directly
+/// within [hostAppRoot], so any additional projects must live in a subdirectory instead
+/// (for example `ios/Something/Foo.xcodeproj`).
+void throwToolExitIfMultipleXcodeProjects(Directory hostAppRoot) {
+  final List<String> projectNames = _xcodeProjectNamesIn(hostAppRoot);
+  if (projectNames.length <= 1) {
+    return;
+  }
+  final String platformDirectory = hostAppRoot.basename;
+  throwToolExit(
+    'Found multiple Xcode projects in $platformDirectory/: ${projectNames.join(', ')}.\n'
+    'Flutter identifies the host app by looking for a single .xcodeproj directly within '
+    '$platformDirectory/, so xcodebuild is unable to determine which project to use.\n'
+    'Move the additional Xcode project(s) into a subdirectory, such as '
+    '$platformDirectory/Something/Foo.xcodeproj, and update any references to them.',
+  );
+}
+
+List<String> _xcodeProjectNamesIn(Directory hostAppRoot) {
+  if (!hostAppRoot.existsSync()) {
+    return <String>[];
+  }
+  return hostAppRoot
+      .listSync()
+      .map((FileSystemEntity entity) => entity.basename)
+      .where((String name) => name.endsWith('.xcodeproj') && !name.startsWith('.'))
+      .toList()
+    ..sort();
 }
 
 /// Environment variables prefixed by FLUTTER_XCODE_ will be passed as build configurations to xcodebuild.
