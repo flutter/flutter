@@ -9,7 +9,9 @@ on:
     branches: main
     types: [labeled]
 
-permissions: write-all
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   cherrypick_to_release:
@@ -20,15 +22,19 @@ jobs:
       (github.event.pull_request.merged == true)
     steps:
       - name: Get Release Channel
+        env:
+          LABEL_NAME: ${{ github.event.label.name }}
         run: |
-          echo "CHANNEL=$(echo ${{ github.event.label.name }} | cut -d ':' -f 2 | xargs)" >> $GITHUB_ENV
+          echo "CHANNEL=$(echo "$LABEL_NAME" | cut -d ':' -f 2 | xargs)" >> $GITHUB_ENV
       - name: Get Release Candidate Branch
         run: |
           RELEASE_BRANCH=$(curl https://raw.githubusercontent.com/flutter/flutter/$CHANNEL/bin/internal/release-candidate-branch.version)
           echo "RELEASE_BRANCH=$(echo $RELEASE_BRANCH | tr -d '\n')" >> $GITHUB_ENV
       - name: Get Cherry Pick PR
+        env:
+          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: |
-          echo "COMMIT_SHA=$(echo ${{ github.event.pull_request.merge_commit_sha }})" >> $GITHUB_ENV
+          echo "COMMIT_SHA=$MERGE_COMMIT_SHA" >> $GITHUB_ENV
       - name: Checkout Flutter Engine Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -57,30 +63,33 @@ jobs:
         if: ${{ steps.attempt-cp.conclusion == 'success' }}
         working-directory: ./engine
         id: create-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          git push https://${{ env.GITHUB_TOKEN }}@github.com/flutteractionsbot/engine cp-engine-${CHANNEL}-${COMMIT_SHA}
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/flutteractionsbot/engine
+          git push origin cp-engine-${CHANNEL}-${COMMIT_SHA}
           {
             echo 'PR_URL<<EOF'
             gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ../PULL_REQUEST_CP_TEMPLATE.md --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/engine --head flutteractionsbot:cp-engine-${CHANNEL}-${COMMIT_SHA}
             echo EOF
           } >> "$GITHUB_ENV"
-        env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
       - name: Leave Comment on CP success
         if: ${{ steps.create-pr.conclusion == 'success' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: |
           echo $PR_URL
           NEW_PR_NUMBER="${PR_URL##*/}"
-          SUCCESS_MSG=" @${{ github.actor }} please fill out the PR description above, afterwards the release team will review this request."
+          SUCCESS_MSG=" @${GITHUB_ACTOR} please fill out the PR description above, afterwards the release team will review this request."
           gh pr comment $NEW_PR_NUMBER -R flutter/engine -b "${SUCCESS_MSG}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
       - name: Leave Comment on CP failure
         if: ${{ failure() && steps.attempt-cp.conclusion == 'failure' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           FAILURE_MSG="Failed to create CP due to merge conflicts.<br>"
           FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) for more info."
-          gh pr comment ${{ github.event.pull_request.number }} -R flutter/engine -b "${FAILURE_MSG}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          gh pr comment "${PR_NUMBER}" -R flutter/engine -b "${FAILURE_MSG}"
