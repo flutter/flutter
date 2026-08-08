@@ -5,13 +5,24 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/testbed.dart';
 import 'runner/utils.dart';
 
@@ -27,8 +38,27 @@ void main() {
   testUsingContext(
     'Help for command line arguments is consistently styled and complete',
     () => TestBed().run(() {
-      final runner = FlutterCommandRunner(verboseHelp: true);
-      executable.generateCommands(verboseHelp: true, verbose: true).forEach(runner.addCommand);
+      final fakeAndroidContext = FakeAndroidContext();
+      final fakeAppleContext = FakeAppleContext();
+      final fakeToolContext = FakeToolContext();
+      final fakeToolDependencies = FakeToolDependencies(
+        androidContext: fakeAndroidContext,
+        appleContext: fakeAppleContext,
+        toolContext: fakeToolContext,
+      );
+      final runner = FlutterCommandRunner(
+        androidContext: fakeAndroidContext,
+        appleContext: fakeAppleContext,
+        toolContext: fakeToolContext,
+        verboseHelp: true,
+      );
+      executable
+          .generateCommands(
+            toolDependencies: fakeToolDependencies,
+            verbose: true,
+            verboseHelp: true,
+          )
+          .forEach(runner.addCommand);
       verifyCommandRunner(runner);
       for (final Command<void> command in runner.commands.values) {
         if (command.name == 'analyze') {
@@ -37,6 +67,7 @@ void main() {
         }
       }
     }),
+    overrides: <Type, Generator>{AndroidSdk: () => FakeAndroidSdk()},
   );
 
   testUsingContext('Global arg results are available in FlutterCommands', () async {
@@ -396,4 +427,57 @@ void verifyOptions(String? command, Iterable<Option> options) {
     // TODO(ianh): add some checking for embedded URLs to make sure we're consistent on how we format those.
     // TODO(ianh): arguably we should ban help text that starts with "Whether to..." since by definition a flag is to enable a feature, so the "whether to" is redundant.
   }
+}
+
+class FakeAnalytics extends Fake implements Analytics {
+  @override
+  bool get telemetryEnabled => false;
+
+  @override
+  bool get okToSend => false;
+}
+
+class FakeBuildSystem extends Fake implements BuildSystem {}
+
+class FakeBuildTargets extends Fake implements BuildTargets {}
+
+class FakeCrashReporter extends Fake implements CrashReporter {}
+
+class FakeToolDependencies extends Fake implements ToolDependencies {
+  FakeToolDependencies({
+    Analytics? analytics,
+    AndroidContext? androidContext,
+    AppleContext? appleContext,
+    BuildSystem? buildSystem,
+    BuildTargets? buildTargets,
+    CrashReporter? crashReporter,
+    ToolContext? toolContext,
+  }) : analytics = analytics ?? FakeAnalytics(),
+       androidContext = androidContext ?? FakeAndroidContext(),
+       appleContext = appleContext ?? FakeAppleContext(),
+       buildSystem = buildSystem ?? FakeBuildSystem(),
+       buildTargets = buildTargets ?? FakeBuildTargets(),
+       crashReporter = crashReporter ?? FakeCrashReporter(),
+       toolContext = toolContext ?? FakeToolContext();
+
+  @override
+  final Analytics analytics;
+
+  @override
+  final AndroidContext androidContext;
+
+  @override
+  final AppleContext appleContext;
+
+  @override
+  final BuildSystem buildSystem;
+
+  @override
+  final BuildTargets buildTargets;
+
+  @override
+  final CrashReporter crashReporter;
+
+  @override
+  final ToolContext toolContext;
 }
