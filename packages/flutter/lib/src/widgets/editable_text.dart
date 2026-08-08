@@ -1404,17 +1404,20 @@ class EditableText extends StatefulWidget {
   final TextInputAction? textInputAction;
 
   /// {@template flutter.widgets.editableText.onChanged}
-  /// Called when the user initiates a change to the TextField's
-  /// value: when they have inserted or deleted text.
+  /// Called when the user changes the text within the TextField, such as
+  /// typing, pasting, or deleting text.
   ///
-  /// This callback doesn't run when the TextField's text is changed
-  /// programmatically, via the TextField's [controller]. Typically it
-  /// isn't necessary to be notified of such changes, since they're
-  /// initiated by the app itself.
+  /// This callback is triggered only by user-initiated changes to the text.
   ///
-  /// To be notified of all changes to the TextField's text, cursor,
-  /// and selection, one can add a listener to its [controller] with
-  /// [TextEditingController.addListener].
+  /// This callback is _not_ triggered by:
+  ///
+  /// 1. Programmatic changes to the text, via the TextField's [controller].
+  /// 2. Selection or cursor changes.
+  /// 3. IME composition changes that don't alter the text string.
+  ///
+  /// To be notified of all changes to the TextField's text, cursor, selection,
+  /// and composing state, you can add a listener to its [controller]
+  /// with [TextEditingController.addListener].
   ///
   /// [onChanged] is called before [onSubmitted] when user indicates completion
   /// of editing, such as when pressing the "done" button on the keyboard. That
@@ -1429,7 +1432,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// ## Handling emojis and other complex characters
-  /// {@template flutter.widgets.EditableText.onChanged}
+  /// {@template flutter.widgets.editableText.onChangedComplexCharacters}
   /// It's important to always use
   /// [characters](https://pub.dev/packages/characters) when dealing with user
   /// input text that may contain complex characters. This will ensure that
