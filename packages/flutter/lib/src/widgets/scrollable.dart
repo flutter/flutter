@@ -613,14 +613,25 @@ class ScrollableState extends State<Scrollable>
   late ScrollBehavior _configuration;
   ScrollController? _fallbackScrollController;
   DeviceGestureSettings? _mediaQueryGestureSettings;
+  bool _accessibleNavigation = false;
 
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
     _configuration = widget.scrollBehavior ?? ScrollConfiguration.of(context);
     final ScrollPhysics? physicsFromWidget =
         widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
-    _physics = _configuration.getScrollPhysics(context);
-    _physics = physicsFromWidget?.applyTo(_physics) ?? _physics;
+    ScrollPhysics physics = _configuration.getScrollPhysics(context);
+    if (physicsFromWidget != null) {
+      physics = physicsFromWidget.applyTo(physics);
+    }
+    // Semantic scroll actions synthesize a fixed drag from the viewport size,
+    // which bounces past the edge with bouncing physics. Clamp them while a
+    // screen reader is active. Skip physics that block user scrolling so a
+    // non-scrollable view isn't made scrollable.
+    if (_accessibleNavigation && physics.allowUserScrolling) {
+      physics = ClampingScrollPhysics(parent: physics);
+    }
+    _physics = physics;
 
     final ScrollPosition? oldPosition = _position;
     if (oldPosition != null) {
@@ -671,6 +682,7 @@ class ScrollableState extends State<Scrollable>
     _mediaQueryGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     _devicePixelRatio =
         MediaQuery.maybeDevicePixelRatioOf(context) ?? View.of(context).devicePixelRatio;
+    _accessibleNavigation = MediaQuery.maybeAccessibleNavigationOf(context) ?? false;
     _updatePosition();
     super.didChangeDependencies();
   }
