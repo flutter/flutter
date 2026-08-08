@@ -230,7 +230,10 @@ class Chrome {
       //   provides tracing data from the GPU data
       //   disabled due to https://bugs.chromium.org/p/chromium/issues/detail?id=1068259
       // TODO(yjbanov): extract useful GPU data
-      'categories': 'blink,blink.user_timing',
+      'traceConfig': <String, dynamic>{
+        'includedCategories': <String>['blink', 'blink.user_timing'],
+        'enableThreadCpuTime': true,
+      },
       'transferMode': 'SendAsStream',
     });
   }
@@ -465,10 +468,10 @@ Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
     double previousValue,
     BlinkTraceEvent event,
   ) {
-    if (event.tdur == null) {
-      throw FormatException('Trace event lacks "tdur" field: $event');
+    if (event.tdur == null && event.dur == null) {
+      throw FormatException('Trace event lacks "tdur" and "dur" fields: $event');
     }
-    return previousValue + event.tdur!;
+    return previousValue + (event.tdur ?? event.dur)!;
   });
   final int sampleCount = math.min(events.length, _kMeasuredSampleCount);
   return Duration(microseconds: sum ~/ sampleCount);
@@ -512,7 +515,8 @@ class BlinkTraceEvent {
       tid = _readInt(json, 'tid'),
       ts = _readInt(json, 'ts'),
       tts = _readInt(json, 'tts'),
-      tdur = _readInt(json, 'tdur');
+      tdur = _readInt(json, 'tdur'),
+      dur = _readInt(json, 'dur');
 
   /// Event-specific data.
   final Map<String, dynamic> args;
@@ -540,6 +544,9 @@ class BlinkTraceEvent {
 
   /// Event duration in microseconds.
   final int? tdur;
+
+  /// Wall-clock event duration in microseconds.
+  final int? dur;
 
   /// A "begin frame" event contains all of the scripting time of an animation
   /// frame (JavaScript, WebAssembly), plus a negligible amount of internal
