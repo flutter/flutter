@@ -490,6 +490,7 @@ class FakeMacosPlatformViewsController {
 
   Iterable<FakeAppKitView> get views => _views.values;
   final Map<int, FakeAppKitView> _views = <int, FakeAppKitView>{};
+  final Map<int, int?> layoutDirections = <int, int?>{};
 
   final Set<String> _registeredViewTypes = <String>{};
 
@@ -534,6 +535,7 @@ class FakeMacosPlatformViewsController {
     final args = call.arguments as Map<dynamic, dynamic>;
     final id = args['id'] as int;
     final viewType = args['viewType'] as String;
+    final layoutDirection = args['direction'] as int?;
     final creationParams = args['params'] as Uint8List?;
 
     if (_views.containsKey(id)) {
@@ -551,6 +553,7 @@ class FakeMacosPlatformViewsController {
     }
 
     _views[id] = FakeAppKitView(id, viewType, creationParams);
+    layoutDirections[id] = layoutDirection;
     gesturesAccepted[id] = 0;
     gesturesRejected[id] = 0;
     return Future<int?>.sync(() => null);
@@ -581,6 +584,7 @@ class FakeMacosPlatformViewsController {
     }
 
     _views.remove(id);
+    layoutDirections.remove(id);
     return Future<dynamic>.sync(() => null);
   }
 }
