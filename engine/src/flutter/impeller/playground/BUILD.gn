@@ -89,6 +89,8 @@ impeller_component("playground_test") {
     "playground_test.h",
   ]
 
+  deps = [ "//flutter/skia" ]
+
   public_deps = [
     ":playground",
     "//flutter/impeller/testing:golden_digest_manager",
