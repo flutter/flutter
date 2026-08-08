@@ -28,6 +28,7 @@ void main() {
       expect(feature.name, 'example');
       expect(feature.environmentOverride, null);
       expect(feature.configSetting, null);
+      expect(feature.warningOnDisable, null);
     });
 
     testWithoutContext('retrieves the correct setting for each branch', () {
@@ -415,6 +416,7 @@ void main() {
     test('can be configured', () {
       expect(swiftPackageManager.configSetting, 'enable-swift-package-manager');
       expect(swiftPackageManager.environmentOverride, 'FLUTTER_SWIFT_PACKAGE_MANAGER');
+      expect(swiftPackageManager.warningOnDisable, kSwiftPackageManagerDisabledWarning);
     });
 
     test('forwards to isEnabled', () {

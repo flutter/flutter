@@ -180,6 +180,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    featureFlags: featureFlags,
   );
 
   await removeExtendedAttributesForProject(
