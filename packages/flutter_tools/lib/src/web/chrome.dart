@@ -49,6 +49,25 @@ const kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const _kGlibcError = 'Inconsistency detected by ld.so';
 
+/// Filters out non-fatal D-Bus connection error messages emitted by Chromium.
+///
+/// Headless Linux Chrome attempts to query Linux D-Bus desktop services (such as
+/// system theme, desktop notifications, and keyrings) when `DBUS_SESSION_BUS_ADDRESS`
+/// is missing or disabled. Chromium logs non-fatal fallback notices to stderr via
+/// `LOG(ERROR)` in `dbus/bus.cc` (see
+/// https://chromium.googlesource.com/chromium/src/+/refs/heads/main/dbus/bus.cc#405)
+/// and `dbus/object_proxy.cc`.
+///
+/// We filter out these benign D-Bus lines to prevent stderr log noise in CI,
+/// following the industry standard pattern used by open source projects to filter
+/// E2E test logs (e.g. https://github.com/kitelev/exocortex/blob/4290cdade669034e5f71c892fb3e1908c5a2fe12/packages/obsidian-plugin/docker-entrypoint-e2e.sh#L48-L49).
+bool _isDbusError(String line) {
+  return line.contains('ERROR:dbus/bus.cc') ||
+      line.contains('ERROR:dbus/object_proxy.cc') ||
+      line.contains('Failed to connect to the bus') ||
+      line.contains('org.freedesktop.DBus');
+}
+
 typedef BrowserFinder = String Function(Platform, FileSystem);
 
 /// Find the chrome executable on the current platform.
@@ -342,6 +361,9 @@ class ChromiumLauncher {
 
       final StreamSubscription<String> stderrSub = process.stderr.transform(utf8LineDecoder).listen(
         (String line) {
+          if (_isDbusError(line)) {
+            return;
+          }
           addLog('CHROME STDERR', line);
           if (line.contains(_kGlibcError)) {
             hitGlibcBug = true;
