@@ -1973,6 +1973,17 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// The app bar can still expand and contract as the user scrolls, but it will
   /// also stretch when the user over-scrolls.
+  ///
+  /// Note that stretch behavior requires the scroll view to use a scroll physics
+  /// that supports overscroll (like [BouncingScrollPhysics]). On platforms
+  /// using clamping physics (like Android by default), stretching will not
+  /// occur unless [BouncingScrollPhysics] is explicitly set, even if
+  /// [AlwaysScrollableScrollPhysics] is used.
+  ///
+  /// See also:
+  ///
+  ///  * [FlexibleSpaceBar], which implements the stretch animations (like zoom,
+  ///    blur, or fading the title) using [FlexibleSpaceBar.stretchModes].
   final bool stretch;
 
   /// The offset of overscroll required to activate [onStretchTrigger].
@@ -1982,6 +1993,28 @@ class SliverAppBar extends StatefulWidget {
 
   /// The callback function to be executed when a user over-scrolls to the
   /// offset specified by [stretchTriggerOffset].
+  ///
+  /// This callback will only be triggered if [stretch] is true and the scroll
+  /// view's physics supports overscroll (like [BouncingScrollPhysics]).
+  ///
+  /// For example, on Android where [ClampingScrollPhysics] is the default,
+  /// [onStretchTrigger] will not be called unless the scroll view is explicitly
+  /// configured with [BouncingScrollPhysics]:
+  ///
+  /// ```dart
+  /// CustomScrollView(
+  ///   physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+  ///   slivers: <Widget>[
+  ///     SliverAppBar(
+  ///       stretch: true,
+  ///       onStretchTrigger: () async {
+  ///         // Perform async refresh work here...
+  ///       },
+  ///     ),
+  ///     // ...
+  ///   ],
+  /// )
+  /// ```
   final AsyncCallback? onStretchTrigger;
 
   /// {@macro flutter.material.appbar.toolbarHeight}
