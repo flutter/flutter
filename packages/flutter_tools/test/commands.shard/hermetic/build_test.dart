@@ -97,7 +97,7 @@ void main() {
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fs,
-          logger: logger,
+          logger: testLogger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
           platform: FakePlatform(),
@@ -130,7 +130,7 @@ void main() {
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fs,
-          logger: logger,
+          logger: testLogger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
           platform: FakePlatform(),
@@ -146,6 +146,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+        testLogger.printError('Error: Danger Will Robinson!');
         try {
           await createTestCommandRunner(command).run(<String>['build', 'test']);
         } on Exception {
@@ -162,7 +163,7 @@ void main() {
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fs,
-          logger: logger,
+          logger: testLogger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
           platform: FakePlatform(),
@@ -198,7 +199,7 @@ void main() {
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fs,
-          logger: logger,
+          logger: testLogger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
           platform: FakePlatform(),
