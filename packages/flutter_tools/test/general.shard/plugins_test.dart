@@ -492,9 +492,9 @@ dependencies:
             'bad_plugin',
           ]);
           // Write bytes that are not valid UTF-8, so readAsString throws a FileSystemException.
-          pluginDirs[1].childFile('pubspec.yaml').writeAsBytesSync(
-            Uint8List.fromList(<int>[0xff, 0xfe, 0xfd]),
-          );
+          pluginDirs[1]
+              .childFile('pubspec.yaml')
+              .writeAsBytesSync(Uint8List.fromList(<int>[0xff, 0xfe, 0xfd]));
 
           // The tool must not crash when a plugin's pubspec.yaml cannot be read.
           final Future<List<Plugin>> pluginsFuture = findPlugins(flutterProject);
@@ -801,6 +801,46 @@ dependencies:
             'ios': false,
             'macos': false,
           };
+          expect(jsonContent['swift_package_manager_enabled'], expectedSwiftPackageManagerEnabled);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          SystemClock: () => systemClock,
+          FlutterVersion: () => flutterVersion,
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
+        '.flutter-plugins-dependencies forces swift_package_manager_enabled if forceSwiftPM is true',
+        () async {
+          createPlugin(
+            name: 'plugin-a',
+            platforms: const <String, _PluginPlatformInfo>{
+              'ios': _PluginPlatformInfo(
+                pluginClass: 'Foo',
+                dartPluginClass: 'Bar',
+                sharedDarwinSource: true,
+              ),
+            },
+          );
+          iosProject.testExists = true;
+
+          final dateCreated = DateTime(1970);
+          systemClock.currentTime = dateCreated;
+
+          iosProject.usesSwiftPackageManager = false;
+          macosProject.usesSwiftPackageManager = false;
+
+          await refreshPluginsList(flutterProject, forceSwiftPM: true);
+
+          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+
+          final expectedSwiftPackageManagerEnabled = <String, dynamic>{'ios': true, 'macos': true};
           expect(jsonContent['swift_package_manager_enabled'], expectedSwiftPackageManagerEnabled);
         },
         overrides: <Type, Generator>{
