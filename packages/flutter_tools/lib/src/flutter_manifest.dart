@@ -344,6 +344,21 @@ class FlutterManifest {
     return null;
   }
 
+  /// Whether the project is a module and should use an ephemeral iOS project (.ios/).
+  ///
+  /// When false, the project should use a normal iOS project (ios/).
+  ///
+  /// If the project is not a module, this value is null.
+  bool? get iosEphemeralModule {
+    if (isModule) {
+      if (_flutterDescriptor case {'module': final YamlMap map}) {
+        return map['iosEphemeral'] as bool?;
+      }
+      return true;
+    }
+    return null;
+  }
+
   /// Gets the supported platforms. This only supports the new `platforms` format.
   ///
   /// If the plugin uses the legacy pubspec format, this method returns null.
@@ -583,6 +598,9 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         if (yamlValue['iosBundleIdentifier'] != null &&
             yamlValue['iosBundleIdentifier'] is! String) {
           errors.add('The "iosBundleIdentifier" section must be a string if set.');
+        }
+        if (yamlValue['iosEphemeral'] != null && yamlValue['iosEphemeral'] is! bool) {
+          errors.add('The "iosEphemeral" section must be a boolean if set.');
         }
       case 'plugin':
         if (yamlValue is! YamlMap) {

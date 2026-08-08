@@ -525,6 +525,61 @@ flutter:
     expect(flutterManifest.isModule, true);
     expect(flutterManifest.androidPackage, 'com.example');
     expect(flutterManifest.usesAndroidX, true);
+    expect(flutterManifest.iosEphemeralModule, isNull);
+  });
+
+  testWithoutContext('FlutterManifest parses iosEphemeral in module declaration', () {
+    const manifest = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+    androidX: true
+    iosEphemeral: false
+''';
+
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.isModule, true);
+    expect(flutterManifest.iosEphemeralModule, false);
+  });
+
+  testWithoutContext('FlutterManifest handles invalid iosEphemeral in module declaration', () {
+    const manifest = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+    androidX: true
+    iosEphemeral: "false"
+''';
+
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, isNull);
+    expect(logger.errorText, contains('The "iosEphemeral" section must be a boolean if set.'));
+  });
+
+  testWithoutContext('FlutterManifest iosEphemeralModule is null when not a module', () {
+    const manifest = '''
+name: test
+flutter:
+  uses-material-design: true
+''';
+
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.isModule, false);
+    expect(flutterManifest.iosEphemeralModule, isNull);
   });
 
   testWithoutContext('FlutterManifest allows a legacy plugin declaration', () {

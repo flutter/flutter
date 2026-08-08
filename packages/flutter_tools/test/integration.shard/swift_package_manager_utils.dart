@@ -86,6 +86,7 @@ class SwiftPackageManagerUtils {
     required List<String> options,
     List<Pattern>? expectedLines,
     List<String>? unexpectedLines,
+    int expectedExitCode = 0,
   }) async {
     final List<Pattern> remainingExpectedLines = expectedLines ?? <Pattern>[];
     final List<String> allUnexpectedLines = unexpectedLines ?? <String>[];
@@ -122,7 +123,7 @@ class SwiftPackageManagerUtils {
     }
     expect(
       result.exitCode,
-      0,
+      expectedExitCode,
       reason:
           'Failed to build app for "${command.join(' ')}":\n'
           'stdout: \n${result.stdout}\n'

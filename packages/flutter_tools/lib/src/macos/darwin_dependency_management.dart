@@ -76,7 +76,7 @@ class DarwinDependencyManagement {
 
     // Skip updating Podfile if project is a module, since it will use a
     // different module-specific Podfile.
-    if (_project.isModule) {
+    if (platform == .ios && _project.ios.isEphemeralModule) {
       return;
     }
     final (:int totalCount, :int swiftPackageCount, :int podCount) = await _countPluginsPerManager(
