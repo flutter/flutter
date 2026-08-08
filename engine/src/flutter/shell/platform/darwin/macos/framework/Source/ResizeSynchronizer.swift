@@ -41,23 +41,21 @@ import Foundation
 ///   - Thread Safety: The class manages its internal state in a thread-safe manner to coordinate
 ///     actions between the platform thread and the raster thread.
 @objc(FlutterResizeSynchronizer)
-final class ResizeSynchronizer: NSObject {
+@MainActor
+final class ResizeSynchronizer: NSObject, @unchecked Sendable {
   private static let invalidSize = CGSize(width: -1, height: -1)
 
-  // Synchronizes access to _isInResize_unsafe: isInResize is accessed from multiple threads and
-  // thus requires synchronized access to the underlying storage.
+  // Synchronizes access to _isInResize_unsafe: isInResize is accessed from
+  // both the raster thread and the platform thread, and thus requires
+  // synchronized access to the underlying storage.
   private let isInResizeLock = NSLock()
-  private var _isInResize_unsafe: Bool = false
-  private var isInResize: Bool {
+  private nonisolated(unsafe) var _isInResize_unsafe: Bool = false
+  private nonisolated var isInResize: Bool {
     get {
-      isInResizeLock.lock()
-      defer { isInResizeLock.unlock() }
-      return _isInResize_unsafe
+      isInResizeLock.withLock { _isInResize_unsafe }
     }
     set {
-      isInResizeLock.lock()
-      _isInResize_unsafe = newValue
-      isInResizeLock.unlock()
+      isInResizeLock.withLock { _isInResize_unsafe = newValue }
     }
   }
 
@@ -70,6 +68,8 @@ final class ResizeSynchronizer: NSObject {
   // The updated view surface size. Must be set on platform thread.
   private var contentSize: CGSize = ResizeSynchronizer.invalidSize
 
+  private let mainRunLoop: FlutterRunLoop = .mainRunLoop
+
   /// Begins window resize operation to the specified size.
   ///
   /// Blocks the thread until `performCommit(forSize:notify:delay:)` with the same size is called.
@@ -77,8 +77,8 @@ final class ResizeSynchronizer: NSObject {
   /// See `FlutterRunLoop.mainRunLoop.pollFlutterMessagesOnce()`.
   @objc func beginResize(
     forSize size: CGSize,
-    notify: () -> Void,
-    onTimeout: (() -> Void)? = nil
+    notify: @MainActor () -> Void,
+    onTimeout: (@MainActor () -> Void)? = nil
   ) {
     if !didReceiveFrame || isShuttingDown {
       // If we haven't yet received a frame, or we're shutting down, there's nothing to do.
@@ -110,7 +110,7 @@ final class ResizeSynchronizer: NSObject {
 
       // Process platform thread messages to pick up any updates to contentSize, didReceiveFrame,
       // isShuttingDown made in performCommit and shutdown methods.
-      FlutterRunLoop.mainRunLoop.pollFlutterMessagesOnce()
+      mainRunLoop.pollFlutterMessagesOnce()
     }
     isInResize = false
   }
@@ -120,20 +120,18 @@ final class ResizeSynchronizer: NSObject {
   /// Schedules the given block on the platform thread with the given delay. Unblocks `beginResize`
   /// on the platform thread, if waiting for the surface during resize.
   ///
-  /// Called from the raster thread on frame present.
+  /// Called from the raster thread on frame present. The `notify` callback will
+  /// be invoked on the platform thread.
   @objc func performCommit(
     forSize size: CGSize,
     afterDelay delay: TimeInterval,
-    notify: @escaping () -> Void
+    notify: @MainActor @escaping () -> Void
   ) {
-    var effectiveDelay = delay
 
     // If we're currently resizing, process immediately.
-    if self.isInResize {  // Accesses the computed property which uses the lock
-      effectiveDelay = 0
-    }
+    let effectiveDelay = isInResize ? 0 : delay
 
-    FlutterRunLoop.mainRunLoop.perform(afterDelay: effectiveDelay) {
+    mainRunLoop.perform(afterDelay: effectiveDelay) {
       self.didReceiveFrame = true
       self.contentSize = size
       notify()
@@ -144,7 +142,7 @@ final class ResizeSynchronizer: NSObject {
   ///
   /// Unblocks the platform thread if blocked.
   @objc func shutDown() {
-    FlutterRunLoop.mainRunLoop.perform {
+    mainRunLoop.perform {
       self.isShuttingDown = true
     }
   }

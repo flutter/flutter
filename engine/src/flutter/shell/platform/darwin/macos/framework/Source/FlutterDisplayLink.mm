@@ -28,7 +28,10 @@
 namespace {
 class DisplayLinkManager {
  public:
+  DisplayLinkManager() : main_run_loop_(FlutterRunLoop.mainRunLoop) {}
+
   static DisplayLinkManager& Instance() {
+    FML_DCHECK(NSThread.isMainThread);
     static DisplayLinkManager instance;
     return instance;
   }
@@ -39,6 +42,8 @@ class DisplayLinkManager {
   CFTimeInterval GetNominalOutputPeriod(CGDirectDisplayID display_id);
 
  private:
+  FlutterRunLoop* main_run_loop_;
+
   void OnDisplayLink(CVDisplayLinkRef display_link,
                      const CVTimeStamp* in_now,
                      const CVTimeStamp* in_output_time,
@@ -144,7 +149,7 @@ void DisplayLinkManager::OnDisplayLink(CVDisplayLinkRef display_link,
                                        CVOptionFlags* flags_out) {
   CVTimeStamp inNow = *in_now;
   CVTimeStamp inOutputTime = *in_output_time;
-  [FlutterRunLoop.mainRunLoop performBlock:^{
+  [main_run_loop_ performBlock:^{
     std::vector<_FlutterDisplayLink*> clients;
     for (ScreenEntry& entry : entries_) {
       if (entry.display_link == display_link) {
