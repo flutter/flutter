@@ -169,6 +169,21 @@ public class FlutterFragmentTest {
   }
 
   @Test
+  public void itDestroysFallbackEngine() {
+    FlutterFragment fragment =
+        FlutterFragment.withCachedEngine("my_cached_engine")
+            .destroyEngineWithFragment(false)
+            .build();
+
+    FlutterActivityAndFragmentDelegate mockDelegate =
+        mock(FlutterActivityAndFragmentDelegate.class);
+    when(mockDelegate.isFlutterEngineFromHost()).thenReturn(false);
+    fragment.delegate = mockDelegate;
+
+    assertTrue(fragment.shouldDestroyEngineWithHost());
+  }
+
+  @Test
   public void itCreatesCachedEngineFragmentThatDelaysFirstDrawWhenRequested() {
     FlutterFragment fragment =
         FlutterFragment.withCachedEngine("my_cached_engine")
