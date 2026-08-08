@@ -269,10 +269,22 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// reasonable selection range within the new [text].
   ///
   /// Setting this notifies all the listeners of this [TextEditingController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
-  /// this value should only be set between frames, e.g. in response to user
-  /// actions, not during the build, layout, or paint phases. This property can
-  /// be set from a listener added to this [TextEditingController].
+  /// that they need to update (it calls [notifyListeners]). Listeners are
+  /// typically used to rebuild widgets: every text field attached to this
+  /// controller rebuilds its content when notified, and other listeners often
+  /// call [State.setState]. For this reason, this value should only be set
+  /// between frames, e.g. in response to user actions, not during the build,
+  /// layout, or paint phases: the framework does not allow widgets to be
+  /// marked as needing to build during those phases, and throws an exception
+  /// when a listener attempts it. Setting the text from a build method also
+  /// risks rebuilding in a loop, as every notification can schedule another
+  /// build that sets the text again.
+  ///
+  /// This property can be set from a listener added to this
+  /// [TextEditingController], but take care to avoid an infinite loop: setting
+  /// the text notifies listeners, so a listener that sets the text will be
+  /// triggered again. A common way to avoid this is to remove the listener
+  /// before setting the text and re-add it afterward.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
