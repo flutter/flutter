@@ -113,18 +113,17 @@ class AndroidDevices extends PollingDeviceDiscovery {
   // Parses the output of `adb devices -l`.
   //
   // The regex is structured as:
-  // 1. Group 1 (Serial): Lazily matched to allow spaces in the serial (which
-  //    can happen during wireless ADB mDNS name conflicts, e.g., "device (2)").
-  //    The column separator requires at least two spaces or a tab to prevent
-  //    single spaces within a serial from being mis-matched.
+  // 1. Group 1 (Serial): Greedily matched before the state. ADB formats long
+  //    listings as `%-22s %s`, so the width is a minimum: serials longer than
+  //    22 characters are followed by one space. Serials can also contain
+  //    whitespace, such as a wireless mDNS conflict suffix (`device (2)`).
   // 2. Group 2 (State): Matches known ADB device states explicitly, including
   //    "no permissions" (which contains a space). Explicitly listing states
-  //    prevents false positive state matching on extra device info/attributes
-  //    or serial name components.
+  //    lets the greedy serial capture retain state-like serial components.
   // 3. Group 3 (Extra Info): Optional trailing details (e.g. key:value pairs
   //    like "product:mokey model:mokey device:mokey transport_id:1" or "usb:123").
   static final _kDeviceRegex = RegExp(
-    r'^(.*?)(?:\s{2,}|\t+)'
+    r'^(.*)\s+'
     r'(device|offline|unauthorized|no permissions|bootloader|recovery|sideload|rescue|connecting|authorizing|host|unknown)'
     r'(?:\s+(.*)|$)',
   );
@@ -163,7 +162,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
       if (_kDeviceRegex.hasMatch(line)) {
         final Match match = _kDeviceRegex.firstMatch(line)!;
 
-        final String deviceID = match[1]!;
+        // The greedy serial capture includes the optional padding from ADB's
+        // minimum-width serial field.
+        final String deviceID = match[1]!.trimRight();
         final String deviceState = match[2]!;
         String? rest = match[3];
 

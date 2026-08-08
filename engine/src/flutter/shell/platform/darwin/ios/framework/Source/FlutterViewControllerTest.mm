@@ -551,7 +551,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   engine.viewController = (FlutterViewController*)delegate;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   BOOL isLocal = YES;
 
@@ -639,7 +640,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Exercise the real shouldIgnoreKeyboardNotification: implementation.
   FlutterKeyboardInsetManager* managerMock = [[FlutterKeyboardInsetManager alloc]
-      initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock];
+        initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock
+      displayLinkManager:FlutterDisplayLinkManager.shared];
   viewController.keyboardInsetManager = managerMock;
 
   UIScreen* screen = [self setUpMockScreen];
@@ -973,7 +975,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.mockConvertedViewRect = convertedViewFrame;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   CGFloat adjustment = [manager calculateMultitaskingAdjustment:screenRect
                                                   keyboardFrame:keyboardFrame];
@@ -994,7 +997,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.mockConvertedViewRect = convertedViewFrame;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   CGFloat inset = [manager calculateKeyboardInset:keyboardFrame
                                      keyboardMode:FlutterKeyboardModeDocked];
@@ -1031,7 +1035,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   engine.viewController = (FlutterViewController*)delegate;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
   manager.targetViewInsetBottom = 0;
 
   [manager handleKeyboardNotification:notification];
@@ -2305,7 +2310,12 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  UIWindow* window = [[UIWindow alloc] init];
+  // The window must be attached to the connected scene to have a screen, without which the
+  // viewport metrics stay empty and the surface is never updated.
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
   [window addSubview:flutterViewController.view];
   flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
   [flutterViewController viewDidLayoutSubviews];
@@ -2343,7 +2353,12 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  UIWindow* window = [[UIWindow alloc] init];
+  // The window must be attached to the connected scene to have a screen, without which the
+  // viewport metrics stay empty and the surface is never updated.
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
   [window addSubview:flutterViewController.view];
   flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
   [flutterViewController viewDidLayoutSubviews];
@@ -2834,7 +2849,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.mockEngine = engine;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
   manager.targetViewInsetBottom = 100;
   [manager startKeyBoardAnimation:0.25];
 

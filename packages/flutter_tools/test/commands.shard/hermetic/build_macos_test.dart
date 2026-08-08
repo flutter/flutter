@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -131,13 +132,15 @@ void main() {
   }
 
   // Sets up the minimal mock project files necessary for macOS builds to succeed.
-  void createMinimalMockProjectFiles() {
+  void createMinimalMockProjectFiles({bool createWorkspace = true}) {
     fileSystem
         .directory(fileSystem.path.join('macos', 'Runner.xcodeproj'))
         .createSync(recursive: true);
-    fileSystem
-        .directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
-        .createSync(recursive: true);
+    if (createWorkspace) {
+      fileSystem
+          .directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
+          .createSync(recursive: true);
+    }
     createCoreMockProjectFiles();
   }
 
@@ -146,6 +149,7 @@ void main() {
   FakeCommand setUpFakeXcodeBuildHandler(
     String configuration, {
     bool verbose = false,
+    bool hasWorkspace = true,
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
@@ -160,8 +164,10 @@ void main() {
         '/usr/bin/env',
         'xcrun',
         'xcodebuild',
-        '-workspace',
-        flutterProject.macos.xcodeWorkspace!.path,
+        if (hasWorkspace) ...<String>[
+          '-workspace',
+          flutterProject.macos.xcodeWorkspace!.path,
+        ] else ...<String>['-project', flutterProject.macos.xcodeProject.path],
         '-configuration',
         configuration,
         '-scheme',
@@ -302,6 +308,51 @@ STDERR STUFF
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       Analytics: () => fakeAnalytics,
+    },
+  );
+
+  testUsingContext(
+    'macOS build invokes xcodebuild with -project when there is no .xcworkspace',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      createMinimalMockProjectFiles(createWorkspace: false);
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler('Debug', hasWorkspace: false),
+      ]);
+
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
 
@@ -1576,4 +1627,178 @@ STDERR STUFF
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
+
+  group('Analytics for impeller plist setting', () {
+    const plistContents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>FLTEnableImpeller</key>
+  <false/>
+</dict>
+</plist>
+''';
+
+    testUsingContext(
+      'Sends an analytics event when Impeller is enabled',
+      () async {
+        final command = BuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        createMinimalMockProjectFiles();
+
+        await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(Event.flutterBuildInfo(label: 'plist-impeller-enabled', buildType: 'macos')),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () =>
+            FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+        Platform: () => macosPlatform,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Pub: ThrowingPub.new,
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
+      'Sends an analytics event when Impeller is disabled',
+      () async {
+        final command = BuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        createMinimalMockProjectFiles();
+
+        fileSystem.file(fileSystem.path.join('usr', 'bin', 'plutil')).createSync(recursive: true);
+
+        final File infoPlist = fileSystem.file(
+          fileSystem.path.join('macos', 'Runner', 'Info.plist'),
+        )..createSync(recursive: true);
+
+        infoPlist.writeAsStringSync(plistContents);
+
+        await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(Event.flutterBuildInfo(label: 'plist-impeller-disabled', buildType: 'macos')),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () =>
+            FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+        Platform: () => macosPlatform,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Pub: ThrowingPub.new,
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        Analytics: () => fakeAnalytics,
+        PlistParser: () => FakePlistParser(<String, Object>{'FLTEnableImpeller': false}),
+      },
+    );
+
+    testUsingContext(
+      'Reads built app bundle Contents/Info.plist when present',
+      () async {
+        final command = BuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        createMinimalMockProjectFiles();
+
+        await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(Event.flutterBuildInfo(label: 'plist-impeller-disabled', buildType: 'macos')),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          setUpFakeXcodeBuildHandler(
+            'Release',
+            onRun: (_) {
+              fileSystem
+                  .file(
+                    fileSystem.path.join(
+                      'build',
+                      'macos',
+                      'Build',
+                      'Products',
+                      'Release',
+                      'Runner.app',
+                      'Contents',
+                      'Info.plist',
+                    ),
+                  )
+                  .createSync(recursive: true);
+            },
+          ),
+        ]),
+        Platform: () => macosPlatform,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Pub: ThrowingPub.new,
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        Analytics: () => fakeAnalytics,
+        PlistParser: () => FakePlistParser(<String, Object>{'FLTEnableImpeller': false}),
+      },
+    );
+  });
 }
