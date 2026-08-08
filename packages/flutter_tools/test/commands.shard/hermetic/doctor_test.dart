@@ -4,8 +4,10 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -25,11 +28,16 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   late BufferLogger logger;
   late FakeProcessManager fakeProcessManager;
   late MemoryFileSystem fs;
+
+  setUpAll(() {
+    Cache.disableLocking();
+  });
 
   setUp(() {
     logger = BufferLogger.test();
@@ -114,176 +122,148 @@ void main() {
   });
 
   group('doctor with fake validators', () {
-    testUsingContext(
-      'validate non-verbose output format for run without issues',
-      () async {
-        expect(await FakeQuietDoctor(logger).diagnose(verbose: false), isTrue);
-        expect(
-          logger.statusText,
-          equals(
-            'Doctor summary (to see all details, run flutter doctor -v):\n'
-            '[✓] Passing Validator (with statusInfo)\n'
-            '[✓] Another Passing Validator (with statusInfo)\n'
-            '[✓] Validators are fun (with statusInfo)\n'
-            '[✓] Four score and seven validators ago (with statusInfo)\n'
-            '\n'
-            '• No issues found!\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate non-verbose output format for run without issues', () async {
+      expect(await FakeQuietDoctor(logger).diagnose(verbose: false), isTrue);
+      expect(
+        logger.statusText,
+        equals(
+          'Doctor summary (to see all details, run flutter doctor -v):\n'
+          '[✓] Passing Validator (with statusInfo)\n'
+          '[✓] Another Passing Validator (with statusInfo)\n'
+          '[✓] Validators are fun (with statusInfo)\n'
+          '[✓] Four score and seven validators ago (with statusInfo)\n'
+          '\n'
+          '• No issues found!\n',
+        ),
+      );
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate non-verbose output format for run with crash',
-      () async {
-        expect(await FakeCrashingDoctor(logger).diagnose(verbose: false), isFalse);
-        expect(
-          logger.statusText,
-          equals(
-            'Doctor summary (to see all details, run flutter doctor -v):\n'
-            '[✓] Passing Validator (with statusInfo)\n'
-            '[✓] Another Passing Validator (with statusInfo)\n'
-            '[☠] Crashing validator (the doctor check crashed)\n'
-            '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
-            'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-            '    ✗ Bad state: fatal error\n'
-            '[✓] Validators are fun (with statusInfo)\n'
-            '[✓] Four score and seven validators ago (with statusInfo)\n'
-            '\n'
-            '! Doctor found issues in 1 category.\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate non-verbose output format for run with crash', () async {
+      expect(await FakeCrashingDoctor(logger).diagnose(verbose: false), isFalse);
+      expect(
+        logger.statusText,
+        equals(
+          'Doctor summary (to see all details, run flutter doctor -v):\n'
+          '[✓] Passing Validator (with statusInfo)\n'
+          '[✓] Another Passing Validator (with statusInfo)\n'
+          '[☠] Crashing validator (the doctor check crashed)\n'
+          '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
+          'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
+          '    ✗ Bad state: fatal error\n'
+          '[✓] Validators are fun (with statusInfo)\n'
+          '[✓] Four score and seven validators ago (with statusInfo)\n'
+          '\n'
+          '! Doctor found issues in 1 category.\n',
+        ),
+      );
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
     testUsingContext('validate verbose output format contains trace for run with crash', () async {
       expect(await FakeCrashingDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
     });
 
-    testUsingContext(
-      'validate tool exit when exceeding timeout',
-      () async {
-        FakeAsync().run<void>((FakeAsync time) {
-          final Doctor doctor = FakeAsyncStuckDoctor(logger);
-          doctor.diagnose(verbose: false);
-          time.elapse(const Duration(minutes: 5));
-          time.flushMicrotasks();
-        });
+    testUsingContext('validate tool exit when exceeding timeout', () async {
+      FakeAsync().run<void>((FakeAsync time) {
+        final Doctor doctor = FakeAsyncStuckDoctor(logger);
+        doctor.diagnose(verbose: false);
+        time.elapse(const Duration(minutes: 5));
+        time.flushMicrotasks();
+      });
 
-        expect(
-          logger.statusText,
-          contains('Stuck validator that never completes exceeded maximum allowed duration of '),
-        );
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+      expect(
+        logger.statusText,
+        contains('Stuck validator that never completes exceeded maximum allowed duration of '),
+      );
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate non-verbose output format for run with an async crash',
-      () async {
-        final completer = Completer<void>();
-        await FakeAsync().run((FakeAsync time) {
-          unawaited(
-            FakeAsyncCrashingDoctor(time, logger).diagnose(verbose: false).then((bool r) {
-              expect(r, isFalse);
-              completer.complete();
-            }),
-          );
-          time.elapse(const Duration(seconds: 1));
-          time.flushMicrotasks();
-          return completer.future;
-        });
-        expect(
-          logger.statusText,
-          equals(
-            'Doctor summary (to see all details, run flutter doctor -v):\n'
-            '[✓] Passing Validator (with statusInfo)\n'
-            '[✓] Another Passing Validator (with statusInfo)\n'
-            '[☠] Async crashing validator (the doctor check crashed)\n'
-            '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
-            'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-            '    ✗ Bad state: fatal error\n'
-            '[✓] Validators are fun (with statusInfo)\n'
-            '[✓] Four score and seven validators ago (with statusInfo)\n'
-            '\n'
-            '! Doctor found issues in 1 category.\n',
-          ),
+    testUsingContext('validate non-verbose output format for run with an async crash', () async {
+      final completer = Completer<void>();
+      await FakeAsync().run((FakeAsync time) {
+        unawaited(
+          FakeAsyncCrashingDoctor(time, logger).diagnose(verbose: false).then((bool r) {
+            expect(r, isFalse);
+            completer.complete();
+          }),
         );
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+        time.elapse(const Duration(seconds: 1));
+        time.flushMicrotasks();
+        return completer.future;
+      });
+      expect(
+        logger.statusText,
+        equals(
+          'Doctor summary (to see all details, run flutter doctor -v):\n'
+          '[✓] Passing Validator (with statusInfo)\n'
+          '[✓] Another Passing Validator (with statusInfo)\n'
+          '[☠] Async crashing validator (the doctor check crashed)\n'
+          '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
+          'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
+          '    ✗ Bad state: fatal error\n'
+          '[✓] Validators are fun (with statusInfo)\n'
+          '[✓] Four score and seven validators ago (with statusInfo)\n'
+          '\n'
+          '! Doctor found issues in 1 category.\n',
+        ),
+      );
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate non-verbose output format when only one category fails',
-      () async {
-        expect(await FakeSinglePassingDoctor(logger).diagnose(verbose: false), isTrue);
-        expect(
-          logger.statusText,
-          equals(
-            'Doctor summary (to see all details, run flutter doctor -v):\n'
-            '[!] Partial Validator with only a Hint\n'
-            '    ! There is a hint here\n'
-            '\n'
-            '! Doctor found issues in 1 category.\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate non-verbose output format when only one category fails', () async {
+      expect(await FakeSinglePassingDoctor(logger).diagnose(verbose: false), isTrue);
+      expect(
+        logger.statusText,
+        equals(
+          'Doctor summary (to see all details, run flutter doctor -v):\n'
+          '[!] Partial Validator with only a Hint\n'
+          '    ! There is a hint here\n'
+          '\n'
+          '! Doctor found issues in 1 category.\n',
+        ),
+      );
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate non-verbose output format for a passing run',
-      () async {
-        expect(await FakePassingDoctor(logger).diagnose(verbose: false), isTrue);
-        expect(
-          logger.statusText,
-          equals(
-            'Doctor summary (to see all details, run flutter doctor -v):\n'
-            '[✓] Passing Validator (with statusInfo)\n'
-            '[!] Partial Validator with only a Hint\n'
-            '    ! There is a hint here\n'
-            '[!] Partial Validator with Errors\n'
-            '    ✗ An error message indicating partial installation\n'
-            '    ! Maybe a hint will help the user\n'
-            '[✓] Another Passing Validator (with statusInfo)\n'
-            '\n'
-            '! Doctor found issues in 2 categories.\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate non-verbose output format for a passing run', () async {
+      expect(await FakePassingDoctor(logger).diagnose(verbose: false), isTrue);
+      expect(
+        logger.statusText,
+        equals(
+          'Doctor summary (to see all details, run flutter doctor -v):\n'
+          '[✓] Passing Validator (with statusInfo)\n'
+          '[!] Partial Validator with only a Hint\n'
+          '    ! There is a hint here\n'
+          '[!] Partial Validator with Errors\n'
+          '    ✗ An error message indicating partial installation\n'
+          '    ! Maybe a hint will help the user\n'
+          '[✓] Another Passing Validator (with statusInfo)\n'
+          '\n'
+          '! Doctor found issues in 2 categories.\n',
+        ),
+      );
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate non-verbose output format',
-      () async {
-        expect(await FakeDoctor(logger).diagnose(verbose: false), isFalse);
-        expect(
-          logger.statusText,
-          equals(
-            'Doctor summary (to see all details, run flutter doctor -v):\n'
-            '[✓] Passing Validator (with statusInfo)\n'
-            '[✗] Missing Validator\n'
-            '    ✗ A useful error message\n'
-            '    ! A hint message\n'
-            '[!] Not Available Validator\n'
-            '    ✗ A useful error message\n'
-            '    ! A hint message\n'
-            '[!] Partial Validator with only a Hint\n'
-            '    ! There is a hint here\n'
-            '[!] Partial Validator with Errors\n'
-            '    ✗ An error message indicating partial installation\n'
-            '    ! Maybe a hint will help the user\n'
-            '\n'
-            '! Doctor found issues in 4 categories.\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate non-verbose output format', () async {
+      expect(await FakeDoctor(logger).diagnose(verbose: false), isFalse);
+      expect(
+        logger.statusText,
+        equals(
+          'Doctor summary (to see all details, run flutter doctor -v):\n'
+          '[✓] Passing Validator (with statusInfo)\n'
+          '[✗] Missing Validator\n'
+          '    ✗ A useful error message\n'
+          '    ! A hint message\n'
+          '[!] Not Available Validator\n'
+          '    ✗ A useful error message\n'
+          '    ! A hint message\n'
+          '[!] Partial Validator with only a Hint\n'
+          '    ! There is a hint here\n'
+          '[!] Partial Validator with Errors\n'
+          '    ✗ An error message indicating partial installation\n'
+          '    ! Maybe a hint will help the user\n'
+          '\n'
+          '! Doctor found issues in 4 categories.\n',
+        ),
+      );
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
     testUsingContext('validate verbose output format', () async {
       expect(await FakeDoctor(logger).diagnose(), isFalse);
@@ -405,45 +385,41 @@ void main() {
     });
   });
 
-  testUsingContext(
-    'validate non-verbose output wrapping',
-    () async {
-      final wrapLogger = BufferLogger.test(
-        outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 30),
-      );
-      expect(await FakeDoctor(wrapLogger).diagnose(verbose: false), isFalse);
-      expect(
-        wrapLogger.statusText,
-        equals(
-          'Doctor summary (to see all\n'
-          'details, run flutter doctor\n'
-          '-v):\n'
-          '[✓] Passing Validator (with\n'
-          '    statusInfo)\n'
-          '[✗] Missing Validator\n'
-          '    ✗ A useful error message\n'
-          '    ! A hint message\n'
-          '[!] Not Available Validator\n'
-          '    ✗ A useful error message\n'
-          '    ! A hint message\n'
-          '[!] Partial Validator with\n'
-          '    only a Hint\n'
-          '    ! There is a hint here\n'
-          '[!] Partial Validator with\n'
-          '    Errors\n'
-          '    ✗ An error message\n'
-          '      indicating partial\n'
-          '      installation\n'
-          '    ! Maybe a hint will help\n'
-          '      the user\n'
-          '\n'
-          '! Doctor found issues in 4\n'
-          '  categories.\n',
-        ),
-      );
-    },
-    overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-  );
+  testUsingContext('validate non-verbose output wrapping', () async {
+    final wrapLogger = BufferLogger.test(
+      outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 30),
+    );
+    expect(await FakeDoctor(wrapLogger).diagnose(verbose: false), isFalse);
+    expect(
+      wrapLogger.statusText,
+      equals(
+        'Doctor summary (to see all\n'
+        'details, run flutter doctor\n'
+        '-v):\n'
+        '[✓] Passing Validator (with\n'
+        '    statusInfo)\n'
+        '[✗] Missing Validator\n'
+        '    ✗ A useful error message\n'
+        '    ! A hint message\n'
+        '[!] Not Available Validator\n'
+        '    ✗ A useful error message\n'
+        '    ! A hint message\n'
+        '[!] Partial Validator with\n'
+        '    only a Hint\n'
+        '    ! There is a hint here\n'
+        '[!] Partial Validator with\n'
+        '    Errors\n'
+        '    ✗ An error message\n'
+        '      indicating partial\n'
+        '      installation\n'
+        '    ! Maybe a hint will help\n'
+        '      the user\n'
+        '\n'
+        '! Doctor found issues in 4\n'
+        '  categories.\n',
+      ),
+    );
+  }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
   testUsingContext('validate verbose output wrapping', () async {
     final wrapLogger = BufferLogger.test(
@@ -494,46 +470,38 @@ void main() {
   }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
   group('doctor with grouped validators', () {
-    testUsingContext(
-      'validate diagnose combines validator output',
-      () async {
-        expect(await FakeGroupedDoctor(logger).diagnose(), isTrue);
-        expect(
-          logger.statusText,
-          equals(
-            '[✓] Category 1 [0ms]\n'
-            '    • A helpful message\n'
-            '    • A helpful message\n'
-            '\n'
-            '[!] Category 2 [0ms]\n'
-            '    • A helpful message\n'
-            '    ✗ A useful error message\n'
-            '\n'
-            '! Doctor found issues in 1 category.\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate diagnose combines validator output', () async {
+      expect(await FakeGroupedDoctor(logger).diagnose(), isTrue);
+      expect(
+        logger.statusText,
+        equals(
+          '[✓] Category 1 [0ms]\n'
+          '    • A helpful message\n'
+          '    • A helpful message\n'
+          '\n'
+          '[!] Category 2 [0ms]\n'
+          '    • A helpful message\n'
+          '    ✗ A useful error message\n'
+          '\n'
+          '! Doctor found issues in 1 category.\n',
+        ),
+      );
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate merging assigns statusInfo and title',
-      () async {
-        // There are two subvalidators. Only the second contains statusInfo.
-        expect(await FakeGroupedDoctorWithStatus(logger).diagnose(), isTrue);
-        expect(
-          logger.statusText,
-          equals(
-            '[✓] First validator title (A status message) [0ms]\n'
-            '    • A helpful message\n'
-            '    • A different message\n'
-            '\n'
-            '• No issues found!\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate merging assigns statusInfo and title', () async {
+      // There are two subvalidators. Only the second contains statusInfo.
+      expect(await FakeGroupedDoctorWithStatus(logger).diagnose(), isTrue);
+      expect(
+        logger.statusText,
+        equals(
+          '[✓] First validator title (A status message) [0ms]\n'
+          '    • A helpful message\n'
+          '    • A different message\n'
+          '\n'
+          '• No issues found!\n',
+        ),
+      );
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
   });
 
   group('grouped validator merging results', () {
@@ -541,86 +509,50 @@ void main() {
     final partial = PartialGroupedValidator('Category');
     final missing = MissingGroupedValidator('Category');
 
-    testUsingContext(
-      'validate installed + installed = installed',
-      () async {
-        expect(await FakeSmallGroupDoctor(logger, installed, installed).diagnose(), isTrue);
-        expect(logger.statusText, startsWith('[✓]'));
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate installed + installed = installed', () async {
+      expect(await FakeSmallGroupDoctor(logger, installed, installed).diagnose(), isTrue);
+      expect(logger.statusText, startsWith('[✓]'));
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate installed + partial = partial',
-      () async {
-        expect(await FakeSmallGroupDoctor(logger, installed, partial).diagnose(), isTrue);
-        expect(logger.statusText, startsWith('[!]'));
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate installed + partial = partial', () async {
+      expect(await FakeSmallGroupDoctor(logger, installed, partial).diagnose(), isTrue);
+      expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate installed + missing = partial',
-      () async {
-        expect(await FakeSmallGroupDoctor(logger, installed, missing).diagnose(), isTrue);
-        expect(logger.statusText, startsWith('[!]'));
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate installed + missing = partial', () async {
+      expect(await FakeSmallGroupDoctor(logger, installed, missing).diagnose(), isTrue);
+      expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate partial + installed = partial',
-      () async {
-        expect(await FakeSmallGroupDoctor(logger, partial, installed).diagnose(), isTrue);
-        expect(logger.statusText, startsWith('[!]'));
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate partial + installed = partial', () async {
+      expect(await FakeSmallGroupDoctor(logger, partial, installed).diagnose(), isTrue);
+      expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate partial + partial = partial',
-      () async {
-        expect(await FakeSmallGroupDoctor(logger, partial, partial).diagnose(), isTrue);
-        expect(logger.statusText, startsWith('[!]'));
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate partial + partial = partial', () async {
+      expect(await FakeSmallGroupDoctor(logger, partial, partial).diagnose(), isTrue);
+      expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate partial + missing = partial',
-      () async {
-        expect(await FakeSmallGroupDoctor(logger, partial, missing).diagnose(), isTrue);
-        expect(logger.statusText, startsWith('[!]'));
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate partial + missing = partial', () async {
+      expect(await FakeSmallGroupDoctor(logger, partial, missing).diagnose(), isTrue);
+      expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate missing + installed = partial',
-      () async {
-        expect(await FakeSmallGroupDoctor(logger, missing, installed).diagnose(), isTrue);
-        expect(logger.statusText, startsWith('[!]'));
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate missing + installed = partial', () async {
+      expect(await FakeSmallGroupDoctor(logger, missing, installed).diagnose(), isTrue);
+      expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate missing + partial = partial',
-      () async {
-        expect(await FakeSmallGroupDoctor(logger, missing, partial).diagnose(), isTrue);
-        expect(logger.statusText, startsWith('[!]'));
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate missing + partial = partial', () async {
+      expect(await FakeSmallGroupDoctor(logger, missing, partial).diagnose(), isTrue);
+      expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
 
-    testUsingContext(
-      'validate missing + missing = missing',
-      () async {
-        expect(await FakeSmallGroupDoctor(logger, missing, missing).diagnose(), isFalse);
-        expect(logger.statusText, startsWith('[✗]'));
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()},
-    );
+    testUsingContext('validate missing + missing = missing', () async {
+      expect(await FakeSmallGroupDoctor(logger, missing, missing).diagnose(), isFalse);
+      expect(logger.statusText, startsWith('[✗]'));
+    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
   });
 
   testUsingContext(
@@ -638,17 +570,13 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'CustomDevicesWorkflow is a part of validator workflows if enabled',
-    () async {
-      final List<Workflow> workflows = DoctorValidatorsProvider.test(
-        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
-        platform: FakePlatform(),
-      ).workflows;
-      expect(workflows, contains(isA<CustomDeviceWorkflow>()));
-    },
-    overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => fakeProcessManager},
-  );
+  testUsingContext('CustomDevicesWorkflow is a part of validator workflows if enabled', () async {
+    final List<Workflow> workflows = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      platform: FakePlatform(),
+    ).workflows;
+    expect(workflows, contains(isA<CustomDeviceWorkflow>()));
+  }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => fakeProcessManager});
 
   group('FlutterValidator', () {
     late FakeFlutterVersion initialVersion;
@@ -714,14 +642,10 @@ void main() {
       );
     });
 
-    testUsingContext(
-      'ensure fake is being used and initialized',
-      () {
-        expect(fakeAnalytics.sentEvents.length, 0);
-        expect(fakeAnalytics.okToSend, true);
-      },
-      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-    );
+    testUsingContext('ensure fake is being used and initialized', () {
+      expect(fakeAnalytics.sentEvents.length, 0);
+      expect(fakeAnalytics.okToSend, true);
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
     testUsingContext(
       'contains installed',
@@ -879,31 +803,92 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'grouped validator subresult and subvalidators different lengths',
-      () async {
-        final fakeDoctor = FakeGroupedDoctorWithCrash(logger, clock: fakeSystemClock);
-        await fakeDoctor.diagnose(verbose: false);
+    testUsingContext('grouped validator subresult and subvalidators different lengths', () async {
+      final fakeDoctor = FakeGroupedDoctorWithCrash(logger, clock: fakeSystemClock);
+      await fakeDoctor.diagnose(verbose: false);
 
-        expect(fakeDoctor.validators, hasLength(1));
-        expect(fakeDoctor.validators.first.runtimeType == FakeGroupedValidatorWithCrash, true);
-        expect(fakeAnalytics.sentEvents, hasLength(0));
+      expect(fakeDoctor.validators, hasLength(1));
+      expect(fakeDoctor.validators.first.runtimeType == FakeGroupedValidatorWithCrash, true);
+      expect(fakeAnalytics.sentEvents, hasLength(0));
 
-        // Attempt to send a random event to ensure that the
-        // analytics package is still working, despite not sending
-        // above (as expected)
-        final testEvent = Event.analyticsCollectionEnabled(status: true);
-        fakeAnalytics.send(testEvent);
-        expect(fakeAnalytics.sentEvents, hasLength(1));
-        expect(fakeAnalytics.sentEvents, contains(testEvent));
-      },
-      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-    );
+      // Attempt to send a random event to ensure that the
+      // analytics package is still working, despite not sending
+      // above (as expected)
+      final testEvent = Event.analyticsCollectionEnabled(status: true);
+      fakeAnalytics.send(testEvent);
+      expect(fakeAnalytics.sentEvents, hasLength(1));
+      expect(fakeAnalytics.sentEvents, contains(testEvent));
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
     testUsingContext('sending events can be skipped', () async {
       await FakePassingDoctor(logger).diagnose(verbose: false, sendEvent: false);
       expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+  });
+
+  group('DoctorCommand', () {
+    testWithoutContext('executes diagnose via injected Doctor', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.verbosePassed, isFalse);
+    });
+
+    testWithoutContext('passes verbose flag to doctor.diagnose', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(
+        toolContext: fakeToolContext,
+        doctor: fakeDoctor,
+        verbose: true,
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.verbosePassed, isTrue);
+    });
+
+    testWithoutContext('passes --android-licenses to doctor.diagnose', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor', '--android-licenses']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.androidLicensesPassed, isTrue);
+    });
+
+    testWithoutContext('checks remote artifacts when flag provided', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor', '--check-for-remote-artifacts=1234567890abcdef']);
+
+      expect(fakeDoctor.checkRemoteArtifactsRevision, '1234567890abcdef');
+    });
+
+    testWithoutContext('throws ToolExit on missing remote artifacts', () async {
+      final fakeDoctor = FakeDiagnoseDoctor(checkRemoteArtifactsResult: true);
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await expectLater(
+        runner.run(<String>['doctor', '--check-for-remote-artifacts=1234567890abcdef']),
+        throwsToolExit(message: 'Artifacts for engine 1234567890abcdef are missing'),
+      );
+    });
   });
 }
 
@@ -1342,4 +1327,36 @@ class ZeroExecutionTimeValidationResult extends ValidationResult {
 
   @override
   Duration? get executionTime => Duration.zero;
+}
+
+class FakeDiagnoseDoctor extends Fake implements Doctor {
+  FakeDiagnoseDoctor({this.diagnoseResult = true, this.checkRemoteArtifactsResult = false});
+
+  final bool diagnoseResult;
+  final bool checkRemoteArtifactsResult;
+  bool diagnoseCalled = false;
+  bool? verbosePassed;
+  bool? androidLicensesPassed;
+  String? checkRemoteArtifactsRevision;
+
+  @override
+  Future<bool> diagnose({
+    bool androidLicenses = false,
+    bool verbose = true,
+    AndroidLicenseValidator? androidLicenseValidator,
+    bool showPii = true,
+    List<ValidatorTask>? startedValidatorTasks,
+    bool sendEvent = true,
+  }) async {
+    diagnoseCalled = true;
+    verbosePassed = verbose;
+    androidLicensesPassed = androidLicenses;
+    return diagnoseResult;
+  }
+
+  @override
+  Future<bool> checkRemoteArtifacts(String engineRevision) async {
+    checkRemoteArtifactsRevision = engineRevision;
+    return checkRemoteArtifactsResult;
+  }
 }

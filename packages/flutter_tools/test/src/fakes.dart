@@ -6,8 +6,10 @@ import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:dds/dds_launcher.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -16,20 +18,47 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/git.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/cocoapods.dart';
+import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
+import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/native_assets.dart';
+import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
+
+import 'context.dart';
 
 /// Environment with DYLD_LIBRARY_PATH=/path/to/libraries
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
@@ -919,18 +948,660 @@ class ClosedStdinController extends Fake implements StreamSink<List<int>> {
   }
 }
 
-class FakeConfig extends Fake implements Config {}
+class FakeConfig extends Fake implements Config {
+  @override
+  dynamic getValue(String key) => null;
+
+  @override
+  String get configPath => '/fake/config';
+
+  @override
+  bool containsKey(String key) => false;
+}
 
 class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 
 class FakeTerminal extends Fake implements Terminal {}
 
-class FakeProcessUtils extends Fake implements ProcessUtils {}
+class FakeProcessUtils extends Fake implements ProcessUtils {
+  FakeProcessUtils({ProcessManager? processManager, Logger? logger})
+    : _delegate = ProcessUtils(
+        processManager: processManager ?? FakeProcessManager.any(),
+        logger: logger ?? BufferLogger.test(),
+      );
+
+  final ProcessUtils _delegate;
+
+  @override
+  Future<RunResult> run(
+    List<String> cmd, {
+    bool throwOnError = false,
+    RunResultChecker? allowedFailures,
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    Map<String, String>? environment,
+    Duration? timeout,
+    int timeoutRetries = 0,
+  }) => _delegate.run(
+    cmd,
+    throwOnError: throwOnError,
+    allowedFailures: allowedFailures,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    environment: environment,
+    timeout: timeout,
+    timeoutRetries: timeoutRetries,
+  );
+
+  @override
+  RunResult runSync(
+    List<String> cmd, {
+    bool throwOnError = false,
+    bool verboseExceptions = false,
+    RunResultChecker? allowedFailures,
+    bool hideStdout = false,
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool allowReentrantFlutter = false,
+    Encoding encoding = systemEncoding,
+  }) => _delegate.runSync(
+    cmd,
+    throwOnError: throwOnError,
+    verboseExceptions: verboseExceptions,
+    allowedFailures: allowedFailures,
+    hideStdout: hideStdout,
+    workingDirectory: workingDirectory,
+    environment: environment,
+    allowReentrantFlutter: allowReentrantFlutter,
+    encoding: encoding,
+  );
+
+  @override
+  Future<Process> start(
+    List<String> cmd, {
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    Map<String, String>? environment,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) => _delegate.start(
+    cmd,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    environment: environment,
+    mode: mode,
+  );
+
+  @override
+  Future<int> stream(
+    List<String> cmd, {
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    String prefix = '',
+    bool trace = false,
+    RegExp? filter,
+    RegExp? stdoutErrorMatcher,
+    StringConverter? mapFunction,
+    Map<String, String>? environment,
+  }) => _delegate.stream(
+    cmd,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    prefix: prefix,
+    trace: trace,
+    filter: filter,
+    stdoutErrorMatcher: stdoutErrorMatcher,
+    mapFunction: mapFunction,
+    environment: environment,
+  );
+
+  @override
+  bool exitsHappySync(List<String> cli, {Map<String, String>? environment}) =>
+      _delegate.exitsHappySync(cli, environment: environment);
+
+  @override
+  Future<bool> exitsHappy(List<String> cli, {Map<String, String>? environment}) =>
+      _delegate.exitsHappy(cli, environment: environment);
+}
 
 class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
 
-class FakeXcode extends Fake implements Xcode {}
+class FakeXcode extends Fake implements Xcode {
+  FakeXcode({
+    Version? currentVersion,
+    this.isInstalledAndMeetsVersionCheck = true,
+    this.isInstalled = true,
+  }) : currentVersion = currentVersion ?? Version(15, 4, 0);
 
-class FakeArtifacts extends Fake implements Artifacts {}
+  @override
+  final Version? currentVersion;
 
-class FakeCache extends Fake implements Cache {}
+  @override
+  final bool isInstalledAndMeetsVersionCheck;
+
+  @override
+  final bool isInstalled;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
+
+  @override
+  Future<String> sdkLocation(EnvironmentType environmentType) async => 'iPhoneSDK';
+}
+
+class FakeArtifacts extends Fake implements Artifacts {
+  @override
+  FileSystemEntity getHostArtifact(HostArtifact artifact) =>
+      MemoryFileSystem.test().file(artifact.name);
+
+  @override
+  String getEngineType(TargetPlatform platform, [BuildMode? mode]) => 'fake_engine';
+
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) => 'fake_artifact';
+}
+
+class FakeCache extends Fake implements Cache {
+  FakeCache({Directory? rootOverride}) : _rootOverride = rootOverride;
+
+  final Directory? _rootOverride;
+
+  @override
+  Directory getRoot() => _rootOverride ?? MemoryFileSystem.test().directory('/flutter/bin/cache');
+
+  @override
+  MapEntry<String, String> get dyLdLibEntry =>
+      const MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path');
+
+  @override
+  Future<bool> lock() async => true;
+
+  @override
+  void releaseLock() {}
+
+  @override
+  Future<void> updateAll(
+    Set<DevelopmentArtifact> requiredArtifacts, {
+    bool offline = false,
+  }) async {}
+}
+
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({
+    Artifacts? artifacts,
+    BotDetector? botDetector,
+    Cache? cache,
+    Config? config,
+    CustomDevicesConfig? customDevicesConfig,
+    FlutterVersion? flutterVersion,
+    FileSystem? fs,
+    Git? git,
+    LocalEngineLocator? localEngineLocator,
+    Logger? logger,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    OperatingSystemUtils? os,
+    OutputPreferences? outputPreferences,
+    Platform? platform,
+    PreRunValidator? preRunValidator,
+    ProcessManager? processManager,
+    ProcessUtils? processUtils,
+    FlutterProjectFactory? projectFactory,
+    ShutdownHooks? shutdownHooks,
+    Signals? signals,
+    Stdio? stdio,
+    SystemClock? systemClock,
+    AnsiTerminal? terminal,
+    UserMessages? userMessages,
+  }) : _artifacts = artifacts,
+       _botDetector = botDetector,
+       _cache = cache,
+       _config = config,
+       _customDevicesConfig = customDevicesConfig,
+       _flutterVersion = flutterVersion,
+       _fs = fs,
+       _git = git,
+       _localEngineLocator = localEngineLocator,
+       _logger = logger,
+       _nativeAssetsBuilder = nativeAssetsBuilder,
+       _os = os,
+       _outputPreferences = outputPreferences,
+       _platform = platform,
+       _preRunValidator = preRunValidator,
+       _processManager = processManager,
+       _processUtils = processUtils,
+       _projectFactory = projectFactory,
+       _shutdownHooks = shutdownHooks,
+       _signals = signals,
+       _stdio = stdio,
+       _systemClock = systemClock,
+       _terminal = terminal,
+       _userMessages = userMessages;
+
+  final Artifacts? _artifacts;
+  final BotDetector? _botDetector;
+  final Cache? _cache;
+  final Config? _config;
+  final CustomDevicesConfig? _customDevicesConfig;
+  final FlutterVersion? _flutterVersion;
+  final FileSystem? _fs;
+  final Git? _git;
+  final LocalEngineLocator? _localEngineLocator;
+  final Logger? _logger;
+  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
+  final OperatingSystemUtils? _os;
+  final OutputPreferences? _outputPreferences;
+  final Platform? _platform;
+  final PreRunValidator? _preRunValidator;
+  final ProcessManager? _processManager;
+  final ProcessUtils? _processUtils;
+  final FlutterProjectFactory? _projectFactory;
+  final ShutdownHooks? _shutdownHooks;
+  final Signals? _signals;
+  final Stdio? _stdio;
+  final SystemClock? _systemClock;
+  final AnsiTerminal? _terminal;
+  final UserMessages? _userMessages;
+
+  @override
+  Artifacts get artifacts => _artifacts ?? Artifacts.test();
+
+  @override
+  BotDetector get botDetector => _botDetector ?? const FakeBotDetector(false);
+
+  @override
+  Cache get cache =>
+      _cache ??
+      Cache.test(
+        fileSystem: fs,
+        processManager: processManager,
+        platform: platform,
+        logger: logger,
+      );
+
+  @override
+  Config get config => _config ?? Config.test(directory: fs.directory('/'));
+
+  @override
+  CustomDevicesConfig get customDevicesConfig =>
+      _customDevicesConfig ??
+      CustomDevicesConfig(fileSystem: fs, logger: logger, platform: platform);
+
+  @override
+  FlutterVersion get flutterVersion => _flutterVersion ?? FakeFlutterVersion();
+
+  @override
+  FileSystem get fs => _fs ?? MemoryFileSystem.test();
+
+  @override
+  Git get git => _git ?? Git(currentPlatform: platform, runProcessWith: processUtils);
+
+  @override
+  LocalEngineLocator get localEngineLocator =>
+      _localEngineLocator ??
+      LocalEngineLocator(
+        userMessages: userMessages,
+        logger: logger,
+        platform: platform,
+        fileSystem: fs,
+        flutterRoot: Cache.flutterRoot ?? '',
+      );
+
+  @override
+  Logger get logger => _logger ?? BufferLogger.test();
+
+  @override
+  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => _nativeAssetsBuilder;
+
+  @override
+  OperatingSystemUtils get os => _os ?? FakeOperatingSystemUtils();
+
+  @override
+  OutputPreferences get outputPreferences => _outputPreferences ?? OutputPreferences.test();
+
+  @override
+  Platform get platform => _platform ?? FakePlatform();
+
+  @override
+  PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+
+  @override
+  ProcessManager get processManager => _processManager ?? FakeProcessManager.any();
+
+  @override
+  ProcessUtils get processUtils =>
+      _processUtils ?? ProcessUtils(processManager: processManager, logger: logger);
+
+  @override
+  FlutterProjectFactory get projectFactory =>
+      _projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger);
+
+  @override
+  ShutdownHooks get shutdownHooks => _shutdownHooks ?? ShutdownHooks();
+
+  @override
+  Signals get signals => _signals ?? Signals.test();
+
+  @override
+  Stdio get stdio => _stdio ?? FakeStdio();
+
+  @override
+  SystemClock get systemClock => _systemClock ?? const SystemClock();
+
+  @override
+  AnsiTerminal get terminal => _terminal ?? AnsiTerminal(stdio: stdio, platform: platform);
+
+  @override
+  UserMessages get userMessages => _userMessages ?? UserMessages();
+
+  @override
+  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+}
+
+/// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
+class DelegatingToolContext extends Fake implements ToolContext {
+  DelegatingToolContext({
+    Artifacts? artifacts,
+    BotDetector? botDetector,
+    Cache? cache,
+    Config? config,
+    CustomDevicesConfig? customDevicesConfig,
+    FlutterVersion? flutterVersion,
+    FileSystem? fs,
+    Git? git,
+    LocalEngineLocator? localEngineLocator,
+    Logger? logger,
+    OperatingSystemUtils? os,
+    OutputPreferences? outputPreferences,
+    Platform? platform,
+    PreRunValidator? preRunValidator,
+    ProcessManager? processManager,
+    ProcessUtils? processUtils,
+    FlutterProjectFactory? projectFactory,
+    ShutdownHooks? shutdownHooks,
+    Signals? signals,
+    Stdio? stdio,
+    SystemClock? systemClock,
+    AnsiTerminal? terminal,
+    UserMessages? userMessages,
+  }) : _artifacts = artifacts,
+       _botDetector = botDetector,
+       _cache = cache,
+       _config = config,
+       _customDevicesConfig = customDevicesConfig,
+       _flutterVersion = flutterVersion,
+       _fs = fs,
+       _git = git,
+       _localEngineLocator = localEngineLocator,
+       _logger = logger,
+       _os = os,
+       _outputPreferences = outputPreferences,
+       _platform = platform,
+       _preRunValidator = preRunValidator,
+       _processManager = processManager,
+       _processUtils = processUtils,
+       _projectFactory = projectFactory,
+       _shutdownHooks = shutdownHooks,
+       _signals = signals,
+       _stdio = stdio,
+       _systemClock = systemClock,
+       _terminal = terminal,
+       _userMessages = userMessages;
+
+  final Artifacts? _artifacts;
+  final BotDetector? _botDetector;
+  final Cache? _cache;
+  final Config? _config;
+  final CustomDevicesConfig? _customDevicesConfig;
+  final FlutterVersion? _flutterVersion;
+  final FileSystem? _fs;
+  final Git? _git;
+  final LocalEngineLocator? _localEngineLocator;
+  final Logger? _logger;
+  final OperatingSystemUtils? _os;
+  final OutputPreferences? _outputPreferences;
+  final Platform? _platform;
+  final PreRunValidator? _preRunValidator;
+  final ProcessManager? _processManager;
+  final ProcessUtils? _processUtils;
+  final FlutterProjectFactory? _projectFactory;
+  final ShutdownHooks? _shutdownHooks;
+  final Signals? _signals;
+  final Stdio? _stdio;
+  final SystemClock? _systemClock;
+  final AnsiTerminal? _terminal;
+  final UserMessages? _userMessages;
+
+  @override
+  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+
+  @override
+  BotDetector get botDetector => _botDetector ?? globals.botDetector;
+
+  @override
+  Cache get cache => _cache ?? globals.cache;
+
+  @override
+  Config get config => _config ?? globals.config;
+
+  @override
+  CustomDevicesConfig get customDevicesConfig =>
+      _customDevicesConfig ?? globals.customDevicesConfig;
+
+  @override
+  FlutterVersion get flutterVersion => _flutterVersion ?? globals.flutterVersion;
+
+  @override
+  FileSystem get fs => _fs ?? globals.fs;
+
+  @override
+  Git get git => _git ?? globals.git;
+
+  @override
+  LocalEngineLocator get localEngineLocator =>
+      _localEngineLocator ??
+      globals.localEngineLocator ??
+      LocalEngineLocator(
+        userMessages: userMessages,
+        logger: logger,
+        platform: platform,
+        fileSystem: fs,
+        flutterRoot: Cache.flutterRoot ?? '',
+      );
+
+  @override
+  Logger get logger => _logger ?? globals.logger;
+
+  @override
+  OperatingSystemUtils get os => _os ?? globals.os;
+
+  @override
+  OutputPreferences get outputPreferences => _outputPreferences ?? globals.outputPreferences;
+
+  @override
+  Platform get platform => _platform ?? globals.platform;
+
+  @override
+  PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+
+  @override
+  ProcessManager get processManager => _processManager ?? globals.processManager;
+
+  @override
+  ProcessUtils get processUtils => _processUtils ?? globals.processUtils;
+
+  @override
+  FlutterProjectFactory get projectFactory => _projectFactory ?? globals.projectFactory;
+
+  @override
+  ShutdownHooks get shutdownHooks => _shutdownHooks ?? globals.shutdownHooks;
+
+  @override
+  Signals get signals => _signals ?? globals.signals;
+
+  @override
+  Stdio get stdio => _stdio ?? globals.stdio;
+
+  @override
+  SystemClock get systemClock => _systemClock ?? globals.systemClock;
+
+  @override
+  AnsiTerminal get terminal => _terminal ?? globals.terminal;
+
+  @override
+  UserMessages get userMessages => _userMessages ?? globals.userMessages;
+
+  @override
+  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+}
+
+class FakeAndroidContext extends Fake implements AndroidContext {
+  FakeAndroidContext({
+    AndroidSdk? androidSdk,
+    AndroidStudio? androidStudio,
+    Java? java,
+    GradleUtils? gradleUtils,
+  }) : _androidSdk = androidSdk,
+       _androidStudio = androidStudio,
+       _java = java,
+       _gradleUtils = gradleUtils;
+
+  final AndroidSdk? _androidSdk;
+  final AndroidStudio? _androidStudio;
+  final Java? _java;
+  final GradleUtils? _gradleUtils;
+
+  @override
+  AndroidSdk? get androidSdk => _androidSdk;
+
+  @override
+  AndroidStudio? get androidStudio => _androidStudio;
+
+  @override
+  Java? get java => _java;
+
+  @override
+  GradleUtils get gradleUtils => _gradleUtils ?? FakeGradleUtils();
+}
+
+class FakeAppleContext extends Fake implements AppleContext {
+  FakeAppleContext({
+    CocoaPods? cocoaPods,
+    CocoaPodsValidator? cocoapodsValidator,
+    IOSSimulatorUtils? iosSimulatorUtils,
+    IOSWorkflow? iosWorkflow,
+    PlistParser? plistParser,
+    XCDevice? xcdevice,
+    Xcode? xcode,
+    XcodeProjectInterpreter? xcodeProjectInterpreter,
+  }) : _cocoaPods = cocoaPods,
+       _cocoapodsValidator = cocoapodsValidator,
+       _iosSimulatorUtils = iosSimulatorUtils,
+       _iosWorkflow = iosWorkflow,
+       _plistParser = plistParser,
+       _xcdevice = xcdevice,
+       _xcode = xcode,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter;
+
+  final CocoaPods? _cocoaPods;
+  final CocoaPodsValidator? _cocoapodsValidator;
+  final IOSSimulatorUtils? _iosSimulatorUtils;
+  final IOSWorkflow? _iosWorkflow;
+  final PlistParser? _plistParser;
+  final XCDevice? _xcdevice;
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
+
+  @override
+  CocoaPods get cocoaPods => _cocoaPods ?? FakeCocoaPods();
+
+  @override
+  CocoaPodsValidator get cocoapodsValidator => _cocoapodsValidator ?? FakeCocoaPodsValidator();
+
+  @override
+  IOSSimulatorUtils get iosSimulatorUtils => _iosSimulatorUtils ?? FakeIOSSimulatorUtils();
+
+  @override
+  IOSWorkflow get iosWorkflow => _iosWorkflow ?? FakeIOSWorkflow();
+
+  @override
+  PlistParser get plistParser => _plistParser ?? FakePlistParser();
+
+  @override
+  XCDevice get xcdevice => _xcdevice ?? FakeXCDevice();
+
+  @override
+  Xcode get xcode => _xcode ?? FakeXcode();
+
+  @override
+  XcodeProjectInterpreter get xcodeProjectInterpreter =>
+      _xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter();
+}
+
+class FakeGradleUtils extends Fake implements GradleUtils {}
+
+class FakeCocoaPods extends Fake implements CocoaPods {}
+
+class FakeCocoaPodsValidator extends Fake implements CocoaPodsValidator {}
+
+class FakeIOSSimulatorUtils extends Fake implements IOSSimulatorUtils {}
+
+class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
+
+class FakeXCDevice extends Fake implements XCDevice {}
+
+class FakeBuildSystem extends Fake implements BuildSystem {}
+
+class FakeBuildTargets extends Fake implements BuildTargets {}
+
+class FakeCrashReporter extends Fake implements CrashReporter {}
+
+class FakeToolDependencies extends Fake implements ToolDependencies {
+  FakeToolDependencies({
+    Analytics? analytics,
+    AndroidContext? androidContext,
+    AppleContext? appleContext,
+    BuildSystem? buildSystem,
+    BuildTargets? buildTargets,
+    CrashReporter? crashReporter,
+    ToolContext? toolContext,
+  }) : _analytics = analytics,
+       _androidContext = androidContext,
+       _appleContext = appleContext,
+       _buildSystem = buildSystem,
+       _buildTargets = buildTargets,
+       _crashReporter = crashReporter,
+       _toolContext = toolContext;
+
+  final Analytics? _analytics;
+  final AndroidContext? _androidContext;
+  final AppleContext? _appleContext;
+  final BuildSystem? _buildSystem;
+  final BuildTargets? _buildTargets;
+  final CrashReporter? _crashReporter;
+  final ToolContext? _toolContext;
+
+  @override
+  Analytics get analytics => _analytics ?? const NoOpAnalytics();
+
+  @override
+  AndroidContext get androidContext => _androidContext ?? FakeAndroidContext();
+
+  @override
+  AppleContext get appleContext => _appleContext ?? FakeAppleContext();
+
+  @override
+  BuildSystem get buildSystem => _buildSystem ?? FakeBuildSystem();
+
+  @override
+  BuildTargets get buildTargets => _buildTargets ?? FakeBuildTargets();
+
+  @override
+  CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
+
+  @override
+  ToolContext get toolContext => _toolContext ?? FakeToolContext();
+}

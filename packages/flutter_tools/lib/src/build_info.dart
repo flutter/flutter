@@ -916,12 +916,22 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  final Config localConfig = config ?? globals.config;
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  Config? localConfig;
+  try {
+    localConfig = config ?? globals.config;
+  } on UnsupportedError {
+    localConfig = null;
+  }
+  FileSystem localFilesystem;
+  try {
+    localFilesystem = fileSystem ?? globals.fs;
+  } on UnsupportedError {
+    localFilesystem = globals.localFileSystem;
+  }
 
-  final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
-  if (localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception('build-dir config setting in ${globals.config.configPath} must be relative');
+  final String buildDir = localConfig?.getValue('build-dir') as String? ?? 'build';
+  if (localConfig != null && localFilesystem.path.isAbsolute(buildDir)) {
+    throw Exception('build-dir config setting in ${localConfig.configPath} must be relative');
   }
   return buildDir;
 }
@@ -966,8 +976,14 @@ String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'web');
+String getWebBuildDirectory([Config? config, FileSystem? fileSystem]) {
+  FileSystem localFilesystem;
+  try {
+    localFilesystem = fileSystem ?? globals.fs;
+  } on UnsupportedError {
+    localFilesystem = globals.localFileSystem;
+  }
+  return localFilesystem.path.join(getBuildDirectory(config, fileSystem), 'web');
 }
 
 /// Returns the Linux build output directory.
