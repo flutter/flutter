@@ -49,6 +49,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
     bool enableFilter = false,
     bool enableSearch = true,
     TextInputType? keyboardType,
+    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     TextStyle? textStyle,
     TextAlign textAlign = TextAlign.start,
     // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
@@ -121,6 +122,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
                enableFilter: enableFilter,
                enableSearch: enableSearch,
                keyboardType: keyboardType,
+               scrollPadding: scrollPadding,
                textStyle: textStyle,
                textAlign: textAlign,
                inputDecorationTheme: inputDecorationTheme,
