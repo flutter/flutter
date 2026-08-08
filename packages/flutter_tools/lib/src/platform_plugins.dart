@@ -42,6 +42,29 @@ final RegExp _pluginIdentifierPattern = RegExp(
 /// checks; absent fields are not validated here.
 bool _isValidPluginIdentifier(String value) => _pluginIdentifierPattern.hasMatch(value);
 
+/// Throws a [ToolExit] if [value] (the [fieldName] of plugin [pluginName], such
+/// as `pluginClass`, `androidPackage` or `iosPrefix`) is not a plain, optionally
+/// dot-separated identifier before it is interpolated verbatim into a generated
+/// GeneratedPluginRegistrant source file.
+///
+/// The modern `platforms:` plugin format is validated in each platform's
+/// `validate`/`fromYaml`. This helper lets the legacy plugin format
+/// (`Plugin._fromLegacyYaml`, which builds [AndroidPlugin]/[IOSPlugin] through
+/// their plain constructors rather than `fromYaml`) reuse the same check. A null
+/// or empty value (e.g. the default empty iOS class prefix) is left untouched.
+void validatePluginIdentifier(String pluginName, String fieldName, String? value) {
+  if (value == null || value.isEmpty) {
+    return;
+  }
+  if (!_isValidPluginIdentifier(value)) {
+    throwToolExit(
+      'The plugin "$pluginName" declares an invalid "$fieldName" ("$value") in its '
+      'pubspec.yaml. It must be a valid identifier, optionally with '
+      'dot-separated segments.',
+    );
+  }
+}
+
 /// Matches a safe relative Dart source path (e.g. `src/foo_web.dart`) ending in
 /// `.dart`. Plugin `fileName`/`dartFileName` values are interpolated into an
 /// `import` in the generated registrant, so they must not contain quotes,

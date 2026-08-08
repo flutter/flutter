@@ -217,8 +217,14 @@ class Plugin {
   }) {
     final platforms = <String, PluginPlatform>{};
     final pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
+    // The legacy plugin format builds AndroidPlugin/IOSPlugin through their
+    // plain constructors rather than `fromYaml`, so it does not reach the
+    // identifier validation performed there. Validate the raw values here too,
+    // since they are interpolated verbatim into the generated registrant.
+    validatePluginIdentifier(name, kPluginClass, pluginClass);
     if (pluginClass != null) {
       final androidPackage = pluginYaml['androidPackage'] as String?;
+      validatePluginIdentifier(name, 'androidPackage', androidPackage);
       if (androidPackage != null) {
         platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
           name: name,
@@ -230,6 +236,7 @@ class Plugin {
       }
 
       final String iosPrefix = pluginYaml['iosPrefix'] as String? ?? '';
+      validatePluginIdentifier(name, 'iosPrefix', iosPrefix);
       platforms[IOSPlugin.kConfigKey] = IOSPlugin(
         name: name,
         classPrefix: iosPrefix,
