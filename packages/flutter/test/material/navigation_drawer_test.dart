@@ -591,6 +591,59 @@ void main() {
       expect(inkMaterialRect.bottom, equals(footerRect.top));
     },
   );
+
+  testWidgets('Indicator repaints when selectedIndex changes without pointer interaction', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/180359.
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+    var selectedIndex = 0;
+    late StateSetter setSelectedIndex;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setSelectedIndex = setState;
+            return Scaffold(
+              key: scaffoldKey,
+              drawer: NavigationDrawer(
+                selectedIndex: selectedIndex,
+                children: const <Widget>[
+                  NavigationDrawerDestination(icon: Icon(Icons.ac_unit), label: Text('AC')),
+                  NavigationDrawerDestination(icon: Icon(Icons.access_alarm), label: Text('Alarm')),
+                ],
+              ),
+              body: Container(),
+            );
+          },
+        ),
+      ),
+    );
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    // The indicator is painted by an Ink widget, which paints on the nearest
+    // ancestor Material rather than on its own render object.
+    final Finder indicatorInk = find
+        .descendant(of: find.byType(NavigationIndicator).first, matching: find.byType(Ink))
+        .first;
+    final inkController = Material.of(tester.element(indicatorInk)) as RenderBox;
+
+    // Change the selected index without any pointer interaction and advance
+    // one frame, stopping before the paint phase: the Material that hosts the
+    // indicator's ink must have been marked as needing paint, otherwise it
+    // keeps showing the indicator's previous frame.
+    setSelectedIndex(() {
+      selectedIndex = 1;
+    });
+    await tester.pump(null, EnginePhase.layout);
+    expect(inkController.debugNeedsPaint, isTrue);
+
+    // Let the indicator animation run to completion normally.
+    await tester.pumpAndSettle();
+  });
 }
 
 Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, {bool? useMaterial3}) {
