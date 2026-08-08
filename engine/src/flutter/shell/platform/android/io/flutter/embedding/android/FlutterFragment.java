@@ -98,7 +98,11 @@ import java.util.List;
  * <p>If Flutter is needed in a location that can only use a {@code View}, consider using a {@link
  * io.flutter.embedding.android.FlutterView}. Using a {@link
  * io.flutter.embedding.android.FlutterView} requires forwarding some calls from an {@code
- * Activity}, as well as forwarding lifecycle calls from an {@code Activity} or a {@code Fragment}.
+ * Activity}, as well as forwarding lifecycle calls from an {@code Activity} or a {@code Fragment}
+ * to the {@link io.flutter.embedding.engine.systemchannels.LifecycleChannel} of the {@link
+ * io.flutter.embedding.engine.FlutterEngine}. Without these lifecycle notifications, Flutter's
+ * internal state will not match the host application's state, resulting in issues such as rendering
+ * being paused when the app should be active.
  */
 public class FlutterFragment extends Fragment
     implements FlutterActivityAndFragmentDelegate.Host,
