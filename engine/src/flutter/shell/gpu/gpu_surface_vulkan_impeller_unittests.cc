@@ -110,5 +110,29 @@ TEST(GPUSurfaceVulkanImpeller, RecreatesTransientsWhenFrameSizeChanges) {
   EXPECT_EQ(surface->transients_size_, impeller::ISize(200, 100));
 }
 
+TEST(GPUSurfaceVulkanImpeller, TeardownAfterDeviceLossAbandonsResources) {
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback = vkGetInstanceProcAddr;
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  auto context = impeller::ContextVK::Create(std::move(context_settings));
+
+  TestGPUSurfaceVulkanDelegate delegate;
+
+  std::unique_ptr<Surface> surface =
+      std::make_unique<GPUSurfaceVulkanImpeller>(&delegate, context);
+
+  // Populate the image view cache and exercise the fence ring with a frame.
+  auto frame = surface->AcquireFrame(DlISize(100, 100));
+  ASSERT_NE(frame, nullptr);
+  frame.reset();
+
+  // Teardown after a device loss must not wait on the frame fences or
+  // destroy the cached image views; on a corrupted driver either can fault
+  // inside the ICD. The surface abandons the handles and must come down
+  // cleanly.
+  context->MarkDeviceLost();
+  surface.reset();
+}
+
 }  // namespace testing
 }  // namespace flutter
