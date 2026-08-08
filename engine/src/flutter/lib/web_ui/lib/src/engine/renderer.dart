@@ -171,6 +171,9 @@ abstract class Renderer {
     required ui.ImageFilter inner,
   });
 
+  BackendColorFilter createColorFilter(EngineColorFilter filter);
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter);
+
   bool get isMultiThreaded;
 
   /// Whether this renderer natively supports resizing/scaling animated images during decoding.

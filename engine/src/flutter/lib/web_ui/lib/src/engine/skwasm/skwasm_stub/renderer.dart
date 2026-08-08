@@ -24,6 +24,16 @@ class SkwasmRenderer extends Renderer {
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
+  BackendColorFilter createColorFilter(EngineColorFilter filter) {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter) {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
   ui.ImageFilter composeImageFilters({
     required ui.ImageFilter outer,
     required ui.ImageFilter inner,
