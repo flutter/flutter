@@ -496,6 +496,7 @@ class DataTable extends StatelessWidget {
     this.checkboxHorizontalMargin,
     this.border,
     this.clipBehavior = Clip.none,
+    this.sortIconBuilder,
   }) : assert(columns.isNotEmpty),
        assert(
          sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length),
@@ -549,6 +550,15 @@ class DataTable extends StatelessWidget {
   ///
   /// Ascending order is represented by an upwards-facing arrow.
   final bool sortAscending;
+
+  /// {@template flutter.material.dataTable.sortIconBuilder}
+  /// A builder function that returns a widget to use as the sorting indicator
+  /// icon for the table's header cells.
+  ///
+  /// If null, [DataTableThemeData.sortIconBuilder] is used. If that is also null,
+  /// the default Material design sort arrow animation is used.
+  /// {@endtemplate}
+  final DataTableSortIconBuilder? sortIconBuilder;
 
   /// Invoked when the user selects or unselects every row, using the
   /// checkbox in the heading row.
@@ -891,6 +901,11 @@ class DataTable extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
+    final DataTableSortIconBuilder? effectiveSortIconBuilder =
+        sortIconBuilder ??
+        dataTableTheme.sortIconBuilder ??
+        themeData.dataTableTheme.sortIconBuilder;
+
     label = Semantics(
       role: SemanticsRole.columnHeader,
       child: Row(
@@ -901,11 +916,14 @@ class DataTable extends StatelessWidget {
             const SizedBox(width: _SortArrowState._arrowIconSize + _sortArrowPadding),
           label,
           if (onSort != null) ...<Widget>[
-            _SortArrow(
-              visible: sorted,
-              up: sorted ? ascending : null,
-              duration: _sortArrowAnimationDuration,
-            ),
+            if (effectiveSortIconBuilder != null)
+              effectiveSortIconBuilder(context, sorted, ascending)
+            else
+              _SortArrow(
+                visible: sorted,
+                up: sorted ? ascending : null,
+                duration: _sortArrowAnimationDuration,
+              ),
             const SizedBox(width: _sortArrowPadding),
           ],
         ],
