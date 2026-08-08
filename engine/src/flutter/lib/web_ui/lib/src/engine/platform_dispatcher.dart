@@ -368,6 +368,36 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     invoke1<List<ui.FrameTiming>>(_onReportTimings, _onReportTimingsZone, timings);
   }
 
+  /// A callback invoked when a new frame is available for a texture.
+  @override
+  ui.TextureFrameAvailableCallback? get onTextureFrameAvailable => _onTextureFrameAvailable;
+  ui.TextureFrameAvailableCallback? _onTextureFrameAvailable;
+  Zone _onTextureFrameAvailableZone = Zone.root;
+  @override
+  set onTextureFrameAvailable(ui.TextureFrameAvailableCallback? callback) {
+    _onTextureFrameAvailable = callback;
+    _onTextureFrameAvailableZone = Zone.current;
+  }
+
+  void invokeOnTextureFrameAvailable(int textureId) {
+    invoke1<int>(_onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
+  }
+
+  /// A callback that is invoked when the application should re-render.
+  @override
+  ui.MarkAllViewsNeedRenderCallback? get onMarkAllViewsNeedRender => _onMarkAllViewsNeedRender;
+  ui.MarkAllViewsNeedRenderCallback? _onMarkAllViewsNeedRender;
+  Zone _onMarkAllViewsNeedRenderZone = Zone.root;
+  @override
+  set onMarkAllViewsNeedRender(ui.MarkAllViewsNeedRenderCallback? callback) {
+    _onMarkAllViewsNeedRender = callback;
+    _onMarkAllViewsNeedRenderZone = Zone.current;
+  }
+
+  void markAllViewsNeedRender() {
+    invoke(onMarkAllViewsNeedRender, _onMarkAllViewsNeedRenderZone);
+  }
+
   @override
   void sendPlatformMessage(
     String name,
