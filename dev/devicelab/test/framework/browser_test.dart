@@ -45,4 +45,49 @@ void main() {
       expect(anotherUnrelated.isEndMeasuredFrame, isFalse);
     });
   });
+
+  test('BlinkTraceSummary falls back to duration when thread duration is absent', () {
+    final Map<String, dynamic> beginMeasuredFrame = _event(beginMeasuredFrameJson_89plus, ts: 100);
+    final Map<String, dynamic> beginFrame = _event(
+      beginMainFrameJson_89plus,
+      ts: 110,
+      duration: 6000,
+      removeThreadDuration: true,
+    );
+    final Map<String, dynamic> endMeasuredFrame = _event(endMeasuredFrameJson_89plus, ts: 120);
+    final Map<String, dynamic> updateLifecycle = _event(
+      updateLifecycleJson_89plus,
+      ts: 130,
+      duration: 250,
+      removeThreadDuration: true,
+    );
+
+    final BlinkTraceSummary? summary = BlinkTraceSummary.fromJson(<Map<String, dynamic>>[
+      beginMeasuredFrame,
+      beginFrame,
+      endMeasuredFrame,
+      updateLifecycle,
+    ]);
+
+    expect(summary!.averageBeginFrameTime, const Duration(microseconds: 6000));
+    expect(summary.averageUpdateLifecyclePhasesTime, const Duration(microseconds: 250));
+    expect(summary.averageTotalUIFrameTime, const Duration(microseconds: 6250));
+  });
+}
+
+Map<String, dynamic> _event(
+  Map<String, Object?> event, {
+  required int ts,
+  int? duration,
+  bool removeThreadDuration = false,
+}) {
+  final result = Map<String, dynamic>.from(event);
+  result['ts'] = ts;
+  if (duration != null) {
+    result['dur'] = duration;
+  }
+  if (removeThreadDuration) {
+    result.remove('tdur');
+  }
+  return result;
 }
