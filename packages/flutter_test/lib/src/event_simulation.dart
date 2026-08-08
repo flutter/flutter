@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 
 import 'binding.dart';
 import 'test_async_utils.dart';
-import 'widget_tester.dart';
+import 'test_variant.dart';
 
 // A tuple of `key` and `location` from Web's `KeyboardEvent` class.
 //

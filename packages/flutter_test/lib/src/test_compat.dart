@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/foundation.dart';
 /// @docImport 'package:test_api/backend.dart';
 /// @docImport 'package:test_api/scaffolding.dart';
+///
+/// @docImport 'widget_tester.dart';
 library;
 
 import 'dart:async';
@@ -22,6 +25,8 @@ import 'package:test_api/src/backend/state.dart'; // ignore: implementation_impo
 import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
+
+import 'test_variant.dart';
 
 export 'package:test_api/fake.dart' show Fake;
 
@@ -171,6 +176,33 @@ Future<void> _runSkippedTest(
 ///
 /// If multiple platforms match, the annotations apply in order as through
 /// they were in nested groups.
+///
+/// When [variant] is set, the test is registered once for each value of
+/// [TestVariant.values], and the value's description is appended to the
+/// description of each of the resulting tests. [TestVariant.setUp] runs before
+/// the [body] and [TestVariant.tearDown] runs after it, even if the [body]
+/// throws. If [variant] is not set, the test is registered once using the base
+/// test environment.
+///
+/// {@tool snippet}
+/// This example runs the same test once for each [TargetPlatform], with
+/// [debugDefaultTargetPlatformOverride] set to the platform under test. The
+/// resulting tests are named `defaultTargetPlatform is overridden (variant:
+/// TargetPlatform.android)`, and so on for each platform.
+///
+/// ```dart
+/// void main() {
+///   test('defaultTargetPlatform is overridden', () {
+///     expect(defaultTargetPlatform, debugDefaultTargetPlatformOverride);
+///   }, variant: TargetPlatformVariant.all());
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [testWidgets], which accepts the same [variant] argument for tests that
+///    need a [WidgetTester].
 @isTest
 void test(
   Object description,
@@ -181,18 +213,57 @@ void test(
   dynamic tags,
   Map<String, dynamic>? onPlatform,
   int? retry,
+  TestVariant<Object?> variant = const DefaultTestVariant(),
 }) {
-  _maybeConfigureTearDownForTestFile();
-  _declarer.test(
-    description.toString(),
-    body,
-    testOn: testOn,
-    timeout: timeout,
-    skip: skip,
-    onPlatform: onPlatform,
-    tags: tags,
-    retry: retry,
+  assert(
+    variant.values.isNotEmpty,
+    'There must be at least one value to test in the testing variant.',
   );
+  _maybeConfigureTearDownForTestFile();
+  if (variant.runtimeType == DefaultTestVariant) {
+    // The default variant makes no changes to the test environment, so the body
+    // is registered as-is. This keeps the many tests that don't use variants
+    // from paying for an extra layer of asynchrony around their bodies.
+    _declarer.test(
+      description.toString(),
+      body,
+      testOn: testOn,
+      timeout: timeout,
+      skip: skip,
+      onPlatform: onPlatform,
+      tags: tags,
+      retry: retry,
+    );
+    return;
+  }
+  for (final Object? value in variant.values) {
+    final String variationDescription = variant.describeValue(value);
+    // IDEs may make assumptions about the format of this suffix in order to
+    // support running tests directly from the editor (where they may have
+    // access to only the test name, provided by the analysis server).
+    // See https://github.com/flutter/flutter/issues/86659.
+    final combinedDescription = variationDescription.isNotEmpty
+        ? '$description (variant: $variationDescription)'
+        : description.toString();
+    _declarer.test(
+      combinedDescription,
+      () async {
+        Object? memento;
+        try {
+          memento = await variant.setUp(value);
+          await body();
+        } finally {
+          await variant.tearDown(value, memento);
+        }
+      },
+      testOn: testOn,
+      timeout: timeout,
+      skip: skip,
+      onPlatform: onPlatform,
+      tags: tags,
+      retry: retry,
+    );
+  }
 }
 
 /// Creates a group of tests.
