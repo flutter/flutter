@@ -5,8 +5,11 @@
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
@@ -234,7 +237,12 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await ChannelCommand.upgradeChannel(flutterVersion);
+    await ChannelCommand.upgradeChannel(
+      flutterVersion,
+      logger: globals.logger,
+      git: globals.git,
+      cache: globals.cache,
+    );
     globals.printStatus(
       'Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...',
     );
@@ -281,7 +289,7 @@ class UpgradeCommandRunner {
     // Make sure the welcome message re-display is delayed until the end.
     final PersistentToolState persistentToolState = globals.persistentToolState!;
     persistentToolState.setShouldRedisplayWelcomeMessage(false);
-    await precacheArtifacts(workingDirectory);
+    await precacheArtifacts(workingDirectory: workingDirectory);
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
@@ -458,18 +466,23 @@ class UpgradeCommandRunner {
   }
 }
 
-/// Update the engine repository and precache all artifacts.
-///
-/// Check for and download any engine and pkg/ updates. We run the 'flutter'
-/// shell script reentrantly here so that it will download the updated
-/// Dart and so forth if necessary.
-Future<void> precacheArtifacts([String? workingDirectory]) async {
-  globals.printStatus('');
-  globals.printStatus('Upgrading engine...');
-  final int code = await globals.processUtils.stream(
-    [globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache'],
+Future<void> precacheArtifacts({
+  String? workingDirectory,
+  Logger? logger,
+  ProcessUtils? processUtils,
+  FileSystem? fileSystem,
+  Platform? platform,
+}) async {
+  final Logger lgr = logger ?? globals.logger;
+  final ProcessUtils procUtils = processUtils ?? globals.processUtils;
+  final FileSystem fs = fileSystem ?? globals.fs;
+  final Platform plt = platform ?? globals.platform;
+  lgr.printStatus('');
+  lgr.printStatus('Upgrading engine...');
+  final int code = await procUtils.stream(
+    <String>[fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache'],
     allowReentrantFlutter: true,
-    environment: Map<String, String>.of(globals.platform.environment),
+    environment: Map<String, String>.of(plt.environment),
     workingDirectory: workingDirectory,
   );
   if (code != 0) {
