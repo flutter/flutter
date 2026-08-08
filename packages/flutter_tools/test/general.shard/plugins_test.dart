@@ -513,6 +513,93 @@ dependencies:
         },
       );
 
+      // The modern `platforms:` plugin format is validated in each platform's
+      // `fromYaml`, but the legacy format is parsed by `Plugin._fromLegacyYaml`,
+      // which builds AndroidPlugin/IOSPlugin through their plain constructors and
+      // so bypasses that validation. These fields are still interpolated verbatim
+      // into the generated registrant, so the legacy format must reject them too.
+      testUsingContext(
+        'rejects a legacy-format plugin with an unsafe pluginClass',
+        () async {
+          final Directory pluginDirectory = fs.systemTempDirectory.createTempSync(
+            'flutter_plugin_legacy_injection.',
+          );
+          pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+name: evil_plugin
+flutter:
+  plugin:
+    androidPackage: com.example.evil
+    pluginClass: "Evil(); some.malicious.Payload.run(); //"
+''');
+          addToPackageConfig('evil_plugin', pluginDirectory);
+
+          await expectLater(
+            () => findPlugins(flutterProject),
+            throwsToolExit(message: 'invalid "pluginClass"'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
+        'rejects a legacy-format plugin with an unsafe androidPackage',
+        () async {
+          final Directory pluginDirectory = fs.systemTempDirectory.createTempSync(
+            'flutter_plugin_legacy_injection.',
+          );
+          pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+name: evil_plugin
+flutter:
+  plugin:
+    androidPackage: "com.example.evil.Payload.run(); //"
+    pluginClass: EvilPlugin
+''');
+          addToPackageConfig('evil_plugin', pluginDirectory);
+
+          await expectLater(
+            () => findPlugins(flutterProject),
+            throwsToolExit(message: 'invalid "androidPackage"'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
+        'rejects a legacy-format plugin with an unsafe iosPrefix',
+        () async {
+          final Directory pluginDirectory = fs.systemTempDirectory.createTempSync(
+            'flutter_plugin_legacy_injection.',
+          );
+          pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+name: evil_plugin
+flutter:
+  plugin:
+    androidPackage: com.example.evil
+    pluginClass: EvilPlugin
+    iosPrefix: "FLT; some.malicious.Payload.run(); //"
+''');
+          addToPackageConfig('evil_plugin', pluginDirectory);
+
+          await expectLater(
+            () => findPlugins(flutterProject),
+            throwsToolExit(message: 'invalid "iosPrefix"'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: ThrowingPub.new,
+        },
+      );
+
       testUsingContext(
         'Refreshing the plugin list updates .flutter-plugins-dependencies if the plugins changed',
         () async {
