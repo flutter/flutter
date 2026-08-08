@@ -34,16 +34,19 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
 
   bool SetLayout(const BarrierVK& barrier) const;
 
-  vk::ImageLayout SetLayoutWithoutEncoding(vk::ImageLayout layout) const;
+  vk::ImageLayout SetLayoutWithoutEncoding(vk::ImageLayout layout,
+                                           uint32_t base_mip_level = 0u,
+                                           uint32_t level_count = 0u,
+                                           uint32_t base_array_layer = 0u,
+                                           uint32_t layer_count = 0u) const;
 
-  vk::ImageLayout GetLayout() const;
+  vk::ImageLayout GetLayout(uint32_t mip_level = 0u,
+                            uint32_t array_layer = 0u) const;
 
   std::shared_ptr<const TextureSourceVK> GetTextureSource() const;
 
   // |Texture|
   ISize GetSize() const override;
-
-  void SetMipMapGenerated();
 
   bool IsSwapchainImage() const;
 

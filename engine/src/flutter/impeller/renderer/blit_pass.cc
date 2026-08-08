@@ -28,13 +28,21 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
                        std::shared_ptr<Texture> destination,
                        std::optional<IRect> source_region,
                        IPoint destination_origin,
-                       std::string_view label) {
+                       std::string_view label,
+                       uint32_t destination_mip_level) {
   if (!source) {
     VALIDATION_LOG << "Attempted to add a texture blit with no source.";
     return false;
   }
   if (!destination) {
     VALIDATION_LOG << "Attempted to add a texture blit with no destination.";
+    return false;
+  }
+  if (destination_mip_level >= destination->GetTextureDescriptor().mip_count) {
+    VALIDATION_LOG << std::format(
+        "The destination mip level ({}) must be less than the destination mip "
+        "count ({}) for blits.",
+        destination_mip_level, destination->GetTextureDescriptor().mip_count);
     return false;
   }
 
@@ -71,14 +79,15 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
 
   return OnCopyTextureToTextureCommand(
       std::move(source), std::move(destination), source_region.value(),
-      destination_origin, label);
+      destination_origin, label, destination_mip_level);
 }
 
 bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
                        std::shared_ptr<DeviceBuffer> destination,
                        std::optional<IRect> source_region,
                        size_t destination_offset,
-                       std::string_view label) {
+                       std::string_view label,
+                       uint32_t source_mip_level) {
   if (!source) {
     VALIDATION_LOG << "Attempted to add a texture blit with no source.";
     return false;
@@ -111,7 +120,7 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
 
   return OnCopyTextureToBufferCommand(std::move(source), std::move(destination),
                                       source_region.value(), destination_offset,
-                                      label);
+                                      label, source_mip_level);
 }
 
 bool BlitPass::AddCopy(BufferView source,

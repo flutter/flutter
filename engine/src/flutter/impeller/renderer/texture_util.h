@@ -18,12 +18,6 @@ std::shared_ptr<Texture> CreateTexture(
     const std::shared_ptr<impeller::Context>& context,
     std::string_view debug_label);
 
-/// Adds a blit command to the render pass.
-[[nodiscard]] fml::Status AddMipmapGeneration(
-    const std::shared_ptr<CommandBuffer>& command_buffer,
-    const std::shared_ptr<Context>& context,
-    const std::shared_ptr<Texture>& texture);
-
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_RENDERER_TEXTURE_UTIL_H_

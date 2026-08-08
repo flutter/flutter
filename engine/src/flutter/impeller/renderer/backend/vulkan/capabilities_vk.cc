@@ -558,6 +558,10 @@ bool CapabilitiesVK::SupportsManuallyMippedTextures() const {
   return true;
 }
 
+bool CapabilitiesVK::SupportsBlitMipmapGeneration() const {
+  return has_blit_mipmap_generation_;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }
@@ -902,6 +906,7 @@ uint32_t CapabilitiesVK::GetMaxSamplerAnisotropy() const {
 void CapabilitiesVK::ApplyWorkarounds(const WorkaroundsVK& workarounds) {
   has_primitive_restart_ = !workarounds.slow_primitive_restart_performance;
   has_framebuffer_fetch_ = !workarounds.input_attachment_self_dependency_broken;
+  has_blit_mipmap_generation_ = !workarounds.broken_mipmap_generation;
 }
 
 bool CapabilitiesVK::SupportsExternalSemaphoreExtensions() const {

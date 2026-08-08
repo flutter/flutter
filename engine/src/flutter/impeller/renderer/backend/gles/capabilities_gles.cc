@@ -341,6 +341,12 @@ bool CapabilitiesGLES::SupportsManuallyMippedTextures() const {
   return supports_texture_max_level_;
 }
 
+bool CapabilitiesGLES::SupportsBlitMipmapGeneration() const {
+  // The blit pass generates mipmaps with glGenerateMipmap, a driver path
+  // separate from the broken Vulkan blit chains.
+  return true;
+}
+
 bool CapabilitiesGLES::SupportsExtendedRangeFormats() const {
   return false;
 }

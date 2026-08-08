@@ -152,6 +152,30 @@ TEST(DriverInfoVKTest, CanGenerateMipMaps) {
   EXPECT_TRUE(CanUseMipgeneration("Mali-G51", false));
 }
 
+TEST(DriverInfoVKTest, BrokenMipGenerationTurnsOffBlitMipmapCapability) {
+  auto make_context = [](std::string_view driver_name, bool qc) {
+    return MockVulkanContextBuilder()
+        .SetPhysicalPropertiesCallback(
+            [&driver_name, qc](VkPhysicalDevice device,
+                               VkPhysicalDeviceProperties* prop) {
+              if (qc) {
+                prop->vendorID = 0x168C;  // Qualcomm
+              } else {
+                prop->vendorID = 0x13B5;  // ARM
+              }
+              driver_name.copy(prop->deviceName, driver_name.size());
+              prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+            })
+        .Build();
+  };
+  EXPECT_FALSE(make_context("Adreno (TM) 630", true)
+                   ->GetCapabilities()
+                   ->SupportsBlitMipmapGeneration());
+  EXPECT_TRUE(make_context("Mali-G51", false)
+                  ->GetCapabilities()
+                  ->SupportsBlitMipmapGeneration());
+}
+
 TEST(DriverInfoVKTest, DriverParsingMali) {
   EXPECT_EQ(GetMaliVersion("Mali-G51-MORE STUFF"), MaliGPU::kG51);
   EXPECT_EQ(GetMaliVersion("Mali-G51"), MaliGPU::kG51);

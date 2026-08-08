@@ -100,6 +100,12 @@ class Capabilities {
   ///        bounded to the levels the texture declares.
   virtual bool SupportsManuallyMippedTextures() const = 0;
 
+  /// @brief Whether `BlitPass::GenerateMipmap` produces a correct mip chain
+  ///        on this device. False where the driver's blit-based generation
+  ///        corrupts the generated levels, in which case the mip chain must
+  ///        be rendered instead (see `AddMipmapGeneration`).
+  virtual bool SupportsBlitMipmapGeneration() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;

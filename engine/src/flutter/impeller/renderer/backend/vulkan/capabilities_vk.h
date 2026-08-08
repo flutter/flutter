@@ -276,6 +276,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsManuallyMippedTextures() const override;
 
   // |Capabilities|
+  bool SupportsBlitMipmapGeneration() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|
@@ -363,6 +366,7 @@ class CapabilitiesVK final : public Capabilities,
   bool has_triangle_fans_ = true;
   bool has_primitive_restart_ = true;
   bool has_framebuffer_fetch_ = true;
+  bool has_blit_mipmap_generation_ = true;
   bool supports_external_fence_and_semaphore_ = false;
   bool supports_texture_compression_bc_ = false;
   bool supports_texture_compression_etc2_ = false;

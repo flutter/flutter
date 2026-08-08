@@ -17,9 +17,12 @@
 #include "flutter/impeller/renderer/context.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/host_buffer.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/skia_conversions.h"
+#include "impeller/entity/mipmap_generator.h"
 #include "impeller/geometry/size.h"
+#include "impeller/renderer/render_target.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -499,9 +502,6 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
   blit_pass->SetLabel("Mipmap Blit Pass");
   blit_pass->AddCopy(impeller::DeviceBuffer::AsBufferView(buffer),
                      dest_texture);
-  if (texture_descriptor.mip_count > 1) {
-    blit_pass->GenerateMipmap(dest_texture);
-  }
 
   std::shared_ptr<impeller::Texture> result_texture = dest_texture;
   if (resize_info.has_value()) {
@@ -526,13 +526,41 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
 
     blit_pass->ResizeTexture(/*source=*/dest_texture,
                              /*destination=*/resize_texture);
-    if (resize_desc.mip_count > 1) {
-      blit_pass->GenerateMipmap(resize_texture);
-    }
 
     result_texture = std::move(resize_texture);
   }
   blit_pass->EncodeCommands();
+
+  // Mipmap generation happens after the upload pass. Resizes read only the
+  // source base level, so generation order does not affect them.
+  {
+    impeller::RenderTargetAllocator render_target_allocator(
+        context->GetResourceAllocator());
+    std::shared_ptr<impeller::HostBuffer> data_host_buffer;
+    auto generate_mips =
+        [&](const std::shared_ptr<impeller::Texture>& texture) -> bool {
+      if (texture->GetTextureDescriptor().mip_count <= 1u) {
+        return true;
+      }
+      if (!data_host_buffer) {
+        data_host_buffer = impeller::HostBuffer::Create(
+            context->GetResourceAllocator(), context->GetIdleWaiter(),
+            context->GetCapabilities()->GetMinimumUniformAlignment(),
+            context->GetSubmissionTracker());
+      }
+      return impeller::AddMipmapGeneration(command_buffer, context, texture,
+                                           render_target_allocator,
+                                           *data_host_buffer)
+          .ok();
+    };
+    if (!generate_mips(dest_texture) ||
+        (result_texture != dest_texture && !generate_mips(result_texture))) {
+      std::string decode_error("Could not generate mipmaps.");
+      FML_DLOG(ERROR) << decode_error;
+      return std::make_pair(nullptr, decode_error);
+    }
+  }
+
   if (!context->GetCommandQueue()
            ->Submit(
                {command_buffer},

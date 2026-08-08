@@ -142,6 +142,9 @@ class CapabilitiesGLES final
   bool SupportsManuallyMippedTextures() const override;
 
   // |Capabilities|
+  bool SupportsBlitMipmapGeneration() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|

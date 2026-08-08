@@ -70,7 +70,8 @@ bool BlitPassMTL::OnCopyTextureToTextureCommand(
     std::shared_ptr<Texture> destination,
     IRect source_region,
     IPoint destination_origin,
-    std::string_view label) {
+    std::string_view label,
+    uint32_t destination_mip_level) {
   auto source_mtl = TextureMTL::Cast(*source).GetMTLTexture();
   if (!source_mtl) {
     return false;
@@ -100,7 +101,7 @@ bool BlitPassMTL::OnCopyTextureToTextureCommand(
                  sourceSize:source_size_mtl
                   toTexture:destination_mtl
            destinationSlice:0
-           destinationLevel:0
+           destinationLevel:destination_mip_level
           destinationOrigin:destination_origin_mtl];
 
 #ifdef IMPELLER_DEBUG
@@ -139,7 +140,8 @@ bool BlitPassMTL::OnCopyTextureToBufferCommand(
     std::shared_ptr<DeviceBuffer> destination,
     IRect source_region,
     size_t destination_offset,
-    std::string_view label) {
+    std::string_view label,
+    uint32_t source_mip_level) {
   auto source_mtl = TextureMTL::Cast(*source).GetMTLTexture();
   if (!source_mtl) {
     return false;
@@ -169,7 +171,7 @@ bool BlitPassMTL::OnCopyTextureToBufferCommand(
 #endif  // IMPELLER_DEBUG
   [encoder_ copyFromTexture:source_mtl
                    sourceSlice:0
-                   sourceLevel:0
+                   sourceLevel:source_mip_level
                   sourceOrigin:source_origin_mtl
                     sourceSize:source_size_mtl
                       toBuffer:destination_mtl

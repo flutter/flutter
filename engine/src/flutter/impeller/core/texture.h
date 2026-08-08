@@ -60,6 +60,10 @@ class Texture {
   /// `array_layer_count` for 2D array textures).
   bool IsSliceValid(size_t slice) const;
 
+  /// Marks the mip chain contents valid. Called by whatever populates the
+  /// chain, either blit-based generation or the render-pass generator.
+  void SetMipmapGenerated();
+
  protected:
   explicit Texture(TextureDescriptor desc);
 

@@ -106,17 +106,29 @@ class TextureSourceVK {
   ///
   /// @return     The old layout.
   ///
-  vk::ImageLayout SetLayoutWithoutEncoding(vk::ImageLayout layout) const;
+  ///             By default the whole image is updated. Pass a subresource
+  ///             range (a `level_count`/`layer_count` of 0 means "to the end")
+  ///             to update only part of it; mip levels and array layers can
+  ///             hold different layouts.
+  ///
+  vk::ImageLayout SetLayoutWithoutEncoding(vk::ImageLayout layout,
+                                           uint32_t base_mip_level = 0u,
+                                           uint32_t level_count = 0u,
+                                           uint32_t base_array_layer = 0u,
+                                           uint32_t layer_count = 0u) const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Get the last layout assigned to the TextureSourceVK.
+  /// @brief      Get the last layout assigned to a subresource of the
+  ///             TextureSourceVK.
   ///
   ///             This value is synchronized with the GPU via SetLayout so it
-  ///             may not reflect the actual layout.
+  ///             may not reflect the actual layout. Layouts are tracked per
+  ///             (mip level, array layer) subresource.
   ///
-  /// @return     The last known layout of the texture source.
+  /// @return     The last known layout of the subresource.
   ///
-  vk::ImageLayout GetLayout() const;
+  vk::ImageLayout GetLayout(uint32_t mip_level = 0u,
+                            uint32_t array_layer = 0u) const;
 
   //----------------------------------------------------------------------------
   /// @brief      When sampling from textures whose formats are not known to
@@ -177,7 +189,13 @@ class TextureSourceVK {
   // are rendered to across many subresources (e.g. a fully populated cube
   // mip chain).
   std::vector<CachedFrameDataEntry> frame_data_;
-  mutable vk::ImageLayout layout_ = vk::ImageLayout::eUndefined;
+  // One layout per (mip level, array layer) subresource, row-major by mip
+  // (`mip * layer_count + layer`). Sized `mip_count * layer_count`; a plain
+  // 2D texture has a single entry.
+  mutable std::vector<vk::ImageLayout> layouts_;
+
+  // Number of array layers (6 for cube maps, 1 otherwise).
+  uint32_t LayerCount() const;
 };
 
 }  // namespace impeller
