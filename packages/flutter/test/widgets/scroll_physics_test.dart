@@ -30,6 +30,13 @@ class TestScrollPhysics extends ScrollPhysics {
 void main() {
   const kBlueColor = Color(0xFF0000FF);
 
+  test('ScrollPhysics.snapsToPages', () {
+    expect(const BouncingScrollPhysics().snapsToPages, isFalse);
+    expect(const PageScrollPhysics().snapsToPages, isTrue);
+    // Propagates through the parent chain so wrapped page physics still count.
+    expect(const ClampingScrollPhysics(parent: PageScrollPhysics()).snapsToPages, isTrue);
+  });
+
   test('ScrollPhysics applyTo()', () {
     const a = TestScrollPhysics(name: 'a');
     const b = TestScrollPhysics(name: 'b');

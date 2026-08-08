@@ -499,6 +499,13 @@ class ScrollPhysics {
   /// Whether a viewport is allowed to change the scroll position as the result of user input.
   bool get allowUserScrolling => true;
 
+  /// Whether this physics snaps to page boundaries, as [PageScrollPhysics] does.
+  ///
+  /// Selection edge auto-scrolling checks this to avoid scrolling a paged
+  /// scrollable (such as a [PageView] or [TabBarView]) while extending a
+  /// selection, which would flip pages instead of revealing more content.
+  bool get snapsToPages => parent?.snapsToPages ?? false;
+
   @override
   String toString() {
     if (parent == null) {

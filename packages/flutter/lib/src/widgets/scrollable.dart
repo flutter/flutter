@@ -1299,6 +1299,12 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       return result;
     }
     if (_selectionStartsInScrollable) {
+      // A paged scrollable (PageView or TabBarView) would flip pages instead of
+      // revealing more content, so never edge scroll it while selecting.
+      if (state.resolvedPhysics?.snapsToPages ?? false) {
+        _autoScroller.stopAutoScroll();
+        return result;
+      }
       _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
