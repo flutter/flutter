@@ -1,20 +1,33 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../android/java.dart';
 import '../base/common.dart';
+import '../base/config.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
+import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
 class ConfigCommand extends FlutterCommand {
-  ConfigCommand({bool verboseHelp = false}) {
+  ConfigCommand({
+    required AndroidContext androidContext,
+    required ToolContext toolContext,
+    FeatureFlags? featureFlags,
+    Analytics? analytics,
+    bool verboseHelp = false,
+  }) : _androidContext = androidContext,
+       _toolContext = toolContext,
+       _featureFlags = featureFlags,
+       _analytics = analytics,
+       super(toolContext: toolContext) {
     argParser.addFlag(
       'list',
       help: 'List all settings and their current values.',
@@ -62,12 +75,12 @@ class ConfigCommand extends FlutterCommand {
       valueHelp: 'out/',
     );
     addMachineOutputFlag(verboseHelp: verboseHelp);
-    for (final Feature feature in featureFlags.allFeatures) {
+    for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
       }
-      final String channel = globals.flutterVersion.channel;
+      final String channel = _toolContext.flutterVersion.channel;
       argParser.addFlag(
         configSetting,
         help: feature.generateHelpMessage(),
@@ -81,6 +94,16 @@ class ConfigCommand extends FlutterCommand {
     );
   }
 
+  final AndroidContext _androidContext;
+  final ToolContext _toolContext;
+  final FeatureFlags? _featureFlags;
+  final Analytics? _analytics;
+
+  FeatureFlags get _effectiveFeatureFlags =>
+      _featureFlags ?? const _DefaultFeatureFlags();
+
+  Analytics get _effectiveAnalytics => _analytics ?? const NoOpAnalytics();
+
   @override
   final name = 'config';
 
@@ -88,11 +111,13 @@ class ConfigCommand extends FlutterCommand {
   final description =
       'Configure Flutter settings.\n\n'
       'To remove a setting, configure it to an empty string.\n\n'
-      'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
-      "Flutter tools over time. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/";
+      'The Flutter tool logs metric data on some Flutter executions for internal usage analysis. '
+      'The data is anonymized before being sent to Google and no personal information is '
+      'collected. To prevent reporting of the data to Google, disable telemetry with '
+      '"flutter config --no-analytics".';
 
   @override
-  final String category = FlutterCommandCategory.sdk;
+  final category = FlutterCommandCategory.sdk;
 
   @override
   final aliases = <String>['configure'];
@@ -108,7 +133,16 @@ class ConfigCommand extends FlutterCommand {
   Future<String?> get usagePath async => null;
 
   @override
+  void printUsage() {
+    _toolContext.logger.printStatus(usage);
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
+    final Logger logger = _toolContext.logger;
+    final Config config = _toolContext.config;
+    final FileSystem fs = _toolContext.fs;
+
     final List<String> rest = argResults!.rest;
     if (rest.isNotEmpty) {
       throwToolExit(
@@ -122,7 +156,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (boolArg('list')) {
-      globals.printStatus(settingsText);
+      logger.printStatus(settingsText);
       return FlutterCommandResult.success();
     }
 
@@ -132,21 +166,21 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (boolArg('clear-features')) {
-      for (final Feature feature in featureFlags.allFeatures) {
+      for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
-          globals.config.removeValue(configSetting);
+          config.removeValue(configSetting);
         }
       }
-      globals.printStatus(requireReloadTipText);
+      logger.printStatus(requireReloadTipText);
       return FlutterCommandResult.success();
     }
 
     if (argResults!.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
-      globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
+      logger.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
 
-      await globals.analytics.setTelemetry(value);
+      await _effectiveAnalytics.setTelemetry(value);
     }
 
     if (argResults!.wasParsed('android-sdk')) {
@@ -162,19 +196,26 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults!.wasParsed('clear-ios-signing-settings')) {
-      XcodeCodeSigningSettings.resetSettings(globals.config, globals.logger);
+      XcodeCodeSigningSettings.resetSettings(config, logger);
     }
 
     if (argResults!.wasParsed('select-ios-signing-settings')) {
       final settings = XcodeCodeSigningSettings(
-        config: globals.config,
-        logger: globals.logger,
-        platform: globals.platform,
-        processUtils: globals.processUtils,
-        fileSystem: globals.fs,
-        fileSystemUtils: globals.fsUtils,
-        terminal: globals.terminal,
-        plistParser: globals.plistParser,
+        config: config,
+        logger: logger,
+        platform: _toolContext.platform,
+        processUtils: _toolContext.processUtils,
+        fileSystem: fs,
+        fileSystemUtils: FileSystemUtils(
+          fileSystem: fs,
+          platform: _toolContext.platform,
+        ),
+        terminal: _toolContext.terminal,
+        plistParser: PlistParser(
+          fileSystem: fs,
+          logger: logger,
+          processManager: _toolContext.processManager,
+        ),
       );
 
       await settings.selectSettings();
@@ -182,83 +223,88 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults!.wasParsed('build-dir')) {
       final String buildDir = stringArg('build-dir')!;
-      if (globals.fs.path.isAbsolute(buildDir)) {
+      if (fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
       }
       _updateConfig('build-dir', buildDir);
     }
 
-    for (final Feature feature in featureFlags.allFeatures) {
+    for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
       }
       if (argResults!.wasParsed(configSetting)) {
         final bool keyValue = boolArg(configSetting);
-        globals.config.setValue(configSetting, keyValue);
-        globals.printStatus('Setting "$configSetting" value to "$keyValue".');
+        config.setValue(configSetting, keyValue);
+        logger.printStatus('Setting "$configSetting" value to "$keyValue".');
       }
     }
 
     if (argResults == null || argResults!.arguments.isEmpty) {
-      globals.printStatus(usage);
+      logger.printStatus(usage);
     } else {
-      globals.printStatus('\n$requireReloadTipText');
+      logger.printStatus('\n$requireReloadTipText');
     }
 
     return FlutterCommandResult.success();
   }
 
   Future<void> handleMachine() async {
+    final Config config = _toolContext.config;
+    final Logger logger = _toolContext.logger;
     // Get all the current values.
     final results = <String, Object?>{};
-    for (final String key in globals.config.keys) {
-      results[key] = globals.config.getValue(key);
+    for (final String key in config.keys) {
+      results[key] = config.getValue(key);
     }
 
     // Ensure we send any calculated ones, if overrides don't exist.
-    final AndroidStudio? androidStudio = globals.androidStudio;
+    final AndroidStudio? androidStudio = _androidContext.androidStudio;
     if (results['android-studio-dir'] == null && androidStudio != null) {
       results['android-studio-dir'] = androidStudio.directory;
     }
-    final AndroidSdk? androidSdk = globals.androidSdk;
+    final AndroidSdk? androidSdk = _androidContext.androidSdk;
     if (results['android-sdk'] == null && androidSdk != null) {
       results['android-sdk'] = androidSdk.directory.path;
     }
-    final Java? java = globals.java;
+    final Java? java = _androidContext.java;
     if (results['jdk-dir'] == null && java != null) {
       results['jdk-dir'] = java.javaHome;
     }
 
-    globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));
+    logger.printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
   void _updateConfig(String keyName, String keyValue) {
+    final Config config = _toolContext.config;
+    final Logger logger = _toolContext.logger;
     if (keyValue.isEmpty) {
-      globals.config.removeValue(keyName);
-      globals.printStatus('Removing "$keyName" value.');
+      config.removeValue(keyName);
+      logger.printStatus('Removing "$keyName" value.');
     } else {
-      globals.config.setValue(keyName, keyValue);
-      globals.printStatus('Setting "$keyName" value to "$keyValue".');
+      config.setValue(keyName, keyValue);
+      logger.printStatus('Setting "$keyName" value to "$keyValue".');
     }
   }
 
   /// List all config settings. for feature flags, include whether they are available.
   String get settingsText {
+    final Config config = _toolContext.config;
     final featuresByName = <String, Feature>{};
-    final String channel = globals.flutterVersion.channel;
-    for (final Feature feature in featureFlags.allFeatures) {
+    final String channel = _toolContext.flutterVersion.channel;
+    for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting != null) {
         featuresByName[configSetting] = feature;
       }
     }
     final keys = <String>{
-      ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
-      ...globals.config.keys,
+      ..._effectiveFeatureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
+      ...config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {
-      Object? value = globals.config.getValue(key);
+      Object? value = config.getValue(key);
       value ??= '(Not set)';
       final buffer = StringBuffer('  $key: $value');
       if (featuresByName.containsKey(key)) {
@@ -281,10 +327,57 @@ class ConfigCommand extends FlutterCommand {
 
   /// List the status of the analytics reporting.
   String get analyticsUsage {
-    return 'Analytics reporting is currently ${globals.analytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
+    return 'Analytics reporting is currently ${_effectiveAnalytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Raising the reload tip for setting changes.
   final requireReloadTipText =
       'You may need to restart any open editors for them to read new settings.';
+}
+
+class _DefaultFeatureFlags extends FeatureFlags {
+  const _DefaultFeatureFlags();
+
+  @override
+  bool isEnabled(Feature feature) => false;
+  @override
+  bool get isLinuxEnabled => false;
+  @override
+  bool get isMacOSEnabled => false;
+  @override
+  bool get isWindowsEnabled => false;
+  @override
+  bool get isWebEnabled => false;
+  @override
+  bool get isAndroidEnabled => false;
+  @override
+  bool get isIOSEnabled => false;
+  @override
+  bool get isFuchsiaEnabled => false;
+  @override
+  bool get areCustomDevicesEnabled => false;
+  @override
+  bool get isCliAnimationEnabled => false;
+  @override
+  bool get isNativeAssetsEnabled => false;
+  @override
+  bool get isDartDataAssetsEnabled => false;
+  @override
+  bool get isRecordUseEnabled => false;
+  @override
+  bool get isSwiftPackageManagerEnabled => false;
+  @override
+  bool get isOmitLegacyVersionFileEnabled => false;
+  @override
+  bool get isWindowingEnabled => false;
+  @override
+  bool get isAccessibilityEvaluationsEnabled => false;
+  @override
+  bool get isLLDBDebuggingEnabled => false;
+  @override
+  bool get isUISceneMigrationEnabled => false;
+  @override
+  bool get isRiscv64SupportEnabled => false;
+  @override
+  bool get isMacOSArm64OnlyEnabled => false;
 }
