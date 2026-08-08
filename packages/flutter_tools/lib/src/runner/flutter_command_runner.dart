@@ -467,10 +467,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         topLevelResults.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ||
         topLevelResults.wasParsed(FlutterGlobalOptions.kPackagesOption);
     if (hasLocalEngineOption) {
-      final LocalEngineLocator? engineLocator =
-          localToolContext != null
-              ? localToolContext.localEngineLocator
-              : globals.localEngineLocator;
+      final LocalEngineLocator? engineLocator = localToolContext != null
+          ? localToolContext.localEngineLocator
+          : globals.localEngineLocator;
       final EngineBuildPaths? engineBuildPaths = await engineLocator?.findEnginePath(
         engineSourcePath:
             topLevelResults[FlutterGlobalOptions.kLocalEngineSrcPathOption] as String?,
@@ -536,7 +535,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
         // See if the user specified a specific device.
         final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
-          globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
+          try {
+            globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
+          } on UnsupportedError {
+            // globals.deviceManager is not available in testWithoutContext.
+          }
         }
 
         final bool topLevelMachineFlag =
