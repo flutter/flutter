@@ -4,9 +4,23 @@
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createEndToEndKeyboardTextfieldTest());
+  await task(() async {
+    String? simulatorDeviceId;
+    var res = TaskResult.success(null);
+    try {
+      await testWithNewIOSSimulator('integration_ui_ios_textfield', (String deviceId) async {
+        simulatorDeviceId = deviceId;
+        res = await createEndToEndKeyboardTextfieldTest(deviceIdOverride: deviceId).call();
+      });
+    } finally {
+      await removeIOSSimulator(simulatorDeviceId);
+    }
+    return res;
+  });
 }
