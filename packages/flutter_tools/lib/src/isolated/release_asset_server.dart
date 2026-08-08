@@ -115,13 +115,15 @@ class ReleaseAssetServer {
     // that do not exist on disk must return 404 Not Found so browser entrypoint fallback
     // functions properly. SPA index.html fallback is preserved for navigation routes and
     // unallowed project path fallthroughs.
-    final List<String> segments = requestPath.split('/');
-    final bool isMissingStaticAsset = switch (segments) {
-      ['assets' || 'canvaskit', ...] => true,
-      [..., final String file] =>
-        file.endsWith('.wasm') || file.endsWith('.mjs') || file.endsWith('.js'),
-      _ => false,
-    };
+    final String cleanPath = requestPath.startsWith('/') ? requestPath.substring(1) : requestPath;
+    final bool isMissingStaticAsset =
+        cleanPath.startsWith('assets/') ||
+        cleanPath == 'assets' ||
+        cleanPath.startsWith('canvaskit/') ||
+        cleanPath == 'canvaskit' ||
+        cleanPath.endsWith('.wasm') ||
+        cleanPath.endsWith('.mjs') ||
+        cleanPath.endsWith('.js');
     if (isMissingStaticAsset) {
       return shelf.Response.notFound('');
     }
