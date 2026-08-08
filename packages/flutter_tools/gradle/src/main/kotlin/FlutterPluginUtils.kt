@@ -86,6 +86,19 @@ object FlutterPluginUtils {
         "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors"
 
     /**
+     * The Kotlin Gradle Plugin (KGP) id for Android.
+     */
+    internal const val KGP_PLUGIN_ID = "org.jetbrains.kotlin.android"
+
+    /**
+     * The legacy alias KGP registers for [KGP_PLUGIN_ID].
+     *
+     * Gradle resolves a plugin id to its implementation class, so as long as a KGP release publishes descriptors
+     * for both ids, querying either one reports a KGP applied under the other.
+     */
+    internal const val KGP_LEGACY_PLUGIN_ID = "kotlin-android"
+
+    /**
      * Matches the AGP application plugin declaration in Kotlin DSL (`build.gradle.kts`).
      * Targets `id("com.android.application")` or `alias(libs.plugins.android.application)`
      * within a `plugins { ... }` block.
@@ -107,6 +120,18 @@ object FlutterPluginUtils {
      * Matches the KGP declaration in Kotlin DSL (`build.gradle.kts`).
      * Targets `kotlin-android`, `org.jetbrains.kotlin.android`, or version catalog aliases
      * for Kotlin Android within a `plugins { ... }` block.
+     *
+     * Unlike [kgpRegexGroovy] this deliberately does not match the imperative
+     * `apply(plugin = "kotlin-android")` form, even though that is valid Kotlin DSL. A match here means
+     * "the subproject applies KGP itself", which suppresses the fallback in
+     * [detectApplyingKotlinGradlePlugin] that applies KGP on the subproject's behalf. Plugins commonly write
+     * that imperative call behind a guard such as `if (agpMajor < 9)`, which is false on AGP 9 while
+     * `android.builtInKotlin=false` still leaves Kotlin uncompiled, so honoring the text would suppress the
+     * fallback exactly when the subproject needs it and fail the build with
+     * `Extension of type 'KotlinAndroidProjectExtension' does not exist`.
+     *
+     * Under-matching is the safe direction here: the fallback re-applying KGP to a subproject that already has
+     * it is a no-op, and the report in [detectApplyingKotlinGradlePlugin] no longer depends on this regex.
      */
     internal val kgpRegexKotlin =
         """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
@@ -569,9 +594,14 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
-        val pluginsWithKGPAppliedList = mutableListOf<String>()
         val agpVersion = VersionFetcher.getAGPVersion(project)
-        var shouldLogForApp = false
+
+        // Android subprojects that the report may name, paired with the roles their build script declares.
+        val androidSubprojects = mutableListOf<Pair<Project, SubprojectPluginState>>()
+        // Subprojects this function applied KGP to. They apply KGP because Flutter asked them to, not because
+        // they are unmigrated, so naming them in the report would tell app developers to chase their own build.
+        val subprojectsFlutterAppliedKgpTo = mutableSetOf<String>()
+
         project.rootProject.subprojects {
             val pluginState = getSubprojectPluginState(this) ?: return@subprojects
 
@@ -580,7 +610,8 @@ object FlutterPluginUtils {
 
             if (!isBuiltInKotlinEnabled(project, agpVersion) && !pluginState.hasKgpPlugin) {
                 try {
-                    pluginManager.apply("kotlin-android")
+                    pluginManager.apply(KGP_LEGACY_PLUGIN_ID)
+                    subprojectsFlutterAppliedKgpTo.add(path)
                 } catch (_: Exception) {
                     logger.quiet(
                         """
@@ -592,18 +623,11 @@ object FlutterPluginUtils {
                 }
             }
 
-            // Apply AGP exists and Apply KGP also exists in build.gradle
-            if (pluginState.hasAppPlugin && pluginState.hasKgpPlugin) {
-                shouldLogForApp = true
-            }
-
-            if (pluginState.hasLibPlugin && pluginState.hasKgpPlugin) {
-                pluginsWithKGPAppliedList.add(name)
-            }
+            androidSubprojects.add(this to pluginState)
         }
 
-        // If no imperative apply KGP declarations were found, there is nothing to log.
-        if (!shouldLogForApp && pluginsWithKGPAppliedList.isEmpty()) {
+        // No Android subprojects means there is nothing that could apply KGP, so there is nothing to report.
+        if (androidSubprojects.isEmpty()) {
             return
         }
 
@@ -611,6 +635,24 @@ object FlutterPluginUtils {
             if (agpVersion == null || agpVersion.major < 9) {
                 return@projectsEvaluated
             }
+
+            // Whether a subproject applies KGP is decided here rather than from the earlier scan of its build
+            // script. A build script can declare KGP behind a conditional that never runs, and can apply it by
+            // routes no regex can see, so only the evaluated plugin container knows the answer.
+            var shouldLogForApp = false
+            val pluginsWithKGPAppliedList = mutableListOf<String>()
+            for ((subproject, pluginState) in androidSubprojects) {
+                if (subproject.path in subprojectsFlutterAppliedKgpTo) continue
+                if (!hasKotlinAndroidPluginApplied(subproject)) continue
+
+                if (pluginState.hasAppPlugin) {
+                    shouldLogForApp = true
+                }
+                if (pluginState.hasLibPlugin) {
+                    pluginsWithKGPAppliedList.add(subproject.name)
+                }
+            }
+
             if (shouldLogForApp) {
                 project.logger.error(
                     """
@@ -636,6 +678,17 @@ object FlutterPluginUtils {
             )
         }
     }
+
+    /**
+     * Whether [subproject] has the Kotlin Gradle Plugin applied, as opposed to merely declaring it.
+     *
+     * Only meaningful once [subproject] has been evaluated, which for the subprojects of a Flutter app means
+     * inside a `Gradle.projectsEvaluated` callback.
+     *
+     * Both ids are queried so that this keeps working for a KGP release that publishes only one of them.
+     */
+    internal fun hasKotlinAndroidPluginApplied(subproject: Project): Boolean =
+        subproject.pluginManager.hasPlugin(KGP_PLUGIN_ID) || subproject.pluginManager.hasPlugin(KGP_LEGACY_PLUGIN_ID)
 
     /**
      * Represents whether Kotlin Gradle Plugin, Android Gradle Plugin (for applications), and the
