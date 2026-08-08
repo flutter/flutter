@@ -509,5 +509,81 @@ void main() {
 
       expect(server.basePath, isEmpty);
     });
+
+    testWithoutContext(
+      'release asset server returns 404 for missing static file asset requests across all 5 static cases',
+      () async {
+        final assetServer = ReleaseAssetServer(
+          Uri.base,
+          fileSystem: fileSystem,
+          platform: platform,
+          flutterRoot: '/flutter',
+          webBuildDirectory: 'build/web',
+          needsCoopCoep: true,
+        );
+
+        // Populate build/web with index.html only
+        fileSystem.file('build/web/index.html')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('<html></html>');
+
+        // Case 1: assets/ prefix missing
+        final Response assetsResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/assets/icons/missing.png')),
+        );
+        expect(assetsResponse.statusCode, equals(404));
+
+        // Case 2: canvaskit/ prefix missing
+        final Response canvaskitResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/canvaskit/skwasm.wasm')),
+        );
+        expect(canvaskitResponse.statusCode, equals(404));
+
+        // Case 3: *.wasm file missing
+        final Response wasmResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/main.dart.wasm')),
+        );
+        expect(wasmResponse.statusCode, equals(404));
+
+        // Case 4: *.mjs file missing
+        final Response mjsResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/main.dart.mjs')),
+        );
+        expect(mjsResponse.statusCode, equals(404));
+
+        // Case 5: *.js file missing
+        final Response jsResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/main.dart.js')),
+        );
+        expect(jsResponse.statusCode, equals(404));
+      },
+    );
+
+    testWithoutContext(
+      'release asset server serves index.html SPA fallback for route paths without file extensions',
+      () async {
+        final assetServer = ReleaseAssetServer(
+          Uri.base,
+          fileSystem: fileSystem,
+          platform: platform,
+          flutterRoot: '/flutter',
+          webBuildDirectory: 'build/web',
+          needsCoopCoep: false,
+        );
+
+        fileSystem.file('build/web/index.html')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('<html>index</html>');
+
+        // Client-side route paths like /settings or /profile must fall back to index.html
+        final Response routeResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/settings')),
+        );
+
+        expect(routeResponse.statusCode, equals(200));
+        expect(routeResponse.headers['Content-Type'], equals('text/html'));
+        expect(await routeResponse.readAsString(), equals('<html>index</html>'));
+      },
+    );
   });
 }
