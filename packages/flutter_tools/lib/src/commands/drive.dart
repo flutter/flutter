@@ -16,15 +16,17 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../drive/web_driver_service.dart' show Browser;
-import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
@@ -55,23 +57,13 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    bool verboseHelp = false,
+    required super.toolContext,
+    super.analytics,
     @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required Terminal terminal,
-    required OutputPreferences outputPreferences,
-    required this.signals,
+    bool verboseHelp = false,
   }) : _flutterDriverFactory = flutterDriverFactory,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       _terminal = terminal,
-       _outputPreferences = outputPreferences,
-       _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
@@ -187,10 +179,10 @@ class DriveCommand extends RunCommandBase {
       );
   }
 
+  ToolContext get _toolContext => toolContext!;
+
   static const _kKeepAppRunning = 'keep-app-running';
   static const _kUseExistingApp = 'use-existing-app';
-
-  final Signals signals;
 
   /// The [ProcessSignal]s that will lead to a screenshot being taken (if the option is provided).
   final Set<ProcessSignal> signalsToHandle;
@@ -207,12 +199,6 @@ class DriveCommand extends RunCommandBase {
   }
 
   FlutterDriverFactory? _flutterDriverFactory;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Platform _platform;
-  final Terminal _terminal;
-  final OutputPreferences _outputPreferences;
-  final FileSystemUtils _fsUtils;
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
 
@@ -254,13 +240,14 @@ class DriveCommand extends RunCommandBase {
   // change it to be enabled.
   @override
   Future<bool> get disablePortPublication async {
+    final Logger logger = _toolContext.logger;
     final ArgResults? localArgResults = argResults;
     final Device? device = await targetedDevice;
     final bool isWirelessIOSDevice = device is IOSDevice && device.isWirelesslyConnected;
     if (isWirelessIOSDevice &&
         localArgResults != null &&
         !localArgResults.wasParsed('publish-port')) {
-      _logger.printTrace(
+      logger.printTrace(
         'A wireless iOS device is being used. Changing `publish-port` to be enabled.',
       );
       return false;
@@ -281,16 +268,25 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final Artifacts artifacts = _toolContext.artifacts;
+    final FileSystem fs = _toolContext.fs;
+    final Logger logger = _toolContext.logger;
+    final OutputPreferences outputPreferences = _toolContext.outputPreferences;
+    final Platform platform = _toolContext.platform;
+    final ProcessUtils processUtils = _toolContext.processUtils;
+    final SystemClock systemClock = _toolContext.systemClock;
+    final AnsiTerminal terminal = _toolContext.terminal;
+
     final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
     }
-    if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
+    if (await fs.type(testFile) != FileSystemEntityType.file) {
       // A very common source of error is holding "flutter drive" wrong,
       // and providing the "test_driver/foo_test.dart" as the target, when
       // the intention was to provide "lib/foo.dart".
-      if (_fileSystem.path.isWithin('test_driver', targetFile)) {
-        _logger.printError(
+      if (fs.path.isWithin('test_driver', targetFile)) {
+        logger.printError(
           'The file path passed to --target should be an app entrypoint that '
           'contains a "main()". Did you mean "flutter drive --driver $targetFile"?',
         );
@@ -302,7 +298,7 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
     if (screenshot != null && !device.supportsScreenshot) {
-      _logger.printError('Screenshot not supported for ${device.displayName}.');
+      logger.printError('Screenshot not supported for ${device.displayName}.');
     }
 
     final WebDevServerConfig? webDevServerConfig =
@@ -315,19 +311,22 @@ class DriveCommand extends RunCommandBase {
 
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
-      logger: _logger,
-      platform: _platform,
-      terminal: _terminal,
-      outputPreferences: _outputPreferences,
-      processUtils: globals.processUtils,
-      dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+      logger: logger,
+      platform: platform,
+      terminal: terminal,
+      outputPreferences: outputPreferences,
+      processUtils: processUtils,
+      dartSdkPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
+      fileSystem: fs,
+      analytics: analytics,
+      systemClock: systemClock,
     );
-    final File packageConfigFile = findPackageConfigFileOrDefault(_fileSystem.currentDirectory);
+    final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
-      logger: _logger,
+      logger: logger,
       throwOnError: false,
     );
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
@@ -337,7 +336,7 @@ class DriveCommand extends RunCommandBase {
     );
     final File? applicationBinary = applicationBinaryPath == null
         ? null
-        : _fileSystem.file(applicationBinaryPath);
+        : fs.file(applicationBinaryPath);
 
     var screenshotTaken = false;
     try {
@@ -381,7 +380,7 @@ class DriveCommand extends RunCommandBase {
 
       if (screenshot != null) {
         // If the test is sent a signal or times out, take a screenshot
-        _registerScreenshotCallbacks(device, _fileSystem.directory(screenshot));
+        _registerScreenshotCallbacks(device, fs.directory(screenshot));
       }
 
       final int testResult = await testResultFuture;
@@ -393,12 +392,12 @@ class DriveCommand extends RunCommandBase {
 
       if (testResult != 0 && screenshot != null) {
         // Take a screenshot while the app is still running.
-        await _takeScreenshot(device, _fileSystem.directory(screenshot));
+        await _takeScreenshot(device, fs.directory(screenshot));
         screenshotTaken = true;
       }
 
       if (_keepAppRunningWhenComplete) {
-        _logger.printStatus('Leaving the application running.');
+        logger.printStatus('Leaving the application running.');
       } else {
         await driverService.stop(userIdentifier: userIdentifier);
       }
@@ -409,7 +408,7 @@ class DriveCommand extends RunCommandBase {
       // On exceptions, including ToolExit, take a screenshot on the device
       // unless a screenshot was already taken on test failure.
       if (!screenshotTaken && screenshot != null) {
-        await _takeScreenshot(device, _fileSystem.directory(screenshot));
+        await _takeScreenshot(device, fs.directory(screenshot));
       }
       rethrow;
     }
@@ -450,12 +449,15 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
-    _logger.printTrace('Registering signal handlers...');
+    final Logger logger = _toolContext.logger;
+    final Signals signals = _toolContext.signals;
+
+    logger.printTrace('Registering signal handlers...');
     final tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
       tokens[signal] = signals.addHandler(signal, (ProcessSignal signal) {
         _unregisterScreenshotCallbacks();
-        _logger.printError('Caught $signal');
+        logger.printError('Caught $signal');
         return _takeScreenshot(device, screenshotDir);
       });
     }
@@ -472,8 +474,11 @@ class DriveCommand extends RunCommandBase {
   }
 
   void _unregisterScreenshotCallbacks() {
+    final Logger logger = _toolContext.logger;
+    final Signals signals = _toolContext.signals;
+
     if (screenshotTokens != null) {
-      _logger.printTrace('Unregistering signal handlers...');
+      logger.printTrace('Unregistering signal handlers...');
       for (final MapEntry<ProcessSignal, Object> entry in screenshotTokens!.entries) {
         signals.removeHandler(entry.key, entry.value);
       }
@@ -482,34 +487,35 @@ class DriveCommand extends RunCommandBase {
   }
 
   String? _getTestFile() {
+    final FileSystem fs = _toolContext.fs;
+    final Logger logger = _toolContext.logger;
+
     if (argResults!['driver'] != null) {
       return stringArg('driver');
     }
 
     // If the --driver argument wasn't provided, then derive the value from
     // the target file.
-    String appFile = _fileSystem.path.normalize(targetFile);
+    String appFile = fs.path.normalize(targetFile);
 
     // This command extends `flutter run` and therefore CWD == package dir
-    final String packageDir = _fileSystem.currentDirectory.path;
+    final String packageDir = fs.currentDirectory.path;
 
     // Make appFile path relative to package directory because we are looking
     // for the corresponding test file relative to it.
-    if (!_fileSystem.path.isRelative(appFile)) {
-      if (!_fileSystem.path.isWithin(packageDir, appFile)) {
-        _logger.printError(
-          'Application file $appFile is outside the package directory $packageDir',
-        );
+    if (!fs.path.isRelative(appFile)) {
+      if (!fs.path.isWithin(packageDir, appFile)) {
+        logger.printError('Application file $appFile is outside the package directory $packageDir');
         return null;
       }
 
-      appFile = _fileSystem.path.relative(appFile, from: packageDir);
+      appFile = fs.path.relative(appFile, from: packageDir);
     }
 
-    final List<String> parts = _fileSystem.path.split(appFile);
+    final List<String> parts = fs.path.split(appFile);
 
     if (parts.length < 2) {
-      _logger.printError(
+      logger.printError(
         'Application file $appFile must reside in one of the sub-directories '
         'of the package structure, not in the root directory.',
       );
@@ -519,23 +525,26 @@ class DriveCommand extends RunCommandBase {
     // Look for the test file inside `test_driver/` matching the sub-path, e.g.
     // if the application is `lib/foo/bar.dart`, the test file is expected to
     // be `test_driver/foo/bar_test.dart`.
-    final String pathWithNoExtension = _fileSystem.path.withoutExtension(
-      _fileSystem.path.joinAll(<String>[packageDir, 'test_driver', ...parts.skip(1)]),
+    final String pathWithNoExtension = fs.path.withoutExtension(
+      fs.path.joinAll(<String>[packageDir, 'test_driver', ...parts.skip(1)]),
     );
-    return '${pathWithNoExtension}_test${_fileSystem.path.extension(appFile)}';
+    return '${pathWithNoExtension}_test${fs.path.extension(appFile)}';
   }
 
   Future<void> _takeScreenshot(Device device, Directory outputDirectory) async {
+    final FileSystemUtils fsUtils = _toolContext.fileSystemUtils;
+    final Logger logger = _toolContext.logger;
+
     if (!device.supportsScreenshot) {
       return;
     }
     try {
       outputDirectory.createSync(recursive: true);
-      final File outputFile = _fsUtils.getUniqueFile(outputDirectory, 'drive', 'png');
+      final File outputFile = fsUtils.getUniqueFile(outputDirectory, 'drive', 'png');
       await device.takeScreenshot(outputFile);
-      _logger.printStatus('Screenshot written to ${outputFile.path}');
+      logger.printStatus('Screenshot written to ${outputFile.path}');
     } on Exception catch (error) {
-      _logger.printError('Error taking screenshot: $error');
+      logger.printError('Error taking screenshot: $error');
     }
   }
 }

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -443,6 +444,7 @@ WebDriverService setUpDriverService() {
     outputPreferences: OutputPreferences.test(),
     processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
     dartSdkPath: 'dart',
+    fileSystem: MemoryFileSystem.test(),
   );
 }
 
