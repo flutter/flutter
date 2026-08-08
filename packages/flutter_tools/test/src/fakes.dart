@@ -26,10 +26,13 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -45,10 +48,12 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'fake_process_manager.dart';
 
@@ -1223,3 +1228,56 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 class FakeXCDevice extends Fake implements XCDevice {}
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}
+
+class FakeBuildSystem extends Fake implements BuildSystem {}
+
+class FakeBuildTargets extends Fake implements BuildTargets {}
+
+class FakeCrashReporter extends Fake implements CrashReporter {}
+
+class FakeToolDependencies extends Fake implements ToolDependencies {
+  FakeToolDependencies({
+    Analytics? analytics,
+    AndroidContext? androidContext,
+    AppleContext? appleContext,
+    BuildSystem? buildSystem,
+    BuildTargets? buildTargets,
+    CrashReporter? crashReporter,
+    ToolContext? toolContext,
+  }) : _analytics = analytics,
+       _androidContext = androidContext,
+       _appleContext = appleContext,
+       _buildSystem = buildSystem,
+       _buildTargets = buildTargets,
+       _crashReporter = crashReporter,
+       _toolContext = toolContext;
+
+  final Analytics? _analytics;
+  final AndroidContext? _androidContext;
+  final AppleContext? _appleContext;
+  final BuildSystem? _buildSystem;
+  final BuildTargets? _buildTargets;
+  final CrashReporter? _crashReporter;
+  final ToolContext? _toolContext;
+
+  @override
+  Analytics get analytics => _analytics ?? const NoOpAnalytics();
+
+  @override
+  AndroidContext get androidContext => _androidContext ?? FakeAndroidContext();
+
+  @override
+  AppleContext get appleContext => _appleContext ?? FakeAppleContext();
+
+  @override
+  BuildSystem get buildSystem => _buildSystem ?? FakeBuildSystem();
+
+  @override
+  BuildTargets get buildTargets => _buildTargets ?? FakeBuildTargets();
+
+  @override
+  CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
+
+  @override
+  ToolContext get toolContext => _toolContext ?? FakeToolContext();
+}

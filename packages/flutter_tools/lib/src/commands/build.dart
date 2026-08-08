@@ -5,23 +5,38 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
+import '../android/gradle_utils.dart';
 import '../artifacts.dart';
+import '../base/bot_detector.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/signals.dart';
 import '../base/template.dart';
 import '../base/terminal.dart';
+import '../base/time.dart';
+import '../base/user_messages.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
+import '../custom_devices/custom_devices_config.dart';
 import '../features.dart';
+import '../git.dart';
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
+import '../persistent_tool_state.dart';
+import '../pre_run_validator.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../runner/local_engine.dart';
 import '../version.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
@@ -56,18 +71,102 @@ class BuildCommand extends FlutterCommand {
     required Terminal terminal,
     required PlistParser plistParser,
     required Xcode? xcode,
+    AndroidBuilder? androidBuilder,
+    AndroidContext? androidContext,
+    ToolContext? toolContext,
     bool verboseHelp = false,
   }) {
+    final persistentToolState = PersistentToolState(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+    );
+    final ToolContext effectiveToolContext =
+        toolContext ??
+        ToolContext(
+          artifacts: artifacts,
+          botDetector: BotDetector(
+            httpClientFactory: () => HttpClient(),
+            persistentToolState: persistentToolState,
+            platform: platform,
+          ),
+          cache: cache,
+          config: config,
+          customDevicesConfig: CustomDevicesConfig(
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: platform,
+          ),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          git: Git(currentPlatform: platform, runProcessWith: processUtils),
+          localEngineLocator: LocalEngineLocator(
+            fileSystem: fileSystem,
+            flutterRoot: Cache.flutterRoot ?? '',
+            logger: logger,
+            platform: platform,
+            userMessages: UserMessages(),
+          ),
+          logger: logger,
+          os: osUtils,
+          outputPreferences: OutputPreferences.test(),
+          platform: platform,
+          preRunValidator: PreRunValidator(fileSystem: fileSystem),
+          processManager: processManager,
+          processUtils: processUtils,
+          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
+          shutdownHooks: ShutdownHooks(),
+          signals: LocalSignals.instance,
+          stdio: Stdio(),
+          systemClock: const SystemClock(),
+          terminal: terminal is AnsiTerminal
+              ? terminal
+              : AnsiTerminal(stdio: Stdio(), platform: platform),
+          userMessages: UserMessages(),
+        );
+    final AndroidContext effectiveAndroidContext =
+        androidContext ??
+        AndroidContext(
+          androidSdk: androidSdk,
+          androidStudio: null,
+          gradleUtils: GradleUtils(
+            cache: cache,
+            logger: logger,
+            operatingSystemUtils: osUtils,
+            platform: platform,
+          ),
+          java: null,
+        );
     _addSubcommand(
       BuildAarCommand(
-        fileSystem: fileSystem,
+        androidBuilder: androidBuilder,
+        androidContext: effectiveAndroidContext,
         androidSdk: androidSdk,
-        logger: logger,
+        buildSystem: buildSystem,
+        toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildApkCommand(
+        androidBuilder: androidBuilder,
+        androidContext: effectiveAndroidContext,
+        androidSdk: androidSdk,
+        buildSystem: buildSystem,
+        toolContext: effectiveToolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
+    _addSubcommand(
+      BuildAppBundleCommand(
+        androidBuilder: androidBuilder,
+        androidContext: effectiveAndroidContext,
+        androidSdk: androidSdk,
+        buildSystem: buildSystem,
+        toolContext: effectiveToolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildIOSFrameworkCommand(
@@ -174,7 +273,13 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand({required this.logger, required bool verboseHelp}) {
+  BuildSubCommand({
+    required this.logger,
+    required bool verboseHelp,
+    super.analytics,
+    super.outputPreferences,
+    super.toolContext,
+  }) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }

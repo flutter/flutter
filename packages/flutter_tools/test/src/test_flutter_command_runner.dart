@@ -11,16 +11,25 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'context.dart';
+import 'fakes.dart';
 
 export 'package:test/test.dart' hide isInstanceOf, test;
 
-CommandRunner<void> createTestCommandRunner([FlutterCommand? command]) {
-  final FlutterCommandRunner runner = TestFlutterCommandRunner(toolContext: command?.toolContext);
+CommandRunner<void> createTestCommandRunner([FlutterCommand? command, Analytics? analytics]) {
+  final ToolContext? toolContext = command?.toolContext;
+  final FlutterCommandRunner runner = TestFlutterCommandRunner(
+    toolContext: toolContext,
+    toolDependencies: (toolContext != null || analytics != null)
+        ? FakeToolDependencies(analytics: analytics, toolContext: toolContext)
+        : null,
+  );
   if (command != null) {
     runner.addCommand(command);
   }
@@ -38,7 +47,16 @@ Future<String> createProject(
   arguments ??= <String>['--no-pub'];
   final String projectPath = globals.fs.path.join(temp.path, name);
   final command = CreateCommand();
-  final CommandRunner<void> runner = createTestCommandRunner(command);
+  Analytics? analytics;
+  try {
+    analytics = context.get<Analytics>();
+  } on UnsupportedError {
+    // In testWithoutContext, context.get is not supported.
+  }
+  final CommandRunner<void> runner = createTestCommandRunner(
+    command,
+    analytics,
+  );
   await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }

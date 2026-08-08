@@ -4,7 +4,6 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -12,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -31,6 +31,8 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
+import '../flutter_features.dart';
+import '../flutter_features_config.dart';
 import '../globals.dart' as globals;
 import '../pre_run_validator.dart';
 import '../project.dart';
@@ -195,10 +197,12 @@ abstract class FlutterCommand extends Command<void> {
   OperatingSystemUtils? get _os => toolContext?.os;
   Platform? get _platform => toolContext?.platform;
   FileSystem? get _fs => toolContext?.fs;
+  FileSystemUtils? get _fileSystemUtils => toolContext?.fileSystemUtils;
   FlutterProjectFactory? get _projectFactory => toolContext?.projectFactory;
   Analytics? get _analytics =>
       _explicitAnalytics ?? (super.runner as FlutterCommandRunner?)?.toolDependencies?.analytics;
   Cache? get _cache => toolContext?.cache;
+  FlutterVersion? get _flutterVersion => toolContext?.flutterVersion;
 
   /// The currently executing command (or sub-command).
   ///
@@ -287,12 +291,19 @@ abstract class FlutterCommand extends Command<void> {
   bool get outputMachineFormat =>
       argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
       boolArg(FlutterGlobalOptions.kMachineFlag);
-
   bool get shouldUpdateCache => true;
 
   bool get deprecated => false;
 
-  ProcessInfo get processInfo => _fs != null ? ProcessInfo(_fs!) : globals.processInfo;
+  ProcessInfo get processInfo {
+    ProcessInfo? contextProcessInfo;
+    try {
+      contextProcessInfo = context.get<ProcessInfo>();
+    } on UnsupportedError {
+      // In testWithoutContext, context.get is not supported.
+    }
+    return contextProcessInfo ?? (_fs != null ? ProcessInfo(_fs!) : globals.processInfo);
+  }
 
   /// When the command runs and this is true, trigger an async process to
   /// discover devices from discoverers that support wireless devices for an
@@ -489,6 +500,10 @@ abstract class FlutterCommand extends Command<void> {
     final List<String>? rest = argResults?.rest;
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
+    }
+    final FileSystem? fs = _fs;
+    if (fs != null) {
+      return fs.path.join('lib', 'main.dart');
     }
     return bundle.defaultMainPath;
   }
@@ -1452,11 +1467,11 @@ abstract class FlutterCommand extends Command<void> {
         ? stringArg('build-name')
         : null;
 
-    final File packageConfigFile = globals.fs.file(packageConfigPath());
+    final File packageConfigFile = (_fs ?? globals.fs).file(packageConfigPath());
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
-      logger: globals.logger,
+      logger: _logger ?? globals.logger,
       throwOnError: false,
     );
 
@@ -1482,13 +1497,15 @@ abstract class FlutterCommand extends Command<void> {
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
         boolArg(FlutterOptions.kAnalyzeSize)) {
-      Directory directory = globals.fsUtils.getUniqueDirectory(
-        globals.fs.directory(getBuildDirectory()),
+      final FileSystem fs = _fs ?? globals.fs;
+      final FileSystemUtils fsUtils = _fileSystemUtils ?? globals.fsUtils;
+      Directory directory = fsUtils.getUniqueDirectory(
+        fs.directory(getBuildDirectory()),
         'flutter_size',
       );
       if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) &&
           stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
-        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
+        directory = fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
       }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
@@ -1576,7 +1593,7 @@ abstract class FlutterCommand extends Command<void> {
         dartDefines.add('$define=$value');
       }
     }
-    _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
+    _addFlutterVersionToDartDefines(_flutterVersion ?? globals.flutterVersion, dartDefines);
     _addFeatureFlagsToDartDefines(dartDefines);
 
     return BuildInfo(
@@ -1623,7 +1640,8 @@ abstract class FlutterCommand extends Command<void> {
   /// framework, has been set either in the environment or through
   /// `--${FlutterOptions.kDartDefinesOption}` / `--${FlutterOptions.kDartDefineFromFileOption}`.
   void _ensureReservedDartDefineIsUnset(String define, List<String> dartDefines) {
-    if (globals.platform.environment[define] != null) {
+    final Platform platform = _platform ?? globals.platform;
+    if (platform.environment[define] != null) {
       throwToolExit('$define is used by the framework and cannot be set in the environment.');
     }
     if (dartDefines.any((String d) => d == define || d.startsWith('$define='))) {
@@ -1656,6 +1674,22 @@ abstract class FlutterCommand extends Command<void> {
     ]);
   }
 
+  FeatureFlags get _featureFlags {
+    final ToolContext? toolContext = this.toolContext;
+    if (toolContext != null) {
+      return FlutterFeatureFlags(
+        flutterVersion: toolContext.flutterVersion,
+        featuresConfig: FlutterFeaturesConfig(
+          globalConfig: toolContext.config,
+          platform: toolContext.platform,
+          projectManifest: null,
+        ),
+        platform: toolContext.platform,
+      );
+    }
+    return featureFlags;
+  }
+
   void _addFeatureFlagsToDartDefines(List<String> dartDefines) {
     if (dartDefines.any((String define) => define.startsWith(kEnabledFeatureFlags))) {
       throwToolExit(
@@ -1666,8 +1700,9 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final String enabledFeatureFlags = featureFlags.allFeatures
-        .where((Feature feature) => featureFlags.isEnabled(feature))
+    final FeatureFlags flags = _featureFlags;
+    final String enabledFeatureFlags = flags.allFeatures
+        .where((Feature feature) => flags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');
@@ -1712,38 +1747,39 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime? startTime = _clock?.now();
+    final SystemClock clock = _clock ?? globals.systemClock;
+    final Logger logger = _logger ?? globals.logger;
+    final UserMessages userMessages = _userMessages ?? globals.userMessages;
+    final DateTime startTime = clock.now();
 
     return context.run<void>(
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (_usesFatalWarnings && _logger != null) {
-          _logger!.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
+        if (_usesFatalWarnings) {
+          logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
-        if (commandPath != null && startTime != null && _signals != null) {
+        if (commandPath != null) {
           _registerSignalHandlers(commandPath, startTime);
         }
         var commandResult = FlutterCommandResult.fail();
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
-          final DateTime? endTime = _clock?.now();
-          if (startTime != null && endTime != null && _logger != null && _userMessages != null) {
-            _logger!.printTrace(
-              _userMessages!.flutterElapsedTime(
-                name,
-                getElapsedAsMilliseconds(endTime.difference(startTime)),
-              ),
-            );
-            if (commandPath != null && _analytics != null) {
-              _sendPostUsage(commandPath, commandResult, startTime, endTime);
-            }
+          final DateTime endTime = clock.now();
+          logger.printTrace(
+            userMessages.flutterElapsedTime(
+              name,
+              getElapsedAsMilliseconds(endTime.difference(startTime)),
+            ),
+          );
+          if (commandPath != null) {
+            _sendPostUsage(commandPath, commandResult, startTime, endTime);
           }
-          if (_usesFatalWarnings && _logger != null) {
-            _logger!.checkForFatalLogs();
+          if (_usesFatalWarnings) {
+            logger.checkForFatalLogs();
           }
         }
       },
