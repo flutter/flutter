@@ -119,10 +119,9 @@ Future<void> testMain() async {
     expect(lines.length, 15);
     var length = 0;
     for (var i = 0; i < 15; i++) {
-      expect(lines[i].whitespacesRange.size, i != 14 ? 1 : 0);
-      expect(lines[i].hardLineBreak, i != 14);
-      length += lines[i].textRange.size;
-      length += lines[i].whitespacesRange.size;
+      expect(lines[i].whitespacesRange.size, 0);
+      expect(lines[i].hasHardLineBreak, true);
+      length += lines[i].allLineTextRange.size + (i != 14 ? 1 : 0);
     }
     expect(length, paragraph.text.length);
   });
@@ -136,10 +135,10 @@ Future<void> testMain() async {
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 2);
-    expect(lines[0].whitespacesRange.size, 3 + 1);
-    expect(lines[0].hardLineBreak, true);
+    expect(lines[0].whitespacesRange.size, 3);
+    expect(lines[0].hasHardLineBreak, true);
     expect(lines[1].whitespacesRange.size, 0);
-    expect(lines[1].hardLineBreak, false);
+    expect(lines[1].hasHardLineBreak, true);
   });
 
   test('Text wrapper, 3 hard line breaks and nothing else', () {
@@ -152,9 +151,61 @@ Future<void> testMain() async {
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
     for (var i = 0; i < lines.length; i++) {
-      expect(lines[i].whitespacesRange.size, i != lines.length - 1 ? 1 : 0);
+      expect(lines[i].whitespacesRange.size, i == lines.length - 1 ? 1 : 0);
       expect(lines[i].textRange.size, 0);
-      expect(lines[i].hardLineBreak, i != lines.length - 1);
+      expect(lines[i].hasHardLineBreak, true);
     }
+  });
+
+  test('Text wrapper, ultimate test for edge cases', () {
+    final builder = WebParagraphBuilder(ahemStyle);
+    builder.addText('Text\nText \nText \n');
+    builder.addText(' \n  \n');
+    builder.addText('\n\n \n\n');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 10000));
+
+    final List<TextLine> lines = paragraph.lines;
+    expect(lines.length, 10);
+
+    expect(lines[0].allLineTextRange, const TextRange(start: 0, end: 4));
+    expect(lines[0].whitespacesRange, const TextRange(start: 4, end: 4));
+    expect(lines[0].hardLineBreakRange, const TextRange(start: 4, end: 5));
+
+    expect(lines[1].allLineTextRange, const TextRange(start: 5, end: 10));
+    expect(lines[1].whitespacesRange, const TextRange(start: 9, end: 10));
+    expect(lines[1].hardLineBreakRange, const TextRange(start: 10, end: 11));
+
+    expect(lines[2].allLineTextRange, const TextRange(start: 11, end: 16));
+    expect(lines[2].whitespacesRange, const TextRange(start: 15, end: 16));
+    expect(lines[2].hardLineBreakRange, const TextRange(start: 16, end: 17));
+
+    expect(lines[3].allLineTextRange, const TextRange(start: 17, end: 18));
+    expect(lines[3].whitespacesRange, const TextRange(start: 17, end: 18));
+    expect(lines[3].hardLineBreakRange, const TextRange(start: 18, end: 19));
+
+    expect(lines[4].allLineTextRange, const TextRange(start: 19, end: 21));
+    expect(lines[4].whitespacesRange, const TextRange(start: 19, end: 21));
+    expect(lines[4].hardLineBreakRange, const TextRange(start: 21, end: 22));
+
+    expect(lines[5].allLineTextRange, const TextRange(start: 22, end: 22));
+    expect(lines[5].whitespacesRange, const TextRange(start: 22, end: 22));
+    expect(lines[5].hardLineBreakRange, const TextRange(start: 22, end: 23));
+
+    expect(lines[6].allLineTextRange, const TextRange(start: 23, end: 23));
+    expect(lines[6].whitespacesRange, const TextRange(start: 23, end: 23));
+    expect(lines[6].hardLineBreakRange, const TextRange(start: 23, end: 24));
+
+    expect(lines[7].allLineTextRange, const TextRange(start: 24, end: 25));
+    expect(lines[7].whitespacesRange, const TextRange(start: 24, end: 25));
+    expect(lines[7].hardLineBreakRange, const TextRange(start: 25, end: 26));
+
+    expect(lines[8].allLineTextRange, const TextRange(start: 26, end: 27));
+    expect(lines[8].whitespacesRange, const TextRange(start: 26, end: 26));
+    expect(lines[8].hardLineBreakRange, const TextRange(start: 26, end: 27));
+
+    expect(lines[9].allLineTextRange, const TextRange(start: 26, end: 27));
+    expect(lines[9].whitespacesRange, const TextRange(start: 26, end: 27));
+    expect(lines[9].hardLineBreakRange, const TextRange(start: 27, end: 27));
   });
 }

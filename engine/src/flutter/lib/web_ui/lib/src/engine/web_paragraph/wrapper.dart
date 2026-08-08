@@ -30,7 +30,8 @@ class TextWrapper {
   double _height = 0.0;
 
   bool _isWhitespace(WebCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.whitespace);
+    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.whitespace) &&
+        !_layout.codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
   }
 
   bool _isSoftLineBreak(WebCluster cluster) {
@@ -38,7 +39,8 @@ class TextWrapper {
   }
 
   bool _isHardLineBreak(WebCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.hardLineBreak);
+    // The flag is "Hard line break before the codepoint" so we need to test the end of the cluster
+    return _layout.codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
   }
 
   void breakLines(double maxWidth) {
@@ -56,12 +58,16 @@ class TextWrapper {
       if (hardLineBreak) {
         // Break the line and then continue with the current cluster as usual
         line.consumePendingText();
+        line.addHardLineBreak(index);
 
-        // This is the case when the ellipsis will be added to the empty line; weird...
-        line.ellipsize(index);
-        line.build(hardLineBreak);
+        // There is a special case: "\n" at the end of the text
+        // In this special case we will add 2 lines
+        line.build(/*specialCase=*/ index == _layout.allClusters.length - 2);
+
         if (line.reachedMaxLines()) {
           break;
+        } else {
+          continue;
         }
       } else if (_isSoftLineBreak(cluster) && line.isNotEmpty) {
         // Mark the potential line break and then continue with the current cluster as usual
@@ -104,7 +110,7 @@ class TextWrapper {
         // Add ellipsis if needed (and correct all the structures accordingly)
         line.ellipsize(index);
         // Add the line
-        line.build(hardLineBreak);
+        line.build(false);
         if (line.reachedMaxLines()) {
           break;
         }
@@ -114,7 +120,7 @@ class TextWrapper {
         }
       }
 
-      // This is just a regular cluster, add it as pending text.
+      // This is just a regular cluster, add it as pending text
       line.addPendingText(index, widthCluster);
     }
 
@@ -122,31 +128,21 @@ class TextWrapper {
     assert(line.reachedEndOfText() || line.reachedMaxLines());
 
     if (!line.reachedMaxLines()) {
-      // Special case: we have only whitespaces in the whole paragraph
       if (_layout.lines.isEmpty && line.hasOnlyWhitespaces) {
+        // We have only whitespaces in the whole paragraph
         line._minIntrinsicWidth = line._widthWhitespaces;
         line._longestLine = line._widthWhitespaces;
         line._maxLineWidthWithTrailingSpaces = line._widthWhitespaces;
-        line.build(hardLineBreak);
+        line.build(false);
         // Nothing to ellipsize in this case;
       }
       // Add the last line if there's anything left to add
       else if (line.isNotEmpty) {
         // Treat the end of text as a soft line break
         line.markSoftLineBreak(_layout.allClusters.length - 1);
-        line.build(hardLineBreak);
+        line.build(false);
         // This is the line line with the text that fits in the given width, no need to ellipsize it
       }
-    }
-
-    // Flutter wants to have another (empty) line if \n is the last codepoint in the text
-    // This empty line gets in a way of detecting line visual runs (there isn't any)
-    if (hardLineBreak) {
-      final emptyClusterRange = ClusterRange(
-        start: _layout.allClusters.length - 1,
-        end: _layout.allClusters.length - 1,
-      );
-      line._top += _layout.addLine(emptyClusterRange, emptyClusterRange, false, line._top);
     }
 
     _minIntrinsicWidth = math.max(_minIntrinsicWidth, line._minIntrinsicWidth);
@@ -176,6 +172,7 @@ class _LineBuilder {
     : start = 0,
       _whitespaceStart = 0,
       _whitespaceEnd = 0,
+      _newlineEnd = 0,
       _pendingTextEnd = 0,
       _top = 0.0;
 
@@ -189,6 +186,8 @@ class _LineBuilder {
 
   int _whitespaceStart;
   int _whitespaceEnd;
+
+  int _newlineEnd;
 
   int _pendingTextEnd;
 
@@ -255,12 +254,14 @@ class _LineBuilder {
     return result;
   }
 
+  bool get hasHardLineBreak => _newlineEnd > _whitespaceEnd;
+
   bool get hasLeadingWhitespaces => !hasConsumedText && hasWhitespaces;
 
   bool get hasOnlyWhitespaces => !hasConsumedText && !hasPendingText && hasWhitespaces;
 
   bool get hasPendingText {
-    final bool result = _pendingTextEnd > _whitespaceEnd;
+    final bool result = _pendingTextEnd > _newlineEnd;
 
     assert(() {
       if (!result) {
@@ -282,11 +283,11 @@ class _LineBuilder {
     if (hasPendingText) {
       assert(_pendingTextEnd == index);
     } else {
-      assert(_whitespaceEnd == index);
+      assert(_newlineEnd == index);
     }
 
     consumePendingText();
-    assert(_whitespaceEnd == index);
+    assert(_newlineEnd == index);
   }
 
   bool canFit(double extraWidth) {
@@ -301,11 +302,22 @@ class _LineBuilder {
     assert(!hasPendingText);
 
     _whitespaceEnd = index + 1;
+    _newlineEnd = index + 1;
     _pendingTextEnd = index + 1;
 
     _widthWhitespaces += width;
 
     assert(hasWhitespaces);
+  }
+
+  void addHardLineBreak(int index) {
+    assert(!hasPendingText);
+
+    _whitespaceEnd = index;
+    _newlineEnd = index + 1;
+    _pendingTextEnd = index + 1;
+
+    assert(hasHardLineBreak);
   }
 
   void addPendingText(int index, double width) {
@@ -326,6 +338,7 @@ class _LineBuilder {
 
     _whitespaceStart = _pendingTextEnd;
     _whitespaceEnd = _pendingTextEnd;
+    _newlineEnd = _pendingTextEnd;
 
     _widthConsumedText += _widthWhitespaces + _widthPendingText;
     _widthWhitespaces = 0.0;
@@ -340,7 +353,7 @@ class _LineBuilder {
   /// After calling [build], the line builder instance is ready for the next line.
   ///
   /// Returns the height of the line.
-  double build(bool hardLineBreak) {
+  void build(bool specialCase) {
     _longestLine = math.max(_longestLine, _widthConsumedText);
     _maxLineWidthWithTrailingSpaces = math.max(
       _maxLineWidthWithTrailingSpaces,
@@ -350,26 +363,36 @@ class _LineBuilder {
     final double height = _layout.addLine(
       ClusterRange(start: start, end: _whitespaceStart),
       ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
-      hardLineBreak,
+      ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
       _top,
+      specialCase,
     );
+    _top += height;
 
+    // Flutter wants to have another (empty) line if \n is the last codepoint in the text
+    // This empty line gets in a way of detecting line visual runs (there isn't any)
+    if (specialCase) {
+      _top += _layout.addLine(
+        ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
+        ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
+        ClusterRange(start: _newlineEnd, end: _newlineEnd),
+        _top,
+        true,
+      );
+    }
     // Reset the line builder to be ready for the next line.
 
     _hasSoftLineBreak = false;
 
-    start = _whitespaceEnd;
+    start = _newlineEnd;
     _whitespaceStart = start;
     _whitespaceEnd = start;
+    _newlineEnd = start;
 
     _widthConsumedText = 0.0;
     _widthWhitespaces = 0.0;
 
     // Leave `pendingTextEnd` and `widthPendingText` untouched so they are used in the next line.
-
-    _top += height;
-
-    return height;
   }
 
   bool reachedMaxLines() {
@@ -418,17 +441,22 @@ class _LineBuilder {
         break;
       }
       // Remove this cluster, correct the structures and try again
+      assert(!hasHardLineBreak);
       clusterIndex -= 1;
-      if (clusterIndex >= _whitespaceEnd) {
+      if (clusterIndex >= _newlineEnd) {
+        _pendingTextEnd = clusterIndex;
+      } else if (clusterIndex >= _whitespaceEnd) {
         _widthPendingText -= widthCluster;
         _pendingTextEnd = clusterIndex;
       } else if (clusterIndex >= _whitespaceStart) {
         _widthWhitespaces -= widthCluster;
         _whitespaceEnd = clusterIndex;
+        _newlineEnd = clusterIndex;
       } else {
         _widthConsumedText -= widthCluster;
         _whitespaceStart = clusterIndex;
         _whitespaceEnd = clusterIndex;
+        _newlineEnd = clusterIndex;
       }
     }
 
