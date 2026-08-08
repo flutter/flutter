@@ -592,6 +592,14 @@ public class FlutterView extends FrameLayout
     super.onDetachedFromWindow();
   }
 
+  @Override
+  public void onWindowFocusChanged(boolean hasWindowFocus) {
+    super.onWindowFocusChanged(hasWindowFocus);
+    if (textInputPlugin != null) {
+      textInputPlugin.onWindowFocusChanged(hasWindowFocus);
+    }
+  }
+
   /**
    * Refresh {@link androidx.window.layout.WindowInfoTracker} and {@link android.view.DisplayCutout}
    * display features. Fold, hinge and cutout areas are populated here.
