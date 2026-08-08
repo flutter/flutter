@@ -111,7 +111,25 @@ class ReleaseAssetServer {
       );
     }
 
+    // Requests for specific compiled web build artifacts (.wasm, .mjs, .js, assets/, canvaskit/)
+    // that do not exist on disk must return 404 Not Found so browser entrypoint fallback
+    // functions properly. SPA index.html fallback is preserved for navigation routes and
+    // unallowed project path fallthroughs.
+    final List<String> segments = requestPath.split('/');
+    final bool isMissingStaticAsset = switch (segments) {
+      ['assets' || 'canvaskit', ...] => true,
+      [..., final String file] =>
+        file.endsWith('.wasm') || file.endsWith('.mjs') || file.endsWith('.js'),
+      _ => false,
+    };
+    if (isMissingStaticAsset) {
+      return shelf.Response.notFound('');
+    }
+
     final File file = _fileSystem.file(_fileSystem.path.join(_webBuildDirectory!, 'index.html'));
+    if (!file.existsSync()) {
+      return shelf.Response.notFound('');
+    }
     return shelf.Response.ok(
       file.readAsBytesSync(),
       headers: <String, String>{
