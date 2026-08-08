@@ -5,6 +5,11 @@ homepage: https://flutter.dev
 environment:
   sdk: ^3.11.0-0
 
+workspace:
+  - packages/flutter_tools_core
+  - packages/flutter_tools_extension
+  - packages/flutter_tools_extension_linux_prototype
+
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   #
@@ -22,6 +27,12 @@ dependencies:
   crypto: 3.0.7
   ffi: 2.2.0
   file: 7.0.1
+  flutter_tools_core:
+    path: packages/flutter_tools_core
+  flutter_tools_extension:
+    path: packages/flutter_tools_extension
+  flutter_tools_extension_linux_prototype:
+    path: packages/flutter_tools_extension_linux_prototype
   flutter_template_images: 5.0.0
   html: 0.15.6
   http: 1.6.0
@@ -129,4 +140,4 @@ dartdoc:
   nodoc: true
 
 
-# PUBSPEC CHECKSUM: 9v55jf
+# PUBSPEC CHECKSUM: sues9d
