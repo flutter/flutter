@@ -1633,6 +1633,7 @@ Future<T?> showDialog<T>({
   bool fullscreenDialog = false,
   bool? requestFocus,
   AnimationStyle? animationStyle,
+  RouteBarrierBuilder? barrierBuilder,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1667,6 +1668,7 @@ Future<T?> showDialog<T>({
         requestFocus: requestFocus,
         animationStyle: animationStyle,
         fullscreenDialog: fullscreenDialog,
+        barrierBuilder: barrierBuilder,
       );
     },
     builder: (BuildContext routeContext) {
@@ -1717,6 +1719,7 @@ Future<T?> showAdaptiveDialog<T>({
   TraversalEdgeBehavior? traversalEdgeBehavior,
   bool? requestFocus,
   AnimationStyle? animationStyle,
+  RouteBarrierBuilder? barrierBuilder,
 }) {
   final ThemeData theme = Theme.of(context);
   switch (theme.platform) {
@@ -1737,6 +1740,7 @@ Future<T?> showAdaptiveDialog<T>({
         traversalEdgeBehavior: traversalEdgeBehavior,
         requestFocus: requestFocus,
         animationStyle: animationStyle,
+        barrierBuilder: barrierBuilder,
       );
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -1831,6 +1835,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.anchorPoint,
     super.traversalEdgeBehavior,
     super.fullscreenDialog,
+    super.barrierBuilder,
     AnimationStyle? animationStyle,
   }) : _animationStyle = animationStyle,
        super(
