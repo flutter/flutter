@@ -283,5 +283,57 @@ void main() {
         );
       },
     );
+
+    testUsingContext(
+      'update-templates with --overwrite preserves and updates .tmpl files',
+      () async {
+        final Map<String, String> templateManifest = getManifest(
+          intellijDir,
+          'template',
+          isTemplate: true,
+        );
+        final String copyPath = globals.fs.path.join(
+          'packages',
+          'flutter_tools',
+          'ide_templates',
+          'intellij',
+          'example',
+          'gallery',
+          'android.iml${Template.copyTemplateExtension}',
+        );
+        final String tmplPath = globals.fs.path.join(
+          'packages',
+          'flutter_tools',
+          'ide_templates',
+          'intellij',
+          'example',
+          'gallery',
+          'android.iml${Template.templateExtension}',
+        );
+        final String templateContent = templateManifest.remove(copyPath)!;
+        templateManifest[tmplPath] = templateContent;
+
+        populateDir(templateManifest);
+
+        final Map<String, String> flutterManifest = getManifest(tempDir, 'existing');
+        populateDir(flutterManifest);
+
+        final Map<String, String> updatedTemplates = getManifest(
+          intellijDir,
+          'existing',
+          isTemplate: true,
+        );
+        updatedTemplates.remove(copyPath);
+        updatedTemplates[tmplPath] = 'android existing';
+
+        final expectedContents = <String, String>{...flutterManifest, ...updatedTemplates};
+
+        await updateIdeConfig(
+          args: <String>['--update-templates', '--overwrite'],
+          expectedContents: expectedContents,
+          unexpectedPaths: <String>[copyPath],
+        );
+      },
+    );
   });
 }
