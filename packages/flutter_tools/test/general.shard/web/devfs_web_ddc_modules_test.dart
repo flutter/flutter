@@ -945,7 +945,7 @@ void main() {
     });
   }, overrides: <Type, Generator>{Artifacts: Artifacts.test});
 
-  runInTestbed('Can start web server with hostname any', () async {
+  runInTestbed('Can start web server with default hostname', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
@@ -985,6 +985,51 @@ void main() {
     final Uri uri = await webDevFS.create();
 
     expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress.isLoopback, true);
+    await webDevFS.destroy();
+  });
+
+  runInTestbed('Can start web server with hostname any', () async {
+    final String path = globals.fs.path.join('lib', 'main.dart');
+    final File outputFile = globals.fs.file(path)..createSync(recursive: true);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+
+    const webDevServerConfig = WebDevServerConfig(host: webDevAnyHostDefault);
+    final webDevFS = WebDevFS(
+      packagesFilePath: '.dart_tool/package_config.json',
+      urlTunneller: null,
+      useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
+      buildInfo: BuildInfo.debug,
+      enableDwds: false,
+      ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
+      entrypoint: Uri.base,
+      testMode: true,
+      expressionCompiler: null,
+      chromiumLauncher: null,
+      nativeNullAssertions: true,
+      ddcModuleSystem: usesDdcModuleSystem,
+      canaryFeatures: canaryFeatures,
+      webRenderer: WebRendererMode.canvaskit,
+      isWasm: false,
+      useLocalCanvasKit: false,
+      rootDirectory: globals.fs.currentDirectory,
+      webDevServerConfig: webDevServerConfig,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      webCrossOriginIsolation: false,
+    );
+    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
+    webDevFS.stackTraceMapper.createSync(recursive: true);
+
+    final Uri uri = await webDevFS.create();
+
+    expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress, InternetAddress.anyIPv4);
     await webDevFS.destroy();
   });
 

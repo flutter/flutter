@@ -830,6 +830,25 @@ void main() {
   );
 
   test(
+    'does not serve non-Dart files from project root',
+    () => testbed.run(() async {
+      final files = <String, String>{
+        '.env': 'env_secret',
+        'pubspec.yaml': 'pubspec_secret',
+        '.dart_tool/package_config.json': 'package_config_secret',
+      };
+
+      for (final MapEntry<String, String> file in files.entries) {
+        globals.fs.file(file.key)
+          ..createSync(recursive: true)
+          ..writeAsStringSync(file.value);
+
+        expect(await webAssetServer.dartSourceContents(file.key), isNull);
+      }
+    }),
+  );
+
+  test(
     'serves asset files from in filesystem with known mime type',
     () => testbed.run(() async {
       final File source =
@@ -1683,7 +1702,7 @@ void main() {
   );
 
   test(
-    'Can start web server with hostname any',
+    'Can start web server with default hostname',
     () => testbed.run(() async {
       final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
         ..createSync(recursive: true);
@@ -1721,6 +1740,51 @@ void main() {
 
       final Uri uri = await webDevFS.create();
       expect(uri.host, 'localhost');
+      expect(webDevFS.webAssetServer.internetAddress.isLoopback, true);
+      await webDevFS.destroy();
+    }),
+  );
+
+  test(
+    'Can start web server with hostname any',
+    () => testbed.run(() async {
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      const webDevServerConfig = WebDevServerConfig(host: webDevAnyHostDefault);
+      final webDevFS = WebDevFS(
+        packagesFilePath: '.dart_tool/package_config.json',
+        urlTunneller: null,
+        useSseForDebugProxy: true,
+        useSseForDebugBackend: true,
+        useSseForInjectedClient: true,
+        buildInfo: BuildInfo.debug,
+        enableDwds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
+        entrypoint: Uri.base,
+        testMode: true,
+        expressionCompiler: null,
+        chromiumLauncher: null,
+        nativeNullAssertions: true,
+        ddcModuleSystem: usesDdcModuleSystem,
+        canaryFeatures: canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        rootDirectory: globals.fs.currentDirectory,
+        webDevServerConfig: webDevServerConfig,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        webCrossOriginIsolation: false,
+      );
+      webDevFS.requireJS.createSync(recursive: true);
+
+      final Uri uri = await webDevFS.create();
+      expect(uri.host, 'localhost');
+      expect(webDevFS.webAssetServer.internetAddress, InternetAddress.anyIPv4);
       await webDevFS.destroy();
     }),
   );
