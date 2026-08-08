@@ -10,6 +10,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show awaitNotRequired;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -193,6 +194,7 @@ const double _fontSizeToScale = 14.0;
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showTimePicker], which shows a dialog that contains a Material Design time picker.
+@awaitNotRequired
 Future<DateTime?> showDatePicker({
   required BuildContext context,
   DateTime? initialDate,
@@ -1162,6 +1164,7 @@ typedef SelectableDayForRangePredicate =
 ///  * [DateTimeRange], which is used to describe a date range.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
+@awaitNotRequired
 Future<DateTimeRange?> showDateRangePicker({
   required BuildContext context,
   DateTimeRange? initialDateRange,
