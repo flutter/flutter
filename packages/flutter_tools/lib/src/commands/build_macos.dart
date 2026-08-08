@@ -2,20 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command_runner.dart';
 import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand({required super.logger, required bool verboseHelp})
-    : super(verboseHelp: verboseHelp) {
+  BuildMacosCommand({
+    super.analytics,
+    required BuildSystem buildSystem,
+    required ToolContext toolContext,
+    required bool verboseHelp,
+  }) : _buildSystem = buildSystem,
+       _toolContext = toolContext,
+       super(
+         logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
+         toolContext: toolContext,
+         verboseHelp: verboseHelp,
+       ) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser.addFlag(
@@ -27,11 +44,21 @@ class BuildMacosCommand extends BuildSubCommand {
     );
   }
 
+  final BuildSystem _buildSystem;
+  final ToolContext _toolContext;
+
+  @visibleForTesting
+  BuildSystem get buildSystem => _buildSystem;
+
+  @visibleForTesting
+  @override
+  ToolContext get toolContext => _toolContext;
+
   @override
   final name = 'macos';
 
   @override
-  bool get hidden => !featureFlags.isMacOSEnabled || !globals.platform.isMacOS;
+  bool get hidden => !featureFlags.isMacOSEnabled || !_toolContext.platform.isMacOS;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -42,12 +69,15 @@ class BuildMacosCommand extends BuildSubCommand {
   String get description => 'Build a macOS desktop application.';
 
   @override
-  bool get supported => globals.platform.isMacOS;
+  bool get supported => _toolContext.platform.isMacOS;
 
   bool get configOnly => boolArg('config-only');
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final FileSystem fs = _toolContext.fs;
+    final Logger logger = this.logger;
+
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit(
@@ -58,15 +88,18 @@ class BuildMacosCommand extends BuildSubCommand {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
 
+    final bool verbose =
+        (globalResults?[FlutterGlobalOptions.kVerboseFlag] as bool? ?? false) || logger.isVerbose;
+
     await buildMacOS(
       flutterProject: project,
       buildInfo: buildInfo,
       targetOverride: targetFile,
-      verboseLogging: globals.logger.isVerbose,
+      verboseLogging: verbose,
       configOnly: configOnly,
       sizeAnalyzer: SizeAnalyzer(
-        fileSystem: globals.fs,
-        logger: globals.logger,
+        fileSystem: fs,
+        logger: logger,
         appFilenamePattern: 'App',
         analytics: analytics,
       ),
