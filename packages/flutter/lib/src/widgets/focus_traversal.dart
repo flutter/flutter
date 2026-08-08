@@ -814,6 +814,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     TraversalDirection direction, {
     bool forward = true,
   }) {
+    // A scope's rect spans all of its children. If the focused child is a
+    // scope, search from its innermost focused node instead, so that the
+    // geometry reflects where focus actually is.
+    while (focusedChild is FocusScopeNode && focusedChild.focusedChild != null) {
+      focusedChild = focusedChild.focusedChild!;
+    }
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:
