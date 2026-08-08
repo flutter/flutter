@@ -1110,7 +1110,11 @@ class FakeCache extends Fake implements Cache {
       const MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path');
 
   @override
+  Future<bool> lock() async => true;
+
+  @override
   void releaseLock() {}
+
 
   @override
   Future<void> updateAll(

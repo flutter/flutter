@@ -86,6 +86,7 @@ class BuildCommand extends FlutterCommand {
     AndroidBuilder? androidBuilder,
     AndroidContext? androidContext,
     AppleContext? appleContext,
+    FeatureFlags? featureFlags,
     OutputPreferences? outputPreferences,
     PreRunValidator? preRunValidator,
     ToolContext? toolContext,
@@ -93,21 +94,24 @@ class BuildCommand extends FlutterCommand {
   }) : super(analytics: analytics, outputPreferences: outputPreferences, toolContext: toolContext) {
     final Analytics effectiveAnalytics =
         analytics ?? (context.get<Analytics>() ?? const NoOpAnalytics());
+    final FeatureFlags effectiveFeatureFlags =
+        featureFlags ?? (context.get<FeatureFlags>() ?? const _DefaultFeatureFlags());
     final Platform effectivePlatform =
         (platform.isMacOS || context.get<Platform>() == null || !context.get<Platform>()!.isMacOS)
         ? platform
         : context.get<Platform>()!;
     final persistentToolState = PersistentToolState.test(
-      directory: fileSystem.directory('.tmp_state'),
+      directory: fileSystem.directory('.tmp_state')..createSync(recursive: true),
       logger: logger,
     );
+
     final ProcessUtils effectiveProcessUtils =
         processUtils ?? ProcessUtils(processManager: processManager, logger: logger);
     final OutputPreferences effectiveOutputPreferences =
         outputPreferences ?? (context.get<OutputPreferences>() ?? OutputPreferences.test());
     final ToolContext effectiveToolContext =
         toolContext ??
-        ToolContext(
+        (_fallbackToolContext = ToolContext(
           artifacts: artifacts,
           botDetector: BotDetector(
             httpClientFactory: () => HttpClient(),
@@ -152,7 +156,8 @@ class BuildCommand extends FlutterCommand {
               ? terminal
               : AnsiTerminal(stdio: Stdio(), platform: platform),
           userMessages: UserMessages(),
-        );
+        ));
+
     final AndroidContext effectiveAndroidContext =
         androidContext ??
         AndroidContext(
@@ -214,7 +219,7 @@ class BuildCommand extends FlutterCommand {
                 ),
           ),
           iosWorkflow: IOSWorkflow(
-            featureFlags: featureFlags,
+            featureFlags: effectiveFeatureFlags,
             xcode:
                 xcode ??
                 Xcode(
@@ -356,8 +361,9 @@ class BuildCommand extends FlutterCommand {
         artifacts: artifacts,
         buildSystem: buildSystem,
         cache: cache,
-        featureFlags: featureFlags,
+        featureFlags: effectiveFeatureFlags,
         fileSystem: fileSystem,
+
         flutterVersion: flutterVersion,
         platform: platform,
         processManager: processManager,
@@ -402,10 +408,22 @@ class BuildCommand extends FlutterCommand {
       ),
     );
     _addSubcommand(
-      BuildLinuxCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
+      BuildLinuxCommand(
+        analytics: effectiveAnalytics,
+        buildSystem: buildSystem,
+        featureFlags: effectiveFeatureFlags,
+        toolContext: effectiveToolContext,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
-      BuildWindowsCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
+      BuildWindowsCommand(
+        analytics: effectiveAnalytics,
+        buildSystem: buildSystem,
+        featureFlags: effectiveFeatureFlags,
+        toolContext: effectiveToolContext,
+        verboseHelp: verboseHelp,
+      ),
     );
   }
 
@@ -415,8 +433,14 @@ class BuildCommand extends FlutterCommand {
     }
   }
 
+  ToolContext? _fallbackToolContext;
+
+  @override
+  ToolContext? get toolContext => super.toolContext ?? _fallbackToolContext;
+
   @override
   final name = 'build';
+
 
   @override
   final description = 'Build an executable app or install bundle.';
@@ -450,4 +474,17 @@ abstract class BuildSubCommand extends FlutterCommand {
 class _NoopPreRunValidator implements PreRunValidator {
   @override
   void validate() {}
+}
+
+class _DefaultFeatureFlags implements FeatureFlags {
+  const _DefaultFeatureFlags();
+
+  @override
+  bool get isLinuxEnabled => true;
+
+  @override
+  bool get isWindowsEnabled => true;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => false;
 }
