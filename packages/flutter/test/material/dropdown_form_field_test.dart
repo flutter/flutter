@@ -1056,7 +1056,7 @@ void main() {
     expect(find.text(currentValue), findsOneWidget);
 
     // Tap the DropdownButtonFormField widget
-    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.tap(find.text(currentValue));
     await tester.pumpAndSettle();
 
     // Tap the first dropdown menu item.
