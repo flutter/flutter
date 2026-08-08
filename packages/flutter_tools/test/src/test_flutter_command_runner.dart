@@ -9,19 +9,27 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'context.dart';
+import 'fakes.dart';
 
 export 'package:test/test.dart' hide isInstanceOf, test;
 
-CommandRunner<void> createTestCommandRunner([FlutterCommand? command]) {
-  final FlutterCommandRunner runner = TestFlutterCommandRunner();
+CommandRunner<void> createTestCommandRunner([FlutterCommand? command, Analytics? analytics]) {
+  final ToolContext? toolContext = command?.toolContext;
+  final FlutterCommandRunner runner = TestFlutterCommandRunner(
+    toolContext: toolContext,
+    toolDependencies: (toolContext != null || analytics != null)
+        ? FakeToolDependencies(analytics: analytics, toolContext: toolContext)
+        : null,
+  );
   if (command != null) {
     runner.addCommand(command);
   }
@@ -35,34 +43,59 @@ Future<String> createProject(
   Directory temp, {
   String name = 'flutter_project',
   List<String>? arguments,
+  ToolContext? toolContext,
 }) async {
   arguments ??= <String>['--no-pub'];
-  final String projectPath = globals.fs.path.join(temp.path, name);
-  final command = CreateCommand();
-  final CommandRunner<void> runner = createTestCommandRunner(command);
+  final FileSystem fs = toolContext?.fs ?? globals.fs;
+  final String projectPath = fs.path.join(temp.path, name);
+  final command = CreateCommand(
+    toolContext:
+        toolContext ??
+        FakeToolContext(
+          fs: fs,
+          logger: globals.logger,
+          platform: globals.platform,
+          processManager: globals.processManager,
+          cache: globals.cache,
+          flutterVersion: FakeFlutterVersion(),
+        ),
+  );
+  Analytics? analytics;
+  try {
+    analytics = context.get<Analytics>();
+  } on UnsupportedError {
+    // In testWithoutContext, context.get is not supported.
+  }
+  final CommandRunner<void> runner = createTestCommandRunner(command, analytics);
   await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
+  TestFlutterCommandRunner({super.toolDependencies, super.toolContext});
+
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Logger topLevelLogger = globals.logger;
+    final Logger? topLevelLogger = toolContext?.logger ?? context.get<Logger>();
     final contextOverrides = <Type, dynamic>{
-      if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
+      if (topLevelLogger != null && (topLevelResults['verbose'] as bool))
+        Logger: VerboseLogger(topLevelLogger),
     };
     return context.run<void>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-          platform: globals.platform,
-          fileSystem: globals.fs,
-          userMessages: UserMessages(),
-        );
-        // For compatibility with tests that set this to a relative path.
-        Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot!));
+        if (toolContext != null) {
+          Cache.flutterRoot ??= Cache.defaultFlutterRoot(
+            platform: toolContext!.platform,
+            fileSystem: toolContext!.fs,
+            userMessages: toolContext!.userMessages,
+          );
+          Cache.flutterRoot = toolContext!.fs.path.normalize(
+            toolContext!.fs.path.absolute(Cache.flutterRoot!),
+          );
+        }
         return super.runCommand(topLevelResults);
       },
     );
@@ -70,6 +103,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   @override
   void printUsage() {
-    testLogger.printStatus(usage);
+    (toolContext?.logger ?? testLogger).printStatus(usage);
   }
 }

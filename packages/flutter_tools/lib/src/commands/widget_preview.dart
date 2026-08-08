@@ -22,6 +22,7 @@ import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/analysis.dart';
 import '../device.dart';
@@ -57,9 +58,10 @@ class WidgetPreviewCommand extends FlutterCommand {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required Terminal terminal,
+    ToolContext? toolContext,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
-  }) {
+  }) : super(toolContext: toolContext) {
     addSubcommand(
       WidgetPreviewStartCommand(
         verbose: verboseHelp,
@@ -75,6 +77,7 @@ class WidgetPreviewCommand extends FlutterCommand {
         dtdServicesOverride: dtdServicesOverride,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         terminal: terminal,
+        toolContext: toolContext,
       ),
     );
     addSubcommand(
@@ -97,6 +100,8 @@ class WidgetPreviewCommand extends FlutterCommand {
 }
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
+  WidgetPreviewSubCommandBase({super.toolContext});
+
   FileSystem get fs;
   Logger get logger;
   FlutterProjectFactory get projectFactory;
@@ -140,6 +145,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.processManager,
     required this.artifacts,
     required this.terminal,
+    super.toolContext,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) : _logger = logger {
