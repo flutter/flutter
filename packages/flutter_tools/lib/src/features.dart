@@ -88,6 +88,9 @@ abstract class FeatureFlags {
   /// Whether to only build for arm64 when targeting macOS.
   bool get isMacOSArm64OnlyEnabled;
 
+  /// Whether support for tool extensions is enabled.
+  bool get isToolExtensionsEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -115,6 +118,7 @@ abstract class FeatureFlags {
     uiSceneMigration,
     riscv64,
     macOSArm64Only,
+    toolExtensionsFeature,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -322,6 +326,16 @@ const macOSArm64Only = Feature(
       'See https://flutter.dev/go/macos-intel-deprecation for details.',
   configSetting: 'enable-macos-arm64-only',
   environmentOverride: 'FLUTTER_MACOS_ARM64_ONLY',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Enable tool extensions feature.
+const toolExtensionsFeature = Feature(
+  name: 'support for tool extensions',
+  configSetting: 'enable-tool-extensions',
+  environmentOverride: 'FLUTTER_TOOL_EXTENSIONS',
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),
