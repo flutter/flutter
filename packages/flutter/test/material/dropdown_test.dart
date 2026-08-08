@@ -68,6 +68,7 @@ Widget buildDropdown({
   double? menuMaxHeight,
   EdgeInsetsGeometry? padding,
   InputDecoration? decoration,
+  bool enabled = true,
 }) {
   final List<DropdownMenuItem<String>>? listItems = items?.map<DropdownMenuItem<String>>((
     String item,
@@ -75,6 +76,7 @@ Widget buildDropdown({
     return DropdownMenuItem<String>(
       key: ValueKey<String>(item),
       value: item,
+      enabled: enabled,
       child: Text(item, key: ValueKey<String>('${item}Text')),
     );
   }).toList();
@@ -106,6 +108,7 @@ Widget buildDropdown({
         menuMaxHeight: menuMaxHeight,
         padding: padding,
         decoration: decoration,
+        enabled: enabled,
       ),
     );
   }
@@ -134,6 +137,7 @@ Widget buildDropdown({
     alignment: alignment,
     menuMaxHeight: menuMaxHeight,
     padding: padding,
+    enabled: enabled,
   );
 }
 
@@ -169,6 +173,7 @@ Widget buildFrame({
   bool? useMaterial3,
   InputDecoration? decoration,
   InputDecorationThemeData? localInputDecorationTheme,
+  bool enabled = true,
 }) {
   return Theme(
     data: ThemeData(useMaterial3: useMaterial3),
@@ -208,6 +213,7 @@ Widget buildFrame({
                 menuMaxHeight: menuMaxHeight,
                 padding: padding,
                 decoration: decoration,
+                enabled: enabled,
               ),
             ),
           ),
@@ -872,7 +878,7 @@ void main() {
     expect(enabledRichText.text.style!.color, Colors.grey.shade700);
 
     // test for disabled color
-    await tester.pumpWidget(buildFrame(icon: customIcon));
+    await tester.pumpWidget(buildFrame(icon: customIcon, enabled: false));
 
     final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(disabledRichText.text.style!.color, Colors.grey.shade400);
@@ -909,6 +915,7 @@ void main() {
         iconSize: 30.0,
         iconEnabledColor: Colors.pink,
         iconDisabledColor: Colors.orange,
+        enabled: false,
       ),
     );
 
@@ -1617,34 +1624,36 @@ void main() {
   testWidgets('disabledHint displays on empty items or onChanged', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({List<String>? items, ValueChanged<String?>? onChanged}) => buildFrame(
-      items: items,
-      onChanged: onChanged,
-      buttonKey: buttonKey,
-      initialValue: null,
-      hint: const Text('enabled'),
-      disabledHint: const Text('disabled'),
-    );
+    Widget build({List<String>? items, ValueChanged<String?>? onChanged, required bool enabled}) =>
+        buildFrame(
+          items: items,
+          onChanged: onChanged,
+          buttonKey: buttonKey,
+          initialValue: null,
+          hint: const Text('enabled'),
+          disabledHint: const Text('disabled'),
+          enabled: enabled,
+        );
 
     // [disabledHint] should display when [items] is null
-    await tester.pumpWidget(build(onChanged: onChanged));
+    await tester.pumpWidget(build(onChanged: onChanged, enabled: true));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
 
     // [disabledHint] should display when [items] is an empty list.
-    await tester.pumpWidget(build(items: <String>[], onChanged: onChanged));
+    await tester.pumpWidget(build(items: <String>[], onChanged: onChanged, enabled: true));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
 
-    // [disabledHint] should display when [onChanged] is null
-    await tester.pumpWidget(build(items: menuItems));
+    // [disabledHint] should display when [enabled] is false.
+    await tester.pumpWidget(build(items: menuItems, enabled: false));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
     final RenderBox disabledHintBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
 
     // A Dropdown button with a disabled hint should be the same size as a
     // one with a regular enabled hint.
-    await tester.pumpWidget(build(items: menuItems, onChanged: onChanged));
+    await tester.pumpWidget(build(items: menuItems, onChanged: onChanged, enabled: true));
     expect(find.text('disabled'), findsNothing);
     expect(find.text('enabled'), findsOneWidget);
     final RenderBox enabledHintBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
@@ -1663,16 +1672,18 @@ void main() {
       String? value,
       Widget? hint,
       Widget? disabledHint,
+      required bool enabled,
     }) => buildFrame(
       items: items,
       onChanged: onChanged,
       initialValue: value,
       hint: hint,
       disabledHint: disabledHint,
+      enabled: enabled,
     );
 
     // The selected value should be displayed when the button is disabled.
-    await tester.pumpWidget(build(items: menuItems, value: 'two'));
+    await tester.pumpWidget(build(items: menuItems, value: 'two', enabled: false));
     // The dropdown icon and the selected menu item are vertically aligned.
     expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
 
@@ -1683,18 +1694,24 @@ void main() {
         onChanged: onChanged,
         hint: const Text('hint'),
         disabledHint: const Text('disabledHint'),
+        enabled: true,
       ),
     );
     expect(tester.getCenter(find.text('hint')).dy, tester.getCenter(find.byType(Icon)).dy);
 
     // If [value] is null, the button is disabled, [disabledHint] is displayed when [disabledHint] is non-null.
     await tester.pumpWidget(
-      build(items: menuItems, hint: const Text('hint'), disabledHint: const Text('disabledHint')),
+      build(
+        items: menuItems,
+        hint: const Text('hint'),
+        disabledHint: const Text('disabledHint'),
+        enabled: false,
+      ),
     );
     expect(tester.getCenter(find.text('disabledHint')).dy, tester.getCenter(find.byType(Icon)).dy);
 
     // If [value] is null, the button is disabled, [hint] is displayed when [disabledHint] is null.
-    await tester.pumpWidget(build(items: menuItems, hint: const Text('hint')));
+    await tester.pumpWidget(build(items: menuItems, hint: const Text('hint'), enabled: false));
     expect(tester.getCenter(find.text('hint')).dy, tester.getCenter(find.byType(Icon)).dy);
 
     int? getIndex() {
@@ -1703,11 +1720,11 @@ void main() {
     }
 
     // If [value], [hint] and [disabledHint] are null, the button is disabled, nothing displayed.
-    await tester.pumpWidget(build(items: menuItems));
+    await tester.pumpWidget(build(items: menuItems, enabled: false));
     expect(getIndex(), null);
 
     // If [value], [hint] and [disabledHint] are null, the button is enabled, nothing displayed.
-    await tester.pumpWidget(build(items: menuItems, onChanged: onChanged));
+    await tester.pumpWidget(build(items: menuItems, onChanged: onChanged, enabled: true));
     expect(getIndex(), null);
   });
 
@@ -1717,6 +1734,7 @@ void main() {
       String? value,
       Widget? hint,
       Widget? disabledHint,
+      required bool enabled,
     }) {
       return MaterialApp(
         theme: ThemeData(disabledColor: Colors.pink),
@@ -1734,6 +1752,7 @@ void main() {
                   ],
                   initialValue: value,
                   onChanged: onChanged,
+                  enabled: enabled,
                 ),
               ],
             ),
@@ -1747,7 +1766,7 @@ void main() {
     }
 
     // The selected value should be displayed when the button is enabled.
-    await tester.pumpWidget(build(onChanged: onChanged, value: 'two'));
+    await tester.pumpWidget(build(onChanged: onChanged, value: 'two', enabled: true));
     // The dropdown icon and the selected menu item are vertically aligned.
     expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
     // Selected item has a normal color from [DropdownButtonFormField.style]
@@ -1755,7 +1774,7 @@ void main() {
     expect(textColor('two'), Colors.yellow);
 
     // The selected value should be displayed when the button is disabled.
-    await tester.pumpWidget(build(value: 'two'));
+    await tester.pumpWidget(build(value: 'two', enabled: false));
     expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
     // Selected item has a disabled color from [theme.disabledColor]
     // when the button is disable.
@@ -1991,6 +2010,7 @@ void main() {
           disabledHint: const SizedBox(height: 50, width: 50, child: Text('hint')),
           items: items,
           itemHeight: null,
+          enabled: false,
           selectedItemBuilder: (BuildContext context) => [
             for (final item in items)
               SizedBox.square(
@@ -2024,6 +2044,7 @@ void main() {
           disabledHint: const SizedBox(height: 125, width: 125, child: Text('hint')),
           items: items,
           itemHeight: null,
+          enabled: false,
           selectedItemBuilder: (BuildContext context) => [
             for (final item in items)
               SizedBox.square(
@@ -2866,6 +2887,7 @@ void main() {
         focusNode: focusNode,
         autofocus: true,
         focusColor: const Color(0xff00ff00),
+        enabled: false,
       ),
     );
     await tester.pump(); // Pump a frame for autofocus to take effect (although it shouldn't).
@@ -4065,6 +4087,7 @@ void main() {
           child: DropdownButton<String>(
             key: key,
             onChanged: null,
+            enabled: false,
             items: <String>['One', 'Two', 'Three', 'Four'].map<DropdownMenuItem<String>>((
               String value,
             ) {
@@ -4166,36 +4189,34 @@ void main() {
     );
   });
 
-  testWidgets(
-    'Conflicting scrollbars are not applied by ScrollBehavior to Dropdown',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/83819
-      // Open the dropdown menu
-      final Key buttonKey = UniqueKey();
-      await tester.pumpWidget(
-        buildFrame(
-          buttonKey: buttonKey,
-          initialValue: null, // nothing selected
-          items: List<String>.generate(100, (int index) => index.toString()),
-          onChanged: onChanged,
-        ),
-      );
-      await tester.tap(find.byKey(buttonKey));
-      await tester.pump();
-      await tester.pumpAndSettle(); // finish the menu animation
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to Dropdown', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83819
+    // Open the dropdown menu
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(
+      buildFrame(
+        buttonKey: buttonKey,
+        initialValue: null, // nothing selected
+        items: List<String>.generate(100, (int index) => index.toString()),
+        onChanged: onChanged,
+      ),
+    );
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pump();
+    await tester.pumpAndSettle(); // finish the menu animation
 
-      // The inherited ScrollBehavior should not apply Scrollbars since they are
-      // already built in to the widget. For iOS platform, ScrollBar directly returns
-      // CupertinoScrollbar
-      expect(
-        find.byType(CupertinoScrollbar),
-        debugDefaultTargetPlatformOverride == TargetPlatform.iOS ? findsOneWidget : findsNothing,
-      );
-      expect(find.byType(Scrollbar), findsOneWidget);
-      expect(find.byType(RawScrollbar), findsNothing);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    // The inherited ScrollBehavior should not apply Scrollbars since they are
+    // already built in to the widget. For iOS platform, ScrollBar directly returns
+    // CupertinoScrollbar
+    expect(
+      find.byType(CupertinoScrollbar),
+      debugDefaultTargetPlatformOverride == TargetPlatform.iOS ? findsOneWidget : findsNothing,
+    );
+    expect(find.byType(Scrollbar), findsOneWidget);
+    expect(find.byType(RawScrollbar), findsNothing);
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('borderRadius property works properly', (WidgetTester tester) async {
     const radius = 20.0;
@@ -4635,6 +4656,7 @@ void main() {
           disabledHint: const Text(disabledHintText),
           isFormField: true,
           decoration: const InputDecoration(hintText: decorationHintText),
+          enabled: false,
         ),
       );
 
@@ -4989,6 +5011,107 @@ void main() {
         ),
         throwsAssertionError,
       );
+    },
+  );
+
+  testWidgets('DropdownButton is disabled when enabled is false even with onChanged provided', (
+    WidgetTester tester,
+  ) async {
+    Widget buildDropdown({bool? enabled, ValueChanged<int?>? onChanged}) {
+      return MaterialApp(
+        home: Material(
+          child: DropdownButton<int>(
+            value: 1,
+            items: const <DropdownMenuItem<int>>[
+              DropdownMenuItem<int>(value: 1, child: Text('one')),
+              DropdownMenuItem<int>(value: 2, child: Text('two')),
+            ],
+            onChanged: onChanged,
+            enabled: enabled,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildDropdown(enabled: false, onChanged: (int? v) {}));
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    expect(find.text('two'), findsNothing); // Menu did not open
+  });
+
+  testWidgets('DropdownButton is enabled when enabled is true even without onChanged', (
+    WidgetTester tester,
+  ) async {
+    Widget buildDropdown({bool? enabled, ValueChanged<int?>? onChanged}) {
+      return MaterialApp(
+        home: Material(
+          child: DropdownButton<int>(
+            value: 1,
+            items: const <DropdownMenuItem<int>>[
+              DropdownMenuItem<int>(value: 1, child: Text('one')),
+              DropdownMenuItem<int>(value: 2, child: Text('two')),
+            ],
+            onChanged: onChanged,
+            enabled: enabled,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildDropdown(enabled: true));
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    expect(find.text('two'), findsOneWidget); // Menu opened
+  });
+
+  testWidgets('DropdownButton falls back to disabled when enabled is null and onChanged is null', (
+    WidgetTester tester,
+  ) async {
+    Widget buildDropdown({bool? enabled, ValueChanged<int?>? onChanged}) {
+      return MaterialApp(
+        home: Material(
+          child: DropdownButton<int>(
+            value: 1,
+            items: const <DropdownMenuItem<int>>[
+              DropdownMenuItem<int>(value: 1, child: Text('one')),
+              DropdownMenuItem<int>(value: 2, child: Text('two')),
+            ],
+            onChanged: onChanged,
+            enabled: enabled,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildDropdown());
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    expect(find.text('two'), findsNothing); // Menu did not open
+  });
+
+  testWidgets(
+    'DropdownButton falls back to enabled when enabled is null and onChanged is provided',
+    (WidgetTester tester) async {
+      Widget buildDropdown({bool? enabled, ValueChanged<int?>? onChanged}) {
+        return MaterialApp(
+          home: Material(
+            child: DropdownButton<int>(
+              value: 1,
+              items: const <DropdownMenuItem<int>>[
+                DropdownMenuItem<int>(value: 1, child: Text('one')),
+                DropdownMenuItem<int>(value: 2, child: Text('two')),
+              ],
+              onChanged: onChanged,
+              enabled: enabled,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildDropdown(onChanged: (int? v) {}));
+      await tester.tap(find.text('one'));
+      await tester.pumpAndSettle();
+      expect(find.text('two'), findsOneWidget); // Menu opened
     },
   );
 }
