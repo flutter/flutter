@@ -12,12 +12,15 @@
 
 namespace flutter {
 
-// This value needs to be larger than the number of swapchain images
-// that a typical image reader will produce to ensure that we effectively
-// cache. If the value is too small, we will unnecessarily churn through
-// images, while if it is too large we may retain images longer than
-// necessary.
-static constexpr size_t kImageReaderSwapchainSize = 6u;
+// Android BufferQueue supports at most 64 slots
+// (`BufferQueueDefs::NUM_BUFFER_SLOTS`):
+// https://android.googlesource.com/platform/frameworks/native/+/refs/heads/main/libs/ui/include/ui/BufferQueueDefs.h
+//
+// Matching that limit lets a stable producer buffer pool be retained without
+// evicting reusable imports. Images are retained only as buffer IDs are
+// observed; once all slots are occupied, normal LRU eviction keeps retention
+// bounded.
+static constexpr size_t kImageReaderSwapchainSize = 64u;
 
 using HardwareBufferKey = uint64_t;
 
