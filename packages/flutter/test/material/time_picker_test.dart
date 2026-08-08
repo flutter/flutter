@@ -674,23 +674,21 @@ void main() {
         expect(find.text('Cancel'), findsOneWidget);
       });
 
-      testWidgets(
-        'Material3 - large actions label should not overflow in input mode',
-        (WidgetTester tester) async {
-          await startPicker(
-            tester,
-            (TimeOfDay? time) {},
-            entryMode: TimePickerEntryMode.input,
-            materialType: MaterialType.material3,
-            cancelText: 'Very very very long cancel text',
-            confirmText: 'Very very very long confirm text',
-          );
+      testWidgets('Material3 - large actions label should not overflow in input mode', (
+        WidgetTester tester,
+      ) async {
+        await startPicker(
+          tester,
+          (TimeOfDay? time) {},
+          entryMode: TimePickerEntryMode.input,
+          materialType: MaterialType.material3,
+          cancelText: 'Very very very long cancel text',
+          confirmText: 'Very very very long confirm text',
+        );
 
-          // Verify that no overflow errors occur.
-          expect(tester.takeException(), isNull);
-        },
-        variant: TargetPlatformVariant.mobile(),
-      );
+        // Verify that no overflow errors occur.
+        expect(tester.takeException(), isNull);
+      }, variant: TargetPlatformVariant.mobile());
 
       testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (
         WidgetTester tester,
@@ -2096,6 +2094,76 @@ void main() {
         expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
       });
 
+      testWidgets('parses localized digits in input fields', (WidgetTester tester) async {
+        const localizedDigitLocales = <Locale>[
+          Locale('en'),
+          Locale('ar'),
+          Locale('fa'),
+          Locale('bn'),
+          Locale('my'),
+          Locale('th'),
+          Locale('ne'),
+          Locale('fr'),
+          Locale('de'),
+          Locale('pt'),
+        ];
+
+        Future<void> verifyLocale(Locale locale) async {
+          TimeOfDay? result;
+
+          await tester.pumpWidget(
+            MaterialApp(
+              localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: <Locale>[const Locale('en'), locale],
+              restorationScopeId: 'app',
+              locale: locale,
+              theme: ThemeData(useMaterial3: materialType == MaterialType.material3),
+              home: _TimePickerLauncher(
+                onChanged: (TimeOfDay? time) {
+                  result = time;
+                },
+                emptyInitialInput: false,
+              ),
+            ),
+          );
+
+          // Open the picker.
+          await tester.tap(find.text('X'));
+          await tester.pumpAndSettle();
+
+          // Switch to input mode and read the text fields.
+          await tester.tap(find.byIcon(Icons.keyboard_outlined));
+          await tester.pumpAndSettle();
+
+          final TextField hourField = tester.widget(find.byType(TextField).first);
+          final TextField minuteField = tester.widget(find.byType(TextField).last);
+
+          final String hourText = hourField.controller?.text ?? '';
+          final String minuteText = minuteField.controller?.text ?? '';
+
+          final BuildContext context = tester.element(find.byType(TextField).first);
+
+          const timeOfDay = TimeOfDay(hour: 7, minute: 0);
+          final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+          final String localizedHour = localizations.formatHour(timeOfDay);
+          expect(hourText, equals(localizedHour));
+          final String localizedMinute = localizations.formatMinute(timeOfDay);
+          expect(minuteText, equals(localizedMinute));
+
+          await finishPicker(tester);
+
+          expect(result, equals(timeOfDay));
+        }
+
+        for (final locale in localizedDigitLocales) {
+          await verifyLocale(locale);
+        }
+      });
+
       testWidgets('Toggle to dial mode keeps selected time', (WidgetTester tester) async {
         late TimeOfDay result;
         await startPicker(
@@ -2593,57 +2661,52 @@ void main() {
     },
   );
 
-  testWidgets(
-    'AM/PM buttons have correct selected/checked semantics for platform variant',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/173302
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (BuildContext context) {
-              return TextButton(
-                onPressed: () {
-                  showTimePicker(
-                    context: context,
-                    initialTime: const TimeOfDay(hour: 14, minute: 0),
-                  );
-                },
-                child: const Text('Open Picker'),
-              );
-            },
-          ),
+  testWidgets('AM/PM buttons have correct selected/checked semantics for platform variant', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/173302
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return TextButton(
+              onPressed: () {
+                showTimePicker(context: context, initialTime: const TimeOfDay(hour: 14, minute: 0));
+              },
+              child: const Text('Open Picker'),
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text('Open Picker'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Open Picker'));
+    await tester.pumpAndSettle();
 
-      final Finder pmButtonSemantics = find.ancestor(
-        of: find.widgetWithText(InkWell, 'PM'),
-        matching: find.byWidgetPredicate(
-          (Widget widget) => widget is Semantics && (widget.properties.button ?? false),
-        ),
-      );
+    final Finder pmButtonSemantics = find.ancestor(
+      of: find.widgetWithText(InkWell, 'PM'),
+      matching: find.byWidgetPredicate(
+        (Widget widget) => widget is Semantics && (widget.properties.button ?? false),
+      ),
+    );
 
-      final Finder amButtonSemantics = find.ancestor(
-        of: find.widgetWithText(InkWell, 'AM'),
-        matching: find.byWidgetPredicate(
-          (Widget widget) => widget is Semantics && (widget.properties.button ?? false),
-        ),
-      );
+    final Finder amButtonSemantics = find.ancestor(
+      of: find.widgetWithText(InkWell, 'AM'),
+      matching: find.byWidgetPredicate(
+        (Widget widget) => widget is Semantics && (widget.properties.button ?? false),
+      ),
+    );
 
-      bool? getPlatformSemanticProperty(Semantics semantics) {
-        return switch (defaultTargetPlatform) {
-          TargetPlatform.iOS => semantics.properties.selected,
-          _ => semantics.properties.checked,
-        };
-      }
+    bool? getPlatformSemanticProperty(Semantics semantics) {
+      return switch (defaultTargetPlatform) {
+        TargetPlatform.iOS => semantics.properties.selected,
+        _ => semantics.properties.checked,
+      };
+    }
 
-      expect(getPlatformSemanticProperty(tester.widget<Semantics>(pmButtonSemantics)), isTrue);
-      expect(getPlatformSemanticProperty(tester.widget<Semantics>(amButtonSemantics)), isFalse);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    expect(getPlatformSemanticProperty(tester.widget<Semantics>(pmButtonSemantics)), isTrue);
+    expect(getPlatformSemanticProperty(tester.widget<Semantics>(amButtonSemantics)), isFalse);
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('TimePickerDialog does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
