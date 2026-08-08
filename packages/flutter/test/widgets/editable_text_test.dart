@@ -18869,6 +18869,59 @@ void main() {
     // [intended] only applies to platforms where we supply the context menu.
     skip: kIsWeb,
   );
+  group('TextInputAction updates', () {
+    testWidgets('EditableText updates textInputAction when text changes', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+
+      TextInputAction currentAction = TextInputAction.done;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return EditableText(
+                controller: controller,
+                textInputAction: currentAction,
+                focusNode: focusNode,
+                style: const TextStyle(),
+                cursorColor: const Color(0xFF0000FF),
+                backgroundCursorColor: const Color(0xFF0A0A0A),
+                onChanged: (String value) {
+                  setState(() {
+                    currentAction = value.isNotEmpty ? TextInputAction.send : TextInputAction.done;
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.idle();
+
+      // Initial: empty, "done"
+      expect(controller.text, isEmpty);
+      expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
+
+      // Type text: action changes to "send"
+      await tester.enterText(find.byType(EditableText), 'hello');
+      await tester.pumpAndSettle();
+      expect(controller.text, equals('hello'));
+      expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.send'));
+
+      // Clear text: action changes back to "done"
+      await tester.enterText(find.byType(EditableText), '');
+      await tester.pumpAndSettle();
+      expect(controller.text, isEmpty);
+      expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {
