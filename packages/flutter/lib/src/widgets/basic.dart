@@ -5315,6 +5315,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
     this.spacing = 0.0,
+    this.ignoreZeroSizeChildrenForSpacing = false,
     super.children,
   }) : assert(
          !identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null,
@@ -5427,6 +5428,9 @@ class Flex extends MultiChildRenderObjectWidget {
   /// {@macro flutter.rendering.RenderFlex.spacing}
   final double spacing;
 
+  /// {@macro flutter.rendering.RenderFlex.ignoreZeroSizeChildrenForSpacing}
+  final bool ignoreZeroSizeChildrenForSpacing;
+
   bool get _needTextDirection {
     switch (direction) {
       case Axis.horizontal:
@@ -5469,6 +5473,7 @@ class Flex extends MultiChildRenderObjectWidget {
       textBaseline: textBaseline,
       clipBehavior: clipBehavior,
       spacing: spacing,
+      ignoreZeroSizeChildrenForSpacing: ignoreZeroSizeChildrenForSpacing,
     );
   }
 
@@ -5483,7 +5488,8 @@ class Flex extends MultiChildRenderObjectWidget {
       ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline
       ..clipBehavior = clipBehavior
-      ..spacing = spacing;
+      ..spacing = spacing
+      ..ignoreZeroSizeChildrenForSpacing = ignoreZeroSizeChildrenForSpacing;
   }
 
   @override
@@ -5506,6 +5512,14 @@ class Flex extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
     properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
+    properties.add(
+      FlagProperty(
+        'ignoreZeroSizeChildrenForSpacing',
+        value: ignoreZeroSizeChildrenForSpacing,
+        ifTrue: 'ignoring zero-size children for spacing',
+        defaultValue: false,
+      ),
+    );
   }
 }
 
@@ -5713,6 +5727,7 @@ class Row extends Flex {
     super.verticalDirection,
     super.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     super.spacing,
+    super.ignoreZeroSizeChildrenForSpacing,
     super.children,
   }) : super(direction: Axis.horizontal);
 }
@@ -5903,6 +5918,7 @@ class Column extends Flex {
     super.verticalDirection,
     super.textBaseline,
     super.spacing,
+    super.ignoreZeroSizeChildrenForSpacing,
     super.children,
   }) : super(direction: Axis.vertical);
 }
@@ -6099,6 +6115,7 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.clipBehavior = Clip.none,
+    this.ignoreZeroSizeChildrenForSpacing = false,
     super.children,
   });
 
@@ -6137,6 +6154,9 @@ class Wrap extends MultiChildRenderObjectWidget {
   ///
   /// Defaults to 0.0.
   final double spacing;
+
+  /// {@macro flutter.rendering.RenderWrap.ignoreZeroSizeChildrenForSpacing}
+  final bool ignoreZeroSizeChildrenForSpacing;
 
   /// How the runs themselves should be placed in the cross axis.
   ///
@@ -6251,6 +6271,7 @@ class Wrap extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.maybeOf(context),
       verticalDirection: verticalDirection,
       clipBehavior: clipBehavior,
+      ignoreZeroSizeChildrenForSpacing: ignoreZeroSizeChildrenForSpacing,
     );
   }
 
@@ -6265,7 +6286,8 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context)
       ..verticalDirection = verticalDirection
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..ignoreZeroSizeChildrenForSpacing = ignoreZeroSizeChildrenForSpacing;
   }
 
   @override
@@ -6274,6 +6296,14 @@ class Wrap extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<Axis>('direction', direction));
     properties.add(EnumProperty<WrapAlignment>('alignment', alignment));
     properties.add(DoubleProperty('spacing', spacing));
+    properties.add(
+      FlagProperty(
+        'ignoreZeroSizeChildrenForSpacing',
+        value: ignoreZeroSizeChildrenForSpacing,
+        ifTrue: 'ignoring zero-size children for spacing',
+        defaultValue: false,
+      ),
+    );
     properties.add(EnumProperty<WrapAlignment>('runAlignment', runAlignment));
     properties.add(DoubleProperty('runSpacing', runSpacing));
     properties.add(EnumProperty<WrapCrossAlignment>('crossAxisAlignment', crossAxisAlignment));
