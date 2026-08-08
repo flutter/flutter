@@ -141,6 +141,7 @@ class SkwasmRenderer extends Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    ui.Hyphens? hyphens,
   }) => SkwasmParagraphStyle(
     textAlign: textAlign,
     textDirection: textDirection,
@@ -154,6 +155,7 @@ class SkwasmRenderer extends Renderer {
     strutStyle: strutStyle,
     ellipsis: ellipsis,
     locale: locale,
+    hyphens: hyphens,
   );
 
   @override

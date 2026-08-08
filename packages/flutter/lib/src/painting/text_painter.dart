@@ -31,7 +31,7 @@ import 'text_scaler.dart';
 import 'text_span.dart';
 import 'text_style.dart';
 
-export 'dart:ui' show LineMetrics;
+export 'dart:ui' show Hyphens, LineMetrics;
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
 /// The default font size if none is specified.
@@ -610,6 +610,7 @@ class TextPainter {
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     TextHeightBehavior? textHeightBehavior,
+    Hyphens hyphens = Hyphens.manual,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -627,7 +628,8 @@ class TextPainter {
        _locale = locale,
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
-       _textHeightBehavior = textHeightBehavior {
+       _textHeightBehavior = textHeightBehavior,
+       _hyphens = hyphens {
     assert(debugMaybeDispatchCreated('painting', 'TextPainter', this));
   }
 
@@ -656,6 +658,7 @@ class TextPainter {
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     TextHeightBehavior? textHeightBehavior,
+    Hyphens hyphens = Hyphens.manual,
     double minWidth = 0.0,
     double maxWidth = double.infinity,
   }) {
@@ -676,6 +679,7 @@ class TextPainter {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
+      hyphens: hyphens,
     )..layout(minWidth: minWidth, maxWidth: maxWidth);
 
     try {
@@ -710,6 +714,7 @@ class TextPainter {
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     TextHeightBehavior? textHeightBehavior,
+    Hyphens hyphens = Hyphens.manual,
     double minWidth = 0.0,
     double maxWidth = double.infinity,
   }) {
@@ -730,6 +735,7 @@ class TextPainter {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
+      hyphens: hyphens,
     )..layout(minWidth: minWidth, maxWidth: maxWidth);
 
     try {
@@ -1031,6 +1037,23 @@ class TextPainter {
     markNeedsLayout();
   }
 
+  /// {@template flutter.painting.textPainter.hyphens}
+  /// The behavior of soft hyphens (U+00AD) at a line break.
+  ///
+  /// Defaults to [Hyphens.manual], which renders a hyphen glyph at a line break
+  /// that falls on a soft hyphen. [Hyphens.hidden] suppresses the glyph; the line
+  /// still breaks at U+00AD regardless.
+  /// {@endtemplate}
+  Hyphens get hyphens => _hyphens;
+  Hyphens _hyphens;
+  set hyphens(Hyphens value) {
+    if (_hyphens == value) {
+      return;
+    }
+    _hyphens = value;
+    markNeedsLayout();
+  }
+
   /// An ordered list of [TextBox]es that bound the positions of the placeholders
   /// in the paragraph.
   ///
@@ -1093,6 +1116,7 @@ class TextPainter {
       textScaler: textScaler,
       maxLines: _maxLines,
       textHeightBehavior: _textHeightBehavior,
+      hyphens: _hyphens,
       ellipsis: _ellipsis,
       locale: _locale,
       strutStyle: _strutStyle,

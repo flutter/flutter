@@ -391,6 +391,7 @@ class CanvasKitRenderer extends Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    ui.Hyphens? hyphens,
   }) => isWebParagraphEnabled
       ? WebParagraphStyle(
           textAlign: textAlign,
@@ -405,6 +406,7 @@ class CanvasKitRenderer extends Renderer {
           strutStyle: strutStyle as WebStrutStyle?,
           ellipsis: ellipsis,
           locale: locale,
+          hyphens: hyphens,
         )
       : CkParagraphStyle(
           textAlign: textAlign,
@@ -419,6 +421,7 @@ class CanvasKitRenderer extends Renderer {
           strutStyle: strutStyle,
           ellipsis: ellipsis,
           locale: locale,
+          hyphens: hyphens,
         );
 
   @override

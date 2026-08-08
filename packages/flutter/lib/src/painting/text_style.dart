@@ -1396,6 +1396,7 @@ class TextStyle with Diagnosticable {
     String? ellipsis,
     int? maxLines,
     TextHeightBehavior? textHeightBehavior,
+    Hyphens? hyphens,
     Locale? locale,
     String? fontFamily,
     double? fontSize,
@@ -1424,6 +1425,7 @@ class TextStyle with Diagnosticable {
       fontSize: textScaler.scale(fontSize ?? this.fontSize ?? kDefaultFontSize),
       height: height ?? this.height,
       textHeightBehavior: effectiveTextHeightBehavior,
+      hyphens: hyphens,
       strutStyle: strutStyle == null
           ? null
           : ui.StrutStyle(
