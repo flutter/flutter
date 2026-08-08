@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "flutter/fml/logging.h"
+#include "third_party/skia/include/codec/SkEncodedImageFormat.h"
 #include "third_party/skia/include/codec/SkEncodedOrigin.h"
 #include "third_party/skia/include/codec/SkPixmapUtils.h"
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -177,7 +178,10 @@ bool BuiltinSkiaCodecImageGenerator::GetPixels(
   }
 
   SkCodec::Result result = codec_->getPixels(temp_pixmap, &options);
-  if (result != SkCodec::kSuccess) {
+  const bool allow_incomplete =
+      (result == SkCodec::kIncompleteInput) &&
+      (codec_->getEncodedFormat() == SkEncodedImageFormat::kJPEG);
+  if (result != SkCodec::kSuccess && !allow_incomplete) {
     FML_DLOG(WARNING) << "codec could not get pixels. "
                       << SkCodec::ResultToString(result);
     return false;
