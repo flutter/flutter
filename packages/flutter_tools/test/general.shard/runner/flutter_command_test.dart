@@ -653,6 +653,45 @@ void main() {
     );
 
     testUsingContext(
+      'reports an explicit --[no-]enable-hcpp to gradle so it overrides the manifest',
+      () async {
+        final enabledCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(enabledCommand).run(<String>['dummy', '--enable-hcpp']);
+        final BuildInfo enabledBuildInfo = await enabledCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(enabledBuildInfo.explicitAndroidEnableHcpp, isTrue);
+        expect(enabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+
+        // The negation has to be reported too, otherwise gradle cannot tell it apart from the
+        // flag being absent and would leave a manifest value of true in place.
+        final disabledCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(disabledCommand).run(<String>['dummy', '--no-enable-hcpp']);
+        final BuildInfo disabledBuildInfo = await disabledCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(disabledBuildInfo.explicitAndroidEnableHcpp, isFalse);
+        expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
+
+        // Without the flag nothing is reported, so the manifest decides.
+        final defaultCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(defaultCommand).run(<String>['dummy']);
+        final BuildInfo defaultBuildInfo = await defaultCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(defaultBuildInfo.explicitAndroidEnableHcpp, isNull);
+        expect(
+          defaultBuildInfo.toGradleConfig(),
+          isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'use fileSystemScheme to generate BuildInfo',
       () async {
         final flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
@@ -2106,5 +2145,11 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 class DummyMachineFlutterCommand extends DummyFlutterCommand {
   DummyMachineFlutterCommand() : super(name: 'dummy') {
     addMachineOutputFlag(verboseHelp: false);
+  }
+}
+
+class DummyHcppFlutterCommand extends DummyFlutterCommand {
+  DummyHcppFlutterCommand() : super(name: 'dummy') {
+    addEnableHcppFlag(verboseHelp: false);
   }
 }
