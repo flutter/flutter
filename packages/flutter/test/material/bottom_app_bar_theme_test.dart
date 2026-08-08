@@ -207,6 +207,7 @@ void main() {
       );
 
       await tester.pumpWidget(_withTheme(babTheme: theme, useMaterial3: false));
+      await tester.pumpAndSettle();
 
       await expectLater(
         find.byKey(_painterKey),
