@@ -180,7 +180,15 @@ void testWidgets(
         if (semanticsEnabled) {
           semanticsHandle = tester.ensureSemantics();
         }
+        // testWidgets owns the package:test tearDown callbacks, so it can
+        // defer binding invariant verification until after user addTearDown
+        // callbacks and before postTest. Lower-level binding.runTest callers
+        // keep the immediate invariant check inside runTest.
+        // ignore: invalid_use_of_protected_member
+        binding.deferInvariantsUntilAfterTestTearDown();
         test_package.addTearDown(binding.postTest);
+        // ignore: invalid_use_of_protected_member
+        test_package.addTearDown(binding.verifyInvariantsAfterTestTearDown);
         return binding.runTest(
           () async {
             debugResetSemanticsIdCounter();
