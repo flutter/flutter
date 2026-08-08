@@ -363,9 +363,9 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     }
 
     final controller = StreamController<Object?>();
-    addTearDown(() async {
+    addTearDown(() {
       if (!controller.isClosed) {
-        await controller.close();
+        return controller.close();
       }
     });
 
