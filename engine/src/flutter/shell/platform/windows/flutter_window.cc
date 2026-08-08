@@ -382,9 +382,8 @@ PointerLocation FlutterWindow::GetPrimaryPointerLocation() {
 }
 
 FlutterEngineDisplayId FlutterWindow::GetDisplayId() {
-  FlutterEngineDisplayId const display_id =
-      reinterpret_cast<FlutterEngineDisplayId>(
-          MonitorFromWindow(GetWindowHandle(), MONITOR_DEFAULTTONEAREST));
+  FlutterEngineDisplayId const display_id = DisplayManagerWin32::ToDisplayId(
+      MonitorFromWindow(GetWindowHandle(), MONITOR_DEFAULTTONEAREST));
   if (!display_manager_->FindById(display_id)) {
     FML_LOG(ERROR) << "Current monitor not found in display list.";
   }
