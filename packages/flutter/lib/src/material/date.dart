@@ -4,10 +4,12 @@
 
 /// @docImport 'calendar_date_picker.dart';
 /// @docImport 'date_picker.dart';
+/// @docImport 'input_date_picker_form_field.dart';
 /// @docImport 'text_field.dart';
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'material_localizations.dart';
@@ -152,6 +154,15 @@ abstract class CalendarDelegate<T extends DateTime> {
   /// The help text used on an empty [InputDatePickerFormField] to indicate
   /// to the user the date format being asked for.
   String dateHelpText(MaterialLocalizations localizations);
+
+  /// Optional list of [TextInputFormatter]s applied to the date input field.
+  ///
+  /// These formatters control and restrict how the user enters text, such as
+  /// enforcing a specific date mask.
+  ///
+  /// The functionality of date input and validation relies on consistency between
+  /// these formatters and the [parseCompactDate] method.
+  List<TextInputFormatter>? keyboardInputFormatters(MaterialLocalizations localizations) => null;
 }
 
 /// A [CalendarDelegate] implementation for the Gregorian calendar system.

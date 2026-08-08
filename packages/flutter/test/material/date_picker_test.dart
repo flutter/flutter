@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/clipboard_utils.dart';
 
 void main() {
@@ -2765,6 +2766,84 @@ void main() {
     );
     expect(tester.getSize(find.byType(DatePickerDialog)).isEmpty, isTrue);
   });
+
+  group('Date TextInputFormatter', () {
+    DateTime? result;
+
+    Widget buildApp(Widget child) {
+      return MaterialApp(
+        home: Scaffold(body: Center(child: child)),
+      );
+    }
+
+    Future<void> openPicker(WidgetTester tester) async {
+      final BuildContext context = tester.element(find.text('Open'));
+
+      result = await showDatePicker(
+        context: context,
+        initialDate: initialDate,
+        firstDate: firstDate,
+        lastDate: lastDate,
+        initialEntryMode: DatePickerEntryMode.input,
+        calendarDelegate: const _TestDateInputDelegate(),
+      );
+    }
+
+    testWidgets('applies inputFormatters and allows text entry parsing', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildApp(ElevatedButton(onPressed: () => openPicker(tester), child: const Text('Open'))),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '20240620');
+      await tester.pump();
+
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      expect(result, DateTime(2024, 6, 20));
+    });
+
+    testWidgets('filters non-digit input via inputFormatters', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildApp(ElevatedButton(onPressed: () => openPicker(tester), child: const Text('Open'))),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      final Finder textFieldFinder = find.byType(TextField);
+
+      await tester.enterText(textFieldFinder, '2024-06-20');
+      await tester.pump();
+
+      final TextField textField = tester.widget<TextField>(textFieldFinder);
+      // Verify that hyphens were removed by the formatter.
+      expect(textField.controller!.text, '20240620');
+    });
+
+    testWidgets('rejects alphabetic characters via inputFormatters', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildApp(ElevatedButton(onPressed: () => openPicker(tester), child: const Text('Open'))),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      final Finder textFieldFinder = find.byType(TextField);
+
+      await tester.enterText(textFieldFinder, '20ab24cd0620');
+      await tester.pump();
+
+      final TextField textField = tester.widget<TextField>(textFieldFinder);
+      // Only digits should remain in the controller.
+      expect(textField.controller!.text, '20240620');
+    });
+  });
 }
 
 class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
@@ -2894,5 +2973,52 @@ class TestCalendarDelegate extends GregorianCalendarDelegate {
   @override
   int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
     return 1;
+  }
+}
+
+class _TestDateInputDelegate extends GregorianCalendarDelegate {
+  const _TestDateInputDelegate();
+
+  @override
+  String dateHelpText(MaterialLocalizations localizations) {
+    return 'yyyymmdd';
+  }
+
+  @override
+  String formatCompactDate(DateTime date, MaterialLocalizations localizations) {
+    final String year = date.year.toString().padLeft(4, '0');
+    final String month = date.month.toString().padLeft(2, '0');
+    final String day = date.day.toString().padLeft(2, '0');
+    return '$year$month$day';
+  }
+
+  @override
+  DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations) {
+    if (inputString == null || inputString.length != 8) {
+      return null;
+    }
+
+    try {
+      final int year = int.parse(inputString.substring(0, 4));
+      final int month = int.parse(inputString.substring(4, 6));
+      final int day = int.parse(inputString.substring(6, 8));
+
+      final date = DateTime(year, month, day);
+      if (date.year == year && date.month == month && date.day == day) {
+        return date;
+      }
+    } catch (e) {
+      return null;
+    }
+
+    return null;
+  }
+
+  @override
+  List<TextInputFormatter>? keyboardInputFormatters(MaterialLocalizations localizations) {
+    return <TextInputFormatter>[
+      FilteringTextInputFormatter.digitsOnly,
+      LengthLimitingTextInputFormatter(8),
+    ];
   }
 }
