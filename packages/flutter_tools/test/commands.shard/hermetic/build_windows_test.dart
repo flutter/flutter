@@ -656,6 +656,36 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   );
 
   testUsingContext(
+    'Windows release build does not copy AOT PDB into the output bundle',
+    () async {
+      final fakeVisualStudio = FakeVisualStudio();
+      final command = BuildWindowsCommand(
+        logger: BufferLogger.test(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      )..visualStudioOverride = fakeVisualStudio;
+      setUpMockProjectFilesForBuild();
+      fileSystem.file(r'C:\build\windows\app.pdb').createSync(recursive: true);
+
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        cmakeGenerationCommand(),
+        buildCommand('Release'),
+      ]);
+
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['windows', '--release', '--no-pub']);
+
+      expect(fileSystem.file(r'C:\build\windows\x64\runner\Release\data\app.pdb'), isNot(exists));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => windowsPlatform,
+      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    },
+  );
+
+  testUsingContext(
     'Windows build passes correct generator',
     () async {
       const generator = 'A different generator';

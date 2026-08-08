@@ -252,7 +252,7 @@ flutter:
       testEnvironment.buildDir.childFile('app.so').createSync();
       testEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-      await const LinuxAotBundle(AotElfProfile(TargetPlatform.linux_x64)).build(testEnvironment);
+      await const LinuxAotBundle(AotDataProfile(TargetPlatform.linux_x64)).build(testEnvironment);
       await const ProfileBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
       final Directory libDir = testEnvironment.outputDir.childDirectory('lib');
       final Directory assetsDir = testEnvironment.outputDir.childDirectory('flutter_assets');
@@ -297,7 +297,7 @@ flutter:
       testEnvironment.buildDir.childFile('app.so').createSync();
       testEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-      await const LinuxAotBundle(AotElfRelease(TargetPlatform.linux_x64)).build(testEnvironment);
+      await const LinuxAotBundle(AotDataRelease(TargetPlatform.linux_x64)).build(testEnvironment);
       await const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
       final Directory libDir = testEnvironment.outputDir.childDirectory('lib');
       final Directory assetsDir = testEnvironment.outputDir.childDirectory('flutter_assets');

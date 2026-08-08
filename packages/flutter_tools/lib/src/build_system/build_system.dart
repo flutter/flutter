@@ -96,12 +96,12 @@ class BuildSystemConfig {
 ///
 /// ### Targets should only depend on files that are provided as inputs
 ///
-/// Example: gen_snapshot must be provided as an input to the aot_elf
+/// Example: gen_snapshot must be provided as an input to the aot_data
 /// build steps, even though it isn't a source file. This ensures that changes
 /// to the gen_snapshot binary (during a local engine build) correctly
 /// trigger a corresponding build update.
 ///
-/// Example: aot_elf has a dependency on the dill and packages file
+/// Example: aot_data has a dependency on the dill and packages file
 /// produced by the kernel_snapshot step.
 ///
 /// ### Targets should declare all outputs produced
