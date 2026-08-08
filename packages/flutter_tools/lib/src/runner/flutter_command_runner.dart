@@ -7,7 +7,6 @@ import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
 import 'package:unified_analytics/unified_analytics.dart';
-
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -22,6 +21,7 @@ import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
+import '../commands/skills.dart';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
@@ -229,6 +229,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       help: 'Path to a directory where logs for debugging may be added.',
       hide: !verboseHelp,
     );
+    addCommand(SkillsCommand(verboseHelp: verboseHelp));
   }
 
   @override
