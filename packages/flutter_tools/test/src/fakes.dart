@@ -1247,7 +1247,7 @@ class FakeToolContext extends Fake implements ToolContext {
         logger: logger,
         platform: platform,
         fileSystem: fs,
-        flutterRoot: Cache.flutterRoot ?? '',
+        flutterRoot: cache.flutterRoot,
       );
 
   @override
@@ -1409,7 +1409,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
         logger: logger,
         platform: platform,
         fileSystem: fs,
-        flutterRoot: Cache.flutterRoot ?? '',
+        flutterRoot: globals.cache.flutterRoot,
       );
 
   @override

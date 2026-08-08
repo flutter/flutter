@@ -418,12 +418,8 @@ abstract class FlutterVersion {
   Future<String> _fetchRemoteFrameworkCommitDate() async {
     try {
       // Fetch upstream branch's commit and tags
-      await _run(_git, ['fetch', '--tags']);
-      return _gitCommitDate(
-        git: _git,
-        gitRef: kGitTrackingUpstream,
-        workingDirectory: Cache.flutterRoot,
-      );
+      await _run(_git, ['fetch', '--tags'], flutterRoot: flutterRoot);
+      return _gitCommitDate(git: _git, gitRef: kGitTrackingUpstream, workingDirectory: flutterRoot);
     } on VersionCheckError catch (error) {
       globals.printError(error.message);
       rethrow;
@@ -973,9 +969,9 @@ class VersionCheckError implements Exception {
 /// standard output as a string.
 ///
 /// If the command fails, throws a [ToolExit] exception.
-Future<String> _run(Git git, List<String> command) async {
+Future<String> _run(Git git, List<String> command, {String? flutterRoot}) async {
   // TODO(matanlurey): Inline this in the single place it's called in this file.
-  final RunResult results = await git.run(command, workingDirectory: Cache.flutterRoot);
+  final RunResult results = await git.run(command, workingDirectory: flutterRoot);
 
   if (results.exitCode == 0) {
     return results.stdout.trim();

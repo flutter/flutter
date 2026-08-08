@@ -6,7 +6,6 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -165,7 +164,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
 }) async {
   final xcodeBuildSettings = <String>[];
 
-  final String flutterRoot = globals.fs.path.normalize(Cache.flutterRoot!);
+  final String flutterRoot = globals.fs.path.normalize(globals.cache.flutterRoot);
   xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command

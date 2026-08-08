@@ -16,7 +16,6 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -259,6 +258,7 @@ interface class FlutterTestRunner {
     required FlutterProject flutterProject,
     required File isolateSpawningTesterPackageConfigFile,
     required FileSystem fileSystem,
+    String? flutterRoot,
   }) async {
     final File packageConfigFile = fileSystem
         .directory(flutterProject.directory.path)
@@ -284,10 +284,11 @@ interface class FlutterTestRunner {
       throwToolExit('Could not find package config for ${flutterProject.directory.path}.');
     }
 
+    final String actualFlutterRoot = flutterRoot ?? '';
     // The flutter_tools package_config.json is guaranteed to include
     // package:ffi and package:test_core.
     final File flutterToolsPackageConfigFile = fileSystem
-        .directory(fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'))
+        .directory(fileSystem.path.join(actualFlutterRoot, 'packages', 'flutter_tools'))
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(

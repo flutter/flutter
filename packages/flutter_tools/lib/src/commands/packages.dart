@@ -544,7 +544,7 @@ class PackagesGetCommand extends FlutterCommand {
             cacheDir: cache.getRoot(),
             engineVersion: flutterVersion.engineRevision,
             fileSystem: fs,
-            flutterRootDir: fs.directory(Cache.flutterRoot),
+            flutterRootDir: fs.directory(cache.flutterRoot),
             outputDir: fs.directory(getBuildDirectory(config, fs)),
             processManager: processManager,
             platform: platform,

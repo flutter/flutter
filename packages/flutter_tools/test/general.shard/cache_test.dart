@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -78,23 +79,18 @@ void main() {
     });
 
     testWithoutContext('should not throw when lock is acquired', () async {
-      final String? oldRoot = Cache.flutterRoot;
-      Cache.flutterRoot = '';
-      try {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-        fileSystem
-            .file(fileSystem.path.join('bin', 'cache', 'lockfile'))
-            .createSync(recursive: true);
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final cache = Cache.test(
+        fileSystem: fileSystem,
+        flutterRoot: '',
+        processManager: FakeProcessManager.any(),
+      );
+      fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile')).createSync(recursive: true);
 
-        await cache.lock();
+      await cache.lock();
 
-        expect(cache.checkLockAcquired, returnsNormally);
-        expect(cache.releaseLock, returnsNormally);
-      } finally {
-        Cache.flutterRoot = oldRoot;
-      }
-      // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
+      expect(cache.checkLockAcquired, returnsNormally);
+      expect(cache.releaseLock, returnsNormally);
     }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
@@ -1680,7 +1676,11 @@ void main() {
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
-      cache = Cache.test(fileSystem: memoryFileSystem, processManager: FakeProcessManager.any());
+      cache = Cache.test(
+        fileSystem: memoryFileSystem,
+        flutterRoot: '',
+        processManager: FakeProcessManager.any(),
+      );
       fakeAndroidSdk = FakeAndroidSdk();
     });
 
@@ -1693,42 +1693,10 @@ void main() {
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
-    testUsingContext(
+    testWithoutContext(
       'AndroidMavenArtifacts can invoke Gradle resolve dependencies if Android SDK is present',
       () async {
-        final String? oldRoot = Cache.flutterRoot;
-        Cache.flutterRoot = '';
-        try {
-          final mavenArtifacts = AndroidMavenArtifacts(
-            cache!,
-            java: FakeJava(),
-            platform: FakePlatform(),
-          );
-          expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
-
-          final Directory gradleWrapperDir = cache!.getArtifactDirectory('gradle_wrapper')
-            ..createSync(recursive: true);
-          gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
-          gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
-
-          await mavenArtifacts.update(
-            FakeArtifactUpdater(),
-            BufferLogger.test(),
-            memoryFileSystem!,
-            FakeOperatingSystemUtils(),
-          );
-
-          expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
-          expect(fakeAndroidSdk!.reinitialized, true);
-        } finally {
-          Cache.flutterRoot = oldRoot;
-        }
-      },
-      overrides: <Type, Generator>{
-        Cache: () => cache,
-        FileSystem: () => memoryFileSystem,
-        Platform: () => FakePlatform(),
-        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        final processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
               '/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
@@ -1739,20 +1707,24 @@ void main() {
               'resolveDependencies',
             ],
           ),
-        ]),
-        AndroidSdk: () => fakeAndroidSdk,
-      },
-    );
-
-    testUsingContext(
-      'AndroidMavenArtifacts is a no-op if the Android SDK is absent',
-      () async {
+        ]);
+        final processUtils = ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: processManager,
+        );
         final mavenArtifacts = AndroidMavenArtifacts(
           cache!,
           java: FakeJava(),
           platform: FakePlatform(),
+          androidSdk: fakeAndroidSdk,
+          processUtils: processUtils,
         );
         expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
+
+        final Directory gradleWrapperDir = cache!.getArtifactDirectory('gradle_wrapper')
+          ..createSync(recursive: true);
+        gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+        gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
         await mavenArtifacts.update(
           FakeArtifactUpdater(),
@@ -1762,14 +1734,27 @@ void main() {
         );
 
         expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
-      },
-      overrides: <Type, Generator>{
-        Cache: () => cache,
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.empty(),
-        AndroidSdk: () => null, // Android SDK was not located.
+        expect(fakeAndroidSdk!.reinitialized, true);
       },
     );
+
+    testWithoutContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
+      final mavenArtifacts = AndroidMavenArtifacts(
+        cache!,
+        java: FakeJava(),
+        platform: FakePlatform(),
+      );
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
+
+      await mavenArtifacts.update(
+        FakeArtifactUpdater(),
+        BufferLogger.test(),
+        memoryFileSystem!,
+        FakeOperatingSystemUtils(),
+      );
+
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
+    });
   });
 }
 

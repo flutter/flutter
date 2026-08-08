@@ -337,12 +337,16 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.nativeAssetsBuilder,
+    Cache? cache,
+    String? flutterRoot,
   }) : _artifacts = artifacts,
        _config = config,
        _fileSystem = fileSystem,
        _platform = platform,
        _processManager = processManager,
-       _shutdownHooks = shutdownHooks {
+       _shutdownHooks = shutdownHooks,
+       _cache = cache,
+       _flutterRoot = flutterRoot {
     _testGoldenComparator = TestGoldenComparator(
       flutterTesterBinPath: flutterTesterBinPath,
       compilerFactory: () =>
@@ -371,6 +375,10 @@ class FlutterPlatform extends PlatformPlugin {
   final Platform _platform;
   final ProcessManager _processManager;
   final ShutdownHooks _shutdownHooks;
+  final Cache? _cache;
+  final String? _flutterRoot;
+
+  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
 
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
@@ -853,7 +861,7 @@ class FlutterPlatform extends PlatformPlugin {
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
       packageConfig[flutterProject!.manifest.appName],
-      Cache.flutterRoot!,
+      _flutterRootPath,
     );
     return generateTestBootstrap(
       testUrl: testUrl,

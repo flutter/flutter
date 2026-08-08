@@ -83,8 +83,7 @@ class ChannelCommand extends FlutterCommand {
     final Git git = _toolContext.git;
 
     // Beware: currentBranch could contain PII. See getBranchName().
-    final String currentChannel =
-        flutterVersion.channel; // limited to known branch names
+    final String currentChannel = flutterVersion.channel; // limited to known branch names
     assert(
       kOfficialChannels.contains(currentChannel) ||
           kObsoleteBranches.containsKey(currentChannel) ||
@@ -98,7 +97,7 @@ class ChannelCommand extends FlutterCommand {
     logger.printStatus('Flutter channels:');
     final int result = await git.stream(
       ['branch', '-r'],
-      workingDirectory: Cache.flutterRoot,
+      workingDirectory: _toolContext.cache.flutterRoot,
       mapFunction: (String line) {
         rawOutput.add(line);
         return null;
@@ -136,9 +135,7 @@ class ChannelCommand extends FlutterCommand {
           currentIndicator = '*';
           currentChannelIsOfficial = true;
         }
-        logger.printStatus(
-          '$currentIndicator $channel (${kChannelDescriptions[channel]})',
-        );
+        logger.printStatus('$currentIndicator $channel (${kChannelDescriptions[channel]})');
       }
     }
 
@@ -184,7 +181,7 @@ class ChannelCommand extends FlutterCommand {
     await _checkout(branchName, git: git, cache: cache);
     if (boolArg('cache-artifacts')) {
       await precacheArtifacts(
-        workingDirectory: Cache.flutterRoot,
+        workingDirectory: cache.flutterRoot,
         logger: logger,
         processUtils: _toolContext.processUtils,
         fileSystem: _toolContext.fs,
@@ -212,8 +209,9 @@ class ChannelCommand extends FlutterCommand {
   }
 
   static Future<void> _checkout(String branchName, {required Git git, Cache? cache}) async {
+    final String? flutterRoot = cache?.flutterRoot;
     // Get latest refs from upstream.
-    RunResult runResult = await git.run(<String>['fetch'], workingDirectory: Cache.flutterRoot);
+    RunResult runResult = await git.run(<String>['fetch'], workingDirectory: flutterRoot);
 
     if (runResult.processResult.exitCode == 0) {
       runResult = await git.run(<String>[
@@ -221,14 +219,14 @@ class ChannelCommand extends FlutterCommand {
         '--verify',
         '--quiet',
         'refs/heads/$branchName',
-      ], workingDirectory: Cache.flutterRoot);
+      ], workingDirectory: flutterRoot);
       if (runResult.processResult.exitCode == 0) {
         // branch already exists, try just switching to it
         runResult = await git.run(<String>[
           'checkout',
           branchName,
           '--',
-        ], workingDirectory: Cache.flutterRoot);
+        ], workingDirectory: flutterRoot);
       } else {
         // branch does not exist, we have to create it
         runResult = await git.run(<String>[
@@ -237,7 +235,7 @@ class ChannelCommand extends FlutterCommand {
           '-b',
           branchName,
           'origin/$branchName',
-        ], workingDirectory: Cache.flutterRoot);
+        ], workingDirectory: flutterRoot);
       }
     }
     if (runResult.processResult.exitCode != 0) {

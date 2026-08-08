@@ -5,7 +5,6 @@
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../globals.dart' as globals;
 import '../template.dart';
 import '../xcode_project.dart';
@@ -184,7 +183,7 @@ class BuildableIOSApp extends IOSApp {
 
   // Template asset's Contents.json file is in flutter_tools, but the actual
   String _templateImageAssetDirNameForContentsJson(String asset) => globals.fs.path.join(
-    Cache.flutterRoot!,
+    globals.cache.flutterRoot,
     'packages',
     'flutter_tools',
     'templates',

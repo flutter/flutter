@@ -211,6 +211,8 @@ class WebAssetServer implements AssetReader {
     required Platform platform,
     bool shouldEnableMiddleware = true,
     Map<String, String> webDefines = const <String, String>{},
+    Cache? cache,
+    String? flutterRoot,
   }) async {
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
@@ -305,7 +307,7 @@ class WebAssetServer implements AssetReader {
         entrypoint,
         fileSystem: fileSystem,
         platform: platform,
-        flutterRoot: Cache.flutterRoot,
+        flutterRoot: flutterRoot ?? cache?.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(),
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,

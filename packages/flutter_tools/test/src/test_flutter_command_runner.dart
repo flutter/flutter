@@ -9,7 +9,6 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -94,16 +93,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        if (toolContext != null) {
-          Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-            platform: toolContext!.platform,
-            fileSystem: toolContext!.fs,
-            userMessages: toolContext!.userMessages,
-          );
-          Cache.flutterRoot = toolContext!.fs.path.normalize(
-            toolContext!.fs.path.absolute(Cache.flutterRoot!),
-          );
-        }
         return super.runCommand(topLevelResults);
       },
     );

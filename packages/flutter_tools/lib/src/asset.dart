@@ -16,11 +16,11 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
+import 'globals.dart' as globals;
 import 'license_collector.dart';
 import 'package_graph.dart';
 import 'project.dart';
@@ -204,15 +204,18 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
+    String? flutterRoot,
     bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
+       _flutterRoot = flutterRoot,
        _splitDeferredAssets = splitDeferredAssets;
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
+  final String? _flutterRoot;
   final bool _splitDeferredAssets;
 
   @override
@@ -220,7 +223,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     logger: _logger,
     fileSystem: _fileSystem,
     platform: _platform,
-    flutterRoot: Cache.flutterRoot!,
+    flutterRoot: _flutterRoot ?? globals.cache.flutterRoot,
     splitDeferredAssets: _splitDeferredAssets,
   );
 }
@@ -1425,7 +1428,11 @@ class ManifestAssetBundle implements AssetBundle {
     required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
-    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri, packageName: packageName);
+    _ensureAssetPathIsValid(
+      assetsBaseDir: assetsBaseDir,
+      assetUri: assetUri,
+      packageName: packageName,
+    );
     if (assetUri.pathSegments.first == 'packages' &&
         !_fileSystem.isFileSync(
           _fileSystem.path.join(assetsBaseDir, _fileSystem.path.fromUri(assetUri)),

@@ -230,15 +230,30 @@ class ToolDependencies {
     final Git finalGit =
         git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
-    // 7. Flutter Version and Cache
-    final String flutterRoot =
-        Cache.flutterRoot ??
-        Cache.defaultFlutterRoot(
-          platform: finalPlatform,
+    // 7. Project Factory, OS Utilities, and Cache
+    final FlutterProjectFactory finalProjectFactory =
+        projectFactory ?? FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
+
+    final finalOS = OperatingSystemUtils(
+      fileSystem: finalFS,
+      logger: finalLogger,
+      platform: finalPlatform,
+      processManager: finalProcessManager,
+    );
+
+    final Cache finalCache =
+        cache ??
+        FlutterCache(
           fileSystem: finalFS,
-          userMessages: finalUserMessages,
+          flutterRoot: cache?.flutterRoot,
+          logger: finalLogger,
+          platform: finalPlatform,
+          osUtils: finalOS,
+          projectFactory: finalProjectFactory,
+          stdio: finalStdio,
         );
-    Cache.flutterRoot ??= flutterRoot;
+
+    final String flutterRoot = finalCache.flutterRoot;
 
     final FlutterVersion finalFlutterVersion =
         flutterVersion ?? FlutterVersion(fs: finalFS, flutterRoot: flutterRoot, git: finalGit);
@@ -255,29 +270,7 @@ class ToolDependencies {
         );
     finalAnalyticsInitialized = true;
 
-    // 9. Project Factory and Operating System Utilities
-    final FlutterProjectFactory finalProjectFactory =
-        projectFactory ?? FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
-
-    final finalOS = OperatingSystemUtils(
-      fileSystem: finalFS,
-      logger: finalLogger,
-      platform: finalPlatform,
-      processManager: finalProcessManager,
-    );
-
-    final Cache finalCache =
-        cache ??
-        FlutterCache(
-          fileSystem: finalFS,
-          logger: finalLogger,
-          platform: finalPlatform,
-          osUtils: finalOS,
-          projectFactory: finalProjectFactory,
-          stdio: finalStdio,
-        );
-
-    // 10. Remaining ToolContext Dependencies
+    // 9. Remaining ToolContext Dependencies
     final BuildSystem finalBuildSystem =
         buildSystem ??
         FlutterBuildSystem(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
@@ -294,10 +287,15 @@ class ToolDependencies {
 
     final CustomDevicesConfig finalCustomDevicesConfig =
         customDevicesConfig ??
-        CustomDevicesConfig(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
+        CustomDevicesConfig(
+          cache: finalCache,
+          fileSystem: finalFS,
+          logger: finalLogger,
+          platform: finalPlatform,
+        );
 
     final PreRunValidator finalPreRunValidator =
-        preRunValidator ?? PreRunValidator(fileSystem: finalFS);
+        preRunValidator ?? PreRunValidator(cache: finalCache, fileSystem: finalFS);
 
     final LocalEngineLocator finalLocalEngineLocator =
         localEngineLocator ??

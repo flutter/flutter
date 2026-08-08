@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -141,11 +140,6 @@ void testUsingContext(
                       overrides: overrides,
                       name: 'test-specific overrides',
                       body: () async {
-                        if (initializeFlutterRoot) {
-                          // Provide a sane default for the flutterRoot directory. Individual
-                          // tests can override this either in the test or during setup.
-                          Cache.flutterRoot ??= getFlutterRoot();
-                        }
                         return await testMethod();
                       },
                     );

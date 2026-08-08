@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/template.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../isolated/mustache_template.dart';
 import '../runner/flutter_command.dart';
@@ -74,18 +73,26 @@ class IdeConfigCommand extends FlutterCommand {
   Directory get _templateDirectory {
     final FileSystem fs = _toolContext.fs;
     return fs.directory(
-      fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'ide_templates', _ideName),
+      fs.path.join(
+        _toolContext.cache.flutterRoot,
+        'packages',
+        'flutter_tools',
+        'ide_templates',
+        _ideName,
+      ),
     );
   }
 
   Directory get _createTemplatesDirectory {
     final FileSystem fs = _toolContext.fs;
-    return fs.directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates'));
+    return fs.directory(
+      fs.path.join(_toolContext.cache.flutterRoot, 'packages', 'flutter_tools', 'templates'),
+    );
   }
 
   Directory get _flutterRoot {
     final FileSystem fs = _toolContext.fs;
-    return fs.directory(fs.path.absolute(Cache.flutterRoot!));
+    return fs.directory(fs.path.absolute(_toolContext.cache.flutterRoot));
   }
 
   // Returns true if any entire path element is equal to dir.
@@ -252,9 +259,9 @@ class IdeConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    final String flutterRoot = fs.path.absolute(Cache.flutterRoot!);
+    final String flutterRoot = fs.path.absolute(_toolContext.cache.flutterRoot);
     final String dirPath = fs.path.normalize(
-      fs.directory(fs.path.absolute(Cache.flutterRoot!)).absolute.path,
+      fs.directory(fs.path.absolute(_toolContext.cache.flutterRoot)).absolute.path,
     );
 
     final String? error = _validateFlutterDir(dirPath, fileSystem: fs, flutterRoot: flutterRoot);

@@ -21,7 +21,6 @@ import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/utils.dart';
-import 'cache.dart';
 import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
@@ -100,7 +99,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
         artifacts: globals.artifacts!,
-        flutterRoot: () => Cache.flutterRoot!,
+        flutterRoot: () => globals.cache.flutterRoot,
         operatingSystemUtils: globals.os,
         featureFlags: featureFlags,
       ),

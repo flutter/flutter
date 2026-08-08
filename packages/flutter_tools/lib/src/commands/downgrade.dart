@@ -10,7 +10,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../git.dart';
 import '../persistent_tool_state.dart';
@@ -104,7 +103,7 @@ class DowngradeCommand extends FlutterCommand {
     final Terminal terminal = _terminal ?? _toolContext.terminal;
     FlutterVersion flutterVersion = _flutterVersion ?? _toolContext.flutterVersion;
 
-    String workingDirectory = Cache.flutterRoot!;
+    String workingDirectory = _toolContext.cache.flutterRoot;
     if (argResults!.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory')!;
       flutterVersion = FlutterVersion(fs: fs, flutterRoot: workingDirectory, git: git);
