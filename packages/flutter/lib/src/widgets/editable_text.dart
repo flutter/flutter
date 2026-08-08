@@ -361,6 +361,12 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
+  ///
+  /// This method does not trigger [TextInputFormatter]s. Input formatters only
+  /// run on user input (e.g., from the onscreen or physical keyboard), not on
+  /// programmatic changes to the controller's value. If you need to keep
+  /// formatter state in sync with the controller, do so manually after calling
+  /// this method.
   void clear() {
     value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
   }
