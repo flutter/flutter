@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
@@ -16,6 +17,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
+import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../resident_runner.dart';
@@ -25,41 +27,53 @@ import 'web_driver_service.dart';
 class FlutterDriverFactory {
   FlutterDriverFactory({
     required ApplicationPackageFactory applicationPackageFactory,
-    required Platform platform,
-    required Logger logger,
-    required Terminal terminal,
-    required OutputPreferences outputPreferences,
-    required ProcessUtils processUtils,
     required String dartSdkPath,
     required DevtoolsLauncher devtoolsLauncher,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required OutputPreferences outputPreferences,
+    required Platform platform,
+    required ProcessUtils processUtils,
+    required Terminal terminal,
+    Analytics? analytics,
+    SystemClock? systemClock,
   }) : _applicationPackageFactory = applicationPackageFactory,
-       _platform = platform,
-       _logger = logger,
-       _terminal = terminal,
-       _outputPreferences = outputPreferences,
-       _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _devtoolsLauncher = devtoolsLauncher;
+       _devtoolsLauncher = devtoolsLauncher,
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _outputPreferences = outputPreferences,
+       _platform = platform,
+       _processUtils = processUtils,
+       _terminal = terminal,
+       _analytics = analytics,
+       _systemClock = systemClock;
 
   final ApplicationPackageFactory _applicationPackageFactory;
-  final Platform _platform;
-  final Logger _logger;
-  final Terminal _terminal;
-  final OutputPreferences _outputPreferences;
-  final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final OutputPreferences _outputPreferences;
+  final Platform _platform;
+  final ProcessUtils _processUtils;
+  final Terminal _terminal;
+  final Analytics? _analytics;
+  final SystemClock? _systemClock;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
     if (web) {
       return WebDriverService(
-        logger: _logger,
-        terminal: _terminal,
-        platform: _platform,
-        outputPreferences: _outputPreferences,
-        processUtils: _processUtils,
+        analytics: _analytics,
         dartSdkPath: _dartSdkPath,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        outputPreferences: _outputPreferences,
+        platform: _platform,
+        processUtils: _processUtils,
+        systemClock: _systemClock,
+        terminal: _terminal,
       );
     }
     return FlutterDriverService(
