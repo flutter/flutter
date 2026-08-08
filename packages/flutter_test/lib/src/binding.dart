@@ -2936,6 +2936,23 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher? deviceEventDispatcher;
 
+  // Tracks active pointer IDs that were initiated by test gestures (i.e.
+  // dispatched under [TestBindingEventSource.test]).
+  //
+  // A pointer stream initiated by a test gesture belongs to
+  // [TestBindingEventSource.test] throughout its entire lifecycle. However,
+  // framework operations (such as `Navigator.cancelPointer` during route
+  // transitions) may dispatch a synthetic [PointerCancelEvent] while
+  // [pointerEventSource] is set to [TestBindingEventSource.device].
+  //
+  // This set tracks active test pointers from
+  // `PointerDown`/`PointerPanZoomStart` until
+  // `PointerUp`/`PointerCancel`/`PointerPanZoomEnd`, allowing
+  // [handlePointerEvent] to identify and re-route framework-generated
+  // cancellation events back through the `test` source so active gesture
+  // recognizers can process them correctly.
+  final Set<int> _testPointerIds = <int>{};
+
   /// Dispatch an event to the targets found by a hit test on its position.
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.test], then
@@ -2947,8 +2964,25 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// forwarded to [deviceEventDispatcher].
   @override
   void handlePointerEvent(PointerEvent event) {
+    // Ensure all events belonging to a test pointer stream are processed under
+    // TestBindingEventSource.test, even if a framework-generated cancellation
+    // arrives while pointerEventSource is set to 'device'.
+    if (pointerEventSource == TestBindingEventSource.device &&
+        event is PointerCancelEvent &&
+        _testPointerIds.contains(event.pointer)) {
+      withPointerEventSource(TestBindingEventSource.test, () => handlePointerEvent(event));
+      return;
+    }
+
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
+        if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
+          _testPointerIds.add(event.pointer);
+        } else if (event is PointerUpEvent ||
+            event is PointerCancelEvent ||
+            event is PointerPanZoomEndEvent) {
+          _testPointerIds.remove(event.pointer);
+        }
         RenderView? target;
         for (final RenderView renderView in renderViews) {
           if (renderView.flutterView.viewId == event.viewId) {
@@ -3103,6 +3137,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void postTest() {
     super.postTest();
+    _testPointerIds.clear();
     assert(!_expectingFrame);
     assert(_pendingFrame == null);
     _inTest = false;
