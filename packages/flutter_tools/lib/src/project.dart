@@ -75,7 +75,7 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest);
+      return FlutterProject(directory, manifest, exampleManifest, projectFactory: this);
     });
   }
 }
@@ -91,9 +91,16 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest) {
+  FlutterProject(
+    this.directory,
+    FlutterManifest manifest,
+    this._exampleManifest, {
+    FlutterProjectFactory? projectFactory,
+  }) : _projectFactory = projectFactory {
     _setManifest(manifest);
   }
+
+  final FlutterProjectFactory? _projectFactory;
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -152,7 +159,11 @@ class FlutterProject {
               .listFileSystemSync(directory.fileSystem, root: directory.path)
               .whereType<Directory>()) {
         if (globResult.childFile('pubspec.yaml').existsSync()) {
-          _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
+          _workspaceProjects.add(
+            _projectFactory != null
+                ? _projectFactory.fromDirectory(globResult)
+                : FlutterProject.fromDirectory(globResult),
+          );
         }
       }
     }

@@ -611,39 +611,42 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   /// Get the root directories of the repo - the directories containing Dart packages.
-  List<String> getRepoRoots() {
-    final String root = globals.fs.path.absolute(Cache.flutterRoot!);
+  List<String> getRepoRoots({FileSystem? fileSystem}) {
+    final FileSystem fs = fileSystem ?? toolContext?.fs ?? globals.fs;
+    final String root = fs.path.absolute(Cache.flutterRoot!);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
-      return globals.fs.path.join(root, item);
+      return fs.path.join(root, item);
     }).toList();
   }
 
   /// Get all pub packages in the Flutter repo.
-  List<Directory> getRepoPackages() {
-    return getRepoRoots()
-        .expand<String>((String root) => _gatherProjectPaths(root))
-        .map<Directory>((String dir) => globals.fs.directory(dir))
+  List<Directory> getRepoPackages({FileSystem? fileSystem}) {
+    final FileSystem fs = fileSystem ?? toolContext?.fs ?? globals.fs;
+    return getRepoRoots(fileSystem: fs)
+        .expand<String>((String root) => _gatherProjectPaths(root, fs: fs))
+        .map<Directory>((String dir) => fs.directory(dir))
         .toList();
   }
 
-  static List<String> _gatherProjectPaths(String rootPath) {
-    if (globals.fs.isFileSync(globals.fs.path.join(rootPath, '.dartignore'))) {
+  static List<String> _gatherProjectPaths(String rootPath, {FileSystem? fs}) {
+    final FileSystem fileSystem = fs ?? globals.fs;
+    if (fileSystem.isFileSync(fileSystem.path.join(rootPath, '.dartignore'))) {
       return <String>[];
     }
 
-    final List<String> projectPaths = globals.fs
+    final List<String> projectPaths = fileSystem
         .directory(rootPath)
         .listSync(followLinks: false)
         .expand((FileSystemEntity entity) {
-          if (entity is Directory && !globals.fs.path.split(entity.path).contains('.dart_tool')) {
-            return _gatherProjectPaths(entity.path);
+          if (entity is Directory && !fileSystem.path.split(entity.path).contains('.dart_tool')) {
+            return _gatherProjectPaths(entity.path, fs: fileSystem);
           }
           return <String>[];
         })
         .toList();
 
-    if (globals.fs.isFileSync(globals.fs.path.join(rootPath, 'pubspec.yaml'))) {
+    if (fileSystem.isFileSync(fileSystem.path.join(rootPath, 'pubspec.yaml'))) {
       projectPaths.add(rootPath);
     }
 

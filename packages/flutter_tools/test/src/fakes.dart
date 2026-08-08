@@ -39,6 +39,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -1295,6 +1296,163 @@ class FakeToolContext extends Fake implements ToolContext {
 
   @override
   UserMessages get userMessages => _userMessages ?? UserMessages();
+
+  @override
+  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+}
+
+/// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
+class DelegatingToolContext extends Fake implements ToolContext {
+  DelegatingToolContext({
+    Artifacts? artifacts,
+    BotDetector? botDetector,
+    Cache? cache,
+    Config? config,
+    CustomDevicesConfig? customDevicesConfig,
+    FlutterVersion? flutterVersion,
+    FileSystem? fs,
+    Git? git,
+    LocalEngineLocator? localEngineLocator,
+    Logger? logger,
+    OperatingSystemUtils? os,
+    OutputPreferences? outputPreferences,
+    Platform? platform,
+    PreRunValidator? preRunValidator,
+    ProcessManager? processManager,
+    ProcessUtils? processUtils,
+    FlutterProjectFactory? projectFactory,
+    ShutdownHooks? shutdownHooks,
+    Signals? signals,
+    Stdio? stdio,
+    SystemClock? systemClock,
+    AnsiTerminal? terminal,
+    UserMessages? userMessages,
+  }) : _artifacts = artifacts,
+       _botDetector = botDetector,
+       _cache = cache,
+       _config = config,
+       _customDevicesConfig = customDevicesConfig,
+       _flutterVersion = flutterVersion,
+       _fs = fs,
+       _git = git,
+       _localEngineLocator = localEngineLocator,
+       _logger = logger,
+       _os = os,
+       _outputPreferences = outputPreferences,
+       _platform = platform,
+       _preRunValidator = preRunValidator,
+       _processManager = processManager,
+       _processUtils = processUtils,
+       _projectFactory = projectFactory,
+       _shutdownHooks = shutdownHooks,
+       _signals = signals,
+       _stdio = stdio,
+       _systemClock = systemClock,
+       _terminal = terminal,
+       _userMessages = userMessages;
+
+  final Artifacts? _artifacts;
+  final BotDetector? _botDetector;
+  final Cache? _cache;
+  final Config? _config;
+  final CustomDevicesConfig? _customDevicesConfig;
+  final FlutterVersion? _flutterVersion;
+  final FileSystem? _fs;
+  final Git? _git;
+  final LocalEngineLocator? _localEngineLocator;
+  final Logger? _logger;
+  final OperatingSystemUtils? _os;
+  final OutputPreferences? _outputPreferences;
+  final Platform? _platform;
+  final PreRunValidator? _preRunValidator;
+  final ProcessManager? _processManager;
+  final ProcessUtils? _processUtils;
+  final FlutterProjectFactory? _projectFactory;
+  final ShutdownHooks? _shutdownHooks;
+  final Signals? _signals;
+  final Stdio? _stdio;
+  final SystemClock? _systemClock;
+  final AnsiTerminal? _terminal;
+  final UserMessages? _userMessages;
+
+  @override
+  Artifacts get artifacts => _artifacts ?? globals.artifacts!;
+
+  @override
+  BotDetector get botDetector => _botDetector ?? globals.botDetector;
+
+  @override
+  Cache get cache => _cache ?? globals.cache;
+
+  @override
+  Config get config => _config ?? globals.config;
+
+  @override
+  CustomDevicesConfig get customDevicesConfig =>
+      _customDevicesConfig ?? globals.customDevicesConfig;
+
+  @override
+  FlutterVersion get flutterVersion => _flutterVersion ?? globals.flutterVersion;
+
+  @override
+  FileSystem get fs => _fs ?? globals.fs;
+
+  @override
+  Git get git => _git ?? globals.git;
+
+  @override
+  LocalEngineLocator get localEngineLocator =>
+      _localEngineLocator ??
+      globals.localEngineLocator ??
+      LocalEngineLocator(
+        userMessages: userMessages,
+        logger: logger,
+        platform: platform,
+        fileSystem: fs,
+        flutterRoot: Cache.flutterRoot ?? '',
+      );
+
+  @override
+  Logger get logger => _logger ?? globals.logger;
+
+  @override
+  OperatingSystemUtils get os => _os ?? globals.os;
+
+  @override
+  OutputPreferences get outputPreferences => _outputPreferences ?? globals.outputPreferences;
+
+  @override
+  Platform get platform => _platform ?? globals.platform;
+
+  @override
+  PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+
+  @override
+  ProcessManager get processManager => _processManager ?? globals.processManager;
+
+  @override
+  ProcessUtils get processUtils => _processUtils ?? globals.processUtils;
+
+  @override
+  FlutterProjectFactory get projectFactory => _projectFactory ?? globals.projectFactory;
+
+  @override
+  ShutdownHooks get shutdownHooks => _shutdownHooks ?? globals.shutdownHooks;
+
+  @override
+  Signals get signals => _signals ?? globals.signals;
+
+  @override
+  Stdio get stdio => _stdio ?? globals.stdio;
+
+  @override
+  SystemClock get systemClock => _systemClock ?? globals.systemClock;
+
+  @override
+  AnsiTerminal get terminal => _terminal ?? globals.terminal;
+
+  @override
+  UserMessages get userMessages => _userMessages ?? globals.userMessages;
 
   @override
   FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);

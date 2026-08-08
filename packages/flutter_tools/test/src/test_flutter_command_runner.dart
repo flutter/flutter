@@ -24,10 +24,18 @@ export 'package:test/test.dart' hide isInstanceOf, test;
 
 CommandRunner<void> createTestCommandRunner([FlutterCommand? command, Analytics? analytics]) {
   final ToolContext? toolContext = command?.toolContext;
-  final FlutterCommandRunner runner = TestFlutterCommandRunner(
+  var resolvedAnalytics = analytics;
+  if (resolvedAnalytics == null) {
+    try {
+      resolvedAnalytics = context.get<Analytics>();
+    } on UnsupportedError {
+      // In testWithoutContext, context.get is not supported.
+    }
+  }
+  final runner = TestFlutterCommandRunner(
     toolContext: toolContext,
-    toolDependencies: (toolContext != null || analytics != null)
-        ? FakeToolDependencies(analytics: analytics, toolContext: toolContext)
+    toolDependencies: (toolContext != null || resolvedAnalytics != null)
+        ? FakeToolDependencies(analytics: resolvedAnalytics, toolContext: toolContext)
         : null,
   );
   if (command != null) {
