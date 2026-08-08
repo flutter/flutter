@@ -53,12 +53,10 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = '';
   });
 
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-    Cache.flutterRoot = flutterRoot;
     processManager = FakeProcessManager.empty();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
@@ -97,7 +95,8 @@ void main() {
         context.get<ProcessManager>() ?? FakeProcessManager.any();
     final toolContext = FakeToolContext(
       cache: Cache.test(
-        rootOverride: fileSystem.directory(flutterRoot),
+        fileSystem: fileSystem,
+        flutterRoot: flutterRoot,
         logger: effectiveLogger,
         processManager: effectiveProcessManager,
       ),

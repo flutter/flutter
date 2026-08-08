@@ -437,10 +437,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     var useWrapping = false;
     if (topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)) {
       useWrapping = topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
-    } else if (localToolContext != null) {
+    } else {
+      final Stdio stdio = localToolContext?.stdio ?? globals.stdio;
       useWrapping =
-          localToolContext.stdio.terminalColumns != null &&
-          topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
+          stdio.terminalColumns != null && topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
     }
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,

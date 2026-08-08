@@ -118,7 +118,6 @@ void main() {
     // which in turn will check for the presence of the Flutter SDK root. Without
     // this field set consistently, the order of the tests becomes important *or*
     // you need to remember to set it everywhere.
-    Cache.flutterRoot = '../..';
   });
 
   tearDown(() {
@@ -336,7 +335,7 @@ void main() {
       final ProcessResult exec = await Process.run(flutterBin, <String>[
         'create',
         'flutter_project',
-      ], workingDirectory: Cache.flutterRoot);
+      ], workingDirectory: getFlutterRoot());
       expect(exec.exitCode, 2);
       expect(exec.stderr, contains('Cannot create a project within the Flutter SDK'));
     },
@@ -3350,7 +3349,7 @@ void main() {
 
   testUsingContext('newly created iOS plugins has correct min iOS version', () async {
     final String flutterToolsAbsolutePath = globals.fs.path.join(
-      Cache.flutterRoot!,
+      getFlutterRoot(),
       'packages',
       'flutter_tools',
     );
@@ -4926,7 +4925,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       globals.fs
           .file(
             globals.fs.path.join(
-              Cache.flutterRoot!,
+              getFlutterRoot(),
               'packages',
               'flutter_tools',
               'templates',
@@ -5020,7 +5019,6 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     // 2. We want to pretend we're creating into a relative (not absolute) path
     // 3. It's non-trivial to use MemoryFileSystem.test(), we need real template files
     await io.IOOverrides.runZoned<Future<void>>(() async {
-      Cache.flutterRoot = getFlutterRoot();
       final CommandRunner<void> runner = createTestCommandRunner(createCreateCommand());
       await runner.run(['create', '--no-pub', '.']);
     }, getCurrentDirectory: () => out);

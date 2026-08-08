@@ -274,7 +274,6 @@ void main() {
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
-  Cache.flutterRoot = '../..';
   final command = CreateCommand(
     toolContext: FakeToolContext(
       fs: globals.fs,

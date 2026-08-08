@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:file/memory.dart';
+@Deprecated('Use ToolContext and constructor injection instead.')
 library;
 
 import 'package:process/process.dart';
@@ -41,6 +42,7 @@ import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
+import 'isolated/mustache_template.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
@@ -256,7 +258,8 @@ PlistParser get plistParser =>
 PlistParser? _plistInstance;
 
 /// The global template renderer.
-TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
+TemplateRenderer get templateRenderer =>
+    context.get<TemplateRenderer>() ?? const MustacheTemplateRenderer();
 
 /// Global [ShutdownHooks] that should be run before the tool process exits.
 ///

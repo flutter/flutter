@@ -116,6 +116,7 @@ class BuildWindowsCommand extends BuildSubCommand {
         appFilenamePattern: 'app.so',
         analytics: analytics,
       ),
+      cache: _toolContext.cache,
       configOnly: configOnly,
     );
     return FlutterCommandResult.success();

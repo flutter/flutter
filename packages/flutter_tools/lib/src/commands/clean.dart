@@ -136,10 +136,7 @@ class CleanCommand extends FlutterCommand {
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = _xcodeProjectInterpreter;
       final Directory darwinBuildDirectory = fs.directory(
-        xcodeProject.darwinPlatform.buildDirectory(
-          config: config,
-          fileSystem: fs,
-        ),
+        xcodeProject.darwinPlatform.buildDirectory(config: config, fileSystem: fs),
       );
       final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
         xcodeProject,
@@ -239,8 +236,7 @@ class CleanCommand extends FlutterCommand {
     final FileSystem fs = _toolContext.fs;
     final bool stopGradleFlag =
         (argResults?.wasParsed('stop-gradle') ?? false) && boolArg('stop-gradle');
-    final bool isInteractive =
-        terminal.stdinHasTerminal && terminal.usesTerminalUi;
+    final bool isInteractive = terminal.stdinHasTerminal && terminal.usesTerminalUi;
     var shouldStopGradle = stopGradleFlag;
 
     if (!stopGradleFlag && isInteractive) {

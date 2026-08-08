@@ -187,22 +187,41 @@ abstract class FlutterCommand extends Command<void> {
   /// The [ToolContext] providing explicit dependency injection for this command.
   ToolContext? get toolContext =>
       _explicitToolContext ??
+      (parent as FlutterCommand?)?.toolContext ??
       (super.runner as FlutterCommandRunner?)?.toolDependencies?.toolContext;
 
-  SystemClock? get _clock => toolContext?.systemClock;
-  Logger? get _logger => toolContext?.logger;
-  Signals? get _signals => toolContext?.signals;
-  UserMessages? get _userMessages => toolContext?.userMessages;
-  PreRunValidator? get _preRunValidator => toolContext?.preRunValidator;
-  OperatingSystemUtils? get _os => toolContext?.os;
-  Platform? get _platform => toolContext?.platform;
-  FileSystem? get _fs => toolContext?.fs;
-  FileSystemUtils? get _fileSystemUtils => toolContext?.fileSystemUtils;
-  FlutterProjectFactory? get _projectFactory => toolContext?.projectFactory;
+  T? _safeGlobal<T>(T Function() getter) {
+    try {
+      return getter();
+    } on UnsupportedError {
+      return null;
+    }
+  }
+
+  SystemClock? get _clock => toolContext?.systemClock ?? _safeGlobal(() => globals.systemClock);
+  Logger? get _logger => toolContext?.logger ?? _safeGlobal(() => globals.logger);
+  Signals? get _signals => toolContext?.signals ?? _safeGlobal(() => globals.signals);
+  UserMessages? get _userMessages =>
+      toolContext?.userMessages ?? _safeGlobal(() => globals.userMessages);
+  PreRunValidator? get _preRunValidator =>
+      toolContext?.preRunValidator ?? _safeGlobal(() => globals.preRunValidator);
+  OperatingSystemUtils? get _os => toolContext?.os ?? _safeGlobal(() => globals.os);
+  Platform? get _platform => toolContext?.platform ?? _safeGlobal(() => globals.platform);
+  FileSystem? get _fs => toolContext?.fs ?? _safeGlobal(() => globals.fs);
+  FileSystemUtils? get _fileSystemUtils =>
+      toolContext?.fileSystemUtils ??
+      (_fs != null && _platform != null
+          ? FileSystemUtils(fileSystem: _fs!, platform: _platform!)
+          : null);
+  FlutterProjectFactory? get _projectFactory =>
+      toolContext?.projectFactory ?? _safeGlobal(() => globals.projectFactory);
   Analytics? get _analytics =>
-      _explicitAnalytics ?? (super.runner as FlutterCommandRunner?)?.toolDependencies?.analytics;
-  Cache? get _cache => toolContext?.cache;
-  FlutterVersion? get _flutterVersion => toolContext?.flutterVersion;
+      _explicitAnalytics ??
+      (super.runner as FlutterCommandRunner?)?.toolDependencies?.analytics ??
+      _safeGlobal(() => globals.analytics);
+  Cache? get _cache => toolContext?.cache ?? _safeGlobal(() => globals.cache);
+  FlutterVersion? get _flutterVersion =>
+      toolContext?.flutterVersion ?? _safeGlobal(() => globals.flutterVersion);
 
   /// The currently executing command (or sub-command).
   ///

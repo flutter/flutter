@@ -78,7 +78,6 @@ void main() {
   group('Fatal Logs', () {
     late FakeBuildCommand command;
     late MemoryFileSystem fs;
-    late BufferLogger logger;
     late ProcessManager processManager;
 
     setUp(() {
@@ -86,147 +85,130 @@ void main() {
       fs.file('/package/pubspec.yaml').createSync(recursive: true);
       fs.currentDirectory = '/package';
       Cache.disableLocking();
-      logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
     });
 
-    testUsingContext(
-      "doesn't fail if --fatal-warnings specified and no warnings occur",
-      () async {
-        command = FakeBuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: fs,
-          logger: testLogger,
-          osUtils: FakeOperatingSystemUtils(),
-          config: FakeConfig(),
-          platform: FakePlatform(),
-          fileSystemUtils: FakeFileSystemUtils(),
-          terminal: FakeTerminal(),
-          plistParser: FakePlistParser(),
-          processUtils: FakeProcessUtils(),
-          processManager: FakeProcessManager.any(),
-          templateRenderer: FakeTemplateRenderer(),
-          xcode: FakeXcode(),
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          flutterVersion: FakeFlutterVersion(),
-        );
-        try {
-          await createTestCommandRunner(
-            command,
-          ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']);
-        } on Exception {
-          fail('Unexpected exception thrown');
-        }
-      },
-      overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager},
-    );
+    testUsingContext("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
+      command = FakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: testLogger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      try {
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']);
+      } on Exception {
+        fail('Unexpected exception thrown');
+      }
+    }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
 
-    testUsingContext(
-      "doesn't fail if --fatal-warnings not specified",
-      () async {
-        command = FakeBuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: fs,
-          logger: testLogger,
-          osUtils: FakeOperatingSystemUtils(),
-          config: FakeConfig(),
-          platform: FakePlatform(),
-          fileSystemUtils: FakeFileSystemUtils(),
-          terminal: FakeTerminal(),
-          plistParser: FakePlistParser(),
-          processUtils: FakeProcessUtils(),
-          processManager: FakeProcessManager.any(),
-          templateRenderer: FakeTemplateRenderer(),
-          xcode: FakeXcode(),
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          flutterVersion: FakeFlutterVersion(),
-        );
-        testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
-        testLogger.printError('Error: Danger Will Robinson!');
-        try {
-          await createTestCommandRunner(command).run(<String>['build', 'test']);
-        } on Exception {
-          fail('Unexpected exception thrown');
-        }
-      },
-      overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager},
-    );
+    testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
+      command = FakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: testLogger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+      testLogger.printError('Error: Danger Will Robinson!');
+      try {
+        await createTestCommandRunner(command).run(<String>['build', 'test']);
+      } on Exception {
+        fail('Unexpected exception thrown');
+      }
+    }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
 
-    testUsingContext(
-      'fails if --fatal-warnings specified and warnings emitted',
-      () async {
-        command = FakeBuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: fs,
-          logger: testLogger,
-          osUtils: FakeOperatingSystemUtils(),
-          config: FakeConfig(),
-          platform: FakePlatform(),
-          fileSystemUtils: FakeFileSystemUtils(),
-          terminal: FakeTerminal(),
-          plistParser: FakePlistParser(),
-          processUtils: FakeProcessUtils(),
-          processManager: FakeProcessManager.any(),
-          templateRenderer: FakeTemplateRenderer(),
-          xcode: FakeXcode(),
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          flutterVersion: FakeFlutterVersion(),
-        );
-        testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
-        await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
-          throwsToolExit(
-            message:
-                'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager},
-    );
+    testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
+      command = FakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: testLogger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+      await expectLater(
+        createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
+        throwsToolExit(
+          message:
+              'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
+        ),
+      );
+    }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
 
-    testUsingContext(
-      'fails if --fatal-warnings specified and errors emitted',
-      () async {
-        command = FakeBuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: fs,
-          logger: testLogger,
-          osUtils: FakeOperatingSystemUtils(),
-          config: FakeConfig(),
-          platform: FakePlatform(),
-          fileSystemUtils: FakeFileSystemUtils(),
-          terminal: FakeTerminal(),
-          plistParser: FakePlistParser(),
-          processUtils: FakeProcessUtils(),
-          processManager: FakeProcessManager.any(),
-          templateRenderer: FakeTemplateRenderer(),
-          xcode: FakeXcode(),
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          flutterVersion: FakeFlutterVersion(),
-        );
-        testLogger.printError('Error: Danger Will Robinson!');
-        await expectLater(
-          createTestCommandRunner(
-            command,
-          ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
-          throwsToolExit(
-            message:
-                'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager},
-    );
+    testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
+      command = FakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: testLogger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      testLogger.printError('Error: Danger Will Robinson!');
+      await expectLater(
+        createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
+        throwsToolExit(
+          message:
+              'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
+        ),
+      );
+    }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
   });
 }
 

@@ -8,6 +8,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -132,7 +133,8 @@ class CocoaPods {
   final Cache? _cache;
   final String? _flutterRoot;
 
-  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
+  String get _flutterRootPath =>
+      _flutterRoot ?? _cache?.flutterRoot ?? context.get<Cache>()?.flutterRoot ?? '';
 
   Future<String?>? _versionText;
 

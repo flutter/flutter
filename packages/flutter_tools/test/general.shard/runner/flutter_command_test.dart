@@ -58,9 +58,7 @@ void main() {
     late FakeLockTrackingCache lockTrackingCache;
     late FakeLockCheckingPub lockCheckingPub;
 
-    setUpAll(() {
-      Cache.flutterRoot = '/path/to/sdk/flutter';
-    });
+    setUpAll(() {});
 
     setUp(() {
       Cache.disableLocking();

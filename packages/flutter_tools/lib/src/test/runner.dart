@@ -16,6 +16,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -45,7 +46,9 @@ interface class FlutterTestRunner {
     required ShutdownHooks shutdownHooks,
     required Stdio stdio,
     required AnsiTerminal terminal,
+    Cache? cache,
   }) : _artifacts = artifacts,
+       _cache = cache,
        _config = config,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -57,6 +60,7 @@ interface class FlutterTestRunner {
        _terminal = terminal;
 
   final Artifacts _artifacts;
+  final Cache? _cache;
   final Config _config;
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -701,6 +705,7 @@ class SpawnPlugin extends PlatformPlugin {
       flutterProject: flutterProject,
       isolateSpawningTesterPackageConfigFile: isolateSpawningTesterPackageConfigFile,
       fileSystem: fileSystem,
+      flutterRoot: _cache?.flutterRoot,
     );
     final PackageConfig isolateSpawningTesterPackageConfig = PackageConfig.parseBytes(
       isolateSpawningTesterPackageConfigFile.readAsBytesSync(),

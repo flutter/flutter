@@ -492,9 +492,9 @@ dependencies:
             'bad_plugin',
           ]);
           // Write bytes that are not valid UTF-8, so readAsString throws a FileSystemException.
-          pluginDirs[1].childFile('pubspec.yaml').writeAsBytesSync(
-            Uint8List.fromList(<int>[0xff, 0xfe, 0xfd]),
-          );
+          pluginDirs[1]
+              .childFile('pubspec.yaml')
+              .writeAsBytesSync(Uint8List.fromList(<int>[0xff, 0xfe, 0xfd]));
 
           // The tool must not crash when a plugin's pubspec.yaml cannot be read.
           final Future<List<Plugin>> pluginsFuture = findPlugins(flutterProject);

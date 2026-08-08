@@ -395,10 +395,6 @@ void main() {
     testUsingContext(
       'support ExtraDartFlagOptions',
       () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module'],
-        );
         final Directory sdkDir = tempDir.childDirectory('android-sdk');
         sdkDir
             .childDirectory('ndk')
@@ -406,6 +402,10 @@ void main() {
             .childFile('source.properties')
             .createSync(recursive: true);
         androidSdk = FakeAndroidSdk(sdkDir);
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
         final List<String> installedNdkVersions =
             androidSdk.directory
                 .childDirectory('ndk')

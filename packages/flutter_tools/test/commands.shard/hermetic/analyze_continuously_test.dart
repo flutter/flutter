@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -26,9 +25,7 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  setUpAll(() {
-    Cache.flutterRoot = getFlutterRoot();
-  });
+  setUpAll(() {});
 
   late Directory tempDir;
   late FileSystem fileSystem;

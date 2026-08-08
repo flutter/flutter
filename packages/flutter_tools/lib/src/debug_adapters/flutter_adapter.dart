@@ -21,6 +21,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     super.channel, {
     required super.fileSystem,
     required super.platform,
+    super.flutterSdkRoot,
     super.ipv6,
     super.enableFlutterDds = true,
     super.enableAuthCodes,

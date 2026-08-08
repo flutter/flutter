@@ -26,7 +26,6 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   setUpAll(() {
-    Cache.flutterRoot = getFlutterRoot();
     Cache.disableLocking();
   });
 
@@ -218,7 +217,7 @@ void main() {
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
-              globals.fs.path.join(Cache.flutterRoot!, 'bin', 'flutter'),
+              globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',
@@ -505,7 +504,7 @@ void main() {
           FakeCommand(
             command: <String>[
               globals.fs.path.join(
-                realCommandRunner.workingDirectory ?? Cache.flutterRoot!,
+                realCommandRunner.workingDirectory ?? getFlutterRoot(),
                 'bin',
                 'flutter',
               ),
@@ -756,7 +755,7 @@ void main() {
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              globals.fs.path.join(Cache.flutterRoot!, 'bin', 'flutter'),
+              globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',

@@ -179,9 +179,7 @@ class SymbolizeCommand extends FlutterCommand {
       output = outputFile.openWrite();
     } else {
       final outputController = StreamController<List<int>>();
-      outputController.stream
-          .transformWithCallSite(utf8.decoder)
-          .listen(stdio.stdoutWrite);
+      outputController.stream.transformWithCallSite(utf8.decoder).listen(stdio.stdoutWrite);
       output = IOSink(outputController);
     }
 

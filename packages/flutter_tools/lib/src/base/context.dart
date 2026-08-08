@@ -40,6 +40,7 @@ const Object contextKey = _Key.key;
 /// context will not have any values associated with it.
 ///
 /// This is guaranteed to never return `null`.
+@Deprecated('Use ToolContext and constructor injection instead.')
 AppContext get context => Zone.current[contextKey] as AppContext? ?? AppContext._root;
 
 /// A lookup table (mapping types to values) and an implied scope, in which
@@ -51,7 +52,9 @@ AppContext get context => Zone.current[contextKey] as AppContext? ?? AppContext.
 ///
 /// Child contexts are created and run using zones. To read more about how
 /// zones work, see https://api.dart.dev/stable/dart-async/Zone-class.html.
+@Deprecated('Use ToolContext and constructor injection instead.')
 class AppContext {
+  @Deprecated('Use ToolContext and constructor injection instead.')
   AppContext._(
     this._parent,
     this.name, [

@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -16,6 +17,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'common.dart';
 import 'context.dart';
 import 'fakes.dart';
 
@@ -33,7 +35,7 @@ CommandRunner<void> createTestCommandRunner([FlutterCommand? command, Analytics?
   }
   final runner = TestFlutterCommandRunner(
     toolContext: toolContext,
-    toolDependencies: (toolContext != null || resolvedAnalytics != null)
+    toolDependencies: toolContext != null
         ? FakeToolDependencies(analytics: resolvedAnalytics, toolContext: toolContext)
         : null,
   );
@@ -63,7 +65,7 @@ Future<String> createProject(
           logger: globals.logger,
           platform: globals.platform,
           processManager: globals.processManager,
-          cache: globals.cache,
+          cache: Cache.test(fileSystem: fs, flutterRoot: getFlutterRoot()),
           flutterVersion: FakeFlutterVersion(),
         ),
   );

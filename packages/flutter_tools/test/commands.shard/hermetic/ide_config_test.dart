@@ -86,7 +86,6 @@ void main() {
       List<String> unexpectedPaths = const <String>[],
     }) async {
       dir ??= tempDir;
-      Cache.flutterRoot = tempDir.absolute.path;
       final command = IdeConfigCommand(toolContext: toolContext);
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['ide-config', ...args]);
@@ -117,8 +116,11 @@ void main() {
 
     setUp(() {
       fs = MemoryFileSystem.test();
-      toolContext = FakeToolContext(fs: fs);
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_ide_config_test.');
+      toolContext = FakeToolContext(
+        fs: fs,
+        cache: Cache.test(fileSystem: fs, flutterRoot: tempDir.absolute.path),
+      );
       final Directory packagesDir = tempDir.childDirectory('packages')..createSync(recursive: true);
       toolsDir = packagesDir.childDirectory('flutter_tools')..createSync();
       templateDir = toolsDir.childDirectory('ide_templates')..createSync();

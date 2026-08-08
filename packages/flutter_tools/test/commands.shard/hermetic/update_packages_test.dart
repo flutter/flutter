@@ -278,7 +278,6 @@ void main() {
       hookUserDefinesIntegrationTest.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(kNonWorkspacePubspecYaml);
-      Cache.flutterRoot = flutterSdk.absolute.path;
       pub = _FakePub(flutterTools: flutterTools);
       processManager = FakeProcessManager.empty();
     });
@@ -288,7 +287,11 @@ void main() {
         fs: fileSystem,
         logger: logger,
         processManager: processManager,
-        cache: Cache.test(processManager: processManager),
+        cache: Cache.test(
+          fileSystem: fileSystem,
+          flutterRoot: flutterSdk.absolute.path,
+          processManager: processManager,
+        ),
       );
       return UpdatePackagesCommand(toolContext: toolContext, pub: pub, verboseHelp: false);
     }

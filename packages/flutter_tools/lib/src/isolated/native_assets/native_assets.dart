@@ -549,7 +549,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required this.includeDevDependencies,
     Cache? cache,
     String? flutterRoot,
-  }) : _flutterRoot = flutterRoot ?? cache?.flutterRoot;
+  }) : _flutterRoot = flutterRoot ?? cache?.flutterRoot ?? globals.cache.flutterRoot;
 
   final String pubspecPath;
   final String packageConfigPath;

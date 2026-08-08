@@ -4,14 +4,12 @@
 
 import 'dart:convert';
 
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
-import '../../../src/test_flutter_command_runner.dart';
+import '../../../src/common.dart';
 
 /// A ProcessManager that invokes a real process manager, but keeps
 /// track of all commands sent to it.
@@ -69,14 +67,15 @@ Future<void> analyzeProject(
   String workingDir, {
   List<String> expectedFailures = const <String>[],
 }) async {
+  final String flutterRoot = getFlutterRoot();
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'flutter_tools.snapshot'),
+    globals.fs.path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   final args = <String>[flutterToolsSnapshotPath, 'analyze'];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+    globals.fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
     args,
     workingDirectory: workingDir,
   );
@@ -122,14 +121,21 @@ Future<void> analyzeProject(
 }
 
 Future<void> ensureFlutterToolsSnapshot() async {
+  final String flutterRoot = getFlutterRoot();
   final String flutterToolsPath = globals.fs.path.absolute(
-    globals.fs.path.join('bin', 'flutter_tools.dart'),
+    globals.fs.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'flutter_tools.dart'),
   );
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+    globals.fs.path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'),
   );
   final String packageConfig = globals.fs.path.absolute(
-    globals.fs.path.join('.dart_tool', 'package_config.json'),
+    globals.fs.path.join(
+      flutterRoot,
+      'packages',
+      'flutter_tools',
+      '.dart_tool',
+      'package_config.json',
+    ),
   );
 
   final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
@@ -143,7 +149,7 @@ Future<void> ensureFlutterToolsSnapshot() async {
     flutterToolsPath,
   ];
   final ProcessResult snapshotResult = await Process.run(
-    '../../bin/cache/dart-sdk/bin/dart',
+    globals.fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
     snapshotArgs,
   );
   printOnFailure('Results of generating snapshot:');
@@ -154,7 +160,7 @@ Future<void> ensureFlutterToolsSnapshot() async {
 
 Future<void> restoreFlutterToolsSnapshot() async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+    globals.fs.path.join(getFlutterRoot(), 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   final File snapshotBackup = globals.fs.file('$flutterToolsSnapshotPath.bak');

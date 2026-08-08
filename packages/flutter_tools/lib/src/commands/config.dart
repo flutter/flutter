@@ -99,8 +99,7 @@ class ConfigCommand extends FlutterCommand {
   final FeatureFlags? _featureFlags;
   final Analytics? _analytics;
 
-  FeatureFlags get _effectiveFeatureFlags =>
-      _featureFlags ?? const _DefaultFeatureFlags();
+  FeatureFlags get _effectiveFeatureFlags => _featureFlags ?? const _DefaultFeatureFlags();
 
   Analytics get _effectiveAnalytics => _analytics ?? const NoOpAnalytics();
 
@@ -206,10 +205,7 @@ class ConfigCommand extends FlutterCommand {
         platform: _toolContext.platform,
         processUtils: _toolContext.processUtils,
         fileSystem: fs,
-        fileSystemUtils: FileSystemUtils(
-          fileSystem: fs,
-          platform: _toolContext.platform,
-        ),
+        fileSystemUtils: FileSystemUtils(fileSystem: fs, platform: _toolContext.platform),
         terminal: _toolContext.terminal,
         plistParser: PlistParser(
           fileSystem: fs,
