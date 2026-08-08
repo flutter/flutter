@@ -16,6 +16,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,6 +61,7 @@ import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
+import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import java.lang.reflect.Field;
@@ -121,6 +123,103 @@ public class FlutterViewTest {
     // Value should not exclude descendants because platform views are added as child views and
     // can be eligible for autofill (e.g. a WebView).
     assertEquals(View.IMPORTANT_FOR_AUTOFILL_YES, flutterView.getImportantForAutofill());
+  }
+
+  @Test
+  public void onCheckIsTextEditor_usesActiveTextInputClient() throws Exception {
+    FlutterView flutterView = new FlutterView(ctx);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
+
+    assertFalse(flutterView.onCheckIsTextEditor());
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    TextInputPlugin textInputPlugin = mock(TextInputPlugin.class);
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    textInputPluginField.set(flutterView, textInputPlugin);
+
+    when(textInputPlugin.isTextInputClientActive()).thenReturn(false);
+    assertFalse(flutterView.onCheckIsTextEditor());
+
+    when(textInputPlugin.isTextInputClientActive()).thenReturn(true);
+    assertTrue(flutterView.onCheckIsTextEditor());
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_30)
+  public void setVisibility_restoresFocusForActiveTextInputClientWithVisibleIme() throws Exception {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
+    flutterView.attachToFlutterEngine(flutterEngine);
+    applyImeVisibility(flutterView, true);
+
+    TextInputPlugin textInputPlugin = mock(TextInputPlugin.class);
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    textInputPluginField.set(flutterView, textInputPlugin);
+    when(textInputPlugin.isTextInputClientActive()).thenReturn(true);
+    when(flutterView.hasFocus()).thenReturn(true, false);
+    doReturn(true).when(flutterView).requestFocus();
+    clearInvocations(flutterView);
+
+    flutterView.setVisibility(View.GONE);
+    flutterView.setVisibility(View.VISIBLE);
+
+    verify(flutterView).requestFocus();
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_30)
+  public void setVisibility_doesNotRestoreFocusForActiveTextInputClientWithHiddenIme()
+      throws Exception {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
+    flutterView.attachToFlutterEngine(flutterEngine);
+    applyImeVisibility(flutterView, false);
+
+    TextInputPlugin textInputPlugin = mock(TextInputPlugin.class);
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    textInputPluginField.set(flutterView, textInputPlugin);
+    when(textInputPlugin.isTextInputClientActive()).thenReturn(true);
+    when(flutterView.hasFocus()).thenReturn(true, false);
+    clearInvocations(flutterView);
+
+    flutterView.setVisibility(View.GONE);
+    flutterView.setVisibility(View.VISIBLE);
+
+    verify(flutterView, never()).requestFocus();
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_30)
+  public void setVisibility_doesNotRestoreFocusWithoutActiveTextInputClient() throws Exception {
+    FlutterView flutterView = spy(new FlutterView(ctx));
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
+    flutterView.attachToFlutterEngine(flutterEngine);
+    applyImeVisibility(flutterView, true);
+
+    TextInputPlugin textInputPlugin = mock(TextInputPlugin.class);
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    textInputPluginField.set(flutterView, textInputPlugin);
+    when(textInputPlugin.isTextInputClientActive()).thenReturn(false);
+    when(flutterView.hasFocus()).thenReturn(true, false);
+    clearInvocations(flutterView);
+
+    flutterView.setVisibility(View.GONE);
+    flutterView.setVisibility(View.VISIBLE);
+
+    verify(flutterView, never()).requestFocus();
   }
 
   @Test
@@ -1455,6 +1554,16 @@ public class FlutterViewTest {
     when(displayCutout.getSafeInsetBottom()).thenReturn(100);
     when(displayCutout.getSafeInsetRight()).thenReturn(100);
     return windowInsets;
+  }
+
+  private void applyImeVisibility(FlutterView flutterView, boolean visible) {
+    final WindowInsets windowInsets =
+        new WindowInsets.Builder()
+            .setInsets(
+                WindowInsets.Type.ime(), visible ? Insets.of(0, 0, 0, 100) : Insets.of(0, 0, 0, 0))
+            .setVisible(WindowInsets.Type.ime(), visible)
+            .build();
+    flutterView.onApplyWindowInsets(windowInsets);
   }
 
   /*

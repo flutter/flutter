@@ -16,8 +16,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,8 +27,10 @@ import static org.mockito.Mockito.when;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Insets;
 import android.net.Uri;
 import android.view.View;
+import android.view.WindowInsets;
 import android.window.BackEvent;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -56,10 +60,12 @@ import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1467,6 +1473,67 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
+  @Config(sdk = Build.API_LEVELS.API_30)
+  public void itRestoresFocusedTextInputViewVisibilityWhenOnStartAndOnStop() throws Exception {
+    // ---- Test setup ----
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+    delegate.onCreateView(null, null, null, 0, true);
+    delegate.onStart();
+
+    FlutterView flutterView = spy(delegate.flutterView);
+    delegate.flutterView = flutterView;
+    applyImeVisibility(flutterView, true);
+    TextInputPlugin textInputPlugin = mock(TextInputPlugin.class);
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    textInputPluginField.set(flutterView, textInputPlugin);
+    when(textInputPlugin.isTextInputClientActive()).thenReturn(true);
+    when(flutterView.hasFocus()).thenReturn(true, false);
+    doReturn(true).when(flutterView).requestFocus();
+    clearInvocations(flutterView);
+
+    // --- Execute the behavior under test ---
+    delegate.onStop();
+    delegate.onStart();
+
+    // Verify that the flutterView is focused and reports as a text editor before the host
+    // receives its next window-focus callback, so Android's soft-input policy can run normally.
+    verify(flutterView).requestFocus();
+    assertTrue(flutterView.onCheckIsTextEditor());
+  }
+
+  @Test
+  @Config(sdk = Build.API_LEVELS.API_30)
+  public void itDoesNotRestoreFocusedTextInputViewVisibilityWhenImeHiddenOnStartAndOnStop()
+      throws Exception {
+    // ---- Test setup ----
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    delegate.onAttach(ctx);
+    delegate.onCreateView(null, null, null, 0, true);
+    delegate.onStart();
+
+    FlutterView flutterView = spy(delegate.flutterView);
+    delegate.flutterView = flutterView;
+    applyImeVisibility(flutterView, false);
+    TextInputPlugin textInputPlugin = mock(TextInputPlugin.class);
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    textInputPluginField.set(flutterView, textInputPlugin);
+    when(textInputPlugin.isTextInputClientActive()).thenReturn(true);
+    when(flutterView.hasFocus()).thenReturn(true, false);
+    clearInvocations(flutterView);
+
+    // --- Execute the behavior under test ---
+    delegate.onStop();
+    delegate.onStart();
+
+    // The framework text field can remain focused while the user-hidden IME stays hidden.
+    verify(flutterView, never()).requestFocus();
+    assertTrue(flutterView.onCheckIsTextEditor());
+  }
+
+  @Test
   public void flutterSurfaceViewVisibilityChangedWithFlutterView() {
     // ---- Test setup ----
     // Create the real object that we're testing.
@@ -1679,5 +1746,15 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getScribeChannel()).thenReturn(mock(ScribeChannel.class));
 
     return engine;
+  }
+
+  private void applyImeVisibility(FlutterView flutterView, boolean visible) {
+    final WindowInsets windowInsets =
+        new WindowInsets.Builder()
+            .setInsets(
+                WindowInsets.Type.ime(), visible ? Insets.of(0, 0, 0, 100) : Insets.of(0, 0, 0, 0))
+            .setVisible(WindowInsets.Type.ime(), visible)
+            .build();
+    flutterView.onApplyWindowInsets(windowInsets);
   }
 }
