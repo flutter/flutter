@@ -9,7 +9,6 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -21,7 +20,7 @@ import 'context.dart';
 export 'package:test/test.dart' hide isInstanceOf, test;
 
 CommandRunner<void> createTestCommandRunner([FlutterCommand? command]) {
-  final FlutterCommandRunner runner = TestFlutterCommandRunner();
+  final FlutterCommandRunner runner = TestFlutterCommandRunner(toolContext: command?.toolContext);
   if (command != null) {
     runner.addCommand(command);
   }
@@ -45,24 +44,30 @@ Future<String> createProject(
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
+  TestFlutterCommandRunner({super.toolDependencies, super.toolContext});
+
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Logger topLevelLogger = globals.logger;
+    final Logger? topLevelLogger = toolContext?.logger;
     final contextOverrides = <Type, dynamic>{
-      if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
+      if (topLevelLogger != null && (topLevelResults['verbose'] as bool))
+        Logger: VerboseLogger(topLevelLogger),
     };
     return context.run<void>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-          platform: globals.platform,
-          fileSystem: globals.fs,
-          userMessages: UserMessages(),
-        );
-        // For compatibility with tests that set this to a relative path.
-        Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot!));
+        if (toolContext != null) {
+          Cache.flutterRoot ??= Cache.defaultFlutterRoot(
+            platform: toolContext!.platform,
+            fileSystem: toolContext!.fs,
+            userMessages: toolContext!.userMessages,
+          );
+          Cache.flutterRoot = toolContext!.fs.path.normalize(
+            toolContext!.fs.path.absolute(Cache.flutterRoot!),
+          );
+        }
         return super.runCommand(topLevelResults);
       },
     );
@@ -70,6 +75,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   @override
   void printUsage() {
-    testLogger.printStatus(usage);
+    (toolContext?.logger ?? testLogger).printStatus(usage);
   }
 }
