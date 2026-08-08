@@ -6,17 +6,26 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:uuid/uuid.dart';
 
+import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
+import '../android/java.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
+import '../base/signals.dart';
 import '../base/terminal.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../daemon.dart';
 import '../device.dart';
@@ -24,7 +33,6 @@ import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../emulator.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../proxied_devices/debounce_data_stream.dart';
 import '../proxied_devices/file_transfer.dart';
@@ -44,7 +52,8 @@ const protocolVersion = '0.6.1';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({this.hidden = false}) {
+  DaemonCommand({required super.toolContext, this.hidden = false, DeviceManager? deviceManager})
+    : _deviceManager = deviceManager {
     argParser.addOption(
       'listen-on-tcp-port',
       help:
@@ -52,6 +61,10 @@ class DaemonCommand extends FlutterCommand {
       valueHelp: 'port',
     );
   }
+
+  final DeviceManager? _deviceManager;
+
+  ToolContext get _toolContext => toolContext!;
 
   @override
   final name = 'daemon';
@@ -67,6 +80,15 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final Logger logger = _toolContext.logger;
+    final Stdio stdio = _toolContext.stdio;
+    final AnsiTerminal terminal = _toolContext.terminal;
+    final OutputPreferences outputPreferences = _toolContext.outputPreferences;
+    final FileSystem fs = _toolContext.fs;
+    final Platform platform = _toolContext.platform;
+    final ProcessManager processManager = _toolContext.processManager;
+    final SystemClock systemClock = _toolContext.systemClock;
+
     if (argResults!['listen-on-tcp-port'] != null) {
       int? port;
       try {
@@ -78,22 +100,42 @@ class DaemonCommand extends FlutterCommand {
       await DaemonServer(
         port: port,
         logger: StdoutLogger(
-          terminal: globals.terminal,
-          stdio: globals.stdio,
-          outputPreferences: globals.outputPreferences,
+          terminal: terminal,
+          stdio: stdio,
+          outputPreferences: outputPreferences,
         ),
-        notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
+        notifyingLogger: asLogger<NotifyingLogger>(logger),
+        fileSystem: fs,
+        platform: platform,
+        processManager: processManager,
+        analytics: analytics,
+        systemClock: systemClock,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        deviceManager: _deviceManager,
+        featureFlags: featureFlags,
       ).run();
       return FlutterCommandResult.success();
     }
     final daemon = Daemon(
       DaemonConnection(
-        daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
-        logger: globals.logger,
+        daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
+        logger: logger,
       ),
-      notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
+      notifyingLogger: asLogger<NotifyingLogger>(logger),
+      fileSystem: fs,
+      platform: platform,
+      processManager: processManager,
+      logger: logger,
+      analytics: analytics,
+      systemClock: systemClock,
+      terminal: terminal,
+      outputPreferences: outputPreferences,
+      deviceManager: _deviceManager,
+      featureFlags: featureFlags,
+      stdio: stdio,
     );
-    globals.printStatus('Device daemon started.');
+    logger.printStatus('Device daemon started.');
     final int code = await daemon.onExit;
     if (code != 0) {
       throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
@@ -108,6 +150,19 @@ class DaemonServer {
     this.port,
     required this.logger,
     this.notifyingLogger,
+    this.fileSystem,
+    this.platform,
+    this.processManager,
+    this.analytics,
+    this.systemClock,
+    this.terminal,
+    this.outputPreferences,
+    this.deviceManager,
+    this.java,
+    this.androidSdk,
+    this.featureFlags,
+    this.androidWorkflow,
+    this.stdio,
     @visibleForTesting
     Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
   }) : _bind = bind;
@@ -119,6 +174,20 @@ class DaemonServer {
 
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
+
+  final FileSystem? fileSystem;
+  final Platform? platform;
+  final ProcessManager? processManager;
+  final Analytics? analytics;
+  final SystemClock? systemClock;
+  final AnsiTerminal? terminal;
+  final OutputPreferences? outputPreferences;
+  final DeviceManager? deviceManager;
+  final Java? java;
+  final AndroidSdk? androidSdk;
+  final FeatureFlags? featureFlags;
+  final AndroidWorkflow? androidWorkflow;
+  final Stdio? stdio;
 
   final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
 
@@ -153,6 +222,20 @@ class DaemonServer {
           logger: logger,
         ),
         notifyingLogger: notifyingLogger,
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        logger: logger,
+        analytics: analytics,
+        systemClock: systemClock,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        deviceManager: deviceManager,
+        java: java,
+        androidSdk: androidSdk,
+        featureFlags: featureFlags,
+        androidWorkflow: androidWorkflow,
+        stdio: stdio,
       );
       await daemon.onExit;
       await socketDone;
@@ -174,14 +257,75 @@ class Daemon {
     this.notifyingLogger,
     this.logToStdout = false,
     FileTransfer fileTransfer = const FileTransfer(),
-  }) {
+    FileSystem? fileSystem,
+    Platform? platform,
+    ProcessManager? processManager,
+    Logger? logger,
+    Analytics? analytics,
+    SystemClock? systemClock,
+    AnsiTerminal? terminal,
+    OutputPreferences? outputPreferences,
+    DeviceManager? deviceManager,
+    Java? java,
+    AndroidSdk? androidSdk,
+    FeatureFlags? featureFlags,
+    AndroidWorkflow? androidWorkflow,
+    Stdio? stdio,
+  }) : _stdio = stdio,
+       _logger = logger ?? BufferLogger.test(),
+       _fs =
+           fileSystem ??
+           LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()) {
+    final FileSystem fs = _fs;
+    final Platform p = platform ?? const LocalPlatform();
+    final Logger l = _logger;
+    final FeatureFlags flags = featureFlags ?? const _DefaultFeatureFlags();
+    final ProcessManager pm = processManager ?? const LocalProcessManager();
+    final AnsiTerminal term = terminal ?? AnsiTerminal(stdio: stdio ?? Stdio(), platform: p);
+    final OutputPreferences prefs = outputPreferences ?? OutputPreferences.test();
+    final Analytics an = analytics ?? const NoOpAnalytics();
+    final SystemClock clock = systemClock ?? const SystemClock();
+    final AndroidWorkflow workflow =
+        androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: flags);
+
     // Set up domains.
-    registerDomain(daemonDomain = DaemonDomain(this));
-    registerDomain(appDomain = AppDomain(this));
-    registerDomain(deviceDomain = DeviceDomain(this));
-    registerDomain(emulatorDomain = EmulatorDomain(this));
+    registerDomain(
+      daemonDomain = DaemonDomain(
+        this,
+        fileSystem: fs,
+        featureFlags: flags,
+        logger: l,
+        stdio: _stdio,
+      ),
+    );
+    registerDomain(
+      appDomain = AppDomain(
+        this,
+        fileSystem: fs,
+        platform: p,
+        analytics: an,
+        systemClock: clock,
+        logger: l,
+        terminal: term,
+        outputPreferences: prefs,
+      ),
+    );
+    registerDomain(deviceDomain = DeviceDomain(this, deviceManager: deviceManager, logger: l));
+    registerDomain(
+      emulatorDomain = EmulatorDomain(
+        this,
+        fileSystem: fs,
+        logger: l,
+        java: java,
+        androidSdk: androidSdk,
+        processManager: pm,
+        androidWorkflow: workflow,
+      ),
+    );
     registerDomain(devToolsDomain = DevToolsDomain(this));
-    registerDomain(proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer));
+    registerDomain(
+      proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer, fileSystem: fs, logger: l),
+    );
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -195,21 +339,53 @@ class Daemon {
     );
   }
 
-  factory Daemon.createMachineDaemon() {
+  factory Daemon.createMachineDaemon({
+    required Stdio stdio,
+    required Logger logger,
+    FileSystem? fileSystem,
+    Platform? platform,
+    ProcessManager? processManager,
+    Analytics? analytics,
+    SystemClock? systemClock,
+    AnsiTerminal? terminal,
+    OutputPreferences? outputPreferences,
+    DeviceManager? deviceManager,
+    Java? java,
+    AndroidSdk? androidSdk,
+    FeatureFlags? featureFlags,
+    AndroidWorkflow? androidWorkflow,
+  }) {
     final daemon = Daemon(
       DaemonConnection(
-        daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
-        logger: globals.logger,
+        daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
+        logger: logger,
       ),
-      notifyingLogger: (globals.logger is NotifyingLogger)
-          ? globals.logger as NotifyingLogger
-          : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
+      notifyingLogger: (logger is NotifyingLogger)
+          ? logger
+          : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
+      stdio: stdio,
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      analytics: analytics,
+      systemClock: systemClock,
+      terminal: terminal,
+      outputPreferences: outputPreferences,
+      deviceManager: deviceManager,
+      java: java,
+      androidSdk: androidSdk,
+      featureFlags: featureFlags,
+      androidWorkflow: androidWorkflow,
     );
     return daemon;
   }
 
   final DaemonConnection connection;
+  final Stdio? _stdio;
+  final Logger _logger;
+  final FileSystem _fs;
 
   late DaemonDomain daemonDomain;
   late AppDomain appDomain;
@@ -239,7 +415,11 @@ class Daemon {
     final Object? id = request.data['id'];
 
     if (id == null) {
-      globals.stdio.stderrWrite('no id for request: $request\n');
+      if (_stdio != null) {
+        _stdio.stderrWrite('no id for request: $request\n');
+      } else {
+        _logger.printError('no id for request: $request');
+      }
       return;
     }
 
@@ -375,7 +555,17 @@ abstract class Domain {
 ///
 /// This domain fires the `daemon.logMessage` event.
 class DaemonDomain extends Domain {
-  DaemonDomain(Daemon daemon) : super(daemon, 'daemon') {
+  DaemonDomain(
+    Daemon daemon, {
+    required FileSystem fileSystem,
+    required FeatureFlags featureFlags,
+    required Logger logger,
+    Stdio? stdio,
+  }) : _fs = fileSystem,
+       _featureFlags = featureFlags,
+       _logger = logger,
+       _stdio = stdio,
+       super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
     registerHandler('getSupportedPlatforms', getSupportedPlatforms);
@@ -391,9 +581,13 @@ class DaemonDomain extends Domain {
           // ignore: avoid_print
           print(message.message);
         } else if (message.level == 'error' || message.level == 'warning') {
-          globals.stdio.stderrWrite('${message.message}\n');
-          if (message.stackTrace != null) {
-            globals.stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
+          if (_stdio != null) {
+            _stdio.stderrWrite('${message.message}\n');
+            if (message.stackTrace != null) {
+              _stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
+            }
+          } else {
+            _logger.printError(message.message, stackTrace: message.stackTrace);
           }
         }
       } else {
@@ -413,6 +607,11 @@ class DaemonDomain extends Domain {
     });
   }
 
+  final FileSystem _fs;
+  final FeatureFlags _featureFlags;
+  final Logger _logger;
+  final Stdio? _stdio;
+
   StreamSubscription<LogMessage>? _subscription;
 
   Future<String> version(Map<String, Object?> args) {
@@ -431,7 +630,7 @@ class DaemonDomain extends Domain {
     if (res is Map<String, Object?> && res['url'] is String) {
       return res['url']! as String;
     } else {
-      globals.printError(
+      _logger.printError(
         'Invalid response to exposeUrl - params should include a String url field',
       );
       return url;
@@ -459,7 +658,7 @@ class DaemonDomain extends Domain {
     final platformTypesMap = <String, Object>{};
     try {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
-        globals.fs.directory(projectRoot),
+        _fs.directory(projectRoot),
       );
       final Set<SupportedPlatform> supportedPlatforms = flutterProject
           .getSupportedPlatforms()
@@ -469,7 +668,7 @@ class DaemonDomain extends Domain {
         final reasons = <Map<String, Object>>[];
         switch (platform) {
           case PlatformType.linux:
-            if (!featureFlags.isLinuxEnabled) {
+            if (!_featureFlags.isLinuxEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Linux feature is not enabled',
                 'fixText': 'Run "flutter config --enable-linux-desktop"',
@@ -484,7 +683,7 @@ class DaemonDomain extends Domain {
               });
             }
           case PlatformType.macos:
-            if (!featureFlags.isMacOSEnabled) {
+            if (!_featureFlags.isMacOSEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the macOS feature is not enabled',
                 'fixText': 'Run "flutter config --enable-macos-desktop"',
@@ -499,7 +698,7 @@ class DaemonDomain extends Domain {
               });
             }
           case PlatformType.windows:
-            if (!featureFlags.isWindowsEnabled) {
+            if (!_featureFlags.isWindowsEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Windows feature is not enabled',
                 'fixText': 'Run "flutter config --enable-windows-desktop"',
@@ -515,7 +714,7 @@ class DaemonDomain extends Domain {
               });
             }
           case PlatformType.ios:
-            if (!featureFlags.isIOSEnabled) {
+            if (!_featureFlags.isIOSEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the iOS feature is not enabled',
                 'fixText': 'Run "flutter config --enable-ios"',
@@ -530,7 +729,7 @@ class DaemonDomain extends Domain {
               });
             }
           case PlatformType.android:
-            if (!featureFlags.isAndroidEnabled) {
+            if (!_featureFlags.isAndroidEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Android feature is not enabled',
                 'fixText': 'Run "flutter config --enable-android"',
@@ -546,7 +745,7 @@ class DaemonDomain extends Domain {
               });
             }
           case PlatformType.web:
-            if (!featureFlags.isWebEnabled) {
+            if (!_featureFlags.isWebEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Web feature is not enabled',
                 'fixText': 'Run "flutter config --enable-web"',
@@ -561,7 +760,7 @@ class DaemonDomain extends Domain {
               });
             }
           case PlatformType.fuchsia:
-            if (!featureFlags.isFuchsiaEnabled) {
+            if (!_featureFlags.isFuchsiaEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the Fuchsia feature is not enabled',
                 'fixText': 'Run "flutter config --enable-fuchsia"',
@@ -577,7 +776,7 @@ class DaemonDomain extends Domain {
               });
             }
           case PlatformType.custom:
-            if (!featureFlags.areCustomDevicesEnabled) {
+            if (!_featureFlags.areCustomDevicesEnabled) {
               reasons.add(<String, Object>{
                 'reasonText': 'the custom devices feature is not enabled',
                 'fixText': 'Run "flutter config --enable-custom-devices"',
@@ -628,6 +827,19 @@ class DaemonDomain extends Domain {
   }
 }
 
+class _DefaultFeatureFlags implements FeatureFlags {
+  const _DefaultFeatureFlags();
+
+  @override
+  bool get isLinuxEnabled => true;
+
+  @override
+  bool get isWindowsEnabled => true;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => false;
+}
+
 /// The reason a [PlatformType] is not currently supported.
 ///
 /// The [name] of this value will be sent as a response to daemon client.
@@ -643,12 +855,36 @@ typedef RunOrAttach =
 ///
 /// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
-  AppDomain(Daemon daemon) : super(daemon, 'app') {
+  AppDomain(
+    Daemon daemon, {
+    required FileSystem fileSystem,
+    required Platform platform,
+    required Analytics analytics,
+    required SystemClock systemClock,
+    required Logger logger,
+    required AnsiTerminal terminal,
+    required OutputPreferences outputPreferences,
+  }) : _fs = fileSystem,
+       _platform = platform,
+       _analytics = analytics,
+       _systemClock = systemClock,
+       _logger = logger,
+       _terminal = terminal,
+       _outputPreferences = outputPreferences,
+       super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
   }
+
+  final FileSystem _fs;
+  final Platform _platform;
+  final Analytics _analytics;
+  final SystemClock _systemClock;
+  final Logger _logger;
+  final AnsiTerminal _terminal;
+  final OutputPreferences _outputPreferences;
 
   static const _uuidGenerator = Uuid();
 
@@ -675,6 +911,10 @@ class AppDomain extends Domain {
     bool machine = true,
     String? userIdentifier,
   }) async {
+    final FileSystem fs = _fs;
+    final Platform platform = _platform;
+    final Logger logger = _logger;
+
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
         '${options.buildInfo.mode.uppercaseFriendlyName} '
@@ -683,15 +923,15 @@ class AppDomain extends Domain {
     }
 
     // We change the current working directory for the duration of the `start` command.
-    final Directory cwd = globals.fs.currentDirectory;
-    globals.fs.currentDirectory = globals.fs.directory(projectDirectory);
-    final FlutterProject flutterProject = FlutterProject.current();
+    final Directory cwd = fs.currentDirectory;
+    fs.currentDirectory = fs.directory(projectDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       target: target,
       buildInfo: options.buildInfo,
-      platform: globals.platform,
+      platform: platform,
       userIdentifier: userIdentifier,
     );
 
@@ -706,13 +946,13 @@ class AppDomain extends Domain {
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
-        analytics: globals.analytics,
-        systemClock: globals.systemClock,
-        logger: globals.logger,
-        terminal: globals.terminal,
-        platform: globals.platform,
-        outputPreferences: globals.outputPreferences,
-        fileSystem: globals.fs,
+        analytics: _analytics,
+        systemClock: _systemClock,
+        logger: logger,
+        terminal: _terminal,
+        platform: platform,
+        outputPreferences: _outputPreferences,
+        fileSystem: fs,
         webDefines: webDefines,
       );
     } else if (enableHotReload) {
@@ -725,8 +965,8 @@ class AppDomain extends Domain {
         dillOutputPath: dillOutputPath,
         hostIsIde: true,
         machine: machine,
-        analytics: globals.analytics,
-        logger: globals.logger,
+        analytics: _analytics,
+        logger: logger,
       );
     } else {
       runner = ColdRunner(
@@ -755,7 +995,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
-      asLogger<MachineOutputLogger>(globals.logger),
+      asLogger<MachineOutputLogger>(logger),
     );
   }
 
@@ -833,7 +1073,7 @@ class AppDomain extends Domain {
       } finally {
         // If the full directory is used instead of the path then this causes
         // a TypeError with the ErrorHandlingFileSystem.
-        globals.fs.currentDirectory = cwd.path;
+        _fs.currentDirectory = cwd.path;
         _apps.remove(app);
       }
     });
@@ -1011,7 +1251,10 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(Daemon daemon) : super(daemon, 'device') {
+  DeviceDomain(Daemon daemon, {DeviceManager? deviceManager, required Logger logger})
+    : _deviceManager = deviceManager,
+      _logger = logger,
+      super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1033,8 +1276,11 @@ class DeviceDomain extends Domain {
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
-    globals.deviceManager!.deviceDiscoverers.forEach(addDeviceDiscoverer);
+    _deviceManager?.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
+
+  final DeviceManager? _deviceManager;
+  final Logger _logger;
 
   /// An incrementing number used to generate unique ids.
   var _id = 0;
@@ -1062,7 +1308,7 @@ class DeviceDomain extends Domain {
           final Map<String, Object?> response = await _deviceToMap(device);
           sendEvent(eventName, response);
         } on Exception catch (err) {
-          globals.printError('$err');
+          _logger.printError('$err');
         }
       });
     };
@@ -1378,7 +1624,7 @@ class DeviceDomain extends Domain {
       fuchsiaModule: fuchsiaModule,
       filterDevicePort: filterDevicePort,
       ipv6: ipv6 ?? false,
-      logger: globals.logger,
+      logger: _logger,
     );
     _vmServiceDiscoverySubscriptions[id] = discovery.uris.listen(
       (Uri uri) => sendEvent('device.VMServiceDiscoveryForAttach.$id', uri.toString()),
@@ -1609,20 +1855,32 @@ class AppInstance {
 
 /// This domain responds to methods like [getEmulators] and [launch].
 class EmulatorDomain extends Domain {
-  EmulatorDomain(Daemon daemon) : super(daemon, 'emulator') {
+  EmulatorDomain(
+    Daemon daemon, {
+    required FileSystem fileSystem,
+    required Logger logger,
+    Java? java,
+    AndroidSdk? androidSdk,
+    required ProcessManager processManager,
+    required AndroidWorkflow androidWorkflow,
+    EmulatorManager? emulatorManager,
+  }) : emulators =
+           emulatorManager ??
+           EmulatorManager(
+             fileSystem: fileSystem,
+             logger: logger,
+             java: java,
+             androidSdk: androidSdk,
+             processManager: processManager,
+             androidWorkflow: androidWorkflow,
+           ),
+       super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);
     registerHandler('launch', launch);
     registerHandler('create', create);
   }
 
-  EmulatorManager emulators = EmulatorManager(
-    fileSystem: globals.fs,
-    logger: globals.logger,
-    java: globals.java,
-    androidSdk: globals.androidSdk,
-    processManager: globals.processManager,
-    androidWorkflow: androidWorkflow!,
-  );
+  final EmulatorManager emulators;
 
   Future<List<Map<String, Object?>>> getEmulators([Map<String, Object?>? args]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
@@ -1654,9 +1912,15 @@ class EmulatorDomain extends Domain {
 }
 
 class ProxyDomain extends Domain {
-  ProxyDomain(Daemon daemon, {required FileTransfer fileTransfer})
-    : _fileTransfer = fileTransfer,
-      super(daemon, 'proxy') {
+  ProxyDomain(
+    Daemon daemon, {
+    required FileTransfer fileTransfer,
+    required FileSystem fileSystem,
+    required Logger logger,
+  }) : _fileTransfer = fileTransfer,
+       _fs = fileSystem,
+       _logger = logger,
+       super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);
     registerHandlerWithBinary('updateFile', updateFile);
@@ -1666,6 +1930,8 @@ class ProxyDomain extends Domain {
   }
 
   final FileTransfer _fileTransfer;
+  final FileSystem _fs;
+  final Logger _logger;
 
   final _forwardedConnections = <String, Socket>{};
   var _id = 0;
@@ -1726,14 +1992,14 @@ class ProxyDomain extends Domain {
     try {
       socket = await Socket.connect(InternetAddress.loopbackIPv4, targetPort);
     } on SocketException {
-      globals.logger.printTrace('Connecting to localhost:$targetPort failed with IPv4');
+      _logger.printTrace('Connecting to localhost:$targetPort failed with IPv4');
     }
 
     try {
       // If connecting to IPv4 loopback interface fails, try IPv6.
       socket ??= await Socket.connect(InternetAddress.loopbackIPv6, targetPort);
     } on SocketException {
-      globals.logger.printError('Connecting to localhost:$targetPort failed');
+      _logger.printError('Connecting to localhost:$targetPort failed');
     }
 
     if (socket == null) {
@@ -1747,7 +2013,7 @@ class ProxyDomain extends Domain {
       },
       onError: (Object error, StackTrace stackTrace) {
         // Socket error, probably disconnected.
-        globals.logger.printTrace('Socket error: $error, $stackTrace');
+        _logger.printTrace('Socket error: $error, $stackTrace');
       },
     );
 
@@ -1757,7 +2023,7 @@ class ProxyDomain extends Domain {
             (Object? obj) => obj,
             onError: (Object error, StackTrace stackTrace) {
               // Socket error, probably disconnected.
-              globals.logger.printTrace('Socket error: $error, $stackTrace');
+              _logger.printTrace('Socket error: $error, $stackTrace');
             },
           )
           .then((Object? _) {
@@ -1803,7 +2069,7 @@ class ProxyDomain extends Domain {
 
   Directory? _tempDirectory;
   Directory get tempDirectory =>
-      _tempDirectory ??= globals.fs.systemTempDirectory.childDirectory('flutter_tool_daemon')
+      _tempDirectory ??= _fs.systemTempDirectory.childDirectory('flutter_tool_daemon')
         ..createSync();
 }
 

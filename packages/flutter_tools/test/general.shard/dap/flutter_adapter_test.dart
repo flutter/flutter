@@ -9,11 +9,13 @@ import 'package:dds/dap.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/error_formatter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
-import 'package:flutter_tools/src/globals.dart' as globals show fs, platform;
+import 'package:flutter_tools/src/globals.dart' as globals show platform;
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
@@ -422,12 +424,14 @@ void main() {
       });
 
       test('runs "flutter attach" with --debug-uri if vmServiceInfoFile exists', () async {
-        final adapter = FakeFlutterDebugAdapter(
-          fileSystem: MemoryFileSystem.test(style: fsStyle),
-          platform: platform,
+        final fs = LocalFileSystem(
+          LocalSignals.instance,
+          Signals.defaultExitSignals,
+          ShutdownHooks(),
         );
+        final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
         final responseCompleter = Completer<void>();
-        final File serviceInfoFile = globals.fs.systemTempDirectory
+        final File serviceInfoFile = fs.systemTempDirectory
             .createTempSync('dap_flutter_attach_vmServiceInfoFile')
             .childFile('vmServiceInfo.json');
 
@@ -460,12 +464,14 @@ void main() {
       test(
         'runs "flutter attach" with --debug-uri if vmServiceInfoFile is created later',
         () async {
-          final adapter = FakeFlutterDebugAdapter(
-            fileSystem: MemoryFileSystem.test(style: fsStyle),
-            platform: platform,
+          final fs = LocalFileSystem(
+            LocalSignals.instance,
+            Signals.defaultExitSignals,
+            ShutdownHooks(),
           );
+          final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
           final responseCompleter = Completer<void>();
-          final File serviceInfoFile = globals.fs.systemTempDirectory
+          final File serviceInfoFile = fs.systemTempDirectory
               .createTempSync('dap_flutter_attach_vmServiceInfoFile')
               .childFile('vmServiceInfo.json');
 

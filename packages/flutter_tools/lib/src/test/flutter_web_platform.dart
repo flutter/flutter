@@ -124,8 +124,18 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_packageFilesHandler);
     _server.mount(cascade.handler);
     _testGoldenComparator = TestGoldenComparator(
-      compilerFactory: () =>
-          TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      compilerFactory: () => TestCompiler(
+        buildInfo,
+        flutterProject,
+        artifacts: artifacts ?? globals.artifacts!,
+        config: globals.config,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        platform: globals.platform,
+        processManager: processManager,
+        shutdownHooks: globals.shutdownHooks,
+        testTimeRecorder: testTimeRecorder,
+      ),
       flutterTesterBinPath: flutterTesterBinPath,
       fileSystem: _fileSystem,
       logger: _logger,

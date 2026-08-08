@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
@@ -104,7 +105,11 @@ void main() {
     testUsingContext(
       'daemon.getSupportedPlatforms command should succeed',
       () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+        );
         // Use the flutter_gallery project which has a known set of supported platforms.
         final String projectPath = globals.fs.path.join(
           getFlutterRoot(),
@@ -1119,6 +1124,19 @@ void main() {
 
         expect(results, orderedEquals(<int>[1, 2]));
       });
+    });
+  });
+
+  group('DaemonCommand', () {
+    testWithoutContext('has correct properties', () {
+      final command = DaemonCommand(toolContext: FakeToolContext());
+
+      expect(command.name, 'daemon');
+      expect(command.category, FlutterCommandCategory.tools);
+      expect(command.hidden, false);
+
+      final hiddenCommand = DaemonCommand(toolContext: FakeToolContext(), hidden: true);
+      expect(hiddenCommand.hidden, true);
     });
   });
 }
