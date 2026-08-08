@@ -418,29 +418,60 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
-    final String? javaBinary = _java?.binaryPath;
-
-    if (javaBinary == null) {
-      return false;
-    }
-    if (!_processManager.canRun(javaBinary)) {
-      return false;
-    }
-    String? javaVersion;
-    try {
-      final ProcessResult result = await _processManager.run(<String>[javaBinary, '-version']);
-      if (result.exitCode == 0) {
-        final List<String> versionLines = (result.stderr as String).split('\n');
-        javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+    Java? currentJava = _java;
+    while (currentJava != null) {
+      final String javaBinary = currentJava.binaryPath;
+      if (!_processManager.canRun(javaBinary)) {
+        currentJava = currentJava.fallback;
+        continue;
       }
-    } on Exception catch (error) {
-      _logger.printTrace(error.toString());
+      String? javaVersion;
+      try {
+        final ProcessResult result = await _processManager.run(<String>[javaBinary, '-version']);
+        if (result.exitCode == 0) {
+          final List<String> versionLines = (result.stderr as String).split('\n');
+          javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+        }
+      } on Exception catch (error) {
+        _logger.printTrace(error.toString());
+      }
+      if (javaVersion != null) {
+        return true;
+      }
+      currentJava = currentJava.fallback;
     }
-    if (javaVersion == null) {
-      // Could not determine the java version.
-      return false;
+    return false;
+  }
+
+  Future<Java?> _findCompatibleJava() async {
+    if (!_canRunSdkManager()) {
+      return null;
     }
-    return true;
+    Java? currentJava = _java;
+    while (currentJava != null) {
+      try {
+        final ProcessResult result = await _processManager.run(<String>[
+          _androidSdk!.sdkManagerPath!,
+          '--version',
+        ], environment: currentJava.environment);
+        if (result.exitCode == 0) {
+          return currentJava;
+        }
+        if (currentJava.fallback != null) {
+          _logger.printTrace(
+            'sdkmanager --version failed with exit code ${result.exitCode} using Java from ${currentJava.javaSource}.',
+          );
+        }
+      } on Exception catch (e) {
+        if (currentJava.fallback != null) {
+          _logger.printTrace(
+            'sdkmanager --version check failed for Java from ${currentJava.javaSource}: $e',
+          );
+        }
+      }
+      currentJava = currentJava.fallback;
+    }
+    return null;
   }
 
   Future<LicensesAccepted> get licensesAccepted async {
@@ -455,9 +486,6 @@ class AndroidLicenseValidator extends DoctorValidator {
           status = LicensesAccepted.none;
         }
       } else if (licenseNotAccepted.hasMatch(line)) {
-        // The licenseNotAccepted pattern is trying to match the same line as
-        // licenseCounts, but is more general. In case the format changes, a
-        // more general match may keep doctor mostly working.
         status = LicensesAccepted.none;
       } else if (licenseAccepted.hasMatch(line)) {
         status ??= LicensesAccepted.all;
@@ -468,14 +496,18 @@ class AndroidLicenseValidator extends DoctorValidator {
       return LicensesAccepted.unknown;
     }
 
+    final Java? compatibleJava = await _findCompatibleJava();
+    if (compatibleJava == null) {
+      return LicensesAccepted.unknown;
+    }
+
     try {
       final Process process = await _processManager.start(<String>[
         _androidSdk!.sdkManagerPath!,
         '--licenses',
-      ], environment: _java?.environment);
+      ], environment: compatibleJava.environment);
       await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: 'n');
-      // We expect logcat streams to occasionally contain invalid utf-8,
-      // see: https://github.com/flutter/flutter/pull/8864.
+
       final Future<void> output = process.stdout
           .transform<String>(const Utf8Decoder(reportErrors: false))
           .transform<String>(const LineSplitter())
@@ -508,19 +540,42 @@ class AndroidLicenseValidator extends DoctorValidator {
       );
     }
 
+    final Java? compatibleJava = await _findCompatibleJava();
+    if (compatibleJava == null) {
+      final Java javaToRun = _java!;
+      try {
+        final Process process = await _processManager.start(<String>[
+          _androidSdk.sdkManagerPath!,
+          '--licenses',
+        ], environment: javaToRun.environment);
+
+        final stderrLines = <String>[];
+        await process.stderr.forEach((List<int> event) {
+          _stdio.stderr.add(event);
+          stderrLines.add(utf8.decode(event));
+        });
+        final int exitCode = await process.exitCode;
+        throwToolExit(_messageForSdkManagerError(stderrLines, exitCode, javaToRun));
+      } on ProcessException catch (e) {
+        throwToolExit(
+          _userMessages.androidCannotRunSdkManager(
+            _androidSdk.sdkManagerPath ?? '',
+            e.toString(),
+            _platform,
+          ),
+        );
+      }
+    }
+
     try {
       final Process process = await _processManager.start(<String>[
         _androidSdk.sdkManagerPath!,
         '--licenses',
-      ], environment: _java?.environment);
+      ], environment: compatibleJava.environment);
 
-      // The real stdin will never finish streaming. Pipe until the child process
-      // finishes.
       unawaited(
         process.stdin
             .addStream(_stdio.stdin)
-            // If the process exits unexpectedly with an error, that will be
-            // handled by the caller.
             .then(
               (Object? socket) => socket,
               onError: (dynamic err, StackTrace stack) {
@@ -531,8 +586,6 @@ class AndroidLicenseValidator extends DoctorValidator {
       );
 
       final stderrLines = <String>[];
-      // Wait for stdout and stderr to be fully processed, because process.exitCode
-      // may complete first.
       try {
         await Future.wait<void>(<Future<void>>[
           _stdio.addStdoutStream(process.stdout),
@@ -548,7 +601,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
       final int exitCode = await process.exitCode;
       if (exitCode != 0) {
-        throwToolExit(_messageForSdkManagerError(stderrLines, exitCode));
+        throwToolExit(_messageForSdkManagerError(stderrLines, exitCode, compatibleJava));
       }
       return true;
     } on ProcessException catch (e) {
@@ -570,8 +623,9 @@ class AndroidLicenseValidator extends DoctorValidator {
     return _processManager.canRun(sdkManagerPath);
   }
 
-  String _messageForSdkManagerError(List<String> androidSdkStderr, int exitCode) {
+  String _messageForSdkManagerError(List<String> androidSdkStderr, int exitCode, Java? java) {
     final String sdkManagerPath = _androidSdk!.sdkManagerPath!;
+    final String javaBinaryPath = java?.binaryPath ?? 'java';
 
     final bool failedDueToJdkIncompatibility = androidSdkStderr.join().contains(
       RegExp(
@@ -582,7 +636,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     if (failedDueToJdkIncompatibility) {
       return 'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "exited code $exitCode".\n'
-          'It appears the version of the Java binary used (${_java!.binaryPath}) is '
+          'It appears the version of the Java binary used ($javaBinaryPath) is '
           'too out-of-date and is incompatible with the Android sdkmanager tool.\n'
           'If the Java binary came bundled with Android Studio, consider updating '
           'your installation of Android studio. Alternatively, you can uninstall '
