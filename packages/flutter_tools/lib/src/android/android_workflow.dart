@@ -20,6 +20,7 @@ import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
+import 'android_studio.dart';
 import 'gradle_utils.dart' as gradle_utils;
 import 'java.dart';
 
@@ -114,6 +115,7 @@ class AndroidValidator extends DoctorValidator {
     required UserMessages userMessages,
     required ProcessManager processManager,
     required OperatingSystemUtils osUtils,
+    List<AndroidStudio> androidStudios = const <AndroidStudio>[],
   }) : _java = java,
        _androidSdk = androidSdk,
        _logger = logger,
@@ -121,6 +123,7 @@ class AndroidValidator extends DoctorValidator {
        _userMessages = userMessages,
        _processManager = processManager,
        _osUtils = osUtils,
+       _androidStudios = androidStudios,
        super('Android toolchain - develop for Android devices');
 
   final Java? _java;
@@ -130,6 +133,7 @@ class AndroidValidator extends DoctorValidator {
   final UserMessages _userMessages;
   final ProcessManager _processManager;
   final OperatingSystemUtils _osUtils;
+  final List<AndroidStudio> _androidStudios;
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -227,15 +231,25 @@ class AndroidValidator extends DoctorValidator {
 
     _task = 'Validating Android SDK command line tools are available';
     if (!androidSdk.cmdlineToolsAvailable) {
-      messages.add(
-        const ValidationMessage.error(
-          'cmdline-tools component is missing.\n'
-          'Try installing or updating Android Studio.\n'
-          'Alternatively, download the tools from https://developer.android.com/studio#command-line-tools-only '
-          'and make sure to set the ANDROID_HOME environment variable.\n'
-          'See https://developer.android.com/studio/command-line for more details.',
-        ),
-      );
+      if (_androidStudios.isNotEmpty) {
+        messages.add(
+          const ValidationMessage.error(
+            'Unable to locate Android SDK command-line tools. '
+            'Try installing the "Android SDK Command-line Tools (latest)" component via the Android Studio SDK Manager. '
+            'See https://developer.android.com/studio/intro/update#sdk-manager for details.',
+          ),
+        );
+      } else {
+        messages.add(
+          const ValidationMessage.error(
+            'cmdline-tools component is missing.\n'
+            'Try installing or updating Android Studio.\n'
+            'Alternatively, download the tools from https://developer.android.com/studio#command-line-tools-only '
+            'and make sure to set the ANDROID_HOME environment variable.\n'
+            'See https://developer.android.com/studio/command-line for more details.',
+          ),
+        );
+      }
       return ValidationResult(ValidationType.missing, messages);
     }
 
@@ -331,10 +345,23 @@ class AndroidValidator extends DoctorValidator {
       messages.add(ValidationMessage.hint(warningMessage.toString().trim()));
     }
 
+    var androidStudioError = false;
+    for (final AndroidStudio studio in _androidStudios) {
+      if (!studio.isValid) {
+        androidStudioError = true;
+        messages.add(ValidationMessage.error('Android Studio at ${studio.directory}'));
+        for (final String message in studio.validationMessages) {
+          messages.add(ValidationMessage.error(message));
+        }
+      }
+    }
+
     _task = 'Finding Java binary';
 
     // Check JDK version.
-    if (!await _checkJavaVersion(messages)) {
+    final bool javaVersionValid = await _checkJavaVersion(messages);
+
+    if (androidStudioError || !javaVersionValid) {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
