@@ -4,7 +4,6 @@
 
 /// @docImport 'dart:ui';
 ///
-/// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter/services.dart';
 ///
 /// @docImport 'app.dart';
@@ -224,7 +223,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   /// See also:
   ///
   ///  * [CupertinoPageTransitionsBuilder], which uses this method to define a
-  ///    [PageTransitionsBuilder] for the [PageTransitionsTheme].
+  ///    [PageTransitionsBuilder] for the [PageTransitionsTheme](https://api.flutter.dev/flutter/material/PageTransitionsTheme-class.html).
   static Widget buildPageTransitions<T>(
     PageRoute<T> route,
     BuildContext context,
@@ -1368,7 +1367,8 @@ Widget _buildCupertinoDialogTransitions(
 /// By default, `useRootNavigator` is `true` and the dialog route created by
 /// this method is pushed to the root navigator.
 ///
-/// {@macro flutter.material.dialog.requestFocus}
+/// The `requestFocus` argument is used to specify whether the dialog should
+/// request focus when shown.
 /// {@macro flutter.widgets.navigator.Route.requestFocus}
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
@@ -1565,10 +1565,10 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
 ///    Cupertino apps.
 ///  * [CupertinoPageTransition], the widget that implements the iOS page
 ///    transition animation.
-///  * [MaterialPageRoute], an adaptive [PageRoute] that can use this builder
-///    through [PageTransitionsTheme].
-///  * [PageTransitionsTheme], which defines the page transitions used by
-///    [MaterialPageRoute] for different target platforms.
+///  * [MaterialPageRoute](https://api.flutter.dev/flutter/material/MaterialPageRoute-class.html), an adaptive [PageRoute] that can use this builder
+///    through [PageTransitionsTheme](https://api.flutter.dev/flutter/material/PageTransitionsTheme-class.html).
+///  * [PageTransitionsTheme](https://api.flutter.dev/flutter/material/PageTransitionsTheme-class.html), which defines the page transitions used by
+///    [MaterialPageRoute](https://api.flutter.dev/flutter/material/MaterialPageRoute-class.html) for different target platforms.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the iOS transition.
   const CupertinoPageTransitionsBuilder();

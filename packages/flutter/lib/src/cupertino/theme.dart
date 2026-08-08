@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-///
 /// @docImport 'app.dart';
 /// @docImport 'button.dart';
 /// @docImport 'switch.dart';
@@ -51,8 +49,8 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
 ///  * [CupertinoThemeData], specifies the theme's visual styling.
 ///  * [CupertinoApp], which will automatically add a [CupertinoTheme] based on the
 ///    value of [CupertinoApp.theme].
-///  * [Theme], a Material theme which will automatically add a [CupertinoTheme]
-///    with a [CupertinoThemeData] derived from the Material [ThemeData].
+///  * [Theme](https://api.flutter.dev/flutter/material/Theme-class.html), a Material theme which will automatically add a [CupertinoTheme]
+///    with a [CupertinoThemeData] derived from the Material [ThemeData](https://api.flutter.dev/flutter/material/ThemeData-class.html).
 class CupertinoTheme extends StatelessWidget {
   /// Creates a [CupertinoTheme] to change descendant Cupertino widgets' styling.
   const CupertinoTheme({super.key, required this.data, required this.child});
@@ -169,8 +167,8 @@ class InheritedCupertinoTheme extends InheritedTheme {
 /// See also:
 ///
 ///  * [CupertinoTheme], in which this [CupertinoThemeData] is inserted.
-///  * [ThemeData], a Material equivalent that also configures Cupertino
-///    styling via a [CupertinoThemeData] subclass [MaterialBasedCupertinoThemeData].
+///  * [ThemeData](https://api.flutter.dev/flutter/material/ThemeData-class.html), a Material equivalent that also configures Cupertino
+///    styling via a [CupertinoThemeData] subclass [MaterialBasedCupertinoThemeData](https://api.flutter.dev/flutter/material/MaterialBasedCupertinoThemeData-class.html).
 @immutable
 class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable {
   /// Creates a [CupertinoTheme] styling specification.
@@ -414,7 +412,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 /// Unlike [CupertinoThemeData] instances of this class do not return default
 /// values for properties that have been left unspecified in the constructor.
 /// Instead, unspecified properties will return null. This is used by
-/// Material's [ThemeData.cupertinoOverrideTheme].
+/// Material's [ThemeData.cupertinoOverrideTheme](https://api.flutter.dev/flutter/material/ThemeData/cupertinoOverrideTheme.html).
 ///
 /// See also:
 ///
@@ -442,13 +440,13 @@ class NoDefaultCupertinoThemeData {
   /// take precedence over the ambient [MediaQueryData.platformBrightness], when
   /// determining the brightness of descendant Cupertino widgets.
   ///
-  /// If coming from a Material [Theme] and unspecified, [brightness] will be
-  /// derived from the Material [ThemeData]'s [brightness].
+  /// If coming from a Material [Theme](https://api.flutter.dev/flutter/material/Theme-class.html) and unspecified, [brightness] will be
+  /// derived from the Material [ThemeData](https://api.flutter.dev/flutter/material/ThemeData-class.html)'s [brightness].
   ///
   /// See also:
   ///
-  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///    [brightness] to its Material [Theme] parent if it's unspecified.
+  ///  * [MaterialBasedCupertinoThemeData](https://api.flutter.dev/flutter/material/MaterialBasedCupertinoThemeData-class.html), a [CupertinoThemeData] that defers
+  ///    [brightness] to its Material [Theme](https://api.flutter.dev/flutter/material/Theme-class.html) parent if it's unspecified.
   ///
   ///  * [CupertinoTheme.brightnessOf], a method used to retrieve the overall
   ///    [Brightness] from a [BuildContext], for Cupertino widgets.
@@ -459,16 +457,16 @@ class NoDefaultCupertinoThemeData {
   /// This color is generally used on text and icons in buttons and tappable
   /// elements. Defaults to [CupertinoColors.activeBlue].
   ///
-  /// If coming from a Material [Theme] and unspecified, [primaryColor] will be
-  /// derived from the Material [ThemeData]'s `colorScheme.primary`. However, in
+  /// If coming from a Material [Theme](https://api.flutter.dev/flutter/material/Theme-class.html) and unspecified, [primaryColor] will be
+  /// derived from the Material [ThemeData](https://api.flutter.dev/flutter/material/ThemeData-class.html)'s `colorScheme.primary`. However, in
   /// iOS styling, the [primaryColor] is more sparsely used than in Material
   /// Design where the [primaryColor] can appear on non-interactive surfaces like
   /// the [AppBar] background, [TextField] borders etc.
   ///
   /// See also:
   ///
-  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///    [primaryColor] to its Material [Theme] parent if it's unspecified.
+  ///  * [MaterialBasedCupertinoThemeData](https://api.flutter.dev/flutter/material/MaterialBasedCupertinoThemeData-class.html), a [CupertinoThemeData] that defers
+  ///    [primaryColor] to its Material [Theme](https://api.flutter.dev/flutter/material/Theme-class.html) parent if it's unspecified.
   final Color? primaryColor;
 
   /// A color that must be easy to see when rendered on a [primaryColor] background.
@@ -476,13 +474,13 @@ class NoDefaultCupertinoThemeData {
   /// For example, this color is used for a [CupertinoButton]'s text and icons
   /// when the button's background is [primaryColor].
   ///
-  /// If coming from a Material [Theme] and unspecified, [primaryContrastingColor]
-  /// will be derived from the Material [ThemeData]'s `colorScheme.onPrimary`.
+  /// If coming from a Material [Theme](https://api.flutter.dev/flutter/material/Theme-class.html) and unspecified, [primaryContrastingColor]
+  /// will be derived from the Material [ThemeData](https://api.flutter.dev/flutter/material/ThemeData-class.html)'s `colorScheme.onPrimary`.
   ///
   /// See also:
   ///
-  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///    [primaryContrastingColor] to its Material [Theme] parent if it's unspecified.
+  ///  * [MaterialBasedCupertinoThemeData](https://api.flutter.dev/flutter/material/MaterialBasedCupertinoThemeData-class.html), a [CupertinoThemeData] that defers
+  ///    [primaryContrastingColor] to its Material [Theme](https://api.flutter.dev/flutter/material/Theme-class.html) parent if it's unspecified.
   final Color? primaryContrastingColor;
 
   /// Text styles used by Cupertino widgets.

@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-/// @docImport 'package:flutter/services.dart';
-///
 /// @docImport 'page_scaffold.dart';
 /// @docImport 'tab_view.dart';
 library;
@@ -51,7 +48,7 @@ import 'theme.dart';
 /// The [CupertinoApp] widget isn't a required ancestor for other Cupertino
 /// widgets, but many Cupertino widgets could depend on the [CupertinoTheme]
 /// widget, which the [CupertinoApp] composes. If you use Material widgets, a
-/// [MaterialApp] also creates the needed dependencies for Cupertino widgets.
+/// [MaterialApp](https://api.flutter.dev/flutter/material/MaterialApp-class.html) also creates the needed dependencies for Cupertino widgets.
 ///
 /// {@template flutter.cupertino.CupertinoApp.defaultSelectionStyle}
 /// The [CupertinoApp] automatically creates a [DefaultSelectionStyle] with
@@ -420,7 +417,12 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.restorationScopeId}
   final String? restorationScopeId;
 
-  /// {@macro flutter.material.materialApp.scrollBehavior}
+  /// The default [ScrollBehavior] for the application.
+  ///
+  /// [ScrollBehavior]s describe how [Scrollable] widgets behave. Providing
+  /// a [ScrollBehavior] can set the default [ScrollPhysics] across
+  /// an application, and manage [Scrollable] decorations like [Scrollbar]s and
+  /// [GlowingOverscrollIndicator]s.
   ///
   /// When null, defaults to [CupertinoScrollBehavior].
   ///

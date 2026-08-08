@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-///
 /// @docImport 'checkbox.dart';
 /// @docImport 'slider.dart';
 /// @docImport 'switch.dart';
@@ -129,14 +127,28 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// {@macro flutter.widget.RawRadio.value}
   final T value;
 
-  /// {@macro flutter.material.Radio.groupValue}
+  /// The currently selected value for a group of radio buttons.
+  ///
+  /// This radio button is considered selected if its [value] matches the
+  /// [groupValue].
+  ///
+  /// This is deprecated, use [RadioGroup] to manage group value instead.
   @Deprecated(
     'Use a RadioGroup ancestor to manage group value instead. '
     'This feature was deprecated after v3.32.0-0.0.pre.',
   )
   final T? groupValue;
 
-  /// {@macro flutter.material.Radio.onChanged}
+  /// Called when the user selects this radio button.
+  ///
+  /// The radio button passes [value] as a parameter to this callback. The radio
+  /// button does not actually change state until the parent widget rebuilds the
+  /// radio button with the new [groupValue].
+  ///
+  /// If null, the radio button will be displayed as disabled.
+  ///
+  /// The provided callback will not be invoked if this radio button is already
+  /// selected and [toggleable] is not set to true.
   ///
   /// For example:
   ///
@@ -220,7 +232,17 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// [RadioGroupRegistry].
   final RadioGroupRegistry<T>? groupRegistry;
 
-  /// {@macro flutter.material.Radio.enabled}
+  /// Whether this widget is interactive.
+  ///
+  /// If not provided, this widget will be interactable if one of the following
+  /// is true:
+  ///
+  /// * A [onChanged] is provided.
+  /// * Having a [RadioGroup] with the same type T above this widget.
+  /// * A [groupRegistry] is provided.
+  ///
+  /// If this is set to true, one of the above condition must also be true.
+  /// Otherwise, an assertion error is thrown.
   final bool? enabled;
 
   @override

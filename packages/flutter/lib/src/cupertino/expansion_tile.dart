@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-///
 /// @docImport 'list_section.dart';
 library;
 
@@ -67,7 +65,7 @@ enum ExpansionTileTransitionMode {
 ///
 /// See also:
 ///
-///  * [ExpansionTile], the Material Design equivalent.
+///  * [ExpansionTile](https://api.flutter.dev/flutter/material/ExpansionTile-class.html), the Material Design equivalent.
 ///  * [CupertinoListSection], useful for creating an expansion tile [child].
 ///  * [CupertinoListTile], the header of a [CupertinoExpansionTile].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/disclosure-controls/>

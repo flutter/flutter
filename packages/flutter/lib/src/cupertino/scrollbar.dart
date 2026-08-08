@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
-library;
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -65,7 +62,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 ///
 ///  * [ListView], which displays a linear, scrollable list of children.
 ///  * [GridView], which displays a 2 dimensional, scrollable array of children.
-///  * [Scrollbar], a Material Design scrollbar.
+///  * [Scrollbar](https://api.flutter.dev/flutter/material/Scrollbar-class.html), a Material Design scrollbar.
 ///  * [RawScrollbar], a basic scrollbar that fades in and out, extended
 ///    by this class to add more animations and behaviors.
 class CupertinoScrollbar extends RawScrollbar {
