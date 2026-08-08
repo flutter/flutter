@@ -595,6 +595,50 @@ std::shared_ptr<ShaderBundleData> Reflector::GenerateShaderBundleData() const {
     data->AddUniformStruct(uniform_struct);
   }
 
+  // A stage declares at most one push constant block, and always reads it from
+  // offset zero.
+  const auto push_constants =
+      compiler_->get_shader_resources().push_constant_buffers;
+  if (push_constants.size() > 1u) {
+    std::cerr << "Error: A shader may declare at most one push constant block."
+              << std::endl;
+    return nullptr;
+  }
+  for (const auto& push_constant : push_constants) {
+    ShaderBundleData::ShaderPushConstantBlock block;
+    block.name = push_constant.name;
+    block.ext_res_0 = compiler_.GetExtendedMSLResourceBinding(
+        CompilerBackend::ExtendedResourceIndex::kPrimary, push_constant.id);
+
+    const auto type = compiler_->get_type(push_constant.type_id);
+    if (type.basetype != spirv_cross::SPIRType::BaseType::Struct) {
+      std::cerr << "Error: Push constant block \"" << push_constant.name
+                << "\" is not a struct." << std::endl;
+      return nullptr;
+    }
+
+    size_t size_in_bytes = 0;
+    for (const auto& struct_member : ReadStructMembers(push_constant.type_id)) {
+      size_in_bytes += struct_member.byte_length;
+      if (StringStartsWith(struct_member.name, "_PADDING_")) {
+        continue;
+      }
+      ShaderBundleData::ShaderUniformStructField field;
+      field.name = struct_member.name;
+      field.type = struct_member.base_type;
+      field.offset_in_bytes = struct_member.offset;
+      field.element_size_in_bytes = struct_member.size;
+      field.total_size_in_bytes = struct_member.byte_length;
+      field.array_elements = struct_member.array_elements;
+      field.vec_size = struct_member.vec_size;
+      field.columns = struct_member.columns;
+      block.fields.push_back(field);
+    }
+    block.size_in_bytes = size_in_bytes;
+
+    data->SetPushConstantBlock(std::move(block));
+  }
+
   const auto sampled_images = compiler_->get_shader_resources().sampled_images;
   for (const auto& image : sampled_images) {
     ShaderBundleData::ShaderUniformTexture uniform_texture;
