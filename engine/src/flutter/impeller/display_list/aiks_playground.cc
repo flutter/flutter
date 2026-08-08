@@ -45,15 +45,15 @@ bool AiksPlayground::OpenPlaygroundHere(
   }
 
   return Playground::OpenPlaygroundHere(
-      [&renderer, &callback](RenderTarget& render_target) -> bool {
+      [&renderer, &callback](RenderTarget& render_target,
+                             bool is_onscreen) -> bool {
         return RenderToTarget(
             renderer.GetContentContext(),  //
             render_target,                 //
             callback(),                    //
             Rect::MakeWH(render_target.GetRenderTargetSize().width,
                          render_target.GetRenderTargetSize().height),  //
-            /*reset_host_buffer=*/true,                                //
-            /*is_onscreen=*/false);
+            /*reset_host_buffer=*/true, is_onscreen);
       });
 }
 
