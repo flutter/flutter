@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -2017,6 +2018,20 @@ class FakeClock extends Fake implements SystemClock {
 }
 
 class _TestRunCommandThatOnlyValidates extends RunCommand {
+  _TestRunCommandThatOnlyValidates({ToolContext? toolContext})
+    : super(
+        toolContext:
+            toolContext ??
+            FakeToolContext(
+              fs: globals.fs,
+              logger: globals.logger,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              artifacts: globals.artifacts,
+              cache: globals.cache,
+            ),
+      );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();

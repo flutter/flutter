@@ -114,7 +114,26 @@ abstract class Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
-  }) = _DefaultPub;
+    Stdio? stdio,
+  }) {
+    if (stdio != null) {
+      return _DefaultPub.test(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        platform: platform,
+        botDetector: botDetector,
+        stdio: stdio,
+      );
+    }
+    return _DefaultPub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      platform: platform,
+      botDetector: botDetector,
+    );
+  }
 
   /// Create a [Pub] instance with a mocked [stdio].
   @visibleForTesting
