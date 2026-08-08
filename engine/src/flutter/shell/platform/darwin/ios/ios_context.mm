@@ -9,7 +9,6 @@
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #include "flutter/shell/platform/darwin/ios/ios_context_metal_impeller.h"
-#include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -20,15 +19,9 @@ IOSContext::IOSContext() = default;
 IOSContext::~IOSContext() = default;
 
 std::unique_ptr<IOSContext> IOSContext::Create(
-    IOSRenderingAPI api,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
     const Settings& settings) {
-  switch (api) {
-    case IOSRenderingAPI::kMetal:
-      return std::make_unique<IOSContextMetalImpeller>(settings, is_gpu_disabled_sync_switch);
-  }
-  FML_CHECK(false);
-  return nullptr;
+  return std::make_unique<IOSContextMetalImpeller>(settings, is_gpu_disabled_sync_switch);
 }
 
 std::shared_ptr<impeller::Context> IOSContext::GetImpellerContext() const {
