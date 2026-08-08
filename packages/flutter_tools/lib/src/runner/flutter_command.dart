@@ -170,10 +170,15 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
-  FlutterCommand({ToolContext? toolContext, OutputPreferences? outputPreferences})
-    : _explicitToolContext = toolContext,
-      _outputPreferences = outputPreferences;
+  FlutterCommand({
+    Analytics? analytics,
+    OutputPreferences? outputPreferences,
+    ToolContext? toolContext,
+  }) : _explicitAnalytics = analytics,
+       _explicitToolContext = toolContext,
+       _outputPreferences = outputPreferences;
 
+  final Analytics? _explicitAnalytics;
   final ToolContext? _explicitToolContext;
   final OutputPreferences? _outputPreferences;
 
@@ -191,7 +196,8 @@ abstract class FlutterCommand extends Command<void> {
   Platform? get _platform => toolContext?.platform;
   FileSystem? get _fs => toolContext?.fs;
   FlutterProjectFactory? get _projectFactory => toolContext?.projectFactory;
-  Analytics? get _analytics => (super.runner as FlutterCommandRunner?)?.toolDependencies?.analytics;
+  Analytics? get _analytics =>
+      _explicitAnalytics ?? (super.runner as FlutterCommandRunner?)?.toolDependencies?.analytics;
   Cache? get _cache => toolContext?.cache;
 
   /// The currently executing command (or sub-command).
@@ -286,7 +292,7 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get deprecated => false;
 
-  ProcessInfo get processInfo => globals.processInfo;
+  ProcessInfo get processInfo => _fs != null ? ProcessInfo(_fs!) : globals.processInfo;
 
   /// When the command runs and this is true, trigger an async process to
   /// discover devices from discoverers that support wireless devices for an
@@ -302,7 +308,8 @@ abstract class FlutterCommand extends Command<void> {
   /// Grabs the [Analytics] instance from the global context. It is defined
   /// at the [FlutterCommand] level to enable any classes that extend it to
   /// easily reference it or overwrite as necessary.
-  Analytics get analytics => globals.analytics;
+  Analytics get analytics =>
+      _analytics ?? (toolContext != null ? const NoOpAnalytics() : globals.analytics);
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
@@ -453,9 +460,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       'target',
       abbr: 't',
-      defaultsTo: bundle.defaultMainPath,
+      defaultsTo: _fs?.path.join('lib', 'main.dart') ?? bundle.defaultMainPath,
       help:
           'The main entry-point file of the application, as run on the device.\n'
+          '\n'
           'If the "--target" option is omitted, but a file name is provided on '
           'the command line, then that is used instead.',
       valueHelp: 'path',
@@ -1402,7 +1410,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  FlutterProject get project => FlutterProject.current();
+  FlutterProject get project => _projectFactory != null && _fs != null
+      ? _projectFactory!.fromDirectory(_fs!.currentDirectory)
+      : FlutterProject.current();
 
   /// The path to the package config for the current project.
   ///
@@ -2290,7 +2300,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
 // Returns the development artifact for the target platform, or null
 // if none is supported
 @protected
-DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+DevelopmentArtifact? artifactFromTargetPlatform(
+  TargetPlatform targetPlatform, [
+  FeatureFlags? featureFlags,
+]) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -2302,20 +2315,20 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin:
-      if (featureFlags.isMacOSEnabled) {
+      if (featureFlags?.isMacOSEnabled ?? true) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
-      if (featureFlags.isWindowsEnabled) {
+      if (featureFlags?.isWindowsEnabled ?? true) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
-      if (featureFlags.isLinuxEnabled) {
+      if (featureFlags?.isLinuxEnabled ?? true) {
         return DevelopmentArtifact.linux;
       }
       return null;
