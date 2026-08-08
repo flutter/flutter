@@ -184,7 +184,21 @@ void main() {
     final rotationTween = Matrix4Tween(begin: a, end: c);
     expect(rotationTween.lerp(0.0), equals(a));
     expect(rotationTween.lerp(1.0), equals(c));
-    expect(rotationTween.lerp(0.5).absoluteError(a.clone()..rotateZ(0.5)), moreOrLessEquals(0.0));
+    expect(rotationTween.lerp(0.5), matrixMoreOrLessEquals(a.clone()..rotateZ(0.5)));
+  });
+
+  test('Matrix4Tween reads mutated endpoints on every lerp', () {
+    final begin = Matrix4.identity();
+    final end = Matrix4.translationValues(10.0, 20.0, 30.0);
+    final tween = Matrix4Tween(begin: begin, end: end);
+    final Matrix4 firstResult = tween.lerp(0.5);
+
+    begin.setTranslationRaw(2.0, 4.0, 6.0);
+    end.setTranslationRaw(14.0, 24.0, 34.0);
+    final Matrix4 secondResult = tween.lerp(0.5);
+
+    expect(firstResult, equals(Matrix4.translationValues(5.0, 10.0, 15.0)));
+    expect(secondResult, equals(Matrix4.translationValues(8.0, 14.0, 20.0)));
   });
 
   test('ConstantTween', () {
