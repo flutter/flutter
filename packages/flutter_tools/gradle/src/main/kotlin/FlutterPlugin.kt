@@ -25,15 +25,16 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
 import java.io.File
+import javax.inject.Inject
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
 
-class FlutterPlugin : Plugin<Project> {
+class FlutterPlugin @Inject constructor(
+    private val execOperations: ExecOperations
+) : Plugin<Project> {
     private var project: Project? = null
     private var flutterRoot: File? = null
     private var flutterExecutable: File? = null
@@ -260,8 +261,10 @@ class FlutterPlugin : Plugin<Project> {
         )
     }
 
-    private fun getExecutableNameForPlatform(baseExecutableName: String): String =
-        if (OperatingSystem.current().isWindows) "$baseExecutableName.bat" else baseExecutableName
+    private fun getExecutableNameForPlatform(baseExecutableName: String): String {
+        val isWindows = System.getProperty("os.name")?.startsWith("Windows", ignoreCase = true) == true
+        return if (isWindows) "$baseExecutableName.bat" else baseExecutableName
+    }
 
     private fun resolveFlutterSdkProperty(defaultValue: String?): String? {
         val propertyName = "flutter.sdk"
@@ -281,8 +284,7 @@ class FlutterPlugin : Plugin<Project> {
                 rootProject.subprojects.forEach { subproject ->
                     val gradlew: String =
                         getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
-                    val execOps = rootProject.serviceOf<ExecOperations>()
-                    execOps.exec {
+                    execOperations.exec {
                         workingDir(rootProject.projectDir)
                         executable(gradlew)
                         args(":${subproject.name}:dependencies", "--write-locks")
