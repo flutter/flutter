@@ -422,9 +422,10 @@ class ResidentWebRunner extends ResidentRunner {
 
   WebCompilerConfig get _compilerConfig {
     if (debuggingOptions.webUseWasm) {
+      final bool isRelease = debuggingOptions.buildInfo.mode.isRelease;
       return WasmCompilerConfig(
-        optimizationLevel: 0,
-        stripWasm: false,
+        optimizationLevel: isRelease ? 2 : 0,
+        stripWasm: isRelease,
         renderer: debuggingOptions.webRenderer,
       );
     }
