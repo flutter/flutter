@@ -5606,6 +5606,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_driver
@@ -5616,6 +5620,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_frame_number
@@ -5626,6 +5634,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_keyboard_resize
@@ -5636,6 +5648,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_textfield
