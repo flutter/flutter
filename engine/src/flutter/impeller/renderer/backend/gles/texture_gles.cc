@@ -280,7 +280,7 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
     // Bail out synchronously on contexts without array support (e.g. ES 2.0).
     // The glTexImage3D/glTexSubImage3D procs are null there, so queuing the
     // upload would dereference a null proc on the reactor thread.
-    if (!reactor_->GetProcTable().GetCapabilities()->SupportsTextureArray()) {
+    if (!reactor_->GetProcTable().GetCapabilities()->SupportsTextureArrays()) {
       VALIDATION_LOG << "2D array textures are not supported on this context.";
       return false;
     }
@@ -506,7 +506,7 @@ void TextureGLES::InitializeContentsIfNecessary() {
           MarkSliceMipLevelInitialized(face, 0);
         }
       } else if (desc.type == TextureType::kTexture2DArray) {
-        if (!gl.GetCapabilities()->SupportsTextureArray()) {
+        if (!gl.GetCapabilities()->SupportsTextureArrays()) {
           VALIDATION_LOG << "2D array textures are not supported on this "
                             "context.";
           return;

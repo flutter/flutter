@@ -5,6 +5,7 @@
 #include "flutter/lib/gpu/texture.h"
 
 #include <cstring>
+#include <limits>
 
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/painting/image.h"
@@ -211,15 +212,21 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
                                            bool enable_render_target_usage,
                                            bool enable_shader_read_usage,
                                            bool enable_shader_write_usage,
-                                           int mip_level_count) {
+                                           int mip_level_count,
+                                           int layer_count) {
   if (mip_level_count < 1) {
     return false;
   }
+  if (layer_count < 1) {
+    return false;
+  }
+  FML_DCHECK(layer_count <= std::numeric_limits<uint16_t>::max());
   impeller::TextureDescriptor desc;
   desc.storage_mode = flutter::gpu::ToImpellerStorageMode(storage_mode);
   desc.size = {width, height};
   desc.format = flutter::gpu::ToImpellerPixelFormat(format);
   desc.mip_count = static_cast<size_t>(mip_level_count);
+  desc.array_layer_count = static_cast<uint16_t>(layer_count);
   desc.usage = {};
   if (enable_render_target_usage) {
     desc.usage |= impeller::TextureUsage::kRenderTarget;
@@ -240,7 +247,7 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
     default:
       return false;
   }
-  desc.type = static_cast<impeller::TextureType>(texture_type);
+  desc.type = flutter::gpu::ToImpellerTextureType(texture_type);
   if (!impeller::IsMultisampleCapable(desc.type) &&
       desc.sample_count != impeller::SampleCount::kCount1) {
     return false;
@@ -289,7 +296,7 @@ Dart_Handle InternalFlutterGpu_Texture_ImageTextureInfo(
   const impeller::TextureUsageMask usage = desc.usage;
 
   // Layout must match the parsing in the Dart `Texture._fromImage`.
-  int32_t values[10];
+  int32_t values[11];
   values[0] = static_cast<int32_t>(
       flutter::gpu::FromImpellerStorageMode(desc.storage_mode));
   values[1] =
@@ -297,12 +304,13 @@ Dart_Handle InternalFlutterGpu_Texture_ImageTextureInfo(
   values[2] = static_cast<int32_t>(desc.size.width);
   values[3] = static_cast<int32_t>(desc.size.height);
   values[4] = static_cast<int32_t>(desc.sample_count);
-  // The Flutter GPU `TextureType` enum mirrors `impeller::TextureType`.
-  values[5] = static_cast<int32_t>(desc.type);
+  values[5] =
+      static_cast<int32_t>(flutter::gpu::FromImpellerTextureType(desc.type));
   values[6] = (usage & impeller::TextureUsage::kRenderTarget) ? 1 : 0;
   values[7] = (usage & impeller::TextureUsage::kShaderRead) ? 1 : 0;
   values[8] = (usage & impeller::TextureUsage::kShaderWrite) ? 1 : 0;
   values[9] = static_cast<int32_t>(desc.mip_count);
+  values[10] = static_cast<int32_t>(desc.array_layer_count);
 
   const intptr_t length = sizeof(values) / sizeof(values[0]);
   Dart_Handle list = Dart_NewTypedData(Dart_TypedData_kInt32, length);
