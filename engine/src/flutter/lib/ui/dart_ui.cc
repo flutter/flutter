@@ -24,6 +24,7 @@
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/image_descriptor.h"
 #include "flutter/lib/ui/painting/image_filter.h"
+#include "flutter/lib/ui/painting/image_from_texture.h"
 #include "flutter/lib/ui/painting/image_shader.h"
 #include "flutter/lib/ui/painting/immutable_buffer.h"
 #include "flutter/lib/ui/painting/path.h"
@@ -125,7 +126,8 @@ typedef CanvasPath Path;
   V(DartRuntimeHooks::GetCallbackHandle)                           \
   V(DartRuntimeHooks::GetCallbackFromHandle)                       \
   V(DartPluginRegistrant_EnsureInitialized)                        \
-  V(Vertices::init)
+  V(Vertices::init)                                                \
+  V(CreateImageFromTextureId)
 
 // List of native instance methods used as @Native functions.
 // Items are tuples of ('class_name', 'method_name', 'parameter_count'), where:
