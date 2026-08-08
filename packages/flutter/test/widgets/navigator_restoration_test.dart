@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -1076,13 +1076,13 @@ void main() {
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          restorationScopeId: 'material_app',
+        TestWidgetsApp(
+          restorationScopeId: 'widgets_app',
           initialRoute: '/',
           routes: <String, WidgetBuilder>{'/': (BuildContext context) => Container()},
           onGenerateInitialRoutes: (String initialRoute) {
-            return <MaterialPageRoute<void>>[
-              MaterialPageRoute<void>(builder: (BuildContext context) => Container()),
+            return <Route<void>>[
+              buildTestPageRoute<void>(null, (BuildContext context) => Container()),
             ];
           },
         ),
@@ -1100,20 +1100,16 @@ void main() {
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
-  return MaterialPageRoute<void>(
-    builder: (BuildContext context) {
-      return RouteWidget(name: arguments! as String);
-    },
-  );
+  return buildTestPageRoute<void>(null, (BuildContext context) {
+    return RouteWidget(name: arguments! as String);
+  });
 }
 
 @pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
-  return MaterialPageRoute<void>(
-    builder: (BuildContext context) {
-      return const RouteFutureWidget();
-    },
-  );
+  return buildTestPageRoute<void>(null, (BuildContext context) {
+    return const RouteFutureWidget();
+  });
 }
 
 class PagedTestWidget extends StatelessWidget {
@@ -1193,12 +1189,9 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
               return TestPage(name: name, key: ValueKey<String>(name));
             }).toList(),
       onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute<int>(
-          settings: settings,
-          builder: (BuildContext context) {
-            return RouteWidget(name: settings.name!, arguments: settings.arguments);
-          },
-        );
+        return buildTestPageRoute<int>(settings, (BuildContext context) {
+          return RouteWidget(name: settings.name!, arguments: settings.arguments);
+        });
       },
     );
   }
@@ -1223,12 +1216,9 @@ class TestPage extends Page<void> {
 
   @override
   Route<void> createRoute(BuildContext context) {
-    return MaterialPageRoute<void>(
-      settings: this,
-      builder: (BuildContext context) {
-        return RouteWidget(name: name!);
-      },
-    );
+    return buildTestPageRoute<void>(this, (BuildContext context) {
+      return RouteWidget(name: name!);
+    });
   }
 }
 
@@ -1249,12 +1239,9 @@ class TestWidget extends StatelessWidget {
             initialRoute: 'home',
             restorationScopeId: 'app',
             onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<int>(
-                settings: settings,
-                builder: (BuildContext context) {
-                  return RouteWidget(name: settings.name!, arguments: settings.arguments);
-                },
-              );
+              return buildTestPageRoute<int>(settings, (BuildContext context) {
+                return RouteWidget(name: settings.name!, arguments: settings.arguments);
+              });
             },
           ),
         ),
