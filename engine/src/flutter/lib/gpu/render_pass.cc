@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/gpu/render_pass.h"
-#include <algorithm>
 #include <future>
 #include <memory>
 
@@ -152,11 +151,23 @@ void RenderPass::SetPolygonMode(impeller::PolygonMode mode) {
   pipeline_state_dirty_ = true;
 }
 
+void RenderPass::BindSet(size_t slot, fml::RefPtr<BindingSet> set) {
+  if (slot >= kMaxBindingSets) {
+    return;
+  }
+  // On debug this makes a difference, but not on release builds.
+  // NOLINTNEXTLINE(performance-move-const-arg)
+  binding_sets[slot] = std::move(set);
+}
+
 void RenderPass::ClearBindings() {
   vertex_uniform_bindings.clear();
   vertex_texture_bindings.clear();
   fragment_uniform_bindings.clear();
   fragment_texture_bindings.clear();
+  for (auto& set : binding_sets) {
+    set = nullptr;
+  }
   for (auto& buffer : vertex_buffers) {
     buffer = {};
   }
@@ -287,6 +298,25 @@ bool RenderPass::Draw(size_t element_count,
     return false;
   }
   render_pass_->SetPipeline(impeller::PipelineRef(pipeline));
+
+  // Binding sets are replayed first, so an individual bind that collides
+  // with a set member overrides it for this draw. Their metadata is borrowed
+  // from the shader rather than copied, so no allocation happens here.
+  for (const auto& set : binding_sets) {
+    if (!set) {
+      continue;
+    }
+    for (const auto& buffer : set->GetBufferBindings()) {
+      render_pass_->BindResource(buffer.stage,
+                                 impeller::DescriptorType::kUniformBuffer,
+                                 buffer.slot, buffer.metadata, buffer.view);
+    }
+    for (const auto& texture : set->GetTextureBindings()) {
+      render_pass_->BindResource(
+          texture.stage, impeller::DescriptorType::kSampledImage, texture.slot,
+          texture.metadata, texture.texture, texture.sampler);
+    }
+  }
 
   for (const auto& [_, buffer] : vertex_uniform_bindings) {
     render_pass_->BindDynamicResource(
@@ -577,18 +607,10 @@ static bool BindTextureBinding(
     return false;
   }
 
-  impeller::SamplerDescriptor sampler_desc;
-  sampler_desc.min_filter = flutter::gpu::ToImpellerMinMagFilter(min_filter);
-  sampler_desc.mag_filter = flutter::gpu::ToImpellerMinMagFilter(mag_filter);
-  sampler_desc.mip_filter = flutter::gpu::ToImpellerMipFilter(mip_filter);
-  sampler_desc.width_address_mode =
-      flutter::gpu::ToImpellerSamplerAddressMode(width_address_mode);
-  sampler_desc.height_address_mode =
-      flutter::gpu::ToImpellerSamplerAddressMode(height_address_mode);
-  // Backends clamp this to the device limit reported by
-  // Capabilities::GetMaxSamplerAnisotropy.
-  sampler_desc.max_anisotropy =
-      static_cast<uint8_t>(std::clamp(max_anisotropy, 1, 255));
+  const impeller::SamplerDescriptor sampler_desc =
+      flutter::gpu::ToImpellerSamplerDescriptor(
+          min_filter, mag_filter, mip_filter, width_address_mode,
+          height_address_mode, max_anisotropy);
   auto sampler =
       wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
 
@@ -647,6 +669,16 @@ bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
       wrapper, shader, shader->GetUniformTextureAt(uniform_texture_index),
       texture, min_filter, mag_filter, mip_filter, width_address_mode,
       height_address_mode, max_anisotropy);
+}
+
+void InternalFlutterGpu_RenderPass_BindSet(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::BindingSet* binding_set,
+    int slot) {
+  if (slot < 0) {
+    return;
+  }
+  wrapper->BindSet(slot, fml::RefPtr<flutter::gpu::BindingSet>(binding_set));
 }
 
 void InternalFlutterGpu_RenderPass_ClearBindings(

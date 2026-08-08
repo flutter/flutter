@@ -5,8 +5,11 @@
 #ifndef FLUTTER_LIB_GPU_FORMATS_H_
 #define FLUTTER_LIB_GPU_FORMATS_H_
 
+#include <algorithm>
+
 #include "fml/logging.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/core/shader_types.h"
 
 // ATTENTION! ATTENTION! ATTENTION!
@@ -477,6 +480,28 @@ constexpr impeller::SamplerAddressMode ToImpellerSamplerAddressMode(
 constexpr impeller::SamplerAddressMode ToImpellerSamplerAddressMode(int value) {
   return ToImpellerSamplerAddressMode(
       static_cast<FlutterGPUSamplerAddressMode>(value));
+}
+
+/// Builds a sampler descriptor from the enum indices and anisotropy clamp
+/// that `SamplerOptions` marshals across the Dart boundary.
+inline impeller::SamplerDescriptor ToImpellerSamplerDescriptor(
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy) {
+  impeller::SamplerDescriptor desc;
+  desc.min_filter = ToImpellerMinMagFilter(min_filter);
+  desc.mag_filter = ToImpellerMinMagFilter(mag_filter);
+  desc.mip_filter = ToImpellerMipFilter(mip_filter);
+  desc.width_address_mode = ToImpellerSamplerAddressMode(width_address_mode);
+  desc.height_address_mode = ToImpellerSamplerAddressMode(height_address_mode);
+  // Backends clamp this to the device limit reported by
+  // Capabilities::GetMaxSamplerAnisotropy.
+  desc.max_anisotropy =
+      static_cast<uint8_t>(std::clamp(max_anisotropy, 1, 255));
+  return desc;
 }
 
 enum class FlutterGPUIndexType {
