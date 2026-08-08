@@ -5162,8 +5162,8 @@ void main() {
     // Adding a counter causes the EditableText to shrink to fit the counter
     // inside the parent as well.
     const counterHeight = 40.0;
-    const subtextGap = 8.0;
-    const double counterSpace = counterHeight + subtextGap;
+    const supportingTextGap = 8.0;
+    const double counterSpace = counterHeight + supportingTextGap;
     await tester.pumpWidget(containedTextFieldBuilder(counter: Container(height: counterHeight)));
     expect(findEditableText(), equals(inputBox));
     expect(inputBox.size.height, height - padding - counterSpace);
@@ -5173,7 +5173,7 @@ void main() {
     await tester.pumpWidget(containedTextFieldBuilder(helperText: 'I am helperText'));
     expect(findEditableText(), equals(inputBox));
     const helperTextSpace = 12.0;
-    expect(inputBox.size.height, height - padding - helperTextSpace - subtextGap);
+    expect(inputBox.size.height, height - padding - helperTextSpace - supportingTextGap);
 
     // When both helperText and counter are present, EditableText shrinks by the
     // height of the taller of the two in order to fit both within the parent.
