@@ -926,18 +926,15 @@ abstract class ResidentHandlers {
       }
     }
 
-    if (!await setDebugBanner(false)) {
-      return false;
-    }
-    var succeeded = true;
+    final bool disabled = await setDebugBanner(false);
     try {
       await cb();
+      return true;
     } finally {
-      if (!await setDebugBanner(true)) {
-        succeeded = false;
+      if (disabled) {
+        await setDebugBanner(true);
       }
     }
-    return succeeded;
   }
 
   /// Remove sigusr signal handlers.
