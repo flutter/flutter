@@ -12,10 +12,9 @@ import os
 import subprocess
 import sys
 
-SRC_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+FLUTTER_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 )
-FLUTTER_DIR = os.path.join(SRC_ROOT, 'flutter')
 
 
 def IsWindows():
@@ -46,14 +45,14 @@ def Main(argv):
     ]
     print('Uninstalling Git Hooks')
   else:
-    githooks = os.path.join(FLUTTER_DIR, 'tools', 'githooks')
+    githooks = os.path.join(FLUTTER_ROOT, 'dev', 'tools', 'githooks')
     command += [
         'core.hooksPath',
         githooks,
     ]
     print('Installing Git Hooks')
 
-  result = subprocess.run(command, cwd=FLUTTER_DIR)
+  result = subprocess.run(command, cwd=FLUTTER_ROOT)
   return result.returncode
 
 
