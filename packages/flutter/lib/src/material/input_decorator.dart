@@ -2402,7 +2402,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
             style: labelShouldWithdraw ? _getFloatingLabelStyle(themeData, defaults) : labelStyle,
             child:
                 decoration.label ??
-                Text(decoration.labelText!, overflow: TextOverflow.ellipsis, textAlign: textAlign),
+                Text(
+                  decoration.labelText!,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: textAlign,
+                  textDirection: decoration.labelTextDirection,
+                ),
           ),
         ),
       );
@@ -2850,6 +2855,7 @@ class InputDecoration {
     this.alignLabelWithHint,
     this.constraints,
     this.visualDensity,
+    this.labelTextDirection,
   }) : assert(
          !(label != null && labelText != null),
          'Declaring both label and labelText is not supported.',
@@ -2922,6 +2928,7 @@ class InputDecoration {
        labelText = null,
        labelStyle = null,
        floatingLabelStyle = null,
+       labelTextDirection = null,
        helper = null,
        helperText = null,
        helperStyle = null,
@@ -3081,6 +3088,17 @@ class InputDecoration {
   /// {@endtemplate}
   final TextStyle? floatingLabelStyle;
 
+  /// The direction to use for the [labelText].
+  ///
+  /// If null, defaults to a value derived from [Directionality] for the
+  /// input field and the current context.
+  ///
+  /// This is ignored if [label] is provided instead of [labelText].
+  /// If you need to set the direction for a custom [label] widget,
+  /// wrap that widget in a [Directionality] widget or use a [Text]
+  /// widget with its own [Text.textDirection] property.
+  final TextDirection? labelTextDirection;
+
   /// Optional widget that appears below the [InputDecorator.child].
   ///
   /// If non-null, the [helper] is displayed below the [InputDecorator.child], in
@@ -3167,6 +3185,11 @@ class InputDecoration {
   ///
   /// If null, defaults to a value derived from [Directionality] for the
   /// input field and the current context.
+  ///
+  /// This is ignored if [hint] is provided instead of [hintText].
+  /// If you need to set the direction for a custom [hint] widget,
+  /// wrap that widget in a [Directionality] widget or use a [Text]
+  /// widget with its own [Text.textDirection] property.
   final TextDirection? hintTextDirection;
 
   /// The maximum number of lines the [hintText] can occupy.
@@ -3915,6 +3938,7 @@ class InputDecoration {
     String? labelText,
     TextStyle? labelStyle,
     TextStyle? floatingLabelStyle,
+    TextDirection? labelTextDirection,
     Widget? helper,
     String? helperText,
     TextStyle? helperStyle,
@@ -3976,6 +4000,7 @@ class InputDecoration {
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
       floatingLabelStyle: floatingLabelStyle ?? this.floatingLabelStyle,
+      labelTextDirection: labelTextDirection ?? this.labelTextDirection,
       helper: helper ?? this.helper,
       helperText: helperText ?? this.helperText,
       helperStyle: helperStyle ?? this.helperStyle,
@@ -4101,6 +4126,7 @@ class InputDecoration {
         other.labelText == labelText &&
         other.labelStyle == labelStyle &&
         other.floatingLabelStyle == floatingLabelStyle &&
+        other.labelTextDirection == labelTextDirection &&
         other.helper == helper &&
         other.helperText == helperText &&
         other.helperStyle == helperStyle &&
@@ -4163,6 +4189,7 @@ class InputDecoration {
       label,
       labelText,
       floatingLabelStyle,
+      labelTextDirection,
       labelStyle,
       helper,
       helperText,

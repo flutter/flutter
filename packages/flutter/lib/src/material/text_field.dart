@@ -464,6 +464,18 @@ class TextField extends StatefulWidget {
   final TextAlignVertical? textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.textDirection}
+  ///
+  /// This does not affect the direction of the decoration's
+  /// [InputDecoration.hintText] or [InputDecoration.labelText].
+  ///
+  /// To override the direction for the entire field (including the hint, label,
+  /// and prefix/suffix icons), wrap the [TextField] in a [Directionality] widget.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.hintTextDirection], which specifically controls the hint.
+  ///  * [InputDecoration.labelTextDirection], which specifically controls the label.
+  ///  * [Directionality], which provides the default direction for the subtree.
   final TextDirection? textDirection;
 
   /// {@macro flutter.widgets.editableText.autofocus}

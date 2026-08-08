@@ -15770,4 +15770,39 @@ void main() {
     );
     expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
   });
+
+  testWidgets('InputDecorator respects individual text directions for label and hint', (
+    WidgetTester tester,
+  ) async {
+    const hintText = 'Hint Text';
+    const labelText = 'Label Text';
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  labelText: labelText,
+                  labelTextDirection: TextDirection.rtl,
+                  hintTextDirection: TextDirection.rtl,
+                ),
+                isEmpty: true,
+                child: SizedBox.shrink(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Text hint = tester.widget<Text>(find.text(hintText));
+    expect(hint.textDirection, TextDirection.rtl);
+
+    final Text label = tester.widget<Text>(find.text(labelText));
+    expect(label.textDirection, TextDirection.rtl);
+  });
 }
