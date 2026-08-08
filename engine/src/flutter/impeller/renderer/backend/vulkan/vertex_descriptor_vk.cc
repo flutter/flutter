@@ -9,7 +9,11 @@
 namespace impeller {
 
 vk::Format ToVertexDescriptorFormat(const ShaderStageIOSlot& input) {
-  switch (input.GetVertexAttributeFormat()) {
+  return ToVertexDescriptorFormat(input.GetVertexAttributeFormat());
+}
+
+vk::Format ToVertexDescriptorFormat(VertexAttributeFormat format) {
+  switch (format) {
     case VertexAttributeFormat::kFloat32:
       return vk::Format::eR32Sfloat;
     case VertexAttributeFormat::kFloat32x2:
@@ -42,6 +46,20 @@ vk::Format ToVertexDescriptorFormat(const ShaderStageIOSlot& input) {
       return vk::Format::eR8G8B8Uint;
     case VertexAttributeFormat::kUInt8x4:
       return vk::Format::eR8G8B8A8Uint;
+    case VertexAttributeFormat::kSNorm8:
+      return vk::Format::eR8Snorm;
+    case VertexAttributeFormat::kSNorm8x2:
+      return vk::Format::eR8G8Snorm;
+    case VertexAttributeFormat::kSNorm8x4:
+      return vk::Format::eR8G8B8A8Snorm;
+    case VertexAttributeFormat::kUNorm8:
+      return vk::Format::eR8Unorm;
+    case VertexAttributeFormat::kUNorm8x2:
+      return vk::Format::eR8G8Unorm;
+    case VertexAttributeFormat::kUNorm8x4:
+      return vk::Format::eR8G8B8A8Unorm;
+    case VertexAttributeFormat::kUNorm8x4BGRA:
+      return vk::Format::eB8G8R8A8Unorm;
     case VertexAttributeFormat::kSInt16:
       return vk::Format::eR16Sint;
     case VertexAttributeFormat::kSInt16x2:
@@ -58,6 +76,18 @@ vk::Format ToVertexDescriptorFormat(const ShaderStageIOSlot& input) {
       return vk::Format::eR16G16B16Uint;
     case VertexAttributeFormat::kUInt16x4:
       return vk::Format::eR16G16B16A16Uint;
+    case VertexAttributeFormat::kSNorm16:
+      return vk::Format::eR16Snorm;
+    case VertexAttributeFormat::kSNorm16x2:
+      return vk::Format::eR16G16Snorm;
+    case VertexAttributeFormat::kSNorm16x4:
+      return vk::Format::eR16G16B16A16Snorm;
+    case VertexAttributeFormat::kUNorm16:
+      return vk::Format::eR16Unorm;
+    case VertexAttributeFormat::kUNorm16x2:
+      return vk::Format::eR16G16Unorm;
+    case VertexAttributeFormat::kUNorm16x4:
+      return vk::Format::eR16G16B16A16Unorm;
     case VertexAttributeFormat::kSInt32:
       return vk::Format::eR32Sint;
     case VertexAttributeFormat::kSInt32x2:
@@ -74,6 +104,8 @@ vk::Format ToVertexDescriptorFormat(const ShaderStageIOSlot& input) {
       return vk::Format::eR32G32B32Uint;
     case VertexAttributeFormat::kUInt32x4:
       return vk::Format::eR32G32B32A32Uint;
+    case VertexAttributeFormat::kUNorm10_10_10_2:
+      return vk::Format::eA2B10G10R10UnormPack32;
     case VertexAttributeFormat::kInvalid:
       return vk::Format::eUndefined;
   }

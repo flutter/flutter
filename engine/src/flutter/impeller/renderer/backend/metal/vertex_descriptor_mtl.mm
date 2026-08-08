@@ -47,6 +47,20 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       return MTLVertexFormatUChar3;
     case VertexAttributeFormat::kUInt8x4:
       return MTLVertexFormatUChar4;
+    case VertexAttributeFormat::kSNorm8:
+      return MTLVertexFormatCharNormalized;
+    case VertexAttributeFormat::kSNorm8x2:
+      return MTLVertexFormatChar2Normalized;
+    case VertexAttributeFormat::kSNorm8x4:
+      return MTLVertexFormatChar4Normalized;
+    case VertexAttributeFormat::kUNorm8:
+      return MTLVertexFormatUCharNormalized;
+    case VertexAttributeFormat::kUNorm8x2:
+      return MTLVertexFormatUChar2Normalized;
+    case VertexAttributeFormat::kUNorm8x4:
+      return MTLVertexFormatUChar4Normalized;
+    case VertexAttributeFormat::kUNorm8x4BGRA:
+      return MTLVertexFormatUChar4Normalized_BGRA;
     case VertexAttributeFormat::kSInt16:
       return MTLVertexFormatShort;
     case VertexAttributeFormat::kSInt16x2:
@@ -63,6 +77,18 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       return MTLVertexFormatUShort3;
     case VertexAttributeFormat::kUInt16x4:
       return MTLVertexFormatUShort4;
+    case VertexAttributeFormat::kSNorm16:
+      return MTLVertexFormatShortNormalized;
+    case VertexAttributeFormat::kSNorm16x2:
+      return MTLVertexFormatShort2Normalized;
+    case VertexAttributeFormat::kSNorm16x4:
+      return MTLVertexFormatShort4Normalized;
+    case VertexAttributeFormat::kUNorm16:
+      return MTLVertexFormatUShortNormalized;
+    case VertexAttributeFormat::kUNorm16x2:
+      return MTLVertexFormatUShort2Normalized;
+    case VertexAttributeFormat::kUNorm16x4:
+      return MTLVertexFormatUShort4Normalized;
     case VertexAttributeFormat::kSInt32:
       return MTLVertexFormatInt;
     case VertexAttributeFormat::kSInt32x2:
@@ -79,6 +105,8 @@ static MTLVertexFormat ReadStageInputFormat(const ShaderStageIOSlot& input) {
       return MTLVertexFormatUInt3;
     case VertexAttributeFormat::kUInt32x4:
       return MTLVertexFormatUInt4;
+    case VertexAttributeFormat::kUNorm10_10_10_2:
+      return MTLVertexFormatUInt1010102Normalized;
     case VertexAttributeFormat::kInvalid:
       return MTLVertexFormatInvalid;
   }

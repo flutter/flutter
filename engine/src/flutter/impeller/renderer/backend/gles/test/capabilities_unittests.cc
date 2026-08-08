@@ -127,5 +127,83 @@ TEST(CapabilitiesGLES, SupportsTextureArrayViaEXTExtension) {
   EXPECT_TRUE(capabilities->SupportsTextureArray());
 }
 
+TEST(CapabilitiesGLES, VertexFormatsOnTheES2Floor) {
+  // Normalized 8 and 16-bit attributes only need glVertexAttribPointer with a
+  // normalized flag, which is core all the way down to OpenGL ES 2.0.
+  auto const extensions = std::vector<const char*>{"GL_KHR_debug"};
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kFloat32x4));
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kUNorm8x4));
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kSNorm8x2));
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kUNorm16x4));
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kSNorm16));
+
+  // Everything above the floor needs a newer context or an extension.
+  EXPECT_FALSE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kFloat16x2));
+  EXPECT_FALSE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kUInt8x4));
+  EXPECT_FALSE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kSInt32));
+  EXPECT_FALSE(capabilities->SupportsVertexFormat(
+      VertexAttributeFormat::kUNorm10_10_10_2));
+  EXPECT_FALSE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kUNorm8x4BGRA));
+  EXPECT_FALSE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kInvalid));
+}
+
+TEST(CapabilitiesGLES, VertexFormatsOnES3) {
+  // Half-float, integer, and packed 2/10/10/10 attributes are all core on
+  // OpenGL ES 3.0.
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 3.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kFloat16x2));
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kUInt8x4));
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kSInt32));
+  EXPECT_TRUE(capabilities->SupportsVertexFormat(
+      VertexAttributeFormat::kUNorm10_10_10_2));
+
+  // The byte-swizzled format stays extension-gated on ES.
+  EXPECT_FALSE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kUNorm8x4BGRA));
+}
+
+TEST(CapabilitiesGLES, VertexHalfFloatViaOESExtensionOnES2) {
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",              //
+      "GL_OES_vertex_half_float",  //
+  };
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kFloat16x4));
+  // The extension spells the same layout with a different enum value.
+  EXPECT_EQ(capabilities->GetVertexFormatSupport().half_float_type,
+            static_cast<GLenum>(GL_HALF_FLOAT_OES));
+}
+
+TEST(CapabilitiesGLES, VertexBgraOnDesktopGL) {
+  // GL_BGRA as an attribute size is core on desktop GL 3.2 and has no OpenGL
+  // ES counterpart at any version.
+  auto mock_gles = MockGLES::Init(std::nullopt, "3.3");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+
+  EXPECT_TRUE(
+      capabilities->SupportsVertexFormat(VertexAttributeFormat::kUNorm8x4BGRA));
+}
+
 }  // namespace testing
 }  // namespace impeller
