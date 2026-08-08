@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "すべてを選択",
   "searchResultsFound": "検索結果が見つかりました",
   "noResultsFound": "一致する検索結果はありません",
-  "radioButtonUnselectedLabel": "選択されていません"
+  "radioButtonUnselectedLabel": "選択されていません",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

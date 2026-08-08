@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Zgjidh të gjitha",
   "searchResultsFound": "U gjetën rezultate kërkimi",
   "noResultsFound": "Nuk u gjet asnjë rezultat",
-  "radioButtonUnselectedLabel": "Nuk është zgjedhur"
+  "radioButtonUnselectedLabel": "Nuk është zgjedhur",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
