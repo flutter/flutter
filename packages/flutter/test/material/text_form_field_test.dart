@@ -1739,6 +1739,122 @@ void main() {
   );
 
   group('context menu', () {
+    testWidgets('TextFormField uses ThemeData.textSelectionTheme contextMenuBuilder', (
+      WidgetTester tester,
+    ) async {
+      Widget themeDataContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const Placeholder();
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            textSelectionTheme: TextSelectionThemeData(
+              contextMenuBuilder: themeDataContextMenuBuilder,
+            ),
+          ),
+          home: Material(child: TextFormField()),
+        ),
+      );
+
+      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+      final BuildContext textFormFieldContext = tester.element(find.byType(TextFormField));
+      final Widget contextMenu = editableTextState.widget.contextMenuBuilder!(
+        textFormFieldContext,
+        editableTextState,
+      );
+
+      expect(contextMenu, isA<Placeholder>());
+    });
+
+    testWidgets('TextFormField prefers local TextSelectionTheme contextMenuBuilder', (
+      WidgetTester tester,
+    ) async {
+      Widget themeDataContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const Placeholder();
+      }
+
+      Widget localTextSelectionThemeContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const Icon(Icons.search);
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            textSelectionTheme: TextSelectionThemeData(
+              contextMenuBuilder: themeDataContextMenuBuilder,
+            ),
+          ),
+          home: Material(
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                contextMenuBuilder: localTextSelectionThemeContextMenuBuilder,
+              ),
+              child: TextFormField(),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+      final BuildContext textFormFieldContext = tester.element(find.byType(TextFormField));
+      final Widget contextMenu = editableTextState.widget.contextMenuBuilder!(
+        textFormFieldContext,
+        editableTextState,
+      );
+
+      expect(contextMenu, isA<Icon>());
+      expect(contextMenu, isNot(isA<Placeholder>()));
+    });
+
+    testWidgets('TextFormField.contextMenuBuilder overrides ThemeData.textSelectionTheme', (
+      WidgetTester tester,
+    ) async {
+      Widget themeDataContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const Placeholder();
+      }
+
+      Widget textFormFieldContextMenuBuilder(
+        BuildContext context,
+        EditableTextState editableTextState,
+      ) {
+        return const SizedBox();
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            textSelectionTheme: TextSelectionThemeData(
+              contextMenuBuilder: themeDataContextMenuBuilder,
+            ),
+          ),
+          home: Material(child: TextFormField(contextMenuBuilder: textFormFieldContextMenuBuilder)),
+        ),
+      );
+
+      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+      final BuildContext textFormFieldContext = tester.element(find.byType(TextFormField));
+      final Widget contextMenu = editableTextState.widget.contextMenuBuilder!(
+        textFormFieldContext,
+        editableTextState,
+      );
+
+      expect(contextMenu, isA<SizedBox>());
+      expect(contextMenu, isNot(isA<Placeholder>()));
+    });
+
     testWidgets(
       'iOS uses the system context menu by default if supported',
       (WidgetTester tester) async {
