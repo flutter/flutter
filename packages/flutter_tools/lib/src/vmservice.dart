@@ -15,7 +15,6 @@ import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -44,13 +43,19 @@ const kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 /// The error response code from an unrecoverable compilation failure.
 const kIsolateReloadBarred = 1005;
 
+/// Used to build RegExp instances which can detect the VM service message.
+final kVMServiceMessageRegExp = RegExp(
+  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+);
+
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(
-  String url, {
-  io.CompressionOptions compression,
-  required Logger logger,
-});
+typedef WebSocketConnector =
+    Future<io.WebSocket> Function(
+      String url, {
+      io.CompressionOptions compression,
+      required Logger logger,
+    });
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -79,19 +84,20 @@ typedef ReloadSources = Future<void> Function(String isolateId, {bool force, boo
 
 typedef Restart = Future<void> Function({bool pause});
 
-typedef CompileExpression = Future<String> Function(
-  String isolateId,
-  String expression,
-  List<String> definitions,
-  List<String> definitionTypes,
-  List<String> typeDefinitions,
-  List<String> typeBounds,
-  List<String> typeDefaults,
-  String libraryUri,
-  String? klass,
-  String? method,
-  bool isStatic,
-);
+typedef CompileExpression =
+    Future<String> Function(
+      String isolateId,
+      String expression,
+      List<String> definitions,
+      List<String> definitionTypes,
+      List<String> typeDefinitions,
+      List<String> typeBounds,
+      List<String> typeDefaults,
+      String libraryUri,
+      String? klass,
+      String? method,
+      bool isStatic,
+    );
 
 Future<io.WebSocket> _defaultOpenChannel(
   String url, {
@@ -157,17 +163,18 @@ Future<io.WebSocket> _defaultOpenChannel(
 
 /// Override `VMServiceConnector` in [context] to return a different
 /// [vm_service.VmService] from [connectToVmService] (used by tests).
-typedef VMServiceConnector = Future<FlutterVmService> Function(
-  Uri httpUri, {
-  ReloadSources? reloadSources,
-  Restart? restart,
-  CompileExpression? compileExpression,
-  FlutterProject? flutterProject,
-  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-  io.CompressionOptions compression,
-  Device? device,
-  required Logger logger,
-});
+typedef VMServiceConnector =
+    Future<FlutterVmService> Function(
+      Uri httpUri, {
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      FlutterProject? flutterProject,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions compression,
+      Device? device,
+      required Logger logger,
+    });
 
 /// Set up the VM Service client by attaching services for each of the provided
 /// callbacks.
@@ -221,7 +228,7 @@ Future<vm_service.VmService> setUpVmService({
   ) async {
     final FlutterVersion version =
         context.get<FlutterVersion>() ??
-        FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git);
+        FlutterVersion(fs: globals.fs, flutterRoot: globals.cache.flutterRoot, git: globals.git);
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
     versionJson['engineRevisionShort'] = version.engineRevisionShort;

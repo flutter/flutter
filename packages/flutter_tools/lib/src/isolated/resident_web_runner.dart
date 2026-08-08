@@ -24,7 +24,6 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
@@ -340,7 +339,7 @@ class ResidentWebRunner extends ResidentRunner {
             return 1;
           }
           flutterDevice!.generator!.accept();
-          cacheInitialDillCompilation();
+          unawaited(cacheInitialDillCompilation());
         } else {
           final webBuilder = WebBuilder(
             logger: _logger,
@@ -729,7 +728,7 @@ class ResidentWebRunner extends ResidentRunner {
       final LanguageVersion languageVersion = determineLanguageVersion(
         _fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
-        Cache.flutterRoot!,
+        cache?.flutterRoot ?? '',
       );
 
       final String entrypoint = main_dart.generateMainDartFile(
