@@ -241,7 +241,12 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
   ),
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
-  CreateCommand(verboseHelp: verboseHelp),
+  CreateCommand(
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+    java: toolDependencies.androidContext.java,
+    plistParser: toolDependencies.appleContext.plistParser,
+  ),
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(
@@ -303,6 +308,7 @@ List<FlutterCommand> generateCommands({
     processManager: toolDependencies.toolContext.processManager,
     artifacts: toolDependencies.toolContext.artifacts,
     terminal: toolDependencies.toolContext.terminal,
+    toolContext: toolDependencies.toolContext,
   ),
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),

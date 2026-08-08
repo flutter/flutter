@@ -43,10 +43,23 @@ Future<String> createProject(
   Directory temp, {
   String name = 'flutter_project',
   List<String>? arguments,
+  ToolContext? toolContext,
 }) async {
   arguments ??= <String>['--no-pub'];
-  final String projectPath = globals.fs.path.join(temp.path, name);
-  final command = CreateCommand();
+  final FileSystem fs = toolContext?.fs ?? globals.fs;
+  final String projectPath = fs.path.join(temp.path, name);
+  final command = CreateCommand(
+    toolContext:
+        toolContext ??
+        FakeToolContext(
+          fs: fs,
+          logger: globals.logger,
+          platform: globals.platform,
+          processManager: globals.processManager,
+          cache: globals.cache,
+          flutterVersion: FakeFlutterVersion(),
+        ),
+  );
   Analytics? analytics;
   try {
     analytics = context.get<Analytics>();
