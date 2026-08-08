@@ -53,10 +53,7 @@ Future<String> createProject(
   } on UnsupportedError {
     // In testWithoutContext, context.get is not supported.
   }
-  final CommandRunner<void> runner = createTestCommandRunner(
-    command,
-    analytics,
-  );
+  final CommandRunner<void> runner = createTestCommandRunner(command, analytics);
   await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }
@@ -66,7 +63,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Logger? topLevelLogger = toolContext?.logger;
+    final Logger? topLevelLogger = toolContext?.logger ?? context.get<Logger>();
     final contextOverrides = <Type, dynamic>{
       if (topLevelLogger != null && (topLevelResults['verbose'] as bool))
         Logger: VerboseLogger(topLevelLogger),

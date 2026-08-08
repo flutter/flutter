@@ -1713,9 +1713,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void setupApplicationPackages() {
-    if (applicationPackages == null && toolContext == null) {
-      applicationPackages = ApplicationPackageFactory.instance;
-    }
+    applicationPackages ??= ApplicationPackageFactory.instance;
   }
 
   /// The path to send to Google Analytics. Return null here to disable

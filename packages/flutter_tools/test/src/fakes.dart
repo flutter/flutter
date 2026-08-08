@@ -26,7 +26,9 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
@@ -55,7 +57,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import 'fake_process_manager.dart';
+import 'context.dart';
 
 /// Environment with DYLD_LIBRARY_PATH=/path/to/libraries
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
@@ -945,21 +947,177 @@ class ClosedStdinController extends Fake implements StreamSink<List<int>> {
   }
 }
 
-class FakeConfig extends Fake implements Config {}
+class FakeConfig extends Fake implements Config {
+  @override
+  dynamic getValue(String key) => null;
+
+  @override
+  String get configPath => '/fake/config';
+
+  @override
+  bool containsKey(String key) => false;
+}
 
 class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 
 class FakeTerminal extends Fake implements Terminal {}
 
-class FakeProcessUtils extends Fake implements ProcessUtils {}
+class FakeProcessUtils extends Fake implements ProcessUtils {
+  FakeProcessUtils({ProcessManager? processManager, Logger? logger})
+    : _delegate = ProcessUtils(
+        processManager: processManager ?? FakeProcessManager.any(),
+        logger: logger ?? BufferLogger.test(),
+      );
+
+  final ProcessUtils _delegate;
+
+  @override
+  Future<RunResult> run(
+    List<String> cmd, {
+    bool throwOnError = false,
+    RunResultChecker? allowedFailures,
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    Map<String, String>? environment,
+    Duration? timeout,
+    int timeoutRetries = 0,
+  }) => _delegate.run(
+    cmd,
+    throwOnError: throwOnError,
+    allowedFailures: allowedFailures,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    environment: environment,
+    timeout: timeout,
+    timeoutRetries: timeoutRetries,
+  );
+
+  @override
+  RunResult runSync(
+    List<String> cmd, {
+    bool throwOnError = false,
+    bool verboseExceptions = false,
+    RunResultChecker? allowedFailures,
+    bool hideStdout = false,
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool allowReentrantFlutter = false,
+    Encoding encoding = systemEncoding,
+  }) => _delegate.runSync(
+    cmd,
+    throwOnError: throwOnError,
+    verboseExceptions: verboseExceptions,
+    allowedFailures: allowedFailures,
+    hideStdout: hideStdout,
+    workingDirectory: workingDirectory,
+    environment: environment,
+    allowReentrantFlutter: allowReentrantFlutter,
+    encoding: encoding,
+  );
+
+  @override
+  Future<Process> start(
+    List<String> cmd, {
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    Map<String, String>? environment,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) => _delegate.start(
+    cmd,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    environment: environment,
+    mode: mode,
+  );
+
+  @override
+  Future<int> stream(
+    List<String> cmd, {
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    String prefix = '',
+    bool trace = false,
+    RegExp? filter,
+    RegExp? stdoutErrorMatcher,
+    StringConverter? mapFunction,
+    Map<String, String>? environment,
+  }) => _delegate.stream(
+    cmd,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    prefix: prefix,
+    trace: trace,
+    filter: filter,
+    stdoutErrorMatcher: stdoutErrorMatcher,
+    mapFunction: mapFunction,
+    environment: environment,
+  );
+
+  @override
+  bool exitsHappySync(List<String> cli, {Map<String, String>? environment}) =>
+      _delegate.exitsHappySync(cli, environment: environment);
+
+  @override
+  Future<bool> exitsHappy(List<String> cli, {Map<String, String>? environment}) =>
+      _delegate.exitsHappy(cli, environment: environment);
+}
 
 class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
 
-class FakeXcode extends Fake implements Xcode {}
+class FakeXcode extends Fake implements Xcode {
+  FakeXcode({
+    Version? currentVersion,
+    this.isInstalledAndMeetsVersionCheck = true,
+    this.isInstalled = true,
+  }) : currentVersion = currentVersion ?? Version(15, 4, 0);
 
-class FakeArtifacts extends Fake implements Artifacts {}
+  @override
+  final Version? currentVersion;
 
-class FakeCache extends Fake implements Cache {}
+  @override
+  final bool isInstalledAndMeetsVersionCheck;
+
+  @override
+  final bool isInstalled;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
+
+  @override
+  Future<String> sdkLocation(EnvironmentType environmentType) async => 'iPhoneSDK';
+}
+
+class FakeArtifacts extends Fake implements Artifacts {
+  @override
+  FileSystemEntity getHostArtifact(HostArtifact artifact) =>
+      MemoryFileSystem.test().file(artifact.name);
+
+  @override
+  String getEngineType(TargetPlatform platform, [BuildMode? mode]) => 'fake_engine';
+
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) => 'fake_artifact';
+}
+
+class FakeCache extends Fake implements Cache {
+  @override
+  MapEntry<String, String> get dyLdLibEntry =>
+      const MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path');
+
+  @override
+  void releaseLock() {}
+
+  @override
+  Future<void> updateAll(
+    Set<DevelopmentArtifact> requiredArtifacts, {
+    bool offline = false,
+  }) async {}
+}
 
 class FakeToolContext extends Fake implements ToolContext {
   FakeToolContext({
@@ -1226,8 +1384,6 @@ class FakeIOSSimulatorUtils extends Fake implements IOSSimulatorUtils {}
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
 class FakeXCDevice extends Fake implements XCDevice {}
-
-class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}
 
 class FakeBuildSystem extends Fake implements BuildSystem {}
 
