@@ -20,6 +20,8 @@ namespace {
 
 std::optional<SkColorType> ToSkColorType(impeller::PixelFormat format) {
   switch (format) {
+    case impeller::PixelFormat::kGray8UNormInt:
+      return SkColorType::kGray_8_SkColorType;
     case impeller::PixelFormat::kR8G8B8A8UNormInt:
       return SkColorType::kRGBA_8888_SkColorType;
     case impeller::PixelFormat::kR16G16B16A16Float:
@@ -41,8 +43,11 @@ sk_sp<SkImage> ConvertBufferToSkImage(
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
     SkColorType color_type,
     SkISize dimensions) {
-  SkImageInfo image_info = SkImageInfo::Make(dimensions, color_type,
-                                             SkAlphaType::kPremul_SkAlphaType);
+  const SkAlphaType alpha_type = color_type == kGray_8_SkColorType
+                                     ? SkAlphaType::kOpaque_SkAlphaType
+                                     : SkAlphaType::kPremul_SkAlphaType;
+  SkImageInfo image_info =
+      SkImageInfo::Make(dimensions, color_type, alpha_type);
   SkBitmap bitmap;
   auto func = [](void* addr, void* context) {
     auto buffer =

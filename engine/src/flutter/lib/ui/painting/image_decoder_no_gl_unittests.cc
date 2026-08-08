@@ -8,6 +8,7 @@
 #include "flutter/fml/endianness.h"
 #include "impeller/renderer/capabilities.h"
 #include "include/core/SkColorType.h"
+#include "third_party/skia/include/codec/SkJpegDecoder.h"
 #include "third_party/skia/include/codec/SkPngDecoder.h"
 
 namespace flutter {
@@ -75,6 +76,67 @@ float DecodeBGR10(uint32_t x) {
   const float intercept = min;
   const float slope = (max - min) / 1024.0f;
   return (x * slope) + intercept;
+}
+
+TEST(ImageDecoderNoGLTest, ImpellerPreservesGray8) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "Fuchsia can't load the test fixtures.";
+#endif
+  SkCodecs::Register(SkJpegDecoder::Decoder());
+  auto data = flutter::testing::OpenFixtureAsSkData("embarcadero.jpg");
+  ASSERT_TRUE(data);
+
+  ImageGeneratorRegistry registry;
+  std::shared_ptr<ImageGenerator> generator =
+      registry.CreateCompatibleGenerator(data);
+  ASSERT_TRUE(generator);
+  const SkImageInfo source_info = generator->GetInfo();
+  ASSERT_EQ(source_info.colorType(), kGray_8_SkColorType);
+
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
+                                                         std::move(generator));
+
+#if IMPELLER_SUPPORTS_RENDERING
+  const ImageDecoder::Options options = {
+      .target_width = static_cast<uint32_t>(source_info.width()),
+      .target_height = static_cast<uint32_t>(source_info.height()),
+  };
+  const impeller::ISize max_texture_size = {source_info.width(),
+                                            source_info.height()};
+  const size_t pixel_count = static_cast<size_t>(source_info.width()) *
+                             static_cast<size_t>(source_info.height());
+  std::shared_ptr<impeller::Capabilities> fallback_capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .Build();
+  std::shared_ptr<impeller::Capabilities> capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .SetSupportsGray8Textures(true)
+          .Build();
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> fallback_result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), options, max_texture_size,
+          /*supports_wide_gamut=*/false, fallback_capabilities, allocator);
+
+  ASSERT_TRUE(fallback_result.ok()) << fallback_result.status();
+  EXPECT_EQ(fallback_result->image_info.format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
+  EXPECT_EQ(fallback_result->device_buffer->GetDeviceBufferDescriptor().size,
+            pixel_count * 4u);
+
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), options, max_texture_size,
+          /*supports_wide_gamut=*/false, capabilities, allocator);
+
+  ASSERT_TRUE(result.ok()) << result.status();
+  EXPECT_EQ(result->image_info.format, impeller::PixelFormat::kGray8UNormInt);
+  EXPECT_EQ(result->device_buffer->GetDeviceBufferDescriptor().size,
+            pixel_count);
+#endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
 TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {

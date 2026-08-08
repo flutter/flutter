@@ -926,6 +926,7 @@ Rasterizer::ScreenshotFormat ToScreenshotFormat(impeller::PixelFormat format) {
   switch (format) {
     case impeller::PixelFormat::kUnknown:
     case impeller::PixelFormat::kA8UNormInt:
+    case impeller::PixelFormat::kGray8UNormInt:
     case impeller::PixelFormat::kR8UNormInt:
     case impeller::PixelFormat::kR8G8UNormInt:
     case impeller::PixelFormat::kR8G8B8A8UNormIntSRGB:

@@ -191,6 +191,7 @@ TEST(AllocatorTest, CompressedFormatBlockMath) {
   EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kASTC8x8HDR), 16u);
   // Uncompressed falls back to bytes-per-pixel.
   EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kR8G8B8A8UNormInt), 4u);
+  EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kGray8UNormInt), 1u);
 }
 
 TEST(AllocatorTest, CompressedFormatRegionByteSizes) {

@@ -100,6 +100,10 @@ class Capabilities {
   ///        bounded to the levels the texture declares.
   virtual bool SupportsManuallyMippedTextures() const = 0;
 
+  /// @brief Whether one-byte Gray8 textures can be sampled as `(r, r, r, 1)`,
+  ///        resized, mipmapped, and read back as one byte per pixel.
+  virtual bool SupportsGray8Textures() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;
@@ -192,6 +196,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsReadFromResolve(bool value);
 
+  CapabilitiesBuilder& SetSupportsGray8Textures(bool value);
+
   CapabilitiesBuilder& SetDefaultColorFormat(PixelFormat value);
 
   CapabilitiesBuilder& SetDefaultStencilFormat(PixelFormat value);
@@ -230,6 +236,7 @@ class CapabilitiesBuilder {
   bool supports_compute_ = false;
   bool supports_compute_subgroups_ = false;
   bool supports_read_from_resolve_ = false;
+  bool supports_gray8_textures_ = false;
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_device_transient_textures_ = false;
   bool supports_triangle_fan_ = false;

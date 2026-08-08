@@ -102,6 +102,11 @@ class StandardCapabilities final : public Capabilities {
   bool SupportsManuallyMippedTextures() const override { return true; }
 
   // |Capabilities|
+  bool SupportsGray8Textures() const override {
+    return supports_gray8_textures_;
+  }
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override {
     return supports_extended_range_formats_;
   }
@@ -148,6 +153,7 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_compute,
                        bool supports_compute_subgroups,
                        bool supports_read_from_resolve,
+                       bool supports_gray8_textures,
                        bool supports_decal_sampler_address_mode,
                        bool supports_device_transient_textures,
                        bool supports_triangle_fan,
@@ -171,6 +177,7 @@ class StandardCapabilities final : public Capabilities {
         supports_compute_(supports_compute),
         supports_compute_subgroups_(supports_compute_subgroups),
         supports_read_from_resolve_(supports_read_from_resolve),
+        supports_gray8_textures_(supports_gray8_textures),
         supports_decal_sampler_address_mode_(
             supports_decal_sampler_address_mode),
         supports_device_transient_textures_(supports_device_transient_textures),
@@ -200,6 +207,7 @@ class StandardCapabilities final : public Capabilities {
   bool supports_compute_ = false;
   bool supports_compute_subgroups_ = false;
   bool supports_read_from_resolve_ = false;
+  bool supports_gray8_textures_ = false;
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_device_transient_textures_ = false;
   bool supports_triangle_fan_ = false;
@@ -280,6 +288,11 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetDefaultDepthStencilFormat(
 CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsReadFromResolve(
     bool read_from_resolve) {
   supports_read_from_resolve_ = read_from_resolve;
+  return *this;
+}
+
+CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsGray8Textures(bool value) {
+  supports_gray8_textures_ = value;
   return *this;
 }
 
@@ -366,6 +379,7 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_compute_,                                                   //
       supports_compute_subgroups_,                                         //
       supports_read_from_resolve_,                                         //
+      supports_gray8_textures_,                                            //
       supports_decal_sampler_address_mode_,                                //
       supports_device_transient_textures_,                                 //
       supports_triangle_fan_,                                              //

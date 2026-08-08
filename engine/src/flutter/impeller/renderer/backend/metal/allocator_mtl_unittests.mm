@@ -25,6 +25,20 @@ namespace testing {
 using AllocatorMTLTest = PlaygroundTest;
 INSTANTIATE_METAL_PLAYGROUND_SUITE(AllocatorMTLTest);
 
+TEST(FormatsMTLTest, Gray8Mapping) {
+  TextureDescriptor desc;
+  desc.format = PixelFormat::kGray8UNormInt;
+  desc.size = {1, 1};
+
+  MTLTextureDescriptor* mtl_desc = ToMTLTextureDescriptor(desc);
+  ASSERT_NE(mtl_desc, nil);
+  EXPECT_EQ(mtl_desc.pixelFormat, MTLPixelFormatR8Unorm);
+  EXPECT_EQ(mtl_desc.swizzle.red, MTLTextureSwizzleRed);
+  EXPECT_EQ(mtl_desc.swizzle.green, MTLTextureSwizzleRed);
+  EXPECT_EQ(mtl_desc.swizzle.blue, MTLTextureSwizzleRed);
+  EXPECT_EQ(mtl_desc.swizzle.alpha, MTLTextureSwizzleOne);
+}
+
 TEST_P(AllocatorMTLTest, DebugTraceMemoryStatistics) {
   auto& context_mtl = ContextMTL::Cast(*GetContext());
   const auto& allocator = context_mtl.GetResourceAllocator();

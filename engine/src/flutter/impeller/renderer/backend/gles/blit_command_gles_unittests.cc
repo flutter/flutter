@@ -4,6 +4,7 @@
 
 #include <initializer_list>
 #include <tuple>
+#include <vector>
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
@@ -42,19 +43,21 @@ namespace {
 
 std::shared_ptr<TextureGLES> CreateTexture(
     const std::shared_ptr<ReactorGLES>& reactor,
-    PixelFormat format) {
+    PixelFormat format,
+    ISize size = {10, 10}) {
   TextureDescriptor tex_desc;
   tex_desc.format = format;
-  tex_desc.size = {10, 10};
+  tex_desc.size = size;
   tex_desc.usage = static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
   auto texture = std::make_shared<TextureGLES>(reactor, tex_desc);
   return texture;
 }
 
 std::shared_ptr<DeviceBufferGLES> CreateBuffer(
-    const std::shared_ptr<ReactorGLES>& reactor) {
+    const std::shared_ptr<ReactorGLES>& reactor,
+    size_t size = 10 * 10 * 4) {
   DeviceBufferDescriptor buffer_desc;
-  buffer_desc.size = 10 * 10 * 4;
+  buffer_desc.size = size;
   buffer_desc.storage_mode = StorageMode::kHostVisible;
   auto allocation = std::make_unique<Allocation>();
   FML_CHECK(allocation->Truncate(Bytes(buffer_desc.size)));
@@ -84,6 +87,7 @@ BlitCopyTextureToBufferCommandGLES CreateCopyTextureToBufferCommand(
   command.source = source;
   command.destination = dest;
   command.source_region = IRect::MakeSize(source->GetTextureDescriptor().size);
+  command.destination_offset = 0u;
   command.label = "TestBlit";
   return command;
 }
@@ -139,6 +143,61 @@ TEST(BlitCommandGLESTest, BlitCopyBufferToTextureCommandGLESBGRA) {
       .Times(1);
 
   EXPECT_TRUE(command.Encode(*reactor));
+}
+
+TEST(BlitCommandGLESTest, BlitCopyBufferToTextureCommandGLESGray8) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  auto reactor = std::make_shared<TestReactorGLES>();
+  auto worker = std::make_shared<MockWorker>();
+  reactor->AddWorker(worker);
+
+  std::shared_ptr<TextureGLES> dest_texture =
+      CreateTexture(reactor, PixelFormat::kGray8UNormInt);
+  std::shared_ptr<DeviceBufferGLES> source_buffer = CreateBuffer(reactor, 100u);
+  BlitCopyBufferToTextureCommandGLES command =
+      CreateCopyBufferToTextureCommand(source_buffer, dest_texture);
+
+  EXPECT_CALL(mock_gles_impl_ref, TexImage2D(GL_TEXTURE_2D, _, GL_R8, _, _, _,
+                                             GL_RED, GL_UNSIGNED_BYTE, _))
+      .Times(1);
+  EXPECT_CALL(mock_gles_impl_ref, TexSubImage2D(GL_TEXTURE_2D, _, _, _, _, _,
+                                                GL_RED, GL_UNSIGNED_BYTE, _))
+      .Times(1);
+
+  EXPECT_TRUE(command.Encode(*reactor));
+}
+
+TEST(BlitCommandGLESTest, Gray8TextureConfiguresSamplingSwizzleOnce) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+
+  EXPECT_CALL(mock_gles_impl_ref, GenTextures(1, _))
+      .WillOnce(::testing::SetArgPointee<1>(1));
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  auto reactor = std::make_shared<TestReactorGLES>();
+  auto worker = std::make_shared<MockWorker>();
+  reactor->AddWorker(worker);
+  std::shared_ptr<TextureGLES> texture =
+      CreateTexture(reactor, PixelFormat::kGray8UNormInt);
+
+  EXPECT_CALL(mock_gles_impl_ref,
+              TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED))
+      .Times(1);
+  EXPECT_CALL(mock_gles_impl_ref,
+              TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_RED))
+      .Times(1);
+  EXPECT_CALL(mock_gles_impl_ref,
+              TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED))
+      .Times(1);
+  EXPECT_CALL(mock_gles_impl_ref,
+              TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ONE))
+      .Times(1);
+
+  EXPECT_TRUE(texture->Bind());
+  EXPECT_TRUE(texture->Bind());
 }
 
 // This test makes sure we bind to GL_FRAMEBUFFER so that it's compatible for
@@ -230,6 +289,85 @@ TEST(BlitCommandGLESTest, BlitCopyTextureToBufferCommandGLESBGRA) {
       .Times(1);
 
   EXPECT_TRUE(command.Encode(*reactor));
+}
+
+TEST(BlitCommandGLESTest, BlitCopyTextureToBufferCommandGLESGray8) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  auto reactor = std::make_shared<TestReactorGLES>();
+  auto worker = std::make_shared<MockWorker>();
+  reactor->AddWorker(worker);
+
+  std::shared_ptr<TextureGLES> source_texture =
+      CreateTexture(reactor, PixelFormat::kGray8UNormInt);
+  std::shared_ptr<DeviceBufferGLES> dest_buffer = CreateBuffer(reactor, 100u);
+  BlitCopyTextureToBufferCommandGLES command =
+      CreateCopyTextureToBufferCommand(source_texture, dest_buffer);
+
+  EXPECT_CALL(mock_gles_impl_ref, CheckFramebufferStatus(_))
+      .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
+  EXPECT_CALL(mock_gles_impl_ref,
+              ReadPixels(_, _, 10, 10, GL_RGBA, GL_UNSIGNED_BYTE, _))
+      .WillOnce(
+          [](GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, void* pixels) {
+            auto* rgba = static_cast<uint8_t*>(pixels);
+            for (size_t i = 0; i < 100u; i++) {
+              rgba[i * 4u] = static_cast<uint8_t>(i);
+            }
+          });
+
+  EXPECT_TRUE(command.Encode(*reactor));
+  for (size_t i = 0; i < 100u; i++) {
+    EXPECT_EQ(dest_buffer->GetBufferData()[i], static_cast<uint8_t>(i));
+  }
+}
+
+TEST(BlitCommandGLESTest, Gray8ReadbackUsesBoundedChunks) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  auto reactor = std::make_shared<TestReactorGLES>();
+  auto worker = std::make_shared<MockWorker>();
+  reactor->AddWorker(worker);
+
+  constexpr ISize kSize = {1024, 1025};
+  std::shared_ptr<TextureGLES> source_texture =
+      CreateTexture(reactor, PixelFormat::kGray8UNormInt, kSize);
+  std::shared_ptr<DeviceBufferGLES> dest_buffer =
+      CreateBuffer(reactor, kSize.Area());
+  BlitCopyTextureToBufferCommandGLES command =
+      CreateCopyTextureToBufferCommand(source_texture, dest_buffer);
+
+  EXPECT_CALL(mock_gles_impl_ref, CheckFramebufferStatus(_))
+      .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
+  auto write_pixels = [](GLint, GLint y, GLsizei width, GLsizei height, GLenum,
+                         GLenum, void* pixels) {
+    auto* rgba = static_cast<uint8_t*>(pixels);
+    for (GLint row = 0; row < height; row++) {
+      for (GLint x = 0; x < width; x++) {
+        const size_t index = static_cast<size_t>(row) * width + x;
+        rgba[index * 4u] = static_cast<uint8_t>(y + row + x);
+      }
+    }
+  };
+  EXPECT_CALL(mock_gles_impl_ref,
+              ReadPixels(0, 0, 1024, 1024, GL_RGBA, GL_UNSIGNED_BYTE, _))
+      .WillOnce(write_pixels);
+  EXPECT_CALL(mock_gles_impl_ref,
+              ReadPixels(0, 1024, 1024, 1, GL_RGBA, GL_UNSIGNED_BYTE, _))
+      .WillOnce(write_pixels);
+
+  EXPECT_TRUE(command.Encode(*reactor));
+  for (int64_t y = 0; y < kSize.height; y++) {
+    for (int64_t x = 0; x < kSize.width; x++) {
+      const size_t index = static_cast<size_t>(y * kSize.width + x);
+      EXPECT_EQ(dest_buffer->GetBufferData()[index],
+                static_cast<uint8_t>(y + x));
+    }
+  }
 }
 
 TEST(BlitCommandGLESTest,

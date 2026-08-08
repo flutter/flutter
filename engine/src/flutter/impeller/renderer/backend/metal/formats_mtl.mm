@@ -90,6 +90,11 @@ MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc) {
   auto mtl_desc = [[MTLTextureDescriptor alloc] init];
   mtl_desc.textureType = ToMTLTextureType(desc.type);
   mtl_desc.pixelFormat = ToMTLPixelFormat(desc.format);
+  if (desc.format == PixelFormat::kGray8UNormInt) {
+    mtl_desc.swizzle = MTLTextureSwizzleChannelsMake(
+        MTLTextureSwizzleRed, MTLTextureSwizzleRed, MTLTextureSwizzleRed,
+        MTLTextureSwizzleOne);
+  }
   mtl_desc.sampleCount = static_cast<NSUInteger>(desc.sample_count);
   mtl_desc.width = desc.size.width;
   mtl_desc.height = desc.size.height;
