@@ -305,8 +305,10 @@ FLUTTER_DARWIN_EXPORT
  * You can subscribe to semantics updates via `NSNotificationCenter` by adding
  * an observer for the name `FlutterSemanticsUpdateNotification`.  The `object`
  * parameter will be the `FlutterViewController` associated with the semantics
- * update.  This will asynchronously fire after a semantics tree has actually
- * built (which may be some time after the frame has been rendered).
+ * update. This will asynchronously fire after a semantics tree has actually
+ * built and has been applied to a loaded Flutter view (which may be some time after the frame has
+ * been rendered). If the view is not loaded when the semantics tree is built, the notification is
+ * deferred until the cached semantics are applied when the view loads.
  */
 - (void)ensureSemanticsEnabled;
 
