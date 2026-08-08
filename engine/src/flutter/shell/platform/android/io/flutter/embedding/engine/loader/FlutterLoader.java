@@ -491,12 +491,14 @@ public class FlutterLoader {
       }
 
       if (!oldGenHeapSizeSet) {
-        // Default to half of total memory.
+        // Default to the memory class of the device (or large memory class if large heap is
+        // enabled)
+        // to avoid out-of-memory issues from overly large default heap sizes.
         ActivityManager activityManager =
             (ActivityManager) applicationContext.getSystemService(Context.ACTIVITY_SERVICE);
-        ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
-        activityManager.getMemoryInfo(memInfo);
-        int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+        boolean isLargeHeap = (applicationInfo.flags & ApplicationInfo.FLAG_LARGE_HEAP) != 0;
+        int oldGenHeapSizeMegaBytes =
+            isLargeHeap ? activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
         shellArgs.add(
             FlutterEngineFlags.OLD_GEN_HEAP_SIZE.engineArgument + oldGenHeapSizeMegaBytes);
       }
