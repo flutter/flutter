@@ -193,13 +193,7 @@ class Tooltip extends StatefulWidget {
   ///  * [constraints], which allow setting an explicit size for the tooltip.
   final EdgeInsetsGeometry? margin;
 
-  /// The vertical gap between the widget and the displayed tooltip.
-  ///
-  /// When [preferBelow] is set to true and tooltips have sufficient space to
-  /// display themselves, this property defines how much vertical space
-  /// tooltips will position themselves under their corresponding widgets.
-  /// Otherwise, tooltips will position themselves above their corresponding
-  /// widgets with the given offset.
+  /// {@macro flutter.widgets.RawTooltip.verticalOffset}
   final double? verticalOffset;
 
   /// Whether the tooltip defaults to being displayed below the widget.
@@ -550,6 +544,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         enableTapToDismiss: widget.enableTapToDismiss,
         onTriggered: widget.onTriggered,
         dismissDelay: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
+        preferBelow: widget.preferBelow ?? _tooltipTheme.preferBelow ?? _defaultPreferBelow,
+        verticalOffset:
+            widget.verticalOffset ?? _tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
         positionDelegate: _getDefaultPositionDelegate,
         ignorePointer: widget.ignorePointer ?? widget.message != null,
         child: effectiveChild,

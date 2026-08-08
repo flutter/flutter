@@ -1739,6 +1739,7 @@ void main() {
       'dismiss delay: 0:00:00.100000',
       'triggerMode: TooltipTriggerMode.longPress',
       'enableFeedback: true',
+      'position: below',
     ]);
   });
 
@@ -1768,6 +1769,7 @@ void main() {
       'dismiss delay: 0:00:00.100000',
       'triggerMode: TooltipTriggerMode.manual',
       'enableFeedback: true',
+      'position: below',
     ]);
   });
 
@@ -2793,6 +2795,220 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(RawTooltip)), Size.zero);
+  });
+
+  testWidgets('RawTooltip debugFillProperties with preferBelow false and verticalOffset', (
+    WidgetTester tester,
+  ) async {
+    final builder = DiagnosticPropertiesBuilder();
+
+    RawTooltip(
+      semanticsTooltip: 'message',
+      tooltipBuilder: (BuildContext context, Animation<double> animation) => const Text('message'),
+      preferBelow: false,
+      verticalOffset: 10.0,
+      child: const SizedBox.shrink(),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[
+      '"message"',
+      'hover delay: 0:00:00.000000',
+      'touch delay: 0:00:01.500000',
+      'dismiss delay: 0:00:00.100000',
+      'triggerMode: TooltipTriggerMode.longPress',
+      'enableFeedback: true',
+      'position: above',
+      'vertical offset: 10.0',
+    ]);
+  });
+
+  testWidgets('RawTooltip.preferBelow positions tooltip above the widget when set to false', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(
+      () => entry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0x00000000),
+        builder: (BuildContext context, Widget? navigator) => Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 400.0,
+                      top: 300.0,
+                      child: RawTooltip(
+                        key: tooltipKey,
+                        semanticsTooltip: tooltipText,
+                        preferBelow: false,
+                        tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                            const Placeholder(
+                              child: SizedBox(height: 100, child: Text(tooltipText)),
+                            ),
+                        child: const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2));
+
+    /********************* 800x600 screen
+     *        ___        *
+     *       |___|       * }- 100.0 height
+     *         o         * y=300.0
+     *                   *
+     *                   *
+     *                   *
+     *********************/
+
+    final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
+    expect(tip.size.height, equals(100.0));
+    // Tooltip should appear above the target (bottom edge at target y=300).
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(200.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(300.0));
+  });
+
+  testWidgets('RawTooltip.verticalOffset applies vertical gap between widget and tooltip', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(
+      () => entry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0x00000000),
+        builder: (BuildContext context, Widget? navigator) => Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 400.0,
+                      top: 300.0,
+                      child: RawTooltip(
+                        key: tooltipKey,
+                        semanticsTooltip: tooltipText,
+                        verticalOffset: 20.0,
+                        tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                            const Placeholder(
+                              child: SizedBox(height: 100, child: Text(tooltipText)),
+                            ),
+                        child: const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2));
+
+    /********************* 800x600 screen
+     *                   *
+     *                   *
+     *         o         * y=300.0
+     *                   * }- 20.0 vertical offset
+     *       |___|       * }- 100.0 height (top at y=320)
+     *                   *
+     *********************/
+
+    final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
+    expect(tip.size.height, equals(100.0));
+    // Tooltip should be below target with 20px gap.
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(320.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(420.0));
+  });
+
+  testWidgets('RawTooltip.verticalOffset with preferBelow false applies offset above widget', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(
+      () => entry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0x00000000),
+        builder: (BuildContext context, Widget? navigator) => Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 400.0,
+                      top: 300.0,
+                      child: RawTooltip(
+                        key: tooltipKey,
+                        semanticsTooltip: tooltipText,
+                        preferBelow: false,
+                        verticalOffset: 20.0,
+                        tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                            const Placeholder(
+                              child: SizedBox(height: 100, child: Text(tooltipText)),
+                            ),
+                        child: const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2));
+
+    /********************* 800x600 screen
+       *       |___|       * }- 100.0 height (top at y=180)
+       *                   * }- 20.0 vertical offset
+       *         o         * y=300.0
+       *                   *
+       *                   *
+       *                   *
+       *********************/
+
+    final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
+    expect(tip.size.height, equals(100.0));
+    // Tooltip should be above target with 20px gap.
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(180.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(280.0));
   });
 }
 
