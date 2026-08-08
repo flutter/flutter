@@ -6,12 +6,15 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include "flutter/fml/paths.h"
 #include "impeller/base/allocation.h"
@@ -397,6 +400,127 @@ void CanonicalizeUniformBlockInstanceNamesForGL(
   }
 }
 
+static bool IsDerivativeOpcode(uint32_t op) {
+  switch (op) {
+    case spv::OpDPdx:
+    case spv::OpDPdy:
+    case spv::OpFwidth:
+    case spv::OpDPdxFine:
+    case spv::OpDPdyFine:
+    case spv::OpFwidthFine:
+    case spv::OpDPdxCoarse:
+    case spv::OpDPdyCoarse:
+    case spv::OpFwidthCoarse:
+      return true;
+    default:
+      return false;
+  }
+}
+
+static std::vector<spirv_cross::ID> GetBlockSuccessors(
+    const spirv_cross::SPIRBlock& block) {
+  std::vector<spirv_cross::ID> successors;
+  if (block.true_block != 0) {
+    successors.push_back(block.true_block);
+  }
+  if (block.false_block != 0 && block.false_block != block.true_block) {
+    successors.push_back(block.false_block);
+  }
+  if (block.default_block != 0) {
+    successors.push_back(block.default_block);
+  }
+  if (block.next_block != 0 &&
+      block.merge == spirv_cross::SPIRBlock::MergeNone) {
+    successors.push_back(block.next_block);
+  }
+  return successors;
+}
+
+static bool ValidateDerivativeControlFlow(const spirv_cross::ParsedIR& ir,
+                                          const std::string& file_name,
+                                          std::stringstream& error_stream) {
+  std::unordered_set<spirv_cross::ID> non_uniform_blocks;
+
+  // Step 1: Mark all blocks inside selection or loop constructs as non-uniform.
+  for (const auto& block_id : ir.ids_for_type[spirv_cross::TypeBlock]) {
+    const auto& header = ir.ids[block_id].get<spirv_cross::SPIRBlock>();
+    if (header.merge != spirv_cross::SPIRBlock::MergeNone &&
+        header.next_block != 0) {
+      spirv_cross::ID merge_target = header.next_block;
+      std::vector<spirv_cross::ID> queue = GetBlockSuccessors(header);
+      std::unordered_set<spirv_cross::ID> visited;
+      for (auto succ : queue) {
+        if (succ != merge_target && succ != 0) {
+          visited.insert(succ);
+        }
+      }
+      size_t head = 0;
+      while (head < queue.size()) {
+        spirv_cross::ID current_id = queue[head++];
+        if (current_id == merge_target || current_id == 0) {
+          continue;
+        }
+        non_uniform_blocks.insert(current_id);
+        const auto& current_block =
+            ir.ids[current_id].get<spirv_cross::SPIRBlock>();
+        for (auto succ : GetBlockSuccessors(current_block)) {
+          if (succ != merge_target && succ != 0 &&
+              visited.find(succ) == visited.end()) {
+            visited.insert(succ);
+            queue.push_back(succ);
+          }
+        }
+      }
+    }
+  }
+
+  // Step 2: Propagate non-uniformity to functions called from non-uniform
+  // blocks.
+  std::unordered_set<spirv_cross::ID> non_uniform_functions;
+  auto mark_function_non_uniform = [&](spirv_cross::ID func_id) {
+    if (non_uniform_functions.insert(func_id).second) {
+      const auto& func = ir.ids[func_id].get<spirv_cross::SPIRFunction>();
+      for (const auto& blk_id : func.blocks) {
+        non_uniform_blocks.insert(blk_id);
+      }
+    }
+  };
+
+  bool changed = true;
+  while (changed) {
+    size_t prev_func_count = non_uniform_functions.size();
+    for (const auto& block_id : non_uniform_blocks) {
+      const auto& block = ir.ids[block_id].get<spirv_cross::SPIRBlock>();
+      for (const auto& inst : block.ops) {
+        if (inst.op == spv::OpFunctionCall) {
+          if (inst.offset + 3 < ir.spirv.size()) {
+            spirv_cross::ID called_func_id = ir.spirv[inst.offset + 3];
+            mark_function_non_uniform(called_func_id);
+          }
+        }
+      }
+    }
+    changed = (non_uniform_functions.size() > prev_func_count);
+  }
+
+  // Step 3: Check if any non-uniform block contains a derivative instruction.
+  for (const auto& block_id : non_uniform_blocks) {
+    const auto& block = ir.ids[block_id].get<spirv_cross::SPIRBlock>();
+    for (const auto& inst : block.ops) {
+      if (IsDerivativeOpcode(inst.op)) {
+        error_stream << file_name << ": "
+                     << "Derivative instruction (dFdx/dFdy/fwidth) used in "
+                        "non-uniform control flow (branching or loops). "
+                        "This is undefined in GLSL/HLSL and causes rendering "
+                        "artifacts on Windows/ANGLE.\n";
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 }  // namespace
 
 Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
@@ -552,6 +676,11 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
 
   const auto parsed_ir =
       std::make_shared<spirv_cross::ParsedIR>(parser.get_parsed_ir());
+
+  if (!ValidateDerivativeControlFlow(
+          *parsed_ir, Utf8FromPath(options_.file_name), error_stream_)) {
+    return;
+  }
 
   auto sl_compiler = CreateCompiler(*parsed_ir, options_);
 
