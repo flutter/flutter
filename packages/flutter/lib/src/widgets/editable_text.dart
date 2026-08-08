@@ -25,8 +25,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import '_web_browser_detection_io.dart'
-    if (dart.library.js_interop) '_web_browser_detection_web.dart';
 import 'actions.dart';
 import 'app_lifecycle_listener.dart';
 import 'autofill.dart';
@@ -83,8 +81,10 @@ export 'package:flutter/services.dart'
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef SelectionChangedCallback =
-    void Function(TextSelection selection, SelectionChangedCause? cause);
+typedef SelectionChangedCallback = void Function(
+  TextSelection selection,
+  SelectionChangedCause? cause,
+);
 
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
@@ -96,8 +96,10 @@ typedef AppPrivateCommandCallback = void Function(String action, Map<String, dyn
 ///
 ///  * [SelectableRegionContextMenuBuilder], which performs the same role for
 ///    [SelectableRegion].
-typedef EditableTextContextMenuBuilder =
-    Widget Function(BuildContext context, EditableTextState editableTextState);
+typedef EditableTextContextMenuBuilder = Widget Function(
+  BuildContext context,
+  EditableTextState editableTextState,
+);
 
 // Signature for a function that determines the target location of the given
 // [TextPosition] after applying the given [TextBoundary].
@@ -2091,21 +2093,8 @@ class EditableText extends StatefulWidget {
 
   /// The default value for [selectionWidthStyle].
   ///
-  /// On web platforms, this defaults to [ui.BoxWidthStyle.max] for Apple platforms running
-  /// Safari (webkit) based browsers and [ui.BoxWidthStyle.tight] for all others.
-  ///
-  /// On non-web platforms, this defaults to [ui.BoxWidthStyle.max].
-  static ui.BoxWidthStyle get defaultSelectionWidthStyle {
-    if (kIsWeb) {
-      if (defaultTargetPlatform == TargetPlatform.iOS || WebBrowserDetection.isSafari) {
-        // On macOS web, the selection width behavior differs when running on
-        // Chrom(e|ium) (blink) or Safari (webkit).
-        return ui.BoxWidthStyle.max;
-      }
-      return ui.BoxWidthStyle.tight;
-    }
-    return ui.BoxWidthStyle.max;
-  }
+  /// Returns [ui.BoxWidthStyle.tight] on all platforms.
+  static ui.BoxWidthStyle get defaultSelectionWidthStyle => ui.BoxWidthStyle.tight;
 
   /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
