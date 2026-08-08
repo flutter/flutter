@@ -499,6 +499,23 @@ class ScrollPhysics {
   /// Whether a viewport is allowed to change the scroll position as the result of user input.
   bool get allowUserScrolling => true;
 
+  /// Called whenever a [Scrollable] is rebuilt with a new [ScrollPhysics]
+  /// of the same [runtimeType].
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If this method returns true, the [Scrollable] will update its
+  /// [ScrollPosition] with the new [ScrollPhysics]. If this method returns
+  /// false, the update might be optimized away.
+  ///
+  /// Subclasses that contain configuration parameters should override this
+  /// method to return true when those parameters change. 
+  ///
+  /// Defaults to false.
+  bool shouldUpdate(covariant ScrollPhysics old) => false;
+
   @override
   String toString() {
     if (parent == null) {
