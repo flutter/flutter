@@ -92,6 +92,13 @@ When new versions of the Android Gradle Plugin become available, make sure to:
 - Check if the maximum version of AGP that we support
 (`maxKnownAndSupportedAgpVersion`) can be updated, and if so, take the necessary
 steps to ensure that we are testing this version in CI.
+- Check that the Flutter Gradle Plugin still compiles and passes its unit tests
+against the new version's public API artifact:
+`cd packages/flutter_tools/gradle && ./gradlew -PagpVersion=<version> test`.
+The plugin depends on `com.android.tools.build:gradle-api` only (no AGP
+internals; enforced by `InternalAgpApiImportTest` and the
+`validateNoCommonExtensionInBytecode` task) - see
+[the AGP public API migration doc](../../../../../docs/platforms/android/Migrating-Flutter-Gradle-Plugin-to-AGP-public-API.md).
 - Update the `_javaAgpCompatList` that contains the Java/AGP compatibility
 information known to the tool.
 - Update the test cases in [gradle_utils_test.dart](../../../test/general.shard/android/gradle_utils_test.dart) that test compatibility between Java and AGP versions

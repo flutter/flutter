@@ -990,6 +990,8 @@ See the link below for more information:
       'agpVersion': gradle.templateAndroidGradlePluginVersion,
       'agpVersionForModule': gradle.templateAndroidGradlePluginVersionForModule,
       'kotlinVersion': gradle.templateKotlinGradlePluginVersion,
+      'junitJupiterEngineVersion': gradle.templateJunitJupiterEngineVersion,
+      'junitPlatformLauncherVersion': gradle.templateJunitPlatformLauncherVersion,
       'gradleVersion': gradle.templateDefaultGradleVersion,
       'compileSdkVersion': gradle.compileSdkVersion,
       'minSdkVersion': gradle.minSdkVersion,
