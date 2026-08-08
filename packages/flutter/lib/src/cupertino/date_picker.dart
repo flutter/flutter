@@ -53,6 +53,10 @@ const double _kTimerPickerLabelFontSize = 17.0;
 // The width of each column of the countdown time picker.
 const double _kTimerPickerColumnIntrinsicWidth = 106;
 
+// Value derived by analyzing the animation duration of a video captured from the Clock app
+// running on an iPhone 16 with iOS 18.
+const Duration _kTimePickerLabelAnimationDuration = Duration(milliseconds: 200);
+
 TextStyle _themeTextStyle(BuildContext context, {bool isValid = true}) {
   final TextStyle style = CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
   return isValid
@@ -2347,6 +2351,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     if (widget.mode != CupertinoTimerPickerMode.ms) {
       selectedHour = widget.initialTimerDuration.inHours;
+      lastSelectedHour = selectedHour;
     }
 
     if (widget.mode != CupertinoTimerPickerMode.hm) {
@@ -2461,32 +2466,35 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   // `pickerPadding ` is the additional padding the corresponding picker has to apply
   // around the `Text`, in order to extend its separators towards the closest
   // horizontal edge of the encompassing widget.
-  Widget _buildLabel(String text, EdgeInsetsDirectional pickerPadding) {
-    final padding = EdgeInsetsDirectional.only(
+  // Wraps [child] in the standard label container: an IgnorePointer with the
+  // correct start padding, centered alignment, and fixed height.
+  Widget _buildLabelContainer(EdgeInsetsDirectional pickerPadding, Widget child) {
+    final EdgeInsets padding = EdgeInsetsDirectional.only(
       start: numberLabelWidth + _kTimerPickerLabelPadSize + pickerPadding.start,
-    );
+    ).resolve(textDirection);
 
     return IgnorePointer(
       child: Padding(
-        padding: padding.resolve(textDirection),
+        padding: padding,
         child: Align(
           alignment: AlignmentDirectional.centerStart.resolve(textDirection),
-          child: SizedBox(
-            height: numberLabelHeight,
-            child: Baseline(
-              baseline: numberLabelBaseline,
-              baselineType: TextBaseline.alphabetic,
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontSize: _kTimerPickerLabelFontSize,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                softWrap: false,
-              ),
-            ),
-          ),
+          child: SizedBox(height: numberLabelHeight, child: child),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text, EdgeInsetsDirectional pickerPadding) {
+    return _buildLabelContainer(
+      pickerPadding,
+      Baseline(
+        baseline: numberLabelBaseline,
+        baselineType: TextBaseline.alphabetic,
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: _kTimerPickerLabelFontSize, fontWeight: FontWeight.w600),
+          maxLines: 1,
+          softWrap: false,
         ),
       ),
     );
@@ -2564,11 +2572,30 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           },
           child: _buildHourPicker(additionalPadding, selectionOverlay),
         ),
-        _buildLabel(
-          localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour!) ?? '',
-          additionalPadding,
+        _buildAnimatedLabel(
+          labelBuilder: (int value) => localizations.timerPickerHourLabel(value) ?? '',
+          currentValue: lastSelectedHour ?? selectedHour!,
+          additionalPadding: additionalPadding,
         ),
       ],
+    );
+  }
+
+  Widget _buildAnimatedLabel({
+    required String Function(int) labelBuilder,
+    required int currentValue,
+    required EdgeInsetsDirectional additionalPadding,
+  }) {
+    const labelStyle = TextStyle(fontSize: _kTimerPickerLabelFontSize, fontWeight: FontWeight.w600);
+
+    return _buildLabelContainer(
+      additionalPadding,
+      _AnimatedLabelSwitcher(
+        labelBuilder: labelBuilder,
+        currentValue: currentValue,
+        labelStyle: labelStyle,
+        textBaseline: numberLabelBaseline,
+      ),
     );
   }
 
@@ -2947,6 +2974,118 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           ),
         );
       },
+    );
+  }
+}
+
+/// A widget that animates label text transitions by keeping a stable prefix
+/// and cross-fading the suffix.
+///
+/// When the label changes, the longest common prefix between the old and new
+/// labels is computed. The shared prefix remains visible (no opacity dip),
+/// while only the differing suffixes cross-fade.
+///
+/// This handles two scenarios:
+/// 1. **Happy path** (e.g., English "hour"/"hours"): labelBuilder(1) is a
+///    prefix of labelBuilder(n), so the split is trivial.
+/// 2. **Non-prefix path** (e.g., Czech "hodina"/"hodiny"): labelBuilder(1)
+///    is NOT a prefix of labelBuilder(n), but they still share a common
+///    prefix ("hodin") that can remain stable during the transition.
+class _AnimatedLabelSwitcher extends StatefulWidget {
+  const _AnimatedLabelSwitcher({
+    required this.labelBuilder,
+    required this.currentValue,
+    required this.labelStyle,
+    required this.textBaseline,
+  });
+
+  final String Function(int) labelBuilder;
+  final int currentValue;
+  final TextStyle labelStyle;
+  final double textBaseline;
+
+  @override
+  State<_AnimatedLabelSwitcher> createState() => _AnimatedLabelSwitcherState();
+}
+
+class _AnimatedLabelSwitcherState extends State<_AnimatedLabelSwitcher> {
+  /// The label text that was displayed before the current transition started,
+  /// used to compute the common prefix with the new label so that the stable
+  /// portion doesn't fade.
+  late String _previousLabel;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousLabel = widget.labelBuilder(widget.currentValue);
+  }
+
+  @override
+  void didUpdateWidget(_AnimatedLabelSwitcher oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final String oldLabel = oldWidget.labelBuilder(oldWidget.currentValue);
+    final String newLabel = widget.labelBuilder(widget.currentValue);
+    if (oldLabel != newLabel) {
+      // The label changed. Save the old label so that build() can compute
+      // the common prefix between old and new for the animation.
+      _previousLabel = oldLabel;
+    }
+    // When the label hasn't changed, _previousLabel stays as-is. This keeps
+    // the prefix/suffix split stable across rebuilds. If a locale change
+    // causes the same value to produce a different label string, the prefix
+    // will change and the AnimatedSwitcher (keyed on prefix) will be
+    // recreated, avoiding a cross-fade between mismatched suffixes.
+  }
+
+  /// Returns the length of the longest common prefix between [a] and [b].
+  static int _commonPrefixLength(String a, String b) {
+    final int minLen = a.length < b.length ? a.length : b.length;
+    for (int i = 0; i < minLen; i++) {
+      if (a.codeUnitAt(i) != b.codeUnitAt(i)) {
+        return i;
+      }
+    }
+    return minLen;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String currentLabel = widget.labelBuilder(widget.currentValue);
+
+    final int commonPrefixLen = _commonPrefixLength(_previousLabel, currentLabel);
+    final String prefix = currentLabel.substring(0, commonPrefixLen);
+    final String suffix = currentLabel.substring(commonPrefixLen);
+
+    final TextStyle effectiveStyle = DefaultTextStyle.of(context).style.merge(widget.labelStyle);
+
+    return Baseline(
+      baseline: widget.textBaseline,
+      baselineType: TextBaseline.alphabetic,
+      child: RichText(
+        text: TextSpan(
+          style: effectiveStyle,
+          children: <InlineSpan>[
+            TextSpan(text: prefix),
+            WidgetSpan(
+              alignment: PlaceholderAlignment.baseline,
+              baseline: TextBaseline.alphabetic,
+              child: AnimatedSwitcher(
+                // Key the AnimatedSwitcher on the prefix so that when the
+                // prefix changes (e.g., after a locale change), the switcher
+                // is recreated rather than trying to cross-fade mismatched
+                // suffixes. In the normal case (e.g., "hour" → "hours"),
+                // the prefix stays the same so the switcher persists and
+                // animates the suffix transition correctly.
+                key: ValueKey<String>(prefix),
+                duration: _kTimePickerLabelAnimationDuration,
+                child: Text(key: ValueKey<String>(suffix), suffix, style: widget.labelStyle),
+              ),
+            ),
+          ],
+        ),
+        maxLines: 1,
+        softWrap: false,
+      ),
     );
   }
 }
