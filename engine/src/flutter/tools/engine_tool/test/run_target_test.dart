@@ -69,6 +69,7 @@ void main() {
       TargetPlatform.darwinArm64: 'host_debug_arm64',
       TargetPlatform.linuxX64: 'host_debug',
       TargetPlatform.linuxArm64: 'host_debug_arm64',
+      TargetPlatform.linuxRiscv64: 'linux_debug_riscv64',
       TargetPlatform.windowsX64: 'host_debug',
       TargetPlatform.windowsArm64: 'host_debug_arm64',
       TargetPlatform.webJavascript: 'chrome_debug',
@@ -124,6 +125,9 @@ void main() {
       ],
       TargetPlatform.linuxX64: [Label.parseGn('//flutter/shell/platform/linux:flutter_linux_gtk')],
       TargetPlatform.linuxArm64: [
+        Label.parseGn('//flutter/shell/platform/linux:flutter_linux_gtk'),
+      ],
+      TargetPlatform.linuxRiscv64: [
         Label.parseGn('//flutter/shell/platform/linux:flutter_linux_gtk'),
       ],
       TargetPlatform.windowsX64: [Label.parseGn('//flutter/shell/platform/windows')],
