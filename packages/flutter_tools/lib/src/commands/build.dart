@@ -92,14 +92,31 @@ class BuildCommand extends FlutterCommand {
     ToolContext? toolContext,
     bool verboseHelp = false,
   }) : super(analytics: analytics, outputPreferences: outputPreferences, toolContext: toolContext) {
-    final Analytics effectiveAnalytics =
-        analytics ?? (context.get<Analytics>() ?? const NoOpAnalytics());
+    Analytics? contextAnalytics;
+    FeatureFlags? contextFeatureFlags;
+    Platform? contextPlatform;
+    OutputPreferences? contextOutputPreferences;
+    PreRunValidator? contextPreRunValidator;
+    XcodeProjectInterpreter? contextXcodeProjectInterpreter;
+    PlistParser? contextPlistParser;
+    try {
+      contextAnalytics = context.get<Analytics>();
+      contextFeatureFlags = context.get<FeatureFlags>();
+      contextPlatform = context.get<Platform>();
+      contextOutputPreferences = context.get<OutputPreferences>();
+      contextPreRunValidator = context.get<PreRunValidator>();
+      contextXcodeProjectInterpreter = context.get<XcodeProjectInterpreter>();
+      contextPlistParser = context.get<PlistParser>();
+    } on UnsupportedError {
+      // In testWithoutContext, context.get is not supported.
+    }
+    final Analytics effectiveAnalytics = analytics ?? (contextAnalytics ?? const NoOpAnalytics());
     final FeatureFlags effectiveFeatureFlags =
-        featureFlags ?? (context.get<FeatureFlags>() ?? const _DefaultFeatureFlags());
+        featureFlags ?? (contextFeatureFlags ?? const _DefaultFeatureFlags());
     final Platform effectivePlatform =
-        (platform.isMacOS || context.get<Platform>() == null || !context.get<Platform>()!.isMacOS)
+        (platform.isMacOS || contextPlatform == null || !contextPlatform.isMacOS)
         ? platform
-        : context.get<Platform>()!;
+        : contextPlatform;
     final persistentToolState = PersistentToolState.test(
       directory: fileSystem.directory('.tmp_state')..createSync(recursive: true),
       logger: logger,
@@ -108,7 +125,7 @@ class BuildCommand extends FlutterCommand {
     final ProcessUtils effectiveProcessUtils =
         processUtils ?? ProcessUtils(processManager: processManager, logger: logger);
     final OutputPreferences effectiveOutputPreferences =
-        outputPreferences ?? (context.get<OutputPreferences>() ?? OutputPreferences.test());
+        outputPreferences ?? (contextOutputPreferences ?? OutputPreferences.test());
     final ToolContext effectiveToolContext =
         toolContext ??
         (_fallbackToolContext = ToolContext(
@@ -141,7 +158,7 @@ class BuildCommand extends FlutterCommand {
           platform: effectivePlatform,
           preRunValidator:
               preRunValidator ??
-              (context.get<PreRunValidator>() ??
+              (contextPreRunValidator ??
                   (!fileSystem.directory(Cache.flutterRoot ?? '').existsSync()
                       ? _NoopPreRunValidator()
                       : PreRunValidator(fileSystem: fileSystem))),
@@ -173,7 +190,7 @@ class BuildCommand extends FlutterCommand {
         );
     final XcodeProjectInterpreter effectiveXcodeProjectInterpreter =
         xcodeProjectInterpreter ??
-        (context.get<XcodeProjectInterpreter>() ??
+        (contextXcodeProjectInterpreter ??
             XcodeProjectInterpreter(
               platform: platform,
               processManager: processManager,
@@ -232,7 +249,7 @@ class BuildCommand extends FlutterCommand {
                 ),
             platform: platform,
           ),
-          plistParser: context.get<PlistParser>() ?? plistParser,
+          plistParser: contextPlistParser ?? plistParser,
           xcdevice: XCDevice(
             processManager: processManager,
             logger: logger,
@@ -395,9 +412,23 @@ class BuildCommand extends FlutterCommand {
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
-      BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
+      BuildBundleCommand(
+        analytics: effectiveAnalytics,
+        buildSystem: buildSystem,
+        featureFlags: effectiveFeatureFlags,
+        toolContext: effectiveToolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
+    _addSubcommand(
+      BuildWebCommand(
+        analytics: effectiveAnalytics,
+        buildSystem: buildSystem,
+        featureFlags: effectiveFeatureFlags,
+        toolContext: effectiveToolContext,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
       BuildMacosCommand(
@@ -440,7 +471,6 @@ class BuildCommand extends FlutterCommand {
 
   @override
   final name = 'build';
-
 
   @override
   final description = 'Build an executable app or install bundle.';

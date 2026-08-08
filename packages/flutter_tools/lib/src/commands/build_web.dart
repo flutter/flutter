@@ -2,14 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../cache.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
+import '../version.dart';
 import '../web/compile.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/web_constants.dart';
@@ -18,11 +28,22 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
-    required super.logger,
-    required FileSystem fileSystem,
+    required BuildSystem buildSystem,
+    required ToolContext toolContext,
     required bool verboseHelp,
-  }) : _fileSystem = fileSystem,
-       super(verboseHelp: verboseHelp) {
+    super.analytics,
+    FeatureFlags? featureFlags,
+    WebBuilder? webBuilder,
+  }) : _buildSystem = buildSystem,
+       _featureFlags = featureFlags ?? const _DefaultFeatureFlags(),
+       _toolContext = toolContext,
+       _webBuilder = webBuilder,
+       super(
+         logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
+         toolContext: toolContext,
+         verboseHelp: verboseHelp,
+       ) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesOutputDir();
@@ -152,7 +173,20 @@ class BuildWebCommand extends BuildSubCommand {
     );
   }
 
-  final FileSystem _fileSystem;
+  final BuildSystem _buildSystem;
+  final FeatureFlags _featureFlags;
+  final ToolContext _toolContext;
+  final WebBuilder? _webBuilder;
+
+  @visibleForTesting
+  BuildSystem get buildSystem => _buildSystem;
+
+  @visibleForTesting
+  FeatureFlags get featureFlags => _featureFlags;
+
+  @visibleForTesting
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -163,14 +197,19 @@ class BuildWebCommand extends BuildSubCommand {
   final name = 'web';
 
   @override
-  bool get hidden => !featureFlags.isWebEnabled;
+  bool get hidden => !_featureFlags.isWebEnabled;
 
   @override
   final description = 'Build a web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (!featureFlags.isWebEnabled) {
+    final FileSystem fs = _toolContext.fs;
+    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
+    final Logger logger = this.logger;
+    final ProcessManager processManager = _toolContext.processManager;
+
+    if (!_featureFlags.isWebEnabled) {
       throwToolExit(
         '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
       );
@@ -205,7 +244,7 @@ class BuildWebCommand extends BuildSubCommand {
           'Do not attempt to set a web renderer when using "--${FlutterOptions.kWebWasmFlag}"',
         );
       }
-      globals.logger.printBox(title: 'New feature', '''
+      logger.printBox(title: 'New feature', '''
   WebAssembly compilation is new. Understand the details before deploying to production.
   $kWasmMoreInfo''');
 
@@ -272,7 +311,7 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    if (!_fileSystem.currentDirectory
+    if (!fs.currentDirectory
             .childDirectory('web')
             .childFile('index.html')
             .readAsStringSync()
@@ -288,15 +327,26 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
+    final Artifacts artifacts = _toolContext.artifacts;
+    final Cache cache = _toolContext.cache;
+    final Platform platform = _toolContext.platform;
+    final AnsiTerminal terminal = _toolContext.terminal;
+
     final Map<String, String> webDefines = extractWebDefines();
-    final webBuilder = WebBuilder(
-      logger: globals.logger,
-      processManager: globals.processManager,
-      buildSystem: globals.buildSystem,
-      fileSystem: globals.fs,
-      flutterVersion: globals.flutterVersion,
-      analytics: globals.analytics,
-    );
+    final WebBuilder webBuilder =
+        _webBuilder ??
+        WebBuilder(
+          analytics: analytics,
+          artifacts: artifacts,
+          buildSystem: _buildSystem,
+          cache: cache,
+          fileSystem: fs,
+          flutterVersion: flutterVersion,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+          terminal: terminal,
+        );
     await webBuilder.buildWeb(
       project,
       targetFile,
@@ -310,4 +360,51 @@ class BuildWebCommand extends BuildSubCommand {
     );
     return FlutterCommandResult.success();
   }
+}
+
+class _DefaultFeatureFlags extends FeatureFlags {
+  const _DefaultFeatureFlags();
+
+  @override
+  bool isEnabled(Feature feature) => false;
+  @override
+  bool get isLinuxEnabled => false;
+  @override
+  bool get isMacOSEnabled => false;
+  @override
+  bool get isWindowsEnabled => false;
+  @override
+  bool get isWebEnabled => false;
+  @override
+  bool get isAndroidEnabled => false;
+  @override
+  bool get isIOSEnabled => false;
+  @override
+  bool get isFuchsiaEnabled => false;
+  @override
+  bool get areCustomDevicesEnabled => false;
+  @override
+  bool get isCliAnimationEnabled => false;
+  @override
+  bool get isNativeAssetsEnabled => false;
+  @override
+  bool get isDartDataAssetsEnabled => false;
+  @override
+  bool get isRecordUseEnabled => false;
+  @override
+  bool get isSwiftPackageManagerEnabled => false;
+  @override
+  bool get isOmitLegacyVersionFileEnabled => false;
+  @override
+  bool get isWindowingEnabled => false;
+  @override
+  bool get isAccessibilityEvaluationsEnabled => false;
+  @override
+  bool get isLLDBDebuggingEnabled => false;
+  @override
+  bool get isUISceneMigrationEnabled => false;
+  @override
+  bool get isRiscv64SupportEnabled => false;
+  @override
+  bool get isMacOSArm64OnlyEnabled => false;
 }

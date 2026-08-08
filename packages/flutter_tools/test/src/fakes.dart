@@ -1105,6 +1105,13 @@ class FakeArtifacts extends Fake implements Artifacts {
 }
 
 class FakeCache extends Fake implements Cache {
+  FakeCache({Directory? rootOverride}) : _rootOverride = rootOverride;
+
+  final Directory? _rootOverride;
+
+  @override
+  Directory getRoot() => _rootOverride ?? MemoryFileSystem.test().directory('/flutter/bin/cache');
+
   @override
   MapEntry<String, String> get dyLdLibEntry =>
       const MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path');
@@ -1114,7 +1121,6 @@ class FakeCache extends Fake implements Cache {
 
   @override
   void releaseLock() {}
-
 
   @override
   Future<void> updateAll(
