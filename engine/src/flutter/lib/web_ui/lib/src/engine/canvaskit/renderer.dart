@@ -73,28 +73,13 @@ class CanvasKitRenderer extends Renderer {
   ui.Paint createPaint() => CkPaint();
 
   @override
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  }) => CkVertices(
-    mode,
-    positions,
-    textureCoordinates: textureCoordinates,
-    colors: colors,
-    indices: indices,
-  );
-
-  @override
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
     Int32List? colors,
     Uint16List? indices,
-  }) => CkVertices.raw(
+  }) => CkVertices(
     mode,
     positions,
     textureCoordinates: textureCoordinates,

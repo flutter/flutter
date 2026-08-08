@@ -212,18 +212,7 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  }) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
