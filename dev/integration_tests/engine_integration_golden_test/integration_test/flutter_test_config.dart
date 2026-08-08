@@ -10,5 +10,5 @@ import 'package:flutter_goldens/flutter_goldens.dart' as flutter_goldens;
 /// On CI/LUCI, if `GOLDCTL` environment variable is present, screenshots taken with
 /// `matchesGoldenFile` will be uploaded to Skia Gold.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  return flutter_goldens.testExecutable(testMain, namePrefix: 'primitive_shape');
+  return flutter_goldens.testExecutable(testMain, namePrefix: 'engine_integration_golden');
 }
