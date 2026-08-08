@@ -27,7 +27,6 @@ import '../convert.dart';
 import '../dart/analysis.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../isolated/resident_web_runner.dart';
 import '../migrations/widget_preview_gitignore_migration.dart';
 import '../project.dart';
@@ -47,42 +46,20 @@ import 'create_base.dart';
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
-    required bool verboseHelp,
-    required Logger logger,
-    required FileSystem fs,
-    required FlutterProjectFactory projectFactory,
-    required Cache cache,
-    required Platform platform,
-    required ShutdownHooks shutdownHooks,
-    required OperatingSystemUtils os,
-    required ProcessManager processManager,
-    required Artifacts artifacts,
-    required Terminal terminal,
-    ToolContext? toolContext,
+    required ToolContext toolContext,
+    bool verboseHelp = false,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) : super(toolContext: toolContext) {
     addSubcommand(
       WidgetPreviewStartCommand(
+        toolContext: toolContext,
         verbose: verboseHelp,
-        logger: logger,
-        fs: fs,
-        projectFactory: projectFactory,
-        cache: cache,
-        platform: platform,
-        shutdownHooks: shutdownHooks,
-        os: os,
-        processManager: processManager,
-        artifacts: artifacts,
         dtdServicesOverride: dtdServicesOverride,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
-        terminal: terminal,
-        toolContext: toolContext,
       ),
     );
-    addSubcommand(
-      WidgetPreviewCleanCommand(logger: logger, fs: fs, projectFactory: projectFactory),
-    );
+    addSubcommand(WidgetPreviewCleanCommand(toolContext: toolContext));
   }
 
   @override
@@ -100,15 +77,20 @@ class WidgetPreviewCommand extends FlutterCommand {
 }
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
-  WidgetPreviewSubCommandBase({super.toolContext});
+  WidgetPreviewSubCommandBase({required ToolContext toolContext})
+    : _toolContext = toolContext,
+      super(toolContext: toolContext);
 
-  FileSystem get fs;
-  Logger get logger;
-  FlutterProjectFactory get projectFactory;
+  final ToolContext _toolContext;
+
+  FileSystem get fs => _toolContext.fs;
+  Logger get logger => _toolContext.logger;
+  FlutterProjectFactory get projectFactory => _toolContext.projectFactory;
 
   FlutterProject getRootProject() {
     final ArgResults results = argResults!;
     final Directory projectDir;
+    final FileSystem fs = _toolContext.fs;
     if (results.rest case <String>[final String directory]) {
       projectDir = fs.directory(directory);
       if (!projectDir.existsSync()) {
@@ -134,21 +116,11 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
+    required super.toolContext,
     this.verbose = false,
-    required Logger logger,
-    required this.fs,
-    required this.projectFactory,
-    required this.cache,
-    required this.platform,
-    required this.shutdownHooks,
-    required this.os,
-    required this.processManager,
-    required this.artifacts,
-    required this.terminal,
-    super.toolContext,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
-  }) : _logger = logger {
+  }) {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }
@@ -227,28 +199,22 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   final bool verbose;
 
   @override
-  final FileSystem fs;
+  WidgetPreviewMachineAwareLogger get logger =>
+      _toolContext.logger as WidgetPreviewMachineAwareLogger;
 
-  @override
-  WidgetPreviewMachineAwareLogger get logger => _logger as WidgetPreviewMachineAwareLogger;
-  final Logger _logger;
+  Cache get cache => _toolContext.cache;
 
-  @override
-  final FlutterProjectFactory projectFactory;
+  Platform get platform => _toolContext.platform;
 
-  final Cache cache;
+  ShutdownHooks get shutdownHooks => _toolContext.shutdownHooks;
 
-  final Platform platform;
+  OperatingSystemUtils get os => _toolContext.os;
 
-  final ShutdownHooks shutdownHooks;
+  ProcessManager get processManager => _toolContext.processManager;
 
-  final OperatingSystemUtils os;
+  Artifacts get artifacts => _toolContext.artifacts;
 
-  final ProcessManager processManager;
-
-  final Artifacts artifacts;
-
-  final Terminal terminal;
+  Terminal get terminal => _toolContext.terminal;
 
   late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
 
@@ -323,7 +289,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    assert(_logger is WidgetPreviewMachineAwareLogger);
+    assert(_toolContext.logger is WidgetPreviewMachineAwareLogger);
 
     // Start the timer tracking how long it takes to launch the preview environment.
     previewAnalytics.initializeLaunchStopwatch();
@@ -618,10 +584,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           flutterProject: widgetPreviewScaffoldProject,
           fileSystem: fs,
           logger: logger,
-          terminal: globals.terminal,
+          terminal: terminal,
           platform: platform,
-          outputPreferences: globals.outputPreferences,
-          systemClock: globals.systemClock,
+          outputPreferences: _toolContext.outputPreferences,
+          systemClock: _toolContext.systemClock,
           // Explicitly provide the project root path rather than relying on the current directory
           // as the current directory exists within $TMP. At least on MacOS, when setting the
           // current directory to the widget_preview_scaffold project created under
@@ -666,22 +632,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 }
 
 final class WidgetPreviewCleanCommand extends WidgetPreviewSubCommandBase {
-  WidgetPreviewCleanCommand({required this.fs, required this.logger, required this.projectFactory});
+  WidgetPreviewCleanCommand({required super.toolContext});
 
   @override
   String get description => 'Cleans up widget preview state.';
 
   @override
   String get name => 'clean';
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Logger logger;
-
-  @override
-  final FlutterProjectFactory projectFactory;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -700,10 +657,16 @@ final class WidgetPreviewCleanCommand extends WidgetPreviewSubCommandBase {
 /// A custom logger for the widget-preview commands that disables non-event output to stdio when
 /// machine mode is enabled.
 final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
-  WidgetPreviewMachineAwareLogger(super.delegate, {required this.machine, required this.verbose});
+  WidgetPreviewMachineAwareLogger(
+    super.delegate, {
+    required this.machine,
+    required this.verbose,
+    Stdio? stdio,
+  }) : _stdio = stdio;
 
   final bool machine;
   final bool verbose;
+  final Stdio? _stdio;
 
   @override
   void printError(
@@ -822,7 +785,8 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     }
     // Don't call super.printStatus as it will result in a prefix being printed when --verbose is
     // provided.
-    globals.stdio.stdout.writeln(
+    final Stdio stdio = _stdio ?? Stdio();
+    stdio.stdout.writeln(
       json.encode([
         {'event': 'widget_preview.$name', 'params': ?args},
       ]),

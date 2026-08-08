@@ -1425,7 +1425,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
   Platform get platform => _platform ?? globals.platform;
 
   @override
-  PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+  PreRunValidator get preRunValidator => _preRunValidator ?? globals.preRunValidator;
 
   @override
   ProcessManager get processManager => _processManager ?? globals.processManager;
