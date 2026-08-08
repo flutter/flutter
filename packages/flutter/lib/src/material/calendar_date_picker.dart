@@ -1523,10 +1523,11 @@ class _YearPickerState extends State<YearPicker> {
 
     BorderSide? borderSide;
     if (isCurrentYear) {
-      borderSide = datePickerTheme.todayBorder ?? defaults.todayBorder;
-      if (borderSide != null) {
-        borderSide = borderSide.copyWith(color: textColor);
-      }
+      final bool hasCustomBorderColor =
+          datePickerTheme.todayBorder != null && datePickerTheme.todayBorder!.color.opacity != 0.0;
+      borderSide = hasCustomBorderColor
+          ? datePickerTheme.todayBorder
+          : (datePickerTheme.todayBorder ?? defaults.todayBorder)?.copyWith(color: textColor);
     }
     final decoration = ShapeDecoration(
       color: background,
