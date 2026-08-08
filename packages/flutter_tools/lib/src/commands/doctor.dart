@@ -6,7 +6,6 @@ import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../context/tool_context.dart';
 import '../doctor.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
@@ -37,10 +36,6 @@ class DoctorCommand extends FlutterCommand {
   final AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
 
-  Doctor? get _effectiveDoctor => _doctor ?? (toolContext == null ? globals.doctor : null);
-  AndroidLicenseValidator? get _effectiveAndroidLicenseValidator =>
-      _androidLicenseValidator ?? (toolContext == null ? androidLicenseValidator : null);
-
   @override
   final name = 'doctor';
 
@@ -52,7 +47,9 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Doctor? doctor = _effectiveDoctor;
+    final Doctor? doctor = _doctor;
+    final AndroidLicenseValidator? androidLicenseValidator = _androidLicenseValidator;
+
     if (argResults?.wasParsed('check-for-remote-artifacts') ?? false) {
       final String engineRevision = stringArg('check-for-remote-artifacts')!;
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {
@@ -75,7 +72,7 @@ class DoctorCommand extends FlutterCommand {
         await doctor?.diagnose(
           androidLicenses: boolArg('android-licenses'),
           verbose: verbose,
-          androidLicenseValidator: _effectiveAndroidLicenseValidator,
+          androidLicenseValidator: androidLicenseValidator,
         ) ??
         false;
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'runner.dart' as runner;
+import 'src/android/android_workflow.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -245,7 +246,12 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
-  DoctorCommand(verbose: verbose, toolContext: toolDependencies.toolContext),
+  DoctorCommand(
+    verbose: verbose,
+    toolContext: toolDependencies.toolContext,
+    doctor: globals.doctor,
+    androidLicenseValidator: androidLicenseValidator,
+  ),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(
     verboseHelp: verboseHelp,
