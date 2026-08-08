@@ -276,11 +276,11 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
           HapticFeedback.selectionClick();
           SystemSound.play(SystemSoundType.tick);
         }
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
+      case TargetPlatform.android ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.linux ||
+          TargetPlatform.macOS ||
+          TargetPlatform.windows:
         // No haptic feedback on these platforms.
         return;
     }
