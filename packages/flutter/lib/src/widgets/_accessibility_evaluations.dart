@@ -241,9 +241,19 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
 
   static const double _kContrastTolerance = -0.01;
 
+  /// The widget elements this evaluation matches against semantics nodes,
+  /// collected once before traversal.
+  ///
+  /// Defaults to none. Evaluations that match against widget geometry (e.g.
+  /// text contrast) override this; the base traversal then precomputes each
+  /// element's screen bounds per view and threads them — together with a
+  /// per-view dedup set — into [evaluateNodeContent].
+  List<Element> _collectElements() => const <Element>[];
+
   @override
   Future<EvaluationResult> _evaluate(WidgetsBinding binding) async {
     final violations = <Violation>[];
+    final List<Element> elements = _collectElements();
     for (final RenderView renderView in binding.renderViews) {
       final layer = renderView.debugLayer! as OffsetLayer;
       final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
@@ -251,7 +261,33 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
       final double ratio = 1 / renderView.flutterView.devicePixelRatio;
       final ui.Image image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
       final ByteData byteData = (await image.toByteData())!;
-      violations.addAll(await _evaluateNode(root, image, byteData, renderView));
+
+      // Precompute each element's painted bounds in screen coordinates once per
+      // view. Mapping a render object to screen space walks the render tree
+      // (getTransformTo, O(tree depth)); doing it here rather than for every
+      // (node, element) pair keeps the per-node geometric check O(1).
+      final elementScreenBounds = <Element, Rect>{};
+      for (final element in elements) {
+        final Rect? screenBounds = _elementScreenBounds(element, renderView);
+        if (screenBounds != null) {
+          elementScreenBounds[element] = screenBounds;
+        }
+      }
+
+      // Tracks which elements have already been checked within this view, so
+      // each is evaluated against a single semantics node (the deepest one that
+      // owns it) and not again for its ancestors.
+      final evaluatedElements = <Element>{};
+      violations.addAll(
+        await _evaluateNode(
+          root,
+          image,
+          byteData,
+          renderView,
+          elementScreenBounds,
+          evaluatedElements,
+        ),
+      );
       image.dispose();
     }
 
@@ -263,6 +299,8 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
+    Map<Element, Rect> elementScreenBounds,
+    Set<Element> evaluatedElements,
   ) async {
     final violations = <Violation>[];
 
@@ -277,14 +315,31 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
       return true;
     });
     for (final child in children) {
-      violations.addAll(await _evaluateNode(child, image, byteData, renderView));
+      violations.addAll(
+        await _evaluateNode(
+          child,
+          image,
+          byteData,
+          renderView,
+          elementScreenBounds,
+          evaluatedElements,
+        ),
+      );
     }
 
     if (_shouldSkipNodeEvaluation(data)) {
       return violations;
     }
 
-    return evaluateNodeContent(node, data, image, byteData, renderView);
+    return evaluateNodeContent(
+      node,
+      data,
+      image,
+      byteData,
+      renderView,
+      elementScreenBounds,
+      evaluatedElements,
+    );
   }
 
   bool _shouldSkipNodeTraversal(SemanticsNode node) {
@@ -303,7 +358,28 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
+    Map<Element, Rect> elementScreenBounds,
+    Set<Element> evaluatedElements,
   );
+
+  /// [element]'s painted bounds in screen coordinates, or null if it has no
+  /// [RenderBox] and therefore cannot be matched against a semantics node.
+  Rect? _elementScreenBounds(Element element, RenderView renderView) {
+    final RenderObject? renderBox = element.renderObject;
+    if (renderBox is! RenderBox) {
+      return null;
+    }
+
+    final Matrix4 globalTransform = renderBox.getTransformTo(null);
+
+    // The semantics node transform will include root view transform, which is
+    // not included in renderBox.getTransformTo(null). Manually multiply the
+    // root transform to the global transform.
+    final rootTransform = Matrix4.identity();
+    renderView.applyPaintTransform(renderView.child!, rootTransform);
+    rootTransform.multiply(globalTransform);
+    return MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
+  }
 
   /// Returns if a rectangle of node is off the screen.
   ///
@@ -372,23 +448,77 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
       data.flagsCollection.scopesRoute || (data.label.trim().isEmpty && data.value.trim().isEmpty);
 
   @override
+  List<Element> _collectElements() {
+    final Element? root = WidgetsBinding.instance.rootElement;
+    return root == null ? const <Element>[] : _collectTextElements(root);
+  }
+
+  @override
   Future<List<Violation>> evaluateNodeContent(
     SemanticsNode node,
     SemanticsData data,
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
+    Map<Element, Rect> elementScreenBounds,
+    Set<Element> evaluatedElements,
   ) async {
     final violations = <Violation>[];
-    final String text = data.label.isEmpty ? data.value : data.label;
-    final Iterable<Element> elements = _collectElementsByText(
-      WidgetsBinding.instance.rootElement!,
-      text,
-    );
-    for (final element in elements) {
+    // Match each text-bearing widget to this node when (a) its rendered text is
+    // part of the node's accessibility label or value, and (b) it paints within
+    // the node's bounds. (a) keeps decorative text and labels that fully replace
+    // the visible text out of the check; (b) disambiguates other widgets that
+    // happen to share the same string. Children are visited first, so the
+    // deepest (most specific) node claims each element via [evaluatedElements].
+    final Rect nodeBounds = _nodeScreenBounds(node);
+    for (final MapEntry<Element, Rect> entry in elementScreenBounds.entries) {
+      final Element element = entry.key;
+      if (evaluatedElements.contains(element)) {
+        continue;
+      }
+      final String? text = _renderedText(element);
+      if (text == null || text.isEmpty) {
+        continue;
+      }
+      if (!data.label.contains(text) && !data.value.contains(text)) {
+        continue;
+      }
+      final Rect intersection = nodeBounds.intersect(entry.value);
+      if (intersection.width <= 0 || intersection.height <= 0) {
+        continue;
+      }
+      evaluatedElements.add(element);
       violations.addAll(await _evaluateElement(node, element, image, byteData, renderView));
     }
     return violations;
+  }
+
+  /// The plain rendered text of a [Text] or [EditableText] [element], or null if
+  /// it exposes no text string.
+  String? _renderedText(Element element) {
+    final Widget widget = element.widget;
+    if (widget is Text) {
+      return widget.data ?? widget.textSpan?.toPlainText();
+    }
+    if (widget is EditableText) {
+      return widget.controller.text;
+    }
+    return null;
+  }
+
+  /// [node]'s rect mapped into the same screen coordinate space used by
+  /// [_elementScreenBounds], by applying its own and its ancestors' transforms.
+  Rect _nodeScreenBounds(SemanticsNode node) {
+    Rect nodeBounds = node.rect;
+    SemanticsNode? current = node;
+    while (current != null) {
+      final Matrix4? transform = current.transform;
+      if (transform != null) {
+        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
+      }
+      current = current.parent;
+    }
+    return nodeBounds;
   }
 
   Future<List<Violation>> _evaluateElement(
@@ -402,42 +532,16 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
     late bool isBold;
     double? fontSize;
 
-    late final Rect screenBounds;
-    late final Rect paintBoundsWithOffset;
-
     final RenderObject? renderBox = element.renderObject;
     if (renderBox is! RenderBox) {
       throw StateError('Unexpected renderObject type: $renderBox');
     }
 
     final Matrix4 globalTransform = renderBox.getTransformTo(null);
-    paintBoundsWithOffset = MatrixUtils.transformRect(
+    final Rect paintBoundsWithOffset = MatrixUtils.transformRect(
       globalTransform,
       renderBox.paintBounds.inflate(4.0),
     );
-
-    // The semantics node transform will include root view transform, which is
-    // not included in renderBox.getTransformTo(null). Manually multiply the
-    // root transform to the global transform.
-    final rootTransform = Matrix4.identity();
-    renderView.applyPaintTransform(renderView.child!, rootTransform);
-    rootTransform.multiply(globalTransform);
-    screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
-    Rect nodeBounds = node.rect;
-    SemanticsNode? current = node;
-    while (current != null) {
-      final Matrix4? transform = current.transform;
-      if (transform != null) {
-        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
-      }
-      current = current.parent;
-    }
-    final Rect intersection = nodeBounds.intersect(screenBounds);
-    if (intersection.width <= 0 || intersection.height <= 0) {
-      // Skip this element since it doesn't correspond to the given semantic
-      // node.
-      return <Violation>[];
-    }
 
     final Widget widget = element.widget;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
@@ -549,6 +653,10 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
+    // Non-text contrast is measured from the node's own bounds, so the
+    // text-element matching state threaded by the base class is unused here.
+    Map<Element, Rect> elementScreenBounds,
+    Set<Element> evaluatedElements,
   ) async {
     final violations = <Violation>[];
     Rect nodeBounds = node.rect;
@@ -701,13 +809,16 @@ Map<Color, int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, in
   });
 }
 
-Iterable<Element> _collectElementsByText(Element root, String text) {
+/// Collects every [Text] and [EditableText] element in the tree rooted at
+/// [root], so each can be matched to a semantics node by its rendered text and
+/// painted bounds (see [MinimumTextContrastEvaluation.evaluateNodeContent]).
+List<Element> _collectTextElements(Element root) {
   final result = <Element>[];
   root.visitChildren((Element child) {
-    if (child.widget is Text && (child.widget as Text).data == text) {
+    if (child.widget is Text || child.widget is EditableText) {
       result.add(child);
     }
-    result.addAll(_collectElementsByText(child, text));
+    result.addAll(_collectTextElements(child));
   });
   return result;
 }
