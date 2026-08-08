@@ -85,6 +85,7 @@ class ScrollBehavior {
   ScrollBehavior copyWith({
     bool? scrollbars,
     bool? overscroll,
+    bool? delegateOverscroll,
     Set<PointerDeviceKind>? dragDevices,
     MultitouchDragStrategy? multitouchDragStrategy,
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
@@ -96,6 +97,7 @@ class ScrollBehavior {
       delegate: this,
       scrollbars: scrollbars ?? true,
       overscroll: overscroll ?? true,
+      delegateOverscroll: delegateOverscroll ?? this.delegateOverscroll,
       dragDevices: dragDevices,
       multitouchDragStrategy: multitouchDragStrategy,
       pointerAxisModifiers: pointerAxisModifiers,
@@ -274,6 +276,15 @@ class ScrollBehavior {
   ScrollViewKeyboardDismissBehavior getKeyboardDismissBehavior(BuildContext context) =>
       ScrollViewKeyboardDismissBehavior.manual;
 
+  /// Whether overscroll should be delegated to the ancestor [Scrollable].
+  ///
+  /// When a [Scrollable] reaches its boundary and overscrolls, it can attempt
+  /// to apply the unused delta to its ancestor [Scrollable], enabling seamless
+  /// scroll delegation between nested scrollables.
+  ///
+  /// This defaults to false.
+  bool get delegateOverscroll => false;
+
   @override
   String toString() => objectRuntimeType(this, 'ScrollBehavior');
 }
@@ -283,6 +294,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     required this.delegate,
     this.scrollbars = true,
     this.overscroll = true,
+    this.delegateOverscroll = false,
     Set<PointerDeviceKind>? dragDevices,
     this.multitouchDragStrategy,
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
@@ -295,6 +307,8 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final ScrollBehavior delegate;
   final bool scrollbars;
   final bool overscroll;
+  @override
+  final bool delegateOverscroll;
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
   final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
@@ -334,6 +348,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   ScrollBehavior copyWith({
     bool? scrollbars,
     bool? overscroll,
+    bool? delegateOverscroll,
     Set<PointerDeviceKind>? dragDevices,
     MultitouchDragStrategy? multitouchDragStrategy,
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
@@ -344,6 +359,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
       overscroll: overscroll ?? this.overscroll,
+      delegateOverscroll: delegateOverscroll ?? this.delegateOverscroll,
       dragDevices: dragDevices ?? this.dragDevices,
       multitouchDragStrategy: multitouchDragStrategy ?? this.multitouchDragStrategy,
       pointerAxisModifiers: pointerAxisModifiers ?? this.pointerAxisModifiers,
@@ -373,6 +389,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     return oldDelegate.delegate.runtimeType != delegate.runtimeType ||
         oldDelegate.scrollbars != scrollbars ||
         oldDelegate.overscroll != overscroll ||
+        oldDelegate.delegateOverscroll != delegateOverscroll ||
         !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices) ||
         oldDelegate.multitouchDragStrategy != multitouchDragStrategy ||
         !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers) ||
