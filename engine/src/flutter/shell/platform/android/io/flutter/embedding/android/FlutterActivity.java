@@ -1054,7 +1054,10 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_ID) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    }
+    return null;
   }
 
   /**
@@ -1065,7 +1068,10 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineGroupId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    }
+    return null;
   }
 
   /**
@@ -1110,7 +1116,7 @@ public class FlutterActivity extends Activity
    */
   @NonNull
   public String getDartEntrypointFunctionName() {
-    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT)) {
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT) && IntentUtils.isIntentSelfSent(this)) {
       return getIntent().getStringExtra(EXTRA_DART_ENTRYPOINT);
     }
 
@@ -1133,7 +1139,10 @@ public class FlutterActivity extends Activity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT_ARGS) && IntentUtils.isIntentSelfSent(this)) {
+      return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    }
+    return null;
   }
 
   /**
@@ -1187,7 +1196,7 @@ public class FlutterActivity extends Activity
    * initial route is derived from the {@code Intent} through the Intent.getData() instead.
    */
   public String getInitialRoute() {
-    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
+    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE) && IntentUtils.isIntentSelfSent(this)) {
       return getIntent().getStringExtra(EXTRA_INITIAL_ROUTE);
     }
 

@@ -823,6 +823,10 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @NonNull
   public String getDartEntrypointFunctionName() {
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_DART_ENTRYPOINT);
+    }
+
     try {
       Bundle metaData = getMetaData();
       String desiredDartEntrypoint =
@@ -842,7 +846,10 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT_ARGS) && IntentUtils.isIntentSelfSent(this)) {
+      return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    }
+    return null;
   }
 
   /**
@@ -896,7 +903,7 @@ public class FlutterFragmentActivity extends FragmentActivity
    * initial route is derived from the {@code Intent} through the Intent.getData() instead.
    */
   protected String getInitialRoute() {
-    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
+    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE) && IntentUtils.isIntentSelfSent(this)) {
       return getIntent().getStringExtra(EXTRA_INITIAL_ROUTE);
     }
 
@@ -918,12 +925,18 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Nullable
   protected String getCachedEngineId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_ID) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    }
+    return null;
   }
 
   @Nullable
   protected String getCachedEngineGroupId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID) && IntentUtils.isIntentSelfSent(this)) {
+      return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    }
+    return null;
   }
 
   /**
