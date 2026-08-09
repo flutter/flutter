@@ -513,8 +513,20 @@ class ScrollPhysics {
   /// Subclasses that contain configuration parameters should override this
   /// method to return true when those parameters change. 
   ///
-  /// Defaults to false.
-  bool shouldUpdate(covariant ScrollPhysics old) => false;
+  /// The base class implementation returns true if the [runtimeType] or
+  /// [parent] changes.
+  bool shouldUpdate(covariant ScrollPhysics old) {
+    if (old.runtimeType != runtimeType) {
+      return true;
+    }
+    if (parent != old.parent) {
+      if (parent == null || old.parent == null) {
+        return true;
+      }
+      return parent!.shouldUpdate(old.parent!);
+    }
+    return false;
+  }
 
   @override
   String toString() {
@@ -705,6 +717,14 @@ class BouncingScrollPhysics extends ScrollPhysics {
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return BouncingScrollPhysics(parent: buildParent(ancestor), decelerationRate: decelerationRate);
+  }
+
+  @override
+  bool shouldUpdate(covariant BouncingScrollPhysics old) {
+    if (decelerationRate != old.decelerationRate) {
+      return true;
+    }
+    return super.shouldUpdate(old);
   }
 
   /// The multiple applied to overscroll to make it appear that scrolling past

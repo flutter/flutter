@@ -688,8 +688,10 @@ class ScrollableState extends State<Scrollable>
     ScrollPhysics? oldPhysics =
         oldWidget.physics ?? oldWidget.scrollBehavior?.getScrollPhysics(context);
     do {
-      if (newPhysics?.runtimeType != oldPhysics?.runtimeType ||
-          (newPhysics != null && newPhysics.shouldUpdate(oldPhysics!))) {
+      if (newPhysics?.runtimeType != oldPhysics?.runtimeType) {
+        return true;
+      }
+      if (newPhysics != null && oldPhysics != null && newPhysics.shouldUpdate(oldPhysics)) {
         return true;
       }
       newPhysics = newPhysics?.parent;

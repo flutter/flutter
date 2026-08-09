@@ -404,6 +404,87 @@ FlutterError
     expect(secondPosition, isNot(same(firstPosition)));
     expect((secondPosition.physics as ReactiveScrollPhysics).value, 1);
   });
+
+  testWidgets('BouncingScrollPhysics updates position when decelerationRate changes', (
+    WidgetTester tester,
+  ) async {
+    ScrollDecelerationRate decelerationRate = ScrollDecelerationRate.normal;
+
+    Widget buildScrollable() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          physics: BouncingScrollPhysics(decelerationRate: decelerationRate),
+          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+          itemCount: 10,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildScrollable());
+
+    ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition firstPosition = scrollable.position;
+    expect(
+      (firstPosition.physics as BouncingScrollPhysics).decelerationRate,
+      ScrollDecelerationRate.normal,
+    );
+
+    // Identical configuration should not recreate ScrollPosition.
+    await tester.pumpWidget(buildScrollable());
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    expect(scrollable.position, same(firstPosition));
+    expect(
+      (scrollable.position.physics as BouncingScrollPhysics).decelerationRate,
+      ScrollDecelerationRate.normal,
+    );
+
+    // Different decelerationRate should recreate ScrollPosition.
+    decelerationRate = ScrollDecelerationRate.fast;
+    await tester.pumpWidget(buildScrollable());
+
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition secondPosition = scrollable.position;
+    expect(secondPosition, isNot(same(firstPosition)));
+    expect(
+      (secondPosition.physics as BouncingScrollPhysics).decelerationRate,
+      ScrollDecelerationRate.fast,
+    );
+  });
+
+  testWidgets('ScrollPhysics updates position when parent changes', (WidgetTester tester) async {
+    ScrollPhysics parentPhysics = const AlwaysScrollableScrollPhysics();
+
+    Widget buildScrollable() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          physics: BouncingScrollPhysics(parent: parentPhysics),
+          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+          itemCount: 10,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildScrollable());
+
+    ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition firstPosition = scrollable.position;
+
+    // Identical parent should not recreate ScrollPosition
+    parentPhysics = const AlwaysScrollableScrollPhysics();
+    await tester.pumpWidget(buildScrollable());
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    expect(scrollable.position, same(firstPosition));
+
+    // Different parent runtimeType should recreate ScrollPosition
+    parentPhysics = const ClampingScrollPhysics();
+    await tester.pumpWidget(buildScrollable());
+
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition secondPosition = scrollable.position;
+    expect(secondPosition, isNot(same(firstPosition)));
+  });
 }
 
 class ReactiveScrollPhysics extends ScrollPhysics {
