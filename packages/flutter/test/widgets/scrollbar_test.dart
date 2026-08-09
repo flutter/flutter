@@ -5,8 +5,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Color _kScrollbarColor = Color(0xFF123456);
@@ -3621,48 +3621,6 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(horizontalScrollController.offset, greaterThan(0.0));
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/141348.
-  testWidgets(
-    'Scrollbar should not shown due to precision error on desktop',
-    (WidgetTester tester) async {
-      Widget buildFrame(Size size) {
-        tester.view.physicalSize = size;
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.reset);
-        return MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: DatePickerDialog(
-                initialDate: DateTime(2020, DateTime.may), // Month with six rows.
-                firstDate: DateTime(2010),
-                lastDate: DateTime(2030),
-              ),
-            ),
-          ),
-        );
-      }
-
-      const screenSizePortrait = Size(400, 600);
-      await tester.pumpWidget(buildFrame(screenSizePortrait));
-      await tester.pumpAndSettle();
-
-      // Scrollbar is not shown.
-      expect(find.byType(Scrollbar), findsOneWidget);
-      expect(find.byType(Scrollbar), isNot(paints..rect()));
-
-      // Scroll on the Scrollbar.
-      final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-      pointer.hover(tester.getCenter(find.byType(Scrollbar)));
-      await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 10.0)));
-      await tester.pumpAndSettle();
-
-      // Scrollbar is still not shown.
-      expect(find.byType(Scrollbar), findsOneWidget);
-      expect(find.byType(Scrollbar), isNot(paints..rect()));
-    },
-    variant: TargetPlatformVariant.desktop(),
-  );
-
   test('with EdgeInsetsDirectional', () {
     const size = Size(60, 80);
     final ScrollMetrics metrics = defaultMetrics.copyWith(
@@ -3750,8 +3708,8 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                 data: const MediaQueryData(),
                 child: Column(
                   children: <Widget>[
-                    ElevatedButton(
-                      onPressed: () {
+                    GestureDetector(
+                      onTap: () {
                         setState(() {
                           // This reproduces the exact scenario from the linked issue:
                           // Initially the controller is null, thumbVisibility is false, and interactive is false.
@@ -3761,6 +3719,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                           interactive = true;
                         });
                       },
+                      behavior: HitTestBehavior.opaque,
                       child: const Text('Enable Scrollbar'),
                     ),
                     Expanded(
