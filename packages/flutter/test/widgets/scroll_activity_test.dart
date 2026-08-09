@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
@@ -360,6 +361,40 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets(
+    '$ScrollDragController preserves an input frame request made before a pending frame',
+    (WidgetTester tester) async {
+      final controller = ScrollDragController(
+        delegate: _ScrollActivityDelegate(),
+        details: DragStartDetails(),
+      );
+      addTearDown(controller.dispose);
+
+      final details = DragUpdateDetails(
+        delta: const Offset(0.0, 1.0),
+        primaryDelta: 1.0,
+        globalPosition: Offset.zero,
+      );
+
+      // The first input update schedules a frame.
+      controller.update(details);
+      expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+
+      // A second input update arrives while that frame is still pending.
+      // Its frame request must be preserved for the following frame.
+      controller.update(details);
+
+      // Pump the already pending frame. The second input update should have
+      // scheduled another frame to run afterwards.
+      await tester.pump();
+      expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+
+      // Pump the preserved frame. No further frame should remain scheduled.
+      await tester.pump();
+      expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
+    },
+  );
 }
 
 class PageView62209 extends StatefulWidget {

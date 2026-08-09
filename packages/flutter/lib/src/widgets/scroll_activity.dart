@@ -17,6 +17,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -293,6 +294,10 @@ class ScrollDragController implements Drag {
   Duration? _lastNonStationaryTimestamp;
   bool _retainMomentum;
 
+  /// Prevents registering multiple post-frame callbacks while preserving a
+  /// frame request made by input during an already scheduled frame.
+  bool _nextInputFrameCallbackScheduled = false;
+
   /// Null if already in motion or has no [motionStartDistanceThreshold].
   double? _offsetSinceLastStop;
 
@@ -319,6 +324,25 @@ class ScrollDragController implements Drag {
   static const double _bigThresholdBreakDistance = 24.0;
 
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
+
+  /// Ensures that an input update schedules a subsequent frame even when a
+  /// frame is already pending.
+  void _scheduleInputFrame() {
+    final SchedulerBinding scheduler = SchedulerBinding.instance;
+    if (!scheduler.hasScheduledFrame) {
+      scheduler.scheduleFrame();
+      return;
+    }
+    if (_nextInputFrameCallbackScheduled) {
+      return;
+    }
+
+    _nextInputFrameCallbackScheduled = true;
+    scheduler.addPostFrameCallback((timeStamp) {
+      _nextInputFrameCallbackScheduled = false;
+      scheduler.scheduleFrame();
+    }, debugLabel: 'ScrollDragController.scheduleInputFrame');
+  }
 
   /// Updates the controller's link to the [ScrollActivityDelegate].
   ///
@@ -413,6 +437,7 @@ class ScrollDragController implements Drag {
       offset = -offset;
     }
     delegate.applyUserOffset(offset);
+    _scheduleInputFrame();
   }
 
   @override
