@@ -165,8 +165,9 @@ enum HitTestBehavior {
   /// most specific target first (the descendant), then to the translucent
   /// target. In gesture arena competitions for the same gesture, the
   /// descendant typically wins because it enters the arena first (first come,
-  /// first served), and the translucent target's gesture is not invoked unless
-  /// the descendant's gesture is rejected.
+  /// first served). The translucent target's gesture is not invoked unless the
+  /// descendant's gesture is rejected or the descendant listens to a different
+  /// gesture.
   ///
   /// See also:
   ///
