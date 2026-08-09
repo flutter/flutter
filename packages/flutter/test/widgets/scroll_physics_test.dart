@@ -471,13 +471,13 @@ FlutterError
     ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
     final ScrollPosition firstPosition = scrollable.position;
 
-    // Identical parent should not recreate ScrollPosition
+    // Identical parent should not recreate ScrollPosition.
     parentPhysics = const AlwaysScrollableScrollPhysics();
     await tester.pumpWidget(buildScrollable());
     scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
     expect(scrollable.position, same(firstPosition));
 
-    // Different parent runtimeType should recreate ScrollPosition
+    // Different parent runtimeType should recreate ScrollPosition.
     parentPhysics = const ClampingScrollPhysics();
     await tester.pumpWidget(buildScrollable());
 
