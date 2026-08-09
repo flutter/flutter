@@ -574,7 +574,7 @@ class PageScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  bool get snapsToPages => true;
+  bool get allowSelectionEdgeScrolling => false;
 
   double _getPage(ScrollMetrics position) {
     if (position is _PagePosition) {
