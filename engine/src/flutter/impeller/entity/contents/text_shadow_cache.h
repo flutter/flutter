@@ -89,8 +89,7 @@ class TextShadowCache {
       std::size_t operator()(const TextShadowCacheKey& key) const {
         return absl::HashOf(key.max_basis, key.is_single_glyph,
                             key.font.GetHash(), key.rounded_sigma.GetHash(),
-                            key.color.ToARGB(), key.fingerprint.full_hash,
-                            key.fingerprint.first_glyph_id);
+                            key.color.ToARGB(), key.fingerprint.full_hash);
       }
     };
 

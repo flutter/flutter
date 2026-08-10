@@ -994,6 +994,46 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
   EXPECT_TRUE(equal(key1, key3));
 }
 
+TEST_P(AiksTest, SingleGlyphTextShadowCache) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            0u);
+
+  SkFont font = flutter::testing::CreateTestFontOfSize(12);
+  TextRenderOptions options{
+      .color = DlColor::kBlue(),
+      .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)};
+
+  // Draw single glyph "A".
+  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), builder, "A", kFontFixture,
+                                     options, font));
+
+  // Draw single glyph "B" (different glyph ID, identical font/color/sigma).
+  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), builder, "B", kFontFixture,
+                                     options, font));
+
+  // Draw single glyph "A" again (duplicate glyph ID).
+  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), builder, "A", kFontFixture,
+                                     options, font));
+
+  DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
+
+  // Single glyphs "A" and "B" get distinct entries; duplicate "A" reuses "A".
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            2u);
+}
+
 TEST_P(AiksTest, MultipleColorWithShadowCache) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);

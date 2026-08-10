@@ -2145,8 +2145,7 @@ bool Canvas::AttemptBlurredTextOptimization(
   std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
   TextFrameFingerprint fingerprint =
       maybe_glyph.has_value()
-          ? TextFrameFingerprint{.first_glyph_id =
-                                     PackGlyphId(maybe_glyph.value())}
+          ? TextFrameFingerprint{.full_hash = PackGlyphId(maybe_glyph.value())}
           : ComputeTextFrameFingerprint(*text_frame);
   TextShadowCache::TextShadowCacheKey cache_key(
       /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
