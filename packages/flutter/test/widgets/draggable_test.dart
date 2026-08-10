@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'route_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Drag and drop - control test', (WidgetTester tester) async {

@@ -823,7 +823,7 @@ class IosUsbArtifacts extends CachedArtifact {
   // used for additional download checks below, so we can re-download if they are
   // missing.
   static const _kExecutables = <String, List<String>>{
-    'libimobiledevice': <String>['idevicescreenshot', 'idevicesyslog'],
+    'libimobiledevice': <String>['idevicesyslog'],
     'libusbmuxd': <String>['iproxy'],
   };
 

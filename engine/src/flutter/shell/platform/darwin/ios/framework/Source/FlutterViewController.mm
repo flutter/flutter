@@ -365,9 +365,10 @@ typedef struct MouseState {
   _statusBarStyle = UIStatusBarStyleDefault;
 
   _accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
+  _displayLinkManager = FlutterDisplayLinkManager.shared;
   _keyboardInsetManager =
       [[FlutterKeyboardInsetManager alloc] initWithDelegate:self
-                                         displayLinkManager:FlutterDisplayLinkManager.shared];
+                                         displayLinkManager:_displayLinkManager];
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
@@ -1313,7 +1314,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  double displayRefreshRate = FlutterDisplayLinkManager.shared.displayRefreshRate;
+  double displayRefreshRate = self.displayLinkManager.displayRefreshRate;
   const double epsilon = 0.1;
   if (displayRefreshRate < 60.0 + epsilon) {  // displayRefreshRate <= 60.0
 
@@ -1329,8 +1330,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       };
   _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
                 initWithTaskRunner:self.engine.platformTaskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.shared.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.shared.displayRefreshRate
+      isVariableRefreshRateEnabled:self.displayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:self.displayLinkManager.displayRefreshRate
                           callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
@@ -1392,27 +1393,12 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self updateViewportMetricsIfNeeded];
 
   // There is no guarantee that UIKit will layout subviews when the application/scene is active.
-  // Creating the surface when inactive will cause GPU accesses from the background. Only wait for
-  // the first frame to render when the application/scene is actually active.
+  // Creating the surface when inactive will cause GPU accesses from the background, so only
+  // create the surface when the application/scene is actually active.
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
   if (firstViewBoundsUpdate && self.stateIsActive && self.engine) {
     [self surfaceUpdated:YES];
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-    NSTimeInterval timeout = 0.2;
-#else
-    NSTimeInterval timeout = 0.1;
-#endif
-    [self.engine
-        waitForFirstFrameSync:timeout
-                     callback:^(BOOL didTimeout) {
-                       if (didTimeout) {
-                         [FlutterLogger logInfo:@"Timeout waiting for the first frame to render. "
-                                                 "This may happen in unoptimized builds. If this is"
-                                                 "a release build, you should load a less complex "
-                                                 "frame to avoid the timeout."];
-                       }
-                     }];
   }
 }
 
