@@ -2132,8 +2132,49 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   @protected
+  void validateUseApplicationBinary() {
+    final String? applicationBinary = argParser.options.containsKey(FlutterOptions.kUseApplicationBinary)
+        ? stringArg(FlutterOptions.kUseApplicationBinary)
+        : null;
+    if (applicationBinary != null && applicationBinary.toLowerCase().endsWith('.apk')) {
+      final BuildMode buildMode = getBuildMode();
+      if (buildMode == BuildMode.release) {
+        final Iterable<String> intentFlags = <String>[
+          'trace-startup',
+          'route',
+          'trace-skia',
+          'trace-allowlist',
+          'trace-skia-allowlist',
+          'trace-systrace',
+          'trace-to-file',
+          'enable-dart-profiling',
+          'enable-software-rendering',
+          'skia-deterministic-rendering',
+          'endless-trace-buffer',
+          'profile-microtasks',
+          'purge-persistent-cache',
+          'enable-impeller',
+          'enable-vulkan-validation',
+          'enable-flutter-gpu',
+          'start-paused',
+          'dart-flags',
+        ].where((String flag) => argParser.options.containsKey(flag) && argResults?.wasParsed(flag) == true);
+
+        if (intentFlags.isNotEmpty) {
+          throwToolExit(
+            'Using --${FlutterOptions.kUseApplicationBinary} with --release and additional intent flags '
+            'is not supported for Android. Please do not use a prebuilt binary or define the '
+            'required flags via the Android manifest.',
+          );
+        }
+      }
+    }
+  }
+
+  @protected
   @mustCallSuper
   Future<void> validateCommand() async {
+    validateUseApplicationBinary();
     if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 

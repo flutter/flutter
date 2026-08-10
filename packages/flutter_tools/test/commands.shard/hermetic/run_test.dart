@@ -176,6 +176,24 @@ void main() {
       );
 
       testUsingContext(
+        'fails when --use-application-binary is provided with --release and intent flags for Android',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          expect(
+            () => runner.run(<String>['run', '--no-pub', '--release', '--route=/', '--use-application-binary=path/to/app.apk']),
+            throwsToolExit(message: 'Using --use-application-binary with --release and additional intent flags is not supported for Android. Please do not use a prebuilt binary or define the required flags via the Android manifest.'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
         'exits with a user message when no supported devices attached',
         () async {
           final command = RunCommand();

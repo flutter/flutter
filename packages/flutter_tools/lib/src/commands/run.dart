@@ -703,6 +703,8 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
+    validateUseApplicationBinary();
+
     // When running with a prebuilt application, no command validation is
     // necessary.
     if (!runningWithPrebuiltApplication) {
