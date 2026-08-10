@@ -193,6 +193,8 @@ impeller_component("interop_unittests") {
 zip_bundle("sdk") {
   if (is_mac) {
     zip_out_dir = "darwin-${target_cpu}"
+  } else if (use_ios_simulator) {
+    zip_out_dir = "ios-sim-${target_cpu}"
   } else {
     zip_out_dir = "${full_target_platform_name}"
   }
@@ -234,7 +236,7 @@ zip_bundle("sdk") {
     },
   ]
 
-  if (is_mac) {
+  if (is_mac || is_ios) {
     files += [
       {
         source = "$root_build_dir/libimpeller.dylib"
@@ -261,7 +263,7 @@ zip_bundle("sdk") {
     ]
   }
 
-  if (is_mac || is_linux || is_android || is_qnx) {
+  if (is_mac || is_ios || is_linux || is_android || is_qnx) {
     files += [
       {
         source =
