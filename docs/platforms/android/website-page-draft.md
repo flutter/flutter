@@ -69,15 +69,13 @@ Example of a simple finalizer task in `build.gradle` (Groovy):
 ```groovy
 androidComponents {
     onVariants(selector().all()) { variant ->
-        tasks.named("assemble${variant.name.capitalize()}").configure {
-            it.doLast {
-                copy {
-                    // In AGP 8+, APK is a directory containing the file(s)
-                    from(variant.artifacts.get(com.android.build.api.artifact.SingleArtifact.APK.INSTANCE))
-                    into(layout.buildDirectory.dir("custom-outputs"))
-                    rename { String fileName -> fileName.replace("app", "myapp") }
-                }
-            }
+        def copyTask = tasks.register("copy${variant.name.capitalize()}Apk", Copy) {
+            from(variant.artifacts.get(com.android.build.api.artifact.SingleArtifact.APK.INSTANCE))
+            into(layout.buildDirectory.dir("custom-outputs"))
+            rename { String fileName -> fileName.replace("app", "myapp") }
+        }
+        tasks.matching { it.name == "assemble${variant.name.capitalize()}" }.configureEach {
+            dependsOn(copyTask)
         }
     }
 }
