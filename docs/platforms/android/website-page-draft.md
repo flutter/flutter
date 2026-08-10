@@ -28,9 +28,9 @@ lines carrying Flutter's marker comments, and prints a message when it does.
 Opt-outs you added by hand are left alone.
 
 `android.builtInKotlin=false` is **not** affected by this change. It is owned
-by the separate built-in-Kotlin migration (tracked in <!-- TODO: link
-built-in-Kotlin tracking issue -->), which means one more (smaller)
-`gradle.properties` change later.
+by the separate built-in-Kotlin migration (tracked in
+[flutter/flutter#184836](https://github.com/flutter/flutter/issues/184836)),
+which means one more (smaller) `gradle.properties` change later.
 
 ## Migration guide
 
