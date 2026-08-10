@@ -182,13 +182,33 @@ jobs:
           set -euo pipefail
           mkdir -p build/ios/SourcePackages
 
-          # Let Flutter perform migrations and generate iOS artifacts without signing.
+          # Generate Flutter iOS configs without triggering a full build that can
+          # rewrite CocoaPods integration immediately before archive.
           flutter build ios \
             --release \
+            --config-only \
             --no-codesign \
             --dart-define=APP_ENV=${{ inputs.app_env }}
 
+          if grep -qE "^platform :ios" ios/Podfile; then
+            sed -i '' -E "s/^platform :ios, .*/platform :ios, '15.0'/" ios/Podfile
+          else
+            cp ios/Podfile ios/Podfile.bak
+            {
+              echo "platform :ios, '15.0'"
+              cat ios/Podfile.bak
+            } > ios/Podfile
+          fi
+
+          if ! grep -q "use_modular_headers!" ios/Podfile; then
+            awk 'NR==1 {print; print "use_modular_headers!"; next} {print}' ios/Podfile > ios/Podfile.tmp
+            mv ios/Podfile.tmp ios/Podfile
+          fi
+
           cd ios
+          pod install --repo-update
+          sed -i '' "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]\+;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g" Pods/Pods.xcodeproj/project.pbxproj
+
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
