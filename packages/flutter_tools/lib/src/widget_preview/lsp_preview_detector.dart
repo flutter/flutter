@@ -136,6 +136,10 @@ class LspPreviewDetector {
   }
 
   Future<AnalysisServer> launchAnalysisServer() async {
+    final String? protocolTrafficLog = platform.environment['FLUTTER_LSP_TRAFFIC_LOG'];
+    if (protocolTrafficLog != null) {
+      logger.printTrace('LSP Traffic Log path from env: $protocolTrafficLog');
+    }
     final analysisServer = AnalysisServer(
       artifacts.getArtifactPath(Artifact.engineDartSdkPath),
       [projectRoot.path],
@@ -145,6 +149,7 @@ class LspPreviewDetector {
       processManager: processManager,
       terminal: terminal,
       suppressAnalytics: suppressAnalytics,
+      protocolTrafficLog: protocolTrafficLog,
     );
     return analysisServer;
   }
@@ -186,20 +191,42 @@ class LspPreviewDetector {
       return;
     }
     await _analysisServer?.waitForAnalysis();
-    try {
-      final FlutterWidgetPreviews result = await dtd.getFlutterWidgetPreviews();
-      onChangeDetected(result);
-    } catch (e) {
+    FlutterWidgetPreviews? result;
+    var retries = 5;
+    while (retries > 0) {
       if (_disposed || shutdownHooks.isShuttingDown) {
-        logger.printTrace('Failed to get widget previews during shutdown: $e');
-      } else if (e is StateError || e is Exception) {
-        logger.printWarning(
-          'Lost connection to the Dart Tooling Daemon (DTD). '
-          'Live preview updates are paused. Details: $e',
-        );
-      } else {
-        rethrow;
+        break;
       }
+      try {
+        result = await dtd.getFlutterWidgetPreviews().timeout(const Duration(seconds: 5));
+        break;
+      } catch (e) {
+        retries--;
+        if (retries == 0) {
+          if (_disposed || shutdownHooks.isShuttingDown) {
+            logger.printTrace('Failed to get widget previews during shutdown: $e');
+          } else if (e is StateError || e is Exception) {
+            logger.printWarning(
+              'Lost connection to the Dart Tooling Daemon (DTD). '
+              'Live preview updates are paused. Details: $e',
+            );
+          } else {
+            rethrow;
+          }
+        } else {
+          logger.printTrace(
+            'Failed to get widget previews, retrying in 200ms... ($retries retries left). Error: $e',
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          if (_disposed || shutdownHooks.isShuttingDown) {
+            break;
+          }
+          await _analysisServer?.waitForAnalysis();
+        }
+      }
+    }
+    if (result != null) {
+      onChangeDetected(result);
     }
   }
 }
