@@ -138,7 +138,7 @@ class SwiftPackageManager {
         final pluginsPackage = SwiftPackage(
           manifest: project.flutterPluginSwiftPackageManifest,
           name: kFlutterGeneratedPluginSwiftPackageName,
-          platforms: <SwiftPackageSupportedPlatform>[platform.supportedPackagePlatform],
+          platforms: <SwiftPackageSupportedPlatform>[],
           products: <SwiftPackageProduct>[generatedProduct],
           dependencies: packageDependencies,
           targets: <SwiftPackageTarget>[generatedTarget],
