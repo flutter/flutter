@@ -49,7 +49,7 @@ void main() {
         '-q', // quiet output.
         'printBuildVariants',
       ], workingDirectory: androidApp.path);
-      // Verify that gradlew has a javaVersion task.
+      // Verify that gradlew has a printBuildVariants task.
       expect(result.exitCode, 0);
       // Verify the format is a number on its own line.
       final List<String> actualLines = LineSplitter.split(result.stdout.toString()).toList();

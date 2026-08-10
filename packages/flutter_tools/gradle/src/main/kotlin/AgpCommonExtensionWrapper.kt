@@ -8,6 +8,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildType
 import com.android.build.api.dsl.DynamicFeatureExtension
 import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.dsl.Splits
 import com.android.build.api.dsl.TestExtension
 import org.gradle.api.NamedDomainObjectContainer
 import java.io.File
@@ -84,6 +85,16 @@ class AgpCommonExtensionWrapper(
                 is LibraryExtension -> backingExtension.buildTypes
                 is DynamicFeatureExtension -> backingExtension.buildTypes
                 is TestExtension -> backingExtension.buildTypes
+                else -> throw IllegalArgumentException(unsupportedMessage())
+            }
+
+    val splits: Splits
+        get() =
+            when (backingExtension) {
+                is ApplicationExtension -> backingExtension.splits
+                is LibraryExtension -> backingExtension.splits
+                is DynamicFeatureExtension -> backingExtension.splits
+                is TestExtension -> backingExtension.splits
                 else -> throw IllegalArgumentException(unsupportedMessage())
             }
 

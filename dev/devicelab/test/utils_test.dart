@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 import 'common.dart';
 
@@ -39,6 +41,37 @@ void main() {
       expect(localEngineFromEnv, null);
       expect(localEngineHostFromEnv, null);
       expect(localEngineSrcPathFromEnv, null);
+    });
+  });
+
+  group('filesystem safety guard', () {
+    test('isolates modifications to system temp directory', () {
+      final tempFile = io.File(
+        path.join(io.Directory.systemTemp.path, 'devicelab_fs_guard_test_safe.txt'),
+      );
+      addTearDown(() {
+        if (tempFile.existsSync()) {
+          tempFile.deleteSync();
+        }
+      });
+      // Writing under system temp should succeed
+      tempFile.writeAsStringSync('safe-devicelab-content');
+      expect(tempFile.readAsStringSync(), 'safe-devicelab-content');
+
+      // Modifying outside system temp should fail and throw our guarded exception
+      final String root = path.rootPrefix(io.Directory.current.absolute.path);
+      final unsafeFile = io.File(path.join(root, 'tmp_unsafe_devicelab.txt'));
+      expect(unsafeFile.existsSync(), false);
+      expect(
+        () => unsafeFile.writeAsStringSync('unsafe-content'),
+        throwsA(
+          isA<io.FileSystemException>().having(
+            (e) => e.message,
+            'message',
+            contains('Test attempted to modify file outside of temp directory'),
+          ),
+        ),
+      );
     });
   });
 }

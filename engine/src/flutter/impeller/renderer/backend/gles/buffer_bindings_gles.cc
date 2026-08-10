@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 
+#include <cstdint>
 #include <cstring>
 #include <vector>
 
@@ -51,7 +52,7 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
         return false;
       }
       attrib.size = input.vec_size;
-      auto type = ToVertexAttribType(input.type);
+      auto type = ToVertexAttribType(input.GetVertexAttributeFormat());
       if (!type.has_value()) {
         return false;
       }
@@ -59,6 +60,8 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
       attrib.normalized = GL_FALSE;
       attrib.offset = input.offset;
       attrib.stride = layout.stride;
+      attrib.vertex_attrib_divisor =
+          layout.input_rate == VertexInputRate::kInstance ? 1u : 0u;
       vertex_attrib_arrays[layout_i].push_back(attrib);
     }
   }
@@ -127,9 +130,13 @@ bool BufferBindingsGLES::ReadUniformsBindingsV3(const ProcTableGLES& gl,
 
     GLuint block_index = gl.GetUniformBlockIndex(program, name.data());
     gl.UniformBlockBinding(program_handle_, block_index, i);
+    GLint block_data_size = 0;
+    gl.GetActiveUniformBlockiv(program, i, GL_UNIFORM_BLOCK_DATA_SIZE,
+                               &block_data_size);
 
     ubo_locations_[std::string{name.data(), static_cast<size_t>(length)}] =
-        std::make_pair(block_index, i);
+        UBOInfo{static_cast<GLint>(block_index), static_cast<GLuint>(i),
+                block_data_size};
   }
   use_ubo_ = true;
   return ReadUniformsBindingsV2(gl, program);
@@ -193,9 +200,26 @@ bool BufferBindingsGLES::ReadUniformsBindingsV2(const ProcTableGLES& gl,
 
 bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
                                               size_t binding,
-                                              size_t vertex_offset) {
+                                              size_t vertex_offset,
+                                              size_t instance) {
   if (binding >= vertex_attrib_arrays_.size()) {
     return false;
+  }
+
+  // For an emulated instanced draw (instance > 0), a binding whose attributes
+  // are all vertex-rate (divisor 0) does not change across instances, so the
+  // state bound for instance 0 still applies. Skip the redundant re-binding.
+  if (instance > 0u) {
+    bool has_instance_rate = false;
+    for (const auto& array : vertex_attrib_arrays_[binding]) {
+      if (array.vertex_attrib_divisor != 0u) {
+        has_instance_rate = true;
+        break;
+      }
+    }
+    if (!has_instance_rate) {
+      return true;
+    }
   }
 
   if (!gl.GetCapabilities()->IsES()) {
@@ -206,14 +230,33 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
 
   for (const auto& array : vertex_attrib_arrays_[binding]) {
     gl.EnableVertexAttribArray(array.index);
+    // For an emulated instanced draw, an instance-rate attribute is
+    // re-pointed at instance `instance`, since there is no hardware divisor
+    // to advance it. A non-instanced or hardware-instanced draw passes
+    // instance 0 and lets the divisor (if any) do the stepping.
+    size_t attribute_offset = vertex_offset + array.offset;
+    if (array.vertex_attrib_divisor != 0u) {
+      attribute_offset += instance * static_cast<size_t>(array.stride);
+    }
     gl.VertexAttribPointer(array.index,       // index
                            array.size,        // size (must be 1, 2, 3, or 4)
                            array.type,        // type
                            array.normalized,  // normalized
                            array.stride,      // stride
-                           reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
-                               vertex_offset + array.offset))  // pointer
+                           reinterpret_cast<const GLvoid*>(
+                               static_cast<uintptr_t>(attribute_offset))  // ptr
     );
+    // Set the instancing divisor when the driver supports it. It is core
+    // on ES 3.0+ and comes from GL_EXT_instanced_arrays on ES 2.0. When
+    // unavailable, only per-vertex (divisor 0) bindings are possible,
+    // which is the default. Setting it for every attribute (including
+    // divisor 0) also clears any stale divisor left by a prior pipeline,
+    // which matters on ES, where there is no vertex array object.
+    if (gl.VertexAttribDivisor.IsAvailable()) {
+      gl.VertexAttribDivisor(array.index, array.vertex_attrib_divisor);
+    } else if (gl.VertexAttribDivisorEXT.IsAvailable()) {
+      gl.VertexAttribDivisorEXT(array.index, array.vertex_attrib_divisor);
+    }
   }
 
   return true;
@@ -331,15 +374,14 @@ bool BufferBindingsGLES::BindUniformBufferV3(
     const BufferView& buffer,
     const ShaderMetadata* metadata,
     const DeviceBufferGLES& device_buffer_gles) {
-  absl::flat_hash_map<std::string, std::pair<GLint, GLuint>>::iterator it =
-      ubo_locations_.find(metadata->name);
+  auto it = ubo_locations_.find(metadata->name);
   if (it == ubo_locations_.end()) {
     // This should only happen if we have GLESv3 but are using v2 shaders,
     // as GLESv3 shaders compiled by impeller always have
     // **named** uniform buffer blocks
     return BindUniformBufferV2(gl, buffer, metadata, device_buffer_gles);
   }
-  const auto& [block_index, binding_point] = it->second;
+  const auto& ubo_info = it->second;
   if (!device_buffer_gles.BindAndUploadDataIfNecessary(
           DeviceBufferGLES::BindingType::kUniformBuffer)) {
     return false;
@@ -348,8 +390,15 @@ bool BufferBindingsGLES::BindUniformBufferV3(
   if (!handle.has_value()) {
     return false;
   }
-  gl.BindBufferRange(GL_UNIFORM_BUFFER, binding_point, handle.value(),
-                     buffer.GetRange().offset, buffer.GetRange().length);
+  size_t length = std::max<size_t>(buffer.GetRange().length,
+                                   static_cast<size_t>(ubo_info.data_size));
+  if (buffer.GetRange().offset + length >
+      device_buffer_gles.GetDeviceBufferDescriptor().size) {
+    VALIDATION_LOG << "Uniform buffer range exceeds device buffer size.";
+    return false;
+  }
+  gl.BindBufferRange(GL_UNIFORM_BUFFER, ubo_info.binding_point, handle.value(),
+                     buffer.GetRange().offset, length);
   return true;
 }
 
@@ -444,6 +493,7 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     ShaderStage stage,
     size_t unit_start_index) {
   size_t active_index = unit_start_index;
+  size_t stage_texture_count = 0;
   for (auto i = 0u; i < texture_range.length; i++) {
     const TextureAndSampler& data = bound_textures[texture_range.offset + i];
     if (data.stage != stage) {
@@ -464,9 +514,19 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     //--------------------------------------------------------------------------
     /// Set the active texture unit.
     ///
-    if (active_index >= gl.GetCapabilities()->GetMaxTextureUnits(stage)) {
+    /// Units are a combined resource; the per-stage limits cap only how many
+    /// samplers one stage references, not the unit indices they bind to.
+    ///
+    stage_texture_count++;
+    if (stage_texture_count > gl.GetCapabilities()->GetMaxTextureUnits(stage)) {
       VALIDATION_LOG << "Texture units specified exceed the capabilities for "
                         "this shader stage.";
+      return std::nullopt;
+    }
+    if (active_index >=
+        gl.GetCapabilities()->max_combined_texture_image_units) {
+      VALIDATION_LOG << "Texture units specified exceed the combined texture "
+                        "unit limit.";
       return std::nullopt;
     }
     gl.ActiveTexture(GL_TEXTURE0 + active_index);

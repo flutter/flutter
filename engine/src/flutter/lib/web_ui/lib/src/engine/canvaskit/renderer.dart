@@ -11,8 +11,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-bool get isExperimentalWebParagraph =>
-    configuration.canvasKitVariant == CanvasKitVariant.experimentalWebParagraph;
+bool get isWebParagraphEnabled => configuration.preferWebParagraph && browserSupportsWebParagraph;
 
 class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
@@ -26,7 +25,7 @@ class CanvasKitRenderer extends Renderer {
   /// Whether the renderer is using software rendering.
   bool get isSoftware => _pictureToImageSurface.isSoftware;
 
-  late final FlutterFontCollection _fontCollection = isExperimentalWebParagraph
+  late final FlutterFontCollection _fontCollection = isWebParagraphEnabled
       ? WebFontCollection()
       : SkiaFontCollection();
 
@@ -199,103 +198,101 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  Future<ui.Codec> instantiateImageCodec(
-    Uint8List list, {
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
-  }) async => skiaInstantiateImageCodec(list, targetWidth, targetHeight, allowUpscaling);
-
-  @override
-  Future<ui.Codec> instantiateImageCodecFromUrl(
-    Uri uri, {
-    ui_web.ImageCodecChunkCallback? chunkCallback,
-  }) => skiaInstantiateWebImageCodec(uri.toString(), chunkCallback);
-
-  @override
-  ui.Image createImageFromImageBitmap(DomImageBitmap imageBitmap) {
-    SkImage? skImage;
-    if (isSoftware) {
-      skImage = canvasKit.MakeImageFromCanvasImageSource(imageBitmap);
-    } else {
-      skImage = canvasKit.MakeLazyImageFromImageBitmap(imageBitmap, true);
-    }
-    if (skImage == null) {
-      throw Exception('Failed to convert image bitmap to an SkImage.');
-    }
-    return CkImage(skImage, imageSource: ImageBitmapImageSource(imageBitmap));
+  BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight}) {
+    return CkAnimatedImage.decodeFromBytes(
+      bytes,
+      'encoded image bytes',
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+    );
   }
 
   @override
-  FutureOr<ui.Image> createImageFromTextureSource(
-    JSAny object, {
+  /// Converts a normalized [ImageSource] into a CanvasKit-specific [BackendImage].
+  ///
+  /// This method implements a highly optimized resource allocation strategy that
+  /// behaves differently depending on the active rendering mode:
+  ///
+  /// - **Software Rendering Fallback (`isSoftware`):** If the CanvasKit backend is running
+  ///    without GPU acceleration, we call `MakeImageFromCanvasImageSource`. This eagerly
+  ///    rasterizes the DOM source on the CPU and copies its pixels into a C++ WASM-allocated
+  ///    heap buffer.
+  /// - **Hardware-Accelerated WebGL Path (`!isSoftware`):** To avoid blocking the main
+  ///    thread and prevent massive GPU memory spikes, we use "lazy" texture uploads:
+  ///    - **ImageBitmap Source:** We call `MakeLazyImageFromImageBitmap`. The second argument
+  ///      (`true`) transfers ownership of the bitmap to CanvasKit, allowing CanvasKit to
+  ///      automatically close and release the browser-allocated bitmap once it has been
+  ///      successfully uploaded to a GPU texture.
+  ///    - **Other Texture Sources:** We call `MakeLazyImageFromTextureSourceWithInfo` to register
+  ///      the texture source (e.g. canvas or video frame) with WebGL.
+  ///    In both cases, the actual upload of the texture to the GPU is deferred until the
+  ///    image is drawn on the screen for the first time, ensuring smooth animations.
+  ///
+  ///    Additionally, lazy texture uploads allow a single texture source to be uploaded
+  ///    to multiple WebGL contexts. This is critical in "MultiSurfaceRasterizer" mode,
+  ///    where multiple WebGL contexts are active on-screen concurrently, and the same
+  ///    image may need to be rendered across different surfaces.
+  BackendImage createImageFromImageSource(ImageSource source) {
+    SkImage? skImage;
+    final DomCanvasImageSource canvasImageSource = source.canvasImageSource;
+    if (isSoftware) {
+      skImage = canvasKit.MakeImageFromCanvasImageSource(canvasImageSource);
+    } else {
+      if (canvasImageSource.isA<DomImageBitmap>()) {
+        skImage = canvasKit.MakeLazyImageFromImageBitmap(canvasImageSource as DomImageBitmap, true);
+      } else {
+        skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
+          canvasImageSource,
+          SkPartialImageInfo(
+            width: source.width.toDouble(),
+            height: source.height.toDouble(),
+            alphaType: canvasKit.AlphaType.Premul,
+            colorType: canvasKit.ColorType.RGBA_8888,
+            colorSpace: SkColorSpaceSRGB,
+          ),
+        );
+      }
+    }
+    if (skImage == null) {
+      throw Exception('Failed to convert image source to an SkImage.');
+    }
+    return CkImageDelegate(skImage);
+  }
+
+  @override
+  bool get isMultiThreaded => false;
+
+  @override
+  bool get supportsResizingAnimatedImages => false;
+
+  @override
+  BackendImage decodeBackendImageFromPixels(
+    Uint8List pixels, {
     required int width,
     required int height,
-    required bool transferOwnership,
-  }) async {
-    if (!transferOwnership) {
-      final DomImageBitmap bitmap = await createImageBitmap(object, (
-        x: 0,
-        y: 0,
-        width: width,
-        height: height,
-      ));
-      return createImageFromImageBitmap(bitmap);
-    }
-    SkImage? skImage;
-    if (isSoftware) {
-      if (object.isA<VideoFrame>()) {
-        // If the object is a VideoFrame, we need to draw it to a canvas first to
-        // avoid a bug in CanvasKit where MakeImageFromCanvasImageSource doesn't
-        // work with VideoFrames.
-        final DomHTMLCanvasElement canvas = createDomCanvasElement(width: width, height: height);
-        final DomCanvasRenderingContext2D ctx = canvas.context2D;
-        ctx.drawImage(object as VideoFrame, 0, 0);
-        skImage = canvasKit.MakeImageFromCanvasImageSource(canvas);
-      } else {
-        skImage = canvasKit.MakeImageFromCanvasImageSource(object);
-      }
-    } else {
-      skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
-        object,
-        SkPartialImageInfo(
-          width: width.toDouble(),
-          height: height.toDouble(),
-          alphaType: canvasKit.AlphaType.Premul,
-          colorType: canvasKit.ColorType.RGBA_8888,
-          colorSpace: SkColorSpaceSRGB,
-        ),
-      );
-    }
+    required ui.PixelFormat format,
+    int? rowBytes,
+  }) {
+    final SkImage? skImage = canvasKit.MakeImage(
+      SkImageInfo(
+        width: width.toDouble(),
+        height: height.toDouble(),
+        colorType: format == ui.PixelFormat.rgba8888
+            ? canvasKit.ColorType.RGBA_8888
+            : canvasKit.ColorType.BGRA_8888,
+        alphaType: canvasKit.AlphaType.Premul,
+        colorSpace: SkColorSpaceSRGB,
+      ),
+      pixels,
+      rowBytes ?? 4 * width,
+    );
 
     if (skImage == null) {
-      throw Exception('Failed to convert image bitmap to an SkImage.');
+      throw Exception('Failed to create image from pixels.');
     }
-    return CkImage(skImage);
-  }
 
-  @override
-  void decodeImageFromPixels(
-    Uint8List pixels,
-    int width,
-    int height,
-    ui.PixelFormat format,
-    ui.ImageDecoderCallback callback, {
-    int? rowBytes,
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
-  }) => skiaDecodeImageFromPixels(
-    pixels,
-    width,
-    height,
-    format,
-    callback,
-    rowBytes: rowBytes,
-    targetWidth: targetWidth,
-    targetHeight: targetHeight,
-    allowUpscaling: allowUpscaling,
-  );
+    return CkImageDelegate(skImage);
+  }
 
   @override
   ui.ImageShader createImageShader(
@@ -332,7 +329,7 @@ class CanvasKitRenderer extends Renderer {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
-  }) => isExperimentalWebParagraph
+  }) => isWebParagraphEnabled
       ? WebTextStyle(
           color: color,
           decoration: decoration,
@@ -394,7 +391,7 @@ class CanvasKitRenderer extends Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) => isExperimentalWebParagraph
+  }) => isWebParagraphEnabled
       ? WebParagraphStyle(
           textAlign: textAlign,
           textDirection: textDirection,
@@ -435,7 +432,7 @@ class CanvasKitRenderer extends Renderer {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) => isExperimentalWebParagraph
+  }) => isWebParagraphEnabled
       ? WebStrutStyle(
           fontFamily: fontFamily,
           fontFamilyFallback: fontFamilyFallback,
@@ -461,7 +458,7 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      isExperimentalWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
+      isWebParagraphEnabled ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>

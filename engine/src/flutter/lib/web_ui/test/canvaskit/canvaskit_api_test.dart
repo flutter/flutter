@@ -276,6 +276,11 @@ void _vertexModeTests() {
 
 void _imageTests() {
   test('MakeAnimatedImageFromEncoded makes a non-animated image', () {
+    if (configuration.canvasKitVariant == CanvasKitVariant.chromium) {
+      // The CanvasKit Chromium build does not contain image codecs.
+      return;
+    }
+
     final SkAnimatedImage nonAnimated = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
     expect(nonAnimated.getFrameCount(), 1);
     expect(nonAnimated.getRepetitionCount(), 0);
@@ -300,6 +305,11 @@ void _imageTests() {
   });
 
   test('MakeAnimatedImageFromEncoded makes an animated image', () {
+    if (configuration.canvasKitVariant == CanvasKitVariant.chromium) {
+      // The CanvasKit Chromium build does not contain image codecs.
+      return;
+    }
+
     final SkAnimatedImage animated = canvasKit.MakeAnimatedImageFromEncoded(kAnimatedGif)!;
     expect(animated.getFrameCount(), 3);
     expect(animated.getRepetitionCount(), -1); // animates forever
@@ -1140,15 +1150,16 @@ void _canvasTests() {
     canvas.drawArc(Float32List.fromList(<double>[0, 0, 100, 50]), 0, 100, true, SkPaint());
   });
 
-  test('drawAtlas', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
+  test('drawAtlas', () async {
+    final EngineImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawAtlas(
-      image.makeImageAtCurrentFrame(),
+      (image.backendImage as CkImageDelegate).skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
       Float32List.fromList(<double>[1, 0, 2, 3]),
       SkPaint(),
       canvasKit.BlendMode.SrcOver,
       Uint32List.fromList(<int>[0xff000000, 0xffffffff]),
+      toSkFilterOptions(ui.FilterQuality.none),
     );
   });
 
@@ -1168,10 +1179,10 @@ void _canvasTests() {
     );
   });
 
-  test('drawImageOptions', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
+  test('drawImageOptions', () async {
+    final EngineImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageOptions(
-      image.makeImageAtCurrentFrame(),
+      (image.backendImage as CkImageDelegate).skImage,
       10,
       20,
       canvasKit.FilterMode.Linear,
@@ -1180,15 +1191,22 @@ void _canvasTests() {
     );
   });
 
-  test('drawImageCubic', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
-    canvas.drawImageCubic(image.makeImageAtCurrentFrame(), 10, 20, 0.3, 0.3, SkPaint());
+  test('drawImageCubic', () async {
+    final EngineImage image = await createImageFromBytes(kTransparentImage);
+    canvas.drawImageCubic(
+      (image.backendImage as CkImageDelegate).skImage,
+      10,
+      20,
+      0.3,
+      0.3,
+      SkPaint(),
+    );
   });
 
-  test('drawImageRectOptions', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
+  test('drawImageRectOptions', () async {
+    final EngineImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageRectOptions(
-      image.makeImageAtCurrentFrame(),
+      (image.backendImage as CkImageDelegate).skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
       Float32List.fromList(<double>[0, 0, 1, 1]),
       canvasKit.FilterMode.Linear,
@@ -1197,10 +1215,10 @@ void _canvasTests() {
     );
   });
 
-  test('drawImageRectCubic', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
+  test('drawImageRectCubic', () async {
+    final EngineImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageRectCubic(
-      image.makeImageAtCurrentFrame(),
+      (image.backendImage as CkImageDelegate).skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
       Float32List.fromList(<double>[0, 0, 1, 1]),
       0.3,
@@ -1209,10 +1227,10 @@ void _canvasTests() {
     );
   });
 
-  test('drawImageNine', () {
-    final SkAnimatedImage image = canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!;
+  test('drawImageNine', () async {
+    final EngineImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageNine(
-      image.makeImageAtCurrentFrame(),
+      (image.backendImage as CkImageDelegate).skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
       Float32List.fromList(<double>[0, 0, 1, 1]),
       canvasKit.FilterMode.Linear,
@@ -1430,16 +1448,16 @@ void _canvasTests() {
       SkPaint()..setColorInt(0xAAFFFFFF),
     );
     final picture = CkPicture(otherRecorder.finishRecordingAsPicture());
-    final image = await picture.toImage(1, 1) as CkImage;
-    final ByteData rawData = await image.toByteData();
+    final image = await picture.toImage(1, 1) as EngineImage;
+    final ByteData rawData = (await image.toByteData())!;
     expect(rawData.lengthInBytes, greaterThan(0));
     expect(rawData.buffer.asUint32List(), <int>[0xAAAAAAAA]);
-    final ByteData rawStraightData = await image.toByteData(
+    final ByteData rawStraightData = (await image.toByteData(
       format: ui.ImageByteFormat.rawStraightRgba,
-    );
+    ))!;
     expect(rawStraightData.lengthInBytes, greaterThan(0));
     expect(rawStraightData.buffer.asUint32List(), <int>[0xAAFFFFFF]);
-    final ByteData pngData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData pngData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
     expect(pngData.lengthInBytes, greaterThan(0));
   });
 }
@@ -1819,20 +1837,65 @@ void _paragraphTests() {
 
       v8BreakIterator = Object().toJSBox;
       browserSupportsImageDecoder = false;
-      // TODO(mdebbar): we don't check image codecs for now.
-      // https://github.com/flutter/flutter/issues/122331
       expect(getCanvasKitJsFileNames(CanvasKitVariant.full), <String>['canvaskit.js']);
       expect(getCanvasKitJsFileNames(CanvasKitVariant.chromium), <String>['chromium/canvaskit.js']);
-      expect(getCanvasKitJsFileNames(CanvasKitVariant.auto), <String>[
-        'chromium/canvaskit.js',
-        'canvaskit.js',
-      ]);
+      expect(getCanvasKitJsFileNames(CanvasKitVariant.auto), <String>['canvaskit.js']);
 
       v8BreakIterator = null;
       browserSupportsImageDecoder = false;
       expect(getCanvasKitJsFileNames(CanvasKitVariant.full), <String>['canvaskit.js']);
       expect(getCanvasKitJsFileNames(CanvasKitVariant.chromium), <String>['chromium/canvaskit.js']);
       expect(getCanvasKitJsFileNames(CanvasKitVariant.auto), <String>['canvaskit.js']);
+    });
+
+    test('with preferWebParagraph enabled and supported', () {
+      v8BreakIterator = Object().toJSBox; // Any non-null value.
+      intlSegmenter = Object().toJSBox; // Any non-null value.
+      browserSupportsImageDecoder = true;
+      browserSupportsTextCluster = true;
+
+      debugOverrideJsConfiguration(
+        <String, Object?>{'preferWebParagraph': true}.jsify() as JsFlutterConfiguration?,
+      );
+
+      try {
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.full), <String>[
+          'webparagraph/canvaskit.js',
+        ]);
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.chromium), <String>[
+          'webparagraph/canvaskit.js',
+        ]);
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.auto), <String>[
+          'webparagraph/canvaskit.js',
+        ]);
+      } finally {
+        debugOverrideJsConfiguration(null);
+        browserSupportsTextCluster = false;
+      }
+    });
+
+    test('with preferWebParagraph enabled but NOT supported', () {
+      v8BreakIterator = Object().toJSBox; // Any non-null value.
+      intlSegmenter = Object().toJSBox; // Any non-null value.
+      browserSupportsImageDecoder = true;
+      browserSupportsTextCluster = false; // Not supported!
+
+      debugOverrideJsConfiguration(
+        <String, Object?>{'preferWebParagraph': true}.jsify() as JsFlutterConfiguration?,
+      );
+
+      try {
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.full), <String>['canvaskit.js']);
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.chromium), <String>[
+          'chromium/canvaskit.js',
+        ]);
+        expect(getCanvasKitJsFileNames(CanvasKitVariant.auto), <String>[
+          'chromium/canvaskit.js',
+          'canvaskit.js',
+        ]);
+      } finally {
+        debugOverrideJsConfiguration(null);
+      }
     });
   });
 
