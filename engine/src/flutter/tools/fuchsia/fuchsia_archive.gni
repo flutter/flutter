@@ -86,7 +86,11 @@ template("fuchsia_archive") {
   _package_target = target_name + "__package"
   _package_name = target_name
   fuchsia_package(_package_target) {
-    forward_variables_from(invoker, [ "testonly" ])
+    forward_variables_from(invoker,
+                           [
+                             "subpackages",
+                             "testonly",
+                           ])
     package_name = _package_name
     deps = [ ":$_component_target" ]
   }
@@ -159,6 +163,7 @@ template("fuchsia_test_archive") {
                              "binary",
                              "libraries",
                              "resources",
+                             "subpackages",
                            ])
     testonly = true
     if (defined(_cml_file)) {

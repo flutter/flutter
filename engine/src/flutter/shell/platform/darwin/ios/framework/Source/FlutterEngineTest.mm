@@ -10,14 +10,15 @@
 
 #import "flutter/common/settings.h"
 #include "flutter/fml/synchronization/sync_switch.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
@@ -282,14 +283,6 @@ FLUTTER_ASSERT_ARC
       [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:setInitialRouteMethodCall];
   OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/navigation"
                                        message:encodedSetInitialRouteMethod]);
-}
-
-- (void)testPlatformViewsControllerRenderingMetalBackend {
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
-  [engine run];
-  flutter::IOSRenderingAPI renderingApi = [engine platformViewsRenderingAPI];
-
-  XCTAssertEqual(renderingApi, flutter::IOSRenderingAPI::kMetal);
 }
 
 - (void)testWaitForFirstFrameTimeout {
@@ -584,19 +577,6 @@ FLUTTER_ASSERT_ARC
 
   XCTAssertEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
                  engine.shell.GetTaskRunners().GetPlatformTaskRunner());
-#endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
-}
-
-- (void)testCanUnMergePlatformAndUIThread {
-#if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
-  auto settings = FLTDefaultSettingsForBundle();
-  settings.merged_platform_ui_thread = flutter::Settings::MergedPlatformUIThread::kDisabled;
-  FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
-  [engine run];
-
-  XCTAssertNotEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
-                    engine.shell.GetTaskRunners().GetPlatformTaskRunner());
 #endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
 }
 

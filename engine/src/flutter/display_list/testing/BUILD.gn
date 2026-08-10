@@ -76,21 +76,7 @@ source_set("display_list_surface_provider") {
   ]
 
   if (is_mac) {
-    deps += [ "//flutter/impeller/golden_tests:metal_screenshot" ]
-  }
-
-  if (impeller_supports_rendering) {
-    sources += [
-      "impeller/dl_test_surface_instance_impeller.cc",
-      "impeller/dl_test_surface_instance_impeller.h",
-      "impeller/dl_test_surface_provider_impeller.cc",
-      "impeller/dl_test_surface_provider_impeller.h",
-    ]
-
-    deps += [
-      "//flutter/impeller/display_list",
-      "//flutter/impeller/playground",
-    ]
+    deps += [ "//flutter/impeller/testing:metal_screenshot" ]
   }
 
   public_configs = [ ":surface_provider_config" ]
@@ -125,12 +111,21 @@ source_set("display_list_surface_provider") {
       "skia/dl_test_surface_provider_skia_metal.h",
       "skia/dl_test_surface_provider_skia_metal.mm",
     ]
-    if (impeller_supports_rendering) {
+    if (impeller_enable_metal) {
       sources += [
+        "impeller/dl_test_surface_instance_impeller.cc",
+        "impeller/dl_test_surface_instance_impeller.h",
+        "impeller/dl_test_surface_provider_impeller.cc",
+        "impeller/dl_test_surface_provider_impeller.h",
         "impeller/dl_test_surface_provider_impeller_metal.cc",
         "impeller/dl_test_surface_provider_impeller_metal.h",
       ]
-      deps += [ "//flutter/impeller/display_list" ]
+      deps += [
+        "//flutter/impeller/display_list",
+        "//flutter/impeller/playground",
+        "//flutter/impeller/testing:metal_screenshot",
+        "//flutter/impeller/testing:screenshot",
+      ]
     }
     deps += [ "//flutter/testing:metal" ]
   }

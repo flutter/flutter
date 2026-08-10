@@ -196,6 +196,14 @@ class ScrollController extends ChangeNotifier {
   /// The animation is indifferent to changes to the viewport or content
   /// dimensions.
   ///
+  /// For scrollables that lazily construct their contents, such as
+  /// [ListView.builder], a value based on [ScrollPosition.maxScrollExtent] can
+  /// be an estimate. It may not reach newly added content outside the current
+  /// cache extent because the animation target is computed from the current
+  /// [ScrollMetrics.maxScrollExtent] estimate. The target is not updated as
+  /// more children are laid out during the animation. To reveal a built child,
+  /// use [Scrollable.ensureVisible] with the child's [BuildContext].
+  ///
   /// Once the animation has completed, the scroll position will attempt to
   /// begin a ballistic activity in case its value is not stable (for example,
   /// if it is scrolled beyond the extents and in that situation the scroll

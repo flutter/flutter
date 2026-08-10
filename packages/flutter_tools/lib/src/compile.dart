@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-import 'package:usage/uuid/uuid.dart';
+import 'package:uuid/uuid.dart';
 
 import 'artifacts.dart';
 import 'base/common.dart';
@@ -23,6 +23,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'convert.dart';
+import 'dart/package_map.dart';
 
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
@@ -62,6 +63,15 @@ class TargetModel {
 
   @override
   String toString() => _value;
+
+  /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
+  static TargetModel fromTargetPlatform(TargetPlatform? platform) {
+    return switch (platform) {
+      TargetPlatform.web_javascript => TargetModel.dartdevc,
+      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
+      _ => TargetModel.flutter,
+    };
+  }
 }
 
 class CompilerOutput {
@@ -282,7 +292,7 @@ class KernelCompiler {
       final File mainFile = _fileSystem.file(mainPath);
       final Uri mainFileUri = mainFile.uri;
       if (packagesPath != null) {
-        mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
+        mainUri = packageConfig.toPackageUriForWorkspace(mainFileUri)?.toString();
       }
       mainUri ??= toMultiRootPath(
         mainFileUri,
@@ -305,7 +315,7 @@ class KernelCompiler {
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
       dartPluginRegistrantUri =
-          packageConfig.toPackageUri(dartPluginRegistrantFileUri)?.toString() ??
+          packageConfig.toPackageUriForWorkspace(dartPluginRegistrantFileUri)?.toString() ??
           toMultiRootPath(
             dartPluginRegistrantFileUri,
             _fileSystemScheme,
@@ -350,7 +360,7 @@ class KernelCompiler {
           '--no-print-incremental-dependencies',
           for (final Object dartDefine in dartDefines) '-D$dartDefine',
           ...buildModeOptions(buildMode, dartDefines),
-          if (trackWidgetCreation) '--track-widget-creation',
+          if (trackWidgetCreation) '--track-creation-locations',
           if (!linkPlatformKernelIn) '--no-link-platform',
           if (aot) ...<String>[
             '--aot',
@@ -391,7 +401,8 @@ class KernelCompiler {
     _logger.printTrace(command.join(' '));
     final Process server = await _processManager.start(command);
 
-    server.stderr.transform<String>(utf8.decoder).listen(_logger.printError);
+    // Use permissive decoder for compiler stderr which may contain invalid UTF-8
+    server.stderr.transform<String>(utf8AllowMalformed.decoder).listen(_logger.printError);
     server.stdout.transform(utf8LineDecoder).listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
@@ -726,6 +737,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
              fileSystem: fileSystem,
              trackWidgetCreation: buildInfo.trackWidgetCreation,
              dartDefines: buildInfo.dartDefines,
+             targetModel: targetModel,
              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
            ),
        extraFrontEndOptions = buildInfo.extraFrontEndOptions,
@@ -842,13 +854,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
 
     final String mainUri =
-        request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
+        request.packageConfig.toPackageUriForWorkspace(request.mainUri)?.toString() ??
         toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
 
     String? additionalSourceUri;
     if (request.additionalSourceUri != null) {
       additionalSourceUri =
-          request.packageConfig.toPackageUri(request.additionalSourceUri!)?.toString() ??
+          request.packageConfig
+              .toPackageUriForWorkspace(request.additionalSourceUri!)
+              ?.toString() ??
           toMultiRootPath(
             request.additionalSourceUri!,
             fileSystemScheme,
@@ -867,7 +881,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         nativeAssetsUri: nativeAssets,
       );
     }
-    final String inputKey = Uuid().generateV4();
+    final String inputKey = const Uuid().v4();
 
     if (nativeAssets != null && nativeAssets.isNotEmpty) {
       server.stdin.writeln('native-assets $nativeAssets');
@@ -887,7 +901,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           message = fileUri.toString();
         } else {
           message =
-              request.packageConfig.toPackageUri(fileUri)?.toString() ??
+              request.packageConfig.toPackageUriForWorkspace(fileUri)?.toString() ??
               toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
         }
         server.stdin.writeln(message);
@@ -963,7 +977,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       if (packagesPath != null) ...<String>['--packages', packagesPath!],
       ...buildModeOptions(buildMode, dartDefines),
-      if (trackWidgetCreation) '--track-widget-creation',
+      if (trackWidgetCreation) '--track-creation-locations',
       if (includeUnsupportedPlatformLibraryStubs) '--include-unsupported-platform-library-stubs',
       for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
       if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme!],
@@ -999,7 +1013,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
           },
         );
 
-    _server?.stderr.transform(utf8LineDecoder).listen(_logger.printError);
+    // Use permissive decoder for compiler stderr which may contain invalid UTF-8
+    _server?.stderr.transform(utf8AllowMalformedLineDecoder).listen(_logger.printError);
 
     unawaited(
       _server?.exitCode.then((int code) {
@@ -1067,7 +1082,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return null;
     }
 
-    final String inputKey = Uuid().generateV4();
+    final String inputKey = const Uuid().v4();
     server.stdin
       ..writeln('compile-expression $inputKey')
       ..writeln(request.expression);

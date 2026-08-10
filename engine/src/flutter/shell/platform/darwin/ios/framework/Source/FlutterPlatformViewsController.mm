@@ -437,15 +437,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   [self resetFrameState];
 }
 
-- (flutter::PostPrerollResult)postPrerollActionWithThreadMerger:
-    (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
-  return flutter::PostPrerollResult::kSuccess;
-}
-
-- (void)endFrameWithResubmit:(BOOL)shouldResubmitFrame
-                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
-}
-
 - (void)pushFilterToVisitedPlatformViews:(const std::shared_ptr<flutter::DlImageFilter>&)filter
                                 withRect:(const flutter::DlRect&)filterRect {
   for (int64_t id : self.visitedPlatformViews) {
@@ -615,10 +606,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
           [pendingClipRRects removeAllObjects];
         }
         visualEffectView.layer.cornerRadius = cornerRadius;
-        if (@available(iOS 13.0, *)) {
-          visualEffectView.layer.cornerCurve =
-              isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
-        }
+        visualEffectView.layer.cornerCurve =
+            isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
         visualEffectView.clipsToBounds = YES;
 
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView

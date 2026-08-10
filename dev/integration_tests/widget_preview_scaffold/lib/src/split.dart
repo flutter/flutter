@@ -10,6 +10,8 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'utils/pointer_events/pointer_events.dart';
+
 // Method to convert degrees to radians
 double degToRad(num deg) => deg * (math.pi / 180.0);
 
@@ -97,6 +99,7 @@ final class SplitPane extends StatefulWidget {
 
 final class _SplitPaneState extends State<SplitPane> {
   late final List<double> fractions;
+  bool _isDragging = false;
 
   bool get isHorizontal => widget.axis == Axis.horizontal;
 
@@ -104,6 +107,14 @@ final class _SplitPaneState extends State<SplitPane> {
   void initState() {
     super.initState();
     fractions = List.of(widget.initialFractions);
+  }
+
+  @override
+  void dispose() {
+    if (_isDragging) {
+      toggleIframePointerEvents(false);
+    }
+    super.dispose();
   }
 
   @override
@@ -270,7 +281,19 @@ final class _SplitPaneState extends State<SplitPane> {
             child: GestureDetector(
               key: widget.dividerKey(i),
               behavior: HitTestBehavior.translucent,
+              onPanStart: (details) {
+                _isDragging = true;
+                toggleIframePointerEvents(true);
+              },
               onPanUpdate: (details) => updateSpacing(details, i),
+              onPanEnd: (details) {
+                _isDragging = false;
+                toggleIframePointerEvents(false);
+              },
+              onPanCancel: () {
+                _isDragging = false;
+                toggleIframePointerEvents(false);
+              },
               // DartStartBehavior.down is needed to keep the mouse pointer stuck to
               // the drag bar. There still appears to be a few frame lag before the
               // drag action triggers which is't ideal but isn't a launch blocker.

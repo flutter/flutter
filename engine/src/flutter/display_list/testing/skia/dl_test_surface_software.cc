@@ -20,13 +20,13 @@ bool DlSoftwareSurfaceProvider::InitializeSurface(size_t width,
   return primary_ != nullptr;
 }
 
-std::shared_ptr<DlSurfaceInstance>
+std::unique_ptr<DlSurfaceInstance>
 DlSoftwareSurfaceProvider::MakeOffscreenSurface(size_t width,
                                                 size_t height,
                                                 PixelFormat format) const {
   auto surface = SkSurfaces::Raster(MakeInfo(format, width, height));
   surface->getCanvas()->clear(SK_ColorTRANSPARENT);
-  return std::make_shared<DlSurfaceInstanceSkia>(surface);
+  return std::make_unique<DlSurfaceInstanceSkia>(surface);
 }
 
 }  // namespace testing

@@ -17,6 +17,7 @@ import 'basic.dart';
 import 'constants.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
 import 'localizations.dart';
@@ -647,7 +648,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
                 highlightIndexNotifier: _highlightedOptionIndex,
-                child: child,
+                // Exclude the options overlay from the ambient focus
+                // traversal tree. Autocomplete options are navigated by
+                // arrow keys (via the widget's own shortcuts) and selected
+                // via Enter or tap, so they don't participate in TAB
+                // traversal. Without this, TAB from the field would
+                // detour into focusable items in the options overlay
+                // instead of advancing to the next form field.
+                child: ExcludeFocus(child: child),
               ),
             ),
           ),

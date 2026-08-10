@@ -65,10 +65,12 @@ bool WriteImageToDisk(const fml::UniqueFD& directory,
                       const sk_sp<SkImage>& image);
 
 bool ImageMatchesFixture(const std::string& fixture_file_name,
-                         const sk_sp<SkImage>& scene_image);
+                         const sk_sp<SkImage>& scene_image,
+                         int allowable_different_pixels = 0);
 
 bool ImageMatchesFixture(const std::string& fixture_file_name,
-                         std::future<sk_sp<SkImage>>& scene_image);
+                         std::future<sk_sp<SkImage>>& scene_image,
+                         int allowable_different_pixels = 0);
 
 bool SurfacePixelDataMatchesBytes(SkSurface* surface,
                                   const std::vector<uint8_t>& bytes);

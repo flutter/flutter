@@ -35,4 +35,28 @@ public class FlutterShellArgsTest {
     assertTrue(argValues.contains("--dart-flags=--observe --no-hot --no-pub"));
     assertTrue(argValues.contains("--trace-skia-allowlist=skia.a,skia.b"));
   }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void itPropagatesEnableFlutterGpuFromIntent() {
+    Intent intent = new Intent();
+    intent.putExtra(FlutterShellArgs.ARG_KEY_ENABLE_FLUTTER_GPU, true);
+
+    FlutterShellArgs args = FlutterShellArgs.fromIntent(intent);
+    HashSet<String> argValues = new HashSet<String>(Arrays.asList(args.toArray()));
+
+    assertEquals(1, argValues.size());
+    assertTrue(argValues.contains(FlutterShellArgs.ARG_ENABLE_FLUTTER_GPU));
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void itDoesNotPropagateEnableFlutterGpuWhenAbsent() {
+    Intent intent = new Intent();
+
+    FlutterShellArgs args = FlutterShellArgs.fromIntent(intent);
+    HashSet<String> argValues = new HashSet<String>(Arrays.asList(args.toArray()));
+
+    assertEquals(0, argValues.size());
+  }
 }

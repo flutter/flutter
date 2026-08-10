@@ -389,6 +389,12 @@ class Plugin {
       final dartClass = (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
       final String dartFileName =
           (platformsYaml[platformKey] as YamlMap)[kDartFileName] as String? ?? '$pluginName.dart';
+      if (!isValidPluginDartFileName(dartFileName)) {
+        throwToolExit(
+          'The plugin `$pluginName` has an invalid `dartFileName` for platform `$platformKey` '
+          'in pubspec.yaml.',
+        );
+      }
       return (dartClass: dartClass, dartFileName: dartFileName);
     }
     return null;
@@ -470,12 +476,20 @@ class Plugin {
     return fileSystem.path.join(packagePath, 'Package.swift');
   }
 
-  /// Returns true if a Package.swift is found.
+  /// Returns true if the plugin supports the [platform] and a Package.swift exists.
   bool supportSwiftPackageManagerForPlatform(FileSystem fileSystem, String platform) {
     final String? manifestPath = pluginSwiftPackageManifestPath(fileSystem, platform);
     return platforms[platform] != null &&
         manifestPath != null &&
         fileSystem.file(manifestPath).existsSync();
+  }
+
+  /// Returns true if the plugin supports the [platform] and a podspec exists.
+  bool supportCocoapodsForPlatform(FileSystem fileSystem, String platform) {
+    final String? podspecPath = pluginPodspecPath(fileSystem, platform);
+    return platforms[platform] != null &&
+        podspecPath != null &&
+        fileSystem.file(podspecPath).existsSync();
   }
 
   /// Expected path to the plugin's podspec. Returns null if the plugin does

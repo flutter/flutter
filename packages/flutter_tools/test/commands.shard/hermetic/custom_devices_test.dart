@@ -204,6 +204,9 @@ class FakeTerminal implements Terminal {
   Stream<String> get keystrokes => terminal.keystrokes;
 
   @override
+  Future<String> readLine() => terminal.readLine();
+
+  @override
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
     required Logger logger,

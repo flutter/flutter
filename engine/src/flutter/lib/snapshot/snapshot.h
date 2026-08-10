@@ -10,10 +10,8 @@
 #include <stdint.h>
 
 extern "C" {
-extern const uint8_t kDartVmSnapshotData[];
-extern const uint8_t kDartVmSnapshotInstructions[];
-extern const uint8_t kDartIsolateSnapshotData[];
-extern const uint8_t kDartIsolateSnapshotInstructions[];
+extern const uint8_t kDartSnapshotData[];
+extern const uint8_t kDartSnapshotText[];
 }
 
 #endif  // FLUTTER_LIB_SNAPSHOT_SNAPSHOT_H_

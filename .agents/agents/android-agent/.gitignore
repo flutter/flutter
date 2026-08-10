@@ -1,0 +1,2 @@
+# Ignore npx managed skills
+.agents/skills/

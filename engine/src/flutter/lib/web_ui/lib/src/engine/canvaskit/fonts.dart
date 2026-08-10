@@ -27,7 +27,7 @@ class SkiaFontCollection implements FlutterFontCollection {
   final Set<String> _downloadedFontFamilies = <String>{};
 
   @override
-  late FontFallbackManager? fontFallbackManager;
+  late FontFallbackManager fontFallbackManager;
 
   late FallbackFontRegistry _fallbackRegistry;
 

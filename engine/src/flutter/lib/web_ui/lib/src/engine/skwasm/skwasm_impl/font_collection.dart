@@ -55,16 +55,8 @@ class SkwasmFontCollection implements FlutterFontCollection {
     }
   });
 
-  @visibleForTesting
   @override
-  set fontFallbackManager(FontFallbackManager? value) {
-    _fontFallbackManager = value;
-  }
-
-  FontFallbackManager? _fontFallbackManager;
-
-  @override
-  FontFallbackManager? get fontFallbackManager => _fontFallbackManager;
+  late FontFallbackManager fontFallbackManager;
 
   late FallbackFontRegistry _fallbackRegistry;
 

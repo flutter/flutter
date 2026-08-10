@@ -5,11 +5,16 @@
 /// @docImport 'ios/mac.dart';
 library;
 
+import 'dart:async';
+
 import 'package:yaml/yaml.dart' as yaml;
 
+import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/process.dart';
 import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
@@ -240,7 +245,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return null;
     }
     return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
-      hostAppRoot.path,
+      this,
       buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
     );
   }
@@ -339,7 +344,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
 
     final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
-      xcodeProject.path,
+      this,
       buildContext: buildContext,
     );
     if (buildSettings.isNotEmpty) {
@@ -383,6 +388,67 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       }
     }
     return flavor;
+  }
+
+  /// The process used to fetch Swift packages.
+  Process? _swiftPackageFetchProcess;
+
+  /// The stdout subscription for the Swift package fetch process.
+  StreamSubscription<String>? _swiftPackageFetchStdoutSubscription;
+
+  /// The stderr subscription for the Swift package fetch process.
+  StreamSubscription<String>? _swiftPackageFetchStderrSubscription;
+
+  /// Prefetches Swift packages for the Xcode project if the project has migrated to SwiftPM.
+  Future<void> prefetchSwiftPackages({
+    required List<String> xcodebuildProjectCommandArguments,
+    required ProcessUtils processUtils,
+    required Logger logger,
+  }) async {
+    // If the project has not migrated to SwiftPM, we don't need to prefetch Swift packages.
+    if (!usesSwiftPackageManager || !flutterPluginSwiftPackageInProjectSettings) {
+      return;
+    }
+
+    Status? status;
+    try {
+      final command = <String>[...xcodebuildProjectCommandArguments, '-resolvePackageDependencies'];
+      if (_swiftPackageFetchProcess != null) {
+        return;
+      }
+      final Process process = await processUtils.start(command, workingDirectory: hostAppRoot.path);
+      _swiftPackageFetchProcess = process;
+      var printFetchWarnings = false;
+      _swiftPackageFetchStdoutSubscription ??= process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) {
+            if (line.startsWith('Fetching')) {
+              status?.cancel();
+              if (!printFetchWarnings) {
+                logger.printStatus(
+                  'Xcode is fetching Swift Package Manager dependencies. This may take several minutes...',
+                );
+                printFetchWarnings = true;
+              }
+              status = logger.startProgress('  $line...');
+            }
+          });
+      final stderrBuffer = StringBuffer();
+      _swiftPackageFetchStderrSubscription ??= process.stderr
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .listen(stderrBuffer.write);
+
+      final int exitCode = await process.exitCode.whenComplete(() async {
+        await _swiftPackageFetchStdoutSubscription?.cancel();
+        await _swiftPackageFetchStderrSubscription?.cancel();
+      });
+      if (exitCode != 0) {
+        throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
+      }
+    } finally {
+      status?.cancel();
+    }
   }
 }
 

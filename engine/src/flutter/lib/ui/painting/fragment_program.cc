@@ -158,6 +158,13 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
       ui_dart_state->GetRuntimeStageBackend();
   std::shared_ptr<impeller::RuntimeStage> runtime_stage =
       (*runtime_stages)[backend];
+  if (runtime_stage) {
+    // Anchor the registry namespace to the asset path so hot reload of the
+    // same asset evicts the previous registration at the same scoped key,
+    // and so two different FragmentProgram assets cannot collide with each
+    // other or with engine-internal entrypoint names.
+    runtime_stage->SetLibraryId(asset_name);
+  }
   if (!runtime_stage) {
     std::ostringstream stream;
     stream << "Asset '" << asset_name
@@ -264,9 +271,10 @@ std::shared_ptr<DlColorSource> FragmentProgram::MakeDlColorSource(
 
 std::shared_ptr<DlImageFilter> FragmentProgram::MakeDlImageFilter(
     std::shared_ptr<std::vector<uint8_t>> float_uniforms,
-    const std::vector<std::shared_ptr<DlColorSource>>& children) {
-  return DlImageFilter::MakeRuntimeEffect(runtime_effect_, children,
-                                          std::move(float_uniforms));
+    const std::vector<std::shared_ptr<DlColorSource>>& children,
+    DlImageSampling input_sampling) {
+  return DlImageFilter::MakeRuntimeEffect(
+      runtime_effect_, children, std::move(float_uniforms), input_sampling);
 }
 
 void FragmentProgram::Create(Dart_Handle wrapper) {

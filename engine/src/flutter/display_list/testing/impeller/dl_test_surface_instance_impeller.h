@@ -11,6 +11,7 @@
 #include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/playground/playground_impl.h"
 #include "flutter/impeller/renderer/surface.h"
+#include "flutter/impeller/testing/metal/metal_screenshotter.h"
 #include "flutter/impeller/typographer/typographer_context.h"
 
 namespace flutter {
@@ -39,6 +40,12 @@ class DlSurfaceInstanceImpeller : public DlSurfaceInstance {
 
   // |DlSurfaceInstance|
   void FlushSubmitCpuSync() override;
+
+  // |DlSurfaceInstance|
+  std::unique_ptr<DlPixelData> SnapshotToPixelData() const override;
+
+  // |DlSurfaceInstance|
+  sk_sp<DlImage> SnapshotToImage() const override;
 
   // |DlSurfaceInstance|
   bool SnapshotToFile(std::string& filename) const override;

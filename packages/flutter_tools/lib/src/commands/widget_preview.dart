@@ -28,6 +28,7 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../isolated/resident_web_runner.dart';
+import '../migrations/widget_preview_gitignore_migration.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
@@ -322,6 +323,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     previewAnalytics.initializeLaunchStopwatch();
     logger.sendInitializingEvent();
 
+    await WidgetPreviewGitignoreMigration(rootProject, logger).migrate();
+
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
     widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
@@ -356,6 +359,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         printStatusWhenWriting: verbose,
       );
       if (customPreviewScaffoldOutput != null) {
+        _copyHostWebDirToScaffold(widgetPreviewScaffold);
         return FlutterCommandResult.success();
       }
       _previewManifest.generate();
@@ -385,6 +389,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       await _previewPubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
     }
 
+    _copyHostWebDirToScaffold(widgetPreviewScaffold);
+
     if (!widgetPreviewScaffoldProject.dartTool.existsSync()) {
       await _previewPubspecBuilder.generatePackageConfig(
         widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
@@ -410,13 +416,31 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
       await _lspPreviewDetector.initialize();
 
+      // Wait for the initial analysis to complete to ensure the analysis server
+      // has registered the widget preview RPC methods.
+      await _lspPreviewDetector.analysisServer?.waitForAnalysis();
+
       _previewCodeGenerator.populateDtdConnectionInfo(
         dtdUri: _dtdService.dtdUri!,
         widgetPreviewServiceName: _dtdService.widgetPreviewService,
         widgetPreviewScaffoldStreamName: _dtdService.widgetPreviewScaffoldStream,
+        projectRootPath: rootProject.directory.absolute.path,
       );
 
-      final FlutterWidgetPreviews originalPreviews = await _dtdService.getFlutterWidgetPreviews();
+      final FlutterWidgetPreviews originalPreviews;
+      try {
+        originalPreviews = await _dtdService.getFlutterWidgetPreviews();
+      } on Exception catch (e) {
+        throwToolExit(
+          'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
+          'Ensure that the analysis server is running and reachable. Details: $e',
+        );
+      } on StateError catch (e) {
+        throwToolExit(
+          'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
+          'Ensure that the analysis server is running and reachable. Details: $e',
+        );
+      }
       _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(originalPreviews);
     }
 
@@ -428,6 +452,21 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
 
     return FlutterCommandResult.success();
+  }
+
+  void _copyHostWebDirToScaffold(Directory scaffoldDirectory) {
+    final Directory hostWebDir = rootProject.directory.childDirectory('web');
+    if (hostWebDir.existsSync()) {
+      final Directory scaffoldWebDir = scaffoldDirectory.childDirectory('web');
+      if (scaffoldWebDir.existsSync()) {
+        logger.printTrace('Deleting scaffold web directory: ${scaffoldWebDir.path}');
+        scaffoldWebDir.deleteSync(recursive: true);
+      }
+      logger.printTrace(
+        'Copying host web directory to scaffold web directory: ${hostWebDir.path} -> ${scaffoldWebDir.path}',
+      );
+      copyDirectory(hostWebDir, scaffoldWebDir);
+    }
   }
 
   void onLegacyChangeDetected(PreviewDependencyGraph previews) {

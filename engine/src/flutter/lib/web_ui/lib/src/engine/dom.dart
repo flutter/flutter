@@ -258,22 +258,103 @@ external DomIntl get domIntl;
 @JS('Symbol')
 external DomSymbol get domSymbol;
 
-@JS('createImageBitmap')
-external JSPromise<JSAny?> _createImageBitmap(JSAny source, [int x, int y, int width, int height]);
+extension CreateImageBitmapExtension on JSObject {
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> createImageBitmap(JSAny source);
+
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> createImageBitmapWithOptions(JSAny source, ImageBitmapOptions options);
+
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> createImageBitmapWithBounds(
+    JSAny source,
+    int x,
+    int y,
+    int width,
+    int height,
+  );
+
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> createImageBitmapWithBoundsAndOptions(
+    JSAny source,
+    int x,
+    int y,
+    int width,
+    int height,
+    ImageBitmapOptions options,
+  );
+}
+
 Future<DomImageBitmap> createImageBitmap(
-  JSAny source, [
+  JSAny source, {
   ({int x, int y, int width, int height})? bounds,
-]) {
+  ImageBitmapOptions? options,
+}) {
   if (debugThrowOnCreateImageBitmapIfDisabled && !browserSupportsCreateImageBitmap) {
     throw UnsupportedError('createImageBitmap is not supported in this browser');
   }
-  JSPromise<JSAny?> jsPromise;
+  final JSPromise<JSAny?> jsPromise;
   if (bounds != null) {
-    jsPromise = _createImageBitmap(source, bounds.x, bounds.y, bounds.width, bounds.height);
+    if (options != null) {
+      jsPromise = globalContext.createImageBitmapWithBoundsAndOptions(
+        source,
+        bounds.x,
+        bounds.y,
+        bounds.width,
+        bounds.height,
+        options,
+      );
+    } else {
+      jsPromise = globalContext.createImageBitmapWithBounds(
+        source,
+        bounds.x,
+        bounds.y,
+        bounds.width,
+        bounds.height,
+      );
+    }
   } else {
-    jsPromise = _createImageBitmap(source);
+    if (options != null) {
+      jsPromise = globalContext.createImageBitmapWithOptions(source, options);
+    } else {
+      jsPromise = globalContext.createImageBitmap(source);
+    }
   }
   return jsPromise.toDart.then((JSAny? value) => value! as DomImageBitmap);
+}
+
+@JS()
+@anonymous
+extension type ImageBitmapOptions._primary(JSObject _) implements JSObject {
+  factory ImageBitmapOptions({
+    String? imageOrientation,
+    String? premultiplyAlpha,
+    String? colorSpaceConversion,
+    int? resizeWidth,
+    int? resizeHeight,
+    String? resizeQuality,
+  }) {
+    final obj = JSObject();
+    if (imageOrientation != null) {
+      obj['imageOrientation'] = imageOrientation.toJS;
+    }
+    if (premultiplyAlpha != null) {
+      obj['premultiplyAlpha'] = premultiplyAlpha.toJS;
+    }
+    if (colorSpaceConversion != null) {
+      obj['colorSpaceConversion'] = colorSpaceConversion.toJS;
+    }
+    if (resizeWidth != null) {
+      obj['resizeWidth'] = resizeWidth.toJS;
+    }
+    if (resizeHeight != null) {
+      obj['resizeHeight'] = resizeHeight.toJS;
+    }
+    if (resizeQuality != null) {
+      obj['resizeQuality'] = resizeQuality.toJS;
+    }
+    return ImageBitmapOptions._primary(obj);
+  }
 }
 
 @JS('Navigator')
@@ -872,8 +953,8 @@ extension type DomPerformanceMeasure._(JSObject _) implements DomPerformanceEntr
 
 @JS('HTMLCanvasElement')
 extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, DomCanvasImageSource {
-  external double? width;
-  external double? height;
+  external num? width;
+  external num? height;
 
   @JS('toDataURL')
   external JSString _toDataURL(JSString type);
@@ -1062,6 +1143,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   }
 
   external DomImageData getImageData(int x, int y, int sw, int sh);
+  external void putImageData(DomImageData imagedata, int dx, int dy);
   external void lineTo(num x, num y);
   external DomTextMetrics measureText(String text);
   external void moveTo(num x, num y);
@@ -1263,6 +1345,10 @@ abstract class HttpFetchResponse {
   /// Returns null if "Content-Length" is missing.
   int? get contentLength;
 
+  /// Returns the value of the HTTP header with the given [name], or null if
+  /// the header is not present.
+  String? header(String name);
+
   /// Return true if this response has a [payload].
   ///
   /// Returns false if this response does not have a payload and therefore it is
@@ -1321,12 +1407,15 @@ class HttpFetchResponseImpl implements HttpFetchResponse {
 
   @override
   int? get contentLength {
-    final String? header = _domResponse.headers.get('Content-Length');
+    final String? header = this.header('Content-Length');
     if (header == null) {
       return null;
     }
     return int.tryParse(header);
   }
+
+  @override
+  String? header(String name) => _domResponse.headers.get(name);
 
   @override
   bool get hasPayload {
@@ -1367,6 +1456,14 @@ class MockHttpFetchResponse implements HttpFetchResponse {
   final int? contentLength;
 
   @override
+  String? header(String name) {
+    if (name.toLowerCase() == 'content-length' && contentLength != null) {
+      return contentLength.toString();
+    }
+    return null;
+  }
+
+  @override
   bool get hasPayload => _payload != null;
 
   @override
@@ -1391,6 +1488,9 @@ abstract class HttpFetchPayload {
 
   /// Return the data as a string.
   Future<String> text();
+
+  /// Returns the raw DOM readable stream.
+  DomReadableStream get stream;
 }
 
 class HttpFetchPayloadImpl implements HttpFetchPayload {
@@ -1399,12 +1499,15 @@ class HttpFetchPayloadImpl implements HttpFetchPayload {
   final DomResponse _domResponse;
 
   @override
+  DomReadableStream get stream => _domResponse.body;
+
+  @override
   Future<void> read(HttpFetchReader<JSUint8Array> callback) async {
     final DomReadableStream stream = _domResponse.body;
-    final _DomStreamReader reader = stream._getReader();
+    final DomStreamReader reader = stream.getReader();
 
     while (true) {
-      final _DomStreamChunk chunk = await reader.read();
+      final DomStreamChunk chunk = await reader.read();
       if (chunk.done) {
         break;
       }
@@ -1459,6 +1562,9 @@ class MockHttpFetchPayload implements HttpFetchPayload {
 
   @override
   Future<String> text() async => throw AssertionError('text not supported by mock');
+
+  @override
+  DomReadableStream get stream => throw AssertionError('stream not supported by mock');
 }
 
 /// Indicates a missing HTTP payload when one was expected, such as when
@@ -1540,17 +1646,23 @@ extension type DomHeaders._(JSObject _) implements JSObject {
 
 extension type DomReadableStream._(JSObject _) implements JSObject {
   @JS('getReader')
-  external _DomStreamReader _getReader();
+  external DomStreamReader getReader();
+
+  @JS('tee')
+  external JSArray<DomReadableStream> tee();
 }
 
-extension type _DomStreamReader._(JSObject _) implements JSObject {
+extension type DomStreamReader._(JSObject _) implements JSObject {
   @JS('read')
   external JSPromise<JSAny?> _read();
-  Future<_DomStreamChunk> read() =>
-      _read().toDart.then((JSAny? value) => value! as _DomStreamChunk);
+  Future<DomStreamChunk> read() => _read().toDart.then((JSAny? value) => value! as DomStreamChunk);
+
+  @JS('cancel')
+  external JSPromise<JSAny?> _cancel();
+  Future<void> cancel() => _cancel().toDart;
 }
 
-extension type _DomStreamChunk._(JSObject _) implements JSObject {
+extension type DomStreamChunk._(JSObject _) implements JSObject {
   external JSAny? get value;
   external bool get done;
 }
@@ -1571,16 +1683,16 @@ extension type DomTextMetrics._(JSObject _) implements JSObject {
   external JSArray<JSAny?> _getTextClusters();
   List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
 
-  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+  external DomRectReadOnly getActualBoundingBox(int start, int end);
 
   external double get fontBoundingBoxAscent;
 
   external double get fontBoundingBoxDescent;
 
   @JS('getSelectionRects')
-  external JSArray<JSAny> _getSelectionRects(int begin, int end);
-  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
-      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
+  external JSArray<JSAny> _getSelectionRects(int start, int end);
+  List<DomRectReadOnly> getSelectionRects(int start, int end) =>
+      _getSelectionRects(start, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')
@@ -1996,6 +2108,19 @@ extension type DomTouchEvent._(JSObject _) implements DomUIEvent {
   @JS('changedTouches')
   external _DomList get _changedTouches;
   Iterable<DomTouch> get changedTouches => _createDomListWrapper<DomTouch>(_changedTouches);
+
+  @JS('touches')
+  external _DomList get _touches;
+
+  /// All touch points currently in contact with the surface.
+  ///
+  /// On iOS WebKit this stays accurate even where the pointer events do not:
+  /// WebKit can stop dispatching pointer events for a touch it has taken over
+  /// for a native gesture, but it still drops that touch from this list once
+  /// the finger leaves, which is what makes an abandoned touch detectable. This
+  /// is observed WebKit behavior, not a cross-browser guarantee.
+  /// See: https://github.com/flutter/flutter/issues/188781
+  Iterable<DomTouch> get touches => _createDomListWrapper<DomTouch>(_touches);
 }
 
 @JS('Touch')
@@ -2701,6 +2826,11 @@ extension JSArrayExtension on JSArray<JSAny?> {
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
 }
+
+@JS('window.TextCluster')
+external JSAny? get _textClusterConstructor;
+
+bool browserSupportsTextCluster = _textClusterConstructor != null;
 
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {

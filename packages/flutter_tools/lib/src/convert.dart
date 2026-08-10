@@ -10,6 +10,7 @@ import 'dart:convert' as cnv show Utf8Decoder, utf8;
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
+
 export 'dart:convert' hide Utf8Codec, Utf8Decoder, utf8;
 
 /// The original utf8 encoding for testing overrides only.
@@ -20,11 +21,23 @@ export 'dart:convert' hide Utf8Codec, Utf8Decoder, utf8;
 @visibleForTesting
 const Encoding utf8ForTesting = cnv.utf8;
 
+/// A [Codec] which permits malformed UTF-8 bytes when decoding.
+///
+/// This decoder is used for displaying application logs and tool output
+/// where invalid UTF-8 is expected (e.g., from external devices, network
+/// APIs, or debugging output). Invalid UTF-8 sequences will be decoded
+/// to replacement characters (U+FFFD) without warnings.
+///
+/// For critical tool data parsing (configs, manifests), use the strict
+/// [utf8] decoder instead, which will warn about malformed bytes.
+const Encoding utf8AllowMalformed = Utf8Codec(reportErrors: false);
+
 /// A [Codec] which reports malformed bytes when decoding.
 ///
 /// Occasionally people end up in a situation where we try to decode bytes
 /// that aren't UTF-8 and we're not quite sure how this is happening.
-/// This tells people to report a bug when they see this.
+/// This prints a warning when they see this, but continues execution
+/// to avoid disrupting the developer workflow.
 class Utf8Codec extends Encoding {
   const Utf8Codec({this.reportErrors = true});
 
@@ -41,21 +54,33 @@ class Utf8Codec extends Encoding {
   String get name => cnv.utf8.name;
 }
 
+/// A strict UTF-8 decoder for critical tool data parsing.
+///
+/// This decoder reports warnings when encountering invalid UTF-8 sequences
+/// (replacement character U+FFFD). It should be used for parsing tool-critical
+/// data such as configuration files, manifests, and build metadata.
+///
+/// For displaying application logs and external tool output with potential
+/// encoding issues, use [utf8AllowMalformed] instead.
 const Encoding utf8 = Utf8Codec();
 
 class Utf8Decoder extends Converter<List<int>, String> {
   const Utf8Decoder({this.reportErrors = true});
 
-  static const _systemDecoder = cnv.Utf8Decoder(allowMalformed: true);
+  static const _allowMalformedDecoder = cnv.Utf8Decoder(allowMalformed: true);
+  static const _strictDecoder = cnv.Utf8Decoder();
 
   final bool reportErrors;
 
   @override
   String convert(List<int> input, [int start = 0, int? end]) {
-    final String result = _systemDecoder.convert(input, start, end);
-    // Finding a Unicode replacement character indicates that the input
-    // was malformed.
-    if (reportErrors && result.contains('\u{FFFD}')) {
+    if (!reportErrors) {
+      return _allowMalformedDecoder.convert(input, start, end);
+    }
+    try {
+      return _strictDecoder.convert(input, start, end);
+    } on FormatException {
+      final String result = _allowMalformedDecoder.convert(input, start, end);
       throwToolExit(
         'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found while decoding string: $result. '
         'The Flutter team would greatly appreciate if you could file a bug explaining '
@@ -64,16 +89,16 @@ class Utf8Decoder extends Converter<List<int>, String> {
         'The source bytes were:\n$input\n\n',
       );
     }
-    return result;
   }
 
   @override
   ByteConversionSink startChunkedConversion(Sink<String> sink) =>
-      _systemDecoder.startChunkedConversion(sink);
+      _allowMalformedDecoder.startChunkedConversion(sink);
 
   @override
-  Stream<String> bind(Stream<List<int>> stream) => _systemDecoder.bind(stream);
+  Stream<String> bind(Stream<List<int>> stream) => _allowMalformedDecoder.bind(stream);
 
   @override
-  Converter<List<int>, T> fuse<T>(Converter<String, T> other) => _systemDecoder.fuse(other);
+  Converter<List<int>, T> fuse<T>(Converter<String, T> other) =>
+      _allowMalformedDecoder.fuse(other);
 }

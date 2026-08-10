@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_emulator.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/base/common.dart';
+
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
@@ -170,10 +172,90 @@ void main() {
         logger: logger,
       );
 
-      await emulator.launch(startupDuration: Duration.zero);
+      await expectLater(
+        () => emulator.launch(startupDuration: Duration.zero),
+        throwsA(isA<ToolExit>()),
+      );
 
       expect(logger.errorText, contains(errorText));
     });
+
+    testWithoutContext(
+      'throws ToolExit on AVD lock error during startup without AVD directory',
+      () async {
+        final logger = BufferLogger.test();
+        final emulator = AndroidEmulator(
+          emulatorID,
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: kEmulatorLaunchCommand,
+              exitCode: 1,
+              stderr:
+                  'ERROR: Running multiple emulators with the same AVD is an experimental feature.\n'
+                  'Refer to -read-only for details.',
+            ),
+          ]),
+          androidSdk: mockSdk,
+          logger: logger,
+        );
+
+        await expectLater(
+          () => emulator.launch(startupDuration: Duration.zero),
+          throwsA(
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              allOf(
+                contains(
+                  'An emulator with the name "i1234" is already running or has active lock files',
+                ),
+                contains('in your AVD directory.'),
+                isNot(contains('in the AVD directory located at:')),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'throws ToolExit on AVD lock error during startup with AVD directory',
+      () async {
+        final logger = BufferLogger.test();
+        final emulator = AndroidEmulator(
+          emulatorID,
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: kEmulatorLaunchCommand,
+              exitCode: 1,
+              stderr:
+                  'ERROR: Running multiple emulators with the same AVD is an experimental feature.\n'
+                  'Refer to -read-only for details.',
+            ),
+          ]),
+          androidSdk: mockSdk,
+          logger: logger,
+          avdDirectory: '/path/to/avd/directory',
+        );
+
+        await expectLater(
+          () => emulator.launch(startupDuration: Duration.zero),
+          throwsA(
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              allOf(
+                contains(
+                  'An emulator with the name "i1234" is already running or has active lock files',
+                ),
+                contains('in the AVD directory located at:'),
+                contains('/path/to/avd/directory'),
+              ),
+            ),
+          ),
+        );
+      },
+    );
 
     testWithoutContext('prints nothing on late failure with empty stderr', () async {
       final logger = BufferLogger.test();

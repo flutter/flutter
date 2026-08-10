@@ -112,13 +112,18 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 ///
 /// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
 /// value.
-typedef ChildSemanticsConfigurationsDelegate =
-    ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
+typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(
+  List<SemanticsConfiguration>,
+);
 
 /// Controls how accessibility focus is blocked.
 ///
-/// This is typically used to prevent screen readers
-/// from focusing on parts of the UI.
+/// This is typically used to prevent screen readers from focusing on parts
+/// of the UI.
+///
+/// Setting this property also blocks the reporting of keyboard focusability
+/// for the semantics node, but it does not affect the actual keyboard focus
+/// handled by [FocusNode].
 enum AccessibilityFocusBlockType {
   /// Accessibility focus is **not blocked**.
   none,
@@ -1372,6 +1377,38 @@ class SemanticsData with Diagnosticable {
   /// Whether [actions] contains the given action.
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
 
+  /// Returns a JSON-compatible map representation of this object.
+  ///
+  /// Used by debugging tools and VM service extensions such as
+  /// `ext.flutter.accessibility.getSemanticsTree`.
+  Map<String, Object?> toJson() {
+    final flagsList = <String>[
+      for (final SemanticsFlag flag in SemanticsFlag.values)
+        if (hasFlag(flag)) flag.name,
+    ];
+    final actionsList = <String>[
+      for (final SemanticsAction action in SemanticsAction.values)
+        if (hasAction(action)) action.name,
+    ];
+    return <String, Object?>{
+      'label': label,
+      'value': value,
+      'hint': hint,
+      'tooltip': tooltip,
+      'increasedValue': increasedValue,
+      'decreasedValue': decreasedValue,
+      'flags': flagsList,
+      'actions': actionsList,
+      'rect': <String, double>{
+        'left': rect.left,
+        'top': rect.top,
+        'width': rect.width,
+        'height': rect.height,
+      },
+      'transform': ?transform?.storage.toList(),
+    };
+  }
+
   @override
   String toStringShort() => objectRuntimeType(this, 'SemanticsData');
 
@@ -1850,7 +1887,7 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node currently holds input focus.
   ///
-  /// If null, the node is not fosusable.
+  /// If null, the node is not focusable.
   ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
@@ -3272,12 +3309,19 @@ class SemanticsNode with DiagnosticableTreeMixin {
     owner!._nodes.remove(id);
     owner!._detachedNodes.add(this);
 
+    if (_traversalChildIdentifier case final Object identifier?) {
+      owner!._traversalParentNodes[identifier]?._markDirty();
+    }
+
     // Clean up the according entry in owner._traversalParentNodes map.
     owner!._traversalParentNodes.removeWhere((Object key, SemanticsNode node) => node == this);
     // Clean up this node from the value set in owner._traversalChildNodes map.
     for (final Set<SemanticsNode> childSet in owner!._traversalChildNodes.values) {
       childSet.removeWhere((SemanticsNode node) => node == this);
     }
+    owner!._traversalChildNodes.removeWhere(
+      (Object key, Set<SemanticsNode> value) => value.isEmpty,
+    );
 
     _owner = null;
     assert(parent == null || attached == parent!.attached);
@@ -3679,6 +3723,23 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
+  /// Whether this node can perform the specific [CustomSemanticsAction]
+  /// identified by [actionId].
+  bool _canPerformCustomAction(int actionId) {
+    final CustomSemanticsAction? customAction = CustomSemanticsAction.getAction(actionId);
+    return customAction != null && _customSemanticsActions.containsKey(customAction);
+  }
+
+  /// Whether this node can handle [action], taking [args] into account for
+  /// custom actions so that nodes which only have *other* custom actions
+  /// registered are not treated as candidates.
+  bool _canHandleAction(SemanticsAction action, Object? args) {
+    if (action == SemanticsAction.customAction) {
+      return args is int && _canPerformCustomAction(args);
+    }
+    return _canPerformAction(action);
+  }
+
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
 
   /// Reconfigures the properties of this object to describe the configuration
@@ -4027,8 +4088,37 @@ class SemanticsNode with DiagnosticableTreeMixin {
     return childrenInTraversalOrder;
   }
 
+  List<SemanticsNode> _childrenInHitTestOrder() {
+    if (_children == null) {
+      return const <SemanticsNode>[];
+    }
+    if (kIsWeb || _isTraversalParent) {
+      return _children!;
+    }
+
+    // If a child node is not in the traversal tree after grafting, it is
+    // dropped from the hit-test tree to keep the two trees in sync.
+    // Otherwise, the user might accidentally hit test a node that cannot
+    // be traversed.
+    bool shouldNotSkipInHitTest(SemanticsNode child) {
+      if (child._isTraversalChild) {
+        final SemanticsNode? traversalParent =
+            owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
+        return traversalParent != null;
+      }
+      return true;
+    }
+
+    return _children!.where(shouldNotSkipInHitTest).toList();
+  }
+
+  Int32List _childrenIdInHitTestOrder() {
+    final List<SemanticsNode> children = _childrenInHitTestOrder();
+    return Int32List.fromList(children.reversed.map<int>((SemanticsNode node) => node.id).toList());
+  }
+
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
-    assert(_dirty || _isTraversalParent);
+    assert(_dirty);
     final SemanticsData data = getSemanticsData();
     assert(() {
       final FlutterError? error = _DebugSemanticsRoleChecks._checkSemanticsData(this);
@@ -4065,14 +4155,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     } else {
       childrenInTraversalOrder = _childrenIdInTraversalOrder();
-
-      final int childCount = _children!.length;
-      // _children is sorted in paint order, so we invert it to get the hit test
-      // order.
-      childrenInHitTestOrder = Int32List(childCount);
-      for (int i = childCount - 1; i >= 0; i -= 1) {
-        childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
-      }
+      childrenInHitTestOrder = _childrenIdInHitTestOrder();
     }
 
     Int32List? customSemanticsActionIds;
@@ -4511,8 +4594,31 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     return switch (childOrder) {
-      DebugSemanticsDumpOrder.inverseHitTest => _children!,
+      DebugSemanticsDumpOrder.inverseHitTest => _childrenInHitTestOrder(),
       DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
+    };
+  }
+
+  /// Returns a JSON-compatible map representation of this node and its children
+  /// identifiers.
+  ///
+  /// Used by debugging tools and VM service extensions such as
+  /// `ext.flutter.accessibility.getSemanticsTree`.
+  Map<String, Object?> toJson() {
+    final SemanticsData data = getSemanticsData();
+    final List<SemanticsNode> traversalChildren = debugListChildrenInOrder(
+      DebugSemanticsDumpOrder.traversalOrder,
+    );
+    final List<SemanticsNode> hitTestChildren = debugListChildrenInOrder(
+      DebugSemanticsDumpOrder.inverseHitTest,
+    );
+    return <String, Object?>{
+      'id': id,
+      ...data.toJson(),
+      'childrenInTraversalOrder': <int>[
+        for (final SemanticsNode child in traversalChildren) child.id,
+      ],
+      'childrenInHitTestOrder': <int>[for (final SemanticsNode child in hitTestChildren) child.id],
     };
   }
 }
@@ -4843,6 +4949,9 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the semantics tree is empty, returns null.
   SemanticsNode? get rootSemanticsNode => _nodes[0];
 
+  /// Returns the [SemanticsNode] with the given [id], if any.
+  SemanticsNode? getSemanticsNode(int id) => _nodes[id];
+
   @override
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
@@ -4950,69 +5059,53 @@ class SemanticsOwner extends ChangeNotifier {
         for (final Set<SemanticsNode> childSet in _traversalChildNodes.values) {
           childSet.removeWhere((SemanticsNode oldNode) => node == oldNode);
         }
+        _traversalChildNodes.removeWhere((Object key, Set<SemanticsNode> value) => value.isEmpty);
+        final bool isTraversalParent = node._isTraversalParent;
+        final bool isTraversalChild = node._isTraversalChild;
+
+        // If the node is a traversal parent, then add it to the
+        // _traversalParentNodes map for later grafting. Similarly, add the node
+        // to the _traversalChildNodes map if it is a traversal child.
+        if (isTraversalParent) {
+          assert(
+            !_traversalParentNodes.containsKey(node._traversalParentIdentifier) ||
+                _traversalParentNodes[node.traversalParentIdentifier!] == node,
+            'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
+          );
+          _traversalParentNodes[node.traversalParentIdentifier!] = node;
+        } else if (isTraversalChild) {
+          _traversalChildNodes
+              .putIfAbsent(node.traversalChildIdentifier!, () => <SemanticsNode>{})
+              .add(node);
+        }
+
+        if (!kIsWeb) {
+          if (node._isTraversalChild) {
+            // If the node has a non-null `_traversalChildIdentifier`, it indicates
+            // that its hit-test parent and traversal parent are different, and
+            // its traversal parent should update its children to include this node.
+            // Therefore, its traversal parent node should be visited for later
+            // grafting, in order to generate a correct `childrenInTraversalOrder`.
+            // This is typically used in `OverlayPortal` widget.
+            final SemanticsNode? parentNode = _traversalParentNodes[node.traversalChildIdentifier];
+            if (parentNode != null && !visitedNodes.contains(parentNode)) {
+              parentNode._markDirty();
+            }
+          }
+        }
       }
     }
 
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
     final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
 
-    final updatedVisitedNodes = <SemanticsNode>[];
-
     for (final node in visitedNodes) {
-      final bool isTraversalParent = node._isTraversalParent;
-      final bool isTraversalChild = node._isTraversalChild;
-
-      if (kIsWeb) {
-        updatedVisitedNodes.add(node);
-      } else {
-        if (!isTraversalParent && !isTraversalChild) {
-          updatedVisitedNodes.add(node);
-          continue;
-        }
-
-        if (isTraversalChild) {
-          // If the node has a non-null `_traversalChildIdentifier`, it indicates
-          // that its hit-test parent and traversal parent are different, and
-          // its traversal parent should update its children to include this node.
-          // Therefore, its traversal parent node should be added to the
-          // `updatedVisitedNodes` list for later grafting, in order to generate
-          // a correct `childrenIntraversalOrder`. This is typically used in
-          // `OverlayPortal` widget.
-          final SemanticsNode? parentNode = _traversalParentNodes[node.traversalChildIdentifier];
-          if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
-            updatedVisitedNodes.add(parentNode);
-          }
-        }
-
-        updatedVisitedNodes.add(node);
-      }
-
-      // If the node is a traversal parent, then add it to the
-      // _traversalParentNodes map for later grafting. Similarly, add the node
-      // to the _traversalChildNodes map if it is a traversal child.
-      if (isTraversalParent) {
-        assert(
-          !_traversalParentNodes.containsKey(node._traversalParentIdentifier) ||
-              _traversalParentNodes[node.traversalParentIdentifier!] == node,
-          'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
-        );
-        _traversalParentNodes[node.traversalParentIdentifier!] = node;
-      } else if (isTraversalChild) {
-        _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
-        _traversalChildNodes[node.traversalChildIdentifier!]!.add(node);
-      }
-    }
-
-    for (final node in updatedVisitedNodes) {
-      assert(
-        node.parent?._dirty != true || node._isTraversalParent,
-      ); // could be null (no parent) or false (not dirty)
-
-      // The traversalParentNode is added to updatedVisitedNodes for later
-      // grafting; its traversalChildren should be grafted to its children in
-      // the traversal order. This grafting process is skipped on web because
-      // the traversal order will be handled in the web engine.
-      final bool needUpdateTraversalParent = !kIsWeb && node._isTraversalParent;
+      // TODO(QuncCccccc): Add an assert that each non-root node has a
+      // non-dirty parent. This currently fails in view-related tests such as
+      // test/widgets/view_test.dart's "correctly switches between view
+      // configurations" when switching view configurations during semantics
+      // updates.
+      assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
       // contiguous dirty nodes. This means that when we return here,
@@ -5023,7 +5116,7 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if ((node._dirty || needUpdateTraversalParent) && node.attached) {
+      if (node._dirty && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
@@ -5041,21 +5134,34 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  SemanticsActionHandler? _getSemanticsActionHandlerForId(
+    int id,
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     SemanticsNode? result = _nodes[id];
-    if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
+    if (result == null) {
+      return null;
+    }
+    // For merged nodes, walk descendants whenever the merge root itself does
+    // not handle the specific (action, args) pair. Without the args check,
+    // a merge root that owns *some* custom action would short-circuit the
+    // walk and we'd dispatch to the wrong handler.
+    if (result.isPartOfNodeMerging && !result._canHandleAction(action, args)) {
+      SemanticsNode? found;
       result._visitDescendants((SemanticsNode node) {
-        if (node._canPerformAction(action)) {
-          result = node;
+        if (node._canHandleAction(action, args)) {
+          found = node;
           return false; // found node, abort walk
         }
         return true; // continue walk
       });
+      result = found;
     }
-    if (result == null || !result!._canPerformAction(action)) {
+    if (result == null || !result._canHandleAction(action, args)) {
       return null;
     }
-    return result!._actions[action];
+    return result._actions[action];
   }
 
   /// Asks the [SemanticsNode] with the given id to perform the given action.
@@ -5066,7 +5172,7 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [Object? args]) {
-    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
+    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action, args);
     if (handler != null) {
       handler(args);
       return;
@@ -5081,8 +5187,9 @@ class SemanticsOwner extends ChangeNotifier {
   SemanticsActionHandler? _getSemanticsActionHandlerForPosition(
     SemanticsNode node,
     Offset position,
-    SemanticsAction action,
-  ) {
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     if (node.transform != null) {
       final inverse = Matrix4.identity();
       if (inverse.copyInverse(node.transform!) == 0.0) {
@@ -5094,12 +5201,12 @@ class SemanticsOwner extends ChangeNotifier {
       return null;
     }
     if (node.mergeAllDescendantsIntoThisNode) {
-      if (node._canPerformAction(action)) {
+      if (node._canHandleAction(action, args)) {
         return node._actions[action];
       }
       SemanticsNode? result;
       node._visitDescendants((SemanticsNode child) {
-        if (child._canPerformAction(action)) {
+        if (child._canHandleAction(action, args)) {
           result = child;
           return false;
         }
@@ -5113,6 +5220,7 @@ class SemanticsOwner extends ChangeNotifier {
           child,
           position,
           action,
+          args,
         );
         if (handler != null) {
           return handler;
@@ -5138,6 +5246,7 @@ class SemanticsOwner extends ChangeNotifier {
       node,
       position,
       action,
+      args,
     );
     if (handler != null) {
       handler(args);
@@ -7074,7 +7183,7 @@ class OrdinalSortKey extends SemanticsSortKey {
 /// Argument [sourceLevel] is the heading level of the source node that is being
 /// merged into a target node, which has heading level [targetLevel].
 ///
-/// If the target node is not a heading, the the source heading level is used.
+/// If the target node is not a heading, the source heading level is used.
 /// Otherwise, the target heading level is used irrespective of the source
 /// heading level.
 int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {

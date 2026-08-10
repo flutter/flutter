@@ -2,16 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+#include <vector>
+
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_context.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_manager.h"
+#include "flutter/shell/platform/windows/testing/egl/mock_window_surface.h"
+#include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/shell/platform/windows/window_manager.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
 namespace testing {
 
 namespace {
+
+using ::testing::NiceMock;
+using ::testing::Return;
+
+// Builds a mock |WindowSurface| whose lifecycle operations all succeed. Used to
+// keep the EGL surface lifecycle deterministic in tests so that resize paths
+// (e.g. |FlutterWindowsView::OnFrameGenerated|) do not perform real, flaky
+// cross-thread ANGLE/D3D calls against an actual GPU surface.
+std::unique_ptr<egl::MockWindowSurface> CreateMockWindowSurface() {
+  auto surface = std::make_unique<NiceMock<egl::MockWindowSurface>>();
+  ON_CALL(*surface, IsValid).WillByDefault(Return(true));
+  ON_CALL(*surface, MakeCurrent).WillByDefault(Return(true));
+  ON_CALL(*surface, SetVSyncEnabled).WillByDefault(Return(true));
+  ON_CALL(*surface, Destroy).WillByDefault(Return(true));
+  return surface;
+}
 
 class WindowManagerTest : public WindowsTest {
  public:
@@ -31,14 +55,30 @@ class WindowManagerTest : public WindowsTest {
     ASSERT_TRUE(engine_->Run("testWindowController"));
 
     bool signalled = false;
-    context.AddNativeFunction(
-        "Signal", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-          isolate_ = flutter::Isolate::Current();
-          signalled = true;
-        }));
+    context.AddFfiNativeFunction("Signal", CREATE_FFI_LAMBDA([&]() {
+                                   isolate_ = flutter::Isolate::Current();
+                                   signalled = true;
+                                 }));
     while (!signalled) {
       engine_->task_runner()->ProcessTasks();
     }
+
+    // Replace the engine's EGL manager with a permissive mock so that EGL
+    // surface creation and resizing are deterministic and never issue real,
+    // cross-thread GPU calls. These tests do not exercise real EGL rendering,
+    // and without this, tests that drive |FlutterWindowsView::OnFrameGenerated|
+    // from the test thread race the engine's raster thread for the EGL context,
+    // intermittently producing an EGL_BAD_ACCESS and a crash. Installed here,
+    // before any windows (and thus render surfaces) are created.
+    auto egl_manager = std::make_unique<NiceMock<egl::MockManager>>();
+    ON_CALL(*egl_manager, CreateWindowSurface)
+        .WillByDefault(
+            [](HWND, size_t, size_t) { return CreateMockWindowSurface(); });
+    ON_CALL(*egl_manager, render_context)
+        .WillByDefault(Return(&mock_egl_context_));
+    ON_CALL(mock_egl_context_, ClearCurrent).WillByDefault(Return(true));
+    ON_CALL(mock_egl_context_, MakeCurrent).WillByDefault(Return(true));
+    EngineModifier{engine_.get()}.SetEGLManager(std::move(egl_manager));
   }
 
   void TearDown() override { engine_->Stop(); }
@@ -52,6 +92,7 @@ class WindowManagerTest : public WindowsTest {
 
  private:
   std::unique_ptr<FlutterWindowsEngine> engine_;
+  NiceMock<egl::MockContext> mock_egl_context_;
   std::optional<flutter::Isolate> isolate_;
   RegularWindowCreationRequest regular_creation_request_{
       .preferred_size =
@@ -352,6 +393,38 @@ TEST_F(WindowManagerTest, CreateModalDialogWindow) {
             parent_window_handle);
 }
 
+TEST_F(WindowManagerTest, DeactivatedRegularWindowDoesNotReactivateItself) {
+  IsolateScope isolate_scope(isolate());
+
+  // Two independent top-level regular windows (regular windows have no Win32
+  // owner). |window_handle| is deactivated while |active_window_handle| holds
+  // activation.
+  const int64_t window_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), window_view_id);
+
+  const int64_t active_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND active_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), active_view_id);
+
+  SetActiveWindow(active_window_handle);
+  ASSERT_EQ(GetActiveWindow(), active_window_handle);
+
+  // A window receiving WM_ACTIVATE with WA_INACTIVE must not focus its own
+  // content: SetFocus activates the parent of the focused window (the window
+  // itself), which would reactivate the deactivated window, pull it back to the
+  // top of the z-order, and take activation away from the active window.
+  SendMessage(window_handle, WM_ACTIVATE, MAKEWPARAM(WA_INACTIVE, 0), 0);
+
+  EXPECT_EQ(GetActiveWindow(), active_window_handle);
+}
+
 TEST_F(WindowManagerTest, DialogCanNeverBeFullscreen) {
   IsolateScope isolate_scope(isolate());
 
@@ -554,7 +627,10 @@ TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
   EXPECT_EQ(result, MA_NOACTIVATE);
 }
 
-TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
+// TODO(team-windows): Fix flakes. See:
+// https://github.com/flutter/flutter/issues/177172
+TEST_F(WindowManagerTest,
+       DISABLED_TooltipWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t parent_view_id =
@@ -770,7 +846,9 @@ TEST_F(WindowManagerTest, PopupWindowDoesNotStealFocus) {
   EXPECT_NE(focused_after, popup_window_handle);
 }
 
-TEST_F(WindowManagerTest, PopupWindowUpdatesPositionOnViewSizeChange) {
+// TODO(team-windows): Fix flakes. See:
+// https://github.com/flutter/flutter/issues/177172
+TEST_F(WindowManagerTest, DISABLED_PopupWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
 
   const int64_t parent_view_id =
@@ -853,6 +931,319 @@ TEST_F(WindowManagerTest, PopupWindowUpdatesPositionOnViewSizeChange) {
   // (we offset by callback_count * 5)
   EXPECT_NE(initial_rect.left, new_rect.left);
   EXPECT_NE(initial_rect.top, new_rect.top);
+}
+
+TEST_F(WindowManagerTest, CreateRegularWindowSizedToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content",
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  EXPECT_GE(view_id, 0);
+}
+
+TEST_F(WindowManagerTest, RegularWindowSizedToContentResizesToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content",
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FlutterWindowsView* view = engine()->GetViewFromTopLevelWindow(window_handle);
+  ASSERT_NE(view, nullptr);
+
+  view->OnFrameGenerated(300, 200);
+  engine()->task_runner()->ProcessTasks();
+
+  ActualWindowSize size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_EQ(size.width, 300);
+  EXPECT_EQ(size.height, 200);
+}
+
+TEST_F(WindowManagerTest,
+       RegularWindowSizedToContentNonResizableHasNoThickFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content Non-Resizable",
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  const LONG style = GetWindowLong(window_handle, GWL_STYLE);
+  EXPECT_EQ(style & WS_THICKFRAME, 0L);
+  EXPECT_EQ(style & WS_MAXIMIZEBOX, 0L);
+}
+
+TEST_F(WindowManagerTest, RegularWindowSizedToContentResizableHasThickFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content Resizable",
+      .sized_to_content = true,
+      .resizable = true};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  const LONG style = GetWindowLong(window_handle, GWL_STYLE);
+  EXPECT_NE(style & WS_THICKFRAME, 0L);
+  EXPECT_NE(style & WS_MAXIMIZEBOX, 0L);
+}
+
+TEST_F(WindowManagerTest,
+       RegularWindowSizedToContentResizableStopsTrackingAfterFirstFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content Resizable",
+      .sized_to_content = true,
+      .resizable = true};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FlutterWindowsView* view = engine()->GetViewFromTopLevelWindow(window_handle);
+  ASSERT_NE(view, nullptr);
+
+  view->OnFrameGenerated(300, 200);
+  engine()->task_runner()->ProcessTasks();
+
+  EXPECT_FALSE(view->IsSizedToContent());
+}
+
+TEST_F(WindowManagerTest, CreateModelessDialogSizedToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Modeless Dialog Sized To Content",
+      .parent_or_null = nullptr,
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  EXPECT_GE(view_id, 0);
+}
+
+TEST_F(WindowManagerTest, CreateModalDialogSizedToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Modal Dialog Sized To Content",
+      .parent_or_null = parent_window_handle,
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  EXPECT_GE(view_id, 0);
+}
+
+TEST_F(WindowManagerTest, DialogWindowSizedToContentResizesToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Dialog Sized To Content",
+      .parent_or_null = nullptr,
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FlutterWindowsView* view = engine()->GetViewFromTopLevelWindow(window_handle);
+  ASSERT_NE(view, nullptr);
+
+  view->OnFrameGenerated(300, 200);
+  engine()->task_runner()->ProcessTasks();
+
+  ActualWindowSize size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_EQ(size.width, 300);
+  EXPECT_EQ(size.height, 200);
+}
+
+TEST_F(WindowManagerTest,
+       DialogWindowSizedToContentNonResizableHasNoThickFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Dialog Sized To Content Non-Resizable",
+      .parent_or_null = nullptr,
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  const LONG style = GetWindowLong(window_handle, GWL_STYLE);
+  EXPECT_EQ(style & WS_THICKFRAME, 0L);
+}
+
+// Verifies that |OnEngineShutdown| destroys popup windows BEFORE clearing
+// |on_message_|, so the WM_DESTROY round-trip reaches the isolate. Without
+// this, |PopupWindowControllerWin32._destroyed| would never be set during
+// engine shutdown and queued FFI calls (e.g. updatePosition) would
+// dereference stale HostWindow pointers.
+TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForPopupWindow) {
+  IsolateScope isolate_scope(isolate());
+
+  static std::vector<UINT> received_messages;
+  received_messages.clear();
+  WindowingInitRequest init_request{.on_message = [](WindowsMessage* message) {
+    received_messages.push_back(message->message);
+  }};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  PopupWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  InternalFlutterWindows_WindowManager_CreatePopupWindow(engine_id(),
+                                                         &creation_request);
+
+  received_messages.clear();
+  engine()->window_manager()->OnEngineShutdown();
+
+  EXPECT_NE(std::find(received_messages.begin(), received_messages.end(),
+                      static_cast<UINT>(WM_DESTROY)),
+            received_messages.end());
+}
+
+// Same as above for tooltips.
+TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForTooltipWindow) {
+  IsolateScope isolate_scope(isolate());
+
+  static std::vector<UINT> received_messages;
+  received_messages.clear();
+  WindowingInitRequest init_request{.on_message = [](WindowsMessage* message) {
+    received_messages.push_back(message->message);
+  }};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  TooltipWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  InternalFlutterWindows_WindowManager_CreateTooltipWindow(engine_id(),
+                                                           &creation_request);
+
+  received_messages.clear();
+  engine()->window_manager()->OnEngineShutdown();
+
+  EXPECT_NE(std::find(received_messages.begin(), received_messages.end(),
+                      static_cast<UINT>(WM_DESTROY)),
+            received_messages.end());
 }
 
 }  // namespace testing

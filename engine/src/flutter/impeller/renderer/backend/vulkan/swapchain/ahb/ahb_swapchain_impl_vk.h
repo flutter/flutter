@@ -141,6 +141,8 @@ class AHBSwapchainImplVK final
 
   bool Present(const std::shared_ptr<AHBTextureSourceVK>& texture);
 
+  void WaitIdle() const;
+
   vk::UniqueSemaphore CreateRenderReadySemaphore(
       const std::shared_ptr<fml::UniqueFD>& fd) const;
 

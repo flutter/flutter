@@ -41,8 +41,7 @@ Future<void> testMain() async {
       final sceneBuilder = ui.SceneBuilder();
       final transform = Matrix4.identity();
 
-      // The html renderer expects the top-level transform to just be a scaling
-      // matrix for the device pixel ratio, so just push the identity matrix.
+      // Push the identity matrix.
       sceneBuilder.pushTransform(transform.toFloat64());
       transform.translate(150, 150);
       transform.rotate(kUnitZ, math.pi / 3);
