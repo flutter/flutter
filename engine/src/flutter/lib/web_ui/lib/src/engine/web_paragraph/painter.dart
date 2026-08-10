@@ -17,19 +17,7 @@ final _paintContext =
     _paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
 
 typedef ParagraphImageGenerator = Uint8List Function();
-/*
-/// Resizes the global paint canvas to the given width and height and updates the device pixel ratio.
-///
-/// The paint canvas is scaled by the device pixel ratio to avoid pixelation
-/// that would happen if it wasn't resized.
-void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
-  _paintCanvas.width = rect.width.ceil();
-  _paintCanvas.height = rect.height.ceil();
-  _paintCanvas.style.width = '${rect.width / devicePixelRatio}px';
-  _paintCanvas.style.height = '${rect.height / devicePixelRatio}px';
-  _paintContext.scale(devicePixelRatio, devicePixelRatio);
-}
-*/
+
 /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text block.
 (ui.Rect sourceRect, ui.Rect targetRect) _calculateBlock(TextBlock block, ui.Offset offset) {
   final double dpr = ui.window.devicePixelRatio;
@@ -68,25 +56,25 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
       : 0.0;
 
   // Convert the bleeds to physical pixels
-  final double physBleedLeft = logicalBleedLeft * dpr;
-  final double physBleedTop = logicalBleedTop * dpr;
-  final double physBleedRight = logicalBleedRight * dpr;
-  final double physBleedBottom = logicalBleedBottom * dpr;
+  final double physicalBleedLeft = logicalBleedLeft * dpr;
+  final double physicalBleedTop = logicalBleedTop * dpr;
+  final double physicalBleedRight = logicalBleedRight * dpr;
+  final double physicalBleedBottom = logicalBleedBottom * dpr;
 
   // Quantize the physical padding into chunks of 32 pixels
   // This scales dynamically with zoom/font size, but prevents per-keystroke jitter!
   const chunkSize = 32.0;
-  final double padLeft = (physBleedLeft / chunkSize).ceil() * chunkSize;
-  final double padTop = (physBleedTop / chunkSize).ceil() * chunkSize;
-  final double padRight = (physBleedRight / chunkSize).ceil() * chunkSize;
-  final double padBottom = (physBleedBottom / chunkSize).ceil() * chunkSize;
+  final double padLeft = (physicalBleedLeft / chunkSize).ceil() * chunkSize;
+  final double padTop = (physicalBleedTop / chunkSize).ceil() * chunkSize;
+  final double padRight = (physicalBleedRight / chunkSize).ceil() * chunkSize;
+  final double padBottom = (physicalBleedBottom / chunkSize).ceil() * chunkSize;
 
   // Calculate total physical buffer dimensions using the stable layout + quantized padding
   final double layoutPhysWidth = (paragraph.longestLine * dpr).ceilToDouble();
   final double layoutPhysHeight = (paragraph.height * dpr).ceilToDouble();
 
-  int physicalWidth = (padLeft + layoutPhysWidth + padRight).toInt();
-  int physicalHeight = (padTop + layoutPhysHeight + padBottom).toInt();
+  int physicalWidth = (padLeft + layoutPhysWidth + padRight).floor();
+  int physicalHeight = (padTop + layoutPhysHeight + padBottom).floor();
 
   // Enforce even dimensions to prevent WebGL odd-dimension texture sampling.
   if (physicalWidth % 2 != 0) {
@@ -111,43 +99,6 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   );
 
   return (sourceRect, targetRect, padLeft, padTop);
-}
-
-(ui.Rect sourceRect, ui.Rect targetRect, double physicalTx, double physicalTy) _calculateParagraph1(
-  WebParagraph paragraph,
-  ui.Offset offset,
-  double devicePixelRatio,
-) {
-  final dpr = devicePixelRatio;
-
-  // Calculate strict physical integer bounds
-  final int bufferPhysicalLeft = (paragraph.paintBounds.left * dpr).floor();
-  final int bufferPhysicalTop = (paragraph.paintBounds.top * dpr).floor();
-  final int bufferPhysicalRight = (paragraph.paintBounds.right * dpr).ceil();
-  final int bufferPhysicalBottom = (paragraph.paintBounds.bottom * dpr).ceil();
-
-  int physicalWidth = bufferPhysicalRight - bufferPhysicalLeft;
-  int physicalHeight = bufferPhysicalBottom - bufferPhysicalTop;
-
-  // Pad to even dimensions to prevent WebGL sub-pixel texture sampling
-  physicalWidth += physicalWidth % 2 != 0 ? 1 : 0;
-  physicalHeight += physicalHeight % 2 != 0 ? 1 : 0;
-
-  final sourceRect = ui.Rect.fromLTWH(0, 0, physicalWidth.toDouble(), physicalHeight.toDouble());
-
-  // Lock the global canvas anchor to the physical grid
-  final double anchorPhysicalX = (offset.dx * dpr).roundToDouble();
-  final double anchorPhysicalY = (offset.dy * dpr).roundToDouble();
-
-  // Combine the physical anchor with the physical ink offset
-  final targetRect = ui.Rect.fromLTWH(
-    (anchorPhysicalX + bufferPhysicalLeft) / dpr,
-    (anchorPhysicalY + bufferPhysicalTop) / dpr,
-    physicalWidth / dpr,
-    physicalHeight / dpr,
-  );
-
-  return (sourceRect, targetRect, bufferPhysicalLeft.toDouble(), bufferPhysicalTop.toDouble());
 }
 
 /// Paints a [WebParagraph].
