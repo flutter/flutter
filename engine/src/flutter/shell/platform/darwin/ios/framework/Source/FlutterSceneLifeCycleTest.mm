@@ -1045,7 +1045,7 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockRestorationPlugin restorationData]).andReturn(mockData);
 
   id mockScene = mocks[@"mockScene"];
-  id mockSession = OCMClassMock([UISceneSession class]);
+  UISceneSession* mockSession = OCMClassMock([UISceneSession class]);
   id mockConfiguration = OCMClassMock([UISceneConfiguration class]);
   OCMStub([mockScene session]).andReturn(mockSession);
   OCMStub([mockSession configuration]).andReturn(mockConfiguration);

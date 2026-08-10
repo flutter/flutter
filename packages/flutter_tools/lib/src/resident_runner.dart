@@ -48,7 +48,10 @@ class FlutterDevice {
     required this.generator,
     required this.developmentShaderCompiler,
     this.userIdentifier,
+    @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
   });
+
+  final Duration logFlushDelay;
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
@@ -68,6 +71,7 @@ class FlutterDevice {
         fileSystem: globals.fs,
       ),
       fileSystem: globals.fs,
+      logger: globals.logger,
     );
 
     final ResidentCompiler generator = residentCompilerFactory.create(
@@ -251,20 +255,26 @@ class FlutterDevice {
         // shuts down, including after an error. If `done` completes before `connectToVmService`,
         // something went wrong that caused DDS to shutdown early.
         try {
-          service = await Future.any<dynamic>(<Future<dynamic>>[
-            connectToVmService(
-              debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri!) : vmServiceUri!,
-              reloadSources: reloadSources,
-              restart: restart,
-              compileExpression: compileExpression,
-              flutterProject: FlutterProject.current(),
-              printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-              device: device,
-              logger: globals.logger,
-            ),
-            if (!existingDds)
-              device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
-          ]) as FlutterVmService?;
+          service =
+              await Future.any<dynamic>(<Future<dynamic>>[
+                    connectToVmService(
+                      debuggingOptions.enableDds
+                          ? (device!.dds.uri ?? vmServiceUri!)
+                          : vmServiceUri!,
+                      reloadSources: reloadSources,
+                      restart: restart,
+                      compileExpression: compileExpression,
+                      flutterProject: FlutterProject.current(),
+                      printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+                      device: device,
+                      logger: globals.logger,
+                    ),
+                    if (!existingDds)
+                      device!.dds.done.whenComplete(
+                        () => throw Exception('DDS shut down too early'),
+                      ),
+                  ])
+                  as FlutterVmService?;
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
           if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
@@ -1175,7 +1185,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp(); // calls appFinished
-    shutdownDartDevelopmentService();
+    await shutdownDartDevelopmentService();
   }
 
   @override
@@ -1194,9 +1204,22 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
   }
 
-  void shutdownDartDevelopmentService() {
-    for (final FlutterDevice device in flutterDevices) {
-      device.device?.dds.shutdown();
+  Future<void> shutdownDartDevelopmentService() async {
+    try {
+      await Future.wait<void>(
+        flutterDevices.map<Future<void>>((FlutterDevice device) async {
+          final DartDevelopmentService? dds = device.device?.dds;
+          if (dds != null) {
+            try {
+              await dds.shutdown();
+            } on Object catch (error) {
+              globals.printTrace('Warning: Failed to shut down DDS for device: $error');
+            }
+          }
+        }),
+      ).timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      globals.printTrace('Warning: shutdownDartDevelopmentService timed out.');
     }
   }
 
@@ -1267,14 +1290,23 @@ abstract class ResidentRunner extends ResidentHandlers {
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
     for (final FlutterDevice? device in flutterDevices) {
-      await device!.connect(
-        debuggingOptions: debuggingOptions,
-        reloadSources: reloadSources,
-        restart: restart,
-        compileExpression: compileExpression,
-        hostVmServicePort: debuggingOptions.hostVmServicePort,
-        printStructuredErrorLogMethod: printStructuredErrorLog,
-      );
+      if (device == null) {
+        continue;
+      }
+      try {
+        await device.connect(
+          debuggingOptions: debuggingOptions,
+          reloadSources: reloadSources,
+          restart: restart,
+          compileExpression: compileExpression,
+          hostVmServicePort: debuggingOptions.hostVmServicePort,
+          printStructuredErrorLogMethod: printStructuredErrorLog,
+        );
+      } catch (error) {
+        // Allow time for buffered/async log messages (e.g. engine crash logs) to arrive and flush.
+        await Future<void>.delayed(device.logFlushDelay);
+        rethrow;
+      }
       await device.vmService!.getFlutterViews();
 
       // This hooks up callbacks for when the connection stops in the future.

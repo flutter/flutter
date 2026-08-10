@@ -28,9 +28,9 @@ TEST_F(FlPointerManagerTest, EnterLeave) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
-                                  1.0, 2.0);
+                                  1.0, 2.0, 0, 0);
   fl_pointer_manager_handle_leave(manager, 1235, kFlutterPointerDeviceKindMouse,
-                                  3.0, 4.0);
+                                  3.0, 4.0, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 2u);
 
@@ -66,10 +66,10 @@ TEST_F(FlPointerManagerTest, EnterEnter) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
-                                  1.0, 2.0);
+                                  1.0, 2.0, 0, 0);
   // Duplicate enter is ignored
   fl_pointer_manager_handle_enter(manager, 1235, kFlutterPointerDeviceKindMouse,
-                                  3.0, 4.0);
+                                  3.0, 4.0, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 1u);
 
@@ -98,12 +98,12 @@ TEST_F(FlPointerManagerTest, EnterLeaveLeave) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
-                                  1.0, 2.0);
+                                  1.0, 2.0, 0, 0);
   fl_pointer_manager_handle_leave(manager, 1235, kFlutterPointerDeviceKindMouse,
-                                  3.0, 4.0);
+                                  3.0, 4.0, 0, 0);
   // Duplicate leave is ignored
   fl_pointer_manager_handle_leave(manager, 1235, kFlutterPointerDeviceKindMouse,
-                                  5.0, 6.0);
+                                  5.0, 6.0, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 2u);
 
@@ -139,10 +139,10 @@ TEST_F(FlPointerManagerTest, EnterButtonPress) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
-                                  1.0, 2.0);
+                                  1.0, 2.0, 0, 0);
   fl_pointer_manager_handle_button_press(manager, 1235,
                                          kFlutterPointerDeviceKindMouse, 4.0,
-                                         8.0, GDK_BUTTON_PRIMARY);
+                                         8.0, GDK_BUTTON_PRIMARY, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 2u);
 
@@ -179,7 +179,7 @@ TEST_F(FlPointerManagerTest, NoEnterButtonPress) {
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 4.0,
-                                         8.0, GDK_BUTTON_PRIMARY);
+                                         8.0, GDK_BUTTON_PRIMARY, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 2u);
 
@@ -217,10 +217,10 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleasePrimary) {
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 4.0,
-                                         8.0, GDK_BUTTON_PRIMARY);
+                                         8.0, GDK_BUTTON_PRIMARY, 0, 0);
   fl_pointer_manager_handle_button_release(manager, 1235,
                                            kFlutterPointerDeviceKindMouse, 5.0,
-                                           9.0, GDK_BUTTON_PRIMARY);
+                                           9.0, GDK_BUTTON_PRIMARY, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 3u);
 
@@ -257,10 +257,10 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseSecondary) {
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 4.0,
-                                         8.0, GDK_BUTTON_SECONDARY);
+                                         8.0, GDK_BUTTON_SECONDARY, 0, 0);
   fl_pointer_manager_handle_button_release(manager, 1235,
                                            kFlutterPointerDeviceKindMouse, 5.0,
-                                           9.0, GDK_BUTTON_SECONDARY);
+                                           9.0, GDK_BUTTON_SECONDARY, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 3u);
 
@@ -297,10 +297,10 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseMiddle) {
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 4.0,
-                                         8.0, GDK_BUTTON_MIDDLE);
+                                         8.0, GDK_BUTTON_MIDDLE, 0, 0);
   fl_pointer_manager_handle_button_release(manager, 1235,
                                            kFlutterPointerDeviceKindMouse, 5.0,
-                                           9.0, GDK_BUTTON_MIDDLE);
+                                           9.0, GDK_BUTTON_MIDDLE, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 3u);
 
@@ -337,9 +337,9 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseBack) {
   // Forward button is 8 (no GDK define).
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_button_press(
-      manager, 1234, kFlutterPointerDeviceKindMouse, 4.0, 8.0, 8);
+      manager, 1234, kFlutterPointerDeviceKindMouse, 4.0, 8.0, 8, 0, 0);
   fl_pointer_manager_handle_button_release(
-      manager, 1235, kFlutterPointerDeviceKindMouse, 5.0, 9.0, 8);
+      manager, 1235, kFlutterPointerDeviceKindMouse, 5.0, 9.0, 8, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 3u);
 
@@ -376,9 +376,9 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseForward) {
   // Forward button is 9 (no GDK define).
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_button_press(
-      manager, 1234, kFlutterPointerDeviceKindMouse, 4.0, 8.0, 9);
+      manager, 1234, kFlutterPointerDeviceKindMouse, 4.0, 8.0, 9, 0, 0);
   fl_pointer_manager_handle_button_release(
-      manager, 1235, kFlutterPointerDeviceKindMouse, 5.0, 9.0, 9);
+      manager, 1235, kFlutterPointerDeviceKindMouse, 5.0, 9.0, 9, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 3u);
 
@@ -416,22 +416,22 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseThreeButtons) {
   // Press buttons 1-2-3, release 3-2-1
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 1.0,
-                                         2.0, GDK_BUTTON_PRIMARY);
+                                         2.0, GDK_BUTTON_PRIMARY, 0, 0);
   fl_pointer_manager_handle_button_press(manager, 1235,
                                          kFlutterPointerDeviceKindMouse, 3.0,
-                                         4.0, GDK_BUTTON_SECONDARY);
+                                         4.0, GDK_BUTTON_SECONDARY, 0, 0);
   fl_pointer_manager_handle_button_press(manager, 1236,
                                          kFlutterPointerDeviceKindMouse, 5.0,
-                                         6.0, GDK_BUTTON_MIDDLE);
+                                         6.0, GDK_BUTTON_MIDDLE, 0, 0);
   fl_pointer_manager_handle_button_release(manager, 1237,
                                            kFlutterPointerDeviceKindMouse, 7.0,
-                                           8.0, GDK_BUTTON_MIDDLE);
+                                           8.0, GDK_BUTTON_MIDDLE, 0, 0);
   fl_pointer_manager_handle_button_release(manager, 1238,
                                            kFlutterPointerDeviceKindMouse, 9.0,
-                                           10.0, GDK_BUTTON_SECONDARY);
+                                           10.0, GDK_BUTTON_SECONDARY, 0, 0);
   fl_pointer_manager_handle_button_release(
       manager, 1239, kFlutterPointerDeviceKindMouse, 11.0, 12.0,
-      kFlutterPointerButtonMousePrimary);
+      kFlutterPointerButtonMousePrimary, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 7u);
 
@@ -466,6 +466,145 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseThreeButtons) {
   EXPECT_EQ(pointer_events[6].buttons, 0);
 }
 
+TEST_F(FlPointerManagerTest, ButtonPressStylusPrimaryButton) {
+  StartEngine();
+
+  constexpr int64_t kStylusContact = 1 << 0;
+  constexpr int64_t kStylusPrimary = 1 << 1;
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, 0.0, 0.5);
+  fl_pointer_manager_handle_button_press(manager, 1235,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, GDK_BUTTON_SECONDARY, 0.0, 0.5);
+
+  EXPECT_EQ(pointer_events.size(), 3u);
+  EXPECT_EQ(pointer_events[2].device_kind, kFlutterPointerDeviceKindStylus);
+  EXPECT_EQ(pointer_events[2].buttons, kStylusContact | kStylusPrimary);
+}
+
+TEST_F(FlPointerManagerTest, ButtonPressStylusContact) {
+  StartEngine();
+
+  constexpr int64_t kStylusContact = 1 << 0;
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, 0.0, 0.5);
+
+  EXPECT_EQ(pointer_events.size(), 2u);
+  EXPECT_EQ(pointer_events[1].device_kind, kFlutterPointerDeviceKindStylus);
+  EXPECT_EQ(pointer_events[1].buttons, kStylusContact);
+}
+
+TEST_F(FlPointerManagerTest, ButtonPressInvertedStylusContact) {
+  StartEngine();
+
+  constexpr int64_t kStylusContact = 1 << 0;
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_button_press(
+      manager, 1234, kFlutterPointerDeviceKindInvertedStylus, 4.0, 8.0,
+      GDK_BUTTON_PRIMARY, 0.0, 0.5);
+
+  EXPECT_EQ(pointer_events.size(), 2u);
+  EXPECT_EQ(pointer_events[1].device_kind,
+            kFlutterPointerDeviceKindInvertedStylus);
+  EXPECT_EQ(pointer_events[1].buttons, kStylusContact);
+}
+
+TEST_F(FlPointerManagerTest, ButtonPressStylusSecondaryButton) {
+  StartEngine();
+
+  constexpr int64_t kStylusContact = 1 << 0;
+  constexpr int64_t kStylusSecondary = 1 << 2;
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, 0.0, 0.5);
+  fl_pointer_manager_handle_button_press(manager, 1235,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, GDK_BUTTON_MIDDLE, 0.0, 0.5);
+
+  EXPECT_EQ(pointer_events.size(), 3u);
+  EXPECT_EQ(pointer_events[2].device_kind, kFlutterPointerDeviceKindStylus);
+  EXPECT_EQ(pointer_events[2].buttons, kStylusContact | kStylusSecondary);
+}
+
+TEST_F(FlPointerManagerTest, ButtonPressStylusUnknownButton) {
+  StartEngine();
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_button_press(
+      manager, 1234, kFlutterPointerDeviceKindStylus, 4.0, 8.0, 8, 0, 0);
+
+  EXPECT_EQ(pointer_events.size(), 0u);
+}
+
 TEST_F(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
   StartEngine();
 
@@ -484,14 +623,14 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 4.0,
-                                         8.0, GDK_BUTTON_PRIMARY);
+                                         8.0, GDK_BUTTON_PRIMARY, 0, 0);
   // Ignore duplicate press
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 6.0,
-                                         10.0, GDK_BUTTON_PRIMARY);
+                                         10.0, GDK_BUTTON_PRIMARY, 0, 0);
   fl_pointer_manager_handle_button_release(manager, 1235,
                                            kFlutterPointerDeviceKindMouse, 5.0,
-                                           9.0, GDK_BUTTON_PRIMARY);
+                                           9.0, GDK_BUTTON_PRIMARY, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 3u);
 
@@ -528,14 +667,14 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseButtonRelease) {
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 4.0,
-                                         8.0, GDK_BUTTON_PRIMARY);
+                                         8.0, GDK_BUTTON_PRIMARY, 0, 0);
   fl_pointer_manager_handle_button_release(manager, 1235,
                                            kFlutterPointerDeviceKindMouse, 5.0,
-                                           9.0, GDK_BUTTON_PRIMARY);
+                                           9.0, GDK_BUTTON_PRIMARY, 0, 0);
   // Ignore duplicate release
   fl_pointer_manager_handle_button_release(manager, 1235,
                                            kFlutterPointerDeviceKindMouse, 6.0,
-                                           10.0, GDK_BUTTON_PRIMARY);
+                                           10.0, GDK_BUTTON_PRIMARY, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 3u);
 
@@ -573,7 +712,7 @@ TEST_F(FlPointerManagerTest, NoButtonPressButtonRelease) {
   // Release without associated press, will be ignored
   fl_pointer_manager_handle_button_release(manager, 1235,
                                            kFlutterPointerDeviceKindMouse, 5.0,
-                                           9.0, GDK_BUTTON_PRIMARY);
+                                           9.0, GDK_BUTTON_PRIMARY, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 0u);
 }
@@ -594,12 +733,12 @@ TEST_F(FlPointerManagerTest, Motion) {
       }));
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
-  fl_pointer_manager_handle_motion(manager, 1234,
-                                   kFlutterPointerDeviceKindMouse, 1.0, 2.0);
-  fl_pointer_manager_handle_motion(manager, 1235,
-                                   kFlutterPointerDeviceKindMouse, 3.0, 4.0);
-  fl_pointer_manager_handle_motion(manager, 1236,
-                                   kFlutterPointerDeviceKindMouse, 5.0, 6.0);
+  fl_pointer_manager_handle_motion(
+      manager, 1234, kFlutterPointerDeviceKindMouse, 1.0, 2.0, 0, 0);
+  fl_pointer_manager_handle_motion(
+      manager, 1235, kFlutterPointerDeviceKindMouse, 3.0, 4.0, 0, 0);
+  fl_pointer_manager_handle_motion(
+      manager, 1236, kFlutterPointerDeviceKindMouse, 5.0, 6.0, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 4u);
 
@@ -640,18 +779,18 @@ TEST_F(FlPointerManagerTest, Drag) {
       }));
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
-  fl_pointer_manager_handle_motion(manager, 1234,
-                                   kFlutterPointerDeviceKindMouse, 1.0, 2.0);
+  fl_pointer_manager_handle_motion(
+      manager, 1234, kFlutterPointerDeviceKindMouse, 1.0, 2.0, 0, 0);
   fl_pointer_manager_handle_button_press(manager, 1235,
                                          kFlutterPointerDeviceKindMouse, 3.0,
-                                         4.0, GDK_BUTTON_PRIMARY);
-  fl_pointer_manager_handle_motion(manager, 1236,
-                                   kFlutterPointerDeviceKindMouse, 5.0, 6.0);
+                                         4.0, GDK_BUTTON_PRIMARY, 0, 0);
+  fl_pointer_manager_handle_motion(
+      manager, 1236, kFlutterPointerDeviceKindMouse, 5.0, 6.0, 0, 0);
   fl_pointer_manager_handle_button_release(manager, 1237,
                                            kFlutterPointerDeviceKindMouse, 7.0,
-                                           8.0, GDK_BUTTON_PRIMARY);
-  fl_pointer_manager_handle_motion(manager, 1238,
-                                   kFlutterPointerDeviceKindMouse, 9.0, 10.0);
+                                           8.0, GDK_BUTTON_PRIMARY, 0, 0);
+  fl_pointer_manager_handle_motion(
+      manager, 1238, kFlutterPointerDeviceKindMouse, 9.0, 10.0, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 6u);
 
@@ -699,18 +838,18 @@ TEST_F(FlPointerManagerTest, DeviceKind) {
       }));
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
-  fl_pointer_manager_handle_enter(manager, 1234,
-                                  kFlutterPointerDeviceKindTrackpad, 1.0, 2.0);
+  fl_pointer_manager_handle_enter(
+      manager, 1234, kFlutterPointerDeviceKindTrackpad, 1.0, 2.0, 0, 0);
   fl_pointer_manager_handle_button_press(manager, 1235,
                                          kFlutterPointerDeviceKindTrackpad, 1.0,
-                                         2.0, GDK_BUTTON_PRIMARY);
-  fl_pointer_manager_handle_motion(manager, 1238,
-                                   kFlutterPointerDeviceKindTrackpad, 3.0, 4.0);
+                                         2.0, GDK_BUTTON_PRIMARY, 0, 0);
+  fl_pointer_manager_handle_motion(
+      manager, 1238, kFlutterPointerDeviceKindTrackpad, 3.0, 4.0, 0, 0);
   fl_pointer_manager_handle_button_release(manager, 1237,
                                            kFlutterPointerDeviceKindTrackpad,
-                                           3.0, 4.0, GDK_BUTTON_PRIMARY);
-  fl_pointer_manager_handle_leave(manager, 1235,
-                                  kFlutterPointerDeviceKindTrackpad, 3.0, 4.0);
+                                           3.0, 4.0, GDK_BUTTON_PRIMARY, 0, 0);
+  fl_pointer_manager_handle_leave(
+      manager, 1235, kFlutterPointerDeviceKindTrackpad, 3.0, 4.0, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 5u);
 

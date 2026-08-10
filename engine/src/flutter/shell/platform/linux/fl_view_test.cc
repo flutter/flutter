@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
@@ -43,6 +44,27 @@ TEST_F(FlViewTest, StateUpdateDoesNotHappenInInit) {
       (GLogLevelFlags)0x0);
 
   (void)view;
+}
+
+// Disposing a view that holds the text input focus clears the handler's
+// widget pointer so it does not dangle.
+// https://github.com/flutter/flutter/issues/188657
+TEST_F(FlViewTest, DisposeClearsTextInputWidget) {
+  FlView* view = fl_view_new(project);
+  g_object_ref_sink(view);
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_object_ref(fl_view_get_engine(view)));
+  StartEngine(engine);
+  FlTextInputHandler* handler = fl_engine_get_text_input_handler(engine);
+
+  // Give the view text input focus.
+  fl_text_input_handler_set_widget(handler, GTK_WIDGET(view));
+  EXPECT_EQ(fl_text_input_handler_get_widget(handler), GTK_WIDGET(view));
+
+  // Destroy the view while the engine and handler persist.
+  g_object_unref(view);
+
+  EXPECT_EQ(fl_text_input_handler_get_widget(handler), nullptr);
 }
 
 // FIXME(robert-ancell): Disabling this test as it requires the FlView

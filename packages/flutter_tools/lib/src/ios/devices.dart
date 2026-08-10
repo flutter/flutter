@@ -38,6 +38,7 @@ import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'application_package.dart';
 import 'core_devices.dart';
+import 'device_support.dart';
 import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
@@ -65,6 +66,17 @@ In the meantime, we recommend these temporary workarounds:
 * Use a simulator for development rather than a physical device.
 * If you must use a device updated to $deviceVersion, use Flutter's release or
   profile mode via --release or --profile flags.
+════════════════════════════════════════════════════════════════════════════════''';
+
+/// The error message shown when an iOS app fails to launch because it has not
+/// been migrated to the UIScene lifecycle.
+const String kUISceneMigrationRequiredError = '''
+════════════════════════════════════════════════════════════════════════════════
+Your iOS app has not been migrated to the UIScene lifecycle.
+UIScene lifecycle is required on iOS 27 and later.
+
+To migrate your app, please follow the migration guide at:
+  https://flutter.dev/to/uiscene-migration
 ════════════════════════════════════════════════════════════════════════════════''';
 
 enum IOSDeploymentMethod {
@@ -297,8 +309,9 @@ class IOSDevice extends Device {
   IOSDevice(
     super.id, {
     required FileSystem fileSystem,
+    required ProcessUtils processUtils,
     required this.name,
-    required this.cpuArchitecture,
+    required CpuArch cpuArch,
     required this.connectionInterface,
     required this.isConnected,
     required this.isPaired,
@@ -314,14 +327,18 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required super.logger,
     required Analytics analytics,
-  }) : _sdkVersion = sdkVersion,
+    required Xcode? xcode,
+  }) : _cpuArch = cpuArch,
+       _sdkVersion = sdkVersion,
        _iosDeploy = iosDeploy,
        _iMobileDevice = iMobileDevice,
        _coreDeviceControl = coreDeviceControl,
        _coreDeviceLauncher = coreDeviceLauncher,
        _xcodeDebug = xcodeDebug,
+       _xcode = xcode,
        _iproxy = iProxy,
        _fileSystem = fileSystem,
+       _processUtils = processUtils,
        _logger = logger,
        _analytics = analytics,
        _platform = platform,
@@ -336,12 +353,14 @@ class IOSDevice extends Device {
   final IOSDeploy _iosDeploy;
   final Analytics _analytics;
   final FileSystem _fileSystem;
+  final ProcessUtils _processUtils;
   final Logger _logger;
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
+  final Xcode? _xcode;
   final IProxy _iproxy;
 
   Version? get sdkVersion {
@@ -359,7 +378,10 @@ class IOSDevice extends Device {
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
-  final DarwinArch cpuArchitecture;
+  final CpuArch _cpuArch;
+
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
 
   @override
   /// The [connectionInterface] provided from `XCDevice.getAvailableIOSDevices`
@@ -484,7 +506,7 @@ class IOSDevice extends Device {
 
   @override
   // 32-bit devices are not supported.
-  Future<bool> isSupported() async => cpuArchitecture == DarwinArch.arm64;
+  Future<bool> isSupported() async => _cpuArch == .arm64;
 
   @override
   Future<LaunchResult> startApp(
@@ -517,7 +539,7 @@ class IOSDevice extends Device {
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
         targetOverride: mainPath,
-        activeArch: cpuArchitecture,
+        activeArch: _cpuArch,
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
@@ -548,6 +570,15 @@ class IOSDevice extends Device {
       return LaunchResult.failed();
     }
 
+    final bool shouldAttachDebugger = shouldAttachLLDBDebugger(debuggingOptions);
+    if (shouldAttachDebugger) {
+      await IOSDeviceSupport(
+        logger: _logger,
+        processUtils: _processUtils,
+        xcode: _xcode,
+      ).prepareDeviceSupport(id);
+    }
+
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
       EnvironmentType.physical,
@@ -566,8 +597,12 @@ class IOSDevice extends Device {
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
       );
+
+      // This completer is used to intercept when the app crashes after the app launches but
+      // before the Dart VM service is found.
+      final appTerminatedCompleter = Completer<Uri?>();
       if (deviceLogReader is SharedIOSDeviceLogReader) {
-        await _addLogInterceptors(deviceLogReader);
+        await _addLogInterceptors(deviceLogReader, appTerminatedCompleter);
       }
 
       if (debuggingOptions.debuggingEnabled) {
@@ -592,6 +627,7 @@ class IOSDevice extends Device {
           mainPath: mainPath,
           discoveryTimeout: discoveryTimeout,
           shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
+          shouldAttachDebugger: shouldAttachDebugger,
         );
         installationResult = result ? 0 : 1;
         deploymentMethod = coreDeviceDeploymentMethod;
@@ -677,6 +713,7 @@ class IOSDevice extends Device {
           vmServiceDiscovery: vmServiceDiscovery,
           package: package,
           deviceLogReader: deviceLogReader,
+          appTerminatedCompleter: appTerminatedCompleter,
         );
       } else if (isWirelesslyConnected) {
         // Wait for the Dart VM url to be discovered via logs (from `ios-deploy`)
@@ -836,7 +873,10 @@ class IOSDevice extends Device {
     _logger.printError('');
   }
 
-  Future<void> _addLogInterceptors(SharedIOSDeviceLogReader deviceLogReader) async {
+  Future<void> _addLogInterceptors(
+    SharedIOSDeviceLogReader deviceLogReader,
+    Completer<Uri?> appTerminatedCompleter,
+  ) async {
     final String? uisceneWarning = globals.userMessages.uiSceneMigrationWarning;
     if (uisceneWarning != null) {
       final uisceneWarningInterceptor = LogInterceptor(
@@ -852,10 +892,32 @@ class IOSDevice extends Device {
       deviceLogReader.addLogInterceptor(uisceneWarningInterceptor);
     }
 
+    final uisceneCrashInterceptor = LogInterceptor(
+      identifier: 'uiscene_crash',
+      pattern: RegExp(r'UIScene life\s?cycle is required'),
+      action: () {
+        throwToolExit(kUISceneMigrationRequiredError);
+      },
+      excludeFromStream: false,
+    );
+    deviceLogReader.addLogInterceptor(uisceneCrashInterceptor);
+
     final LogInterceptor? jitCrashInterceptor = await _jitCrashInterceptor();
     if (jitCrashInterceptor != null) {
       deviceLogReader.addLogInterceptor(jitCrashInterceptor);
     }
+
+    final appTerminatedInterceptor = LogInterceptor(
+      identifier: 'app_terminated',
+      pattern: RegExp('^App terminated due to signal'),
+      action: () {
+        if (!appTerminatedCompleter.isCompleted) {
+          appTerminatedCompleter.complete();
+        }
+      },
+      excludeFromStream: false,
+    );
+    deviceLogReader.addLogInterceptor(appTerminatedInterceptor);
   }
 
   /// Find the Dart VM url using ProtocolDiscovery (logs from `idevicesyslog`)
@@ -868,47 +930,8 @@ class IOSDevice extends Device {
     ProtocolDiscovery? vmServiceDiscovery,
     IOSApp? package,
     required DeviceLogReader deviceLogReader,
+    required Completer<Uri?> appTerminatedCompleter,
   }) async {
-    Timer? maxWaitForCI;
-    final cancelCompleter = Completer<Uri?>();
-
-    // When testing in CI, wait a max of 10 minutes for the Dart VM to be found.
-    // Afterwards, stop the app from running and upload DerivedData Logs to debug
-    // logs directory. CoreDevices are run through Xcode and launch logs are
-    // therefore found in DerivedData.
-    if (debuggingOptions.usingCISystem && debuggingOptions.debugLogsDirectoryPath != null) {
-      maxWaitForCI = Timer(const Duration(minutes: 10), () async {
-        _logger.printError('Failed to find Dart VM after 10 minutes.');
-        await _xcodeDebug.exit();
-        final String? homePath = _platform.environment['HOME'];
-        Directory? derivedData;
-        if (homePath != null) {
-          derivedData = _fileSystem.directory(
-            _fileSystem.path.join(homePath, 'Library', 'Developer', 'Xcode', 'DerivedData'),
-          );
-        }
-        if (derivedData != null && derivedData.existsSync()) {
-          final Directory debugLogsDirectory = _fileSystem.directory(
-            debuggingOptions.debugLogsDirectoryPath,
-          );
-          debugLogsDirectory.createSync(recursive: true);
-          for (final FileSystemEntity entity in derivedData.listSync()) {
-            if (entity is! Directory || !entity.childDirectory('Logs').existsSync()) {
-              continue;
-            }
-            final Directory logsToCopy = entity.childDirectory('Logs');
-            final Directory copyDestination = debugLogsDirectory
-                .childDirectory('DerivedDataLogs')
-                .childDirectory(entity.basename)
-                .childDirectory('Logs');
-            _logger.printTrace('Copying logs ${logsToCopy.path} to ${copyDestination.path}...');
-            copyDirectory(logsToCopy, copyDestination);
-          }
-        }
-        cancelCompleter.complete();
-      });
-    }
-
     final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
 
     // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
@@ -927,20 +950,26 @@ class IOSDevice extends Device {
       if (discoverVMUrlFromLogs) vmServiceDiscovery.uri,
     ];
 
-    Uri? localUri = await Future.any(<Future<Uri?>>[...discoveryOptions, cancelCompleter.future]);
+    Uri? localUri = await Future.any(<Future<Uri?>>[
+      ...discoveryOptions,
+      appTerminatedCompleter.future,
+    ]);
 
     // If the first future to return is null, wait for the other to complete
-    // unless canceled.
-    if (localUri == null && !cancelCompleter.isCompleted) {
+    // unless the app was terminated.
+    if (localUri == null && !appTerminatedCompleter.isCompleted) {
       final Future<List<Uri?>> allDiscoveryOptionsComplete = Future.wait(discoveryOptions);
-      await Future.any(<Future<Object?>>[allDiscoveryOptionsComplete, cancelCompleter.future]);
-      if (!cancelCompleter.isCompleted) {
-        // If it wasn't cancelled, that means one of the discovery options completed.
+      await Future.any(<Future<Object?>>[
+        allDiscoveryOptionsComplete,
+        appTerminatedCompleter.future,
+      ]);
+      if (!appTerminatedCompleter.isCompleted) {
+        // If it wasn't terminated, that means one of the discovery options completed.
         final List<Uri?> vmUrls = await allDiscoveryOptionsComplete;
         localUri = vmUrls.where((Uri? vmUrl) => vmUrl != null).firstOrNull;
       }
     }
-    maxWaitForCI?.cancel();
+
     if (deviceLogReader is SharedIOSDeviceLogReader) {
       deviceLogReader.removeLogInterceptorByIdentifier(kJITCrashLogInterceptorIdentifier);
     }
@@ -1006,6 +1035,15 @@ class IOSDevice extends Device {
     );
   }
 
+  /// Whether the LLDB debugger should be attached.
+  ///
+  /// The LLDB debugger should only be attached in debug mode or if the user uses the
+  /// `--ios-profile-debugger` flag in profile mode.
+  bool shouldAttachLLDBDebugger(DebuggingOptions debuggingOptions) {
+    return debuggingOptions.buildInfo.isDebug ||
+        (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
+  }
+
   /// Uses either `devicectl` or Xcode automation to install, launch, and debug
   /// apps on physical iOS devices.
   ///
@@ -1029,6 +1067,7 @@ class IOSDevice extends Device {
     required IOSApp package,
     required List<String> launchArguments,
     required String? mainPath,
+    required bool shouldAttachDebugger,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
@@ -1061,8 +1100,7 @@ class IOSDevice extends Device {
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
-    if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
@@ -1070,10 +1108,6 @@ class IOSDevice extends Device {
       if (deviceLogReader is IOSDeviceLogReader) {
         await deviceLogReader.listenToCoreDeviceLauncher(_coreDeviceLauncher);
       }
-
-      final bool shouldAttachDebugger =
-          debuggingOptions.buildInfo.isDebug ||
-          (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
 
       if (shouldAttachDebugger) {
         final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
@@ -1311,17 +1345,42 @@ class IOSDevice extends Device {
 
   @override
   bool get supportsScreenshot {
-    if (isCoreDevice) {
-      // `idevicescreenshot` stopped working with iOS 17 / Xcode 15
-      // (https://github.com/flutter/flutter/issues/128598).
-      return false;
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      return globals.xcode!.isDevicectlInstalled;
     }
-    return _iMobileDevice.isInstalled;
+    return false;
   }
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      var success = false;
+      try {
+        success = await _coreDeviceControl.takeScreenshot(
+          deviceId: id,
+          destination: outputFile.path,
+        );
+      } on Exception catch (error) {
+        final errorMessage = error.toString();
+        if (errorMessage.contains('CoreDeviceError error 4000') ||
+            errorMessage.contains('CoreDeviceError error 4016') ||
+            errorMessage.contains('RemotePairingError error 2') ||
+            errorMessage.contains('Connection was invalidated')) {
+          throwToolExit(
+            'Failed to establish a connection to the device. '
+            'Please make sure the device is available and try again.',
+          );
+        }
+        throwToolExit('Failed to take screenshot with devicectl: $error');
+      }
+      if (success) {
+        return;
+      }
+      throwToolExit('Failed to take screenshot with devicectl.');
+    }
+    throwToolExit('flutter screenshot requires Xcode 27 or higher.');
   }
 
   @override

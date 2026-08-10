@@ -77,7 +77,7 @@ enum FlutterDarwinPlatform {
   Version deploymentTarget() {
     return switch (this) {
       ios => Version(15, 0, null),
-      macos => Version(10, 15, null),
+      macos => Version(12, 0, null),
     };
   }
 
