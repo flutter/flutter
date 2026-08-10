@@ -246,11 +246,11 @@ class WebTestsSuite {
   }
 
   Future<void> runWebCanvasKitUnitTests() {
-    return _runWebUnitTests(useWasm: false, webShardCount: 8);
+    return _runWebUnitTests(useWasm: false);
   }
 
   Future<void> runWebSkwasmUnitTests() {
-    return _runWebUnitTests(useWasm: true, webShardCount: 2);
+    return _runWebUnitTests(useWasm: true);
   }
 
   /// Runs one of the `dev/integration_tests/web_e2e_tests` tests.
@@ -543,9 +543,7 @@ class WebTestsSuite {
     }
   }
 
-  Future<void> _runWebUnitTests({required bool useWasm, required int webShardCount}) async {
-    final subshards = <String, ShardRunner>{};
-
+  Future<void> _runWebUnitTests({required bool useWasm}) async {
     final flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
     final flutterPackageTestDirectory = Directory(path.join(flutterPackageDirectory.path, 'test'));
 
@@ -573,29 +571,43 @@ class WebTestsSuite {
           // We use a constant seed for repeatability.
           ..shuffle(math.Random(0));
 
-    assert(webShardCount >= 1);
-    final int testsPerShard = (allTests.length / webShardCount).ceil();
-    assert(testsPerShard * webShardCount >= allTests.length);
+    final String? subshardName = Platform.environment[kSubshardKey];
+    var isLastShard = true;
+    var testsToRun = allTests;
 
-    // This for loop computes all but the last shard.
-    for (var index = 0; index < webShardCount - 1; index += 1) {
-      subshards['$index'] = () => _runFlutterWebTest(
-        flutterPackageDirectory.path,
-        allTests.sublist(index * testsPerShard, (index + 1) * testsPerShard),
-        useWasm,
-      );
+    if (subshardName != null) {
+      final Pattern indexTotalPattern = RegExp(r'^(\d+)_(\d+)$');
+      final Match? match = indexTotalPattern.matchAsPrefix(subshardName);
+
+      if (match != null) {
+        final int index = int.parse(match.group(1)!);
+        final int total = int.parse(match.group(2)!);
+        isLastShard = index == total;
+        testsToRun = selectIndexOfTotalSubshard<String>(allTests);
+      } else {
+        // Fallback for legacy subshard names (e.g. "0", "1", "7_last")
+        const legacyShardCount = 8;
+        final String rawIndex = subshardName.replaceFirst(RegExp(r'_last$'), '');
+        final int? parsedIndex = int.tryParse(rawIndex);
+        if (parsedIndex != null) {
+          final int index = parsedIndex + 1;
+          isLastShard = subshardName.endsWith('_last') || index == legacyShardCount;
+          final int testsPerShard = (allTests.length / legacyShardCount).ceil();
+          final int start = (index - 1) * testsPerShard;
+          final int end = math.min(index * testsPerShard, allTests.length);
+          testsToRun = allTests.sublist(start, end);
+        } else {
+          foundError(<String>[
+            '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" (e.g. "1_8").',
+          ]);
+          return;
+        }
+      }
     }
 
-    // The last shard also runs the flutter_web_plugins tests.
-    //
-    // We make sure the last shard ends in _last so it's easier to catch mismatches
-    // between `.ci.yaml` and `test.dart`.
-    Future<void> lastShardRunner() async {
-      await _runFlutterWebTest(
-        flutterPackageDirectory.path,
-        allTests.sublist((webShardCount - 1) * testsPerShard, allTests.length),
-        useWasm,
-      );
+    await _runFlutterWebTest(flutterPackageDirectory.path, testsToRun, useWasm);
+
+    if (isLastShard) {
       await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_web_plugins'), <String>[
         'test',
       ], useWasm);
@@ -603,11 +615,6 @@ class WebTestsSuite {
         path.join('test', 'src', 'web_tests', 'web_extension_test.dart'),
       ], useWasm);
     }
-
-    subshards['${webShardCount - 1}'] = lastShardRunner;
-    subshards['${webShardCount - 1}_last'] = lastShardRunner;
-
-    await selectSubshard(subshards);
   }
 
   Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests, bool useWasm) async {
