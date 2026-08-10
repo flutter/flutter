@@ -74,7 +74,10 @@ SamplerBinding SetupGradientParameters(
   frag_info.gradient_start = gradient.start;
   frag_info.gradient_end = gradient.end;
   frag_info.tile_mode = static_cast<Scalar>(gradient.tile_mode);
-  frag_info.half_texel = Point(0.5f, 0.5f) / gradient.texture->GetSize();
+  auto texture_size = gradient.texture->GetSize();
+  FML_DCHECK(!texture_size.IsEmpty());
+  frag_info.half_texel =
+      Point(0.5f, 0.5f) / Point(texture_size.width, texture_size.height);
 
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;
