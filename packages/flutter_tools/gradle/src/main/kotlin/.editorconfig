@@ -1,0 +1,5 @@
+# Generated constants keep the names of the Dart source of truth they come
+# from, which are not the screaming snake case ktlint expects of Kotlin
+# constants. See dev/tools/gen_gradle_constants.
+[*.g.kt]
+ktlint_standard_property-naming = disabled

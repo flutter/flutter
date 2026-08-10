@@ -7,7 +7,6 @@
 
 package com.flutter.gradle
 
-
 const val propShouldShrinkResources: String = "shrink"
 const val propSplitPerAbi: String = "split-per-abi"
 const val propEnableHcpp: String = "enable-hcpp"

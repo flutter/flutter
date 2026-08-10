@@ -375,6 +375,11 @@ List<Validation> _getValidations({
       () => verifyMaterialFilesAreUpToDateWithTemplateFiles(flutterRoot, dart),
     ),
     Validation(
+      'gen-gradle-constants-up-to-date',
+      'Generated Gradle constants are up-to-date with their Dart sources...',
+      () => verifyGeneratedGradleConstants(flutterRoot, dart),
+    ),
+    Validation(
       'integration-templates',
       'Up to date integration test template files...',
       () => verifyIntegrationTestTemplateFiles(flutterRoot),
@@ -626,6 +631,47 @@ Future<void> verifyMaterialFilesAreUpToDateWithTemplateFiles(
     foundError(<String>[
       ...errors,
       '${bold}See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.$reset',
+    ]);
+  }
+}
+
+/// Verify the checked in Gradle constants are up-to-date with the Dart sources
+/// they are generated from by /dev/tools/gen_gradle_constants.
+Future<void> verifyGeneratedGradleConstants(String workingDirectory, String dartExecutable) async {
+  // Regenerate the constants. The generator prints the path of every file it
+  // writes, which is what gets handed to `git diff` below, so that the set of
+  // generated files only has to be listed in the generator itself.
+  final EvalResult generated = await _evalCommand(dartExecutable, <String>[
+    '--enable-asserts',
+    path.join('dev', 'tools', 'gen_gradle_constants', 'bin', 'gen_gradle_constants.dart'),
+  ], workingDirectory: workingDirectory);
+  final List<String> generatedFiles = const LineSplitter()
+      .convert(generated.stdout)
+      .map((String line) => line.trim())
+      .where((String line) => line.isNotEmpty)
+      .toList();
+  if (generatedFiles.isEmpty) {
+    foundError(<String>['The Gradle constants generator did not report generating any files.']);
+    return;
+  }
+
+  // Check that regeneration did not dirty the tree.
+  final EvalResult result = await _evalCommand(
+    'git',
+    <String>['diff', '--name-only', '--exit-code', '--', ...generatedFiles],
+    workingDirectory: workingDirectory,
+    allowNonZeroExit: true,
+  );
+  if (result.exitCode == 1) {
+    foundError(<String>[
+      'The following generated Gradle constants appear to be out of date:',
+      ...(const LineSplitter().convert(result.stdout).map((String line) => ' * $line')),
+      'Run "dart dev/tools/gen_gradle_constants/bin/gen_gradle_constants.dart" to regenerate.',
+    ]);
+  } else if (result.exitCode != 0) {
+    foundError(<String>[
+      'Failed to run "git diff" on the generated Gradle constants:',
+      result.stderr,
     ]);
   }
 }
