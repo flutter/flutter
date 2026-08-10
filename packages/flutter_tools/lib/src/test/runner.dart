@@ -216,7 +216,7 @@ interface class FlutterTestRunner {
     if (packageConfigFile.existsSync()) {
       projectPackageConfig = PackageConfig.parseBytes(
         packageConfigFile.readAsBytesSync(),
-        Uri.file(flutterProject.directory.path),
+        packageConfigFile.uri,
       );
     } else {
       // We can't use this directly, but need to manually check
