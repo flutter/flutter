@@ -12,7 +12,7 @@ import 'screens/workout_of_week_screen.dart';
 import 'utils/storage_helper.dart';
 import 'utils/firebase_service.dart';
 import 'screens/instructor_dashboard.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart' hide FirebaseService;
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -1384,100 +1384,123 @@ class _MainNavigationState extends State<MainNavigation> {
       const StretchingScreen(),
     ];
 
+    final pendingCount = widget.workouts
+        .where(
+          (w) =>
+              w.isReviewedByInstructor &&
+              !w.isReviewAcknowledged &&
+              w.instructorReview != null &&
+              w.instructorReview!.isNotEmpty,
+        )
+        .length;
+
+    final navItems = <({String label, Widget icon})>[
+      (
+        label: 'Home',
+        icon: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Icon(Icons.home),
+            if (pendingCount > 0)
+              Positioned(
+                right: -8,
+                top: -4,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    '$pendingCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+      (
+        label: 'Profile',
+        icon: Icon(
+          Icons.person,
+          color: widget.currentUserEmail != null &&
+                  widget.currentUserEmail!.isNotEmpty &&
+                  widget.clientProfile.username.isNotEmpty &&
+                  widget.clientProfile.username != widget.currentUserEmail
+              ? Colors.orange
+              : null,
+        ),
+      ),
+      (label: 'History', icon: const Icon(Icons.history)),
+      (label: 'Progress', icon: const Icon(Icons.timeline)),
+      (label: 'Workout of Week', icon: const Icon(Icons.star)),
+      (label: 'Exercise Library', icon: const Icon(Icons.fitness_center)),
+      (label: 'Stretching', icon: const Icon(Icons.self_improvement)),
+    ];
+
     return Scaffold(
       body: screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        backgroundColor: const Color(0xFF2563EB),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            label: 'Home',
-            icon: Builder(
-              builder: (context) {
-                final pendingCount = widget.workouts
-                    .where(
-                      (w) =>
-                          w.isReviewedByInstructor &&
-                          !w.isReviewAcknowledged &&
-                          w.instructorReview != null &&
-                          w.instructorReview!.isNotEmpty,
-                    )
-                    .length;
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    const Icon(Icons.home),
-                    if (pendingCount > 0)
-                      Positioned(
-                        right: -8,
-                        top: -4,
-                        child: Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
+      bottomNavigationBar: Container(
+        color: const Color(0xFF2563EB),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 72,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: List.generate(navItems.length, (index) {
+                  final item = navItems[index];
+                  final isSelected = index == _selectedIndex;
+                  final itemColor = isSelected ? Colors.white : Colors.white70;
+
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    },
+                    child: Container(
+                      width: 120,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconTheme(
+                            data: IconThemeData(color: itemColor),
+                            child: item.icon,
                           ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          child: Text(
-                            '$pendingCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          const SizedBox(height: 4),
+                          Text(
+                            item.label,
                             textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: itemColor,
+                              fontSize: 12,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                  ],
-                );
-              },
+                    ),
+                  );
+                }),
+              ),
             ),
           ),
-          BottomNavigationBarItem(
-            label: 'Profile',
-            icon: Icon(
-              Icons.person,
-              color: widget.currentUserEmail != null &&
-                      widget.currentUserEmail!.isNotEmpty &&
-                      widget.clientProfile.username.isNotEmpty &&
-                      widget.clientProfile.username != widget.currentUserEmail
-                  ? Colors.orange
-                  : null,
-            ),
-          ),
-          const BottomNavigationBarItem(
-            label: 'History',
-            icon: Icon(Icons.history),
-          ),
-          const BottomNavigationBarItem(
-            label: 'Progress',
-            icon: Icon(Icons.timeline),
-          ),
-          const BottomNavigationBarItem(
-            label: 'Workout of Week',
-            icon: Icon(Icons.star),
-          ),
-          const BottomNavigationBarItem(
-            label: 'Exercise Library',
-            icon: Icon(Icons.fitness_center),
-          ),
-          const BottomNavigationBarItem(
-            label: 'Stretching',
-            icon: Icon(Icons.self_improvement),
-          ),
-        ],
+        ),
       ),
     );
   }
