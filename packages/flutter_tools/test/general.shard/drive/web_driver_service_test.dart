@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -30,6 +31,11 @@ final kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
+  '--disable-background-networking',
+  '--disable-sync',
+  '--disable-client-side-phishing-detection',
+  '--disable-notifications',
+  '--disable-features=GCM',
   '--disable-default-apps',
   '--disable-extensions',
   '--disable-popup-blocking',
@@ -264,7 +270,11 @@ void main() {
     );
     await service.stop();
     expect(FakeResidentRunner.instance.callLog, <String>['run', 'exitApp', 'cleanupAtFinish']);
-  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
 
   testUsingContext(
     'WebDriverService forwards platform args to the web runner',
@@ -281,6 +291,8 @@ void main() {
       expect(fakeWebRunnerFactory.lastPlatformArgs, <String, Object?>{'no-launch-chrome': true});
     },
     overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
       WebRunnerFactory: () => fakeWebRunnerFactory = FakeWebRunnerFactory(),
     },
   );
@@ -296,7 +308,11 @@ void main() {
     );
     await service.stop();
     expect(service.webUri, Uri.parse(testUrl));
-  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
 
   testUsingContext('WebDriverService starts an app with provided web headers', () async {
     final WebDriverService service = setUpDriverService();
@@ -317,7 +333,11 @@ void main() {
       FakeResidentRunner.instance.debuggingOptions.webDevServerConfig?.headers,
       equals(webHeaders),
     );
-  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
 
   testUsingContext('WebDriverService will throw when an invalid launch url is provided', () async {
     final WebDriverService service = setUpDriverService();
@@ -331,7 +351,11 @@ void main() {
       ),
       throwsA(isA<FormatException>()),
     );
-  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
 
   testUsingContext(
     'WebDriverService forwards exception when run future fails before app starts',
@@ -348,6 +372,8 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
       WebRunnerFactory: () => FakeWebRunnerFactory(doResolveToError: true),
     },
   );

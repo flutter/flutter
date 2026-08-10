@@ -104,6 +104,11 @@ class Chrome extends Browser {
             // DWARF debugging requires a Chrome extension.
             '--disable-extensions',
           '--disable-popup-blocking',
+          '--disable-background-networking',
+          '--disable-sync',
+          '--disable-client-side-phishing-detection',
+          '--disable-notifications',
+          '--disable-features=GCM',
           // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
           '--bwsi',
           '--no-first-run',
