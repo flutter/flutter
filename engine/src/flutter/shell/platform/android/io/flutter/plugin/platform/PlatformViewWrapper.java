@@ -244,4 +244,26 @@ public class PlatformViewWrapper extends FrameLayout {
       observer.removeOnGlobalFocusChangeListener(currFocusListener);
     }
   }
+
+  public interface FocusSearchFailedListener {
+    void onFocusSearchFailed(int direction);
+  }
+
+  private FocusSearchFailedListener focusSearchFailedListener;
+
+  public void setFocusSearchFailedListener(FocusSearchFailedListener listener) {
+    this.focusSearchFailedListener = listener;
+  }
+
+  @Override
+  public View focusSearch(View focused, int direction) {
+    View next = super.focusSearch(focused, direction);
+    if (next == null || next == this) {
+      if (focusSearchFailedListener != null) {
+        focusSearchFailedListener.onFocusSearchFailed(direction);
+      }
+    }
+    return next;
+  }
 }
+

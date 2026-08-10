@@ -36,6 +36,19 @@ public class PlatformViewWrapperTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
 
   @Test
+  public void focusSearch_callsFocusSearchFailedListenerWhenNull() {
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx);
+    final boolean[] listenerCalled = {false};
+    wrapper.setFocusSearchFailedListener((direction) -> {
+      listenerCalled[0] = true;
+    });
+
+    wrapper.focusSearch(null, android.view.View.FOCUS_DOWN);
+
+    assertTrue(listenerCalled[0]);
+  }
+
+  @Test
   public void invalidateChildInParent_callsInvalidate() {
     final PlatformViewWrapper wrapper = spy(new PlatformViewWrapper(ctx));
 

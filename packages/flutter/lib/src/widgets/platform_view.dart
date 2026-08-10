@@ -16,6 +16,7 @@ import 'basic.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 
 // Examples can assume:
@@ -800,6 +801,7 @@ class _AndroidViewState extends State<AndroidView> {
       onFocus: () {
         _focusNode!.requestFocus();
       },
+      onFocusSearchFailed: _handlePlatformFocusSearchFailed,
     );
     if (widget.onPlatformViewCreated != null) {
       _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated!);
@@ -833,6 +835,7 @@ class _AndroidViewState extends State<AndroidView> {
       });
       return;
     }
+    _controller.requestFocus();
     SystemChannels.textInput
         .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
           'platformViewId': _id,
@@ -857,6 +860,25 @@ class _AndroidViewState extends State<AndroidView> {
             );
           }
         });
+  }
+
+  void _handlePlatformFocusSearchFailed(int direction) {
+    switch (direction) {
+      case 1: // FOCUS_BACKWARD
+        FocusManager.instance.primaryFocus?.previousFocus();
+      case 2: // FOCUS_FORWARD
+        FocusManager.instance.primaryFocus?.nextFocus();
+      case 17: // FOCUS_LEFT
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.left);
+      case 33: // FOCUS_UP
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.up);
+      case 66: // FOCUS_RIGHT
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.right);
+      case 130: // FOCUS_DOWN
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.down);
+      default:
+        FocusManager.instance.primaryFocus?.nextFocus();
+    }
   }
 }
 
@@ -1160,6 +1182,7 @@ class PlatformViewCreationParams {
     required this.viewType,
     required this.onPlatformViewCreated,
     required this.onFocusChanged,
+    required this.onFocusSearchFailed,
   });
 
   /// The unique identifier for the new platform view.
@@ -1180,6 +1203,11 @@ class PlatformViewCreationParams {
   ///
   /// The value is true when the platform view gains focus and false when it loses focus.
   final ValueChanged<bool> onFocusChanged;
+
+  /// Callback invoked when the platform view cannot find a view to focus in the given direction.
+  ///
+  /// The value is the Android focus direction integer.
+  final ValueChanged<int> onFocusSearchFailed;
 }
 
 /// A factory for a surface presenting a platform view as part of the widget hierarchy.
@@ -1323,6 +1351,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
         viewType: widget.viewType,
         onPlatformViewCreated: _onPlatformViewCreated,
         onFocusChanged: _handlePlatformFocusChanged,
+        onFocusSearchFailed: _handlePlatformFocusSearchFailed,
       ),
     );
   }
@@ -1340,6 +1369,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       _controller?.clearFocus();
       return;
     }
+    _controller?.requestFocus();
     SystemChannels.textInput
         .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
           'platformViewId': _id,
@@ -1359,6 +1389,25 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void _handlePlatformFocusChanged(bool isFocused) {
     if (isFocused) {
       _focusNode!.requestFocus();
+    }
+  }
+
+  void _handlePlatformFocusSearchFailed(int direction) {
+    switch (direction) {
+      case 1: // FOCUS_BACKWARD
+        FocusManager.instance.primaryFocus?.previousFocus();
+      case 2: // FOCUS_FORWARD
+        FocusManager.instance.primaryFocus?.nextFocus();
+      case 17: // FOCUS_LEFT
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.left);
+      case 33: // FOCUS_UP
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.up);
+      case 66: // FOCUS_RIGHT
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.right);
+      case 130: // FOCUS_DOWN
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.down);
+      default:
+        FocusManager.instance.primaryFocus?.nextFocus();
     }
   }
 

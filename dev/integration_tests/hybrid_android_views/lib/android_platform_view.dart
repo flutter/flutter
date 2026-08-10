@@ -56,6 +56,7 @@ class AndroidPlatformView extends StatelessWidget {
             onFocus: () {
               params.onFocusChanged(true);
             },
+            onFocusSearchFailed: params.onFocusSearchFailed,
           );
         } else {
           controller = PlatformViewsService.initSurfaceAndroidView(
@@ -65,6 +66,7 @@ class AndroidPlatformView extends StatelessWidget {
             onFocus: () {
               params.onFocusChanged(true);
             },
+            onFocusSearchFailed: params.onFocusSearchFailed,
           );
         }
         if (onPlatformViewCreated != null) {

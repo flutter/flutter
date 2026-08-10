@@ -4168,6 +4168,58 @@ void main() {
       expect(controller.focusCleared, true);
     });
 
+    testWidgets('PlatformViewLink onFocusSearchFailed passes focus correctly', (WidgetTester tester) async {
+      late ValueChanged<int> focusSearchFailed;
+      final platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          params.onPlatformViewCreated(params.id);
+          focusSearchFailed = params.onFocusSearchFailed;
+          return FakePlatformViewController(params.id);
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+      final GlobalKey nextFocusKey = GlobalKey();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              SizedBox(width: 300, height: 300, child: platformViewLink),
+              Focus(
+                debugLabel: 'next',
+                child: Container(key: nextFocusKey, width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final Focus platformViewFocusWidget = tester.widget(
+        find.descendant(of: find.byType(PlatformViewLink), matching: find.byType(Focus)),
+      );
+      final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode!;
+      
+      platformViewFocusNode.requestFocus();
+      await tester.pump();
+      expect(platformViewFocusNode.hasFocus, true);
+      
+      // Simulate exhausting focus natively (FOCUS_FORWARD == 2)
+      focusSearchFailed(2);
+      await tester.pump();
+
+      final Element nextElement = tester.element(find.byKey(nextFocusKey));
+      final FocusNode nextFocusNode = Focus.of(nextElement);
+      expect(nextFocusNode.hasFocus, true);
+      expect(platformViewFocusNode.hasFocus, false);
+    });
+
     testWidgets('PlatformViewLink sets a platform view text input client when focused', (
       WidgetTester tester,
     ) async {

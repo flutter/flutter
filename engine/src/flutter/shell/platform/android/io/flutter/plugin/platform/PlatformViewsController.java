@@ -490,6 +490,28 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
+        public void requestFocus(int viewId) {
+          View embeddedView;
+
+          if (usesVirtualDisplay(viewId)) {
+            final VirtualDisplayController controller = vdControllers.get(viewId);
+            embeddedView = controller.getView();
+          } else {
+            final PlatformView platformView = platformViews.get(viewId);
+            if (platformView == null) {
+              Log.e(TAG, "Requesting focus on an unknown view with id: " + viewId);
+              return;
+            }
+            embeddedView = platformView.getView();
+          }
+          if (embeddedView == null) {
+            Log.e(TAG, "Requesting focus on a null view with id: " + viewId);
+            return;
+          }
+          embeddedView.requestFocus();
+        }
+
+        @Override
         public void synchronizeToNativeViewHierarchy(boolean yes) {
           synchronizeToNativeViewHierarchy = yes;
         }
@@ -666,6 +688,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           } else if (textInputPlugin != null) {
             textInputPlugin.clearPlatformViewClient(request.viewId);
           }
+        });
+
+    viewWrapper.setFocusSearchFailedListener(
+        (direction) -> {
+          platformViewsChannel.invokeFocusNext(request.viewId, direction);
         });
 
     flutterView.addView(viewWrapper);

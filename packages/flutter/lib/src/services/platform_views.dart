@@ -83,6 +83,13 @@ class PlatformViewsService {
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
+      case 'invokeFocusNext':
+        final args = call.arguments as Map<Object?, Object?>;
+        final id = args['viewId']! as int;
+        final direction = args['direction']! as int;
+        if (_focusNextCallbacks.containsKey(id)) {
+          _focusNextCallbacks[id]!(direction);
+        }
       default:
         throw UnimplementedError(
           "${call.method} was invoked but isn't implemented by PlatformViewsService",
@@ -95,6 +102,11 @@ class PlatformViewsService {
   ///
   /// The callbacks are invoked when the platform view asks to be focused.
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
+
+  /// Maps platform view IDs to focus search failed callbacks.
+  ///
+  /// The callbacks are invoked when the native Android view cannot find a view to focus.
+  final Map<int, ValueChanged<int>> _focusNextCallbacks = <int, ValueChanged<int>>{};
 
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
@@ -138,6 +150,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
+    ValueChanged<int>? onFocusSearchFailed,
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -150,6 +163,9 @@ class PlatformViewsService {
     );
 
     _instance._focusCallbacks[id] = onFocus ?? () {};
+    if (onFocusSearchFailed != null) {
+      _instance._focusNextCallbacks[id] = onFocusSearchFailed;
+    }
     return controller;
   }
 
@@ -168,6 +184,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
+    ValueChanged<int>? onFocusSearchFailed,
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -179,6 +196,9 @@ class PlatformViewsService {
       creationParamsCodec: creationParamsCodec,
     );
     _instance._focusCallbacks[id] = onFocus ?? () {};
+    if (onFocusSearchFailed != null) {
+      _instance._focusNextCallbacks[id] = onFocusSearchFailed;
+    }
     return controller;
   }
 
@@ -198,6 +218,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
+    ValueChanged<int>? onFocusSearchFailed,
   }) {
     final controller = ExpensiveAndroidViewController._(
       viewId: id,
@@ -208,6 +229,9 @@ class PlatformViewsService {
     );
 
     _instance._focusCallbacks[id] = onFocus ?? () {};
+    if (onFocusSearchFailed != null) {
+      _instance._focusNextCallbacks[id] = onFocusSearchFailed;
+    }
     return controller;
   }
 
@@ -226,6 +250,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
+    ValueChanged<int>? onFocusSearchFailed,
   }) {
     final controller = HybridAndroidViewController._(
       viewId: id,
@@ -236,6 +261,9 @@ class PlatformViewsService {
     );
 
     _instance._focusCallbacks[id] = onFocus ?? () {};
+    if (onFocusSearchFailed != null) {
+      _instance._focusNextCallbacks[id] = onFocusSearchFailed;
+    }
     return controller;
   }
 
@@ -262,6 +290,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
+    ValueChanged<int>? onFocusSearchFailed,
   }) async {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -312,6 +341,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
+    ValueChanged<int>? onFocusSearchFailed,
   }) async {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -1030,6 +1060,15 @@ abstract class AndroidViewController extends PlatformViewController {
     return SystemChannels.platform_views.invokeMethod<void>('clearFocus', viewId);
   }
 
+  /// Requests focus for the Android View.
+  @override
+  Future<void> requestFocus() {
+    if (_state != _AndroidViewState.created) {
+      return Future<void>.value();
+    }
+    return SystemChannels.platform_views.invokeMethod<void>('requestFocus', viewId);
+  }
+
   /// Disposes the Android view.
   ///
   /// The [AndroidViewController] object is unusable after calling this.
@@ -1716,4 +1755,7 @@ abstract class PlatformViewController {
 
   /// Clears the view's focus on the platform side.
   Future<void> clearFocus();
+
+  /// Requests focus for the view on the platform side.
+  Future<void> requestFocus() async {}
 }
