@@ -2144,16 +2144,13 @@ bool Canvas::AttemptBlurredTextOptimization(
 
   std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
   TextFrameFingerprint fingerprint;
-  int64_t identifier;
   if (maybe_glyph.has_value()) {
-    identifier = maybe_glyph.value().index;
+    fingerprint.first_glyph_id = PackGlyphId(maybe_glyph.value());
   } else {
     fingerprint = ComputeTextFrameFingerprint(*text_frame);
-    identifier = static_cast<int64_t>(fingerprint.full_hash);
   }
   TextShadowCache::TextShadowCacheKey cache_key(
       /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
-      /*p_identifier=*/identifier,
       /*p_is_single_glyph=*/maybe_glyph.has_value(),
       /*p_font=*/text_frame->GetFont(),
       /*p_sigma=*/paint.mask_blur_descriptor->sigma,

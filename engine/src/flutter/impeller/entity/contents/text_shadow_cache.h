@@ -72,7 +72,6 @@ class TextShadowCache {
   /// @brief A key to look up cached glyph textures.
   struct TextShadowCacheKey {
     Scalar max_basis;
-    int64_t identifier;
     bool is_single_glyph;
     Font font;
     Rational rounded_sigma;
@@ -80,7 +79,6 @@ class TextShadowCache {
     TextFrameFingerprint fingerprint;
 
     TextShadowCacheKey(Scalar p_max_basis,
-                       int64_t p_identifier,
                        bool p_is_single_glyph,
                        const Font& p_font,
                        Sigma p_sigma,
@@ -89,9 +87,10 @@ class TextShadowCache {
 
     struct Hash {
       std::size_t operator()(const TextShadowCacheKey& key) const {
-        return absl::HashOf(key.max_basis, key.identifier, key.is_single_glyph,
+        return absl::HashOf(key.max_basis, key.is_single_glyph,
                             key.font.GetHash(), key.rounded_sigma.GetHash(),
-                            key.color.ToARGB(), key.fingerprint.full_hash);
+                            key.color.ToARGB(), key.fingerprint.full_hash,
+                            key.fingerprint.first_glyph_id);
       }
     };
 
@@ -99,7 +98,6 @@ class TextShadowCache {
       constexpr bool operator()(const TextShadowCacheKey& lhs,
                                 const TextShadowCacheKey& rhs) const {
         return lhs.max_basis == rhs.max_basis &&
-               lhs.identifier == rhs.identifier &&
                lhs.is_single_glyph == rhs.is_single_glyph &&
                lhs.font.IsEqual(rhs.font) &&
                lhs.rounded_sigma == rhs.rounded_sigma &&

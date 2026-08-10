@@ -943,7 +943,6 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
   // last_glyph_id).
   TextShadowCache::TextShadowCacheKey key1(
       /*p_max_basis=*/1.0f,
-      /*p_identifier=*/12345,
       /*p_is_single_glyph=*/false,
       /*p_font=*/impeller_font,
       /*p_sigma=*/Sigma{4.0f},
@@ -952,7 +951,6 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
 
   TextShadowCache::TextShadowCacheKey key2(
       /*p_max_basis=*/1.0f,
-      /*p_identifier=*/12345,
       /*p_is_single_glyph=*/false,
       /*p_font=*/impeller_font,
       /*p_sigma=*/Sigma{4.0f},
@@ -960,13 +958,12 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
       /*p_fingerprint=*/fp2);
 
   TextShadowCache::TextShadowCacheKey::Equal equal;
-  // Key comparison must fail because fingerprints differ despite identical hash
-  // identifier.
+  // Key comparison must fail because fingerprints differ despite identical
+  // hash.
   EXPECT_FALSE(equal(key1, key2));
 
   TextShadowCache::TextShadowCacheKey key3(
       /*p_max_basis=*/1.0f,
-      /*p_identifier=*/12345,
       /*p_is_single_glyph=*/false,
       /*p_font=*/impeller_font,
       /*p_sigma=*/Sigma{4.0f},
