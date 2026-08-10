@@ -81,7 +81,7 @@ jobs:
 
       - name: Prepare export options
         run: |
-          cat > "$HOME/export_options.plist" << 'EOF'
+          cat > "$HOME/export_options.plist" << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -91,7 +91,7 @@ jobs:
             <key>signingStyle</key>
             <string>automatic</string>
             <key>teamID</key>
-            <string>${APPLE_TEAM_ID}</string>
+            <string>$APPLE_TEAM_ID</string>
             <key>stripSwiftSymbols</key>
             <true/>
             <key>uploadBitcode</key>
@@ -179,11 +179,28 @@ jobs:
 
       - name: Build iOS IPA for App Store
         run: |
+          set -euo pipefail
           mkdir -p build/ios/SourcePackages
-          flutter build ipa \
+
+          # Let Flutter perform migrations and generate iOS artifacts without signing.
+          flutter build ios \
             --release \
-            --dart-define=APP_ENV=${{ inputs.app_env }} \
-            --export-options-plist="$HOME/export_options.plist"
+            --no-codesign \
+            --dart-define=APP_ENV=${{ inputs.app_env }}
+
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath ../build/ios/archive/Runner.xcarchive \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            archive
+
+          xcodebuild -exportArchive \
+            -archivePath ../build/ios/archive/Runner.xcarchive \
+            -exportPath ../build/ios/ipa \
+            -exportOptionsPlist "$HOME/export_options.plist"
         working-directory: ${{ env.APP_DIR }}
 
       - name: Upload iOS IPA artifact
