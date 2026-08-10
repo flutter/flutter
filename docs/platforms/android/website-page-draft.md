@@ -51,21 +51,37 @@ android {
 After (Variant API, `build.gradle` / `build.gradle.kts`):
 
 ```kotlin
+// Note: androidComponents is a top-level block, peer to android {}
 androidComponents {
     onVariants(selector().all()) { variant ->
         variant.outputs.forEach { output ->
-            // Use variant.name / output.filters and your own naming scheme.
+            // WARNING: VariantOutput in the new API does not have an outputFileName property.
+            // You cannot mutate the filename here.
         }
     }
 }
 ```
 
-For output *file* renames, prefer consuming the built APKs from
-`SingleArtifact.APK` with a task wired through
-`variant.artifacts.use(...)`, or copy/rename in a finalizer task. Flutter's
-own copy step already places APKs at
-`build/app/outputs/flutter-apk/app[-abi][-flavor]-<mode>.apk` with unchanged
-names and paths.
+For output *file* renames, you must copy or rename the built APKs using a Gradle task. 
+(Note: Flutter's own copy step already places APKs at `build/app/outputs/flutter-apk/app[-abi][-flavor]-<mode>.apk` with unchanged names and paths.)
+
+Example of a simple finalizer task in `build.gradle` (Groovy):
+```groovy
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        tasks.named("assemble${variant.name.capitalize()}").configure {
+            it.doLast {
+                copy {
+                    // In AGP 8+, APK is a directory containing the file(s)
+                    from(variant.artifacts.get(com.android.build.api.artifact.SingleArtifact.APK.INSTANCE))
+                    into("${layout.buildDirectory.get()}/custom-outputs")
+                    rename { String fileName -> "myapp-${variant.name}.apk" }
+                }
+            }
+        }
+    }
+}
+```
 
 ### Setting per-ABI or per-variant versionCode
 
@@ -86,7 +102,7 @@ androidComponents {
     onVariants(selector().all()) { variant ->
         variant.outputs.forEach { output ->
             val abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
-            val base = output.versionCode.get() ?: 1
+            val base = output.versionCode.orNull ?: 1
             output.versionCode.set((abiCodes[abi] ?: 0) * 1000 + base)
         }
     }
@@ -96,7 +112,9 @@ androidComponents {
 Note: Flutter itself sets per-ABI version codes for `--split-per-abi` inside
 `onVariants`. If your CI mutates version codes in `afterEvaluate`, that runs at
 a different time than before; Flutter prints a warning when it detects a
-divergence between the DSL value and the final output value.
+divergence between the DSL value and the final output value. To verify your 
+mutations worked, inspect the built APK:
+`apkanalyzer manifest print versionCode build/app/outputs/flutter-apk/app-release.apk`
 
 ### Custom build types and plugins
 
@@ -105,7 +123,9 @@ they resolve. With the new DSL these are `initWith` copies rather than live
 aliases:
 
 - Set `matchingFallbacks` on custom build types so dependent Android libraries
-  resolve, for example:
+  resolve. If a third-party plugin does not define your app's custom `staging` 
+  build type, AGP needs to know to safely fall back to compiling the plugin's 
+  `debug` variant rather than failing the build. For example:
 
   ```kotlin
   android {
@@ -118,10 +138,12 @@ aliases:
   }
   ```
 
-- Library (plugin) projects cannot be marked debuggable through the public
-  API, so a plugin's `BuildConfig.DEBUG` and native (JNI) debuggability can
-  differ from before for custom *debuggable* build types. Variant matching
-  still works via `matchingFallbacks`.
+- **Warning for Plugin Authors / JNI Developers:** Library (plugin) projects cannot 
+  be explicitly marked debuggable through the public AGP API. If an app uses a 
+  custom build type (like `staging`), the plugin's `BuildConfig.DEBUG` and native (C++/JNI) 
+  code may silently compile in release mode instead of debug mode. Variant matching 
+  still works via `matchingFallbacks`, but C++ debugging will be broken for those 
+  custom build types.
 
 ### Add-to-app (Flutter module in a host app)
 
@@ -129,7 +151,9 @@ aliases:
   module. The dependency between your host's asset merging and Flutter's asset
   copy is expressed through the Variant API instead of an explicit
   `merge<Variant>Assets.dependsOn(...)` edge. Build scripts that reference
-  Flutter's `copyFlutterAssets<Variant>` tasks by name or type may break: the
+  Flutter's `copyFlutterAssets<Variant>` tasks by name or type will break. 
+  For example, `tasks.getByPath(":flutter:copyFlutterAssetsDebug")` will crash 
+  your build with a `Task with path ... not found` error because the
   tasks are now registered lazily and are no longer of type
   `org.gradle.api.tasks.Copy`.
 - `flutter.hostAppProjectName` in `gradle.properties` is now a no-op. Flutter
@@ -151,7 +175,9 @@ aliases:
 ### Flutter plugin authors
 
 - Do not read `android.applicationVariants` / `android.libraryVariants` in
-  plugin build scripts; use `androidComponents.onVariants`.
+  plugin build scripts; use `androidComponents.onVariants`. (We are tracking
+  an audit of the top 200 plugins for this legacy usage in
+  [flutter/flutter#190845](https://github.com/flutter/flutter/issues/190845)).
 - Do not assume Flutter's tasks exist at configuration time or have specific
   types; look tasks up lazily (`tasks.named`) without a type, or better, wire
   through Variant API artifacts.
@@ -173,14 +199,9 @@ If you cannot migrate immediately, add the opt-out by hand to
 android.newDsl=false
 ```
 
-**This stops working with AGP 10** (removal of the legacy APIs). Treat it as a
-short-term unblock only; hand-added opt-outs are never touched by Flutter's
-migrator.
-
-## Timeline
-
-Landed in version: TBD<br>
-In stable release: TBD
+**AGP 10 is expected to remove the legacy APIs**, meaning this opt-out will 
+stop working. Treat it as a short-term unblock only; hand-added opt-outs are 
+never touched by Flutter's migrator.
 
 ## References
 

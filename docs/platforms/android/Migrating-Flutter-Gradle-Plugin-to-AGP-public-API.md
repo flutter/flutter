@@ -163,15 +163,18 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
    CI patterns) may behave differently; a runtime divergence warning is added.
 4. **Custom build types → plugins**: live-aliased instances become `initWith`
    copies; library plugins cannot receive `isDebuggable` (no public setter on
-   `LibraryBuildType`) — plugin-side `BuildConfig.DEBUG`/JNI debuggability may
-   differ for custom debuggable build types; matching preserved via
-   `matchingFallbacks`.
+   `LibraryBuildType`). **Warning:** If an app uses a custom build type (like `staging`), 
+   the plugin's `BuildConfig.DEBUG` and native (C++/JNI) code may silently compile 
+   in release mode instead of debug mode. Matching is preserved via `matchingFallbacks`, 
+   but C++ debugging will be broken for those custom build types.
 5. **Asset merge**: flutter assets become a merged source dir instead of a
    post-merge overwrite; collisions resolve by AGP source-set priority.
 6. **Add-to-app**: the explicit `:app:merge<V>Assets.dependsOn` edge and
    host-project lookup are removed; `flutter.hostAppProjectName` becomes a
-   no-op with a deprecation warning naming a removal milestone; ordering
-   against `copyFlutterAssets<V>` task names may break.
+   no-op with a deprecation warning naming a removal milestone. Build scripts that 
+   reference Flutter's `copyFlutterAssets<V>` tasks by name (e.g. `tasks.getByPath(...)`) 
+   will crash with a `Task with path ... not found` error because the tasks are now 
+   registered lazily.
 7. **Task realization/type**: flutter tasks become lazy `TaskProvider`s, and
    `copyFlutterAssets<V>` changes type from `org.gradle.api.tasks.Copy` to a
    custom task class — `tasks.named(..., Copy::class)` casts fail.
