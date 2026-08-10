@@ -39,6 +39,9 @@ class DapTestClient {
           ),
         );
         _pendingRequests.clear();
+        if (!_eventController.isClosed) {
+          unawaited(_eventController.close());
+        }
       },
     );
   }

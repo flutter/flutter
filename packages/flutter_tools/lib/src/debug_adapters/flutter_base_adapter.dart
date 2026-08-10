@@ -45,6 +45,19 @@ abstract class FlutterBaseDebugAdapter
   /// the same as what is passed to the base class, which is always provided 'false'.
   final bool enableFlutterDds;
 
+  bool waitingForDebugger = false;
+  final Completer<void> debuggerInitializationFailedCompleter = Completer<void>();
+
+  @override
+  void handleSessionTerminate([String exitSuffix = '']) {
+    if (waitingForDebugger && !debuggerInitializationFailedCompleter.isCompleted) {
+      debuggerInitializationFailedCompleter.completeError(
+        DebugAdapterException('Session terminated before debugger initialized: $exitSuffix'),
+      );
+    }
+    super.handleSessionTerminate(exitSuffix);
+  }
+
   @override
   final FlutterLaunchRequestArguments Function(Map<String, Object?> obj) parseLaunchArgs =
       FlutterLaunchRequestArguments.fromJson;
