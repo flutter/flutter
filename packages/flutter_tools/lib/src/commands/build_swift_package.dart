@@ -1525,10 +1525,11 @@ class CocoaPodPluginDependencies {
       }
 
       if (_utils.project.isModule) {
-        // Flutter modules generate a FlutterPluginRegistrant framework, but this command uses a
-        // Swift package for the FlutterPluginRegistrant instead. Since SwiftPM compatible pods
-        // are skipped, the FlutterPluginRegistrant.podspec is overwritten to have no dependencies
-        // to avoid build failures and it will be skipped in [_findFrameworks] anyway.
+        // Flutter modules generate a FlutterPluginRegistrant framework, but "flutter build
+        // swift-package" uses a Swift package for the FlutterPluginRegistrant instead. Since
+        // SwiftPM compatible pods are skipped, the FlutterPluginRegistrant.podspec is overwritten
+        // to have no dependencies to avoid build failures and it will be skipped in
+        // [_findFrameworks] anyway.
         await writeIOSPluginRegistrant(
           _utils.project,
           [],
@@ -1596,9 +1597,9 @@ class CocoaPodPluginDependencies {
       _targetPlatform.buildDirectory(),
       buildInfo.mode,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
-      // SwiftPM. Since this command builds swift packages and CocoaPods separately, we need to
-      // force SwiftPM to be enabled so that CocoaPods will skip processing plugins that support
-      // SwiftPM.
+      // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods
+      // separately, we need to force SwiftPM to be enabled so that CocoaPods will skip processing
+      // plugins that support SwiftPM.
       forceSwiftPM: true,
     );
   }
