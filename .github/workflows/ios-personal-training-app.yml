@@ -28,6 +28,9 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Disable Swift Package Manager in CI
+        run: flutter config --no-enable-swift-package-manager
+
       - name: Prepare iOS build directories
         run: |
           mkdir -p build/ios/SourcePackages
