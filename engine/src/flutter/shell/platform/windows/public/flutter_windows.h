@@ -128,6 +128,11 @@ typedef struct {
 
   // Policy for enabling the Impeller renderer.
   FlutterDesktopImpellerSwitch impeller_switch;
+
+  // Whether to enable the Flutter GPU API (package:flutter_gpu).
+  // Flutter GPU requires the Impeller renderer.
+  // If not set defaults to false.
+  bool enable_flutter_gpu;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
@@ -268,6 +273,25 @@ FlutterDesktopEngineGetTextureRegistrar(FlutterDesktopEngineRef engine);
 FLUTTER_EXPORT void FlutterDesktopEngineSetNextFrameCallback(
     FlutterDesktopEngineRef engine,
     VoidCallback callback,
+    void* user_data);
+
+// Returns true if the current thread is the platform thread.
+// This can be called on any thread.
+FLUTTER_EXPORT bool FlutterDesktopEngineIsPlatformThread(
+    FlutterDesktopEngineRef engine);
+
+// Schedule a callback to be called on the platform thread.
+//
+// This can be called on any thread. The callback is executed only
+// once on the platform thread.
+//
+// If the task is discarded without being executed (e.g. during engine
+// shutdown), |on_cancel| is called on the platform thread so the caller can
+// cleanup allocations. |on_cancel| can be nullptr if no cleanup is needed.
+FLUTTER_EXPORT void FlutterDesktopEnginePostPlatformThreadTask(
+    FlutterDesktopEngineRef engine,
+    VoidCallback callback,
+    VoidCallback on_cancel,
     void* user_data);
 
 // ========== View ==========

@@ -2,7 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Mirror master to main branches in the flutter repository.
+name: Mirror flutter/flutter master branch to main
+
 on:
   push:
     branches:
@@ -21,7 +22,9 @@ jobs:
     steps:
       - name: Mirror action step
         id: mirror
-        uses: google/mirror-branch-action@30c52ee21f5d3bd7fb28b95501c11aae7f17eebb
+        # google/mirror-branch-action is a secure Google-managed action.
+        # Although the repository is archived, it is the standard and trusted tool used for mirroring master to main in this project.
+        uses: google/mirror-branch-action@30c52ee21f5d3bd7fb28b95501c11aae7f17eebb # zizmor: ignore[archived-uses]
         with:
           github-token: ${{ secrets.FLUTTERMIRRORINGBOT_TOKEN }}
           source: 'master'

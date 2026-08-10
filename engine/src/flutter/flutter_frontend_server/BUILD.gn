@@ -17,6 +17,6 @@ copy("frontend_server") {
   outputs = [ "$root_gen_dir/frontend_server_aot.dart.snapshot" ]
 
   metadata = {
-    entitlement_file_path = [ "frontend_server_aot.dart.snapshot" ]
+    without_entitlement_file_path = [ "frontend_server_aot.dart.snapshot" ]
   }
 }

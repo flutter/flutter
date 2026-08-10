@@ -170,6 +170,7 @@ base class SamplerOptions {
     this.mipFilter = MipFilter.nearest,
     this.widthAddressMode = SamplerAddressMode.clampToEdge,
     this.heightAddressMode = SamplerAddressMode.clampToEdge,
+    this.maxAnisotropy = 1,
   });
 
   MinMagFilter minFilter;
@@ -177,6 +178,19 @@ base class SamplerOptions {
   MipFilter mipFilter;
   SamplerAddressMode widthAddressMode;
   SamplerAddressMode heightAddressMode;
+
+  /// The maximum anisotropy clamp used when sampling. The default value of 1
+  /// disables anisotropic filtering.
+  ///
+  /// When greater than 1, [minFilter], [magFilter], and [mipFilter] must all
+  /// be linear. Values beyond [GpuContext.maxSamplerAnisotropy] are clamped
+  /// to it, and a maximum of 1 means the device does not support anisotropic
+  /// filtering.
+  ///
+  /// Anisotropic filtering samples across the mip chain, so populate mip
+  /// levels (via [Texture.overwrite] or by rendering into them) to get the
+  /// full quality benefit.
+  int maxAnisotropy;
 }
 
 base class Scissor {
@@ -454,9 +468,18 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void bindUniform(UniformSlot slot, BufferView bufferView) {
+    // The slot's index is resolved once and cached, so steady-state binds
+    // pass an integer across the native boundary instead of the name.
+    int uniformStructIndex = slot._resolvedStructIndex;
+    if (uniformStructIndex < 0) {
+      throw Exception(
+        "Failed to bind uniform (no uniform struct named '${slot.uniformName}')",
+      );
+    }
     bool success = bufferView.buffer._bindAsUniform(
       this,
-      slot,
+      slot.shader,
+      uniformStructIndex,
       bufferView.offsetInBytes,
       bufferView.lengthInBytes,
     );
@@ -483,15 +506,35 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       return true;
     }());
 
-    bool success = _bindTexture(
+    if (sampler.maxAnisotropy < 1) {
+      throw Exception("SamplerOptions.maxAnisotropy must be at least 1");
+    }
+    if (sampler.maxAnisotropy > 1 &&
+        (sampler.minFilter != MinMagFilter.linear ||
+            sampler.magFilter != MinMagFilter.linear ||
+            sampler.mipFilter != MipFilter.linear)) {
+      throw Exception(
+        "When SamplerOptions.maxAnisotropy is greater than 1, minFilter, "
+        "magFilter, and mipFilter must all be linear",
+      );
+    }
+
+    int uniformTextureIndex = slot._resolvedTextureIndex;
+    if (uniformTextureIndex < 0) {
+      throw Exception(
+        "Failed to bind texture (no texture named '${slot.uniformName}')",
+      );
+    }
+    bool success = _bindTextureIndexed(
       slot.shader,
-      slot.uniformName,
+      uniformTextureIndex,
       texture,
       sampler.minFilter.index,
       sampler.magFilter.index,
       sampler.mipFilter.index,
       sampler.widthAddressMode.index,
       sampler.heightAddressMode.index,
+      sampler.maxAnisotropy,
     );
     if (!success) {
       throw Exception("Failed to bind texture");
@@ -773,11 +816,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   );
 
   @Native<
-    Bool Function(Pointer<Void>, Pointer<Void>, Handle, Pointer<Void>, Int, Int)
-  >(symbol: 'InternalFlutterGpu_RenderPass_BindUniformDevice')
-  external bool _bindUniformDevice(
+    Bool Function(Pointer<Void>, Pointer<Void>, Int, Pointer<Void>, Int, Int)
+  >(symbol: 'InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed')
+  external bool _bindUniformDeviceIndexed(
     Shader shader,
-    String uniformName,
+    int uniformStructIndex,
     DeviceBuffer buffer,
     int offsetInBytes,
     int lengthInBytes,
@@ -799,24 +842,26 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     Bool Function(
       Pointer<Void>,
       Pointer<Void>,
-      Handle,
+      Int,
       Pointer<Void>,
       Int,
       Int,
       Int,
       Int,
       Int,
+      Int,
     )
-  >(symbol: 'InternalFlutterGpu_RenderPass_BindTexture')
-  external bool _bindTexture(
+  >(symbol: 'InternalFlutterGpu_RenderPass_BindTextureIndexed')
+  external bool _bindTextureIndexed(
     Shader shader,
-    String uniformName,
+    int uniformTextureIndex,
     Texture texture,
     int minFilter,
     int magFilter,
     int mipFilter,
     int widthAddressMode,
     int heightAddressMode,
+    int maxAnisotropy,
   );
 
   @Native<Void Function(Pointer<Void>)>(

@@ -1516,6 +1516,38 @@ void main() {
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
   }, overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform});
 
+  testUsingContext('has correct content and formatting with plugin template', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--template=plugin',
+      '--no-pub',
+      '--org',
+      'com.foo.bar',
+      projectDir.path,
+    ]);
+
+    // The generated plugin and its example app should already be formatted, so
+    // `flutter create -t plugin` output passes `dart format` out of the box.
+    // Regression test for https://github.com/flutter/flutter/issues/175960.
+    for (final FileSystemEntity file in projectDir.listSync(recursive: true)) {
+      if (file is File && file.path.endsWith('.dart')) {
+        final String original = file.readAsStringSync();
+
+        final Process process = await Process.start(
+          globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+          <String>['format', '--output=show', file.path],
+          workingDirectory: projectDir.path,
+        );
+        final String formatted = await process.stdout.transform(utf8.decoder).join();
+
+        expect(formatted, contains(original), reason: file.path);
+      }
+    }
+  }, overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform});
+
   testUsingContext(
     'has iOS development team with app template',
     () async {
@@ -3338,7 +3370,7 @@ void main() {
 
     for (final templatePath in iosPluginTemplates) {
       final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
-      expect(rawTemplate, contains("s.platform = :ios, '13.0'"));
+      expect(rawTemplate, contains("s.platform = :ios, '15.0'"));
     }
 
     final command = CreateCommand();
@@ -3356,7 +3388,7 @@ void main() {
         .childDirectory('ios')
         .childFile('flutter_project.podspec')
         .readAsString();
-    expect(rawPodSpec, contains("s.platform = :ios, '13.0'"));
+    expect(rawPodSpec, contains("s.platform = :ios, '15.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {
@@ -3465,8 +3497,8 @@ void main() {
 
     final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
     final String podspecContent = await podspec.readAsString();
-    expect(podspecContent, contains("s.ios.deployment_target = '13.0'"));
-    expect(podspecContent, contains("s.osx.deployment_target = '10.15'"));
+    expect(podspecContent, contains("s.ios.deployment_target = '15.0'"));
+    expect(podspecContent, contains("s.osx.deployment_target = '12.0'"));
 
     final File swiftFile = projectDir
         .childDirectory('darwin')
@@ -3554,8 +3586,8 @@ void main() {
           .childDirectory('darwin_plugin')
           .childFile('Package.swift');
       final String packageSwiftContent = await packageSwift.readAsString();
-      expect(packageSwiftContent, contains('.macOS("10.15")'));
-      expect(packageSwiftContent, contains('.iOS("13.0")'));
+      expect(packageSwiftContent, contains('.macOS("12.0")'));
+      expect(packageSwiftContent, contains('.iOS("15.0")'));
 
       // Verify podspec exists (CocoaPods)
       final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
@@ -3594,8 +3626,8 @@ void main() {
           .childDirectory('darwin_plugin')
           .childFile('Package.swift');
       final String packageSwiftContent = await packageSwift.readAsString();
-      expect(packageSwiftContent, contains('.macOS("10.15")'));
-      expect(packageSwiftContent, contains('.iOS("13.0")'));
+      expect(packageSwiftContent, contains('.macOS("12.0")'));
+      expect(packageSwiftContent, contains('.iOS("15.0")'));
 
       // Verify podspec exists (CocoaPods)
       final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');

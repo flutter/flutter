@@ -366,7 +366,7 @@ public class PlatformViewsController2Test {
 
     // Simulate create call from the framework.
     createPlatformView(jni, PlatformViewsController2, platformViewId, "testType");
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertFalse(PlatformViewsController2.initializePlatformViewIfNeeded(platformViewId));
   }
@@ -392,7 +392,7 @@ public class PlatformViewsController2Test {
 
     // Simulate create call from the framework.
     createPlatformView(jni, PlatformViewsController2, platformViewId, "testType");
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertFalse(PlatformViewsController2.initializePlatformViewIfNeeded(platformViewId));
   }
@@ -421,7 +421,7 @@ public class PlatformViewsController2Test {
 
     // Simulate create call from the framework.
     createPlatformView(jni, PlatformViewsController2, platformViewId, "testType");
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     // Simulate set direction call from the framework.
     setLayoutDirection(jni, PlatformViewsController2, platformViewId, 1);
@@ -430,7 +430,7 @@ public class PlatformViewsController2Test {
     // The limit value of reply message will be equal to 2 if the layout direction is set
     // successfully, otherwise it will be much more than 2 due to the reply message contains
     // an error message wrapped with exception detail information.
-    assertEquals(ShadowFlutterJNI.getResponses().get(0).limit(), 2);
+    assertEquals(2, ShadowFlutterJNI.getResponses().get(0).limit());
   }
 
   @Test
