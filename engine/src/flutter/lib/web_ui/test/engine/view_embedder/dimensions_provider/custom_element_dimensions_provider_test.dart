@@ -18,7 +18,6 @@ void doTests() {
 
   group('computePhysicalSize', () {
     late CustomElementDimensionsProvider provider;
-    late double originalDpr;
 
     setUp(() {
       sizeSource
@@ -26,13 +25,12 @@ void doTests() {
         ..style.height = '10px';
       domDocument.body!.append(sizeSource);
       provider = CustomElementDimensionsProvider(sizeSource);
-      originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
     });
 
     tearDown(() {
       provider.close(); // cleanup
       sizeSource.remove();
-      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
     });
 
     test('returns physical size of element (width * dpr)', () {
