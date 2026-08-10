@@ -51,8 +51,9 @@ projects. That opt-out dies with AGP 10.
 
 ## Decision records
 
-1. **Min AGP floor: out of scope.** A separate in-flight version bump owns the
-   floor; this migration builds on whatever floor is in effect at landing.
+1. **Min AGP floor: out of scope.** A separate version bump owned the
+   floor, which has now landed on `master` (PRs #176858 and #177416 bumped the 
+   floor to `8.11.1`). This migration builds seamlessly on that new floor.
    Every replacement API used here was verified public in `gradle-api:8.11.1`
    (decompiled jar inspection). If implementation finds a replacement API that
    genuinely requires a higher min AGP: document which API and why no
