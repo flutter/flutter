@@ -39,17 +39,6 @@ void main() {
     expect(state.reactionController.duration, const Duration(milliseconds: 100));
   });
 
-  testWidgets('null reactionAnimationDuration override falls back to the 100ms default', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const TestWidgetsApp(home: TestToggleable()));
-    final TestToggleableState state = tester.state<TestToggleableState>(
-      find.byType(TestToggleable),
-    );
-
-    expect(state.reactionController.duration, const Duration(milliseconds: 100));
-  });
-
   testWidgets('reactionAnimationDuration override is used by the reactionController', (
     WidgetTester tester,
   ) async {
@@ -107,7 +96,7 @@ class TestToggleableState extends State<TestToggleable>
     with TickerProviderStateMixin, ToggleableStateMixin {
   @override
   Duration? get reactionAnimationDuration => widget.reactionAnimationDuration;
-  
+
   @override
   Widget build(BuildContext context) {
     return buildToggleableWithChild(child: const Text('child'));
