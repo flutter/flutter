@@ -49,6 +49,20 @@ const kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const _kGlibcError = 'Inconsistency detected by ld.so';
 
+/// Flags passed to Chrome to disable GCM (Google Cloud Messaging) and MCS
+/// (Mobile Connection Server) background network registration calls and
+/// prevent deprecation error logs.
+const kGcmDisabledFlags = <String>[
+  '--disable-background-networking',
+  '--disable-sync',
+  '--disable-client-side-phishing-detection',
+  '--disable-notifications',
+  '--disable-features=GCM',
+  '--gcm-checkin-url=http://127.0.0.1',
+  '--gcm-registration-url=http://127.0.0.1',
+  '--gcm-mcs-endpoint=127.0.0.1:0',
+];
+
 typedef BrowserFinder = String Function(Platform, FileSystem);
 
 /// Find the chrome executable on the current platform.
@@ -235,14 +249,7 @@ class ChromiumLauncher {
       // When the DevTools has focus we don't want to slow down the application.
       '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding',
-      '--disable-background-networking',
-      '--disable-sync',
-      '--disable-client-side-phishing-detection',
-      '--disable-notifications',
-      '--disable-features=GCM',
-      '--gcm-checkin-url=http://127.0.0.1',
-      '--gcm-registration-url=http://127.0.0.1',
-      '--gcm-mcs-endpoint=127.0.0.1:0',
+      ...kGcmDisabledFlags,
       // Since we are using a temp profile, disable features that slow the
       // Chrome launch.
       '--disable-extensions',

@@ -10,6 +10,20 @@ import 'dart:math' as math;
 import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
+/// Flags passed to Chrome to disable GCM (Google Cloud Messaging) and MCS
+/// (Mobile Connection Server) background network registration calls and
+/// prevent deprecation error logs.
+const kGcmDisabledFlags = <String>[
+  '--disable-background-networking',
+  '--disable-sync',
+  '--disable-client-side-phishing-detection',
+  '--disable-notifications',
+  '--disable-features=GCM',
+  '--gcm-checkin-url=http://127.0.0.1',
+  '--gcm-registration-url=http://127.0.0.1',
+  '--gcm-mcs-endpoint=127.0.0.1:0',
+];
+
 /// The number of samples used to extract metrics, such as noise, means,
 /// max/min values.
 ///
@@ -121,14 +135,7 @@ class Chrome {
       '--disable-popup-blocking',
       '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding',
-      '--disable-background-networking',
-      '--disable-sync',
-      '--disable-client-side-phishing-detection',
-      '--disable-notifications',
-      '--disable-features=GCM',
-      '--gcm-checkin-url=http://127.0.0.1',
-      '--gcm-registration-url=http://127.0.0.1',
-      '--gcm-mcs-endpoint=127.0.0.1:0',
+      ...kGcmDisabledFlags,
       // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
       '--bwsi',
       '--no-first-run',

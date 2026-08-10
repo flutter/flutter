@@ -23,6 +23,7 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
+import '../web/chrome.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
@@ -342,14 +343,7 @@ Map<String, dynamic> getDesiredCapabilities(
         '--bwsi',
         '--disable-background-timer-throttling',
         '--disable-renderer-backgrounding',
-        '--disable-background-networking',
-        '--disable-sync',
-        '--disable-client-side-phishing-detection',
-        '--disable-notifications',
-        '--disable-features=GCM',
-        '--gcm-checkin-url=http://127.0.0.1',
-        '--gcm-registration-url=http://127.0.0.1',
-        '--gcm-mcs-endpoint=127.0.0.1:0',
+        ...kGcmDisabledFlags,
         '--disable-default-apps',
         '--disable-extensions',
         '--disable-popup-blocking',

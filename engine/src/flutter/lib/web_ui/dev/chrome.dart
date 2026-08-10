@@ -19,6 +19,20 @@ import 'common.dart';
 import 'environment.dart';
 import 'package_lock.dart';
 
+/// Flags passed to Chrome to disable GCM (Google Cloud Messaging) and MCS
+/// (Mobile Connection Server) background network registration calls and
+/// prevent deprecation error logs.
+const kGcmDisabledFlags = <String>[
+  '--disable-background-networking',
+  '--disable-sync',
+  '--disable-client-side-phishing-detection',
+  '--disable-notifications',
+  '--disable-features=GCM',
+  '--gcm-checkin-url=http://127.0.0.1',
+  '--gcm-registration-url=http://127.0.0.1',
+  '--gcm-mcs-endpoint=127.0.0.1:0',
+];
+
 /// Provides an environment for desktop Chrome.
 class ChromeEnvironment implements BrowserEnvironment {
   ChromeEnvironment({required bool useDwarf, required List<String> flags})
@@ -104,14 +118,7 @@ class Chrome extends Browser {
             // DWARF debugging requires a Chrome extension.
             '--disable-extensions',
           '--disable-popup-blocking',
-          '--disable-background-networking',
-          '--disable-sync',
-          '--disable-client-side-phishing-detection',
-          '--disable-notifications',
-          '--disable-features=GCM',
-          '--gcm-checkin-url=http://127.0.0.1',
-          '--gcm-registration-url=http://127.0.0.1',
-          '--gcm-mcs-endpoint=127.0.0.1:0',
+          ...kGcmDisabledFlags,
           // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
           '--bwsi',
           '--no-first-run',
@@ -188,14 +195,7 @@ class Chrome extends Browser {
       final Process addExtension = await Process.start(installation.executable, <String>[
         '--user-data-dir=${baselineUserDirectory.path}',
         'https://goo.gle/wasm-debugging-extension',
-        '--disable-background-networking',
-        '--disable-sync',
-        '--disable-client-side-phishing-detection',
-        '--disable-notifications',
-        '--disable-features=GCM',
-        '--gcm-checkin-url=http://127.0.0.1',
-        '--gcm-registration-url=http://127.0.0.1',
-        '--gcm-mcs-endpoint=127.0.0.1:0',
+        ...kGcmDisabledFlags,
         '--bwsi',
         '--no-first-run',
         '--no-default-browser-check',

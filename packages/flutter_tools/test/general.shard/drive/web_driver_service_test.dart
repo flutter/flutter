@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
@@ -31,14 +32,7 @@ final kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
-  '--disable-background-networking',
-  '--disable-sync',
-  '--disable-client-side-phishing-detection',
-  '--disable-notifications',
-  '--disable-features=GCM',
-  '--gcm-checkin-url=http://127.0.0.1',
-  '--gcm-registration-url=http://127.0.0.1',
-  '--gcm-mcs-endpoint=127.0.0.1:0',
+  ...kGcmDisabledFlags,
   '--disable-default-apps',
   '--disable-extensions',
   '--disable-popup-blocking',
