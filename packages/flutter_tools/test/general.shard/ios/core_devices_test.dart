@@ -299,6 +299,65 @@ void main() {
         expect(fakeLLDB.exitCalled, isTrue);
       });
 
+      testWithoutContext('shutdown hook catches Exception thrown by stopApp', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'installedApplications': [
+                <String, Object?>{'installationURL': '/asdf'},
+              ],
+            },
+          }),
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 123},
+            },
+          }),
+          runningProcesses: [
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 123,
+              'executable': '/asdf',
+            }),
+          ],
+        );
+        fakeCoreDeviceControl.terminateException = Exception('failed to terminate');
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        fakeLLDB.setIsRunning(true, 123);
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          lldb: fakeLLDB,
+        );
+        final shutdownHooks = FakeShutdownHooks();
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(
+            operatingSystemVersion: '17.0',
+            modelCode: 'iPhone15,2',
+            cpuArchitectureString: 'arm64e',
+          ),
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+          shutdownHooks: shutdownHooks,
+          mode: BuildMode.debug,
+        );
+
+        expect(result, isTrue);
+        expect(shutdownHooks.registeredHooks, hasLength(1));
+        await expectLater(shutdownHooks.registeredHooks.first(), completes);
+      });
+
       testWithoutContext('ignores app extension processes', () async {
         final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
           installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{
@@ -4096,6 +4155,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   bool launchSuccess;
   IOSCoreDeviceInstallResult? installResult;
   bool terminateSuccess;
+  Exception? terminateException;
   int? processTerminated;
   List<IOSCoreDeviceRunningProcess> runningProcesses;
   bool get terminateProcessCalled => processTerminated != null;
@@ -4153,6 +4213,9 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   @override
   Future<bool> terminateProcess({required String deviceId, required int processId}) async {
     processTerminated = processId;
+    if (terminateException != null) {
+      throw terminateException!;
+    }
     return terminateSuccess;
   }
 

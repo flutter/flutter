@@ -71,7 +71,7 @@ class IOSDeviceSupport {
 
   /// Returns the directory for existing Device Support symbols. If there is not an existing
   /// directory, returns null.
-  late final Directory? existingDeviceSupportSymbols = () {
+  Directory? get existingDeviceSupportSymbols {
     final (Directory? symbolDirectory, Directory? archSymbolDirectory) = _findSymbolDirectories();
     if (archSymbolDirectory != null && archSymbolDirectory.existsSync()) {
       return archSymbolDirectory;
@@ -80,7 +80,7 @@ class IOSDeviceSupport {
       return symbolDirectory;
     }
     return null;
-  }();
+  }
 
   /// Calls `xcodebuild -prepareDeviceSupport` and streams the logs when copying is in progress.
   ///
@@ -98,7 +98,7 @@ class IOSDeviceSupport {
       final timer = Timer(const Duration(seconds: 10), () {
         _logger.printError(
           'Xcode is taking longer than expected to start preparing Device Support symbols...\n'
-          'Connect your device via USB and try running this command manually:\n'
+          'Try closing Xcode, connecting your device via USB, and running the following command:\n'
           '  "${_prepareDeviceSupportCommand.join(' ')}"',
         );
       });
@@ -111,7 +111,7 @@ class IOSDeviceSupport {
               printToTrace = false;
               _logger.printStatus(
                 'Copying Device Support symbols. This may take several minutes to complete...\n'
-                'Please do not connect or disconnect your device until finished.',
+                'Please do not connect or disconnect your device or open Xcode until finished.',
               );
               timer.cancel();
             }

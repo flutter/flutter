@@ -145,7 +145,7 @@ Target 0: (Runner) stopped.
         setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
       }
       if (line == platformStatusMatcher) {
-        platformStatusCompleter.complete(utf8.encode('platform status\n'));
+        platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
       }
       if (line == processResumedMatcher) {
         processResumedCompleted.complete(utf8.encode('1 location added to breakpoint 1\n'));
@@ -239,7 +239,7 @@ Target 0: (Runner) stopped.
         setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
       }
       if (line == platformStatusMatcher) {
-        platformStatusCompleter.complete(utf8.encode('platform status\n'));
+        platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
       }
       if (line == processResumedMatcher) {
         processResumedCompleted.complete(utf8.encode('Process 568 resuming\n'));
@@ -522,7 +522,7 @@ Target 0: (Runner) stopped.
         setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
       }
       if (line == platformStatusMatcher) {
-        platformStatusCompleter.complete(utf8.encode('platform status\n'));
+        platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
       }
       if (line == processResumedMatcher) {
         processResumedCompleted.complete(utf8.encode('1 location added to breakpoint 1\n'));
@@ -711,7 +711,7 @@ Target 0: (Runner) stopped.
                 setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
               }
               if (line == platformStatusMatcher) {
-                platformStatusCompleter.complete(utf8.encode('platform status\n'));
+                platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
               }
               if (line == processResumedMatcher) {
                 processResumedCompleted.complete(utf8.encode('Process 568 resuming\n'));
@@ -820,7 +820,7 @@ Target 0: (Runner) stopped.
                 setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
               }
               if (line == platformStatusMatcher) {
-                platformStatusCompleter.complete(utf8.encode('platform status\n'));
+                platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
               }
               if (line == processResumedMatcher) {
                 processResumedCompleted.complete(utf8.encode('Process 568 resuming\n'));

@@ -156,7 +156,7 @@ class IOSCoreDeviceLauncher {
     shutdownHooks.addShutdownHook(() async {
       try {
         await stopApp(deviceId: deviceId, processId: processId);
-      } finally {
+      } on Exception {
         // ignore any failures
       }
     });

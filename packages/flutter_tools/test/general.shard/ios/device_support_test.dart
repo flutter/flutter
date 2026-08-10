@@ -177,7 +177,7 @@ void main() {
         logger.statusText,
         contains(
           'Copying Device Support symbols. This may take several minutes to complete...\n'
-          'Please do not connect or disconnect your device until finished.',
+          'Please do not connect or disconnect your device or open Xcode until finished.',
         ),
       );
       expect(logger.statusText, contains('Copying symbols...'));
@@ -264,7 +264,7 @@ void main() {
             logger.errorText,
             contains(
               'Xcode is taking longer than expected to start preparing Device Support symbols...\n'
-              'Connect your device via USB and try running this command manually:\n'
+              'Try closing Xcode, connecting your device via USB, and running the following command:\n'
               '  "xcrun xcodebuild -prepareDeviceSupport -destination id=id-123"',
             ),
           );
@@ -740,6 +740,37 @@ void main() {
           deviceId: 'id-123',
         );
         expect(deviceSupport.existingDeviceSupportSymbols, isNull);
+      });
+
+      testWithoutContext('is dynamic getter and re-evaluates symbol directories', () {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Directory homeDir = fileSystem.directory('/Users/username');
+        final deviceSupport = IOSDeviceSupport(
+          logger: BufferLogger.test(),
+          processUtils: ProcessUtils(
+            processManager: FakeProcessManager.empty(),
+            logger: BufferLogger.test(),
+          ),
+          xcode: null,
+          homeDirectory: homeDir,
+          modelCode: 'iPhone15,2',
+          operatingSystemVersion: '17.0',
+          cpuArchitectureString: 'arm64e',
+          deviceId: 'id-123',
+        );
+        expect(deviceSupport.existingDeviceSupportSymbols, isNull);
+
+        final Directory symbolDir =
+            homeDir
+                .childDirectory('Library')
+                .childDirectory('Developer')
+                .childDirectory('Xcode')
+                .childDirectory('iOS DeviceSupport')
+                .childDirectory('iPhone15,2 17.0')
+                .childDirectory('Symbols')
+              ..createSync(recursive: true);
+
+        expect(deviceSupport.existingDeviceSupportSymbols?.path, symbolDir.path);
       });
 
       testWithoutContext('returns symbolDirectory when symbolDirectory exists', () {

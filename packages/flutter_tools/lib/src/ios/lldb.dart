@@ -273,7 +273,7 @@ return False
   /// Prints logs of available Device Support
   Future<void> _printDeviceSupportStatus() async {
     final Future<String> futureLog = _startWaitingForLog(
-      RegExp('platform status'),
+      RegExp(r'\s*Platform:'),
     ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('platform status');
