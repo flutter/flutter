@@ -376,6 +376,7 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
+/// Creates a task that runs the text shadow performance benchmark.
 TaskFunction createTextShadowPerfTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
