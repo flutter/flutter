@@ -23,6 +23,10 @@ import '../src/fakes.dart' hide FakeProcess;
 const kChromeArgs = <String>[
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
+  '--disable-background-networking',
+  '--disable-sync',
+  '--disable-client-side-phishing-detection',
+  '--disable-notifications',
   ...kGcmDisabledFlags,
   '--disable-extensions',
   '--disable-popup-blocking',
