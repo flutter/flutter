@@ -74,8 +74,8 @@ androidComponents {
                 copy {
                     // In AGP 8+, APK is a directory containing the file(s)
                     from(variant.artifacts.get(com.android.build.api.artifact.SingleArtifact.APK.INSTANCE))
-                    into("${layout.buildDirectory.get()}/custom-outputs")
-                    rename { String fileName -> "myapp-${variant.name}.apk" }
+                    into(layout.buildDirectory.dir("custom-outputs"))
+                    rename { String fileName -> fileName.replace("app", "myapp") }
                 }
             }
         }
