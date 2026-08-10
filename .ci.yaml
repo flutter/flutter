@@ -5564,13 +5564,18 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: route_test_ios
 
-  - name: Mac_ios flavors_test_ios
+  - name: Mac flavors_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: flavors_test_ios
 
   - name: Mac_arm64_ios flutter_gallery_ios__compile
