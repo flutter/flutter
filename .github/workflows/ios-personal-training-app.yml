@@ -177,6 +177,33 @@ jobs:
           echo "==== Provisioning profiles ===="
           ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
 
+          selected_profile_plist="$RUNNER_TEMP/selected-profile.plist"
+          found_profile=false
+          while IFS= read -r -d '' profile; do
+            if ! security cms -D -i "$profile" > "$selected_profile_plist" 2>/dev/null; then
+              continue
+            fi
+
+            profile_team=$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$selected_profile_plist" 2>/dev/null || true)
+            profile_app_id=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$selected_profile_plist" 2>/dev/null || true)
+            profile_bundle_id="${profile_app_id#*.}"
+
+            if [ "$profile_team" = "$APPLE_TEAM_ID" ] && [ "$profile_bundle_id" = "$IOS_BUNDLE_ID" ]; then
+              profile_uuid=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$selected_profile_plist")
+              profile_name=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$selected_profile_plist")
+              echo "CI_PROFILE_UUID=$profile_uuid" >> "$GITHUB_ENV"
+              echo "CI_PROFILE_NAME=$profile_name" >> "$GITHUB_ENV"
+              echo "Selected provisioning profile: $profile_name ($profile_uuid)"
+              found_profile=true
+              break
+            fi
+          done < <(find "$HOME/Library/MobileDevice/Provisioning Profiles" -name '*.mobileprovision' -print0)
+
+          if [ "$found_profile" != true ]; then
+            echo "No provisioning profile matching team $APPLE_TEAM_ID and bundle $IOS_BUNDLE_ID was installed."
+            exit 1
+          fi
+
       - name: Build iOS IPA for App Store
         run: |
           set -euo pipefail
@@ -209,18 +236,32 @@ jobs:
           pod install --repo-update
           sed -i '' "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]\+;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g" Pods/Pods.xcodeproj/project.pbxproj
 
+          if [ -n "${CI_PROFILE_NAME:-}" ]; then
+            /usr/libexec/PlistBuddy -c "Add :provisioningProfiles dict" "$HOME/export_options.plist" 2>/dev/null || true
+            /usr/libexec/PlistBuddy -c "Add :provisioningProfiles:$IOS_BUNDLE_ID string $CI_PROFILE_NAME" "$HOME/export_options.plist" 2>/dev/null || \
+              /usr/libexec/PlistBuddy -c "Set :provisioningProfiles:$IOS_BUNDLE_ID $CI_PROFILE_NAME" "$HOME/export_options.plist"
+          fi
+
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath ../build/ios/archive/Runner.xcarchive \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE="$CI_PROFILE_UUID" \
+            PROVISIONING_PROFILE_SPECIFIER="$CI_PROFILE_NAME" \
             archive
 
           xcodebuild -exportArchive \
             -archivePath ../build/ios/archive/Runner.xcarchive \
             -exportPath ../build/ios/ipa \
-            -exportOptionsPlist "$HOME/export_options.plist"
+            -exportOptionsPlist "$HOME/export_options.plist" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE="$CI_PROFILE_UUID" \
+            PROVISIONING_PROFILE_SPECIFIER="$CI_PROFILE_NAME"
         working-directory: ${{ env.APP_DIR }}
 
       - name: Upload iOS IPA artifact
