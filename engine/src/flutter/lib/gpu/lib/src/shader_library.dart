@@ -110,14 +110,22 @@ base class ShaderLibrary extends NativeFieldWrapperClass1 {
     if (error != null) {
       throw Exception("Failed to reinitialize ShaderLibrary: ${error}");
     }
+    // The reload replaced the shaders' reflection data in place, so cached
+    // uniform slot indices must re-resolve.
+    _shaderReloadEpoch++;
   }
 
   /// Test-only. Reloads this library from `assetName`'s bytes while keeping
   /// this library's identity and registry key. Production hot reload always
   /// re-fetches the original asset path via [reinitialize]; this hook lets
   /// tests simulate an edited bundle by swapping in a different fixture.
-  String? debugReinitializeFromAsset(String assetName) =>
-      _reinitializeWithAsset(assetName);
+  String? debugReinitializeFromAsset(String assetName) {
+    final String? error = _reinitializeWithAsset(assetName);
+    if (error == null) {
+      _shaderReloadEpoch++;
+    }
+    return error;
+  }
 
   /// Reparses [bytes] into this library in place, preserving its identity so
   /// any [Shader]s already handed out keep working (they are mutated and
@@ -127,8 +135,13 @@ base class ShaderLibrary extends NativeFieldWrapperClass1 {
   ///
   /// Returns null on success, or an error message if [bytes] could not be
   /// parsed (the live shaders are left unchanged in that case).
-  String? reinitializeFromBytes(ByteData bytes) =>
-      _reinitializeWithBytes(bytes);
+  String? reinitializeFromBytes(ByteData bytes) {
+    final String? error = _reinitializeWithBytes(bytes);
+    if (error == null) {
+      _shaderReloadEpoch++;
+    }
+    return error;
+  }
 
   @Native<Handle Function(Handle, Handle)>(
     symbol: 'InternalFlutterGpu_ShaderLibrary_InitializeWithAsset',
