@@ -202,7 +202,7 @@ void main() {
             expectedOutput: [
               RegExp(r'Gatekeeper check failed.*\.build\/prebuild\/release\/flutter-prebuild-tool'),
               RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-assemble-tool'),
-              RegExp(r'Build.*complete!'),
+              RegExp(r'Build(?: of product .*)? complete!'),
               'FlutterPluginRegistrant symlink updated to ./Release',
               'flutter --verbose assemble',
               'release_unpack_${targetPlatform.name.toLowerCase()}: Starting',
@@ -228,7 +228,7 @@ void main() {
             unexpectedOutput: [
               RegExp(r'Gatekeeper check failed.*\.build\/prebuild\/release\/flutter-prebuild-tool'),
               RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-assemble-tool'),
-              RegExp(r'Build.*complete!'),
+              RegExp(r'Build(?: of product .*)? complete!'),
               'flutter --verbose assemble',
               'note: Transfer starting',
             ],
@@ -259,7 +259,7 @@ void main() {
             unexpectedOutput: [
               RegExp(r'Gatekeeper check failed.*\.build\/prebuild\/release\/flutter-prebuild-tool'),
               RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-assemble-tool'),
-              RegExp(r'Build.*complete!'),
+              RegExp(r'Build(?: of product .*)? complete!'),
               'flutter --verbose assemble',
               'note: Transfer starting',
             ],
@@ -281,7 +281,7 @@ void main() {
               'FlutterPluginRegistrant symlink updated to ./Release',
               RegExp(r'Gatekeeper check failed.*\.build\/prebuild\/release\/flutter-prebuild-tool'),
               RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-assemble-tool'),
-              RegExp(r'Build.*complete!'),
+              RegExp(r'Build(?: of product .*)? complete!'),
               'flutter --verbose assemble',
               'note: Transfer starting',
             ],
@@ -406,7 +406,7 @@ void main() {
           ],
           expectedOutput: [
             RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-assemble-tool'),
-            RegExp(r'Build.*complete!'),
+            RegExp(r'Build(?: of product .*)? complete!'),
             'FlutterPluginRegistrant symlink updated to ./Release',
             'flutter --verbose assemble',
             'release_unpack_${targetPlatform.name.toLowerCase()}: Starting',
