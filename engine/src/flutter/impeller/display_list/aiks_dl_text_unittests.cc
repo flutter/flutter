@@ -44,12 +44,14 @@ struct TextRenderOptions {
   bool is_subpixel = false;
 };
 
-bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
-                            DisplayListBuilder& canvas,
-                            const std::string& text,
-                            const std::string_view& font_fixture,
-                            const TextRenderOptions& options = {},
-                            const std::optional<SkFont>& font = std::nullopt) {
+bool RenderTextInCanvasSkia(
+    const std::shared_ptr<Context>& context,
+    DisplayListBuilder& canvas,
+    const std::string& text,
+    const std::string_view& font_fixture,
+    const TextRenderOptions& options = {},
+    const std::optional<SkFont>& font = std::nullopt,
+    std::map<std::string, sk_sp<SkTypeface>>* typeface_cache = nullptr) {
   // Draw the baseline.
   DlPaint paint;
   paint.setColor(DlColor::kAqua().withAlpha(255 * 0.25));
@@ -65,13 +67,29 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   SkFont selected_font;
   if (!font.has_value()) {
     auto c_font_fixture = std::string(font_fixture);
-    auto mapping =
-        flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
-    if (!mapping) {
-      return false;
+    sk_sp<SkTypeface> typeface;
+    if (typeface_cache) {
+      auto it = typeface_cache->find(c_font_fixture);
+      if (it != typeface_cache->end()) {
+        typeface = it->second;
+      }
     }
-    sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
-    selected_font = SkFont(font_mgr->makeFromData(mapping), options.font_size);
+    if (!typeface) {
+      auto mapping =
+          flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
+      if (!mapping) {
+        return false;
+      }
+      sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+      typeface = font_mgr->makeFromData(mapping);
+      if (!typeface) {
+        return false;
+      }
+      if (typeface_cache) {
+        (*typeface_cache)[c_font_fixture] = typeface;
+      }
+    }
+    selected_font = SkFont(typeface, options.font_size);
     if (options.is_subpixel) {
       selected_font.setSubpixel(true);
     }
@@ -898,12 +916,14 @@ TEST_P(AiksTest, DuplicateTextWithShadowCache) {
                 .GetCacheSizeForTesting(),
             0u);
 
+  std::map<std::string, sk_sp<SkTypeface>> typeface_cache;
   for (auto i = 0; i < 5; i++) {
     ASSERT_TRUE(RenderTextInCanvasSkia(
         GetContext(), builder, "Hello World", kFontFixture,
         TextRenderOptions{
             .color = DlColor::kBlue(),
-            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)}));
+            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)},
+        std::nullopt, &typeface_cache));
   }
 
   DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);

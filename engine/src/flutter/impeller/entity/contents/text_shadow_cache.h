@@ -101,8 +101,7 @@ class TextShadowCache {
                lhs.is_single_glyph == rhs.is_single_glyph &&
                lhs.font.IsEqual(rhs.font) &&
                lhs.rounded_sigma == rhs.rounded_sigma &&
-               lhs.color == rhs.color &&
-               (lhs.is_single_glyph || lhs.fingerprint == rhs.fingerprint);
+               lhs.color == rhs.color && lhs.fingerprint == rhs.fingerprint;
       }
     };
   };
