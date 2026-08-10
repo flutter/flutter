@@ -55,6 +55,17 @@ void main() {
         dtdUri: dtdUri,
       );
 
+      final reloadCompleter = Completer<void>();
+      late final StreamSubscription<String> reloadSub;
+      reloadSub = stream.listen((String msg) {
+        if (msg.contains('Triggering reload based on update to script:')) {
+          if (!reloadCompleter.isCompleted) {
+            reloadCompleter.complete();
+          }
+          reloadSub.cancel();
+        }
+      });
+
       final File newFile = tempDir.childDirectory('lib').childFile('new_preview.dart');
       newFile.createSync(recursive: true);
       newFile.writeAsStringSync('''
@@ -64,13 +75,6 @@ import 'package:flutter/widget_previews.dart';
 @Preview()
 Widget myNewPreview() => Container();
 ''');
-
-      final reloadCompleter = Completer<void>();
-      final StreamSubscription<String> reloadSub = stream.listen((String msg) {
-        if (msg.contains('Triggering reload based on update to script:')) {
-          reloadCompleter.complete();
-        }
-      });
       await reloadCompleter.future.timeout(
         const Duration(seconds: 60),
         onTimeout: () => throw StateError('Timed out waiting for reload message in LSP test!'),
@@ -96,6 +100,17 @@ Widget myNewPreview() => Container();
         dtdUri: dtdUri,
       );
 
+      final initReloadCompleter = Completer<void>();
+      late final StreamSubscription<String> initReloadSub;
+      initReloadSub = stream.listen((String msg) {
+        if (msg.contains('Triggering reload based on update to script:')) {
+          if (!initReloadCompleter.isCompleted) {
+            initReloadCompleter.complete();
+          }
+          initReloadSub.cancel();
+        }
+      });
+
       final File removeFile = tempDir.childDirectory('lib').childFile('remove_preview.dart');
       removeFile.createSync(recursive: true);
       removeFile.writeAsStringSync('''
@@ -105,13 +120,6 @@ import 'package:flutter/widget_previews.dart';
 @Preview()
 Widget myRemovePreview() => Container();
 ''');
-
-      final initReloadCompleter = Completer<void>();
-      final StreamSubscription<String> initReloadSub = stream.listen((String msg) {
-        if (msg.contains('Triggering reload based on update to script:')) {
-          initReloadCompleter.complete();
-        }
-      });
       await initReloadCompleter.future.timeout(
         const Duration(seconds: 60),
         onTimeout: () =>
@@ -121,14 +129,16 @@ Widget myRemovePreview() => Container();
 
       await waitForPreviews(dtdConnection);
 
-      removeFile.deleteSync();
-
       final deleteReloadCompleter = Completer<void>();
       final StreamSubscription<String> deleteReloadSub = stream.listen((String msg) {
         if (msg.contains('Triggering reload based on update to script:')) {
-          deleteReloadCompleter.complete();
+          if (!deleteReloadCompleter.isCompleted) {
+            deleteReloadCompleter.complete();
+          }
         }
       });
+
+      removeFile.deleteSync();
       await deleteReloadCompleter.future.timeout(
         const Duration(seconds: 60),
         onTimeout: () =>
@@ -164,6 +174,17 @@ Widget myRemovePreview() => Container();
         dtdUri: dtdUri,
       );
 
+      final initReloadCompleter = Completer<void>();
+      late final StreamSubscription<String> initReloadSub;
+      initReloadSub = stream.listen((String msg) {
+        if (msg.contains('Triggering reload based on update to script:')) {
+          if (!initReloadCompleter.isCompleted) {
+            initReloadCompleter.complete();
+          }
+          initReloadSub.cancel();
+        }
+      });
+
       final File modifyFile = tempDir.childDirectory('lib').childFile('modify_preview.dart');
       modifyFile.createSync(recursive: true);
       modifyFile.writeAsStringSync('''
@@ -173,13 +194,6 @@ import 'package:flutter/widget_previews.dart';
 @Preview(name: 'Initial')
 Widget myModifyPreview() => Container();
 ''');
-
-      final initReloadCompleter = Completer<void>();
-      final StreamSubscription<String> initReloadSub = stream.listen((String msg) {
-        if (msg.contains('Triggering reload based on update to script:')) {
-          initReloadCompleter.complete();
-        }
-      });
       await initReloadCompleter.future.timeout(
         const Duration(seconds: 60),
         onTimeout: () =>
@@ -189,6 +203,15 @@ Widget myModifyPreview() => Container();
 
       await waitForPreviews(dtdConnection);
 
+      final modifyReloadCompleter = Completer<void>();
+      final StreamSubscription<String> modifyReloadSub = stream.listen((String msg) {
+        if (msg.contains('Triggering reload based on update to script:')) {
+          if (!modifyReloadCompleter.isCompleted) {
+            modifyReloadCompleter.complete();
+          }
+        }
+      });
+
       modifyFile.writeAsStringSync('''
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
@@ -196,13 +219,6 @@ import 'package:flutter/widget_previews.dart';
 @Preview(name: 'Updated')
 Widget myModifyPreview() => Container();
 ''');
-
-      final modifyReloadCompleter = Completer<void>();
-      final StreamSubscription<String> modifyReloadSub = stream.listen((String msg) {
-        if (msg.contains('Triggering reload based on update to script:')) {
-          modifyReloadCompleter.complete();
-        }
-      });
       await modifyReloadCompleter.future.timeout(
         const Duration(seconds: 60),
         onTimeout: () =>
@@ -233,6 +249,17 @@ Widget myModifyPreview() => Container();
         dtdUri: dtdUri,
       );
 
+      final reloadCompleter = Completer<void>();
+      late final StreamSubscription<String> reloadSub;
+      reloadSub = stream.listen((String msg) {
+        if (msg.contains('Triggering reload based on update to script:')) {
+          if (!reloadCompleter.isCompleted) {
+            reloadCompleter.complete();
+          }
+          reloadSub.cancel();
+        }
+      });
+
       final File libFile = tempDir.childDirectory('lib').childFile('my_library.dart');
       final File partFile = tempDir.childDirectory('lib').childFile('my_part.dart');
 
@@ -254,13 +281,6 @@ import 'package:flutter/widget_previews.dart';
 @Preview()
 Widget myPartPreview() => Container();
 ''');
-
-      final reloadCompleter = Completer<void>();
-      final StreamSubscription<String> reloadSub = stream.listen((String msg) {
-        if (msg.contains('Triggering reload based on update to script:')) {
-          reloadCompleter.complete();
-        }
-      });
       await reloadCompleter.future.timeout(
         const Duration(seconds: 60),
         onTimeout: () => throw StateError('Timed out waiting for reload message in Parts test!'),

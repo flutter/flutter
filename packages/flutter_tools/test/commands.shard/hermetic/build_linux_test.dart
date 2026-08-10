@@ -68,7 +68,9 @@ void main() {
   // Creates the mock files necessary to run a build.
   void setUpMockProjectFilesForBuild() {
     setUpMockCoreProjectFiles();
-    fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('linux', 'CMakeLists.txt'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('set(BINARY_NAME "test_app")');
   }
 
   // Returns the command matching the build_linux call to cmake.

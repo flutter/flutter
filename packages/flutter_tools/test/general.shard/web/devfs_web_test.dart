@@ -2487,6 +2487,9 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
     final String source = utf8.decode(await inputShader.contentsAsBytes());
     return DevFSStringContent('compiled_shader: $source');
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }
 
 class FakeAssetBundle extends Fake implements AssetBundle {

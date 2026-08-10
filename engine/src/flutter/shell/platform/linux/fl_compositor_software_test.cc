@@ -6,27 +6,14 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
-#include "flutter/common/constants.h"
-#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/linux/fl_compositor_software.h"
-#include "flutter/shell/platform/linux/fl_task_runner.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
-
-#include <gdk/gdkwayland.h>
 
 class FlCompositorSoftwareTest : public flutter::testing::LinuxTest {
  protected:
-  void SetUp() override {
-    task_runner = fl_task_runner_new(engine);
-    compositor = fl_compositor_software_new(task_runner);
-  }
+  void SetUp() override { compositor = fl_compositor_software_new(); }
 
-  ~FlCompositorSoftwareTest() {
-    g_clear_object(&compositor);
-    g_clear_object(&task_runner);
-  }
+  ~FlCompositorSoftwareTest() { g_clear_object(&compositor); }
 
-  FlTaskRunner* task_runner = nullptr;
   FlCompositorSoftware* compositor = nullptr;
 };
 
@@ -46,13 +33,11 @@ TEST_F(FlCompositorSoftwareTest, Render) {
                         .offset = {0, 0},
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
-  std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
-  }).join();
+  fl_compositor_software_composite_layers(compositor, layers, 1);
 
   size_t frame_width, frame_height;
-  fl_compositor_get_frame_size(FL_COMPOSITOR(compositor), &frame_width,
-                               &frame_height);
+  fl_compositor_software_get_frame_size(compositor, &frame_width,
+                                        &frame_height);
   EXPECT_EQ(frame_width, width);
   EXPECT_EQ(frame_height, height);
 
@@ -63,7 +48,7 @@ TEST_F(FlCompositorSoftwareTest, Render) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  EXPECT_TRUE(fl_compositor_software_render(compositor, cr, 1));
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -85,11 +70,9 @@ TEST_F(FlCompositorSoftwareTest, Resize) {
                          .offset = {0, 0},
                          .size = {width1, height1}};
   const FlutterLayer* layers1[1] = {&layer1};
-  std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers1, 1);
-  }).join();
+  fl_compositor_software_composite_layers(compositor, layers1, 1);
 
-  // Present layer in current size.
+  // Present a layer in the new size.
   constexpr size_t width2 = 100;
   constexpr size_t height2 = 100;
   row_bytes = width2 * 4;
@@ -105,22 +88,23 @@ TEST_F(FlCompositorSoftwareTest, Resize) {
                          .offset = {0, 0},
                          .size = {width2, height2}};
   const FlutterLayer* layers2[1] = {&layer2};
-  fml::AutoResetWaitableEvent latch;
-  std::thread([&]() {
-    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers2, 1);
-    latch.Signal();
-  }).detach();
+  fl_compositor_software_composite_layers(compositor, layers2, 1);
 
-  // Render, will wait for the second layer if necessary.
+  // The stored frame is now the new size.
+  size_t frame_width, frame_height;
+  fl_compositor_software_get_frame_size(compositor, &frame_width,
+                                        &frame_height);
+  EXPECT_EQ(frame_width, width2);
+  EXPECT_EQ(frame_height, height2);
+
+  // Render the presented layer.
   int stride2 = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width2);
   g_autofree unsigned char* image_data =
       static_cast<unsigned char*>(malloc(height2 * stride2));
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width2, height2, stride2);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  EXPECT_TRUE(fl_compositor_software_render(compositor, cr, 1));
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
-
-  latch.Wait();
 }
