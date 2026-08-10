@@ -376,6 +376,16 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createTextShadowPerfTest({bool? enableImpeller}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'text_shadow_perf',
+    testDriver: 'test_driver/text_shadow_perf_test.dart',
+    enableImpeller: enableImpeller,
+  ).run;
+}
+
 TaskFunction createVeryLongPictureScrollingPerfE2ETest({required bool enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
