@@ -16,7 +16,7 @@ class SearchBarUseCase extends UseCase {
   String get route => '/search-bar';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch3, Tag.core];
+  List<Tag> get tags => <Tag>[Tag.core];
 
   @override
   Widget build(BuildContext context) => _MainWidget();

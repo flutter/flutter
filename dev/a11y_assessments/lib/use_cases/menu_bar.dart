@@ -16,7 +16,7 @@ class MenuBarUseCase extends UseCase {
   String get route => '/menu-bar';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch3, Tag.core];
+  List<Tag> get tags => <Tag>[Tag.core];
 
   @override
   Widget build(BuildContext context) => const _MainWidget();

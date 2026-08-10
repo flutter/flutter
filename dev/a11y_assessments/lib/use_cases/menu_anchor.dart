@@ -16,7 +16,7 @@ class MenuAnchorUseCase extends UseCase {
   String get route => '/menu-anchor';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch3, Tag.core];
+  List<Tag> get tags => <Tag>[Tag.core];
 
   @override
   Widget build(BuildContext context) => const _MainWidget();
