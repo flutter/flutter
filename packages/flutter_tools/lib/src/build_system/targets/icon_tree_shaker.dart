@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:process/process.dart';
+import 'package:record_use/record_use.dart';
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
@@ -67,14 +68,18 @@ class IconTreeShaker {
     'application/x-font-ttf', // based on running locally.
   };
 
-  /// The [Source] inputs that targets using this should depend on.
+  /// The [Source] inputs that native targets using this should depend on.
+  ///
+  /// Web targets (such as `WebReleaseBundle`) do not use this field because
+  /// their recorded uses inputs are dynamically provided via
+  /// `Dart2WebTarget.buildPatternStems`.
   ///
   /// See [Target.inputs].
   static const inputs = <Source>[
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/icon_tree_shaker.dart',
     ),
-    Source.artifact(Artifact.constFinder),
+    Source.pattern('{BUILD_DIR}/recorded_uses.json'),
     Source.artifact(Artifact.fontSubset),
   ];
 
@@ -101,16 +106,34 @@ class IconTreeShaker {
       return;
     }
 
-    final File appDill = environment.buildDir.childFile('app.dill');
-    if (!appDill.existsSync()) {
+    final candidates = <String>[
+      'recorded_uses.json',
+      'recorded_uses_js.json',
+      'recorded_uses_wasm.json',
+    ];
+    final recordedUsesFiles = <File>[];
+    for (final candidate in candidates) {
+      final File file = environment.buildDir.childFile(candidate);
+      if (file.existsSync() && file.lengthSync() > 0) {
+        recordedUsesFiles.add(file);
+      }
+    }
+    if (recordedUsesFiles.isEmpty) {
+      final File defaultFile = environment.buildDir.childFile('recorded_uses.json');
       throw IconTreeShakerException._(
-        'Expected to find kernel file at ${appDill.path}, but no file found.',
+        'Expected to find recorded uses file at ${defaultFile.path}, but no file found.',
       );
     }
-    final File constFinder = _fs.file(_artifacts.getArtifactPath(Artifact.constFinder));
-    final File dart = _fs.file(_artifacts.getArtifactPath(Artifact.engineDartBinary));
 
-    final Map<String, List<int>> iconData = await _findConstants(dart, constFinder, appDill);
+    Recordings? combinedRecordings;
+    for (final file in recordedUsesFiles) {
+      final Recordings recordings = await _readRecordings(file);
+      combinedRecordings = combinedRecordings == null
+          ? recordings
+          : combinedRecordings.merge(recordings);
+    }
+
+    final Map<String, List<int>> iconData = _parseRecordings(combinedRecordings!);
     final Set<String> familyKeys = iconData.keys.toSet();
 
     final Map<String, String> fonts = await _parseFontJson(
@@ -131,11 +154,11 @@ class IconTreeShaker {
 
     final result = <String, _IconTreeShakerData>{};
     const kSpacePoint = 32;
-    for (final MapEntry<String, String> entry in fonts.entries) {
-      final List<int>? codePoints = iconData[entry.key];
+    for (final MapEntry(:key, :value) in fonts.entries) {
+      final List<int>? codePoints = iconData[key];
       if (codePoints == null) {
         throw IconTreeShakerException._(
-          'Expected to font code points for ${entry.key}, but none were found.',
+          'Expected to font code points for $key, but none were found.',
         );
       }
 
@@ -143,9 +166,9 @@ class IconTreeShaker {
       final optionalCodePoints = _targetPlatform == TargetPlatform.web_javascript
           ? <int>[kSpacePoint]
           : <int>[];
-      result[entry.value] = _IconTreeShakerData(
-        family: entry.key,
-        relativePath: entry.value,
+      result[value] = _IconTreeShakerData(
+        family: key,
+        relativePath: value,
         codePoints: codePoints,
         optionalCodePoints: optionalCodePoints,
       );
@@ -169,7 +192,7 @@ class IconTreeShaker {
     if (!enabled) {
       return false;
     }
-    if (input.lengthSync() < 12) {
+    if (!input.existsSync() || input.lengthSync() < 12) {
       return false;
     }
     final String? mimeType = mime.lookupMimeType(
@@ -287,106 +310,121 @@ class IconTreeShaker {
     return result;
   }
 
-  Future<Map<String, List<int>>> _findConstants(File dart, File constFinder, File appDill) async {
-    final cmd = <String>[
-      dart.path,
-      constFinder.path,
-      '--kernel-file',
-      appDill.path,
-      '--class-library-uri',
-      'package:flutter/src/widgets/icon_data.dart',
-      '--class-name',
-      'IconData',
-      '--annotation-class-name',
-      '_StaticIconProvider',
-      '--annotation-class-library-uri',
-      'package:flutter/src/widgets/icon_data.dart',
-    ];
-    _logger.printTrace('Running command: ${cmd.join(' ')}');
-    final ProcessResult constFinderProcessResult = await _processManager.run(cmd);
-
-    if (constFinderProcessResult.exitCode != 0) {
-      throw IconTreeShakerException._('ConstFinder failure: ${constFinderProcessResult.stderr}');
+  Future<Recordings> _readRecordings(File recordedUsesFile) async {
+    final String content = await recordedUsesFile.readAsString();
+    final Object? data;
+    try {
+      data = json.decode(content);
+    } on FormatException catch (e) {
+      throw IconTreeShakerException._('Failed to parse recorded uses file: $e');
     }
-    final Object? constFinderMap = json.decode(constFinderProcessResult.stdout as String);
-    if (constFinderMap is! Map<String, Object?>) {
+    if (data is! Map<String, Object?>) {
       throw IconTreeShakerException._(
-        'Invalid ConstFinder output: expected a top level JSON object, '
-        'got $constFinderMap.',
+        'Invalid recorded uses file: expected a top level JSON object.',
       );
     }
-    final constFinderResult = _ConstFinderResult(constFinderMap);
-    if (constFinderResult.hasNonConstantLocations) {
+
+    try {
+      return Recordings.fromJson(data);
+    } on Exception catch (e) {
+      throw IconTreeShakerException._('Failed to parse recorded uses file: $e');
+    }
+  }
+
+  Map<String, List<int>> _parseRecordings(Recordings recordings) {
+    final result = <String, List<int>>{};
+    var hasNonConstant = false;
+
+    for (final MapEntry(:key, :value) in recordings.instances.entries) {
+      if (_isIconDataDefinition(key)) {
+        for (final reference in value) {
+          final _IconDataConstants? constants = _extractIconDataConstants(reference);
+          if (constants == null) {
+            hasNonConstant = true;
+            continue;
+          }
+
+          if (constants.codePoint is IntConstant) {
+            final int codePoint = (constants.codePoint! as IntConstant).value;
+            if (constants.fontFamily is! StringConstant) {
+              _logger.printTrace(
+                'Expected to find fontFamily for constant IconData with codepoint: '
+                '$codePoint, but found fontFamily: null. This usually means '
+                'you are relying on the system font. Alternatively, font families in '
+                'an IconData class can be provided in the assets section of your '
+                'pubspec.yaml, or you are missing "uses-material-design: true".',
+              );
+              continue;
+            }
+            final String fontFamily = (constants.fontFamily! as StringConstant).value;
+            final String? fontPackage = constants.fontPackage is StringConstant
+                ? (constants.fontPackage! as StringConstant).value
+                : null;
+            final family = fontPackage == null ? fontFamily : 'packages/$fontPackage/$fontFamily';
+            result[family] ??= <int>[];
+            result[family]!.add(codePoint);
+          }
+        }
+      }
+    }
+    if (hasNonConstant) {
       _logger.printError(
         'This application cannot tree shake icons fonts. '
-        'It has non-constant instances of IconData at the '
-        'following locations:',
+        'It has non-constant instances of IconData.',
         emphasis: true,
       );
-      for (final Map<String, Object?> location in constFinderResult.nonConstantLocations) {
-        _logger.printError(
-          '- ${location['file']}:${location['line']}:${location['column']}',
-          indent: 2,
-          hangingIndent: 4,
-        );
-      }
       throwToolExit(
         'Avoid non-constant invocations of IconData or try to '
         'build again with --no-tree-shake-icons.',
       );
     }
-    return _parseConstFinderResult(constFinderResult);
-  }
-
-  Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult constants) {
-    final result = <String, List<int>>{};
-    for (final Map<String, Object?> iconDataMap in constants.constantInstances) {
-      final Object? package = iconDataMap['fontPackage'];
-      final Object? fontFamily = iconDataMap['fontFamily'];
-      final Object? codePoint = iconDataMap['codePoint'];
-      if ((package ?? '') is! String || (fontFamily ?? '') is! String || codePoint is! num) {
-        throw IconTreeShakerException._(
-          'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
-          '"fontFamily" to be a String, and "codePoint" to be an int, '
-          'got: $iconDataMap.',
-        );
-      }
-      if (fontFamily == null) {
-        _logger.printTrace(
-          'Expected to find fontFamily for constant IconData with codepoint: '
-          '$codePoint, but found fontFamily: $fontFamily. This usually means '
-          'you are relying on the system font. Alternatively, font families in '
-          'an IconData class can be provided in the assets section of your '
-          'pubspec.yaml, or you are missing "uses-material-design: true".',
-        );
-        continue;
-      }
-      final family = fontFamily as String;
-      final key = package == null ? family : 'packages/$package/$family';
-      result[key] ??= <int>[];
-      result[key]!.add(codePoint.round());
-    }
     return result;
   }
+
+  static const String _iconDataClassName = 'IconData';
+  static const String _codePointFieldName = 'codePoint';
+  static const String _fontFamilyFieldName = 'fontFamily';
+  static const String _fontPackageFieldName = 'fontPackage';
+
+  bool _isIconDataDefinition(DefinitionWithInstances definition) {
+    if (definition is Class) {
+      return definition.name == _iconDataClassName &&
+          definition.library.uri == 'package:flutter/src/widgets/icon_data.dart';
+    }
+    final str = definition.toString();
+    return str == 'package:flutter/src/widgets/icon_data.dart::IconData' ||
+        str.startsWith('package:flutter/src/widgets/icon_data.dart::IconData.');
+  }
+
+  _IconDataConstants? _extractIconDataConstants(InstanceReference reference) {
+    if (reference case InstanceConstantReference(
+      instanceConstant: InstanceConstant(:final fields),
+    )) {
+      return (
+        codePoint: fields[_codePointFieldName],
+        fontFamily: fields[_fontFamilyFieldName],
+        fontPackage: fields[_fontPackageFieldName],
+      );
+    } else if (reference case InstanceCreationReference(
+      positionalArguments: final positional,
+      namedArguments: final named,
+    )) {
+      final bool hasNonConstantArg =
+          positional.any((MaybeConstant arg) => arg is! Constant) ||
+          named.values.any((MaybeConstant arg) => arg is! Constant);
+      if (!hasNonConstantArg) {
+        return (
+          codePoint: positional.isNotEmpty ? positional[0] as Constant : null,
+          fontFamily: named[_fontFamilyFieldName] as Constant?,
+          fontPackage: named[_fontPackageFieldName] as Constant?,
+        );
+      }
+    }
+    return null;
+  }
 }
 
-class _ConstFinderResult {
-  _ConstFinderResult(this.result);
-
-  final Map<String, Object?> result;
-
-  late final List<Map<String, Object?>> constantInstances = _getList(
-    result['constantInstances'],
-    'Invalid ConstFinder output: Expected "constInstances" to be a list of objects.',
-  );
-
-  late final List<Map<String, Object?>> nonConstantLocations = _getList(
-    result['nonConstantLocations'],
-    'Invalid ConstFinder output: Expected "nonConstLocations" to be a list of objects',
-  );
-
-  bool get hasNonConstantLocations => nonConstantLocations.isNotEmpty;
-}
+typedef _IconDataConstants = ({Constant? codePoint, Constant? fontFamily, Constant? fontPackage});
 
 /// The font family name, relative path to font file, and list of code points
 /// the application is using.
@@ -426,4 +464,31 @@ class IconTreeShakerException implements Exception {
       'IconTreeShakerException: $message\n\n'
       'To disable icon tree shaking, pass --no-tree-shake-icons to the requested '
       'flutter build command';
+}
+
+extension on Recordings {
+  /// Returns a new [Recordings] containing all usages from both `this` and
+  /// [other].
+  ///
+  /// If a definition is present in both recordings, its usages from both
+  /// are combined in the returned [Recordings].
+  Recordings merge(Recordings other) {
+    final newCalls = <DefinitionWithStaticCalls, List<CallReference>>{};
+    for (final MapEntry(:key, :value) in calls.entries) {
+      newCalls[key] = <CallReference>[...value];
+    }
+    for (final MapEntry(:key, :value) in other.calls.entries) {
+      newCalls.putIfAbsent(key, () => <CallReference>[]).addAll(value);
+    }
+
+    final newInstances = <DefinitionWithInstances, List<InstanceReference>>{};
+    for (final MapEntry(:key, :value) in instances.entries) {
+      newInstances[key] = <InstanceReference>[...value];
+    }
+    for (final MapEntry(:key, :value) in other.instances.entries) {
+      newInstances.putIfAbsent(key, () => <InstanceReference>[]).addAll(value);
+    }
+
+    return Recordings(calls: newCalls, instances: newInstances);
+  }
 }

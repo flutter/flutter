@@ -1342,6 +1342,47 @@ void main() {
       expect(label, 'Emoji: 😀🎉 Math: ∑∆π Currency: €£¥');
     });
   });
+
+  test('SemanticsData.toJson and SemanticsNode.toJson generate expected maps', () {
+    final node = SemanticsNode()
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0)
+      ..updateWith(
+        config: SemanticsConfiguration()
+          ..label = 'Test Label'
+          ..textDirection = TextDirection.ltr
+          ..value = 'Test Value'
+          ..hint = 'Test Hint'
+          ..isButton = true,
+      );
+
+    final SemanticsData data = node.getSemanticsData();
+    final Map<String, Object?> dataJsonMap = data.toJson();
+    expect(dataJsonMap['label'], 'Test Label');
+    expect(dataJsonMap['value'], 'Test Value');
+    expect(dataJsonMap['hint'], 'Test Hint');
+    expect(dataJsonMap['flags'], contains('isButton'));
+    expect(dataJsonMap['rect'], <String, double>{
+      'left': 0.0,
+      'top': 0.0,
+      'width': 100.0,
+      'height': 50.0,
+    });
+
+    final Map<String, Object?> nodeJsonMap = node.toJson();
+    expect(nodeJsonMap['id'], node.id);
+    expect(nodeJsonMap['label'], 'Test Label');
+    expect(nodeJsonMap['value'], 'Test Value');
+    expect(nodeJsonMap['hint'], 'Test Hint');
+    expect(nodeJsonMap['flags'], contains('isButton'));
+    expect(nodeJsonMap['rect'], <String, double>{
+      'left': 0.0,
+      'top': 0.0,
+      'width': 100.0,
+      'height': 50.0,
+    });
+    expect(nodeJsonMap['childrenInTraversalOrder'], isEmpty);
+    expect(nodeJsonMap['childrenInHitTestOrder'], isEmpty);
+  });
 }
 
 class TestRender extends RenderProxyBox {

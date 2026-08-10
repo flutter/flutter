@@ -29,6 +29,7 @@ workspace:
   - dev/integration_tests/data_asset_package
   - dev/integration_tests/deferred_components_test
   - dev/integration_tests/display_cutout_rotation
+  - dev/integration_tests/engine_integration_golden_test
   - dev/integration_tests/external_textures
   - dev/integration_tests/flavors
   - dev/integration_tests/flutter_gallery
@@ -61,7 +62,6 @@ workspace:
   - dev/tools/gen_keycodes
   - dev/tools/vitool
   - dev/tracing_tests
-  - examples/api
   - examples/flutter_view
   - examples/hello_world
   - examples/image_list
@@ -77,6 +77,7 @@ workspace:
   - packages/flutter_localizations
   - packages/flutter_test
   - packages/flutter_web_plugins
+  - packages/flutter/examples/api
   - packages/flutter/test_private
   - packages/flutter/test_private/test
   - packages/fuchsia_remote_debug_protocol
