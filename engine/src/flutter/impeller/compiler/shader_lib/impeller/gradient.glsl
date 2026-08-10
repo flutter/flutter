@@ -149,4 +149,33 @@ vec3 IPComputeFixedGradientValues(float t, float colors_length) {
   return vec3(lower_index, upper_index, scale);
 }
 
+/// Samples a linear gradient from a 1D gradient ramp texture.
+vec4 IPSampleLinearGradient(sampler2D tex,
+                            vec2 start_point,
+                            vec2 end_point,
+                            vec2 pos,
+                            vec2 half_texel,
+                            float tile_mode,
+                            vec4 decal_border_color) {
+  vec2 start_to_end = end_point - start_point;
+  vec2 start_to_position = pos - start_point;
+  float t =
+      dot(start_to_position, start_to_end) / dot(start_to_end, start_to_end);
+  return IPSampleLinearWithTileMode(tex, vec2(t, 0.5), half_texel, tile_mode,
+                                    decal_border_color);
+}
+
+/// Samples a radial gradient from a 1D gradient ramp texture.
+vec4 IPSampleRadialGradient(sampler2D tex,
+                            vec2 center,
+                            float radius,
+                            vec2 pos,
+                            vec2 half_texel,
+                            float tile_mode,
+                            vec4 decal_border_color) {
+  float t = length(pos - center) / radius;
+  return IPSampleLinearWithTileMode(tex, vec2(t, 0.5), half_texel, tile_mode,
+                                    decal_border_color);
+}
+
 #endif

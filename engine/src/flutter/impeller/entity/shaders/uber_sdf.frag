@@ -5,10 +5,14 @@
 precision mediump float;
 
 #include <impeller/color.glsl>
+#include <impeller/gradient.glsl>
+#include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
 #include "sdf_functions.glsl"
 #include "sdf_utils.glsl"
+
+uniform sampler2D color_source_sampler;
 
 uniform FragInfo {
   vec4 color;
@@ -27,12 +31,40 @@ uniform FragInfo {
   vec2 circle_center_right;
   vec2 superellipse_scale;
   vec4 radii;
+  vec2 gradient_start;
+  vec2 gradient_end;
+  vec2 half_texel;
+  float tile_mode;
+  float color_source_type;
 }
 frag_info;
 
 out vec4 frag_color;
 
 highp in vec2 v_position;
+
+// Gets the color to use at v_position based on frag_info properties.
+vec4 getColor() {
+  vec4 color;
+  if (frag_info.color_source_type < 0.5) {
+    // Solid color
+    color = frag_info.color;
+  } else if (frag_info.color_source_type < 1.5) {
+    // Linear gradient
+    vec4 gradient_color = IPSampleLinearGradient(
+        color_source_sampler, frag_info.gradient_start, frag_info.gradient_end,
+        v_position, frag_info.half_texel, frag_info.tile_mode, vec4(0.0));
+    color = vec4(gradient_color.rgb, gradient_color.a * frag_info.color.a);
+  } else {
+    // Radial gradient
+    vec4 gradient_color = IPSampleRadialGradient(
+        color_source_sampler, frag_info.gradient_start,
+        frag_info.gradient_end.x, v_position, frag_info.half_texel,
+        frag_info.tile_mode, vec4(0.0));
+    color = vec4(gradient_color.rgb, gradient_color.a * frag_info.color.a);
+  }
+  return color;
+}
 
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
@@ -276,8 +308,9 @@ float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
 }
 
 void main() {
-  vec2 p = v_position - frag_info.center;
+  vec4 color = getColor();
 
+  vec2 p = v_position - frag_info.center;
   vec2 sdf_and_pixel_size =
       (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
   float sdf = sdf_and_pixel_size.x;
@@ -287,8 +320,8 @@ void main() {
   // Clamp alpha in case floating point precision errors cause it to be outside
   // [0.0, 1.0].
   alpha = clamp(alpha, 0.0, 1.0);
-  alpha = gammaCorrectedAlpha(alpha, frag_info.color.rgb);
+  alpha = gammaCorrectedAlpha(alpha, color.rgb);
 
-  frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
+  frag_color = vec4(color.rgb, color.a * alpha);
   frag_color = IPPremultiply(frag_color);
 }

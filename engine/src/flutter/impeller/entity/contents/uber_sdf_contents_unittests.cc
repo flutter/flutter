@@ -100,5 +100,29 @@ TEST(UberSDFContentsTest, AsBackgroundColorStrokedRect) {
   EXPECT_FALSE(bg_color.has_value());
 }
 
+TEST(UberSDFContentsTest, AsBackgroundColorGradientReturnsNullopt) {
+  auto rect = Rect::MakeXYWH(-2, -2, 504, 504);
+  auto params =
+      UberSDFParameters::MakeRect(Color::Red(), rect, /*stroke=*/std::nullopt);
+
+  UberSDFParameters::GradientParameters gradient;
+  gradient.type = UberSDFParameters::GradientParameters::Type::kLinear;
+  gradient.start = Point(0, 0);
+  gradient.end = Point(500, 500);
+  gradient.tile_mode = Entity::TileMode::kClamp;
+  params.gradient = gradient;
+
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
+
+  Entity entity;
+  entity.SetTransform(Matrix());
+
+  // Even though the rect covers the entire area, a gradient is not a single
+  // solid background color, so AsBackgroundColor must return nullopt.
+  auto bg_color = contents->AsBackgroundColor(entity, ISize(500, 500));
+  EXPECT_FALSE(bg_color.has_value());
+}
+
 }  // namespace testing
 }  // namespace impeller
