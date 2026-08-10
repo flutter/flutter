@@ -115,6 +115,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
         splitCommas: false,
       )
+      ..addMultiOption(
+        'preset',
+        abbr: 'P',
+        help: 'The configuration preset(s) to use.',
+        splitCommas: false,
+      )
       ..addFlag(
         'start-paused',
         negatable: false,
@@ -432,6 +438,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final List<String> plainNames = stringsArg('plain-name');
     final List<String> tags = stringsArg('tags');
     final List<String> excludeTags = stringsArg('exclude-tags');
+    final List<String> presets = stringsArg('preset');
     final BuildInfo buildInfo = await getBuildInfo(
       forcedBuildMode: BuildMode.debug,
       forcedUseLocalCanvasKit: true,
@@ -676,6 +683,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         plainNames: plainNames,
         tags: tags,
         excludeTags: excludeTags,
+        presets: presets,
         machine: outputMachineFormat,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
@@ -702,6 +710,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         plainNames: plainNames,
         tags: tags,
         excludeTags: excludeTags,
+        presets: presets,
         watcher: watcher,
         enableVmService: collector != null || startPaused || enableVmService,
         machine: outputMachineFormat,

@@ -594,6 +594,46 @@ resolution: workspace
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       },
     );
+
+    testUsingContext(
+      'passes --preset through to package:test',
+      () async {
+        final fakePackageTest = FakePackageTest();
+        final testCommand = TestCommand(testWrapper: fakePackageTest);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(<String>['test', '--no-pub', '--preset=foo', '--preset=bar']);
+        expect(
+          fakePackageTest.lastArgs,
+          containsAllInOrder(<String>['--preset', 'foo', '--preset', 'bar']),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      },
+    );
+
+    testUsingContext(
+      'passes -P through to package:test',
+      () async {
+        final fakePackageTest = FakePackageTest();
+        final testCommand = TestCommand(testWrapper: fakePackageTest);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(<String>['test', '--no-pub', '-Pfoo', '-Pbar']);
+        expect(
+          fakePackageTest.lastArgs,
+          containsAllInOrder(<String>['--preset', 'foo', '--preset', 'bar']),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      },
+    );
   });
 
   testUsingContext(
@@ -703,6 +743,7 @@ resolution: workspace
           '--test-randomize-ordering-seed=random',
           '--tags=tag1',
           '--exclude-tags=tag2',
+          '--preset=preset1',
           '--fail-fast',
           '--run-skipped',
           '--total-shards=1',
@@ -741,6 +782,8 @@ const List<String> packageTestArgs = <String>[
   'tag1',
   '--exclude-tags',
   'tag2',
+  '--preset',
+  'preset1',
   '--fail-fast',
   '--run-skipped',
   '--total-shards=1',
@@ -1730,6 +1773,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     List<String> plainNames = const <String>[],
     List<String> tags = const <String>[],
     List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
@@ -1788,6 +1832,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     List<String> plainNames = const <String>[],
     List<String> tags = const <String>[],
     List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool machine = false,
     bool updateGoldens = false,
     required int? concurrency,
