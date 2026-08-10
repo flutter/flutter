@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/file.dart';
-import 'package:file/local.dart';
-import 'package:path/path.dart' as path;
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 
 void main() {
-  const FileSystem fs = LocalFileSystem();
-  final String flutterToolsRoot = path.join(getFlutterRoot(), 'packages', 'flutter_tools');
+  final FileSystem fs = globals.localFileSystem;
+  final String flutterToolsRoot = fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
   const expectedWorkspaceMembers = <String>[
     'packages/flutter_tools_core',
     'packages/flutter_tools_extension',
@@ -20,7 +19,7 @@ void main() {
 
   group('Flutter Tools Pub Workspace', () {
     testWithoutContext('root pubspec.yaml declares all sub-packages in workspace', () {
-      final File pubspecFile = fs.file(path.join(flutterToolsRoot, 'pubspec.yaml'));
+      final File pubspecFile = fs.file(fs.path.join(flutterToolsRoot, 'pubspec.yaml'));
       expect(pubspecFile.existsSync(), isTrue);
 
       final Object? yamlContent = loadYaml(pubspecFile.readAsStringSync());
@@ -31,17 +30,13 @@ void main() {
       final List<String> workspaceList = (yamlMap['workspace'] as YamlList).cast<String>().toList();
 
       for (final member in expectedWorkspaceMembers) {
-        expect(
-          workspaceList,
-          contains(member),
-          reason: 'Expected workspace to include $member',
-        );
+        expect(workspaceList, contains(member), reason: 'Expected workspace to include $member');
       }
     });
 
     testWithoutContext('member pubspec.yaml files declare workspace resolution', () {
       for (final member in expectedWorkspaceMembers) {
-        final File memberPubspec = fs.file(path.join(flutterToolsRoot, member, 'pubspec.yaml'));
+        final File memberPubspec = fs.file(fs.path.join(flutterToolsRoot, member, 'pubspec.yaml'));
         expect(
           memberPubspec.existsSync(),
           isTrue,
