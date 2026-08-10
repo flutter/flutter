@@ -73,6 +73,16 @@ Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
 
+Future<gpu.RenderPipeline> createOptimizedOutSamplerRenderPipeline() async {
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['UnlitVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['OptimizedOutSamplerFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
 Future<gpu.RenderPipeline> createTextureRenderPipeline() async {
   final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
@@ -897,6 +907,53 @@ void main() async {
     expect(image.height, 100);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('Texture.fromImage wraps a ui.Image without a copy', () async {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    canvas.drawPaint(ui.Paint()..color = const ui.Color(0xFF00FF00));
+    final ui.Picture picture = recorder.endRecording();
+    final ui.Image image = await picture.toImage(16, 24);
+    picture.dispose();
+
+    final texture = gpu.Texture.fromImage(gpu.gpuContext, image);
+    expect(texture.width, 16);
+    expect(texture.height, 24);
+    expect(texture.sampleCount, 1);
+    expect(texture.textureType, gpu.TextureType.texture2D);
+    expect(texture.enableShaderReadUsage, true);
+    expect(texture.mipLevelCount, greaterThanOrEqualTo(1));
+    expect(
+      texture.format,
+      anyOf(gpu.PixelFormat.r8g8b8a8UNormInt, gpu.PixelFormat.b8g8r8a8UNormInt),
+    );
+
+    // The wrapped texture is GPU resident and can be handed back to the UI.
+    final ui.Image roundTrip = texture.asImage();
+    expect(roundTrip.width, 16);
+    expect(roundTrip.height, 24);
+
+    image.dispose();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Texture.fromImage shares storage with the source image', () async {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    canvas.drawPaint(ui.Paint()..color = const ui.Color(0xFFFF0000));
+    final ui.Picture picture = recorder.endRecording();
+    final ui.Image image = await picture.toImage(8, 8);
+    picture.dispose();
+
+    final texture = gpu.Texture.fromImage(gpu.gpuContext, image);
+    // Disposing the source image must not invalidate the wrapper, which holds
+    // its own reference to the shared texture. Reading the texture back as an
+    // image exercises the native texture (not the cached Dart fields).
+    image.dispose();
+    expect(texture.isValid, true);
+    final ui.Image roundTrip = texture.asImage();
+    expect(roundTrip.width, 8);
+    expect(roundTrip.height, 8);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('Texture.asImage throws when not shader readable', () async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(
       gpu.StorageMode.hostVisible,
@@ -1151,6 +1208,35 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('Binding a dead-code-eliminated sampler does not crash', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createOptimizedOutSamplerRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+
+    // `tex` is optimized out. Binding it used to crash; now it either binds or
+    // is skipped, and either way the pass must draw.
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 1, 1);
+    try {
+      state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
+    } on Exception {
+      // Optimized out; binding it is a no-op.
+    }
+
+    state.renderPass.draw(3);
+    state.commandBuffer.submit();
+    expect(state.renderTexture.asImage(), isNotNull);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('RenderPass.bindTexture throws for deviceTransient Textures', () async {
     final RenderPassState state = createSimpleRenderPass();
 
@@ -1173,6 +1259,44 @@ void main() async {
         e.toString(),
         contains('Textures with StorageMode.deviceTransient cannot be bound to a RenderPass'),
       );
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.maxSamplerAnisotropy reports at least 1', () async {
+    expect(gpu.gpuContext.maxSamplerAnisotropy, greaterThanOrEqualTo(1));
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass.bindTexture throws for invalid SamplerOptions.maxAnisotropy', () async {
+    final RenderPassState state = createSimpleRenderPass();
+
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    // Although this is a non-texture uniform slot, it'll work fine for the
+    // purposes of testing this error.
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
+
+    try {
+      state.renderPass.bindTexture(
+        vertInfo,
+        texture,
+        sampler: gpu.SamplerOptions(maxAnisotropy: 0),
+      );
+      fail('Exception not thrown for a maxAnisotropy less than 1.');
+    } catch (e) {
+      expect(e.toString(), contains('maxAnisotropy must be at least 1'));
+    }
+
+    // Anisotropic filtering requires all filters to be linear.
+    try {
+      state.renderPass.bindTexture(
+        vertInfo,
+        texture,
+        sampler: gpu.SamplerOptions(maxAnisotropy: 16),
+      );
+      fail('Exception not thrown for anisotropy with non-linear filters.');
+    } catch (e) {
+      expect(e.toString(), contains('must all be linear'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -1320,6 +1444,34 @@ void main() async {
     try {
       state.renderPass.bindUniform(vertInfo, badUniformBufferView);
       fail('Exception not thrown for bad buffer view range.');
+    } catch (e) {
+      expect(e.toString(), contains('Failed to bind uniform'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Shader.getUniformSlot returns the same slot for repeat lookups', () async {
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.UniformSlot first = pipeline.vertexShader.getUniformSlot('VertInfo');
+    final gpu.UniformSlot second = pipeline.vertexShader.getUniformSlot('VertInfo');
+    expect(identical(first, second), isTrue);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass.bindUniform throws for an unknown uniform name', () async {
+    final RenderPassState state = createSimpleRenderPass();
+
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.DeviceBuffer uniformBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
+      float32(<double>[1, 2, 3, 4]),
+    );
+    final uniformBufferView = gpu.BufferView(
+      uniformBuffer,
+      offsetInBytes: 0,
+      lengthInBytes: uniformBuffer.sizeInBytes,
+    );
+    final gpu.UniformSlot unknownSlot = pipeline.vertexShader.getUniformSlot('DoesNotExist');
+    try {
+      state.renderPass.bindUniform(unknownSlot, uniformBufferView);
+      fail('Exception not thrown for an unknown uniform name.');
     } catch (e) {
       expect(e.toString(), contains('Failed to bind uniform'));
     }

@@ -38,8 +38,8 @@ interface class FlutterTestRunner {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
+    List<String> tags = const <String>[],
+    List<String> excludeTags = const <String>[],
     bool enableVmService = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -82,8 +82,8 @@ interface class FlutterTestRunner {
       for (final String name in names) ...<String>['--name', name],
       for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
       if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
-      if (tags != null) ...<String>['--tags', tags],
-      if (excludeTags != null) ...<String>['--exclude-tags', excludeTags],
+      for (final String tag in tags) ...<String>['--tags', tag],
+      for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
       if (failFast) '--fail-fast',
       if (runSkipped) '--run-skipped',
       if (totalShards != null) '--total-shards=$totalShards',
@@ -92,6 +92,9 @@ interface class FlutterTestRunner {
     ];
 
     if (web) {
+      // Unsupported for general Flutter developers.
+      // This is only used by the Flutter Framework tests.
+      // See: https://github.com/flutter/flutter/pull/65984.
       final String tempBuildDir = globals.fs.systemTempDirectory
           .createTempSync('flutter_test.')
           .absolute
@@ -586,8 +589,8 @@ class SpawnPlugin extends PlatformPlugin {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
+    List<String> tags = const <String>[],
+    List<String> excludeTags = const <String>[],
     bool machine = false,
     bool updateGoldens = false,
     required int? concurrency,
@@ -653,8 +656,8 @@ class SpawnPlugin extends PlatformPlugin {
       for (final String name in names) ...<String>['--name', name],
       for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
       if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
-      if (tags != null) ...<String>['--tags', tags],
-      if (excludeTags != null) ...<String>['--exclude-tags', excludeTags],
+      for (final String tag in tags) ...<String>['--tags', tag],
+      for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
       if (failFast) '--fail-fast',
       if (runSkipped) '--run-skipped',
       if (totalShards != null) '--total-shards=$totalShards',

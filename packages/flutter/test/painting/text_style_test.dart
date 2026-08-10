@@ -314,6 +314,29 @@ void main() {
     expect(ps7, equals(ui.ParagraphStyle(textDirection: TextDirection.rtl, fontSize: 14.0)));
   });
 
+  test('TextStyle rejects NaN height', () {
+    expect(
+      () => TextStyle(height: double.nan),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'message',
+          contains('TextStyle.height must not be NaN.'),
+        ),
+      ),
+    );
+    expect(
+      () => const TextStyle().getParagraphStyle(height: double.nan),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'message',
+          contains('TextStyle.height must not be NaN.'),
+        ),
+      ),
+    );
+  });
+
   test('TextStyle using package font', () {
     const s6 = TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');

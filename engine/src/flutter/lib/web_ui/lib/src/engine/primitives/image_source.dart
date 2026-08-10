@@ -234,6 +234,9 @@ int _premultiply(int value, int alpha) {
 /// Mutates the [pixels], converting them from BGRX/BGRA to RGBA with
 /// premultiplied alpha.
 void _bgrToRawRgba(ByteBuffer pixels) {
+  // Swaps the Red and Blue channels to convert the layout from BGRA to RGBA,
+  // while simultaneously premultiplying the color channels by the alpha channel
+  // (as required by the rawRgba image byte format).
   final Uint8List pixelBytes = pixels.asUint8List();
   for (var i = 0; i < pixelBytes.length; i += 4) {
     final int a = pixelBytes[i + 3];
@@ -250,6 +253,7 @@ void _bgrToRawRgba(ByteBuffer pixels) {
 /// Mutates the [pixels] in-place, converting them from premultiplied alpha
 /// RGBA layout to straight/unpremultiplied RGBA layout.
 void unpremultiplyRawRgba(Uint8List pixels) {
+  assert(pixels.length % 4 == 0, 'Pixel buffer length must be a multiple of 4.');
   for (var i = 0; i < pixels.length; i += 4) {
     final int a = pixels[i + 3];
     if (a == 0) {
@@ -257,6 +261,10 @@ void unpremultiplyRawRgba(Uint8List pixels) {
       pixels[i + 1] = 0;
       pixels[i + 2] = 0;
     } else if (a < 255) {
+      // Divide the color channel by the alpha value to unpremultiply it.
+      // Adding 'a ~/ 2' (half the divisor) before dividing by 'a' performs
+      // correct integer rounding to the nearest integer instead of truncating,
+      // which prevents color-channel drift and banding.
       pixels[i] = ((pixels[i] * 255 + a ~/ 2) ~/ a).clamp(0, 255);
       pixels[i + 1] = ((pixels[i + 1] * 255 + a ~/ 2) ~/ a).clamp(0, 255);
       pixels[i + 2] = ((pixels[i + 2] * 255 + a ~/ 2) ~/ a).clamp(0, 255);
@@ -331,4 +339,25 @@ Future<Uint8List> encodeDomImageSourceAsPng(
   canvas.width = 0;
   canvas.height = 0;
   return base64.decode(pngBase64);
+}
+
+/// An [ImageSource] implementation wrapping a generic [DomCanvasImageSource]
+/// (such as an HTMLCanvasElement, OffscreenCanvas, SVGImageElement, or HTMLVideoElement)
+/// that does not require manual resource cleanup.
+class CanvasImageSourceWrapper extends ImageSource {
+  CanvasImageSourceWrapper(this.canvasImageSource, this.width, this.height);
+
+  @override
+  final DomCanvasImageSource canvasImageSource;
+
+  @override
+  final int width;
+
+  @override
+  final int height;
+
+  @override
+  void _doClose() {
+    // Generic canvas image sources do not require manual resource disposal.
+  }
 }

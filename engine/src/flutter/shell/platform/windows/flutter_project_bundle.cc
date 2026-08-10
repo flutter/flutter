@@ -39,6 +39,11 @@ FlutterProjectBundle::FlutterProjectBundle(
   accessibility_mode_ =
       static_cast<FlutterAccessibilityMode>(properties.accessibility_mode);
 
+  impeller_switch_ =
+      static_cast<FlutterImpellerSwitch>(properties.impeller_switch);
+
+  enable_flutter_gpu_ = properties.enable_flutter_gpu;
+
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
       (!aot_library_path_.empty() && aot_library_path_.is_relative())) {
