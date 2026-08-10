@@ -15,7 +15,7 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-///// Signature for a builder function that returns a widget to use as a sorting
+/// Signature for a builder function that returns a widget to use as a sorting
 /// indicator icon in a [DataTable] header cell.
 ///
 /// The [visible] parameter indicates whether the sort icon should be visible

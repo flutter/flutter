@@ -555,6 +555,18 @@ class DataTable extends StatelessWidget {
   /// A builder function that returns a widget to use as the sorting indicator
   /// icon for the table's header cells.
   ///
+  /// When providing a custom sort icon via this builder, the default sort arrow's
+  /// automatic rotation and opacity transitions are omitted. To achieve animated
+  /// transitions for custom icons, wrap the returned widget in explicit
+  /// transition widgets such as [AnimatedRotation] or [AnimatedOpacity].
+  ///
+  /// Custom icons should target a size of approximately 18.0 logical pixels or
+  /// be wrapped in a fixed-size container to maintain visually balanced header
+  /// labels. For columns where [DataColumn.numeric] is true, [DataTable] adds
+  /// a leading 20.0 logical pixel spacer to mirror the space occupied by the
+  /// sort icon and its padding, ensuring centered column labels remain properly
+  /// aligned.
+  ///
   /// If null, [DataTableThemeData.sortIconBuilder] is used. If that is also null,
   /// the default Material design sort arrow animation is used.
   /// {@endtemplate}
