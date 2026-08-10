@@ -57,96 +57,96 @@
   if ([processArguments containsObject:@"--maskview-blocking"]) {
     self.window.tintColor = UIColor.systemPinkColor;
   }
-  NSDictionary<NSString*, NSString*>* launchArgsMap = @{
-    // The golden test args should match `GoldenTestManager`.
-    @"--locale-initialization" : @"locale_initialization",
-    @"--platform-view" : @"platform_view",
-    @"--platform-view-no-overlay-intersection" : @"platform_view_no_overlay_intersection",
-    @"--platform-view-two-intersecting-overlays" : @"platform_view_two_intersecting_overlays",
-    @"--platform-view-partial-intersection" : @"platform_view_partial_intersection",
-    @"--platform-view-one-overlay-two-intersecting-overlays" :
-        @"platform_view_one_overlay_two_intersecting_overlays",
-    @"--platform-view-multiple-without-overlays" : @"platform_view_multiple_without_overlays",
-    @"--platform-view-max-overlays" : @"platform_view_max_overlays",
-    @"--platform-view-surrounding-layers-fractional-coordinate" :
-        @"platform_view_surrounding_layers_fractional_coordinate",
-    @"--platform-view-partial-intersection-fractional-coordinate" :
-        @"platform_view_partial_intersection_fractional_coordinate",
-    @"--platform-view-multiple" : @"platform_view_multiple",
-    @"--platform-view-multiple-background-foreground" :
-        @"platform_view_multiple_background_foreground",
-    @"--platform-view-cliprect" : @"platform_view_cliprect",
-    @"--platform-view-cliprect-multiple-clips" : @"platform_view_cliprect_multiple_clips",
-    @"--platform-view-cliprrect" : @"platform_view_cliprrect",
-    @"--platform-view-cliprrect-multiple-clips" : @"platform_view_cliprrect_multiple_clips",
-    @"--platform-view-large-cliprrect" : @"platform_view_large_cliprrect",
-    @"--platform-view-large-cliprrect-multiple-clips" :
-        @"platform_view_large_cliprrect_multiple_clips",
-    @"--platform-view-clippath" : @"platform_view_clippath",
-    @"--platform-view-clippath-multiple-clips" : @"platform_view_clippath_multiple_clips",
-    @"--platform-view-cliprrect-with-transform" : @"platform_view_cliprrect_with_transform",
-    @"--platform-view-cliprrect-with-transform-multiple-clips" :
-        @"platform_view_cliprrect_with_transform_multiple_clips",
-    @"--platform-view-large-cliprrect-with-transform" :
-        @"platform_view_large_cliprrect_with_transform",
-    @"--platform-view-large-cliprrect-with-transform-multiple-clips" :
-        @"platform_view_large_cliprrect_with_transform_multiple_clips",
-    @"--platform-view-cliprect-with-transform" : @"platform_view_cliprect_with_transform",
-    @"--platform-view-cliprect-with-transform-multiple-clips" :
-        @"platform_view_cliprect_with_transform_multiple_clips",
-    @"--platform-view-clippath-with-transform" : @"platform_view_clippath_with_transform",
-    @"--platform-view-clippath-with-transform-multiple-clips" :
-        @"platform_view_clippath_with_transform_multiple_clips",
-    @"--platform-view-transform" : @"platform_view_transform",
-    @"--platform-view-opacity" : @"platform_view_opacity",
-    @"--platform-view-with-other-backdrop-filter" : @"platform_view_with_other_backdrop_filter",
-    @"--two-platform-views-with-other-backdrop-filter" :
-        @"two_platform_views_with_other_backdrop_filter",
-    @"--platform-view-with-negative-backdrop-filter" :
-        @"platform_view_with_negative_backdrop_filter",
-    @"--platform-view-rotate" : @"platform_view_rotate",
-    @"--non-full-screen-flutter-view-platform-view" : @"non_full_screen_flutter_view_platform_view",
-    @"--gesture-reject-after-touches-ended" : @"platform_view_gesture_reject_after_touches_ended",
-    @"--gesture-reject-eager" : @"platform_view_gesture_reject_eager",
-    @"--gesture-accept" : @"platform_view_gesture_accept",
-    @"--gesture-accept-with-overlapping-platform-views" :
-        @"platform_view_gesture_accept_with_overlapping_platform_views",
-    @"--tap-status-bar" : @"tap_status_bar",
-    @"--animated-color-square" : @"animated_color_square",
-    @"--solid-blue" : @"solid_blue",
-    @"--platform-view-with-continuous-texture" : @"platform_view_with_continuous_texture",
-    @"--bogus-font-text" : @"bogus_font_text",
-    @"--spawn-engine-works" : @"spawn_engine_works",
-    @"--pointer-events" : @"pointer_events",
-    @"--platform-view-scrolling-under-widget" : @"platform_view_scrolling_under_widget",
-    @"--platform-views-with-clips-scrolling" : @"platform_views_with_clips_scrolling",
-    @"--platform-views-with-clips-scrolling-multiple-clips" :
-        @"platform_views_with_clips_scrolling_multiple_clips",
-    @"--platform-view-cliprect-after-moved" : @"platform_view_cliprect_after_moved",
-    @"--platform-view-cliprect-after-moved-multiple-clips" :
-        @"platform_view_cliprect_after_moved_multiple_clips",
-    @"--two-platform-view-clip-rect" : @"two_platform_view_clip_rect",
-    @"--two-platform-view-clip-rect-multiple-clips" : @"two_platform_view_clip_rect_multiple_clips",
-    @"--two-platform-view-clip-rrect" : @"two_platform_view_clip_rrect",
-    @"--two-platform-view-clip-rrect-multiple-clips" :
-        @"two_platform_view_clip_rrect_multiple_clips",
-    @"--two-platform-view-clip-path" : @"two_platform_view_clip_path",
-    @"--two-platform-view-clip-path-multiple-clips" : @"two_platform_view_clip_path_multiple_clips",
-    @"--darwin-system-font" : @"darwin_system_font",
-  };
-  __block NSString* flutterViewControllerTestName = nil;
-  [launchArgsMap
-      enumerateKeysAndObjectsUsingBlock:^(NSString* argument, NSString* testName, BOOL* stop) {
-        if ([processArguments containsObject:argument]) {
-          flutterViewControllerTestName = testName;
-          *stop = YES;
-        }
-      }];
+  NSSet<NSString*>* scenarioArguments = [NSSet setWithArray:@[
+    @"--animated-color-square",
+    @"--bogus-font-text",
+    @"--darwin-system-font",
+    @"--locale-initialization",
+    @"--non-full-screen-flutter-view-platform-view",
+    @"--platform-view",
+    @"--platform-view-clippath",
+    @"--platform-view-clippath-multiple-clips",
+    @"--platform-view-clippath-with-transform",
+    @"--platform-view-clippath-with-transform-multiple-clips",
+    @"--platform-view-cliprect",
+    @"--platform-view-cliprect-after-moved",
+    @"--platform-view-cliprect-after-moved-multiple-clips",
+    @"--platform-view-cliprect-multiple-clips",
+    @"--platform-view-cliprect-with-transform",
+    @"--platform-view-cliprect-with-transform-multiple-clips",
+    @"--platform-view-cliprrect",
+    @"--platform-view-cliprrect-multiple-clips",
+    @"--platform-view-cliprrect-with-transform",
+    @"--platform-view-cliprrect-with-transform-multiple-clips",
+    @"--platform-view-gesture-accept",
+    @"--platform-view-gesture-accept-with-overlapping-platform-views",
+    @"--platform-view-gesture-reject-after-touches-ended",
+    @"--platform-view-gesture-reject-eager",
+    @"--platform-view-large-cliprrect",
+    @"--platform-view-large-cliprrect-multiple-clips",
+    @"--platform-view-large-cliprrect-with-transform",
+    @"--platform-view-large-cliprrect-with-transform-multiple-clips",
+    @"--platform-view-max-overlays",
+    @"--platform-view-multiple",
+    @"--platform-view-multiple-background-foreground",
+    @"--platform-view-multiple-without-overlays",
+    @"--platform-view-no-overlay-intersection",
+    @"--platform-view-one-overlay-two-intersecting-overlays",
+    @"--platform-view-opacity",
+    @"--platform-view-partial-intersection",
+    @"--platform-view-partial-intersection-fractional-coordinate",
+    @"--platform-view-rotate",
+    @"--platform-view-scrolling-under-widget",
+    @"--platform-view-surrounding-layers-fractional-coordinate",
+    @"--platform-view-transform",
+    @"--platform-view-two-intersecting-overlays",
+    @"--platform-view-with-continuous-texture",
+    @"--platform-view-with-negative-backdrop-filter",
+    @"--platform-view-with-other-backdrop-filter",
+    @"--platform-views-with-clips-scrolling",
+    @"--platform-views-with-clips-scrolling-multiple-clips",
+    @"--pointer-events",
+    @"--solid-blue",
+    @"--spawn-engine-works",
+    @"--tap-status-bar",
+    @"--two-platform-view-clip-path",
+    @"--two-platform-view-clip-path-multiple-clips",
+    @"--two-platform-view-clip-rect",
+    @"--two-platform-view-clip-rect-multiple-clips",
+    @"--two-platform-view-clip-rrect",
+    @"--two-platform-view-clip-rrect-multiple-clips",
+    @"--two-platform-views-with-other-backdrop-filter",
+  ]];
+
+  // We derive the Dart scenario name from the launch argument:
+  // * drop the leading "--"
+  // * swap "-" for "_"
+  // The GoldenTestManager golden name is derived exactly the same way.
+  NSString* flutterViewControllerTestName = nil;
+  for (NSString* argument in processArguments) {
+    if ([scenarioArguments containsObject:argument]) {
+      flutterViewControllerTestName =
+          [[argument substringFromIndex:2] stringByReplacingOccurrencesOfString:@"-"
+                                                                     withString:@"_"];
+      break;
+    }
+  }
   if (flutterViewControllerTestName) {
     [self setupFlutterViewControllerTest:flutterViewControllerTestName];
   } else if ([processArguments containsObject:@"--screen-before-flutter"]) {
     self.window.rootViewController = [[ScreenBeforeFlutter alloc] initWithEngineRunCompletion:nil];
   } else {
+    // No scenario was selected.
+    // Bail out immediately on any unrecognized `--` argument and let the user know how to register
+    // a new scenario.
+    for (NSString* argument in processArguments) {
+      if ([argument hasPrefix:@"--"]) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"Unrecognised scenario argument \"%@\". Add it to scenarioArguments in "
+                           @"SceneDelegate.m, and register the scenario in scenarios.dart.",
+                           argument];
+      }
+    }
     self.window.rootViewController = [[UIViewController alloc] init];
   }
 
