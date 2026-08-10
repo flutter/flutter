@@ -28,6 +28,11 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Prepare iOS build directories
+        run: |
+          mkdir -p build/ios/SourcePackages
+        working-directory: ${{ env.APP_DIR }}
+
       - name: Flutter pub get
         run: flutter pub get
         working-directory: ${{ env.APP_DIR }}
@@ -40,6 +45,7 @@ jobs:
 
       - name: Build iOS IPA for App Store
         run: |
+          mkdir -p build/ios/SourcePackages
           flutter build ipa \
             --release \
             --dart-define=APP_ENV=${{ inputs.app_env }} \
