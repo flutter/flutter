@@ -216,7 +216,7 @@ interface class FlutterTestRunner {
     if (packageConfigFile.existsSync()) {
       projectPackageConfig = PackageConfig.parseBytes(
         packageConfigFile.readAsBytesSync(),
-        packageConfigFile.uri,
+        packageConfigFile.absolute.uri,
       );
     } else {
       // We can't use this directly, but need to manually check
@@ -240,7 +240,7 @@ interface class FlutterTestRunner {
         .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(
       flutterToolsPackageConfigFile.readAsBytesSync(),
-      flutterToolsPackageConfigFile.uri,
+      flutterToolsPackageConfigFile.absolute.uri,
     );
 
     final mergedPackages = <Package>[...projectPackageConfig.packages];
@@ -629,7 +629,7 @@ class SpawnPlugin extends PlatformPlugin {
     );
     final PackageConfig isolateSpawningTesterPackageConfig = PackageConfig.parseBytes(
       isolateSpawningTesterPackageConfigFile.readAsBytesSync(),
-      isolateSpawningTesterPackageConfigFile.uri,
+      isolateSpawningTesterPackageConfigFile.absolute.uri,
     );
 
     final File childTestIsolateSpawnerSourceFile = isolateSpawningTesterDirectory.childFile(
