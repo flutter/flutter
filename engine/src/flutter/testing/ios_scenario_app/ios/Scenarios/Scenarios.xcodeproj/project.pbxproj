@@ -234,7 +234,6 @@
 		68D4017B2564859300ECD91A /* ContinuousTexture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContinuousTexture.h; sourceTree = "<group>"; };
 		68D4017C2564859300ECD91A /* ContinuousTexture.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ContinuousTexture.m; sourceTree = "<group>"; };
 		F26F15B7268B6B5500EC54D3 /* iPadGestureTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = iPadGestureTests.m; sourceTree = "<group>"; };
-		F72114B628EF99F500184A2D /* Info_Skia.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info_Skia.plist; sourceTree = "<group>"; };
 		21C15BDB794F61D0706DF179 /* golden_bogus_font_text_impeller_iPhone SE (3rd generation)_26.2_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_bogus_font_text_impeller_iPhone SE (3rd generation)_26.2_simulator.png"; sourceTree = "<group>"; };
 		AAD032C50FB93A4D46C467D6 /* golden_darwin_system_font_impeller_iPhone SE (3rd generation)_26.2_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_darwin_system_font_impeller_iPhone SE (3rd generation)_26.2_simulator.png"; sourceTree = "<group>"; };
 		5BA530B25CC9089C12F2A472 /* golden_non_full_screen_flutter_view_platform_view_impeller_iPhone SE (3rd generation)_26.2_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_non_full_screen_flutter_view_platform_view_impeller_iPhone SE (3rd generation)_26.2_simulator.png"; sourceTree = "<group>"; };
@@ -346,7 +345,6 @@
 				0D5CE1B12E4A000200AA0002 /* SceneDelegate.m */,
 				248D76D322E388380012F0C1 /* Assets.xcassets */,
 				248D76D822E388380012F0C1 /* Info.plist */,
-				F72114B628EF99F500184A2D /* Info_Skia.plist */,
 				248D76D922E388380012F0C1 /* main.m */,
 				0A57B3BB2323C4BD00DD9521 /* ScreenBeforeFlutter.h */,
 				0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */,
