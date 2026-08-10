@@ -191,6 +191,7 @@ class SwiftPackageManager {
       final String basename = _fileSystem.directory(plugin.path).basename;
 
       final Link pluginSymlink;
+      final String linkName;
       if (pluginsRequiringPluginNameSymlink.contains(plugin)) {
         // When basename can't be used as the symlink path, copy the plugin and update the
         // manifest contents so Xcode will re-process the package manifest.
@@ -201,16 +202,17 @@ class SwiftPackageManager {
           platform: platform,
           manifest: manifest,
         );
-        pluginSymlink = symlinkDirectory.childLink(plugin.name);
+        linkName = plugin.name;
       } else {
         // Use the plugin basename as the symlink plugin directory name since the basename has the
         // version number in it. This will make the symlink name change when the plugin version
         // changes, which forces Xcode to re-process the package manifest.
-        pluginSymlink = symlinkDirectory.childLink(basename);
+        linkName = basename;
       }
+      pluginSymlink = symlinkDirectory.childLink(linkName);
 
       _createPluginSymlink(pluginSymlink: pluginSymlink, packagePath: packagePath);
-      expectedBasenames.add(basename);
+      expectedBasenames.add(linkName);
 
       final String packageRelativePath = _fileSystem.path.relative(
         pluginSymlink.path,

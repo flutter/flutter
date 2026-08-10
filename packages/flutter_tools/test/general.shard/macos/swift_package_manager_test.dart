@@ -608,7 +608,7 @@ let package = Package(
 
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
                 ? '.iOS("15.0")'
-                : '.macOS("10.15")';
+                : '.macOS("12.0")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
 
             // Since basename did not match the plugin name, the plugin is copied to the
