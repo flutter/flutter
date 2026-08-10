@@ -25,6 +25,7 @@ CAPABILITY_TEST(SupportsFramebufferFetch, false);
 CAPABILITY_TEST(SupportsCompute, false);
 CAPABILITY_TEST(SupportsComputeSubgroups, false);
 CAPABILITY_TEST(SupportsReadFromResolve, false);
+CAPABILITY_TEST(SupportsGray8Textures, false);
 CAPABILITY_TEST(SupportsDecalSamplerAddressMode, false);
 CAPABILITY_TEST(SupportsDeviceTransientTextures, false);
 CAPABILITY_TEST(SupportsTriangleFan, false);

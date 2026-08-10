@@ -413,15 +413,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     view_info.subresourceRange.aspectMask = ToVKImageAspectFlags(desc.format);
     view_info.subresourceRange.levelCount = image_info.mipLevels;
     view_info.subresourceRange.layerCount = ToArrayLayerCount(desc);
-
-    // Vulkan does not have an image format that is equivalent to
-    // `MTLPixelFormatA8Unorm`, so we use `R8Unorm` instead. Given that the
-    // shaders expect that alpha channel to be set in the cases, we swizzle.
-    // See: https://github.com/flutter/flutter/issues/115461 for more details.
-    if (desc.format == PixelFormat::kA8UNormInt) {
-      view_info.components.a = vk::ComponentSwizzle::eR;
-      view_info.components.r = vk::ComponentSwizzle::eA;
-    }
+    view_info.components = ToVKComponentMapping(desc.format);
 
     auto [result, image_view] = device.createImageViewUnique(view_info);
     if (result != vk::Result::eSuccess) {

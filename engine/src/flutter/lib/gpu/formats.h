@@ -215,6 +215,9 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
     case impeller::PixelFormat::kB10G10R10A10XR:
       // Apple-only extended-range formats, not exposed by the Flutter GPU API.
       return FlutterGPUPixelFormat::kUnknown;
+    case impeller::PixelFormat::kGray8UNormInt:
+      // Internal image format, not exposed by the Flutter GPU API.
+      return FlutterGPUPixelFormat::kUnknown;
     case impeller::PixelFormat::kS8UInt:
       return FlutterGPUPixelFormat::kS8UInt;
     case impeller::PixelFormat::kD24UnormS8Uint:

@@ -24,12 +24,25 @@ TEST(CapabilitiesGLES, CanInitializeWithDefaults) {
   EXPECT_FALSE(capabilities->SupportsReadFromResolve());
   EXPECT_FALSE(capabilities->SupportsDecalSamplerAddressMode());
   EXPECT_FALSE(capabilities->SupportsDeviceTransientTextures());
+  EXPECT_TRUE(capabilities->SupportsGray8Textures());
 
   EXPECT_EQ(capabilities->GetDefaultColorFormat(),
             PixelFormat::kR8G8B8A8UNormInt);
   EXPECT_EQ(capabilities->GetDefaultStencilFormat(), PixelFormat::kS8UInt);
   EXPECT_EQ(capabilities->GetDefaultDepthStencilFormat(),
             PixelFormat::kD24UnormS8Uint);
+}
+
+TEST(CapabilitiesGLES, DoesNotSupportGray8TexturesOnES2) {
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_FALSE(capabilities->SupportsGray8Textures());
+}
+
+TEST(CapabilitiesGLES, DoesNotSupportGray8TexturesOnDesktopGL) {
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL 4.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_FALSE(capabilities->SupportsGray8Textures());
 }
 
 TEST(CapabilitiesGLES, SupportsDecalSamplerAddressMode) {

@@ -93,10 +93,14 @@ absl::StatusOr<ImageDecoderImpeller::ImageInfo> ToImageInfo(
   }};
 }
 
-SkColorType ChooseCompatibleColorType(SkColorType type) {
+SkColorType ChooseCompatibleColorType(SkColorType type,
+                                      bool supports_gray8_textures) {
   switch (type) {
     case kRGBA_F32_SkColorType:
       return kRGBA_F16_SkColorType;
+    case kGray_8_SkColorType:
+      return supports_gray8_textures ? kGray_8_SkColorType
+                                     : kRGBA_8888_SkColorType;
     default:
       return kRGBA_8888_SkColorType;
   }
@@ -120,6 +124,7 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
     const SkImageInfo& base_image_info,
     const SkISize& decode_size,
     bool supports_wide_gamut,
+    bool supports_gray8_textures,
     ImageDecoder::TargetPixelFormat target_format) {
   const bool is_wide_gamut =
       supports_wide_gamut ? IsWideGamut(base_image_info.colorSpace()) : false;
@@ -147,7 +152,8 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
         .makeColorSpace(SkColorSpace::MakeSRGB());
   } else {
     return base_image_info.makeWH(decode_size.width(), decode_size.height())
-        .makeColorType(ChooseCompatibleColorType(base_image_info.colorType()))
+        .makeColorType(ChooseCompatibleColorType(base_image_info.colorType(),
+                                                 supports_gray8_textures))
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
   }
@@ -290,6 +296,8 @@ impeller::PixelFormat ToImpellerPixelFormat(
 std::optional<impeller::PixelFormat> ImageDecoderImpeller::ToPixelFormat(
     SkColorType type) {
   switch (type) {
+    case kGray_8_SkColorType:
+      return impeller::PixelFormat::kGray8UNormInt;
     case kRGBA_8888_SkColorType:
       return impeller::PixelFormat::kR8G8B8A8UNormInt;
     case kBGRA_8888_SkColorType:
@@ -389,7 +397,8 @@ ImageDecoderImpeller::DecompressTexture(
   const SkImageInfo base_image_info =
       ImageDescriptor::ToSkImageInfo(descriptor->image_info());
   const absl::StatusOr<SkImageInfo> image_info = CreateImageInfo(
-      base_image_info, decode_size, supports_wide_gamut, options.target_format);
+      base_image_info, decode_size, supports_wide_gamut,
+      capabilities->SupportsGray8Textures(), options.target_format);
 
   if (!image_info.ok()) {
     return image_info.status();

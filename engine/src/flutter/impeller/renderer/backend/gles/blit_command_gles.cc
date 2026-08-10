@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
 
 #include <algorithm>
+#include <vector>
 
 #include "flutter/fml/closure.h"
 #include "impeller/base/validation.h"
@@ -16,6 +17,8 @@
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
 namespace impeller {
+
+constexpr size_t kGray8ReadbackChunkBytes = 4u * 1024u * 1024u;
 
 BlitEncodeGLES::~BlitEncodeGLES() = default;
 
@@ -313,6 +316,38 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
       return false;
     }
     read_fbo = read.value();
+  }
+
+  if (source_format == PixelFormat::kGray8UNormInt) {
+    DeviceBufferGLES::Cast(*destination)
+        .UpdateBufferData([&gl, this](uint8_t* data, size_t) {
+          const size_t width = static_cast<size_t>(source_region.GetWidth());
+          const size_t height = static_cast<size_t>(source_region.GetHeight());
+          const size_t rgba_row_bytes = width * 4u;
+          const size_t rows_per_chunk =
+              std::max<size_t>(1u, kGray8ReadbackChunkBytes / rgba_row_bytes);
+          std::vector<uint8_t> rgba(rgba_row_bytes *
+                                    std::min(rows_per_chunk, height));
+          // RGBA/UNSIGNED_BYTE is the only universally supported ReadPixels
+          // combination for normalized fixed-point framebuffers in GLES 3.
+          for (size_t first_row = 0u; first_row < height;
+               first_row += rows_per_chunk) {
+            const size_t row_count =
+                std::min(rows_per_chunk, height - first_row);
+            gl.ReadPixels(
+                source_region.GetX(),
+                source_region.GetY() + static_cast<int64_t>(first_row),
+                source_region.GetWidth(), static_cast<GLsizei>(row_count),
+                GL_RGBA, GL_UNSIGNED_BYTE, rgba.data());
+            const size_t pixel_count = width * row_count;
+            const size_t destination_start =
+                destination_offset + first_row * width;
+            for (size_t i = 0; i < pixel_count; i++) {
+              data[destination_start + i] = rgba[i * 4u];
+            }
+          }
+        });
+    return true;
   }
 
   DeviceBufferGLES::Cast(*destination)

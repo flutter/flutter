@@ -238,6 +238,7 @@ if (enable_unittests) {
       "fixtures/FontManifest.json",
       "fixtures/unmultiplied_alpha.png",
       "fixtures/WideGamutIndexed.png",
+      "//flutter/impeller/fixtures/embarcadero.jpg",
       "//flutter/txt/third_party/fonts/Roboto-Medium.ttf",
     ]
   }

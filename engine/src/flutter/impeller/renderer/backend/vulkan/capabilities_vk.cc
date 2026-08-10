@@ -765,6 +765,10 @@ bool CapabilitiesVK::SupportsReadFromResolve() const {
   return false;
 }
 
+bool CapabilitiesVK::SupportsGray8Textures() const {
+  return true;
+}
+
 bool CapabilitiesVK::SupportsDecalSamplerAddressMode() const {
   return true;
 }

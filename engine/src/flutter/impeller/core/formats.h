@@ -99,6 +99,8 @@ constexpr const char* StorageModeToString(StorageMode mode) {
 enum class PixelFormat : uint8_t {
   kUnknown,
   kA8UNormInt,
+  /// One normalized luminance channel that samples as `(r, r, r, 1)`.
+  kGray8UNormInt,
   kR8UNormInt,
   kR8G8UNormInt,
   kR8G8B8A8UNormInt,
@@ -295,6 +297,8 @@ constexpr const char* PixelFormatToString(PixelFormat format) {
       return "Unknown";
     case PixelFormat::kA8UNormInt:
       return "A8UNormInt";
+    case PixelFormat::kGray8UNormInt:
+      return "Gray8UNormInt";
     case PixelFormat::kR8UNormInt:
       return "R8UNormInt";
     case PixelFormat::kR8G8UNormInt:
@@ -653,6 +657,7 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
     case PixelFormat::kUnknown:
       return 0u;
     case PixelFormat::kA8UNormInt:
+    case PixelFormat::kGray8UNormInt:
     case PixelFormat::kR8UNormInt:
     case PixelFormat::kS8UInt:
       return 1u;

@@ -207,6 +207,12 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
                                 desc->GetGlVersion().major_version >= 3 ||
                                 desc->HasExtension(kAppleTextureMaxLevelExt);
 
+  // OpenGL ES 3.0 makes R8 color-renderable and texture-filterable, and adds
+  // the texture swizzles needed to sample it as opaque grayscale. ES 2.0 does
+  // not guarantee either part of that lifecycle.
+  supports_gray8_textures_ =
+      desc->IsES() && desc->GetGlVersion().major_version >= 3;
+
   // 2D array textures (GL_TEXTURE_2D_ARRAY, sampled as sampler2DArray) need the
   // 3D texture upload entry points. These are core on desktop GL 3.0 and
   // OpenGL ES 3.0, and reachable below them via GL_EXT_texture_array (desktop
@@ -339,6 +345,10 @@ bool CapabilitiesGLES::SupportsManuallyMippedTextures() const {
   // the levels the texture declares, so a hand-uploaded chain is mipmap
   // incomplete and samples as black.
   return supports_texture_max_level_;
+}
+
+bool CapabilitiesGLES::SupportsGray8Textures() const {
+  return supports_gray8_textures_;
 }
 
 bool CapabilitiesGLES::SupportsExtendedRangeFormats() const {

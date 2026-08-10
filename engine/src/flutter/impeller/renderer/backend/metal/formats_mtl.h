@@ -100,6 +100,8 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
       return MTLPixelFormatInvalid;
     case PixelFormat::kA8UNormInt:
       return MTLPixelFormatA8Unorm;
+    case PixelFormat::kGray8UNormInt:
+      return MTLPixelFormatR8Unorm;
     case PixelFormat::kR8UNormInt:
       return MTLPixelFormatR8Unorm;
     case PixelFormat::kR8G8UNormInt:

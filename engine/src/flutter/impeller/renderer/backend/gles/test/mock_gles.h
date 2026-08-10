@@ -27,6 +27,7 @@ class IMockGLESImpl {
   virtual void DeleteTextures(GLsizei size, const GLuint* queries) {}
   virtual void GenTextures(GLsizei n, GLuint* textures) {}
   virtual void BindTexture(GLenum target, GLuint texture) {}
+  virtual void TexParameteri(GLenum target, GLenum pname, GLint param) {}
   virtual void TexImage2D(GLenum target,
                           GLint level,
                           GLint internalformat,
@@ -154,6 +155,10 @@ class MockGLESImpl : public IMockGLESImpl {
               (override));
   MOCK_METHOD(void, GenTextures, (GLsizei n, GLuint* textures), (override));
   MOCK_METHOD(void, BindTexture, (GLenum target, GLuint texture), (override));
+  MOCK_METHOD(void,
+              TexParameteri,
+              (GLenum target, GLenum pname, GLint param),
+              (override));
   MOCK_METHOD(void,
               TexImage2D,
               (GLenum target,
