@@ -1099,13 +1099,29 @@ See the link below for more information:
     );
   }
 
-  bool computeHcppEnabled() {
-    return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', false);
+  /// Returns the `io.flutter.embedding.android.EnableHcpp` manifest value.
+  ///
+  /// If there is no manifest file, or the key is not present, returns
+  /// [ifAbsent]. Callers should pass the value the build injects into the
+  /// manifest when the key is not explicitly set, so that the result reflects
+  /// what is actually packaged.
+  ///
+  /// This reads the app's primary source manifest, so it is an estimate of the
+  /// packaged value: it does not account for contributions from build
+  /// type/flavor overlay manifests or library manifests merged in at build
+  /// time. Intended for analytics, not for correctness-sensitive decisions.
+  bool computeHcppEnabled({bool ifAbsent = false}) {
+    return _computeManifestMetadataBoolValueOrNull('io.flutter.embedding.android.EnableHcpp') ??
+        ifAbsent;
   }
 
   bool _computeManifestMetadataBoolValue(String metadataKey, bool defaultValue) {
+    return _computeManifestMetadataBoolValueOrNull(metadataKey) ?? defaultValue;
+  }
+
+  bool? _computeManifestMetadataBoolValueOrNull(String metadataKey) {
     if (!appManifestFile.existsSync()) {
-      return defaultValue;
+      return null;
     }
     final XmlDocument document;
     try {
@@ -1136,7 +1152,7 @@ See the link below for more information:
         }
       }
     }
-    return defaultValue;
+    return null;
   }
 }
 

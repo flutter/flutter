@@ -39,6 +39,7 @@ import 'package:flutter/services.dart';
 import '../foundation/_features.dart';
 import '_accessibility_evaluations.dart';
 import '_window.dart';
+import 'accessibility_inspector.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -808,12 +809,14 @@ mixin WidgetsBinding
           return _forceRebuild();
         },
       );
-
+      
       registerServiceExtension(
         name: WidgetsServiceExtensions.viewMetricsOverride.name,
         callback: _handleViewMetricsOverrideServiceExtension,
       );
-
+      
+      AccessibilityInspector.instance.initServiceExtensions(registerServiceExtension);
+      
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;

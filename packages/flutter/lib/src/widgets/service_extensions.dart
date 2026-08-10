@@ -6,6 +6,7 @@
 /// @docImport 'package:flutter/foundation.dart';
 /// @docImport 'package:flutter/rendering.dart';
 ///
+/// @docImport 'accessibility_inspector.dart';
 /// @docImport 'app.dart';
 /// @docImport 'binding.dart';
 /// @docImport 'debug.dart';
@@ -547,4 +548,47 @@ enum WidgetInspectorServiceExtensions {
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.
   setFlexProperties,
+}
+
+/// Service extension constants for accessibility and semantics.
+///
+/// These constants will be used when registering service extensions in the
+/// framework, and they will also be used by tools and services that call these
+/// service extensions.
+///
+/// The String value for each of these extension names should be accessed by
+/// calling the [extensionName] property on the enum value.
+enum AccessibilityServiceExtensions {
+  /// Name of service extension that, when called, returns the JSON serialized
+  /// semantics tree.
+  ///
+  /// This extension should only be called after semantics has been enabled
+  /// (for example, by calling [enableSemantics]).
+  ///
+  /// See also:
+  ///
+  /// * [AccessibilityInspector.initServiceExtensions], where the service
+  ///   extension is registered.
+  getSemanticsTree,
+
+  /// Name of service extension that, when called, enables semantics in the app
+  /// by creating a [SemanticsHandle].
+  ///
+  /// See also:
+  ///
+  /// * [AccessibilityInspector.initServiceExtensions], where the service
+  ///   extension is registered.
+  enableSemantics,
+
+  /// Name of service extension that, when called, disposes the [SemanticsHandle]
+  /// created by [enableSemantics].
+  ///
+  /// See also:
+  ///
+  /// * [AccessibilityInspector.initServiceExtensions], where the service
+  ///   extension is registered.
+  disposeSemantics;
+
+  /// The full name of the service extension, including the `accessibility.` prefix.
+  String get extensionName => 'accessibility.$name';
 }
