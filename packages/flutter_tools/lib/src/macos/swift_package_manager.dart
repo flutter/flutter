@@ -234,9 +234,14 @@ class SwiftPackageManager {
 
       // Plugins that are depended on by other plugins cannot use the basename
       // since their dependency paths are relative using the name of the plugin.
-      final File manifest = _fileSystem.file(
-        plugin.pluginSwiftPackageManifestPath(_fileSystem, platform.name),
+      final String? manifestPath = plugin.pluginSwiftPackageManifestPath(
+        _fileSystem,
+        platform.name,
       );
+      if (manifestPath == null) {
+        continue;
+      }
+      final File manifest = _fileSystem.file(manifestPath);
       final String manifestContent = manifest.readAsStringSync();
       final List<Plugin> pluginDependencies = _getPluginDependencies(manifestContent, plugins);
       if (pluginDependencies.isNotEmpty) {
@@ -298,28 +303,15 @@ class SwiftPackageManager {
     }
   }
 
-  /// Checks if the plugin has a dependency on another Flutter plugin and returns a list of paths
-  /// that should be replaced in the [manifestContent].
+  /// Returns a list of [Plugin]s that the given plugin's [manifestContent] declares a dependency on.
   ///
-  /// Plugins can declare a SwiftPM dependency on another plugin like this:
+  /// Plugins can declare a SwiftPM dependency on another plugin in their Package.swift like this:
   /// ```swift
   /// dependencies: [
   ///   .package(name: "plugin_1", path: "../plugin_1")
   /// ]
   /// ```
   ///
-  /// However, plugins are symlinked in the [XcodeBasedProject.relativeSwiftPackagesDirectory]
-  /// using the plugin's basename as the symlink name. The basename for non-path dependencies
-  /// includes the version number, e.g. "plugin_1-1.0.0". To make the relative path in the
-  /// manifest match the symlink path, we need to replace the path in the manifest with the
-  /// symlink path.
-  ///
-  /// For example, the manifest would need to updated to:
-  /// ```swift
-  /// dependencies: [
-  ///   .package(name: "plugin_1", path: "../plugin_1-1.0.0")
-  /// ]
-  /// ```
   List<Plugin> _getPluginDependencies(String manifestContent, List<Plugin> plugins) {
     final dependencyPattern = RegExp(r'"\.\.\/([^"]+)"');
     final Iterable<Match> matches = dependencyPattern.allMatches(manifestContent);
@@ -363,15 +355,17 @@ class SwiftPackageManager {
       ),
     );
     destination.createSync(recursive: true);
+    final String sourcePath = plugin.path.endsWith('/') ? plugin.path : '${plugin.path}/';
     final String destinationPath = destination.absolute.path;
-
     final RunResult result = _processUtils.runSync([
       'rsync',
       '-8', // Avoid mangling filenames with encodings that do not match the current locale.
       '-av', // Archive mode and verbose: preserve permissions, ownership, timestamps, etc.
       '--delete', // Delete files in the destination that are not in the source.
-      '--exclude=/example/', // Don't copy the example directory as this can cause rsync to fail or be slow due to copying build directories and symlinks
-      plugin.path,
+      // Don't copy the example directory as this can cause rsync to fail or be slow due to
+      // copying build directories and symlinks
+      '--exclude=/example/',
+      sourcePath,
       destinationPath,
     ]);
     if (result.exitCode != 0) {

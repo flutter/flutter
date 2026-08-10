@@ -454,7 +454,7 @@ let package = Package(
                   '-av',
                   '--delete',
                   '--exclude=/example/',
-                  validPlugin2.path,
+                  '${validPlugin2.path}/',
                   '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
                 ],
                 onRun: (_) {
@@ -468,7 +468,7 @@ let package = Package(
                   '-av',
                   '--delete',
                   '--exclude=/example/',
-                  validPlugin3.path,
+                  '${validPlugin3.path}/',
                   '$buildSourcePackagesPath/valid_plugin_3-1.0.0',
                 ],
                 onRun: (_) {
@@ -588,7 +588,7 @@ let package = Package(
                   '-av',
                   '--delete',
                   '--exclude=/example/',
-                  validPlugin1.path,
+                  '${validPlugin1.path}/',
                   '$buildSourcePackagesPath/custom_basename',
                 ],
                 onRun: (_) {
