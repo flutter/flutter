@@ -53,10 +53,6 @@ const _kGlibcError = 'Inconsistency detected by ld.so';
 /// (Mobile Connection Server) background network registration calls and
 /// prevent deprecation error logs.
 const kGcmDisabledFlags = <String>[
-  '--disable-background-networking',
-  '--disable-sync',
-  '--disable-client-side-phishing-detection',
-  '--disable-notifications',
   '--disable-features=GCM',
   '--gcm-checkin-url=http://127.0.0.1',
   '--gcm-registration-url=http://127.0.0.1',
@@ -249,6 +245,10 @@ class ChromiumLauncher {
       // When the DevTools has focus we don't want to slow down the application.
       '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding',
+      '--disable-background-networking',
+      '--disable-sync',
+      '--disable-client-side-phishing-detection',
+      '--disable-notifications',
       ...kGcmDisabledFlags,
       // Since we are using a temp profile, disable features that slow the
       // Chrome launch.

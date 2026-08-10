@@ -23,10 +23,6 @@ import 'package_lock.dart';
 /// (Mobile Connection Server) background network registration calls and
 /// prevent deprecation error logs.
 const kGcmDisabledFlags = <String>[
-  '--disable-background-networking',
-  '--disable-sync',
-  '--disable-client-side-phishing-detection',
-  '--disable-notifications',
   '--disable-features=GCM',
   '--gcm-checkin-url=http://127.0.0.1',
   '--gcm-registration-url=http://127.0.0.1',
@@ -118,6 +114,10 @@ class Chrome extends Browser {
             // DWARF debugging requires a Chrome extension.
             '--disable-extensions',
           '--disable-popup-blocking',
+          '--disable-background-networking',
+          '--disable-sync',
+          '--disable-client-side-phishing-detection',
+          '--disable-notifications',
           ...kGcmDisabledFlags,
           // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
           '--bwsi',
@@ -195,6 +195,10 @@ class Chrome extends Browser {
       final Process addExtension = await Process.start(installation.executable, <String>[
         '--user-data-dir=${baselineUserDirectory.path}',
         'https://goo.gle/wasm-debugging-extension',
+        '--disable-background-networking',
+        '--disable-sync',
+        '--disable-client-side-phishing-detection',
+        '--disable-notifications',
         ...kGcmDisabledFlags,
         '--bwsi',
         '--no-first-run',

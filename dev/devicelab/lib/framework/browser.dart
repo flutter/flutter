@@ -14,10 +14,6 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 /// (Mobile Connection Server) background network registration calls and
 /// prevent deprecation error logs.
 const kGcmDisabledFlags = <String>[
-  '--disable-background-networking',
-  '--disable-sync',
-  '--disable-client-side-phishing-detection',
-  '--disable-notifications',
   '--disable-features=GCM',
   '--gcm-checkin-url=http://127.0.0.1',
   '--gcm-registration-url=http://127.0.0.1',
@@ -135,6 +131,10 @@ class Chrome {
       '--disable-popup-blocking',
       '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding',
+      '--disable-background-networking',
+      '--disable-sync',
+      '--disable-client-side-phishing-detection',
+      '--disable-notifications',
       ...kGcmDisabledFlags,
       // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
       '--bwsi',
