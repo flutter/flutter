@@ -200,7 +200,7 @@ void main() {
             ],
             codesign: codesign,
             expectedOutput: [
-              RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-prebuild-tool'),
+              RegExp(r'Gatekeeper check failed.*\.build\/prebuild\/release\/flutter-prebuild-tool'),
               RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-assemble-tool'),
               RegExp(r'Build.*complete!'),
               'FlutterPluginRegistrant symlink updated to ./Release',
@@ -226,7 +226,7 @@ void main() {
               'Verification complete.',
             ],
             unexpectedOutput: [
-              RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-prebuild-tool'),
+              RegExp(r'Gatekeeper check failed.*\.build\/prebuild\/release\/flutter-prebuild-tool'),
               RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-assemble-tool'),
               RegExp(r'Build.*complete!'),
               'flutter --verbose assemble',
@@ -257,7 +257,7 @@ void main() {
               'warning: Alternatively, you can remove FLUTTER_APPLICATION_PATH from your build settings to dismiss this warning.',
             ],
             unexpectedOutput: [
-              RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-prebuild-tool'),
+              RegExp(r'Gatekeeper check failed.*\.build\/prebuild\/release\/flutter-prebuild-tool'),
               RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-assemble-tool'),
               RegExp(r'Build.*complete!'),
               'flutter --verbose assemble',
@@ -279,7 +279,7 @@ void main() {
             expectedOutput: ['Verification complete.'],
             unexpectedOutput: [
               'FlutterPluginRegistrant symlink updated to ./Release',
-              RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-prebuild-tool'),
+              RegExp(r'Gatekeeper check failed.*\.build\/prebuild\/release\/flutter-prebuild-tool'),
               RegExp(r'Gatekeeper check failed.*\.build\/assemble\/release\/flutter-assemble-tool'),
               RegExp(r'Build.*complete!'),
               'flutter --verbose assemble',
