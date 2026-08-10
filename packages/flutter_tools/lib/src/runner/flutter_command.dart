@@ -152,6 +152,30 @@ abstract final class FlutterOptions {
   static const kEnableImpeller = 'enable-impeller';
   static const kCodesignIdentity = 'codesign-identity';
   static const kCodesign = 'codesign';
+
+  // TODO(camsim99): make sure that debuggingoptions uses this/the same list as well after 
+  // https://github.com/flutter/flutter/pull/190222 lands.
+  /// The list of CLI flags that are sent to the Android embedding via an Intent.
+  static const List<String> kAndroidEngineConfigOptions = <String>[
+    'trace-startup',
+    'route',
+    'trace-skia',
+    'trace-allowlist',
+    'trace-skia-allowlist',
+    'trace-systrace',
+    'trace-to-file',
+    'enable-dart-profiling',
+    'enable-software-rendering',
+    'skia-deterministic-rendering',
+    'endless-trace-buffer',
+    'profile-microtasks',
+    'purge-persistent-cache',
+    kEnableImpeller,
+    'enable-vulkan-validation',
+    'enable-flutter-gpu',
+    'start-paused',
+    'dart-flags',
+  ];
 }
 
 /// flutter command categories for usage.
@@ -2132,39 +2156,21 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   @protected
-  void validateUseApplicationBinary() {
+  void validateUseApplicationBinaryForAndroidEngineConfigOptions() {
     final String? applicationBinary = argParser.options.containsKey(FlutterOptions.kUseApplicationBinary)
         ? stringArg(FlutterOptions.kUseApplicationBinary)
         : null;
     if (applicationBinary != null && applicationBinary.toLowerCase().endsWith('.apk')) {
       final BuildMode buildMode = getBuildMode();
       if (buildMode == BuildMode.release) {
-        final Iterable<String> intentFlags = <String>[
-          'trace-startup',
-          'route',
-          'trace-skia',
-          'trace-allowlist',
-          'trace-skia-allowlist',
-          'trace-systrace',
-          'trace-to-file',
-          'enable-dart-profiling',
-          'enable-software-rendering',
-          'skia-deterministic-rendering',
-          'endless-trace-buffer',
-          'profile-microtasks',
-          'purge-persistent-cache',
-          'enable-impeller',
-          'enable-vulkan-validation',
-          'enable-flutter-gpu',
-          'start-paused',
-          'dart-flags',
-        ].where((String flag) => argParser.options.containsKey(flag) && argResults?.wasParsed(flag) == true);
+        final Iterable<String> intentFlags = FlutterOptions.kAndroidEngineConfigOptions
+            .where((String flag) => argParser.options.containsKey(flag) && argResults?.wasParsed(flag) == true);
 
         if (intentFlags.isNotEmpty) {
           throwToolExit(
-            'Using --${FlutterOptions.kUseApplicationBinary} with --release and additional intent flags '
-            'is not supported for Android. Please do not use a prebuilt binary or define the '
-            'required flags via the Android manifest.',
+            'Using --${FlutterOptions.kUseApplicationBinary} in release mode and additional flags used to configure the Flutter Android embedding '
+            'is not supported for Android (${intentFlags.join(', ')}). Please do not use a prebuilt binary or define the '
+            'required flags via the Android manifest. See TODO(camsim99) for more details.',
           );
         }
       }
@@ -2174,7 +2180,7 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    validateUseApplicationBinary();
+    validateUseApplicationBinaryForAndroidEngineConfigOptions();
     if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 

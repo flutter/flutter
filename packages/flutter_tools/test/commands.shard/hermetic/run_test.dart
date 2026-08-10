@@ -176,14 +176,14 @@ void main() {
       );
 
       testUsingContext(
-        'fails when --use-application-binary is provided with --release and intent flags for Android',
+        'fails when --use-application-binary is provided with --release and engine config flags for Android',
         () async {
           testDeviceManager.devices = <Device>[FakeDevice()];
           final RunCommand command = TestRunCommandThatOnlyValidates();
           final CommandRunner<void> runner = createTestCommandRunner(command);
           expect(
             () => runner.run(<String>['run', '--no-pub', '--release', '--route=/', '--use-application-binary=path/to/app.apk']),
-            throwsToolExit(message: 'Using --use-application-binary with --release and additional intent flags is not supported for Android. Please do not use a prebuilt binary or define the required flags via the Android manifest.'),
+            throwsToolExit(message: 'Using --use-application-binary in release mode and additional flags used to configure the Flutter Android embedding is not supported for Android (route). Please do not use a prebuilt binary or define the required flags via the Android manifest. See TODO(camsim99) for more details.'),
           );
         },
         overrides: <Type, Generator>{
@@ -192,6 +192,58 @@ void main() {
           DeviceManager: () => testDeviceManager,
         },
       );
+
+      testUsingContext(
+        'succeeds when --use-application-binary is provided with --release and engine config flags for iOS',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          
+          await runner.run(<String>['run', '--no-pub', '--release', '--route=/', '--use-application-binary=path/to/app.ipa']);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/app.ipa');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'succeeds when --use-application-binary is provided with --release and engine config flags for Windows',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          
+          await runner.run(<String>['run', '--no-pub', '--release', '--route=/', '--use-application-binary=path/to/app.exe']);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/app.exe');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'succeeds when --use-application-binary is provided with --release and engine config flags for macOS',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          
+          await runner.run(<String>['run', '--no-pub', '--release', '--route=/', '--use-application-binary=path/to/app.app']);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/app.app');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
 
       testUsingContext(
         'exits with a user message when no supported devices attached',
