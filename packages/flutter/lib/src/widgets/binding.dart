@@ -809,14 +809,14 @@ mixin WidgetsBinding
           return _forceRebuild();
         },
       );
-      
+
       registerServiceExtension(
         name: WidgetsServiceExtensions.viewMetricsOverride.name,
         callback: _handleViewMetricsOverrideServiceExtension,
       );
-      
+
       AccessibilityInspector.instance.initServiceExtensions(registerServiceExtension);
-      
+
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
