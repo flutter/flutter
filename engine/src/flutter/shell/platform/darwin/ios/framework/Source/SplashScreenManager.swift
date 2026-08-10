@@ -9,7 +9,7 @@ import UIKit
 /// Handles loading from storyboards or XIBs based on the `UILaunchStoryboardName` in the app's
 /// Info.plist. Performs an animated fade-out transition when the splash screen is removed.
 @objc(FlutterSplashScreenManager)
-public final class SplashScreenManager: NSObject {
+final class SplashScreenManager: NSObject {
 
   /// The default duration for the splash screen fade-out animation.
   private static let defaultAnimationDuration: TimeInterval = 0.2
@@ -23,7 +23,7 @@ public final class SplashScreenManager: NSObject {
   /// Setting this property to a new view will update view and apply flexible width/height
   /// autoresizing masks. Setting to `nil` will trigger the removal of the current splash screen
   /// with a fade-out animation.
-  @objc public var splashScreenView: UIView? {
+  @objc var splashScreenView: UIView? {
     get { return _splashScreenView }
     set {
       guard newValue !== _splashScreenView else { return }
@@ -40,20 +40,20 @@ public final class SplashScreenManager: NSObject {
   /// Initializes a new manager with the specified bundle.
   ///
   /// The bundle is used to look up the launch storyboard name and resources.
-  @objc public init(bundle: Bundle = .main) {
+  @objc init(bundle: Bundle = .main) {
     self.bundle = bundle
     super.init()
   }
 
   /// Initializes a new manager with the main bundle.
-  @objc public override convenience init() {
+  @objc override convenience init() {
     self.init(bundle: .main)
   }
 
   /// Attempts to load the splash screen view specified by `UILaunchStoryboardName` in Info.plist.
   /// - Returns: `true` if successful, `false` otherwise.
   @discardableResult
-  @objc public func loadDefaultSplashScreenView() -> Bool {
+  @objc func loadDefaultSplashScreenView() -> Bool {
     guard let launchscreenName = bundle.infoDictionary?["UILaunchStoryboardName"] as? String else {
       return false
     }
@@ -93,7 +93,7 @@ public final class SplashScreenManager: NSObject {
   ///
   /// The completion block is invoked after the animation completes and the view is removed from its
   /// superview.
-  @objc public func removeSplashScreen(completion: (() -> Void)?) {
+  @objc func removeSplashScreen(completion: (() -> Void)?) {
     // If no splash screen, bail out immediately and invoke the completion handler.
     guard let splashScreen = _splashScreenView else {
       completion?()
@@ -115,7 +115,7 @@ public final class SplashScreenManager: NSObject {
   /// Installs the splash screen view into the specified parent view, if it is not already added.
   ///
   /// The view's frame is set to match the parent view's bounds.
-  @objc public func installSplashScreenView(asSubviewOf parentView: UIView) {
+  @objc func installSplashScreenView(asSubviewOf parentView: UIView) {
     guard let splashScreen = splashScreenView else { return }
 
     splashScreen.frame = parentView.bounds

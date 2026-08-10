@@ -403,5 +403,15 @@ TEST(AccessibilityBridgeWindows, OnDocumentSelectionChanged) {
       ax::mojom::Event::kDocumentSelectionChanged, 2);
 }
 
+TEST(AccessibilityBridgeWindows, OnAccessibilityEnabledChanged) {
+  ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::ENABLED_CHANGED,
+                            ax::mojom::Event::kStateChanged);
+}
+
+TEST(AccessibilityBridgeWindows, OnAccessibilityReadOnlyChanged) {
+  ExpectWinEventFromAXEvent(1, ui::AXEventGenerator::Event::READONLY_CHANGED,
+                            ax::mojom::Event::kStateChanged);
+}
+
 }  // namespace testing
 }  // namespace flutter
