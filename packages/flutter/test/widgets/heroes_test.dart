@@ -3920,6 +3920,103 @@ Future<void> main() async {
     );
     expect(tester.getSize(find.byType(Hero)), Size.zero);
   });
+
+  testWidgets('Hero does not resize when its Navigator resizes during flight', (
+    WidgetTester tester,
+  ) async {
+    final heroController = HeroController(
+      createRectTween: (begin, end) => RectTween(begin: begin, end: end),
+    );
+
+    addTearDown(heroController.dispose);
+
+    final navigatorKey = GlobalKey<NavigatorState>();
+    const shuttleKey = ValueKey<String>('hero-shuttle');
+
+    late StateSetter updateHost;
+    var navigatorHeight = 600.0;
+
+    Widget buildHero(Alignment alignment) {
+      return Align(
+        alignment: alignment,
+        child: Hero(
+          tag: 'hero',
+          flightShuttleBuilder: (_, _, _, _, _) {
+            return const SizedBox(key: shuttleKey, width: 100.0, height: 100.0);
+          },
+          child: const SizedBox(width: 100.0, height: 100.0),
+        ),
+      );
+    }
+
+    Widget buildSourcePage() {
+      return buildHero(Alignment.topLeft);
+    }
+
+    Widget buildDestinationPage() {
+      return buildHero(Alignment.topRight);
+    }
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            updateHost = setState;
+
+            return Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 400.0,
+                height: navigatorHeight,
+                child: HeroControllerScope(
+                  controller: heroController,
+                  child: Navigator(
+                    key: navigatorKey,
+                    onGenerateRoute: (RouteSettings settings) {
+                      return PageRouteBuilder<void>(
+                        transitionDuration: const Duration(seconds: 1),
+                        pageBuilder: (_, _, _) => buildSourcePage(),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Push the destination route to start the Hero transition.
+    navigatorKey.currentState!.push(
+      PageRouteBuilder<void>(
+        transitionDuration: const Duration(seconds: 1),
+        pageBuilder: (_, _, _) => buildDestinationPage(),
+      ),
+    );
+
+    // Build the destination route, then advance into the middle of the Hero flight.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final Finder shuttle = find.byKey(shuttleKey);
+
+    // Verify the shuttle starts with the expected size.
+    expect(shuttle, findsOneWidget);
+    expect(tester.getSize(shuttle), const Size(100.0, 100.0));
+
+    // Resize the Navigator while the Hero is still in flight.
+    updateHost(() => navigatorHeight -= 100.0);
+    await tester.pump();
+
+    // Verify that resizing the Navigator does not alter the shuttle's size.
+    expect(shuttle, findsOneWidget);
+    expect(tester.getSize(shuttle), const Size(100.0, 100.0));
+
+    await tester.pumpAndSettle();
+  });
 }
 
 class TestDependencies extends StatelessWidget {

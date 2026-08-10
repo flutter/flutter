@@ -24,6 +24,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_playground.h"
+#include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
@@ -53,7 +54,7 @@ TEST_P(DisplayListTest, CanDrawRect) {
 
 TEST_P(DisplayListTest, CanDrawTextBlob) {
   flutter::DisplayListBuilder builder;
-  builder.DrawText(flutter::DlTextSkia::Make(
+  builder.DrawText(flutter::DlTextImpeller::MakeFromBlob(
                        SkTextBlob::MakeFromString("Hello", CreateTestFont())),
                    100, 100, flutter::DlPaint(flutter::DlColor::kBlue()));
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -66,21 +67,22 @@ TEST_P(DisplayListTest, CanDrawTextBlobWithGradient) {
                                           flutter::DlColor::kRed()};
   const float stops[2] = {0.0, 1.0};
 
-  auto linear = flutter::DlColorSource::MakeLinear({0.0, 0.0}, {300.0, 300.0},
-                                                   2, colors.data(), stops,
-                                                   flutter::DlTileMode::kClamp);
+  auto linear = flutter::DlColorSource::MakeLinear(
+      {0.0, 0.0}, {300.0, 300.0}, 2, colors.data(), stops,
+      flutter::DlTileMode::kMirror);
   flutter::DlPaint paint;
   paint.setColorSource(linear);
 
-  builder.DrawText(flutter::DlTextSkia::Make(SkTextBlob::MakeFromString(
-                       "Hello World", CreateTestFont())),
-                   100, 100, paint);
+  builder.DrawText(
+      flutter::DlTextImpeller::MakeFromBlob(
+          SkTextBlob::MakeFromString("Hello World", CreateTestFont())),
+      100, 100, paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 TEST_P(DisplayListTest, CanDrawTextWithSaveLayer) {
   flutter::DisplayListBuilder builder;
-  builder.DrawText(flutter::DlTextSkia::Make(
+  builder.DrawText(flutter::DlTextImpeller::MakeFromBlob(
                        SkTextBlob::MakeFromString("Hello", CreateTestFont())),
                    100, 100, flutter::DlPaint(flutter::DlColor::kRed()));
 
@@ -88,9 +90,10 @@ TEST_P(DisplayListTest, CanDrawTextWithSaveLayer) {
   float alpha = 0.5;
   save_paint.setAlpha(static_cast<uint8_t>(255 * alpha));
   builder.SaveLayer(std::nullopt, &save_paint);
-  builder.DrawText(flutter::DlTextSkia::Make(SkTextBlob::MakeFromString(
-                       "Hello with half alpha", CreateTestFontOfSize(100))),
-                   100, 300, flutter::DlPaint(flutter::DlColor::kRed()));
+  builder.DrawText(
+      flutter::DlTextImpeller::MakeFromBlob(SkTextBlob::MakeFromString(
+          "Hello with half alpha", CreateTestFontOfSize(100))),
+      100, 300, flutter::DlPaint(flutter::DlColor::kRed()));
   builder.Restore();
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -163,14 +166,16 @@ TEST_P(DisplayListTest, CanDrawArc) {
     const char* cap_names[] = {"Butt", "Round", "Square"};
     flutter::DlStrokeCap cap;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Start angle", &start_angle, -360, 360);
-    ImGui::SliderFloat("Sweep angle", &sweep_angle, -360, 360);
-    ImGui::SliderFloat("Stroke width", &stroke_width, 0, 300);
-    ImGui::Combo("Cap", &selected_cap, cap_names,
-                 sizeof(cap_names) / sizeof(char*));
-    ImGui::Checkbox("Use center", &use_center);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Start angle", &start_angle, -360, 360);
+      ImGui::SliderFloat("Sweep angle", &sweep_angle, -360, 360);
+      ImGui::SliderFloat("Stroke width", &stroke_width, 0, 300);
+      ImGui::Combo("Cap", &selected_cap, cap_names,
+                   sizeof(cap_names) / sizeof(char*));
+      ImGui::Checkbox("Use center", &use_center);
+      ImGui::End();
+    }
 
     switch (selected_cap) {
       case 0:
@@ -227,13 +232,15 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
     const char* stroke_types[] = {"Butte", "Round", "Square"};
     const char* join_type[] = {"kMiter", "Round", "kBevel"};
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::Combo("Cap", &selected_stroke_type, stroke_types,
-                 sizeof(stroke_types) / sizeof(char*));
-    ImGui::Combo("Join", &selected_join_type, join_type,
-                 sizeof(join_type) / sizeof(char*));
-    ImGui::SliderFloat("Stroke Width", &stroke_width, 10.0f, 50.0f);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::Combo("Cap", &selected_stroke_type, stroke_types,
+                   sizeof(stroke_types) / sizeof(char*));
+      ImGui::Combo("Join", &selected_join_type, join_type,
+                   sizeof(join_type) / sizeof(char*));
+      ImGui::SliderFloat("Stroke Width", &stroke_width, 10.0f, 50.0f);
+      ImGui::End();
+    }
 
     flutter::DlStrokeCap cap;
     flutter::DlStrokeJoin join;
@@ -466,9 +473,10 @@ TEST_P(DisplayListTest, CanDrawWithMaskBlur) {
     auto filter =
         flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kSolid, 10.0f);
     paint.setMaskFilter(&filter);
-    builder.DrawText(flutter::DlTextSkia::Make(SkTextBlob::MakeFromString(
-                         "Testing", CreateTestFont())),
-                     220, 170, paint);
+    builder.DrawText(
+        flutter::DlTextImpeller::MakeFromBlob(
+            SkTextBlob::MakeFromString("Testing", CreateTestFont())),
+        220, 170, paint);
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -480,9 +488,10 @@ TEST_P(DisplayListTest, CanDrawStrokedText) {
 
   paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
   paint.setColor(flutter::DlColor::kRed());
-  builder.DrawText(flutter::DlTextSkia::Make(SkTextBlob::MakeFromString(
-                       "stoked about stroked text", CreateTestFont())),
-                   250, 250, paint);
+  builder.DrawText(
+      flutter::DlTextImpeller::MakeFromBlob(SkTextBlob::MakeFromString(
+          "stoked about stroked text", CreateTestFont())),
+      250, 250, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -492,7 +501,7 @@ TEST_P(DisplayListTest, StrokedTextNotOffsetFromNormalText) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
   auto const& text_blob = SkTextBlob::MakeFromString("00000", CreateTestFont());
-  auto text = flutter::DlTextSkia::Make(text_blob);
+  auto text = flutter::DlTextImpeller::MakeFromBlob(text_blob);
 
   // https://api.flutter.dev/flutter/material/Colors/blue-constant.html.
   auto const& mat_blue = flutter::DlColor(0xFF2196f3);
@@ -584,9 +593,11 @@ TEST_P(DisplayListTest, CanDrawWithImageBlurFilter) {
   auto callback = [&]() {
     static float sigma[] = {10, 10};
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat2("Sigma", sigma, 0, 100);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat2("Sigma", sigma, 0, 100);
+      ImGui::End();
+    }
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
@@ -663,17 +674,19 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
     static bool draw_circle = true;
     static bool add_clip = true;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat2("Sigma", sigma, 0, 100);
-    ImGui::SliderFloat("Scale", &ctm_scale, 0, 10);
-    ImGui::NewLine();
-    ImGui::TextWrapped(
-        "If everything is working correctly, none of the options below should "
-        "impact the filter's appearance.");
-    ImGui::Checkbox("Use SaveLayer bounds", &use_bounds);
-    ImGui::Checkbox("Draw child element", &draw_circle);
-    ImGui::Checkbox("Add pre-clip", &add_clip);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat2("Sigma", sigma, 0, 100);
+      ImGui::SliderFloat("Scale", &ctm_scale, 0, 10);
+      ImGui::NewLine();
+      ImGui::TextWrapped(
+          "If everything is working correctly, none of the options below "
+          "should impact the filter's appearance.");
+      ImGui::Checkbox("Use SaveLayer bounds", &use_bounds);
+      ImGui::Checkbox("Draw child element", &draw_circle);
+      ImGui::Checkbox("Add pre-clip", &add_clip);
+      ImGui::End();
+    }
 
     flutter::DisplayListBuilder builder;
 
@@ -736,16 +749,18 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
     static bool use_bounds = true;
     static int selected_tile_mode = 0;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Background scale", &bg_scale, 0, 10);
-    ImGui::SliderFloat("Sigma", &sigma, 0, 100);
-    ImGui::SliderFloat("Bounds rotate", &rotate_degree, -200, 200);
-    ImGui::SliderFloat("Bounds scale", &bounds_scale, 0.5f, 2.0f);
-    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
-                 sizeof(tile_mode_names) / sizeof(char*));
-    ImGui::NewLine();
-    ImGui::Checkbox("Bounded blur", &use_bounds);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Background scale", &bg_scale, 0, 10);
+      ImGui::SliderFloat("Sigma", &sigma, 0, 100);
+      ImGui::SliderFloat("Bounds rotate", &rotate_degree, -200, 200);
+      ImGui::SliderFloat("Bounds scale", &bounds_scale, 0.5f, 2.0f);
+      ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                   sizeof(tile_mode_names) / sizeof(char*));
+      ImGui::NewLine();
+      ImGui::Checkbox("Bounded blur", &use_bounds);
+      ImGui::End();
+    }
 
     // Draw from top right to bottom left.
     static PlaygroundPoint blur_point_a(Point(410, 30), 10, Color::White());
@@ -1058,8 +1073,8 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
 
     static bool enable_savelayer = true;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Filter type", &selected_matrix_type, matrix_type_names,
                    sizeof(matrix_type_names) / sizeof(char*));
 
@@ -1084,8 +1099,8 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
           "issues. If the rendered image gets cut off when this setting is "
           "enabled, there's a coverage bug in the filter.");
       ImGui::Checkbox("Render in layer", &enable_savelayer);
+      ImGui::End();
     }
-    ImGui::End();
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
@@ -1150,10 +1165,12 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilterWhenSavingLayer) {
     static float translation[2] = {0, 0};
     static bool enable_save_layer = true;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat2("Translation", translation, -130, 130);
-    ImGui::Checkbox("Enable save layer", &enable_save_layer);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat2("Translation", translation, -130, 130);
+      ImGui::Checkbox("Enable save layer", &enable_save_layer);
+      ImGui::End();
+    }
 
     flutter::DisplayListBuilder builder;
     builder.Save();
@@ -1446,8 +1463,8 @@ TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
     static float stroked_alpha = 255.0;
     static float stroked_scale[2] = {1.0, 1.0};
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Filled Radius", &filled_radius, 0, 500);
       ImGui::SliderFloat("Filled Alpha", &filled_alpha, 0, 255);
       ImGui::SliderFloat2("Filled Scale", filled_scale, 0, 10.0);
@@ -1456,8 +1473,8 @@ TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
       ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
       ImGui::SliderFloat("Stroked Alpha", &stroked_alpha, 0, 10.0);
       ImGui::SliderFloat2("Stroked Scale", stroked_scale, 0, 10.0);
+      ImGui::End();
     }
-    ImGui::End();
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
@@ -1598,8 +1615,8 @@ TEST_P(DisplayListTest, DrawVerticesBlendModes) {
     static float color2[4] = {0.0f, 0.0f, 1.0f, 1.0f};
     static float src_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::ListBox("Blending mode", &current_blend_index,
                      blend_mode_names.data(), blend_mode_names.size());
       ImGui::SliderFloat("Source alpha", &src_alpha, 0, 1);
@@ -1608,8 +1625,8 @@ TEST_P(DisplayListTest, DrawVerticesBlendModes) {
       ImGui::ColorEdit4("Color C", color2);
       ImGui::ColorEdit4("Source Color", src_color);
       ImGui::SliderFloat("Destination alpha", &dst_alpha, 0, 1);
+      ImGui::End();
     }
-    ImGui::End();
 
     std::vector<DlPoint> positions = {DlPoint(100, 300),  //
                                       DlPoint(200, 100),  //

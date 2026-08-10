@@ -84,13 +84,14 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
 
   bool _bindAsUniform(
     RenderPass renderPass,
-    UniformSlot slot,
+    Shader shader,
+    int uniformStructIndex,
     int offsetInBytes,
     int lengthInBytes,
   ) {
-    return renderPass._bindUniformDevice(
-      slot.shader,
-      slot.uniformName,
+    return renderPass._bindUniformDeviceIndexed(
+      shader,
+      uniformStructIndex,
       this,
       offsetInBytes,
       lengthInBytes,
