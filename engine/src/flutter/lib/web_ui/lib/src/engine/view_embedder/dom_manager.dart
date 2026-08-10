@@ -17,11 +17,11 @@ import 'style_manager.dart';
 ///
 /// [rootElement] <flutter-view>
 ///   |
+///   +- <flt-semantics-placeholder> (mobile only)
+///   |
 ///   +- [platformViewsHost] <flt-glass-pane>
 ///   |    |
 ///   |    +- [renderingHost] #shadow-root
-///   |    |    |
-///   |    |    +- <flt-semantics-placeholder>
 ///   |    |    |
 ///   |    |    +- [sceneHost] <flt-scene-host>
 ///   |    |    |    |
@@ -40,6 +40,10 @@ import 'style_manager.dart';
 ///   |    +- ...semantics nodes
 ///   |
 ///   +- <style>
+///
+/// The <flt-semantics-placeholder> is added by [ui.FlutterView] rather than by
+/// this class, and is removed as soon as semantics is enabled. On desktop it
+/// lives in the document body instead of the view. See `SemanticsHelper`.
 ///
 class DomManager {
   factory DomManager({required double devicePixelRatio}) {

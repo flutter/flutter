@@ -802,6 +802,98 @@ void testMain() {
     });
   });
 
+  group('accessibility placeholder', () {
+    late DomHTMLDivElement host;
+
+    setUp(() {
+      // A view only gets a placeholder while semantics is off, so make sure
+      // no earlier test left it enabled.
+      EngineSemantics.instance.semanticsEnabled = false;
+      host = createDomHTMLDivElement()
+        ..style.width = '640px'
+        ..style.height = '480px';
+      domDocument.body!.append(host);
+    });
+
+    tearDown(() {
+      host.remove();
+      EngineSemantics.instance.semanticsEnabled = false;
+    });
+
+    // These tests are about the contract `EngineFlutterView` owns: it tells the
+    // semantics helper when a view appears and disappears. Where the
+    // placeholder actually lands differs by form factor and is covered in
+    // `semantics_helper_test.dart`.
+    //
+    // A recorder is swapped in *after* the implicit view has registered, so
+    // each test sees only the calls made by the view it creates. Asserting on
+    // global placeholder counts instead would be ambiguous: on desktop all
+    // views share one placeholder, so the count does not move.
+    // See https://github.com/flutter/flutter/issues/152838
+    late _RecordingSemanticsEnabler recorder;
+
+    void useRecordingEnabler() {
+      final SemanticsHelper helper = EngineSemantics.instance.semanticsHelper;
+      final SemanticsEnabler original = helper.semanticsEnabler;
+      recorder = _RecordingSemanticsEnabler();
+      helper.semanticsEnabler = recorder;
+      // Put the real enabler back before the implicit view is disposed, so it
+      // can still clean up the placeholder it registered.
+      addTearDown(() => helper.semanticsEnabler = original);
+    }
+
+    test('is registered when a view is created', () {
+      useRecordingEnabler();
+
+      final view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      addTearDown(view.dispose);
+
+      expect(recorder.added, <DomElement>[view.dom.rootElement]);
+      expect(recorder.removed, isEmpty);
+    });
+
+    test('is deregistered when the view is disposed', () {
+      useRecordingEnabler();
+
+      final view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      view.dispose();
+
+      // A placeholder left behind by a disposed view would be detached, and
+      // its 0x0 bounding box would make the mobile activation check read a tap
+      // at the page origin as a hit on its center.
+      expect(recorder.removed, <DomElement>[view.dom.rootElement]);
+    });
+
+    test('is not registered when semantics is already enabled', () {
+      EngineSemantics.instance.semanticsEnabled = true;
+      useRecordingEnabler();
+
+      final view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      addTearDown(view.dispose);
+
+      expect(recorder.added, isEmpty);
+    });
+
+    test('every placeholder goes away when semantics turns on', () {
+      final DomHTMLDivElement secondHost = createDomHTMLDivElement();
+      domDocument.body!.append(secondHost);
+      addTearDown(() => secondHost.remove());
+
+      final firstView = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      addTearDown(firstView.dispose);
+      final secondView = EngineFlutterView(EnginePlatformDispatcher.instance, secondHost);
+      addTearDown(secondView.dispose);
+
+      // The real enablers, and the real activation path a semantics update
+      // takes.
+      EngineSemantics.instance.didReceiveSemanticsUpdate();
+
+      expect(EngineSemantics.instance.semanticsEnabled, isTrue);
+      expect(EngineSemantics.instance.semanticsHelper.semanticsEnabler.placeholders, isEmpty);
+      expect(domDocument.querySelector('flt-semantics-placeholder'), isNull);
+    });
+  });
+
   group('keyboard resize behavior', () {
     setUp(() {
       // Simulate keyboard being up.
@@ -825,4 +917,38 @@ void testMain() {
       expect(myWindow.physicalSize, initialPhysicalSize);
     });
   });
+}
+
+/// Records the view lifecycle calls that [EngineFlutterView] makes, without
+/// creating or placing any DOM.
+class _RecordingSemanticsEnabler implements SemanticsEnabler {
+  final List<DomElement> added = <DomElement>[];
+  final List<DomElement> removed = <DomElement>[];
+
+  @override
+  void addPlaceholderForView(DomElement viewRoot) => added.add(viewRoot);
+
+  @override
+  void removePlaceholderForView(DomElement viewRoot) => removed.add(viewRoot);
+
+  @override
+  List<DomElement> get placeholders => <DomElement>[];
+
+  @override
+  DomElement addPlaceholder() => throw UnimplementedError();
+
+  @override
+  bool get isWaitingToEnableSemantics => false;
+
+  @override
+  bool shouldEnableSemantics(DomEvent event) => true;
+
+  @override
+  bool tryEnableSemantics(DomEvent event) => true;
+
+  @override
+  void updatePlaceholderLabel(String message) {}
+
+  @override
+  void dispose() {}
 }

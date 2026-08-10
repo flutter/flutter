@@ -940,7 +940,20 @@ class MockSemanticsEnabler implements SemanticsEnabler {
   bool get isWaitingToEnableSemantics => throw UnimplementedError();
 
   @override
-  DomElement get accessibilityPlaceholder => throw UnimplementedError();
+  List<DomElement> get placeholders => throw UnimplementedError();
+
+  @override
+  DomElement addPlaceholder() => throw UnimplementedError();
+
+  @override
+  void addPlaceholderForView(DomElement viewRoot) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void removePlaceholderForView(DomElement viewRoot) {
+    throw UnimplementedError();
+  }
 
   @override
   void updatePlaceholderLabel(String message) {
