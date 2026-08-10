@@ -117,13 +117,15 @@ std::shared_ptr<FilterContents> WrapInput(const ContentContext& renderer,
           runtime_filter->runtime_effect()->runtime_stage();
 
       std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
-      size_t index = 0;
+      bool is_first = true;
       for (const std::shared_ptr<flutter::DlColorSource>& sampler :
            runtime_filter->samplers()) {
-        if (index == 0 && sampler == nullptr) {
-          // Insert placeholder for filter.
+        if (is_first) {
+          is_first = false;
+          // The first sampler is always the image filter input.
           texture_inputs.push_back(
-              {.sampler_descriptor = skia_conversions::ToSamplerDescriptor({}),
+              {.sampler_descriptor = skia_conversions::ToSamplerDescriptor(
+                   runtime_filter->input_sampling()),
                .texture = nullptr});
           continue;
         }
@@ -137,7 +139,6 @@ std::shared_ptr<FilterContents> WrapInput(const ContentContext& renderer,
         std::shared_ptr<impeller::Texture> texture =
             image->image()->asImpellerImage()->GetCachedTexture(renderer);
         FML_DCHECK(texture);
-        index++;
         texture_inputs.push_back({
             .sampler_descriptor =
                 skia_conversions::ToSamplerDescriptor(image->sampling()),

@@ -29,6 +29,7 @@ workspace:
   - dev/integration_tests/data_asset_package
   - dev/integration_tests/deferred_components_test
   - dev/integration_tests/display_cutout_rotation
+  - dev/integration_tests/engine_integration_golden_test
   - dev/integration_tests/external_textures
   - dev/integration_tests/flavors
   - dev/integration_tests/flutter_gallery
@@ -61,7 +62,6 @@ workspace:
   - dev/tools/gen_keycodes
   - dev/tools/vitool
   - dev/tracing_tests
-  - examples/api
   - examples/flutter_view
   - examples/hello_world
   - examples/image_list
@@ -77,6 +77,7 @@ workspace:
   - packages/flutter_localizations
   - packages/flutter_test
   - packages/flutter_web_plugins
+  - packages/flutter/examples/api
   - packages/flutter/test_private
   - packages/flutter/test_private/test
   - packages/fuchsia_remote_debug_protocol
@@ -190,7 +191,7 @@ dependencies:
   url_launcher_platform_interface: 2.3.2
   url_launcher_web: 2.4.3
   url_launcher_windows: 3.1.5
-  vector_math: ^2.4.1
+  vector_math: ^2.4.2
   video_player: 2.13.0
   video_player_android: 2.12.0
   video_player_avfoundation: 2.11.0
@@ -222,4 +223,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 1n10pp
+# PUBSPEC CHECKSUM: db69ps
