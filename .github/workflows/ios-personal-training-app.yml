@@ -42,6 +42,9 @@ jobs:
 
       - name: Install CocoaPods dependencies
         run: |
+          if ! grep -q "use_modular_headers!" ios/Podfile; then
+            perl -0pi -e "s/(platform\s*:ios[^\n]*\n)/$1\nuse_modular_headers!\n/" ios/Podfile
+          fi
           cd ios
           pod install --repo-update
         working-directory: ${{ env.APP_DIR }}
