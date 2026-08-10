@@ -121,10 +121,7 @@ final class ViewFocusBinding {
 
   bool _isViewRoot(int viewId, DomElement? element) {
     final DomElement? rootElement = _viewManager[viewId]?.dom.rootElement;
-    return element != null &&
-        rootElement != null &&
-        rootElement.contains(element) &&
-        element.contains(rootElement);
+    return element != null && element == rootElement;
   }
 
   void _handleViewCreated(int viewId) {

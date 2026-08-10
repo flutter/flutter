@@ -199,6 +199,34 @@ void testMain() {
       expect(dispatchedViewFocusEvents[2].direction, ui.ViewFocusDirection.undefined);
     });
 
+    test('fires a focus event - focus transitions between children of two views', () async {
+      final EngineFlutterView view1 = createAndRegisterView(dispatcher);
+      final EngineFlutterView view2 = createAndRegisterView(dispatcher);
+      final DomElement button1 = createDomElement('button');
+      final DomElement button2 = createDomElement('button');
+
+      view1.dom.rootElement.append(button1);
+      view2.dom.rootElement.append(button2);
+
+      button1.focusWithoutScroll();
+      button2.focusWithoutScroll();
+
+      expect(dispatchedViewFocusEvents, hasLength(2));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view1.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
+
+      expect(dispatchedViewFocusEvents[1].viewId, view2.viewId);
+      expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[1].direction, ui.ViewFocusDirection.undefined);
+
+      // The view that lost the focus becomes reachable by the keyboard again,
+      // and the view that gained it is taken out of the tab order.
+      expect(view1.dom.rootElement.getAttribute('tabindex'), '0');
+      expect(view2.dom.rootElement.getAttribute('tabindex'), '-1');
+    });
+
     test('requestViewFocusChange focuses the view', () {
       final EngineFlutterView view = createAndRegisterView(dispatcher);
 
