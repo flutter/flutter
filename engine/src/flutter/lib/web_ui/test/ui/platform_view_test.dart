@@ -824,6 +824,59 @@ Future<void> testMain() async {
     expect(platformViewsHost.querySelector('flt-platform-view'), isNull);
   });
 
+  test('does not crash when a platform view is disposed mid-frame', () async {
+    await createPlatformView(0, platformViewType);
+    await createPlatformView(1, platformViewType);
+
+    final sb = ui.SceneBuilder()
+      ..pushOffset(0, 0)
+      ..addPlatformView(0, width: 10, height: 10)
+      ..addPlatformView(1, width: 10, height: 10)
+      ..pop();
+    await renderScene(sb.build());
+    _expectSceneMatches(<_EmbeddedViewMarker>[_platformView, _platformView]);
+
+    // Build the next frame by hand so that a platform view can be disposed
+    // after the composition was created, but before the frame is submitted.
+    final ViewRasterizer rasterizer = renderer.rasterizers[implicitView.viewId]!;
+    final PlatformViewEmbedder embedder = rasterizer.viewEmbedder;
+    final rootLayer = RootLayer();
+    // The views are composited in the opposite order, so the DOM needs to be
+    // updated for this composition.
+    rootLayer.children.add(PlatformViewLayer(1, ui.Offset.zero, 10, 10));
+    rootLayer.children.add(PlatformViewLayer(0, ui.Offset.zero, 10, 10));
+
+    embedder.frameSize = rasterizer.currentFrameSize;
+    final Frame frame = rasterizer.context.acquireFrame(embedder);
+    frame.raster(LayerTree(rootLayer), rasterizer.currentFrameSize, null);
+
+    // View 0 is disposed while it is still part of the composition which is
+    // about to be submitted.
+    embedder.disposeView(0);
+
+    final warnings = <String>[];
+    final void Function(String) originalPrintWarning = printWarning;
+    printWarning = (String warning) => warnings.add(warning);
+    try {
+      await expectLater(embedder.submitFrame(null), completes);
+    } finally {
+      printWarning = originalPrintWarning;
+    }
+
+    // The disposed view is left out of the composition.
+    _expectSceneMatches(<_EmbeddedViewMarker>[_platformView]);
+    expect(embedder.debugActiveComposition.entities, hasLength(1));
+    expect(
+      warnings,
+      contains(
+        contains(
+          'Cannot render platform views: 0. '
+          'These views were disposed while they were being composited.',
+        ),
+      ),
+    );
+  });
+
   test('preserves the DOM node of an unrendered platform view', () async {
     await createPlatformView(1, platformViewType);
 
