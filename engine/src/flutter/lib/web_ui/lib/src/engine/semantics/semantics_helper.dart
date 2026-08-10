@@ -523,6 +523,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
   void dispose() {
     super.dispose();
     _placeholderByViewRoot.clear();
+    semanticsActivationTimer?.cancel();
     semanticsActivationTimer = null;
   }
 }
