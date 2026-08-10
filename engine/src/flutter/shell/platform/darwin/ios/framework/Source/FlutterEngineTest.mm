@@ -375,7 +375,6 @@ FLUTTER_ASSERT_ARC
   {
     // Not enable embedder API by default
     auto settings = FLTDefaultSettingsForBundle();
-    settings.enable_software_rendering = true;
     FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
     XCTAssertFalse(engine.enableEmbedderAPI);
@@ -386,7 +385,6 @@ FLUTTER_ASSERT_ARC
     OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableIOSEmbedderAPI"])
         .andReturn(@"YES");
     auto settings = FLTDefaultSettingsForBundle();
-    settings.enable_software_rendering = true;
     FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
     XCTAssertTrue(engine.enableEmbedderAPI);
