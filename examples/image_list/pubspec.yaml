@@ -16,6 +16,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
 
 
+  material_ui: ^0.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -37,4 +38,4 @@ flutter:
   assets:
    - images/coast.jpg
 
-# PUBSPEC CHECKSUM: 60tfp7
+# PUBSPEC CHECKSUM: oescuq
