@@ -41,8 +41,8 @@ namespace impeller {
 ///        all devices running Flutter, while avoiding heap pointers or map
 ///        lookup array traversals.
 struct TextFrameFingerprint {
-  size_t run_count = 0;
-  size_t total_glyph_count = 0;
+  uint32_t run_count = 0;
+  uint32_t total_glyph_count = 0;
   uint32_t first_glyph_id = 0;
   uint32_t last_glyph_id = 0;
   size_t full_hash = 0;
