@@ -11,6 +11,7 @@ import 'app_bar.dart';
 import 'auto_complete.dart';
 import 'back_button.dart';
 import 'badge.dart';
+import 'bottom_app_bar.dart';
 import 'card.dart';
 import 'check_box.dart';
 import 'check_box_list_tile.dart';
@@ -120,4 +121,5 @@ final List<UseCase> useCases = <UseCase>[
   DropdownMenuUseCase(),
   MenuAnchorUseCase(),
   MenuBarUseCase(),
+  BottomAppBarUseCase(),
 ];
