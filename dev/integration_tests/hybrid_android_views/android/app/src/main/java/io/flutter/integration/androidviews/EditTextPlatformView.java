@@ -38,19 +38,6 @@ public class EditTextPlatformView implements PlatformView, MethodChannel.MethodC
                 android.util.Log.i("EditTextPlatformView", "editText hasFocus=" + hasFocus);
             }
         });
-        editText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, android.view.KeyEvent event) {
-                android.util.Log.i("EditTextPlatformView", "onKey: keyCode=" + keyCode + " action=" + event.getAction());
-                if (keyCode == android.view.KeyEvent.KEYCODE_TAB && event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
-                    if (MainActivity.activeActivity != null && MainActivity.activeActivity.mMethodChannel != null) {
-                        MainActivity.activeActivity.mMethodChannel.invokeMethod("tabOut", null);
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
 
         view = new FrameLayout(context);
         view.setBackgroundColor(Color.WHITE);

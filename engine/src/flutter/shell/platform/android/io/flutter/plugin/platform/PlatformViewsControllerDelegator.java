@@ -112,6 +112,15 @@ public class PlatformViewsControllerDelegator
   }
 
   @Override
+  public void requestFocus(int viewId) {
+    if (platformViewsController2.getPlatformViewById(viewId) != null) {
+      platformViewsController2.channelHandler.requestFocus(viewId);
+    } else {
+      platformViewsController.channelHandler.requestFocus(viewId);
+    }
+  }
+
+  @Override
   public void synchronizeToNativeViewHierarchy(boolean yes) {
     platformViewsController.channelHandler.synchronizeToNativeViewHierarchy(yes);
   }

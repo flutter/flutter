@@ -1211,6 +1211,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           }
         });
 
+    parentView.setFocusSearchFailedListener(
+        (direction) -> {
+          platformViewsChannel.invokeFocusNext(viewId, direction);
+        });
+
     platformViewParent.put(viewId, parentView);
 
     // Accessibility in the embedded view is initially disabled because if a Flutter app disabled

@@ -4168,8 +4168,10 @@ void main() {
       expect(controller.focusCleared, true);
     });
 
-    testWidgets('PlatformViewLink onFocusSearchFailed passes focus correctly', (WidgetTester tester) async {
-      late ValueChanged<int> focusSearchFailed;
+    testWidgets('PlatformViewLink onFocusSearchFailed passes focus correctly', (
+      WidgetTester tester,
+    ) async {
+      late ValueChanged<PlatformViewFocusDirection> focusSearchFailed;
       final platformViewLink = PlatformViewLink(
         viewType: 'webview',
         onCreatePlatformView: (PlatformViewCreationParams params) {
@@ -4194,7 +4196,7 @@ void main() {
               SizedBox(width: 300, height: 300, child: platformViewLink),
               Focus(
                 debugLabel: 'next',
-                child: Container(key: nextFocusKey, width: 10, height: 10),
+                child: SizedBox(key: nextFocusKey, width: 10, height: 10),
               ),
             ],
           ),
@@ -4205,13 +4207,13 @@ void main() {
         find.descendant(of: find.byType(PlatformViewLink), matching: find.byType(Focus)),
       );
       final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode!;
-      
+
       platformViewFocusNode.requestFocus();
       await tester.pump();
       expect(platformViewFocusNode.hasFocus, true);
-      
+
       // Simulate exhausting focus natively (FOCUS_FORWARD == 2)
-      focusSearchFailed(2);
+      focusSearchFailed(PlatformViewFocusDirection.forward);
       await tester.pump();
 
       final Element nextElement = tester.element(find.byKey(nextFocusKey));

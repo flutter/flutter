@@ -475,6 +475,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
           }
         });
 
+    parentView.setFocusSearchFailedListener(
+        (direction) -> {
+          platformViewsChannel.invokeFocusNext(viewId, direction);
+        });
+
     platformViewParent.put(viewId, parentView);
 
     // Accessibility in the embedded view is initially disabled because if a Flutter app disabled
@@ -852,6 +857,21 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             return;
           }
           embeddedView.clearFocus();
+        }
+
+        @Override
+        public void requestFocus(int viewId) {
+          final PlatformView platformView = platformViews.get(viewId);
+          if (platformView == null) {
+            Log.e(TAG, "Requesting focus on an unknown view with id: " + viewId);
+            return;
+          }
+          View embeddedView = platformView.getView();
+          if (embeddedView == null) {
+            Log.e(TAG, "Requesting focus on a null view with id: " + viewId);
+            return;
+          }
+          embeddedView.requestFocus();
         }
 
         @Override

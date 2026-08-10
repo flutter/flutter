@@ -28,11 +28,13 @@ class KeyboardNavigationBody extends StatefulWidget {
 class _KeyboardNavigationBodyState extends State<KeyboardNavigationBody> {
   final GlobalKey _platformViewKey = GlobalKey();
   final FocusNode _flutterTextFieldFocusNode = FocusNode(debugLabel: 'FlutterTextField');
+  final FocusNode _testTabKeyFocusNode = FocusNode(debugLabel: 'TestTabKey');
   String _status = 'Pending';
 
   @override
   void dispose() {
     _flutterTextFieldFocusNode.dispose();
+    _testTabKeyFocusNode.dispose();
     super.dispose();
   }
 
@@ -72,6 +74,7 @@ class _KeyboardNavigationBodyState extends State<KeyboardNavigationBody> {
           ),
           ElevatedButton(
             key: const ValueKey<String>('TestTabKey'),
+            focusNode: _testTabKeyFocusNode,
             onPressed: _runTest,
             child: const Text('TEST TAB KEY'),
           ),
@@ -90,34 +93,44 @@ class _KeyboardNavigationBodyState extends State<KeyboardNavigationBody> {
     await integrationChannel.invokeMethod<void>('sendAndroidKeyEvent', <String, dynamic>{
       'keyCode': 61, // KEYCODE_TAB
     });
-    await Future<void>.delayed(const Duration(milliseconds: 300));
+
 
     // 2. Type character 'h' (KEYCODE_H = 36) into the focused text field
     await integrationChannel.invokeMethod<void>('sendAndroidKeyEvent', <String, dynamic>{
       'keyCode': 36, // KEYCODE_H
     });
-    await Future<void>.delayed(const Duration(milliseconds: 300));
 
     // 3. Type character 'i' (KEYCODE_I = 37) into the focused text field
     await integrationChannel.invokeMethod<void>('sendAndroidKeyEvent', <String, dynamic>{
       'keyCode': 37, // KEYCODE_I
     });
-    await Future<void>.delayed(const Duration(milliseconds: 300));
 
-    // 4. Validate typed text is present in the platform view's EditText ("hi")
+    // 4. Validate typed text is present in the platform view's EditText ("hi").
     final String typedText = await integrationChannel.invokeMethod<String>('getEditText') ?? '';
 
     // 5. Tab back out of the platform view (focus should move to the next focusable widget, which is the ElevatedButton)
+    final Completer<void> focusCompleter = Completer<void>();
+    void focusListener() {
+      if (_testTabKeyFocusNode.hasFocus && !focusCompleter.isCompleted) {
+        focusCompleter.complete();
+      }
+    }
+
+    _testTabKeyFocusNode.addListener(focusListener);
+
     await integrationChannel.invokeMethod<void>('sendAndroidKeyEvent', <String, dynamic>{
       'keyCode': 61, // KEYCODE_TAB
     });
-    await Future<void>.delayed(const Duration(milliseconds: 300));
 
-    final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
-    final bool focusIsOnFlutterView =
-        primaryFocus != null &&
-        primaryFocus.context != null &&
-        primaryFocus.context!.widget.key == const ValueKey<String>('TestTabKey');
+    try {
+      await focusCompleter.future.timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Timeout occurred, focus didn't arrive.
+    } finally {
+      _testTabKeyFocusNode.removeListener(focusListener);
+    }
+
+    final bool focusIsOnFlutterView = _testTabKeyFocusNode.hasFocus;
 
     setState(() {
       if (typedText == 'hi' && focusIsOnFlutterView) {

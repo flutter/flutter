@@ -862,22 +862,23 @@ class _AndroidViewState extends State<AndroidView> {
         });
   }
 
-  void _handlePlatformFocusSearchFailed(int direction) {
+  void _handlePlatformFocusSearchFailed(PlatformViewFocusDirection direction) {
+    if (!_focusNode!.hasFocus) {
+      return;
+    }
     switch (direction) {
-      case 1: // FOCUS_BACKWARD
+      case PlatformViewFocusDirection.backward:
         FocusManager.instance.primaryFocus?.previousFocus();
-      case 2: // FOCUS_FORWARD
+      case PlatformViewFocusDirection.forward:
         FocusManager.instance.primaryFocus?.nextFocus();
-      case 17: // FOCUS_LEFT
+      case PlatformViewFocusDirection.left:
         FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.left);
-      case 33: // FOCUS_UP
+      case PlatformViewFocusDirection.up:
         FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.up);
-      case 66: // FOCUS_RIGHT
+      case PlatformViewFocusDirection.right:
         FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.right);
-      case 130: // FOCUS_DOWN
+      case PlatformViewFocusDirection.down:
         FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.down);
-      default:
-        FocusManager.instance.primaryFocus?.nextFocus();
     }
   }
 }
@@ -1206,8 +1207,8 @@ class PlatformViewCreationParams {
 
   /// Callback invoked when the platform view cannot find a view to focus in the given direction.
   ///
-  /// The value is the Android focus direction integer.
-  final ValueChanged<int> onFocusSearchFailed;
+  /// The value is a [PlatformViewFocusDirection] representing the directional navigation.
+  final ValueChanged<PlatformViewFocusDirection> onFocusSearchFailed;
 }
 
 /// A factory for a surface presenting a platform view as part of the widget hierarchy.
@@ -1392,22 +1393,23 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     }
   }
 
-  void _handlePlatformFocusSearchFailed(int direction) {
+  void _handlePlatformFocusSearchFailed(PlatformViewFocusDirection direction) {
+    if (!_focusNode!.hasFocus) {
+      return;
+    }
     switch (direction) {
-      case 1: // FOCUS_BACKWARD
+      case PlatformViewFocusDirection.backward:
         FocusManager.instance.primaryFocus?.previousFocus();
-      case 2: // FOCUS_FORWARD
+      case PlatformViewFocusDirection.forward:
         FocusManager.instance.primaryFocus?.nextFocus();
-      case 17: // FOCUS_LEFT
+      case PlatformViewFocusDirection.left:
         FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.left);
-      case 33: // FOCUS_UP
+      case PlatformViewFocusDirection.up:
         FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.up);
-      case 66: // FOCUS_RIGHT
+      case PlatformViewFocusDirection.right:
         FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.right);
-      case 130: // FOCUS_DOWN
+      case PlatformViewFocusDirection.down:
         FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.down);
-      default:
-        FocusManager.instance.primaryFocus?.nextFocus();
     }
   }
 

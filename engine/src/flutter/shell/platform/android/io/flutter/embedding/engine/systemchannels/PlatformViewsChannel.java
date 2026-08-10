@@ -45,7 +45,6 @@ public class PlatformViewsChannel {
     channel.invokeMethod("invokeFocusNext", args);
   }
 
-
   private static String detailedExceptionString(Exception exception) {
     return Log.getStackTraceString(exception);
   }

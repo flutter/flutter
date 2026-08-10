@@ -201,4 +201,48 @@ public class FlutterMutatorView extends FrameLayout {
     screenMatrix.postTranslate(getLeft(), getTop());
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);
   }
+
+  private io.flutter.plugin.platform.PlatformViewWrapper.FocusSearchFailedListener
+      focusSearchFailedListener;
+
+  public void setFocusSearchFailedListener(
+      io.flutter.plugin.platform.PlatformViewWrapper.FocusSearchFailedListener listener) {
+    this.focusSearchFailedListener = listener;
+  }
+
+  private boolean isDescendant(android.view.View view) {
+    if (view == null) return false;
+    android.view.ViewParent parent = view.getParent();
+    while (parent != null) {
+      if (parent == this) return true;
+      parent = parent.getParent();
+    }
+    return false;
+  }
+
+  @Override
+  public boolean dispatchKeyEvent(android.view.KeyEvent event) {
+    boolean handled = super.dispatchKeyEvent(event);
+    if (!handled
+        && event.getAction() == android.view.KeyEvent.ACTION_DOWN
+        && event.getKeyCode() == android.view.KeyEvent.KEYCODE_TAB) {
+      View focused = findFocus();
+      int direction =
+          event.hasModifiers(android.view.KeyEvent.META_SHIFT_ON)
+              ? android.view.View.FOCUS_BACKWARD
+              : android.view.View.FOCUS_FORWARD;
+      if (focused != null) {
+        View next = focused.focusSearch(direction);
+        if (next != null && next != focused && isDescendant(next) && next.requestFocus(direction)) {
+          return true;
+        } else {
+          if (focusSearchFailedListener != null) {
+            focusSearchFailedListener.onFocusSearchFailed(direction);
+            return true;
+          }
+        }
+      }
+    }
+    return handled;
+  }
 }

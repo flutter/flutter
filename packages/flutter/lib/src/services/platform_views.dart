@@ -66,12 +66,54 @@ class PlatformViewsRegistry {
 /// The `id` parameter is the platform view's unique identifier.
 typedef PlatformViewCreatedCallback = void Function(int id);
 
+/// The direction in which a platform view requested to move focus.
+enum PlatformViewFocusDirection {
+  /// Move focus backward.
+  backward,
+
+  /// Move focus forward.
+  forward,
+
+  /// Move focus left.
+  left,
+
+  /// Move focus up.
+  up,
+
+  /// Move focus right.
+  right,
+
+  /// Move focus down.
+  down,
+}
+
+PlatformViewFocusDirection _mapAndroidDirection(int direction) {
+  switch (direction) {
+    case 1: // FOCUS_BACKWARD
+      return PlatformViewFocusDirection.backward;
+    case 2: // FOCUS_FORWARD
+      return PlatformViewFocusDirection.forward;
+    case 17: // FOCUS_LEFT
+      return PlatformViewFocusDirection.left;
+    case 33: // FOCUS_UP
+      return PlatformViewFocusDirection.up;
+    case 66: // FOCUS_RIGHT
+      return PlatformViewFocusDirection.right;
+    case 130: // FOCUS_DOWN
+      return PlatformViewFocusDirection.down;
+    default:
+      return PlatformViewFocusDirection.forward;
+  }
+}
+
 /// Provides access to the platform views service.
 ///
 /// This service allows creating and controlling platform-specific views.
+
 class PlatformViewsService {
   PlatformViewsService._() {
     SystemChannels.platform_views.setMethodCallHandler(_onMethodCall);
+    SystemChannels.platform_views_2.setMethodCallHandler(_onMethodCall);
   }
 
   static final PlatformViewsService _instance = PlatformViewsService._();
@@ -88,7 +130,7 @@ class PlatformViewsService {
         final id = args['viewId']! as int;
         final direction = args['direction']! as int;
         if (_focusNextCallbacks.containsKey(id)) {
-          _focusNextCallbacks[id]!(direction);
+          _focusNextCallbacks[id]!(_mapAndroidDirection(direction));
         }
       default:
         throw UnimplementedError(
@@ -105,8 +147,9 @@ class PlatformViewsService {
 
   /// Maps platform view IDs to focus search failed callbacks.
   ///
-  /// The callbacks are invoked when the native Android view cannot find a view to focus.
-  final Map<int, ValueChanged<int>> _focusNextCallbacks = <int, ValueChanged<int>>{};
+  /// The callbacks are invoked when the native view cannot find a view to focus in a given direction.
+  final Map<int, ValueChanged<PlatformViewFocusDirection>> _focusNextCallbacks =
+      <int, ValueChanged<PlatformViewFocusDirection>>{};
 
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
@@ -150,7 +193,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
-    ValueChanged<int>? onFocusSearchFailed,
+    ValueChanged<PlatformViewFocusDirection>? onFocusSearchFailed,
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -184,7 +227,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
-    ValueChanged<int>? onFocusSearchFailed,
+    ValueChanged<PlatformViewFocusDirection>? onFocusSearchFailed,
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -218,7 +261,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
-    ValueChanged<int>? onFocusSearchFailed,
+    ValueChanged<PlatformViewFocusDirection>? onFocusSearchFailed,
   }) {
     final controller = ExpensiveAndroidViewController._(
       viewId: id,
@@ -250,7 +293,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
-    ValueChanged<int>? onFocusSearchFailed,
+    ValueChanged<PlatformViewFocusDirection>? onFocusSearchFailed,
   }) {
     final controller = HybridAndroidViewController._(
       viewId: id,
@@ -290,7 +333,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
-    ValueChanged<int>? onFocusSearchFailed,
+    ValueChanged<PlatformViewFocusDirection>? onFocusSearchFailed,
   }) async {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -341,7 +384,7 @@ class PlatformViewsService {
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
-    ValueChanged<int>? onFocusSearchFailed,
+    ValueChanged<PlatformViewFocusDirection>? onFocusSearchFailed,
   }) async {
     assert(creationParams == null || creationParamsCodec != null);
 
