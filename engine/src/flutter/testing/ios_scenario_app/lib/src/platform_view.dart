@@ -716,6 +716,56 @@ class PlatformViewClipRRectMultipleClipsScenario extends PlatformViewScenario {
   }
 }
 
+/// Platform view with clip rsuperellipse.
+///
+/// Rounded superellipse clipped natively with `cornerCurve` set to
+/// `kCACornerCurveContinuous`, rather than by the circular corner curve used
+/// for a plain rrect.
+class PlatformViewClipRSuperellipseScenario extends PlatformViewScenario {
+  /// Constructs a platform view with clip rsuperellipse scenario.
+  PlatformViewClipRSuperellipseScenario(super.view, {super.id = 0});
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final builder = SceneBuilder();
+    // Uniform radii on purpose.
+    //
+    // iOS renders a rounded-superellipse clip by setting `CALayer.cornerCurve`
+    // to `kCACornerCurveContinuous`, which only applies when the clip can be
+    // expressed as a single `cornerRadius`. Asymmetric radii fall back to a
+    // mask path that renders identically to a plain rrect, so they would not
+    // exercise the superellipse at all.
+    builder.pushClipRSuperellipse(
+      RSuperellipse.fromRectXY(const Rect.fromLTRB(100, 100, 400, 400), 50, 50),
+    );
+
+    addPlatformView(id, dispatcher: view.platformDispatcher, sceneBuilder: builder);
+
+    finishBuilder(builder);
+  }
+}
+
+/// Platform view with clip rsuperellipse, with multiple clips.
+class PlatformViewClipRSuperellipseMultipleClipsScenario extends PlatformViewScenario {
+  /// Constructs a platform view with clip rsuperellipse and multiple clips.
+  PlatformViewClipRSuperellipseMultipleClipsScenario(super.view, {super.id = 0});
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final builder = SceneBuilder();
+    // See `PlatformViewClipRSuperellipseScenario` for why the radii are uniform.
+    builder
+      ..pushClipRSuperellipse(
+        RSuperellipse.fromRectXY(const Rect.fromLTRB(100, 100, 400, 400), 50, 50),
+      )
+      ..pushClipRect(const Rect.fromLTRB(200, 0, 600, 600));
+
+    addPlatformView(id, dispatcher: view.platformDispatcher, sceneBuilder: builder);
+
+    finishBuilder(builder);
+  }
+}
+
 /// Platform view with clip rrect.
 /// The bounding rect of the rrect is the same as PlatformView and only the corner radii clips the PlatformView.
 class PlatformViewLargeClipRRectScenario extends PlatformViewScenario {
