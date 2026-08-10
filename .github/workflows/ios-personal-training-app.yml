@@ -17,6 +17,16 @@ jobs:
     runs-on: macos-14
     env:
       APP_DIR: examples/personal_training_app
+      IOS_BUNDLE_ID: com.simtrainingpartner.simtrainingpartner
+      APPLE_TEAM_ID: 5QHDS9AQFB
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APPLE_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+      APPLE_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APPLE_STORE_CONNECT_API_KEY_BASE64 }}
+      APP_STORE_CONNECT_CERTIFICATE_KEY: ${{ secrets.APP_STORE_CONNECT_CERTIFICATE_KEY }}
+      IOS_DIST_P12_BASE64: ${{ secrets.IOS_DIST_P12_BASE64 }}
+      IOS_DIST_P12_PASSWORD: ${{ secrets.IOS_DIST_P12_PASSWORD }}
+      IOS_MOBILEPROVISION_BASE64: ${{ secrets.IOS_MOBILEPROVISION_BASE64 }}
 
     steps:
       - name: Checkout
@@ -27,6 +37,13 @@ jobs:
         with:
           channel: stable
           cache: true
+
+      - name: Install Codemagic CLI tools
+        run: |
+          brew update
+          brew install pipx
+          pipx install codemagic-cli-tools
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Disable Swift Package Manager in CI
         run: flutter config --no-enable-swift-package-manager
@@ -62,13 +79,111 @@ jobs:
           pod install --repo-update
         working-directory: ${{ env.APP_DIR }}
 
+      - name: Prepare export options
+        run: |
+          cat > "$HOME/export_options.plist" << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>teamID</key>
+            <string>${APPLE_TEAM_ID}</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>uploadBitcode</key>
+            <false/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Set up iOS signing
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+
+          # Prepare a temporary keychain for CI signing material.
+          security create-keychain -p "" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p "" build.keychain
+          security list-keychains -d user -s build.keychain login.keychain-db
+          security default-keychain -d user -s build.keychain
+
+          if [ -n "${IOS_DIST_P12_BASE64:-}" ] && [ -n "${IOS_MOBILEPROVISION_BASE64:-}" ]; then
+            echo "Using direct distribution certificate/profile secrets"
+            p12_path="$RUNNER_TEMP/dist.p12"
+            profile_path="$RUNNER_TEMP/profile.mobileprovision"
+
+            printf "%s" "$IOS_DIST_P12_BASE64" | tr -d ' \n\r\t' | base64 --decode > "$p12_path"
+            printf "%s" "$IOS_MOBILEPROVISION_BASE64" | tr -d ' \n\r\t' | base64 --decode > "$profile_path"
+
+            security import "$p12_path" -k build.keychain -P "${IOS_DIST_P12_PASSWORD:-}" -T /usr/bin/codesign -T /usr/bin/security
+            mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+            cp "$profile_path" "$HOME/Library/MobileDevice/Provisioning Profiles/ci.mobileprovision"
+          else
+            echo "Direct cert/profile secrets not found. Falling back to App Store Connect fetch-signing-files."
+
+            if [ -z "${APP_STORE_CONNECT_ISSUER_ID:-}" ]; then
+              echo "Missing secret: APP_STORE_CONNECT_ISSUER_ID"
+              exit 1
+            fi
+            if [ -z "${APP_STORE_CONNECT_KEY_IDENTIFIER:-}" ]; then
+              echo "Missing secret: APPLE_STORE_CONNECT_API_KEY_ID"
+              exit 1
+            fi
+            if [ -z "${APP_STORE_CONNECT_CERTIFICATE_KEY:-}" ]; then
+              echo "Missing secret: APP_STORE_CONNECT_CERTIFICATE_KEY"
+              exit 1
+            fi
+
+            asc_key_path="$RUNNER_TEMP/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8"
+            if [ -n "${APP_STORE_CONNECT_PRIVATE_KEY:-}" ] && printf "%s" "$APP_STORE_CONNECT_PRIVATE_KEY" | grep -q "BEGIN PRIVATE KEY"; then
+              printf "%s" "$APP_STORE_CONNECT_PRIVATE_KEY" | sed 's/\\n/\n/g' > "$asc_key_path"
+            elif [ -n "${APPLE_STORE_CONNECT_API_KEY_BASE64:-}" ] && printf "%s" "$APPLE_STORE_CONNECT_API_KEY_BASE64" | grep -q "BEGIN PRIVATE KEY"; then
+              printf "%s" "$APPLE_STORE_CONNECT_API_KEY_BASE64" | sed 's/\\n/\n/g' > "$asc_key_path"
+            elif [ -n "${APPLE_STORE_CONNECT_API_KEY_BASE64:-}" ]; then
+              printf "%s" "$APPLE_STORE_CONNECT_API_KEY_BASE64" | tr -d ' \n\r\t' | base64 --decode > "$asc_key_path"
+            else
+              echo "Missing key secret: set APP_STORE_CONNECT_PRIVATE_KEY or APPLE_STORE_CONNECT_API_KEY_BASE64"
+              exit 1
+            fi
+
+            cert_key_path="$RUNNER_TEMP/distribution_certificate.key"
+            printf "%s" "$APP_STORE_CONNECT_CERTIFICATE_KEY" | sed 's/\\n/\n/g' > "$cert_key_path"
+
+            keychain initialize
+            app-store-connect fetch-signing-files \
+              "$IOS_BUNDLE_ID" \
+              --platform IOS \
+              --type IOS_APP_STORE \
+              --create \
+              --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
+              --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+              --private-key "@file:$asc_key_path" \
+              --certificate-key "@file:$cert_key_path"
+            keychain add-certificates -A
+            xcode-project use-profiles \
+              --project "ios/Runner.xcodeproj" \
+              --archive-method app-store \
+              --export-options-plist "$HOME/export_options.plist" \
+              --code-signing-setup-verbose-logging
+          fi
+
+          echo "==== Code signing identities ===="
+          security find-identity -v -p codesigning || true
+          echo "==== Provisioning profiles ===="
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
+
       - name: Build iOS IPA for App Store
         run: |
           mkdir -p build/ios/SourcePackages
           flutter build ipa \
             --release \
             --dart-define=APP_ENV=${{ inputs.app_env }} \
-            --export-options-plist=ios/ExportOptions-AppStore.plist
+            --export-options-plist="$HOME/export_options.plist"
         working-directory: ${{ env.APP_DIR }}
 
       - name: Upload iOS IPA artifact
