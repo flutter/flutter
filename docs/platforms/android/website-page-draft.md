@@ -62,7 +62,7 @@ androidComponents {
 }
 ```
 
-For output *file* renames, you must copy or rename the built APKs using a Gradle task. 
+For output *file* renames, you must copy or rename the built APKs using a Gradle task.
 (Note: Flutter's own copy step already places APKs at `build/app/outputs/flutter-apk/app[-abi][-flavor]-<mode>.apk` with unchanged names and paths.)
 
 Example of a simple finalizer task in `build.gradle` (Groovy):
@@ -112,7 +112,7 @@ androidComponents {
 Note: Flutter itself sets per-ABI version codes for `--split-per-abi` inside
 `onVariants`. If your CI mutates version codes in `afterEvaluate`, that runs at
 a different time than before; Flutter prints a warning when it detects a
-divergence between the DSL value and the final output value. To verify your 
+divergence between the DSL value and the final output value. To verify your
 mutations worked, inspect the built APK:
 `apkanalyzer manifest print versionCode build/app/outputs/flutter-apk/app-release.apk`
 
@@ -123,8 +123,8 @@ they resolve. With the new DSL these are `initWith` copies rather than live
 aliases:
 
 - Set `matchingFallbacks` on custom build types so dependent Android libraries
-  resolve. If a third-party plugin does not define your app's custom `staging` 
-  build type, AGP needs to know to safely fall back to compiling the plugin's 
+  resolve. If a third-party plugin does not define your app's custom `staging`
+  build type, AGP needs to know to safely fall back to compiling the plugin's
   `debug` variant rather than failing the build. For example:
 
   ```kotlin
@@ -138,11 +138,11 @@ aliases:
   }
   ```
 
-- **Warning for Plugin Authors / JNI Developers:** Library (plugin) projects cannot 
-  be explicitly marked debuggable through the public AGP API. If an app uses a 
-  custom build type (like `staging`), the plugin's `BuildConfig.DEBUG` and native (C++/JNI) 
-  code may silently compile in release mode instead of debug mode. Variant matching 
-  still works via `matchingFallbacks`, but C++ debugging will be broken for those 
+- **Warning for Plugin Authors / JNI Developers:** Library (plugin) projects cannot
+  be explicitly marked debuggable through the public AGP API. If an app uses a
+  custom build type (like `staging`), the plugin's `BuildConfig.DEBUG` and native (C++/JNI)
+  code may silently compile in release mode instead of debug mode. Variant matching
+  still works via `matchingFallbacks`, but C++ debugging will be broken for those
   custom build types.
 
 ### Add-to-app (Flutter module in a host app)
@@ -151,8 +151,8 @@ aliases:
   module. The dependency between your host's asset merging and Flutter's asset
   copy is expressed through the Variant API instead of an explicit
   `merge<Variant>Assets.dependsOn(...)` edge. Build scripts that reference
-  Flutter's `copyFlutterAssets<Variant>` tasks by name or type will break. 
-  For example, `tasks.getByPath(":flutter:copyFlutterAssetsDebug")` will crash 
+  Flutter's `copyFlutterAssets<Variant>` tasks by name or type will break.
+  For example, `tasks.getByPath(":flutter:copyFlutterAssetsDebug")` will crash
   your build with a `Task with path ... not found` error because the
   tasks are now registered lazily and are no longer of type
   `org.gradle.api.tasks.Copy`.
@@ -199,8 +199,8 @@ If you cannot migrate immediately, add the opt-out by hand to
 android.newDsl=false
 ```
 
-**AGP 10 is expected to remove the legacy APIs**, meaning this opt-out will 
-stop working. Treat it as a short-term unblock only; hand-added opt-outs are 
+**AGP 10 is expected to remove the legacy APIs**, meaning this opt-out will
+stop working. Treat it as a short-term unblock only; hand-added opt-outs are
 never touched by Flutter's migrator.
 
 ## References

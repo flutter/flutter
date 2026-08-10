@@ -52,7 +52,7 @@ projects. That opt-out dies with AGP 10.
 ## Decision records
 
 1. **Min AGP floor: out of scope.** A separate version bump owned the
-   floor, which has now landed on `master` (PRs #176858 and #177416 bumped the 
+   floor, which has now landed on `master` (PRs #176858 and #177416 bumped the
    floor to `8.11.1`). This migration builds seamlessly on that new floor.
    Every replacement API used here was verified public in `gradle-api:8.11.1`
    (decompiled jar inspection). If implementation finds a replacement API that
@@ -164,17 +164,17 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
    CI patterns) may behave differently; a runtime divergence warning is added.
 4. **Custom build types → plugins**: live-aliased instances become `initWith`
    copies; library plugins cannot receive `isDebuggable` (no public setter on
-   `LibraryBuildType`). **Warning:** If an app uses a custom build type (like `staging`), 
-   the plugin's `BuildConfig.DEBUG` and native (C++/JNI) code may silently compile 
-   in release mode instead of debug mode. Matching is preserved via `matchingFallbacks`, 
+   `LibraryBuildType`). **Warning:** If an app uses a custom build type (like `staging`),
+   the plugin's `BuildConfig.DEBUG` and native (C++/JNI) code may silently compile
+   in release mode instead of debug mode. Matching is preserved via `matchingFallbacks`,
    but C++ debugging will be broken for those custom build types.
 5. **Asset merge**: flutter assets become a merged source dir instead of a
    post-merge overwrite; collisions resolve by AGP source-set priority.
 6. **Add-to-app**: the explicit `:app:merge<V>Assets.dependsOn` edge and
    host-project lookup are removed; `flutter.hostAppProjectName` becomes a
-   no-op with a deprecation warning naming a removal milestone. Build scripts that 
-   reference Flutter's `copyFlutterAssets<V>` tasks by name (e.g. `tasks.getByPath(...)`) 
-   will crash with a `Task with path ... not found` error because the tasks are now 
+   no-op with a deprecation warning naming a removal milestone. Build scripts that
+   reference Flutter's `copyFlutterAssets<V>` tasks by name (e.g. `tasks.getByPath(...)`)
+   will crash with a `Task with path ... not found` error because the tasks are now
    registered lazily.
 7. **Task realization/type**: flutter tasks become lazy `TaskProvider`s, and
    `copyFlutterAssets<V>` changes type from `org.gradle.api.tasks.Copy` to a
