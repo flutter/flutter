@@ -126,6 +126,9 @@ class Chrome {
       '--disable-client-side-phishing-detection',
       '--disable-notifications',
       '--disable-features=GCM',
+      '--gcm-checkin-url=http://127.0.0.1',
+      '--gcm-registration-url=http://127.0.0.1',
+      '--gcm-mcs-endpoint=127.0.0.1:0',
       // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
       '--bwsi',
       '--no-first-run',

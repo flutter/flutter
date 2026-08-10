@@ -240,6 +240,9 @@ class ChromiumLauncher {
       '--disable-client-side-phishing-detection',
       '--disable-notifications',
       '--disable-features=GCM',
+      '--gcm-checkin-url=http://127.0.0.1',
+      '--gcm-registration-url=http://127.0.0.1',
+      '--gcm-mcs-endpoint=127.0.0.1:0',
       // Since we are using a temp profile, disable features that slow the
       // Chrome launch.
       '--disable-extensions',
