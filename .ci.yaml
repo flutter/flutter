@@ -5347,6 +5347,10 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: flavors_test_ios
@@ -7119,6 +7123,20 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: windows_home_scroll_perf__timeline_summary
+
+  - name: Windows windows_text_shadow_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_text_shadow_perf__timeline_summary
 
   - name: Windows_arm64 windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
