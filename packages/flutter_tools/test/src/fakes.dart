@@ -1210,33 +1210,33 @@ class FakeToolContext extends Fake implements ToolContext {
   final UserMessages? _userMessages;
 
   @override
-  Artifacts get artifacts => _artifacts ?? FakeArtifacts(fileSystem: fs);
+  late final Artifacts artifacts = _artifacts ?? FakeArtifacts(fileSystem: fs);
 
   @override
-  BotDetector get botDetector => _botDetector ?? const FakeBotDetector(false);
+  late final BotDetector botDetector = _botDetector ?? const FakeBotDetector(false);
 
   @override
-  Cache get cache => _cache ?? FakeCache(fileSystem: fs);
+  late final Cache cache = _cache ?? FakeCache(fileSystem: fs);
 
   @override
-  Config get config => _config ?? FakeConfig();
+  late final Config config = _config ?? FakeConfig();
 
   @override
-  CustomDevicesConfig get customDevicesConfig =>
+  late final CustomDevicesConfig customDevicesConfig =
       _customDevicesConfig ??
       CustomDevicesConfig.test(fileSystem: fs, logger: logger, platform: platform);
 
   @override
-  FlutterVersion get flutterVersion => _flutterVersion ?? FakeFlutterVersion();
+  late final FlutterVersion flutterVersion = _flutterVersion ?? FakeFlutterVersion();
 
   @override
-  FileSystem get fs => _fs ?? MemoryFileSystem.test();
+  late final FileSystem fs = _fs ?? MemoryFileSystem.test();
 
   @override
-  Git get git => _git ?? Git(currentPlatform: platform, runProcessWith: processUtils);
+  late final Git git = _git ?? Git(currentPlatform: platform, runProcessWith: processUtils);
 
   @override
-  LocalEngineLocator get localEngineLocator =>
+  late final LocalEngineLocator localEngineLocator =
       _localEngineLocator ??
       LocalEngineLocator(
         userMessages: userMessages,
@@ -1247,51 +1247,51 @@ class FakeToolContext extends Fake implements ToolContext {
       );
 
   @override
-  Logger get logger => _logger ?? BufferLogger.test();
+  late final Logger logger = _logger ?? BufferLogger.test();
 
   @override
   TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder => _nativeAssetsBuilder;
 
   @override
-  OperatingSystemUtils get os => _os ?? FakeOperatingSystemUtils();
+  late final OperatingSystemUtils os = _os ?? FakeOperatingSystemUtils();
 
   @override
-  OutputPreferences get outputPreferences => _outputPreferences ?? OutputPreferences.test();
+  late final OutputPreferences outputPreferences = _outputPreferences ?? OutputPreferences.test();
 
   @override
-  Platform get platform => _platform ?? FakePlatform();
+  late final Platform platform = _platform ?? FakePlatform();
 
   @override
-  PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+  late final PreRunValidator preRunValidator = _preRunValidator ?? const NoOpPreRunValidator();
 
   @override
-  ProcessManager get processManager => _processManager ?? FakeProcessManager.any();
+  late final ProcessManager processManager = _processManager ?? FakeProcessManager.any();
 
   @override
-  ProcessUtils get processUtils =>
+  late final ProcessUtils processUtils =
       _processUtils ?? ProcessUtils(processManager: processManager, logger: logger);
 
   @override
-  FlutterProjectFactory get projectFactory =>
+  late final FlutterProjectFactory projectFactory =
       _projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger);
 
   @override
-  ShutdownHooks get shutdownHooks => _shutdownHooks ?? ShutdownHooks();
+  late final ShutdownHooks shutdownHooks = _shutdownHooks ?? ShutdownHooks();
 
   @override
-  Signals get signals => _signals ?? Signals.test();
+  late final Signals signals = _signals ?? Signals.test();
 
   @override
-  Stdio get stdio => _stdio ?? FakeStdio();
+  late final Stdio stdio = _stdio ?? FakeStdio();
 
   @override
-  SystemClock get systemClock => _systemClock ?? const SystemClock();
+  late final SystemClock systemClock = _systemClock ?? const SystemClock();
 
   @override
-  AnsiTerminal get terminal => _terminal ?? AnsiTerminal(stdio: stdio, platform: platform);
+  late final AnsiTerminal terminal = _terminal ?? AnsiTerminal(stdio: stdio, platform: platform);
 
   @override
-  UserMessages get userMessages => _userMessages ?? UserMessages();
+  late final UserMessages userMessages = _userMessages ?? UserMessages();
 
   @override
   FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
@@ -1477,7 +1477,7 @@ class FakeAndroidContext extends Fake implements AndroidContext {
   AndroidStudio? get androidStudio => _androidStudio;
 
   @override
-  GradleUtils get gradleUtils => _gradleUtils ?? FakeGradleUtils();
+  late final GradleUtils gradleUtils = _gradleUtils ?? FakeGradleUtils();
 
   @override
   Java? get java => _java;
@@ -1492,13 +1492,15 @@ class FakeAppleContext extends Fake implements AppleContext {
     PlistParser? plistParser,
     XCDevice? xcdevice,
     Xcode? xcode,
+    XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) : _cocoaPods = cocoaPods,
        _cocoapodsValidator = cocoapodsValidator,
        _iosSimulatorUtils = iosSimulatorUtils,
        _iosWorkflow = iosWorkflow,
        _plistParser = plistParser,
        _xcdevice = xcdevice,
-       _xcode = xcode;
+       _xcode = xcode,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter;
 
   final CocoaPods? _cocoaPods;
   final CocoaPodsValidator? _cocoapodsValidator;
@@ -1507,28 +1509,31 @@ class FakeAppleContext extends Fake implements AppleContext {
   final PlistParser? _plistParser;
   final XCDevice? _xcdevice;
   final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   @override
-  CocoaPods get cocoaPods => _cocoaPods ?? FakeCocoaPods();
+  late final CocoaPods cocoaPods = _cocoaPods ?? FakeCocoaPods();
 
   @override
-  CocoaPodsValidator get cocoapodsValidator => _cocoapodsValidator ?? FakeCocoaPodsValidator();
+  late final CocoaPodsValidator cocoapodsValidator =
+      _cocoapodsValidator ?? FakeCocoaPodsValidator();
 
   @override
-  IOSSimulatorUtils get iosSimulatorUtils => _iosSimulatorUtils ?? FakeIOSSimulatorUtils();
+  late final IOSSimulatorUtils iosSimulatorUtils = _iosSimulatorUtils ?? FakeIOSSimulatorUtils();
 
   @override
-  IOSWorkflow get iosWorkflow => _iosWorkflow ?? FakeIOSWorkflow();
+  late final IOSWorkflow iosWorkflow = _iosWorkflow ?? FakeIOSWorkflow();
 
   @override
-  PlistParser get plistParser => _plistParser ?? FakePlistParser();
+  late final PlistParser plistParser = _plistParser ?? FakePlistParser();
 
   @override
-  XCDevice get xcdevice => _xcdevice ?? FakeXCDevice();
+  late final XCDevice xcdevice = _xcdevice ?? FakeXCDevice();
 
   @override
-  Xcode get xcode => _xcode ?? FakeXcode();
+  late final Xcode xcode = _xcode ?? FakeXcode();
 
   @override
-  XcodeProjectInterpreter get xcodeProjectInterpreter => FakeXcodeProjectInterpreter();
+  late final XcodeProjectInterpreter xcodeProjectInterpreter =
+      _xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter();
 }

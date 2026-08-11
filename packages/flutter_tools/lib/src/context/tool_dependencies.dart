@@ -142,7 +142,7 @@ class ToolDependencies {
         AnsiTerminal(
           stdio: finalStdio,
           platform: finalPlatform,
-          now: DateTime.now(),
+          now: finalSystemClock.now(),
           shutdownHooks: finalShutdownHooks,
         );
 
@@ -175,7 +175,7 @@ class ToolDependencies {
             delegate: LocalFileSystem(
               LocalSignals.instance,
               Signals.defaultExitSignals,
-              shutdownHooks ?? ShutdownHooks(),
+              finalShutdownHooks,
             ),
             platform: finalPlatform,
           )
