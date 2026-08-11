@@ -10,15 +10,21 @@ import 'package:yaml/yaml.dart';
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/template.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../experimental/templates.dart';
 import '../flutter_project_metadata.dart';
-import '../globals.dart' as globals;
+import '../isolated/mustache_template.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../version.dart';
 
 const _kAvailablePlatforms = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
 
@@ -41,6 +47,11 @@ const _kDefaultPlatformArgumentHelp =
 
 /// Common behavior for `flutter create` and `flutter widget-preview start` commands.
 mixin CreateBase on FlutterCommand {
+  ToolContext get _context => toolContext!;
+
+  @protected
+  TemplateRenderer get templateRenderer => const MustacheTemplateRenderer();
+
   /// Pattern for a Windows file system drive (e.g. "D:").
   ///
   /// `dart:io` does not recognize strings matching this pattern as absolute
@@ -55,7 +66,9 @@ mixin CreateBase on FlutterCommand {
   @visibleForTesting
   Directory get projectDir {
     final String argProjectDir = argResults!.rest.first;
-    if (globals.platform.isWindows && kWindowsDrivePattern.hasMatch(argProjectDir)) {
+    final Platform platform = _context.platform;
+    final FileSystem fs = _context.fs;
+    if (platform.isWindows && kWindowsDrivePattern.hasMatch(argProjectDir)) {
       throwToolExit(
         'You attempted to create a flutter project at the path "$argProjectDir", which is the name of a drive. This '
         'is usually a mistake--you probably want to specify a containing directory, like "$argProjectDir\\app_name". '
@@ -63,13 +76,14 @@ mixin CreateBase on FlutterCommand {
         '"$argProjectDir\\".',
       );
     }
-    return globals.fs.directory(argResults!.rest.first);
+    return fs.directory(argProjectDir);
   }
 
   /// The normalized absolute path of [projectDir].
   @protected
   String get projectDirPath {
-    return globals.fs.path.normalize(projectDir.absolute.path);
+    final FileSystem fs = _context.fs;
+    return fs.path.normalize(projectDir.absolute.path);
   }
 
   @protected
@@ -158,12 +172,12 @@ mixin CreateBase on FlutterCommand {
     required ExtensionTemplateManager? extensionTemplateManager,
   }) {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
-    final File metadataFile = globals.fs.file(
-      globals.fs.path.join(projectDir.absolute.path, '.metadata'),
-    );
+    final FileSystem fs = _context.fs;
+    final Logger logger = _context.logger;
+    final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
     final projectMetadata = FlutterProjectMetadata(
       metadataFile,
-      globals.logger,
+      logger,
       extensionTemplateManager: extensionTemplateManager,
     );
     final ParsedFlutterTemplateType? projectType = projectMetadata.projectType;
@@ -172,8 +186,8 @@ mixin CreateBase on FlutterCommand {
     }
 
     bool exists(List<String> path) {
-      return globals.fs
-          .directory(globals.fs.path.joinAll(<String>[projectDir.absolute.path, ...path]))
+      return fs
+          .directory(fs.path.joinAll(<String>[projectDir.absolute.path, ...path]))
           .existsSync();
     }
 
@@ -198,7 +212,7 @@ mixin CreateBase on FlutterCommand {
   Future<String> getOrganization() async {
     String? organization = stringArg('org');
     if (!argResults!.wasParsed('org')) {
-      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+      final FlutterProject project = _context.projectFactory.fromDirectory(projectDir);
       final Set<String> existingOrganizations = await project.organizationNames;
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
@@ -218,27 +232,28 @@ mixin CreateBase on FlutterCommand {
   /// Throws with exit 2 if the project directory is illegal.
   @protected
   void validateProjectDir({bool overwrite = false}) {
-    if (globals.fs.path.isWithin(flutterRoot, projectDirPath)) {
+    final FileSystem fs = _context.fs;
+    if (fs.path.isWithin(flutterRoot, projectDirPath)) {
       // Make exception for dev and examples to facilitate example project development.
-      final String examplesDirectory = globals.fs.path.join(flutterRoot, 'examples');
-      final String packageExamplesDirectory = globals.fs.path.join(
+      final String examplesDirectory = fs.path.join(flutterRoot, 'examples');
+      final String packageExamplesDirectory = fs.path.join(
         flutterRoot,
         'packages',
         'flutter',
         'examples',
       );
-      final String devDirectory = globals.fs.path.join(flutterRoot, 'dev');
-      final String engineExamplesDirectory = globals.fs.path.join(
+      final String devDirectory = fs.path.join(flutterRoot, 'dev');
+      final String engineExamplesDirectory = fs.path.join(
         flutterRoot,
         'engine',
         'src',
         'flutter',
         'examples',
       );
-      if (!globals.fs.path.isWithin(examplesDirectory, projectDirPath) &&
-          !globals.fs.path.isWithin(packageExamplesDirectory, projectDirPath) &&
-          !globals.fs.path.isWithin(devDirectory, projectDirPath) &&
-          !globals.fs.path.isWithin(engineExamplesDirectory, projectDirPath)) {
+      if (!fs.path.isWithin(examplesDirectory, projectDirPath) &&
+          !fs.path.isWithin(packageExamplesDirectory, projectDirPath) &&
+          !fs.path.isWithin(devDirectory, projectDirPath) &&
+          !fs.path.isWithin(engineExamplesDirectory, projectDirPath)) {
         throwToolExit(
           'Cannot create a project within the Flutter SDK. '
           "Target directory '$projectDirPath' is within the Flutter SDK at '$flutterRoot'.",
@@ -249,7 +264,7 @@ mixin CreateBase on FlutterCommand {
 
     // If the destination directory is actually a file, then we refuse to
     // overwrite, on the theory that the user probably didn't expect it to exist.
-    if (globals.fs.isFileSync(projectDirPath)) {
+    if (fs.isFileSync(projectDirPath)) {
       final message = "Invalid project name: '$projectDirPath' - refers to an existing file.";
       throwToolExit(
         overwrite ? '$message Refusing to overwrite a file with a directory.' : message,
@@ -261,7 +276,7 @@ mixin CreateBase on FlutterCommand {
       return;
     }
 
-    final FileSystemEntityType type = globals.fs.typeSync(projectDirPath);
+    final FileSystemEntityType type = fs.typeSync(projectDirPath);
 
     // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
     switch (type) {
@@ -289,7 +304,8 @@ mixin CreateBase on FlutterCommand {
     String? projectName = stringArg('project-name');
 
     if (projectName == null) {
-      final File pubspec = globals.fs.directory(projectDirPath).childFile('pubspec.yaml');
+      final FileSystem fs = _context.fs;
+      final File pubspec = fs.directory(projectDirPath).childFile('pubspec.yaml');
 
       if (pubspec.existsSync()) {
         final String pubspecContents = pubspec.readAsStringSync();
@@ -309,7 +325,7 @@ mixin CreateBase on FlutterCommand {
         }
       }
 
-      final String projectDirName = globals.fs.path.basename(projectDirPath);
+      final String projectDirName = fs.path.basename(projectDirPath);
 
       projectName ??= projectDirName;
     }
@@ -351,6 +367,7 @@ mixin CreateBase on FlutterCommand {
     bool darwin = false,
     bool implementationTests = false,
   }) {
+    final FlutterVersion flutterVersion = _context.flutterVersion;
     final String pluginDartClass = _createPluginClassName(projectName);
     final pluginClass = pluginDartClass.endsWith('Plugin')
         ? pluginDartClass
@@ -396,8 +413,8 @@ mixin CreateBase on FlutterCommand {
       'androidLanguage': androidLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
-      'flutterRevision': escapeYamlString(globals.flutterVersion.frameworkRevision),
-      'flutterChannel': escapeYamlString(globals.flutterVersion.getBranchName()), // may contain PII
+      'flutterRevision': escapeYamlString(flutterVersion.frameworkRevision),
+      'flutterChannel': escapeYamlString(flutterVersion.getBranchName()), // may contain PII
       'ios': ios,
       'android': android,
       'web': web,
@@ -432,11 +449,13 @@ mixin CreateBase on FlutterCommand {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
   }) async {
+    final FileSystem fs = _context.fs;
+    final Logger logger = _context.logger;
     final Template template = await Template.fromName(
       templateName,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      templateRenderer: globals.templateRenderer,
+      fileSystem: fs,
+      logger: logger,
+      templateRenderer: templateRenderer,
       templateManifest: _templateManifest,
     );
     return template.render(
@@ -460,12 +479,14 @@ mixin CreateBase on FlutterCommand {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
   }) async {
+    final FileSystem fs = _context.fs;
+    final Logger logger = _context.logger;
     final Template template = await Template.merged(
       names,
       directory,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      templateRenderer: globals.templateRenderer,
+      fileSystem: fs,
+      logger: logger,
+      templateRenderer: templateRenderer,
       templateManifest: _templateManifest,
     );
     return template.render(
@@ -498,7 +519,7 @@ mixin CreateBase on FlutterCommand {
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-    final FlutterProject project = FlutterProject.fromDirectory(directory);
+    final FlutterProject project = _context.projectFactory.fromDirectory(directory);
     if (templateContext['android'] == true) {
       generatedCount += _injectGradleWrapper(project);
     }
@@ -543,26 +564,26 @@ mixin CreateBase on FlutterCommand {
       platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
     }
     if (generateMetadata) {
-      final File metadataFile = globals.fs.file(
-        globals.fs.path.join(projectDir.absolute.path, '.metadata'),
-      );
+      final FileSystem fs = _context.fs;
+      final Logger logger = _context.logger;
+      final FlutterVersion flutterVersion = _context.flutterVersion;
+      final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
       final metadata = FlutterProjectMetadata.explicit(
         file: metadataFile,
-        versionRevision: globals.flutterVersion.frameworkRevision,
-        versionChannel: globals.flutterVersion.getBranchName(), // may contain PII
+        versionRevision: flutterVersion.frameworkRevision,
+        versionChannel: flutterVersion.getBranchName(), // may contain PII
         projectType: projectType,
         migrateConfig: MigrateConfig(),
-        logger: globals.logger,
         extensionTemplateManager: null,
+        logger: logger,
       );
       metadata.populate(
         platforms: platformsForMigrateConfig,
         projectDirectory: directory,
         update: false,
-        currentRevision:
-            stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
-        createRevision: globals.flutterVersion.frameworkRevision,
-        logger: globals.logger,
+        currentRevision: stringArg('initial-create-revision') ?? flutterVersion.frameworkRevision,
+        createRevision: flutterVersion.frameworkRevision,
+        logger: logger,
       );
       metadata.writeFile();
     }
@@ -632,19 +653,20 @@ mixin CreateBase on FlutterCommand {
 
   late final Set<Uri> _templateManifest = _computeTemplateManifest();
   Set<Uri> _computeTemplateManifest() {
-    final String flutterToolsAbsolutePath = globals.fs.path.join(
+    final FileSystem fs = _context.fs;
+    final String flutterToolsAbsolutePath = fs.path.join(
       Cache.flutterRoot!,
       'packages',
       'flutter_tools',
     );
-    final String manifestPath = globals.fs.path.join(
+    final String manifestPath = fs.path.join(
       flutterToolsAbsolutePath,
       'templates',
       'template_manifest.json',
     );
     final String manifestFileContents;
     try {
-      manifestFileContents = globals.fs.file(manifestPath).readAsStringSync();
+      manifestFileContents = fs.file(manifestPath).readAsStringSync();
     } on FileSystemException catch (e) {
       throwToolExit(
         'Unable to read the template manifest at path "$manifestPath".\n'
@@ -655,21 +677,23 @@ mixin CreateBase on FlutterCommand {
     final manifest = json.decode(manifestFileContents) as Map<String, Object?>;
     return Set<Uri>.from(
       (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
-        (String path) => Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path)),
+        (String path) => Uri.file(fs.path.join(flutterToolsAbsolutePath, path)),
       ),
     );
   }
 
   int _injectGradleWrapper(FlutterProject project) {
     var filesCreated = 0;
+    final Cache cache = _context.cache;
+    final OperatingSystemUtils os = _context.os;
     copyDirectory(
-      globals.cache.getArtifactDirectory('gradle_wrapper'),
+      cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
       onFileCopied: (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
         if (modes.contains('x')) {
-          globals.os.makeExecutable(destinationFile);
+          os.makeExecutable(destinationFile);
         }
       },
     );
