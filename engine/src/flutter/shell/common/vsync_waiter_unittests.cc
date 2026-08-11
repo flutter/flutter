@@ -9,6 +9,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
+#include "flutter/shell/common/pointer_data_dispatcher.h"
 #include "flutter/shell/common/switches.h"
 
 #include "gtest/gtest.h"
@@ -34,6 +35,33 @@ class TestVsyncWaiter : public VsyncWaiter {
 
  protected:
   void AwaitVSync() override { await_vsync_call_count_++; }
+};
+
+class TestPointerDataDispatcherDelegate final
+    : public PointerDataDispatcher::Delegate {
+ public:
+  explicit TestPointerDataDispatcherDelegate(
+      const std::shared_ptr<TestVsyncWaiter>& vsync_waiter)
+      : vsync_waiter_(vsync_waiter) {}
+
+  void DoDispatchPacket(std::unique_ptr<PointerDataPacket> /*packet*/,
+                        uint64_t /*trace_flow_id*/) override {
+    dispatched_packet_count_++;
+    vsync_waiter_->AsyncWaitForVsync([this](auto) {
+      packet_counts_at_primary_callback_.push_back(dispatched_packet_count_);
+    });
+  }
+
+  void SchedulePreFrameVsyncCallback(uintptr_t id,
+                                     const fml::closure& callback) override {
+    vsync_waiter_->SchedulePreFrameCallback(id, callback);
+  }
+
+  int dispatched_packet_count_ = 0;
+  std::vector<int> packet_counts_at_primary_callback_;
+
+ private:
+  std::shared_ptr<TestVsyncWaiter> vsync_waiter_;
 };
 
 TEST(VsyncWaiterTest, NoUnneededAwaitVsync) {
@@ -142,6 +170,34 @@ TEST(VsyncWaiterTest, PreFrameCallbackScheduledAfterFireTargetsNextVsync) {
   EXPECT_EQ(callback_order,
             (std::vector<std::string>{"current pre-frame", "current primary",
                                       "next pre-frame"}));
+}
+
+TEST(VsyncWaiterTest, SmoothPointerDataJoinsTheSameVsync) {
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  const flutter::TaskRunners task_runners("smooth_pointer_same_vsync_test",
+                                          task_runner, task_runner, task_runner,
+                                          task_runner);
+  auto vsync_waiter = std::make_shared<TestVsyncWaiter>(task_runners);
+  TestPointerDataDispatcherDelegate delegate(vsync_waiter);
+  SmoothPointerDataDispatcher dispatcher(delegate);
+
+  dispatcher.DispatchPacket(std::make_unique<PointerDataPacket>(0), 1);
+  dispatcher.DispatchPacket(std::make_unique<PointerDataPacket>(0), 2);
+
+  // The first packet is dispatched immediately and the second is held until
+  // the pre-frame phase.
+  EXPECT_EQ(delegate.dispatched_packet_count_, 1);
+  EXPECT_EQ(vsync_waiter->await_vsync_call_count_, 1);
+
+  vsync_waiter->SimulateVsync();
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+
+  // Flushing the pending packet before the primary callback lets the frame
+  // consume both packets at this vsync. Flushing it as a secondary callback
+  // would leave the first frame with only one packet.
+  EXPECT_EQ(delegate.dispatched_packet_count_, 2);
+  EXPECT_EQ(delegate.packet_counts_at_primary_callback_, (std::vector<int>{2}));
 }
 
 }  // namespace testing
