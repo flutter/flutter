@@ -118,7 +118,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addMultiOption(
         'preset',
         abbr: 'P',
-        help: 'The configuration preset(s) to use.',
+        help: 'The configuration preset(s) to use. Presets are defined in "dart_test.yaml".',
         splitCommas: false,
       )
       ..addFlag(
