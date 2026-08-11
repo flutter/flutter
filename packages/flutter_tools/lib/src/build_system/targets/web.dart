@@ -12,6 +12,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
+import '../../base/logger.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../cache.dart';
@@ -300,6 +301,8 @@ class Dart2JSTarget extends Dart2WebTarget {
   ];
 }
 
+enum _DryRunOutcome { crash, success, failure, findings, unknown }
+
 /// Compiles a web entry point with dart2wasm.
 class Dart2WasmTarget extends Dart2WebTarget {
   Dart2WasmTarget(this.compilerConfig, this._analytics);
@@ -460,123 +463,29 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final int exitCode = runResult.exitCode;
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
-    String? result;
-    final Map<String, String> findingsInfo = {};
 
-    if (exitCode != 0 && exitCode != 254) {
-      environment.logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
-      if (stderr.isNotEmpty) {
-        environment.logger.printWarning(stdout);
-        environment.logger.printWarning(stderr);
-      }
-      result = 'crash';
-    } else if (exitCode == 0) {
-      environment.logger.printWarning(
-        'Wasm dry run succeeded. Consider building and testing your application with the '
-        '`--wasm` flag. See docs for more info: '
-        'https://docs.flutter.dev/platform-integration/web/wasm',
-      );
-      result = 'success';
-    } else if (stderr.isNotEmpty) {
-      environment.logger.printWarning('Wasm dry run failed:');
-      environment.logger.printWarning(stdout);
-      environment.logger.printWarning(stderr);
-      result = 'failure';
-    } else if (stdout.isNotEmpty) {
-      environment.logger.printWarning('Wasm dry run findings:');
-      environment.logger.printWarning(stdout);
-      environment.logger.printWarning(
-        'Consider addressing these issues to enable wasm builds. See docs for more info: '
-        'https://docs.flutter.dev/platform-integration/web/wasm\n',
-      );
-      result = 'findings';
-      final Map<String, Set<Uri>> errorCodeToImportUris = {};
-      for (final String line in stdout.split('\n')) {
-        final Uri uri = Uri.parse(line.split(' ')[0]);
-        final String? errorCode = RegExp(r'\(([0-9]+)\)\s*$').firstMatch(line)?.group(1);
-        if (errorCode != null) {
-          (errorCodeToImportUris[errorCode] ??= {}).add(uri);
-        }
-      }
+    final _DryRunOutcome outcome = _logAndClassifyDryRunResult(
+      environment.logger,
+      exitCode: exitCode,
+      stdout: stdout,
+      stderr: stderr,
+    );
 
-      final PackageConfig packageConfigPackages;
-      try {
-        packageConfigPackages = await loadPackageConfigWithLogging(
-          findPackageConfigFileOrDefault(environment.projectDir),
-          logger: environment.logger,
-        );
-      } on ToolExit {
-        _analytics.send(
-          Event.flutterWasmDryRunPackage(
-            result: result,
-            exitCode: exitCode,
-            findingsInfo: {
-              'error': 'packageConfigNotLoaded',
-              'findings': errorCodeToImportUris.keys.join(','),
-            },
-          ),
-        );
+    final Map<String, String> findingsInfo;
+    if (outcome == _DryRunOutcome.findings) {
+      final Map<String, String>? findings = await _collectFindingsInfo(
+        environment,
+        stdout,
+        exitCode,
+        outcome.name,
+      );
+      if (findings == null) {
         return;
       }
-
-      final Map<String, String> hostedPackages = {};
-      final Set<String> privatePackages = {};
-      for (final Package package in packageConfigPackages.packages) {
-        final String packageName = package.name;
-        if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList() case [
-          ...,
-          'hosted',
-          _,
-          final packageFolder,
-        ] when packageFolder.startsWith('$packageName-')) {
-          // Hosted package directories in .pub-cache follow '<packageName>-<version>'.
-          // Substring past the package name and hyphen to extract the version.
-          hostedPackages[packageName] = packageFolder.substring(packageName.length + 1);
-        } else {
-          privatePackages.add(packageName);
-        }
-      }
-
-      errorCodeToImportUris.forEach((String errorCode, Set<Uri> uris) {
-        final Set<String> hostedPackageFindings = {};
-        // Randomize the URI order so that we
-        final urisList = <Uri>[...uris]..shuffle(dryRunRandom);
-        var hostApp = false;
-        var privatePackage = false;
-        for (final uri in urisList) {
-          final String packageName = uri.pathSegments.first;
-          final String? hostedPackageVersion = hostedPackages[packageName];
-          if (uri.scheme == 'package') {
-            if (hostedPackageVersion != null) {
-              hostedPackageFindings.add('$packageName:$hostedPackageVersion');
-              continue;
-            } else if (privatePackages.contains(packageName)) {
-              privatePackage = true;
-              continue;
-            }
-          }
-          hostApp = true;
-        }
-        final String? hpHint = switch ((hostApp, privatePackage)) {
-          (true, true) => '-hp',
-          (true, false) => '-h',
-          (false, true) => '-p',
-          _ => null,
-        };
-
-        final findingsBuffer = StringBuffer(hpHint ?? '');
-        for (final hostedPackageFinding in hostedPackageFindings) {
-          // Try to fit as many findings as we can into the 100 character limit imposed
-          // by google analytics.
-          final pendingString = '${findingsBuffer.isNotEmpty ? ',' : ''}$hostedPackageFinding';
-          if (findingsBuffer.length + pendingString.length <= 100) {
-            findingsBuffer.write(pendingString);
-          }
-        }
-        findingsInfo['E$errorCode'] = findingsBuffer.toString();
-      });
+      findingsInfo = findings;
+    } else {
+      findingsInfo = const <String, String>{};
     }
-    result ??= 'unknown';
 
     _checkForLegacyWebImports(environment, stdout, stderr);
 
@@ -584,11 +493,193 @@ class Dart2WasmTarget extends Dart2WebTarget {
 
     _analytics.send(
       Event.flutterWasmDryRunPackage(
-        result: result,
+        result: outcome.name,
         exitCode: exitCode,
         findingsInfo: findingsInfo,
       ),
     );
+  }
+
+  static _DryRunOutcome _logAndClassifyDryRunResult(
+    Logger logger, {
+    required int exitCode,
+    required String stdout,
+    required String stderr,
+  }) {
+    if (exitCode != 0 && exitCode != 254) {
+      logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
+      if (stderr.isNotEmpty) {
+        logger.printWarning(stdout);
+        logger.printWarning(stderr);
+      }
+      return _DryRunOutcome.crash;
+    }
+    if (exitCode == 0) {
+      logger.printWarning(
+        'Wasm dry run succeeded. Consider building and testing your application with the '
+        '`--wasm` flag. See docs for more info: '
+        'https://docs.flutter.dev/platform-integration/web/wasm',
+      );
+      return _DryRunOutcome.success;
+    }
+    if (stderr.isNotEmpty) {
+      logger.printWarning('Wasm dry run failed:');
+      logger.printWarning(stdout);
+      logger.printWarning(stderr);
+      return _DryRunOutcome.failure;
+    }
+    if (stdout.isNotEmpty) {
+      logger.printWarning('Wasm dry run findings:');
+      logger.printWarning(stdout);
+      logger.printWarning(
+        'Consider addressing these issues to enable wasm builds. See docs for more info: '
+        'https://docs.flutter.dev/platform-integration/web/wasm\n',
+      );
+      return _DryRunOutcome.findings;
+    }
+    return _DryRunOutcome.unknown;
+  }
+
+  Future<Map<String, String>?> _collectFindingsInfo(
+    Environment environment,
+    String stdout,
+    int exitCode,
+    String result,
+  ) async {
+    final Map<String, Set<Uri>> errorCodeToImportUris = _parseWasmFindings(stdout);
+
+    final PackageConfig packageConfigPackages;
+    try {
+      packageConfigPackages = await loadPackageConfigWithLogging(
+        findPackageConfigFileOrDefault(environment.projectDir),
+        logger: environment.logger,
+      );
+    } on ToolExit {
+      _analytics.send(
+        Event.flutterWasmDryRunPackage(
+          result: result,
+          exitCode: exitCode,
+          findingsInfo: {
+            'error': 'packageConfigNotLoaded',
+            'findings': errorCodeToImportUris.keys.join(','),
+          },
+        ),
+      );
+      return null;
+    }
+
+    final (:Map<String, String> hosted, :Set<String> private) = _categorizePackages(
+      packageConfigPackages,
+    );
+    final findingsInfo = <String, String>{};
+    for (final MapEntry(key: errorCode, value: uris) in errorCodeToImportUris.entries) {
+      findingsInfo['E$errorCode'] = _formatFindingsBuffer(
+        uris: uris,
+        hostedPackages: hosted,
+        privatePackages: private,
+        random: dryRunRandom,
+      );
+    }
+    return findingsInfo;
+  }
+
+  static Map<String, Set<Uri>> _parseWasmFindings(String stdout) {
+    final errorCodeToImportUris = <String, Set<Uri>>{};
+    for (final String line in stdout.split('\n')) {
+      final Uri uri = Uri.parse(line.split(' ')[0]);
+      final String? errorCode = RegExp(r'\(([0-9]+)\)\s*$').firstMatch(line)?.group(1);
+      if (errorCode != null) {
+        (errorCodeToImportUris[errorCode] ??= {}).add(uri);
+      }
+    }
+    return errorCodeToImportUris;
+  }
+
+  static ({Map<String, String> hosted, Set<String> private}) _categorizePackages(
+    PackageConfig packageConfigPackages,
+  ) {
+    final hostedPackages = <String, String>{};
+    final privatePackages = <String>{};
+    for (final Package package in packageConfigPackages.packages) {
+      final String packageName = package.name;
+      if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList() case [
+        ...,
+        'hosted',
+        _,
+        final packageFolder,
+      ] when packageFolder.startsWith('$packageName-')) {
+        // Hosted package directories in .pub-cache follow '<packageName>-<version>'.
+        // Substring past the package name and hyphen to extract the version.
+        hostedPackages[packageName] = packageFolder.substring(packageName.length + 1);
+      } else {
+        privatePackages.add(packageName);
+      }
+    }
+    return (hosted: hostedPackages, private: privatePackages);
+  }
+
+  static String _formatFindingsBuffer({
+    required Set<Uri> uris,
+    required Map<String, String> hostedPackages,
+    required Set<String> privatePackages,
+    Random? random,
+  }) {
+    final urisList = <Uri>[...uris]..shuffle(random);
+    final (:hostedFindings, :hostApp, :privatePackage) = _classifyUris(
+      urisList,
+      hostedPackages,
+      privatePackages,
+    );
+    final String? hpHint = switch ((hostApp, privatePackage)) {
+      (true, true) => '-hp',
+      (true, false) => '-h',
+      (false, true) => '-p',
+      _ => null,
+    };
+    return _truncateAnalyticsBuffer(hpHint ?? '', hostedFindings);
+  }
+
+  static ({Set<String> hostedFindings, bool hostApp, bool privatePackage}) _classifyUris(
+    Iterable<Uri> uris,
+    Map<String, String> hostedPackages,
+    Set<String> privatePackages,
+  ) {
+    final hostedFindings = <String>{};
+    var hostApp = false;
+    var privatePackage = false;
+    for (final uri in uris) {
+      final String packageName = uri.pathSegments.first;
+      final String? hostedPackageVersion = hostedPackages[packageName];
+      if (uri.scheme == 'package') {
+        if (hostedPackageVersion != null) {
+          hostedFindings.add('$packageName:$hostedPackageVersion');
+          continue;
+        }
+        if (privatePackages.contains(packageName)) {
+          privatePackage = true;
+          continue;
+        }
+      }
+      hostApp = true;
+    }
+    return (hostedFindings: hostedFindings, hostApp: hostApp, privatePackage: privatePackage);
+  }
+
+  static String _truncateAnalyticsBuffer(
+    String prefix,
+    Iterable<String> findings, {
+    int maxLength = 100,
+  }) {
+    final findingsBuffer = StringBuffer(prefix);
+    for (final finding in findings) {
+      // Try to fit as many findings as we can into the character limit imposed
+      // by google analytics.
+      final pendingString = '${findingsBuffer.isNotEmpty ? ',' : ''}$finding';
+      if (findingsBuffer.length + pendingString.length <= maxLength) {
+        findingsBuffer.write(pendingString);
+      }
+    }
+    return findingsBuffer.toString();
   }
 
   static final RegExp _kLegacyImportErrorPattern = RegExp(
