@@ -57,6 +57,10 @@ class SwiftPackageManager {
   final Config _config;
   final Logger? _logger;
 
+  static File _savedDeploymentTargetFile(FlutterDarwinPlatform platform, Directory buildDirectory) {
+    return buildDirectory.childFile('.swift_pm_${platform.name}_deployment_target');
+  }
+
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
     FlutterDarwinPlatform platform,
@@ -138,7 +142,9 @@ class SwiftPackageManager {
         final pluginsPackage = SwiftPackage(
           manifest: project.flutterPluginSwiftPackageManifest,
           name: kFlutterGeneratedPluginSwiftPackageName,
-          platforms: <SwiftPackageSupportedPlatform>[platform.supportedPackagePlatform],
+          platforms: <SwiftPackageSupportedPlatform>[
+            _getSupportedPlatform(platform: platform, project: project),
+          ],
           products: <SwiftPackageProduct>[generatedProduct],
           dependencies: packageDependencies,
           targets: <SwiftPackageTarget>[generatedTarget],
@@ -153,6 +159,39 @@ class SwiftPackageManager {
         );
       },
     );
+  }
+
+  /// Returns the [SwiftPackageSupportedPlatform] for the given [platform] and [project].
+  ///
+  /// Will attempt to get the version from [_savedDeploymentTargetFile] and will fallback to the
+  /// default [FlutterDarwinPlatform.supportedPackagePlatform] if not found.
+  ///
+  /// The FlutterGeneratedPluginSwiftPackage minimum deployment target should match the app's
+  /// minimum deployment target. However, the app's build settings are not available during
+  /// non-build Flutter commands (e.g. `flutter pub get`). Instead `flutter build ios/macos
+  /// --config-only` must be used to determine the deployment target. Once found, it will be saved
+  /// to [_savedDeploymentTargetFile] so it can be used for subsequent non-build Flutter commands.
+  SwiftPackageSupportedPlatform _getSupportedPlatform({
+    required FlutterDarwinPlatform platform,
+    required XcodeBasedProject project,
+  }) {
+    final String buildDirectoryPath = platform.buildDirectory(
+      config: _config,
+      fileSystem: _fileSystem,
+    );
+    final Directory buildDirectory = _fileSystem.directory(buildDirectoryPath);
+    final File savedDeploymentTargetFile = _savedDeploymentTargetFile(platform, buildDirectory);
+    if (savedDeploymentTargetFile.existsSync()) {
+      final String savedDeploymentTarget = savedDeploymentTargetFile.readAsStringSync();
+      final Version? parsedDeploymentTarget = Version.parse(savedDeploymentTarget);
+      if (parsedDeploymentTarget != null) {
+        return SwiftPackageSupportedPlatform(
+          platform: platform.swiftPackagePlatform,
+          version: parsedDeploymentTarget,
+        );
+      }
+    }
+    return platform.supportedPackagePlatform;
   }
 
   (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>, Set<String>)
@@ -446,7 +485,7 @@ class SwiftPackageManager {
   }
 
   /// If the project's IPHONEOS_DEPLOYMENT_TARGET/MACOSX_DEPLOYMENT_TARGET is
-  /// higher than the FlutterGeneratedPluginSwiftPackage's default
+  /// higher than the FlutterGeneratedPluginSwiftPackage's current
   /// SupportedPlatform, increase the SupportedPlatform to match the project's
   /// deployment target.
   ///
@@ -465,6 +504,7 @@ class SwiftPackageManager {
     required XcodeBasedProject project,
     required FlutterDarwinPlatform platform,
     required String deploymentTarget,
+    required Directory buildDirectory,
   }) {
     final Version? projectDeploymentTargetVersion = Version.parse(deploymentTarget);
     final SwiftPackageSupportedPlatform defaultPlatform = platform.supportedPackagePlatform;
@@ -486,6 +526,10 @@ class SwiftPackageManager {
     project.flutterPluginSwiftPackageManifest.writeAsStringSync(
       manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),
     );
+
+    // Save version to file for future non-build command (e.g. `flutter pub get`)
+    final File savedDeploymentTargetFile = _savedDeploymentTargetFile(platform, buildDirectory);
+    savedDeploymentTargetFile.writeAsStringSync(projectDeploymentTargetVersion.toString());
   }
 
   /// Cleans up any stale or unreferenced plugin symlinks from the project's

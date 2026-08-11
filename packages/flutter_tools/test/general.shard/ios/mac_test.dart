@@ -797,6 +797,12 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         expect(
           logger.errorText,
           contains(
+            'Then run "flutter build ios --config-only" to regenerate the project\'s configuration files.',
+          ),
+        );
+        expect(
+          logger.errorText,
+          contains(
             'https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-use-a-swift-package-manager-flutter-plugin-that-requires-a-higher-os-version',
           ),
         );

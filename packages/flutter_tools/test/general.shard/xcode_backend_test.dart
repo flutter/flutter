@@ -59,6 +59,7 @@ void main() {
             '--ExtraFrontEndOptions=',
             '-dSrcRoot=',
             '-dXcodeBuildScript=build',
+            '-dDeploymentTarget=',
             '-dTargetDeviceOSVersion=',
             'debug_ios_bundle_flutter_assets',
           ],
@@ -140,6 +141,7 @@ void main() {
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
                 '-dXcodeBuildScript=build',
+                '-dDeploymentTarget=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 if (platform == TargetPlatform.macos) ...<String>[
                   '--build-inputs=/Flutter/ephemeral/FlutterInputs.xcfilelist',
@@ -162,6 +164,9 @@ void main() {
 
       test('forwards all env variables to flutter assemble', () {
         final targetPlatform = platform == TargetPlatform.ios ? 'Ios' : 'Darwin';
+        final deploymentTargetEnvVar = platform == TargetPlatform.ios
+            ? 'IPHONEOS_DEPLOYMENT_TARGET'
+            : 'MACOSX_DEPLOYMENT_TARGET';
         final Directory buildDir = fileSystem.directory('/path/to/builds')
           ..createSync(recursive: true);
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
@@ -180,6 +185,7 @@ void main() {
         const treeShake = 'true';
         const srcRoot = '/path/to/project';
         const iOSVersion = '18.3.1';
+        const deploymentTarget = '14.0';
         final context = TestContext(
           <String>['build', platformName],
           <String, String>{
@@ -206,6 +212,7 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
+            deploymentTargetEnvVar: deploymentTarget,
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -232,6 +239,7 @@ void main() {
                 '--ExtraFrontEndOptions=$extraFrontEndOptions',
                 '-dSrcRoot=$srcRoot',
                 '-dXcodeBuildScript=build',
+                '-dDeploymentTarget=$deploymentTarget',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
@@ -324,6 +332,7 @@ void main() {
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
               '-dSrcRoot=$srcRoot',
               '-dXcodeBuildScript=build-add-to-app',
+              '-dDeploymentTarget=',
               '-dTargetDeviceOSVersion=$iOSVersion',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_ios_bundle_flutter_assets',
@@ -434,6 +443,7 @@ void main() {
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
               '-dSrcRoot=$srcRoot',
               '-dXcodeBuildScript=build-add-to-app',
+              '-dDeploymentTarget=',
               'release_macos_bundle_flutter_assets',
             ],
           ),
@@ -713,6 +723,7 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dXcodeBuildScript=prepare',
+                '-dDeploymentTarget=',
                 '-dSrcRoot=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 'debug_unpack_$platformName',
@@ -769,6 +780,7 @@ void main() {
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
                 '-dXcodeBuildScript=prepare',
+                '-dDeploymentTarget=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 'debug_unpack_$platformName',
               ],
@@ -852,6 +864,7 @@ void main() {
                 '--ExtraFrontEndOptions=$extraFrontEndOptions',
                 '-dSrcRoot=$srcRoot',
                 '-dXcodeBuildScript=prepare',
+                '-dDeploymentTarget=',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
@@ -911,6 +924,7 @@ void main() {
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
                 '-dXcodeBuildScript=prepare',
+                '-dDeploymentTarget=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 'debug_unpack_$platformName',
               ],
@@ -968,6 +982,7 @@ void main() {
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
                 '-dXcodeBuildScript=prepare',
+                '-dDeploymentTarget=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 'debug_unpack_$platformName',
               ],
@@ -1024,6 +1039,7 @@ void main() {
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
                 '-dXcodeBuildScript=prepare',
+                '-dDeploymentTarget=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 'debug_unpack_$platformName',
               ],

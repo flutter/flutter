@@ -257,7 +257,7 @@ abstract class UnpackIOS extends UnpackDarwin {
   List<Source> get outputs => const <Source>[kFlutterIOSFrameworkBinarySource];
 
   @override
-  List<Target> get dependencies => <Target>[];
+  List<Target> get dependencies => <Target>[const IosSwiftPackageMinimumDeployment()];
 
   @visibleForOverriding
   BuildMode get buildMode;
@@ -953,5 +953,30 @@ Future<void> _signFramework(Environment environment, File binary, BuildMode buil
       output.writeln(stderr);
     }
     throw Exception(output.toString());
+  }
+}
+
+class IosSwiftPackageMinimumDeployment extends DarwinSwiftPackageMinimumDeployment {
+  const IosSwiftPackageMinimumDeployment();
+
+  @override
+  String get name => 'ios_swift_package_minimum_deployment';
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
+
+  @override
+  List<Source> get inputs {
+    return <Source>[
+      ...super.inputs,
+      Source.fromProject(
+        (FlutterProject project) => project.ios.xcodeProjectInfoFile,
+        optional: true,
+      ),
+      Source.fromProject(
+        (FlutterProject project) => project.ios.flutterPluginSwiftPackageManifest,
+        optional: true,
+      ),
+    ];
   }
 }

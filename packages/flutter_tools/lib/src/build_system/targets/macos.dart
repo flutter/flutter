@@ -48,7 +48,7 @@ abstract class UnpackMacOS extends UnpackDarwin {
   }
 
   @override
-  List<Target> get dependencies => <Target>[];
+  List<Target> get dependencies => <Target>[const MacOSSwiftPackageMinimumDeployment()];
 
   @override
   FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
@@ -684,5 +684,30 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
         );
       }
     }
+  }
+}
+
+class MacOSSwiftPackageMinimumDeployment extends DarwinSwiftPackageMinimumDeployment {
+  const MacOSSwiftPackageMinimumDeployment();
+
+  @override
+  String get name => 'macos_swift_package_minimum_deployment';
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
+
+  @override
+  List<Source> get inputs {
+    return <Source>[
+      ...super.inputs,
+      Source.fromProject(
+        (FlutterProject project) => project.macos.xcodeProjectInfoFile,
+        optional: true,
+      ),
+      Source.fromProject(
+        (FlutterProject project) => project.macos.flutterPluginSwiftPackageManifest,
+        optional: true,
+      ),
+    ];
   }
 }

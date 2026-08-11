@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -1596,6 +1597,146 @@ flutter:
         FileSystem: () => testFileSystem,
         ProcessManager: () => processManager,
         Platform: () => macPlatform,
+      },
+    );
+  });
+
+  group('IosSwiftPackageMinimumDeployment', () {
+    late FakeStdio fakeStdio;
+
+    setUp(() {
+      fakeStdio = FakeStdio();
+    });
+
+    testWithoutContext(
+      'DebugUnpackIOS includes IosSwiftPackageMinimumDeployment in dependencies',
+      () {
+        expect(
+          const DebugUnpackIOS().dependencies,
+          contains(const IosSwiftPackageMinimumDeployment()),
+        );
+      },
+    );
+
+    testUsingContext('canSkip returns true when kXcodeBuildScript is not prepare', () async {
+      const target = IosSwiftPackageMinimumDeployment();
+      environment.defines[kXcodeBuildScript] = 'build';
+      expect(await target.canSkip(environment), isTrue);
+
+      environment.defines[kXcodeBuildScript] = kXcodeBuildScriptValuePrepare;
+      expect(await target.canSkip(environment), isFalse);
+    });
+
+    testUsingContext(
+      'skips build when not using Swift PM',
+      () async {
+        const target = IosSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(logger.traceText, isEmpty);
+        expect(fakeStdio.buffer.toString(), isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(),
+        Stdio: () => fakeStdio,
+      },
+    );
+
+    testUsingContext(
+      'skips build when deployment target is missing or invalid',
+      () async {
+        final Directory iosDir = fileSystem.directory('ios')..createSync(recursive: true);
+        iosDir.childFile('Runner.xcodeproj').createSync();
+
+        const target = IosSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(logger.traceText, contains('Unexpected app deployment target version: null'));
+        expect(fakeStdio.buffer.toString(), isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        Stdio: () => fakeStdio,
+      },
+    );
+
+    testUsingContext(
+      'skips build when Swift PM manifest does not exist',
+      () async {
+        final Directory iosDir = fileSystem.directory('ios')..createSync(recursive: true);
+        iosDir.childFile('Runner.xcodeproj').createSync();
+        environment.defines[kDeploymentTarget] = '16.0';
+
+        const target = IosSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(
+          logger.traceText,
+          contains('FlutterGeneratedPluginSwiftPackage manifest does not exist'),
+        );
+        expect(fakeStdio.buffer.toString(), isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        Stdio: () => fakeStdio,
+      },
+    );
+
+    testUsingContext(
+      'prints warning when deployment target in manifest does not match',
+      () async {
+        final Directory iosDir = fileSystem.directory('ios')..createSync(recursive: true);
+        iosDir.childFile('Runner.xcodeproj').createSync();
+        iosDir
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('FlutterGeneratedPluginSwiftPackage')
+            .childFile('Package.swift')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('.iOS("15.0")');
+
+        environment.defines[kDeploymentTarget] = '16.0';
+
+        const target = IosSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(
+          fakeStdio.buffer.toString(),
+          contains(
+            'warning: The minimum platform version for FlutterGeneratedPluginSwiftPackage has not been updated. Please run "flutter build ios --config-only" and try again.\n',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        Stdio: () => fakeStdio,
+      },
+    );
+
+    testUsingContext(
+      'does not print warning when deployment target in manifest matches',
+      () async {
+        final Directory iosDir = fileSystem.directory('ios')..createSync(recursive: true);
+        iosDir.childFile('Runner.xcodeproj').createSync();
+        iosDir
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('FlutterGeneratedPluginSwiftPackage')
+            .childFile('Package.swift')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('.iOS("16.0")');
+
+        environment.defines[kDeploymentTarget] = '16.0';
+
+        const target = IosSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(fakeStdio.buffer.toString(), isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        Stdio: () => fakeStdio,
       },
     );
   });
