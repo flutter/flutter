@@ -141,7 +141,9 @@ class IconTreeShaker {
       familyKeys,
     );
 
-    final Set<String> missingFonts = iconData.keys.toSet().difference(fonts.keys.toSet());
+    final Set<String> missingFonts = iconData.keys
+        .where((String key) => !fonts.containsKey(key))
+        .toSet();
     if (missingFonts.isNotEmpty) {
       environment.logger.printStatus(
         'Expected to find fonts for $missingFonts, but found '
@@ -156,11 +158,9 @@ class IconTreeShaker {
     final result = <String, _IconTreeShakerData>{};
     const kSpacePoint = 32;
     for (final MapEntry(:key, :value) in fonts.entries) {
+      final int? fallbackCodePoint = _kKnownIconFontFallbackCodePoints[key];
       final List<int>? codePoints =
-          iconData[key] ??
-          (_kKnownIconFontFallbackCodePoints.containsKey(key)
-              ? <int>[_kKnownIconFontFallbackCodePoints[key]!]
-              : null);
+          iconData[key] ?? (fallbackCodePoint != null ? <int>[fallbackCodePoint] : null);
       if (codePoints == null) {
         throw IconTreeShakerException._(
           'Expected to font code points for $key, but none were found.',
