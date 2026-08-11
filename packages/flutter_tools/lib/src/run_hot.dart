@@ -114,6 +114,7 @@ class HotRunner extends ResidentRunner {
   final ProjectFileInvalidator? _projectFileInvalidator;
   final HotRunnerConfig? _hotRunnerConfig;
 
+  @override
   ProjectFileInvalidator get projectFileInvalidator =>
       _projectFileInvalidator ??
       ProjectFileInvalidator(fileSystem: fileSystem, platform: platform, logger: logger);

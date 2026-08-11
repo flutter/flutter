@@ -122,6 +122,8 @@ class TestCompiler {
     String? precompiledDillPath,
     this.residentCompilerFactory = const ResidentCompilerFactory(),
     this.testTimeRecorder,
+    Cache? cache,
+    String? flutterRoot,
   }) : _artifacts = artifacts,
        _config = config,
        _fileSystem = fileSystem,
@@ -129,6 +131,8 @@ class TestCompiler {
        _platform = platform,
        _processManager = processManager,
        _shutdownHooks = shutdownHooks,
+       _cache = cache,
+       _flutterRoot = flutterRoot,
        testFilePath =
            precompiledDillPath ??
            fileSystem.path.join(
@@ -182,6 +186,10 @@ class TestCompiler {
   final Platform _platform;
   final ProcessManager _processManager;
   final ShutdownHooks _shutdownHooks;
+  final Cache? _cache;
+  final String? _flutterRoot;
+
+  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
 
   ResidentCompiler? compiler;
   late File outputDill;
@@ -265,7 +273,7 @@ class TestCompiler {
         final LanguageVersion languageVersion = determineLanguageVersion(
           mainFile,
           buildInfo.packageConfig.packageOf(request.mainUri),
-          Cache.flutterRoot!,
+          _flutterRootPath,
         );
         if (languageVersion != _registrantLanguageVersion) {
           // (Re)generate the registrant. The output is keyed only on the plugin

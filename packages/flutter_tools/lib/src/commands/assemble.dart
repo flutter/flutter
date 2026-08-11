@@ -21,7 +21,6 @@ import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
 import '../build_system/targets/windows.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../project.dart';
@@ -288,7 +287,7 @@ class AssembleCommand extends FlutterCommand {
       defines: _parseDefines([...stringsArg('define'), ...decodedDefines]),
       inputs: _parseDefines(stringsArg('input')),
       cacheDir: _toolContext.cache.getRoot(),
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      flutterRootDir: fs.directory(_toolContext.cache.flutterRoot),
       artifacts: artifacts,
       fileSystem: fs,
       logger: _toolContext.logger,

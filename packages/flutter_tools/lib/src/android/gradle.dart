@@ -27,7 +27,6 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
@@ -848,7 +847,7 @@ To fix this, you can either:
     final String aarTask = getAarTaskFor(buildInfo);
     final Status status = _logger.startProgress("Running Gradle task '$aarTask'...");
 
-    final String flutterRoot = _fileSystem.path.absolute(Cache.flutterRoot!);
+    final String flutterRoot = _fileSystem.path.absolute(globals.cache.flutterRoot);
     final String initScript = _fileSystem.path.join(
       flutterRoot,
       'packages',

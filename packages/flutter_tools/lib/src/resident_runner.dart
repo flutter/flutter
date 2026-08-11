@@ -1123,6 +1123,8 @@ abstract class ResidentRunner extends ResidentHandlers {
   Xcode? get xcode => _xcode;
   ProcessManager get processManager => _processManager;
   OperatingSystemUtils? get osUtils => _osUtils;
+  ProjectFileInvalidator get projectFileInvalidator =>
+      ProjectFileInvalidator(fileSystem: fileSystem, platform: platform, logger: logger);
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -1186,7 +1188,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     cacheDir: _cache?.getRoot() ?? _fileSystem.directory('cache'),
     engineVersion: _flutterVersion?.engineRevision ?? 'engineVersion',
     fileSystem: _fileSystem,
-    flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
+    flutterRootDir: _fileSystem.directory(_cache?.flutterRoot ?? ''),
     outputDir: _fileSystem.directory(getBuildDirectory()),
     processManager: _processManager,
     platform: _platform,

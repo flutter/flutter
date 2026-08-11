@@ -93,19 +93,23 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.useWasm,
     required this.crossOriginIsolation,
     TestTimeRecorder? testTimeRecorder,
+    Cache? cache,
+    String? flutterRoot,
   }) : _fileSystem = fileSystem,
        _buildDirectory = buildDirectory,
        _testDartJs = testDartJs,
        _testHostDartJs = testHostDartJs,
        _chromiumLauncher = chromiumLauncher,
        _logger = logger,
-       _artifacts = artifacts {
+       _artifacts = artifacts,
+       _cache = cache,
+       _flutterRoot = flutterRoot {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(
           createDirectoryHandler(
             fileSystem.directory(
-              fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
+              fileSystem.path.join(_flutterRootPath, 'packages', 'flutter_tools'),
             ),
             crossOriginIsolated: crossOriginIsolation,
           ),
@@ -196,6 +200,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     required bool crossOriginIsolation,
     TestTimeRecorder? testTimeRecorder,
     Uri? testPackageUri,
+    Cache? cache,
+    String? flutterRoot,
     Future<shelf.Server> Function() serverFactory = defaultServerFactory,
   }) async {
     final shelf.Server server = await serverFactory();
@@ -237,6 +243,8 @@ class FlutterWebPlatform extends PlatformPlugin {
       useWasm: useWasm,
       crossOriginIsolation: crossOriginIsolation,
       testTimeRecorder: testTimeRecorder,
+      cache: cache,
+      flutterRoot: flutterRoot,
     );
   }
 
@@ -244,11 +252,16 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   final Configuration _config;
   final shelf.Server _server;
+  final Cache? _cache;
+  final String? _flutterRoot;
+
+  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
+
   Uri get url => _server.url;
 
   /// The ahem text file.
   File get _ahem => _fileSystem.file(
-    _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'static', 'Ahem.ttf'),
+    _fileSystem.path.join(_flutterRootPath, 'packages', 'flutter_tools', 'static', 'Ahem.ttf'),
   );
 
   /// The require js binary.

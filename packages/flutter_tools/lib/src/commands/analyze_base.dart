@@ -19,7 +19,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../cache.dart';
+import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
@@ -55,7 +55,7 @@ abstract class AnalyzeBase {
   final bool suppressAnalytics;
 
   @protected
-  String get flutterRoot => fileSystem.path.absolute(Cache.flutterRoot!);
+  String get flutterRoot => fileSystem.path.absolute(globals.cache.flutterRoot);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -143,12 +143,12 @@ class PackageDependency {
 
   bool get hasConflict => values.length > 1;
   bool hasConflictAffectingFlutterRepo(FileSystem fileSystem) {
-    final String? flutterRoot = Cache.flutterRoot;
-    assert(flutterRoot != null && fileSystem.path.isAbsolute(flutterRoot));
+    final String flutterRoot = globals.cache.flutterRoot;
+    assert(fileSystem.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
       for (final source in targetSources) {
         assert(fileSystem.path.isAbsolute(source));
-        if (fileSystem.path.isWithin(flutterRoot!, source)) {
+        if (fileSystem.path.isWithin(flutterRoot, source)) {
           return true;
         }
       }

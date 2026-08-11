@@ -19,7 +19,6 @@ import 'base/platform.dart';
 import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
@@ -1950,8 +1949,9 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
-  File mainFile,
-) async {
+  File mainFile, {
+  String? flutterRoot,
+}) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
@@ -1960,7 +1960,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
     packageConfig.packageOf(mainFile.absolute.uri),
-    Cache.flutterRoot!,
+    flutterRoot ?? '',
   );
   final templateContext = <String, Object>{
     'dartLanguageVersion': entrypointVersion.toString(),

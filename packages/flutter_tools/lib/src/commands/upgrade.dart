@@ -108,7 +108,8 @@ class UpgradeCommand extends FlutterCommand {
     final Platform platform = _toolContext.platform;
     final FlutterVersion flutterVersion = _toolContext.flutterVersion;
 
-    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot!;
+    _commandRunner.workingDirectory =
+        stringArg('working-directory') ?? _toolContext.cache.flutterRoot;
     return _commandRunner.runCommand(
       _parsePhaseFromContinueArg(),
       force: boolArg('force'),
@@ -313,7 +314,7 @@ class UpgradeCommandRunner {
 
     final int code = await processUtils.stream(
       [
-        fs.path.join(workingDirectory ?? Cache.flutterRoot!, 'bin', 'flutter'),
+        fs.path.join(workingDirectory ?? _toolContext.cache.flutterRoot, 'bin', 'flutter'),
         'upgrade',
         '--continue',
         '--continue-started-at',

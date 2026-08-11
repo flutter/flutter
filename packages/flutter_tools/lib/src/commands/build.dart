@@ -147,7 +147,7 @@ class BuildCommand extends FlutterCommand {
           git: Git(currentPlatform: effectivePlatform, runProcessWith: effectiveProcessUtils),
           localEngineLocator: LocalEngineLocator(
             fileSystem: fileSystem,
-            flutterRoot: Cache.flutterRoot ?? '',
+            flutterRoot: cache.flutterRoot,
             logger: logger,
             platform: effectivePlatform,
             userMessages: UserMessages(),
@@ -159,15 +159,7 @@ class BuildCommand extends FlutterCommand {
           preRunValidator:
               preRunValidator ??
               (contextPreRunValidator ??
-                  (!fileSystem
-                          .directory(
-                            fileSystem.path.join(
-                              Cache.flutterRoot ?? '',
-                              'packages',
-                              'flutter_tools',
-                            ),
-                          )
-                          .existsSync()
+                  (!fileSystem.directory(cache.flutterRoot).existsSync()
                       ? _NoopPreRunValidator()
                       : PreRunValidator(fileSystem: fileSystem))),
           processManager: processManager,
