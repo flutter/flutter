@@ -22,7 +22,7 @@ import 'test_page_tester.dart';
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
-  return MaterialPageRoute<void>(
+  return TestRoute<void>(
     settings: const RouteSettings(name: 'route'),
     builder: (BuildContext context) => Container(),
   );
@@ -451,19 +451,19 @@ void main() {
                 child: Navigator(
                   onGenerateRoute: (RouteSettings settings) {
                     if (settings.name == '/') {
-                      return MaterialPageRoute<void>(
+                      return TestRoute<void>(
                         builder: (BuildContext context) {
                           return ElevatedButton(
                             child: const Text('Next'),
                             onPressed: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute<void>(
+                                TestRoute<void>(
                                   builder: (BuildContext context) {
                                     return ElevatedButton(
                                       child: const Text('Inner page'),
                                       onPressed: () {
                                         Navigator.of(context, rootNavigator: true).push(
-                                          MaterialPageRoute<void>(
+                                          TestRoute<void>(
                                             builder: (BuildContext context) {
                                               return const Text('Dialog');
                                             },
@@ -916,7 +916,7 @@ void main() {
       );
 
       nav.currentState!.push(
-        MaterialPageRoute<void>(builder: (_) => const Placeholder()),
+        TestRoute<void>(builder: (_) => const Placeholder()),
       ); // This should create a route
       await tester.pumpAndSettle();
 
@@ -926,7 +926,7 @@ void main() {
 
     final events = <ObjectEvent>[];
     void listener(ObjectEvent event) {
-      if (event.object.runtimeType == MaterialPageRoute<void>) {
+      if (event.object.runtimeType == TestRoute<void>) {
         events.add(event);
       }
     }
@@ -1354,7 +1354,7 @@ void main() {
 
           switch (routeName) {
             case '/':
-              return MaterialPageRoute<bool>(
+              return TestRoute<bool>(
                 builder: (BuildContext context) => OnTapPage(
                   id: '/',
                   onTap: () async {
@@ -1364,7 +1364,7 @@ void main() {
                 settings: settings,
               );
             case '/A':
-              return MaterialPageRoute<bool>(
+              return TestRoute<bool>(
                 builder: (BuildContext context) => OnTapPage(
                   id: 'A',
                   onTap: () async {
@@ -1374,7 +1374,7 @@ void main() {
                 settings: settings,
               );
             case '/B':
-              return MaterialPageRoute<bool>(
+              return TestRoute<bool>(
                 builder: (BuildContext context) => OnTapPage(
                   id: 'B',
                   onTap: () async {
@@ -1864,9 +1864,7 @@ void main() {
 
     final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
 
-    final routeB = MaterialPageRoute<void>(
-      builder: (BuildContext context) => const OnTapPage(id: '/B'),
-    );
+    final routeB = TestRoute<void>(builder: (BuildContext context) => const OnTapPage(id: '/B'));
     navigator.replace(
       oldRoute: routes['/A']!,
       newRoute: routeB,
@@ -1906,9 +1904,7 @@ void main() {
 
     final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
 
-    final routeB = MaterialPageRoute<void>(
-      builder: (BuildContext context) => const OnTapPage(id: '/B'),
-    );
+    final routeB = TestRoute<void>(builder: (BuildContext context) => const OnTapPage(id: '/B'));
     navigator.replace(
       oldRoute: routes['/A']!,
       newRoute: routeB,
@@ -2050,9 +2046,7 @@ void main() {
 
     final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
 
-    final routeC = MaterialPageRoute<void>(
-      builder: (BuildContext context) => const OnTapPage(id: '/C'),
-    );
+    final routeC = TestRoute<void>(builder: (BuildContext context) => const OnTapPage(id: '/C'));
     navigator.pushAndRemoveUntil(
       routeC,
       ModalRoute.withName('/'),
@@ -2193,14 +2187,14 @@ void main() {
           child: const Text('A'),
           onPressed: () {
             key.currentState!.push<void>(
-              routeB = MaterialPageRoute<void>(
+              routeB = TestRoute<void>(
                 settings: const RouteSettings(name: 'B'),
                 builder: (BuildContext context) {
                   return TextButton(
                     child: const Text('B'),
                     onPressed: () {
                       key.currentState!.push<void>(
-                        MaterialPageRoute<int>(
+                        TestRoute<int>(
                           settings: const RouteSettings(name: 'C'),
                           builder: (BuildContext context) {
                             return TextButton(
@@ -2208,7 +2202,7 @@ void main() {
                               onPressed: () {
                                 key.currentState!.replace(
                                   oldRoute: routeB,
-                                  newRoute: MaterialPageRoute<int>(
+                                  newRoute: TestRoute<int>(
                                     settings: const RouteSettings(name: 'D'),
                                     builder: (BuildContext context) {
                                       return const Text('D');
@@ -2313,7 +2307,7 @@ void main() {
           child: const Text('A'),
           onPressed: () {
             key.currentState!.push<void>(
-              routeB = MaterialPageRoute<void>(
+              routeB = TestRoute<void>(
                 settings: const RouteSettings(name: 'B'),
                 builder: (BuildContext context) {
                   log.add('building B');
@@ -2321,7 +2315,7 @@ void main() {
                     child: const Text('B'),
                     onPressed: () {
                       key.currentState!.push<void>(
-                        MaterialPageRoute<int>(
+                        TestRoute<int>(
                           settings: const RouteSettings(name: 'C'),
                           builder: (BuildContext context) {
                             log.add('building C');
@@ -2331,8 +2325,9 @@ void main() {
                               onPressed: () {
                                 key.currentState!.replace(
                                   oldRoute: routeB,
-                                  newRoute: MaterialPageRoute<int>(
+                                  newRoute: TestRoute<int>(
                                     settings: const RouteSettings(name: 'D'),
+                                    maintainState: true,
                                     builder: (BuildContext context) {
                                       log.add('building D');
                                       return const Text('D');
@@ -2583,7 +2578,7 @@ void main() {
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           arguments.add(settings.arguments);
-          return MaterialPageRoute<void>(
+          return TestRoute<void>(
             settings: settings,
             builder: (BuildContext context) =>
                 Center(key: currentRouteKey = GlobalKey(), child: Text(settings.name!)),
@@ -2653,7 +2648,7 @@ void main() {
         navigatorKey: navigatorKey,
         onGenerateRoute: (RouteSettings settings) {
           arguments.add(settings.arguments);
-          return MaterialPageRoute<void>(
+          return TestRoute<void>(
             settings: settings,
             builder: (BuildContext context) => Center(child: Text(settings.name!)),
           );
@@ -3026,7 +3021,8 @@ void main() {
           key: testKey,
           initialRoute: '/a/b',
           onGenerateRoute: (RouteSettings s) {
-            return MaterialPageRoute<void>(
+            return TestRoute<void>(
+              maintainState: true,
               builder: (BuildContext c) {
                 return Text('+${s.name}+');
               },
@@ -3072,7 +3068,7 @@ void main() {
             final result = <Route<void>>[];
             for (final String route in initialRoute.split(' ')) {
               result.add(
-                MaterialPageRoute<void>(
+                TestRoute<void>(
                   builder: (BuildContext context) {
                     return Text(route);
                   },
@@ -3117,7 +3113,7 @@ void main() {
         home: Navigator(
           key: sub,
           onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute<void>(
+            return TestRoute<void>(
               settings: settings,
               builder: (BuildContext context) => const Text('dummy'),
             );
@@ -3169,7 +3165,7 @@ void main() {
           home: Navigator(
             key: sub,
             onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(
+              return TestRoute<void>(
                 settings: settings,
                 builder: (BuildContext context) => const Text('dummy'),
               );
@@ -3189,7 +3185,7 @@ void main() {
 
     final navigator = GlobalKey<NavigatorState>();
     final observer = TransitionDurationObserver();
-    final routeNameToContext = <String, MaterialPageRoute<dynamic>>{};
+    final routeNameToContext = <String, TestRoute<Object?>>{};
 
     await tester.pumpWidget(
       TestDependencies(
@@ -3198,11 +3194,12 @@ void main() {
           observers: <NavigatorObserver>[observer],
           initialRoute: 'root',
           onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute<void>(
+            return TestRoute<void>(
               settings: settings,
+              maintainState: true,
+              transitionDuration: const Duration(milliseconds: 300),
               builder: (BuildContext context) {
-                routeNameToContext[settings.name!] =
-                    ModalRoute.of(context)! as MaterialPageRoute<dynamic>;
+                routeNameToContext[settings.name!] = ModalRoute.of(context)! as TestRoute<Object?>;
                 return Text('Route: ${settings.name}');
               },
             );
@@ -3278,7 +3275,7 @@ void main() {
           child: Navigator(
             initialRoute: 'root',
             onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(
+              return TestRoute<void>(
                 settings: settings,
                 builder: (BuildContext context) {
                   return _TickingWidget(
@@ -3389,13 +3386,13 @@ void main() {
             key: top,
             initialRoute: 'top1',
             onGenerateRoute: (RouteSettings s) {
-              return MaterialPageRoute<void>(
+              return TestRoute<void>(
                 builder: (BuildContext c) {
                   return Navigator(
                     key: sub,
                     initialRoute: 'sub1',
                     onGenerateRoute: (RouteSettings s) {
-                      return MaterialPageRoute<void>(
+                      return TestRoute<void>(
                         builder: (BuildContext c) {
                           return const Placeholder();
                         },
@@ -3417,7 +3414,7 @@ void main() {
     expect(observations[0].previous, isNull);
 
     sub.currentState!.push(
-      MaterialPageRoute<void>(
+      TestRoute<void>(
         settings: const RouteSettings(name: 'sub2'),
         builder: (BuildContext context) => const Text('sub2'),
       ),
@@ -3429,7 +3426,7 @@ void main() {
     expect(observations.length, 1);
 
     top.currentState!.push(
-      MaterialPageRoute<void>(
+      TestRoute<void>(
         settings: const RouteSettings(name: 'top2'),
         builder: (BuildContext context) => const Text('top2'),
       ),
@@ -3467,7 +3464,7 @@ void main() {
             key: key1,
             initialRoute: 'navigator1',
             onGenerateRoute: (RouteSettings s) {
-              return MaterialPageRoute<void>(
+              return TestRoute<void>(
                 builder: (BuildContext c) {
                   return const Placeholder();
                 },
@@ -3487,7 +3484,7 @@ void main() {
             key: key2,
             initialRoute: 'navigator2',
             onGenerateRoute: (RouteSettings s) {
-              return MaterialPageRoute<void>(
+              return TestRoute<void>(
                 builder: (BuildContext c) {
                   return const Placeholder();
                 },
@@ -3501,7 +3498,7 @@ void main() {
     observations.clear();
 
     key2.currentState!.push(
-      MaterialPageRoute<void>(
+      TestRoute<void>(
         settings: const RouteSettings(name: 'new route'),
         builder: (BuildContext context) => const Text('new route'),
       ),
@@ -3556,7 +3553,7 @@ void main() {
                 key: key1,
                 initialRoute: 'navigator1',
                 onGenerateRoute: (RouteSettings s) {
-                  return MaterialPageRoute<void>(
+                  return TestRoute<void>(
                     builder: (BuildContext c) {
                       return const Placeholder();
                     },
@@ -3571,7 +3568,7 @@ void main() {
                 key: key2,
                 initialRoute: 'navigator2',
                 onGenerateRoute: (RouteSettings s) {
-                  return MaterialPageRoute<void>(
+                  return TestRoute<void>(
                     builder: (BuildContext c) {
                       return const Placeholder();
                     },
@@ -3602,7 +3599,7 @@ void main() {
                 key: key1,
                 initialRoute: 'navigator1',
                 onGenerateRoute: (RouteSettings s) {
-                  return MaterialPageRoute<void>(
+                  return TestRoute<void>(
                     builder: (BuildContext c) {
                       return const Placeholder();
                     },
@@ -3617,7 +3614,7 @@ void main() {
                 key: key2,
                 initialRoute: 'navigator2',
                 onGenerateRoute: (RouteSettings s) {
-                  return MaterialPageRoute<void>(
+                  return TestRoute<void>(
                     builder: (BuildContext c) {
                       return const Placeholder();
                     },
@@ -3633,7 +3630,7 @@ void main() {
 
     // Pushes a route to navigator2.
     key2.currentState!.push(
-      MaterialPageRoute<void>(
+      TestRoute<void>(
         settings: const RouteSettings(name: 'new route2'),
         builder: (BuildContext context) => const Text('new route2'),
       ),
@@ -3649,7 +3646,7 @@ void main() {
 
     // Pushes a route to navigator1
     key1.currentState!.push(
-      MaterialPageRoute<void>(
+      TestRoute<void>(
         settings: const RouteSettings(name: 'new route1'),
         builder: (BuildContext context) => const Text('new route1'),
       ),
@@ -3679,7 +3676,7 @@ void main() {
               Navigator(
                 initialRoute: 'navigator1',
                 onGenerateRoute: (RouteSettings s) {
-                  return MaterialPageRoute<void>(
+                  return TestRoute<void>(
                     builder: (BuildContext c) {
                       return const Placeholder();
                     },
@@ -3690,7 +3687,7 @@ void main() {
               Navigator(
                 initialRoute: 'navigator2',
                 onGenerateRoute: (RouteSettings s) {
-                  return MaterialPageRoute<void>(
+                  return TestRoute<void>(
                     builder: (BuildContext c) {
                       return const Placeholder();
                     },
@@ -3719,7 +3716,7 @@ void main() {
               Navigator(
                 initialRoute: 'navigator1',
                 onGenerateRoute: (RouteSettings s) {
-                  return MaterialPageRoute<void>(
+                  return TestRoute<void>(
                     builder: (BuildContext c) {
                       return const Placeholder();
                     },
@@ -3730,7 +3727,7 @@ void main() {
               Navigator(
                 initialRoute: 'navigator2',
                 onGenerateRoute: (RouteSettings s) {
-                  return MaterialPageRoute<void>(
+                  return TestRoute<void>(
                     builder: (BuildContext c) {
                       return const Placeholder();
                     },
@@ -4329,10 +4326,10 @@ void main() {
       expect(find.text('initial'), findsNothing);
       // Pushes two pageless routes to second page route
       navigator.currentState!.push(
-        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('second-pageless1')),
+        TestRoute<void>(builder: (BuildContext context) => const Text('second-pageless1')),
       );
       navigator.currentState!.push(
-        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('second-pageless2')),
+        TestRoute<void>(builder: (BuildContext context) => const Text('second-pageless2')),
       );
       await tester.pumpAndSettle();
       // Now the history should look like
@@ -4359,7 +4356,7 @@ void main() {
 
       // Pushes one pageless routes to third page route
       navigator.currentState!.push(
-        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('third-pageless1')),
+        TestRoute<void>(builder: (BuildContext context) => const Text('third-pageless1')),
       );
       await tester.pumpAndSettle();
       // Now the history should look like
@@ -4453,11 +4450,7 @@ void main() {
       );
       var initialPageless1Completed = false;
       navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('initial-pageless1'),
-            ),
-          )
+          .push(TestRoute<void>(builder: (BuildContext context) => const Text('initial-pageless1')))
           .then((_) => initialPageless1Completed = true);
       await tester.pumpAndSettle();
 
@@ -4472,20 +4465,12 @@ void main() {
       await tester.pumpAndSettle();
       var secondPageless1Completed = false;
       navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless1'),
-            ),
-          )
+          .push(TestRoute<void>(builder: (BuildContext context) => const Text('second-pageless1')))
           .then((_) => secondPageless1Completed = true);
       await tester.pumpAndSettle();
       var secondPageless2Completed = false;
       navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless2'),
-            ),
-          )
+          .push(TestRoute<void>(builder: (BuildContext context) => const Text('second-pageless2')))
           .then((_) => secondPageless2Completed = true);
       await tester.pumpAndSettle();
 
@@ -4501,11 +4486,7 @@ void main() {
       await tester.pumpAndSettle();
       var thirdPageless1Completed = false;
       navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('third-pageless1'),
-            ),
-          )
+          .push(TestRoute<void>(builder: (BuildContext context) => const Text('third-pageless1')))
           .then((_) => thirdPageless1Completed = true);
       await tester.pumpAndSettle();
 
@@ -4571,7 +4552,7 @@ void main() {
       expect(find.text('initial'), findsNothing);
       // Push pageless route to second page route
       navigator.currentState!.push(
-        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('second-pageless1')),
+        TestRoute<void>(builder: (BuildContext context) => const Text('second-pageless1')),
       );
 
       await tester.pumpAndSettle();
@@ -4629,11 +4610,7 @@ void main() {
       );
       var initialPageless1Completed = false;
       navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('initial-pageless1'),
-            ),
-          )
+          .push(TestRoute<void>(builder: (BuildContext context) => const Text('initial-pageless1')))
           .then((_) => initialPageless1Completed = true);
       await tester.pumpAndSettle();
 
@@ -4653,20 +4630,12 @@ void main() {
       );
       var secondPageless1Completed = false;
       navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless1'),
-            ),
-          )
+          .push(TestRoute<void>(builder: (BuildContext context) => const Text('second-pageless1')))
           .then((_) => secondPageless1Completed = true);
       await tester.pumpAndSettle();
       var secondPageless2Completed = false;
       navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('second-pageless2'),
-            ),
-          )
+          .push(TestRoute<void>(builder: (BuildContext context) => const Text('second-pageless2')))
           .then((_) => secondPageless2Completed = true);
       await tester.pumpAndSettle();
 
@@ -4687,11 +4656,7 @@ void main() {
       );
       var thirdPageless1Completed = false;
       navigator.currentState!
-          .push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const Text('third-pageless1'),
-            ),
-          )
+          .push(TestRoute<void>(builder: (BuildContext context) => const Text('third-pageless1')))
           .then((_) => thirdPageless1Completed = true);
       await tester.pumpAndSettle();
 
@@ -6314,7 +6279,7 @@ void main() {
           Navigator(
             key: navigatorKey,
             onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(
+              return TestRoute<void>(
                 builder: (BuildContext context) {
                   return const Center(child: Text('home'));
                 },
@@ -6352,7 +6317,7 @@ void main() {
     /// ---------MaterialApp End---------
     void pushWith(TraversalEdgeBehavior behavior) {
       navigatorKey.currentState!.push(
-        MaterialPageRoute<void>(
+        TestRoute<void>(
           directionalTraversalEdgeBehavior: behavior,
           builder: (BuildContext context) {
             return Column(children: <Widget>[makeFocus(1), makeFocus(2)]);
@@ -6772,7 +6737,7 @@ class CanPopPage<T> extends Page<T> {
 
   @override
   Route<T> createRoute(BuildContext context) {
-    return MaterialPageRoute<T>(builder: (BuildContext context) => Text(name!), settings: this);
+    return TestRoute<T>(builder: (BuildContext context) => Text(name!), settings: this);
   }
 }
 
@@ -6956,7 +6921,7 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
             case '/':
-              return MaterialPageRoute<void>(
+              return TestRoute<void>(
                 builder: (BuildContext context) {
                   return _LinksPage(
                     title: 'Nested - home',
@@ -6987,13 +6952,13 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
                 },
               );
             case '/one':
-              return MaterialPageRoute<void>(
+              return TestRoute<void>(
                 builder: (BuildContext context) {
                   return const _LinksPage(title: 'Nested - page one');
                 },
               );
             case '/popscope':
-              return MaterialPageRoute<void>(
+              return TestRoute<void>(
                 builder: (BuildContext context) {
                   return _LinksPage(canPop: widget.popScopePageEnabled, title: 'Nested - PopScope');
                 },
