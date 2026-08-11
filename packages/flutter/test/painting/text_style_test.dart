@@ -555,11 +555,10 @@ void main() {
 
     final ui.TextStyle ts2 = s2.getTextStyle();
 
-    // TODO(matanlurey): Remove when https://github.com/flutter/flutter/issues/112498 is resolved.
-    // The web implementation never includes "dither: ..." as a property, and after #112498 neither
-    // does non-web (as there will no longer be a user-visible "dither" property). So, relax the
-    // test to just check for the color by using a regular expression.
-    expect(ts2.toString(), matches(RegExp(r'background: Paint\(Color\(.*\).*\)')));
+    expect(
+      ts2.toString(),
+      contains('background: Paint(Color(alpha: 1.0000, red: 0.0000, green: 1.0000, blue: 0.0000,'),
+    );
   });
 
   test('TextStyle background and backgroundColor combos', () {
