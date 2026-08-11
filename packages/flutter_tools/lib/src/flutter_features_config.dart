@@ -102,7 +102,7 @@ interface class FlutterFeaturesConfig {
   /// ENABLE_FOO=any-other-value flutter some-command
   /// ```
   bool? isEnabled(Feature feature) {
-    return _isEnabledByPlatformEnvironment(feature) ?? _isEnabledByConfigValue(feature);
+    return _isEnabledByConfigValue(feature) ?? _isEnabledByPlatformEnvironment(feature);
   }
 
   bool? _isEnabledByConfigValue(Feature feature) {

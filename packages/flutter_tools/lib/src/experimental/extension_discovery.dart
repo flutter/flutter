@@ -62,10 +62,37 @@ class ExtensionConnection {
   }) async {
     logger.printTrace('ExtensionConnection spawning extension isolate...');
     final receivePort = ReceivePort();
+    final errorPort = RawReceivePort();
+    final exitPort = RawReceivePort();
+    final errorCompleter = Completer<Never>();
+
+    errorPort.handler = (Object? error) {
+      if (!errorCompleter.isCompleted) {
+        if (error is List && error.isNotEmpty) {
+          errorCompleter.completeError(StateError('Extension isolate error: ${error[0]}'));
+        } else {
+          errorCompleter.completeError(StateError('Extension isolate error: $error'));
+        }
+      }
+    };
+
+    exitPort.handler = (Object? _) {
+      if (!errorCompleter.isCompleted) {
+        errorCompleter.completeError(
+          StateError('Extension isolate exited unexpectedly before handshake completed.'),
+        );
+      }
+    };
+
     Isolate? isolate;
 
     try {
-      isolate = await Isolate.spawn(entryPoint, receivePort.sendPort);
+      isolate = await Isolate.spawn(
+        entryPoint,
+        receivePort.sendPort,
+        onError: errorPort.sendPort,
+        onExit: exitPort.sendPort,
+      );
       logger.printTrace('ExtensionConnection isolate spawned; connecting IsolateChannel...');
       final channel = IsolateChannel<Object?>.connectReceive(receivePort);
       final peer = json_rpc.Peer.withoutJson(channel);
@@ -73,9 +100,10 @@ class ExtensionConnection {
       unawaited(peer.listen());
 
       logger.printTrace('ExtensionConnection querying extension.getCapabilities...');
-      final Object? responseObj = await peer
-          .sendRequest('extension.getCapabilities')
-          .timeout(timeout);
+      final Object? responseObj = await Future.any<Object?>([
+        peer.sendRequest('extension.getCapabilities'),
+        errorCompleter.future,
+      ]).timeout(timeout);
       if (responseObj is! Map<String, Object?>) {
         throw StateError(
           'Extension handshake failed: extension.getCapabilities did not return a Map.',
@@ -86,6 +114,9 @@ class ExtensionConnection {
         'ExtensionConnection handshake complete. Capabilities: ${capabilities.services}',
       );
 
+      errorPort.close();
+      exitPort.close();
+
       return ExtensionConnection._(
         isolate: isolate,
         peer: peer,
@@ -94,11 +125,15 @@ class ExtensionConnection {
       );
     } on TimeoutException {
       logger.printTrace('ExtensionConnection handshake timed out.');
+      errorPort.close();
+      exitPort.close();
       receivePort.close();
       isolate?.kill(priority: Isolate.immediate);
       throw TimeoutException('Handshake with tool extension isolate timed out.');
     } on Object catch (error) {
       logger.printTrace('ExtensionConnection spawn failed with error: $error');
+      errorPort.close();
+      exitPort.close();
       receivePort.close();
       isolate?.kill(priority: Isolate.immediate);
       rethrow;
