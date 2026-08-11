@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -87,6 +88,149 @@ void testMain() {
 
   tearDown(() {
     printWarning = originalPrintWarning;
+  });
+
+  test('first-frame browser event waits for the first frame to be rendered', () async {
+    // Each dispatcher tracks only its own first frame, so this test brings its
+    // own and drives its `onDrawFrame` directly, instead of going through the
+    // singleton via `renderScene`, to stay independent of what ran before it.
+    final ownDispatcher = EnginePlatformDispatcher();
+    addTearDown(ownDispatcher.dispose);
+
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
+      createCanvas: () => FakeDisplayCanvas(),
+    );
+    final testRasterizer = TestRasterizer(view, displayFactory)
+      ..prepareCompleter = Completer<void>();
+    final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
+    renderer.rasterizers[view.viewId] = testRasterizer;
+    addTearDown(() => renderer.rasterizers[view.viewId] = originalRasterizer);
+
+    var firstFrameEventCount = 0;
+    final firstFrameEvent = Completer<void>();
+    final DomEventListener listener = createDomEventListener((DomEvent event) {
+      firstFrameEventCount++;
+      if (!firstFrameEvent.isCompleted) {
+        firstFrameEvent.complete();
+      }
+    });
+    domWindow.addEventListener('flutter-first-frame', listener);
+    addTearDown(() => domWindow.removeEventListener('flutter-first-frame', listener));
+
+    // Wait for next frame.
+    Future<void> waitForAnimationFrame() {
+      final completer = Completer<void>();
+      domWindow.requestAnimationFrame((_) {
+        Timer.run(completer.complete);
+      });
+      return completer.future;
+    }
+
+    // `render` only draws anything in an `onDrawFrame` scope, so a frame is a
+    // scene rendered from within `onDrawFrame`.
+    Future<void> renderFrame() {
+      final ui.Scene scene = ui.SceneBuilder().build();
+      addTearDown(scene.dispose);
+      late final Future<void> rendered;
+      ownDispatcher.onDrawFrame = () {
+        rendered = ownDispatcher.render(scene, view);
+      };
+      ownDispatcher.invokeOnDrawFrame();
+      return rendered;
+    }
+
+    final Future<void> renderFuture = renderFrame();
+    ownDispatcher.sendPlatformMessage(
+      'flutter/service_worker',
+      ByteData(0),
+      (ByteData? response) {},
+    );
+
+    // The render is parked in `prepareToDraw`, so nothing is on screen yet. The
+    // event is dispatched from an animation frame callback, so waiting for one
+    // is enough to observe it if it were sent too early.
+    await waitForAnimationFrame();
+    expect(firstFrameEventCount, 0);
+
+    testRasterizer.prepareCompleter!.complete();
+    await renderFuture;
+    await expectLater(firstFrameEvent.future, completes);
+
+    // Renders requested by later frames are not tracked, and don't dispatch the
+    // event again, no matter how many frames go by.
+    await renderFrame();
+    await waitForAnimationFrame();
+    expect(firstFrameEventCount, 1);
+
+    await renderFrame();
+    await waitForAnimationFrame();
+    expect(firstFrameEventCount, 1);
+  });
+
+  test('first-frame browser event is still sent if a first-frame render fails', () async {
+    // Each dispatcher tracks only its own first frame, so this test brings its
+    // own and drives its `onDrawFrame` directly instead of going through
+    // `renderScene`, to stay independent of what ran before it.
+    final ownDispatcher = EnginePlatformDispatcher();
+    addTearDown(ownDispatcher.dispose);
+
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
+      createCanvas: () => FakeDisplayCanvas(),
+    );
+    final testRasterizer = TestRasterizer(view, displayFactory)
+      ..prepareCompleter = Completer<void>();
+    final ViewRasterizer originalRasterizer = renderer.rasterizers[view.viewId]!;
+    renderer.rasterizers[view.viewId] = testRasterizer;
+    addTearDown(() => renderer.rasterizers[view.viewId] = originalRasterizer);
+
+    var firstFrameEventCount = 0;
+    final firstFrameEvent = Completer<void>();
+    final DomEventListener listener = createDomEventListener((DomEvent event) {
+      firstFrameEventCount++;
+      if (!firstFrameEvent.isCompleted) {
+        firstFrameEvent.complete();
+      }
+    });
+    domWindow.addEventListener('flutter-first-frame', listener);
+    addTearDown(() => domWindow.removeEventListener('flutter-first-frame', listener));
+
+    // Wait for next frame.
+    Future<void> waitForAnimationFrame() {
+      final completer = Completer<void>();
+      domWindow.requestAnimationFrame((_) {
+        Timer.run(completer.complete);
+      });
+      return completer.future;
+    }
+
+    final ui.Scene scene = ui.SceneBuilder().build();
+    addTearDown(scene.dispose);
+    late final Future<void> renderFuture;
+    ownDispatcher.onDrawFrame = () {
+      renderFuture = ownDispatcher.render(scene, view);
+    };
+    ownDispatcher.invokeOnDrawFrame();
+    ownDispatcher.sendPlatformMessage(
+      'flutter/service_worker',
+      ByteData(0),
+      (ByteData? response) {},
+    );
+
+    // The render is parked in `prepareToDraw`, so the first frame is not
+    // settled yet and the event is withheld.
+    await waitForAnimationFrame();
+    expect(firstFrameEventCount, 0);
+
+    // Failing the render settles the first frame too: `render` reports the
+    // failure to its caller, and the event still goes out, so an app hiding its
+    // loading screen on the event is not stuck on a failed frame.
+    testRasterizer.prepareCompleter!.completeError(StateError('render failed'));
+    await expectLater(renderFuture, throwsStateError);
+    await expectLater(firstFrameEvent.future, completes);
+    await waitForAnimationFrame();
+    expect(firstFrameEventCount, 1);
   });
 
   test('disposing platform view during prepareToDraw causes crash in submitFrame', () async {
