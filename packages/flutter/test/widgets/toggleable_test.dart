@@ -57,9 +57,13 @@ void main() {
   testWidgets('reactionAnimationDuration is only read when the state initializes', (
     WidgetTester tester,
   ) async {
+    const toggleableKey = Key('toggleable');
     await tester.pumpWidget(
       const TestWidgetsApp(
-        home: TestToggleable(reactionAnimationDuration: Duration(milliseconds: 250)),
+        home: TestToggleable(
+          key: toggleableKey,
+          reactionAnimationDuration: Duration(milliseconds: 250),
+        ),
       ),
     );
     final TestToggleableState state = tester.state<TestToggleableState>(
@@ -70,10 +74,16 @@ void main() {
     // re-initializing state.
     await tester.pumpWidget(
       const TestWidgetsApp(
-        home: TestToggleable(reactionAnimationDuration: Duration(milliseconds: 400)),
+        home: TestToggleable(
+          key: toggleableKey,
+          reactionAnimationDuration: Duration(milliseconds: 400),
+        ),
       ),
     );
 
+    // State is conserved across rebuilds, and the reaction controller keeps the
+    // duration that was read at initialization.
+    expect(tester.state(find.byKey(toggleableKey)), same(state));
     expect(state.reactionController.duration, const Duration(milliseconds: 250));
   });
 }
