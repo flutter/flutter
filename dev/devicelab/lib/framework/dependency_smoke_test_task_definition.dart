@@ -158,7 +158,10 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
       section('Add a dependency on a plugin');
       await flutter(
         'pub',
-        options: <String>['add', 'shared_preferences_android:2.4.7'], // Chosen randomly.
+        options: <String>[
+          'add',
+          'shared_preferences_android:2.4.24',
+        ], // Smallest version jump supporting AGP 9.
         workingDirectory: appPath,
       );
 
