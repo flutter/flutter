@@ -28,12 +28,12 @@ class MockLspServerProcess extends test_process_manager.FakeProcess {
   }
 
   final StreamController<List<int>> _stdinController;
-  final StringBuffer _inputBuffer = StringBuffer();
-  final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
+  final _inputBuffer = StringBuffer();
+  final _stdoutController = StreamController<List<int>>();
   final Completer<void> _exitCompleter;
 
   Completer<void>? _analysisCompleter;
-  final Completer<Map<String, Object?>> _initializeRequestCompleter = Completer();
+  final _initializeRequestCompleter = Completer<Map<String, Object?>>();
   Future<Map<String, Object?>> get initializeRequest => _initializeRequestCompleter.future;
 
   @override
