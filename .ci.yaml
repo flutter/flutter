@@ -5481,7 +5481,6 @@ targets:
   - name: Mac flavors_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
