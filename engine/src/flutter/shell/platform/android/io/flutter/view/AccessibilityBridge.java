@@ -2390,6 +2390,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (flags & flag.value) != 0;
     }
 
+    boolean hasRole(@NonNull Role role) {
+      return this.role == role.value;
+    }
+
     private boolean hadFlag(@NonNull Flag flag) {
       if (BuildConfig.DEBUG && !hadPreviousConfig) {
         Log.e(TAG, "Attempted to check hadFlag but had no previous config.");

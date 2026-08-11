@@ -9,6 +9,8 @@ package io.flutter.view;
  * AccessibilityBridge.Role}.
  */
 public class RoleConfiguratorFactory {
+  private static final AccessibilityNodeConfigurator tableConfigurator =
+      new TableRoleConfigurator();
   private static final AccessibilityNodeConfigurator progressBarConfigurator =
       new ProgressBarRoleConfigurator();
   private static final AccessibilityNodeConfigurator comboBoxConfigurator =
@@ -25,6 +27,8 @@ public class RoleConfiguratorFactory {
 
   public static AccessibilityNodeConfigurator getConfigurator(AccessibilityBridge.Role role) {
     switch (role) {
+      case TABLE:
+        return tableConfigurator;
       case PROGRESS_BAR:
         return progressBarConfigurator;
       case COMBO_BOX:
