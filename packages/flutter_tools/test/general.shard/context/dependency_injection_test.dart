@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
@@ -21,6 +22,8 @@ class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String? get javaPath => null;
 }
+
+class FakeBuildTargets extends Fake implements BuildTargets {}
 
 void main() {
   group('ToolDependencies.bootstrap', () {
@@ -72,7 +75,7 @@ void main() {
       expect(dependencies.analytics, isNotNull);
       expect(dependencies.toolContext.botDetector, isNotNull);
       expect(dependencies.buildSystem, isNotNull);
-      expect(dependencies.buildTargets, isNotNull);
+      expect(dependencies.buildTargets, isNull);
       expect(dependencies.crashReporter, isNotNull);
       expect(dependencies.toolContext.cache, isNotNull);
       expect(dependencies.toolContext.config, isNotNull);
@@ -114,6 +117,20 @@ void main() {
 
       expect(dependencies.androidContext.androidSdk, same(mockSdk));
       expect(dependencies.androidContext.androidStudio, same(mockStudio));
+    });
+
+    testUsingContext('respects explicit overrides for BuildTargets', () async {
+      final mockBuildTargets = FakeBuildTargets();
+
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        buildTargets: mockBuildTargets,
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      expect(dependencies.buildTargets, same(mockBuildTargets));
     });
   });
 }

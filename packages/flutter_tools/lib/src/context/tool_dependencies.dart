@@ -39,7 +39,6 @@ import '../ios/iproxy.dart';
 import '../ios/plist_parser.dart';
 import '../ios/simulators.dart';
 import '../ios/xcodeproj.dart';
-import '../isolated/build_targets.dart';
 import '../macos/cocoapods.dart';
 import '../macos/cocoapods_validator.dart';
 import '../macos/xcdevice.dart';
@@ -63,7 +62,7 @@ class ToolDependencies {
     required this.androidContext,
     required this.appleContext,
     required this.buildSystem,
-    required this.buildTargets,
+    this.buildTargets,
     required this.crashReporter,
     required this.toolContext,
   });
@@ -81,7 +80,7 @@ class ToolDependencies {
   final BuildSystem buildSystem;
 
   /// Factory interface for constructing compile and bundle build targets.
-  final BuildTargets buildTargets;
+  final BuildTargets? buildTargets;
 
   /// Captures and submits unhandled tool crash reports and stack traces.
   final CrashReporter crashReporter;
@@ -275,7 +274,7 @@ class ToolDependencies {
         buildSystem ??
         FlutterBuildSystem(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
-    final BuildTargets finalBuildTargets = buildTargets ?? const BuildTargetsImpl();
+    final finalBuildTargets = buildTargets;
 
     final CrashReporter finalCrashReporter =
         crashReporter ??
