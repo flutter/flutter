@@ -89,13 +89,17 @@ class OnTapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Page $id')),
-      body: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Center(child: Text(id, style: Theme.of(context).textTheme.displaySmall)),
-      ),
+    return Column(
+      children: <Widget>[
+        Text('Page $id'),
+        Expanded(
+          child: GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: Center(child: Text(id, style: const TextStyle(fontSize: 16))),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -208,7 +212,7 @@ void main() {
   ) async {
     final nav = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         navigatorKey: nav,
         home: const Scaffold(body: Text('home')),
       ),
@@ -530,7 +534,7 @@ void main() {
       },
       '/second': (BuildContext context) => Container(),
     };
-    await tester.pumpWidget(MaterialApp(routes: routes));
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
     expect(log, isEmpty);
     await tester.tap(find.text('left'));
     expect(log, equals(<String>['left']));
@@ -645,7 +649,7 @@ void main() {
       },
       '/second': (BuildContext context) => Container(),
     };
-    await tester.pumpWidget(MaterialApp(routes: routes));
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
     final TestGesture gesture = await tester.startGesture(
       tester.getCenter(find.text('right')),
       pointer: 23,
