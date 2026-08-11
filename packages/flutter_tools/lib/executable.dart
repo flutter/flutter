@@ -206,6 +206,7 @@ List<FlutterCommand> generateCommands({
   BuildCommand(
     androidContext: toolDependencies.androidContext,
     androidSdk: toolDependencies.androidContext.androidSdk,
+    appleContext: toolDependencies.appleContext,
     artifacts: toolDependencies.toolContext.artifacts,
     buildSystem: toolDependencies.buildSystem,
     cache: toolDependencies.toolContext.cache,

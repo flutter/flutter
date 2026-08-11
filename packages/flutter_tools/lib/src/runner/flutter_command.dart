@@ -1714,8 +1714,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void setupApplicationPackages() {
-    if (applicationPackages == null && toolContext == null) {
-      applicationPackages = ApplicationPackageFactory.instance;
+    if (applicationPackages == null) {
+      try {
+        applicationPackages = ApplicationPackageFactory.instance;
+      } on Object catch (_) {}
     }
   }
 
