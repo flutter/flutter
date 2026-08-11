@@ -466,17 +466,16 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       waitingForDebugger = true;
       try {
         await Future.any<void>([debuggerInitialized, debuggerInitializationFailedCompleter.future]);
-        sendEvent(RawEventBody(<String, Object?>{}), eventType: 'flutter.appStarted');
       } catch (e) {
         if (!isTerminating) {
           rethrow;
         }
+        return;
       } finally {
         waitingForDebugger = false;
       }
-    } else {
-      sendEvent(RawEventBody(<String, Object?>{}), eventType: 'flutter.appStarted');
     }
+    sendEvent(RawEventBody(<String, Object?>{}), eventType: 'flutter.appStarted');
   }
 
   /// Handles the app.stop event from Flutter.
