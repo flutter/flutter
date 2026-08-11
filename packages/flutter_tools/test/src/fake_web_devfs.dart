@@ -84,6 +84,7 @@ WebDevFS createWebDevFS({
   );
 }
 
+/// A fake [HttpServer] for testing.
 class FakeHttpServer extends Fake implements HttpServer {
   bool closed = false;
 
@@ -93,6 +94,7 @@ class FakeHttpServer extends Fake implements HttpServer {
   }
 }
 
+/// A fake [ResidentCompiler] for testing.
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   CompilerOutput? output;
 
@@ -117,6 +119,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   }
 }
 
+/// A fake [DevelopmentShaderCompiler] for testing.
 class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler({this.returnNull = false});
 
@@ -138,11 +141,13 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   bool areDependenciesModified(DevFSContent shaderContent) => false;
 }
 
+/// A fake [AssetBundle] for testing.
 class FakeAssetBundle extends Fake implements AssetBundle {
   @override
   final Map<String, AssetBundleEntry> entries = <String, AssetBundleEntry>{};
 }
 
+/// A fake [Dwds] service for testing.
 class FakeDwds extends Fake implements Dwds {
   FakeDwds(Iterable<AppConnection> connectedAppsIterable)
     : connectedApps = Stream<AppConnection>.fromIterable(connectedAppsIterable);
@@ -155,11 +160,13 @@ class FakeDwds extends Fake implements Dwds {
       Future<DebugConnection>.value(FakeDebugConnection());
 }
 
+/// A fake [AppConnection] for testing.
 class FakeAppConnection extends Fake implements AppConnection {
   @override
   void runMain() {}
 }
 
+/// A fake [DebugConnection] for testing.
 class FakeDebugConnection extends Fake implements DebugConnection {
   FakeDebugConnection({this.uri = 'http://foo'});
 
@@ -167,4 +174,5 @@ class FakeDebugConnection extends Fake implements DebugConnection {
   final String uri;
 }
 
+/// A fake [vm_service.VmService] for testing.
 class FakeVmService extends Fake implements vm_service.VmService {}
