@@ -314,6 +314,9 @@ const int _kMaxModuleNameBytes = 300;
 /// The maximum length, in bytes, of a structured test id case name.
 const int _kMaxCaseNameBytes = 512;
 
+/// Matches ASCII control characters (including newlines and tabs) and DEL.
+final RegExp _controlCharacters = RegExp(r'[\x00-\x1f\x7f]');
+
 /// Makes [moduleName] safe for a ResultDB structured test id.
 ///
 /// The module name must be non-empty, printable UTF-8 of at most
@@ -321,7 +324,7 @@ const int _kMaxCaseNameBytes = 512;
 /// build target names), so no escaping is required.
 String _sanitizeModuleName(String moduleName) {
   // Replace control characters (including newlines/tabs) with spaces.
-  final String sanitized = moduleName.replaceAll(RegExp(r'[\x00-\x1f\x7f]'), ' ');
+  final String sanitized = moduleName.replaceAll(_controlCharacters, ' ');
   return _truncateToBytes(sanitized.isEmpty ? 'unknown' : sanitized, _kMaxModuleNameBytes);
 }
 
@@ -337,7 +340,7 @@ String _sanitizeModuleName(String moduleName) {
 /// whole batch of results to be rejected.
 String _sanitizeCaseName(String caseName) {
   // Replace control characters (including newlines/tabs) with spaces.
-  String sanitized = caseName.replaceAll(RegExp(r'[\x00-\x1f\x7f]'), ' ');
+  String sanitized = caseName.replaceAll(_controlCharacters, ' ');
   // "*fixture" is a reserved value (used for setup/teardown); leave it as-is.
   if (sanitized != '*fixture') {
     // Escape backslashes first, then colons (order matters).
