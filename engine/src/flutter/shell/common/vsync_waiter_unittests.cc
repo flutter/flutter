@@ -172,6 +172,41 @@ TEST(VsyncWaiterTest, PreFrameCallbackScheduledAfterFireTargetsNextVsync) {
                                       "next pre-frame"}));
 }
 
+TEST(VsyncWaiterTest, OlderVsyncCannotCloseNewerRegistrationWindow) {
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  const flutter::TaskRunners task_runners("vsync_waiter_generation_test",
+                                          task_runner, task_runner, task_runner,
+                                          task_runner);
+  auto vsync_waiter = std::make_shared<TestVsyncWaiter>(task_runners);
+  std::vector<std::string> callback_order;
+
+  vsync_waiter->SchedulePreFrameCallback(
+      1, [&] { callback_order.push_back("current pre-frame"); });
+  vsync_waiter->AsyncWaitForVsync(
+      [&](auto) { callback_order.push_back("current primary"); });
+  vsync_waiter->SimulateVsync();
+
+  // Arm another vsync before the UI task for the current primary callback has
+  // run, as can happen when the UI thread is blocked for a frame interval.
+  vsync_waiter->SchedulePreFrameCallback(
+      2, [&] { callback_order.push_back("next pre-frame"); });
+  task_runner->PostTask([&] {
+    callback_order.push_back("between primary callbacks");
+    EXPECT_TRUE(vsync_waiter->CanRegisterCallbackForCurrentVsync());
+    vsync_waiter->AsyncWaitForVsync(
+        [&](auto) { callback_order.push_back("next primary"); });
+  });
+  vsync_waiter->SimulateVsync();
+
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  EXPECT_EQ(callback_order,
+            (std::vector<std::string>{"current pre-frame", "current primary",
+                                      "between primary callbacks",
+                                      "next pre-frame", "next primary"}));
+  EXPECT_FALSE(vsync_waiter->CanRegisterCallbackForCurrentVsync());
+}
+
 TEST(VsyncWaiterTest, SmoothPointerDataJoinsTheSameVsync) {
   fml::MessageLoop::EnsureInitializedForCurrentThread();
   auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();

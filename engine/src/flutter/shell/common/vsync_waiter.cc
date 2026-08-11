@@ -43,7 +43,7 @@ void VsyncWaiter::AsyncWaitForVsync(const Callback& callback) {
       return;
     }
     callback_ = callback;
-    if (vsync_fire_in_progress_) {
+    if (vsync_fire_sequence_number_ > vsync_fire_consumed_sequence_number_) {
       return;
     }
     if (!pre_frame_callbacks_.empty() || !secondary_callbacks_.empty()) {
@@ -56,7 +56,7 @@ void VsyncWaiter::AsyncWaitForVsync(const Callback& callback) {
 
 bool VsyncWaiter::CanRegisterCallbackForCurrentVsync() {
   std::scoped_lock lock(callback_mutex_);
-  return vsync_fire_in_progress_;
+  return vsync_fire_sequence_number_ > vsync_fire_consumed_sequence_number_;
 }
 
 void VsyncWaiter::SchedulePreFrameCallback(uintptr_t id,
@@ -79,7 +79,7 @@ void VsyncWaiter::SchedulePreFrameCallback(uintptr_t id,
                            "MultipleCallsToPreFrameVsyncInFrameInterval");
       return;
     }
-    if (vsync_fire_in_progress_) {
+    if (vsync_fire_sequence_number_ > vsync_fire_consumed_sequence_number_) {
       if (!callbacks_originally_empty) {
         return;
       }
@@ -111,7 +111,7 @@ void VsyncWaiter::ScheduleSecondaryCallback(uintptr_t id,
                            "MultipleCallsToSecondaryVsyncInFrameInterval");
       return;
     }
-    if (vsync_fire_in_progress_) {
+    if (vsync_fire_sequence_number_ > vsync_fire_consumed_sequence_number_) {
       if (!callbacks_originally_empty) {
         return;
       }
@@ -134,6 +134,7 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
   FML_DCHECK(fml::TimePoint::Now() >= frame_start_time);
 
   bool had_primary_callback = false;
+  uint64_t vsync_fire_sequence_number = 0;
   std::vector<fml::closure> pre_frame_callbacks;
   std::vector<fml::closure> secondary_callbacks;
 
@@ -150,9 +151,11 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
     secondary_callbacks_.clear();
     // Do not take callback_ until after the pre-frame callbacks have run. They
     // may synchronously process input and register a primary callback that can
-    // still be rendered for this vsync.
-    vsync_fire_in_progress_ =
-        had_primary_callback || !pre_frame_callbacks.empty();
+    // still be rendered for this vsync. Track the generation so consuming an
+    // older callback cannot close a newer vsync's registration window.
+    if (had_primary_callback || !pre_frame_callbacks.empty()) {
+      vsync_fire_sequence_number = ++vsync_fire_sequence_number_;
+    }
   }
 
   if (!had_primary_callback && pre_frame_callbacks.empty() &&
@@ -180,12 +183,16 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
     std::shared_ptr<VsyncWaiter> waiter = shared_from_this();
     task_runners_.GetUITaskRunner()->PostTask(
         [waiter, ui_task_queue_id, frame_start_time, frame_target_time,
-         pause_secondary_tasks]() {
+         pause_secondary_tasks, vsync_fire_sequence_number]() {
           Callback callback;
           {
             std::scoped_lock lock(waiter->callback_mutex_);
             waiter->callback_.swap(callback);
-            waiter->vsync_fire_in_progress_ = false;
+            if (vsync_fire_sequence_number >
+                waiter->vsync_fire_consumed_sequence_number_) {
+              waiter->vsync_fire_consumed_sequence_number_ =
+                  vsync_fire_sequence_number;
+            }
           }
 
           if (callback) {

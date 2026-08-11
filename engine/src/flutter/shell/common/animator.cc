@@ -260,7 +260,8 @@ void Animator::RequestFrame(bool regenerate_layer_trees) {
   // started an expensive operation right after posting this message however.
   // To support that, we need edge triggered wakes on VSync.
 
-  if (waiter_->CanRegisterCallbackForCurrentVsync()) {
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() &&
+      waiter_->CanRegisterCallbackForCurrentVsync()) {
     // The platform vsync has fired, but its primary callback has not yet been
     // consumed. Posting AwaitVSync would put it behind the task that consumes
     // the callback and would defer the frame to the following vsync. Register

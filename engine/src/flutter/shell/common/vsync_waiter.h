@@ -87,12 +87,12 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
  private:
   std::mutex callback_mutex_;
   Callback callback_;
-  // True after FireCallback receives a platform vsync and until its primary
-  // callback is taken on the UI task runner. Keeping callback_ available during
-  // this interval lets pre-frame input handling register work for the current
-  // vsync. Pre-frame and secondary callbacks added during this interval are
-  // retained for the next vsync.
-  bool vsync_fire_in_progress_ = false;
+  // The latest platform vsync generation posted to the UI task runner and the
+  // latest generation whose primary callback task has begun. Their difference
+  // preserves the registration window even if another platform vsync arrives
+  // while the UI thread is still processing the previous generation.
+  uint64_t vsync_fire_sequence_number_ = 0;
+  uint64_t vsync_fire_consumed_sequence_number_ = 0;
   std::unordered_map<uintptr_t, fml::closure> pre_frame_callbacks_;
   std::unordered_map<uintptr_t, fml::closure> secondary_callbacks_;
 
