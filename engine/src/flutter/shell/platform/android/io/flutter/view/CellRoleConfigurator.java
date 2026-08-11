@@ -46,6 +46,9 @@ public class CellRoleConfigurator extends BaseRoleConfigurator {
     // records it in SemanticsNode.indexInParent, but that field stays in the framework and is
     // never sent over the semantics wire, so it is not available here.
     final int columnIndex = row.childrenInTraversalOrder.indexOf(node);
+    if (columnIndex < 0) {
+      return;
+    }
 
     final boolean isHeading =
         node.hasRole(AccessibilityBridge.Role.COLUMN_HEADER)
