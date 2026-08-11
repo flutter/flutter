@@ -231,8 +231,9 @@ static std::pair<Rect, Color> ExpandRectToPixelMinimum(const Rect& rect,
 ///
 /// @return Whether the color source was successfully populated into `params`.
 static bool PopulateUberSDFColorSource(
-    const flutter::DlColorSource& color_source,
     const ContentContext& renderer,
+    const flutter::DlColorSource& color_source,
+    const std::optional<Matrix>& shape_transform,
     UberSDFParameters& params) {
   if (color_source.isGradient()) {
     UberSDFParameters::GradientParameters gradient;
@@ -240,23 +241,46 @@ static bool PopulateUberSDFColorSource(
     std::vector<Color> colors;
     std::vector<float> stops;
 
+    // When a shape transform is applied to transform the SDF shape from local
+    // space into canvas space, the gradient parameters must be mapped from
+    // canvas space into local space via the inverse shape transform.
+    Matrix inverted_shape_transform =
+        shape_transform.has_value() ? shape_transform->Invert() : Matrix();
+
     if (color_source.type() == flutter::DlColorSourceType::kLinearGradient) {
       const auto* linear = color_source.asLinearGradient();
       FML_DCHECK(linear);
+      Matrix gradient_transform = inverted_shape_transform * linear->matrix();
+      if (!gradient_transform.IsAffine()) {
+        // Non-affine matrix transformation not supported by UberSDF.
+        return false;
+      }
       Paint::ConvertStops(linear, colors, stops);
       gradient.type = UberSDFParameters::GradientParameters::Type::kLinear;
-      gradient.start = linear->start_point();
-      gradient.end = linear->end_point();
+      gradient.start = gradient_transform * linear->start_point();
+      gradient.end = gradient_transform * linear->end_point();
       gradient.tile_mode = static_cast<Entity::TileMode>(linear->tile_mode());
     } else if (color_source.type() ==
                flutter::DlColorSourceType::kRadialGradient) {
       const auto* radial = color_source.asRadialGradient();
       FML_DCHECK(radial);
+      Matrix gradient_transform = inverted_shape_transform * radial->matrix();
+      if (!gradient_transform.IsAffine()) {
+        // Non-affine matrix transformation not supported by UberSDF.
+        return false;
+      }
+      auto scales = gradient_transform.GetScales2D();
+      if (!scales.has_value() ||
+          !ScalarNearlyEqual(scales->first, scales->second)) {
+        // Non-uniform scaling on a radial gradient creates an ellipse, which is
+        // not supported by UberSDF.
+        return false;
+      }
       Paint::ConvertStops(radial, colors, stops);
       gradient.type = UberSDFParameters::GradientParameters::Type::kRadial;
-      gradient.start = radial->center();
+      gradient.start = gradient_transform * radial->center();
       // For radial gradients, gradient.end.x stores the radius.
-      gradient.end = Point(radial->radius(), 0.0f);
+      gradient.end = Point(radial->radius() * scales->first, 0.0f);
       gradient.tile_mode = static_cast<Entity::TileMode>(radial->tile_mode());
     } else {
       // Gradient type not supported by UberSDF.
@@ -2236,7 +2260,8 @@ void Canvas::AddRenderSDFEntityToCurrentPass(
   entity.SetBlendMode(paint.blend_mode);
 
   if (!paint.color_source ||
-      PopulateUberSDFColorSource(*paint.color_source, renderer_, params)) {
+      PopulateUberSDFColorSource(renderer_, *paint.color_source,
+                                 shape_transform, params)) {
     // No color source (solid paint color), or a supported color source was
     // populated into UberSDFParams.
     auto geometry = std::make_unique<UberSDFGeometry>(params);
