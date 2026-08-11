@@ -765,6 +765,15 @@ Future<void> testMain() async {
     // The connection close is deferred so that refocus cancels it; otherwise the
     // keyboard dismisses mid-drag.
     // Regression test for https://github.com/flutter/flutter/issues/189744
+    //
+    // The tests below that dispatch a real `blur()` are skipped on desktop
+    // Safari. `debugEmulateIosSafari` flips `isIosSafari` inside [handleBlur],
+    // but it cannot change which strategy was constructed: on desktop Safari
+    // that is [SafariDesktopTextEditingStrategy], which deliberately does not
+    // subscribe to `blur` (see [DefaultTextEditingStrategy.addEventHandlers]),
+    // so a dispatched blur never reaches [handleBlur]. On actual iOS the
+    // strategy is [IOSTextEditingStrategy], which does subscribe. Tests that
+    // call [handleBlur] directly are unaffected and still run everywhere.
     test('keeps the text connection open on iOS when the input refocuses after a '
         'null-relatedTarget blur', () async {
       final spy = PlatformMessagesSpy();
@@ -794,7 +803,9 @@ Future<void> testMain() async {
       }
 
       spy.tearDown();
-    });
+      // See the note above: dispatches a real blur, so it cannot run on desktop
+      // Safari, where it would pass vacuously.
+    }, skip: isSafari);
 
     // The Done button and tapping away also blur with `relatedTarget == null`,
     // but do not refocus, so the deferred close must still fire.
@@ -823,7 +834,9 @@ Future<void> testMain() async {
       }
 
       spy.tearDown();
-    });
+      // See the note above: dispatches a real blur, so it cannot run on desktop
+      // Safari.
+    }, skip: isSafari);
 
     // The deferral is iOS-only: elsewhere a null-relatedTarget blur closes
     // immediately.
@@ -885,7 +898,9 @@ Future<void> testMain() async {
       }
 
       spy.tearDown();
-    });
+      // See the note above: dispatches a real blur, so it cannot run on desktop
+      // Safari, where it would pass vacuously.
+    }, skip: isSafari);
 
     test(
       'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
