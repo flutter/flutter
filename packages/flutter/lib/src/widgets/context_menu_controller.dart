@@ -20,7 +20,7 @@ import 'overlay.dart';
 /// This example shows how to use a GestureDetector to show a context menu
 /// anywhere in a widget subtree that receives a right click or long press.
 ///
-/// ** See code in examples/api/lib/material/context_menu/context_menu_controller.0.dart **
+/// ** See code in examples/api/lib/widgets/context_menu/context_menu_controller.0.dart **
 /// {@end-tool}
 ///
 /// See also:
