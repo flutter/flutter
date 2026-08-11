@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'test_page_tester.dart';
+
 class OnTapPage extends StatelessWidget {
   const OnTapPage({super.key, required this.id, required this.onTap});
 
@@ -106,7 +108,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
-          pages: const <Page<void>>[TestPage(name: '/')],
+          pages: const <Page<void>>[TestPage(name: '/', child: Placeholder())],
           onPopPage: (Route<void> route, void result) => false,
         ),
       ),
@@ -119,8 +121,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Navigator(
           pages: const <Page<void>>[
-            TestPage(name: '/'),
-            TestPage(name: '/abc'),
+            TestPage(name: '/', child: Placeholder()),
+            TestPage(name: '/abc', child: Placeholder()),
           ],
           onPopPage: (Route<void> route, void result) => false,
         ),
@@ -357,21 +359,4 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   @override
   Widget build(BuildContext context) => builder(context, routeInformation);
-}
-
-class TestPage extends Page<void> {
-  const TestPage({super.key, super.name});
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return PageRouteBuilder<void>(
-      settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => const Placeholder(),
-    );
-  }
 }

@@ -18,6 +18,7 @@ import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'route_tester.dart';
 import 'semantics_tester.dart';
+import 'test_page_tester.dart';
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
@@ -3794,10 +3795,10 @@ void main() {
 
     testWidgets('can initialize with pages list', (WidgetTester tester) async {
       final navigator = GlobalKey<NavigatorState>();
-      final myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
-        const TestPage(key: ValueKey<String>('3'), name: 'third'),
+      final myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
       ];
 
       bool onPopPage(Route<dynamic> route, dynamic result) {
@@ -3830,8 +3831,12 @@ void main() {
     ) async {
       // Regression test for https://github.com/flutter/flutter/issues/97363.
       final navigator = GlobalKey<NavigatorState>();
-      final myPages1 = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
-      final myPages2 = <TestPage>[const TestPage(key: ValueKey<String>('2'), name: 'second')];
+      final myPages1 = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+      ];
+      final myPages2 = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
+      ];
 
       bool onPopPage(Route<dynamic> route, dynamic result) => false;
 
@@ -3860,10 +3865,10 @@ void main() {
     });
 
     testWidgets('throw if onPopPage callback is not provided', (WidgetTester tester) async {
-      final myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
-        const TestPage(key: ValueKey<String>('3'), name: 'third'),
+      final myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
       ];
 
       await tester.pumpWidget(
@@ -3898,7 +3903,7 @@ void main() {
       experimentalLeakTesting: LeakTesting.settings
           .withIgnoredAll(), // leaking by design because of exception
       (WidgetTester tester) async {
-        final myPages = <TestPage>[];
+        final myPages = <TestPage<Object?>>[];
         final FlutterExceptionHandler? originalOnError = FlutterError.onError;
         FlutterErrorDetails? firstError;
         FlutterError.onError = (FlutterErrorDetails? detail) {
@@ -4308,9 +4313,9 @@ void main() {
 
     testWidgets('can work with pageless route', (WidgetTester tester) async {
       final navigator = GlobalKey<NavigatorState>();
-      var myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      var myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
 
       bool onPopPage(Route<dynamic> route, dynamic result) {
@@ -4338,10 +4343,10 @@ void main() {
       expect(find.text('second-pageless1'), findsNothing);
       expect(find.text('second-pageless2'), findsOneWidget);
 
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
-        const TestPage(key: ValueKey<String>('3'), name: 'third'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
       ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
@@ -4367,10 +4372,10 @@ void main() {
       expect(find.text('third'), findsNothing);
       expect(find.text('third-pageless1'), findsOneWidget);
 
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('3'), name: 'third'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
@@ -4435,7 +4440,9 @@ void main() {
 
     testWidgets('complex case 1', (WidgetTester tester) async {
       final navigator = GlobalKey<NavigatorState>();
-      var myPages = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
+      var myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+      ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
         myPages.removeWhere((Page<dynamic> page) => route.settings == page);
         return route.didPop(result);
@@ -4456,9 +4463,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Pushes second page route with two pageless routes.
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
@@ -4484,10 +4491,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Pushes third page route with one pageless route.
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
-        const TestPage(key: ValueKey<String>('3'), name: 'third'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
       ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
@@ -4510,9 +4517,9 @@ void main() {
       expect(thirdPageless1Completed, false);
 
       // Switches order and removes the initial page route.
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('3'), name: 'third'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
@@ -4523,7 +4530,9 @@ void main() {
       expect(secondPageless2Completed, false);
       expect(thirdPageless1Completed, false);
 
-      myPages = <TestPage>[const TestPage(key: ValueKey<String>('3'), name: 'third')];
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
+      ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
@@ -4532,7 +4541,9 @@ void main() {
       expect(secondPageless2Completed, true);
       expect(thirdPageless1Completed, false);
 
-      myPages = <TestPage>[const TestPage(key: ValueKey<String>('4'), name: 'forth')];
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('4'), name: 'forth', child: Text('forth')),
+      ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
@@ -4544,9 +4555,9 @@ void main() {
     //Regression test for https://github.com/flutter/flutter/issues/115887
     testWidgets('Complex case 2', (WidgetTester tester) async {
       final navigator = GlobalKey<NavigatorState>();
-      var myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      var myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
 
       bool onPopPage(Route<dynamic> route, dynamic result) {
@@ -4571,7 +4582,9 @@ void main() {
       expect(find.text('second-pageless1'), findsOneWidget);
       expect(myPages.length, 2);
 
-      myPages = <TestPage>[const TestPage(key: ValueKey<String>('2'), name: 'second')];
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
+      ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
@@ -4597,7 +4610,9 @@ void main() {
     ) async {
       final navigator = GlobalKey<NavigatorState>();
       final transitionDelegate = AlwaysRemoveTransitionDelegate();
-      var myPages = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
+      var myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+      ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
         myPages.removeWhere((Page<dynamic> page) => route.settings == page);
         return route.didPop(result);
@@ -4624,9 +4639,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Pushes second page route with two pageless routes.
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
       await tester.pumpWidget(
         buildNavigator(
@@ -4657,10 +4672,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Pushes third page route with one pageless route.
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
-        const TestPage(key: ValueKey<String>('3'), name: 'third'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
       ];
       await tester.pumpWidget(
         buildNavigator(
@@ -4688,9 +4703,9 @@ void main() {
       expect(thirdPageless1Completed, false);
 
       // Switches order and removes the initial page route.
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('3'), name: 'third'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
       await tester.pumpWidget(
         buildNavigator(
@@ -4707,7 +4722,9 @@ void main() {
       expect(secondPageless2Completed, false);
       expect(thirdPageless1Completed, false);
 
-      myPages = <TestPage>[const TestPage(key: ValueKey<String>('3'), name: 'third')];
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
+      ];
       await tester.pumpWidget(
         buildNavigator(
           view: tester.view,
@@ -4723,7 +4740,9 @@ void main() {
       expect(secondPageless2Completed, true);
       expect(thirdPageless1Completed, false);
 
-      myPages = <TestPage>[const TestPage(key: ValueKey<String>('4'), name: 'forth')];
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('4'), name: 'forth', child: Text('forth')),
+      ];
       await tester.pumpWidget(
         buildNavigator(
           view: tester.view,
@@ -4745,9 +4764,9 @@ void main() {
       WidgetTester tester,
     ) async {
       final navigator = GlobalKey<NavigatorState>();
-      List<Page<dynamic>> myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      List<Page<Object?>> myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
         myPages.removeWhere((Page<dynamic> page) => route.settings == page);
@@ -4759,15 +4778,17 @@ void main() {
       );
 
       // Pops the second page route.
-      myPages = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+      ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
 
       // Re-push the second page again before it finishes popping.
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
@@ -4783,9 +4804,9 @@ void main() {
       WidgetTester tester,
     ) async {
       final navigator = GlobalKey<NavigatorState>();
-      List<Page<dynamic>> myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      List<Page<Object?>> myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
         myPages.removeWhere((Page<dynamic> page) => route.settings == page);
@@ -4797,13 +4818,17 @@ void main() {
       );
 
       // Pops the second page route.
-      myPages = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+      ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
 
       // Updates the pages again before second page finishes popping.
-      myPages = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+      ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
@@ -4819,9 +4844,9 @@ void main() {
     ) async {
       // Regression test for https://github.com/flutter/flutter/issues/68162.
       final navigator = GlobalKey<NavigatorState>();
-      List<Page<dynamic>> myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
+      List<Page<Object?>> myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
       ];
       bool onPopPage(Route<dynamic> route, dynamic result) {
         myPages.removeWhere((Page<dynamic> page) => route.settings == page);
@@ -4842,7 +4867,9 @@ void main() {
       // Pops the pageless route.
       navigator.currentState!.pop();
       // Before the pop finishes, updates the page list.
-      myPages = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'initial', child: Text('initial')),
+      ];
       await tester.pumpWidget(
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
@@ -4856,10 +4883,10 @@ void main() {
       WidgetTester tester,
     ) async {
       final navigator = GlobalKey<NavigatorState>();
-      var myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'first'),
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
-        const TestPage(key: ValueKey<String>('3'), name: 'third'),
+      var myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('1'), name: 'first', child: Text('first')),
+        const TestPage(key: ValueKey<String>('2'), name: 'second', child: Text('second')),
+        const TestPage(key: ValueKey<String>('3'), name: 'third', child: Text('third')),
       ];
       final observations = <NavigatorObservation>[];
       final observer = TestObserver()
@@ -4892,9 +4919,9 @@ void main() {
           observers: <NavigatorObserver>[observer],
         ),
       );
-      myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('4'), name: 'forth'),
-        const TestPage(key: ValueKey<String>('5'), name: 'fifth'),
+      myPages = <TestPage<Object?>>[
+        const TestPage(key: ValueKey<String>('4'), name: 'forth', child: Text('forth')),
+        const TestPage(key: ValueKey<String>('5'), name: 'fifth', child: Text('fifth')),
       ];
 
       await tester.pumpWidget(
@@ -6747,15 +6774,6 @@ class CanPopPage<T> extends Page<T> {
   @override
   Route<T> createRoute(BuildContext context) {
     return MaterialPageRoute<T>(builder: (BuildContext context) => Text(name!), settings: this);
-  }
-}
-
-class TestPage extends Page<void> {
-  const TestPage({super.key, required String super.name, super.arguments});
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return MaterialPageRoute<void>(builder: (BuildContext context) => Text(name!), settings: this);
   }
 }
 
