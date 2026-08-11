@@ -328,7 +328,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       .fetchDependenciesAndGenerateXcodebuildArgs(
         app.project,
         globals.fs.directory(buildDirectoryPath),
-        skipPackageUpdatesAndValidation: false,
+        skipPackageValidation: false,
       );
   final buildCommands = <String>[...xcodebuildCommandArgs, '-configuration', configuration];
 
