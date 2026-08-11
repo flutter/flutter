@@ -1246,7 +1246,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  FlutterProject get project => FlutterProject.current();
+  FlutterProject get project => _projectFactory.fromDirectory(_fs.currentDirectory);
 
   /// The path to the package config for the current project.
   ///
@@ -2103,7 +2103,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
 // Returns the development artifact for the target platform, or null
 // if none is supported
 @protected
-DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+DevelopmentArtifact? artifactFromTargetPlatform(
+  TargetPlatform targetPlatform, [
+  FeatureFlags? featureFlags,
+]) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -2115,20 +2118,20 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin:
-      if (featureFlags.isMacOSEnabled) {
+      if (featureFlags?.isMacOSEnabled ?? true) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
-      if (featureFlags.isWindowsEnabled) {
+      if (featureFlags?.isWindowsEnabled ?? true) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
-      if (featureFlags.isLinuxEnabled) {
+      if (featureFlags?.isLinuxEnabled ?? true) {
         return DevelopmentArtifact.linux;
       }
       return null;

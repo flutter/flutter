@@ -255,7 +255,11 @@ List<FlutterCommand> generateCommands({
     ],
     suppressAnalytics: !toolDependencies.analytics.okToSend,
   ),
-  AssembleCommand(verboseHelp: verboseHelp, buildSystem: toolDependencies.buildSystem),
+  AssembleCommand(
+    buildSystem: toolDependencies.buildSystem,
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   AttachCommand(
     verboseHelp: verboseHelp,
     stdio: toolDependencies.toolContext.stdio,
@@ -333,13 +337,8 @@ List<FlutterCommand> generateCommands({
     signals: toolDependencies.toolContext.signals,
   ),
   EmulatorsCommand(),
-  GenerateCommand(),
-  GenerateLocalizationsCommand(
-    fileSystem: toolDependencies.toolContext.fs,
-    logger: toolDependencies.toolContext.logger,
-    artifacts: toolDependencies.toolContext.artifacts,
-    processManager: toolDependencies.toolContext.processManager,
-  ),
+  GenerateCommand(toolContext: toolDependencies.toolContext),
+  GenerateLocalizationsCommand(toolContext: toolDependencies.toolContext),
   InstallCommand(verboseHelp: verboseHelp),
   LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
   PackagesCommand(),
