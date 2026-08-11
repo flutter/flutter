@@ -91,7 +91,7 @@ class OnTapPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Text('Page $id'),
+        Semantics(header: true, namesRoute: true, child: Text('Page $id')),
         Expanded(
           child: GestureDetector(
             onTap: onTap,
