@@ -1518,20 +1518,11 @@ let package = Package(
           ),
         ]);
 
-        final testUtils = BuildSwiftPackageUtils(
-          analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(_engineArtifactPath),
-          buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, _flutterRoot),
-          fileSystem: fs,
-          flutterRoot: _flutterRoot,
-          flutterVersion: FakeFlutterVersion(),
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
           logger: logger,
-          platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: true),
-          templateRenderer: const MustacheTemplateRenderer(),
-          xcode: FakeXcode(),
+          isModule: true,
         );
         final cocoapodDependencies = CocoaPodPluginDependenciesSkipPodProcessing(
           targetPlatform: targetPlatform,
@@ -1616,20 +1607,11 @@ let package = Package(
           ),
         ]);
 
-        final testUtils = BuildSwiftPackageUtils(
-          analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(_engineArtifactPath),
-          buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, _flutterRoot),
-          fileSystem: fs,
-          flutterRoot: _flutterRoot,
-          flutterVersion: FakeFlutterVersion(),
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
           logger: logger,
-          platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: true),
-          templateRenderer: const MustacheTemplateRenderer(),
-          xcode: FakeXcode(),
+          isModule: true,
         );
         final cocoapodDependencies = CocoaPodPluginDependenciesSkipPodProcessing(
           targetPlatform: targetPlatform,
@@ -2050,22 +2032,10 @@ let package = Package(
           ),
         ]);
 
-        final testUtils = BuildSwiftPackageUtils(
-          analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(
-            '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
-          ),
-          buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, '/path/to/flutter'),
-          fileSystem: fs,
-          flutterRoot: '/path/to/flutter',
-          flutterVersion: FakeFlutterVersion(),
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
           logger: logger,
-          platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: appDirectory),
-          templateRenderer: const MustacheTemplateRenderer(),
-          xcode: FakeXcode(),
         );
 
         final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
@@ -2106,22 +2076,10 @@ let package = Package(
           ..createSync(recursive: true);
         fs.currentDirectory = appDirectory;
 
-        final testUtils = BuildSwiftPackageUtils(
-          analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(
-            '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
-          ),
-          buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, '/path/to/flutter'),
-          fileSystem: fs,
-          flutterRoot: '/path/to/flutter',
-          flutterVersion: FakeFlutterVersion(),
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
           logger: logger,
-          platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: appDirectory),
-          templateRenderer: const MustacheTemplateRenderer(),
-          xcode: FakeXcode(),
         );
 
         final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
@@ -2228,22 +2186,10 @@ let package = Package(
           ),
         ]);
 
-        final testUtils = BuildSwiftPackageUtils(
-          analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(
-            '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
-          ),
-          buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, '/path/to/flutter'),
-          fileSystem: fs,
-          flutterRoot: '/path/to/flutter',
-          flutterVersion: FakeFlutterVersion(),
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
           logger: logger,
-          platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: appDirectory),
-          templateRenderer: const MustacheTemplateRenderer(),
-          xcode: FakeXcode(),
         );
 
         final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
@@ -2365,22 +2311,10 @@ let package = Package(
           ),
         ]);
 
-        final testUtils = BuildSwiftPackageUtils(
-          analytics: FakeAnalytics(),
-          artifacts: FakeArtifacts(
-            '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
-          ),
-          buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, '/path/to/flutter'),
-          fileSystem: fs,
-          flutterRoot: '/path/to/flutter',
-          flutterVersion: FakeFlutterVersion(),
+        final BuildSwiftPackageUtils testUtils = _createTestUtils(
+          fs: fs,
           logger: logger,
-          platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: appDirectory),
-          templateRenderer: const MustacheTemplateRenderer(),
-          xcode: FakeXcode(),
         );
 
         final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
@@ -2474,22 +2408,10 @@ let package = Package(
             ),
           ]);
 
-          final testUtils = BuildSwiftPackageUtils(
-            analytics: FakeAnalytics(),
-            artifacts: FakeArtifacts(
-              '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
-            ),
-            buildSystem: FakeBuildSystem(),
-            cache: FakeCache(fs, '/path/to/flutter'),
-            fileSystem: fs,
-            flutterRoot: '/path/to/flutter',
-            flutterVersion: FakeFlutterVersion(),
+          final BuildSwiftPackageUtils testUtils = _createTestUtils(
+            fs: fs,
             logger: logger,
-            platform: FakePlatform(),
             processManager: processManager,
-            project: FakeFlutterProject(directory: appDirectory),
-            templateRenderer: const MustacheTemplateRenderer(),
-            xcode: FakeXcode(),
           );
 
           final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
@@ -2568,22 +2490,10 @@ let package = Package(
             ),
           ]);
 
-          final testUtils = BuildSwiftPackageUtils(
-            analytics: FakeAnalytics(),
-            artifacts: FakeArtifacts(
-              '/path/to/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework',
-            ),
-            buildSystem: FakeBuildSystem(),
-            cache: FakeCache(fs, '/path/to/flutter'),
-            fileSystem: fs,
-            flutterRoot: '/path/to/flutter',
-            flutterVersion: FakeFlutterVersion(),
+          final BuildSwiftPackageUtils testUtils = _createTestUtils(
+            fs: fs,
             logger: logger,
-            platform: FakePlatform(),
             processManager: processManager,
-            project: FakeFlutterProject(directory: appDirectory),
-            templateRenderer: const MustacheTemplateRenderer(),
-            xcode: FakeXcode(),
           );
 
           final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
@@ -3615,6 +3525,7 @@ BuildSwiftPackageUtils _createTestUtils({
   required FileSystem fs,
   required Logger logger,
   required ProcessManager processManager,
+  bool isModule = false,
 }) {
   return BuildSwiftPackageUtils(
     analytics: FakeAnalytics(),
@@ -3627,7 +3538,7 @@ BuildSwiftPackageUtils _createTestUtils({
     logger: logger,
     platform: FakePlatform(),
     processManager: processManager,
-    project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+    project: FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: isModule),
     templateRenderer: const MustacheTemplateRenderer(),
     xcode: FakeXcode(),
   );
