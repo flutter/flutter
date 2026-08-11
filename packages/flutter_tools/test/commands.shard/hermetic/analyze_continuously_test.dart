@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project_validator.dart';
-import 'package:path/path.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -319,7 +318,7 @@ void main() {
     // Trigger analysis and diagnostics for an existing file.
     final File targetFile = fileSystem.directory('directoryA').childFile('foo')
       ..createSync(recursive: true);
-    final Uri targetUri = toUri(targetFile.path);
+    final Uri targetUri = fileSystem.path.toUri(targetFile.path);
     process.triggerSimulatedAnalysis(diagnosticsFor: targetUri);
 
     while (!logger.statusText.contains('analyzed 1 file')) {
@@ -368,7 +367,7 @@ void main() {
 
     // Trigger analysis and diagnostics for a non-existing file.
     final File targetFile = fileSystem.directory('directoryA').childFile('foo');
-    final Uri targetUri = toUri(targetFile.path);
+    final Uri targetUri = fileSystem.path.toUri(targetFile.path);
     process.triggerSimulatedAnalysis(diagnosticsFor: targetUri);
 
     while (!logger.statusText.contains('analyzed 1 file')) {
@@ -470,7 +469,7 @@ void main() {
     // Simulate some diagnostics coming and going. The file must exist.
     final File targetFile = fileSystem.directory('directoryA').childFile('foo')
       ..createSync(recursive: true);
-    final Uri targetUri = toUri(targetFile.path);
+    final Uri targetUri = fileSystem.path.toUri(targetFile.path);
 
     await process.runSimulatedAnalysis(diagnosticsFor: targetUri); // 1 new
     await process.runSimulatedAnalysis(diagnosticsFor: targetUri, diagnosticsCount: 0); // 1 fixed
