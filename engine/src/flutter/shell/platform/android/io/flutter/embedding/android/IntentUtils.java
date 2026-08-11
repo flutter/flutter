@@ -33,10 +33,10 @@ class IntentUtils {
       if (!isSelfSent) {
         Log.w(
             TAG,
-            "Intent verification failed: the intent was not sent by this app. "
+            "Intent verification failed: the Intent was not sent by this app. "
                 + "This intent will be IGNORED in release builds to prevent security vulnerabilities. "
                 + "If this launch was internal, see TODO(camsim99) for migration options.");
-      }
+      } // TODO(camsim99): Possibly send more information about the Intent.
       return true;
     }
 
