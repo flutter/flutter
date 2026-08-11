@@ -974,7 +974,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Specifies the color of the modal barrier that darkens everything below the
   /// bottom sheet.
   ///
-  /// Defaults to `Colors.black54` if not provided.
+  /// If this is null, then [BottomSheetThemeData.modalBarrierColor] is used.
+  /// If that is also null, then [ColorScheme.scrim] is used with an opacity
+  /// matching [Colors.black54].
   final Color? modalBarrierColor;
 
   /// Specifies whether the bottom sheet will be dismissed
@@ -1106,7 +1108,15 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final String? barrierLabel;
 
   @override
-  Color get barrierColor => modalBarrierColor ?? Colors.black54;
+  Color get barrierColor {
+    if (modalBarrierColor != null) {
+      return modalBarrierColor!;
+    }
+    if (navigator != null) {
+      return Theme.of(navigator!.context).colorScheme.scrim.withValues(alpha: Colors.black54.a);
+    }
+    return Colors.black54;
+  }
 
   AnimationController? _animationController;
 
@@ -1328,7 +1338,10 @@ Future<T?> showModalBottomSheet<T>({
       clipBehavior: clipBehavior,
       constraints: constraints,
       isDismissible: isDismissible,
-      modalBarrierColor: barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
+      modalBarrierColor:
+          barrierColor ??
+          Theme.of(context).bottomSheetTheme.modalBarrierColor ??
+          Theme.of(context).colorScheme.scrim.withValues(alpha: Colors.black54.a),
       enableDrag: enableDrag,
       showDragHandle: showDragHandle,
       settings: routeSettings,

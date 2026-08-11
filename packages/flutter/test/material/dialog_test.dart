@@ -593,6 +593,144 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
   });
 
+  testWidgets('Barrier color uses ColorScheme.scrim', (WidgetTester tester) async {
+    const Color scrim = Colors.red;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+        ),
+        home: const Center(child: Text('Test')),
+      ),
+    );
+    final BuildContext context = tester.element(find.text('Test'));
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return const Text('Dialog');
+      },
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+      scrim.withValues(alpha: Colors.black54.a),
+    );
+  });
+
+  testWidgets('DialogTheme.barrierColor takes precedence over ColorScheme.scrim', (
+    WidgetTester tester,
+  ) async {
+    const Color scrim = Colors.red;
+    const Color themeBarrierColor = Colors.blue;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+          dialogTheme: const DialogThemeData(barrierColor: themeBarrierColor),
+        ),
+        home: const Center(child: Text('Test')),
+      ),
+    );
+    final BuildContext context = tester.element(find.text('Test'));
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return const Text('Dialog');
+      },
+    );
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, themeBarrierColor);
+  });
+
+  testWidgets('Explicit barrierColor takes precedence over ColorScheme.scrim', (
+    WidgetTester tester,
+  ) async {
+    const Color scrim = Colors.red;
+    const Color explicitBarrierColor = Colors.green;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+          dialogTheme: const DialogThemeData(barrierColor: Colors.blue),
+        ),
+        home: const Center(child: Text('Test')),
+      ),
+    );
+    final BuildContext context = tester.element(find.text('Test'));
+
+    showDialog<void>(
+      context: context,
+      barrierColor: explicitBarrierColor,
+      builder: (BuildContext context) {
+        return const Text('Dialog');
+      },
+    );
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, explicitBarrierColor);
+  });
+
+  testWidgets('ColorScheme.scrim alpha is normalized to Colors.black54 opacity', (
+    WidgetTester tester,
+  ) async {
+    final Color scrim = Colors.red.withValues(alpha: 0.2);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+        ),
+        home: const Center(child: Text('Test')),
+      ),
+    );
+    final BuildContext context = tester.element(find.text('Test'));
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return const Text('Dialog');
+      },
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+      scrim.withValues(alpha: Colors.black54.a),
+    );
+  });
+
+  testWidgets('DialogRoute barrier color uses ColorScheme.scrim', (WidgetTester tester) async {
+    const Color scrim = Colors.red;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            return TextButton(
+              onPressed: () {
+                Navigator.of(context).push<void>(
+                  DialogRoute<void>(
+                    context: context,
+                    builder: (BuildContext context) => const Text('Dialog'),
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+      scrim.withValues(alpha: Colors.black54.a),
+    );
+  });
+
   testWidgets('Dialog hides underlying semantics tree', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     const buttonText = 'A button covered by dialog overlay';

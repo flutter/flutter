@@ -1534,10 +1534,11 @@ class _DialogContentPage extends Page<void> {
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
 /// barrier that darkens everything below the dialog. If `null` the `barrierColor`
-/// field from `DialogThemeData` is used. If that is `null` the default color
-/// `Colors.black54` is used. If windowing is enabled via `flutter config
-/// --enable-windowing`, then this  argument is ignored as dialogs are displayed
-/// in their own windows which do not have a modal barrier.
+/// field from `DialogThemeData` is used. If that is also `null`,
+/// [ColorScheme.scrim] is used with an opacity matching [Colors.black54].
+/// If windowing is enabled via `flutter config --enable-windowing`, then this
+/// argument is ignored as dialogs are displayed in their own windows which do
+/// not have a modal barrier.
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
@@ -1656,7 +1657,7 @@ Future<T?> showDialog<T>({
             barrierColor ??
             DialogTheme.of(context).barrierColor ??
             Theme.of(context).dialogTheme.barrierColor ??
-            Colors.black54,
+            Theme.of(context).colorScheme.scrim.withValues(alpha: Colors.black54.a),
         barrierDismissible: barrierDismissible,
         barrierLabel: barrierLabel,
         useSafeArea: useSafeArea,
@@ -1793,8 +1794,8 @@ bool _debugIsActive(BuildContext context) {
 /// barrier will dismiss the dialog. It is `true` by default and cannot be `null`.
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
-/// barrier that darkens everything below the dialog. If `null`, the default
-/// color `Colors.black54` is used.
+/// barrier that darkens everything below the dialog. If `null`,
+/// [ColorScheme.scrim] is used with an opacity matching [Colors.black54].
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
@@ -1822,7 +1823,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     required BuildContext context,
     required WidgetBuilder builder,
     CapturedThemes? themes,
-    super.barrierColor = Colors.black54,
+    Color? barrierColor,
     super.barrierDismissible,
     String? barrierLabel,
     bool useSafeArea = true,
@@ -1834,6 +1835,9 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     AnimationStyle? animationStyle,
   }) : _animationStyle = animationStyle,
        super(
+         barrierColor:
+             barrierColor ??
+             Theme.of(context).colorScheme.scrim.withValues(alpha: Colors.black54.a),
          pageBuilder:
              (
                BuildContext buildContext,
