@@ -218,10 +218,6 @@ class LspPreviewDetector {
             'Failed to get widget previews, retrying in 200ms... ($retries retries left). Error: $e',
           );
           await Future<void>.delayed(const Duration(milliseconds: 200));
-          if (_disposed || shutdownHooks.isShuttingDown) {
-            break;
-          }
-          await _analysisServer?.waitForAnalysis();
         }
       }
     }
