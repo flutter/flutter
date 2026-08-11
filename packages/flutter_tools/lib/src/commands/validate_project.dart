@@ -6,6 +6,7 @@ import 'package:process/process.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../project_validator.dart';
 import '../project_validator_result.dart';
@@ -18,9 +19,10 @@ class ValidateProject {
     required this.allProjectValidators,
     required this.userPath,
     required this.processManager,
+    FlutterProjectFactory? projectFactory,
     this.verbose = false,
     this.machine = false,
-  });
+  }) : _projectFactory = projectFactory;
 
   final FileSystem fileSystem;
   final Logger logger;
@@ -29,13 +31,16 @@ class ValidateProject {
   final String userPath;
   final List<ProjectValidator> allProjectValidators;
   final ProcessManager processManager;
+  final FlutterProjectFactory? _projectFactory;
 
   Future<FlutterCommandResult> run() async {
     final Directory workingDirectory = userPath.isEmpty
         ? fileSystem.currentDirectory
         : fileSystem.directory(userPath);
 
-    final FlutterProject project = FlutterProject.fromDirectory(workingDirectory);
+    final FlutterProject project = (_projectFactory ?? globals.projectFactory).fromDirectory(
+      workingDirectory,
+    );
     final results = <ProjectValidator, Future<List<ProjectValidatorResult>>>{};
 
     var hasCrash = false;
