@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -933,6 +934,143 @@ void main() {
       },
     );
   });
+
+  group('MacOSSwiftPackageMinimumDeployment', () {
+    late FakeStdio fakeStdio;
+
+    setUp(() {
+      fakeStdio = FakeStdio();
+    });
+
+    testWithoutContext(
+      'DebugUnpackMacOS includes MacOSSwiftPackageMinimumDeployment in dependencies',
+      () {
+        expect(
+          const DebugUnpackMacOS().dependencies,
+          contains(const MacOSSwiftPackageMinimumDeployment()),
+        );
+      },
+    );
+
+    testUsingContext('canSkip returns true when kXcodeBuildScript is not prepare', () async {
+      const target = MacOSSwiftPackageMinimumDeployment();
+      environment.defines[kXcodeBuildScript] = 'build';
+      expect(await target.canSkip(environment), isTrue);
+
+      environment.defines[kXcodeBuildScript] = kXcodeBuildScriptValuePrepare;
+      expect(await target.canSkip(environment), isFalse);
+    });
+
+    testUsingContext(
+      'skips build when not using Swift PM',
+      () async {
+        const target = MacOSSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(logger.traceText, isEmpty);
+        expect(fakeStdio.buffer.toString(), isEmpty);
+      },
+      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Stdio: () => fakeStdio},
+    );
+
+    testUsingContext(
+      'skips build when deployment target is missing or invalid',
+      () async {
+        final Directory macosDir = fileSystem.directory('macos')..createSync(recursive: true);
+        macosDir.childFile('Runner.xcodeproj').createSync();
+
+        const target = MacOSSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(logger.traceText, contains('Unexpected app deployment target version: null'));
+        expect(fakeStdio.buffer.toString(), isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        Stdio: () => fakeStdio,
+      },
+    );
+
+    testUsingContext(
+      'skips build when Swift PM manifest does not exist',
+      () async {
+        final Directory macosDir = fileSystem.directory('macos')..createSync(recursive: true);
+        macosDir.childFile('Runner.xcodeproj').createSync();
+        environment.defines[kDeploymentTarget] = '12.0';
+
+        const target = MacOSSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(
+          logger.traceText,
+          contains('FlutterGeneratedPluginSwiftPackage manifest does not exist'),
+        );
+        expect(fakeStdio.buffer.toString(), isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        Stdio: () => fakeStdio,
+      },
+    );
+
+    testUsingContext(
+      'prints warning when deployment target in manifest does not match',
+      () async {
+        final Directory macosDir = fileSystem.directory('macos')..createSync(recursive: true);
+        macosDir.childFile('Runner.xcodeproj').createSync();
+        macosDir
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('FlutterGeneratedPluginSwiftPackage')
+            .childFile('Package.swift')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('.macOS("11.0")');
+
+        environment.defines[kDeploymentTarget] = '12.0';
+
+        const target = MacOSSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(
+          fakeStdio.buffer.toString(),
+          contains(
+            'warning: The minimum platform version for FlutterGeneratedPluginSwiftPackage has not been updated. Please run "flutter build macos --config-only" and try again.\n',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        Stdio: () => fakeStdio,
+      },
+    );
+
+    testUsingContext(
+      'does not print warning when deployment target in manifest matches',
+      () async {
+        final Directory macosDir = fileSystem.directory('macos')..createSync(recursive: true);
+        macosDir.childFile('Runner.xcodeproj').createSync();
+        macosDir
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('FlutterGeneratedPluginSwiftPackage')
+            .childFile('Package.swift')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('.macOS("12.0")');
+
+        environment.defines[kDeploymentTarget] = '12.0';
+
+        const target = MacOSSwiftPackageMinimumDeployment();
+        await target.build(environment);
+        expect(fakeStdio.buffer.toString(), isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        Stdio: () => fakeStdio,
+      },
+    );
+  });
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
@@ -957,5 +1095,14 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     String? projectFilename,
   }) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
+  }
+}
+
+class FakeStdio extends Fake implements Stdio {
+  final buffer = StringBuffer();
+
+  @override
+  void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
+    buffer.writeln(message);
   }
 }

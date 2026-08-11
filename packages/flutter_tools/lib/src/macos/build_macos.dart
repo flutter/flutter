@@ -187,6 +187,7 @@ Future<void> buildMacOS({
         platform: darwinPlatform,
         project: flutterProject.macos,
         deploymentTarget: macOSDeploymentTarget,
+        buildDirectory: flutterBuildDir,
       );
     }
   }

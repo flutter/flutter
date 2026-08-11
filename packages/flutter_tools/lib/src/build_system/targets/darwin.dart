@@ -5,10 +5,15 @@
 import 'package:meta/meta.dart';
 
 import '../../artifacts.dart';
+import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/version.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../globals.dart' as globals show stdio;
+import '../../macos/swift_package_manager.dart';
+import '../../macos/swift_packages.dart';
+import '../../project.dart';
 import '../build_system.dart';
 
 abstract class UnpackDarwin extends Target {
@@ -121,6 +126,74 @@ abstract class UnpackDarwin extends Target {
         '${extractResult.stderr}\n\n'
         'lipo -info:\n'
         '$lipoInfo',
+      );
+    }
+  }
+}
+
+/// Target that verifies the minimum deployment target of the FlutterGeneratedPluginSwiftPackage
+/// matches the app's minimum deployment target.
+///
+/// This target only needs to be run during the Xcode pre-action script. It will check if the
+/// FlutterGeneratedPluginSwiftPackage minimum deployment target matches the app's minimum
+/// deployment target and will log a warning if it does not.
+abstract class DarwinSwiftPackageMinimumDeployment extends Target {
+  const DarwinSwiftPackageMinimumDeployment();
+
+  @visibleForOverriding
+  FlutterDarwinPlatform get darwinPlatform;
+
+  @override
+  List<Source> get inputs {
+    return <Source>[
+      const Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
+      ),
+    ];
+  }
+
+  @override
+  List<Source> get outputs => [];
+
+  @override
+  List<Target> get dependencies => [];
+
+  @override
+  Future<bool> canSkip(Environment environment) async {
+    // This target only needs to be run during the Xcode pre-action script.
+    return environment.defines[kXcodeBuildScript] != kXcodeBuildScriptValuePrepare;
+  }
+
+  @override
+  Future<void> build(Environment environment) async {
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
+    if (!xcodeProject.usesSwiftPackageManager) {
+      return;
+    }
+    final String? deploymentTarget = environment.defines[kDeploymentTarget];
+    final Version? appDeploymentTargetVerison = Version.parse(deploymentTarget);
+    if (appDeploymentTargetVerison == null) {
+      environment.logger.printTrace('Unexpected app deployment target version: $deploymentTarget');
+      return;
+    }
+    final File manifest = xcodeProject.flutterPluginSwiftPackageManifest;
+    if (!manifest.existsSync()) {
+      environment.logger.printTrace(
+        '$kFlutterGeneratedPluginSwiftPackageName manifest does not exist: ${manifest.path}',
+      );
+      return;
+    }
+    final String manifestContents = manifest.readAsStringSync();
+
+    final String expectedSupportedPlatform = SwiftPackageSupportedPlatform(
+      platform: darwinPlatform.swiftPackagePlatform,
+      version: appDeploymentTargetVerison,
+    ).format();
+    if (!manifestContents.contains(expectedSupportedPlatform)) {
+      printXcodeWarning(
+        'The minimum platform version for $kFlutterGeneratedPluginSwiftPackageName has not '
+        'been updated. Please run "flutter build ${darwinPlatform.name} --config-only" and try again.',
       );
     }
   }

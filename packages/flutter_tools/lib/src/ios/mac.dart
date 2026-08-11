@@ -275,6 +275,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final String buildDirectoryPath = getIosBuildDirectory();
+  final Directory buildDirectory = globals.fs.directory(buildDirectoryPath);
 
   final Map<String, String> buildSettings =
       await app.project.buildSettingsForBuildInfo(
@@ -302,7 +303,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final List<String> xcodebuildCommandArgs = await globals.xcode!
       .fetchDependenciesAndGenerateXcodebuildArgs(
         app.project,
-        globals.fs.directory(buildDirectoryPath),
+        buildDirectory,
         skipPackageUpdatesAndValidation: false,
       );
   final buildCommands = <String>[...xcodebuildCommandArgs, '-configuration', configuration];
@@ -356,6 +357,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         platform: darwinPlatform,
         project: project.ios,
         deploymentTarget: iosDeploymentTarget,
+        buildDirectory: buildDirectory,
       );
     }
   }
@@ -1436,12 +1438,12 @@ String? _swiftPackageManagerMinPlatformMismatchMessageFromStdout(String? stdout)
     return null;
   }
 
-  return '''
-To fix this error, increase your app's minimum platform version from $highestSupportedVersion to at least $highestRequiredVersion or remove the $highestRequiredByProduct dependency.
-
-To increase your app's minimum platform version, follow these instructions:
-  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-use-a-swift-package-manager-flutter-plugin-that-requires-a-higher-os-version
-''';
+ return "To fix this error, increase your app's minimum platform version from "
+      '$highestSupportedVersion to at least $highestRequiredVersion or remove the '
+      '$highestRequiredByProduct dependency.\n'
+      'Then run "flutter build ios --config-only" to regenerate the project\'s configuration files.\n\n'
+      "To increase your app's minimum platform version, follow these instructions:\n"
+      '  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-use-a-swift-package-manager-flutter-plugin-that-requires-a-higher-os-version';
 }
 
 String? _parseModuleRedefinition(String message) {
