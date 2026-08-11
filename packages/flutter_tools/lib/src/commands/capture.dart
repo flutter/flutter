@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
@@ -83,7 +86,7 @@ class CaptureImageCommand extends FlutterCommand {
       throwToolExit('Error taking screenshot: $error');
     }
 
-    if (!fs.file(outputFile.path).existsSync()) {
+    if (!outputFile.existsSync()) {
       throwToolExit(
         'File was not created, ensure path is valid\n'
         'Path provided: "${outputFile.path}"',
@@ -171,15 +174,21 @@ class CaptureVideoCommand extends FlutterCommand {
       );
     }
 
+    StreamSubscription<ProcessSignal>? sigintSubscription;
+    if (duration == null) {
+      sigintSubscription = ProcessSignal.sigint.watch().listen((ProcessSignal signal) {});
+    }
     try {
       await _device!.startScreenRecording(outputFile, duration: duration);
     } on ToolExit {
       rethrow;
     } on Exception catch (error) {
       throwToolExit('Error recording screen: $error');
+    } finally {
+      await sigintSubscription?.cancel();
     }
 
-    if (!fs.file(outputFile.path).existsSync()) {
+    if (!outputFile.existsSync()) {
       throwToolExit(
         'Recording file was not created, ensure path is valid\n'
         'Path provided: "${outputFile.path}"',

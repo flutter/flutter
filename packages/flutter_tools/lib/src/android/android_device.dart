@@ -853,14 +853,23 @@ class AndroidDevice extends Device {
     final Process process = await _processManager.start(
       adbCommandForDevice(args),
     );
+    int exitCode = -1;
     try {
-      await process.exitCode;
+      exitCode = await process.exitCode;
     } finally {
-      await _processUtils.run(
-        adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
-        throwOnError: true,
-      );
-      await runAdbCheckedAsync(<String>['shell', 'rm', remotePath]);
+      try {
+        await _processUtils.run(
+          adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
+          throwOnError: true,
+        );
+      } on Exception catch (error) {
+        if (exitCode != 0) {
+          throwToolExit('screenrecord failed with exit code $exitCode.');
+        }
+        rethrow;
+      } finally {
+        await runAdbCheckedAsync(<String>['shell', 'rm', remotePath]);
+      }
     }
   }
 

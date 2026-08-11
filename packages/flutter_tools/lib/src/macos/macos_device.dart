@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -110,9 +112,11 @@ class MacOSDevice extends DesktopDevice {
       outputFile.path,
     ];
     final Process process = await _processManager.start(args);
+    final stderrBuf = StringBuffer();
+    process.stderr.transform(utf8.decoder).listen(stderrBuf.write);
     final int exitCode = await process.exitCode;
     if (exitCode != 0) {
-      throwToolExit('screencapture failed (exit $exitCode).');
+      throwToolExit('screencapture failed (exit $exitCode): $stderrBuf');
     }
   }
 
