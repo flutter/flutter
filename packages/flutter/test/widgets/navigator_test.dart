@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'button_tester.dart';
 import 'list_tile_tester.dart';
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
@@ -1340,6 +1341,77 @@ void main() {
     expect(firstReturnValue, isTrue);
     expect(secondReturnValue, isNull);
   });
+
+  testWidgets(
+    'popUntilWithResult returns value to the last popped route when destination route has local history entries',
+    (WidgetTester tester) async {
+      bool? firstReturnValue;
+      bool? secondReturnValue;
+
+      Widget buildPage(String id, VoidCallback? onTap) {
+        return GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Center(child: Text(id, textDirection: TextDirection.ltr)),
+        );
+      }
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) {
+            final String? routeName = settings.name;
+
+            switch (routeName) {
+              case '/':
+                return TestRoute<bool>(
+                  settings: settings,
+                  builder: (BuildContext context) => buildPage('/', () async {
+                    ModalRoute.of(context)!.addLocalHistoryEntry(LocalHistoryEntry());
+                    firstReturnValue = await Navigator.pushNamed(context, '/A');
+                  }),
+                );
+              case '/A':
+                return TestRoute<bool>(
+                  settings: settings,
+                  builder: (BuildContext context) => buildPage('A', () async {
+                    secondReturnValue = await Navigator.pushNamed(context, '/B');
+                  }),
+                );
+              case '/B':
+                return TestRoute<bool>(
+                  settings: settings,
+                  builder: (BuildContext context) => buildPage('B', () async {
+                    Navigator.popUntilWithResult<bool>(
+                      context,
+                      (Route<dynamic> route) => route.isFirst,
+                      true,
+                    );
+                  }),
+                );
+              default:
+                return null;
+            }
+          },
+        ),
+      );
+      expect(find.text('/'), findsOneWidget);
+
+      await tester.tap(find.text('/'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('A'));
+      await tester.pumpAndSettle();
+      expect(find.text('B'), findsOneWidget);
+
+      await tester.tap(find.text('B'));
+      await tester.pumpAndSettle();
+      expect(find.text('/'), findsOneWidget);
+
+      expect(firstReturnValue, isTrue);
+      expect(secondReturnValue, isNull);
+    },
+  );
 
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final routes = <String, WidgetBuilder>{
@@ -6264,84 +6336,210 @@ void main() {
     clear();
   });
 
-  testWidgets(
-    'Navigator focus restoration reports error to FlutterError',
-    (WidgetTester tester) async {
-      final errorDetails = <FlutterErrorDetails>[];
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        errorDetails.add(details);
-      };
+  testWidgets('Navigator focus restoration reports error to FlutterError', (
+    WidgetTester tester,
+  ) async {
+    final errorDetails = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails.add(details);
+    };
 
-      try {
-        // Mock accessibility channel to throw error.
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (
-              dynamic message,
-            ) async {
-              final map = message as Map<dynamic, dynamic>;
-              if (map['type'] == 'focus') {
-                throw Exception('Focus restoration failed');
-              }
-              return null;
-            });
+    try {
+      // Mock accessibility channel to throw error.
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (
+            dynamic message,
+          ) async {
+            final map = message as Map<dynamic, dynamic>;
+            if (map['type'] == 'focus') {
+              throw Exception('Focus restoration failed');
+            }
+            return null;
+          });
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Builder(
-                builder: (BuildContext context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        NoAnimationPageRoute(
-                          pageBuilder: (BuildContext context) => Scaffold(
-                            appBar: AppBar(title: const Text('Second Route')),
-                            body: ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Pop'),
-                            ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      NoAnimationPageRoute(
+                        pageBuilder: (BuildContext context) => Scaffold(
+                          appBar: AppBar(title: const Text('Second Route')),
+                          body: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Pop'),
                           ),
                         ),
-                      );
-                    },
-                    child: const Text('Push'),
-                  );
-                },
-              ),
+                      ),
+                    );
+                  },
+                  child: const Text('Push'),
+                );
+              },
             ),
           ),
-        );
+        ),
+      );
 
-        // Record the last focus in route entry.
-        ServicesBinding.instance.accessibilityFocus.value = 123;
-        await tester.pump();
+      // Record the last focus in route entry.
+      ServicesBinding.instance.accessibilityFocus.value = 123;
+      await tester.pump();
 
-        // Push second route.
-        await tester.tap(find.text('Push'));
-        await tester.pumpAndSettle();
+      // Push second route.
+      await tester.tap(find.text('Push'));
+      await tester.pumpAndSettle();
 
-        // Now we are on the second route.
-        // Pop it.
-        await tester.tap(find.text('Pop'));
-        await tester.pumpAndSettle();
+      // Now we are on the second route.
+      // Pop it.
+      await tester.tap(find.text('Pop'));
+      await tester.pumpAndSettle();
 
-        expect(errorDetails.length, 1);
-        expect(errorDetails[0].exception.toString(), contains('Focus restoration failed'));
-        expect(errorDetails[0].library, 'widgets library');
-        expect(
-          errorDetails[0].context.toString(),
-          contains('while restoring focus in the navigator'),
-        );
-      } finally {
-        FlutterError.onError = oldHandler;
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
-      }
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+      expect(errorDetails.length, 1);
+      expect(errorDetails[0].exception.toString(), contains('Focus restoration failed'));
+      expect(errorDetails[0].library, 'widgets library');
+      expect(
+        errorDetails[0].context.toString(),
+        contains('while restoring focus in the navigator'),
+      );
+    } finally {
+      FlutterError.onError = oldHandler;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+    }
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('Navigator.pop throws FlutterError when popped with mismatched type', (
+    WidgetTester tester,
+  ) async {
+    Object? popException;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return TestButton(
+              onPressed: () {
+                Navigator.push<bool>(
+                  context,
+                  PageRouteBuilder<bool>(
+                    pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                      return TestButton(
+                        onPressed: () {
+                          try {
+                            Navigator.pop(context, 'NO');
+                          } catch (e) {
+                            popException = e;
+                          }
+                        },
+                        child: const Text('NO'),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Open Route'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Route'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('NO'));
+
+    expect(popException, isFlutterError);
+    final popError = popException! as FlutterError;
+
+    expect(
+      popError.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A request was made to pop a route with a result of type String,\n'
+        '   but the route expected a value of type bool.\n'
+        '   This usually happens when the type provided to Navigator.pop() is\n'
+        '   not a subtype of the type expected by the Route (e.g.\n'
+        '   DialogRoute<Null>), or when a generic type is explicitly provided\n'
+        '   to a route creation method (such as showDialog<T>()) but the\n'
+        '   popped value does not match this type.\n'
+        '   The route was: PageRouteBuilder<bool>(RouteSettings(none, null),\n'
+        '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
+        '     PageRouteBuilder<bool>))\n'
+        '   The provided result was: NO\n'
+        '',
+      ),
+    );
+  });
+
+  testWidgets('Navigator.maybePop throws FlutterError when popped with mismatched type', (
+    WidgetTester tester,
+  ) async {
+    Object? maybePopException;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return TestButton(
+              onPressed: () {
+                Navigator.push<bool>(
+                  context,
+                  PageRouteBuilder<bool>(
+                    pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                      return TestButton(
+                        onPressed: () {
+                          Navigator.maybePop(context, 'YES').catchError((Object e) {
+                            maybePopException = e;
+                            return false;
+                          });
+                        },
+                        child: const Text('YES'),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Open Route'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Route'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('YES'));
+    await tester.pumpAndSettle();
+
+    expect(maybePopException, isFlutterError);
+    final maybePopError = maybePopException! as FlutterError;
+
+    expect(
+      maybePopError.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A request was made to pop a route with a result of type String,\n'
+        '   but the route expected a value of type bool.\n'
+        '   This usually happens when the type provided to\n'
+        '   Navigator.maybePop() is not a subtype of the type expected by the\n'
+        '   Route (e.g. DialogRoute<Null>), or when a generic type is\n'
+        '   explicitly provided to a route creation method (such as\n'
+        '   showDialog<T>()) but the popped value does not match this type.\n'
+        '   The route was: PageRouteBuilder<bool>(RouteSettings(none, null),\n'
+        '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
+        '     PageRouteBuilder<bool>))\n'
+        '   The provided result was: YES\n'
+        '',
+      ),
+    );
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);

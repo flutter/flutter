@@ -4,9 +4,9 @@
 
 // ignore_for_file: invalid_use_of_internal_member
 
-import 'package:flutter/material.dart';
 // ignore: implementation_imports
 import 'package:flutter/src/widgets/_window_positioner.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'models.dart';
 
@@ -40,6 +40,11 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   final TextEditingController _offsetDxController = TextEditingController();
   final TextEditingController _offsetDyController = TextEditingController();
 
+  late bool _regularShrinkWrap;
+  late bool _regularResizable;
+  late bool _dialogShrinkWrap;
+  late bool _dialogResizable;
+
   late bool _flipX;
   late bool _flipY;
   late bool _slideX;
@@ -62,6 +67,10 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     _dialogHeightController.addListener(_updateDialogSize);
     _dialogWidthController.text = widget.settings.dialogSize.width.toString();
     _dialogHeightController.text = widget.settings.dialogSize.height.toString();
+    _regularShrinkWrap = widget.settings.shrinkWrap;
+    _regularResizable = widget.settings.regularResizable;
+    _dialogShrinkWrap = widget.settings.dialogShrinkWrap;
+    _dialogResizable = widget.settings.dialogResizable;
     _offsetDxController.text = widget.settings.positioner.offset.dx.toString();
     _offsetDyController.text = widget.settings.positioner.offset.dy.toString();
     _flipX = widget.settings.positioner.constraintAdjustment.flipX;
@@ -91,10 +100,10 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 child: ListView(
                   children: [
                     _buildRegularEditor(),
-                    const Divider(),
+                    _buildDivider(),
                     _buildDialogEditor(),
-                    const Divider(),
-                    _buildTooltipEditor(),
+                    _buildDivider(),
+                    _buildTooltipAndPopupEditor(),
                   ],
                 ),
               ),
@@ -109,20 +118,43 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   Widget _buildRegularEditor() {
     return ListTile(
       title: const Text('Regular'),
-      subtitle: Row(
+      subtitle: Column(
+        crossAxisAlignment: .start,
         children: [
-          Expanded(
-            child: TextFormField(
-              controller: _regularWidthController,
-              decoration: const InputDecoration(labelText: 'Initial width'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _regularWidthController,
+                  decoration: const InputDecoration(labelText: 'Initial width'),
+                  enabled: !_regularShrinkWrap,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: TextFormField(
+                  controller: _regularHeightController,
+                  decoration: const InputDecoration(labelText: 'Initial height'),
+                  enabled: !_regularShrinkWrap,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: TextFormField(
-              controller: _regularHeightController,
-              decoration: const InputDecoration(labelText: 'Initial height'),
-            ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const SizedBox(width: 100, child: Text('Sized to content')),
+              Switch(
+                value: _regularShrinkWrap,
+                onChanged: (bool value) => setState(() => _regularShrinkWrap = value),
+              ),
+              const SizedBox(width: 24),
+              const SizedBox(width: 70, child: Text('Resizable')),
+              Switch(
+                value: _regularResizable,
+                onChanged: (bool value) => setState(() => _regularResizable = value),
+              ),
+            ],
           ),
         ],
       ),
@@ -132,30 +164,53 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   Widget _buildDialogEditor() {
     return ListTile(
       title: const Text('Dialog'),
-      subtitle: Row(
+      subtitle: Column(
+        crossAxisAlignment: .start,
         children: [
-          Expanded(
-            child: TextFormField(
-              controller: _dialogWidthController,
-              decoration: const InputDecoration(labelText: 'Initial width'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _dialogWidthController,
+                  decoration: const InputDecoration(labelText: 'Initial width'),
+                  enabled: !_dialogShrinkWrap,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: TextFormField(
+                  controller: _dialogHeightController,
+                  decoration: const InputDecoration(labelText: 'Initial height'),
+                  enabled: !_dialogShrinkWrap,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: TextFormField(
-              controller: _dialogHeightController,
-              decoration: const InputDecoration(labelText: 'Initial height'),
-            ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const SizedBox(width: 100, child: Text('Sized to content')),
+              Switch(
+                value: _dialogShrinkWrap,
+                onChanged: (bool value) => setState(() => _dialogShrinkWrap = value),
+              ),
+              const SizedBox(width: 24),
+              const SizedBox(width: 70, child: Text('Resizable')),
+              Switch(
+                value: _dialogResizable,
+                onChanged: (bool value) => setState(() => _dialogResizable = value),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTooltipEditor() {
+  Widget _buildTooltipAndPopupEditor() {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: const Text('Tooltip'),
+      title: const Text('Tooltips and Popups'),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -328,10 +383,14 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 double.tryParse(_regularHeightController.text) ??
                     widget.settings.regularSize.height,
               );
+              widget.settings.shrinkWrap = _regularShrinkWrap;
+              widget.settings.regularResizable = _regularResizable;
               widget.settings.dialogSize = Size(
                 double.tryParse(_dialogWidthController.text) ?? widget.settings.dialogSize.width,
                 double.tryParse(_dialogHeightController.text) ?? widget.settings.dialogSize.height,
               );
+              widget.settings.dialogShrinkWrap = _dialogShrinkWrap;
+              widget.settings.dialogResizable = _dialogResizable;
 
               widget.settings.positioner = widget.settings.positioner.copyWith(
                 parentAnchor: _parentAnchor,
@@ -355,6 +414,16 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             child: const Text('Apply'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return const Padding(
+      padding: EdgeInsets.all(4),
+      child: ColoredBox(
+        color: Color(0xFF000000),
+        child: SizedBox(height: 4, width: double.infinity),
       ),
     );
   }

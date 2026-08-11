@@ -1164,6 +1164,38 @@ void main() {
     expect(node.getSemanticsData().flagsCollection.isFocused, Tristate.none);
   });
 
+  testWidgets('Updating accessibilityFocusBlockType on parent updates children semantics', (
+    WidgetTester tester,
+  ) async {
+    Widget buildFrame(AccessibilityFocusBlockType blockType) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          container: true,
+          accessibilityFocusBlockType: blockType,
+          child: Semantics(
+            container: true,
+            label: 'child',
+            child: const SizedBox(width: 10, height: 10),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(AccessibilityFocusBlockType.none));
+
+    SemanticsNode child = tester.semantics.find(find.bySemanticsLabel('child'));
+    expect(child.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, false);
+    expect(child.parent!.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, false);
+
+    // Rebuild with blockSubtree
+    await tester.pumpWidget(buildFrame(AccessibilityFocusBlockType.blockSubtree));
+
+    child = tester.semantics.find(find.bySemanticsLabel('child'));
+    expect(child.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
+    expect(child.parent!.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
+  });
+
   testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
 

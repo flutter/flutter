@@ -7,11 +7,11 @@ sometimes known as a permalink.
 Even if you update the link in the repo if it changes or breaks,
 outdated versions might remain in older versions of tools, docs, etc.
 Sometimes the link destination itself can add an appropriate redirect,
-but sometimes it can't and other times it's destination is not the best choice.
+but sometimes it can't and other times its destination isn't the best choice.
 
 - If you're not sure if you need a more reliable link,
   check out [Situations to consider](#situations-to-consider).
-- If your destination does not already have a stable link,
+- If your destination doesn't already have a stable link,
   and you think it would benefit from one,
   follow the instructions in [Create a reliable link](#create-a-reliable-link).
 
@@ -48,9 +48,9 @@ starting with `/to/`, such as `flutter.dev/to/gesture-disambiguation`.
 
 Before creating a new tooling link,
 verify that an appropriate one doesn't exist already.
-To see what redirects exist already, check the `/to/` entries in
-[`flutter/website/firebase.json`][flutter-redirects] and
-[`dart-lang/site-www/firebase.json`][dart-redirects].
+To see what redirects exist already, check the `/to/` entries in the
+Flutter documentation website's [`firebase.json` file][flutter-redirects] and
+the Dart website's [`firebase.json` file][dart-redirects].
 
 If an appropriate tooling redirect doesn't exist already,
 create one following these steps:
@@ -101,5 +101,5 @@ create one following these steps:
 > a tooling redirect might not be necessary.
 > The same goes for links that are only needed for a short time.
 
-[flutter-redirects]: https://github.com/flutter/website/blob/main/firebase.json
+[flutter-redirects]: https://flutter.dev/to/site-redirects
 [dart-redirects]: https://github.com/dart-lang/site-www/blob/main/firebase.json

@@ -27,7 +27,7 @@
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace flutter {
@@ -219,9 +219,8 @@ TEST_F(EmbedderTest, MetalCompositorMustBeAbleToRenderPlatformViews) {
         latch.CountDown();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -487,9 +486,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneMetal) {
         return surface->makeImageSnapshot();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -546,9 +544,8 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreMetalTexture) {
         return true;
       };
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -687,6 +684,61 @@ TEST_F(EmbedderTest, CanRenderTextWithImpellerAndCompositorMetal) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
 
   ASSERT_TRUE(ImageMatchesFixture("impeller_text_test.png", rendered_scene, 10));
+}
+
+TEST_F(EmbedderTest, CanRenderPlatformViewWithImpeller) {
+  auto& context = GetEmbedderContext<EmbedderTestContextMetal>();
+
+  EmbedderConfigBuilder builder(context);
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("render_impeller_platform_view");
+
+  builder.SetRenderTargetType(EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture);
+
+  auto rendered_scene = context.GetNextSceneImage();
+
+  fml::CountDownLatch latch(3);
+
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
+
+  context.GetCompositor().SetPlatformViewRendererCallback(
+      [&](const FlutterLayer& layer, GrDirectContext* context) -> sk_sp<SkImage> {
+        auto surface = CreateRenderSurface(layer, context);
+        auto canvas = surface->getCanvas();
+        FML_CHECK(canvas != nullptr);
+
+        switch (layer.platform_view->identifier) {
+          case 1: {
+            SkPaint paint;
+            paint.setColor(SK_ColorGREEN);
+            const auto& rect = SkRect::MakeWH(layer.size.width, layer.size.height);
+            canvas->drawRect(rect, paint);
+            latch.CountDown();
+          } break;
+          default:
+            FML_CHECK(false) << "Test was asked to composite an unknown platform view.";
+        }
+
+        return surface->makeImageSnapshot();
+      });
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics event so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+
+  ASSERT_TRUE(ImageMatchesFixture("impeller_render_platform_view.png", rendered_scene));
 }
 
 }  // namespace testing

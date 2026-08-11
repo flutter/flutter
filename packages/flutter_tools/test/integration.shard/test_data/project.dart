@@ -27,7 +27,9 @@ abstract class Project {
   /// Creates a flutter Project for testing.
   ///
   /// If passed, `indexHtml` is used as the contents of the web/index.html file.
-  Project({this.indexHtml = _kDefaultHtml});
+  Project({this.indexHtml = _kDefaultHtml, String? name}) : name = name ?? 'test';
+
+  final String name;
 
   late Directory dir;
 
@@ -37,7 +39,7 @@ abstract class Project {
   String get generatedFile => '';
   DeferredComponentsConfig? get deferredComponents => null;
 
-  Uri get mainDart => Uri.parse('package:test/main.dart');
+  Uri get mainDart => Uri.parse('package:$name/main.dart');
 
   /// The contents for the index.html file of this `Project`.
   ///
@@ -67,7 +69,7 @@ abstract class Project {
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
-    writePackageConfigFiles(directory: dir, mainLibName: 'test');
+    writePackageConfigFiles(directory: dir, mainLibName: name);
     await getPackages(dir.path);
   }
 
