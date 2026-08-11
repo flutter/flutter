@@ -74,6 +74,99 @@ void main() {
       },
     );
 
+    testUsingContext(
+      'reports hcpp analytics default false when not in the manifest and no explicit flag is passed',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        await runBuildAppBundleCommand(projectPath);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'appbundle',
+              commandHasTerminal: false,
+              buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from an explicit --enable-hcpp flag when not in the manifest',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        // The manifest does not set EnableHcpp, so the build injects the flag value and the
+        // packaged app has HCPP on. Analytics has to report what was packaged, not what the
+        // source manifest happened to say.
+        await runBuildAppBundleCommand(projectPath, arguments: <String>['--enable-hcpp']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'appbundle',
+              commandHasTerminal: false,
+              buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: true,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from an explicit --no-enable-hcpp flag',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        await runBuildAppBundleCommand(projectPath, arguments: <String>['--no-enable-hcpp']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'appbundle',
+              commandHasTerminal: false,
+              buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
     testUsingContext('alias aab', () async {
       final command = BuildAppBundleCommand(logger: BufferLogger.test());
       expect(command.aliases, contains('aab'));

@@ -653,6 +653,45 @@ void main() {
     );
 
     testUsingContext(
+      'reports an explicit --[no-]enable-hcpp to gradle so it overrides the manifest',
+      () async {
+        final enabledCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(enabledCommand).run(<String>['dummy', '--enable-hcpp']);
+        final BuildInfo enabledBuildInfo = await enabledCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(enabledBuildInfo.explicitAndroidEnableHcpp, isTrue);
+        expect(enabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+
+        // The negation has to be reported too, otherwise gradle cannot tell it apart from the
+        // flag being absent and would leave a manifest value of true in place.
+        final disabledCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(disabledCommand).run(<String>['dummy', '--no-enable-hcpp']);
+        final BuildInfo disabledBuildInfo = await disabledCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(disabledBuildInfo.explicitAndroidEnableHcpp, isFalse);
+        expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
+
+        // Without the flag nothing is reported, so the manifest decides.
+        final defaultCommand = DummyHcppFlutterCommand();
+        await createTestCommandRunner(defaultCommand).run(<String>['dummy']);
+        final BuildInfo defaultBuildInfo = await defaultCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(defaultBuildInfo.explicitAndroidEnableHcpp, isNull);
+        expect(
+          defaultBuildInfo.toGradleConfig(),
+          isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'use fileSystemScheme to generate BuildInfo',
       () async {
         final flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
@@ -1228,6 +1267,61 @@ void main() {
             dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
             throwsToolExit(
               message: 'Did not find the file passed to "--dart-define-from-file". Path: config',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          FileSystemUtils: () => fileSystemUtils,
+          Platform: () => platform,
+          ProcessManager: () => processManager,
+        },
+      );
+
+      testUsingContext(
+        'parses values from JSON files encoded in UTF-16 LE with BOM',
+        () async {
+          fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          final utf16Bytes = <int>[
+            0xFF, 0xFE, // UTF-16 LE BOM
+            ...'{ "kInt": 1 }'.codeUnits.expand(
+              (int codeUnit) => <int>[codeUnit & 0xFF, (codeUnit >> 8) & 0xFF],
+            ),
+          ];
+          fileSystem.file('config.json').writeAsBytesSync(utf16Bytes);
+
+          await dummyCommandRunner.run(<String>['dummy', '--dart-define-from-file=config.json']);
+
+          final BuildInfo buildInfo = await dummyCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+          );
+          expect(buildInfo.dartDefines, containsAll(const <String>['kInt=1']));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          FileSystemUtils: () => fileSystemUtils,
+          Platform: () => platform,
+          ProcessManager: () => processManager,
+        },
+      );
+
+      testUsingContext(
+        'throws a ToolExit when the given file cannot be decoded',
+        () async {
+          fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('config.json').writeAsBytesSync(<int>[0xFF, 0xFF, 0xFF, 0xFF, 0x01]);
+
+          await dummyCommandRunner.run(<String>['dummy', '--dart-define-from-file=config.json']);
+          expect(
+            dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+            throwsToolExit(
+              message:
+                  'Unable to decode the file at path "config.json". '
+                  'Ensure that the file is encoded in UTF-8 or UTF-16.\n',
             ),
           );
         },
@@ -2106,5 +2200,11 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 class DummyMachineFlutterCommand extends DummyFlutterCommand {
   DummyMachineFlutterCommand() : super(name: 'dummy') {
     addMachineOutputFlag(verboseHelp: false);
+  }
+}
+
+class DummyHcppFlutterCommand extends DummyFlutterCommand {
+  DummyHcppFlutterCommand() : super(name: 'dummy') {
+    addEnableHcppFlag(verboseHelp: false);
   }
 }

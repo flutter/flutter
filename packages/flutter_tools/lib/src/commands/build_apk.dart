@@ -34,6 +34,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     addIgnoreDeprecationOption();
+    addEnableHcppFlag(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
         'split-per-abi',
@@ -110,7 +111,9 @@ class BuildApkCommand extends BuildSubCommand {
       buildApkTargetPlatform: _targetArchs.join(','),
       buildApkBuildMode: _buildMode.cliName,
       buildApkSplitPerAbi: boolArg('split-per-abi'),
-      buildApkEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
+      buildApkEnableHcpp:
+          explicitEnableHcpp ??
+          FlutterProject.current().android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   }
 
@@ -124,7 +127,7 @@ class BuildApkCommand extends BuildSubCommand {
     final androidBuildInfo = AndroidBuildInfo(
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
-      targetArchs: _targetArchs.map<AndroidArch>(getAndroidArchForName),
+      targetArchs: _targetArchs.map<CpuArch>(getCpuArchForName),
     );
     validateBuild(androidBuildInfo);
     globals.terminal.usesTerminalUi = true;
