@@ -31,12 +31,30 @@ class IntentUtils {
     // Trust Intent in debug/profile modes.
     if (io.flutter.BuildConfig.DEBUG || io.flutter.BuildConfig.PROFILE) {
       if (!isSelfSent) {
+        Intent intent = activity.getIntent();
+        String componentName =
+            activity.getComponentName() != null
+                ? activity.getComponentName().flattenToShortString()
+                : activity.getClass().getSimpleName();
+
+        String extrasKeys =
+            (intent != null && intent.getExtras() != null)
+                ? intent.getExtras().keySet().toString()
+                : "[]";
+
         Log.w(
             TAG,
-            "Intent verification failed: the Intent was not sent by this app. "
+            "Intent verification failed: The intent "
+                + intent
+                + " (with extras: "
+                + extrasKeys
+                + ") "
+                + "sent to "
+                + componentName
+                + " was not sent by this app. "
                 + "This intent will be IGNORED in release builds to prevent security vulnerabilities. "
-                + "If this launch was internal, see TODO(camsim99) for migration options.");
-      } // TODO(camsim99): Possibly send more information about the Intent.
+                + "If this launch was internal, see https://docs.flutter.dev/release/breaking-changes/stricter-android-entrypoint-intent-verification for migration options.");
+      }
       return true;
     }
 
