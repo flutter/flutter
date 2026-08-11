@@ -18,7 +18,6 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_project_metadata.dart';
-import '../isolated/mustache_template.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
@@ -48,7 +47,7 @@ mixin CreateBase on FlutterCommand {
   ToolContext get _context => toolContext!;
 
   @protected
-  TemplateRenderer get templateRenderer => const MustacheTemplateRenderer();
+  TemplateRenderer get templateRenderer => _context.templateRenderer;
 
   /// Pattern for a Windows file system drive (e.g. "D:").
   ///

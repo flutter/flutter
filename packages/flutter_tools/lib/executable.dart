@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'runner.dart' as runner;
+import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
 import 'src/base/process.dart';
+import 'src/base/template.dart';
 import 'src/base/terminal.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
@@ -121,6 +123,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
     shutdownHooks: shutdownHooks,
+    contextOverrides: <Type, Generator>{TemplateRenderer: () => const MustacheTemplateRenderer()},
   );
 }
 

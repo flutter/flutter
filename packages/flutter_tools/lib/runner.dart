@@ -12,6 +12,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import 'src/base/async_guard.dart';
 import 'src/base/common.dart';
+import 'src/base/context.dart';
 import 'src/base/error_handling_io.dart';
 import 'src/base/exit.dart';
 import 'src/base/file_system.dart';
@@ -45,6 +46,7 @@ Future<int> run(
   Stdio? stdio,
   AnsiTerminal? terminal,
   ToolDependencies? toolDependencies,
+  Map<Type, Generator>? contextOverrides,
 }) async {
   return runInContext<int>(() async {
     if (muteCommandLogging) {
@@ -185,7 +187,7 @@ Future<int> run(
         );
       },
     )!;
-  });
+  }, overrides: contextOverrides);
 }
 
 /// Track if we're actively processing an error so we don't try and process

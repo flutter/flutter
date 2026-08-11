@@ -9,17 +9,14 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/template.dart';
 import '../context/tool_context.dart';
-import '../isolated/mustache_template.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
 class IdeConfigCommand extends FlutterCommand {
-  IdeConfigCommand({
-    required ToolContext toolContext,
-    TemplateRenderer templateRenderer = const MustacheTemplateRenderer(),
-  }) : _toolContext = toolContext,
-       _templateRenderer = templateRenderer,
-       super(toolContext: toolContext) {
+  IdeConfigCommand({required ToolContext toolContext, TemplateRenderer? templateRenderer})
+    : _toolContext = toolContext,
+      _templateRenderer = templateRenderer ?? toolContext.templateRenderer,
+      super(toolContext: toolContext) {
     argParser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
     argParser.addFlag(
       'update-templates',

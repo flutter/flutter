@@ -24,7 +24,6 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
-import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
@@ -50,7 +49,6 @@ import 'ios/ios_workflow.dart';
 import 'ios/iproxy.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
-import 'isolated/mustache_template.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
@@ -322,7 +320,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      TemplateRenderer: () => const MustacheTemplateRenderer(),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,

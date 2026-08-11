@@ -1173,6 +1173,7 @@ class FakeToolContext extends Fake implements ToolContext {
     Signals? signals,
     Stdio? stdio,
     SystemClock? systemClock,
+    TemplateRenderer? templateRenderer,
     AnsiTerminal? terminal,
     UserMessages? userMessages,
   }) : _artifacts = artifacts,
@@ -1197,6 +1198,7 @@ class FakeToolContext extends Fake implements ToolContext {
        _signals = signals,
        _stdio = stdio,
        _systemClock = systemClock,
+       _templateRenderer = templateRenderer,
        _terminal = terminal,
        _userMessages = userMessages;
 
@@ -1222,6 +1224,7 @@ class FakeToolContext extends Fake implements ToolContext {
   final Signals? _signals;
   final Stdio? _stdio;
   final SystemClock? _systemClock;
+  final TemplateRenderer? _templateRenderer;
   final AnsiTerminal? _terminal;
   final UserMessages? _userMessages;
 
@@ -1313,6 +1316,9 @@ class FakeToolContext extends Fake implements ToolContext {
   late final SystemClock systemClock = _systemClock ?? const SystemClock();
 
   @override
+  late final TemplateRenderer templateRenderer = _templateRenderer ?? const NoOpTemplateRenderer();
+
+  @override
   late final AnsiTerminal terminal = _terminal ?? AnsiTerminal(stdio: stdio, platform: platform);
 
   @override
@@ -1346,6 +1352,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
     Signals? signals,
     Stdio? stdio,
     SystemClock? systemClock,
+    TemplateRenderer? templateRenderer,
     AnsiTerminal? terminal,
     UserMessages? userMessages,
   }) : _artifacts = artifacts,
@@ -1369,6 +1376,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
        _signals = signals,
        _stdio = stdio,
        _systemClock = systemClock,
+       _templateRenderer = templateRenderer,
        _terminal = terminal,
        _userMessages = userMessages;
 
@@ -1393,6 +1401,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
   final Signals? _signals;
   final Stdio? _stdio;
   final SystemClock? _systemClock;
+  final TemplateRenderer? _templateRenderer;
   final AnsiTerminal? _terminal;
   final UserMessages? _userMessages;
 
@@ -1468,6 +1477,9 @@ class DelegatingToolContext extends Fake implements ToolContext {
 
   @override
   SystemClock get systemClock => _systemClock ?? globals.systemClock;
+
+  @override
+  TemplateRenderer get templateRenderer => _templateRenderer ?? globals.templateRenderer;
 
   @override
   AnsiTerminal get terminal => _terminal ?? globals.terminal;

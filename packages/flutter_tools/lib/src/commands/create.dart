@@ -31,7 +31,6 @@ import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
-import '../isolated/mustache_template.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -55,7 +54,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
     Pub? pub,
     bool verboseHelp = false,
   }) : _toolContext = toolContext,
-       _templateRenderer = templateRenderer ?? const MustacheTemplateRenderer(),
+       _templateRenderer = templateRenderer ?? toolContext.templateRenderer,
        _httpClientFactory = httpClientFactory,
        _explicitJava = java,
        _explicitNet = net,

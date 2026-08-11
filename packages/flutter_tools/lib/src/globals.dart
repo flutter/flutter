@@ -42,7 +42,6 @@ import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
-import 'isolated/mustache_template.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
@@ -259,7 +258,7 @@ PlistParser? _plistInstance;
 
 /// The global template renderer.
 TemplateRenderer get templateRenderer =>
-    context.get<TemplateRenderer>() ?? const MustacheTemplateRenderer();
+    context.get<TemplateRenderer>() ?? const NoOpTemplateRenderer();
 
 /// Global [ShutdownHooks] that should be run before the tool process exits.
 ///

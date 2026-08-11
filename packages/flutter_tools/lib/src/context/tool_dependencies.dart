@@ -23,6 +23,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/signals.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -124,6 +125,7 @@ class ToolDependencies {
     ShutdownHooks? shutdownHooks,
     Stdio? stdio,
     SystemClock? systemClock,
+    TemplateRenderer? templateRenderer,
     AnsiTerminal? terminal,
     UserMessages? userMessages,
     XCDevice? xcdevice,
@@ -134,6 +136,8 @@ class ToolDependencies {
     final Platform finalPlatform = platform ?? context.get<Platform>() ?? const LocalPlatform();
     final SystemClock finalSystemClock =
         systemClock ?? context.get<SystemClock>() ?? const SystemClock();
+    final TemplateRenderer finalTemplateRenderer =
+        templateRenderer ?? context.get<TemplateRenderer>() ?? const NoOpTemplateRenderer();
     final UserMessages finalUserMessages =
         userMessages ?? context.get<UserMessages>() ?? UserMessages();
     final ShutdownHooks finalShutdownHooks =
@@ -512,6 +516,7 @@ class ToolDependencies {
         signals: LocalSignals.instance,
         stdio: finalStdio,
         systemClock: finalSystemClock,
+        templateRenderer: finalTemplateRenderer,
         terminal: finalTerminal,
         userMessages: finalUserMessages,
       ),
