@@ -291,7 +291,28 @@ class UpdatePackagesCommand extends FlutterCommand {
       final yamlEditor = YamlEditor(pubspecContents);
       final ResolvedDependencies oldDeps = _fetchDeps(yamlEditor);
       final workspacePath = <String>['workspace'];
-      if (yamlEditor.parseAt(workspacePath, orElse: () => wrapAsYamlNode(null)).value != null) {
+      final YamlNode workspaceNode = yamlEditor.parseAt(
+        workspacePath,
+        orElse: () => wrapAsYamlNode(null),
+      );
+      final workspaceMembers = <String>{};
+      if (workspaceNode is YamlList) {
+        for (final Object? member in workspaceNode) {
+          if (member is String) {
+            final File memberPubspec = globals.fs.file(
+              globals.fs.path.join(project.directory.path, member, _pubspecName),
+            );
+            if (memberPubspec.existsSync()) {
+              try {
+                final parsed = Pubspec.parse(memberPubspec.readAsStringSync());
+                workspaceMembers.add(parsed.name);
+              } on Exception {
+                // Fall back to basename if parsing fails.
+              }
+            }
+            workspaceMembers.add(globals.fs.path.basename(member));
+          }
+        }
         yamlEditor.remove(workspacePath);
       }
       final RelaxMode relaxMode = switch (cherryPicks.isNotEmpty) {
@@ -299,7 +320,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         false => relaxToAny ? RelaxMode.any : RelaxMode.caret,
       };
       _relaxDeps(yamlEditor, relaxMode, pinnedDeps);
-      _removePathAndWorkspaceDependencies(yamlEditor);
+      _removePathAndWorkspaceDependencies(yamlEditor, project.directory, workspaceMembers);
       tempPubspec.writeAsStringSync(yamlEditor.toString());
       globals.printStatus('Upgrade in $projectTempDir (for project: ${project.manifest.appName})');
       await pub.interactively(
@@ -332,7 +353,12 @@ class UpdatePackagesCommand extends FlutterCommand {
   /// resolve unreleased workspace subpackages from pub.dev. The actual path
   /// dependencies and workspace definitions in the repository are preserved and
   /// not affected by this removal.
-  void _removePathAndWorkspaceDependencies(YamlEditor yamlEditor) {
+  void _removePathAndWorkspaceDependencies(
+    YamlEditor yamlEditor,
+    Directory projectDirectory,
+    Set<String> workspaceMembers,
+  ) {
+    final Directory subpackagesDir = projectDirectory.childDirectory('packages');
     for (final dependencyType in <String>[
       'dependencies',
       'dev_dependencies',
@@ -347,10 +373,14 @@ class UpdatePackagesCommand extends FlutterCommand {
       final toRemove = <String>[];
       for (final MapEntry<Object?, Object?> dep in node.entries) {
         final Object? value = dep.value;
-        // Workspace members without an explicit constraint have a null value,
-        // while local path dependencies have a map containing 'path'.
-        if (value == null || (value is Map && value.containsKey('path'))) {
-          toRemove.add(dep.key! as String);
+        final packageName = dep.key! as String;
+        final bool isPathDependency = value is Map && value.containsKey('path');
+        final bool isWorkspaceMember =
+            workspaceMembers.contains(packageName) ||
+            (subpackagesDir.existsSync() &&
+                subpackagesDir.childDirectory(packageName).childFile(_pubspecName).existsSync());
+        if (isPathDependency || (value == null && isWorkspaceMember)) {
+          toRemove.add(packageName);
         }
       }
       for (final packageName in toRemove) {
