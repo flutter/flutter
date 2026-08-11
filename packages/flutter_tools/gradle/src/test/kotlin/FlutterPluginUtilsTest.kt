@@ -97,6 +97,8 @@ class FlutterPluginUtilsTest {
         every { mockAndroidExtension.ndkVersion } returns ndkVersion
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockAndroidExtension
         every { project.extensions.findByName("android") } returns mockAndroidExtension
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.gradle.startParameter.isOffline } returns false
         return mockAndroidExtension
     }
 
@@ -2447,6 +2449,7 @@ class FlutterPluginUtilsTest {
         every { mockBuildType.externalNativeBuild.cmake.arguments(any(), any(), any()) } returns Unit
 
         setUpMockAndroidExtension(project)
+        every { project.gradle.startParameter.isOffline } returns true
         FlutterPluginUtils.forceNdkDownload(project, basePath)
         finalizeDslSlot.captured.invoke(Any())
 
