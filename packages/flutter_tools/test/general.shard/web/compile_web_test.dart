@@ -78,17 +78,19 @@ environement:
         analytics: fakeAnalytics,
       );
       await webBuilder.buildWeb(
-        flutterProject,
-        'target',
-        BuildInfo.debug,
-        ServiceWorkerStrategy.offlineFirst,
-        compilerConfigs: <WebCompilerConfig>[
-          const WasmCompilerConfig(optimizationLevel: 0, stripWasm: false),
-          const JsCompilerConfig.run(
-            nativeNullAssertions: true,
-            renderer: WebRendererMode.canvaskit,
-          ),
-        ],
+        WebBuildSpecification(
+          project: flutterProject,
+          target: 'target',
+          buildInfo: BuildInfo.debug,
+          serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
+          compilerConfigs: <WebCompilerConfig>[
+            const WasmCompilerConfig(optimizationLevel: 0, stripWasm: false),
+            const JsCompilerConfig.run(
+              nativeNullAssertions: true,
+              renderer: WebRendererMode.canvaskit,
+            ),
+          ],
+        ),
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -146,11 +148,13 @@ environement:
         analytics: fakeAnalytics,
       );
       await webBuilder.buildWeb(
-        flutterProject,
-        'target',
-        BuildInfo.debug,
-        ServiceWorkerStrategy.offlineFirst,
-        compilerConfigs: <WebCompilerConfig>[],
+        WebBuildSpecification(
+          project: flutterProject,
+          target: 'target',
+          buildInfo: BuildInfo.debug,
+          serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
+          compilerConfigs: const <WebCompilerConfig>[],
+        ),
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -191,11 +195,12 @@ environement:
         analytics: fakeAnalytics,
       );
       await webBuilder.buildWeb(
-        flutterProject,
-        'target',
-        BuildInfo.debug,
-        null, // serviceWorkerStrategy is omitted
-        compilerConfigs: <WebCompilerConfig>[],
+        WebBuildSpecification(
+          project: flutterProject,
+          target: 'target',
+          buildInfo: BuildInfo.debug,
+          compilerConfigs: const <WebCompilerConfig>[],
+        ),
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -234,16 +239,18 @@ environement:
       );
       await expectLater(
         () async => webBuilder.buildWeb(
-          flutterProject,
-          'target',
-          BuildInfo.debug,
-          ServiceWorkerStrategy.offlineFirst,
-          compilerConfigs: <WebCompilerConfig>[
-            const JsCompilerConfig.run(
-              nativeNullAssertions: true,
-              renderer: WebRendererMode.canvaskit,
-            ),
-          ],
+          WebBuildSpecification(
+            project: flutterProject,
+            target: 'target',
+            buildInfo: BuildInfo.debug,
+            serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
+            compilerConfigs: <WebCompilerConfig>[
+              const JsCompilerConfig.run(
+                nativeNullAssertions: true,
+                renderer: WebRendererMode.canvaskit,
+              ),
+            ],
+          ),
         ),
         throwsToolExit(message: 'Failed to compile application for the Web.'),
       );

@@ -351,12 +351,14 @@ class ResidentWebRunner extends ResidentRunner {
             analytics: globals.analytics,
           );
           await webBuilder.buildWeb(
-            flutterProject,
-            target,
-            debuggingOptions.buildInfo,
-            ServiceWorkerStrategy.none,
-            compilerConfigs: <WebCompilerConfig>[_compilerConfig],
-            webDefines: _webDefines,
+            WebBuildSpecification(
+              project: flutterProject,
+              target: target,
+              buildInfo: debuggingOptions.buildInfo,
+              serviceWorkerStrategy: ServiceWorkerStrategy.none,
+              compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+              webDefines: _webDefines,
+            ),
           );
         }
         final webDevFS = flutterDevice!.devFS! as WebDevFS;
@@ -505,12 +507,14 @@ class ResidentWebRunner extends ResidentRunner {
           analytics: globals.analytics,
         );
         await webBuilder.buildWeb(
-          flutterProject,
-          target,
-          debuggingOptions.buildInfo,
-          ServiceWorkerStrategy.none,
-          compilerConfigs: <WebCompilerConfig>[_compilerConfig],
-          webDefines: _webDefines,
+          WebBuildSpecification(
+            project: flutterProject,
+            target: target,
+            buildInfo: debuggingOptions.buildInfo,
+            serviceWorkerStrategy: ServiceWorkerStrategy.none,
+            compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+            webDefines: _webDefines,
+          ),
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

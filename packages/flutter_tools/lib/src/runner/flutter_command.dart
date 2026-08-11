@@ -29,9 +29,16 @@ import '../project.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
 import 'flutter_command_runner.dart';
+
+import 'options/option_bundle.dart';
+import 'options/option_descriptor.dart';
 import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
+export 'options/common_options.dart';
+export 'options/option_bundle.dart';
+export 'options/option_descriptor.dart';
+export 'options/safe_arg_results.dart';
 
 abstract class DotEnvRegex {
   // Dot env multi-line block value regex
@@ -230,7 +237,17 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether this command uses the 'target' option.
   var _usesTargetOption = false;
 
+  /// Enables the target option flag behavior on this command.
+  void enableUsesTargetOption() {
+    _usesTargetOption = true;
+  }
+
   var _usesPubOption = false;
+
+  /// Enables the pub option flag behavior on this command.
+  void enableUsesPubOption() {
+    _usesPubOption = true;
+  }
 
   var _usesPortOption = false;
 
@@ -267,6 +284,20 @@ abstract class FlutterCommand extends Command<void> {
   /// at the [FlutterCommand] level to enable any classes that extend it to
   /// easily reference it or overwrite as necessary.
   Analytics get analytics => globals.analytics;
+
+  final Map<String, OptionDescriptor<dynamic>> _optionRegistry =
+      <String, OptionDescriptor<dynamic>>{};
+
+  /// Option descriptor registry for type-safe lookups.
+  Map<String, OptionDescriptor<dynamic>> get optionRegistry => _optionRegistry;
+
+  /// Registers an [OptionBundle] with this command.
+  void registerOptionBundle(OptionBundle bundle) {
+    bundle.register(this, argParser, _optionRegistry);
+  }
+
+  /// Registers multiple [OptionBundle] instances with this command.
+  void registerOptionBundles(List<OptionBundle> bundles) => bundles.forEach(registerOptionBundle);
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
