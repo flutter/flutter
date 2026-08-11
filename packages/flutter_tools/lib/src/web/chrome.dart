@@ -18,6 +18,9 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import 'chrome_constants.dart';
+
+export 'chrome_constants.dart';
 
 /// An environment variable used to override the location of Google Chrome.
 const kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -48,16 +51,6 @@ const kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 ///
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const _kGlibcError = 'Inconsistency detected by ld.so';
-
-/// Flags passed to Chrome to disable GCM (Google Cloud Messaging) and MCS
-/// (Mobile Connection Server) background network registration calls and
-/// prevent deprecation error logs.
-const kGcmDisabledFlags = <String>[
-  '--disable-features=GCM',
-  '--gcm-checkin-url=http://127.0.0.1',
-  '--gcm-registration-url=http://127.0.0.1',
-  '--gcm-mcs-endpoint=127.0.0.1:0',
-];
 
 typedef BrowserFinder = String Function(Platform, FileSystem);
 
