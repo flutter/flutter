@@ -304,6 +304,10 @@ class FlutterPlugin : Plugin<Project> {
             FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
         }
+        // Only applies to app projects. For module (aar) projects the host app's manifest is
+        // the source of truth for HCPP; see addTasksForEnableHcppManifest for why injecting
+        // into the library manifest would break host builds that explicitly opt out.
+        FlutterPluginUtils.addTasksForEnableHcppManifest(projectToAddTasksTo)
 
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
