@@ -2969,6 +2969,49 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itDoesNotAddCollectionInfoToAnEmptyTable() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode table = new TestSemanticsNode();
+    table.id = 0;
+    table.role = AccessibilityBridge.Role.TABLE.value;
+
+    TestSemanticsUpdate testSemanticsUpdate = table.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNotNull(nodeInfo);
+    assertEquals("android.widget.TableLayout", nodeInfo.getClassName().toString());
+    // TalkBack needs counts greater than zero to describe a collection, so an empty table gets
+    // none at all.
+    assertNull(nodeInfo.getCollectionInfo());
+  }
+
+  @Test
+  public void itDoesNotAddCollectionItemInfoToACellOutsideOfATable() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+
+    TestSemanticsNode row = new TestSemanticsNode();
+    row.id = 1;
+    row.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode cell = new TestSemanticsNode();
+    cell.id = 2;
+    cell.role = AccessibilityBridge.Role.CELL.value;
+    row.children.add(cell);
+    root.children.add(row);
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo cellInfo = accessibilityBridge.createAccessibilityNodeInfo(2);
+    assertNotNull(cellInfo);
+    assertNull(cellInfo.getCollectionItemInfo());
+  }
+
+  @Test
   public void itAddsRangeInfoToProgressBar() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();

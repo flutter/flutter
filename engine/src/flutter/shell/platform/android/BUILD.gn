@@ -384,6 +384,7 @@ android_java_sources = [
   "io/flutter/view/AccessibilityStringBuilder.java",
   "io/flutter/view/AccessibilityViewEmbedder.java",
   "io/flutter/view/BaseRoleConfigurator.java",
+  "io/flutter/view/CellRoleConfigurator.java",
   "io/flutter/view/ClassNameRoleConfigurator.java",
   "io/flutter/view/ComboBoxRoleConfigurator.java",
   "io/flutter/view/FlutterCallbackInformation.java",

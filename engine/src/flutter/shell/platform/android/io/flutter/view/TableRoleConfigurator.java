@@ -8,7 +8,10 @@ import android.os.Build;
 import android.view.accessibility.AccessibilityNodeInfo;
 import io.flutter.Build.API_LEVELS;
 
-/** Configures Android accessibility metadata for a Flutter semantic table. */
+/**
+ * Configurator for the {@link AccessibilityBridge.Role#TABLE} role. Sets the class name to
+ * TableLayout and reports the table's dimensions as collection info.
+ */
 public class TableRoleConfigurator extends BaseRoleConfigurator {
   @Override
   protected void configureRole(
@@ -17,16 +20,19 @@ public class TableRoleConfigurator extends BaseRoleConfigurator {
 
     int rowCount = 0;
     int columnCount = 0;
-    if (node.childrenInTraversalOrder != null) {
-      for (AccessibilityBridge.SemanticsNode row : node.childrenInTraversalOrder) {
-        if (row == null || !row.hasRole(AccessibilityBridge.Role.ROW)) {
-          continue;
-        }
-        rowCount++;
-        int rowColumns =
-            row.childrenInTraversalOrder != null ? row.childrenInTraversalOrder.size() : 0;
-        columnCount = Math.max(columnCount, rowColumns);
+    for (AccessibilityBridge.SemanticsNode row : node.childrenInTraversalOrder) {
+      if (!row.hasRole(AccessibilityBridge.Role.ROW)) {
+        continue;
       }
+      rowCount++;
+      columnCount = Math.max(columnCount, row.childrenInTraversalOrder.size());
+    }
+
+    if (rowCount == 0 || columnCount == 0) {
+      // TalkBack needs a row and column count greater than zero to announce entering and leaving
+      // a collection, and reports nonsense for an empty one. An empty table is better described
+      // by no collection info at all.
+      return;
     }
 
     if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
