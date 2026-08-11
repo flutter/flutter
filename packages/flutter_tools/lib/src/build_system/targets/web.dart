@@ -625,7 +625,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     Random? random,
   }) {
     final urisList = <Uri>[...uris]..shuffle(random);
-    final (:hostedFindings, :hostApp, :privatePackage) = _classifyUris(
+    final (:Set<String> hostedFindings, :bool hostApp, :bool privatePackage) = _classifyUris(
       urisList,
       hostedPackages,
       privatePackages,
