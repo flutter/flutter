@@ -124,15 +124,22 @@ class FlutterProject {
       final File pubspec = candidate.childFile('pubspec.yaml');
       if (pubspec.existsSync()) {
         try {
-          final FlutterProject candidateProject = FlutterProject.fromDirectory(candidate);
-          if (candidateProject.manifest.workspace.isNotEmpty) {
-            if (candidateProject.workspaceProjects.any(
-              (FlutterProject p) => fileSystem.path.equals(
-                fileSystem.path.normalize(p.directory.absolute.path),
-                normalizedPath,
-              ),
-            )) {
-              return candidateProject;
+          final FlutterManifest manifest = FlutterProject._readManifest(
+            pubspec.path,
+            logger: globals.logger,
+            fileSystem: fileSystem,
+          );
+          if (manifest.workspace.isNotEmpty) {
+            final String relativePath = fileSystem.path.relative(
+              normalizedPath,
+              from: candidate.path,
+            );
+            final bool isMember = manifest.workspace.any((String entry) {
+              final glob = Glob(entry, context: fileSystem.path);
+              return glob.matches(relativePath);
+            });
+            if (isMember) {
+              return FlutterProject.fromDirectory(candidate);
             }
           }
         } on Exception catch (_) {
@@ -202,7 +209,11 @@ class FlutterProject {
               .listFileSystemSync(directory.fileSystem, root: directory.path)
               .whereType<Directory>()) {
         if (globResult.childFile('pubspec.yaml').existsSync()) {
-          _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
+          try {
+            _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
+          } on Exception catch (_) {
+            // Ignore child projects with invalid manifests.
+          }
         }
       }
     }
