@@ -583,12 +583,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
     return findingsInfo;
   }
 
+  static final RegExp _wasmErrorCodePattern = RegExp(r'\(([0-9]+)\)\s*$');
+
   static Map<String, Set<Uri>> _parseWasmFindings(String stdout) {
     final errorCodeToImportUris = <String, Set<Uri>>{};
     for (final String line in stdout.split('\n')) {
-      final Uri uri = Uri.parse(line.split(' ')[0]);
-      final String? errorCode = RegExp(r'\(([0-9]+)\)\s*$').firstMatch(line)?.group(1);
+      final String? errorCode = _wasmErrorCodePattern.firstMatch(line)?.group(1);
       if (errorCode != null) {
+        final Uri uri = Uri.parse(line.split(' ')[0]);
         (errorCodeToImportUris[errorCode] ??= {}).add(uri);
       }
     }
@@ -648,9 +650,9 @@ class Dart2WasmTarget extends Dart2WebTarget {
     var hostApp = false;
     var privatePackage = false;
     for (final uri in uris) {
-      final String packageName = uri.pathSegments.first;
-      final String? hostedPackageVersion = hostedPackages[packageName];
-      if (uri.scheme == 'package') {
+      if (uri.scheme == 'package' && uri.pathSegments.isNotEmpty) {
+        final String packageName = uri.pathSegments.first;
+        final String? hostedPackageVersion = hostedPackages[packageName];
         if (hostedPackageVersion != null) {
           hostedFindings.add('$packageName:$hostedPackageVersion');
           continue;
