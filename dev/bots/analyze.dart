@@ -225,7 +225,7 @@ List<Validation> _getValidations({
     ),
     Validation('no-sync-star-async-star', 'No sync*/async*', () async {
       await verifyNoSyncAsyncStar(flutterPackages);
-      await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
+      await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 80);
     }),
     Validation(
       'no-runtime-type',

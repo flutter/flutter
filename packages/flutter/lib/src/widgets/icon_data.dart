@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart';
 /// In release builds, the Flutter tool will tree shake out of bundled fonts
 /// the code points (or instances of [IconData]) which are not referenced from
 /// Dart app code. See the [staticIconProvider] annotation for more details.
+@RecordUse()
 @immutable
 final class IconData {
   /// Creates icon data.
@@ -45,11 +46,8 @@ final class IconData {
   /// need to be explicitly opted out at build time). See [staticIconProvider]
   /// for more context.
   const IconData(
-    // ignore: experimental_member_use
     @mustBeConst this.codePoint, {
-    // ignore: experimental_member_use
     @mustBeConst this.fontFamily,
-    // ignore: experimental_member_use
     @mustBeConst this.fontPackage,
     this.matchTextDirection = false,
     this.fontFamilyFallback,
