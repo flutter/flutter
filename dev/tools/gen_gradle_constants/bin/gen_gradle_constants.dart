@@ -128,16 +128,28 @@ Future<void> main() async {
         stdout.writeln(generated.file);
       }
     }
+  } on _PigeonFailure catch (failure) {
+    // Reported rather than thrown so that the scratch directory is still
+    // cleaned up below; calling `exit` here would skip the `finally`.
+    stderr.writeln(failure.message);
+    exitCode = 1;
   } finally {
     scratch.deleteSync(recursive: true);
   }
+}
+
+/// Thrown when Pigeon fails, so that [main] can clean up before exiting.
+class _PigeonFailure implements Exception {
+  const _PigeonFailure(this.message);
+
+  final String message;
 }
 
 /// Runs Pigeon for a single [generated] file, and returns its pruned contents.
 Future<String> _generate(ConstantsSource source, GeneratedFile generated, Directory scratch) async {
   final String scratchFile = path.join(scratch.path, _toPlatformPath(generated.file));
   Directory(path.dirname(scratchFile)).createSync(recursive: true);
-  final int exitCode = await Pigeon.run(<String>[
+  final int pigeonExitCode = await Pigeon.run(<String>[
     '--input',
     _resolve(source.dartSource),
     generated.language.outputFlag,
@@ -148,9 +160,8 @@ Future<String> _generate(ConstantsSource source, GeneratedFile generated, Direct
     _resolve(copyrightHeader),
     '--one_language',
   ]);
-  if (exitCode != 0) {
-    stderr.writeln('Pigeon failed to generate ${generated.file} from ${source.dartSource}.');
-    exit(exitCode);
+  if (pigeonExitCode != 0) {
+    throw _PigeonFailure('Pigeon failed to generate ${generated.file} from ${source.dartSource}.');
   }
   return _keepOnlyConstants(File(scratchFile).readAsLinesSync(), generated.language);
 }

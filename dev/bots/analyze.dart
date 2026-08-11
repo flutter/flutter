@@ -654,6 +654,20 @@ Future<void> verifyGeneratedGradleConstants(String workingDirectory, String dart
     foundError(<String>['The Gradle constants generator did not report generating any files.']);
     return;
   }
+  // Everything the generator prints is meant to be the path of a file it wrote.
+  // Fail on a line that is not, rather than dropping it, since silently
+  // discarding a line would silently drop that file from the check below.
+  final List<String> notFiles = generatedFiles
+      .where((String line) => !File(path.join(workingDirectory, line)).existsSync())
+      .toList();
+  if (notFiles.isNotEmpty) {
+    foundError(<String>[
+      'The Gradle constants generator printed lines that are not files it generated:',
+      ...notFiles.map((String line) => ' * $line'),
+      'It must print nothing to stdout but the path of each file it writes.',
+    ]);
+    return;
+  }
 
   // Check that regeneration did not dirty the tree.
   final EvalResult result = await _evalCommand(
