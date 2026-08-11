@@ -1990,6 +1990,7 @@ class _TabBarViewState extends State<TabBarView> {
     } else {
       _pageController!.jumpToPage(_currentIndex!);
     }
+    _updateChildren();
   }
 
   @override
@@ -1999,6 +2000,7 @@ class _TabBarViewState extends State<TabBarView> {
       _updateTabController();
       _currentIndex = _controller!.index;
       _jumpToPage(_currentIndex!);
+      _updateChildren();
     }
     if (widget.viewportFraction != oldWidget.viewportFraction) {
       _pageController?.dispose();
@@ -2026,7 +2028,25 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   void _updateChildren() {
-    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(widget.children);
+    final PrimaryScrollController? ancestor = context.findAncestorWidgetOfExactType<PrimaryScrollController>();
+    int index = 0;
+    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(
+      widget.children.map<Widget>((Widget child) {
+        final int tabIndex = index++;
+        final Widget wrappedChild;
+        if (tabIndex == _currentIndex && ancestor != null && ancestor.controller != null) {
+          wrappedChild = PrimaryScrollController(
+            controller: ancestor.controller!,
+            automaticallyInheritForPlatforms: ancestor.automaticallyInheritForPlatforms,
+            scrollDirection: ancestor.scrollDirection,
+            child: child,
+          );
+        } else {
+          wrappedChild = PrimaryScrollController.none(child: child);
+        }
+        return wrappedChild;
+      }).toList(),
+    );
   }
 
   void _handleTabControllerAnimationTick() {
@@ -2124,12 +2144,12 @@ class _TabBarViewState extends State<TabBarView> {
       final bool pageChanged = (page - _controller!.index).abs() > 1.0;
       if (pageChanged) {
         _controller!.index = page.round();
-        _currentIndex =_controller!.index;
+        _changeCurrentIndex(_controller!.index);
       }
       _syncControllerOffset();
     } else if (notification is ScrollEndNotification) {
       _controller!.index = page.round();
-      _currentIndex = _controller!.index;
+      _changeCurrentIndex(_controller!.index);
       if (!_controller!.indexIsChanging) {
         _syncControllerOffset();
       }
@@ -2137,6 +2157,17 @@ class _TabBarViewState extends State<TabBarView> {
     _scrollUnderwayCount -= 1;
 
     return false;
+  }
+
+  void _changeCurrentIndex(int newIndex) {
+    if (_currentIndex != newIndex) {
+      _currentIndex = newIndex;
+      if (mounted) {
+        setState(() {
+          _updateChildren();
+        });
+      }
+    }
   }
 
   bool _debugScheduleCheckHasValidChildrenCount() {

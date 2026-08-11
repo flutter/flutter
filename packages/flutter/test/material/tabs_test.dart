@@ -7158,4 +7158,63 @@ void main() {
     labelSize = tester.getSize(find.text('Tab 1'));
     expect(labelSize, equals(const Size(140.5, 40.0)));
   }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
+
+  testWidgets("PrimaryScrollController is not attached to multiple scroll views in TabBarView's keep-alive tabs", (WidgetTester tester) async {
+    final TabController controller = TabController(length: 2, vsync: const TestVSync());
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: controller,
+              tabs: const <Widget>[Tab(text: 'Tab 0'), Tab(text: 'Tab 1')],
+            ),
+          ),
+          body: TabBarView(
+            controller: controller,
+            children: const <Widget>[
+              _KeepAliveTab(name: '0'),
+              _KeepAliveTab(name: '1'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Switch to Tab 1
+    await tester.tap(find.text('Tab 1'));
+    await tester.pumpAndSettle();
+
+    final ScrollController primaryController = PrimaryScrollController.of(tester.element(find.byType(TabBarView)));
+    expect(() => primaryController.position, returnsNormally);
+  });
 }
+
+class _KeepAliveTab extends StatefulWidget {
+  const _KeepAliveTab({required this.name});
+
+  final String name;
+
+  @override
+  State<_KeepAliveTab> createState() => _KeepAliveTabState();
+}
+
+class _KeepAliveTabState extends State<_KeepAliveTab> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return ListView(
+      primary: true,
+      children: List<Widget>.generate(
+        20,
+        (int index) => ListTile(title: Text('${widget.name}: $index')),
+      ),
+    );
+  }
+}
+
