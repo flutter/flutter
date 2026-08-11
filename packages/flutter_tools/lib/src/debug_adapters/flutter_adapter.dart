@@ -463,7 +463,17 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // This may be useful when there's no VM Service (for example Profile mode)
     // but the editor still wants to know that startup has finished.
     if (enableDebugger) {
-      await debuggerInitialized; // Ensure we're fully initialized before sending.
+      waitingForDebugger = true;
+      try {
+        await Future.any<void>([debuggerInitialized, debuggerInitializationFailedCompleter.future]);
+      } catch (e) {
+        if (!isTerminating) {
+          rethrow;
+        }
+        return;
+      } finally {
+        waitingForDebugger = false;
+      }
     }
     sendEvent(RawEventBody(<String, Object?>{}), eventType: 'flutter.appStarted');
   }
