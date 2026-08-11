@@ -125,6 +125,12 @@ class ResidentWebRunner extends ResidentRunner {
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
+         fileSystem: fileSystem,
+         logger: logger,
+         platform: platform,
+         analytics: analytics,
+         outputPreferences: outputPreferences,
+         terminal: terminal,
          commandHelp: CommandHelp(
            logger: logger,
            terminal: terminal,

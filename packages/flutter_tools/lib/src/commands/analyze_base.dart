@@ -19,6 +19,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../cache.dart';
 import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
@@ -33,10 +34,12 @@ abstract class AnalyzeBase {
     required this.terminal,
     required this.artifacts,
     required this.suppressAnalytics,
-  });
+    Cache? cache,
+  }) : _cache = cache;
 
   /// The parsed argument results for execution.
   final ArgResults argResults;
+  final Cache? _cache;
   @protected
   final List<Directory> repoPackages;
   @protected
@@ -55,7 +58,7 @@ abstract class AnalyzeBase {
   final bool suppressAnalytics;
 
   @protected
-  String get flutterRoot => fileSystem.path.absolute(globals.cache.flutterRoot);
+  String get flutterRoot => fileSystem.path.absolute((_cache ?? globals.cache).flutterRoot);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();

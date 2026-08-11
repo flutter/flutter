@@ -54,8 +54,10 @@ void main() {
       platform = FakePlatform();
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
+      const homePath = '/home/user/flutter';
       toolContext = FakeToolContext(
         artifacts: Artifacts.test(),
+        cache: Cache.test(fileSystem: fileSystem, flutterRoot: homePath),
         fs: fileSystem,
         logger: logger,
         platform: platform,
@@ -69,8 +71,6 @@ void main() {
       runner = createTestCommandRunner(command);
 
       // Setup repo roots
-      const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
       for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
@@ -212,16 +212,15 @@ void main() {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
-    Cache.flutterRoot = _kFlutterRoot;
 
     // Absolute paths
     expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
     expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
-    expect(inRepo(<String>[Cache.flutterRoot!], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot!, 'foo')], fileSystem), isTrue);
+    expect(inRepo(<String>[_kFlutterRoot], fileSystem), isTrue);
+    expect(inRepo(<String>[fileSystem.path.join(_kFlutterRoot, 'foo')], fileSystem), isTrue);
 
     // Relative paths
-    fileSystem.currentDirectory = Cache.flutterRoot;
+    fileSystem.currentDirectory = _kFlutterRoot;
     expect(inRepo(<String>['.'], fileSystem), isTrue);
     expect(inRepo(<String>['foo'], fileSystem), isTrue);
     fileSystem.currentDirectory = tempDir.path;
@@ -238,7 +237,7 @@ bool inRepo(List<String>? fileList, FileSystem fileSystem) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot!));
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(_kFlutterRoot));
   final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));

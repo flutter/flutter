@@ -81,6 +81,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
            testRunner ??
            FlutterTestRunner(
              artifacts: toolContext.artifacts,
+             cache: toolContext.cache,
              config: toolContext.config,
              fileSystem: toolContext.fs,
              logger: toolContext.logger,

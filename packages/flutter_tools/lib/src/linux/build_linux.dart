@@ -13,6 +13,7 @@ import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
 import '../convert.dart';
@@ -41,6 +42,7 @@ Future<void> buildLinux(
   required TargetPlatform targetPlatform,
   String targetSysroot = '/',
   required Logger logger,
+  Cache? cache,
   bool configOnly = false,
 }) async {
   target ??= 'lib/main.dart';
@@ -75,7 +77,7 @@ Future<void> buildLinux(
     environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
   writeGeneratedCmakeConfig(
-    globals.cache.flutterRoot,
+    cache?.flutterRoot ?? globals.cache.flutterRoot,
     linuxProject,
     buildInfo,
     environmentConfig,

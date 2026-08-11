@@ -857,20 +857,20 @@ typedef RunOrAttach =
 class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Analytics analytics,
-    required SystemClock systemClock,
-    required Logger logger,
-    required AnsiTerminal terminal,
-    required OutputPreferences outputPreferences,
-  }) : _fs = fileSystem,
-       _platform = platform,
-       _analytics = analytics,
-       _systemClock = systemClock,
-       _logger = logger,
-       _terminal = terminal,
-       _outputPreferences = outputPreferences,
+    FileSystem? fileSystem,
+    Platform? platform,
+    Analytics? analytics,
+    SystemClock? systemClock,
+    Logger? logger,
+    AnsiTerminal? terminal,
+    OutputPreferences? outputPreferences,
+  }) : _fs = fileSystem ?? LocalFileSystem.instance,
+       _platform = platform ?? const LocalPlatform(),
+       _analytics = analytics ?? const NoOpAnalytics(),
+       _systemClock = systemClock ?? const SystemClock(),
+       _logger = logger ?? BufferLogger.test(),
+       _terminal = terminal ?? AnsiTerminal(stdio: Stdio(), platform: const LocalPlatform()),
+       _outputPreferences = outputPreferences ?? OutputPreferences.test(),
        super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);

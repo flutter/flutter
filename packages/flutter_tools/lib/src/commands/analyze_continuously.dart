@@ -21,6 +21,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     required this.shutdownHooks,
     required super.suppressAnalytics,
     required super.terminal,
+    super.cache,
   }) : super(repoPackages: repoPackages);
 
   final ShutdownHooks shutdownHooks;

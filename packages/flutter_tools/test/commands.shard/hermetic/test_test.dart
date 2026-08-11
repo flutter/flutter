@@ -97,6 +97,11 @@ void main() {
 
     logger = LoggingLogger();
     toolContext = FakeToolContext(
+      cache: Cache.test(
+        fileSystem: fs,
+        flutterRoot: getFlutterRoot(),
+        processManager: FakeProcessManager.any(),
+      ),
       fs: fs,
       logger: logger,
       platform: FakePlatform(operatingSystem: globals.platform.operatingSystem),
@@ -683,10 +688,53 @@ resolution: workspace
     },
   );
 
+  FakeProcessManager createFasterTestingProcessManager() {
+    return FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <Pattern>[
+          'Artifact.engineDartAotRuntime',
+          'Artifact.frontendServerSnapshotForEngineDartSdk',
+          '--sdk-root',
+          'Artifact.flutterPatchedSdkPath.TargetPlatform.tester.debug/',
+          '--incremental',
+          '--no-print-incremental-dependencies',
+          '--target=flutter',
+          '--experimental-emit-debug-metadata',
+          '-DFLUTTER_VERSION=0.0.0',
+          '-DFLUTTER_CHANNEL=master',
+          '-DFLUTTER_GIT_URL=https://github.com/flutter/flutter.git',
+          '-DFLUTTER_FRAMEWORK_REVISION=11111',
+          '-DFLUTTER_ENGINE_REVISION=abcde',
+          '-DFLUTTER_DART_VERSION=12',
+          '--output-dill',
+          '/package/build/isolate_spawning_tester/child_test_isolate_spawner.dill',
+          '--packages',
+          '/package/build/isolate_spawning_tester/.dart_tool/package_config.json',
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+          '--track-creation-locations',
+          '--initialize-from-dill',
+          'build/af1bff12e72abd774426211318c4d78e.cache.dill.track.dill',
+          '--verbosity=error',
+          '--enable-experiment=alternative-invalidation-strategy',
+        ],
+        exitCode: 1,
+      ),
+    ]);
+  }
+
   testUsingContext(
     'Generates a satisfactory test runner package_config.json when --experimental-faster-testing is set',
     () async {
-      final testCommand = TestCommand(toolContext: toolContext);
+      final testToolContext = FakeToolContext(
+        cache: toolContext.cache,
+        fs: fs,
+        logger: logger,
+        platform: toolContext.platform,
+        processManager: createFasterTestingProcessManager(),
+      );
+      final testCommand = TestCommand(toolContext: testToolContext);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       var caughtToolExit = false;
@@ -741,7 +789,14 @@ resolution: workspace
   testUsingContext(
     'Pipes specified arguments to package:test when --experimental-faster-testing is set',
     () async {
-      final testCommand = TestCommand(toolContext: toolContext);
+      final testToolContext = FakeToolContext(
+        cache: toolContext.cache,
+        fs: fs,
+        logger: logger,
+        platform: toolContext.platform,
+        processManager: createFasterTestingProcessManager(),
+      );
+      final testCommand = TestCommand(toolContext: testToolContext);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       var caughtToolExit = false;
@@ -825,7 +880,14 @@ const List<String> packageTestArgs = <String>[
   testUsingContext(
     'Only passes --no-color and --chain-stack-traces to package:test by default when --experimental-faster-testing is set',
     () async {
-      final testCommand = TestCommand(toolContext: toolContext);
+      final testToolContext = FakeToolContext(
+        cache: toolContext.cache,
+        fs: fs,
+        logger: logger,
+        platform: toolContext.platform,
+        processManager: createFasterTestingProcessManager(),
+      );
+      final testCommand = TestCommand(toolContext: testToolContext);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       var caughtToolExit = false;

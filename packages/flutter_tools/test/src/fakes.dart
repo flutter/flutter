@@ -131,7 +131,7 @@ class FakeShutdownHooks extends Fake implements ShutdownHooks {
   }
 
   @override
-  Future<void> runShutdownHooks(Logger logger) async {
+  Future<void> runShutdownHooks([Logger? logger]) async {
     _isShuttingDown = true;
   }
 }
@@ -316,6 +316,16 @@ class FakeStdio extends Stdio {
 
   @override
   bool hasTerminal = false;
+
+  @override
+  void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
+    _stderr.write(message);
+  }
+
+  @override
+  void stdoutWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
+    _stdout.write(message);
+  }
 
   List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
@@ -1090,6 +1100,9 @@ class FakeXcode extends Fake implements Xcode {
 
 class FakeArtifacts extends Fake implements Artifacts {
   @override
+  bool get usesLocalArtifacts => false;
+
+  @override
   FileSystemEntity getHostArtifact(HostArtifact artifact) =>
       MemoryFileSystem.test().file(artifact.name);
 
@@ -1106,9 +1119,15 @@ class FakeArtifacts extends Fake implements Artifacts {
 }
 
 class FakeCache extends Fake implements Cache {
-  FakeCache({Directory? rootOverride}) : _rootOverride = rootOverride;
+  FakeCache({Directory? rootOverride, String? flutterRoot})
+    : _rootOverride = rootOverride,
+      _flutterRoot = flutterRoot;
 
   final Directory? _rootOverride;
+  final String? _flutterRoot;
+
+  @override
+  String get flutterRoot => _flutterRoot ?? _rootOverride?.path ?? '/flutter';
 
   @override
   Directory getRoot() => _rootOverride ?? MemoryFileSystem.test().directory('/flutter/bin/cache');

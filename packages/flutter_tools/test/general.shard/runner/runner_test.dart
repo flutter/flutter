@@ -60,6 +60,7 @@ void main() {
 
       Cache.disableLocking();
       fileSystem = MemoryFileSystem.test();
+      fileSystem.directory('/packages/flutter_tools').createSync(recursive: true);
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
@@ -358,9 +359,16 @@ void main() {
       () async {
         // Since crash reporting calls the doctor, which checks for the devtools
         // version file in the cache, write a version file to the memory fs.
-        Cache.flutterRoot = '/path/to/flutter';
         final Directory devtoolsDir = globals.fs.directory(
-          '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+          globals.fs.path.join(
+            globals.cache.flutterRoot,
+            'bin',
+            'cache',
+            'dart-sdk',
+            'bin',
+            'resources',
+            'devtools',
+          ),
         )..createSync(recursive: true);
         devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -458,6 +466,13 @@ void main() {
         );
         final Directory currentDirectory = fileSystem.directory('/current_directory');
         currentDirectory.createSync();
+        fileSystem
+            .directory('/current_directory/packages/flutter_tools')
+            .createSync(recursive: true);
+        final Directory devtoolsDir = fileSystem.directory(
+          '/current_directory/bin/cache/dart-sdk/bin/resources/devtools',
+        )..createSync(recursive: true);
+        devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
         fileSystem.currentDirectory = currentDirectory;
         inTestSetup = false;
       });
@@ -465,14 +480,6 @@ void main() {
       testUsingContext(
         'create local report in temporary directory',
         () async {
-          // Since crash reporting calls the doctor, which checks for the devtools
-          // version file in the cache, write a version file to the memory fs.
-          Cache.flutterRoot = '/path/to/flutter';
-          final Directory devtoolsDir = globals.fs.directory(
-            '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
-          )..createSync(recursive: true);
-          devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
-
           final completer = Completer<void>();
           // runner.run() asynchronously calls the exit function set above, so we
           // catch it in a zone.
@@ -552,6 +559,7 @@ void main() {
       setExitFunctionForTests((int exitCode) {});
 
       fs = MemoryFileSystem.test();
+      fs.directory('/packages/flutter_tools').createSync(recursive: true);
 
       Cache.disableLocking();
     });
@@ -650,31 +658,36 @@ void main() {
       () async {
         // Regression test for https://github.com/flutter/flutter/issues/154119.
         final stdio = FakeStdio();
+        final loggerFactory = LoggerFactory(
+          outputPreferences: globals.outputPreferences,
+          terminal: globals.terminal,
+          stdio: stdio,
+        );
+        final Logger logger = loggerFactory.createLogger(
+          daemon: false,
+          // This is set to true when --machine is detected as an argument in
+          // executable.dart.
+          machine: true,
+          verbose: false,
+          prefixedErrors: false,
+          widgetPreviews: false,
+          windows: globals.platform.isWindows,
+        );
+        final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
+          logger: logger,
+          cache: globals.cache,
+          fs: globals.fs,
+          shutdownHooks: ShutdownHooks(),
+        );
         await runner.run(
           <String>['devices', '--machine'],
-          (ToolDependencies toolDependencies) => <FlutterCommand>[DevicesCommand()],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[
+            DevicesCommand(toolContext: toolDependencies.toolContext),
+          ],
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
-          overrides: {
-            Logger: () {
-              final loggerFactory = LoggerFactory(
-                outputPreferences: globals.outputPreferences,
-                terminal: globals.terminal,
-                stdio: stdio,
-              );
-              return loggerFactory.createLogger(
-                daemon: false,
-                // This is set to true when --machine is detected as an argument in
-                // executable.dart.
-                machine: true,
-                verbose: false,
-                prefixedErrors: false,
-                widgetPreviews: false,
-                windows: globals.platform.isWindows,
-              );
-            },
-          },
+          toolDependencies: toolDeps,
         );
         expect(stdio.writtenToStdout.join(), isNot(contains('Downloading')));
         expect(stdio.writtenToStderr.join(), isNot(contains('Downloading')));
@@ -981,6 +994,9 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
 }
 
 class FakeCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '';
+
   @override
   Future<void> lock() async {}
 

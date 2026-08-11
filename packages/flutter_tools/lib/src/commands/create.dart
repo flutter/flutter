@@ -11,6 +11,7 @@ import '../android/gradle_utils.dart' as gradle;
 import '../android/java.dart';
 import '../base/common.dart';
 import '../base/config.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
@@ -229,13 +230,14 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
   late final PlistParser _plistParser =
       _explicitPlistParser ??
+      context.get<PlistParser>() ??
       PlistParser(
         fileSystem: _toolContext.fs,
         processManager: _toolContext.processManager,
         logger: _toolContext.logger,
       );
 
-  Java? get _java => _explicitJava;
+  Java? get _java => _explicitJava ?? context.get<Java>();
 
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost =>
@@ -619,6 +621,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
     if (shouldCallPubGet) {
       final FlutterProject project = projectFactory.fromDirectory(relativeDir);
+      project.reloadManifest(logger: logger, fs: fs);
       await _pub.get(
         context: pubContext,
         project: project,

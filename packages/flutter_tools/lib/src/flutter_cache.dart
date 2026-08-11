@@ -482,7 +482,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
           'resolve_dependencies.gradle.kts',
         ),
         '--project-cache-dir',
-        tempDir.path,
+        tempDir.absolute.path,
         'resolveDependencies',
       ], environment: _java?.environment);
       if (processResult.exitCode != 0) {

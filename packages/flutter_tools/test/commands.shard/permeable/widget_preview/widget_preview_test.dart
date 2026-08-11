@@ -198,7 +198,6 @@ void main() {
     // which in turn will check for the presence of the Flutter SDK root. Without
     // this field set consistently, the order of the tests becomes important *or*
     // you need to remember to set it everywhere.
-    Cache.flutterRoot = fs.path.absolute('..', '..');
   });
 
   tearDown(() async {

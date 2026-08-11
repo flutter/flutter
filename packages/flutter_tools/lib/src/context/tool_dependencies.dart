@@ -14,6 +14,7 @@ import '../android/java.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
+import '../base/context.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -130,15 +131,20 @@ class ToolDependencies {
     XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) async {
     // 1. Core Platform Inputs
-    final Platform finalPlatform = platform ?? const LocalPlatform();
-    final SystemClock finalSystemClock = systemClock ?? const SystemClock();
-    final UserMessages finalUserMessages = userMessages ?? UserMessages();
-    final ShutdownHooks finalShutdownHooks = shutdownHooks ?? ShutdownHooks();
-    final Stdio finalStdio = stdio ?? Stdio();
+    final Platform finalPlatform = platform ?? context.get<Platform>() ?? const LocalPlatform();
+    final SystemClock finalSystemClock =
+        systemClock ?? context.get<SystemClock>() ?? const SystemClock();
+    final UserMessages finalUserMessages =
+        userMessages ?? context.get<UserMessages>() ?? UserMessages();
+    final ShutdownHooks finalShutdownHooks =
+        shutdownHooks ?? context.get<ShutdownHooks>() ?? ShutdownHooks();
+    final Stdio finalStdio = stdio ?? context.get<Stdio>() ?? Stdio();
 
     // 2. Terminal and Preferences
+    final Object? contextTerminal = context.get<AnsiTerminal>() ?? context.get<Terminal>();
     final AnsiTerminal finalTerminal =
         terminal ??
+        (contextTerminal is AnsiTerminal ? contextTerminal : null) ??
         AnsiTerminal(
           stdio: finalStdio,
           platform: finalPlatform,
@@ -148,6 +154,7 @@ class ToolDependencies {
 
     final OutputPreferences finalOutputPreferences =
         outputPreferences ??
+        context.get<OutputPreferences>() ??
         OutputPreferences(
           wrapText: finalStdio.hasTerminal,
           showColor: finalPlatform.stdoutSupportsAnsi,
@@ -157,6 +164,7 @@ class ToolDependencies {
     // 3. Logger
     final Logger finalLogger =
         logger ??
+        context.get<Logger>() ??
         (finalPlatform.isWindows
             ? WindowsStdoutLogger(
                 terminal: finalTerminal,
@@ -170,7 +178,8 @@ class ToolDependencies {
               ));
 
     // 4. File System
-    final finalFS = fs == null
+    final FileSystem? contextFs = fs ?? context.get<FileSystem>();
+    final FileSystem finalFS = contextFs == null
         ? ErrorHandlingFileSystem(
             delegate: LocalFileSystem(
               LocalSignals.instance,
@@ -179,15 +188,19 @@ class ToolDependencies {
             ),
             platform: finalPlatform,
           )
-        : ErrorHandlingFileSystem(delegate: fs, platform: finalPlatform);
+        : (contextFs is ErrorHandlingFileSystem
+              ? contextFs
+              : ErrorHandlingFileSystem(delegate: contextFs, platform: finalPlatform));
 
     // 5. Bot Detector and Config
     final PersistentToolState finalPersistentToolState =
         persistentToolState ??
+        context.get<PersistentToolState>() ??
         PersistentToolState(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
     final BotDetector finalBotDetector =
         botDetector ??
+        context.get<BotDetector>() ??
         BotDetector(
           httpClientFactory: () => HttpClient(),
           platform: finalPlatform,
@@ -198,6 +211,7 @@ class ToolDependencies {
 
     final Config finalConfig =
         config ??
+        context.get<Config>() ??
         Config(
           Config.kFlutterSettings,
           fileSystem: finalFS,
@@ -210,7 +224,7 @@ class ToolDependencies {
     late final Analytics finalAnalytics;
 
     final finalProcessManager = ErrorHandlingProcessManager(
-      delegate: processManager ?? const LocalProcessManager(),
+      delegate: processManager ?? context.get<ProcessManager>() ?? const LocalProcessManager(),
       platform: finalPlatform,
       analytics: () => finalAnalyticsInitialized ? finalAnalytics : const NoOpAnalytics(),
     );
@@ -221,11 +235,15 @@ class ToolDependencies {
     );
 
     final Git finalGit =
-        git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
+        git ??
+        context.get<Git>() ??
+        Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
     // 7. Project Factory, OS Utilities, and Cache
     final FlutterProjectFactory finalProjectFactory =
-        projectFactory ?? FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
+        projectFactory ??
+        context.get<FlutterProjectFactory>() ??
+        FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
 
     final finalOS = OperatingSystemUtils(
       fileSystem: finalFS,
@@ -236,6 +254,7 @@ class ToolDependencies {
 
     final Cache finalCache =
         cache ??
+        context.get<Cache>() ??
         FlutterCache(
           fileSystem: finalFS,
           flutterRoot: cache?.flutterRoot,
@@ -249,11 +268,14 @@ class ToolDependencies {
     final String flutterRoot = finalCache.flutterRoot;
 
     final FlutterVersion finalFlutterVersion =
-        flutterVersion ?? FlutterVersion(fs: finalFS, flutterRoot: flutterRoot, git: finalGit);
+        flutterVersion ??
+        context.get<FlutterVersion>() ??
+        FlutterVersion(fs: finalFS, flutterRoot: flutterRoot, git: finalGit);
 
     // 8. Analytics
     finalAnalytics =
         analytics ??
+        context.get<Analytics>() ??
         getAnalytics(
           runningOnBot: isBot,
           flutterVersion: finalFlutterVersion,
@@ -266,12 +288,14 @@ class ToolDependencies {
     // 9. Remaining ToolContext Dependencies
     final BuildSystem finalBuildSystem =
         buildSystem ??
+        context.get<BuildSystem>() ??
         FlutterBuildSystem(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
     final finalBuildTargets = buildTargets;
 
     final CrashReporter finalCrashReporter =
         crashReporter ??
+        context.get<CrashReporter>() ??
         CrashReporter(
           fileSystem: finalFS,
           logger: finalLogger,
@@ -280,6 +304,7 @@ class ToolDependencies {
 
     final CustomDevicesConfig finalCustomDevicesConfig =
         customDevicesConfig ??
+        context.get<CustomDevicesConfig>() ??
         CustomDevicesConfig(
           cache: finalCache,
           fileSystem: finalFS,
@@ -288,10 +313,13 @@ class ToolDependencies {
         );
 
     final PreRunValidator finalPreRunValidator =
-        preRunValidator ?? PreRunValidator(cache: finalCache, fileSystem: finalFS);
+        preRunValidator ??
+        context.get<PreRunValidator>() ??
+        PreRunValidator(cache: finalCache, fileSystem: finalFS);
 
     final LocalEngineLocator finalLocalEngineLocator =
         localEngineLocator ??
+        context.get<LocalEngineLocator>() ??
         LocalEngineLocator(
           userMessages: finalUserMessages,
           logger: finalLogger,
@@ -305,6 +333,7 @@ class ToolDependencies {
     // 11. AppleContext Dependencies
     final XcodeProjectInterpreter finalXcodeProjectInterpreter =
         xcodeProjectInterpreter ??
+        context.get<XcodeProjectInterpreter>() ??
         XcodeProjectInterpreter(
           platform: finalPlatform,
           processManager: finalProcessManager,
@@ -315,6 +344,7 @@ class ToolDependencies {
 
     final Xcode finalXcode =
         xcode ??
+        context.get<Xcode>() ??
         Xcode(
           platform: finalPlatform,
           processManager: finalProcessManager,
@@ -326,6 +356,7 @@ class ToolDependencies {
 
     final CocoaPods finalCocoaPods =
         cocoaPods ??
+        context.get<CocoaPods>() ??
         CocoaPods(
           fileSystem: finalFS,
           processManager: finalProcessManager,
@@ -336,10 +367,13 @@ class ToolDependencies {
         );
 
     final CocoaPodsValidator finalCocoapodsValidator =
-        cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
+        cocoapodsValidator ??
+        context.get<CocoaPodsValidator>() ??
+        CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
     final Artifacts finalArtifacts =
         artifacts ??
+        context.get<Artifacts>() ??
         CachedArtifacts(
           fileSystem: finalFS,
           cache: finalCache,
@@ -349,6 +383,7 @@ class ToolDependencies {
 
     final XCDevice finalXCDevice =
         xcdevice ??
+        context.get<XCDevice>() ??
         XCDevice(
           processManager: finalProcessManager,
           logger: finalLogger,
@@ -386,10 +421,12 @@ class ToolDependencies {
 
     final IOSWorkflow finalIOSWorkflow =
         iosWorkflow ??
+        context.get<IOSWorkflow>() ??
         IOSWorkflow(featureFlags: featureFlags, xcode: finalXcode, platform: finalPlatform);
 
     final IOSSimulatorUtils finalIOSSimulatorUtils =
         iosSimulatorUtils ??
+        context.get<IOSSimulatorUtils>() ??
         IOSSimulatorUtils(
           logger: finalLogger,
           operatingSystemUtils: finalOS,
@@ -399,15 +436,19 @@ class ToolDependencies {
 
     final PlistParser finalPlistParser =
         plistParser ??
+        context.get<PlistParser>() ??
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
-    final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();
+    final AndroidStudio? finalAndroidStudio =
+        androidStudio ?? context.get<AndroidStudio>() ?? AndroidStudio.latestValid();
 
-    final AndroidSdk? finalAndroidSdk = androidSdk ?? AndroidSdk.locateAndroidSdk();
+    final AndroidSdk? finalAndroidSdk =
+        androidSdk ?? context.get<AndroidSdk>() ?? AndroidSdk.locateAndroidSdk();
 
     final Java? finalJava =
         java ??
+        context.get<Java>() ??
         Java.find(
           config: finalConfig,
           androidStudio: finalAndroidStudio,
@@ -419,6 +460,7 @@ class ToolDependencies {
 
     final GradleUtils finalGradleUtils =
         gradleUtils ??
+        context.get<GradleUtils>() ??
         GradleUtils(
           platform: finalPlatform,
           logger: finalLogger,

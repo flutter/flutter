@@ -8,6 +8,8 @@ library;
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
+import '../base/config.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
@@ -515,12 +517,14 @@ class AndroidStudio {
   ///
   /// The returned [Directory], if not null, is guaranteed to have existed during
   /// this function's execution.
-  static Directory? _configuredDir() {
-    final configuredPath = globals.config.getValue('android-studio-dir') as String?;
+  static Directory? _configuredDir({Config? config, FileSystem? fileSystem}) {
+    final Config? effectiveConfig = config ?? context.get<Config>();
+    final configuredPath = effectiveConfig?.getValue('android-studio-dir') as String?;
     if (configuredPath == null) {
       return null;
     }
-    final Directory result = globals.fs.directory(configuredPath);
+    final FileSystem fs = fileSystem ?? context.get<FileSystem>() ?? globals.fs;
+    final Directory result = fs.directory(configuredPath);
 
     bool? configuredStudioPathExists;
     String? exceptionMessage;

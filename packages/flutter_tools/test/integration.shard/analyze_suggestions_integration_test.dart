@@ -124,7 +124,7 @@ void main() {
       expect(decoded.containsKey('Platform.isMacOS'), true);
       expect(decoded.containsKey('Platform.isFuchsia'), true);
       expect(decoded.containsKey('Platform.pathSeparator'), true);
-      expect(decoded.containsKey('Cache.flutterRoot'), true);
+      expect(decoded.containsKey('getFlutterRoot()'), true);
 
       expect(decoded['FlutterProject.android.exists'], true);
       expect(decoded['FlutterProject.ios.exists'], true);

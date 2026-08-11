@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -55,7 +54,6 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      Cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
@@ -86,6 +84,7 @@ void main() {
         description,
         body,
         overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
           AndroidSdk: () => AndroidSdk(
             fileSystem.directory(missingSdkPath()),
             java: FakeJava(),
@@ -3130,7 +3129,7 @@ Gradle Crashed
                 'The Java version used for the build is 21.0.0, which is incompatible with Gradle 8.0.\n'
                 'To fix this, you can either:\n'
                 "  1. Upgrade your project's Gradle version (typically in gradle-wrapper.properties to a version matching the range: compatible Gradle versions for Java 21.0.0 are 8.4 or newer).\n"
-                '  2. Use a different Java version for Flutter by running `flutter config --jdk-dir=<path>`.'
+                '  2. Use a different Java version for Flutter by running `flutter config --jdk-dir=<path>`.',
           ),
         );
         expect(processManager, hasNoRemainingExpectations);

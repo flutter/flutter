@@ -21,6 +21,7 @@ class AnalyzeOnce extends AnalyzeBase {
     required super.terminal,
     required super.artifacts,
     required super.suppressAnalytics,
+    super.cache,
     this.workingDirectory,
   }) : super(repoPackages: repoPackages);
 

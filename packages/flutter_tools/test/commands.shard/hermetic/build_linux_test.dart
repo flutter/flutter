@@ -50,7 +50,6 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    Cache.flutterRoot = _kTestFlutterRoot;
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -126,7 +125,8 @@ void main() {
     final ProcessManager effectiveProcessManager = context.get<ProcessManager>() ?? processManager;
     final toolContext = FakeToolContext(
       cache: Cache.test(
-        rootOverride: fileSystem.directory(_kTestFlutterRoot),
+        fileSystem: fileSystem,
+        flutterRoot: _kTestFlutterRoot,
         logger: effectiveLogger,
         processManager: effectiveProcessManager,
       ),
