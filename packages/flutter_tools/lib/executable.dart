@@ -261,7 +261,7 @@ List<FlutterCommand> generateCommands({
     doctor: globals.doctor,
     androidLicenseValidator: androidLicenseValidator,
   ),
-  DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
+  DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(
     verboseHelp: verboseHelp,
     fileSystem: toolDependencies.toolContext.fs,
@@ -280,7 +280,7 @@ List<FlutterCommand> generateCommands({
   GenerateLocalizationsCommand(toolContext: toolDependencies.toolContext),
   InstallCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   LogsCommand(toolContext: toolDependencies.toolContext),
-  PackagesCommand(),
+  PackagesCommand(toolContext: toolDependencies.toolContext),
   PrecacheCommand(
     verboseHelp: verboseHelp,
     cache: toolDependencies.toolContext.cache,
@@ -310,11 +310,11 @@ List<FlutterCommand> generateCommands({
     terminal: toolDependencies.toolContext.terminal,
     toolContext: toolDependencies.toolContext,
   ),
-  UpgradeCommand(verboseHelp: verboseHelp),
+  UpgradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
-  UpdatePackagesCommand(verboseHelp: verboseHelp),
+  UpdatePackagesCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
 ];
 
 /// An abstraction for instantiation of the correct logger type.
