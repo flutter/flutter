@@ -14,9 +14,11 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
+import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../version.dart';
@@ -32,9 +34,11 @@ class BuildWebCommand extends BuildSubCommand {
     required ToolContext toolContext,
     required bool verboseHelp,
     super.analytics,
+    BuildTargets? buildTargets,
     FeatureFlags? featureFlags,
     WebBuilder? webBuilder,
   }) : _buildSystem = buildSystem,
+       _buildTargets = buildTargets ?? const BuildTargetsImpl(),
        _featureFlags = featureFlags ?? const _DefaultFeatureFlags(),
        _toolContext = toolContext,
        _webBuilder = webBuilder,
@@ -174,6 +178,7 @@ class BuildWebCommand extends BuildSubCommand {
   }
 
   final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
   final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
   final WebBuilder? _webBuilder;
@@ -339,6 +344,7 @@ class BuildWebCommand extends BuildSubCommand {
           analytics: analytics,
           artifacts: artifacts,
           buildSystem: _buildSystem,
+          buildTargets: _buildTargets,
           cache: cache,
           fileSystem: fs,
           flutterVersion: flutterVersion,

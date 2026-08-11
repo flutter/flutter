@@ -18,7 +18,6 @@ import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
-import '../isolated/build_targets.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -49,7 +48,7 @@ class WebBuilder {
     required Analytics analytics,
     Artifacts? artifacts,
     required BuildSystem buildSystem,
-    BuildTargets? buildTargets,
+    required BuildTargets buildTargets,
     Cache? cache,
     required FileSystem fileSystem,
     required FlutterVersion flutterVersion,
@@ -60,7 +59,7 @@ class WebBuilder {
   }) : _analytics = analytics,
        _artifacts = artifacts,
        _buildSystem = buildSystem,
-       _buildTargets = buildTargets ?? const BuildTargetsImpl(),
+       _buildTargets = buildTargets,
        _cache = cache,
        _fileSystem = fileSystem,
        _flutterVersion = flutterVersion,
