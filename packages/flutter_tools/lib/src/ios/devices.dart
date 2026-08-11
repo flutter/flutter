@@ -1421,6 +1421,52 @@ class IOSDevice extends Device {
   }
 
   @override
+  bool get supportsScreenRecording {
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      return globals.xcode!.isDevicectlInstalled;
+    }
+    return false;
+  }
+
+  @override
+  Future<void> startScreenRecording(
+    File outputFile, {
+    Duration? duration,
+  }) async {
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      try {
+        final Process process = await _coreDeviceControl.startScreenRecording(
+          deviceId: id,
+          destination: outputFile.path,
+        );
+        if (duration != null) {
+          await Future.any(<Future<void>>[
+            process.exitCode.then((_) {}),
+            Future<void>.delayed(duration).then((_) => ProcessSignal.sigint.kill(process)),
+          ]);
+        }
+        await process.exitCode;
+        return;
+      } on Exception catch (error) {
+        final errorMessage = error.toString();
+        if (errorMessage.contains('CoreDeviceError error 4000') ||
+            errorMessage.contains('CoreDeviceError error 4016') ||
+            errorMessage.contains('RemotePairingError error 2') ||
+            errorMessage.contains('Connection was invalidated')) {
+          throwToolExit(
+            'Failed to establish a connection to the device. '
+            'Please make sure the device is available and try again.',
+          );
+        }
+        throwToolExit('Failed to record screen with devicectl: $error');
+      }
+    }
+    throwToolExit('flutter capture video requires Xcode 27 or higher.');
+  }
+
+  @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync();
   }

@@ -802,6 +802,9 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
+  /// Whether the device supports recording the screen.
+  bool get supportsScreenRecording => false;
+
   /// Whether the Flavors feature ('--flavor') is supported for this device.
   bool get supportsFlavors => false;
 
@@ -819,6 +822,20 @@ abstract class Device {
   }
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
+
+  /// Starts recording the device screen to [outputFile].
+  ///
+  /// Recording continues until the returned [Future] completes. The future
+  /// completes when the recording process exits — either because [duration]
+  /// elapsed or because the process received a signal (e.g. SIGINT from
+  /// Ctrl-C).
+  ///
+  /// [duration] caps the recording length. When null, recording runs until
+  /// the process is interrupted.
+  Future<void> startScreenRecording(
+    File outputFile, {
+    Duration? duration,
+  }) => Future<void>.error('unimplemented');
 
   @nonVirtual
   @override
@@ -893,6 +910,7 @@ abstract class Device {
         'hotReload': supportsHotReload,
         'hotRestart': supportsHotRestart,
         'screenshot': supportsScreenshot,
+        'screenRecording': supportsScreenRecording,
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,

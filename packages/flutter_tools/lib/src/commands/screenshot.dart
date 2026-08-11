@@ -60,7 +60,11 @@ class ScreenshotCommand extends FlutterCommand {
   String get name => 'screenshot';
 
   @override
-  String get description => 'Take a screenshot from a connected device.';
+  String get description =>
+    '(Deprecated, use "flutter capture image") Take a screenshot from a connected device.';
+
+  @override
+  bool get deprecated => true;
 
   @override
   final String category = FlutterCommandCategory.tools;

@@ -309,6 +309,23 @@ class SimControl {
     }
   }
 
+  Future<Process> startRecordVideo(String deviceId, String outputPath) async {
+    try {
+      return await _processUtils.start(<String>[
+        ..._xcode.xcrunCommand(),
+        'simctl',
+        'io',
+        deviceId,
+        'recordVideo',
+        '--codec', 'h264',
+        '--force',
+        outputPath,
+      ]);
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to record video of $deviceId:\n$exception');
+    }
+  }
+
   /// Runs `simctl list runtimes available iOS --json` and returns all available iOS simulator runtimes.
   Future<List<IOSSimulatorRuntime>> listAvailableIOSRuntimes() async {
     final runtimes = <IOSSimulatorRuntime>[];
@@ -699,8 +716,44 @@ class IOSSimulator extends Device {
   bool get supportsScreenshot => true;
 
   @override
+  bool get supportsScreenRecording => true;
+
+  @override
   Future<void> takeScreenshot(File outputFile) {
     return _simControl.takeScreenshot(id, outputFile.path);
+  }
+
+  @override
+  Future<void> startScreenRecording(
+    File outputFile, {
+    Duration? duration,
+  }) async {
+    final Process process = await _simControl.startRecordVideo(id, outputFile.path);
+    final stderrBuf = StringBuffer();
+    final recordingStarted = Completer<void>();
+    process.stderr.transform(utf8.decoder).listen((String data) {
+      stderrBuf.write(data);
+      if (!recordingStarted.isCompleted && data.contains('Recording started')) {
+        recordingStarted.complete();
+      }
+    });
+
+    // Wait for simctl to confirm the first frame is captured.
+    await Future.any(<Future<void>>[
+      recordingStarted.future,
+      process.exitCode.then((_) {}),
+    ]);
+
+    if (duration != null) {
+      await Future.any(<Future<void>>[
+        process.exitCode.then((_) {}),
+        Future<void>.delayed(duration).then((_) => ProcessSignal.sigint.kill(process)),
+      ]);
+    }
+    final int exitCode = await process.exitCode;
+    if (exitCode != 0) {
+      throwToolExit('Screen recording failed (exit $exitCode): $stderrBuf');
+    }
   }
 
   @override

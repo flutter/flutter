@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -79,6 +80,40 @@ class MacOSDevice extends DesktopDevice {
   @override
   String? executablePathForDevice(covariant MacOSApp package, BuildInfo buildInfo) {
     return package.executable(buildInfo);
+  }
+
+  @override
+  bool get supportsScreenshot => true;
+
+  @override
+  bool get supportsScreenRecording => true;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    final ProcessResult result = await _processManager.run(
+      <String>['screencapture', '-x', outputFile.path],
+    );
+    if (result.exitCode != 0) {
+      throwToolExit('screencapture failed: ${result.stderr}');
+    }
+  }
+
+  @override
+  Future<void> startScreenRecording(
+    File outputFile, {
+    Duration? duration,
+  }) async {
+    final args = <String>[
+      'screencapture',
+      '-v',
+      if (duration != null) ...['-V', '${duration.inSeconds}'],
+      outputFile.path,
+    ];
+    final Process process = await _processManager.start(args);
+    final int exitCode = await process.exitCode;
+    if (exitCode != 0) {
+      throwToolExit('screencapture failed (exit $exitCode).');
+    }
   }
 
   @override
