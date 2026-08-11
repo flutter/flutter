@@ -54,7 +54,7 @@ abstract class FlutterBaseDebugAdapter
   /// A dummy error handler is attached to the future to prevent unhandled
   /// asynchronous exceptions if it completes before any listeners are active.
   final Completer<void> debuggerInitializationFailedCompleter = Completer<void>()
-    ..future.catchError((Object _) {});
+    ..future.then<void>((_) {}, onError: (Object _) {});
 
   @override
   void handleSessionTerminate([String exitSuffix = '']) {
