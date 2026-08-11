@@ -141,9 +141,10 @@ class IconTreeShaker {
       familyKeys,
     );
 
-    if (fonts.length != iconData.length) {
+    final Set<String> missingFonts = iconData.keys.toSet().difference(fonts.keys.toSet());
+    if (missingFonts.isNotEmpty) {
       environment.logger.printStatus(
-        'Expected to find fonts for ${iconData.keys}, but found '
+        'Expected to find fonts for $missingFonts, but found '
         '${fonts.keys}. This usually means you are referring to '
         'font families in an IconData class but not including them '
         'in the assets section of your pubspec.yaml, are missing '
@@ -155,7 +156,11 @@ class IconTreeShaker {
     final result = <String, _IconTreeShakerData>{};
     const kSpacePoint = 32;
     for (final MapEntry(:key, :value) in fonts.entries) {
-      final List<int>? codePoints = iconData[key];
+      final List<int>? codePoints =
+          iconData[key] ??
+          (_kKnownIconFontFallbackCodePoints.containsKey(key)
+              ? <int>[_kKnownIconFontFallbackCodePoints[key]!]
+              : null);
       if (codePoints == null) {
         throw IconTreeShakerException._(
           'Expected to font code points for $key, but none were found.',
@@ -269,6 +274,14 @@ class IconTreeShaker {
         'by providing the --no-tree-shake-icons flag when building your app.';
   }
 
+  /// Known icon font families that should be subsetted even if 0 icons are recorded.
+  /// Subsetting unused icon fonts to a single dummy icon ensures that unused fonts
+  /// are not bundled in their entirety.
+  static const Map<String, int> _kKnownIconFontFallbackCodePoints = <String, int>{
+    'MaterialIcons': 57415, // 0xe047, Icons.add
+    'packages/cupertino_icons/CupertinoIcons': 62418, // 0xf3d2, CupertinoIcons.chevron_left
+  };
+
   /// Returns a map of { fontFamily: relativePath } pairs.
   Future<Map<String, String>> _parseFontJson(String fontManifestData, Set<String> families) async {
     final result = <String, String>{};
@@ -285,7 +298,8 @@ class IconTreeShaker {
           'got: ${map['family']}.',
         );
       }
-      if (!families.contains(familyKey)) {
+      if (!families.contains(familyKey) &&
+          !_kKnownIconFontFallbackCodePoints.containsKey(familyKey)) {
         continue;
       }
       final List<Map<String, Object?>> fonts = _getList(
