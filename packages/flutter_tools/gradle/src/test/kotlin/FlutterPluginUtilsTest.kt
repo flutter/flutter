@@ -93,7 +93,10 @@ class FlutterPluginUtilsTest {
         project: Project,
         ndkVersion: String = "29.0.13846066"
     ): ApplicationExtension {
+        val mockAndroidExtension = mockk<ApplicationExtension>()
+        every { mockAndroidExtension.ndkVersion } returns ndkVersion
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockAndroidExtension
+        every { project.extensions.findByName("android") } returns mockAndroidExtension
         return mockAndroidExtension
     }
 

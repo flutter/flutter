@@ -64,7 +64,7 @@ internal object VersionFetcher {
                 .findPlugin(KotlinAndroidPluginWrapper::class.java)
         // Partial implementation of getKotlinPluginVersion from the comment above.
         var versionString: String? = kotlinPlugin?.pluginVersion
-        if (!versionString.isNullOrEmpty()) {
+        if (!versionString.isNullOrEmpty() && versionString != "unknown") {
             return Version.fromString(versionString)
         }
         // Fall back to reflection.
@@ -73,7 +73,7 @@ internal object VersionFetcher {
                 it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
             }
         versionString = versionField?.call(kotlinPlugin) as String?
-        return if (versionString == null) {
+        return if (versionString == null || versionString == "unknown") {
             null
         } else {
             Version.fromString(versionString)
