@@ -410,6 +410,27 @@ packages:
       relative: true
     source: path
     version: "0.0.0"
+  flutter_tools_core:
+    dependency: transitive
+    description:
+      path: "packages/flutter_tools/packages/flutter_tools_core"
+      relative: true
+    source: path
+    version: "0.0.0"
+  flutter_tools_extension:
+    dependency: transitive
+    description:
+      path: "packages/flutter_tools/packages/flutter_tools_extension"
+      relative: true
+    source: path
+    version: "0.0.0"
+  flutter_tools_extension_linux_prototype:
+    dependency: transitive
+    description:
+      path: "packages/flutter_tools/packages/flutter_tools_extension_linux_prototype"
+      relative: true
+    source: path
+    version: "0.0.0"
   frontend_server_client:
     dependency: "direct main"
     description:
