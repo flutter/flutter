@@ -200,7 +200,12 @@ class RenderAndroidView extends PlatformViewRenderBox {
   void _setOffset() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!_isDisposed) {
-        if (attached) {
+        // Don't send an offset if not laid out. For example, a RenderBox that
+        // is attached while a route transition is in flight has no position on
+        // screen yet, and asking for one throws out of this frame callback,
+        // where nothing can catch it.
+        // See https://github.com/flutter/flutter/issues/190833.
+        if (attached && hasSize) {
           await _viewController.setOffset(localToGlobal(Offset.zero));
         }
         // Schedule a new post frame callback.

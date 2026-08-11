@@ -345,6 +345,34 @@ void main() {
     });
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/190833.
+  test('RenderAndroidView does not set the platform view offset when not laid out', () {
+    final viewController = FakeAndroidViewController(0);
+    final renderBox = RenderAndroidView(
+      viewController: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    // Attached but not laid out, the state the render box is in when the
+    // platform view is mounted while a route transition is still in flight.
+    renderBox.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    expect(renderBox.debugNeedsLayout, isTrue);
+
+    binding.pumpCompleteFrame();
+
+    // The post frame callback ran and left the platform view alone, because
+    // the render box has no position on screen to report yet.
+    expect(viewController.offsets, isEmpty);
+
+    renderBox.detach();
+    layout(renderBox);
+    binding.pumpCompleteFrame();
+
+    expect(viewController.offsets, <Offset>[Offset.zero]);
+
+    renderBox.dispose();
+  });
+
   test('markNeedsPaint does not get called when setting the same viewController', () {
     FakeAsync().run((FakeAsync async) {
       final viewCreation = Completer<void>();
