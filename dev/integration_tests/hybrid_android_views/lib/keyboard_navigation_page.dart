@@ -94,7 +94,6 @@ class _KeyboardNavigationBodyState extends State<KeyboardNavigationBody> {
       'keyCode': 61, // KEYCODE_TAB
     });
 
-
     // 2. Type character 'h' (KEYCODE_H = 36) into the focused text field
     await integrationChannel.invokeMethod<void>('sendAndroidKeyEvent', <String, dynamic>{
       'keyCode': 36, // KEYCODE_H
@@ -109,7 +108,7 @@ class _KeyboardNavigationBodyState extends State<KeyboardNavigationBody> {
     final String typedText = await integrationChannel.invokeMethod<String>('getEditText') ?? '';
 
     // 5. Tab back out of the platform view (focus should move to the next focusable widget, which is the ElevatedButton)
-    final Completer<void> focusCompleter = Completer<void>();
+    final focusCompleter = Completer<void>();
     void focusListener() {
       if (_testTabKeyFocusNode.hasFocus && !focusCompleter.isCompleted) {
         focusCompleter.complete();
@@ -132,6 +131,9 @@ class _KeyboardNavigationBodyState extends State<KeyboardNavigationBody> {
 
     final bool focusIsOnFlutterView = _testTabKeyFocusNode.hasFocus;
 
+    if (!mounted) {
+      return;
+    }
     setState(() {
       if (typedText == 'hi' && focusIsOnFlutterView) {
         _status = 'Success';

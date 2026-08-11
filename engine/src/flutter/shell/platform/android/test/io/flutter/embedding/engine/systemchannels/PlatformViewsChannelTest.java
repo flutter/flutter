@@ -23,11 +23,13 @@ import org.mockito.ArgumentCaptor;
 @RunWith(AndroidJUnit4.class)
 public class PlatformViewsChannelTest {
   DartExecutor dartExecutor;
+  BinaryMessenger binaryMessenger;
   PlatformViewsChannel platformViewsChannel;
 
   @Before
   public void setUp() {
     dartExecutor = mock(DartExecutor.class);
+    binaryMessenger = dartExecutor;
     platformViewsChannel = new PlatformViewsChannel(dartExecutor);
   }
 
@@ -36,7 +38,7 @@ public class PlatformViewsChannelTest {
     platformViewsChannel.invokeFocusNext(1, 2);
 
     ArgumentCaptor<ByteBuffer> byteBufferArgumentCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
-    verify(dartExecutor, times(1))
+    verify(binaryMessenger, times(1))
         .send(eq("flutter/platform_views"), byteBufferArgumentCaptor.capture(), any());
 
     ByteBuffer capturedMessage = byteBufferArgumentCaptor.getValue();
@@ -58,7 +60,7 @@ public class PlatformViewsChannelTest {
 
     ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> handlerCaptor =
         ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
-    verify(dartExecutor, times(1))
+    verify(binaryMessenger, times(1))
         .setMessageHandler(eq("flutter/platform_views"), handlerCaptor.capture());
 
     BinaryMessenger.BinaryMessageHandler handler = handlerCaptor.getValue();

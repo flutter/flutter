@@ -126,10 +126,10 @@ class PlatformViewsService {
           _focusCallbacks[id]!();
         }
       case 'invokeFocusNext':
-        final args = call.arguments as Map<Object?, Object?>;
-        final id = args['viewId']! as int;
-        final direction = args['direction']! as int;
-        if (_focusNextCallbacks.containsKey(id)) {
+        final args = call.arguments as Map<Object?, Object?>?;
+        final id = args?['viewId'] as int?;
+        final direction = args?['direction'] as int?;
+        if (id != null && direction != null && _focusNextCallbacks.containsKey(id)) {
           _focusNextCallbacks[id]!(_mapAndroidDirection(direction));
         }
       default:
@@ -1123,6 +1123,7 @@ abstract class AndroidViewController extends PlatformViewController {
     _state = _AndroidViewState.disposed;
     _platformViewCreatedCallbacks.clear();
     PlatformViewsService._instance._focusCallbacks.remove(viewId);
+    PlatformViewsService._instance._focusNextCallbacks.remove(viewId);
     if (state == _AndroidViewState.creating || state == _AndroidViewState.created) {
       await _sendDisposeMessage();
     }

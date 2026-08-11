@@ -220,7 +220,9 @@ public class FlutterMutatorView extends FrameLayout {
     return false;
   }
 
+  // View.focusSearch delegates to ViewGroup.focusSearch at runtime, which supports tab navigation.
   @Override
+  @SuppressLint("WrongConstant")
   public boolean dispatchKeyEvent(android.view.KeyEvent event) {
     boolean handled = super.dispatchKeyEvent(event);
     if (!handled

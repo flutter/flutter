@@ -321,6 +321,30 @@ void main() {
       expect(didFocus, isFalse);
     });
 
+    test('dispose clears focusNextCallbacks', () async {
+      PlatformViewFocusDirection? focusDirection;
+      viewsController.registerViewType('webview');
+      final AndroidViewController viewController = PlatformViewsService.initAndroidView(
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+        onFocusSearchFailed: (PlatformViewFocusDirection direction) {
+          focusDirection = direction;
+        },
+      );
+      await viewController.create(size: const Size(100.0, 100.0));
+      await viewController.dispose();
+      final ByteData message = SystemChannels.platform_views.codec.encodeMethodCall(
+        const MethodCall('invokeFocusNext', <String, Object>{'viewId': 0, 'direction': 2}),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.platform_views.name,
+        message,
+        (_) {},
+      );
+      expect(focusDirection, isNull);
+    });
+
     test('resize Android view', () async {
       viewsController.registerViewType('webview');
       await PlatformViewsService.initAndroidView(
