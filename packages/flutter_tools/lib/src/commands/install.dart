@@ -7,12 +7,15 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand({required bool verboseHelp}) {
+  InstallCommand({required ToolContext toolContext, required super.verboseHelp})
+    : _toolContext = toolContext,
+      super(toolContext: toolContext) {
     addBuildModeFlags(verboseHelp: verboseHelp);
     requiresPubspecYaml();
     usesApplicationBinaryOption();
@@ -25,6 +28,11 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
       help: 'Uninstall the app if already on the device. Skip install.',
     );
   }
+
+  final ToolContext _toolContext;
+
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   final name = 'install';
@@ -45,7 +53,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 
   String? get _applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   File? get _applicationBinary =>
-      _applicationBinaryPath == null ? null : globals.fs.file(_applicationBinaryPath);
+      _applicationBinaryPath == null ? null : _toolContext.fs.file(_applicationBinaryPath);
 
   @override
   Future<void> validateCommand() async {
@@ -83,40 +91,49 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 
   Future<void> _uninstallApp(ApplicationPackage package, Device device) async {
+    final Logger logger = _toolContext.logger;
     if (await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
-      globals.printStatus('Uninstalling $package from $device...');
+      logger.printStatus('Uninstalling $package from $device...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
-        globals.printError('Uninstalling old version failed');
+        logger.printError('Uninstalling old version failed');
       }
     } else {
-      globals.printStatus('$package not found on $device, skipping uninstall');
+      logger.printStatus('$package not found on $device, skipping uninstall');
     }
   }
 
   Future<void> _installApp(ApplicationPackage package, Device device) async {
-    globals.printStatus('Installing $package to $device...');
+    final Logger logger = _toolContext.logger;
+    logger.printStatus('Installing $package to $device...');
 
-    if (!await installApp(device, package, userIdentifier: userIdentifier)) {
+    if (!await installApp(device, package, logger: logger, userIdentifier: userIdentifier)) {
       throwToolExit('Install failed');
     }
   }
 }
 
+/// Installs [package] to [device].
+///
+/// When [uninstall] is true and the package is already present on the device,
+/// it uninstalls the existing version before installing.
+///
+/// Returns true if installation succeeded, or false otherwise.
 Future<bool> installApp(
   Device device,
   ApplicationPackage package, {
-  String? userIdentifier,
+  Logger? logger,
   bool uninstall = true,
+  String? userIdentifier,
 }) async {
   try {
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
-      globals.printStatus('Uninstalling old version...');
+      logger?.printStatus('Uninstalling old version...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
-        globals.printWarning('Warning: uninstalling old version failed');
+        logger?.printWarning('Warning: uninstalling old version failed');
       }
     }
   } on ProcessException catch (e) {
-    globals.printError('Error accessing device ${device.id}:\n${e.message}');
+    logger?.printError('Error accessing device ${device.id}:\n${e.message}');
   }
 
   return device.installApp(package, userIdentifier: userIdentifier);
