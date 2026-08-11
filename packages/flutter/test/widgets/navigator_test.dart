@@ -3804,10 +3804,7 @@ void main() {
           data: MediaQueryData.fromView(tester.view),
           child: Localizations(
             locale: const Locale('en', 'US'),
-            delegates: const <LocalizationsDelegate<dynamic>>[
-              DefaultMaterialLocalizations.delegate,
-              DefaultWidgetsLocalizations.delegate,
-            ],
+            delegates: const <LocalizationsDelegate<Object?>>[DefaultWidgetsLocalizations.delegate],
             child: TestDependencies(child: Navigator(pages: myPages)),
           ),
         ),
@@ -3843,8 +3840,7 @@ void main() {
             data: MediaQueryData.fromView(tester.view),
             child: Localizations(
               locale: const Locale('en', 'US'),
-              delegates: const <LocalizationsDelegate<dynamic>>[
-                DefaultMaterialLocalizations.delegate,
+              delegates: const <LocalizationsDelegate<Object?>>[
                 DefaultWidgetsLocalizations.delegate,
               ],
               child: TestDependencies(child: Navigator(pages: myPages)),
@@ -3871,10 +3867,7 @@ void main() {
           data: MediaQueryData.fromView(tester.view),
           child: Localizations(
             locale: const Locale('en', 'US'),
-            delegates: const <LocalizationsDelegate<dynamic>>[
-              DefaultMaterialLocalizations.delegate,
-              DefaultWidgetsLocalizations.delegate,
-            ],
+            delegates: const <LocalizationsDelegate<Object?>>[DefaultWidgetsLocalizations.delegate],
             child: Navigator(pages: myPages, onPopPage: (_, _) => false),
           ),
         ),
@@ -3892,10 +3885,7 @@ void main() {
           data: MediaQueryData.fromView(tester.view),
           child: Localizations(
             locale: const Locale('en', 'US'),
-            delegates: const <LocalizationsDelegate<dynamic>>[
-              DefaultMaterialLocalizations.delegate,
-              DefaultWidgetsLocalizations.delegate,
-            ],
+            delegates: const <LocalizationsDelegate<Object?>>[DefaultWidgetsLocalizations.delegate],
             child: Navigator(pages: myPages, onPopPage: (_, _) => false),
           ),
         ),
@@ -3916,10 +3906,7 @@ void main() {
           data: MediaQueryData.fromView(tester.view),
           child: Localizations(
             locale: const Locale('en', 'US'),
-            delegates: const <LocalizationsDelegate<dynamic>>[
-              DefaultMaterialLocalizations.delegate,
-              DefaultWidgetsLocalizations.delegate,
-            ],
+            delegates: const <LocalizationsDelegate<Object?>>[DefaultWidgetsLocalizations.delegate],
             child: Navigator(pages: myPages, onPopPage: (_, _) => false),
           ),
         ),
