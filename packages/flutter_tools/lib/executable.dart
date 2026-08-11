@@ -232,8 +232,8 @@ List<FlutterCommand> generateCommands({
     java: toolDependencies.androidContext.java,
     plistParser: toolDependencies.appleContext.plistParser,
   ),
-  DaemonCommand(hidden: !verboseHelp),
-  DebugAdapterCommand(verboseHelp: verboseHelp),
+  DaemonCommand(toolContext: toolDependencies.toolContext, hidden: !verboseHelp),
+  DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
     toolContext: toolDependencies.toolContext,
     deviceManager: globals.deviceManager,

@@ -12,7 +12,6 @@ import '../base/io.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals show fs;
 import 'error_formatter.dart';
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
@@ -143,7 +142,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     if (vmServiceUri == null && vmServiceInfoFile != null) {
       final Uri uriFromFile = await waitForVmServiceInfoFile(
         logger,
-        globals.fs.file(vmServiceInfoFile),
+        fileSystem.file(vmServiceInfoFile),
       );
       vmServiceUri = uriFromFile.toString();
     }
