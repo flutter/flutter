@@ -6,12 +6,15 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/fake.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -32,8 +35,35 @@ void main() {
       Cache.enableLocking();
     });
 
+    LogsCommand createLogsCommand({required ProcessSignal sigint, required ProcessSignal sigterm}) {
+      return LogsCommand(
+        deviceManager: deviceManager,
+        sigint: sigint,
+        sigterm: sigterm,
+        toolContext: FakeToolContext(logger: testLogger, platform: platform),
+      );
+    }
+
+    testWithoutContext('resolves dependencies from the injected parameters', () {
+      final fakeLogger = BufferLogger.test();
+      final fakePlatform = FakePlatform();
+      final fakeDeviceManager = FakeDeviceManager();
+      final toolContext = FakeToolContext(logger: fakeLogger, platform: fakePlatform);
+      final command = LogsCommand(
+        deviceManager: fakeDeviceManager,
+        sigint: FakeProcessSignal(),
+        sigterm: FakeProcessSignal(),
+        toolContext: toolContext,
+      );
+
+      expect(command.deviceManager, same(fakeDeviceManager));
+    });
+
     testUsingContext('fail with a bad device id', () async {
-      final command = LogsCommand(sigterm: FakeProcessSignal(), sigint: FakeProcessSignal());
+      final LogsCommand command = createLogsCommand(
+        sigterm: FakeProcessSignal(),
+        sigint: FakeProcessSignal(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']),
         throwsA(
@@ -42,24 +72,20 @@ void main() {
       );
     });
 
-    testUsingContext(
-      'does not try to complete exitCompleter multiple times',
-      () async {
-        final fakeDevice = FakeDevice('phone', deviceId);
-        deviceManager.attachedDevices.add(fakeDevice);
-        final termSignal = FakeProcessSignal();
-        final intSignal = FakeProcessSignal();
-        final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
-        final Future<void> commandFuture = createTestCommandRunner(
-          command,
-        ).run(<String>['-d', deviceId, 'logs']);
-        intSignal.send(1);
-        termSignal.send(1);
-        await pumpEventQueue(times: 5);
-        await commandFuture;
-      },
-      overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager},
-    );
+    testUsingContext('does not try to complete exitCompleter multiple times', () async {
+      final fakeDevice = FakeDevice('phone', deviceId);
+      deviceManager.attachedDevices.add(fakeDevice);
+      final termSignal = FakeProcessSignal();
+      final intSignal = FakeProcessSignal();
+      final LogsCommand command = createLogsCommand(sigterm: termSignal, sigint: intSignal);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
+      intSignal.send(1);
+      termSignal.send(1);
+      await pumpEventQueue(times: 5);
+      await commandFuture;
+    }, overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager});
   });
 }
 
@@ -74,4 +100,14 @@ class FakeProcessSignal extends Fake implements ProcessSignal {
     _controller.add(this);
     return true;
   }
+}
+
+class FakeToolContext extends Fake implements ToolContext {
+  FakeToolContext({required this.logger, required this.platform});
+
+  @override
+  final Logger logger;
+
+  @override
+  final Platform platform;
 }
