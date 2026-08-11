@@ -42,8 +42,7 @@ GradientData CreateGradientBuffer(const std::vector<Color>& colors,
         minimum_delta = value;
       }
     }
-    texture_size =
-        static_cast<uint32_t>(std::round(1.0 / minimum_delta)) + 1;
+    texture_size = static_cast<uint32_t>(std::round(1.0 / minimum_delta)) + 1;
   }
   GradientData data = {
       .color_bytes = {},

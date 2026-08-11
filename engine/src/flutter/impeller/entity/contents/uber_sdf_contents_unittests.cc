@@ -42,8 +42,9 @@ TEST(UberSDFContentsTest, ApplyColorFilterWithGradient) {
   auto geometry = std::make_unique<UberSDFGeometry>(params);
   auto contents = UberSDFContents::Make(params, std::move(geometry));
 
-  // Color filters cannot be applied on CPU to pre-baked gradients in UberSDFContents,
-  // so ApplyColorFilter must return false to trigger GPU filter wrapping.
+  // Color filters cannot be applied on CPU to pre-baked gradients in
+  // UberSDFContents, so ApplyColorFilter must return false to trigger GPU
+  // filter wrapping.
   bool result =
       contents->ApplyColorFilter([](Color color) { return Color::Blue(); });
 
