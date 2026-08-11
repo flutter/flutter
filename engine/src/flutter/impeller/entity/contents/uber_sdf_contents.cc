@@ -182,6 +182,9 @@ Color UberSDFContents::GetColor() const {
 
 bool UberSDFContents::ApplyColorFilter(
     const ColorFilterProc& color_filter_proc) {
+  if (params_.gradient.has_value()) {
+    return false;
+  }
   params_.color = color_filter_proc(params_.color);
   return true;
 }

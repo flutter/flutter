@@ -29,6 +29,29 @@ TEST(UberSDFContentsTest, ApplyColorFilter) {
   EXPECT_EQ(contents->GetColor(), Color::Blue());
 }
 
+TEST(UberSDFContentsTest, ApplyColorFilterWithGradient) {
+  auto rect = Rect::MakeXYWH(100, 100, 200, 200);
+  auto params =
+      UberSDFParameters::MakeRect(Color::Red(), rect, /*stroke=*/std::nullopt);
+  UberSDFParameters::GradientParameters gradient;
+  gradient.type = UberSDFParameters::GradientParameters::Type::kLinear;
+  gradient.start = Point(0, 0);
+  gradient.end = Point(200, 200);
+  params.gradient = gradient;
+
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
+
+  // Color filters cannot be applied on CPU to pre-baked gradients in UberSDFContents,
+  // so ApplyColorFilter must return false to trigger GPU filter wrapping.
+  bool result =
+      contents->ApplyColorFilter([](Color color) { return Color::Blue(); });
+
+  EXPECT_FALSE(result);
+  // The color should remain unchanged.
+  EXPECT_EQ(contents->GetColor(), Color::Red());
+}
+
 TEST(UberSDFContentsTest, AsBackgroundColor) {
   auto rect = Rect::MakeXYWH(-2, -2, 504, 504);
   auto params =
