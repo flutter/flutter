@@ -4,6 +4,8 @@
 
 #include "flutter/shell/common/vsync_waiter.h"
 
+#include <vector>
+
 #include "flow/frame_timings.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
@@ -41,13 +43,51 @@ void VsyncWaiter::AsyncWaitForVsync(const Callback& callback) {
       return;
     }
     callback_ = callback;
-    if (!secondary_callbacks_.empty()) {
-      // Return directly as `AwaitVSync` is already called by
-      // `ScheduleSecondaryCallback`.
+    if (vsync_fire_in_progress_) {
+      return;
+    }
+    if (!pre_frame_callbacks_.empty() || !secondary_callbacks_.empty()) {
+      // Return directly as a callback has already armed the vsync waiter.
       return;
     }
   }
   AwaitVSync();
+}
+
+bool VsyncWaiter::CanRegisterCallbackForCurrentVsync() {
+  std::scoped_lock lock(callback_mutex_);
+  return vsync_fire_in_progress_;
+}
+
+void VsyncWaiter::SchedulePreFrameCallback(uintptr_t id,
+                                           const fml::closure& callback) {
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+
+  if (!callback) {
+    return;
+  }
+
+  TRACE_EVENT0("flutter", "SchedulePreFrameCallback");
+
+  {
+    std::scoped_lock lock(callback_mutex_);
+    const bool callbacks_originally_empty =
+        pre_frame_callbacks_.empty() && secondary_callbacks_.empty();
+    auto [_, inserted] = pre_frame_callbacks_.emplace(id, callback);
+    if (!inserted) {
+      TRACE_EVENT_INSTANT0("flutter",
+                           "MultipleCallsToPreFrameVsyncInFrameInterval");
+      return;
+    }
+    if (vsync_fire_in_progress_) {
+      if (!callbacks_originally_empty) {
+        return;
+      }
+    } else if (callback_ || !callbacks_originally_empty) {
+      return;
+    }
+  }
+  AwaitVSyncForSecondaryCallback();
 }
 
 void VsyncWaiter::ScheduleSecondaryCallback(uintptr_t id,
@@ -62,7 +102,8 @@ void VsyncWaiter::ScheduleSecondaryCallback(uintptr_t id,
 
   {
     std::scoped_lock lock(callback_mutex_);
-    bool secondary_callbacks_originally_empty = secondary_callbacks_.empty();
+    const bool callbacks_originally_empty =
+        pre_frame_callbacks_.empty() && secondary_callbacks_.empty();
     auto [_, inserted] = secondary_callbacks_.emplace(id, callback);
     if (!inserted) {
       // Multiple schedules must result in a single callback per frame interval.
@@ -70,14 +111,17 @@ void VsyncWaiter::ScheduleSecondaryCallback(uintptr_t id,
                            "MultipleCallsToSecondaryVsyncInFrameInterval");
       return;
     }
-    if (callback_) {
+    if (vsync_fire_in_progress_) {
+      if (!callbacks_originally_empty) {
+        return;
+      }
+    } else if (callback_) {
       // Return directly as `AwaitVSync` is already called by
       // `AsyncWaitForVsync`.
       return;
-    }
-    if (!secondary_callbacks_originally_empty) {
-      // Return directly as `AwaitVSync` is already called by
-      // `ScheduleSecondaryCallback`.
+    } else if (!callbacks_originally_empty) {
+      // Return directly as another callback has already armed the vsync
+      // waiter.
       return;
     }
   }
@@ -89,19 +133,30 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
                                bool pause_secondary_tasks) {
   FML_DCHECK(fml::TimePoint::Now() >= frame_start_time);
 
-  Callback callback;
+  bool had_primary_callback = false;
+  std::vector<fml::closure> pre_frame_callbacks;
   std::vector<fml::closure> secondary_callbacks;
 
   {
     std::scoped_lock lock(callback_mutex_);
-    callback_.swap(callback);
+    had_primary_callback = static_cast<bool>(callback_);
+    for (auto& pair : pre_frame_callbacks_) {
+      pre_frame_callbacks.push_back(std::move(pair.second));
+    }
+    pre_frame_callbacks_.clear();
     for (auto& pair : secondary_callbacks_) {
       secondary_callbacks.push_back(std::move(pair.second));
     }
     secondary_callbacks_.clear();
+    // Do not take callback_ until after the pre-frame callbacks have run. They
+    // may synchronously process input and register a primary callback that can
+    // still be rendered for this vsync.
+    vsync_fire_in_progress_ =
+        had_primary_callback || !pre_frame_callbacks.empty();
   }
 
-  if (!callback && secondary_callbacks.empty()) {
+  if (!had_primary_callback && pre_frame_callbacks.empty() &&
+      secondary_callbacks.empty()) {
     // This means that the vsync waiter implementation fired a callback for a
     // request we did not make. This is a paranoid check but we still want to
     // make sure we catch misbehaving vsync implementations.
@@ -109,37 +164,52 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
     return;
   }
 
-  if (callback) {
-    const uint64_t flow_identifier = fml::tracing::TraceNonce();
-    if (pause_secondary_tasks) {
-      PauseDartEventLoopTasks();
-    }
+  const bool may_have_primary_callback =
+      had_primary_callback || !pre_frame_callbacks.empty();
+  if (may_have_primary_callback && pause_secondary_tasks) {
+    PauseDartEventLoopTasks();
+  }
 
-    // The base trace ensures that flows have a root to begin from if one does
-    // not exist. The trace viewer will ignore traces that have no base event
-    // trace. While all our message loops insert a base trace trace
-    // (MessageLoop::RunExpiredTasks), embedders may not.
-    TRACE_EVENT0_WITH_FLOW_IDS("flutter", "VsyncFireCallback",
-                               /*flow_id_count=*/1,
-                               /*flow_ids=*/&flow_identifier);
+  for (auto& pre_frame_callback : pre_frame_callbacks) {
+    task_runners_.GetUITaskRunner()->PostTask(std::move(pre_frame_callback));
+  }
 
-    TRACE_FLOW_BEGIN("flutter", kVsyncFlowName, flow_identifier);
-
+  if (may_have_primary_callback) {
     fml::TaskQueueId ui_task_queue_id =
         task_runners_.GetUITaskRunner()->GetTaskQueueId();
+    std::shared_ptr<VsyncWaiter> waiter = shared_from_this();
     task_runners_.GetUITaskRunner()->PostTask(
-        [ui_task_queue_id, callback, flow_identifier, frame_start_time,
-         frame_target_time, pause_secondary_tasks]() {
-          FML_TRACE_EVENT_WITH_FLOW_IDS(
-              "flutter", kVsyncTraceName, /*flow_id_count=*/1,
-              /*flow_ids=*/&flow_identifier, "StartTime", frame_start_time,
-              "TargetTime", frame_target_time);
-          std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder =
-              std::make_unique<FrameTimingsRecorder>();
-          frame_timings_recorder->RecordVsync(frame_start_time,
-                                              frame_target_time);
-          callback(std::move(frame_timings_recorder));
-          TRACE_FLOW_END("flutter", kVsyncFlowName, flow_identifier);
+        [waiter, ui_task_queue_id, frame_start_time, frame_target_time,
+         pause_secondary_tasks]() {
+          Callback callback;
+          {
+            std::scoped_lock lock(waiter->callback_mutex_);
+            waiter->callback_.swap(callback);
+            waiter->vsync_fire_in_progress_ = false;
+          }
+
+          if (callback) {
+            const uint64_t flow_identifier = fml::tracing::TraceNonce();
+
+            // The base trace ensures that flows have a root to begin from if
+            // one does not exist. The trace viewer will ignore traces that
+            // have no base event trace. While all our message loops insert a
+            // base trace (MessageLoop::RunExpiredTasks), embedders may not.
+            TRACE_EVENT0_WITH_FLOW_IDS("flutter", "VsyncFireCallback",
+                                       /*flow_id_count=*/1,
+                                       /*flow_ids=*/&flow_identifier);
+            TRACE_FLOW_BEGIN("flutter", kVsyncFlowName, flow_identifier);
+            FML_TRACE_EVENT_WITH_FLOW_IDS(
+                "flutter", kVsyncTraceName, /*flow_id_count=*/1,
+                /*flow_ids=*/&flow_identifier, "StartTime", frame_start_time,
+                "TargetTime", frame_target_time);
+            std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder =
+                std::make_unique<FrameTimingsRecorder>();
+            frame_timings_recorder->RecordVsync(frame_start_time,
+                                                frame_target_time);
+            callback(std::move(frame_timings_recorder));
+            TRACE_FLOW_END("flutter", kVsyncFlowName, flow_identifier);
+          }
           if (pause_secondary_tasks) {
             ResumeDartEventLoopTasks(ui_task_queue_id);
           }

@@ -592,6 +592,11 @@ void Engine::DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
   }
 }
 
+void Engine::SchedulePreFrameVsyncCallback(uintptr_t id,
+                                           const fml::closure& callback) {
+  animator_->SchedulePreFrameVsyncCallback(id, callback);
+}
+
 void Engine::ScheduleSecondaryVsyncCallback(uintptr_t id,
                                             const fml::closure& callback) {
   animator_->ScheduleSecondaryVsyncCallback(id, callback);

@@ -100,12 +100,17 @@ class Animator final {
   ///           callback (`Animator::RequestFrame` is not called), this
   ///           secondary callback will still be executed at vsync.
   ///
-  ///           This callback is used to provide the vsync signal needed by
-  ///           `SmoothPointerDataDispatcher`, and for our own flow events.
-  ///
-  /// @see      `PointerDataDispatcher::ScheduleSecondaryVsyncCallback`.
+  ///           This callback is used for input flow events.
   void ScheduleSecondaryVsyncCallback(uintptr_t id,
                                       const fml::closure& callback);
+
+  /// Schedules work at the next vsync before its primary frame callback is
+  /// consumed. A frame synchronously requested by this work can participate in
+  /// the same vsync.
+  ///
+  /// @see `PointerDataDispatcher::Delegate::SchedulePreFrameVsyncCallback`.
+  void SchedulePreFrameVsyncCallback(uintptr_t id,
+                                     const fml::closure& callback);
 
   // Enqueue |trace_flow_id| into |trace_flow_ids_|.  The flow event will be
   // ended at either the next frame, or the next vsync interval with no active

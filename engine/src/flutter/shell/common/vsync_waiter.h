@@ -29,10 +29,19 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
 
   void AsyncWaitForVsync(const Callback& callback);
 
+  /// Returns whether a primary callback registered now can participate in a
+  /// platform vsync that has fired but has not yet been consumed on the UI task
+  /// runner.
+  bool CanRegisterCallbackForCurrentVsync();
+
+  /// Adds a callback for key |id| to run immediately before the primary frame
+  /// callback at the next vsync. A primary callback registered synchronously
+  /// while a pre-frame callback is running participates in the same vsync.
+  void SchedulePreFrameCallback(uintptr_t id, const fml::closure& callback);
+
   /// Add a secondary callback for key |id| for the next vsync.
   ///
-  /// See also |PointerDataDispatcher::ScheduleSecondaryVsyncCallback| and
-  /// |Animator::ScheduleMaybeClearTraceFlowIds|.
+  /// See also |Animator::ScheduleMaybeClearTraceFlowIds|.
   void ScheduleSecondaryCallback(uintptr_t id, const fml::closure& callback);
 
  protected:
@@ -68,8 +77,9 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
   // as AwaitVSync().
   virtual void AwaitVSyncForSecondaryCallback() { AwaitVSync(); }
 
-  // Schedules the callback on the UI task runner. Needs to be invoked as close
-  // to the `frame_start_time` as possible.
+  // Schedules the pre-frame, primary, and secondary callbacks on the UI task
+  // runner in that order. Needs to be invoked as close to the
+  // `frame_start_time` as possible.
   void FireCallback(fml::TimePoint frame_start_time,
                     fml::TimePoint frame_target_time,
                     bool pause_secondary_tasks = true);
@@ -77,6 +87,13 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
  private:
   std::mutex callback_mutex_;
   Callback callback_;
+  // True after FireCallback receives a platform vsync and until its primary
+  // callback is taken on the UI task runner. Keeping callback_ available during
+  // this interval lets pre-frame input handling register work for the current
+  // vsync. Pre-frame and secondary callbacks added during this interval are
+  // retained for the next vsync.
+  bool vsync_fire_in_progress_ = false;
+  std::unordered_map<uintptr_t, fml::closure> pre_frame_callbacks_;
   std::unordered_map<uintptr_t, fml::closure> secondary_callbacks_;
 
   void PauseDartEventLoopTasks();

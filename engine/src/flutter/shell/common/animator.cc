@@ -260,13 +260,22 @@ void Animator::RequestFrame(bool regenerate_layer_trees) {
   // started an expensive operation right after posting this message however.
   // To support that, we need edge triggered wakes on VSync.
 
-  task_runners_.GetUITaskRunner()->PostTask(
-      [self = weak_factory_.GetWeakPtr()]() {
-        if (!self) {
-          return;
-        }
-        self->AwaitVSync();
-      });
+  if (waiter_->CanRegisterCallbackForCurrentVsync()) {
+    // The platform vsync has fired, but its primary callback has not yet been
+    // consumed. Posting AwaitVSync would put it behind the task that consumes
+    // the callback and would defer the frame to the following vsync. Register
+    // immediately in this narrow interval; otherwise preserve the existing
+    // behavior of awaiting vsync from a posted UI task.
+    AwaitVSync();
+  } else {
+    task_runners_.GetUITaskRunner()->PostTask(
+        [self = weak_factory_.GetWeakPtr()]() {
+          if (!self) {
+            return;
+          }
+          self->AwaitVSync();
+        });
+  }
   frame_scheduled_ = true;
 }
 
@@ -297,6 +306,11 @@ void Animator::OnAllViewsRendered() {
 void Animator::ScheduleSecondaryVsyncCallback(uintptr_t id,
                                               const fml::closure& callback) {
   waiter_->ScheduleSecondaryCallback(id, callback);
+}
+
+void Animator::SchedulePreFrameVsyncCallback(uintptr_t id,
+                                             const fml::closure& callback) {
+  waiter_->SchedulePreFrameCallback(id, callback);
 }
 
 void Animator::ScheduleMaybeClearTraceFlowIds() {

@@ -45,11 +45,11 @@ void SmoothPointerDataDispatcher::DispatchPacket(
                                                  trace_flow_id);
   }
   is_pointer_data_in_progress_ = true;
-  ScheduleSecondaryVsyncCallback();
+  SchedulePreFrameVsyncCallback();
 }
 
-void SmoothPointerDataDispatcher::ScheduleSecondaryVsyncCallback() {
-  delegate_.ScheduleSecondaryVsyncCallback(
+void SmoothPointerDataDispatcher::SchedulePreFrameVsyncCallback() {
+  delegate_.SchedulePreFrameVsyncCallback(
       reinterpret_cast<uintptr_t>(this),
       [dispatcher = weak_factory_.GetWeakPtr()]() {
         if (dispatcher && dispatcher->is_pointer_data_in_progress_) {
@@ -69,7 +69,7 @@ void SmoothPointerDataDispatcher::DispatchPendingPacket() {
                                                pending_trace_flow_id_);
   pending_packet_ = nullptr;
   pending_trace_flow_id_ = -1;
-  ScheduleSecondaryVsyncCallback();
+  SchedulePreFrameVsyncCallback();
 }
 
 }  // namespace flutter

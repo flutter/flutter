@@ -48,20 +48,18 @@ class PointerDataDispatcher {
                                   uint64_t trace_flow_id) = 0;
 
     //--------------------------------------------------------------------------
-    /// @brief    Schedule a secondary callback to be executed right after the
-    ///           main `VsyncWaiter::AsyncWaitForVsync` callback (which is added
-    ///           by `Animator::RequestFrame`).
+    /// @brief    Schedule a callback to execute immediately before the main
+    ///           `VsyncWaiter::AsyncWaitForVsync` callback.
     ///
     ///           Like the callback in `AsyncWaitForVsync`, this callback is
     ///           only scheduled to be called once per |id|, and it will be
     ///           called in the UI thread. If there is no AsyncWaitForVsync
     ///           callback (`Animator::RequestFrame` is not called), this
-    ///           secondary callback will still be executed at vsync.
+    ///           pre-frame callback will still be executed at vsync.
     ///
     ///           This callback is used to provide the vsync signal needed by
-    ///           `SmoothPointerDataDispatcher`, and for `Animator` input flow
-    ///           events.
-    virtual void ScheduleSecondaryVsyncCallback(
+    ///           `SmoothPointerDataDispatcher` before a frame begins.
+    virtual void SchedulePreFrameVsyncCallback(
         uintptr_t id,
         const fml::closure& callback) = 0;
   };
@@ -119,7 +117,7 @@ class DefaultPointerDataDispatcher : public PointerDataDispatcher {
 /// `runtime_controller_->DispatchPointerDataPacket` is always called right
 /// away. That's because `is_pointer_data_in_progress_` will always be false
 /// when `DispatchPacket` is called since it will be cleared by the end of a
-/// frame through `ScheduleSecondaryVsyncCallback`. This is the case for all
+/// frame through `SchedulePreFrameVsyncCallback`. This is the case for all
 /// Android/iOS devices before iPhone X/XS.
 ///
 /// If the input event is irregular, but with a random latency of no more than
@@ -149,7 +147,7 @@ class SmoothPointerDataDispatcher : public DefaultPointerDataDispatcher {
 
  private:
   void DispatchPendingPacket();
-  void ScheduleSecondaryVsyncCallback();
+  void SchedulePreFrameVsyncCallback();
 
   // If non-null, this will be a pending pointer data packet for the next frame
   // to consume. This is used to smooth out the irregular drag events delivery.
