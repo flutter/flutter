@@ -34,6 +34,7 @@ import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const _flutterAppPath = '/path/to/my_flutter_app';
 const _flutterRoot = '/path/to/flutter';
@@ -89,7 +90,12 @@ void main() {
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
-        final runner = FlutterCommandRunner(verboseHelp: true);
+        final runner = FlutterCommandRunner(
+          toolContext: FakeToolContext(),
+          androidContext: FakeAndroidContext(),
+          appleContext: FakeAppleContext(),
+          verboseHelp: true,
+        );
         runner.addCommand(command);
 
         expect(
@@ -125,7 +131,12 @@ void main() {
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
-        final runner = FlutterCommandRunner(verboseHelp: true);
+        final runner = FlutterCommandRunner(
+          toolContext: FakeToolContext(),
+          androidContext: FakeAndroidContext(),
+          appleContext: FakeAppleContext(),
+          verboseHelp: true,
+        );
         runner.addCommand(command);
 
         expect(
@@ -175,7 +186,12 @@ void main() {
             projectDir.childFile('pubspec.yaml').createSync();
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
-            final runner = FlutterCommandRunner(verboseHelp: true);
+            final runner = FlutterCommandRunner(
+              toolContext: FakeToolContext(),
+              androidContext: FakeAndroidContext(),
+              appleContext: FakeAppleContext(),
+              verboseHelp: true,
+            );
             runner.addCommand(command);
 
             // We expect this to fail because we're not competely mocking it out, we're just testing the output creation
@@ -231,7 +247,12 @@ void main() {
             projectDir.childFile('pubspec.yaml').createSync();
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
-            final runner = FlutterCommandRunner(verboseHelp: true);
+            final runner = FlutterCommandRunner(
+              toolContext: FakeToolContext(),
+              androidContext: FakeAndroidContext(),
+              appleContext: FakeAppleContext(),
+              verboseHelp: true,
+            );
             runner.addCommand(command);
 
             // We expect this to fail because we're not competely mocking it out, we're just testing the output creation
