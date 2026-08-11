@@ -544,7 +544,7 @@ class PlatformViewClipRectScenario extends Scenario with _BasePlatformViewScenar
 /// Platform view with clip rect, with multiple clips.
 class PlatformViewClipRectMultipleClipsScenario extends Scenario
     with _BasePlatformViewScenarioMixin {
-  /// Constructs a platform view with clip rect scenario.
+  /// Constructs a platform view with clip rect and multiple clips.
   PlatformViewClipRectMultipleClipsScenario(super.view, {required this.id});
 
   /// The platform view identifier.
@@ -616,7 +616,7 @@ class PlatformViewClipRectAfterMovedScenario extends Scenario with _BasePlatform
 /// The clip rect moves with the same transform matrix with the PlatformView.
 class PlatformViewClipRectAfterMovedMultipleClipsScenario extends Scenario
     with _BasePlatformViewScenarioMixin {
-  /// Constructs a platform view with clip rect scenario.
+  /// Constructs a platform view with clip rect after moved and multiple clips.
   PlatformViewClipRectAfterMovedMultipleClipsScenario(super.view, {required this.id});
 
   /// The platform view identifier.
@@ -690,7 +690,7 @@ class PlatformViewClipRRectScenario extends PlatformViewScenario {
 
 /// Platform view with clip rrect, with multiple clips.
 class PlatformViewClipRRectMultipleClipsScenario extends PlatformViewScenario {
-  /// Constructs a platform view with clip rrect scenario.
+  /// Constructs a platform view with clip rrect and multiple clips.
   PlatformViewClipRRectMultipleClipsScenario(super.view, {super.id = 0});
 
   @override
@@ -796,7 +796,7 @@ class PlatformViewLargeClipRRectScenario extends PlatformViewScenario {
 /// Platform view with clip rrect, with multiple clips.
 /// The bounding rect of the rrect is the same as PlatformView and only the corner radii clips the PlatformView.
 class PlatformViewLargeClipRRectMultipleClipsScenario extends PlatformViewScenario {
-  /// Constructs a platform view with large clip rrect scenario.
+  /// Constructs a platform view with large clip rrect and multiple clips.
   PlatformViewLargeClipRRectMultipleClipsScenario(super.view, {super.id = 0});
 
   @override
@@ -844,7 +844,7 @@ class PlatformViewClipPathScenario extends PlatformViewScenario {
 
 /// Platform view with clip path, with multiple clips.
 class PlatformViewClipPathMultipleClipsScenario extends PlatformViewScenario {
-  /// Constructs a platform view with clip path scenario.
+  /// Constructs a platform view with clip path and multiple clips.
   PlatformViewClipPathMultipleClipsScenario(super.view, {super.id = 0});
 
   @override
@@ -895,7 +895,7 @@ class PlatformViewClipRectWithTransformScenario extends PlatformViewScenario {
 
 /// Platform view with clip rect after transformed, with multiple clips.
 class PlatformViewClipRectWithTransformMultipleClipsScenario extends PlatformViewScenario {
-  /// Constructs a platform view with clip rect with transform scenario.
+  /// Constructs a platform view with clip rect with transform and multiple clips.
   PlatformViewClipRectWithTransformMultipleClipsScenario(super.view, {super.id = 0});
 
   @override
@@ -962,7 +962,7 @@ class PlatformViewClipRRectWithTransformScenario extends PlatformViewScenario {
 
 /// Platform view with clip rrect after transformed, with multiple clips.
 class PlatformViewClipRRectWithTransformMultipleClipsScenario extends PlatformViewScenario {
-  /// Constructs a platform view with clip rrect with transform scenario.
+  /// Constructs a platform view with clip rrect with transform and multiple clips.
   PlatformViewClipRRectWithTransformMultipleClipsScenario(super.view, {super.id = 0});
 
   @override
@@ -1041,7 +1041,7 @@ class PlatformViewLargeClipRRectWithTransformScenario extends PlatformViewScenar
 /// Platform view with clip rrect after transformed, with multiple clips.
 /// The bounding rect of the rrect is the same as PlatformView and only the corner radii clips the PlatformView.
 class PlatformViewLargeClipRRectWithTransformMultipleClipsScenario extends PlatformViewScenario {
-  /// Constructs a platform view with large clip rrect with transform scenario.
+  /// Constructs a platform view with large clip rrect with transform and multiple clips.
   PlatformViewLargeClipRRectWithTransformMultipleClipsScenario(super.view, {super.id = 0});
 
   @override
@@ -1115,7 +1115,7 @@ class PlatformViewClipPathWithTransformScenario extends PlatformViewScenario {
 
 /// Platform view with clip path after transformed, with multiple clips.
 class PlatformViewClipPathWithTransformMultipleClipsScenario extends PlatformViewScenario {
-  /// Constructs a platform view with clip path with transform scenario.
+  /// Constructs a platform view with clip path with transform and multiple clips.
   PlatformViewClipPathWithTransformMultipleClipsScenario(super.view, {super.id = 0});
 
   @override
