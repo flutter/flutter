@@ -363,7 +363,7 @@ class CkCanvas implements LayerCanvas {
   void saveLayerWithFilter(ui.Rect? bounds, ui.Paint? paint, ui.ImageFilter filter) {
     final CkManagedSkImageFilterConvertible convertible;
     if (filter is ui.ColorFilter) {
-      convertible = createCkColorFilter(filter as EngineColorFilter)!;
+      convertible = CkColorFilterImageFilter(colorFilter: filter as EngineColorFilter);
     } else {
       convertible = filter as CkManagedSkImageFilterConvertible;
     }
