@@ -114,9 +114,6 @@ class ExtensionConnection {
         'ExtensionConnection handshake complete. Capabilities: ${capabilities.services}',
       );
 
-      errorPort.close();
-      exitPort.close();
-
       return ExtensionConnection._(
         isolate: isolate,
         peer: peer,
@@ -125,18 +122,17 @@ class ExtensionConnection {
       );
     } on TimeoutException {
       logger.printTrace('ExtensionConnection handshake timed out.');
-      errorPort.close();
-      exitPort.close();
       receivePort.close();
       isolate?.kill(priority: Isolate.immediate);
       throw TimeoutException('Handshake with tool extension isolate timed out.');
     } on Object catch (error) {
       logger.printTrace('ExtensionConnection spawn failed with error: $error');
-      errorPort.close();
-      exitPort.close();
       receivePort.close();
       isolate?.kill(priority: Isolate.immediate);
       rethrow;
+    } finally {
+      errorPort.close();
+      exitPort.close();
     }
   }
 
