@@ -7,11 +7,14 @@
 
 @implementation AppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+- (BOOL)application:(UIApplication *)application
+    didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+  return [super application:application
+      didFinishLaunchingWithOptions:launchOptions];
 }
 
-- (void)didInitializeImplicitFlutterEngine:(id<FlutterImplicitEngineBridge>)engineBridge {
+- (void)didInitializeImplicitFlutterEngine:
+    (NSObject<FlutterImplicitEngineBridge> *)engineBridge {
   [GeneratedPluginRegistrant registerWithRegistry:engineBridge.pluginRegistry];
 }
 
