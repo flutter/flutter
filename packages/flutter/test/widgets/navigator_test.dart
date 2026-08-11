@@ -213,7 +213,7 @@ void main() {
         home: const Scaffold(body: Text('home')),
       ),
     );
-    const page = MaterialPage<void>(child: Text('page'));
+    const page = TestPage<void>(child: Text('page'));
     nav.currentState!.push<void>(page.createRoute(nav.currentContext!));
     await tester.pumpAndSettle();
     expect(find.text('page'), findsOneWidget);
@@ -224,7 +224,7 @@ void main() {
   });
 
   testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
-    const page = MaterialPage<void>(child: Text('page'));
+    const page = TestPage<void>(child: Text('page'));
     await tester.pumpWidget(
       MediaQuery(
         data: MediaQueryData.fromView(tester.view),
@@ -254,7 +254,7 @@ void main() {
   });
 
   testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
-    const page = MaterialPage<void>(child: Text('page'));
+    const page = TestPage<void>(child: Text('page'));
     await tester.pumpWidget(
       MediaQuery(
         data: MediaQueryData.fromView(tester.view),
@@ -298,13 +298,13 @@ void main() {
       );
     }
 
-    const page = MaterialPage<void>(key: ValueKey<String>('page'), child: Text('page'));
-    const page1 = MaterialPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
-    const page2 = MaterialPage<void>(key: ValueKey<String>('page2'), child: Text('page2'));
-    const page3 = MaterialPage<void>(key: ValueKey<String>('page3'), child: Text('page3'));
-    const page4 = MaterialPage<void>(key: ValueKey<String>('page4'), child: Text('page4'));
-    const page5 = MaterialPage<void>(key: ValueKey<String>('page5'), child: Text('page5'));
-    const page6 = MaterialPage<void>(key: ValueKey<String>('page6'), child: Text('page6'));
+    const page = TestPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = TestPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
+    const page2 = TestPage<void>(key: ValueKey<String>('page2'), child: Text('page2'));
+    const page3 = TestPage<void>(key: ValueKey<String>('page3'), child: Text('page3'));
+    const page4 = TestPage<void>(key: ValueKey<String>('page4'), child: Text('page4'));
+    const page5 = TestPage<void>(key: ValueKey<String>('page5'), child: Text('page5'));
+    const page6 = TestPage<void>(key: ValueKey<String>('page6'), child: Text('page6'));
     await buildPages(<Page<void>>[page]);
 
     expect(find.text('page'), findsOneWidget);
@@ -335,10 +335,10 @@ void main() {
       );
     }
 
-    const page = MaterialPage<void>(key: ValueKey<String>('page'), child: Text('page'));
-    const page1 = MaterialPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
-    const page2 = MaterialPage<void>(key: ValueKey<String>('page2'), child: Text('page2'));
-    const page3 = MaterialPage<void>(key: ValueKey<String>('page3'), child: Text('page3'));
+    const page = TestPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = TestPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
+    const page2 = TestPage<void>(key: ValueKey<String>('page2'), child: Text('page2'));
+    const page3 = TestPage<void>(key: ValueKey<String>('page3'), child: Text('page3'));
     await buildPages(<Page<void>>[page]);
 
     expect(find.text('page'), findsOneWidget);
@@ -397,9 +397,9 @@ void main() {
   });
 
   testWidgets('Can push, pop, and replace in sequence', (WidgetTester tester) async {
-    const initial = MaterialPage<void>(key: ValueKey<String>('initial'), child: Text('initial'));
-    const push = MaterialPage<void>(key: ValueKey<String>('push'), child: Text('push'));
-    const replace = MaterialPage<void>(key: ValueKey<String>('replace'), child: Text('replace'));
+    const initial = TestPage<void>(key: ValueKey<String>('initial'), child: Text('initial'));
+    const push = TestPage<void>(key: ValueKey<String>('push'), child: Text('push'));
+    const replace = TestPage<void>(key: ValueKey<String>('replace'), child: Text('replace'));
     var pages = <Page<void>>[initial];
     bool popPageCallback(Route<dynamic> route, dynamic result) {
       pages.removeLast();
@@ -945,8 +945,8 @@ void main() {
     final key = GlobalKey<NavigatorState>();
     var called = false;
     final pages = <Page<void>>[
-      const MaterialPage<void>(child: Text('Page 1')),
-      MaterialPage<void>(
+      const TestPage<void>(child: Text('Page 1')),
+      TestPage<void>(
         child: PopScope(
           onPopInvokedWithResult: (bool didPop, _) {
             called = true;
@@ -977,7 +977,7 @@ void main() {
     // Regression Test for https://github.com/flutter/flutter/issues/61346.
     Widget buildNavigator() {
       return Navigator(
-        pages: const <Page<void>>[MaterialPage<void>(child: Placeholder())],
+        pages: const <Page<void>>[TestPage<void>(child: Placeholder())],
         onPopPage: (Route<dynamic> route, dynamic result) => false,
       );
     }
@@ -1000,7 +1000,7 @@ void main() {
   });
 
   testWidgets('Page-based route pop before push finishes', (WidgetTester tester) async {
-    var pages = <Page<void>>[const MaterialPage<void>(child: Text('Page 1'))];
+    var pages = <Page<void>>[const TestPage<void>(child: Text('Page 1'))];
     final navigator = GlobalKey<NavigatorState>();
     Widget buildNavigator() {
       return Navigator(
@@ -1016,7 +1016,7 @@ void main() {
     await tester.pumpWidget(TestDependencies(child: buildNavigator()));
     expect(find.text('Page 1'), findsOneWidget);
     pages = pages.toList();
-    pages.add(const MaterialPage<void>(child: Text('Page 2')));
+    pages.add(const TestPage<void>(child: Text('Page 2')));
 
     await tester.pumpWidget(TestDependencies(child: buildNavigator()));
     // This test should finish without crashing.
@@ -1031,8 +1031,8 @@ void main() {
   testWidgets('Pages update does update overlay correctly', (WidgetTester tester) async {
     // Regression Test for https://github.com/flutter/flutter/issues/64941.
     var pages = const <Page<void>>[
-      MaterialPage<void>(key: ValueKey<int>(0), child: Text('page 0')),
-      MaterialPage<void>(key: ValueKey<int>(1), child: Text('page 1')),
+      TestPage<void>(key: ValueKey<int>(0), child: Text('page 0')),
+      TestPage<void>(key: ValueKey<int>(1), child: Text('page 1')),
     ];
     Widget buildNavigator() {
       return Navigator(pages: pages, onPopPage: (Route<dynamic> route, dynamic result) => false);
@@ -1044,7 +1044,7 @@ void main() {
     expect(find.text('page 0'), findsNothing);
 
     // Removes the first page.
-    pages = const <Page<void>>[MaterialPage<void>(key: ValueKey<int>(1), child: Text('page 1'))];
+    pages = const <Page<void>>[TestPage<void>(key: ValueKey<int>(1), child: Text('page 1'))];
 
     await tester.pumpWidget(TestDependencies(child: buildNavigator()));
     // Overlay updates correctly.
@@ -3931,8 +3931,8 @@ void main() {
       WidgetTester tester,
     ) async {
       var myPages = const <Page<void>>[
-        MaterialPage<void>(child: Text('page1')),
-        MaterialPage<void>(child: Text('page2')),
+        TestPage<void>(child: Text('page1')),
+        TestPage<void>(child: Text('page2')),
       ];
       await tester.pumpWidget(
         MediaQuery(
@@ -3953,7 +3953,7 @@ void main() {
       route.addLocalHistoryEntry(LocalHistoryEntry(onRemove: () => entryRemoved = true));
       expect(route.willHandlePopInternally, true);
 
-      myPages = const <Page<void>>[MaterialPage<void>(child: Text('page1'))];
+      myPages = const <Page<void>>[TestPage<void>(child: Text('page1'))];
 
       await tester.pumpWidget(
         MediaQuery(
@@ -3976,8 +3976,8 @@ void main() {
       WidgetTester tester,
     ) async {
       const myPages = <Page<void>>[
-        MaterialPage<void>(child: Text('page1')),
-        MaterialPage<void>(child: PopScope<void>(canPop: false, child: Text('page2'))),
+        TestPage<void>(child: Text('page1')),
+        TestPage<void>(child: PopScope<void>(canPop: false, child: Text('page2'))),
       ];
       await tester.pumpWidget(
         MediaQuery(
@@ -4263,7 +4263,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Regression Test for https://github.com/flutter/flutter/issues/156033.
-      var pages = <Page<Object?>>[MaterialPage<void>(key: UniqueKey(), child: const Text('home'))];
+      var pages = <Page<Object?>>[TestPage<void>(key: UniqueKey(), child: const Text('home'))];
       final key = GlobalKey<NavigatorState>();
       Widget buildNavigator() {
         return TestDependencies(
@@ -4276,8 +4276,8 @@ void main() {
 
       pages = <Page<Object?>>[
         ...pages,
-        MaterialPage<void>(key: UniqueKey(), child: const Text('child1')),
-        MaterialPage<void>(key: UniqueKey(), child: const Text('child2')),
+        TestPage<void>(key: UniqueKey(), child: const Text('child1')),
+        TestPage<void>(key: UniqueKey(), child: const Text('child2')),
       ];
 
       await tester.pumpWidget(buildNavigator());
@@ -5832,7 +5832,7 @@ void main() {
                       pages: pages.map((_Page page) {
                         switch (page) {
                           case _Page.home:
-                            return MaterialPage<void>(
+                            return TestPage<void>(
                               child: _LinksPage(
                                 title: 'Home page',
                                 buttons: <Widget>[
@@ -5856,9 +5856,9 @@ void main() {
                               ),
                             );
                           case _Page.one:
-                            return const MaterialPage<void>(child: _LinksPage(title: 'Page one'));
+                            return const TestPage<void>(child: _LinksPage(title: 'Page one'));
                           case _Page.noPop:
-                            return const MaterialPage<void>(
+                            return const TestPage<void>(
                               child: _LinksPage(title: 'Cannot pop page', canPop: false),
                             );
                         }
@@ -5943,7 +5943,7 @@ void main() {
                       pages: pages.map((_Page page) {
                         switch (page) {
                           case _Page.home:
-                            return MaterialPage<void>(
+                            return TestPage<void>(
                               child: _LinksPage(
                                 title: 'Home page',
                                 buttons: <Widget>[
@@ -5967,9 +5967,9 @@ void main() {
                               ),
                             );
                           case _Page.one:
-                            return const MaterialPage<void>(child: _LinksPage(title: 'Page one'));
+                            return const TestPage<void>(child: _LinksPage(title: 'Page one'));
                           case _Page.noPop:
-                            return const MaterialPage<void>(
+                            return const TestPage<void>(
                               child: _LinksPage(title: 'Cannot pop page', canPop: false),
                             );
                         }
@@ -6031,7 +6031,7 @@ void main() {
                       pages: pages.map((_PageWithYesPop page) {
                         switch (page) {
                           case _PageWithYesPop.home:
-                            return MaterialPage<void>(
+                            return TestPage<void>(
                               child: _LinksPage(
                                 title: 'Home page',
                                 buttons: <Widget>[
@@ -6063,13 +6063,13 @@ void main() {
                               ),
                             );
                           case _PageWithYesPop.one:
-                            return const MaterialPage<void>(child: _LinksPage(title: 'Page one'));
+                            return const TestPage<void>(child: _LinksPage(title: 'Page one'));
                           case _PageWithYesPop.noPop:
-                            return const MaterialPage<void>(
+                            return const TestPage<void>(
                               child: _LinksPage(title: 'Cannot pop page', canPop: false),
                             );
                           case _PageWithYesPop.yesPop:
-                            return MaterialPage<void>(
+                            return TestPage<void>(
                               child: _LinksPage(
                                 title: 'Can pop page',
                                 canPop: true,
