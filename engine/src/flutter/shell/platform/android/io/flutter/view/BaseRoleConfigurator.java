@@ -299,6 +299,53 @@ public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
 
   private void configureCollectionItem(
       AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+    if (node.parent != null && node.parent.hasRole(AccessibilityBridge.Role.ROW)) {
+      AccessibilityBridge.SemanticsNode row = node.parent;
+      AccessibilityBridge.SemanticsNode table = row.parent;
+      if (table != null && table.hasRole(AccessibilityBridge.Role.TABLE)) {
+        int rowIndex = 0;
+        if (table.childrenInTraversalOrder != null) {
+          for (AccessibilityBridge.SemanticsNode r : table.childrenInTraversalOrder) {
+            if (r == row) {
+              break;
+            }
+            if (r != null && r.hasRole(AccessibilityBridge.Role.ROW)) {
+              rowIndex++;
+            }
+          }
+        }
+        int columnIndex =
+            row.childrenInTraversalOrder != null ? row.childrenInTraversalOrder.indexOf(node) : 0;
+        if (columnIndex < 0) {
+          columnIndex = 0;
+        }
+        boolean isHeading =
+            node.hasRole(AccessibilityBridge.Role.COLUMN_HEADER)
+                || node.hasFlag(AccessibilityBridge.Flag.IS_HEADER);
+
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
+          result.setCollectionItemInfo(
+              AccessibilityNodeInfo.CollectionItemInfo.obtain(
+                  rowIndex, // row index
+                  1, // row span
+                  columnIndex, // column index
+                  1, // column span
+                  isHeading // is heading
+                  ));
+        } else {
+          result.setCollectionItemInfo(
+              new AccessibilityNodeInfo.CollectionItemInfo(
+                  rowIndex, // row index
+                  1, // row span
+                  columnIndex, // column index
+                  1, // column span
+                  isHeading // is heading
+                  ));
+        }
+        return;
+      }
+    }
+
     if (node.accessibilityBridge.shouldSetCollectionItemInfo(node)) {
       AccessibilityBridge.SemanticsNode parent = node.parent;
       List<AccessibilityBridge.SemanticsNode> scrollChildren = parent.childrenInTraversalOrder;
@@ -307,7 +354,7 @@ public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
               || parent.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT));
       int nodeIndex = scrollChildren.indexOf(node);
       if (verticalScroll) {
-        if (Build.VERSION.SDK_INT < 33) {
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
           result.setCollectionItemInfo(
               AccessibilityNodeInfo.CollectionItemInfo.obtain(
                   nodeIndex, // row index
@@ -327,7 +374,7 @@ public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
                   ));
         }
       } else {
-        if (Build.VERSION.SDK_INT < 33) {
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
           result.setCollectionItemInfo(
               AccessibilityNodeInfo.CollectionItemInfo.obtain(
                   0, // row index
