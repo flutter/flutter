@@ -177,7 +177,7 @@ aliases:
   an audit of the top 200 plugins for this legacy usage in
   [flutter/flutter#190845](https://github.com/flutter/flutter/issues/190845)).
 - Do not assume Flutter's tasks exist at configuration time or have specific
-  types; look tasks up lazily (`tasks.named`) without a type, or better, wire
+  types; look up tasks lazily (`tasks.named`) without a type, or better, wire
   through Variant API artifacts.
 - Test your plugin's example app with AGP 9+ **without** `android.newDsl=false`.
 
