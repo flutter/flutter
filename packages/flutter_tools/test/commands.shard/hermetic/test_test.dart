@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -669,6 +670,13 @@ resolution: workspace
           expect(configContents.contains('"name": "test"'), true);
           expect(configContents.contains('"name": "test_api"'), true);
           expect(configContents.contains('"name": "test_core"'), true);
+
+          final config = json.decode(configContents) as Map<String, dynamic>;
+          final packages = config['packages'] as List<dynamic>;
+          final Map<String, dynamic> myApp = packages.cast<Map<String, dynamic>>().firstWhere(
+            (Map<String, dynamic> p) => p['name'] == 'my_app',
+          );
+          expect(myApp['rootUri'], fs.directory('/package').absolute.uri.toString());
         },
       );
       expect(caughtToolExit, true);
