@@ -2,21 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
+import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand({required super.logger, bool verboseHelp = false})
-    : super(verboseHelp: verboseHelp) {
+  BuildApkCommand({
+    required AndroidBuilder? androidBuilder,
+    required AndroidContext androidContext,
+    required AndroidSdk? androidSdk,
+    required BuildSystem buildSystem,
+    required ToolContext toolContext,
+    bool verboseHelp = false,
+  }) : _androidBuilder = androidBuilder,
+       _androidContext = androidContext,
+       _androidSdk = androidSdk,
+       _buildSystem = buildSystem,
+       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -57,6 +73,22 @@ class BuildApkCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
+  final AndroidBuilder? _androidBuilder;
+  final AndroidContext _androidContext;
+  final AndroidSdk? _androidSdk;
+  final BuildSystem _buildSystem;
+  @visibleForTesting
+  AndroidBuilder? get androidBuilder => _androidBuilder;
+
+  @visibleForTesting
+  AndroidContext get androidContext => _androidContext;
+
+  @visibleForTesting
+  AndroidSdk? get androidSdk => _androidSdk;
+
+  @visibleForTesting
+  BuildSystem get buildSystem => _buildSystem;
+
   BuildMode get _buildMode {
     if (boolArg('release')) {
       return BuildMode.release;
@@ -78,6 +110,9 @@ class BuildApkCommand extends BuildSubCommand {
           BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
         }
       : stringsArg('target-platform');
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'apk';
@@ -118,8 +153,10 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (globals.androidSdk == null) {
-      exitWithNoSdkMessage();
+    final Logger logger = toolContext.logger;
+    final AnsiTerminal terminal = toolContext.terminal;
+    if (_androidSdk == null) {
+      exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -129,8 +166,9 @@ class BuildApkCommand extends BuildSubCommand {
       targetArchs: _targetArchs.map<CpuArch>(getCpuArchForName),
     );
     validateBuild(androidBuildInfo);
-    globals.terminal.usesTerminalUi = true;
-    await androidBuilder?.buildApk(
+    terminal.usesTerminalUi = true;
+    final FlutterProject project = this.project;
+    await _androidBuilder?.buildApk(
       project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
@@ -139,7 +177,7 @@ class BuildApkCommand extends BuildSubCommand {
 
     final bool impellerEnabled = project.android.computeImpellerEnabled();
     final buildLabel = impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
-    globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
+    analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
 
     return FlutterCommandResult.success();
   }
