@@ -130,22 +130,23 @@ abstract class FlutterVersion {
 
   FlutterVersion._({
     required SystemClock clock,
-    required Git git,
     required this.flutterRoot,
     required this.fs,
+    required Git git,
   }) : _clock = clock,
        _git = git;
 
   factory FlutterVersion.fromRevision({
-    SystemClock clock = const SystemClock(),
     required String flutterRoot,
     required String frameworkRevision,
     required FileSystem fs,
     required Git git,
+    SystemClock clock = const SystemClock(),
     bool fetchTags = false,
+    Platform? platform,
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      globals.platform,
+      platform ?? globals.platform,
       git: git,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,
