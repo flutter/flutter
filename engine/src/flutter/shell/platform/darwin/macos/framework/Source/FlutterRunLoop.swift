@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import Foundation
-import InternalFlutterSwiftCommon
 
-/// Interface for scheduling tasks on the run loop.
+/// Interface for scheduling tasks on the main thread run loop.
 ///
 /// The main difference between using `FlutterRunLoop` to schedule tasks compared
 /// to `DispatchQueue.async` or `RunLoop.perform(_:)` is that `FlutterRunLoop`
@@ -15,8 +14,8 @@ import InternalFlutterSwiftCommon
 @objc final class FlutterRunLoop: NSObject, @unchecked Sendable {
   private static let flutterRunLoopMode = CFRunLoopMode("FlutterRunLoopMode" as CFString)
 
-  @MainActor
-  private static var _mainRunLoop: FlutterRunLoop?
+  @objc @MainActor
+  static let mainRunLoop = FlutterRunLoop()
 
   private let runLoop: CFRunLoop = CFRunLoopGetCurrent()
   private let taskQueue = TaskQueue()
@@ -25,6 +24,7 @@ import InternalFlutterSwiftCommon
   private let source: CFRunLoopSource
   private let timer: CFRunLoopTimer
 
+  @MainActor
   private override init() {
     var timerContext = CFRunLoopTimerContext(
       version: 0,
@@ -88,13 +88,6 @@ import InternalFlutterSwiftCommon
     CFRunLoopSourceInvalidate(source)
     CFRunLoopRemoveSource(runLoop, source, .commonModes)
     CFRunLoopRemoveSource(runLoop, source, Self.flutterRunLoopMode)
-  }
-
-  // The `FlutterRunLoop` for the main thread.
-  @MainActor
-  @objc static var mainRunLoop: FlutterRunLoop {
-    assert(Thread.isMainThread, "Must be called on the main thread.")
-    return _mainRunLoop ??= FlutterRunLoop()
   }
 
   // Schedules a block to be executed on the main thread.
@@ -171,14 +164,13 @@ private final class TaskQueue: @unchecked Sendable {
     }
   }
 
+  @MainActor
   func runExpiredTasksAndRearm(timer: CFRunLoopTimer) {
     let (nextFireDate, expiredTasks) = popTasks(expiringBy: CFAbsoluteTimeGetCurrent())
 
     CFRunLoopTimerSetNextFireDate(timer, nextFireDate)
-    MainActor.assumeIsolated {
-      for task in expiredTasks {
-        task.block()
-      }
+    for task in expiredTasks {
+      task.block()
     }
   }
 }

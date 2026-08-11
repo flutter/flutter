@@ -68,7 +68,12 @@ final class ResizeSynchronizer: NSObject, @unchecked Sendable {
   // The updated view surface size. Must be set on platform thread.
   private var contentSize: CGSize = ResizeSynchronizer.invalidSize
 
-  private let mainRunLoop: FlutterRunLoop = .mainRunLoop
+  private nonisolated let mainRunLoop: FlutterRunLoop
+
+  override init() {
+    mainRunLoop = .mainRunLoop
+    super.init()
+  }
 
   /// Begins window resize operation to the specified size.
   ///
@@ -122,7 +127,7 @@ final class ResizeSynchronizer: NSObject, @unchecked Sendable {
   ///
   /// Called from the raster thread on frame present. The `notify` callback will
   /// be invoked on the platform thread.
-  @objc func performCommit(
+  @objc nonisolated func performCommit(
     forSize size: CGSize,
     afterDelay delay: TimeInterval,
     notify: @MainActor @escaping () -> Void
@@ -141,7 +146,7 @@ final class ResizeSynchronizer: NSObject, @unchecked Sendable {
   /// Notifies the synchronizer that the Flutter view is being shut down.
   ///
   /// Unblocks the platform thread if blocked.
-  @objc func shutDown() {
+  @objc nonisolated func shutDown() {
     mainRunLoop.perform {
       self.isShuttingDown = true
     }
