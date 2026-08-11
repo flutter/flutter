@@ -1794,7 +1794,8 @@ bool _debugIsActive(BuildContext context) {
 /// barrier will dismiss the dialog. It is `true` by default and cannot be `null`.
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
-/// barrier that darkens everything below the dialog. If `null`,
+/// barrier that darkens everything below the dialog. If `null`, the
+/// `barrierColor` field from [DialogThemeData] is used. If that is also `null`,
 /// [ColorScheme.scrim] is used with an opacity matching [Colors.black54].
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
@@ -1837,6 +1838,8 @@ class DialogRoute<T> extends RawDialogRoute<T> {
        super(
          barrierColor:
              barrierColor ??
+             DialogTheme.of(context).barrierColor ??
+             Theme.of(context).dialogTheme.barrierColor ??
              Theme.of(context).colorScheme.scrim.withValues(alpha: Colors.black54.a),
          pageBuilder:
              (

@@ -1113,7 +1113,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       return modalBarrierColor!;
     }
     if (navigator != null) {
-      return Theme.of(navigator!.context).colorScheme.scrim.withValues(alpha: Colors.black54.a);
+      final ThemeData theme = Theme.of(navigator!.context);
+      return theme.bottomSheetTheme.modalBarrierColor ??
+          theme.colorScheme.scrim.withValues(alpha: Colors.black54.a);
     }
     return Colors.black54;
   }

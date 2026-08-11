@@ -1144,6 +1144,45 @@ void main() {
     expect(modalBarrier.color, scrim.withValues(alpha: Colors.black54.a));
   });
 
+  testWidgets(
+    'ModalBottomSheetRoute uses BottomSheetTheme.modalBarrierColor over ColorScheme.scrim',
+    (WidgetTester tester) async {
+      const Color scrim = Colors.red;
+      const Color themeBarrierColor = Colors.blue;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+            bottomSheetTheme: const BottomSheetThemeData(modalBarrierColor: themeBarrierColor),
+          ),
+          home: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    ModalBottomSheetRoute<void>(
+                      isScrollControlled: false,
+                      builder: (BuildContext context) {
+                        return const SizedBox(height: 200, child: Text('BottomSheet'));
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Open'),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
+      expect(modalBarrier.color, themeBarrierColor);
+    },
+  );
+
   testWidgets('Material3 - BottomSheet uses fallback values', (WidgetTester tester) async {
     const Color surfaceColor = Colors.pink;
     const Color surfaceTintColor = Colors.blue;

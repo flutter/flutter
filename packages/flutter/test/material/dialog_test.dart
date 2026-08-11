@@ -731,6 +731,40 @@ void main() {
     );
   });
 
+  testWidgets('DialogRoute uses DialogTheme.barrierColor over ColorScheme.scrim', (
+    WidgetTester tester,
+  ) async {
+    const Color scrim = Colors.red;
+    const Color themeBarrierColor = Colors.blue;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+          dialogTheme: const DialogThemeData(barrierColor: themeBarrierColor),
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            return TextButton(
+              onPressed: () {
+                Navigator.of(context).push<void>(
+                  DialogRoute<void>(
+                    context: context,
+                    builder: (BuildContext context) => const Text('Dialog'),
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, themeBarrierColor);
+  });
+
   testWidgets('Dialog hides underlying semantics tree', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     const buttonText = 'A button covered by dialog overlay';
