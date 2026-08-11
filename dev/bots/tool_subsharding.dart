@@ -62,15 +62,11 @@ class TestResult {
 
   /// Maps the `dart test` [result]/[skipped] to a `PASS`/`FAIL`/`SKIP` result
   /// type.
-  String get actual {
-    if (skipped) {
-      return 'SKIP';
-    }
-    return switch (result) {
-      'success' => 'PASS',
-      _ => 'FAIL',
-    };
-  }
+  String get actual => switch (this) {
+    TestResult(skipped: true) => 'SKIP',
+    TestResult(result: 'success') => 'PASS',
+    _ => 'FAIL',
+  };
 
   /// The expected result type for this test.
   ///
@@ -107,22 +103,21 @@ class TestFileReporterResults {
       // TODO(godofredoc): remove when https://github.com/flutter/flutter/issues/145553 is fixed.
       final String sanitizedMetric = metric.replaceAll(RegExp(r'$.*{'), '{');
       final entry = json.decode(sanitizedMetric) as Map<String, Object?>;
-      if (entry.containsKey('suite')) {
-        final suite = entry['suite']! as Map<String, Object?>;
-        addTestSpec(suite, entry['time']! as int, testSpecs);
-      } else if (isMetricDone(entry, testSpecs)) {
-        final group = entry['group']! as Map<String, Object?>;
-        final suiteID = group['suiteID']! as int;
-        addMetricDone(suiteID, entry['time']! as int, testSpecs);
-      } else if (entry['type'] == 'testStart') {
-        addTestStart(entry['test']! as Map<String, Object?>, entry['time']! as int, testResults);
-      } else if (entry['type'] == 'testDone') {
-        addTestDone(entry, testResults);
-      } else if (entry.containsKey('error')) {
-        final stackTrace = entry.containsKey('stackTrace') ? entry['stackTrace']! as String : '';
-        errors.add('${entry['error']}\n $stackTrace');
-      } else if (entry.containsKey('success') && entry['success'] == true) {
-        hasFailedTests = false;
+      switch (entry) {
+        case {'suite': final Map<String, Object?> suite, 'time': final int time}:
+          addTestSpec(suite, time, testSpecs);
+        case {'type': 'group', 'group': {'suiteID': final int suiteID}, 'time': final int time}
+            when testSpecs.containsKey(suiteID):
+          addMetricDone(suiteID, time, testSpecs);
+        case {'type': 'testStart', 'test': final Map<String, Object?> test, 'time': final int time}:
+          addTestStart(test, time, testResults);
+        case {'type': 'testDone'}:
+          addTestDone(entry, testResults);
+        case {'error': final Object? error}:
+          final String stackTrace = entry['stackTrace'] as String? ?? '';
+          errors.add('$error\n $stackTrace');
+        case {'success': true}:
+          hasFailedTests = false;
       }
     }
 
@@ -140,40 +135,38 @@ class TestFileReporterResults {
   final List<String> errors;
 
   static void addTestSpec(Map<String, Object?> suite, int time, Map<int, TestSpecs> allTestSpecs) {
-    allTestSpecs[suite['id']! as int] = TestSpecs(path: suite['path']! as String, startTime: time);
+    if (suite case {'id': final int id, 'path': final String path}) {
+      allTestSpecs[id] = TestSpecs(path: path, startTime: time);
+    }
   }
 
   static void addMetricDone(int suiteID, int time, Map<int, TestSpecs> allTestSpecs) {
-    final TestSpecs testSpec = allTestSpecs[suiteID]!;
-    testSpec.endTime = time;
+    allTestSpecs[suiteID]?.endTime = time;
   }
 
-  static bool isMetricDone(Map<String, Object?> entry, Map<int, TestSpecs> allTestSpecs) {
-    if (entry.containsKey('group') && entry['type']! as String == 'group') {
-      final group = entry['group']! as Map<String, Object?>;
-      return allTestSpecs.containsKey(group['suiteID']! as int);
-    }
-    return false;
-  }
+  static bool isMetricDone(Map<String, Object?> entry, Map<int, TestSpecs> allTestSpecs) =>
+      switch (entry) {
+        {'type': 'group', 'group': {'suiteID': final int suiteID}} => allTestSpecs.containsKey(
+          suiteID,
+        ),
+        _ => false,
+      };
 
   static void addTestStart(Map<String, Object?> test, int time, Map<int, TestResult> testResults) {
-    final id = test['id']! as int;
-    testResults[id] = TestResult(
-      name: test['name']! as String,
-      suiteID: test['suiteID']! as int,
-      startTime: time,
-    );
+    if (test case {'id': final int id, 'name': final String name, 'suiteID': final int suiteID}) {
+      testResults[id] = TestResult(name: name, suiteID: suiteID, startTime: time);
+    }
   }
 
   static void addTestDone(Map<String, Object?> entry, Map<int, TestResult> testResults) {
-    final TestResult? testResult = testResults[entry['testID']! as int];
-    if (testResult == null) {
-      return;
+    if (entry case {'testID': final int testID, 'time': final int time}) {
+      if (testResults[testID] case final testResult?) {
+        testResult
+          ..endTime = time
+          ..result = entry['result'] as String? ?? testResult.result
+          ..skipped = entry['skipped'] as bool? ?? false
+          ..hidden = entry['hidden'] as bool? ?? false;
+      }
     }
-    testResult
-      ..endTime = entry['time']! as int
-      ..result = entry['result'] as String? ?? testResult.result
-      ..skipped = entry['skipped'] as bool? ?? false
-      ..hidden = entry['hidden'] as bool? ?? false;
   }
 }

@@ -25,11 +25,10 @@ Map<String, Object?>? readLuciContext([Map<String, String>? environment]) {
   // Be defensive: an unreadable file or malformed JSON must never crash the
   // test run, since this is called outside the reporting try/catch.
   try {
-    final Object? decoded = json.decode(file.readAsStringSync());
-    if (decoded is! Map<String, Object?>) {
-      return null;
+    if (json.decode(file.readAsStringSync()) case final Map<String, Object?> decoded) {
+      return decoded;
     }
-    return decoded;
+    return null;
   } catch (_) {
     return null;
   }
@@ -68,21 +67,16 @@ class ResultDbRecorder {
   /// Creates a [ResultDbRecorder] from the `LUCI_CONTEXT`, or returns null if
   /// ResultDB is not configured for the current invocation.
   static ResultDbRecorder? fromEnvironment([Map<String, String>? environment]) {
-    final Object? resultdb = readLuciContext(environment)?['resultdb'];
-    if (resultdb is! Map<String, Object?>) {
-      return null;
+    final Map<String, Object?>? luciContext = readLuciContext(environment);
+    if (luciContext case {
+      'resultdb': {
+        'hostname': final String host,
+        'current_invocation': {'name': final String name, 'update_token': final String updateToken},
+      },
+    }) {
+      return ResultDbRecorder(host: host, invocation: name, updateToken: updateToken);
     }
-    final Object? host = resultdb['hostname'];
-    final Object? current = resultdb['current_invocation'];
-    if (host is! String || current is! Map<String, Object?>) {
-      return null;
-    }
-    final Object? name = current['name'];
-    final Object? updateToken = current['update_token'];
-    if (name is! String || updateToken is! String) {
-      return null;
-    }
-    return ResultDbRecorder(host: host, invocation: name, updateToken: updateToken);
+    return null;
   }
 
   /// Reports the given [testResults] to the invocation via
@@ -243,33 +237,33 @@ List<LuciTestResult> convertToLuciTestResultsFormat(
   String? workingDirectory,
   String? rootDirectory,
 }) {
-  final out = <LuciTestResult>[];
   var counter = 0;
-  for (final TestResult testResult in results.testResults.values) {
-    if (testResult.hidden) {
-      continue;
-    }
-    final String rawSuitePath = results.allTestSpecs[testResult.suiteID]?.path ?? '';
-    final String moduleName = rawSuitePath.isEmpty
-        ? testResult.name
-        : _repoRelativeSuitePath(rawSuitePath, workingDirectory, rootDirectory);
-    out.add(
-      LuciTestResult(
-        // A structured test id: the module is the test file and the case is the
-        // individual test name, so ResultDB presents them as separate columns.
-        testId: LuciStructuredTestId(
-          moduleName: _sanitizeModuleName(moduleName),
-          caseName: _sanitizeCaseName(testResult.name),
+  return <LuciTestResult>[
+    for (final testResult in results.testResults.values)
+      if (!testResult.hidden)
+        LuciTestResult(
+          // A structured test id: the module is the test file and the case is the
+          // individual test name, so ResultDB presents them as separate columns.
+          testId: LuciStructuredTestId(
+            moduleName: _sanitizeModuleName(
+              switch (results.allTestSpecs[testResult.suiteID]?.path) {
+                final String path when path.isNotEmpty => _repoRelativeSuitePath(
+                  path,
+                  workingDirectory,
+                  rootDirectory,
+                ),
+                _ => testResult.name,
+              },
+            ),
+            caseName: _sanitizeCaseName(testResult.name),
+          ),
+          // Result ids must be unique within the invocation for a given test id.
+          resultId: '${counter++}',
+          expected: expectFailure || testResult.actual == testResult.expected,
+          status: _sinkStatus(testResult),
+          duration: '${testResult.seconds.toStringAsFixed(6)}s',
         ),
-        // Result ids must be unique within the invocation for a given test id.
-        resultId: '${counter++}',
-        expected: expectFailure || testResult.actual == testResult.expected,
-        status: _sinkStatus(testResult),
-        duration: '${testResult.seconds.toStringAsFixed(6)}s',
-      ),
-    );
-  }
-  return out;
+  ];
 }
 
 /// Returns [suitePath] as a forward-slash path relative to the repository root.
@@ -298,16 +292,12 @@ String _repoRelativeSuitePath(String suitePath, String? workingDirectory, String
 
 /// Whether [p] is an absolute path on POSIX (`/foo`) or Windows (`C:\foo`,
 /// `C:/foo` or `\foo`).
-bool _isAbsolutePath(String p) {
-  if (p.isEmpty) {
-    return false;
-  }
-  if (p.startsWith('/') || p.startsWith(r'\')) {
-    return true;
-  }
+bool _isAbsolutePath(String p) => switch (p) {
+  String(isEmpty: true) => false,
+  _ when p.startsWith('/') || p.startsWith(r'\') => true,
   // Windows drive-letter path, e.g. `C:\...` or `C:/...`.
-  return p.length >= 3 && p[1] == ':' && (p[2] == r'\' || p[2] == '/');
-}
+  _ => p.length >= 3 && p[1] == ':' && (p[2] == r'\' || p[2] == '/'),
+};
 
 /// Removes any trailing `/` or `\` separators from [p].
 String _stripTrailingSeparators(String p) {
@@ -331,11 +321,8 @@ const int _kMaxCaseNameBytes = 512;
 /// build target names), so no escaping is required.
 String _sanitizeModuleName(String moduleName) {
   // Replace control characters (including newlines/tabs) with spaces.
-  String sanitized = moduleName.replaceAll(RegExp(r'[\x00-\x1f\x7f]'), ' ');
-  if (sanitized.isEmpty) {
-    sanitized = 'unknown';
-  }
-  return _truncateToBytes(sanitized, _kMaxModuleNameBytes);
+  final String sanitized = moduleName.replaceAll(RegExp(r'[\x00-\x1f\x7f]'), ' ');
+  return _truncateToBytes(sanitized.isEmpty ? 'unknown' : sanitized, _kMaxModuleNameBytes);
 }
 
 /// Makes [caseName] safe for a ResultDB structured (non-legacy) test id case
@@ -403,9 +390,8 @@ String _stripDanglingBackslash(String value) {
 }
 
 /// Maps a parsed [testResult] to a ResultDB `TestStatus` enum value.
-String _sinkStatus(TestResult testResult) {
-  if (testResult.skipped) {
-    return 'SKIP';
-  }
-  return testResult.actual == 'PASS' ? 'PASS' : 'FAIL';
-}
+String _sinkStatus(TestResult testResult) => switch (testResult) {
+  TestResult(skipped: true) => 'SKIP',
+  TestResult(actual: 'PASS') => 'PASS',
+  _ => 'FAIL',
+};

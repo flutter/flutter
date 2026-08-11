@@ -31,8 +31,6 @@ TestFileReporterResults _parse() {
   return TestFileReporterResults.fromFile(file);
 }
 
-LuciStructuredTestId _structured(LuciTestResult result) => result.testId;
-
 String _caseName(LuciTestResult result) => result.testId.caseName;
 
 void main() {
@@ -50,11 +48,13 @@ void main() {
       expect(byCase.keys, containsAll(<String>['passing test', 'failing test', 'skipped test']));
       // The module name is the test file, and the scheme is the level-free
       // 'flat' scheme, so file and test name are separate columns in the UI.
-      for (final r in results) {
-        final LuciStructuredTestId structured = _structured(r);
-        expect(structured.moduleName, 'test/foo_test.dart');
-        expect(structured.moduleScheme, 'flat');
-        expect(structured.moduleVariant, <String, String>{});
+      for (final LuciTestResult(
+            testId: LuciStructuredTestId(:moduleName, :moduleScheme, :moduleVariant),
+          )
+          in results) {
+        expect(moduleName, 'test/foo_test.dart');
+        expect(moduleScheme, 'flat');
+        expect(moduleVariant, <String, String>{});
       }
     });
 
@@ -73,15 +73,17 @@ void main() {
         parsed,
         rootDirectory: '/b/s/w/ir/x/w/flutter',
       );
-      expect(_structured(stripped.single).moduleName, 'dev/foo/bar_test.dart');
-      expect(_caseName(stripped.single), 'my test');
+      final [LuciTestResult(testId: LuciStructuredTestId(:moduleName, :caseName))] = stripped;
+      expect(moduleName, 'dev/foo/bar_test.dart');
+      expect(caseName, 'my test');
 
       // Without a rootDirectory, the absolute path is preserved.
-      final List<LuciTestResult> unstripped = convertToLuciTestResultsFormat(parsed);
-      expect(
-        _structured(unstripped.single).moduleName,
-        '/b/s/w/ir/x/w/flutter/dev/foo/bar_test.dart',
+      final [
+        LuciTestResult(testId: LuciStructuredTestId(moduleName: String unstrippedModuleName)),
+      ] = convertToLuciTestResultsFormat(
+        parsed,
       );
+      expect(unstrippedModuleName, '/b/s/w/ir/x/w/flutter/dev/foo/bar_test.dart');
     });
 
     test('resolves relative suite paths against the working directory', () {
@@ -102,7 +104,8 @@ void main() {
         workingDirectory: '/b/s/w/ir/x/w/flutter/packages/flutter',
         rootDirectory: '/b/s/w/ir/x/w/flutter',
       );
-      expect(_structured(results.single).moduleName, 'packages/flutter/test/bar_test.dart');
+      final [LuciTestResult(testId: LuciStructuredTestId(:moduleName))] = results;
+      expect(moduleName, 'packages/flutter/test/bar_test.dart');
     });
 
     test('escapes colons and backslashes in the case name', () {
@@ -119,7 +122,8 @@ void main() {
       final List<LuciTestResult> results = convertToLuciTestResultsFormat(parsed);
       // The raw test name is `Group: sub\path does x`; ':' becomes '\:' and the
       // backslash becomes '\\'.
-      expect(_caseName(results.single), r'Group\: sub\\path does x');
+      final [LuciTestResult(testId: LuciStructuredTestId(:caseName))] = results;
+      expect(caseName, r'Group\: sub\\path does x');
     });
 
     test('maps status and expectedness correctly', () {
@@ -129,16 +133,13 @@ void main() {
       };
 
       final LuciTestResult pass = byId['passing test']!;
-      expect(pass.status, 'PASS');
-      expect(pass.expected, true);
+      expect((pass.status, pass.expected), ('PASS', true));
 
       final LuciTestResult fail = byId['failing test']!;
-      expect(fail.status, 'FAIL');
-      expect(fail.expected, false);
+      expect((fail.status, fail.expected), ('FAIL', false));
 
       final LuciTestResult skip = byId['skipped test']!;
-      expect(skip.status, 'SKIP');
-      expect(skip.expected, true);
+      expect((skip.status, skip.expected), ('SKIP', true));
     });
 
     test('marks failing tests as expected when expectFailure is true', () {
@@ -154,8 +155,7 @@ void main() {
       // so ResultDB won't surface it as a red regression (e.g. the
       // test_smoke_test negative tests run with expectFailure: true).
       final LuciTestResult fail = byId['failing test']!;
-      expect(fail.status, 'FAIL');
-      expect(fail.expected, true);
+      expect((fail.status, fail.expected), ('FAIL', true));
 
       // Passing and skipped tests remain expected as well.
       expect(byId['passing test']!.expected, true);
@@ -219,11 +219,15 @@ void main() {
       final ResultDbRecorder? recorder = ResultDbRecorder.fromEnvironment(<String, String>{
         'LUCI_CONTEXT': context.path,
       });
-      expect(recorder, isNotNull);
-      expect(recorder!.host, 'results.api.luci.app');
-      expect(recorder.invocation, 'invocations/build-123');
-      expect(recorder.updateToken, 'tok');
-      recorder.close();
+      if (recorder case final rec?) {
+        expect(
+          (rec.host, rec.invocation, rec.updateToken),
+          ('results.api.luci.app', 'invocations/build-123', 'tok'),
+        );
+        rec.close();
+      } else {
+        fail('Expected non-null recorder');
+      }
     });
   });
 
@@ -277,13 +281,14 @@ void main() {
       expect(bodies, hasLength(1));
       expect(paths.single, '/prpc/luci.resultdb.v1.Recorder/BatchCreateTestResults');
       expect(tokens.single, 'my-token');
-      expect(bodies.single['invocation'], 'invocations/build-123');
-      final requests = bodies.single['requests']! as List<Object?>;
-      expect(requests, hasLength(2));
-      final first = requests.first! as Map<String, Object?>;
-      final testResult = first['testResult']! as Map<String, Object?>;
-      final structured = testResult['testIdStructured']! as Map<String, Object?>;
-      expect(structured['caseName'], 'a');
+      if (bodies.single case {
+        'invocation': 'invocations/build-123',
+        'requests': [{'testResult': {'testIdStructured': {'caseName': 'a'}}}, _],
+      }) {
+        // Matched expected structure.
+      } else {
+        fail('Unexpected body: ${bodies.single}');
+      }
     });
   });
 }
