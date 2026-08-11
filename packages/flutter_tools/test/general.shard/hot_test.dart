@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/hook_runner.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -128,7 +129,7 @@ HotRunner createHotRunner(
       artifacts: effectiveArtifacts,
       benchmarkMode: benchmarkMode,
       buildSystem: buildSystem,
-      buildTargets: buildTargets,
+      buildTargets: buildTargets ?? const BuildTargetsImpl(),
       cache: cache ?? globals.cache,
       commandHelp: commandHelp,
       config: config ?? globals.config,
@@ -164,7 +165,7 @@ HotRunner createHotRunner(
     artifacts: effectiveArtifacts,
     benchmarkMode: benchmarkMode,
     buildSystem: buildSystem,
-    buildTargets: buildTargets,
+    buildTargets: buildTargets ?? const BuildTargetsImpl(),
     cache: cache ?? globals.cache,
     commandHelp: commandHelp,
     config: config ?? globals.config,

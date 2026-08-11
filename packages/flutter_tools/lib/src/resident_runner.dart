@@ -42,7 +42,6 @@ import 'device.dart';
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
-import 'isolated/build_targets.dart';
 import 'macos/xcode.dart';
 import 'project.dart';
 import 'run_cold.dart';
@@ -1069,7 +1068,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   }) : _analytics = analytics ?? const NoOpAnalytics(),
        _artifacts = artifacts,
        _buildSystem = buildSystem,
-       _buildTargets = buildTargets ?? const BuildTargetsImpl(),
+       _buildTargets = buildTargets,
        _cache = cache,
        _config = config,
        _dillOutputPath = dillOutputPath,
@@ -1117,7 +1116,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   Artifacts? get artifacts => _artifacts;
   Analytics get analytics => _analytics;
   Config? get config => _config;
-  BuildTargets get buildTargets => _buildTargets;
+  BuildTargets? get buildTargets => _buildTargets;
   BuildSystem? get buildSystem => _buildSystem;
   Cache? get cache => _cache;
   FlutterVersion? get flutterVersion => _flutterVersion;
@@ -1133,7 +1132,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   final Artifacts? _artifacts;
   final Analytics _analytics;
   final Config? _config;
-  final BuildTargets _buildTargets;
+  final BuildTargets? _buildTargets;
   final BuildSystem? _buildSystem;
   final Cache? _cache;
   final FlutterVersion? _flutterVersion;
@@ -1303,9 +1302,13 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> runSourceGenerators() async {
+    final BuildTargets? buildTargets = _buildTargets;
+    if (buildTargets == null) {
+      return;
+    }
     final compositeTarget = CompositeTarget(<Target>[
-      _buildTargets.generateLocalizationsTarget,
-      _buildTargets.dartPluginRegistrantTarget,
+      buildTargets.generateLocalizationsTarget,
+      buildTargets.dartPluginRegistrantTarget,
     ]);
 
     final BuildSystem buildSystem =

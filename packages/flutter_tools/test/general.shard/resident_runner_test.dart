@@ -28,6 +28,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/hook_runner.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -94,7 +95,7 @@ HotRunner createHotRunner(
       artifacts: artifacts ?? globals.artifacts,
       benchmarkMode: benchmarkMode,
       buildSystem: buildSystem,
-      buildTargets: buildTargets,
+      buildTargets: buildTargets ?? const BuildTargetsImpl(),
       cache: cache ?? globals.cache,
       commandHelp: commandHelp,
       config: config ?? globals.config,
@@ -130,7 +131,7 @@ HotRunner createHotRunner(
     artifacts: artifacts ?? globals.artifacts,
     benchmarkMode: benchmarkMode,
     buildSystem: buildSystem,
-    buildTargets: buildTargets,
+    buildTargets: buildTargets ?? const BuildTargetsImpl(),
     cache: cache ?? globals.cache,
     commandHelp: commandHelp,
     config: config ?? globals.config,
@@ -1327,6 +1328,19 @@ flutter:
 
       // Completing this future ensures that the daemon can exit correctly.
       expect(await residentRunner.waitForAppToFinish(), 1);
+    }),
+  );
+
+  testUsingContext(
+    'ResidentRunner runSourceGenerators is a no-op when buildTargets is null',
+    () => testbed.run(() async {
+      final runner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
+      );
+
+      await expectLater(runner.runSourceGenerators(), completes);
     }),
   );
 
