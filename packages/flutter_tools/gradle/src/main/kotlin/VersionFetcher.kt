@@ -146,7 +146,7 @@ internal data class CompileSdkVersion(
      */
     fun isHigherThan(other: CompileSdkVersion): Boolean =
         when {
-            previewCodename != null && other.previewCodename != null -> false
+            other.previewCodename != null -> false
             previewCodename != null && other.apiLevel != null -> true
             apiLevel != null && other.apiLevel != null -> apiLevel > other.apiLevel
             else -> false
