@@ -299,18 +299,18 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (workspaceNode is YamlList) {
         for (final Object? member in workspaceNode) {
           if (member is String) {
+            String memberName = globals.fs.path.basename(member);
             final File memberPubspec = globals.fs.file(
               globals.fs.path.join(project.directory.path, member, _pubspecName),
             );
             if (memberPubspec.existsSync()) {
               try {
-                final parsed = Pubspec.parse(memberPubspec.readAsStringSync());
-                workspaceMembers.add(parsed.name);
+                memberName = Pubspec.parse(memberPubspec.readAsStringSync()).name;
               } on Exception {
                 // Fall back to basename if parsing fails.
               }
             }
-            workspaceMembers.add(globals.fs.path.basename(member));
+            workspaceMembers.add(memberName);
           }
         }
         yamlEditor.remove(workspacePath);
