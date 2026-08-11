@@ -248,7 +248,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   _enableEmbedderAPI = _dartProject.settings.enable_embedder_api;
   if (_enableEmbedderAPI) {
-    NSLog(@"============== iOS: enable_embedder_api is on ==============");
+    [FlutterLogger logInfo:@"Embedder API enabled."];
     _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
     FlutterEngineGetProcAddresses(&_embedderAPI);
   }
