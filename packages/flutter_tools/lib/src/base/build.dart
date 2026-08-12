@@ -68,9 +68,7 @@ class GenSnapshot {
     assert(snapshotType.platform != TargetPlatform.ios || cpuArch != null);
     final args = <String>[...additionalArgs];
 
-    // iOS and macOS have separate gen_snapshot binaries for each target
-    // architecture (iOS: armv7, arm64; macOS: x86_64, arm64). Select the right
-    // one for the target architecture in question.
+    // Apple platforms use architecture-specific gen_snapshot binaries.
     Artifact genSnapshotArtifact;
     if (snapshotType.platform == TargetPlatform.ios ||
         snapshotType.platform == TargetPlatform.darwin) {
@@ -140,6 +138,12 @@ class AOTSnapshotter {
         platform == TargetPlatform.ios || platform == TargetPlatform.darwin;
     _logger.printTrace('targetingApplePlatform = $targetingApplePlatform');
 
+    final bool targetingIOSSimulator =
+        platform == TargetPlatform.ios &&
+        sdkRoot != null &&
+        environmentTypeFromSdkroot(sdkRoot, _fileSystem) == EnvironmentType.simulator;
+    _logger.printTrace('targetingIOSSimulator = $targetingIOSSimulator');
+
     final bool extractAppleDebugSymbols =
         buildMode == BuildMode.profile || buildMode == BuildMode.release;
     _logger.printTrace('extractAppleDebugSymbols = $extractAppleDebugSymbols');
@@ -192,6 +196,7 @@ class AOTSnapshotter {
         '--macho=$aotSharedLibrary',
         '--macho-object=$relocatableObject',
         '--macho-min-os-version=$minOSVersion',
+        if (targetingIOSSimulator) '--macho-ios-simulator',
         '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
         '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',
       ]);
