@@ -592,10 +592,10 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/180359.
   testWidgets('Indicator repaints when selectedIndex changes without pointer interaction', (
     WidgetTester tester,
   ) async {
-    // Regression test for https://github.com/flutter/flutter/issues/180359.
     final scaffoldKey = GlobalKey<ScaffoldState>();
     var selectedIndex = 0;
     late StateSetter setSelectedIndex;
