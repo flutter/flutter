@@ -49,38 +49,32 @@ void main() {
       expect(discovery.connections, isEmpty);
     });
 
-    test('ExtensionDiscovery spawnAll manages multiple extensions', () async {
+    test('ExtensionConnection.spawn throws and cleans up on isolate startup failure', () async {
       final logger = BufferLogger.test();
+      expect(
+        () => ExtensionConnection.spawn(_failingExtensionEntryPoint, logger: logger),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('ExtensionDiscovery registers multiple connections and disposes them', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection1 = await ExtensionConnection.spawn(
+        _dummyExtensionEntryPoint,
+        logger: logger,
+      );
+      final ExtensionConnection connection2 = await ExtensionConnection.spawn(
+        _dummyExtensionEntryPoint,
+        logger: logger,
+      );
+
       final discovery = ExtensionDiscovery(logger: logger);
-      final List<ExtensionConnection> connections = await discovery.spawnAll(<ExtensionEntryPoint>[
-        _dummyExtensionEntryPoint,
-        _dummyExtensionEntryPoint,
-      ]);
+      discovery.registerConnections(<ExtensionConnection>[connection1, connection2]);
 
-      expect(connections, hasLength(2));
       expect(discovery.connections, hasLength(2));
-
       await discovery.dispose();
       expect(discovery.connections, isEmpty);
     });
-
-    test(
-      'ExtensionDiscovery spawnAll handles individual failure without failing entire batch',
-      () async {
-        final logger = BufferLogger.test();
-        final discovery = ExtensionDiscovery(logger: logger);
-        final List<ExtensionConnection> connections = await discovery.spawnAll(
-          <ExtensionEntryPoint>[_dummyExtensionEntryPoint, _failingExtensionEntryPoint],
-        );
-
-        expect(connections, hasLength(1));
-        expect(discovery.connections, hasLength(1));
-        expect(logger.errorText, contains('Failed to spawn extension'));
-
-        await discovery.dispose();
-        expect(discovery.connections, isEmpty);
-      },
-    );
 
     test(
       'ToolExtensionCapabilities.fromJson eagerly deserializes lists and normalizes platforms',

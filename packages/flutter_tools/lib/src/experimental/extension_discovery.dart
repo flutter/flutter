@@ -177,32 +177,6 @@ class ExtensionDiscovery {
     _connections.addAll(connections);
   }
 
-  /// Spawns and registers multiple extension isolates concurrently.
-  ///
-  /// Any extension isolate that fails to spawn or complete the handshake is
-  /// logged as an error and omitted from the returned list of connections.
-  Future<List<ExtensionConnection>> spawnAll(
-    List<ExtensionEntryPoint> entryPoints, {
-    Duration timeout = const Duration(seconds: 5),
-  }) async {
-    _logger.printTrace('ExtensionDiscovery spawning ${entryPoints.length} extension isolate(s)...');
-    final List<ExtensionConnection?> results = await Future.wait(
-      entryPoints.map((ExtensionEntryPoint entryPoint) async {
-        try {
-          return await ExtensionConnection.spawn(entryPoint, logger: _logger, timeout: timeout);
-        } on Object catch (error) {
-          _logger.printError('Failed to spawn extension: $error');
-          return null;
-        }
-      }),
-    );
-    final List<ExtensionConnection> newConnections = results
-        .whereType<ExtensionConnection>()
-        .toList();
-    _connections.addAll(newConnections);
-    return newConnections;
-  }
-
   /// Disposes all registered extension isolate connections.
   Future<void> dispose() async {
     _logger.printTrace('ExtensionDiscovery disposing all registered connections.');
