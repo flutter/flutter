@@ -2,25 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
-    required super.logger,
-    bool verboseHelp = false,
+    required BuildSystem buildSystem,
+    required ToolContext toolContext,
+    required bool verboseHelp,
+    super.analytics,
     BundleBuilder? bundleBuilder,
-  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
-       super(verboseHelp: verboseHelp) {
+    FeatureFlags? featureFlags,
+  }) : _buildSystem = buildSystem,
+       _bundleBuilder = bundleBuilder ?? BundleBuilder(),
+       _featureFlags = featureFlags ?? const _DefaultFeatureFlags(),
+       _toolContext = toolContext,
+       super(
+         logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
+         toolContext: toolContext,
+         verboseHelp: verboseHelp,
+       ) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -54,7 +68,7 @@ class BuildBundleCommand extends BuildSubCommand {
       )
       ..addOption(
         'asset-dir',
-        defaultsTo: getAssetBuildDirectory(),
+        defaultsTo: getAssetBuildDirectory(toolContext.config, toolContext.fs),
         help:
             'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
             'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
@@ -68,7 +82,23 @@ class BuildBundleCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
+  final BuildSystem _buildSystem;
   final BundleBuilder _bundleBuilder;
+  final FeatureFlags _featureFlags;
+  final ToolContext _toolContext;
+
+  @visibleForTesting
+  BuildSystem get buildSystem => _buildSystem;
+
+  @visibleForTesting
+  BundleBuilder get bundleBuilder => _bundleBuilder;
+
+  @visibleForTesting
+  FeatureFlags get featureFlags => _featureFlags;
+
+  @visibleForTesting
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   final name = 'bundle';
@@ -84,10 +114,10 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
-    final String projectDir = globals.fs.file(targetFile).parent.parent.path;
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(
-      globals.fs.directory(projectDir),
-    );
+    final FileSystem fs = _toolContext.fs;
+    final FlutterProjectFactory projectFactory = _toolContext.projectFactory;
+    final String projectDir = fs.file(targetFile).parent.parent.path;
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.directory(projectDir));
     return Event.commandUsageValues(
       workflow: commandPath,
       commandHasTerminal: hasTerminal,
@@ -113,18 +143,18 @@ class BuildBundleCommand extends BuildSubCommand {
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
       case TargetPlatform.darwin:
-        if (!featureFlags.isMacOSEnabled) {
+        if (!_featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
-        if (!featureFlags.isWindowsEnabled) {
+        if (!_featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
-        if (!featureFlags.isLinuxEnabled) {
+        if (!_featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
       case TargetPlatform.android:
@@ -149,7 +179,55 @@ class BuildBundleCommand extends BuildSubCommand {
       mainPath: targetFile,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
+      buildSystem: _buildSystem,
     );
     return FlutterCommandResult.success();
   }
+}
+
+class _DefaultFeatureFlags extends FeatureFlags {
+  const _DefaultFeatureFlags();
+
+  @override
+  bool isEnabled(Feature feature) => false;
+  @override
+  bool get isLinuxEnabled => false;
+  @override
+  bool get isMacOSEnabled => false;
+  @override
+  bool get isWindowsEnabled => false;
+  @override
+  bool get isWebEnabled => false;
+  @override
+  bool get isAndroidEnabled => false;
+  @override
+  bool get isIOSEnabled => false;
+  @override
+  bool get isFuchsiaEnabled => false;
+  @override
+  bool get areCustomDevicesEnabled => false;
+  @override
+  bool get isCliAnimationEnabled => false;
+  @override
+  bool get isNativeAssetsEnabled => false;
+  @override
+  bool get isDartDataAssetsEnabled => false;
+  @override
+  bool get isRecordUseEnabled => false;
+  @override
+  bool get isSwiftPackageManagerEnabled => false;
+  @override
+  bool get isOmitLegacyVersionFileEnabled => false;
+  @override
+  bool get isWindowingEnabled => false;
+  @override
+  bool get isAccessibilityEvaluationsEnabled => false;
+  @override
+  bool get isLLDBDebuggingEnabled => false;
+  @override
+  bool get isUISceneMigrationEnabled => false;
+  @override
+  bool get isRiscv64SupportEnabled => false;
+  @override
+  bool get isMacOSArm64OnlyEnabled => false;
 }
