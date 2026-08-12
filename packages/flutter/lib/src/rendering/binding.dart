@@ -329,6 +329,11 @@ mixin RendererBinding
     onSemanticsOwnerDisposed: () {
       (pipelineOwner.rootNode as RenderView?)?.clearSemantics();
     },
+    onFlushedPaint: (bool isDirty) {
+      if (isDirty) {
+        (pipelineOwner.rootNode as RenderView?)?.markNeedsCompositeFrame();
+      }
+    },
   );
 
   /// Deprecated. Will be removed in a future version of Flutter.
