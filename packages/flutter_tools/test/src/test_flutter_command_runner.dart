@@ -52,7 +52,7 @@ Future<String> createProject(
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   TestFlutterCommandRunner({Analytics? analytics, ToolContext? toolContext})
     : super(
-        analytics: analytics ?? context.get<Analytics>() ?? const NoOpAnalytics(),
+        analytics: analytics ?? const NoOpAnalytics(),
         toolContext: toolContext ?? DelegatingToolContext(),
       );
 
