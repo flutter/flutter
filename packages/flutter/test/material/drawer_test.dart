@@ -1174,7 +1174,10 @@ void main() {
     final TestGesture gesture1 = await tester.startGesture(const Offset(10.0, 200.0));
     await gesture1.up();
 
-    await tester.pump(const Duration(milliseconds: 50));
+    // Pump once to start the closing animation ticker
+    await tester.pump();
+    // Advance time by 150ms so the drawer is more than half closed
+    await tester.pump(const Duration(milliseconds: 150));
 
     final TestGesture gesture2 = await tester.startGesture(const Offset(10.0, 200.0));
     await gesture2.up();
