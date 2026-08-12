@@ -26,11 +26,7 @@ CommandRunner<void> createTestCommandRunner([
   Analytics? analytics,
   ToolContext? toolContext,
 ]) {
-  final ToolContext effectiveToolContext =
-      toolContext ??
-      (command != null ? (command as dynamic).toolContext as ToolContext? : null) ??
-      DelegatingToolContext();
-  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: effectiveToolContext);
+  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: toolContext);
   if (command != null) {
     runner.addCommand(command);
   }
@@ -56,8 +52,8 @@ Future<String> createProject(
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   TestFlutterCommandRunner({Analytics? analytics, ToolContext? toolContext})
     : super(
-        analytics: analytics ?? const NoOpAnalytics(),
-        toolContext: toolContext ?? FakeToolContext(),
+        analytics: analytics ?? context.get<Analytics>() ?? const NoOpAnalytics(),
+        toolContext: toolContext ?? DelegatingToolContext(),
       );
 
   @override
