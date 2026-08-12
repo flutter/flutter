@@ -119,13 +119,6 @@ TaskFunction createEndToEndDriverTest({Map<String, String>? environment}) {
   ).call;
 }
 
-TaskFunction createEndToEndScreenshotTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/screenshot.dart',
-  ).call;
-}
-
 TaskFunction createEndToEndKeyboardTextfieldTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
