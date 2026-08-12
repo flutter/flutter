@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -110,7 +109,7 @@ void testUsingContext(
               HttpClient: () => FakeHttpClient.any(),
               IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
               OutputPreferences: () => OutputPreferences.test(),
-              Logger: () => BufferLogger.test(),
+              Logger: () => BufferLogger.test(outputPreferences: context.get<OutputPreferences>()),
               OperatingSystemUtils: () => FakeOperatingSystemUtils(),
               PersistentToolState: () => buildPersistentToolState(globals.fs),
               XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
@@ -141,11 +140,6 @@ void testUsingContext(
                       overrides: overrides,
                       name: 'test-specific overrides',
                       body: () async {
-                        if (initializeFlutterRoot) {
-                          // Provide a sane default for the flutterRoot directory. Individual
-                          // tests can override this either in the test or during setup.
-                          Cache.flutterRoot ??= getFlutterRoot();
-                        }
                         return await testMethod();
                       },
                     );
@@ -366,7 +360,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    XcodeProjectBuildContext? buildContext,
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -390,7 +384,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(
+  Future<XcodeProjectInfo?> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
