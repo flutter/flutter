@@ -68,6 +68,7 @@ public class PlatformViewsChannelTest {
     ByteBuffer message = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
 
     BinaryMessenger.BinaryReply mockReply = mock(BinaryMessenger.BinaryReply.class);
+    message.rewind();
     handler.onMessage(message, mockReply);
 
     verify(mockHandler, times(1)).requestFocus(1);
