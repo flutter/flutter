@@ -65,7 +65,10 @@ class BotDetector {
         _platform.environment.containsKey('SWARMING_TASK_ID')
         // Property when running on borg.
         ||
-        _platform.environment.containsKey('BORG_ALLOC_DIR')) {
+        _platform.environment.containsKey('BORG_ALLOC_DIR')
+        // https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
+        ||
+        _platform.environment.containsKey('TF_BUILD')) {
       return true;
     }
 

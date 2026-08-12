@@ -152,6 +152,19 @@ void main() {
         expect(persistentToolState.isRunningOnBot, isNull);
       });
 
+      testWithoutContext('returns true when running on Azure DevOps (TF_BUILD is set)', () async {
+        fakePlatform.environment['TF_BUILD'] = 'True';
+
+        final botDetector = BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(await botDetector.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isNull);
+      });
+
       testWithoutContext(
         'overrides cached false when CI environment variable is set at runtime without mutating cache',
         () async {
