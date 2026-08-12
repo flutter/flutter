@@ -12,16 +12,25 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
-import 'context.dart';
+import 'fakes.dart';
 
 export 'package:test/test.dart' hide isInstanceOf, test;
 
-CommandRunner<void> createTestCommandRunner([FlutterCommand? command]) {
-  final FlutterCommandRunner runner = TestFlutterCommandRunner();
+CommandRunner<void> createTestCommandRunner([
+  FlutterCommand? command,
+  Analytics? analytics,
+  ToolContext? toolContext,
+]) {
+  final ToolContext effectiveToolContext =
+      toolContext ??
+      (command != null ? (command as dynamic).toolContext as ToolContext? : null) ??
+      DelegatingToolContext();
+  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: effectiveToolContext);
   if (command != null) {
     runner.addCommand(command);
   }
@@ -37,17 +46,23 @@ Future<String> createProject(
   List<String>? arguments,
 }) async {
   arguments ??= <String>['--no-pub'];
-  final String projectPath = globals.fs.path.join(temp.path, name);
-  final command = CreateCommand();
+  final String projectPath = temp.fileSystem.path.join(temp.path, name);
+  final command = CreateCommand(toolContext: FakeToolContext(fs: temp.fileSystem));
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
+  TestFlutterCommandRunner({Analytics? analytics, ToolContext? toolContext})
+    : super(
+        analytics: analytics ?? const NoOpAnalytics(),
+        toolContext: toolContext ?? FakeToolContext(),
+      );
+
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Logger topLevelLogger = globals.logger;
+    final Logger topLevelLogger = toolContext.logger;
     final contextOverrides = <Type, dynamic>{
       if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
     };
@@ -57,12 +72,14 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
       }),
       body: () {
         Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-          platform: globals.platform,
-          fileSystem: globals.fs,
+          platform: toolContext.platform,
+          fileSystem: toolContext.fs,
           userMessages: UserMessages(),
         );
         // For compatibility with tests that set this to a relative path.
-        Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot!));
+        Cache.flutterRoot = toolContext.fs.path.normalize(
+          toolContext.fs.path.absolute(Cache.flutterRoot!),
+        );
         return super.runCommand(topLevelResults);
       },
     );
@@ -70,6 +87,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   @override
   void printUsage() {
-    testLogger.printStatus(usage);
+    toolContext.logger.printStatus(usage);
   }
 }

@@ -7,52 +7,82 @@ import 'dart:collection';
 import 'package:args/args.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../package_graph.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 class PackagesCommand extends FlutterCommand {
-  PackagesCommand() {
+  PackagesCommand({required ToolContext toolContext, Pub? pub, BuildSystem? buildSystem})
+    : super(toolContext: toolContext) {
     addSubcommand(
-      PackagesGetCommand('get', "Get the current package's dependencies.", PubContext.pubGet),
+      PackagesGetCommand(
+        'get',
+        "Get the current package's dependencies.",
+        PubContext.pubGet,
+        toolContext: toolContext,
+        pub: pub,
+        buildSystem: buildSystem,
+      ),
     );
     addSubcommand(
       PackagesGetCommand(
         'upgrade',
         "Upgrade the current package's dependencies to latest versions.",
         PubContext.pubUpgrade,
+        toolContext: toolContext,
+        pub: pub,
+        buildSystem: buildSystem,
       ),
     );
     addSubcommand(
-      PackagesGetCommand('add', 'Add a dependency to pubspec.yaml.', PubContext.pubAdd),
+      PackagesGetCommand(
+        'add',
+        'Add a dependency to pubspec.yaml.',
+        PubContext.pubAdd,
+        toolContext: toolContext,
+        pub: pub,
+        buildSystem: buildSystem,
+      ),
     );
     addSubcommand(
       PackagesGetCommand(
         'remove',
         'Removes a dependency from the current package.',
         PubContext.pubRemove,
+        toolContext: toolContext,
+        pub: pub,
+        buildSystem: buildSystem,
       ),
     );
-    addSubcommand(PackagesTestCommand());
+    addSubcommand(PackagesTestCommand(toolContext: toolContext, pub: pub));
     addSubcommand(
       PackagesForwardCommand(
         'publish',
         'Publish the current package to pub.dartlang.org.',
         requiresPubspec: true,
+        toolContext: toolContext,
+        pub: pub,
       ),
     );
     addSubcommand(
@@ -60,31 +90,78 @@ class PackagesCommand extends FlutterCommand {
         'downgrade',
         'Downgrade packages in a Flutter project.',
         requiresPubspec: true,
+        toolContext: toolContext,
+        pub: pub,
       ),
     );
     addSubcommand(
-      PackagesForwardCommand('deps', 'Print package dependencies.'),
+      PackagesForwardCommand(
+        'deps',
+        'Print package dependencies.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
     ); // path to package can be specified with --directory argument
     addSubcommand(
-      PackagesForwardCommand('run', 'Run an executable from a package.', requiresPubspec: true),
+      PackagesForwardCommand(
+        'run',
+        'Run an executable from a package.',
+        requiresPubspec: true,
+        toolContext: toolContext,
+        pub: pub,
+      ),
     );
-    addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache.'));
-    addSubcommand(PackagesForwardCommand('version', 'Print Pub version.'));
-    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev.'));
-    addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.'));
-    addSubcommand(PackagesForwardCommand('logout', 'Log out of pub.dev.'));
-    addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages.'));
+    addSubcommand(
+      PackagesForwardCommand(
+        'cache',
+        'Work with the Pub system cache.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
+    );
+    addSubcommand(
+      PackagesForwardCommand('version', 'Print Pub version.', toolContext: toolContext, pub: pub),
+    );
+    addSubcommand(
+      PackagesForwardCommand(
+        'uploader',
+        'Manage uploaders for a package on pub.dev.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
+    );
+    addSubcommand(
+      PackagesForwardCommand('login', 'Log into pub.dev.', toolContext: toolContext, pub: pub),
+    );
+    addSubcommand(
+      PackagesForwardCommand('logout', 'Log out of pub.dev.', toolContext: toolContext, pub: pub),
+    );
+    addSubcommand(
+      PackagesForwardCommand(
+        'global',
+        'Work with Pub global packages.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
+    );
     addSubcommand(
       PackagesForwardCommand(
         'outdated',
         'Analyze dependencies to find which ones can be upgraded.',
         requiresPubspec: true,
+        toolContext: toolContext,
+        pub: pub,
       ),
     );
     addSubcommand(
-      PackagesForwardCommand('token', 'Manage authentication tokens for hosted pub repositories.'),
+      PackagesForwardCommand(
+        'token',
+        'Manage authentication tokens for hosted pub repositories.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
     );
-    addSubcommand(PackagesPassthroughCommand());
+    addSubcommand(PackagesPassthroughCommand(toolContext: toolContext, pub: pub));
   }
 
   @override
@@ -104,9 +181,26 @@ class PackagesCommand extends FlutterCommand {
 }
 
 class PackagesTestCommand extends FlutterCommand {
-  PackagesTestCommand() {
+  PackagesTestCommand({required ToolContext toolContext, Pub? pub})
+    : _toolContext = toolContext,
+      _injectedPub = pub,
+      super(toolContext: toolContext) {
     requiresPubspecYaml();
   }
+
+  final ToolContext _toolContext;
+  final Pub? _injectedPub;
+
+  Pub get _pub =>
+      _injectedPub ??
+      Pub(
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        processManager: _toolContext.processManager,
+        platform: _toolContext.platform,
+        botDetector: _toolContext.botDetector,
+        stdio: _toolContext.stdio,
+      );
 
   @override
   String get name => 'test';
@@ -128,17 +222,39 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.batch(<String>['run', 'test', ...argResults!.rest], context: PubContext.runTest);
+    await _pub.batch(<String>['run', 'test', ...argResults!.rest], context: PubContext.runTest);
     return FlutterCommandResult.success();
   }
 }
 
 class PackagesForwardCommand extends FlutterCommand {
-  PackagesForwardCommand(this._commandName, this._description, {bool requiresPubspec = false}) {
+  PackagesForwardCommand(
+    this._commandName,
+    this._description, {
+    required ToolContext toolContext,
+    Pub? pub,
+    bool requiresPubspec = false,
+  }) : _toolContext = toolContext,
+       _injectedPub = pub,
+       super(toolContext: toolContext) {
     if (requiresPubspec) {
       requiresPubspecYaml();
     }
   }
+
+  final ToolContext _toolContext;
+  final Pub? _injectedPub;
+
+  Pub get _pub =>
+      _injectedPub ??
+      Pub(
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        processManager: _toolContext.processManager,
+        platform: _toolContext.platform,
+        botDetector: _toolContext.botDetector,
+        stdio: _toolContext.stdio,
+      );
 
   PubContext context = PubContext.pubForward;
 
@@ -166,7 +282,7 @@ class PackagesForwardCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<String> subArgs = argResults!.rest.toList()
       ..removeWhere((String arg) => arg == '--');
-    await pub.interactively(
+    await _pub.interactively(
       <String>[_commandName, ...subArgs],
       context: context,
       command: _commandName,
@@ -176,6 +292,25 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
+  PackagesPassthroughCommand({required ToolContext toolContext, Pub? pub})
+    : _toolContext = toolContext,
+      _injectedPub = pub,
+      super(toolContext: toolContext);
+
+  final ToolContext _toolContext;
+  final Pub? _injectedPub;
+
+  Pub get _pub =>
+      _injectedPub ??
+      Pub(
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        processManager: _toolContext.processManager,
+        platform: _toolContext.platform,
+        botDetector: _toolContext.botDetector,
+        stdio: _toolContext.stdio,
+      );
+
   @override
   ArgParser argParser = ArgParser.allowAnything();
 
@@ -197,14 +332,47 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub.interactively(command: 'pub', argResults!.rest, context: _context);
+    await _pub.interactively(command: 'pub', argResults!.rest, context: _context);
     return FlutterCommandResult.success();
   }
 }
 
 /// Represents the pub sub-commands that makes package-resolutions.
 class PackagesGetCommand extends FlutterCommand {
-  PackagesGetCommand(this._commandName, this._description, this._context);
+  PackagesGetCommand(
+    this._commandName,
+    this._description,
+    this._context, {
+    required ToolContext toolContext,
+    Pub? pub,
+    BuildSystem? buildSystem,
+  }) : _toolContext = toolContext,
+       _injectedPub = pub,
+       _injectedBuildSystem = buildSystem,
+       super(toolContext: toolContext);
+
+  final ToolContext _toolContext;
+  final Pub? _injectedPub;
+  final BuildSystem? _injectedBuildSystem;
+
+  Pub get _pub =>
+      _injectedPub ??
+      Pub(
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        processManager: _toolContext.processManager,
+        platform: _toolContext.platform,
+        botDetector: _toolContext.botDetector,
+        stdio: _toolContext.stdio,
+      );
+
+  BuildSystem get _buildSystem =>
+      _injectedBuildSystem ??
+      FlutterBuildSystem(
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        platform: _toolContext.platform,
+      );
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
@@ -280,8 +448,18 @@ class PackagesGetCommand extends FlutterCommand {
     String? target;
     FlutterProject? rootProject;
 
+    final FileSystem fs = _toolContext.fs;
+    final Logger logger = _toolContext.logger;
+    final Cache cache = _toolContext.cache;
+    final Platform platform = _toolContext.platform;
+    final ProcessManager processManager = _toolContext.processManager;
+    final Artifacts artifacts = _toolContext.artifacts;
+    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
+    final Config config = _toolContext.config;
+    final FlutterProjectFactory projectFactory = _toolContext.projectFactory;
+
     if (!isHelp) {
-      target = findProjectRoot(globals.fs, directoryOption);
+      target = findProjectRoot(fs, directoryOption);
       if (target == null) {
         if (directoryOption == null) {
           throwToolExit('Expected to find project root in current working directory.');
@@ -290,15 +468,15 @@ class PackagesGetCommand extends FlutterCommand {
         }
       }
 
-      rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
+      rootProject = projectFactory.fromDirectory(fs.directory(target));
       _rootProject = rootProject;
     }
-    final String? relativeTarget = target == null ? null : globals.fs.path.relative(target);
+    final String? relativeTarget = target == null ? null : fs.path.relative(target);
 
     final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
     final timer = Stopwatch()..start();
     try {
-      await pub.interactively(
+      await _pub.interactively(
         <String>[
           name,
           ...subArgs,
@@ -342,14 +520,14 @@ class PackagesGetCommand extends FlutterCommand {
       // tooling if needed.
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         rootProject.packageConfig,
-        logger: globals.logger,
+        logger: logger,
       );
       final PackageGraph graph = PackageGraph.load(rootProject);
 
       // Build a cache of all pubspec.yaml contents once, keyed by package root
       // URI. This avoids re-reading the same files for every workspace package
       // during post-processing.
-      final PubspecCache pubspecCache = await buildPubspecCache(packageConfig);
+      final PubspecCache pubspecCache = await buildPubspecCache(packageConfig, fileSystem: fs);
       // Process workspace root packages concurrently, capped to 64 to
       // saturate I/O without exhausting file descriptors or system resources.
       await Pool(64).forEach<String, void>(graph.roots, (String workspaceRootName) async {
@@ -357,26 +535,26 @@ class PackagesGetCommand extends FlutterCommand {
         assert(rootPackage != null);
         final Uri rootUri = rootPackage!.root;
 
-        final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(rootUri));
+        final FlutterProject project = projectFactory.fromDirectory(fs.directory(rootUri));
 
         if (project.manifest.generateLocalizations) {
           final environment = Environment(
-            artifacts: globals.artifacts!,
-            logger: globals.logger,
-            cacheDir: globals.cache.getRoot(),
-            engineVersion: globals.flutterVersion.engineRevision,
-            fileSystem: globals.fs,
-            flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-            outputDir: globals.fs.directory(getBuildDirectory()),
-            processManager: globals.processManager,
-            platform: globals.platform,
+            artifacts: artifacts,
+            logger: logger,
+            cacheDir: cache.getRoot(),
+            engineVersion: flutterVersion.engineRevision,
+            fileSystem: fs,
+            flutterRootDir: fs.directory(Cache.flutterRoot),
+            outputDir: fs.directory(getBuildDirectory(config, fs)),
+            processManager: processManager,
+            platform: platform,
             analytics: analytics,
             projectDir: project.directory,
             packageConfigPath: packageConfigPath(),
             generateDartPluginRegistry: true,
           );
           // If localizations were enabled, but we are not using synthetic packages.
-          final BuildResult result = await globals.buildSystem.build(
+          final BuildResult result = await _buildSystem.build(
             const GenerateLocalizationsTarget(),
             environment,
           );
