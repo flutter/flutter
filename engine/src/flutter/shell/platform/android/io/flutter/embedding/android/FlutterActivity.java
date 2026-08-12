@@ -1055,7 +1055,9 @@ public class FlutterActivity extends Activity
   @Nullable
   public String getCachedEngineId() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_CACHED_ENGINE_ID) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_CACHED_ENGINE_ID)
+        && IntentUtils.isIntentSelfSent(this)) {
       return intent.getStringExtra(EXTRA_CACHED_ENGINE_ID);
     }
     return null;
@@ -1070,7 +1072,9 @@ public class FlutterActivity extends Activity
   @Nullable
   public String getCachedEngineGroupId() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID)
+        && IntentUtils.isIntentSelfSent(this)) {
       return intent.getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
     }
     return null;
@@ -1119,7 +1123,9 @@ public class FlutterActivity extends Activity
   @NonNull
   public String getDartEntrypointFunctionName() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_DART_ENTRYPOINT) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_DART_ENTRYPOINT)
+        && IntentUtils.isIntentSelfSent(this)) {
       return intent.getStringExtra(EXTRA_DART_ENTRYPOINT);
     }
 
@@ -1143,7 +1149,9 @@ public class FlutterActivity extends Activity
   @Nullable
   public List<String> getDartEntrypointArgs() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_DART_ENTRYPOINT_ARGS) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_DART_ENTRYPOINT_ARGS)
+        && IntentUtils.isIntentSelfSent(this)) {
       return (List<String>) intent.getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
     }
     return null;
@@ -1201,7 +1209,9 @@ public class FlutterActivity extends Activity
    */
   public String getInitialRoute() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_INITIAL_ROUTE) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_INITIAL_ROUTE)
+        && IntentUtils.isIntentSelfSent(this)) {
       return intent.getStringExtra(EXTRA_INITIAL_ROUTE);
     }
 

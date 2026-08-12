@@ -824,7 +824,9 @@ public class FlutterFragmentActivity extends FragmentActivity
   @NonNull
   public String getDartEntrypointFunctionName() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_DART_ENTRYPOINT) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_DART_ENTRYPOINT)
+        && IntentUtils.isIntentSelfSent(this)) {
       return intent.getStringExtra(EXTRA_DART_ENTRYPOINT);
     }
 
@@ -848,7 +850,9 @@ public class FlutterFragmentActivity extends FragmentActivity
   @Nullable
   public List<String> getDartEntrypointArgs() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_DART_ENTRYPOINT_ARGS) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_DART_ENTRYPOINT_ARGS)
+        && IntentUtils.isIntentSelfSent(this)) {
       return (List<String>) intent.getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
     }
     return null;
@@ -906,7 +910,9 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   protected String getInitialRoute() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_INITIAL_ROUTE) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_INITIAL_ROUTE)
+        && IntentUtils.isIntentSelfSent(this)) {
       return intent.getStringExtra(EXTRA_INITIAL_ROUTE);
     }
 
@@ -929,7 +935,9 @@ public class FlutterFragmentActivity extends FragmentActivity
   @Nullable
   protected String getCachedEngineId() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_CACHED_ENGINE_ID) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_CACHED_ENGINE_ID)
+        && IntentUtils.isIntentSelfSent(this)) {
       return intent.getStringExtra(EXTRA_CACHED_ENGINE_ID);
     }
     return null;
@@ -938,7 +946,9 @@ public class FlutterFragmentActivity extends FragmentActivity
   @Nullable
   protected String getCachedEngineGroupId() {
     Intent intent = getIntent();
-    if (intent != null && intent.hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID) && IntentUtils.isIntentSelfSent(this)) {
+    if (intent != null
+        && intent.hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID)
+        && IntentUtils.isIntentSelfSent(this)) {
       return intent.getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
     }
     return null;
