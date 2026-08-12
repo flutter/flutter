@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -285,25 +286,6 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'WebDriverService forwards web-defines to the web runner',
-    () async {
-      final WebDriverService service = setUpDriverService();
-      final device = FakeDevice();
-      await service.start(
-        BuildInfo.profile,
-        device,
-        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
-        webDefines: <String, String>{'VERSION': 'v1.2.3'},
-      );
-      await service.stop();
-      expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'VERSION': 'v1.2.3'});
-    },
-    overrides: <Type, Generator>{
-      WebRunnerFactory: () => fakeWebRunnerFactory = FakeWebRunnerFactory(),
-    },
-  );
-
   testUsingContext('WebDriverService can start an app with a launch url provided', () async {
     final WebDriverService service = setUpDriverService();
     final device = FakeDevice();
@@ -377,7 +359,6 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
 
   final bool doResolveToError;
   Map<String, Object?>? lastPlatformArgs;
-  Map<String, String>? lastWebDefines;
 
   @override
   ResidentRunner createWebRunner(
@@ -401,7 +382,6 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   }) {
     expect(stayResident, isTrue);
     lastPlatformArgs = platformArgs;
-    lastWebDefines = webDefines;
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
       debuggingOptions: debuggingOptions,
@@ -464,6 +444,7 @@ WebDriverService setUpDriverService() {
     outputPreferences: OutputPreferences.test(),
     processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
     dartSdkPath: 'dart',
+    fileSystem: MemoryFileSystem.test(),
   );
 }
 

@@ -1232,16 +1232,17 @@ void writeLocalProperties(File properties) {
   settings.writeContents(properties);
 }
 
-void exitWithNoSdkMessage() {
-  globals.analytics.send(
+void exitWithNoSdkMessage({Analytics? analytics, Logger? logger}) {
+  (analytics ?? globals.analytics).send(
     Event.flutterBuildInfo(
       label: 'unsupported-project',
       buildType: 'gradle',
       error: 'android-sdk-not-found',
     ),
   );
+  final Logger effectiveLogger = logger ?? globals.logger;
   throwToolExit(
-    '${globals.logger.terminal.warningMark} No Android SDK found. '
+    '${effectiveLogger.terminal.warningMark} No Android SDK found. '
     'Try setting the ANDROID_HOME environment variable.',
   );
 }
