@@ -387,6 +387,14 @@ List<Validation> _getValidations({
         path.join(flutterRoot, 'dev', 'bots', 'check_tests_cross_imports.dart'),
       ], workingDirectory: flutterRoot),
     ),
+    Validation(
+      'cross-imports-examples',
+      'Examples cross-import test validation...',
+      () => runCommand(dart, <String>[
+        '--enable-asserts',
+        path.join(flutterRoot, 'dev', 'bots', 'check_examples_cross_imports.dart'),
+      ], workingDirectory: flutterRoot),
+    ),
   ];
 }
 
