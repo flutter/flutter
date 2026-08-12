@@ -18,7 +18,9 @@ void main(List<String> args) async {
     return;
   }
 
-  final Engine? engine = Engine.tryFindWithin();
+  // Search from this script's own location rather than the current directory,
+  // so the script can be run from anywhere.
+  final Engine? engine = Engine.tryFindWithin(path.dirname(path.fromUri(io.Platform.script)));
   if (engine == null) {
     io.stderr.writeln('Must be run from within the engine repository.');
     io.exitCode = 1;

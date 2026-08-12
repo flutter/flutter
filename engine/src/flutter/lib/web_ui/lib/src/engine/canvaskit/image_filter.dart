@@ -47,7 +47,7 @@ abstract class CkImageFilter implements CkManagedSkImageFilterConvertible, Layer
     required double sigmaY,
     required ui.TileMode? tileMode,
   }) = _CkBlurImageFilter;
-  factory CkImageFilter.color({required CkColorFilter colorFilter}) = CkColorFilterImageFilter;
+  factory CkImageFilter.color({required EngineColorFilter colorFilter}) = CkColorFilterImageFilter;
   factory CkImageFilter.matrix({
     required Float64List matrix,
     required ui.FilterQuality filterQuality,
@@ -100,14 +100,17 @@ abstract class CkImageFilter implements CkManagedSkImageFilterConvertible, Layer
 class CkColorFilterImageFilter extends CkImageFilter {
   CkColorFilterImageFilter({required this.colorFilter}) : super._();
 
-  final CkColorFilter colorFilter;
+  final EngineColorFilter colorFilter;
 
   @override
   void withSkImageFilter(
     SkImageFilterBorrow borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    final SkImageFilter skImageFilter = colorFilter.initRawImageFilter();
+    final SkImageFilter skImageFilter = canvasKit.ImageFilter.MakeColorFilter(
+      (colorFilter.backendFilter as CkColorFilter).skiaObject,
+      null,
+    );
     borrow(skImageFilter);
     skImageFilter.delete();
   }
