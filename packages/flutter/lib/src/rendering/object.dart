@@ -3673,8 +3673,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// `target` is currently not visible.
   ///
   /// If `target` is null, this method returns a matrix that maps from the
-  /// local paint coordinate system to the coordinate system of the
-  /// [PipelineOwner.rootNode].
+  /// local paint coordinate system to the coordinate system of the root of
+  /// this render object's render tree (typically the [PipelineOwner.rootNode]).
   /// {@endtemplate}
   ///
   /// For the render tree owned by the [RendererBinding] (i.e. for the main
@@ -3695,7 +3695,19 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     List<RenderObject>? toPath;
 
     var from = this;
-    RenderObject to = target ?? owner!.rootNode!;
+    RenderObject to;
+    if (target == null) {
+      // Find the root of this render tree by walking up the parent chain
+      // instead of reading `owner.rootNode`. `owner` is null when this render
+      // object is detached, and a `PipelineOwner` is not guaranteed to have a
+      // `rootNode`.
+      to = this;
+      while (to.parent != null) {
+        to = to.parent!;
+      }
+    } else {
+      to = target;
+    }
 
     while (!identical(from, to)) {
       final int fromDepth = from.depth;
@@ -3713,7 +3725,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
             to.parent ?? (throw FlutterError('$target and $this are not in the same render tree.'));
         assert(
           target != null,
-          '$this has a depth that is less than or equal to ${owner?.rootNode}',
+          '$this has a depth that is less than or equal to the root of its render tree.',
         );
         (toPath ??= <RenderObject>[target!]).add(toParent);
         to = toParent;

@@ -260,6 +260,24 @@ void main() {
     expect(renderObject11.getTransformTo(renderObject21), equals(Matrix4.zero()));
   });
 
+  test('RenderObject.getTransformTo(null) works when the owner has no root node', () {
+    // Regression test for https://github.com/flutter/flutter/issues/148656.
+    final owner = PipelineOwner();
+    final root = TestRenderObject()..attach(owner);
+    final child = TestRenderObject();
+    final grandchild = TestRenderObject();
+    root.add(child);
+    child.add(grandchild);
+    child.paintTransform = Matrix4.translationValues(8, 16, 0);
+    // The root's own paint transform is never applied.
+    root.paintTransform = Matrix4.diagonal3Values(9, 4, 1);
+
+    expect(owner.rootNode, isNull);
+    expect(grandchild.getTransformTo(null), equals(Matrix4.translationValues(8, 16, 0)));
+    expect(child.getTransformTo(null), equals(Matrix4.identity()));
+    expect(root.getTransformTo(null), equals(Matrix4.identity()));
+  });
+
   test('PaintingContext.pushClipRect reuses the layer', () {
     _testPaintingContextLayerReuse<ClipRectLayer>((
       PaintingContextCallback painter,
