@@ -151,11 +151,23 @@ void main() {
     );
     expect(
       BoxConstraints.lerp(
+        BoxConstraints.tight(const Size(10.0, 10.0)),
+        const BoxConstraints(maxWidth: 100.0, maxHeight: 100.0),
+        -0.1,
+      ),
+      BoxConstraints.tight(const Size(11.0, 11.0)),
+    );
+    expect(
+      BoxConstraints.lerp(
         null,
         const BoxConstraints.tightFor(width: 10.0, height: 10.0),
         -0.5,
       )!.isNormalized,
       isTrue,
+    );
+    expect(
+      BoxConstraints.lerp(null, const BoxConstraints.tightFor(width: 10.0, height: 10.0), -0.5),
+      const BoxConstraints.tightFor(width: 0.0, height: 0.0),
     );
     expect(
       BoxConstraints.lerp(
@@ -164,6 +176,10 @@ void main() {
         1.5,
       )!.isNormalized,
       isTrue,
+    );
+    expect(
+      BoxConstraints.lerp(const BoxConstraints.tightFor(width: 10.0, height: 10.0), null, 1.5),
+      const BoxConstraints.tightFor(width: 0.0, height: 0.0),
     );
   });
 
