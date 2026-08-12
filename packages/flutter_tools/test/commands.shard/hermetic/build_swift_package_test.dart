@@ -91,9 +91,7 @@ void main() {
         );
 
         final runner = FlutterCommandRunner(
-          toolContext: FakeToolContext(),
-          androidContext: FakeAndroidContext(),
-          appleContext: FakeAppleContext(),
+          toolDependencies: FakeToolDependencies(),
           verboseHelp: true,
         );
         runner.addCommand(command);
@@ -132,9 +130,7 @@ void main() {
         );
 
         final runner = FlutterCommandRunner(
-          toolContext: FakeToolContext(),
-          androidContext: FakeAndroidContext(),
-          appleContext: FakeAppleContext(),
+          toolDependencies: FakeToolDependencies(),
           verboseHelp: true,
         );
         runner.addCommand(command);
@@ -187,9 +183,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
-              toolContext: FakeToolContext(),
-              androidContext: FakeAndroidContext(),
-              appleContext: FakeAppleContext(),
+              toolDependencies: FakeToolDependencies(),
               verboseHelp: true,
             );
             runner.addCommand(command);
@@ -248,9 +242,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
-              toolContext: FakeToolContext(),
-              androidContext: FakeAndroidContext(),
-              appleContext: FakeAppleContext(),
+              toolDependencies: FakeToolDependencies(),
               verboseHelp: true,
             );
             runner.addCommand(command);

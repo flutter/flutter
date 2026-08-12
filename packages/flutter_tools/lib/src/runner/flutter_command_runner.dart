@@ -55,28 +55,23 @@ abstract final class FlutterGlobalOptions {
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
-  FlutterCommandRunner({
-    required AndroidContext androidContext,
-    required AppleContext appleContext,
-    required ToolContext toolContext,
-    ToolDependencies? toolDependencies,
-    bool verboseHelp = false,
-  }) : _toolDependencies = toolDependencies,
-       _androidContext = androidContext,
-       _appleContext = appleContext,
-       _toolContext = toolContext,
-       super(
-         'flutter',
-         'Manage your Flutter app development.\n'
-             '\n'
-             'Common commands:\n'
-             '\n'
-             '  flutter create <output directory>\n'
-             '    Create a new Flutter project in the specified directory.\n'
-             '\n'
-             '  flutter run [options]\n'
-             '    Run your Flutter application on an attached device or in an emulator.',
-       ) {
+  FlutterCommandRunner({required ToolDependencies toolDependencies, bool verboseHelp = false})
+    : _toolDependencies = toolDependencies,
+      _androidContext = toolDependencies.androidContext,
+      _appleContext = toolDependencies.appleContext,
+      _toolContext = toolDependencies.toolContext,
+      super(
+        'flutter',
+        'Manage your Flutter app development.\n'
+            '\n'
+            'Common commands:\n'
+            '\n'
+            '  flutter create <output directory>\n'
+            '    Create a new Flutter project in the specified directory.\n'
+            '\n'
+            '  flutter run [options]\n'
+            '    Run your Flutter application on an attached device or in an emulator.',
+      ) {
     argParser.addFlag(
       FlutterGlobalOptions.kVerboseFlag,
       abbr: 'v',
@@ -297,13 +292,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
   }
 
-  final ToolDependencies? _toolDependencies;
+  final ToolDependencies _toolDependencies;
   final AndroidContext _androidContext;
   final AppleContext _appleContext;
   final ToolContext _toolContext;
 
-  /// The tool dependencies, if provided.
-  ToolDependencies? get toolDependencies => _toolDependencies;
+  /// The tool dependencies.
+  ToolDependencies get toolDependencies => _toolDependencies;
 
   /// The Android context.
   AndroidContext get androidContext => _androidContext;
@@ -474,7 +469,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
-          (_toolDependencies?.analytics ?? globals.analytics).suppressTelemetry();
+          _toolDependencies.analytics.suppressTelemetry();
         }
 
         // Required to support `flutter --version` before artifacts are cached.
@@ -488,27 +483,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
         // See if the user specified a specific device.
         final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
-          try {
-            globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
-          } on UnsupportedError catch (_) {
-            // Context not available in unit tests without context.
-          }
+          globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
         }
 
         final bool topLevelMachineFlag =
             topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
-          try {
-            (_toolDependencies?.analytics ?? globals.analytics).send(
-              Event.flutterCommandResult(
-                commandPath: 'version',
-                result: 'success',
-                commandHasTerminal: _toolContext.stdio.hasTerminal,
-              ),
-            );
-          } on UnsupportedError catch (_) {
-            // Context not available in unit tests without context.
-          }
+          _toolDependencies.analytics.send(
+            Event.flutterCommandResult(
+              commandPath: 'version',
+              result: 'success',
+              commandHasTerminal: _toolContext.stdio.hasTerminal,
+            ),
+          );
           final FlutterVersion version = _toolContext.flutterVersion.fetchTagsAndGetVersion(
             clock: _toolContext.systemClock,
           );

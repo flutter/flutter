@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -30,25 +31,13 @@ CommandRunner<void> createTestCommandRunner([
   AndroidContext? androidContext,
   AppleContext? appleContext,
 ]) {
-  var derivedToolContext = toolContext;
-  if (derivedToolContext == null && command != null) {
-    try {
-      derivedToolContext = (command as dynamic).toolContext as ToolContext?;
-    } on Object catch (_) {}
-  }
-  var effectiveAnalytics = analytics;
-  if (effectiveAnalytics == null) {
-    try {
-      effectiveAnalytics = context.get<Analytics>();
-    } on UnsupportedError catch (_) {}
-  }
-  final ToolContext effectiveToolContext = derivedToolContext ?? DelegatingToolContext();
+  final ToolContext effectiveToolContext =
+      toolContext ??
+      (command != null ? (command as dynamic).toolContext as ToolContext? : null) ??
+      DelegatingToolContext();
   final runner = TestFlutterCommandRunner(
-    toolContext: effectiveToolContext,
-    androidContext: androidContext,
-    appleContext: appleContext,
     toolDependencies: FakeToolDependencies(
-      analytics: effectiveAnalytics,
+      analytics: analytics,
       toolContext: effectiveToolContext,
       androidContext: androidContext,
       appleContext: appleContext,
@@ -78,14 +67,18 @@ Future<String> createProject(
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   TestFlutterCommandRunner({
-    super.toolDependencies,
+    ToolDependencies? toolDependencies,
     ToolContext? toolContext,
     AndroidContext? androidContext,
     AppleContext? appleContext,
   }) : super(
-         toolContext: toolContext ?? FakeToolContext(),
-         androidContext: androidContext ?? FakeAndroidContext(),
-         appleContext: appleContext ?? FakeAppleContext(),
+         toolDependencies:
+             toolDependencies ??
+             FakeToolDependencies(
+               toolContext: toolContext ?? FakeToolContext(),
+               androidContext: androidContext ?? FakeAndroidContext(),
+               appleContext: appleContext ?? FakeAppleContext(),
+             ),
        );
 
   @override

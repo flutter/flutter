@@ -47,9 +47,7 @@ void main() {
         toolContext: fakeToolContext,
       );
       final runner = FlutterCommandRunner(
-        androidContext: fakeAndroidContext,
-        appleContext: fakeAppleContext,
-        toolContext: fakeToolContext,
+        toolDependencies: fakeToolDependencies,
         verboseHelp: true,
       );
       executable
@@ -78,9 +76,7 @@ void main() {
     );
 
     final runner = FlutterCommandRunner(
-      toolContext: FakeToolContext(),
-      androidContext: FakeAndroidContext(),
-      appleContext: FakeAppleContext(),
+      toolDependencies: FakeToolDependencies(),
       verboseHelp: true,
     );
 
@@ -108,9 +104,7 @@ void main() {
     command.addSubcommand(subcommand);
 
     final runner = FlutterCommandRunner(
-      toolContext: FakeToolContext(),
-      androidContext: FakeAndroidContext(),
-      appleContext: FakeAppleContext(),
+      toolDependencies: FakeToolDependencies(),
       verboseHelp: true,
     );
 
@@ -133,9 +127,7 @@ void main() {
       },
     );
     final runner = FlutterCommandRunner(
-      toolContext: FakeToolContext(),
-      androidContext: FakeAndroidContext(),
-      appleContext: FakeAppleContext(),
+      toolDependencies: FakeToolDependencies(),
       verboseHelp: true,
     );
     command.argParser.addFlag('key');
@@ -164,9 +156,7 @@ void main() {
       },
     );
     final runner = FlutterCommandRunner(
-      toolContext: FakeToolContext(),
-      androidContext: FakeAndroidContext(),
-      appleContext: FakeAppleContext(),
+      toolDependencies: FakeToolDependencies(),
       verboseHelp: true,
     );
     command.argParser.addOption('key');
@@ -191,9 +181,7 @@ void main() {
       },
     );
     final runner = FlutterCommandRunner(
-      toolContext: FakeToolContext(),
-      androidContext: FakeAndroidContext(),
-      appleContext: FakeAppleContext(),
+      toolDependencies: FakeToolDependencies(),
       verboseHelp: true,
     );
     command.argParser.addMultiOption('key', allowed: <String>['a', 'b', 'c']);

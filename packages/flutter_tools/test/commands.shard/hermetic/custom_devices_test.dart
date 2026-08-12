@@ -270,9 +270,12 @@ class FakeCommandRunner extends FlutterCommandRunner {
        _logger = logger,
        _userMessages = userMessages ?? UserMessages(),
        super(
-         toolContext: toolContext ?? FakeToolContext(),
-         androidContext: androidContext ?? FakeAndroidContext(),
-         appleContext: appleContext ?? FakeAppleContext(),
+         toolDependencies: FakeToolDependencies(
+           toolContext:
+               toolContext ?? FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
+           androidContext: androidContext ?? FakeAndroidContext(),
+           appleContext: appleContext ?? FakeAppleContext(),
+         ),
        );
 
   final Platform _platform;
