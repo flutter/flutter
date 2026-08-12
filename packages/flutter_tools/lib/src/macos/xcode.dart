@@ -17,7 +17,6 @@ import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../ios/xcodeproj.dart';
 import '../xcode_project.dart';
 
@@ -135,7 +134,7 @@ class Xcode {
   /// Path to script to automate debugging through Xcode. Used in xcode_debug.dart.
   /// Located in this file to make it easily overrideable in google3.
   String get xcodeAutomationScriptPath {
-    final String flutterRoot = _flutterRoot ?? Cache.flutterRoot!;
+    final String flutterRoot = _flutterRoot ?? '';
     final String flutterToolsAbsolutePath = _fileSystem.path.join(
       flutterRoot,
       'packages',

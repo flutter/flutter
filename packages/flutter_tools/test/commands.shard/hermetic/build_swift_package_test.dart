@@ -89,7 +89,11 @@ void main() {
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
-        final runner = FlutterCommandRunner(verboseHelp: true);
+        final runner = FlutterCommandRunner(
+          analytics: FakeAnalytics(),
+          toolContext: FakeToolContext(),
+          verboseHelp: true,
+        );
         runner.addCommand(command);
 
         expect(
@@ -125,7 +129,11 @@ void main() {
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
-        final runner = FlutterCommandRunner(verboseHelp: true);
+        final runner = FlutterCommandRunner(
+          analytics: FakeAnalytics(),
+          toolContext: FakeToolContext(),
+          verboseHelp: true,
+        );
         runner.addCommand(command);
 
         expect(
@@ -175,7 +183,11 @@ void main() {
             projectDir.childFile('pubspec.yaml').createSync();
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
-            final runner = FlutterCommandRunner(verboseHelp: true);
+            final runner = FlutterCommandRunner(
+              analytics: FakeAnalytics(),
+              toolContext: FakeToolContext(),
+              verboseHelp: true,
+            );
             runner.addCommand(command);
 
             // We expect this to fail because we're not competely mocking it out, we're just testing the output creation
@@ -231,7 +243,11 @@ void main() {
             projectDir.childFile('pubspec.yaml').createSync();
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
-            final runner = FlutterCommandRunner(verboseHelp: true);
+            final runner = FlutterCommandRunner(
+              analytics: FakeAnalytics(),
+              toolContext: FakeToolContext(),
+              verboseHelp: true,
+            );
             runner.addCommand(command);
 
             // We expect this to fail because we're not competely mocking it out, we're just testing the output creation
@@ -3249,9 +3265,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         // Set up templates in fs
         for (final FileSystemEntity fileEntity
             in fileSystem
-                .directory(
-                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
-                )
+                .directory('/packages/flutter_tools/templates/add_to_app/darwin')
                 .listSync(recursive: true)) {
           if (fileEntity is File) {
             fs.file(fileEntity.path).createSync(recursive: true);
@@ -3260,9 +3274,8 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         }
 
         // Set up package_config.json for template imageDirectory
-        final File packagesFile = fs.file(
-          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
-        )..createSync(recursive: true);
+        final File packagesFile = fs.file('/packages/flutter_tools/.dart_tool/package_config.json')
+          ..createSync(recursive: true);
         packagesFile.writeAsStringSync(
           json.encode(<String, Object>{
             'configVersion': 2,
@@ -3501,9 +3514,7 @@ let package = Package(
         // Set up templates in fs
         for (final FileSystemEntity fileEntity
             in fileSystem
-                .directory(
-                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
-                )
+                .directory('/packages/flutter_tools/templates/add_to_app/darwin')
                 .listSync(recursive: true)) {
           if (fileEntity is File) {
             fs.file(fileEntity.path).createSync(recursive: true);
@@ -3512,9 +3523,8 @@ let package = Package(
         }
 
         // Set up package_config.json for template imageDirectory
-        final File packagesFile = fs.file(
-          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
-        )..createSync(recursive: true);
+        final File packagesFile = fs.file('/packages/flutter_tools/.dart_tool/package_config.json')
+          ..createSync(recursive: true);
         packagesFile.writeAsStringSync(
           json.encode(<String, Object>{
             'configVersion': 2,
@@ -3884,6 +3894,7 @@ class FakeCache extends Fake implements Cache {
   FakeCache(this._fileSystem, this.flutterRoot);
 
   final FileSystem _fileSystem;
+  @override
   final String flutterRoot;
 
   @override

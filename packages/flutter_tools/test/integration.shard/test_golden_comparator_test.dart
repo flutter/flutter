@@ -67,6 +67,13 @@ void main() {
         packageConfigPath: packageConfig.path,
       ),
       project,
+      artifacts: globals.artifacts!,
+      config: globals.config,
+      fileSystem: globals.fs,
+      logger: logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      shutdownHooks: globals.shutdownHooks,
     );
     return TestGoldenComparator(
       flutterTesterBinPath: globals.artifacts!.getArtifactPath(Artifact.flutterTester),

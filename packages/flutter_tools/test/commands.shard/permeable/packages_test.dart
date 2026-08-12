@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:unified_analytics/unified_analytics.dart';
@@ -33,7 +34,6 @@ void main() {
     mockStdio = FakeStdio()..stdout.terminalColumns = 80;
 
     // Some tests below override this with a blank root, always reset it.
-    Cache.flutterRoot = null;
   });
 
   setUpAll(() {
@@ -75,7 +75,7 @@ void main() {
       List<String>? args,
       List<String>? globalArgs,
     }) async {
-      final command = PackagesCommand();
+      final PackagesCommand command = createPackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         ...?globalArgs,
@@ -833,7 +833,6 @@ flutter:
     testUsingContext(
       'test without bot',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
         globals.fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
@@ -847,7 +846,7 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(createPackagesCommand()).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -871,7 +870,6 @@ flutter:
     testUsingContext(
       'test with bot',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
           const FakeCommand(
@@ -885,7 +883,7 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(createPackagesCommand()).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -909,7 +907,6 @@ flutter:
     testUsingContext(
       'run pass arguments through to pub',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
@@ -926,7 +923,7 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          PackagesCommand(),
+          createPackagesCommand(),
         ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
         expect(processManager, hasNoRemainingExpectations);
@@ -950,7 +947,6 @@ flutter:
     testUsingContext(
       'token pass arguments through to pub',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
@@ -966,7 +962,7 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          PackagesCommand(),
+          createPackagesCommand(),
         ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
         expect(processManager, hasNoRemainingExpectations);
@@ -990,7 +986,6 @@ flutter:
     testUsingContext(
       'upgrade does not check for pubspec.yaml if -h/--help is passed',
       () async {
-        Cache.flutterRoot = '';
         processManager.addCommand(
           FakeCommand(
             command: const <String>[
@@ -1003,7 +998,9 @@ flutter:
             stdin: IOSink(StreamController<List<int>>().sink),
           ),
         );
-        await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'upgrade', '-h']);
+        await createTestCommandRunner(
+          createPackagesCommand(),
+        ).run(<String>['pub', 'upgrade', '-h']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -1023,4 +1020,8 @@ flutter:
       },
     );
   });
+}
+
+PackagesCommand createPackagesCommand({ToolContext? toolContext}) {
+  return PackagesCommand(toolContext: toolContext ?? DelegatingToolContext());
 }

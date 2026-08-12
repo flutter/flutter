@@ -214,10 +214,7 @@ void main() {
         'force-version-code-ignoring-abi=true',
       ], workingDirectory: projectDir.path);
 
-      expect(
-        _apkHasVersionCode(projectDir, 2, abi: 'arm64-v8a'),
-        true,
-      );
+      expect(_apkHasVersionCode(projectDir, 2, abi: 'arm64-v8a'), true);
     },
   );
 }
@@ -341,8 +338,9 @@ bool _apkHasVersionCode(
       .directory(sdkPath)
       .childDirectory('build-tools')
       .listSync()
-      .firstWhereOrNull((FileSystemEntity entry) =>
-          entry.statSync().type == FileSystemEntityType.directory);
+      .firstWhereOrNull(
+        (FileSystemEntity entry) => entry.statSync().type == FileSystemEntityType.directory,
+      );
   if (toolsDir == null) {
     throw StateError('No build-tools directory found');
   }
@@ -385,7 +383,5 @@ bool _apkHasVersionCode(
     );
   }
 
-  return result.stdout.toString()
-      .contains("versionCode='$versionCode'");
-
+  return result.stdout.toString().contains("versionCode='$versionCode'");
 }

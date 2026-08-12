@@ -1254,50 +1254,47 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'Windows and exit code 3 with Unicode path adds Unicode path warning '
-      '(regression test for https://github.com/flutter/flutter/issues/190233)',
-      () async {
-        const unicodeFragPath = '/shaders/my_shåder.frag';
-        const unicodeOutputPath = '/output/shaders/my_shåder.frag';
-        const unicodeOutputSpirvPath = '/output/shaders/my_shåder.frag.spirv';
-        fileSystem.file(unicodeFragPath).createSync(recursive: true);
+    testWithoutContext('Windows and exit code 3 with Unicode path adds Unicode path warning '
+        '(regression test for https://github.com/flutter/flutter/issues/190233)', () async {
+      const unicodeFragPath = '/shaders/my_shåder.frag';
+      const unicodeOutputPath = '/output/shaders/my_shåder.frag';
+      const unicodeOutputSpirvPath = '/output/shaders/my_shåder.frag.spirv';
+      fileSystem.file(unicodeFragPath).createSync(recursive: true);
 
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              impellerc,
-              '--sksl',
-              '--iplr',
-              '--json',
-              '--sl=$unicodeOutputPath',
-              '--spirv=$unicodeOutputSpirvPath',
-              '--input=$unicodeFragPath',
-              '--input-type=frag',
-              '--include=$fragDir',
-              '--include=$shaderLibDir',
-            ],
-            exitCode: 3,
-          ),
-        ]);
-        final shaderCompiler = ShaderCompiler(
-          processManager: processManager,
-          logger: logger,
-          fileSystem: fileSystem,
-          artifacts: artifacts,
-          platform: FakePlatform(operatingSystem: 'windows'),
-        );
-
-        await expectShaderCompilerException(
-          shaderCompiler: shaderCompiler,
-          inputPath: unicodeFragPath,
-          outputPath: unicodeOutputPath,
-          matchers: <Matcher>[
-            contains('The shader compiler (impellerc) aborted during compilation.'),
-            contains('Warning: The path contains non-ASCII characters'),
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$unicodeOutputPath',
+            '--spirv=$unicodeOutputSpirvPath',
+            '--input=$unicodeFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
           ],
-        );
-      },
-    );
+          exitCode: 3,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: unicodeFragPath,
+        outputPath: unicodeOutputPath,
+        matchers: <Matcher>[
+          contains('The shader compiler (impellerc) aborted during compilation.'),
+          contains('Warning: The path contains non-ASCII characters'),
+        ],
+      );
+    });
   });
 }

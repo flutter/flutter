@@ -14,7 +14,6 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
-import '../../cache.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
@@ -80,7 +79,7 @@ class WebEntrypointTarget extends Target {
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
-      Cache.flutterRoot!,
+      environment.flutterRootDir.path,
     );
 
     // Use the PackageConfig to find the correct package-scheme import path
@@ -94,7 +93,7 @@ class WebEntrypointTarget extends Target {
     // does not have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
     final String importedEntrypoint =
-        packageConfig.toPackageUriForWorkspace(importUri)?.toString() ?? importUri.toString();
+        packageConfig.toPackageUri(importUri)?.toString() ?? importUri.toString();
 
     await injectBuildTimePluginFilesForWebPlatform(
       flutterProject,
@@ -523,15 +522,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
       final Set<String> privatePackages = {};
       for (final Package package in packageConfigPackages.packages) {
         final String packageName = package.name;
-        if (package.root.pathSegments.where((String s) => s.isNotEmpty).toList() case [
-          ...,
-          'hosted',
-          _,
-          final packageFolder,
-        ] when packageFolder.startsWith('$packageName-')) {
-          // Hosted package directories in .pub-cache follow '<packageName>-<version>'.
-          // Substring past the package name and hyphen to extract the version.
-          hostedPackages[packageName] = packageFolder.substring(packageName.length + 1);
+        if (package.root.toString().contains('hosted/pub.dev')) {
+          final String? packageVersion = RegExp(
+            r'([0-9]+\.[0-9]+\.[0-9]+(?:-[\w\.-]+)?)',
+          ).firstMatch(package.root.toString())?.group(1);
+          hostedPackages[packageName] = packageVersion ?? '?';
         } else {
           privatePackages.add(packageName);
         }
@@ -756,7 +751,7 @@ class WebReleaseBundle extends Target {
 
     final File sourceRobotoFont = environment.fileSystem.file(
       environment.fileSystem.path.join(
-        Cache.flutterRoot!,
+        environment.flutterRootDir.path,
         'engine',
         'src',
         'flutter',

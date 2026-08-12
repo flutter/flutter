@@ -4,7 +4,6 @@
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -12,19 +11,30 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/signals.dart';
+import '../base/terminal.dart';
+import '../base/time.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
+import '../flutter_features.dart';
+import '../flutter_features_config.dart';
 import '../globals.dart' as globals;
+import '../pre_run_validator.dart';
 import '../project.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
@@ -162,6 +172,57 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
+  FlutterCommand({
+    Analytics? analytics,
+    OutputPreferences? outputPreferences,
+    ToolContext? toolContext,
+  }) : _explicitAnalytics = analytics,
+       _explicitToolContext = toolContext,
+       _outputPreferences = outputPreferences;
+
+  final Analytics? _explicitAnalytics;
+  final ToolContext? _explicitToolContext;
+  final OutputPreferences? _outputPreferences;
+
+  /// The [ToolContext] providing explicit dependency injection for this command.
+  ToolContext? get toolContext =>
+      _explicitToolContext ??
+      (parent as FlutterCommand?)?.toolContext ??
+      (super.runner as FlutterCommandRunner?)?.toolContext;
+
+  T? _safeGlobal<T>(T Function() getter) {
+    try {
+      return getter();
+    } on UnsupportedError {
+      return null;
+    }
+  }
+
+  SystemClock? get _clock => toolContext?.systemClock ?? _safeGlobal(() => globals.systemClock);
+  Logger? get _logger => toolContext?.logger ?? _safeGlobal(() => globals.logger);
+  Signals? get _signals => toolContext?.signals ?? _safeGlobal(() => globals.signals);
+  UserMessages? get _userMessages =>
+      toolContext?.userMessages ?? _safeGlobal(() => globals.userMessages);
+  PreRunValidator? get _preRunValidator =>
+      toolContext?.preRunValidator ?? _safeGlobal(() => globals.preRunValidator);
+  OperatingSystemUtils? get _os => toolContext?.os ?? _safeGlobal(() => globals.os);
+  Platform? get _platform => toolContext?.platform ?? _safeGlobal(() => globals.platform);
+  FileSystem? get _fs => toolContext?.fs ?? _safeGlobal(() => globals.fs);
+  FileSystemUtils? get _fileSystemUtils =>
+      toolContext?.fileSystemUtils ??
+      (_fs != null && _platform != null
+          ? FileSystemUtils(fileSystem: _fs!, platform: _platform!)
+          : null);
+  FlutterProjectFactory? get _projectFactory =>
+      toolContext?.projectFactory ?? _safeGlobal(() => globals.projectFactory);
+  Analytics? get _analytics =>
+      _explicitAnalytics ??
+      (super.runner as FlutterCommandRunner?)?.analytics ??
+      _safeGlobal(() => globals.analytics);
+  Cache? get _cache => toolContext?.cache ?? _safeGlobal(() => globals.cache);
+  FlutterVersion? get _flutterVersion =>
+      toolContext?.flutterVersion ?? _safeGlobal(() => globals.flutterVersion);
+
   /// The currently executing command (or sub-command).
   ///
   /// Will be `null` until the top-most command has begun execution.
@@ -215,12 +276,16 @@ abstract class FlutterCommand extends Command<void> {
   ];
 
   @override
-  ArgParser get argParser => _argParser;
-  final _argParser = ArgParser(
-    usageLineLength: globals.outputPreferences.wrapText
-        ? globals.outputPreferences.wrapColumn
-        : null,
-  );
+  ArgParser get argParser => _argParser ??= ArgParser(usageLineLength: _usageLineLength);
+  ArgParser? _argParser;
+
+  int? get _usageLineLength {
+    final OutputPreferences? prefs = _outputPreferences ?? toolContext?.outputPreferences;
+    if (prefs != null) {
+      return prefs.wrapText ? prefs.wrapColumn : null;
+    }
+    return null;
+  }
 
   @override
   FlutterCommandRunner? get runner => super.runner as FlutterCommandRunner?;
@@ -245,12 +310,19 @@ abstract class FlutterCommand extends Command<void> {
   bool get outputMachineFormat =>
       argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
       boolArg(FlutterGlobalOptions.kMachineFlag);
-
   bool get shouldUpdateCache => true;
 
   bool get deprecated => false;
 
-  ProcessInfo get processInfo => globals.processInfo;
+  ProcessInfo get processInfo {
+    ProcessInfo? contextProcessInfo;
+    try {
+      contextProcessInfo = context.get<ProcessInfo>();
+    } on UnsupportedError {
+      // In testWithoutContext, context.get is not supported.
+    }
+    return contextProcessInfo ?? (_fs != null ? ProcessInfo(_fs!) : globals.processInfo);
+  }
 
   /// When the command runs and this is true, trigger an async process to
   /// discover devices from discoverers that support wireless devices for an
@@ -266,7 +338,8 @@ abstract class FlutterCommand extends Command<void> {
   /// Grabs the [Analytics] instance from the global context. It is defined
   /// at the [FlutterCommand] level to enable any classes that extend it to
   /// easily reference it or overwrite as necessary.
-  Analytics get analytics => globals.analytics;
+  Analytics get analytics =>
+      _analytics ?? (toolContext != null ? const NoOpAnalytics() : globals.analytics);
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
@@ -417,9 +490,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       'target',
       abbr: 't',
-      defaultsTo: bundle.defaultMainPath,
+      defaultsTo: _fs?.path.join('lib', 'main.dart') ?? bundle.defaultMainPath,
       help:
           'The main entry-point file of the application, as run on the device.\n'
+          '\n'
           'If the "--target" option is omitted, but a file name is provided on '
           'the command line, then that is used instead.',
       valueHelp: 'path',
@@ -446,11 +520,15 @@ abstract class FlutterCommand extends Command<void> {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
+    final FileSystem? fs = _fs;
+    if (fs != null) {
+      return fs.path.join('lib', 'main.dart');
+    }
     return bundle.defaultMainPath;
   }
 
   /// Indicates if the current command running has a terminal attached.
-  bool get hasTerminal => globals.stdio.hasTerminal;
+  bool get hasTerminal => toolContext?.stdio.hasTerminal ?? false;
 
   /// Path to the Dart's package config file.
   ///
@@ -462,8 +540,11 @@ abstract class FlutterCommand extends Command<void> {
   /// This is true if `--ci` is passed to the command or if environment
   /// variable `LUCI_CI` is `True`.
   bool get usingCISystem {
+    final Platform? platform = _platform;
     return boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true) ||
-        globals.platform.environment['LUCI_CI'] == 'True';
+        (platform != null
+            ? platform.environment['LUCI_CI'] == 'True'
+            : globals.platform.environment['LUCI_CI'] == 'True');
   }
 
   String? get debugLogsDirectoryPath =>
@@ -1363,7 +1444,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  FlutterProject get project => FlutterProject.current();
+  FlutterProject get project => _projectFactory != null && _fs != null
+      ? _projectFactory!.fromDirectory(_fs!.currentDirectory)
+      : FlutterProject.current();
 
   /// The path to the package config for the current project.
   ///
@@ -1403,11 +1486,11 @@ abstract class FlutterCommand extends Command<void> {
         ? stringArg('build-name')
         : null;
 
-    final File packageConfigFile = globals.fs.file(packageConfigPath());
+    final File packageConfigFile = (_fs ?? globals.fs).file(packageConfigPath());
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
-      logger: globals.logger,
+      logger: _logger ?? globals.logger,
       throwOnError: false,
     );
 
@@ -1433,13 +1516,15 @@ abstract class FlutterCommand extends Command<void> {
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
         boolArg(FlutterOptions.kAnalyzeSize)) {
-      Directory directory = globals.fsUtils.getUniqueDirectory(
-        globals.fs.directory(getBuildDirectory()),
+      final FileSystem fs = _fs ?? globals.fs;
+      final FileSystemUtils fsUtils = _fileSystemUtils ?? globals.fsUtils;
+      Directory directory = fsUtils.getUniqueDirectory(
+        fs.directory(getBuildDirectory()),
         'flutter_size',
       );
       if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) &&
           stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
-        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
+        directory = fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
       }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
@@ -1527,7 +1612,7 @@ abstract class FlutterCommand extends Command<void> {
         dartDefines.add('$define=$value');
       }
     }
-    _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
+    _addFlutterVersionToDartDefines(_flutterVersion ?? globals.flutterVersion, dartDefines);
     _addFeatureFlagsToDartDefines(dartDefines);
 
     return BuildInfo(
@@ -1574,7 +1659,8 @@ abstract class FlutterCommand extends Command<void> {
   /// framework, has been set either in the environment or through
   /// `--${FlutterOptions.kDartDefinesOption}` / `--${FlutterOptions.kDartDefineFromFileOption}`.
   void _ensureReservedDartDefineIsUnset(String define, List<String> dartDefines) {
-    if (globals.platform.environment[define] != null) {
+    final Platform platform = _platform ?? globals.platform;
+    if (platform.environment[define] != null) {
       throwToolExit('$define is used by the framework and cannot be set in the environment.');
     }
     if (dartDefines.any((String d) => d == define || d.startsWith('$define='))) {
@@ -1607,6 +1693,22 @@ abstract class FlutterCommand extends Command<void> {
     ]);
   }
 
+  FeatureFlags get _featureFlags {
+    final ToolContext? toolContext = this.toolContext;
+    if (toolContext != null) {
+      return FlutterFeatureFlags(
+        flutterVersion: toolContext.flutterVersion,
+        featuresConfig: FlutterFeaturesConfig(
+          globalConfig: toolContext.config,
+          platform: toolContext.platform,
+          projectManifest: null,
+        ),
+        platform: toolContext.platform,
+      );
+    }
+    return featureFlags;
+  }
+
   void _addFeatureFlagsToDartDefines(List<String> dartDefines) {
     if (dartDefines.any((String define) => define.startsWith(kEnabledFeatureFlags))) {
       throwToolExit(
@@ -1617,8 +1719,9 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final String enabledFeatureFlags = featureFlags.allFeatures
-        .where((Feature feature) => featureFlags.isEnabled(feature))
+    final FeatureFlags flags = _featureFlags;
+    final String enabledFeatureFlags = flags.allFeatures
+        .where((Feature feature) => flags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');
@@ -1629,7 +1732,11 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void setupApplicationPackages() {
-    applicationPackages ??= ApplicationPackageFactory.instance;
+    if (applicationPackages == null) {
+      try {
+        applicationPackages = ApplicationPackageFactory.instance;
+      } on Object catch (_) {}
+    }
   }
 
   /// The path to send to Google Analytics. Return null here to disable
@@ -1661,14 +1768,17 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime startTime = globals.systemClock.now();
+    final SystemClock clock = _clock ?? globals.systemClock;
+    final Logger logger = _logger ?? globals.logger;
+    final UserMessages userMessages = _userMessages ?? globals.userMessages;
+    final DateTime startTime = clock.now();
 
     return context.run<void>(
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
         if (_usesFatalWarnings) {
-          globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
+          logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
@@ -1679,9 +1789,9 @@ abstract class FlutterCommand extends Command<void> {
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
-          final DateTime endTime = globals.systemClock.now();
-          globals.printTrace(
-            globals.userMessages.flutterElapsedTime(
+          final DateTime endTime = clock.now();
+          logger.printTrace(
+            userMessages.flutterElapsedTime(
               name,
               getElapsedAsMilliseconds(endTime.difference(startTime)),
             ),
@@ -1690,7 +1800,7 @@ abstract class FlutterCommand extends Command<void> {
             _sendPostUsage(commandPath, commandResult, startTime, endTime);
           }
           if (_usesFatalWarnings) {
-            globals.logger.checkForFatalLogs();
+            logger.checkForFatalLogs();
           }
         }
       },
@@ -1699,12 +1809,14 @@ abstract class FlutterCommand extends Command<void> {
 
   @override
   void printUsage() {
-    globals.logger.printStatus(usage);
+    _logger?.printStatus(usage);
   }
 
   @visibleForOverriding
   String get deprecationWarning {
-    return '${globals.logger.terminal.warningMark} The "$name" command is '
+    final Logger logger = _logger ?? globals.logger;
+    final String warningMark = logger.terminal.warningMark;
+    return '$warningMark The "$name" command is '
         'deprecated and will be removed in a future version of Flutter. '
         'See https://flutter.dev/to/previous-releases '
         'for previous releases of Flutter.\n';
@@ -1712,7 +1824,8 @@ abstract class FlutterCommand extends Command<void> {
 
   void _printDeprecationWarning() {
     if (deprecated) {
-      globals.printWarning(deprecationWarning);
+      final Logger logger = _logger ?? globals.logger;
+      logger.printWarning(deprecationWarning);
     }
   }
 
@@ -1768,16 +1881,7 @@ abstract class FlutterCommand extends Command<void> {
           );
         }
 
-        String configRaw;
-        try {
-          configRaw = decodeUtf8OrUtf16(globals.fs.file(path).readAsBytesSync());
-        } on Exception catch (err) {
-          throwToolExit(
-            'Unable to decode the file at path "$path". '
-            'Ensure that the file is encoded in UTF-8 or UTF-16.\n'
-            'Error details: $err',
-          );
-        }
+        final String configRaw = globals.fs.file(path).readAsStringSync();
 
         // Determine whether the file content is JSON or .env format.
         String configJsonRaw;
@@ -1910,17 +2014,19 @@ abstract class FlutterCommand extends Command<void> {
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
     void handler(io.ProcessSignal s) {
-      globals.cache.releaseLock();
+      final Cache cache = _cache ?? globals.cache;
+      cache.releaseLock();
       _sendPostUsage(
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
         startTime,
-        globals.systemClock.now(),
+        _clock?.now() ?? globals.systemClock.now(),
       );
     }
 
-    globals.signals.addHandler(io.ProcessSignal.sigterm, handler);
-    globals.signals.addHandler(io.ProcessSignal.sigint, handler);
+    final Signals signals = _signals ?? globals.signals;
+    signals.addHandler(ProcessSignal.sigterm, handler);
+    signals.addHandler(ProcessSignal.sigint, handler);
   }
 
   /// Logs data about this command.
@@ -1933,9 +2039,16 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
+    final FlutterCommandRunner? commandRunner = runner;
+    final Analytics effectiveAnalytics =
+        _analytics ?? commandRunner?.analytics ?? context.get<Analytics>() ?? globals.analytics;
+
     // Send command result.
-    final int? maxRss = getMaxRss(processInfo);
-    analytics.send(
+    int? maxRss;
+    try {
+      maxRss = getMaxRss(processInfo);
+    } on UnsupportedError catch (_) {}
+    effectiveAnalytics.send(
       Event.flutterCommandResult(
         commandPath: commandPath,
         result: commandResult.toString(),
@@ -1959,7 +2072,7 @@ abstract class FlutterCommand extends Command<void> {
     final Duration elapsedDuration = (commandResult.endTimeOverride ?? endTime).difference(
       startTime,
     );
-    analytics.send(
+    effectiveAnalytics.send(
       Event.timing(
         workflow: 'flutter',
         variableName: name,
@@ -1980,19 +2093,21 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    globals.preRunValidator.validate();
+    final PreRunValidator validator = _preRunValidator ?? globals.preRunValidator;
+    validator.validate();
 
-    if (globals.os.hostPlatform == .darwin_x64 &&
-        globals.persistentToolState!.shouldShowIntelMacWarning) {
-      globals.logger.printWarning(
+    final OperatingSystemUtils os = _os ?? globals.os;
+    final Logger logger = _logger ?? globals.logger;
+    if (os.hostPlatform == HostPlatform.darwin_x64 &&
+        (globals.persistentToolState?.shouldShowIntelMacWarning ?? true)) {
+      logger.printWarning(
         'Flutter is deprecating support for Intel-based Macs. '
         'A future version of Flutter will require an Apple Silicon Mac to build applications.',
       );
-      globals.persistentToolState!.shouldShowIntelMacWarning = false;
+      globals.persistentToolState?.shouldShowIntelMacWarning = false;
     }
 
-    if (refreshWirelessDevices) {
-      // Loading wireless devices takes longer so start it early.
+    if (refreshWirelessDevices && toolContext == null) {
       _targetDevices.startExtendedWirelessDeviceDiscovery(
         deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       );
@@ -2002,7 +2117,8 @@ abstract class FlutterCommand extends Command<void> {
     try {
       project = await _updateCacheAndRunPubGet();
     } finally {
-      globals.cache.releaseLock();
+      final Cache cache = _cache ?? globals.cache;
+      cache.releaseLock();
     }
 
     if (regeneratePlatformSpecificToolingDuringVerify) {
@@ -2015,7 +2131,10 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      analytics.send(await unifiedAnalyticsUsageValues(commandPath));
+      final FlutterCommandRunner? commandRunner = runner;
+      final Analytics effectiveAnalytics =
+          _analytics ?? commandRunner?.analytics ?? context.get<Analytics>() ?? globals.analytics;
+      effectiveAnalytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
 
     return runCommand();
@@ -2033,14 +2152,15 @@ abstract class FlutterCommand extends Command<void> {
       } else {
         offline = false;
       }
-      await globals.cache.updateAll(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-      }, offline: offline);
-      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
+      final Cache cache = _cache ?? globals.cache;
+      await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}, offline: offline);
+      await cache.updateAll(await requiredArtifacts, offline: offline);
     }
     await validateCommand();
 
-    final FlutterProject project = FlutterProject.current();
+    final FlutterProject project = _projectFactory != null
+        ? _projectFactory!.fromDirectory(_fs?.currentDirectory ?? globals.fs.currentDirectory)
+        : FlutterProject.current();
     project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
 
     if (shouldRunPub) {
@@ -2143,27 +2263,37 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
+    final FileSystem? fileSystem = _fs;
     if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 
       // If there is no pubspec in the current directory, look in the parent
       // until one can be found.
-      final String? path = findProjectRoot(globals.fs, globals.fs.currentDirectory.path);
+      final FileSystem effectiveFs = fileSystem ?? globals.fs;
+      final String? path = findProjectRoot(effectiveFs, effectiveFs.currentDirectory.path);
       if (path == null) {
-        throwToolExit(globals.userMessages.flutterNoPubspec);
+        throwToolExit(_userMessages?.flutterNoPubspec ?? globals.userMessages.flutterNoPubspec);
       }
-      if (path != globals.fs.currentDirectory.path) {
-        globals.fs.currentDirectory = path;
-        globals.printStatus(
-          'Changing current working directory to: ${globals.fs.currentDirectory.path}',
-        );
+      if (path != effectiveFs.currentDirectory.path) {
+        effectiveFs.currentDirectory = path;
+        final message =
+            'Changing current working directory to: ${effectiveFs.currentDirectory.path}';
+        if (_logger != null) {
+          _logger!.printStatus(message);
+        } else {
+          globals.printStatus(message);
+        }
       }
     }
 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
-      if (!globals.fs.isFileSync(targetPath)) {
-        throwToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
+      final FileSystem effectiveFs = fileSystem ?? globals.fs;
+      if (!effectiveFs.isFileSync(targetPath)) {
+        throwToolExit(
+          _userMessages?.flutterTargetFileMissing(targetPath) ??
+              globals.userMessages.flutterTargetFileMissing(targetPath),
+        );
       }
     }
   }
@@ -2176,7 +2306,7 @@ abstract class FlutterCommand extends Command<void> {
     );
     final String help = <String>[
       if (deprecated)
-        '${globals.logger.terminal.warningMark} Deprecated. This command will be removed in a future version of Flutter.',
+        '${(_logger ?? globals.logger).terminal.warningMark} Deprecated. This command will be removed in a future version of Flutter.',
       description,
       '',
       'Global options:',
@@ -2241,7 +2371,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
 // Returns the development artifact for the target platform, or null
 // if none is supported
 @protected
-DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+DevelopmentArtifact? artifactFromTargetPlatform(
+  TargetPlatform targetPlatform, [
+  FeatureFlags? featureFlags,
+]) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -2253,20 +2386,20 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin:
-      if (featureFlags.isMacOSEnabled) {
+      if (featureFlags?.isMacOSEnabled ?? true) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
-      if (featureFlags.isWindowsEnabled) {
+      if (featureFlags?.isWindowsEnabled ?? true) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
-      if (featureFlags.isLinuxEnabled) {
+      if (featureFlags?.isLinuxEnabled ?? true) {
         return DevelopmentArtifact.linux;
       }
       return null;

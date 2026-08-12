@@ -878,6 +878,9 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 class FakeCache extends Fake implements Cache {
   FakeCache({this.olderThanToolsStamp = false});
 
+  @override
+  String get flutterRoot => '';
+
   bool olderThanToolsStamp;
   Map<String, bool> filesOlderThanToolsStamp = <String, bool>{};
 

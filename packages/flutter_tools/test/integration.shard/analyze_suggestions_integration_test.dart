@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/project_validator.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/test_flutter_command_runner.dart';
 import 'test_utils.dart';
 
@@ -30,14 +31,16 @@ void main() {
     testUsingContext('General Info Project Validator', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
-        artifacts: globals.artifacts!,
-        fileSystem: fileSystem,
-        logger: loggerTest,
-        platform: globals.platform,
-        terminal: globals.terminal,
-        processManager: globals.processManager,
         allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: globals.artifacts,
+          fs: fileSystem,
+          logger: loggerTest,
+          platform: globals.platform,
+          processManager: globals.processManager,
+          terminal: globals.terminal,
+        ),
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -121,7 +124,7 @@ void main() {
       expect(decoded.containsKey('Platform.isMacOS'), true);
       expect(decoded.containsKey('Platform.isFuchsia'), true);
       expect(decoded.containsKey('Platform.pathSeparator'), true);
-      expect(decoded.containsKey('Cache.flutterRoot'), true);
+      expect(decoded.containsKey('getFlutterRoot()'), true);
 
       expect(decoded['FlutterProject.android.exists'], true);
       expect(decoded['FlutterProject.ios.exists'], true);

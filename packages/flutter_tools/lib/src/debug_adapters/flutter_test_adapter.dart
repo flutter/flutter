@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:dap_adapters/dap_adapters.dart' hide PidTracker;
 
 import '../base/io.dart';
-import '../cache.dart';
 import '../convert.dart';
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
@@ -19,6 +18,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     super.channel, {
     required super.fileSystem,
     required super.platform,
+    super.flutterSdkRoot,
     super.ipv6,
     super.enableFlutterDds = true,
     super.enableAuthCodes,
@@ -54,11 +54,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     // Handle customTool and deletion of any arguments for it.
     final String executable =
         args.customTool ??
-        fileSystem.path.join(
-          Cache.flutterRoot!,
-          'bin',
-          platform.isWindows ? 'flutter.bat' : 'flutter',
-        );
+        fileSystem.path.join(flutterSdkRoot, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
     final int? removeArgs = args.customToolReplacesArgs;
     if (args.customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
