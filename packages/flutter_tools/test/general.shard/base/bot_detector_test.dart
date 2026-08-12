@@ -42,7 +42,7 @@ void main() {
         );
 
         expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
 
       testWithoutContext('does not cache BOT environment variable', () async {
@@ -55,12 +55,12 @@ void main() {
         );
 
         expect(await botDetector.isRunningOnBot, isTrue);
-        expect(persistentToolState.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isNull);
 
         fakePlatform.environment['BOT'] = 'false';
 
         expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
 
       testWithoutContext('returns false unconditionally if FLUTTER_HOST is set', () async {
@@ -74,7 +74,7 @@ void main() {
         );
 
         expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
 
       testWithoutContext('returns false with and without a terminal attached', () async {
@@ -107,7 +107,7 @@ void main() {
         );
 
         expect(await botDetector.isRunningOnBot, isFalse);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
 
       testWithoutContext('returns true when azure metadata is reachable', () async {
@@ -149,11 +149,11 @@ void main() {
         );
 
         expect(await botDetector.isRunningOnBot, isTrue);
-        expect(persistentToolState.isRunningOnBot, isTrue);
+        expect(persistentToolState.isRunningOnBot, isNull);
       });
 
       testWithoutContext(
-        'overrides cached false when CI environment variable is set at runtime',
+        'overrides cached false when CI environment variable is set at runtime without mutating cache',
         () async {
           // Simulate an image bake where isRunningOnBot evaluated to false and cached to disk:
           persistentToolState.setIsRunningOnBot(false);
@@ -168,26 +168,34 @@ void main() {
           );
 
           expect(await botDetector.isRunningOnBot, isTrue);
-          expect(persistentToolState.isRunningOnBot, isTrue);
+          expect(persistentToolState.isRunningOnBot, isFalse);
         },
       );
 
       testWithoutContext(
-        'overrides cached false when CI=true or SWARMING_TASK_ID is set at runtime',
+        'running with CI=true does not poison persistentToolState for subsequent runs',
         () async {
           persistentToolState.setIsRunningOnBot(false);
           expect(persistentToolState.isRunningOnBot, isFalse);
 
+          // Invocation 1: Ran in a subshell or test runner with CI=true
           fakePlatform.environment['CI'] = 'true';
-
-          final botDetector = BotDetector(
+          final botDetector1 = BotDetector(
             platform: fakePlatform,
             httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
             persistentToolState: persistentToolState,
           );
+          expect(await botDetector1.isRunningOnBot, isTrue);
+          expect(persistentToolState.isRunningOnBot, isFalse);
 
-          expect(await botDetector.isRunningOnBot, isTrue);
-          expect(persistentToolState.isRunningOnBot, isTrue);
+          // Invocation 2: Normal interactive terminal run (no CI variable)
+          fakePlatform.environment.clear();
+          final botDetector2 = BotDetector(
+            platform: fakePlatform,
+            httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+            persistentToolState: persistentToolState,
+          );
+          expect(await botDetector2.isRunningOnBot, isFalse);
         },
       );
 

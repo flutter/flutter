@@ -33,7 +33,6 @@ class BotDetector {
         // When set, GA logs to a local file (normally for tests) so we don't need to filter.
         ||
         _platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')) {
-      _persistentToolState.setIsRunningOnBot(false);
       return false;
     }
 
@@ -67,7 +66,6 @@ class BotDetector {
         // Property when running on borg.
         ||
         _platform.environment.containsKey('BORG_ALLOC_DIR')) {
-      _persistentToolState.setIsRunningOnBot(true);
       return true;
     }
 
