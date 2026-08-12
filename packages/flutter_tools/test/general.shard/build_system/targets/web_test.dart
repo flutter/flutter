@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -1801,6 +1802,112 @@ _flutter.loader.load();
       final File bootstrapJs = environment.outputDir.childFile('flutter_bootstrap.js');
       expect(bootstrapJs.existsSync(), isTrue);
       expect(bootstrapJs.readAsStringSync(), contains('main.dart.01234567.js'));
+    }),
+  );
+
+  test(
+    'hashAndRenameWebOutput produces filename with SHA-256 matching on-disk file bytes after source map fixup',
+    () => testbed.run(() {
+      final File jsFile = environment.buildDir.childFile('main.dart.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('console.log("hello");\n//# sourceMappingURL=main.dart.js.map\n');
+      final File mapFile = environment.buildDir.childFile('main.dart.js.map')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version":3,"sources":[]}');
+
+      final String newBasename = hashAndRenameWebOutput(file: jsFile, sourceMapFile: mapFile);
+
+      final File renamedFile = environment.buildDir.childFile(newBasename);
+      expect(renamedFile.existsSync(), isTrue);
+
+      final hashPattern = RegExp(r'^main\.dart\.([a-f0-9]{8})\.js$');
+      final Match? match = hashPattern.firstMatch(newBasename);
+      expect(match, isNotNull, reason: 'Filename must contain 8-char hex hash');
+      final String filenameHash = match!.group(1)!;
+
+      final String actualFileHash = crypto.sha256
+          .convert(renamedFile.readAsBytesSync())
+          .toString()
+          .substring(0, 8);
+
+      expect(
+        actualFileHash,
+        equals(filenameHash),
+        reason:
+            'The SHA-256 of the on-disk file bytes must match the hash embedded in the filename',
+      );
+    }),
+  );
+
+  test(
+    'hashAndRenameWebOutput preserves custom entrypoint stems instead of hardcoding main.dart',
+    () => testbed.run(() {
+      final File appJs = environment.buildDir.childFile('app_shell.dart.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('console.log("custom entrypoint");\n');
+
+      final String newBasename = hashAndRenameWebOutput(file: appJs);
+      expect(newBasename, matches(r'^app_shell\.dart\.[a-f0-9]{8}\.js$'));
+      expect(newBasename, isNot(startsWith('main.dart')));
+    }),
+  );
+
+  test(
+    'Dart2WasmTarget getBuildConfig does not pair mismatched WASM and MJS binaries across incremental builds',
+    () => testbed.run(() {
+      // Simulate build 1 artifacts with older timestamp
+      final File wasm1 = environment.buildDir.childFile('main.dart.11111111.wasm')..createSync();
+      final File mjs1 = environment.buildDir.childFile('main.dart.11111111.mjs')..createSync();
+      wasm1.setLastModifiedSync(DateTime(2026));
+      mjs1.setLastModifiedSync(DateTime(2026));
+
+      // Simulate build 2 artifacts with newer timestamp
+      final File wasm2 = environment.buildDir.childFile('main.dart.22222222.wasm')..createSync();
+      final File mjs2 = environment.buildDir.childFile('main.dart.22222222.mjs')..createSync();
+      wasm2.setLastModifiedSync(DateTime(2026, 1, 2));
+      mjs2.setLastModifiedSync(DateTime(2026, 1, 2));
+
+      final target = Dart2WasmTarget(
+        const WasmCompilerConfig(webContentHash: true),
+        const NoOpAnalytics(),
+      );
+
+      final Map<String, Object?> config = target.getBuildConfig(environment);
+      expect(config['mainWasmPath'], equals('main.dart.22222222.wasm'));
+      expect(config['jsSupportRuntimePath'], equals('main.dart.22222222.mjs'));
+
+      final List<String> files = target
+          .buildFiles(environment)
+          .map((File f) => f.basename)
+          .toList();
+      expect(files, isNot(contains('main.dart.11111111.wasm')));
+      expect(files, isNot(contains('main.dart.11111111.mjs')));
+      expect(files, containsAll(<String>['main.dart.22222222.wasm', 'main.dart.22222222.mjs']));
+    }),
+  );
+
+  test(
+    'Dart2JSTarget getBuildConfig does not select stale build artifacts across incremental builds',
+    () => testbed.run(() {
+      // Simulate build 1 artifacts with older timestamp
+      final File js1 = environment.buildDir.childFile('main.dart.11111111.js')..createSync();
+      js1.setLastModifiedSync(DateTime(2026));
+
+      // Simulate build 2 artifacts with newer timestamp
+      final File js2 = environment.buildDir.childFile('main.dart.22222222.js')..createSync();
+      js2.setLastModifiedSync(DateTime(2026, 1, 2));
+
+      final target = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+
+      final Map<String, Object?> config = target.getBuildConfig(environment);
+      expect(config['mainJsPath'], equals('main.dart.22222222.js'));
+
+      final List<String> files = target
+          .buildFiles(environment)
+          .map((File f) => f.basename)
+          .toList();
+      expect(files, isNot(contains('main.dart.11111111.js')));
+      expect(files, contains('main.dart.22222222.js'));
     }),
   );
 }
