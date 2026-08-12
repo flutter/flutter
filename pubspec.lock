@@ -234,6 +234,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  dap_adapters:
+    dependency: transitive
+    description:
+      name: dap_adapters
+      sha256: "26f1ae0945bd0e0d015d2c0cb0fa8d1ed84262d7e5db3bf2642fb4c199fa7844"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   dart_service_protocol_shared:
     dependency: transitive
     description:
@@ -407,6 +415,27 @@ packages:
     dependency: transitive
     description:
       path: "packages/flutter_tools"
+      relative: true
+    source: path
+    version: "0.0.0"
+  flutter_tools_core:
+    dependency: transitive
+    description:
+      path: "packages/flutter_tools/packages/flutter_tools_core"
+      relative: true
+    source: path
+    version: "0.0.0"
+  flutter_tools_extension:
+    dependency: transitive
+    description:
+      path: "packages/flutter_tools/packages/flutter_tools_extension"
+      relative: true
+    source: path
+    version: "0.0.0"
+  flutter_tools_extension_linux_prototype:
+    dependency: transitive
+    description:
+      path: "packages/flutter_tools/packages/flutter_tools_extension_linux_prototype"
       relative: true
     source: path
     version: "0.0.0"
@@ -910,10 +939,10 @@ packages:
     dependency: "direct main"
     description:
       name: record_use
-      sha256: af37186ff9ede46fa32f152526c48f46c5b3ad7d3d5a566140cb5df3dc4ed737
+      sha256: "3b4ab682aff40175afca6ff090cc5aa7ce9dafe8dfbae1537a6c678e6678baee"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.0"
   retry:
     dependency: "direct main"
     description:
