@@ -40,6 +40,60 @@
 
 FLUTTER_ASSERT_ARC
 
+#if __IPHONE_OS_VERSION_MAX_ALLOWED < 260000
+// Flutter's engine is built with an older pinned iOS SDK. Declare this iOS 26 override point so
+// the superclass call can compile without requiring the iOS 26 SDK at build time.
+@interface UIViewController (FlutterUpdatePropertiesCompatibility)
+- (void)updateProperties;
+@end
+#endif
+
+typedef id (*FlutterNoArgumentObjectMessage)(id, SEL);
+typedef id (*FlutterOneArgumentObjectMessage)(id, SEL, id);
+typedef void (*FlutterSetObjectMessage)(id, SEL, id);
+typedef CGFloat (*FlutterEffectiveRadiusMessage)(id, SEL, UIRectCorner);
+
+static id CreateDisplayCornerConfiguration() API_AVAILABLE(ios(26.0)) {
+  Class cornerRadiusClass = NSClassFromString(@"UICornerRadius");
+  Class cornerConfigurationClass = NSClassFromString(@"UICornerConfiguration");
+  SEL containerConcentricRadiusSelector = NSSelectorFromString(@"containerConcentricRadius");
+  SEL configurationWithRadiusSelector = NSSelectorFromString(@"configurationWithRadius:");
+  if (![cornerRadiusClass respondsToSelector:containerConcentricRadiusSelector] ||
+      ![cornerConfigurationClass respondsToSelector:configurationWithRadiusSelector]) {
+    return nil;
+  }
+
+  FlutterNoArgumentObjectMessage createRadius = reinterpret_cast<FlutterNoArgumentObjectMessage>(
+      [cornerRadiusClass methodForSelector:containerConcentricRadiusSelector]);
+  id radius = createRadius(cornerRadiusClass, containerConcentricRadiusSelector);
+  FlutterOneArgumentObjectMessage createConfiguration =
+      reinterpret_cast<FlutterOneArgumentObjectMessage>(
+          [cornerConfigurationClass methodForSelector:configurationWithRadiusSelector]);
+  return createConfiguration(cornerConfigurationClass, configurationWithRadiusSelector, radius);
+}
+
+static BOOL SetDisplayCornerConfiguration(UIView* view, id configuration) API_AVAILABLE(ios(26.0)) {
+  SEL selector = NSSelectorFromString(@"setCornerConfiguration:");
+  if (![view respondsToSelector:selector]) {
+    return NO;
+  }
+  FlutterSetObjectMessage setConfiguration =
+      reinterpret_cast<FlutterSetObjectMessage>([view methodForSelector:selector]);
+  setConfiguration(view, selector, configuration);
+  return YES;
+}
+
+static CGFloat GetEffectiveDisplayCornerRadius(UIView* view, UIRectCorner corner)
+    API_AVAILABLE(ios(26.0)) {
+  SEL selector = NSSelectorFromString(@"effectiveRadiusForCorner:");
+  if (![view respondsToSelector:selector]) {
+    return 0.0;
+  }
+  FlutterEffectiveRadiusMessage getEffectiveRadius =
+      reinterpret_cast<FlutterEffectiveRadiusMessage>([view methodForSelector:selector]);
+  return getEffectiveRadius(view, selector, corner);
+}
+
 static constexpr int kMicrosecondsPerSecond = 1000 * 1000;
 static constexpr CGFloat kScrollViewContentSize = 2.0;
 
@@ -1554,12 +1608,16 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
     if (self.displayCornerRadiusProbe.superview != window) {
       [self.displayCornerRadiusProbe removeFromSuperview];
-      self.displayCornerRadiusProbe = [[UIView alloc] initWithFrame:window.bounds];
-      self.displayCornerRadiusProbe.userInteractionEnabled = NO;
-      self.displayCornerRadiusProbe.isAccessibilityElement = NO;
-      self.displayCornerRadiusProbe.accessibilityElementsHidden = YES;
-      self.displayCornerRadiusProbe.cornerConfiguration = [UICornerConfiguration
-          configurationWithRadius:[UICornerRadius containerConcentricRadius]];
+      UIView* probe = [[UIView alloc] initWithFrame:window.bounds];
+      probe.userInteractionEnabled = NO;
+      probe.isAccessibilityElement = NO;
+      probe.accessibilityElementsHidden = YES;
+      id configuration = CreateDisplayCornerConfiguration();
+      if (!configuration || !SetDisplayCornerConfiguration(probe, configuration)) {
+        self.displayCornerRadiusProbe = nil;
+        return;
+      }
+      self.displayCornerRadiusProbe = probe;
       // Keep the transparent probe behind application content so UIKit can resolve its corners
       // against the window without changing the Flutter view's rendering.
       [window insertSubview:self.displayCornerRadiusProbe atIndex:0];
@@ -1570,13 +1628,16 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
     CGFloat scale = screen.scale;
     _viewportMetrics.physical_display_corner_radius_top_left =
-        [self.displayCornerRadiusProbe effectiveRadiusForCorner:UIRectCornerTopLeft] * scale;
+        GetEffectiveDisplayCornerRadius(self.displayCornerRadiusProbe, UIRectCornerTopLeft) * scale;
     _viewportMetrics.physical_display_corner_radius_top_right =
-        [self.displayCornerRadiusProbe effectiveRadiusForCorner:UIRectCornerTopRight] * scale;
+        GetEffectiveDisplayCornerRadius(self.displayCornerRadiusProbe, UIRectCornerTopRight) *
+        scale;
     _viewportMetrics.physical_display_corner_radius_bottom_right =
-        [self.displayCornerRadiusProbe effectiveRadiusForCorner:UIRectCornerBottomRight] * scale;
+        GetEffectiveDisplayCornerRadius(self.displayCornerRadiusProbe, UIRectCornerBottomRight) *
+        scale;
     _viewportMetrics.physical_display_corner_radius_bottom_left =
-        [self.displayCornerRadiusProbe effectiveRadiusForCorner:UIRectCornerBottomLeft] * scale;
+        GetEffectiveDisplayCornerRadius(self.displayCornerRadiusProbe, UIRectCornerBottomLeft) *
+        scale;
   }
 }
 
