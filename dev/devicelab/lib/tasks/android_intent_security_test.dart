@@ -36,10 +36,10 @@ TaskFunction androidIntentSecurityTest({Map<String, String>? environment}) {
 /// Tests entrypoint injection in release mode on a non-prebuilt app.
 TaskFunction _testReleaseNonPrebuiltEntrypointInjection({Map<String, String>? environment}) {
   const org = 'com.example.intentsec';
-  final Directory tempDir = Directory.systemTemp.createTempSync(
-    'flutter_devicelab_intent_security_entrypoint.',
-  );
   return () async {
+    final Directory tempDir = Directory.systemTemp.createTempSync(
+      'flutter_devicelab_intent_security_entrypoint.',
+    );
     try {
       section('TEST: RELEASE NON-PREBUILT ENTRYPOINT INJECTION');
       section('Create app for entrypoint test');
@@ -135,10 +135,10 @@ void main() {
 /// Tests route injection in release mode on a non-prebuilt app.
 TaskFunction _testReleaseNonPrebuiltRouteInjection({Map<String, String>? environment}) {
   const org = 'com.example.intentsec';
-  final Directory tempDir = Directory.systemTemp.createTempSync(
-    'flutter_devicelab_intent_security_route.',
-  );
   return () async {
+    final Directory tempDir = Directory.systemTemp.createTempSync(
+      'flutter_devicelab_intent_security_route.',
+    );
     try {
       section('TEST: RELEASE NON-PREBUILT ROUTE INJECTION');
       section('Create app for route test');
@@ -287,10 +287,10 @@ void main() {
 /// Tests entrypoint injection in release mode when self-sent.
 TaskFunction _testReleaseNonPrebuiltEntrypointSelfSent({Map<String, String>? environment}) {
   const org = 'com.example.intentsec';
-  final Directory tempDir = Directory.systemTemp.createTempSync(
-    'flutter_devicelab_intent_security_entrypoint_self.',
-  );
   return () async {
+    final Directory tempDir = Directory.systemTemp.createTempSync(
+      'flutter_devicelab_intent_security_entrypoint_self.',
+    );
     try {
       section('TEST: RELEASE NON-PREBUILT ENTRYPOINT SELF-SENT');
       section('Create app for self-sent entrypoint test');
@@ -450,10 +450,10 @@ class TestActivity : Activity() {
 /// Tests route injection in release mode when self-sent.
 TaskFunction _testReleaseNonPrebuiltRouteSelfSent({Map<String, String>? environment}) {
   const org = 'com.example.intentsec';
-  final Directory tempDir = Directory.systemTemp.createTempSync(
-    'flutter_devicelab_intent_security_route_self.',
-  );
   return () async {
+    final Directory tempDir = Directory.systemTemp.createTempSync(
+      'flutter_devicelab_intent_security_route_self.',
+    );
     try {
       section('TEST: RELEASE NON-PREBUILT ROUTE SELF-SENT');
       section('Create app for self-sent route test');
@@ -611,10 +611,10 @@ class TestActivity : Activity() {
 /// Tests route injection in release mode when route matches an intent filter.
 TaskFunction _testReleaseNonPrebuiltRouteIntentFilter({Map<String, String>? environment}) {
   const org = 'com.example.intentsec';
-  final Directory tempDir = Directory.systemTemp.createTempSync(
-    'flutter_devicelab_intent_security_route_filter.',
-  );
   return () async {
+    final Directory tempDir = Directory.systemTemp.createTempSync(
+      'flutter_devicelab_intent_security_route_filter.',
+    );
     try {
       section('TEST: RELEASE NON-PREBUILT ROUTE INTENT FILTER');
       section('Create app for route intent-filter test');
