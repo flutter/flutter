@@ -50,34 +50,18 @@ class AnalysisServer {
   final _errorsController = StreamController<FileAnalysisErrors>.broadcast();
   var _didServerErrorOccur = false;
 
-  /// Whether the server is currently analyzing.
-  bool get isAnalyzing => _isAnalyzing;
-  bool _isAnalyzing = false;
-
-  /// Returns a [Future] that completes when the server is no longer analyzing.
+  /// Returns a [Future] that completes when the server has completed any
+  /// in-progress initialization or analysis.
   ///
-  /// If [delay] is provided, this method will wait for that duration before
-  /// checking if the server is analyzing. if the server starts analyzing during
-  /// that duration, it will wait for analysis to complete.
+  /// This method will wait for [delay] before calling the server. If not
+  /// provided, defaults to 100ms.
   ///
   /// This is useful to avoid the race condition where analysis hasn't started
   /// yet after a file change.
   Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
-    if (_isAnalyzing) {
-      await onAnalyzing.firstWhere((bool analyzing) => !analyzing);
-    }
-    if (delay != Duration.zero) {
-      // Wait for analysis to potentially start.
-      try {
-        await onAnalyzing.firstWhere((bool analyzing) => analyzing).timeout(delay);
-        // If analysis started, wait for it to finish.
-        if (_isAnalyzing) {
-          await onAnalyzing.firstWhere((bool analyzing) => !analyzing);
-        }
-      } on TimeoutException {
-        // Analysis didn't start within the delay, so we assume it's not going to.
-      }
-    }
+    await Future<void>.delayed(delay);
+
+    await sendRequest('dart/workspace/analysis/complete', {});
   }
 
   var _id = 0;
@@ -146,6 +130,12 @@ class AnalysisServer {
 
   bool get didServerErrorOccur => _didServerErrorOccur;
 
+  /// A stream of booleans indicating that the server is starting or stopping
+  /// analysis.
+  ///
+  /// These statuses are intended to show progress to a user and not intended
+  /// as a reliable indicator that all analysis has completed. To know when
+  /// analysis has definitely completed, use [waitForAnalysis].
   Stream<bool> get onAnalyzing => _analyzingController.stream;
 
   Stream<FileAnalysisErrors> get onErrors => _errorsController.stream;
@@ -307,10 +297,8 @@ class AnalysisServer {
     if (value is Map<String, Object?>) {
       final kind = value['kind'] as String?;
       if (kind == 'begin') {
-        _isAnalyzing = true;
         _analyzingController.add(true);
       } else if (kind == 'end') {
-        _isAnalyzing = false;
         _analyzingController.add(false);
       }
     }

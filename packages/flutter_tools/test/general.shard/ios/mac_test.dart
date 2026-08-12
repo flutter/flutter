@@ -653,7 +653,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(
         logger.errorText,
         contains(
-          'A precompiled file has been changed since last built. Please run "flutter clean --include-xcode-workspace" to '
+          'A precompiled file has been changed since last built. Please run "flutter clean" to '
           'clear the cache.',
         ),
       );
@@ -1333,7 +1333,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async {
     return <String>['xcrun', 'xcodebuild'];
   }
