@@ -364,13 +364,10 @@ void main() {
           'bin',
           globals.platform.isWindows ? 'flutter.bat' : 'flutter',
         );
-        final String examplesDirectory = globals.fs.path.join(
+        final String examplesDirectory = globals.fs.path.joinAll([
           getFlutterRoot(),
-          examplesPath.elementAtOrNull(0),
-          examplesPath.elementAtOrNull(1),
-          examplesPath.elementAtOrNull(2),
-          examplesPath.elementAtOrNull(3),
-        );
+          ...examplesPath,
+        ]);
         const projectName = 'flutter_project';
         final ProcessResult exec = await Process.run(flutterBin, <String>[
           'create',
