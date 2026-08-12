@@ -22,15 +22,18 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/version.dart' as software;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart' show FlutterTemplateType;
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -159,7 +162,7 @@ void main() {
       await io.IOOverrides.runZoned<Future<void>>(() async {
         // Verify IOOverrides is working
         expect(io.Directory.current, workingDir);
-        final command = CreateCommand();
+        final CreateCommand command = createCreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         const driveName = 'X:';
         await expectToolExitLater(
@@ -957,7 +960,7 @@ void main() {
   );
 
   testUsingContext('androidx is used by default in an app project', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
@@ -976,7 +979,7 @@ void main() {
   });
 
   testUsingContext('androidx is used by default in a module project', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--template=module', '--no-pub', projectDir.path]);
@@ -988,7 +991,7 @@ void main() {
   testUsingContext(
     'creating a new project should create v2 embedding and never show an Android v1 deprecation warning',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--platform', 'android', projectDir.path]);
@@ -1020,7 +1023,7 @@ void main() {
   );
 
   testUsingContext('app supports android and ios by default', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
@@ -1031,7 +1034,7 @@ void main() {
 
   const descAndroid = 'app does not include android if disabled in config';
   testUsingContext(descAndroid, () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
@@ -1041,7 +1044,7 @@ void main() {
 
   const descIos = 'app does not include ios if disabled in config';
   testUsingContext(descIos, () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
@@ -1051,7 +1054,7 @@ void main() {
 
   const descDesktopWeb = 'app does not include desktop or web by default';
   testUsingContext(descDesktopWeb, () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
@@ -1064,7 +1067,7 @@ void main() {
 
   const descPluginDesktopWeb = 'plugin does not include desktop or web by default';
   testUsingContext(descPluginDesktopWeb, () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
@@ -1086,7 +1089,7 @@ void main() {
 
   const descAppLinux = 'app supports Linux if requested';
   testUsingContext(descAppLinux, () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--platform=linux', projectDir.path]);
@@ -1102,7 +1105,7 @@ void main() {
 
   const descPluginLinux = 'plugin supports Linux if requested';
   testUsingContext(descPluginLinux, () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1136,7 +1139,7 @@ void main() {
 
   const descAppMacos = 'app supports macOS if requested';
   testUsingContext(descAppMacos, () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--platform=macos', projectDir.path]);
@@ -1152,7 +1155,7 @@ void main() {
 
   const descPluginMacos = 'plugin supports macOS if requested';
   testUsingContext(descPluginMacos, () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1182,7 +1185,7 @@ void main() {
   testUsingContext(
     'app supports Windows if requested',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--platform=windows', projectDir.path]);
@@ -1199,7 +1202,7 @@ void main() {
   );
 
   testUsingContext('Windows has correct VERSIONINFO', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
@@ -1218,7 +1221,7 @@ void main() {
   testUsingContext(
     'plugin supports Windows if requested',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -1248,7 +1251,7 @@ void main() {
   );
 
   testUsingContext('app supports web if requested', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--platform=web', projectDir.path]);
@@ -1263,7 +1266,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isWebEnabled: true), Logger: () => logger});
 
   testUsingContext('app creates maskable icons for web', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--platform=web', projectDir.path]);
@@ -1275,7 +1278,7 @@ void main() {
   });
 
   testUsingContext('plugin uses new platform schema', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
@@ -1289,7 +1292,7 @@ void main() {
   });
 
   testUsingContext('has correct content and formatting with module template', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1417,7 +1420,7 @@ void main() {
   }, overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform});
 
   testUsingContext('has correct default content and formatting with app template', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1517,7 +1520,7 @@ void main() {
   }, overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform});
 
   testUsingContext('has correct content and formatting with plugin template', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1579,7 +1582,7 @@ void main() {
         completer.complete();
       });
 
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -1612,7 +1615,7 @@ void main() {
   );
 
   testUsingContext('Correct info.plist key-value pairs for project.', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1648,7 +1651,7 @@ void main() {
   testUsingContext(
     'Correct info.plist key-value pairs for iOS module.',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -1692,7 +1695,7 @@ void main() {
   );
 
   testUsingContext('Correct info.plist key-value pairs for iOS plugin.', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -1727,7 +1730,7 @@ void main() {
   });
 
   testUsingContext('should show --ios-language deprecation warning for all templates', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--ios-language=swift', projectDir.path]);
@@ -1744,7 +1747,7 @@ void main() {
   testUsingContext(
     'has correct content and formatting with macOS app template',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -1811,7 +1814,7 @@ void main() {
   testUsingContext(
     'has correct application id for android, bundle id for ios and application id for Linux',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       String tmpProjectDir = globals.fs.path.join(tempDir.path, 'hello_flutter');
@@ -1875,7 +1878,7 @@ void main() {
   );
 
   testUsingContext('can re-gen default template over existing project', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
@@ -1891,7 +1894,7 @@ void main() {
   testUsingContext(
     'can re-gen default template over existing app project with no metadata and detect the type',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
@@ -1911,7 +1914,7 @@ void main() {
   testUsingContext(
     'can re-gen app template over existing app project and detect the type',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
@@ -1928,7 +1931,7 @@ void main() {
   testUsingContext(
     'can re-gen template over existing module project and detect the type',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--template=module', projectDir.path]);
@@ -1945,7 +1948,7 @@ void main() {
   testUsingContext(
     'can re-gen default template over existing plugin project and detect the type',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
@@ -1962,7 +1965,7 @@ void main() {
   testUsingContext(
     'can re-gen default template over existing package project and detect the type',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
@@ -2204,7 +2207,7 @@ void main() {
   });
 
   testUsingContext('fails when file exists where output directory should be', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final File existingFile = globals.fs.file(globals.fs.path.join(projectDir.path, 'bad'));
     if (!existingFile.existsSync()) {
@@ -2217,7 +2220,7 @@ void main() {
   });
 
   testUsingContext('fails overwrite when file exists where output directory should be', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final File existingFile = globals.fs.file(globals.fs.path.join(projectDir.path, 'bad'));
     if (!existingFile.existsSync()) {
@@ -2269,7 +2272,7 @@ void main() {
   testUsingContext(
     'invokes pub in online and offline modes',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       // Run pub online first in order to populate the pub cache.
@@ -2341,7 +2344,7 @@ void main() {
 
   testUsingContext("can't create an empty non-application project", () async {
     final String outputDir = globals.fs.path.join(tempDir.path, 'test_project');
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final args = <String>['create', '--no-pub', '--empty', '--template=plugin', outputDir];
 
@@ -2467,7 +2470,7 @@ void main() {
     'can write samples index to disk',
     () async {
       final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final args = <String>['create', '--list-samples', outputFile];
 
@@ -2494,7 +2497,7 @@ void main() {
     'Throws tool exit on empty samples index',
     () async {
       final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final args = <String>['create', '--list-samples', outputFile];
 
@@ -2518,7 +2521,7 @@ void main() {
     'provides an error to the user if samples json download fails',
     () async {
       final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final args = <String>['create', '--list-samples', outputFile];
 
@@ -2543,7 +2546,7 @@ void main() {
   );
 
   testUsingContext('plugin does not support any platform by default', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
@@ -2570,7 +2573,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext('plugin creates platform interface by default', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
@@ -2586,7 +2589,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext('plugin passes analysis and unit tests', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
@@ -2597,7 +2600,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext('plugin example passes analysis and unit tests', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
@@ -2610,7 +2613,7 @@ void main() {
   });
 
   testUsingContext('plugin supports ios if requested', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -2633,7 +2636,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
   testUsingContext('plugin supports android if requested', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -2657,7 +2660,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
   testUsingContext('plugin supports web if requested', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -2684,7 +2687,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isWebEnabled: true), Logger: () => logger});
 
   testUsingContext('plugin does not support web if feature is not enabled', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -2705,7 +2708,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
   testUsingContext('create an empty plugin, then add ios', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     await runner.run(<String>[
@@ -2721,7 +2724,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext('create an empty plugin, then add android', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     await runner.run(<String>[
@@ -2737,7 +2740,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext('create an empty plugin, then add linux', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     await runner.run(<String>[
@@ -2753,7 +2756,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)});
 
   testUsingContext('create an empty plugin, then add macos', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     await runner.run(<String>[
@@ -2769,7 +2772,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)});
 
   testUsingContext('create an empty plugin, then add windows', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     await runner.run(<String>[
@@ -2785,7 +2788,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)});
 
   testUsingContext('create an empty plugin, then add web', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     await runner.run(<String>[
@@ -2800,7 +2803,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isWebEnabled: true)});
 
   testUsingContext('create a plugin with ios, then add macos', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'create',
@@ -2832,7 +2835,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)});
 
   testUsingContext('create a plugin with ios and android', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'create',
@@ -2858,7 +2861,7 @@ void main() {
   });
 
   testUsingContext('plugin includes native iOS unit tests', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -2888,7 +2891,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true), Logger: () => logger});
 
   testUsingContext('plugin includes native Kotlin unit tests', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -2915,7 +2918,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
   testUsingContext('plugin includes native Java unit tests', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -2945,7 +2948,7 @@ void main() {
 
   testUsingContext('plugin includes only setting.gradle.kts', () async {
     // Regression test for https://github.com/flutter/flutter/issues/181565.
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -2962,7 +2965,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
   testUsingContext('plugin includes native Swift unit tests', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -2986,7 +2989,7 @@ void main() {
   testUsingContext(
     'plugin includes native Windows unit tests',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -3009,7 +3012,7 @@ void main() {
   );
 
   testUsingContext('plugin includes native Linux unit tests', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -3030,7 +3033,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true), Logger: () => logger});
 
   testUsingContext('create a module with --platforms throws error.', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await expectLater(
       runner.run(<String>[
@@ -3045,7 +3048,7 @@ void main() {
   });
 
   testUsingContext('create a package with --platforms throws error.', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await expectLater(
       runner.run(<String>[
@@ -3060,7 +3063,7 @@ void main() {
   });
 
   testUsingContext('create an ffi package with --platforms throws error.', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await expectLater(
       runner.run(<String>[
@@ -3075,7 +3078,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)});
 
   testUsingContext('create a plugin with android, delete then re-create folders', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'create',
@@ -3103,7 +3106,7 @@ void main() {
   testUsingContext(
     'create a plugin with android, delete then re-create folders while also adding windows',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'create',
@@ -3141,7 +3144,7 @@ void main() {
   testUsingContext(
     'flutter create . on and existing plugin does not add android folders if android is not supported in pubspec',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'create',
@@ -3160,7 +3163,7 @@ void main() {
   testUsingContext(
     'flutter create . on and existing plugin does not add windows folder even feature is enabled',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'create',
@@ -3180,7 +3183,7 @@ void main() {
   testUsingContext(
     'flutter create . on and existing plugin does not add linux folder even feature is enabled',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'create',
@@ -3200,7 +3203,7 @@ void main() {
   testUsingContext(
     'flutter create . on and existing plugin does not add web files even feature is enabled',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'create',
@@ -3219,7 +3222,7 @@ void main() {
   testUsingContext(
     'flutter create . on and existing plugin does not add macos folder even feature is enabled',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'create',
@@ -3239,7 +3242,7 @@ void main() {
   testUsingContext(
     'flutter create . on and existing plugin should show "Your example app code in"',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
       final String relativePluginPath = globals.fs.path.normalize(
@@ -3276,7 +3279,7 @@ void main() {
   testUsingContext(
     'flutter create -t plugin in an empty folder should not show pubspec.yaml updating suggestion',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'create',
@@ -3302,7 +3305,7 @@ void main() {
   testUsingContext(
     'flutter create -t plugin in an existing plugin should show pubspec.yaml updating suggestion',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
       final String relativePluginPath = globals.fs.path.normalize(
@@ -3335,7 +3338,7 @@ void main() {
   );
 
   testUsingContext('newly created plugin has min flutter sdk version as 3.3.0', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
@@ -3373,7 +3376,7 @@ void main() {
       expect(rawTemplate, contains("s.platform = :ios, '15.0'"));
     }
 
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'create',
@@ -3392,7 +3395,7 @@ void main() {
   });
 
   testUsingContext('default app uses flutter default versions', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
@@ -3410,7 +3413,7 @@ void main() {
   });
 
   testUsingContext('Android Java plugin contains namespace', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -3436,7 +3439,7 @@ void main() {
   });
 
   testUsingContext('Android FFI plugin contains namespace', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -3460,7 +3463,7 @@ void main() {
   });
 
   testUsingContext('creates a plugin with shared darwin implementation', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -3562,7 +3565,7 @@ void main() {
   testUsingContext(
     'creates a plugin with shared darwin implementation with both SwiftPM and CocoaPods',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -3602,7 +3605,7 @@ void main() {
   testUsingContext(
     'creates a plugin with shared darwin implementation with SwiftPM enabled',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -3643,7 +3646,7 @@ void main() {
   testUsingContext(
     'should show warning when darwin is requested and macOS and iOS are disabled',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -3667,7 +3670,7 @@ void main() {
   testUsingContext(
     'should show warning when darwin is requested and ios is disabled, but still create macos',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -3698,7 +3701,7 @@ void main() {
   );
 
   testUsingContext('Android FFI plugin contains 16kb page support', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -3725,7 +3728,7 @@ void main() {
   });
 
   testUsingContext('Android Kotlin plugin contains namespace', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -3751,7 +3754,7 @@ void main() {
   });
 
   testUsingContext('Android Java plugin sets explicit compatibility version', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -3778,7 +3781,7 @@ void main() {
   });
 
   testUsingContext('Android Kotlin plugin sets explicit compatibility version', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -3855,7 +3858,7 @@ void main() {
   );
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     const projectName = 'foo_BarBaz';
@@ -3889,7 +3892,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)});
 
   testUsingContext('Windows plugins handle partially camel-case project names correctly', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     const projectName = 'foo_BarBaz';
@@ -3939,7 +3942,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)});
 
   testUsingContext('Linux plugins handle project names ending in _plugin correctly', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     const projectName = 'foo_bar_plugin';
@@ -3977,7 +3980,7 @@ void main() {
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true)});
 
   testUsingContext('Windows plugins handle project names ending in _plugin correctly', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     const projectName = 'foo_bar_plugin';
@@ -4029,7 +4032,7 @@ void main() {
   testUsingContext(
     'created plugin supports no platforms should print `no platforms` message',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
@@ -4051,7 +4054,7 @@ void main() {
   testUsingContext(
     'created FFI plugin supports no platforms should print `no platforms` message',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
@@ -4073,7 +4076,7 @@ void main() {
   testUsingContext(
     'created plugin with no --platforms flag should not print `no platforms` message if the existing plugin supports a platform.',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -4092,7 +4095,7 @@ void main() {
   testUsingContext(
     'should show warning when disabled platforms are selected while creating a plugin',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -4111,7 +4114,7 @@ void main() {
   testUsingContext(
     "shouldn't show warning when only enabled platforms are selected while creating a plugin",
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -4130,7 +4133,7 @@ void main() {
   testUsingContext(
     'should show warning when disabled platforms are selected while creating a app',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -4148,7 +4151,7 @@ void main() {
   testUsingContext(
     "shouldn't show warning when only enabled platforms are selected while creating a app",
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -4233,7 +4236,7 @@ void main() {
   testUsingContext(
     'show an error message for removed --template=skeleton',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await expectLater(
         runner.run(<String>['create', '--no-pub', '--template=skeleton', projectDir.path]),
@@ -4253,7 +4256,7 @@ void main() {
   );
 
   testUsingContext('create an FFI plugin with ios, then add macos', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'create',
@@ -4287,7 +4290,7 @@ void main() {
 
   for (final template in <String>['package_ffi', 'plugin_ffi']) {
     testUsingContext('$template error android language', () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final args = <String>[
         'create',
@@ -4310,7 +4313,7 @@ void main() {
   }
 
   testUsingContext('FFI plugins error web platform', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final args = <String>[
       'create',
@@ -4327,7 +4330,7 @@ void main() {
   });
 
   testUsingContext('plugin_ffi template shows deprecation warning', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>[
@@ -4348,7 +4351,7 @@ void main() {
   testUsingContext(
     'should show warning when disabled platforms are selected while creating an FFI plugin',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>[
@@ -4367,7 +4370,7 @@ void main() {
   testUsingContext(
     'should not show warning for incompatible Java/template Gradle versions when Java version not found',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
@@ -4418,7 +4421,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext(
     'should not show warning for incompatible Java/template Gradle versions when created project type is irrelevant',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       // Test not creating a project for Android.
@@ -4501,7 +4504,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext(
     'should not show warning for incompatible Java/template AGP versions when project type unrelated',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       // Test not creating a project for Android.
@@ -4553,7 +4556,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext(
     'should show warning for incompatible Java/template Gradle versions when Java version is too high',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final relevantProjectTypes = <FlutterTemplateType>[
         FlutterTemplateType.app,
@@ -4637,7 +4640,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext(
     'should show warning for incompatible Java/template Gradle versions when Java version is too high',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final relevantProjectTypes = <FlutterTemplateType>[
         FlutterTemplateType.app,
@@ -4723,7 +4726,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext(
     'should not show warning for incompatible Java/template AGP/Gradle versions when not detected',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final relevantProjectTypes = <FlutterTemplateType>[
         FlutterTemplateType.app,
@@ -4778,7 +4781,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext(
     'should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- maximum compatible Java version',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final relevantProjectTypes = <FlutterTemplateType>[
         FlutterTemplateType.app,
@@ -4833,7 +4836,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext(
     'should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- minimum compatible Java version',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final relevantProjectTypes = <FlutterTemplateType>[
         FlutterTemplateType.app,
@@ -4932,7 +4935,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
           )
           .createSync(recursive: true);
 
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await expectLater(
@@ -4961,7 +4964,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext(
     'flutter create should show the incompatible java AGP message',
     () async {
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
@@ -4984,7 +4987,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   );
 
   testUsingContext('flutter create --help hides --sample', () async {
-    final command = CreateCommand();
+    final CreateCommand command = createCreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--help']);
@@ -4994,7 +4997,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext('flutter create --verbose --help shows --sample', () async {
     // Because this is an instrumented TestCommandRunner, verboseHelp is not
     // automatically populated like it would be for the main executable.
-    final command = CreateCommand(verboseHelp: true);
+    final CreateCommand command = createCreateCommand(verboseHelp: true);
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     await runner.run(<String>['create', '--verbose', '--help']);
@@ -5002,7 +5005,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   }, overrides: {Logger: () => logger});
 
   testUsingContext('suggests cd ... after creating a directory', () async {
-    final CommandRunner<void> runner = createTestCommandRunner(CreateCommand());
+    final CommandRunner<void> runner = createTestCommandRunner(createCreateCommand());
     await runner.run(['create', '--no-pub', projectDir.path]);
     final cdLine = RegExp(r'^  \$ cd .*flutter_project$', multiLine: true);
     expect(cdLine.hasMatch(logger.statusText), isTrue);
@@ -5018,7 +5021,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     // 3. It's non-trivial to use MemoryFileSystem.test(), we need real template files
     await io.IOOverrides.runZoned<Future<void>>(() async {
       Cache.flutterRoot = getFlutterRoot();
-      final CommandRunner<void> runner = createTestCommandRunner(CreateCommand());
+      final CommandRunner<void> runner = createTestCommandRunner(createCreateCommand());
       await runner.run(['create', '--no-pub', '.']);
     }, getCurrentDirectory: () => out);
     expect(logger.statusText, isNot(contains(r'  $ cd')));
@@ -5069,7 +5072,7 @@ Future<void> _createProject(
   List<String> unexpectedPaths = const <String>[],
   List<String> expectedGitignoreLines = const <String>[],
 }) async {
-  final command = CreateCommand();
+  final CreateCommand command = createCreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...createArgs, dir.path]);
 
@@ -5159,4 +5162,38 @@ bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex + 1].replaceAll('<', '').replaceAll('/>', '') == 'true';
+}
+
+CreateCommand createCreateCommand({
+  ToolContext? toolContext,
+  TemplateRenderer? templateRenderer,
+  HttpClientFactory? httpClientFactory,
+  Java? java,
+  Net? net,
+  PlistParser? plistParser,
+  Pub? pub,
+  bool verboseHelp = false,
+}) {
+  return CreateCommand(
+    toolContext:
+        toolContext ??
+        FakeToolContext(
+          fs: globals.fs,
+          logger: globals.logger,
+          platform: globals.platform,
+          processManager: globals.processManager,
+          cache: globals.cache,
+          flutterVersion: FakeFlutterVersion(),
+          projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
+          terminal: globals.terminal,
+          os: globals.os,
+        ),
+    templateRenderer: templateRenderer,
+    httpClientFactory: httpClientFactory,
+    java: java,
+    net: net,
+    plistParser: plistParser,
+    pub: pub,
+    verboseHelp: verboseHelp,
+  );
 }

@@ -7,12 +7,22 @@ import 'dart:async';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
-  LogsCommand({required this.sigint, required this.sigterm}) {
+  LogsCommand({
+    required ToolContext toolContext,
+    ApplicationPackageFactory? applicationPackageFactory,
+    ProcessSignal? sigint,
+    ProcessSignal? sigterm,
+  }) : _toolContext = toolContext,
+       _sigint = sigint ?? ProcessSignal.sigint,
+       _sigterm = sigterm ?? ProcessSignal.sigterm,
+       super(toolContext: toolContext) {
+    applicationPackages = applicationPackageFactory;
     argParser.addFlag(
       'clear',
       negatable: false,
@@ -22,6 +32,10 @@ class LogsCommand extends FlutterCommand {
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
+
+  final ToolContext _toolContext;
+  final ProcessSignal _sigint;
+  final ProcessSignal _sigterm;
 
   @override
   final name = 'logs';
@@ -39,8 +53,6 @@ class LogsCommand extends FlutterCommand {
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   Device? device;
-  final ProcessSignal sigint;
-  final ProcessSignal sigterm;
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
@@ -53,6 +65,7 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final Logger logger = _toolContext.logger;
     final Device cachedDevice = device!;
     if (boolArg('clear')) {
       cachedDevice.clearLogs();
@@ -64,7 +77,7 @@ class LogsCommand extends FlutterCommand {
 
     final DeviceLogReader logReader = await cachedDevice.getLogReader(app: app);
 
-    globals.printStatus('Showing $logReader logs:');
+    logger.printStatus('Showing $logReader logs:');
 
     final exitCompleter = Completer<int>();
 
@@ -79,18 +92,18 @@ class LogsCommand extends FlutterCommand {
 
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(
-      (String message) => globals.printStatus(message, wrap: false),
+      (String message) => logger.printStatus(message, wrap: false),
       onDone: () => maybeComplete(),
-      onError: (dynamic error) => maybeComplete(error is int ? error : 1),
+      onError: (Object error) => maybeComplete(error is int ? error : 1),
     );
 
     // When terminating, close down the log reader.
-    sigint.watch().listen((ProcessSignal signal) {
+    _sigint.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       maybeComplete();
-      globals.printStatus('');
+      logger.printStatus('');
     });
-    sigterm.watch().listen((ProcessSignal signal) {
+    _sigterm.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       maybeComplete();
     });

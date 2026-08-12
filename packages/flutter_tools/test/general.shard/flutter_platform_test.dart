@@ -8,14 +8,15 @@ import 'dart:io' as io;
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
@@ -56,6 +57,10 @@ void main() {
           fileSystem: fileSystem,
           processManager: FakeProcessManager.empty(),
           logger: BufferLogger.test(),
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          shutdownHooks: ShutdownHooks(),
         );
         flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -83,6 +88,10 @@ void main() {
           fileSystem: fileSystem,
           processManager: FakeProcessManager.empty(),
           logger: BufferLogger.test(),
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          shutdownHooks: ShutdownHooks(),
         );
         flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -101,6 +110,7 @@ void main() {
       'an exception from the app not starting bubbles up to the test runner',
       () async {
         final testDevice = _UnstartableDevice();
+        final logger = BufferLogger.test();
         final flutterPlatform = FlutterPlatform(
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
@@ -112,7 +122,11 @@ void main() {
           buildInfo: BuildInfo.debug,
           fileSystem: fileSystem,
           processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          logger: logger,
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          shutdownHooks: ShutdownHooks(),
         );
 
         await expectLater(
@@ -126,10 +140,7 @@ void main() {
             ),
           ),
         );
-        expect(
-          (globals.logger as BufferLogger).traceText,
-          contains('test 0: error caught during test;'),
-        );
+        expect(logger.traceText, contains('test 0: error caught during test;'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -142,6 +153,7 @@ void main() {
       'a shutdown signal terminates the test device',
       () async {
         final testDevice = _WorkingDevice();
+        final logger = BufferLogger.test();
 
         final shutdownHooks = ShutdownHooks();
         final flutterPlatform = FlutterPlatform(
@@ -156,7 +168,10 @@ void main() {
           buildInfo: BuildInfo.debug,
           fileSystem: fileSystem,
           processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          logger: logger,
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
         );
 
         await expectLater(
@@ -164,7 +179,6 @@ void main() {
           returnsNormally,
         );
 
-        final logger = globals.logger as BufferLogger;
         await shutdownHooks.runShutdownHooks(logger);
         expect(logger.traceText, contains('test 0: ensuring test device is terminated.'));
       },
@@ -184,6 +198,10 @@ void main() {
           fileSystem: fileSystem,
           processManager: FakeProcessManager.empty(),
           logger: BufferLogger.test(),
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          shutdownHooks: ShutdownHooks(),
         ),
         throwsAssertionError,
       );
@@ -200,6 +218,10 @@ void main() {
           fileSystem: fileSystem,
           processManager: FakeProcessManager.empty(),
           logger: BufferLogger.test(),
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          shutdownHooks: ShutdownHooks(),
         ),
         throwsAssertionError,
       );
@@ -229,6 +251,10 @@ void main() {
         fileSystem: fileSystem,
         processManager: FakeProcessManager.empty(),
         logger: BufferLogger.test(),
+        artifacts: Artifacts.test(fileSystem: fileSystem),
+        config: Config.test(),
+        platform: FakePlatform(),
+        shutdownHooks: ShutdownHooks(),
       );
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
@@ -357,6 +383,10 @@ void main() {
           fileSystem: fileSystem,
           processManager: processManager,
           logger: BufferLogger.test(),
+          artifacts: artifacts,
+          config: Config.test(),
+          platform: FakePlatform(),
+          shutdownHooks: ShutdownHooks(),
         );
         flutterPlatform.compiler = testCompiler;
 
@@ -420,6 +450,10 @@ void main() {
           fileSystem: fileSystem,
           processManager: processManager,
           logger: BufferLogger.test(),
+          artifacts: artifacts,
+          config: Config.test(),
+          platform: FakePlatform(),
+          shutdownHooks: ShutdownHooks(),
         );
         flutterPlatform.compiler = testCompiler;
 
