@@ -162,10 +162,12 @@ void main() {
               return Offstage(
                 offstage: animation.value == 0.0,
                 child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+                  position: animation.drive(
+                    Tween<Offset>(
+                      begin: const Offset(1.0, 0.0),
+                      end: Offset.zero,
+                    ).chain(CurveTween(curve: Curves.easeOut)),
+                  ),
                   child: child,
                 ),
               );
