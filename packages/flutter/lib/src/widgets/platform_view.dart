@@ -1335,6 +1335,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void _handleFrameworkFocusChanged(bool isFocused) {
     if (!isFocused) {
       _controller?.clearFocus();
+      return;
     }
     SystemChannels.textInput
         .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{

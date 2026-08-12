@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 
 import java.lang.StringBuilder;
 import java.util.HashMap;
@@ -123,10 +125,22 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
                 synthesizeEvent(methodCall);
                 result.success(null);
                 return;
-             case "getViewHierarchy":
+            case "getViewHierarchy":
                 String viewHierarchy = getSerializedViewHierarchy();
                 result.success(viewHierarchy);
                 return;
+            case "commitText":
+                View fView = getFlutterView();
+                EditorInfo attrs = new EditorInfo();
+                InputConnection conn = fView.onCreateInputConnection(attrs);
+                if (conn != null) {
+                    conn.commitText("updated", 1);
+                    result.success(true);
+                } else {
+                    result.success(false);
+                }
+                return;
+
         }
         result.notImplemented();
     }
