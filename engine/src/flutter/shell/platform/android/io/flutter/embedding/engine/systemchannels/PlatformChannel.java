@@ -223,6 +223,11 @@ public class PlatformChannel {
     this.platformMessageHandler = platformMessageHandler;
   }
 
+  /** Returns whether the platform is currently displaying Flutter edge-to-edge. */
+  public boolean isEdgeToEdgeEnabled() {
+    return platformMessageHandler != null && platformMessageHandler.isEdgeToEdgeEnabled();
+  }
+
   /** Informs Flutter of a change in the SystemUI overlays. */
   public void systemChromeChanged(boolean overlaysAreVisible) {
     Log.v(TAG, "Sending 'systemUIChange' message.");
@@ -493,6 +498,11 @@ public class PlatformChannel {
      * be set to transparent, making the buttons and icons hover over the fullscreen application.
      */
     void showSystemUiMode(@NonNull SystemUiMode mode);
+
+    /** Returns whether the platform is currently displaying Flutter edge-to-edge. */
+    default boolean isEdgeToEdgeEnabled() {
+      return false;
+    }
 
     /**
      * The Flutter application would like the Android system to notify the framework when the system

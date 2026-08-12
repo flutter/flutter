@@ -110,6 +110,11 @@ public class PlatformPlugin {
         }
 
         @Override
+        public boolean isEdgeToEdgeEnabled() {
+          return PlatformPlugin.this.isEdgeToEdge;
+        }
+
+        @Override
         public void setSystemUiChangeListener() {
           setSystemChromeChangeListener();
         }

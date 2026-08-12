@@ -19,6 +19,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 // Loosely based off of
 // https://github.com/android/user-interface-samples/blob/main/WindowInsetsAnimation/app/src/main/java/com/google/android/samples/insetsanimation/RootViewDeferringInsetsCallback.kt
@@ -56,6 +57,7 @@ class ImeSyncDeferringInsetsCallback {
   private AnimationCallback animationCallback;
   private InsetsListener insetsListener;
   private ImeVisibilityListener imeVisibilityListener;
+  private final BooleanSupplier isEdgeToEdgeEnabled;
 
   // True when an animation that matches deferredInsetTypes is active.
   //
@@ -76,7 +78,12 @@ class ImeSyncDeferringInsetsCallback {
   private boolean needsSave = false;
 
   ImeSyncDeferringInsetsCallback(@NonNull View view) {
+    this(view, () -> false);
+  }
+
+  ImeSyncDeferringInsetsCallback(@NonNull View view, @NonNull BooleanSupplier isEdgeToEdgeEnabled) {
     this.view = view;
+    this.isEdgeToEdgeEnabled = isEdgeToEdgeEnabled;
     this.animationCallback = new AnimationCallback();
     this.insetsListener = new InsetsListener();
   }
@@ -149,15 +156,17 @@ class ImeSyncDeferringInsetsCallback {
 
       // Pre 15, the IME insets include the height of the navigation bar. If the app
       // isn't laid out behind the navigation bar, this causes the IME insets to be too large during
-      // the animation.  To fix this, we subtract the navigationBars bottom inset if the system UI
-      // flags for laying out behind the navigation bar aren't present.
+      // the animation. To fix this, subtract the navigationBars bottom inset unless Flutter's
+      // edge-to-edge system UI mode is active or legacy system UI flags lay the app out behind the
+      // navigation bar.
       int excludedInsets = 0;
       int systemUiFlags = view.getWindowSystemUiVisibility();
-      if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
-        if ((systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-            && (systemUiFlags & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
-          excludedInsets = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
-        }
+      boolean isLaidOutBehindNavigation =
+          isEdgeToEdgeEnabled.getAsBoolean()
+              || (systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
+              || (systemUiFlags & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
+      if (Build.VERSION.SDK_INT < API_LEVELS.API_35 && !isLaidOutBehindNavigation) {
+        excludedInsets = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
       }
 
       WindowInsets.Builder builder = new WindowInsets.Builder(lastWindowInsets);
