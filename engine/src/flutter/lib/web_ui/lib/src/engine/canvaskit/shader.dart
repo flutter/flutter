@@ -2,294 +2,156 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../primitives/image.dart';
-import '../validators.dart';
+import '../backend/shader.dart';
+import '../vector_math.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
-import 'native_memory.dart';
 
 /// Refines the generic [ui.Shader] interface with CanvasKit-specific features.
-abstract class CkShader implements ui.Shader {
-  /// Returns a Skia shader at requested filter quality, if that shader supports
-  /// altering its filter quality.
-  ///
-  /// If the implementation supports changing filter quality, and the value of
-  /// [contextualQuality] is the same as a previously passed value, the
-  /// implementation may return the same object as before. If a new Skia object
-  /// is created, the previous object is released and cannot be used again. For
-  /// this reason, do not store the returned value long-term to prevent dangling
-  /// pointer errors.
-  SkShader getSkShader(ui.FilterQuality contextualQuality);
-
-  /// Whether the shader represents a gradient.
-  bool get isGradient;
+abstract class CkShader implements BackendShader {
+  /// Returns a Skia shader.
+  SkShader get skShader;
 }
 
-/// Base class for shader implementations with a simple memory model that do not
-/// support contextual filter quality.
-///
-/// Provides common memory management logic for shaders that map one-to-one to a
-/// [SkShader] object. The lifetime of this shader is hard-linked to the
-/// lifetime of the [SkShader]. [getSkShader] always returns the one and only
-/// [SkShader] object, ignoring contextual filter quality.
-abstract class SimpleCkShader implements CkShader {
-  SimpleCkShader() {
-    _ref = CkUniqueRef<SkShader>(this, createSkiaObject(), debugOwnerLabel);
+class CkGradient extends BackendGradient implements CkShader {
+  CkGradient.linear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) {
+    _skShader = canvasKit.Shader.MakeLinearGradient(
+      Float32List.fromList(<double>[endPoints[0], endPoints[1]]),
+      Float32List.fromList(<double>[endPoints[2], endPoints[3]]),
+      colors,
+      toSkColorStops(colorStops),
+      toSkTileMode(tileMode),
+      matrix4 != null ? toSkMatrixFromFloat32(matrix4) : null,
+    );
   }
 
-  late final CkUniqueRef<SkShader> _ref;
+  CkGradient.radial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) {
+    _skShader = canvasKit.Shader.MakeRadialGradient(
+      Float32List.fromList(<double>[centerX, centerY]),
+      radius,
+      colors,
+      toSkColorStops(colorStops),
+      toSkTileMode(tileMode),
+      matrix4 != null ? toSkMatrixFromFloat32(matrix4) : null,
+      0,
+    );
+  }
+
+  CkGradient.conical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) {
+    _skShader = canvasKit.Shader.MakeTwoPointConicalGradient(
+      toSkPoint(ui.Offset(startX, startY)),
+      startRadius,
+      toSkPoint(ui.Offset(endX, endY)),
+      endRadius,
+      colors,
+      toSkColorStops(colorStops),
+      toSkTileMode(tileMode),
+      matrix4 != null ? toSkMatrixFromFloat32(matrix4) : null,
+      0,
+    );
+  }
+
+  CkGradient.sweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  ) {
+    _skShader = canvasKit.Shader.MakeSweepGradient(
+      centerX,
+      centerY,
+      colors,
+      toSkColorStops(colorStops),
+      toSkTileMode(tileMode),
+      matrix4 != null ? toSkMatrixFromFloat32(matrix4) : null,
+      0,
+      ui.toDegrees(startAngle),
+      ui.toDegrees(endAngle),
+    );
+  }
+
+  SkShader? _skShader;
 
   @override
-  SkShader getSkShader(ui.FilterQuality contextualQuality) => _ref.nativeObject;
+  SkShader get skShader => _skShader!;
 
-  @override
-  bool get isGradient => false;
-
-  String get debugOwnerLabel;
-  SkShader createSkiaObject();
-
-  @override
-  bool get debugDisposed => _ref.isDisposed;
+  bool get debugDisposed => _skShader == null;
 
   @override
   void dispose() {
-    _ref.dispose();
-  }
-}
-
-/// Base class for gradient shader implementations.
-abstract class GradientCkShader extends SimpleCkShader {
-  @override
-  bool get isGradient => true;
-
-  @override
-  String toString() => 'Gradient()';
-}
-
-class CkGradientSweep extends GradientCkShader implements ui.Gradient {
-  CkGradientSweep(
-    this.center,
-    this.colors,
-    this.colorStops,
-    this.tileMode,
-    this.startAngle,
-    this.endAngle,
-    this.matrix4,
-  ) : assert(offsetIsValid(center)),
-      assert(startAngle < endAngle),
-      assert(matrix4 == null || matrix4IsValid(matrix4)) {
-    validateColorStops(colors, colorStops);
-  }
-
-  @override
-  String get debugOwnerLabel => 'Gradient.sweep';
-
-  final ui.Offset center;
-  final List<ui.Color> colors;
-  final List<double>? colorStops;
-  final ui.TileMode tileMode;
-  final double startAngle;
-  final double endAngle;
-  final Float32List? matrix4;
-
-  @override
-  SkShader createSkiaObject() {
-    const double toDegrees = 180.0 / math.pi;
-    return canvasKit.Shader.MakeSweepGradient(
-      center.dx,
-      center.dy,
-      toFlatColors(colors),
-      toSkColorStops(colorStops),
-      toSkTileMode(tileMode),
-      matrix4 != null ? toSkMatrixFromFloat32(matrix4!) : null,
-      0,
-      toDegrees * startAngle,
-      toDegrees * endAngle,
-    );
-  }
-}
-
-class CkGradientLinear extends GradientCkShader implements ui.Gradient {
-  CkGradientLinear(
-    this.from,
-    this.to,
-    this.colors,
-    this.colorStops,
-    this.tileMode,
-    Float32List? matrix,
-  ) : assert(offsetIsValid(from)),
-      assert(offsetIsValid(to)),
-      matrix4 = matrix {
-    assert(matrix4 == null || matrix4IsValid(matrix4!));
-    // ignore: prefer_asserts_in_initializer_lists
-    assert(() {
-      validateColorStops(colors, colorStops);
-      return true;
-    }());
-  }
-
-  final ui.Offset from;
-  final ui.Offset to;
-  final List<ui.Color> colors;
-  final List<double>? colorStops;
-  final ui.TileMode tileMode;
-  final Float32List? matrix4;
-
-  @override
-  String get debugOwnerLabel => 'Gradient.linear';
-
-  @override
-  SkShader createSkiaObject() {
-    return canvasKit.Shader.MakeLinearGradient(
-      toSkPoint(from),
-      toSkPoint(to),
-      toFlatColors(colors),
-      toSkColorStops(colorStops),
-      toSkTileMode(tileMode),
-      matrix4 != null ? toSkMatrixFromFloat32(matrix4!) : null,
-    );
-  }
-}
-
-class CkGradientRadial extends GradientCkShader implements ui.Gradient {
-  CkGradientRadial(
-    this.center,
-    this.radius,
-    this.colors,
-    this.colorStops,
-    this.tileMode,
-    this.matrix4,
-  );
-
-  final ui.Offset center;
-  final double radius;
-  final List<ui.Color> colors;
-  final List<double>? colorStops;
-  final ui.TileMode tileMode;
-  final Float32List? matrix4;
-
-  @override
-  String get debugOwnerLabel => 'Gradient.radial';
-
-  @override
-  SkShader createSkiaObject() {
-    return canvasKit.Shader.MakeRadialGradient(
-      toSkPoint(center),
-      radius,
-      toFlatColors(colors),
-      toSkColorStops(colorStops),
-      toSkTileMode(tileMode),
-      matrix4 != null ? toSkMatrixFromFloat32(matrix4!) : null,
-      0,
-    );
-  }
-}
-
-class CkGradientConical extends GradientCkShader implements ui.Gradient {
-  CkGradientConical(
-    this.focal,
-    this.focalRadius,
-    this.center,
-    this.radius,
-    this.colors,
-    this.colorStops,
-    this.tileMode,
-    this.matrix4,
-  );
-
-  final ui.Offset focal;
-  final double focalRadius;
-  final ui.Offset center;
-  final double radius;
-  final List<ui.Color> colors;
-  final List<double>? colorStops;
-  final ui.TileMode tileMode;
-  final Float32List? matrix4;
-
-  @override
-  String get debugOwnerLabel => 'Gradient.radial(conical)';
-
-  @override
-  SkShader createSkiaObject() {
-    return canvasKit.Shader.MakeTwoPointConicalGradient(
-      toSkPoint(focal),
-      focalRadius,
-      toSkPoint(center),
-      radius,
-      toFlatColors(colors),
-      toSkColorStops(colorStops),
-      toSkTileMode(tileMode),
-      matrix4 != null ? toSkMatrixFromFloat32(matrix4!) : null,
-      0,
-    );
+    _skShader?.delete();
+    _skShader = null;
   }
 }
 
 /// Implements [ui.ImageShader] for CanvasKit.
-///
-/// The memory management model is different from other shaders (backed by
-/// [SimpleCkShader]) in that this object is not one-to-one to its Skia
-/// counterpart [SkShader]. During initialization a default [SkShader] is
-/// created based on the [filterQuality] specified in the constructor. However,
-/// when [withQuality] is called with a different [ui.FilterQuality] value the
-/// previous [SkShader] is discarded and a new [SkShader] is created. Therefore,
-/// over the lifetime of this object, multiple [SkShader] instances may be
-/// generated depending on the _usage_ of this object in [ui.Paint] and other
-/// scenarios that want a shader at different filter quality levels.
-class CkImageShader implements ui.ImageShader, CkShader {
-  CkImageShader(ui.Image image, this.tileModeX, this.tileModeY, this.matrix4, this.filterQuality)
-    : _image = image as EngineImage {
-    if (_image.backendImage is! CkImageDelegate) {
-      throw ArgumentError('The image used in this ImageShader must be a CanvasKit image.');
-    }
-    _initializeSkImageShader(filterQuality ?? ui.FilterQuality.none);
+class CkImageShader extends BackendImageShader implements CkShader {
+  CkImageShader(
+    this._image,
+    this.tileModeX,
+    this.tileModeY,
+    Float64List? matrix4,
+    this.filterQuality,
+  ) {
+    this.matrix4 = matrix4 ?? Matrix4.identity().toFloat64();
+    _initializeSkImageShader(filterQuality);
   }
 
   final ui.TileMode tileModeX;
   final ui.TileMode tileModeY;
-  final Float64List matrix4;
-  final ui.FilterQuality? filterQuality;
-  final EngineImage _image;
+  late Float64List matrix4;
+  final ui.FilterQuality filterQuality;
+  final CkImageDelegate _image;
 
-  /// Owns the reference to the currently [SkShader].
-  ///
-  /// This reference changes when [withQuality] is called with different filter
-  /// quality levels.
-  @visibleForTesting
-  CkUniqueRef<SkShader>? ref;
-
-  /// The filter quality at which the latest [SkShader] was initialized.
-  @visibleForTesting
-  late ui.FilterQuality currentQuality;
+  SkShader? _skShader;
 
   int get imageWidth => _image.width;
 
   int get imageHeight => _image.height;
 
   @override
-  SkShader getSkShader(ui.FilterQuality contextualQuality) {
-    assert(!debugDisposed, 'Cannot make a copy of a disposed ImageShader.');
-    final ui.FilterQuality quality = filterQuality ?? contextualQuality;
-    if (currentQuality != quality) {
-      _initializeSkImageShader(quality);
-    }
-    return ref!.nativeObject;
+  SkShader get skShader {
+    assert(!debugDisposed, 'Cannot get the skShader of a disposed ImageShader.');
+    return _skShader!;
   }
 
-  @override
-  bool get isGradient => false;
-
   void _initializeSkImageShader(ui.FilterQuality quality) {
-    final CkImageDelegate(:skImage) = _image.backendImage as CkImageDelegate;
-    final SkShader skShader;
+    final SkImage skImage = _image.skImage;
     if (quality == ui.FilterQuality.high) {
-      skShader = skImage.makeShaderCubic(
+      _skShader = skImage.makeShaderCubic(
         toSkTileMode(tileModeX),
         toSkTileMode(tileModeY),
         1.0 / 3.0,
@@ -297,7 +159,7 @@ class CkImageShader implements ui.ImageShader, CkShader {
         toSkMatrixFromFloat64(matrix4),
       );
     } else {
-      skShader = skImage.makeShaderOptions(
+      _skShader = skImage.makeShaderOptions(
         toSkTileMode(tileModeX),
         toSkTileMode(tileModeY),
         toSkFilterMode(quality),
@@ -305,15 +167,10 @@ class CkImageShader implements ui.ImageShader, CkShader {
         toSkMatrixFromFloat64(matrix4),
       );
     }
-
-    currentQuality = quality;
-    ref?.dispose();
-    ref = CkUniqueRef<SkShader>(this, skShader, 'ImageShader');
   }
 
   bool _isDisposed = false;
 
-  @override
   bool get debugDisposed {
     bool? result;
     assert(() {
@@ -330,10 +187,11 @@ class CkImageShader implements ui.ImageShader, CkShader {
 
   @override
   void dispose() {
-    assert(!_isDisposed, 'Cannot dispose ImageShader more than once.');
+    if (_isDisposed) {
+      return;
+    }
     _isDisposed = true;
-    _image.dispose();
-    ref?.dispose();
-    ref = null;
+    _skShader?.delete();
+    _skShader = null;
   }
 }
