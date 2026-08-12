@@ -14,6 +14,10 @@ void linuxExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[],
-    supportedPlatforms: const <String>['linux'],
+    supportedPlatforms: const <String>{'linux'},
+    logger: (String message) {
+      // ignore: avoid_print
+      print('[LinuxExtension] $message');
+    },
   );
 }

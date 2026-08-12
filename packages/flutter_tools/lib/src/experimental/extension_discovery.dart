@@ -178,6 +178,9 @@ class ExtensionDiscovery {
   }
 
   /// Spawns and registers multiple extension isolates concurrently.
+  ///
+  /// Any extension isolate that fails to spawn or complete the handshake is
+  /// logged as an error and omitted from the returned list of connections.
   Future<List<ExtensionConnection>> spawnAll(
     List<ExtensionEntryPoint> entryPoints, {
     Duration timeout = const Duration(seconds: 5),

@@ -82,15 +82,20 @@ void main() {
       },
     );
 
-    test('ToolExtensionCapabilities.fromJson eagerly deserializes lists', () {
-      final capabilities = ToolExtensionCapabilities.fromJson(const <String, Object?>{
-        'services': <Object?>['diagnostics', 'config'],
-        'supportedPlatforms': <Object?>['linux', 'macos'],
-      });
+    test(
+      'ToolExtensionCapabilities.fromJson eagerly deserializes lists and normalizes platforms',
+      () {
+        final capabilities = ToolExtensionCapabilities.fromJson(const <String, Object?>{
+          'services': <Object?>['diagnostics', 'config'],
+          'supportedPlatforms': <Object?>['Linux', 'MacOS'],
+        });
 
-      expect(capabilities.services, const <String>['diagnostics', 'config']);
-      expect(capabilities.supportedPlatforms, const <String>['linux', 'macos']);
-    });
+        expect(capabilities.services, const <String>['diagnostics', 'config']);
+        expect(capabilities.supportedPlatforms, const <String>{'linux', 'macos'});
+        expect(capabilities.supportsHostPlatform('LINUX'), isTrue);
+        expect(capabilities.supportsHostPlatform('windows'), isFalse);
+      },
+    );
 
     test('ToolExtensionEntryPoint.run rejects duplicate RPC method registration', () async {
       final service1 = _DummyService('test', 'ping');

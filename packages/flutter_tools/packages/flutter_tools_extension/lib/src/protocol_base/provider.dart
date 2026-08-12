@@ -20,7 +20,7 @@ class ToolExtensionEntryPoint {
   static Future<void> run(
     SendPort sendPort,
     List<ToolExtensionService> services, {
-    List<String>? supportedPlatforms,
+    Set<String>? supportedPlatforms,
     void Function(String message)? logger,
   }) async {
     logger?.call('[ToolExtensionIsolate] Initializing isolate channel...');
@@ -45,7 +45,7 @@ class ToolExtensionEntryPoint {
     }
 
     final capabilities = ToolExtensionCapabilities(
-      supportedPlatforms: supportedPlatforms ?? const <String>['linux', 'macos', 'windows'],
+      supportedPlatforms: supportedPlatforms ?? const <String>{'linux', 'macos', 'windows'},
       services: services.map((ToolExtensionService s) => s.namespace).toList(),
     );
 

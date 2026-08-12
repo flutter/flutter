@@ -32,25 +32,25 @@ class ToolExtensionCapabilities {
   /// Creates [ToolExtensionCapabilities] listing supported [services] and [supportedPlatforms].
   const ToolExtensionCapabilities({
     required this.services,
-    this.supportedPlatforms = const <String>['linux', 'macos', 'windows'],
+    this.supportedPlatforms = const <String>{'linux', 'macos', 'windows'},
   });
 
   /// Deserializes [ToolExtensionCapabilities] from a JSON map payload.
   factory ToolExtensionCapabilities.fromJson(Map<String, Object?> json) {
     final Object? servicesList = json['services'];
-    final services = servicesList is List ? List<String>.from(servicesList) : <String>[];
+    final services = servicesList is Iterable ? List<String>.from(servicesList) : <String>[];
     final Object? platformsList = json['supportedPlatforms'];
-    final supportedPlatforms = platformsList is List
-        ? List<String>.from(platformsList)
-        : const <String>['linux', 'macos', 'windows'];
+    final Set<String> supportedPlatforms = platformsList is Iterable
+        ? platformsList.map((Object? p) => p.toString().toLowerCase()).toSet()
+        : const <String>{'linux', 'macos', 'windows'};
     return ToolExtensionCapabilities(services: services, supportedPlatforms: supportedPlatforms);
   }
 
   /// The list of service namespace identifiers supported by the extension.
   final List<String> services;
 
-  /// The list of host operating system platforms supported by the extension (e.g., `'linux'`).
-  final List<String> supportedPlatforms;
+  /// The set of host operating system platforms supported by the extension in lowercase (e.g., `{'linux'}`).
+  final Set<String> supportedPlatforms;
 
   /// Returns whether the extension supports the given [hostPlatform].
   bool supportsHostPlatform(String hostPlatform) {
@@ -60,6 +60,6 @@ class ToolExtensionCapabilities {
   /// Serializes capabilities to a map payload.
   Map<String, Object?> toMap() => <String, Object?>{
     'services': services,
-    'supportedPlatforms': supportedPlatforms,
+    'supportedPlatforms': supportedPlatforms.toList(),
   };
 }

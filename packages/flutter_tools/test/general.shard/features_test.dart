@@ -447,13 +447,13 @@ void main() {
   });
 
   group('Tool Extensions', () {
-    test('is available on all channels', () {
+    test('is available only on master', () {
       expect(
         toolExtensionsFeature,
         allOf(<Matcher>[
           _onChannelIs('master', available: true, enabledByDefault: false),
-          _onChannelIs('stable', available: true, enabledByDefault: false),
-          _onChannelIs('beta', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: false, enabledByDefault: false),
+          _onChannelIs('beta', available: false, enabledByDefault: false),
         ]),
       );
     });

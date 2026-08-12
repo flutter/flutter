@@ -20,7 +20,7 @@ void _linuxOnlyExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[],
-    supportedPlatforms: const <String>['linux'],
+    supportedPlatforms: const <String>{'linux'},
   );
 }
 
