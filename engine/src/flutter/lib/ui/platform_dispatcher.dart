@@ -67,11 +67,8 @@ typedef MarkAllViewsNeedRenderCallback = void Function();
   'Migrate to ChannelBuffers.setListener instead. '
   'This feature was deprecated after v3.11.0-20.0.pre.',
 )
-typedef PlatformMessageCallback = void Function(
-  String name,
-  ByteData? data,
-  PlatformMessageResponseCallback? callback,
-);
+typedef PlatformMessageCallback =
+    void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
 
 // Signature for _setNeedsReportTimings.
 typedef _SetNeedsReportTimingsFunc = void Function(bool value);
