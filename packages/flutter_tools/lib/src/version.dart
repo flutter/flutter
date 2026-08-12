@@ -469,11 +469,14 @@ abstract class FlutterVersion {
   /// [checkFlutterVersionFreshness] is called after this. This is typically
   /// used when switching channels so that stale information from another
   /// channel doesn't linger.
-  static Future<void> resetFlutterVersionFreshnessCheck() async {
+  static Future<void> resetFlutterVersionFreshnessCheck([Cache? cache]) async {
     try {
-      await globals.cache.getStampFileFor(VersionCheckStamp.flutterVersionCheckStampFile).delete();
+      final Cache effectiveCache = cache ?? globals.cache;
+      await effectiveCache.getStampFileFor(VersionCheckStamp.flutterVersionCheckStampFile).delete();
     } on FileSystemException {
       // Ignore, since we don't mind if the file didn't exist in the first place.
+    } on UnsupportedError {
+      // In testWithoutContext.
     }
   }
 }
