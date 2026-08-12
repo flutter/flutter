@@ -246,19 +246,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ArgParser? _argParser;
 
   int? get _usageLineLength {
-    final OutputPreferences? prefs = _toolContext?.outputPreferences;
-    if (prefs != null) {
-      return prefs.wrapText ? prefs.wrapColumn : null;
-    }
-    return null;
+    final OutputPreferences prefs = _toolContext.outputPreferences;
+    return prefs.wrapText ? prefs.wrapColumn : null;
   }
 
   (int, bool) get _wrapSettings {
-    final OutputPreferences? prefs = _toolContext?.outputPreferences;
-    if (prefs != null) {
-      return (prefs.wrapColumn, prefs.wrapText);
-    }
-    return (80, false);
+    final OutputPreferences prefs = _toolContext.outputPreferences;
+    return (prefs.wrapColumn, prefs.wrapText);
   }
 
   @override
@@ -374,8 +368,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       return false;
     }
 
-    final Stdio stdio = _toolContext?.stdio ?? globals.stdio;
-    final BotDetector botDetector = _toolContext?.botDetector ?? globals.botDetector;
+    final Stdio stdio = _toolContext.stdio;
+    final BotDetector botDetector = _toolContext.botDetector;
 
     // e.g. `flutter bash-completion` or `flutter zsh-completion`
     final bool isShellCompletionCommand =
@@ -390,8 +384,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final ToolContext? localToolContext = _toolContext;
-    final Analytics? analyticsInstance = _toolDependencies?.analytics;
+    final ToolContext localToolContext = _toolContext;
+    final Analytics analyticsInstance = _analytics;
     final contextOverrides = <Type, Object?>{};
 
     // If the flag for enabling or disabling telemetry is passed in,
@@ -423,7 +417,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)) {
       useWrapping = topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
     } else {
-      final Stdio stdio = localToolContext?.stdio ?? globals.stdio;
+      final Stdio stdio = localToolContext.stdio;
       useWrapping =
           stdio.terminalColumns != null && topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
     }
@@ -452,10 +446,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
         topLevelResults.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ||
         topLevelResults.wasParsed(FlutterGlobalOptions.kPackagesOption);
     if (hasLocalEngineOption) {
-      final LocalEngineLocator? engineLocator = localToolContext != null
-          ? localToolContext.localEngineLocator
-          : globals.localEngineLocator;
-      final EngineBuildPaths? engineBuildPaths = await engineLocator?.findEnginePath(
+      final LocalEngineLocator engineLocator = localToolContext.localEngineLocator;
+      final EngineBuildPaths? engineBuildPaths = await engineLocator.findEnginePath(
         engineSourcePath:
             topLevelResults[FlutterGlobalOptions.kLocalEngineSrcPathOption] as String?,
         localEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineOption] as String?,
@@ -475,52 +467,25 @@ class FlutterCommandRunner extends CommandRunner<void> {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
-        if (localToolContext != null) {
-          localToolContext.logger.quiet =
-              (topLevelResults[FlutterGlobalOptions.kQuietFlag] as bool?) ?? false;
+        localToolContext.logger.quiet =
+            (topLevelResults[FlutterGlobalOptions.kQuietFlag] as bool?) ?? false;
 
-          if (localToolContext.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-            await localToolContext.cache.lock();
-          }
-
-<<<<<<< HEAD
-        if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
-          _analytics.suppressTelemetry();
+        if (localToolContext.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
+          await localToolContext.cache.lock();
         }
-=======
-          if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
-            analyticsInstance?.suppressTelemetry();
-          }
->>>>>>> dd4344a3a2b ([tool] Migrate Cache.flutterRoot static state to instance configuration)
 
-          // Required to support `flutter --version` before artifacts are cached.
-          await localToolContext.cache.updateAll(<DevelopmentArtifact>{
-            DevelopmentArtifact.informative,
-          });
+        if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
+          analyticsInstance.suppressTelemetry();
+        }
 
-          localToolContext.flutterVersion.ensureVersionFile();
-          if (await _shouldCheckForUpdates(topLevelResults)) {
-            await localToolContext.flutterVersion.checkFlutterVersionFreshness();
-          }
-        } else {
-          globals.logger.quiet =
-              (topLevelResults[FlutterGlobalOptions.kQuietFlag] as bool?) ?? false;
+        // Required to support `flutter --version` before artifacts are cached.
+        await localToolContext.cache.updateAll(<DevelopmentArtifact>{
+          DevelopmentArtifact.informative,
+        });
 
-          if (globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-            await globals.cache.lock();
-          }
-
-          if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
-            globals.analytics.suppressTelemetry();
-          }
-
-          // Required to support `flutter --version` before artifacts are cached.
-          await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
-
-          globals.flutterVersion.ensureVersionFile();
-          if (await _shouldCheckForUpdates(topLevelResults)) {
-            await globals.flutterVersion.checkFlutterVersionFreshness();
-          }
+        localToolContext.flutterVersion.ensureVersionFile();
+        if (await _shouldCheckForUpdates(topLevelResults)) {
+          await localToolContext.flutterVersion.checkFlutterVersionFreshness();
         }
 
         // See if the user specified a specific device.
@@ -575,9 +540,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots({FileSystem? fileSystem}) {
     final FileSystem fs = fileSystem ?? _toolContext.fs;
-    final String root = fs.path.absolute(
-      _toolContext.cache.flutterRoot,
-    );
+    final String root = fs.path.absolute(_toolContext.cache.flutterRoot);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
       return fs.path.join(root, item);

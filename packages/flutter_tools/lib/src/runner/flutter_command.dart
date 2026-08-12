@@ -188,7 +188,7 @@ abstract class FlutterCommand extends Command<void> {
   ToolContext? get toolContext =>
       _explicitToolContext ??
       (parent as FlutterCommand?)?.toolContext ??
-      (super.runner as FlutterCommandRunner?)?.toolDependencies?.toolContext;
+      (super.runner as FlutterCommandRunner?)?.toolContext;
 
   T? _safeGlobal<T>(T Function() getter) {
     try {
@@ -217,7 +217,7 @@ abstract class FlutterCommand extends Command<void> {
       toolContext?.projectFactory ?? _safeGlobal(() => globals.projectFactory);
   Analytics? get _analytics =>
       _explicitAnalytics ??
-      (super.runner as FlutterCommandRunner?)?.toolDependencies?.analytics ??
+      (super.runner as FlutterCommandRunner?)?.analytics ??
       _safeGlobal(() => globals.analytics);
   Cache? get _cache => toolContext?.cache ?? _safeGlobal(() => globals.cache);
   FlutterVersion? get _flutterVersion =>
@@ -2041,10 +2041,7 @@ abstract class FlutterCommand extends Command<void> {
   ) {
     final FlutterCommandRunner? commandRunner = runner;
     final Analytics effectiveAnalytics =
-        _analytics ??
-        commandRunner?.toolDependencies?.analytics ??
-        context.get<Analytics>() ??
-        globals.analytics;
+        _analytics ?? commandRunner?.analytics ?? context.get<Analytics>() ?? globals.analytics;
 
     // Send command result.
     int? maxRss;
@@ -2136,10 +2133,7 @@ abstract class FlutterCommand extends Command<void> {
     if (commandPath != null) {
       final FlutterCommandRunner? commandRunner = runner;
       final Analytics effectiveAnalytics =
-          _analytics ??
-          commandRunner?.toolDependencies?.analytics ??
-          context.get<Analytics>() ??
-          globals.analytics;
+          _analytics ?? commandRunner?.analytics ?? context.get<Analytics>() ?? globals.analytics;
       effectiveAnalytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
 

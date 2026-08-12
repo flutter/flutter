@@ -333,9 +333,9 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (workspaceNode is YamlList) {
         for (final Object? member in workspaceNode) {
           if (member is String) {
-            String memberName = globals.fs.path.basename(member);
-            final File memberPubspec = globals.fs.file(
-              globals.fs.path.join(project.directory.path, member, _pubspecName),
+            String memberName = fs.path.basename(member);
+            final File memberPubspec = fs.file(
+              fs.path.join(project.directory.path, member, _pubspecName),
             );
             if (memberPubspec.existsSync()) {
               try {
