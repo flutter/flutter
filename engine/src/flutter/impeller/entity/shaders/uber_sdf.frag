@@ -15,27 +15,101 @@ precision mediump float;
 uniform sampler2D color_source_sampler;
 
 uniform FragInfo {
+  // FragInfo fields are sorted by size (vec4 -> vec2 -> float) to optimize
+  // uniform register usage.
+
+  // ===========================================================================
+  // vec4 fields
+  // ===========================================================================
+
+  /// The RGBA color of the shape (or paint opacity in color.a for gradients).
   vec4 color;
-  vec2 center;
-  vec2 size;
-  float stroke_width;
-  float stroke_join;
-  float aa_pixels;
-  float stroked;
-  float type;
-  vec2 superellipse_degree;
-  vec2 superellipse_semi_axis;
-  vec2 angle_span;
-  float octant_offset_c;
-  vec2 circle_center_top;
-  vec2 circle_center_right;
-  vec2 superellipse_scale;
+  /// Corner radii for rounded rects (top-left, top-right, bottom-left,
+  /// bottom-right) or rounded superellipses (xy).
   vec4 radii;
+
+  // ===========================================================================
+  // vec2 fields
+  // ===========================================================================
+
+  // --- General Shape Geometry ---
+  /// The center position of the shape in local coordinates.
+  vec2 center;
+  /// The half-dimensions of the shape (half-width, half-height).
+  vec2 size;
+
+  // --- Superellipse Parameters ---
+  /// The exponent degree (n_x, n_y) of the superellipse curvature.
+  vec2 superellipse_degree;
+  /// The semi-axis lengths (a, b) of the superellipse.
+  vec2 superellipse_semi_axis;
+  /// Normalization scale factor mapping the superellipse quadrant to a unit
+  /// square.
+  vec2 superellipse_scale;
+  /// The angular span of the corner circular arc transitions for rounded
+  /// superellipses.
+  vec2 angle_span;
+  /// The center of the corner transition circle for the top octant of a
+  /// rounded superellipse.
+  vec2 circle_center_top;
+  /// The center of the corner transition circle for the right octant of a
+  /// rounded superellipse.
+  vec2 circle_center_right;
+
+  // --- Gradient Parameters ---
+  /// The starting point of a linear gradient, or the center point of a radial
+  /// gradient.
   vec2 gradient_start;
+  /// The ending point of a linear gradient, or (radius, 0.0) for a radial
+  /// gradient.
   vec2 gradient_end;
+  /// Half the size of a single gradient texel in normalized texture
+  /// coordinates.
   vec2 half_texel;
-  float tile_mode;
+
+  // ===========================================================================
+  // float fields
+  // ===========================================================================
+
+  // --- General Configuration ---
+  /// The shape type:
+  ///   0: Circle
+  ///   1: Rect
+  ///   2: Oval
+  ///   3: RoundRect
+  ///   4: Superellipse
+  float type;
+  /// The type of color source:
+  ///   0: Solid color
+  ///   1: Linear gradient
+  ///   2: Radial gradient
   float color_source_type;
+  /// The width in device pixels over which to apply antialiasing.
+  float aa_pixels;
+
+  // --- Stroke Parameters ---
+  /// Whether the shape is stroked (1.0) or filled (0.0).
+  float stroked;
+  /// The width of the stroke.
+  float stroke_width;
+  /// The join style for the stroke:
+  ///   0: Miter
+  ///   1: Bevel
+  ///   2: Round
+  float stroke_join;
+
+  // --- Superellipse Parameters ---
+  /// Transition line offset dividing top and right octants for rounded
+  /// superellipses.
+  float octant_offset_c;
+
+  // --- Gradient Parameters ---
+  /// The tile mode for gradient sampling:
+  ///   0: Clamp
+  ///   1: Repeat
+  ///   2: Mirror
+  ///   3: Decal
+  float tile_mode;
 }
 frag_info;
 
