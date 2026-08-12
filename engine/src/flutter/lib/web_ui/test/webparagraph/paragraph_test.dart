@@ -1313,7 +1313,7 @@ Future<void> testMain() async {
       for (final dpr in <double>[1.5, 2.0, 2.5]) {
         EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
 
-        final arialStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
+        final arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
         final builder = WebParagraphBuilder(arialStyle);
         builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
         builder.addText('Fractional DPR text');
@@ -1362,5 +1362,5 @@ class _MockCanvas implements Canvas {
   void drawRect(Rect rect, Paint paint) {}
 
   @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
