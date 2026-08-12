@@ -32,13 +32,13 @@ class WebBuildSpecification {
     required List<WebCompilerConfig> compilerConfigs,
     Map<String, String> webDefines = const <String, String>{},
   }) {
-    final String? pwaStrategyRaw = command.getValue(WebOptions.pwaStrategy);
+    final String? pwaStrategyRaw = command.getString(WebOptions.pwaStrategy);
     final ServiceWorkerStrategy? pwaStrategy = pwaStrategyRaw != null
         ? ServiceWorkerStrategy.fromCliName(pwaStrategyRaw)
         : null;
 
     final String? outputDirectoryPath =
-        command.getValue(CommonOptions.outputDir) ??
+        command.getString(CommonOptions.outputDir) ??
         (command.argResults != null && command.argResults!.options.contains('output')
             ? command.stringArg('output')
             : null);
@@ -49,8 +49,8 @@ class WebBuildSpecification {
       buildInfo: buildInfo,
       compilerConfigs: compilerConfigs,
       serviceWorkerStrategy: pwaStrategy,
-      baseHref: command.getValue(WebOptions.baseHref),
-      staticAssetsUrl: command.getValue(WebOptions.staticAssetsUrl),
+      baseHref: command.getString(WebOptions.baseHref),
+      staticAssetsUrl: command.getString(WebOptions.staticAssetsUrl),
       outputDirectoryPath: outputDirectoryPath,
       webDefines: webDefines,
     );

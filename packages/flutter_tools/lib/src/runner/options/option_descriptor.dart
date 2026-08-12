@@ -145,6 +145,17 @@ class StringOptionDescriptor extends OptionDescriptor<String> {
     final ArgResults? target = _resolveTargetResults(results, globalResults);
     return target?[name] as String?;
   }
+
+  @override
+  String? getValue(ArgResults? results, {ArgResults? globalResults}) =>
+      getParsedValue(results, globalResults: globalResults) ?? defaultsTo;
+
+  /// Returns the resolved value or [fallback] if null.
+  String getValueOrDefault(
+    ArgResults? results, {
+    ArgResults? globalResults,
+    String fallback = '',
+  }) => getValue(results, globalResults: globalResults) ?? fallback;
 }
 
 /// A descriptor for boolean flags.
