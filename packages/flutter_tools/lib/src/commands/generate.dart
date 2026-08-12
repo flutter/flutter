@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../globals.dart' as globals;
+import '../context/tool_context.dart';
 import '../runner/flutter_command.dart';
 
 class GenerateCommand extends FlutterCommand {
-  GenerateCommand() {
+  GenerateCommand({required ToolContext toolContext})
+    : _toolContext = toolContext,
+      super(toolContext: toolContext) {
     usesTargetOption();
   }
+
+  final ToolContext _toolContext;
+
   @override
   String get description => 'run code generators.';
 
@@ -20,7 +25,7 @@ class GenerateCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    globals.printError(
+    _toolContext.logger.printError(
       '"flutter generate" is deprecated, use "dart run build_runner" instead. '
       'The following dependencies must be added to dev_dependencies in pubspec.yaml:\n'
       'build_runner: ^1.10.0\n'

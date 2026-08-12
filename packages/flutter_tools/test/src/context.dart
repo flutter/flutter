@@ -110,7 +110,7 @@ void testUsingContext(
               HttpClient: () => FakeHttpClient.any(),
               IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
               OutputPreferences: () => OutputPreferences.test(),
-              Logger: () => BufferLogger.test(),
+              Logger: () => BufferLogger.test(outputPreferences: context.get<OutputPreferences>()),
               OperatingSystemUtils: () => FakeOperatingSystemUtils(),
               PersistentToolState: () => buildPersistentToolState(globals.fs),
               XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
@@ -366,7 +366,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    XcodeProjectBuildContext? buildContext,
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -390,7 +390,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(
+  Future<XcodeProjectInfo?> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
