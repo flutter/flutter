@@ -23,10 +23,8 @@ import '../version.dart';
 import 'compiler_config.dart';
 import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
-import 'web_build_specification.dart';
 
 export 'compiler_config.dart';
-export 'web_build_specification.dart';
 
 /// Whether the application has web plugins.
 const kHasWebPlugins = 'HasWebPlugins';
@@ -65,19 +63,19 @@ class WebBuilder {
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
 
-  /// Builds the web application using the specified [WebBuildSpecification]
+  /// Builds the web application using the specified compiler configurations
   /// and generates the necessary web assets in the output directory.
-  Future<void> buildWeb(WebBuildSpecification spec) async {
-    final FlutterProject flutterProject = spec.project;
-    final String target = spec.target;
-    final BuildInfo buildInfo = spec.buildInfo;
-    final ServiceWorkerStrategy? serviceWorkerStrategy = spec.serviceWorkerStrategy;
-    final List<WebCompilerConfig> compilerConfigs = spec.compilerConfigs;
-    final String? baseHref = spec.baseHref;
-    final String? staticAssetsUrl = spec.staticAssetsUrl;
-    final String? outputDirectoryPath = spec.outputDirectoryPath;
-    final Map<String, String> webDefines = spec.webDefines;
-
+  Future<void> buildWeb(
+    FlutterProject flutterProject,
+    String target,
+    BuildInfo buildInfo,
+    ServiceWorkerStrategy? serviceWorkerStrategy, {
+    required List<WebCompilerConfig> compilerConfigs,
+    String? baseHref,
+    String? staticAssetsUrl,
+    String? outputDirectoryPath,
+    Map<String, String> webDefines = const <String, String>{},
+  }) async {
     if (serviceWorkerStrategy != null) {
       _logger.printWarning(
         'The --pwa-strategy option is deprecated and will be removed in a future Flutter release.\n'

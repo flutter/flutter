@@ -169,18 +169,6 @@ class BuildWebCommand extends BuildSubCommand {
 
     final Map<String, String> webDefines = extractWebDefines();
 
-    final spec = WebBuildSpecification(
-      project: project,
-      target: targetFile,
-      buildInfo: buildInfo,
-      compilerConfigs: compilerConfigs,
-      serviceWorkerStrategy: ServiceWorkerStrategy.fromCliName(getString(WebOptions.pwaStrategy)),
-      baseHref: baseHref,
-      staticAssetsUrl: staticAssetsUrl,
-      outputDirectoryPath: outputDirectoryPath,
-      webDefines: webDefines,
-    );
-
     final webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,
@@ -189,7 +177,17 @@ class BuildWebCommand extends BuildSubCommand {
       flutterVersion: globals.flutterVersion,
       analytics: globals.analytics,
     );
-    await webBuilder.buildWeb(spec);
+    await webBuilder.buildWeb(
+      project,
+      targetFile,
+      buildInfo,
+      ServiceWorkerStrategy.fromCliName(getString(WebOptions.pwaStrategy)),
+      compilerConfigs: compilerConfigs,
+      baseHref: baseHref,
+      staticAssetsUrl: staticAssetsUrl,
+      outputDirectoryPath: outputDirectoryPath,
+      webDefines: webDefines,
+    );
     return FlutterCommandResult.success();
   }
 }
