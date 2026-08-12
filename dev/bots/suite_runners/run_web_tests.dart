@@ -579,30 +579,17 @@ class WebTestsSuite {
       final Pattern indexTotalPattern = RegExp(r'^(\d+)_(\d+)$');
       final Match? match = indexTotalPattern.matchAsPrefix(subshardName);
 
-      if (match != null) {
-        final int index = int.parse(match.group(1)!);
-        final int total = int.parse(match.group(2)!);
-        isLastShard = index == total;
-        testsToRun = selectIndexOfTotalSubshard<String>(allTests);
-      } else {
-        // Fallback for legacy subshard names (e.g. "0", "1", "7_last")
-        const legacyShardCount = 8;
-        final String rawIndex = subshardName.replaceFirst(RegExp(r'_last$'), '');
-        final int? parsedIndex = int.tryParse(rawIndex);
-        if (parsedIndex != null) {
-          final int index = parsedIndex + 1;
-          isLastShard = subshardName.endsWith('_last') || index == legacyShardCount;
-          final int testsPerShard = (allTests.length / legacyShardCount).ceil();
-          final int start = (index - 1) * testsPerShard;
-          final int end = math.min(index * testsPerShard, allTests.length);
-          testsToRun = allTests.sublist(start, end);
-        } else {
-          foundError(<String>[
-            '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" (e.g. "1_8").',
-          ]);
-          return;
-        }
+      if (match == null) {
+        foundError(<String>[
+          '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" (e.g. "1_8").',
+        ]);
+        throw Exception('Invalid subshard name: $subshardName');
       }
+
+      final int index = int.parse(match.group(1)!);
+      final int total = int.parse(match.group(2)!);
+      isLastShard = index == total;
+      testsToRun = selectIndexOfTotalSubshard<String>(allTests);
     }
 
     await _runFlutterWebTest(flutterPackageDirectory.path, testsToRun, useWasm);
