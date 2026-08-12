@@ -23,6 +23,15 @@ bool SetPermissiveAccess(const std::filesystem::path& p);
 ///         has utf16 paths), the path will get mangled.
 std::string Utf8FromPath(const std::filesystem::path& path);
 
+/// @brief  Escapes a path so it survives a depfile's space separated list.
+///
+///         A space is written as `\ `, and any run of backslashes immediately
+///         before it is doubled, since a parser reads 2N+1 backslashes followed
+///         by a space as N backslashes followed by a space. Backslashes
+///         elsewhere in the path are left alone so that Windows paths, which
+///         Ninja copies through verbatim, keep working.
+std::string EscapeDepfilePath(const std::string& path);
+
 std::string InferShaderNameFromPath(const std::filesystem::path& path);
 
 std::string ToCamelCase(std::string_view string);
