@@ -102,7 +102,7 @@ class IntentUtils {
     if (intent.getData() == null) return false;
 
     // ACTION_VIEW is the required Intent action for deeplinks.
-    if (intent.getAction() == null || !intent.getAction().equals(Intent.ACTION_VIEW)) {
+    if (!Intent.ACTION_VIEW.equals(intent.getAction())) {
       return false;
     }
 
@@ -117,6 +117,10 @@ class IntentUtils {
 
     List<ResolveInfo> resolveInfos =
         activity.getPackageManager().queryIntentActivities(implicitIntent, 0);
+
+    if (resolveInfos == null) {
+      return false;
+    }
 
     for (ResolveInfo resolveInfo : resolveInfos) {
       if (resolveInfo.activityInfo == null) {
