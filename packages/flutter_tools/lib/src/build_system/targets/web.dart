@@ -118,30 +118,21 @@ class WebEntrypointTarget extends Target {
 String hashAndRenameWebOutput({required File file, File? sourceMapFile}) =>
     _hashAndRenameWebOutput(file: file, sourceMapFile: sourceMapFile);
 
+const List<String> _kKnownHashedExtensions = <String>[
+  '.js',
+  '.wasm',
+  '.mjs',
+  '.js.map',
+  '.wasm.map',
+  '.mjs.map',
+];
+
 String _computeHashedBasename(String oldBasename, String contentHash) {
-  if (oldBasename.endsWith('.dart.js')) {
-    final String stem = oldBasename.substring(0, oldBasename.length - '.js'.length);
-    return '$stem.$contentHash.js';
-  }
-  if (oldBasename.endsWith('.dart.wasm')) {
-    final String stem = oldBasename.substring(0, oldBasename.length - '.wasm'.length);
-    return '$stem.$contentHash.wasm';
-  }
-  if (oldBasename.endsWith('.dart.mjs')) {
-    final String stem = oldBasename.substring(0, oldBasename.length - '.mjs'.length);
-    return '$stem.$contentHash.mjs';
-  }
-  if (oldBasename.endsWith('.dart.js.map')) {
-    final String stem = oldBasename.substring(0, oldBasename.length - '.js.map'.length);
-    return '$stem.$contentHash.js.map';
-  }
-  if (oldBasename.endsWith('.dart.wasm.map')) {
-    final String stem = oldBasename.substring(0, oldBasename.length - '.wasm.map'.length);
-    return '$stem.$contentHash.wasm.map';
-  }
-  if (oldBasename.endsWith('.dart.mjs.map')) {
-    final String stem = oldBasename.substring(0, oldBasename.length - '.mjs.map'.length);
-    return '$stem.$contentHash.mjs.map';
+  for (final String ext in _kKnownHashedExtensions) {
+    if (oldBasename.endsWith('.dart$ext')) {
+      final String stem = oldBasename.substring(0, oldBasename.length - ext.length);
+      return '$stem.$contentHash$ext';
+    }
   }
   final int extensionIndex = oldBasename.lastIndexOf('.');
   if (extensionIndex != -1) {
