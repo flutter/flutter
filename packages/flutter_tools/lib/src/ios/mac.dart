@@ -1084,16 +1084,14 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       hasProvisioningProfileIssue: false,
       duplicateModule: duplicateModule,
     );
-  } else if (message.toLowerCase().contains('not found')) {
-    final String? missingModule = _parseMissingModule(message);
-    if (missingModule != null) {
-      return _XCResultIssueHandlingResult(
-        requiresProvisioningProfile: false,
-        hasProvisioningProfileIssue: false,
-        missingModule: missingModule,
-      );
-    }
-  } else if (message.toLowerCase().contains('has been modified since')) {
+  } else if (message.toLowerCase().contains('not found') && _parseMissingModule(message) != null) {
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      missingModule: _parseMissingModule(message),
+    );
+  } else if (message.toLowerCase().contains('has been modified since') ||
+      (message.toLowerCase().contains('module map file') && message.toLowerCase().contains('not found'))) {
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
       hasProvisioningProfileIssue: false,
