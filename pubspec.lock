@@ -234,6 +234,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  dap_adapters:
+    dependency: transitive
+    description:
+      name: dap_adapters
+      sha256: "26f1ae0945bd0e0d015d2c0cb0fa8d1ed84262d7e5db3bf2642fb4c199fa7844"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   dart_service_protocol_shared:
     dependency: transitive
     description:
@@ -407,6 +415,27 @@ packages:
     dependency: transitive
     description:
       path: "packages/flutter_tools"
+      relative: true
+    source: path
+    version: "0.0.0"
+  flutter_tools_core:
+    dependency: transitive
+    description:
+      path: "packages/flutter_tools/packages/flutter_tools_core"
+      relative: true
+    source: path
+    version: "0.0.0"
+  flutter_tools_extension:
+    dependency: transitive
+    description:
+      path: "packages/flutter_tools/packages/flutter_tools_extension"
+      relative: true
+    source: path
+    version: "0.0.0"
+  flutter_tools_extension_linux_prototype:
+    dependency: transitive
+    description:
+      path: "packages/flutter_tools/packages/flutter_tools_extension_linux_prototype"
       relative: true
     source: path
     version: "0.0.0"
@@ -1195,10 +1224,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player
-      sha256: "20ef311160e2ced020a62f38e4cc399a1bf289e722fc5fe37c9d7b18e44c9e8d"
+      sha256: "8c837b570dccb9ae6ff73d2e0b03c7e708bfefd3bd1194faa7f3e7f200dfc399"
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.14.0"
   video_player_android:
     dependency: "direct main"
     description:
@@ -1315,10 +1344,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter_android
-      sha256: a97db7a44f8e71af2f3971c45550a08cce1fb60059c1b8e534251e6cfb753490
+      sha256: b98656fa4461f8cc05c48a778b4d4883e60ec63e1778348f363f9bb9a477745d
       url: "https://pub.dev"
     source: hosted
-    version: "4.13.0"
+    version: "4.14.0"
   webview_flutter_platform_interface:
     dependency: "direct main"
     description:
