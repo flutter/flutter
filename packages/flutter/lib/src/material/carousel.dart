@@ -678,7 +678,7 @@ class _CarouselViewState extends State<CarouselView> {
       }
     }
 
-    return child != null ? _buildCarouselItem(child, index) : null;
+    return child != null ? _buildCarouselItem(child, itemIndex) : null;
   }
 
   Widget _buildSliverCarousel(ThemeData theme) {
