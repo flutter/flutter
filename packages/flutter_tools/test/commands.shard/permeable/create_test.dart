@@ -354,6 +354,7 @@ void main() {
     ('examples', ['examples']),
     ('engine examples', ['engine', 'src', 'flutter', 'examples']),
     ('package examples', ['packages', 'flutter', 'examples']),
+    ('dev', ['dev']),
   ]) {
     testUsingContext(
       'can create a project in the $description directory',
