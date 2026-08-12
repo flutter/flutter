@@ -474,7 +474,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
-          globals.analytics.suppressTelemetry();
+          (_toolDependencies?.analytics ?? globals.analytics).suppressTelemetry();
         }
 
         // Required to support `flutter --version` before artifacts are cached.
@@ -499,7 +499,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
             topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
           try {
-            globals.analytics.send(
+            (_toolDependencies?.analytics ?? globals.analytics).send(
               Event.flutterCommandResult(
                 commandPath: 'version',
                 result: 'success',
@@ -534,7 +534,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final bool shouldPrintDtdUri =
             topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
         if (shouldPrintDtdUri) {
-          DevtoolsLauncher.instance!.printDtdUri = shouldPrintDtdUri;
+          DevtoolsLauncher.instance?.printDtdUri = shouldPrintDtdUri;
         }
 
         await super.runCommand(topLevelResults);
@@ -573,7 +573,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final List<String> projectPaths = directory.listSync(followLinks: false).expand((
       FileSystemEntity entity,
     ) {
-      if (entity is Directory && !fs.path.split(entity.path).contains('.dart_tool')) {
+      if (entity is Directory && fs.path.basename(entity.path) != '.dart_tool') {
         return _gatherProjectPaths(fs, entity.path);
       }
       return <String>[];
