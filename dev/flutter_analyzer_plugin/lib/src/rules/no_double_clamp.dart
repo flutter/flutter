@@ -54,9 +54,9 @@ class _Visitor extends SimpleAstVisitor<void> {
       return;
     }
     final bool isAllowed = switch (node.parent) {
-      // PropertyAccess matches num.clamp in tear-off form. Always prefer
-      // doubleClamp over tear-offs: even when all 3 operands are int literals,
-      // the return type doesn't get promoted to int:
+      // PropertyAccess and PrefixedIdentifier match num.clamp in tear-off form.
+      // Always prefer doubleClamp over tear-offs: even when all 3 operands are
+      // int literals, the return type doesn't get promoted to int:
       // final x = 1.clamp(0, 2); // The inferred return type is int, where as:
       // final f = 1.clamp;
       // final y = f(0, 2)       // The inferred return type is num.
@@ -66,8 +66,14 @@ class _Visitor extends SimpleAstVisitor<void> {
               DartType(isDartCoreNum: true) ||
               DartType(isDartCoreInt: true),
         ),
-      ) =>
-        false,
+      ) ||
+      PrefixedIdentifier(
+        prefix: Expression(
+          staticType: DartType(isDartCoreDouble: true) ||
+              DartType(isDartCoreNum: true) ||
+              DartType(isDartCoreInt: true),
+        ),
+      ) => false,
 
       // Expressions like `final int x = 1.clamp(0, 2);` should be allowed.
       MethodInvocation(

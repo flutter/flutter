@@ -54,22 +54,23 @@ class _Visitor extends SimpleAstVisitor<void> {
   final AnalysisRule rule;
   final RuleContext context;
 
-  static final Map<InterfaceElement, bool> _isRenderBoxClassElementCache =
-      <InterfaceElement, bool>{};
+  final Map<InterfaceElement, bool> _isRenderBoxClassElementCache = <InterfaceElement, bool>{};
+
   // The cached version, call this method instead of _checkIfImplementsRenderBox.
-  static bool _implementsRenderBox(InterfaceElement interfaceElement) {
+  bool _implementsRenderBox(InterfaceElement interfaceElement) {
     // Framework naming convention: a RenderObject subclass names have "Render" in its name.
-    if (!interfaceElement.name!.contains('Render')) {
+    final String? name = interfaceElement.name;
+    if (name == null || !name.contains('Render')) {
       return false;
     }
-    return interfaceElement.name == 'RenderBox' ||
+    return name == 'RenderBox' ||
         _isRenderBoxClassElementCache.putIfAbsent(
           interfaceElement,
           () => _checkIfImplementsRenderBox(interfaceElement),
         );
   }
 
-  static bool _checkIfImplementsRenderBox(InterfaceElement element) {
+  bool _checkIfImplementsRenderBox(InterfaceElement element) {
     return element.allSupertypes.any(
       (InterfaceType interface) => _implementsRenderBox(interface.element),
     );

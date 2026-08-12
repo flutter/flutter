@@ -47,18 +47,19 @@ class _Visitor extends RecursiveAstVisitor<void> {
   final RuleContext context;
 
   /// Holds the `State` class [InterfaceElement].
-  static InterfaceElement? stateElement;
+  InterfaceElement? _stateElement;
 
-  static bool isPublicStateSubtype(InterfaceElement element) {
+  bool _isPublicStateSubtype(InterfaceElement element) {
     if (!element.isPublic) {
       return false;
     }
+    final InterfaceElement? stateElement = _stateElement;
     if (stateElement != null) {
       return element.allSupertypes.any((InterfaceType t) => t.element == stateElement);
     }
     for (final InterfaceType superType in element.allSupertypes) {
       if (superType.element.name == 'State') {
-        stateElement = superType.element;
+        _stateElement = superType.element;
         return true;
       }
     }
@@ -67,7 +68,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    if (isPublicStateSubtype(node.declaredFragment!.element)) {
+    final InterfaceElement? element = node.declaredFragment?.element;
+    if (element != null && _isPublicStateSubtype(element)) {
       node.visitChildren(this);
     }
   }
@@ -87,7 +89,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
       case 'dispose':
       case 'build':
       case 'debugFillProperties':
-        if (!node.declaredFragment!.element.metadata.hasProtected) {
+        final ExecutableElement? element = node.declaredFragment?.element;
+        if (element != null && !element.metadata.hasProtected) {
           rule.reportAtNode(node);
         }
     }

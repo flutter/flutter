@@ -114,7 +114,7 @@ class _Visitor extends SimpleAstVisitor<void> {
   void visitSimpleIdentifier(SimpleIdentifier node) {
     final bool isAllowed = switch (node.element) {
       ExecutableElement(
-        returnType: DartType(element: final ClassElement classElement),
+        returnType: InterfaceType(element: final ClassElement classElement),
         library: final LibraryElement libraryElement,
       )
           // Don't double report constructors and factories.
