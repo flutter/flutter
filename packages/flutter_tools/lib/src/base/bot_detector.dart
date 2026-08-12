@@ -37,12 +37,7 @@ class BotDetector {
       return false;
     }
 
-    if (_persistentToolState.isRunningOnBot != null) {
-      return _persistentToolState.isRunningOnBot!;
-    }
-
-    final bool result =
-        _platform.environment['BOT'] == 'true'
+    if (_platform.environment['BOT'] == 'true'
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         ||
         _platform.environment['TRAVIS'] == 'true' ||
@@ -71,11 +66,16 @@ class BotDetector {
         _platform.environment.containsKey('SWARMING_TASK_ID')
         // Property when running on borg.
         ||
-        _platform.environment.containsKey('BORG_ALLOC_DIR')
-        // Property when running on Azure.
-        ||
-        await _azureDetector.isRunningOnAzure;
+        _platform.environment.containsKey('BORG_ALLOC_DIR')) {
+      _persistentToolState.setIsRunningOnBot(true);
+      return true;
+    }
 
+    if (_persistentToolState.isRunningOnBot != null) {
+      return _persistentToolState.isRunningOnBot!;
+    }
+
+    final bool result = await _azureDetector.isRunningOnAzure;
     _persistentToolState.setIsRunningOnBot(result);
     return result;
   }

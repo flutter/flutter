@@ -151,6 +151,62 @@ void main() {
         expect(await botDetector.isRunningOnBot, isTrue);
         expect(persistentToolState.isRunningOnBot, isTrue);
       });
+
+      testWithoutContext(
+        'overrides cached false when CI environment variable is set at runtime',
+        () async {
+          // Simulate an image bake where isRunningOnBot evaluated to false and cached to disk:
+          persistentToolState.setIsRunningOnBot(false);
+          expect(persistentToolState.isRunningOnBot, isFalse);
+
+          fakePlatform.environment['GITHUB_ACTIONS'] = 'true';
+
+          final botDetector = BotDetector(
+            platform: fakePlatform,
+            httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+            persistentToolState: persistentToolState,
+          );
+
+          expect(await botDetector.isRunningOnBot, isTrue);
+          expect(persistentToolState.isRunningOnBot, isTrue);
+        },
+      );
+
+      testWithoutContext(
+        'overrides cached false when CI=true or SWARMING_TASK_ID is set at runtime',
+        () async {
+          persistentToolState.setIsRunningOnBot(false);
+          expect(persistentToolState.isRunningOnBot, isFalse);
+
+          fakePlatform.environment['CI'] = 'true';
+
+          final botDetector = BotDetector(
+            platform: fakePlatform,
+            httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+            persistentToolState: persistentToolState,
+          );
+
+          expect(await botDetector.isRunningOnBot, isTrue);
+          expect(persistentToolState.isRunningOnBot, isTrue);
+        },
+      );
+
+      testWithoutContext(
+        'returns cached false when no bot environment variables are set',
+        () async {
+          persistentToolState.setIsRunningOnBot(false);
+          expect(persistentToolState.isRunningOnBot, isFalse);
+
+          final botDetector = BotDetector(
+            platform: fakePlatform,
+            httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[]),
+            persistentToolState: persistentToolState,
+          );
+
+          expect(await botDetector.isRunningOnBot, isFalse);
+          expect(persistentToolState.isRunningOnBot, isFalse);
+        },
+      );
     });
   });
 
@@ -182,19 +238,19 @@ void main() {
 
       expect(await azureDetector.isRunningOnAzure, isTrue);
     });
-    testWithoutContext('isRunningOnAzure returns false when an unexpected exception is thrown', () async {
-      final azureDetector = AzureDetector(
-        httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
-          FakeRequest(
-            azureUrl,
-            responseError: ArgumentError(
-              'No host specified in URI http:///e2gerror.php',
+    testWithoutContext(
+      'isRunningOnAzure returns false when an unexpected exception is thrown',
+      () async {
+        final azureDetector = AzureDetector(
+          httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
+            FakeRequest(
+              azureUrl,
+              responseError: ArgumentError('No host specified in URI http:///e2gerror.php'),
             ),
-          ),
-        ]),
-      );
-      expect(await azureDetector.isRunningOnAzure, isFalse);
-    });
+          ]),
+        );
+        expect(await azureDetector.isRunningOnAzure, isFalse);
+      },
+    );
   });
-
 }
