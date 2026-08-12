@@ -131,6 +131,42 @@ void main() {
     expect(() => BoxConstraints.lerp(constraints2, constraints3, 0.5), throwsAssertionError);
   });
 
+  test('BoxConstraints lerp with overshooting t is normalized', () {
+    // Regression test for https://github.com/flutter/flutter/issues/37559.
+    expect(
+      BoxConstraints.lerp(
+        const BoxConstraints.tightFor(height: 25.0),
+        const BoxConstraints.tightFor(height: 0.0),
+        1.2,
+      ),
+      const BoxConstraints.tightFor(height: 0.0),
+    );
+    expect(
+      BoxConstraints.lerp(
+        BoxConstraints.tight(const Size(10.0, 10.0)),
+        const BoxConstraints(maxWidth: 100.0, maxHeight: 100.0),
+        -0.1,
+      )!.isNormalized,
+      isTrue,
+    );
+    expect(
+      BoxConstraints.lerp(
+        null,
+        const BoxConstraints.tightFor(width: 10.0, height: 10.0),
+        -0.5,
+      )!.isNormalized,
+      isTrue,
+    );
+    expect(
+      BoxConstraints.lerp(
+        const BoxConstraints.tightFor(width: 10.0, height: 10.0),
+        null,
+        1.5,
+      )!.isNormalized,
+      isTrue,
+    );
+  });
+
   test('BoxConstraints normalize', () {
     const constraints = BoxConstraints(
       minWidth: 3.0,
