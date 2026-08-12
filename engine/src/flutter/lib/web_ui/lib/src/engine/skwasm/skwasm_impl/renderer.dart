@@ -119,6 +119,12 @@ class SkwasmRenderer extends Renderer {
   ui.Paint createPaint() => SkwasmPaint();
 
   @override
+  BackendColorFilter createColorFilter(EngineColorFilter filter) => SkwasmColorFilter(filter);
+
+  @override
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter) => SkwasmMaskFilter(filter);
+
+  @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
       SkwasmParagraphBuilder(style as SkwasmParagraphStyle, fontCollection);
 
@@ -269,28 +275,13 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  }) => SkwasmVertices(
-    mode,
-    positions,
-    textureCoordinates: textureCoordinates,
-    colors: colors,
-    indices: indices,
-  );
-
-  @override
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
     Int32List? colors,
     Uint16List? indices,
-  }) => SkwasmVertices.raw(
+  }) => SkwasmVertices(
     mode,
     positions,
     textureCoordinates: textureCoordinates,
