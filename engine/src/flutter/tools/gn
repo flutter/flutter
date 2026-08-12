@@ -1213,9 +1213,11 @@ def parse_args(args):
       default=False,
       action='store_true',
       help='Whether to use a prebuilt Dart SDK instead of building one. This defaults to ' +
-      'false due to toolchain difference between dart sdk repo and g3.'
+      'false due to toolchain difference between dart sdk repo and flutter binary users.'
   )
-  parser.add_argument('--no-prebuilt-dart-sdk', dest='prebuilt_dart_sdk', action='store_false')
+  parser.add_argument(
+      '--no-prebuilt-dart-sdk', default=False, dest='prebuilt_dart_sdk', action='store_false'
+  )
 
   # Flags for Dart features.
   parser.add_argument(
