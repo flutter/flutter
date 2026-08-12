@@ -727,13 +727,20 @@ static std::string JoinStrings(std::vector<std::string> items,
 std::string Compiler::GetDependencyNames(const std::string& separator) const {
   std::vector<std::string> dependencies = included_file_names_;
   dependencies.push_back(Utf8FromPath(options_.file_name));
+  for (auto& dependency : dependencies) {
+    dependency = EscapeDepfilePath(dependency);
+  }
   return JoinStrings(dependencies, separator);
 }
 
 std::unique_ptr<fml::Mapping> Compiler::CreateDepfileContents(
     std::initializer_list<std::string> targets_names) const {
   // https://github.com/ninja-build/ninja/blob/master/src/depfile_parser.cc#L28
-  const auto targets = JoinStrings(targets_names, " ");
+  std::vector<std::string> target_names = targets_names;
+  for (auto& target : target_names) {
+    target = EscapeDepfilePath(target);
+  }
+  const auto targets = JoinStrings(target_names, " ");
   const auto dependencies = GetDependencyNames(" ");
 
   std::stringstream stream;
