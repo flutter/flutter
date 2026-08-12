@@ -153,11 +153,14 @@ abstract final class WebOptions {
   );
 }
 
-/// A bundle encapsulating all options and flags needed for Flutter Web compilation.
-class WebOptionsBundle extends OptionBundle {
-  const WebOptionsBundle({this.verboseHelp = false});
+/// A bundle encapsulating general Flutter Web options and flags.
+class WebCoreOptionsBundle extends OptionBundle {
+  const WebCoreOptionsBundle({this.verboseHelp = false});
 
   final bool verboseHelp;
+
+  @override
+  String? get title => 'Flutter web options';
 
   @override
   List<OptionDescriptor<dynamic>> get descriptors => [
@@ -169,15 +172,57 @@ class WebOptionsBundle extends OptionBundle {
     WebOptions.webDefineFromFile,
     WebOptions.optimizationLevel,
     WebOptions.sourceMaps,
+  ];
+}
+
+/// A bundle encapsulating JavaScript-specific compilation options.
+class WebJsOptionsBundle extends OptionBundle {
+  const WebJsOptionsBundle({this.verboseHelp = false});
+
+  final bool verboseHelp;
+
+  @override
+  String? get title => 'JavaScript compilation options';
+
+  @override
+  List<OptionDescriptor<dynamic>> get descriptors => [
     WebOptions.csp,
     WebOptions.dart2jsOptimization,
     WebOptions.dumpInfo,
     WebOptions.minifyJs,
+    WebOptions.noFrequencyBasedMinification,
+  ];
+}
+
+/// A bundle encapsulating WebAssembly-specific compilation options.
+class WebWasmOptionsBundle extends OptionBundle {
+  const WebWasmOptionsBundle({this.verboseHelp = false});
+
+  final bool verboseHelp;
+
+  @override
+  String? get title => 'WebAssembly compilation options';
+
+  @override
+  List<OptionDescriptor<dynamic>> get descriptors => [
+    WebOptions.wasm,
+    WebOptions.stripWasm,
     WebOptions.minifyWasm,
     WebOptions.enableWasmDeferredLoading,
     WebOptions.wasmDryRun,
-    WebOptions.noFrequencyBasedMinification,
-    WebOptions.wasm,
-    WebOptions.stripWasm,
+  ];
+}
+
+/// A composite bundle encapsulating all options and flags needed for Flutter Web compilation.
+class WebOptionsBundle extends OptionBundle {
+  const WebOptionsBundle({this.verboseHelp = false});
+
+  final bool verboseHelp;
+
+  @override
+  List<OptionBundle> get subBundles => <OptionBundle>[
+    WebCoreOptionsBundle(verboseHelp: verboseHelp),
+    WebJsOptionsBundle(verboseHelp: verboseHelp),
+    WebWasmOptionsBundle(verboseHelp: verboseHelp),
   ];
 }
