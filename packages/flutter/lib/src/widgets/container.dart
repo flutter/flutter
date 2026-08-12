@@ -343,6 +343,14 @@ class Container extends StatelessWidget {
   /// insets the child. Reducing the child's corner radii by the corresponding
   /// per-axis padding insets aligns the curves. Moving the border to
   /// [foregroundDecoration] avoids the mismatch.
+  ///
+  /// {@tool dartpad}
+  /// This example shows the resulting gaps, and the related [clipBehavior]
+  /// pitfall of an opaque child covering the border, each rendered side by
+  /// side with a recommended way to avoid it.
+  ///
+  /// ** See code in examples/api/lib/widgets/container/container.decoration.0.dart **
+  /// {@end-tool}
   final Decoration? decoration;
 
   /// The decoration to paint in front of the [child].
@@ -389,6 +397,14 @@ class Container extends StatelessWidget {
   /// painting it with a border-only [foregroundDecoration] of the same
   /// geometry, keeping [decoration] (without the border) to define the clip
   /// path.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a border covered by an opaque child, and the related
+  /// [decoration] pitfall of corner gaps around a self-clipping child, each
+  /// rendered side by side with a recommended way to avoid it.
+  ///
+  /// ** See code in examples/api/lib/widgets/container/container.decoration.0.dart **
+  /// {@end-tool}
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
