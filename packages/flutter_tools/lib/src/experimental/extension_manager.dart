@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/context.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../features.dart';
 import 'extension_discovery.dart';
 
@@ -21,14 +22,21 @@ class ExtensionManager {
        _discovery = discovery ?? ExtensionDiscovery(logger: logger),
        _featureFlags = featureFlags ?? context.get<FeatureFlags>()!;
 
-  /// The active host operating system platform (e.g. `'linux'`, `'macos'`, `'windows'`).
-  final String hostPlatform;
+  /// The active [HostPlatform].
+  final HostPlatform hostPlatform;
   final Logger _logger;
   final ExtensionDiscovery _discovery;
   final FeatureFlags _featureFlags;
 
   /// Active extension connections compatible with [hostPlatform].
   List<ExtensionConnection> get connections => _discovery.connections;
+
+  /// The operating system name of the host platform (e.g. `'linux'`, `'macos'`, `'windows'`).
+  String get hostPlatformName => switch (hostPlatform) {
+    HostPlatform.darwin_x64 || HostPlatform.darwin_arm64 => 'macos',
+    HostPlatform.linux_x64 || HostPlatform.linux_arm64 || HostPlatform.linux_riscv64 => 'linux',
+    HostPlatform.windows_x64 || HostPlatform.windows_arm64 => 'windows',
+  };
 
   /// Spawns entrypoints without host OS checks; disposes any extension that reports
   /// it does not support [hostPlatform].
@@ -39,21 +47,22 @@ class ExtensionManager {
       return;
     }
     _logger.printTrace(
-      'ExtensionManager initializing for platform "$hostPlatform" with ${entryPoints.length} entrypoint(s).',
+      'ExtensionManager initializing for platform "$hostPlatformName" with ${entryPoints.length} entrypoint(s).',
     );
     for (final entryPoint in entryPoints) {
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         entryPoint,
         logger: _logger,
       );
-      if (connection.capabilities.supportsHostPlatform(hostPlatform)) {
+      if (connection.capabilities.supportsHostPlatform(hostPlatformName) ||
+          connection.capabilities.supportsHostPlatform(hostPlatform.cliName)) {
         _logger.printTrace(
-          'Extension connection supported on host platform "$hostPlatform"; registering.',
+          'Extension connection supported on host platform "$hostPlatformName"; registering.',
         );
         _discovery.registerConnection(connection);
       } else {
         _logger.printTrace(
-          'Extension connection does not support host platform "$hostPlatform" '
+          'Extension connection does not support host platform "$hostPlatformName" '
           '(supported platforms: ${connection.capabilities.supportedPlatforms}); disposing connection.',
         );
         await connection.dispose();

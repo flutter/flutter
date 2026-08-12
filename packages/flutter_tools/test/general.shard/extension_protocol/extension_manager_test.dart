@@ -5,6 +5,7 @@
 import 'dart:isolate';
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
@@ -29,7 +30,7 @@ void main() {
     test('ExtensionManager loads extension compatible with hostPlatform', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
-        hostPlatform: 'linux',
+        hostPlatform: HostPlatform.linux_x64,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
       );
@@ -43,7 +44,7 @@ void main() {
     test('ExtensionManager filters out extension incompatible with hostPlatform', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
-        hostPlatform: 'macos',
+        hostPlatform: HostPlatform.darwin_arm64,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
       );
