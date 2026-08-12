@@ -359,7 +359,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)handlePressEvent:(FlutterUIPressProxy*)press
               nextAction:(void (^)())next API_AVAILABLE(ios(13.4));
 - (void)discreteScrollEvent:(UIPanGestureRecognizer*)recognizer;
-- (void)updateProperties API_AVAILABLE(ios(26.0));
 - (void)updateViewportMetricsIfNeeded;
 - (void)setViewportMetricsDisplayCornerRadii;
 - (void)updateAutoResizeConstraints;
@@ -1465,7 +1464,7 @@ API_AVAILABLE(ios(26.0))
     XCTAssertFalse(probe.userInteractionEnabled);
     XCTAssertFalse(probe.isAccessibilityElement);
     XCTAssertTrue(probe.accessibilityElementsHidden);
-    XCTAssertNotNil([probe valueForKey:@"cornerConfiguration"]);
+    XCTAssertNotNil(probe.cornerConfiguration);
 
     const flutter::ViewportMetrics& viewportMetrics = engine.lastViewportMetrics;
     XCTAssertGreaterThan(viewportMetrics.physical_display_corner_radius_top_left, 0.0);
