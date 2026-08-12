@@ -1138,4 +1138,65 @@ void main() {
     expect(tester.getSize(find.byType(Drawer)), Size.zero);
     expect(tester.getSize(find.byType(DrawerHeader)), Size.zero);
   });
+
+  testWidgets('Drawer double tap to close does not leak LocalHistoryEntry', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/133740
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: const Scaffold(body: Center(child: Text('Home'))),
+      ),
+    );
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return Scaffold(
+                appBar: AppBar(title: const Text('Second')),
+                endDrawer: const Drawer(child: Text('Drawer Item')),
+                body: const Center(child: Text('Second Body')),
+              );
+            },
+          ),
+        );
+    await tester.pumpAndSettle();
+
+    // Open the end drawer
+    Scaffold.of(tester.element(find.text('Second Body'))).openEndDrawer();
+    await tester.pumpAndSettle();
+
+    // Rapid double tap on the scrim
+    // Use manual pointer events to simulate tapping the scrim twice rapidly
+    final TestGesture gesture1 = await tester.startGesture(const Offset(10.0, 200.0));
+    await gesture1.up();
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final TestGesture gesture2 = await tester.startGesture(const Offset(10.0, 200.0));
+    await gesture2.up();
+
+    await tester.pumpAndSettle();
+
+    final BuildContext routeContext = tester.element(find.text('Second Body'));
+    final ModalRoute<dynamic> route = ModalRoute.of(routeContext)!;
+
+    // The drawer should be closed
+    expect(find.text('Drawer Item'), findsNothing);
+
+    // The history entry should have been removed, meaning it won't handle pop internally
+    expect(route.willHandlePopInternally, false);
+
+    // Attempt iOS swipe to go back
+    await tester.dragFrom(const Offset(5.0, 200.0), const Offset(500.0, 0.0));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Verify it went back
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Second Body'), findsNothing);
+  });
 }
