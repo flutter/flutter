@@ -31,32 +31,20 @@ bool IsMetalAvailable() {
 
 }  // namespace
 
-IOSRenderingAPI GetRenderingAPIForProcess() {
+Class GetCoreAnimationLayerClass() {
   static bool metal_available = IsMetalAvailable();
-  if (metal_available) {
-    return IOSRenderingAPI::kMetal;
-  }
-  FML_CHECK(false) << "Metal is unavailable. On a simulator this means the host environment "
-                      "does not expose a Metal device; enabling GPU passthrough may fix this.";
-  FML_UNREACHABLE();
-}
+  FML_CHECK(metal_available)
+      << "Metal is unavailable. On a simulator this means the host environment "
+         "does not expose a Metal device; enabling GPU passthrough may fix this.";
 
-Class GetCoreAnimationLayerClassForRenderingAPI(IOSRenderingAPI rendering_api) {
-  switch (rendering_api) {
-    case IOSRenderingAPI::kMetal:
-      if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
-        if ([FlutterMetalLayer enabled]) {
-          return [FlutterMetalLayer class];
-        } else {
-          return [CAMetalLayer class];
-        }
-      }
-      FML_CHECK(false) << "Metal availability should already have been checked";
-      break;
-    default:
-      break;
+  if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
+    // FlutterMetalLayer reports itself as a CAMetalLayer via -isKindOfClass:.
+    if ([FlutterMetalLayer enabled]) {
+      return [FlutterMetalLayer class];
+    }
+    return [CAMetalLayer class];
   }
-  FML_CHECK(false) << "Unknown client rendering API";
+  FML_CHECK(false) << "Metal availability should already have been checked";
   return [CALayer class];
 }
 
