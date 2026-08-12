@@ -119,6 +119,10 @@ class IntentUtils {
         activity.getPackageManager().queryIntentActivities(implicitIntent, 0);
 
     for (ResolveInfo resolveInfo : resolveInfos) {
+      if (resolveInfo.activityInfo == null) {
+        continue;
+      }
+
       if (resolveInfo.activityInfo.name.equals(activity.getClass().getName())) {
         return true;
       }

@@ -549,7 +549,7 @@ import java.util.Set;
   }
 
   private String maybeGetInitialRouteFromIntent(Intent intent) {
-    if (host.shouldHandleDeeplinking()) {
+    if (intent != null && host.shouldHandleDeeplinking()) {
       Uri data = intent.getData();
       if (data != null && host.getActivity() != null) {
         if (IntentUtils.isIntentSelfSent(host.getActivity())) {
