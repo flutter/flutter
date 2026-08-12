@@ -1348,7 +1348,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The HCPP value for an Android artifact when the developer did not pass
   /// `--[no-]enable-hcpp`: the `enable-hcpp` feature flag, which is on by
-  /// default on master and beta.
+  /// default on master.
   ///
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in

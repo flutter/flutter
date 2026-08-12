@@ -447,12 +447,12 @@ void main() {
   });
 
   group('hcpp', () {
-    test('is available on all channels, enabled by default on master and beta', () {
+    test('is available on all channels, enabled by default on master only', () {
       expect(
         hcpp,
         allOf(<Matcher>[
           _onChannelIs('master', available: true, enabledByDefault: true),
-          _onChannelIs('beta', available: true, enabledByDefault: true),
+          _onChannelIs('beta', available: true, enabledByDefault: false),
           _onChannelIs('stable', available: true, enabledByDefault: false),
         ]),
       );

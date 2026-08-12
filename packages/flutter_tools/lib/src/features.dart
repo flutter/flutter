@@ -345,8 +345,11 @@ const hcpp = Feature(
       'Devices that do not support it fall back to the previous platform view rendering mode.',
   configSetting: 'enable-hcpp',
   environmentOverride: 'FLUTTER_ENABLE_HCPP',
+  // Enabled by default on master only for now: the fix for an ANR when an HCPP
+  // platform view is rotated (https://github.com/flutter/flutter/pull/190638)
+  // has not reached beta yet.
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
-  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),
 );
 
