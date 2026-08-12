@@ -1,0 +1,39 @@
+{
+  "fill" : {
+    "automatic-gradient" : "display-p3:0.98656,1.00000,0.99250,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "blend-mode" : "soft-light",
+          "fill" : "automatic",
+          "glass" : true,
+          "image-name" : "icon_flutter.817b4a56b047d0d36b338dd9ffd44dbd.svg",
+          "name" : "icon_flutter.817b4a56b047d0d36b338dd9ffd44dbd",
+          "position" : {
+            "scale" : 1.97,
+            "translation-in-points" : [
+              -26,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

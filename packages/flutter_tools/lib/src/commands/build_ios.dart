@@ -362,7 +362,74 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         ),
       );
     }
+
+    final bool usesLiquidGlassTemplate = _isLiquidGlassIconStillUsingTemplate(app: app);
+
+    if (usesLiquidGlassTemplate) {
+      validationMessages.add(
+        _createValidationMessage(
+          isValid: false,
+          message: 'App icon is set to the default liquid glass placeholder. '
+              'Replace with a unique liquid glass icon.',
+        ),
+      );
+    }
+
     return validationMessages;
+  }
+
+  /// Checks if the project's liquid glass icon is still the default from the template.
+  ///
+  /// Compares every file in the project's `liquidGlassIcon.icon` directory
+  /// against the template's `liquidGlassIcon.icon.tmpl` directory. The icon is
+  /// considered to still be the placeholder only when the full set of files
+  /// (e.g. `icon.json` and the SVG assets) matches the template byte-for-byte.
+  bool _isLiquidGlassIconStillUsingTemplate({
+    required BuildableIOSApp app,
+  }) {
+    final Directory projectIconDir = globals.fs.directory(
+      globals.fs.path.join(app.projectAppIconDirName, '..', '..', 'liquidGlassIcon.icon'),
+    );
+    final Directory templateIconDir = globals.fs.directory(
+      globals.fs.path.join(
+        app.templateAppIconDirNameForContentsJson,
+        '..',
+        '..',
+        'liquidGlassIcon.icon.tmpl',
+      ),
+    );
+
+    if (!projectIconDir.existsSync() || !templateIconDir.existsSync()) {
+      return false;
+    }
+
+    final Map<String, String> templateHashes = _iconFileHashes(templateIconDir);
+    final Map<String, String> projectHashes = _iconFileHashes(projectIconDir);
+
+    if (templateHashes.length != projectHashes.length) {
+      return false;
+    }
+
+    for (final MapEntry<String, String> entry in templateHashes.entries) {
+      if (projectHashes[entry.key] != entry.value) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Returns the MD5 hash of every file in [directory], keyed by its path
+  /// relative to [directory]. `.DS_Store` files are ignored.
+  Map<String, String> _iconFileHashes(Directory directory) {
+    final hashes = <String, String>{};
+    for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
+      if (entity is! File || globals.fs.path.basename(entity.path) == '.DS_Store') {
+        continue;
+      }
+      final String relativePath = globals.fs.path.relative(entity.path, from: directory.path);
+      hashes[relativePath] = md5.convert(entity.readAsBytesSync()).toString();
+    }
+    return hashes;
   }
 
   Future<List<ValidationMessage>> _validateLaunchImageAssetsAfterArchive() async {
