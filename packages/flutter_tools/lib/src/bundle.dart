@@ -12,15 +12,31 @@ import 'compile.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 
-String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
+String get defaultMainPath {
+  try {
+    return globals.fs.path.join('lib', 'main.dart');
+  } on UnsupportedError {
+    return 'lib/main.dart';
+  }
+}
+
 const defaultManifestPath = 'pubspec.yaml';
-String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String get defaultDepfilePath {
+  try {
+    return globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+  } on UnsupportedError {
+    return 'build/snapshot_blob.bin.d';
+  }
+}
 
 String getDefaultApplicationKernelPath({required bool trackWidgetCreation}) {
-  return getKernelPathForTransformerOptions(
-    globals.fs.path.join(getBuildDirectory(), 'app.dill'),
-    trackWidgetCreation: trackWidgetCreation,
-  );
+  String appDillPath;
+  try {
+    appDillPath = globals.fs.path.join(getBuildDirectory(), 'app.dill');
+  } on UnsupportedError {
+    appDillPath = 'build/app.dill';
+  }
+  return getKernelPathForTransformerOptions(appDillPath, trackWidgetCreation: trackWidgetCreation);
 }
 
 String getDefaultCachedKernelPath({
