@@ -12,10 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
-import 'package:flutter_tools/src/context/android_context.dart';
-import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
-import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -28,21 +25,12 @@ CommandRunner<void> createTestCommandRunner([
   FlutterCommand? command,
   Analytics? analytics,
   ToolContext? toolContext,
-  AndroidContext? androidContext,
-  AppleContext? appleContext,
 ]) {
   final ToolContext effectiveToolContext =
       toolContext ??
       (command != null ? (command as dynamic).toolContext as ToolContext? : null) ??
       DelegatingToolContext();
-  final runner = TestFlutterCommandRunner(
-    toolDependencies: FakeToolDependencies(
-      analytics: analytics,
-      toolContext: effectiveToolContext,
-      androidContext: androidContext,
-      appleContext: appleContext,
-    ),
-  );
+  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: effectiveToolContext);
   if (command != null) {
     runner.addCommand(command);
   }
@@ -66,20 +54,11 @@ Future<String> createProject(
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
-  TestFlutterCommandRunner({
-    ToolDependencies? toolDependencies,
-    ToolContext? toolContext,
-    AndroidContext? androidContext,
-    AppleContext? appleContext,
-  }) : super(
-         toolDependencies:
-             toolDependencies ??
-             FakeToolDependencies(
-               toolContext: toolContext ?? FakeToolContext(),
-               androidContext: androidContext ?? FakeAndroidContext(),
-               appleContext: appleContext ?? FakeAppleContext(),
-             ),
-       );
+  TestFlutterCommandRunner({Analytics? analytics, ToolContext? toolContext})
+    : super(
+        analytics: analytics ?? const NoOpAnalytics(),
+        toolContext: toolContext ?? FakeToolContext(),
+      );
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {

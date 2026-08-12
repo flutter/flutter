@@ -18,8 +18,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/custom_devices.dart';
-import 'package:flutter_tools/src/context/android_context.dart';
-import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
@@ -27,6 +25,7 @@ import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -263,19 +262,15 @@ class FakeCommandRunner extends FlutterCommandRunner {
     required Logger logger,
     UserMessages? userMessages,
     ToolContext? toolContext,
-    AndroidContext? androidContext,
-    AppleContext? appleContext,
+    Analytics? analytics,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
        _userMessages = userMessages ?? UserMessages(),
        super(
-         toolDependencies: FakeToolDependencies(
-           toolContext:
-               toolContext ?? FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
-           androidContext: androidContext ?? FakeAndroidContext(),
-           appleContext: appleContext ?? FakeAppleContext(),
-         ),
+         analytics: analytics ?? const NoOpAnalytics(),
+         toolContext:
+             toolContext ?? FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
        );
 
   final Platform _platform;

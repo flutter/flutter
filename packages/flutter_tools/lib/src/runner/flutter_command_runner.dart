@@ -16,10 +16,7 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
-import '../context/android_context.dart';
-import '../context/apple_context.dart';
 import '../context/tool_context.dart';
-import '../context/tool_dependencies.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
@@ -55,23 +52,24 @@ abstract final class FlutterGlobalOptions {
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
-  FlutterCommandRunner({required ToolDependencies toolDependencies, bool verboseHelp = false})
-    : _toolDependencies = toolDependencies,
-      _androidContext = toolDependencies.androidContext,
-      _appleContext = toolDependencies.appleContext,
-      _toolContext = toolDependencies.toolContext,
-      super(
-        'flutter',
-        'Manage your Flutter app development.\n'
-            '\n'
-            'Common commands:\n'
-            '\n'
-            '  flutter create <output directory>\n'
-            '    Create a new Flutter project in the specified directory.\n'
-            '\n'
-            '  flutter run [options]\n'
-            '    Run your Flutter application on an attached device or in an emulator.',
-      ) {
+  FlutterCommandRunner({
+    required Analytics analytics,
+    required ToolContext toolContext,
+    bool verboseHelp = false,
+  }) : _analytics = analytics,
+       _toolContext = toolContext,
+       super(
+         'flutter',
+         'Manage your Flutter app development.\n'
+             '\n'
+             'Common commands:\n'
+             '\n'
+             '  flutter create <output directory>\n'
+             '    Create a new Flutter project in the specified directory.\n'
+             '\n'
+             '  flutter run [options]\n'
+             '    Run your Flutter application on an attached device or in an emulator.',
+       ) {
     argParser.addFlag(
       FlutterGlobalOptions.kVerboseFlag,
       abbr: 'v',
@@ -292,21 +290,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
   }
 
-  final ToolDependencies _toolDependencies;
-  final AndroidContext _androidContext;
-  final AppleContext _appleContext;
+  final Analytics _analytics;
   final ToolContext _toolContext;
 
-  /// The tool dependencies.
-  ToolDependencies get toolDependencies => _toolDependencies;
+  /// The [Analytics] instance.
+  Analytics get analytics => _analytics;
 
-  /// The Android context.
-  AndroidContext get androidContext => _androidContext;
-
-  /// The Apple context.
-  AppleContext get appleContext => _appleContext;
-
-  /// The tool context.
+  /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;
 
   // See https://github.com/flutter/flutter/issues/145158.
@@ -469,7 +459,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         if ((topLevelResults[FlutterGlobalOptions.kSuppressAnalyticsFlag] as bool?) ?? false) {
-          _toolDependencies.analytics.suppressTelemetry();
+          _analytics.suppressTelemetry();
         }
 
         // Required to support `flutter --version` before artifacts are cached.
@@ -489,7 +479,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final bool topLevelMachineFlag =
             topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
-          _toolDependencies.analytics.send(
+          _analytics.send(
             Event.flutterCommandResult(
               commandPath: 'version',
               result: 'success',

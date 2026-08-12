@@ -77,7 +77,11 @@ Future<int> run(
       terminal: globals.terminal,
       userMessages: globals.userMessages,
     );
-    final runner = FlutterCommandRunner(toolDependencies: toolDeps, verboseHelp: verboseHelp);
+    final runner = FlutterCommandRunner(
+      analytics: toolDeps.analytics,
+      toolContext: toolDeps.toolContext,
+      verboseHelp: verboseHelp,
+    );
     commands(toolDeps).forEach(runner.addCommand);
 
     // Initialize the system locale.
