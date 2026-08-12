@@ -77,8 +77,7 @@ abstract class OptionDescriptor<T> {
   T? getParsedValue(ArgResults? results, {ArgResults? globalResults});
 
   /// Returns the parsed value, falling back to [defaultsTo].
-  T? getValue(ArgResults? results, {ArgResults? globalResults}) =>
-      getParsedValue(results, globalResults: globalResults) ?? defaultsTo;
+  T getValue(ArgResults? results, {ArgResults? globalResults});
 
   ArgResults? _resolveTargetResults(ArgResults? results, ArgResults? globalResults) {
     return switch (scope) {
@@ -93,7 +92,7 @@ abstract class OptionDescriptor<T> {
 }
 
 /// A descriptor for single-value string options.
-class StringOptionDescriptor extends OptionDescriptor<String> {
+class StringOptionDescriptor extends OptionDescriptor<String?> {
   const StringOptionDescriptor({
     required super.name,
     required super.help,
@@ -277,5 +276,5 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
 
   @override
   List<String> getValue(ArgResults? results, {ArgResults? globalResults}) =>
-      getParsedValue(results, globalResults: globalResults) ?? const <String>[];
+      getParsedValue(results, globalResults: globalResults) ?? defaultsTo ?? const <String>[];
 }

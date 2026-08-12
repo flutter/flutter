@@ -54,12 +54,12 @@ class BuildWebCommand extends BuildSubCommand {
       );
     }
 
-    final String? optimizationLevelArg = getString(WebOptions.optimizationLevel);
+    final String? optimizationLevelArg = getValue(WebOptions.optimizationLevel);
     final int? optimizationLevel = optimizationLevelArg != null
         ? int.parse(optimizationLevelArg)
         : null;
 
-    final String? dart2jsOptimizationLevelValue = getString(WebOptions.dart2jsOptimization);
+    final String? dart2jsOptimizationLevelValue = getValue(WebOptions.dart2jsOptimization);
     final int? jsOptimizationLevel = dart2jsOptimizationLevelValue != null
         ? int.parse(dart2jsOptimizationLevelValue.substring(1))
         : optimizationLevel;
@@ -67,13 +67,13 @@ class BuildWebCommand extends BuildSubCommand {
     final List<String> dartDefines = extractDartDefines(
       defineConfigJsonMap: extractDartDefineConfigJsonMap(),
     );
-    final bool useWasm = getFlag(WebOptions.wasm);
+    final bool useWasm = getValue(WebOptions.wasm);
     // See also: RunCommandBase.webRenderer and TestCommand.webRenderer.
     final webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
-    final bool sourceMaps = getFlag(WebOptions.sourceMaps);
-    final bool? minifyJs = getParsedFlag(WebOptions.minifyJs);
-    final bool? minifyWasm = getParsedFlag(WebOptions.minifyWasm);
+    final bool sourceMaps = getValue(WebOptions.sourceMaps);
+    final bool? minifyJs = getParsedValue(WebOptions.minifyJs);
+    final bool? minifyWasm = getParsedValue(WebOptions.minifyWasm);
 
     final List<WebCompilerConfig> compilerConfigs;
 
@@ -90,17 +90,17 @@ class BuildWebCommand extends BuildSubCommand {
       compilerConfigs = <WebCompilerConfig>[
         WasmCompilerConfig(
           optimizationLevel: optimizationLevel,
-          stripWasm: getFlag(WebOptions.stripWasm),
+          stripWasm: getValue(WebOptions.stripWasm),
           sourceMaps: sourceMaps,
           minify: minifyWasm,
-          enableWasmDeferredLoading: getFlag(WebOptions.enableWasmDeferredLoading),
+          enableWasmDeferredLoading: getValue(WebOptions.enableWasmDeferredLoading),
         ),
         JsCompilerConfig(
-          csp: getFlag(WebOptions.csp),
-          dumpInfo: getFlag(WebOptions.dumpInfo),
+          csp: getValue(WebOptions.csp),
+          dumpInfo: getValue(WebOptions.dumpInfo),
           minify: minifyJs,
-          nativeNullAssertions: getFlag(CommonOptions.nativeNullAssertions),
-          useFrequencyBasedMinification: !getFlag(WebOptions.noFrequencyBasedMinification),
+          nativeNullAssertions: getValue(CommonOptions.nativeNullAssertions),
+          useFrequencyBasedMinification: !getValue(WebOptions.noFrequencyBasedMinification),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
         ),
@@ -108,31 +108,31 @@ class BuildWebCommand extends BuildSubCommand {
     } else {
       compilerConfigs = <WebCompilerConfig>[
         JsCompilerConfig(
-          csp: getFlag(WebOptions.csp),
-          dumpInfo: getFlag(WebOptions.dumpInfo),
+          csp: getValue(WebOptions.csp),
+          dumpInfo: getValue(WebOptions.dumpInfo),
           minify: minifyJs,
-          nativeNullAssertions: getFlag(CommonOptions.nativeNullAssertions),
-          useFrequencyBasedMinification: !getFlag(WebOptions.noFrequencyBasedMinification),
+          nativeNullAssertions: getValue(CommonOptions.nativeNullAssertions),
+          useFrequencyBasedMinification: !getValue(WebOptions.noFrequencyBasedMinification),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           renderer: webRenderer,
         ),
 
-        if (getFlag(WebOptions.wasmDryRun))
+        if (getValue(WebOptions.wasmDryRun))
           WasmCompilerConfig(
             optimizationLevel: optimizationLevel,
-            stripWasm: getFlag(WebOptions.stripWasm),
+            stripWasm: getValue(WebOptions.stripWasm),
             sourceMaps: sourceMaps,
             minify: minifyWasm,
-            enableWasmDeferredLoading: getFlag(WebOptions.enableWasmDeferredLoading),
+            enableWasmDeferredLoading: getValue(WebOptions.enableWasmDeferredLoading),
             dryRun: true,
           ),
       ];
     }
 
     final BuildInfo buildInfo = await getBuildInfo();
-    final String? baseHref = getString(WebOptions.baseHref);
-    final String? staticAssetsUrl = getString(WebOptions.staticAssetsUrl);
+    final String? baseHref = getValue(WebOptions.baseHref);
+    final String? staticAssetsUrl = getValue(WebOptions.staticAssetsUrl);
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit(
         'Received a --base-href value of "$baseHref"\n'
@@ -164,7 +164,7 @@ class BuildWebCommand extends BuildSubCommand {
     }
 
     final String? outputDirectoryPath =
-        getString(CommonOptions.outputDir) ??
+        getValue(CommonOptions.outputDir) ??
         (argResults?.options.contains('output') == true ? stringArg('output') : null);
 
     final Map<String, String> webDefines = extractWebDefines();
@@ -181,7 +181,7 @@ class BuildWebCommand extends BuildSubCommand {
       project,
       targetFile,
       buildInfo,
-      ServiceWorkerStrategy.fromCliName(getString(WebOptions.pwaStrategy)),
+      ServiceWorkerStrategy.fromCliName(getValue(WebOptions.pwaStrategy)),
       compilerConfigs: compilerConfigs,
       baseHref: baseHref,
       staticAssetsUrl: staticAssetsUrl,
