@@ -1910,4 +1910,61 @@ _flutter.loader.load();
       expect(files, contains('main.dart.22222222.js'));
     }),
   );
+
+  test(
+    'Dart2WasmTarget buildPatternStems keeps main.dart.wasm.map unhashed under webContentHash',
+    () => testbed.run(() {
+      final target = Dart2WasmTarget(
+        const WasmCompilerConfig(webContentHash: true),
+        const NoOpAnalytics(),
+      );
+      expect(target.buildPatternStems, contains('main.dart.wasm.map'));
+      expect(target.buildPatternStems, isNot(contains('main.dart.*.wasm.map')));
+      expect(target.buildPatternStems, contains('main.dart.*.mjs.map'));
+    }),
+  );
+
+  test('hashAndRenameWebOutput skips source map rename for wasm binary files', () {
+    testbed.run(() {
+      final File wasmFile = environment.buildDir.childFile('main.dart.wasm')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
+      final File mapFile = environment.buildDir.childFile('main.dart.wasm.map')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version":3}');
+
+      final String newBasename = hashAndRenameWebOutput(file: wasmFile, sourceMapFile: mapFile);
+
+      expect(newBasename, matches(r'^main\.dart\.[a-f0-9]{8}\.wasm$'));
+      expect(
+        mapFile.existsSync(),
+        isTrue,
+        reason: 'main.dart.wasm.map should remain unhashed on disk',
+      );
+      expect(environment.buildDir.childFile('$newBasename.map').existsSync(), isFalse);
+    });
+  });
+
+  test('Dart2WasmTarget buildFiles discovers unhashed main.dart.wasm.map under webContentHash', () {
+    testbed.run(() {
+      environment.buildDir.childFile('main.dart.22222222.wasm').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.22222222.mjs').createSync(recursive: true);
+      final File mapFile = environment.buildDir.childFile('main.dart.wasm.map')
+        ..createSync(recursive: true);
+      final File mjsMapFile = environment.buildDir.childFile('main.dart.22222222.mjs.map')
+        ..createSync(recursive: true);
+
+      final target = Dart2WasmTarget(
+        const WasmCompilerConfig(webContentHash: true),
+        const NoOpAnalytics(),
+      );
+
+      final List<String> files = target
+          .buildFiles(environment)
+          .map((File f) => f.basename)
+          .toList();
+      expect(files, contains(mapFile.basename));
+      expect(files, contains(mjsMapFile.basename));
+    });
+  });
 }

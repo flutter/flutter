@@ -146,7 +146,8 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     return file.basename;
   }
 
-  if (sourceMapFile != null && sourceMapFile.existsSync()) {
+  final bool isWasm = file.path.endsWith('.wasm');
+  if (sourceMapFile != null && sourceMapFile.existsSync() && !isWasm) {
     final String oldMapBasename = sourceMapFile.basename;
     final String mapContentHash = crypto.sha256
         .convert(sourceMapFile.readAsBytesSync())
@@ -156,13 +157,12 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     final File newMapFile = sourceMapFile.parent.childFile(newMapBasename);
     sourceMapFile.renameSync(newMapFile.path);
 
-    try {
+    final String ext = file.path;
+    if (ext.endsWith('.js') || ext.endsWith('.mjs')) {
       final String content = file.readAsStringSync();
       if (content.contains(oldMapBasename)) {
         file.writeAsStringSync(content.replaceAll(oldMapBasename, newMapBasename));
       }
-    } on FormatException {
-      // Binary file (e.g. .wasm). If source maps are embedded in .wasm, skip ASCII replacement.
     }
   }
 
@@ -624,7 +624,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final Map<String, Object?> config = getBuildConfig(environment);
     final String mainWasmName = (config['mainWasmPath'] as String?) ?? 'main.dart.wasm';
     final String jsSupportName = (config['jsSupportRuntimePath'] as String?) ?? 'main.dart.mjs';
-    final mainWasmMapName = '$mainWasmName.map';
+    const mainWasmMapName = 'main.dart.wasm.map';
     final jsSupportMapName = '$jsSupportName.map';
 
     return environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
@@ -653,7 +653,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'main.dart_module*.wasm',
           if (compilerConfig.webContentHash) 'main.dart.*.mjs' else 'main.dart.mjs',
           if (compilerConfig.sourceMaps) ...<String>[
-            if (compilerConfig.webContentHash) 'main.dart.*.wasm.map' else 'main.dart.wasm.map',
+            'main.dart.wasm.map',
             if (compilerConfig.webContentHash) 'main.dart.*.mjs.map' else 'main.dart.mjs.map',
             'main.dart_module*.wasm.map',
           ],
