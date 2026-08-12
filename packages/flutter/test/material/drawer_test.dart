@@ -202,11 +202,47 @@ void main() {
 
     // Default drawerScrimColor
     await tester.pumpWidget(buildFrame());
-    await checkScrim(Colors.black54);
+    final BuildContext appContext = tester.element(find.byType(MaterialApp));
+    await checkScrim(Theme.of(appContext).colorScheme.scrim);
 
     // Specific drawerScrimColor
     await tester.pumpWidget(buildFrame(drawerScrimColor: const Color(0xFF323232)));
     await checkScrim(const Color(0xFF323232));
+  });
+
+  testWidgets('Drawer scrim uses ColorScheme.scrim by default', (WidgetTester tester) async {
+    const Color scrim = Color(0xFFFF0000);
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+        ),
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Drawer(child: Text('drawer')),
+        ),
+      ),
+    );
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    // The scrim is a ColoredBox within a Semantics node labeled "Dismiss".
+    final ColoredBox scrimBox = tester
+        .widget<Semantics>(
+          find.descendant(
+            of: find.byType(DrawerController),
+            matching: find.byWidgetPredicate((Widget widget) {
+              return widget is Semantics && widget.properties.label == 'Dismiss';
+            }),
+          ),
+        )
+        .child! as ColoredBox;
+    // The scrim's effective color applies the drawer controller's animation
+    // value as opacity, so compare against the fully-opaque scrim color.
+    expect(scrimBox.color, isSameColorAs(scrim));
   });
 
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
