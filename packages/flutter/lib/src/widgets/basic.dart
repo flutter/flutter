@@ -4865,9 +4865,9 @@ class Stack extends MultiChildRenderObjectWidget {
 /// [RenderObjectWidget]s).
 ///
 /// An [Overlay] lays its entries out using the same stack layout, so the
-/// widget built by an [OverlayEntry] can also be a [Positioned], with the
-/// same restriction on the path from the [Positioned] widget to the
-/// [OverlayEntry].
+/// subtree built by an [OverlayEntry] can also contain a [Positioned], with
+/// the same restriction on the path between the [Positioned] widget and the
+/// root of that subtree.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EgtPleVwxBQ}
 ///
@@ -5126,9 +5126,9 @@ class Positioned extends ParentDataWidget<StackParentData> {
 /// widgets, like [RenderObjectWidget]s).
 ///
 /// An [Overlay] lays its entries out using the same stack layout, so the
-/// widget built by an [OverlayEntry] can also be a [PositionedDirectional],
-/// with the same restriction on the path from the [PositionedDirectional]
-/// widget to the [OverlayEntry].
+/// subtree built by an [OverlayEntry] can also contain a
+/// [PositionedDirectional], with the same restriction on the path between the
+/// [PositionedDirectional] widget and the root of that subtree.
 ///
 /// If a widget is wrapped in a [PositionedDirectional], then it is a
 /// _positioned_ widget in its [Stack]. If the [top] property is non-null, the
@@ -5151,6 +5151,9 @@ class Positioned extends ParentDataWidget<StackParentData> {
 ///  * [AnimatedPositionedDirectional], which automatically transitions
 ///    the child's position over a given duration whenever the given position
 ///    changes.
+///  * [Overlay], which lays its entries out using the same stack layout, so
+///    that an [OverlayEntry] can position its contents with a
+///    [PositionedDirectional].
 class PositionedDirectional extends StatelessWidget {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
