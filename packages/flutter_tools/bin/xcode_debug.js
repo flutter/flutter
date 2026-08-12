@@ -10,6 +10,23 @@
 
 'use strict';
 
+ObjC.import('Foundation');
+
+/**
+ * Resolves symlinks in a path using the Foundation framework.
+ * Returns the original path if resolution fails.
+ *
+ * @param {string} path
+ * @returns {string}
+ */
+function resolveSymlink(path) {
+  try {
+    return ObjC.unwrap($.NSURL.fileURLWithPath(path).URLByResolvingSymlinksInPath.path);
+  } catch (e) {
+    return path;
+  }
+}
+
 /**
  * OSA Script `run` handler that is called when the script is run. When ran
  * with `osascript`, arguments are passed from the command line to the direct
@@ -514,26 +531,23 @@ function waitForWorkspaceToLoad(xcode, args) {
  *     Scripting class) or null as the `result`.
  */
 function getWorkspaceDocument(xcode, args, verbose = false) {
-  const privatePrefix = '/private';
-
   try {
+    const resolvedProjectPath = resolveSymlink(args.projectPath);
+    const resolvedWorkspacePath = resolveSymlink(args.workspacePath);
+    if (verbose === true) {
+      console.log(`Expected project path: ${resolvedProjectPath}`);
+      console.log(`Expected workspace path: ${resolvedWorkspacePath}`);
+    }
+
     const documents = xcode.workspaceDocuments();
     for (let document of documents) {
       const filePath = document.file().toString();
+      const resolvedFilePath = resolveSymlink(filePath);
       if (verbose === true) {
-        console.log(`Workspace: ${filePath}`);
+        console.log(`Workspace: ${filePath} (resolved: ${resolvedFilePath})`);
       }
-      if (filePath === args.projectPath || filePath === args.workspacePath) {
+      if (resolvedFilePath === resolvedProjectPath || resolvedFilePath === resolvedWorkspacePath) {
         return new FunctionResult(document);
-      }
-      // Sometimes when the project is in a temporary directory, it'll be
-      // prefixed with `/private` but the args will not. Remove the
-      // prefix before matching.
-      if (filePath.startsWith(privatePrefix) === true) {
-        const filePathWithoutPrefix = filePath.slice(privatePrefix.length);
-        if (filePathWithoutPrefix === args.projectPath || filePathWithoutPrefix === args.workspacePath) {
-          return new FunctionResult(document);
-        }
       }
     }
   } catch (e) {
