@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/executable.dart';
@@ -968,8 +967,8 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    Encoding? stdoutEncoding = io.systemEncoding,
-    Encoding? stderrEncoding = io.systemEncoding,
+    covariant Object? stdoutEncoding = io.systemEncoding,
+    covariant Object? stderrEncoding = io.systemEncoding,
   }) {
     return delegate.runSync(
       command,
@@ -977,8 +976,6 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
       environment: environment,
       includeParentEnvironment: includeParentEnvironment,
       runInShell: runInShell,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
     );
   }
 }

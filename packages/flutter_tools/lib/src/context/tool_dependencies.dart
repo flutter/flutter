@@ -70,10 +70,10 @@ class ToolDependencies {
   /// Telemetry and analytics reporter for command and feature usage.
   final Analytics analytics;
 
-  /// Android SDK, tools, and build configuration.
+  /// Sub-context containing Android-specific platform services.
   final AndroidContext androidContext;
 
-  /// Apple Xcode, toolchains, simulators, and developer tooling.
+  /// Sub-context containing Apple platform services.
   final AppleContext appleContext;
 
   /// High-performance compilation and build pipeline orchestrator.
