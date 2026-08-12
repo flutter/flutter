@@ -29,11 +29,8 @@ class SkwasmPaint implements ui.Paint {
 
     final EngineColorFilter? localColorFilter = _colorFilter;
     if (localColorFilter != null) {
-      SkwasmColorFilter.fromEngineColorFilter(localColorFilter).withRawColorFilter((
-        nativeFilterHandle,
-      ) {
-        paintSetColorFilter(rawPaint, nativeFilterHandle);
-      });
+      final backendFilter = localColorFilter.backendFilter as SkwasmColorFilter;
+      paintSetColorFilter(rawPaint, backendFilter.handle);
     }
 
     final ShaderHandle? shaderHandle = _shader?.handle;
@@ -41,11 +38,10 @@ class SkwasmPaint implements ui.Paint {
       paintSetShader(rawPaint, shaderHandle);
     }
 
-    final ui.MaskFilter? localMaskFilter = maskFilter;
+    final localMaskFilter = maskFilter as EngineMaskFilter?;
     if (localMaskFilter != null) {
-      final nativeFilter = SkwasmMaskFilter.fromUiMaskFilter(localMaskFilter);
-      paintSetMaskFilter(rawPaint, nativeFilter.handle);
-      nativeFilter.dispose();
+      final backendFilter = localMaskFilter.backendFilter as SkwasmMaskFilter;
+      paintSetMaskFilter(rawPaint, backendFilter.handle);
     }
 
     final ui.ImageFilter? filter = imageFilter;

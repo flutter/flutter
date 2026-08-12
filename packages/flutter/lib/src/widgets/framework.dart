@@ -309,6 +309,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
 @immutable
+@pragma('track-creation-locations')
 abstract class Widget extends DiagnosticableTree {
   /// Initializes [key] for subclasses.
   const Widget({this.key});
@@ -1476,6 +1477,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// this method because they need to do some expensive work (e.g., network
   /// fetches) when their dependencies change, and that work would be too
   /// expensive to do for every build.
+  ///
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.didChangeDependencies`.
   @protected
   @mustCallSuper
   void didChangeDependencies() {}

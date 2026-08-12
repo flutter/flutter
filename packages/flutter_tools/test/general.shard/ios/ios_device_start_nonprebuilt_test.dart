@@ -1465,7 +1465,7 @@ IOSDevice setUpIOSDevice({
   IOSCoreDeviceControl? coreDeviceControl,
   IOSCoreDeviceLauncher? coreDeviceLauncher,
   FakeXcodeDebug? xcodeDebug,
-  DarwinArch cpuArchitecture = DarwinArch.arm64,
+  CpuArch cpuArchitecture = CpuArch.arm64,
   FakeExactAnalytics? analytics,
 }) {
   artifacts ??= Artifacts.test();
@@ -1481,6 +1481,11 @@ IOSDevice setUpIOSDevice({
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     platform: macPlatform,
+    processUtils: ProcessUtils(
+      processManager: processManager ?? FakeProcessManager.any(),
+      logger: logger,
+    ),
+    xcode: null,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,
     iosDeploy: IOSDeploy(
@@ -1500,7 +1505,7 @@ IOSDevice setUpIOSDevice({
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
-    cpuArchitecture: cpuArchitecture,
+    cpuArch: cpuArchitecture,
     connectionInterface: DeviceConnectionInterface.attached,
     isConnected: true,
     isPaired: true,
@@ -1539,7 +1544,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async {
     return <String>['xcrun', 'xcodebuild'];
   }
