@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
@@ -629,6 +631,44 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    testUsingContext(
+      'returns false for commented-out AndroidX properties',
+      () async {
+        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_android.',
+        );
+
+        androidDirectory
+            .childFile('gradle.properties')
+            .writeAsStringSync('#android.useAndroidX=true');
+
+        expect(isAppUsingAndroidX(androidDirectory), isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'returns true when AndroidX property has spaces around the separator',
+      () async {
+        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+          'flutter_android.',
+        );
+
+        androidDirectory
+            .childFile('gradle.properties')
+            .writeAsStringSync('android.useAndroidX = true');
+
+        expect(isAppUsingAndroidX(androidDirectory), isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 
   group('printHowToConsumeAar', () {
@@ -816,6 +856,36 @@ flutter:
           'To learn more, visit https://flutter.dev/to/integrate-android-archive\n',
         ),
       );
+    });
+  });
+
+  group('calculateSha', () {
+    late FileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+    });
+
+    testWithoutContext('correctly calculates the SHA-1 hash of a file', () {
+      final File file = fileSystem.file('test_file')..writeAsStringSync('hello world');
+      expect(calculateSha(file), '2aae6c35c94fcfb415dbe95f408b9ce91ee846ed');
+    });
+
+    testWithoutContext('correctly calculates the SHA-1 hash of an empty file', () {
+      final File file = fileSystem.file('test_file')..createSync();
+      expect(calculateSha(file), 'da39a3ee5e6b4b0d3255bfef95601890afd80709');
+    });
+
+    testWithoutContext('correctly calculates the SHA-1 hash of a larger file in chunks', () {
+      // 128KB of data (more than the 64KB buffer size to verify chunking)
+      final data = Uint8List(128 * 1024);
+      for (var i = 0; i < data.length; i++) {
+        data[i] = i % 256;
+      }
+      final File file = fileSystem.file('test_file')..writeAsBytesSync(data);
+
+      final expectedHash = sha1.convert(data).toString();
+      expect(calculateSha(file), expectedHash);
     });
   });
 }

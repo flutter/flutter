@@ -26,6 +26,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../dart/language_version.dart';
+import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
@@ -54,6 +55,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required bool stayResident,
     required FlutterProject flutterProject,
     required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     UrlTunneller? urlTunneller,
     required Logger logger,
     required Terminal terminal,
@@ -70,6 +72,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       target: target,
       flutterProject: flutterProject,
       debuggingOptions: debuggingOptions,
+      platformArgs: platformArgs,
       stayResident: stayResident,
       urlTunneller: urlTunneller,
       machine: machine,
@@ -101,6 +104,7 @@ class ResidentWebRunner extends ResidentRunner {
     super.projectRootPath,
     required this.flutterProject,
     required super.debuggingOptions,
+    this.platformArgs = const <String, Object?>{},
     required FileSystem fileSystem,
     required Logger logger,
     required Terminal terminal,
@@ -136,6 +140,7 @@ class ResidentWebRunner extends ResidentRunner {
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
   final Map<String, String> _webDefines;
+  final Map<String, Object?> platformArgs;
 
   @override
   Logger get logger => _logger;
@@ -351,6 +356,7 @@ class ResidentWebRunner extends ResidentRunner {
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+            webDefines: _webDefines,
           );
         }
         final webDevFS = flutterDevice!.devFS! as WebDevFS;
@@ -365,7 +371,7 @@ class ResidentWebRunner extends ResidentRunner {
           package,
           mainPath: target,
           debuggingOptions: debuggingOptions,
-          platformArgs: <String, Object>{'uri': url.toString()},
+          platformArgs: <String, Object?>{...platformArgs, 'uri': url.toString()},
         );
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
@@ -504,13 +510,14 @@ class ResidentWebRunner extends ResidentRunner {
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
           compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+          webDefines: _webDefines,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
       }
     }
 
-    if (_connectionResult == null) {
+    if (supportsServiceProtocol && _connectionResult == null) {
       return _handleNoClientsAvailable(status);
     }
 
@@ -706,7 +713,7 @@ class ResidentWebRunner extends ResidentRunner {
       // the web_plugin_registrant.dart file alongside the generated main.dart
       const generatedImport = 'web_plugin_registrant.dart';
 
-      Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
+      Uri? importedEntrypoint = packageConfig!.toPackageUriForWorkspace(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
         final String parent = _fileSystem.file(mainUri).parent.path;

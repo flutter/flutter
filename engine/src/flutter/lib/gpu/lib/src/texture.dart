@@ -40,14 +40,12 @@ base class Texture extends NativeFieldWrapperClass1 {
     this.width,
     this.height,
     this.sampleCount,
-    TextureCoordinateSystem coordinateSystem,
     this.textureType,
     this.enableRenderTargetUsage,
     this.enableShaderReadUsage,
     this.enableShaderWriteUsage,
     this.mipLevelCount,
-  ) : _gpuContext = gpuContext,
-      _coordinateSystem = coordinateSystem {
+  ) : _gpuContext = gpuContext {
     if (sampleCount != 1 && sampleCount != 4) {
       throw Exception("Only a sample count of 1 or 4 is currently supported");
     }
@@ -58,7 +56,6 @@ base class Texture extends NativeFieldWrapperClass1 {
       width,
       height,
       sampleCount,
-      coordinateSystem.index,
       textureType.index,
       enableRenderTargetUsage,
       enableShaderReadUsage,
@@ -69,6 +66,69 @@ base class Texture extends NativeFieldWrapperClass1 {
       // The engine logs the specific reason (for example, a compressed format
       // used with render target or shader write usage, which is sample-only).
       throw Exception('Texture creation failed');
+    }
+  }
+
+  Texture._surface(
+    GpuContext gpuContext,
+    PixelFormat format,
+    int width,
+    int height,
+  ) : _gpuContext = gpuContext,
+      storageMode = StorageMode.devicePrivate,
+      format = format,
+      width = width,
+      height = height,
+      sampleCount = 1,
+      textureType = TextureType.texture2D,
+      enableRenderTargetUsage = true,
+      enableShaderReadUsage = true,
+      enableShaderWriteUsage = false,
+      mipLevelCount = 1;
+
+  /// Wraps the GPU texture that backs [image] as a Flutter GPU [Texture],
+  /// without copying any pixel data.
+  ///
+  /// The returned texture shares its storage with [image], so it stays valid
+  /// for as long as either the returned texture or [image] is alive. It is
+  /// intended for sampling (for example as a material texture) and reflects
+  /// the usage of the underlying texture, so it is not guaranteed to be usable
+  /// as a render pass attachment.
+  ///
+  /// [image] must be backed by a GPU texture. Use an image produced by the
+  /// asynchronous `RepaintBoundary.toImage` (or `Picture.toImage`). An image
+  /// from `toImageSync` rasterizes asynchronously and may not have a texture
+  /// yet when this is called. Throws if [image] has no compatible texture.
+  factory Texture.fromImage(GpuContext gpuContext, ui.Image image) {
+    final Int32List info = _imageTextureInfo(gpuContext, image);
+    if (info.length != 10) {
+      throw Exception(
+        'Texture.fromImage could not wrap the image because it is not backed '
+        'by a compatible GPU texture. Use an image from the asynchronous '
+        'RepaintBoundary.toImage rather than toImageSync.',
+      );
+    }
+    return Texture._fromImage(gpuContext, image, info);
+  }
+
+  /// Builds the wrapper from the metadata returned by [_imageTextureInfo] and
+  /// associates it with the image's backing texture. The field layout must
+  /// match `InternalFlutterGpu_Texture_ImageTextureInfo` on the native side.
+  Texture._fromImage(GpuContext gpuContext, ui.Image image, Int32List info)
+    : _gpuContext = gpuContext,
+      storageMode = StorageMode.values[info[0]],
+      format = PixelFormat.values[info[1]],
+      width = info[2],
+      height = info[3],
+      sampleCount = info[4],
+      textureType = TextureType.values[info[5]],
+      enableRenderTargetUsage = info[6] != 0,
+      enableShaderReadUsage = info[7] != 0,
+      enableShaderWriteUsage = info[8] != 0,
+      mipLevelCount = info[9] {
+    _valid = _initializeFromImage(gpuContext, image);
+    if (!_valid) {
+      throw Exception("Texture.fromImage failed to wrap the image texture");
     }
   }
 
@@ -103,28 +163,31 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// 1 for 2D and external textures, 6 for cubemap textures.
   int get sliceCount => textureType == TextureType.textureCube ? 6 : 1;
 
-  TextureCoordinateSystem _coordinateSystem;
-  TextureCoordinateSystem get coordinateSystem {
-    return _coordinateSystem;
+  /// Returns the width of the texture at [mipLevel], clamped at 1.
+  int getMipLevelWidth(int mipLevel) {
+    _validateMipLevel(mipLevel);
+    final int mipWidth = width >> mipLevel;
+    return mipWidth > 0 ? mipWidth : 1;
   }
 
-  set coordinateSystem(TextureCoordinateSystem value) {
-    value;
-    _setCoordinateSystem(value.index);
-  }
-
-  int get bytesPerTexel {
-    return _bytesPerTexel();
+  /// Returns the height of the texture at [mipLevel], clamped at 1.
+  int getMipLevelHeight(int mipLevel) {
+    _validateMipLevel(mipLevel);
+    final int mipHeight = height >> mipLevel;
+    return mipHeight > 0 ? mipHeight : 1;
   }
 
   /// Returns the size in bytes of the [mipLevel] mip level (one slice). Mip
-  /// dimensions are clamped at 1, matching standard mip chain semantics.
+  /// dimensions are clamped at 1, matching standard mip chain semantics. For
+  /// block-compressed formats the dimensions are rounded up to whole blocks.
   int getMipLevelSizeInBytes(int mipLevel) {
-    final int mipWidth = width >> mipLevel;
-    final int mipHeight = height >> mipLevel;
-    final int w = mipWidth > 0 ? mipWidth : 1;
-    final int h = mipHeight > 0 ? mipHeight : 1;
-    return bytesPerTexel * w * h;
+    final int w = getMipLevelWidth(mipLevel);
+    final int h = getMipLevelHeight(mipLevel);
+    final int bw = format.blockWidth;
+    final int bh = format.blockHeight;
+    final int blocksWide = (w + bw - 1) ~/ bw;
+    final int blocksHigh = (h + bh - 1) ~/ bh;
+    return blocksWide * blocksHigh * format.bytesPerBlock;
   }
 
   /// Returns the size in bytes of the base mip level (one slice). Equivalent
@@ -143,25 +206,15 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// each face is a separate slice in the order
   /// `+X, -X, +Y, -Y, +Z, -Z`. Must be 0 for non-cubemap textures.
   ///
-  /// The length of [sourceBytes] must exactly match the size of the
-  /// requested mip level, which is `mipWidth * mipHeight * bytesPerTexel`
-  /// (where `mipWidth` and `mipHeight` are the base dimensions right-shifted
-  /// by [mipLevel], floored at 1).
+  /// The length of [sourceBytes] must exactly match the size returned by
+  /// [getMipLevelSizeInBytes] for the requested [mipLevel]. For
+  /// block-compressed formats, this is the number of whole-block-rounded
+  /// blocks times the bytes per block.
   ///
   /// Throws an exception if the write fails due to an internal error or if
   /// any of the parameters are out of range.
   void overwrite(ByteData sourceBytes, {int mipLevel = 0, int slice = 0}) {
-    if (mipLevel < 0 || mipLevel >= mipLevelCount) {
-      throw Exception(
-        'mipLevel ($mipLevel) must be in the range [0, $mipLevelCount) for this texture',
-      );
-    }
-    final int slices = sliceCount;
-    if (slice < 0 || slice >= slices) {
-      throw Exception(
-        'slice ($slice) must be in the range [0, $slices) for textures of type $textureType',
-      );
-    }
+    _validateMipLevelAndSlice(mipLevel, slice);
     final int expectedSize = getMipLevelSizeInBytes(mipLevel);
     if (sourceBytes.lengthInBytes != expectedSize) {
       throw Exception(
@@ -171,6 +224,24 @@ base class Texture extends NativeFieldWrapperClass1 {
     bool success = _overwrite(_gpuContext, sourceBytes, mipLevel, slice);
     if (!success) {
       throw Exception("Texture overwrite failed");
+    }
+  }
+
+  void _validateMipLevel(int mipLevel) {
+    if (mipLevel < 0 || mipLevel >= mipLevelCount) {
+      throw Exception(
+        'mipLevel ($mipLevel) must be in the range [0, ${mipLevelCount - 1}] for this texture',
+      );
+    }
+  }
+
+  void _validateMipLevelAndSlice(int mipLevel, int slice) {
+    _validateMipLevel(mipLevel);
+    final int slices = sliceCount;
+    if (slice < 0 || slice >= slices) {
+      throw Exception(
+        'slice ($slice) must be in the range [0, ${slices - 1}] for textures of type $textureType',
+      );
     }
   }
 
@@ -194,7 +265,6 @@ base class Texture extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
-      Int,
       Bool,
       Bool,
       Bool,
@@ -208,23 +278,12 @@ base class Texture extends NativeFieldWrapperClass1 {
     int width,
     int height,
     int sampleCount,
-    int coordinateSystem,
     int textureType,
     bool enableRenderTargetUsage,
     bool enableShaderReadUsage,
     bool enableShaderWriteUsage,
     int mipLevelCount,
   );
-
-  @Native<Void Function(Handle, Int)>(
-    symbol: 'InternalFlutterGpu_Texture_SetCoordinateSystem',
-  )
-  external void _setCoordinateSystem(int coordinateSystem);
-
-  @Native<Int Function(Pointer<Void>)>(
-    symbol: 'InternalFlutterGpu_Texture_BytesPerTexel',
-  )
-  external int _bytesPerTexel();
 
   @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle, Int, Int)>(
     symbol: 'InternalFlutterGpu_Texture_Overwrite',
@@ -240,4 +299,17 @@ base class Texture extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Texture_AsImage',
   )
   external ui.Image _asImage();
+
+  @Native<Handle Function(Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_Texture_ImageTextureInfo',
+  )
+  external static Int32List _imageTextureInfo(
+    GpuContext gpuContext,
+    ui.Image image,
+  );
+
+  @Native<Bool Function(Handle, Pointer<Void>, Handle)>(
+    symbol: 'InternalFlutterGpu_Texture_InitializeFromImage',
+  )
+  external bool _initializeFromImage(GpuContext gpuContext, ui.Image image);
 }

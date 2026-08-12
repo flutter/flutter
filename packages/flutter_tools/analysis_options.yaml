@@ -1,4 +1,19 @@
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 include: ../analysis_options.yaml
+
+plugins:
+  flutter_analyzer_plugin:
+    path: ../../dev/flutter_analyzer_plugin
+    diagnostics:
+      avoid_future_catch_error: true
 
 linter:
   rules:

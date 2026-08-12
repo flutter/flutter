@@ -54,12 +54,32 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
 
+  /// Set the face culling mode for subsequent draws.
+  void SetCullMode(impeller::CullMode mode);
+
+  /// Set the front-face winding order for subsequent draws.
+  void SetWindingOrder(impeller::WindingOrder order);
+
+  /// Set the primitive topology for subsequent draws.
+  void SetPrimitiveType(impeller::PrimitiveType type);
+
+  /// Set the polygon fill mode for subsequent draws.
+  void SetPolygonMode(impeller::PolygonMode mode);
+
   void ClearBindings();
 
   /// Append a draw to the underlying render pass. [element_count] is the
   /// vertex count for a non-indexed draw, or the index count when
-  /// [indexed] is true.
-  bool Draw(size_t element_count, bool indexed);
+  /// [indexed] is true. [instance_count] is the number of instances to draw.
+  bool Draw(size_t element_count, size_t instance_count, bool indexed);
+
+  /// Whether the next draw must rebuild its backend pipeline. Exposed for
+  /// testing the memoization's dirty tracking.
+  bool IsPipelineStateDirtyForTesting() const;
+
+  /// Clears the pipeline dirty flag without building a pipeline, so tests
+  /// can observe which mutations re-dirty it.
+  void ClearPipelineStateDirtyForTesting();
 
   struct BufferAndUniformSlot {
     impeller::ShaderUniformSlot slot;
@@ -81,10 +101,9 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   // Vertex buffers indexed by binding slot. Mirrors
   // `impeller::kMaxVertexBuffers`; Impeller's HAL caps vertex buffer
   // bindings at 16 per draw, and index `i` here corresponds to the binding
-  // declared at slot `i` in the active VertexLayout. On the OpenGL ES
-  // backend the per-pipeline limit on the *total attribute count* across
-  // all bound buffers is `GL_MAX_VERTEX_ATTRIBS` (spec minimum 8 on GLES
-  // 2.0, 16 on GLES 3.0+), enforced by the driver.
+  // declared at slot `i` in the active VertexLayout. Devices may impose a
+  // lower per-pipeline limit on the total attribute count across all bound
+  // buffers.
   static constexpr size_t kMaxVertexBufferSlots = 16;
   std::array<impeller::BufferView, kMaxVertexBufferSlots> vertex_buffers;
   // Highest slot index that has been bound on this pass (plus one).
@@ -98,9 +117,27 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
  private:
   /// Lookup an Impeller pipeline by building a descriptor based on the current
-  /// command state.
+  /// command state, or return the memoized pipeline when that state is
+  /// unchanged since the last draw. Returns null (after a validation log)
+  /// when a stage function cannot be resolved or the backend fails to build
+  /// the pipeline.
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
   GetOrCreatePipeline();
+
+  // The non-dirtying counterpart of GetColorAttachmentDescriptor, for the
+  // pipeline rebuild itself.
+  impeller::ColorAttachmentDescriptor& ColorAttachmentDescriptorAt(
+      size_t color_attachment_index);
+
+  // The result of building a pipeline for the current pipeline-affecting
+  // state, null when that build failed (memoized so a broken pipeline is
+  // reported once, not per draw). Every mutable-state accessor above marks
+  // the state dirty; consecutive draws with unchanged state reuse this
+  // directly, skipping the descriptor rebuild, hash, and pipeline-library
+  // lookup.
+  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
+      memoized_pipeline_;
+  bool pipeline_state_dirty_ = true;
 
   impeller::RenderTarget render_target_;
   std::shared_ptr<impeller::RenderPass> render_pass_;
@@ -143,7 +180,9 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     float clear_color_b,
     float clear_color_a,
     flutter::gpu::Texture* texture,
-    Dart_Handle resolve_texture_wrapper);
+    Dart_Handle resolve_texture_wrapper,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
@@ -154,7 +193,9 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
     int stencil_load_action,
     int stencil_store_action,
     int stencil_clear_value,
-    flutter::gpu::Texture* texture);
+    flutter::gpu::Texture* texture,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_Begin(
@@ -192,6 +233,15 @@ extern bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     int length_in_bytes);
 
 FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    int uniform_struct_index,
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int length_in_bytes);
+
+FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_BindTexture(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::Shader* shader,
@@ -201,7 +251,21 @@ extern bool InternalFlutterGpu_RenderPass_BindTexture(
     int mag_filter,
     int mip_filter,
     int width_address_mode,
-    int height_address_mode);
+    int height_address_mode,
+    int max_anisotropy);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    int uniform_texture_index,
+    flutter::gpu::Texture* texture,
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_ClearBindings(
@@ -291,12 +355,14 @@ extern void InternalFlutterGpu_RenderPass_SetPolygonMode(
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_Draw(
     flutter::gpu::RenderPass* wrapper,
-    int vertex_count);
+    int vertex_count,
+    int instance_count);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_DrawIndexed(
     flutter::gpu::RenderPass* wrapper,
-    int index_count);
+    int index_count,
+    int instance_count);
 
 }  // extern "C"
 

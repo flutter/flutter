@@ -115,6 +115,22 @@ void main() {
     expect(find.text('Gilfoyle'), findsNothing);
     expect(valueListenable.hasListeners, false);
   });
+
+  testWidgets('ValueListenableBuilder does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: ValueListenableBuilder<String?>(
+            valueListenable: valueListenable,
+            builder: (BuildContext context, String? value, Widget? child) => const Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ValueListenableBuilder<String?>)), Size.zero);
+  });
 }
 
 class SpyStringValueNotifier extends ValueNotifier<String?> {

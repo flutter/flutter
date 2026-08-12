@@ -14,7 +14,7 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath implements DisposablePath, DisposablePathBuilder {
+class SkwasmPath implements BackendPath, BackendPathBuilder {
   factory SkwasmPath() {
     return SkwasmPath.fromHandle(pathCreate());
   }
@@ -184,20 +184,20 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
-    addPath((path as LazyPath).builtPath, offset);
+    addPath((path as EnginePath).backendPath, offset);
   }
 
   @override
-  void addPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
+  void addPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, false, matrix4: matrix4);
   }
 
   @override
-  void extendWithPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
+  void extendWithPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, true, matrix4: matrix4);
   }
 
-  void _addPath(DisposablePath path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
+  void _addPath(BackendPath path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
     assert(path is SkwasmPath);
     withStackScope((StackScope s) {
       final Pointer<Float> convertedMatrix = s.convertMatrix4toSkMatrix(
@@ -243,7 +243,7 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
       SkwasmPath.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
 
   @override
-  SkwasmPathMetricIterator getMetricsIterator({bool forceClosed = false}) {
+  SkwasmPathMetricIterator computeMetrics({bool forceClosed = false}) {
     return SkwasmPathMetricIterator(this, forceClosed);
   }
 
@@ -258,15 +258,15 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
   }
 }
 
-class SkwasmPathConstructors implements DisposablePathConstructors {
+class SkwasmPathConstructors implements BackendPathConstructors {
   @override
   SkwasmPath createNew() => SkwasmPath();
 
   @override
-  DisposablePathBuilder fromPath(DisposablePath path) => SkwasmPath.from(path as SkwasmPath);
+  BackendPathBuilder fromPath(BackendPath path) => SkwasmPath.from(path as SkwasmPath);
 
   @override
-  SkwasmPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
+  SkwasmPath combinePaths(ui.PathOperation operation, BackendPath path1, BackendPath path2) {
     return SkwasmPath.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
   }
 }

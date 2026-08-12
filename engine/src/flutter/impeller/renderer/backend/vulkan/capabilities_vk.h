@@ -273,11 +273,17 @@ class CapabilitiesVK final : public Capabilities,
   bool Supports32BitPrimitiveIndices() const override;
 
   // |Capabilities|
+  bool SupportsManuallyMippedTextures() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|
   bool SupportsTextureCompression(
       CompressedTextureFamily family) const override;
+
+  // |Capabilities|
+  bool SupportsFramebufferRenderMipmap() const override;
 
   // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
@@ -293,6 +299,9 @@ class CapabilitiesVK final : public Capabilities,
 
   // |Capabilities|
   ISize GetMaximumRenderPassAttachmentSize() const override;
+
+  // |Capabilities|
+  uint32_t GetMaxSamplerAnisotropy() const override;
 
   // |Capabilities|
   size_t GetMinimumUniformAlignment() const override;
@@ -350,6 +359,7 @@ class CapabilitiesVK final : public Capabilities,
   bool supports_device_transient_textures_ = false;
   bool supports_texture_fixed_rate_compression_ = false;
   ISize max_render_pass_attachment_size_ = ISize{0, 0};
+  uint32_t max_sampler_anisotropy_ = 1;
   bool has_triangle_fans_ = true;
   bool has_primitive_restart_ = true;
   bool has_framebuffer_fetch_ = true;

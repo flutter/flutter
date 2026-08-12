@@ -189,7 +189,7 @@ class XcodeProjectInterpreter {
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
@@ -198,7 +198,7 @@ class XcodeProjectInterpreter {
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
-      skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+      skipPackageValidation: skipPackageValidation,
     );
   }
 
@@ -209,11 +209,11 @@ class XcodeProjectInterpreter {
 
   /// Returns a list of required arguments for the `xcodebuild` Xcode project command.
   ///
-  /// When [skipPackageUpdatesAndValidation] is true, it uses arguments to attempt skipping any
-  /// Swift package updates and validation.
+  /// When [skipPackageValidation] is true, it uses arguments to attempt skipping any Swift
+  /// package validation.
   List<String> _xcodebuildProjectCommandArguments(
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) {
     final String cachePath = swiftPackageCachePath(buildDirectory);
     return <String>[
@@ -221,8 +221,7 @@ class XcodeProjectInterpreter {
       'xcodebuild',
       '-clonedSourcePackagesDirPath',
       cachePath,
-      if (skipPackageUpdatesAndValidation) ...<String>[
-        '-skipPackageUpdates',
+      if (skipPackageValidation) ...<String>[
         '-skipPackagePluginValidation',
         '-skipPackageSignatureValidation',
       ],
@@ -395,9 +394,9 @@ class XcodeProjectInterpreter {
     await xcodeProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: _xcodebuildProjectCommandArguments(
         buildDirectory,
-        // skipPackageUpdatesAndValidation should be false so that when subsequent xcodebuild
+        // skipPackageValidation should be false so that when subsequent xcodebuild
         // commands run, packages should already be resolved, downloaded, updated, and validated.
-        skipPackageUpdatesAndValidation: false,
+        skipPackageValidation: false,
       ),
       processUtils: _processUtils,
       logger: _logger,

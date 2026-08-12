@@ -235,11 +235,11 @@ class Xcode {
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async => _xcodeProjectInterpreter.fetchDependenciesAndGenerateXcodebuildArgs(
     xcodeProject,
     buildDirectory,
-    skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+    skipPackageValidation: skipPackageValidation,
   );
 
   Future<RunResult> cc(List<String> args) => _run('cc', args);
@@ -272,8 +272,16 @@ class Xcode {
     if (selectPath == null) {
       return null;
     }
-    final String appPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
-    return _fileSystem.directory(appPath).existsSync() ? appPath : null;
+    final String deviceHubPath = _fileSystem.path.join(
+      _fileSystem.path.dirname(selectPath),
+      'Applications',
+      'DeviceHub.app',
+    );
+    if (_fileSystem.directory(deviceHubPath).existsSync()) {
+      return deviceHubPath;
+    }
+    final String simulatorPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
+    return _fileSystem.directory(simulatorPath).existsSync() ? simulatorPath : null;
   }
 
   /// Gets the version number of the platform for the selected SDK.

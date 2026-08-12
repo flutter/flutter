@@ -8,6 +8,8 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/shell/platform/android/android_shell_holder.h"
+#include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
@@ -101,6 +103,74 @@ TEST_F(PlatformViewAndroidJNIImplTest, ImageGetHardwareBufferException) {
   fml::jni::ScopedJavaLocalRef<jobject> image(&mock_env,
                                               reinterpret_cast<jobject>(123));
   android_jni.ImageGetHardwareBuffer(image);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+
+  typedef void (*SetViewportMetricsFn)(
+      JNIEnv*, jobject, jlong, jfloat, jint, jint, jint, jint, jint, jint, jint,
+      jint, jint, jint, jint, jint, jint, jint, jint, jintArray, jintArray,
+      jintArray, jint, jint, jint, jint, jint, jint, jint, jint);
+
+  SetViewportMetricsFn set_viewport_metrics = nullptr;
+
+  const jclass kPlaceholderClass = reinterpret_cast<jclass>(100);
+  const jfieldID kPlaceholderFieldID = reinterpret_cast<jfieldID>(200);
+  const jmethodID kPlaceholderMethodID = reinterpret_cast<jmethodID>(300);
+
+  EXPECT_CALL(mock_env, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, FindClass(_)).WillRepeatedly(Return(kPlaceholderClass));
+  EXPECT_CALL(mock_env, GetFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderMethodID));
+  EXPECT_CALL(mock_env, GetStaticFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetStaticMethodID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderMethodID));
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  EXPECT_CALL(mock_env, RegisterNatives(_, _, _))
+      .WillRepeatedly(
+          [&](jclass clazz, const JNINativeMethod* methods, jint nMethods) {
+            for (jint i = 0; i < nMethods; ++i) {
+              if (strcmp(methods[i].name, "nativeSetViewportMetrics") == 0) {
+                set_viewport_metrics =
+                    reinterpret_cast<SetViewportMetricsFn>(methods[i].fnPtr);
+              }
+            }
+            return 0;
+          });
+
+  PlatformViewAndroid::Register(&mock_env);
+
+  ASSERT_NE(set_viewport_metrics, nullptr);
+
+  EXPECT_CALL(mock_env, GetArrayLength(_)).WillRepeatedly(Return(0));
+  EXPECT_CALL(mock_env, GetIntArrayRegion(_, _, _, _)).Times(0);
+
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+
+  jobject jcaller = reinterpret_cast<jobject>(123);
+  jintArray bounds = reinterpret_cast<jintArray>(456);
+  jintArray type = reinterpret_cast<jintArray>(789);
+  jintArray state = reinterpret_cast<jintArray>(1011);
+
+  set_viewport_metrics(&mock_env, jcaller,
+                       reinterpret_cast<jlong>(holder.get()), 1.0f, 100, 100, 0,
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, bounds, type, state,
+                       0, 0, 0, 0, 0, 0, 0, 0);
 }
 
 }  // namespace testing
