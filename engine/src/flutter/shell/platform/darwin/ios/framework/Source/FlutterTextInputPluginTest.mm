@@ -593,6 +593,21 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqual(substring.length, 0ul);
 }
 
+- (void)testInsertTextReplacesEntireMarkedRangeForDeadKeySequence {
+  // Regression test for https://github.com/flutter/flutter/issues/59541#issuecomment-4617810595.
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  [inputView setMarkedText:@"´" selectedRange:NSMakeRange(1, 0)];
+  [inputView insertText:@"Á"];
+
+  UITextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 20)];
+  NSString* substring = [inputView textInRange:range];
+  XCTAssertEqualObjects(substring, @"Á");
+}
+
 - (void)testTextInRangeAcceptsNSNotFoundLocationGracefully {
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
