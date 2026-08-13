@@ -936,8 +936,8 @@ public class FlutterFragmentActivity extends FragmentActivity
   protected String getCachedEngineId() {
     Intent intent = getIntent();
     if (intent != null
-        && intent.hasExtra(EXTRA_CACHED_ENGINE_ID)
-        && IntentUtils.isIntentSelfSent(this)) {
+        && IntentUtils.isIntentSelfSent(this)
+        && intent.hasExtra(EXTRA_CACHED_ENGINE_ID)) {
       return intent.getStringExtra(EXTRA_CACHED_ENGINE_ID);
     }
     return null;
