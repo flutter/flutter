@@ -268,16 +268,6 @@ List<Validation> _getValidations({
     Validation('no-missing-license', 'Licenses...', () => verifyNoMissingLicense(flutterRoot)),
     Validation('no-test-imports', 'Test imports...', () => verifyNoTestImports(flutterRoot)),
     Validation(
-      'no-bad-imports-flutter',
-      'Bad imports (framework)...',
-      () => verifyNoBadImportsInFlutter(flutterRoot),
-    ),
-    Validation(
-      'no-bad-imports-tools',
-      'Bad imports (tools)...',
-      () => verifyNoBadImportsInFlutterTools(flutterRoot),
-    ),
-    Validation(
       'internationalization',
       'Internationalization...',
       () => verifyInternationalizations(flutterRoot, dart),
@@ -1222,119 +1212,7 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   }
 }
 
-Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
-  final errors = <String>[];
-  final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
-  final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
-  // Verify there's one libPath/*.dart for each srcPath/*/.
-  final List<String> packages =
-      Directory(libPath)
-          .listSync()
-          .where(
-            (FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart',
-          )
-          .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))
-          .toList()
-        ..sort();
-  final List<String> directories =
-      Directory(srcPath)
-          .listSync()
-          .whereType<Directory>()
-          .map<String>((Directory entity) => path.basename(entity.path))
-          .toList()
-        ..sort();
-  if (!_listEquals<String>(packages, directories)) {
-    errors.add(
-      <String>[
-        'flutter/lib/*.dart does not match flutter/lib/src/*/:',
-        'These are the exported packages:',
-        ...packages.map<String>((String path) => '  lib/$path.dart'),
-        'These are the directories:',
-        ...directories.map<String>((String path) => '  lib/src/$path/'),
-      ].join('\n'),
-    );
-  }
-  // Verify that the imports are well-ordered.
-  final dependencyMap = <String, Set<String>>{};
-  for (final directory in directories) {
-    dependencyMap[directory] = await _findFlutterDependencies(
-      path.join(srcPath, directory),
-      errors,
-      checkForMeta: directory != 'foundation',
-    );
-  }
-  assert(
-    dependencyMap['material']!.contains('widgets') &&
-        dependencyMap['widgets']!.contains('rendering') &&
-        dependencyMap['rendering']!.contains('painting'),
-  ); // to make sure we're convinced _findFlutterDependencies is finding some
-  for (final String package in dependencyMap.keys) {
-    if (dependencyMap[package]!.contains(package)) {
-      errors.add(
-        'One of the files in the $yellow$package$reset package imports that package recursively.',
-      );
-    }
-  }
 
-  for (final String key in dependencyMap.keys) {
-    for (final String dependency in dependencyMap[key]!) {
-      if (dependencyMap[dependency] != null) {
-        continue;
-      }
-      // Sanity check before performing _deepSearch, to ensure there's no rogue
-      // dependencies.
-      final String validFilenames = dependencyMap.keys
-          .map((String name) => '$name.dart')
-          .join(', ');
-      errors.add(
-        '$key imported package:flutter/$dependency.dart '
-        'which is not one of the valid exports { $validFilenames }.\n'
-        'Consider changing $dependency.dart to one of them.',
-      );
-    }
-  }
-
-  for (final String package in dependencyMap.keys) {
-    final List<String>? loop = _deepSearch<String>(dependencyMap, package);
-    if (loop != null) {
-      errors.add('${yellow}Dependency loop:$reset ${loop.join(' depends on ')}');
-    }
-  }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      if (errors.length == 1)
-        '${bold}An error was detected when looking at import dependencies within the Flutter package:$reset'
-      else
-        '${bold}Multiple errors were detected when looking at import dependencies within the Flutter package:$reset',
-      ...errors,
-    ]);
-  }
-}
-
-Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
-  final errors = <String>[];
-  final List<File> files = await _allFiles(
-    path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'),
-    'dart',
-    minimumMatches: 200,
-  ).toList();
-  for (final file in files) {
-    if (file.readAsStringSync().contains('package:flutter_tools/')) {
-      errors.add('$yellow${file.path}$reset imports flutter_tools.');
-    }
-  }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      if (errors.length == 1)
-        '${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset'
-      else
-        '${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset',
-      ...errors.map((String paragraph) => '$paragraph\n'),
-    ]);
-  }
-}
 
 Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   final errors = <String>[];
@@ -2842,37 +2720,6 @@ Future<void> _checkForNewExecutables() async {
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
 final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
-Future<Set<String>> _findFlutterDependencies(
-  String srcPath,
-  List<String> errors, {
-  bool checkForMeta = false,
-}) async {
-  return _allFiles(srcPath, 'dart', minimumMatches: 1)
-      .map<Set<String>>((File file) {
-        final result = <String>{};
-        for (final String line in file.readAsLinesSync()) {
-          Match? match = _importPattern.firstMatch(line);
-          if (match != null) {
-            result.add(match.group(2)!);
-          }
-          if (checkForMeta) {
-            match = _importMetaPattern.firstMatch(line);
-            if (match != null) {
-              errors.add(
-                '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
-                'You should instead import the "foundation.dart" library.',
-              );
-            }
-          }
-        }
-        return result;
-      })
-      .reduce((Set<String>? value, Set<String> element) {
-        value ??= <String>{};
-        value.addAll(element);
-        return value;
-      });
-}
 
 List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [Set<T>? seen]) {
   if (map[start] == null) {

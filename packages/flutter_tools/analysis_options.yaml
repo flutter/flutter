@@ -13,6 +13,7 @@ plugins:
   flutter_analyzer_plugin:
     path: ../../dev/flutter_analyzer_plugin
     diagnostics:
+      no_bad_imports_in_flutter_tools: true
       avoid_future_catch_error: true
 
 linter:
