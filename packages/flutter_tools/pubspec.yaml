@@ -5,6 +5,11 @@ homepage: https://flutter.dev
 environment:
   sdk: ^3.11.0-0
 
+workspace:
+  - packages/flutter_tools_core
+  - packages/flutter_tools_extension
+  - packages/flutter_tools_extension_linux_prototype
+
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   #
@@ -13,7 +18,8 @@ dependencies:
   analyzer: 10.1.0
   archive: 3.6.1
   args: 2.7.0
-  dds: 5.3.0
+  dap_adapters: 1.0.0
+  dds: 5.4.0
   dwds: 27.1.2
   code_builder: 4.11.1
   collection: 1.19.1
@@ -22,6 +28,12 @@ dependencies:
   crypto: 3.0.7
   ffi: 2.2.0
   file: 7.0.1
+  flutter_tools_core:
+    path: packages/flutter_tools_core
+  flutter_tools_extension:
+    path: packages/flutter_tools_extension
+  flutter_tools_extension_linux_prototype:
+    path: packages/flutter_tools_extension_linux_prototype
   flutter_template_images: 5.0.0
   html: 0.15.6
   http: 1.6.0
@@ -53,7 +65,7 @@ dependencies:
   http_multi_server: 3.2.2
   convert: 3.1.2
   async: 2.13.1
-  unified_analytics: 8.0.15
+  unified_analytics: 8.0.16
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
@@ -61,6 +73,7 @@ dependencies:
   hooks: 2.1.0
   code_assets: 1.2.1
   data_assets: 0.20.0
+  record_use: 1.1.0
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -79,13 +92,13 @@ dependencies:
   boolean_selector: 2.1.2
   browser_launcher: 1.1.3
   built_collection: 5.1.1
-  built_value: 8.12.6
+  built_value: 8.12.7
   cli_config: 0.2.0
   clock: 1.1.2
   csslib: 1.0.2
   dap: 1.4.0
   dds_service_extensions: 2.1.0
-  devtools_shared: 12.1.0
+  devtools_shared: 13.1.0
   dtd: 4.0.0
   extension_discovery: 2.1.0
   fixnum: 1.1.1
@@ -127,4 +140,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: vj97p8
+# PUBSPEC CHECKSUM: 1leejj

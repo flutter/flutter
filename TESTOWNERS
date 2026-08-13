@@ -156,7 +156,6 @@
 /dev/devicelab/bin/tasks/integration_ui_driver.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_frame_number.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_keyboard_resize.dart @bkonyi @flutter/tool
-/dev/devicelab/bin/tasks/integration_ui_screenshot.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_textfield.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/native_assets_android.dart @dcharkes @flutter/android
@@ -210,7 +209,6 @@
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart LongCatIsLooong @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_frame_number.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_keyboard_resize.dart @LongCatIsLooong @flutter/engine
-/dev/devicelab/bin/tasks/integration_ui_ios_screenshot.dart @LongCatIsLooong @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @LongCatIsLooong @flutter/tool
 /dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @hellohuanlin @flutter/tool
 /dev/devicelab/bin/tasks/ios_defines_test.dart @vashworth @flutter/tool
@@ -331,7 +329,9 @@
 /dev/devicelab/bin/tasks/windowing_test_macos.dart @knopp @flutter/desktop
 /dev/devicelab/bin/tasks/windowing_test_windows.dart @mattkae @flutter/desktop
 /dev/devicelab/bin/tasks/windows_desktop_impeller.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/windows_engine_integration_golden_test.dart @b-luk @flutter/engine
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/windows_text_shadow_perf__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
 ## Host only framework tests
@@ -339,6 +339,8 @@
 # Linux docs_generate_release
 # Linux docs_publish
 /dev/bots/docs.sh @Piinks @flutter/framework
+# Linux snippets
+/dev/snippets @dkwingsmt @flutter/framework
 # Linux packages_autoroller
 /dev/conductor/core @christopherfujino @flutter/tool
 # Linux web_e2e_test
@@ -364,6 +366,8 @@
 # android_engine_vulkan_tests @reidbaker @flutter/android
 # android_hardware_smoke_opengles_tests @andywolff @flutter/engine
 # android_hardware_smoke_vulkan_tests @andywolff @flutter/engine
+# android_hardware_smoke_opengles_instrumented_tests @andywolff @flutter/engine
+# android_hardware_smoke_vulkan_instrumented_tests @andywolff @flutter/engine
 # android_java11_tool_integration_tests @jesswrd @flutter/android
 # android_preview_tool_integration_tests @mboetger @flutter/android
 # build_tests @bkonyi @flutter/tool
@@ -371,6 +375,7 @@
 # coverage @christopherfujino @flutter/infra
 # customer_testing @Piinks @flutter/framework
 # docs @Piinks @flutter/framework
+# snippets @Piinks @flutter/framework
 # flutter_packaging @christopherfujino @flutter/infra
 # flutter_plugins @stuartmorgan-g @flutter/plugin
 # framework_tests @Piinks @flutter/framework

@@ -2045,7 +2045,7 @@ class EditableText extends StatefulWidget {
   /// </small>
   /// {@endtemplate}
   ///
-  /// {@example /examples/api/lib/material/context_menu/editable_text_toolbar_builder.0.dart#body}
+  /// {@example /examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart#body}
   ///
   /// </callout-box>
   ///
@@ -2058,7 +2058,7 @@ class EditableText extends StatefulWidget {
   // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
   /// {@macro flutter.dartpad_guide}
   ///
-  /// {@example /examples/api/lib/material/context_menu/editable_text_toolbar_builder.1.dart#body}
+  /// {@example /examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart#body}
   ///
   /// </callout-box>
   ///
@@ -2289,6 +2289,7 @@ class EditableText extends StatefulWidget {
             AutofillHints.countryName: TextInputType.name,
             AutofillHints.creditCardNumber: TextInputType.number, // Couldn't test.
             AutofillHints.email: TextInputType.emailAddress,
+            AutofillHints.emailOTPCode: TextInputType.text,
             AutofillHints.familyName: TextInputType.name,
             AutofillHints.fullStreetAddress: TextInputType.name,
             AutofillHints.givenName: TextInputType.name,
@@ -2351,6 +2352,7 @@ class EditableText extends StatefulWidget {
       AutofillHints.creditCardSecurityCode: TextInputType.number,
       AutofillHints.creditCardType: TextInputType.text,
       AutofillHints.email: TextInputType.emailAddress,
+      AutofillHints.emailOTPCode: TextInputType.text,
       AutofillHints.familyName: TextInputType.name,
       AutofillHints.fullStreetAddress: TextInputType.streetAddress,
       AutofillHints.gender: TextInputType.text,
