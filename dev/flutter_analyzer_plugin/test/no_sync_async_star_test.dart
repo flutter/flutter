@@ -41,11 +41,7 @@ class NoSyncAsyncStarTest extends AnalysisRuleTest {
 
   // ignore: non_constant_identifier_names
   Future<void> test_no_sync_async_star() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(6, 51),
-      lint(64, 52),
-      lint(384, 22),
-    ]);
+    await assertDiagnostics(source, <ExpectedDiagnostic>[lint(6, 51), lint(64, 52), lint(384, 22)]);
   }
 }
 

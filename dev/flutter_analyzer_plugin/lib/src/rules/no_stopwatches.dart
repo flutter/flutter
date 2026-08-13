@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: prefer_final_locals, always_put_control_body_on_new_line, specify_nonobvious_local_variable_types, unused_local_variable
 import 'package:analyzer/analysis_rule/analysis_rule.dart';
 import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
@@ -73,9 +72,9 @@ class _Visitor extends SimpleAstVisitor<void> {
     return classElement.library.isDartCore
         ? classElement.name == 'Stopwatch'
         : _isStopwatchClassElementCache.putIfAbsent(
-            classElement,
-            () => _checkIfImplementsStopwatchRecursively(classElement),
-          );
+          classElement,
+          () => _checkIfImplementsStopwatchRecursively(classElement),
+        );
   }
 
   bool _isInternal(LibraryElement libraryElement) {
@@ -101,9 +100,8 @@ class _Visitor extends SimpleAstVisitor<void> {
       return;
     }
     final bool isAllowed = switch (element.returnType) {
-      InterfaceType(element: final ClassElement classElement) => !_implementsStopwatch(
-        classElement,
-      ),
+      InterfaceType(element: final ClassElement classElement) =>
+        !_implementsStopwatch(classElement),
       InterfaceType(element: InterfaceElement()) => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {

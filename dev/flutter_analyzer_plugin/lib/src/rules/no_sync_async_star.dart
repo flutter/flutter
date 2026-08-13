@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: prefer_final_locals, always_put_control_body_on_new_line, specify_nonobvious_local_variable_types, unused_local_variable
 import 'package:analyzer/analysis_rule/analysis_rule.dart';
 import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
@@ -71,15 +70,7 @@ class _Visitor extends SimpleAstVisitor<void> {
   }
 
   bool _hasExplanationComment(AstNode node) {
-    final lineInfo = context.currentUnit!.unit.lineInfo;
-    final int lineStartOffset = lineInfo.getOffsetOfLine(
-      lineInfo.getLocation(node.offset).lineNumber - 1,
-    );
-
-
-    // We can just check the string of the content on both the node line (before it) and the lines before,
-    // actually, let's just use token precedingComments stream - it reads all previous comments accurately!
-    Token? token = node.beginToken;
+    final Token token = node.beginToken;
     Token? comment = token.precedingComments;
     while (comment != null) {
       if (_ignorePattern.hasMatch(comment.lexeme)) {
@@ -88,7 +79,7 @@ class _Visitor extends SimpleAstVisitor<void> {
       comment = comment.next;
     }
     // As a fallback, check the previous comment on the parent's beginToken in case this node's token doesn't capture the doc comment cleanly
-    Token? parentToken = node.parent?.beginToken;
+    final Token? parentToken = node.parent?.beginToken;
     Token? parentComment = parentToken?.precedingComments;
     while (parentComment != null) {
       if (_ignorePattern.hasMatch(parentComment.lexeme)) {

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: prefer_final_locals, always_put_control_body_on_new_line, specify_nonobvious_local_variable_types, unused_local_variable
 import 'package:analyzer/analysis_rule/analysis_rule.dart';
 import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
+import 'package:analyzer/source/line_info.dart';
 
 class DeprecationSyntax extends AnalysisRule {
   DeprecationSyntax() : super(name: code.name, description: 'Verify deprecation syntax');
@@ -16,7 +16,8 @@ class DeprecationSyntax extends AnalysisRule {
   static const LintCode code = LintCode(
     'deprecation_syntax',
     'Deprecation syntax must conform to flutter standards.',
-    correctionMessage: 'See https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
+    correctionMessage:
+        'See https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
     severity: DiagnosticSeverity.ERROR,
   );
 
@@ -46,18 +47,20 @@ class _Visitor extends SimpleAstVisitor<void> {
   );
 
   bool _hasInlineIgnore(AstNode node, Pattern ignorePattern) {
-    final lineInfo = context.currentUnit!.unit.lineInfo;
+    final LineInfo lineInfo = context.currentUnit!.unit.lineInfo;
     final int lineStartOffset = lineInfo.getOffsetOfLine(
       lineInfo.getLocation(node.offset).lineNumber - 1,
     );
     final String content = context.currentUnit!.content;
 
     // Check if previous line has the comment
-    int prevLineNum = lineInfo.getLocation(node.offset).lineNumber - 2;
+    final int prevLineNum = lineInfo.getLocation(node.offset).lineNumber - 2;
     if (prevLineNum >= 0) {
       final int prevLineStart = lineInfo.getOffsetOfLine(prevLineNum);
       final String prevLine = content.substring(prevLineStart, lineStartOffset);
-      if (prevLine.contains(ignorePattern)) return true;
+      if (prevLine.contains(ignorePattern)) {
+        return true;
+      }
     }
 
     // Check current line as well after node? (The analyze.dart implementation checked the previous line OR the same line but technically before the node or after).
@@ -111,9 +114,10 @@ class _Visitor extends SimpleAstVisitor<void> {
     final StringLiteral versionLiteral = strings.last;
 
     // Verify version literal
-    final RegExpMatch? versionMatch = versionLiteral is SimpleStringLiteral
-        ? deprecationVersionPattern.firstMatch(versionLiteral.value)
-        : null;
+    final RegExpMatch? versionMatch =
+        versionLiteral is SimpleStringLiteral
+            ? deprecationVersionPattern.firstMatch(versionLiteral.value)
+            : null;
     if (versionMatch == null) {
       rule.reportAtNode(versionLiteral);
       return;

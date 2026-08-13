@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: prefer_final_locals, always_put_control_body_on_new_line, specify_nonobvious_local_variable_types, unused_local_variable
 // TODO(nate-thegrate): remove this file if @protected changes, or add a test if it doesn't.
 // https://github.com/dart-lang/sdk/issues/57094
 
