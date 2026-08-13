@@ -3648,6 +3648,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     final EdgeInsetsGeometry padding =
         resolve<EdgeInsetsGeometry?>((MenuStyle? style) => style?.padding) ?? EdgeInsets.zero;
     final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     // Per the Material Design team: don't allow the VisualDensity
     // adjustment to reduce the width of the left/right padding. If we
     // did, VisualDensity.compact, the default for desktop/web, would
@@ -3708,17 +3709,27 @@ class _MenuPanelState extends State<_MenuPanel> {
         ).copyWith(scrollbars: false, overscroll: false, physics: const ClampingScrollPhysics()),
         child: PrimaryScrollController(
           controller: scrollController,
-          child: Scrollbar(
-            thumbVisibility: displayScrollbar,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              scrollDirection: widget.orientation,
-              child: Flex(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: Directionality.of(context),
-                direction: widget.orientation,
-                mainAxisSize: MainAxisSize.min,
-                children: children,
+          child: MediaQuery.removePadding(
+            context: context,
+            removeLeft: true,
+            removeTop: true,
+            removeRight: true,
+            removeBottom: true,
+            child: Scrollbar(
+              thumbVisibility: displayScrollbar,
+              child: MediaQuery(
+                data: mediaQuery,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  scrollDirection: widget.orientation,
+                  child: Flex(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    textDirection: Directionality.of(context),
+                    direction: widget.orientation,
+                    mainAxisSize: MainAxisSize.min,
+                    children: children,
+                  ),
+                ),
               ),
             ),
           ),
