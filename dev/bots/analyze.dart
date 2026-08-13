@@ -1212,8 +1212,6 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   }
 }
 
-
-
 Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   final errors = <String>[];
   final String dev = path.join(workingDirectory, 'dev');
@@ -2125,7 +2123,6 @@ Future<void> verifyNoBinaries(String workingDirectory, {Set<Hash256>? legacyBina
 
 // UTILITY FUNCTIONS
 
-
 Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true}) async {
   final EvalResult evalResult = await _evalCommand(
     'git',
@@ -2704,34 +2701,6 @@ Future<void> _checkForNewExecutables() async {
       'must add this file to kExecutableAllowlist in dev/bots/analyze.dart',
     );
   }
-}
-
-
-
-
-  for (final T key in map[start]!) {
-    if (key == start) {
-      continue; // we catch these separately
-    }
-    if (seen != null && seen.contains(key)) {
-      return <T>[start, key];
-    }
-    final List<T>? result = _deepSearch<T>(map, key, <T>{
-      if (seen == null) start else ...seen,
-      key,
-    });
-    if (result != null) {
-      result.insert(0, start);
-      // Only report the shortest chains.
-      // For example a->b->a, rather than c->a->b->a.
-      // Since we visit every node, we know the shortest chains are those
-      // that start and end on the loop.
-      if (result.first == result.last) {
-        return result;
-      }
-    }
-  }
-  return null;
 }
 
 bool _isGeneratedPluginRegistrant(File file) {
