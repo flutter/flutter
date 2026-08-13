@@ -2343,7 +2343,6 @@ class FlutterPluginUtilsTest {
         every { project.gradle.startParameter.taskNames } returns listOf(FlutterPluginUtils.TASK_PRINT_NDK_VERSION)
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk(relaxed = true)
 
-        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk(relaxed = true)
         FlutterPluginUtils.forceNdkDownload(project, "/base/path")
 
         verify(exactly = 0) { mockCmakeOptions.path(any()) }
