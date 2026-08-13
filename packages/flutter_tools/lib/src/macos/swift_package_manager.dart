@@ -236,7 +236,7 @@ class SwiftPackageManager {
   /// If a symlink already exists and points to the correct target, creation is skipped
   /// to avoid potential Xcode parallel target build race conditions.
   /// If creation fails due to sharing violations or locks (e.g., when Xcode is open),
-  /// throws a descriptive [ToolExit] advising the user to close Xcode and run "flutter clean".
+  /// throws a descriptive [ToolExit] advising the user to close Xcode and run "flutter clean --include-xcode-workspace".
   void _createPluginSymlink({required Link pluginSymlink, required String packagePath}) {
     final FileSystemEntityType type = _fileSystem.typeSync(pluginSymlink.path, followLinks: false);
     var skipCreation = false;
@@ -277,7 +277,7 @@ class SwiftPackageManager {
       throwToolExit(
         'Failed to create Swift Package plugin symlink at "${pluginSymlink.path}" to "$packagePath":\n'
         '$e\n'
-        'If Xcode is currently open, please close Xcode, run "flutter clean", and try building again.',
+        'If Xcode is currently open, please close Xcode, run "flutter clean --include-xcode-workspace", and try building again.',
       );
     }
   }
