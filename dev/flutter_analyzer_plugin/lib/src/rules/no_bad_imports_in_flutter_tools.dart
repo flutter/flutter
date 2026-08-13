@@ -10,7 +10,8 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
 class NoBadImportsInFlutterTools extends AnalysisRule {
-  NoBadImportsInFlutterTools() : super(name: code.name, description: 'flutter_tools should not import flutter_tools');
+  NoBadImportsInFlutterTools()
+    : super(name: code.name, description: 'flutter_tools should not import flutter_tools');
 
   static const LintCode code = LintCode(
     'no_bad_imports_in_flutter_tools',

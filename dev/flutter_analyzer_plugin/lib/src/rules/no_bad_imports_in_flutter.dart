@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: specify_nonobvious_local_variable_types, always_put_control_body_on_new_line, use_raw_strings, omit_obvious_local_variable_types
 import 'package:analyzer/analysis_rule/analysis_rule.dart';
 import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
@@ -40,20 +39,20 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitImportDirective(ImportDirective node) {
-    final uriStr = node.uri.stringValue;
-    if (uriStr == null) return;
+    final String? uriStr = node.uri.stringValue;
+    if (uriStr == null) {
+      return;
+    }
 
-    final absolutePath = context.currentUnit?.unit.declaredFragment?.source.fullName;
-    if (absolutePath == null) return;
+    final String? absolutePath = context.currentUnit?.unit.declaredFragment?.source.fullName;
+    if (absolutePath == null) {
+      return;
+    }
 
     // Check for package:meta/meta.dart
     if (uriStr == 'package:meta/meta.dart') {
       // Only allow meta in foundation
-      // For tests, allow it too if we mock path?
-      // Just check if absolutePath contains 'packages/flutter/lib/src/foundation' or 'flutter/foundation.dart'...
-      // Actually `meta` should not be used in the framework generally.
-      if (!absolutePath.contains('src/foundation/') &&
-          !absolutePath.contains('src\\foundation\\')) {
+      if (!absolutePath.contains('src/foundation/') && !absolutePath.contains(r'src\foundation\')) {
         rule.reportAtNode(node.uri);
       }
     }
@@ -62,12 +61,12 @@ class _Visitor extends SimpleAstVisitor<void> {
     // E.g., if we are in package:flutter/src/widgets/framework.dart
     // we should not import 'package:flutter/widgets.dart'
     if (absolutePath.contains('packages/flutter/lib/src/') ||
-        absolutePath.contains('packages\\flutter\\lib\\src\\')) {
-      final String token = absolutePath.contains('/') ? '/' : '\\';
-      final pathParts = absolutePath.split(token);
-      final srcIndex = pathParts.lastIndexOf('src');
+        absolutePath.contains(r'packages\flutter\lib\src\')) {
+      final token = absolutePath.contains('/') ? '/' : r'\';
+      final List<String> pathParts = absolutePath.split(token);
+      final int srcIndex = pathParts.lastIndexOf('src');
       if (srcIndex != -1 && srcIndex + 1 < pathParts.length) {
-        final currentDir = pathParts[srcIndex + 1];
+        final String currentDir = pathParts[srcIndex + 1];
         if (uriStr == 'package:flutter/$currentDir.dart') {
           rule.reportAtNode(node.uri);
         }
