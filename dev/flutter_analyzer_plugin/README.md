@@ -44,9 +44,9 @@ This plugin replaces legacy regex-based and manual AST scripts (previously locat
 The Flutter SDK repository utilizes custom static analysis rules to enforce architectural boundaries, performance invariants, test hygiene, and style conventions across its packages.
 
 The analysis options hierarchy is structured as follows:
-- **`analysis_options_common.yaml`**: Base repository configuration containing common linter rules and analyzer settings. Included by both framework packages and standalone subtrees (like `engine/src/flutter`).
-- **`analysis_options.yaml` (Root)**: Global repository entrypoint. Includes `analysis_options_common.yaml` and configures top-level analyzer behaviors and exclusions.
-- **Subpackage `analysis_options.yaml`**: Subpackages (such as `packages/flutter/lib`, `packages/flutter/test`, and `packages/flutter_tools`) include the parent `analysis_options.yaml` and load `flutter_analyzer_plugin` via the `plugins` block.
+- **Base Options Files (`analysis_options_common.yaml`)**: Define baseline linter rules and analyzer settings shared across repositories and subtrees.
+- **Root `analysis_options.yaml`**: The repository root entrypoint, which includes the common baseline options and configures repository-level analyzer behaviors and exclusions.
+- **Subpackage `analysis_options.yaml` Files**: Packages and directories (such as `packages/flutter/lib`, `packages/flutter/test`, `packages/flutter_tools`, and `dev/`) include their parent analysis options and load `flutter_analyzer_plugin` via the `plugins:` block with the appropriate relative directory depth.
 
 ---
 
