@@ -158,10 +158,7 @@ final double clamped = clampDouble(value, 0.0, 1.0);
 - **Scope**: Global (all Dart files where the plugin is enabled)
 - **Description**: Disallows direct instantiation of `Stopwatch()` or calling functions that return a `Stopwatch`.
 - **Rationale**: Direct usage of `Stopwatch` relies on the host system clock, which can fall out of sync with `FakeAsync` during unit and widget tests, causing non-deterministic test flakes. Code should instead use `clock.stopwatch()` from `package:clock` (which binds with `FakeAsync` during tests) or use `dart:developer` timeline events for profiling.
-- **Inline Exemption**: Lines requiring raw stopwatches can be ignored with:
-  ```dart
-  Stopwatch().runtimeType; // flutter_ignore: stopwatch (see analyze.dart)
-  ```
+- **Inline Exemption**: Standard analyzer ignore comments (`// ignore: no_stopwatches`) or legacy inline directive `// flutter_ignore: stopwatch (see analyze.dart)`.
 
 ```dart
 // BAD:
@@ -178,7 +175,7 @@ final Stopwatch stopwatch = clock.stopwatch()..start();
 - **Scope**: Global (all library declarations and public APIs)
 - **Description**: Enforces standard multi-line string formatting on `@Deprecated` annotations.
 - **Rationale**: Standardizing deprecation messages ensures all deprecated APIs provide actionable migration instructions, state the exact version of deprecation, and link to the Flutter deprecation policy.
-- **Inline Exemption**: `// flutter_ignore: deprecation_syntax (see analyze.dart)` or `// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/<id>`.
+- **Inline Exemption**: Standard analyzer ignore comments (`// ignore: deprecation_syntax`) or legacy inline directive `// flutter_ignore: deprecation_syntax (see analyze.dart)`.
 
 ```dart
 // BAD:
@@ -475,7 +472,7 @@ Rules must be covered by reflective tests using `package:analyzer_testing`:
 
 1. Create a test file in `dev/flutter_analyzer_plugin/test/<rule_name>_test.dart`.
 2. Extend `AnalysisRuleTest` and annotate the class with `@reflectiveTest`.
-3. Register the rule in `setUp()` and define test cases using `assertDiagnostics()`.
+3. Register the rule in `setUp()` using `Registry.ruleRegistry.registerWarningRule(...)` and define test cases using `assertDiagnostics()`.
 
 ```dart
 import 'package:analyzer/src/lint/registry.dart';
@@ -487,6 +484,7 @@ import 'package:test_reflective_loader/test_reflective_loader.dart';
 class MyCustomRuleTest extends AnalysisRuleTest {
   @override
   void setUp() {
+    // Registers the custom AnalysisRule with the test registry prior to running tests.
     Registry.ruleRegistry.registerWarningRule(MyCustomRule());
     super.setUp();
   }
