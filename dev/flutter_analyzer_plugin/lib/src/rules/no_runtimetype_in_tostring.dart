@@ -61,7 +61,7 @@ class _BodyVisitor extends RecursiveAstVisitor<void> {
   void visitSimpleIdentifier(SimpleIdentifier node) {
     if (node.name == 'runtimeType') {
       // Omit checking if it's the right property, as runtimeType is unique enough
-      // in string-based linting. AST gives us a bit more safety in that if we have 
+      // in string-based linting. AST gives us a bit more safety in that if we have
       // a local var called runtimeType, we could accidentally flag it, but the
       // string-rule flagged strings too.
       rule.reportAtNode(node);

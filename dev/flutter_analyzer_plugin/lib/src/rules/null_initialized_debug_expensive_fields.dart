@@ -49,14 +49,14 @@ class _Visitor extends SimpleAstVisitor<void> {
         break;
       }
     }
-    
+
     if (!hasDebugOnly) {
       return;
     }
 
     for (final variable in node.fields.variables) {
       final initializer = variable.initializer;
-      
+
       bool isCorrect = false;
       if (initializer is ConditionalExpression) {
         final condition = initializer.condition;
@@ -67,7 +67,7 @@ class _Visitor extends SimpleAstVisitor<void> {
           }
         }
       }
-      
+
       if (!isCorrect) {
         rule.reportAtNode(variable);
       }

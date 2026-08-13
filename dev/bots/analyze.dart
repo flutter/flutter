@@ -227,7 +227,7 @@ List<Validation> _getValidations({
       await verifyNoSyncAsyncStar(flutterPackages);
       await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 80);
     }),
-    
+
     Validation(
       'no-checked-mode',
       'Debug mode instead of checked mode...',
@@ -288,7 +288,7 @@ List<Validation> _getValidations({
       'Integration test timeouts...',
       () => verifyIntegrationTestTimeouts(flutterRoot),
     ),
-    
+
     Validation('taboo', 'Taboo words...', () => verifyTabooDocumentation(flutterRoot)),
     Validation('lint-kotlin', 'Lint Kotlin files...', () => lintKotlinFiles(flutterRoot)),
     Validation(
