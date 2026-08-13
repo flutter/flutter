@@ -8,6 +8,8 @@ include: analysis_options_common.yaml
 
 analyzer:
   errors:
+    # This error code will no longer be reported here. Until dart rolls in, we need to just ignore the issue.
+    # ignore: unrecognized_error_code
     plugins_in_inner_options: ignore
   exclude:
     - "bin/cache/**"
