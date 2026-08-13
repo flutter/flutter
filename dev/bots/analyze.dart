@@ -227,7 +227,6 @@ List<Validation> _getValidations({
       await verifyNoSyncAsyncStar(flutterPackages);
       await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 80);
     }),
-
     Validation(
       'no-checked-mode',
       'Debug mode instead of checked mode...',
@@ -288,7 +287,6 @@ List<Validation> _getValidations({
       'Integration test timeouts...',
       () => verifyIntegrationTestTimeouts(flutterRoot),
     ),
-
     Validation('taboo', 'Taboo words...', () => verifyTabooDocumentation(flutterRoot)),
     Validation('lint-kotlin', 'Lint Kotlin files...', () => lintKotlinFiles(flutterRoot)),
     Validation(
@@ -1486,7 +1484,6 @@ Future<void> verifyNoCheckedMode(String workingDirectory) async {
   }
 }
 
-
 Future<void> verifyNoTrailingSpaces(String workingDirectory, {int minimumMatches = 4000}) async {
   final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
       .where((File file) => path.basename(file.path) != 'serviceaccount.enc')
@@ -2421,8 +2418,6 @@ Future<void> _checkConsumerDependencies() async {
     ]);
   }
 }
-
-
 
 final RegExp tabooPattern = RegExp(r'^ *///.*\b(simply|note:|note that)\b', caseSensitive: false);
 
