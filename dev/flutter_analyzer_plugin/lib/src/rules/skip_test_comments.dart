@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: specify_nonobvious_local_variable_types, omit_obvious_local_variable_types, always_put_control_body_on_new_line, sort_constructors_first, inference_failure_on_function_return_type, directives_ordering
 import 'package:analyzer/analysis_rule/analysis_rule.dart';
 import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
+import 'package:analyzer/source/line_info.dart';
 
 final Pattern _skipTestIntentionalPattern = RegExp(r'// .*\[intended\]');
-final Pattern _skipTestTrackingBugPattern = RegExp(
-  r'// .*https+?://github.com/.*/issues/\d+',
-);
+final Pattern _skipTestTrackingBugPattern = RegExp(r'// .*https+?://github.com/.*/issues/\d+');
 
 /// Skipped tests should have a justification comment.
 class SkipTestComments extends AnalysisRule {
@@ -49,12 +47,9 @@ class _Visitor extends SimpleAstVisitor<void> {
     return name.startsWith('test') || name == 'group' || name == 'expect';
   }
 
-  bool _hasInlineIgnore(
-    AstNode node,
-    Pattern ignoreDirectivePattern,
-  ) {
-    final compilationUnit = context.currentUnit!;
-    final lineInfo = compilationUnit.unit.lineInfo;
+  bool _hasInlineIgnore(AstNode node, Pattern ignoreDirectivePattern) {
+    final RuleContextUnit compilationUnit = context.currentUnit!;
+    final LineInfo lineInfo = compilationUnit.unit.lineInfo;
 
     final String textAfterNode = compilationUnit.content.substring(
       node.offset,
@@ -76,15 +71,11 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   bool _hasValidJustificationComment(AstNode skipLabel) {
     return _hasInlineIgnore(skipLabel, _skipTestIntentionalPattern) ||
-           _hasInlineIgnore(skipLabel, _skipTestTrackingBugPattern);
+        _hasInlineIgnore(skipLabel, _skipTestTrackingBugPattern);
   }
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
-    if (!context.currentUnit!.file.path.endsWith('_test.dart')) {
-      return;
-    }
-
     if (_isTestMethod(node.methodName.name)) {
       for (final Expression argument in node.argumentList.arguments) {
         if (argument is NamedExpression &&

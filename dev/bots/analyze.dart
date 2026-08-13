@@ -394,7 +394,6 @@ List<Validation> _getValidations({
 
 FeatureSet _parsingFeatureSet() => FeatureSet.latestLanguageVersion();
 
-
 Future<void> verifyReleaseBranchState(String workringDirerctory) async {
   final ProcessResult result = await Process.run(dart, <String>[
     'bin/check_engine_version.dart',
@@ -1098,7 +1097,6 @@ Future<void> _verifyNoMissingLicenseForExtension(
     ]);
   }
 }
-
 
 final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
 const Set<String> _exemptTestImports = <String>{

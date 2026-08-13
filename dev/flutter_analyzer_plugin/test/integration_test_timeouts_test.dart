@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: non_constant_identifier_names
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/integration_test_timeouts.dart';
@@ -33,10 +32,9 @@ void main() {
 }
 ''';
 
+  // ignore: non_constant_identifier_names
   Future<void> test_integration_test_timeouts() async {
-    await assertDiagnostics(source, [
-      lint(158, 4),
-    ]);
+    await assertDiagnostics(source, [lint(163, 4)]);
   }
 }
 

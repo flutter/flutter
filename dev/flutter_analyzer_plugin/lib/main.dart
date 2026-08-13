@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: specify_nonobvious_local_variable_types, omit_obvious_local_variable_types, always_put_control_body_on_new_line, sort_constructors_first, inference_failure_on_function_return_type, directives_ordering
 import 'package:analysis_server_plugin/plugin.dart';
 import 'package:analysis_server_plugin/registry.dart';
+
 import 'src/rules/avoid_future_catch_error.dart';
+import 'src/rules/integration_test_timeouts.dart';
 import 'src/rules/no_double_clamp.dart';
 import 'src/rules/no_stopwatches.dart';
 import 'src/rules/protect_public_state_subtypes.dart';
 import 'src/rules/render_box_intrinsics.dart';
 import 'src/rules/skip_test_comments.dart';
-import 'src/rules/integration_test_timeouts.dart';
 
 final FlutterAnalyzerPlugin plugin = FlutterAnalyzerPlugin();
 

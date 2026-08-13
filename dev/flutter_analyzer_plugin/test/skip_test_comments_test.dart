@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: non_constant_identifier_names
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/skip_test_comments.dart';
@@ -27,9 +26,10 @@ void main() {
 }
 ''';
 
+  // ignore: non_constant_identifier_names
   Future<void> test_skip_test_comments() async {
     await assertDiagnostics(source, [
-      lint(116, 4), // skip length is 4
+      lint(108, 10), // skip: true
     ]);
   }
 }
