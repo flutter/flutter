@@ -1084,16 +1084,14 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       hasProvisioningProfileIssue: false,
       duplicateModule: duplicateModule,
     );
-  } else if (message.toLowerCase().contains('not found')) {
-    final String? missingModule = _parseMissingModule(message);
-    if (missingModule != null) {
-      return _XCResultIssueHandlingResult(
-        requiresProvisioningProfile: false,
-        hasProvisioningProfileIssue: false,
-        missingModule: missingModule,
-      );
-    }
-  } else if (message.toLowerCase().contains('has been modified since')) {
+  } else if (message.toLowerCase().contains('not found') && _parseMissingModule(message) != null) {
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      missingModule: _parseMissingModule(message),
+    );
+  } else if (message.toLowerCase().contains('has been modified since') ||
+      (message.toLowerCase().contains('module map file') && message.toLowerCase().contains('not found'))) {
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
       hasProvisioningProfileIssue: false,
@@ -1264,7 +1262,7 @@ Future<bool> _handleIssues(
   } else if (modifiedPrecompiledSource) {
     logger.printError(
       '════════════════════════════════════════════════════════════════════════════════\n'
-      'A precompiled file has been changed since last built. Please run "flutter clean" to clear '
+      'A precompiled file has been changed since last built. Please run "flutter clean --include-xcode-workspace" to clear '
       'the cache.\n'
       '════════════════════════════════════════════════════════════════════════════════',
     );
@@ -1532,7 +1530,7 @@ class _XCResultIssueHandlingResult {
   final String? missingModule;
 
   /// An issue indicates that a source file, such as a header in the Flutter framework, has
-  /// changed since last built. This requires "flutter clean" to resolve.
+  /// changed since last built. This requires "flutter clean --include-xcode-workspace" to resolve.
   final bool modifiedPrecompiledSource;
 
   final bool unableToFindArmDestination;
