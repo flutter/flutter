@@ -125,14 +125,6 @@ TaskFunction createEndToEndDriverTest({
   ).call;
 }
 
-TaskFunction createEndToEndScreenshotTest({String? deviceIdOverride}) {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/screenshot.dart',
-    deviceIdOverride: deviceIdOverride,
-  ).call;
-}
-
 TaskFunction createEndToEndKeyboardTextfieldTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
