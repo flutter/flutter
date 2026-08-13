@@ -3503,18 +3503,12 @@ Widget _navBarHeroLaunchPadBuilder(BuildContext context, Size heroSize, Widget c
 }
 
 /// Navigation bars' hero flight shuttle builder.
-Widget _navBarHeroFlightShuttleBuilder(
-  BuildContext flightContext,
-  Animation<double> animation,
-  HeroFlightDirection flightDirection,
-  BuildContext fromHeroContext,
-  BuildContext toHeroContext,
-) {
-  assert(fromHeroContext.widget is Hero);
-  assert(toHeroContext.widget is Hero);
+Widget _navBarHeroFlightShuttleBuilder(HeroFlightDetails details) {
+  assert(details.fromHeroContext.widget is Hero);
+  assert(details.toHeroContext.widget is Hero);
 
-  final fromHeroWidget = fromHeroContext.widget as Hero;
-  final toHeroWidget = toHeroContext.widget as Hero;
+  final fromHeroWidget = details.fromHeroContext.widget as Hero;
+  final toHeroWidget = details.toHeroContext.widget as Hero;
 
   assert(fromHeroWidget.child is _TransitionableNavigationBar);
   assert(toHeroWidget.child is _TransitionableNavigationBar);
@@ -3531,16 +3525,16 @@ Widget _navBarHeroFlightShuttleBuilder(
     'The to nav bar to Hero must have been mounted in the previous frame',
   );
 
-  switch (flightDirection) {
+  switch (details.direction) {
     case HeroFlightDirection.push:
       return _NavigationBarTransition(
-        animation: animation,
+        animation: details.animation,
         bottomNavBar: fromNavBar,
         topNavBar: toNavBar,
       );
     case HeroFlightDirection.pop:
       return _NavigationBarTransition(
-        animation: animation,
+        animation: details.animation,
         bottomNavBar: toNavBar,
         topNavBar: fromNavBar,
       );

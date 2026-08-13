@@ -307,6 +307,37 @@ class _SimpleState extends State<_SimpleStatefulWidget> {
   Widget build(BuildContext context) => Text(state.toString());
 }
 
+class _LifecycleTrackingWidget extends StatefulWidget {
+  const _LifecycleTrackingWidget(this.tracker);
+
+  final _LifecycleTracker tracker;
+
+  @override
+  State<_LifecycleTrackingWidget> createState() => _LifecycleTrackingState();
+}
+
+class _LifecycleTrackingState extends State<_LifecycleTrackingWidget> {
+  @override
+  void initState() {
+    super.initState();
+    widget.tracker.states.add(this);
+  }
+
+  @override
+  void dispose() {
+    widget.tracker.disposals += 1;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.expand();
+}
+
+class _LifecycleTracker {
+  final List<State<_LifecycleTrackingWidget>> states = <State<_LifecycleTrackingWidget>>[];
+  int disposals = 0;
+}
+
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({super.key, this.value = '123'});
   final String value;
@@ -523,16 +554,9 @@ Future<void> main() async {
                   return Hero(
                     tag: 'hero',
                     child: Container(),
-                    flightShuttleBuilder:
-                        (
-                          BuildContext flightContext,
-                          Animation<double> animation,
-                          HeroFlightDirection flightDirection,
-                          BuildContext fromHeroContext,
-                          BuildContext toHeroContext,
-                        ) {
-                          return Container(key: heroKey);
-                        },
+                    flightShuttleBuilder: (HeroFlightDetails details) {
+                      return Container(key: heroKey);
+                    },
                   );
                 },
                 settings: s,
@@ -548,16 +572,9 @@ Future<void> main() async {
           return Hero(
             tag: 'hero',
             child: Container(),
-            flightShuttleBuilder:
-                (
-                  BuildContext flightContext,
-                  Animation<double> animation,
-                  HeroFlightDirection flightDirection,
-                  BuildContext fromHeroContext,
-                  BuildContext toHeroContext,
-                ) {
-                  return Container(key: heroKey);
-                },
+            flightShuttleBuilder: (HeroFlightDetails details) {
+              return Container(key: heroKey);
+            },
           );
         },
       ),
@@ -585,16 +602,9 @@ Future<void> main() async {
                   return Hero(
                     tag: 'hero',
                     child: Container(),
-                    flightShuttleBuilder:
-                        (
-                          BuildContext flightContext,
-                          Animation<double> animation,
-                          HeroFlightDirection flightDirection,
-                          BuildContext fromHeroContext,
-                          BuildContext toHeroContext,
-                        ) {
-                          return Container(key: heroKey);
-                        },
+                    flightShuttleBuilder: (HeroFlightDetails details) {
+                      return Container(key: heroKey);
+                    },
                   );
                 },
                 settings: s,
@@ -1755,6 +1765,110 @@ Future<void> main() async {
     expect(find.text('456'), findsOneWidget);
   });
 
+  testWidgets('Destination Hero child state is preserved during push and pop flights', (
+    WidgetTester tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final homeTracker = _LifecycleTracker();
+    final destinationTracker = _LifecycleTracker();
+
+    // Build the source Hero and remember its child State for the later pop flight.
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Hero(
+          tag: 'H',
+          child: SizedBox(width: 100, height: 100, child: _LifecycleTrackingWidget(homeTracker)),
+        ),
+      ),
+    );
+    final State<_LifecycleTrackingWidget> homeState = homeTracker.states.single;
+
+    // Push a route and build its destination Hero before the flight starts.
+    navigatorKey.currentState!.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => Hero(
+          tag: 'H',
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: _LifecycleTrackingWidget(destinationTracker),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(destinationTracker.states, hasLength(1));
+    final State<_LifecycleTrackingWidget> destinationState = destinationTracker.states.single;
+
+    // Start the push flight. The destination child moves into the overlay.
+    await tester.pump();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
+
+    // Finish the push flight. The same State moves back into the destination route.
+    await tester.pumpAndSettle();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
+
+    // Start the pop flight. The home Hero is now the destination Hero.
+    navigatorKey.currentState!.pop();
+    await tester.pump();
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
+
+    // Finish the pop flight and verify that the original home State is restored.
+    await tester.pumpAndSettle();
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
+  });
+
+  testWidgets('Destination Hero child state is preserved when a custom shuttle wraps the child', (
+    WidgetTester tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final destinationTracker = _LifecycleTracker();
+
+    // Build the source Hero.
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Hero(tag: 'H', child: SizedBox(width: 100, height: 100)),
+      ),
+    );
+
+    // Push a route whose custom shuttle wraps the destination Hero child.
+    navigatorKey.currentState!.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => Hero(
+          tag: 'H',
+          flightShuttleBuilder: (HeroFlightDetails details) =>
+              ColoredBox(color: const Color(0xFF000000), child: details.toHeroChild),
+          child: _LifecycleTrackingWidget(destinationTracker),
+        ),
+      ),
+    );
+    await tester.pump();
+    final State<_LifecycleTrackingWidget> destinationState = destinationTracker.states.single;
+
+    // Start the flight. The wrapped destination child keeps the same State in the overlay.
+    await tester.pump();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
+
+    // Finish the flight. The same State returns to the destination route.
+    await tester.pumpAndSettle();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
+  });
+
   testWidgets('Hero createRectTween', (WidgetTester tester) async {
     RectTween createRectTween(Rect? begin, Rect? end) {
       return MaterialRectCenterArcTween(begin: begin, end: end);
@@ -2129,16 +2243,9 @@ Future<void> main() async {
                             child: Hero(
                               tag: 'a',
                               child: const Text('bar'),
-                              flightShuttleBuilder:
-                                  (
-                                    BuildContext flightContext,
-                                    Animation<double> animation,
-                                    HeroFlightDirection flightDirection,
-                                    BuildContext fromHeroContext,
-                                    BuildContext toHeroContext,
-                                  ) {
-                                    return const Text('baz');
-                                  },
+                              flightShuttleBuilder: (HeroFlightDetails details) {
+                                return const Text('baz');
+                              },
                             ),
                           );
                         },
@@ -2171,16 +2278,9 @@ Future<void> main() async {
               Hero(
                 tag: 'a',
                 child: const Text('foo'),
-                flightShuttleBuilder:
-                    (
-                      BuildContext flightContext,
-                      Animation<double> animation,
-                      HeroFlightDirection flightDirection,
-                      BuildContext fromHeroContext,
-                      BuildContext toHeroContext,
-                    ) {
-                      return const Text('baz');
-                    },
+                flightShuttleBuilder: (HeroFlightDetails details) {
+                  return const Text('baz');
+                },
               ),
               Builder(
                 builder: (BuildContext context) {
@@ -2226,16 +2326,9 @@ Future<void> main() async {
               Hero(
                 tag: 'a',
                 child: const Text('foo'),
-                flightShuttleBuilder:
-                    (
-                      BuildContext flightContext,
-                      Animation<double> animation,
-                      HeroFlightDirection flightDirection,
-                      BuildContext fromHeroContext,
-                      BuildContext toHeroContext,
-                    ) {
-                      return const Text('fromHero text');
-                    },
+                flightShuttleBuilder: (HeroFlightDetails details) {
+                  return const Text('fromHero text');
+                },
               ),
               Builder(
                 builder: (BuildContext context) {
@@ -2249,16 +2342,9 @@ Future<void> main() async {
                             child: Hero(
                               tag: 'a',
                               child: const Text('bar'),
-                              flightShuttleBuilder:
-                                  (
-                                    BuildContext flightContext,
-                                    Animation<double> animation,
-                                    HeroFlightDirection flightDirection,
-                                    BuildContext fromHeroContext,
-                                    BuildContext toHeroContext,
-                                  ) {
-                                    return const Text('toHero text');
-                                  },
+                              flightShuttleBuilder: (HeroFlightDetails details) {
+                                return const Text('toHero text');
+                              },
                             ),
                           );
                         },
@@ -3081,13 +3167,7 @@ Future<void> main() async {
     WidgetTester tester,
   ) async {
     var shuttlesBuilt = 0;
-    Widget shuttleBuilder(
-      BuildContext flightContext,
-      Animation<double> animation,
-      HeroFlightDirection flightDirection,
-      BuildContext fromHeroContext,
-      BuildContext toHeroContext,
-    ) {
+    Widget shuttleBuilder(HeroFlightDetails details) {
       shuttlesBuilt += 1;
       return const Text("I'm flying in a jetplane");
     }
@@ -3941,7 +4021,7 @@ Future<void> main() async {
         alignment: alignment,
         child: Hero(
           tag: 'hero',
-          flightShuttleBuilder: (_, _, _, _, _) {
+          flightShuttleBuilder: (HeroFlightDetails details) {
             return const SizedBox(key: shuttleKey, width: 100.0, height: 100.0);
           },
           child: const SizedBox(width: 100.0, height: 100.0),
