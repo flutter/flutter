@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -28,7 +29,7 @@ import 'package:flutter/rendering.dart'; // OK
 import 'utils.dart'; // OK
 ''';
 
-  Future<void> testNoBadImportsInFlutter() async {
+  Future<void> test_no_bad_imports_in_flutter() async {
     // We cannot easily mock the absolute path in AnalysisRuleTest to pretend we are in
     // packages/flutter/lib/src/widgets without subclassing or using test package builders.
     // Assuming the rule gracefully handles this by skipping absolute path dependents if not matched.

@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -27,7 +28,7 @@ import 'package:flutter/flutter.dart'; // OK
 import 'utils.dart'; // OK
 ''';
 
-  Future<void> testNoBadImportsInFlutterTools() async {
+  Future<void> test_no_bad_imports_in_flutter_tools() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
       lint(47, 43),
     ]);
