@@ -25,10 +25,6 @@ class NoStopwatchesTest extends AnalysisRuleTest with ExternalStopwatchesPackage
   String get analysisRule => NoStopwatches.code.name;
 
   static const String source = '''
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:external_stopwatches/external_stopwatches.dart' as externallib;
 
 typedef ExternalStopwatchConstructor = externallib.MyStopwatch Function();
