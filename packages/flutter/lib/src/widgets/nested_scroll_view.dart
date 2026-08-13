@@ -159,6 +159,8 @@ typedef NestedScrollViewHeaderSliversBuilder =
 /// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.2.dart **
 /// {@end-tool}
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DeB2kyLfvfo}
+///
 /// ### Snapping and Floating [SliverAppBar]s
 ///
 // See https://github.com/flutter/flutter/issues/59189
