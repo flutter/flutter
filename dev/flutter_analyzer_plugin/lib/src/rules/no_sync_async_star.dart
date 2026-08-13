@@ -20,7 +20,8 @@ class NoSyncAsyncStar extends AnalysisRule {
   static const LintCode code = LintCode(
     'no_sync_async_star',
     'Do not use sync*/async* methods without an explanation comment.',
-    correctionMessage: 'See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-syncasync for details.',
+    correctionMessage:
+        'See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-syncasync for details.',
     severity: DiagnosticSeverity.ERROR,
   );
 
@@ -75,7 +76,6 @@ class _Visitor extends SimpleAstVisitor<void> {
     );
     final String content = context.currentUnit!.content;
 
-    int prevLineNum = lineInfo.getLocation(node.offset).lineNumber - 2;
     // We can just check the string of the content on both the node line (before it) and the lines before,
     // actually, let's just use token precedingComments stream - it reads all previous comments accurately!
     Token? token = node.beginToken;
