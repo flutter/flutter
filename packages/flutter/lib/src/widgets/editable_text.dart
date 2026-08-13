@@ -1427,7 +1427,11 @@ class EditableText extends StatefulWidget {
   ///
   // TODO(framework): Replace the following block with a @dartpad directive
   // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
-  /// {@macro flutter.dartpad_guide}
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
   ///
   /// {@example /examples/api/lib/widgets/editable_text/editable_text.on_changed.0.dart#body}
   ///
@@ -1982,7 +1986,11 @@ class EditableText extends StatefulWidget {
   ///
   // TODO(framework): Replace the following block with a @dartpad directive
   // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
-  /// {@macro flutter.dartpad_guide}
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
   ///
   /// {@example /examples/api/lib/widgets/editable_text/editable_text.on_content_inserted.0.dart#body}
   ///
@@ -2037,13 +2045,11 @@ class EditableText extends StatefulWidget {
   ///
   // TODO(framework): Replace the following block with a @dartpad directive
   // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
-  /// {@template flutter.dartpad_guide}
   /// <small>
   ///
   /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
   ///
   /// </small>
-  /// {@endtemplate}
   ///
   /// {@example /examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart#body}
   ///
@@ -2056,7 +2062,11 @@ class EditableText extends StatefulWidget {
   ///
   // TODO(framework): Replace the following block with a @dartpad directive
   // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
-  /// {@macro flutter.dartpad_guide}
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
   ///
   /// {@example /examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart#body}
   ///

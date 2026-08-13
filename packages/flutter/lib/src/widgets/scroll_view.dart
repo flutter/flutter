@@ -356,7 +356,11 @@ abstract class ScrollView extends StatelessWidget {
   ///
   // TODO(framework): Replace the following block with a @dartpad directive
   // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
-  /// {@macro flutter.dartpad_guide}
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
   ///
   /// {@example /examples/api/lib/rendering/growth_direction/growth_direction.0.dart#body}
   ///

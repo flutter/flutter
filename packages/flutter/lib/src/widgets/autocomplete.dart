@@ -228,7 +228,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   // TODO(framework): Replace the following block with a @dartpad directive
   // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
-  /// {@macro flutter.dartpad_guide}
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
   ///
   /// {@example /examples/api/lib/widgets/autocomplete/raw_autocomplete.focus_node.0.dart#body}
   ///
