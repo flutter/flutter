@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: specify_nonobvious_local_variable_types, omit_obvious_local_variable_types, prefer_final_locals
 import 'package:analysis_server_plugin/plugin.dart';
 import 'package:analysis_server_plugin/registry.dart';
+
 import 'src/rules/avoid_future_catch_error.dart';
 import 'src/rules/no_double_clamp.dart';
 import 'src/rules/no_runtimetype_in_tostring.dart';

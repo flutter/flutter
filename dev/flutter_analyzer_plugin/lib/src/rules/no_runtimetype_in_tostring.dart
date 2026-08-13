@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: specify_nonobvious_local_variable_types, omit_obvious_local_variable_types, prefer_final_locals
 import 'package:analyzer/analysis_rule/analysis_rule.dart';
 import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
@@ -12,11 +11,7 @@ import 'package:analyzer/error/error.dart';
 
 class NoRuntimeTypeInToString extends AnalysisRule {
   NoRuntimeTypeInToString()
-    : super(
-        name: code.name,
-        description:
-            'Verify that we do not use runtimeType in toString.',
-      );
+    : super(name: code.name, description: 'Verify that we do not use runtimeType in toString.');
 
   static const LintCode code = LintCode(
     'no_runtimetype_in_tostring',

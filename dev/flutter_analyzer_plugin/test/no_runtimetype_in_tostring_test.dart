@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: non_constant_identifier_names, use_raw_strings
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
@@ -20,7 +19,7 @@ class NoRuntimeTypeInToStringTest extends AnalysisRuleTest {
   @override
   String get analysisRule => NoRuntimeTypeInToString.code.name;
 
-  static const String source = '''
+  static const String source = r'''
 class GoodToString {
   @override
   String toString() {
@@ -31,7 +30,7 @@ class GoodToString {
 class BadToString {
   @override
   String toString() {
-    return r'BadToString with \$runtimeType';
+    return 'BadToString with $runtimeType';
   }
 }
 
@@ -47,11 +46,9 @@ class OtherMethodWithRuntimeType {
 }
 ''';
 
+  // ignore: non_constant_identifier_names
   Future<void> test_no_runtimeType() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(173, 11),
-      lint(273, 11),
-    ]);
+    await assertDiagnostics(source, <ExpectedDiagnostic>[lint(173, 11), lint(273, 11)]);
   }
 }
 

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: non_constant_identifier_names, use_raw_strings
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
@@ -21,8 +20,6 @@ class NullInitializedDebugExpensiveFieldsTest extends AnalysisRuleTest {
   String get analysisRule => NullInitializedDebugExpensiveFields.code.name;
 
   static const String source = '''
-import 'package:flutter/foundation.dart';
-
 class GoodClass {
   @_debugOnly
   final int? _foo = kDebugMode ? 1 : null;
@@ -52,9 +49,12 @@ const _debugOnly = Object();
 const kDebugMode = true;
 ''';
 
+  // ignore: non_constant_identifier_names
   Future<void> test_null_initialized() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
-
+      lint(122, 8),
+      lint(174, 4),
+      lint(228, 25),
     ]);
   }
 }

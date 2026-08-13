@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: specify_nonobvious_local_variable_types, omit_obvious_local_variable_types, prefer_final_locals
 import 'package:analyzer/analysis_rule/analysis_rule.dart';
 import 'package:analyzer/analysis_rule/rule_context.dart';
 import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
@@ -14,8 +13,7 @@ class NullInitializedDebugExpensiveFields extends AnalysisRule {
   NullInitializedDebugExpensiveFields()
     : super(
         name: code.name,
-        description:
-            'Verify that debug expensive fields are null initialized.',
+        description: 'Verify that debug expensive fields are null initialized.',
       );
 
   static const LintCode code = LintCode(
@@ -43,8 +41,8 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitFieldDeclaration(FieldDeclaration node) {
-    bool hasDebugOnly = false;
-    for (final annotation in node.metadata) {
+    var hasDebugOnly = false;
+    for (final Annotation annotation in node.metadata) {
       if (annotation.name.name == '_debugOnly') {
         hasDebugOnly = true;
         break;
@@ -55,13 +53,13 @@ class _Visitor extends SimpleAstVisitor<void> {
       return;
     }
 
-    for (final variable in node.fields.variables) {
-      final initializer = variable.initializer;
+    for (final VariableDeclaration variable in node.fields.variables) {
+      final Expression? initializer = variable.initializer;
 
-      bool isCorrect = false;
+      var isCorrect = false;
       if (initializer is ConditionalExpression) {
-        final condition = initializer.condition;
-        final elseExp = initializer.elseExpression;
+        final Expression condition = initializer.condition;
+        final Expression elseExp = initializer.elseExpression;
         if (condition is SimpleIdentifier && condition.name == 'kDebugMode') {
           if (elseExp is NullLiteral) {
             isCorrect = true;
