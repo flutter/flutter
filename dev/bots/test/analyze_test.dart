@@ -67,6 +67,8 @@ void main() {
     expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
   });
 
+
+  test('analyze.dart - verifyGoldenTags', () async {
     final List<String> result = (await capture(
       () => verifyGoldenTags(testRootPath, minimumMatches: 6),
       shouldHaveErrors: true,
