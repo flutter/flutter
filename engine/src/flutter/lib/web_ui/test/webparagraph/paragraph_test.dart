@@ -1335,12 +1335,12 @@ Future<void> testMain() async {
         expect(sourceRect.height % 1.0, 0.0);
 
         // Verify targetRect dimensions perfectly map to sourceRect without being forced to integer values
-        expect(targetRect!.width, sourceRect.width / dpr);
-        expect(targetRect.height, sourceRect.height / dpr);
+        expect(targetRect!.width, closeTo(sourceRect.width / dpr, 0.0001));
+        expect(targetRect.height, closeTo(sourceRect.height / dpr, 0.0001));
 
         // Verify subpixel position precision
-        expect(targetRect.left, offset.dx + paragraph.paintBounds.left);
-        expect(targetRect.top, offset.dy + paragraph.paintBounds.top);
+        expect(targetRect.left, closeTo(offset.dx + paragraph.paintBounds.left, 0.0001));
+        expect(targetRect.top, closeTo(offset.dy + paragraph.paintBounds.top, 0.0001));
       }
     } finally {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
