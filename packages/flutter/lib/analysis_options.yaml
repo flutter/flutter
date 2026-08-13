@@ -6,8 +6,6 @@ plugins:
     diagnostics:
       no_double_clamp: true
       no_stopwatches: true
-      no_runtimetype_in_tostring: true
-      null_initialized_debug_expensive_fields: true
       protect_public_state_subtypes: true
       render_box_intrinsics: true
 
