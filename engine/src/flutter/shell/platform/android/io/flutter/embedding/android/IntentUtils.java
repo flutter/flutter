@@ -75,7 +75,7 @@ class IntentUtils {
           return true;
         }
       }
-    } catch (PackageManager.NameNotFoundException e) {
+    } catch (PackageManager.NameNotFoundException | NullPointerException e) {
     }
 
     // Android API 34+: Verify directly that the uinque user ID of the launcher
