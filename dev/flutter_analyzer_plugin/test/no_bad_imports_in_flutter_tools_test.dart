@@ -16,15 +16,15 @@ class NoBadImportsInFlutterToolsTest extends AnalysisRuleTest {
     Registry.ruleRegistry.registerWarningRule(NoBadImportsInFlutterTools());
     super.setUp();
 
-    newFile('/packages/flutter_tools/lib/src/base/utils.dart', 'const int utils = 1;');
-    writeTestPackageConfig(
-      PackageConfigFileBuilder()
-        ..add(name: 'flutter_tools', rootPath: convertPath('/packages/flutter_tools')),
-    );
+    newPackage('flutter_tools').addFile('lib/src/base/utils.dart', 'const int utils = 1;');
+    writeTestPackageConfig(PackageConfigFileBuilder());
   }
 
   @override
   String get analysisRule => NoBadImportsInFlutterTools.code.name;
+
+  @override
+  String get testPackageRootPath => '$workspaceRootPath/packages/flutter_tools';
 
   static const String source = '''
 import 'package:flutter_tools/src/base/utils.dart';

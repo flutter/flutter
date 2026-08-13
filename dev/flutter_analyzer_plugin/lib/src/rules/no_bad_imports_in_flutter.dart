@@ -9,6 +9,11 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+/// Checks for bad imports in `package:flutter`.
+///
+/// Restricts `package:meta/meta.dart` imports within `lib/src/` (excluding
+/// `src/foundation/`), and prevents recursive self-imports (e.g. files under
+/// `lib/src/widgets/` importing `package:flutter/widgets.dart`).
 class NoBadImportsInFlutter extends AnalysisRule {
   NoBadImportsInFlutter()
     : super(name: code.name, description: 'Checks for bad imports in flutter package.');
@@ -39,29 +44,26 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitImportDirective(ImportDirective node) {
-    final String? uriStr = node.uri.stringValue;
-    if (uriStr == null) {
-      return;
-    }
-
-    final String? absolutePath = context.currentUnit?.unit.declaredFragment?.source.fullName;
-    if (absolutePath == null) {
-      return;
-    }
-
-    // Check for package:meta/meta.dart
-    if (uriStr == 'package:meta/meta.dart') {
-      // Only allow meta in foundation
-      if (!absolutePath.contains('src/foundation/') && !absolutePath.contains(r'src\foundation\')) {
-        rule.reportAtNode(node.uri);
+    if (node.uri.stringValue case final String uriStr) {
+      final String? absolutePath = context.currentUnit?.unit.declaredFragment?.source.fullName;
+      if (absolutePath == null) {
+        return;
       }
-    }
 
-    // Check for recursive self imports.
-    // E.g., if we are in package:flutter/src/widgets/framework.dart
-    // we should not import 'package:flutter/widgets.dart'
-    if (absolutePath.contains('packages/flutter/lib/src/') ||
-        absolutePath.contains(r'packages\flutter\lib\src\')) {
+      final bool isSrc = absolutePath.contains('lib/src/') || absolutePath.contains(r'lib\src\');
+      if (!isSrc) {
+        return;
+      }
+
+      if (uriStr == 'package:meta/meta.dart') {
+        final bool isFoundation =
+            absolutePath.contains('src/foundation/') || absolutePath.contains(r'src\foundation\');
+        if (!isFoundation) {
+          rule.reportAtNode(node.uri);
+        }
+        return;
+      }
+
       final token = absolutePath.contains('/') ? '/' : r'\';
       final List<String> pathParts = absolutePath.split(token);
       final int srcIndex = pathParts.lastIndexOf('src');

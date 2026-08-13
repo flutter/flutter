@@ -268,6 +268,11 @@ List<Validation> _getValidations({
     Validation('no-missing-license', 'Licenses...', () => verifyNoMissingLicense(flutterRoot)),
     Validation('no-test-imports', 'Test imports...', () => verifyNoTestImports(flutterRoot)),
     Validation(
+      'no-bad-imports-flutter',
+      'Bad imports (framework)...',
+      () => verifyNoBadImportsInFlutter(flutterRoot),
+    ),
+    Validation(
       'internationalization',
       'Internationalization...',
       () => verifyInternationalizations(flutterRoot, dart),
@@ -1212,6 +1217,95 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   }
 }
 
+Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
+  final errors = <String>[];
+  final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
+  final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
+  // Verify there's one libPath/*.dart for each srcPath/*/.
+  final List<String> packages =
+      Directory(libPath)
+          .listSync()
+          .where(
+            (FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart',
+          )
+          .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))
+          .toList()
+        ..sort();
+  final List<String> directories =
+      Directory(srcPath)
+          .listSync()
+          .whereType<Directory>()
+          .map<String>((Directory entity) => path.basename(entity.path))
+          .toList()
+        ..sort();
+  if (!_listEquals<String>(packages, directories)) {
+    errors.add(
+      <String>[
+        'flutter/lib/*.dart does not match flutter/lib/src/*/:',
+        'These are the exported packages:',
+        ...packages.map<String>((String path) => '  lib/$path.dart'),
+        'These are the directories:',
+        ...directories.map<String>((String path) => '  lib/src/$path/'),
+      ].join('\n'),
+    );
+  }
+  // Verify that the imports are well-ordered.
+  final dependencyMap = <String, Set<String>>{};
+  for (final directory in directories) {
+    dependencyMap[directory] = await _findFlutterDependencies(
+      path.join(srcPath, directory),
+      errors,
+    );
+  }
+  assert(
+    dependencyMap['material']!.contains('widgets') &&
+        dependencyMap['widgets']!.contains('rendering') &&
+        dependencyMap['rendering']!.contains('painting'),
+  ); // to make sure we're convinced _findFlutterDependencies is finding some
+  for (final String package in dependencyMap.keys) {
+    if (dependencyMap[package]!.contains(package)) {
+      errors.add(
+        'One of the files in the $yellow$package$reset package imports that package recursively.',
+      );
+    }
+  }
+
+  for (final String key in dependencyMap.keys) {
+    for (final String dependency in dependencyMap[key]!) {
+      if (dependencyMap[dependency] != null) {
+        continue;
+      }
+      // Sanity check before performing _deepSearch, to ensure there's no rogue
+      // dependencies.
+      final String validFilenames = dependencyMap.keys
+          .map((String name) => '$name.dart')
+          .join(', ');
+      errors.add(
+        '$key imported package:flutter/$dependency.dart '
+        'which is not one of the valid exports { $validFilenames }.\n'
+        'Consider changing $dependency.dart to one of them.',
+      );
+    }
+  }
+
+  for (final String package in dependencyMap.keys) {
+    final List<String>? loop = _deepSearch<String>(dependencyMap, package);
+    if (loop != null) {
+      errors.add('${yellow}Dependency loop:$reset ${loop.join(' depends on ')}');
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    foundError(<String>[
+      if (errors.length == 1)
+        '${bold}An error was detected when looking at import dependencies within the Flutter package:$reset'
+      else
+        '${bold}Multiple errors were detected when looking at import dependencies within the Flutter package:$reset',
+      ...errors,
+    ]);
+  }
+}
+
 Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   final errors = <String>[];
   final String dev = path.join(workingDirectory, 'dev');
@@ -2123,6 +2217,18 @@ Future<void> verifyNoBinaries(String workingDirectory, {Set<Hash256>? legacyBina
 
 // UTILITY FUNCTIONS
 
+bool _listEquals<T>(List<T> a, List<T> b) {
+  if (a.length != b.length) {
+    return false;
+  }
+  for (var index = 0; index < a.length; index += 1) {
+    if (a[index] != b[index]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true}) async {
   final EvalResult evalResult = await _evalCommand(
     'git',
@@ -2701,6 +2807,57 @@ Future<void> _checkForNewExecutables() async {
       'must add this file to kExecutableAllowlist in dev/bots/analyze.dart',
     );
   }
+}
+
+final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
+
+Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors) async {
+  return _allFiles(srcPath, 'dart', minimumMatches: 1)
+      .map<Set<String>>((File file) {
+        final result = <String>{};
+        for (final String line in file.readAsLinesSync()) {
+          final Match? match = _importPattern.firstMatch(line);
+          if (match != null) {
+            result.add(match.group(2)!);
+          }
+        }
+        return result;
+      })
+      .reduce((Set<String>? value, Set<String> element) {
+        value ??= <String>{};
+        value.addAll(element);
+        return value;
+      });
+}
+
+List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [Set<T>? seen]) {
+  if (map[start] == null) {
+    return null; // We catch these separately.
+  }
+
+  for (final T key in map[start]!) {
+    if (key == start) {
+      continue; // we catch these separately
+    }
+    if (seen != null && seen.contains(key)) {
+      return <T>[start, key];
+    }
+    final List<T>? result = _deepSearch<T>(map, key, <T>{
+      if (seen == null) start else ...seen,
+      key,
+    });
+    if (result != null) {
+      result.insert(0, start);
+      // Only report the shortest chains.
+      // For example a->b->a, rather than c->a->b->a.
+      // Since we visit every node, we know the shortest chains are those
+      // that start and end on the loop.
+      if (result.first == result.last) {
+        return result;
+      }
+    }
+  }
+  return null;
 }
 
 bool _isGeneratedPluginRegistrant(File file) {
