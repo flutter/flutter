@@ -369,7 +369,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       validationMessages.add(
         _createValidationMessage(
           isValid: false,
-          message: 'App icon is set to the default liquid glass placeholder. '
+          message:
+              'App icon is set to the default liquid glass placeholder. '
               'Replace with a unique liquid glass icon.',
         ),
       );
@@ -382,20 +383,24 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   ///
   /// Compares every file in the project's `liquidGlassIcon.icon` directory
   /// against the template's `liquidGlassIcon.icon.tmpl` directory. The icon is
-  /// considered to still be the placeholder only when the full set of files
-  /// (e.g. `icon.json` and the SVG assets) matches the template byte-for-byte.
-  bool _isLiquidGlassIconStillUsingTemplate({
-    required BuildableIOSApp app,
-  }) {
+  /// considered to still be the placeholder when the files from the template
+  /// (e.g. `icon.json` and the SVG assets) are present in the project and
+  /// match the template byte-for-byte. Extra files in the project directory
+  /// do not affect this check.
+  bool _isLiquidGlassIconStillUsingTemplate({required BuildableIOSApp app}) {
     final Directory projectIconDir = globals.fs.directory(
-      globals.fs.path.join(app.projectAppIconDirName, '..', '..', 'liquidGlassIcon.icon'),
+      globals.fs.path.normalize(
+        globals.fs.path.join(app.projectAppIconDirName, '..', '..', 'liquidGlassIcon.icon'),
+      ),
     );
     final Directory templateIconDir = globals.fs.directory(
-      globals.fs.path.join(
-        app.templateAppIconDirNameForContentsJson,
-        '..',
-        '..',
-        'liquidGlassIcon.icon.tmpl',
+      globals.fs.path.normalize(
+        globals.fs.path.join(
+          app.templateAppIconDirNameForContentsJson,
+          '..',
+          '..',
+          'liquidGlassIcon.icon.tmpl',
+        ),
       ),
     );
 
@@ -405,10 +410,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     final Map<String, String> templateHashes = _iconFileHashes(templateIconDir);
     final Map<String, String> projectHashes = _iconFileHashes(projectIconDir);
-
-    if (templateHashes.length != projectHashes.length) {
-      return false;
-    }
 
     for (final MapEntry<String, String> entry in templateHashes.entries) {
       if (projectHashes[entry.key] != entry.value) {
