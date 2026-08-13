@@ -417,6 +417,8 @@ class BuildInfo {
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
+      'BUILD_NAME': ?buildName,
+      'BUILD_NUMBER': ?buildNumber,
       'SPLIT_DEBUG_INFO': ?splitDebugInfoPath,
       'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
       'TREE_SHAKE_ICONS': treeShakeIcons.toString(),

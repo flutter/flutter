@@ -323,8 +323,12 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
+    final skwasmVertices = (vertices as EngineVertices).delegate as SkwasmVertices?;
+    if (skwasmVertices == null) {
+      return;
+    }
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawVertices(_handle, (vertices as SkwasmVertices).handle, blendMode.index, paintHandle);
+    canvasDrawVertices(_handle, skwasmVertices.handle, blendMode.index, paintHandle);
     paintDispose(paintHandle);
   }
 
