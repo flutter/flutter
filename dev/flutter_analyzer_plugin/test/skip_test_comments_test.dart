@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -26,7 +27,7 @@ void main() {
 }
 ''';
 
-  Future<void> testSkipTestComments() async {
+  Future<void> test_skip_test_comments() async {
     await assertDiagnostics(source, [
       lint(116, 4), // skip length is 4
     ]);

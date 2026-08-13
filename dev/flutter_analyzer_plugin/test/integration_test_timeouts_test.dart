@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -32,7 +33,7 @@ void main() {
 }
 ''';
 
-  Future<void> testIntegrationTestTimeouts() async {
+  Future<void> test_integration_test_timeouts() async {
     await assertDiagnostics(source, [
       lint(158, 4),
     ]);
