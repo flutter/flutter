@@ -44,6 +44,17 @@ class OtherMethodWithRuntimeType {
     print(runtimeType);
   }
 }
+
+class GoodToStringWithAssert {
+  @override
+  String toString() {
+    assert(() {
+      print(runtimeType);
+      return true;
+    }());
+    return 'GoodToStringWithAssert';
+  }
+}
 ''';
 
   // ignore: non_constant_identifier_names

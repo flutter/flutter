@@ -9,6 +9,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+/// An analysis rule that verifies that debug expensive fields annotated with @_debugOnly are null initialized.
 class NullInitializedDebugExpensiveFields extends AnalysisRule {
   NullInitializedDebugExpensiveFields()
     : super(
@@ -41,35 +42,32 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitFieldDeclaration(FieldDeclaration node) {
-    var hasDebugOnly = false;
-    for (final Annotation annotation in node.metadata) {
-      if (annotation.name.name == '_debugOnly') {
-        hasDebugOnly = true;
-        break;
-      }
-    }
-
+    final bool hasDebugOnly = node.metadata.any(
+      (Annotation annotation) => annotation.name.name == '_debugOnly',
+    );
     if (!hasDebugOnly) {
       return;
     }
 
     for (final VariableDeclaration variable in node.fields.variables) {
-      final Expression? initializer = variable.initializer;
-
-      var isCorrect = false;
-      if (initializer is ConditionalExpression) {
-        final Expression condition = initializer.condition;
-        final Expression elseExp = initializer.elseExpression;
-        if (condition is SimpleIdentifier && condition.name == 'kDebugMode') {
-          if (elseExp is NullLiteral) {
-            isCorrect = true;
-          }
-        }
-      }
-
-      if (!isCorrect) {
+      if (!_isCorrectInitializer(variable.initializer)) {
         rule.reportAtNode(variable);
       }
     }
+  }
+
+  bool _isCorrectInitializer(Expression? initializer) {
+    if (initializer case ConditionalExpression(:final Expression condition, elseExpression: NullLiteral())) {
+      Expression unwrappedCondition = condition;
+      while (unwrappedCondition is ParenthesizedExpression) {
+        unwrappedCondition = unwrappedCondition.expression;
+      }
+      return switch (unwrappedCondition) {
+        SimpleIdentifier(name: 'kDebugMode') => true,
+        PrefixedIdentifier(identifier: SimpleIdentifier(name: 'kDebugMode')) => true,
+        _ => false,
+      };
+    }
+    return false;
   }
 }

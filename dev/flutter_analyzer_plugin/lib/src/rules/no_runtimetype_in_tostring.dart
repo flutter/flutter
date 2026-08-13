@@ -9,6 +9,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+/// An analysis rule that verifies that runtimeType is not used in toString methods.
 class NoRuntimeTypeInToString extends AnalysisRule {
   NoRuntimeTypeInToString()
     : super(name: code.name, description: 'Verify that we do not use runtimeType in toString.');
@@ -38,12 +39,10 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
-    if (node.name.lexeme != 'toString') {
-      return;
+    if (node case MethodDeclaration(:final FunctionBody body) when node.name.lexeme == 'toString') {
+      final bodyVisitor = _BodyVisitor(rule, context);
+      body.accept(bodyVisitor);
     }
-
-    final bodyVisitor = _BodyVisitor(rule, context);
-    node.body.accept(bodyVisitor);
   }
 }
 
@@ -54,12 +53,13 @@ class _BodyVisitor extends RecursiveAstVisitor<void> {
   final RuleContext context;
 
   @override
+  void visitAssertStatement(AssertStatement node) {
+    // Ignore runtimeType calls inside asserts.
+  }
+
+  @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    if (node.name == 'runtimeType') {
-      // Omit checking if it's the right property, as runtimeType is unique enough
-      // in string-based linting. AST gives us a bit more safety in that if we have
-      // a local var called runtimeType, we could accidentally flag it, but the
-      // string-rule flagged strings too.
+    if (node case SimpleIdentifier(name: 'runtimeType')) {
       rule.reportAtNode(node);
     }
     super.visitSimpleIdentifier(node);

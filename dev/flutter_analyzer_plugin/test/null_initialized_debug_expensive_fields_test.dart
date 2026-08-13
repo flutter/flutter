@@ -45,8 +45,21 @@ class GoodClass2 {
   int? _foo = kDebugMode ? 1 : null;
 }
 
+class GoodClassWithParenthesizedDebugMode {
+  @_debugOnly
+  final int? _foo = (kDebugMode) ? 1 : null;
+}
+
+class GoodClassWithPrefixedDebugMode {
+  @_debugOnly
+  final int? _foo = foundation.kDebugMode ? 1 : null;
+}
+
 const _debugOnly = Object();
 const kDebugMode = true;
+abstract final class foundation {
+  static const bool kDebugMode = true;
+}
 ''';
 
   // ignore: non_constant_identifier_names
