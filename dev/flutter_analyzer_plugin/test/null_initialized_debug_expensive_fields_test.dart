@@ -51,7 +51,7 @@ const _debugOnly = Object();
 const kDebugMode = true;
 ''';
 
-  Future<void> test_null_initialized() async {
+  Future<void> testNullInitialized() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
 
     ]);

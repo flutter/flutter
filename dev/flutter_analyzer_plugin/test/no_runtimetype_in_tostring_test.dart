@@ -30,7 +30,7 @@ class GoodToString {
 class BadToString {
   @override
   String toString() {
-    return 'BadToString with \$runtimeType';
+    return r'BadToString with \$runtimeType';
   }
 }
 
@@ -46,7 +46,7 @@ class OtherMethodWithRuntimeType {
 }
 ''';
 
-  Future<void> test_no_runtimetype() async {
+  Future<void> testNoRuntimetype() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
       lint(173, 11),
       lint(273, 11),
