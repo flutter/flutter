@@ -18,14 +18,14 @@ Some links in the instructions below are Google-internal.
 
 ### Identify the New Gradle Version 
 
-3. Identify the new Gradle Version to include in the upload script
+3. Identify the new Gradle Version to include in the upload script. From the dev folder run: 
    ```sh
-   find dev -name "gradle-wrapper.properties" -exec grep "distributionUrl" {} + | sed -E 's/.*\/gradle-([0-9.]+[^.]*)\.zip.*/\1/'
+   git grep "distributionUrl" {} + | sed -E 's/.*\/gradle-([0-9.]+[^.]*)\.zip.*/\1/'
    ```
    For REPLACEME versions check the ModuleTest versions
    [here](https://github.com/flutter/flutter/blob/master/dev/devicelab/bin/tasks/build_android_host_app_with_module_aar.dart#L449-L456).
 
-4. Update the versions array with these new versions in the generate_gradle_cipd_packages.dart script.
+4. Update the versions array with these new versions in the generate_gradle_cipd_packages.dart script. Gradle distributions in the dev folder should only use the 'bin' distribution type.
 
 ### Upload to CIPD
 
