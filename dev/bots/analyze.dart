@@ -2708,10 +2708,6 @@ Future<void> _checkForNewExecutables() async {
 
 
 
-List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [Set<T>? seen]) {
-  if (map[start] == null) {
-    return null; // We catch these separately.
-  }
 
   for (final T key in map[start]!) {
     if (key == start) {
