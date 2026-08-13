@@ -209,6 +209,12 @@ mixin CreateBase on FlutterCommand {
     if (globals.fs.path.isWithin(flutterRoot, projectDirPath)) {
       // Make exception for dev and examples to facilitate example project development.
       final String examplesDirectory = globals.fs.path.join(flutterRoot, 'examples');
+      final String packageExamplesDirectory = globals.fs.path.join(
+        flutterRoot,
+        'packages',
+        'flutter',
+        'examples',
+      );
       final String devDirectory = globals.fs.path.join(flutterRoot, 'dev');
       final String engineExamplesDirectory = globals.fs.path.join(
         flutterRoot,
@@ -218,6 +224,7 @@ mixin CreateBase on FlutterCommand {
         'examples',
       );
       if (!globals.fs.path.isWithin(examplesDirectory, projectDirPath) &&
+          !globals.fs.path.isWithin(packageExamplesDirectory, projectDirPath) &&
           !globals.fs.path.isWithin(devDirectory, projectDirPath) &&
           !globals.fs.path.isWithin(engineExamplesDirectory, projectDirPath)) {
         throwToolExit(

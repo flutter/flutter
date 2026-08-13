@@ -55,4 +55,15 @@ TEST_F(DartProjectTest, DartEntrypointArguments) {
   EXPECT_EQ(returned_arguments[2], "arg3");
 }
 
+TEST_F(DartProjectTest, EnableFlutterGpu) {
+  DartProject project(L"test");
+  EXPECT_FALSE(project.enable_flutter_gpu());
+
+  project.set_enable_flutter_gpu(true);
+  EXPECT_TRUE(project.enable_flutter_gpu());
+
+  project.set_enable_flutter_gpu(false);
+  EXPECT_FALSE(project.enable_flutter_gpu());
+}
+
 }  // namespace flutter

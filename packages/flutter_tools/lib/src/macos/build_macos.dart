@@ -279,7 +279,7 @@ Future<void> buildMacOS({
         .fetchDependenciesAndGenerateXcodebuildArgs(
           flutterProject.macos,
           globals.fs.directory(buildDirectoryPath),
-          skipPackageUpdatesAndValidation: false,
+          skipPackageValidation: false,
         );
     result = await globals.processUtils.stream(
       <String>[
