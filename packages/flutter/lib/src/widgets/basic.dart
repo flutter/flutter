@@ -3955,6 +3955,8 @@ class IgnoreBaseline extends SingleChildRenderObjectWidget {
 
 /// A sliver that contains a single box widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vWec9DrAbHE}
+///
 /// Slivers are special-purpose widgets that can be combined using a
 /// [CustomScrollView] to create custom scroll effects. A [SliverToBoxAdapter]
 /// is a basic sliver that creates a bridge back to one of the usual box-based
@@ -3967,8 +3969,6 @@ class IgnoreBaseline extends SingleChildRenderObjectWidget {
 /// [SliverFixedExtentList], [SliverPrototypeExtentList], or [SliverGrid],
 /// which are more efficient because they instantiate only those children that
 /// are actually visible through the scroll view's viewport.
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=vWec9DrAbHE}
 ///
 /// See also:
 ///
