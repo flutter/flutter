@@ -4397,6 +4397,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
 ///
 /// {@macro flutter.widgets.SemanticsBase}
 ///  * [Semantics], the widget variant of this sliver.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lPWrd08swlw}
+///
 @immutable
 class SliverSemantics extends _SemanticsBase {
   /// Creates a semantic annotation.
