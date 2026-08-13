@@ -100,14 +100,19 @@ class AnalysisOptionsMigration extends ProjectMigrator {
   /// or list-based include directives while tracking [visited] canonical paths
   /// to prevent infinite recursion on cyclic includes.
   Future<Set<String>> _collectExcludes(File file, {Set<String> visited = const <String>{}}) async {
-    final String canonicalPath = file.fileSystem.path.normalize(file.absolute.path);
+    final String canonicalPath = file.fileSystem.path.canonicalize(file.path);
     if (visited.contains(canonicalPath)) {
       return <String>{}; // Avoid cycles
     }
     if (!file.existsSync()) {
       return <String>{};
     }
-    final String content = file.readAsStringSync();
+    final String content;
+    try {
+      content = file.readAsStringSync();
+    } on FileSystemException {
+      return <String>{};
+    }
     final YamlNode root;
     try {
       root = loadYamlNode(content);

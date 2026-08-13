@@ -371,6 +371,60 @@ analyzer:
       expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
       expect(context.testLogger.statusText, isEmpty);
     });
+
+    testWithoutContext('handles unreadable include file without crashing', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
+include: some_dir
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+      // Create 'some_dir' as a directory so reading it throws FileSystemException
+      context.memoryFileSystem.directory('some_dir').createSync();
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
+
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('handles cyclic includes with different casing without crashing', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
+include: shared_options.yaml
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+''';
+      const sharedOptionsContents = '''
+include: SHARED_OPTIONS.YAML
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+      context.memoryFileSystem.file('shared_options.yaml').writeAsStringSync(sharedOptionsContents);
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
+
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
   });
 }
 
