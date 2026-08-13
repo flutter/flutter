@@ -9,7 +9,9 @@ import 'src/rules/avoid_future_catch_error.dart';
 import 'src/rules/integration_test_timeouts.dart';
 import 'src/rules/no_bad_imports_in_flutter.dart';
 import 'src/rules/no_double_clamp.dart';
+import 'src/rules/no_runtimetype_in_tostring.dart';
 import 'src/rules/no_stopwatches.dart';
+import 'src/rules/null_initialized_debug_expensive_fields.dart';
 import 'src/rules/protect_public_state_subtypes.dart';
 import 'src/rules/render_box_intrinsics.dart';
 import 'src/rules/skip_test_comments.dart';
@@ -22,7 +24,9 @@ class FlutterAnalyzerPlugin extends Plugin {
     registry
       ..registerWarningRule(AvoidFutureCatchError())
       ..registerWarningRule(NoDoubleClamp())
+      ..registerWarningRule(NoRuntimeTypeInToString())
       ..registerWarningRule(NoStopwatches())
+      ..registerWarningRule(NullInitializedDebugExpensiveFields())
       ..registerWarningRule(ProtectPublicStateSubtypes())
       ..registerWarningRule(RenderBoxIntrinsicCalculationRule())
       ..registerWarningRule(NoBadImportsInFlutter())

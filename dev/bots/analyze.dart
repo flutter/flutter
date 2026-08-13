@@ -228,11 +228,6 @@ List<Validation> _getValidations({
       await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 80);
     }),
     Validation(
-      'no-runtime-type',
-      'No runtimeType in toString...',
-      () => verifyNoRuntimeTypeInToString(flutterRoot),
-    ),
-    Validation(
       'no-checked-mode',
       'Debug mode instead of checked mode...',
       () => verifyNoCheckedMode(flutterRoot),
@@ -276,11 +271,6 @@ List<Validation> _getValidations({
       'stock-app-localizations',
       'Localization files of stocks app...',
       () => verifyStockAppLocalizations(flutterRoot),
-    ),
-    Validation(
-      'null-fields',
-      'null initialized debug fields...',
-      () => verifyNullInitializedDebugExpensiveFields(flutterRoot),
     ),
     Validation('taboo', 'Taboo words...', () => verifyTabooDocumentation(flutterRoot)),
     Validation('lint-kotlin', 'Lint Kotlin files...', () => lintKotlinFiles(flutterRoot)),
@@ -1337,66 +1327,6 @@ Future<void> verifyNoCheckedMode(String workingDirectory) async {
   }
 }
 
-Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
-  final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
-  final excludedFiles = <String>{
-    path.join(flutterLib, 'src', 'foundation', 'object.dart'), // Calls this from within an assert.
-  };
-  final List<File> files = await _allFiles(
-    flutterLib,
-    'dart',
-    minimumMatches: 400,
-  ).where((File file) => !excludedFiles.contains(file.path)).toList();
-  final toStringRegExp = RegExp(r'^\s+String\s+to(.+?)?String(.+?)?\(\)\s+(\{|=>)');
-  final problems = <String>[];
-  for (final file in files) {
-    final List<String> lines = file.readAsLinesSync();
-    for (var index = 0; index < lines.length; index++) {
-      if (toStringRegExp.hasMatch(lines[index])) {
-        final int sourceLine = index + 1;
-        bool checkForRuntimeType(String line) {
-          if (line.contains(r'$runtimeType') || line.contains('runtimeType.toString()')) {
-            problems.add('${file.path}:$sourceLine}: toString calls runtimeType.toString');
-            return true;
-          }
-          return false;
-        }
-
-        if (checkForRuntimeType(lines[index])) {
-          continue;
-        }
-        if (lines[index].contains('=>')) {
-          while (!lines[index].contains(';')) {
-            index++;
-            assert(index < lines.length, 'Source file $file has unterminated toString method.');
-            if (checkForRuntimeType(lines[index])) {
-              break;
-            }
-          }
-        } else {
-          int openBraceCount =
-              '{'.allMatches(lines[index]).length - '}'.allMatches(lines[index]).length;
-          while (!lines[index].contains('}') && openBraceCount > 0) {
-            index++;
-            assert(
-              index < lines.length,
-              'Source file $file has unbalanced braces in a toString method.',
-            );
-            if (checkForRuntimeType(lines[index])) {
-              break;
-            }
-            openBraceCount += '{'.allMatches(lines[index]).length;
-            openBraceCount -= '}'.allMatches(lines[index]).length;
-          }
-        }
-      }
-    }
-  }
-  if (problems.isNotEmpty) {
-    foundError(problems);
-  }
-}
-
 Future<void> verifyNoTrailingSpaces(String workingDirectory, {int minimumMatches = 4000}) async {
   final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
       .where((File file) => path.basename(file.path) != 'serviceaccount.enc')
@@ -2328,64 +2258,6 @@ Future<void> _checkConsumerDependencies() async {
       'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
       'please remove ${plural(removed.length, "this", "these")} packages from the allow-list in dev/bots/allowlist.dart.',
       'Thanks!',
-    ]);
-  }
-}
-
-class _DebugOnlyFieldVisitor extends RecursiveAstVisitor<void> {
-  _DebugOnlyFieldVisitor(this.parseResult);
-
-  final ParseStringResult parseResult;
-  final List<AstNode> errors = <AstNode>[];
-
-  static const String _kDebugOnlyAnnotation = '_debugOnly';
-  static final RegExp _nullInitializedField = RegExp(r'kDebugMode \? [\w<> ,{}()]+ : null;');
-
-  @override
-  void visitFieldDeclaration(FieldDeclaration node) {
-    super.visitFieldDeclaration(node);
-    if (node.metadata.any(
-      (Annotation annotation) => annotation.name.name == _kDebugOnlyAnnotation,
-    )) {
-      if (!node.toSource().contains(_nullInitializedField)) {
-        errors.add(node.fields); // Use the fields node for line number.
-      }
-    }
-  }
-}
-
-Future<void> verifyNullInitializedDebugExpensiveFields(
-  String workingDirectory, {
-  int minimumMatches = 400,
-}) async {
-  final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
-  final List<File> files = await _allFiles(
-    flutterLib,
-    'dart',
-    minimumMatches: minimumMatches,
-  ).toList();
-  final errors = <String>[];
-  for (final file in files) {
-    final ParseStringResult parsedFile = parseFile(
-      featureSet: _parsingFeatureSet(),
-      path: file.absolute.path,
-    );
-    final visitor = _DebugOnlyFieldVisitor(parsedFile);
-    visitor.visitCompilationUnit(parsedFile.unit);
-    for (final AstNode badNode in visitor.errors) {
-      errors.add(
-        '${file.path}:${parsedFile.lineInfo.getLocation(badNode.offset).lineNumber}: fields annotated with @_debugOnly must null initialize.',
-      );
-    }
-  }
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '',
-      '$bold${red}Fields annotated with @_debugOnly must null initialize,$reset',
-      'to ensure both the field and initializer are removed from profile/release mode.',
-      'These fields should be written as:',
-      'field = kDebugMode ? <DebugValue> : null;',
     ]);
   }
 }
