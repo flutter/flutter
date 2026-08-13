@@ -39,8 +39,7 @@ Future<void> main(List<String> args) async {
   }
 
   // 1. Create a single reusable staging project for all iterations
-  Directory? stagingProject;
-  stagingProject = await Directory.systemTemp.createTemp('staging_project_');
+  Directory stagingProject = await Directory.systemTemp.createTemp('staging_project_');
 
   try {
     // 2. Initialize a basic gradle project using the gclient-synced binary
@@ -87,7 +86,7 @@ Future<void> main(List<String> args) async {
       }
 
       // 4. Create an isolated Gradle home for this specific version download
-      Directory? isolatedGradleHome = await Directory.systemTemp.createTemp('gradle_home_');
+      final Directory isolatedGradleHome = await Directory.systemTemp.createTemp('gradle_home_');
 
       try {
         // 5. Update the staging project to the target version
@@ -105,11 +104,11 @@ Future<void> main(List<String> args) async {
           gradlewExecutable,
           ['--version', '--no-daemon'],
           stagingProject.path,
-          environment: {'GRADLE_USER_HOME': isolatedGradleHome!.path},
+          environment: {'GRADLE_USER_HOME': isolatedGradleHome.path},
         );
 
         // 7. Navigate into the dists folder and upload to CIPD
-        final distsDirPath = '${isolatedGradleHome!.path}/wrapper/dists';
+        final distsDirPath = '${isolatedGradleHome.path}/wrapper/dists';
         final distsDir = Directory(distsDirPath);
 
         final cipdYamlContent =
@@ -150,14 +149,14 @@ data:
         }
       } finally {
         // 9. Clean up the isolated Gradle home for this iteration
-        if (isolatedGradleHome != null && await isolatedGradleHome.exists()) {
+        if (await isolatedGradleHome.exists()) {
           await isolatedGradleHome.delete(recursive: true);
         }
       }
     }
   } finally {
     // 10. Clean up the shared staging project when script finishes
-    if (stagingProject != null && await stagingProject.exists()) {
+    if (await stagingProject.exists()) {
       await stagingProject.delete(recursive: true);
     }
   }
