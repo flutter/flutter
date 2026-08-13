@@ -1,5 +1,11 @@
 include: ../analysis_options.yaml
 
+plugins:
+  flutter_analyzer_plugin:
+    path: ../../dev/flutter_analyzer_plugin
+    diagnostics:
+      skip_test_comments: true
+
 analyzer:
   exclude:
   - "test_fixes/**"

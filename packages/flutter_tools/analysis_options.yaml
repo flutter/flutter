@@ -15,7 +15,6 @@ plugins:
     diagnostics:
       avoid_future_catch_error: true
       skip_test_comments: true
-      integration_test_timeouts: true
 
 linter:
   rules:
