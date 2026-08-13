@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': '7817fed2e368c34917073c61545ff3ec1137589f',
+  'skia_revision': 'a59c73c6b120c2bbdf303fe37d04a22214bb2cce',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -830,7 +830,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'SFq4FVodIOQAS26LraIN4MNNWCZmirSJvNBY-OO-yZsC'
+        'version': 'BDz0kbVOlaKsjtx_e1VZr5EkoYTaHHIufWtKJ1rrjXgC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
