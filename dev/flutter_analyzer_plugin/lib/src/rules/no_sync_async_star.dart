@@ -74,7 +74,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     final int lineStartOffset = lineInfo.getOffsetOfLine(
       lineInfo.getLocation(node.offset).lineNumber - 1,
     );
-    final String content = context.currentUnit!.content;
+    
 
     // We can just check the string of the content on both the node line (before it) and the lines before,
     // actually, let's just use token precedingComments stream - it reads all previous comments accurately!
