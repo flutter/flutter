@@ -10,12 +10,14 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
 class NoBadImportsInFlutter extends AnalysisRule {
-  NoBadImportsInFlutter() : super(name: code.name, description: 'Checks for bad imports in flutter package.');
+  NoBadImportsInFlutter()
+    : super(name: code.name, description: 'Checks for bad imports in flutter package.');
 
   static const LintCode code = LintCode(
     'no_bad_imports_in_flutter',
     'Bad import in flutter package.',
-    correctionMessage: 'Use relative imports or valid exported packages. Do not recursive import or import meta/meta.dart.',
+    correctionMessage:
+        'Use relative imports or valid exported packages. Do not recursive import or import meta/meta.dart.',
     severity: DiagnosticSeverity.ERROR,
   );
 
@@ -45,19 +47,21 @@ class _Visitor extends SimpleAstVisitor<void> {
 
     // Check for package:meta/meta.dart
     if (uriStr == 'package:meta/meta.dart') {
-       // Only allow meta in foundation
-       // For tests, allow it too if we mock path? 
-       // Just check if absolutePath contains 'packages/flutter/lib/src/foundation' or 'flutter/foundation.dart'...
-       // Actually `meta` should not be used in the framework generally.
-       if (!absolutePath.contains('src/foundation/') && !absolutePath.contains('src\\foundation\\')) {
-          rule.reportAtNode(node.uri);
-       }
+      // Only allow meta in foundation
+      // For tests, allow it too if we mock path?
+      // Just check if absolutePath contains 'packages/flutter/lib/src/foundation' or 'flutter/foundation.dart'...
+      // Actually `meta` should not be used in the framework generally.
+      if (!absolutePath.contains('src/foundation/') &&
+          !absolutePath.contains('src\\foundation\\')) {
+        rule.reportAtNode(node.uri);
+      }
     }
 
     // Check for recursive self imports.
     // E.g., if we are in package:flutter/src/widgets/framework.dart
     // we should not import 'package:flutter/widgets.dart'
-    if (absolutePath.contains('packages/flutter/lib/src/') || absolutePath.contains('packages\\flutter\\lib\\src\\')) {
+    if (absolutePath.contains('packages/flutter/lib/src/') ||
+        absolutePath.contains('packages\\flutter\\lib\\src\\')) {
       final String token = absolutePath.contains('/') ? '/' : '\\';
       final pathParts = absolutePath.split(token);
       final srcIndex = pathParts.lastIndexOf('src');

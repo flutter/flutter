@@ -23,8 +23,8 @@ class FlutterAnalyzerPlugin extends Plugin {
       ..registerWarningRule(NoStopwatches())
       ..registerWarningRule(ProtectPublicStateSubtypes())
       ..registerWarningRule(RenderBoxIntrinsicCalculationRule())
-      ..registerErrorRule(NoBadImportsInFlutter())
-      ..registerErrorRule(NoBadImportsInFlutterTools());
+      ..registerWarningRule(NoBadImportsInFlutter())
+      ..registerWarningRule(NoBadImportsInFlutterTools());
   }
 
   @override

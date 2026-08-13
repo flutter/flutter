@@ -2125,17 +2125,6 @@ Future<void> verifyNoBinaries(String workingDirectory, {Set<Hash256>? legacyBina
 
 // UTILITY FUNCTIONS
 
-bool _listEquals<T>(List<T> a, List<T> b) {
-  if (a.length != b.length) {
-    return false;
-  }
-  for (var index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index]) {
-      return false;
-    }
-  }
-  return true;
-}
 
 Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true}) async {
   final EvalResult evalResult = await _evalCommand(
@@ -2717,8 +2706,6 @@ Future<void> _checkForNewExecutables() async {
   }
 }
 
-final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
-final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
 
 List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [Set<T>? seen]) {
