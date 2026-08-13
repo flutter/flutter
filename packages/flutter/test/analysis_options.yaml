@@ -5,7 +5,6 @@ plugins:
     path: ../../../dev/flutter_analyzer_plugin
     diagnostics:
       no_stopwatches: true
-      skip_test_comments: true
 
 linter:
   rules:
