@@ -935,6 +935,8 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// {@tool dartpad}
 /// To add a widget to the bottom of the nav bar, wrap it with [PreferredSize] and provide its fully extended size.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=xiTuAwvKxBY}
+///
 /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.2.dart **
 /// {@end-tool}
 ///
