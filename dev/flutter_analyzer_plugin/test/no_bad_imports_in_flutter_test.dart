@@ -1,8 +1,9 @@
-// ignore_for_file: non_constant_identifier_names
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: uri_does_not_exist
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
@@ -21,7 +22,6 @@ class NoBadImportsInFlutterTest extends AnalysisRuleTest {
   String get analysisRule => NoBadImportsInFlutter.code.name;
 
   static const String source = '''
-// ignore_for_file: uri_does_not_exist
 
 import 'package:meta/meta.dart'; // ERROR: import 'package:meta/meta.dart'
 import 'package:flutter/widgets.dart'; // ERROR: import 'package:flutter/widgets.dart'
