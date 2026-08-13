@@ -6,6 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_IMPL_H_
 
 #include <functional>
+#include <string>
+#include <vector>
 
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
@@ -13,8 +15,9 @@
 namespace flutter {
 
 //------------------------------------------------------------------------------
-/// @brief      Returns the first entry of `search_paths` that `open_library`
-///             loads (returns non-null for), or nullptr if none of them load.
+/// @brief      Returns the handle from the first entry of `search_paths` that
+///             `open_library` loads (returns non-null for), or nullptr if none
+///             of them load.
 ///
 ///             Paths are tried in order, i.e. in descending priority: this
 ///             matches the contract documented on
