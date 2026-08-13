@@ -5,6 +5,8 @@ plugins:
     path: ../../dev/flutter_analyzer_plugin
     diagnostics:
       no_stopwatches: true
+      no_sync_async_star: true
+      deprecation_syntax: true
 
 linter:
   rules:

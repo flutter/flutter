@@ -9,6 +9,8 @@ import 'src/rules/no_double_clamp.dart';
 import 'src/rules/no_stopwatches.dart';
 import 'src/rules/protect_public_state_subtypes.dart';
 import 'src/rules/render_box_intrinsics.dart';
+import 'src/rules/deprecation_syntax.dart';
+import 'src/rules/no_sync_async_star.dart';
 
 final FlutterAnalyzerPlugin plugin = FlutterAnalyzerPlugin();
 
@@ -18,6 +20,8 @@ class FlutterAnalyzerPlugin extends Plugin {
     registry
       ..registerWarningRule(AvoidFutureCatchError())
       ..registerWarningRule(NoDoubleClamp())
+      ..registerWarningRule(DeprecationSyntax())
+      ..registerWarningRule(NoSyncAsyncStar())
       ..registerWarningRule(NoStopwatches())
       ..registerWarningRule(ProtectPublicStateSubtypes())
       ..registerWarningRule(RenderBoxIntrinsicCalculationRule());
