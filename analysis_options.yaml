@@ -1,6 +1,14 @@
 include: analysis_options_common.yaml
 
+# Note: Analyzer plugins (such as flutter_analyzer_plugin) are intentionally
+# configured directly in subpackages (e.g. packages/flutter/lib,
+# packages/flutter/test, packages/flutter_tools) rather than here at the root.
+# This prevents plugins from leaking into excluded or standalone subtrees (like
+# engine/src/flutter) that do not use the framework plugin.
+
 analyzer:
+  errors:
+    plugins_in_inner_options: ignore
   exclude:
     - "bin/cache/**"
       # Ignore protoc generated files
