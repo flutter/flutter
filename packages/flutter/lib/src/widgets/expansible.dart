@@ -226,6 +226,8 @@ class ExpansibleController extends ChangeNotifier {
 /// [ExpansibleController.collapse] as needed, most typically when the header
 /// returned in [headerBuilder] is tapped.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=TfoJ55nx1S4}
+///
 ///{@tool dartpad}
 /// This example demonstrates how to use the [Expansible] widget and how an
 /// [ExpansibleController] can be used to programmatically expand or collapse it.
