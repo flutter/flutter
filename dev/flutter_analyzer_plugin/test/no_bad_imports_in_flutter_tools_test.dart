@@ -27,7 +27,7 @@ import 'package:flutter/flutter.dart'; // OK
 import 'utils.dart'; // OK
 ''';
 
-  Future<void> test_no_bad_imports_in_flutter_tools() async {
+  Future<void> testNoBadImportsInFlutterTools() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
       lint(47, 43),
     ]);

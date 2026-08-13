@@ -28,7 +28,7 @@ import 'package:flutter/rendering.dart'; // OK
 import 'utils.dart'; // OK
 ''';
 
-  Future<void> test_no_bad_imports_in_flutter() async {
+  Future<void> testNoBadImportsInFlutter() async {
     // We cannot easily mock the absolute path in AnalysisRuleTest to pretend we are in
     // packages/flutter/lib/src/widgets without subclassing or using test package builders.
     // Assuming the rule gracefully handles this by skipping absolute path dependents if not matched.
