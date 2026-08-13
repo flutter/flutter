@@ -64,8 +64,6 @@ internal object VersionFetcher {
                 .findPlugin(KotlinAndroidPluginWrapper::class.java)
         // Partial implementation of getKotlinPluginVersion from the comment above.
         var versionString: String? = kotlinPlugin?.pluginVersion
-        // Avoid passing "unknown" to Version.fromString() to prevent a NumberFormatException.
-        // If it is "unknown", we skip this block and attempt to read it via reflection below.
         if (!versionString.isNullOrEmpty() && versionString != "unknown") {
             return Version.fromString(versionString)
         }
