@@ -342,14 +342,14 @@ List<StackTrace>? _creationStackTraces = kDebugMode ? <StackTrace>[] : null;
 - **Severity**: `ERROR`
 - **Scope**: All repository test files (`*_test.dart`)
 - **Description**: Requires all skipped tests (`test(..., skip: ...)`) to include an inline justification comment explaining why the test is skipped.
-- **Rationale**: Tests should never be silently skipped or left skipped indefinitely without tracking. Every `skip:` argument must provide an intentional marker (such as `// [intended]`) or reference an active GitHub tracking issue link (e.g. `https://github.com/flutter/flutter/issues/12345`).
+- **Rationale**: Tests should never be silently skipped or left skipped indefinitely without tracking. Every `skip:` argument must provide an intentional marker (such as `// [intended]`) or reference an active GitHub tracking issue link (e.g. `https://github.com/flutter/flutter/issues/<issue-number>`).
 
 ```dart
 // BAD:
 test('flaky network test', () {}, skip: true);
 
 // GOOD:
-test('flaky network test', () {}, skip: true); // https://github.com/flutter/flutter/issues/12345
+test('flaky network test', () {}, skip: true); // https://github.com/flutter/flutter/issues/<issue-number>
 
 // GOOD:
 test('platform specific test', () {},
