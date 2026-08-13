@@ -12,7 +12,7 @@ fun setUpMockAndroidExtension(
     ndkVersion: String? = "29.0.13846066"
 ): ApplicationExtension {
     val mockAndroidExtension = mockk<ApplicationExtension>()
-    
+
     if (compileSdk != null) {
         every { mockAndroidExtension.compileSdk } returns compileSdk
         every { mockAndroidExtension.compileSdkPreview } returns null
@@ -20,12 +20,12 @@ fun setUpMockAndroidExtension(
     if (ndkVersion != null) {
         every { mockAndroidExtension.ndkVersion } returns ndkVersion
     }
-    
+
     every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockAndroidExtension
     every { project.extensions.findByName("android") } returns mockAndroidExtension
-    
+
     every { project.gradle.startParameter.taskNames } returns emptyList()
     every { project.gradle.startParameter.isOffline } returns false
-    
+
     return mockAndroidExtension
 }

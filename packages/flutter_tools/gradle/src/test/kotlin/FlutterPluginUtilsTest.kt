@@ -5,7 +5,6 @@
 package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
-import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
@@ -51,6 +50,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
+import testing.setUpMockAndroidExtension
 import java.io.File
 import java.io.IOException
 import java.nio.file.Path
@@ -62,8 +62,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import testing.setUpMockAndroidExtension
-
 
 /**
  * Configuration for a mock Gradle subproject.
@@ -92,7 +90,6 @@ private class TestEnvironment(
 }
 
 class FlutterPluginUtilsTest {
-
     companion object {
         const val EXAMPLE_ENGINE_VERSION = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
 

@@ -4,7 +4,6 @@
 
 package com.flutter.gradle.plugins
 
-import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.BaseExtension
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
@@ -27,17 +26,15 @@ import org.gradle.api.logging.Logger
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
+import testing.setUpMockAndroidExtension
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import testing.setUpMockAndroidExtension
-
 
 class PluginHandlerTest {
-
     // getPluginListWithoutDevDependencies
     @Test
     fun `getPluginListWithoutDevDependencies removes dev dependencies from list`() {
