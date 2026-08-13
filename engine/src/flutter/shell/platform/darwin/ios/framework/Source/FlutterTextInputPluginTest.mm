@@ -603,7 +603,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [inputView setMarkedText:@"´" selectedRange:NSMakeRange(1, 0)];
   [inputView insertText:@"Á"];
 
-  UITextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 20)];
+  UITextRange* range = [inputView textRangeFromPosition:inputView.beginningOfDocument
+                                             toPosition:inputView.endOfDocument];
   NSString* substring = [inputView textInRange:range];
   XCTAssertEqualObjects(substring, @"Á");
 }
