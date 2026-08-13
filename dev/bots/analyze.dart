@@ -260,7 +260,6 @@ List<Validation> _getValidations({
     ),
     Validation('deprecations', 'Deprecations...', () => verifyDeprecations(flutterRoot)),
     Validation('golden-tags', 'Goldens...', () => verifyGoldenTags(flutterPackages)),
-
     Validation('no-missing-license', 'Licenses...', () => verifyNoMissingLicense(flutterRoot)),
     Validation('no-test-imports', 'Test imports...', () => verifyNoTestImports(flutterRoot)),
     Validation(
@@ -283,7 +282,6 @@ List<Validation> _getValidations({
       'Localization files of stocks app...',
       () => verifyStockAppLocalizations(flutterRoot),
     ),
-
     Validation(
       'null-fields',
       'null initialized debug fields...',
