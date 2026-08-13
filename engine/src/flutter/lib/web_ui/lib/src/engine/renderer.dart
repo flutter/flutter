@@ -99,14 +99,7 @@ abstract class Renderer {
 
   ui.Paint createPaint();
 
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  });
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
@@ -170,6 +163,9 @@ abstract class Renderer {
     required ui.ImageFilter outer,
     required ui.ImageFilter inner,
   });
+
+  BackendColorFilter createColorFilter(EngineColorFilter filter);
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter);
 
   bool get isMultiThreaded;
 
