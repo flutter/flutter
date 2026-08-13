@@ -1982,6 +1982,20 @@ abstract class FlutterCommand extends Command<void> {
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
 
+    if (getBuildMode().isRelease) {
+      if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
+          (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
+        final bool enableImpeller = boolArg(FlutterOptions.kEnableImpeller);
+        final flagName = enableImpeller
+            ? '--${FlutterOptions.kEnableImpeller}'
+            : '--no-${FlutterOptions.kEnableImpeller}';
+        globals.logger.printWarning(
+          'The "$flagName" flag is ignored in release builds. '
+          'The rendering backend is determined at build time.',
+        );
+      }
+    }
+
     if (globals.os.hostPlatform == .darwin_x64 &&
         globals.persistentToolState!.shouldShowIntelMacWarning) {
       globals.logger.printWarning(
