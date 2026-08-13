@@ -174,19 +174,20 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
                        0, 0, 0, 0, 0, 0, 0, 0);
 }
 
-// The load order is exercised with an injected loader rather than real dlopen():
-// the property under test is purely the ordering (first-to-last, stop at the
-// first that loads), and a fake loader makes that deterministic and free of any
-// platform- or system-library-specific behavior. Whether a given path format is
-// actually loadable is covered end-to-end by the deferred_components_test.
+// The load order is exercised with an injected loader rather than real
+// dlopen(): the property under test is purely the ordering (first-to-last,
+// stop at the first that loads), and a fake loader makes that deterministic
+// and free of any platform- or system-library-specific behavior. Whether a
+// given path format is actually loadable is covered end-to-end by the
+// deferred_components_test.
 TEST(FindFirstLoadableLibraryTest, TriesInOrderAndStopsAtFirstSuccess) {
   std::vector<std::string> attempted;
-  void* const kHandle = reinterpret_cast<void*>(0x1234);
+  void* const handle = reinterpret_cast<void*>(0x1234);
   auto opener = [&](const std::string& path) -> void* {
     attempted.push_back(path);
-    return path == "b" ? kHandle : nullptr;
+    return path == "b" ? handle : nullptr;
   };
-  EXPECT_EQ(FindFirstLoadableLibrary({"a", "b", "c"}, opener), kHandle);
+  EXPECT_EQ(FindFirstLoadableLibrary({"a", "b", "c"}, opener), handle);
   // "c" is never attempted because "b" already loaded.
   EXPECT_THAT(attempted, ElementsAre("a", "b"));
 }

@@ -683,12 +683,13 @@ static void DeferredComponentInstallFailure(JNIEnv* env,
 void* FindFirstLoadableLibrary(
     const std::vector<std::string>& search_paths,
     const std::function<void*(const std::string&)>& open_library) {
-  // Search paths are provided in descending priority order (see the contract on
-  // FlutterJNI.loadDartDeferredLibrary): try them from first to last and stop at
-  // the first one that loads. This matters for security as well as correctness
-  // -- callers place the most trusted candidates (e.g. OS-installed signed APKs)
-  // ahead of less trusted fallbacks (e.g. loose .so files in app-writable
-  // storage), so the trusted candidate must win when more than one is loadable.
+  // Search paths are provided in descending priority order (see the contract
+  // on FlutterJNI.loadDartDeferredLibrary): try them from first to last and
+  // stop at the first one that loads. This matters for security as well as
+  // correctness -- callers place the most trusted candidates (e.g.
+  // OS-installed signed APKs) ahead of less trusted fallbacks (e.g. loose .so
+  // files in app-writable storage), so the trusted candidate must win when
+  // more than one is loadable.
   for (const std::string& path : search_paths) {
     void* handle = open_library(path);
     if (handle != nullptr) {
