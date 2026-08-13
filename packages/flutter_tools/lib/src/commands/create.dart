@@ -509,6 +509,25 @@ class CreateCommand extends FlutterCommand with CreateBase {
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
         );
+        final FlutterProject project = FlutterProject.fromDirectory(relativeDir);
+        final bool isEphemeral = project.manifest.iosEphemeralModule ?? true;
+        // When iosEphemeral is false, create a full iOS project instead of an ephemeral one.
+        if (!isEphemeral) {
+          // If .ios project already exists, delete it.
+          if (project.ios.ephemeralModuleDirectory.existsSync()) {
+            project.ios.ephemeralModuleDirectory.deleteSync(recursive: true);
+          }
+          templateContext['android'] = false;
+          generatedFileCount += await generateApp(
+            <String>[globals.fs.path.join('app')],
+            relativeDir,
+            templateContext,
+            overwrite: overwrite,
+            printStatusWhenWriting: !creatingNewProject,
+            projectType: template,
+          );
+          templateContext['android'] = includeAndroid;
+        }
         pubContext = PubContext.create;
       case FlutterTemplateType.package:
         generatedFileCount += await _generatePackage(

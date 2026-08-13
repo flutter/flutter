@@ -186,6 +186,24 @@ class BuildSwiftPackage extends BuildSubCommand {
     _validateTargetPlatform();
     _validateFeatureFlags();
     _validateXcodeVersion();
+    _validateModuleLayout();
+  }
+
+  void _validateModuleLayout() {
+    if (_targetPlatform == .ios &&
+        _featureFlags.isSwiftPackageManagerEnabled &&
+        project.ios.isEphemeralModule) {
+      logger.printWarning(
+        "When integrating into a native app with Swift Package Manager, it's recommended to convert "
+        'the ephemeral iOS module into a standard iOS app.\n\n'
+        'To convert this project to a standard iOS app:\n'
+        '  1. Set "iosEphemeral: false" under "flutter: module:" in pubspec.yaml:\n'
+        '     flutter:\n'
+        '       module:\n'
+        '         iosEphemeral: false\n'
+        '  2. Run "flutter create ." in the project root.'
+      );
+    }
   }
 
   /// Validates the Flutter project supports the [_targetPlatform].

@@ -27,6 +27,35 @@ import '../src/fakes.dart';
 
 void main() {
   group('IosProject', () {
+    group('isModule', () {
+      testWithoutContext('is true when parent is module and .ios exists', () {
+        final fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('app_name');
+        projectDirectory.childDirectory('.ios').createSync(recursive: true);
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs, isModule: true));
+        expect(project.isModule, isTrue);
+      });
+
+      testWithoutContext(
+        'is false when parent is module but ios exists and .ios does not exist',
+        () {
+          final fs = MemoryFileSystem.test();
+          final Directory projectDirectory = fs.directory('app_name');
+          projectDirectory.childDirectory('ios').createSync(recursive: true);
+          final project = IosProject.fromFlutter(
+            FakeFlutterProject(fileSystem: fs, isModule: true),
+          );
+          expect(project.isModule, isFalse);
+        },
+      );
+
+      testWithoutContext('is false when parent is not module', () {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        expect(project.isModule, isFalse);
+      });
+    });
+
     testWithoutContext('managedDirectory', () {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
@@ -277,14 +306,30 @@ void main() {
       );
 
       testUsingContext(
-        'is false when project is a module',
+        'is false when project is an ephemeral module',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final Directory projectDirectory = fs.directory('path');
+          projectDirectory.childDirectory('.ios').createSync(recursive: true);
+          final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
+          final project = FlutterProject(projectDirectory, manifest, manifest);
+          expect(project.ios.usesSwiftPackageManager, isFalse);
+        },
+        overrides: <Type, Generator>{
+          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        },
+      );
+
+      testUsingContext(
+        'is true when project is a converted module',
         () async {
           final fs = MemoryFileSystem.test();
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('ios').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
           final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isFalse);
+          expect(project.ios.usesSwiftPackageManager, isTrue);
         },
         overrides: <Type, Generator>{
           FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
@@ -549,14 +594,14 @@ void main() {
       );
 
       testUsingContext(
-        'is false when project is a module',
+        'is true when project is a module',
         () async {
           final fs = MemoryFileSystem.test();
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('macos').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
           final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.macos.usesSwiftPackageManager, isFalse);
+          expect(project.macos.usesSwiftPackageManager, isTrue);
         },
         overrides: <Type, Generator>{
           FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),

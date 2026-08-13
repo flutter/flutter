@@ -208,16 +208,9 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   }
 
   /// Return true if the project meets the following requirements:
-  ///   - Project is not a module
   ///   - Xcode project exists
   ///   - Xcode version is greater or equal to 15
   bool get compatibleWithSwiftPackageManager {
-    // TODO(loic-sharma): Support Swift Package Manager in add-to-app modules.
-    // https://github.com/flutter/flutter/issues/146957
-    if (parent.isModule) {
-      return false;
-    }
-
     if (!existsSync()) {
       return false;
     }
@@ -534,7 +527,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// This parent folder of `Runner.xcodeproj`.
   @override
   Directory get hostAppRoot {
-    if (!isModule || _editableDirectory.existsSync()) {
+    if (!isEphemeralModule || _editableDirectory.existsSync()) {
       return _editableDirectory;
     }
     return ephemeralModuleDirectory;
@@ -546,9 +539,29 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   ///
   /// This is the same as [hostAppRoot] except when the project is
   /// a Flutter module with an editable host app.
-  Directory get _flutterLibRoot => isModule ? ephemeralModuleDirectory : _editableDirectory;
+  Directory get _flutterLibRoot =>
+      isEphemeralModule ? ephemeralModuleDirectory : _editableDirectory;
 
-  /// True, if the parent Flutter project is a module project.
+  @override
+  /// Return true if the Swift Package Manager feature is enabled, the project is
+  /// [compatibleWithSwiftPackageManager], and the project is not an ephemeral module.
+  bool get usesSwiftPackageManager {
+    if (isEphemeralModule) {
+      // Ephemeral modules have custom CocoaPod logic that make it difficult to integrate with SwiftPM.
+      // To use SwiftPM, they should convert to non-ephemeral modules.
+      return false;
+    }
+
+    return super.usesSwiftPackageManager;
+  }
+
+  /// Returns `true` if the project is a module and a standard `ios` directory
+  /// ([_editableDirectory]) does NOT exist.
+  ///
+  /// Modules can be converted to non-ephemeral projects using the `iosEphemeral` option in their
+  /// pubspec.yaml and then running `flutter create .` within their project's root directory.
+  bool get isEphemeralModule => parent.isModule && !_editableDirectory.existsSync();
+
   bool get isModule => parent.isModule;
 
   /// Whether the Flutter application has an iOS project.
@@ -1093,7 +1106,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   }
 
   Future<void> _regenerateModuleFromTemplateIfNeeded() async {
-    if (!isModule) {
+    if (!isEphemeralModule) {
       return;
     }
     final bool pubspecChanged = globals.fsUtils.isOlderThanReference(
@@ -1145,20 +1158,20 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   File get flutterPodspec => _flutterLibRoot.childDirectory('Flutter').childFile('Flutter.podspec');
 
   Directory get pluginRegistrantHost {
-    return isModule
+    return isEphemeralModule
         ? _flutterLibRoot.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
         : hostAppRoot.childDirectory(XcodeBasedProject._defaultHostAppName);
   }
 
   File get pluginRegistrantHeader {
-    final Directory registryDirectory = isModule
+    final Directory registryDirectory = isEphemeralModule
         ? pluginRegistrantHost.childDirectory('Classes')
         : pluginRegistrantHost;
     return registryDirectory.childFile('GeneratedPluginRegistrant.h');
   }
 
   File get pluginRegistrantImplementation {
-    final Directory registryDirectory = isModule
+    final Directory registryDirectory = isEphemeralModule
         ? pluginRegistrantHost.childDirectory('Classes')
         : pluginRegistrantHost;
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');

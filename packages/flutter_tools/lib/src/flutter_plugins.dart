@@ -901,7 +901,7 @@ Future<void> writeIOSPluginRegistrant(
     'framework': FlutterDarwinPlatform.ios.binaryName,
     'methodChannelPlugins': iosPlugins,
   };
-  if (project.isModule) {
+  if (project.ios.isEphemeralModule) {
     final Directory registryDirectory = project.ios.pluginRegistrantHost;
     await _renderTemplateToFile(
       _pluginRegistrantPodspecTemplate,
