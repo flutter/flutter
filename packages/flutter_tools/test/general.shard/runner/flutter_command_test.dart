@@ -315,6 +315,22 @@ void main() {
     );
 
     testUsingContext(
+      'does not fail or warn on command without build mode flags',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy']);
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'uses the error handling file system',
       () async {
         final flutterCommand = DummyFlutterCommand(

@@ -1982,9 +1982,9 @@ abstract class FlutterCommand extends Command<void> {
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
 
-    if (getBuildMode().isRelease) {
-      if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
-          (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
+    if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
+        (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
+      if (getBuildMode().isRelease) {
         final bool enableImpeller = boolArg(FlutterOptions.kEnableImpeller);
         final flagName = enableImpeller
             ? '--${FlutterOptions.kEnableImpeller}'
