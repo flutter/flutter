@@ -28,7 +28,6 @@ import 'run_command.dart';
 import 'utils.dart';
 
 final String flutterPackages = path.join(flutterRoot, 'packages');
-final String flutterExamples = path.join(flutterRoot, 'examples');
 
 /// The path to the `dart` executable; set at the top of `main`
 late final String dart;
