@@ -12,15 +12,15 @@ Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(() async {
     String? simulatorDeviceId;
-    var res = TaskResult.success(null);
+    var result = TaskResult.success(null);
     try {
       await testWithNewIOSSimulator('integration_ui_ios_textfield', (String deviceId) async {
         simulatorDeviceId = deviceId;
-        res = await createEndToEndKeyboardTextfieldTest(deviceIdOverride: deviceId).call();
+        result = await createEndToEndKeyboardTextfieldTest(deviceIdOverride: deviceId).call();
       });
     } finally {
       await removeIOSSimulator(simulatorDeviceId);
     }
-    return res;
+    return result;
   });
 }

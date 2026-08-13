@@ -12,15 +12,15 @@ Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(() async {
     String? simulatorDeviceId;
-    var res = TaskResult.success(null);
+    var result = TaskResult.success(null);
     try {
       await testWithNewIOSSimulator('integration_ui_ios_driver', (String deviceId) async {
         simulatorDeviceId = deviceId;
-        res = await createEndToEndDriverTest(deviceIdOverride: deviceId).call();
+        result = await createEndToEndDriverTest(deviceIdOverride: deviceId).call();
       });
     } finally {
       await removeIOSSimulator(simulatorDeviceId);
     }
-    return res;
+    return result;
   });
 }
