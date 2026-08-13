@@ -6,8 +6,6 @@ plugins:
     diagnostics:
       no_double_clamp: true
       no_stopwatches: true
-      no_sync_async_star: true
-      deprecation_syntax: true
       protect_public_state_subtypes: true
       render_box_intrinsics: true
 

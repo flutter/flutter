@@ -14,8 +14,6 @@ plugins:
     path: ../../dev/flutter_analyzer_plugin
     diagnostics:
       avoid_future_catch_error: true
-      deprecation_syntax: true
-      no_sync_async_star: true
 
 linter:
   rules:
