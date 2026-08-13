@@ -18,6 +18,9 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import 'chrome_constants.dart';
+
+export 'chrome_constants.dart';
 
 /// An environment variable used to override the location of Google Chrome.
 const kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -235,6 +238,11 @@ class ChromiumLauncher {
       // When the DevTools has focus we don't want to slow down the application.
       '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding',
+      '--disable-background-networking',
+      '--disable-sync',
+      '--disable-client-side-phishing-detection',
+      '--disable-notifications',
+      ...kGcmDisabledFlags,
       // Since we are using a temp profile, disable features that slow the
       // Chrome launch.
       '--disable-extensions',
@@ -264,11 +272,6 @@ class ChromiumLauncher {
         '--no-sandbox',
         '--headless',
         '--window-size=1024,1024',
-        '--disable-background-networking',
-        '--disable-sync',
-        '--disable-client-side-phishing-detection',
-        '--disable-notifications',
-        '--disable-features=GCM',
         if (_platform.isLinux) ...<String>[
           '--use-gl=angle',
           '--use-angle=swiftshader',
