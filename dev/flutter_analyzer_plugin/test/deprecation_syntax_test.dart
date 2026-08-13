@@ -19,6 +19,11 @@ class DeprecationSyntaxTest extends AnalysisRuleTest {
   @override
   String get analysisRule => DeprecationSyntax.code.name;
 
+  static const String _invalidAnnotation =
+      '@Deprecated(\n'
+      "        'This is an invalid deprecation message. ' // missing version\n"
+      '      )';
+
   static const String source = '''
       @Deprecated(
         'This is a valid deprecation message. '
@@ -26,16 +31,14 @@ class DeprecationSyntaxTest extends AnalysisRuleTest {
       )
       void foo() {}
 
-      @Deprecated(
-        'This is an invalid deprecation message. ' // missing version
-      )
+      $_invalidAnnotation
       void bar() {}
 ''';
 
   // ignore: non_constant_identifier_names
   Future<void> test_deprecation_syntax() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(163, 90), // Dummy offset
+      lint(source.indexOf(_invalidAnnotation), _invalidAnnotation.length),
     ]);
   }
 }

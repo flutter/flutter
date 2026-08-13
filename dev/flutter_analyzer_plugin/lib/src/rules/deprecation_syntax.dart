@@ -10,9 +10,12 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/source/line_info.dart';
 
+/// A rule that enforces standard Flutter deprecation notice syntax.
 class DeprecationSyntax extends AnalysisRule {
+  /// Creates a new [DeprecationSyntax] rule.
   DeprecationSyntax() : super(name: code.name, description: 'Verify deprecation syntax');
 
+  /// The diagnostic code produced when deprecation syntax does not conform to Flutter standards.
   static const LintCode code = LintCode(
     'deprecation_syntax',
     'Deprecation syntax must conform to flutter standards.',
@@ -42,135 +45,108 @@ class _Visitor extends SimpleAstVisitor<void> {
     r'// flutter_ignore: deprecation_syntax, https://github\.com/flutter/flutter/issues/\d+',
   );
 
-  static final RegExp deprecationVersionPattern = RegExp(
+  static final RegExp _deprecationVersionPattern = RegExp(
     r'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.$',
   );
 
   bool _hasInlineIgnore(AstNode node, Pattern ignorePattern) {
     final LineInfo lineInfo = context.currentUnit!.unit.lineInfo;
-    final int lineStartOffset = lineInfo.getOffsetOfLine(
-      lineInfo.getLocation(node.offset).lineNumber - 1,
-    );
+    final int lineIndex = lineInfo.getLocation(node.offset).lineNumber - 1;
     final String content = context.currentUnit!.content;
 
-    // Check if previous line has the comment
-    final int prevLineNum = lineInfo.getLocation(node.offset).lineNumber - 2;
-    if (prevLineNum >= 0) {
-      final int prevLineStart = lineInfo.getOffsetOfLine(prevLineNum);
-      final String prevLine = content.substring(prevLineStart, lineStartOffset);
+    // Check preceding line.
+    if (lineIndex > 0) {
+      final String prevLine = content.substring(
+        lineInfo.getOffsetOfLine(lineIndex - 1),
+        lineInfo.getOffsetOfLine(lineIndex),
+      );
       if (prevLine.contains(ignorePattern)) {
         return true;
       }
     }
 
-    // Check current line as well after node? (The analyze.dart implementation checked the previous line OR the same line but technically before the node or after).
-    // Let's just check the string of the content on both the node line (before it) and the line before.
-    // And also we can check precedingComments. But let's just do a string substring to match exactly what analyze.dart did for backward compatibility.
-    // However, analyze.dart did: textAfterNode = content.substring(node.offset, lineInfo.getOffsetOfLineAfter(node.offset) - 1).
-    // And it checked if textAfterNode.contains(ignorePattern) for the skipTest version.
-    // But for Ignore directives, it checked `hasInlineIgnore` with the previous line logic! Wait, `hasInlineIgnore` implementation:
-    // It checked `compilationUnit.content.substring(node.offset, offsetOfLineAfter(node.offset) - 1)`. Wait! That is the line of the node itself AFTER the node starts.
-    return content
-            .substring(node.offset, lineInfo.getOffsetOfLineAfter(node.offset) - 1)
-            .contains(ignorePattern) ||
-        (prevLineNum >= 0 &&
-            content
-                .substring(lineInfo.getOffsetOfLine(prevLineNum), lineStartOffset)
-                .contains(ignorePattern));
+    // Check the remainder of the current line.
+    final int currentLineEnd =
+        lineIndex + 1 < lineInfo.lineCount
+            ? lineInfo.getOffsetOfLine(lineIndex + 1)
+            : content.length;
+    final String textAfterNode = content.substring(node.offset, currentLineEnd);
+    return textAfterNode.contains(ignorePattern);
   }
 
   @override
   void visitAnnotation(Annotation node) {
-    final bool shouldCheckAnnotation =
-        node.name.name == 'Deprecated' &&
-        !_hasInlineIgnore(node, _ignoreDeprecation) &&
-        !_hasInlineIgnore(node, _legacyDeprecation);
-    if (!shouldCheckAnnotation) {
+    if (node.name.name != 'Deprecated') {
+      return;
+    }
+    if (_hasInlineIgnore(node, _ignoreDeprecation) || _hasInlineIgnore(node, _legacyDeprecation)) {
       return;
     }
 
-    final NodeList<Expression>? arguments = node.arguments?.arguments;
-    if (arguments == null || arguments.length != 1) {
-      // Different lint message? The legacy one had specific messages. We can just use rule.reportAtNode(node) with custom message, but rule.reportAtNode uses LintCode. Let's just report the one lint code.
-      // Wait, standard Lintcodes do NOT support dynamic messages for the same code.
-      // But we can report it anyway.
-      rule.reportAtNode(node);
-      return;
-    }
+    if (node.arguments?.arguments case [
+      AdjacentStrings(:final List<StringLiteral> strings),
+    ] when strings.isNotEmpty) {
+      final List<StringLiteral> messageLiterals = strings.sublist(0, strings.length - 1);
+      final StringLiteral versionLiteral = strings.last;
 
-    final Expression deprecationNotice = arguments.first;
-    if (deprecationNotice is! AdjacentStrings) {
-      rule.reportAtNode(node);
-      return;
-    }
-
-    final List<StringLiteral> strings = deprecationNotice.strings;
-    if (strings.isEmpty) {
-      rule.reportAtNode(node);
-      return;
-    }
-
-    final List<StringLiteral> messageLiterals = strings.sublist(0, strings.length - 1);
-    final StringLiteral versionLiteral = strings.last;
-
-    // Verify version literal
-    final RegExpMatch? versionMatch =
-        versionLiteral is SimpleStringLiteral
-            ? deprecationVersionPattern.firstMatch(versionLiteral.value)
-            : null;
-    if (versionMatch == null) {
-      rule.reportAtNode(versionLiteral);
-      return;
-    }
-
-    final int major = int.parse(versionMatch.namedGroup('major')!);
-    final int minor = int.parse(versionMatch.namedGroup('minor')!);
-    final int patch = int.parse(versionMatch.namedGroup('patch')!);
-    final hasBuild = versionMatch.namedGroup('build') != null;
-    final bool specialBeta = major == 3 && minor == 1 && patch == 0;
-    if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
-      if (!hasBuild) {
+      final RegExpMatch? versionMatch = switch (versionLiteral) {
+        SimpleStringLiteral(:final String value) => _deprecationVersionPattern.firstMatch(value),
+        _ => null,
+      };
+      if (versionMatch == null) {
         rule.reportAtNode(versionLiteral);
         return;
       }
-    }
 
-    if (messageLiterals.isEmpty) {
+      final int major = int.parse(versionMatch.namedGroup('major')!);
+      final int minor = int.parse(versionMatch.namedGroup('minor')!);
+      final int patch = int.parse(versionMatch.namedGroup('patch')!);
+      final hasBuild = versionMatch.namedGroup('build') != null;
+      final bool specialBeta = major == 3 && minor == 1 && patch == 0;
+      if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
+        if (!hasBuild) {
+          rule.reportAtNode(versionLiteral);
+          return;
+        }
+      }
+
+      if (messageLiterals.isEmpty) {
+        rule.reportAtNode(node);
+        return;
+      }
+
+      for (final message in messageLiterals) {
+        if (message case SingleStringLiteral(isSingleQuoted: true)) {
+          continue;
+        }
+        rule.reportAtNode(message);
+        return;
+      }
+
+      final String fullExplanation =
+          messageLiterals
+              .map((StringLiteral message) => message.stringValue ?? '')
+              .join()
+              .trimRight();
+      if (fullExplanation.isEmpty) {
+        rule.reportAtNode(messageLiterals.last);
+        return;
+      }
+
+      final firstChar = String.fromCharCode(fullExplanation.runes.first);
+      if (firstChar.toUpperCase() != firstChar) {
+        rule.reportAtNode(messageLiterals.first);
+        return;
+      }
+
+      if (!fullExplanation.endsWith('.') &&
+          !fullExplanation.endsWith('?') &&
+          !fullExplanation.endsWith('!')) {
+        rule.reportAtNode(messageLiterals.last);
+        return;
+      }
+    } else {
       rule.reportAtNode(node);
-      return;
-    }
-
-    for (final message in messageLiterals) {
-      if (message is! SingleStringLiteral) {
-        rule.reportAtNode(message);
-        return;
-      }
-      if (!message.isSingleQuoted) {
-        rule.reportAtNode(message);
-        return;
-      }
-    }
-
-    final String fullExplanation = messageLiterals
-        .map((StringLiteral message) => message.stringValue ?? '')
-        .join()
-        .trimRight();
-    if (fullExplanation.isEmpty) {
-      rule.reportAtNode(messageLiterals.last);
-      return;
-    }
-
-    final firstChar = String.fromCharCode(fullExplanation.runes.first);
-    if (firstChar.toUpperCase() != firstChar) {
-      rule.reportAtNode(messageLiterals.first);
-      return;
-    }
-
-    if (!fullExplanation.endsWith('.') &&
-        !fullExplanation.endsWith('?') &&
-        !fullExplanation.endsWith('!')) {
-      rule.reportAtNode(messageLiterals.last);
-      return;
     }
   }
 }

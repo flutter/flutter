@@ -10,13 +10,16 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+/// A rule that enforces explanation comments for `sync*` and `async*` methods.
 class NoSyncAsyncStar extends AnalysisRule {
+  /// Creates a new [NoSyncAsyncStar] rule.
   NoSyncAsyncStar()
     : super(
         name: code.name,
         description: 'Verify that we do not use sync*/async* methods without an explanation.',
       );
 
+  /// The diagnostic code produced when `sync*` or `async*` is used without an explanation.
   static const LintCode code = LintCode(
     'no_sync_async_star',
     'Do not use sync*/async* methods without an explanation comment.',
@@ -62,31 +65,25 @@ class _Visitor extends SimpleAstVisitor<void> {
   }
 
   void _checkFunctionBody(FunctionBody body, AstNode node) {
-    if (body.isGenerator) {
-      if (!_hasExplanationComment(node)) {
-        rule.reportAtNode(node);
-      }
+    if (body.isGenerator && !_hasExplanationComment(node)) {
+      rule.reportAtNode(node);
     }
   }
 
   bool _hasExplanationComment(AstNode node) {
-    final Token token = node.beginToken;
-    Token? comment = token.precedingComments;
-    while (comment != null) {
-      if (_ignorePattern.hasMatch(comment.lexeme)) {
-        return true;
+    bool hasMatch(Token? startToken) {
+      for (
+        Token? comment = startToken?.precedingComments;
+        comment != null;
+        comment = comment.next
+      ) {
+        if (_ignorePattern.hasMatch(comment.lexeme)) {
+          return true;
+        }
       }
-      comment = comment.next;
+      return false;
     }
-    // As a fallback, check the previous comment on the parent's beginToken in case this node's token doesn't capture the doc comment cleanly
-    final Token? parentToken = node.parent?.beginToken;
-    Token? parentComment = parentToken?.precedingComments;
-    while (parentComment != null) {
-      if (_ignorePattern.hasMatch(parentComment.lexeme)) {
-        return true;
-      }
-      parentComment = parentComment.next;
-    }
-    return false;
+
+    return hasMatch(node.beginToken) || hasMatch(node.parent?.beginToken);
   }
 }

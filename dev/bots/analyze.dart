@@ -222,7 +222,6 @@ List<Validation> _getValidations({
       'All tool test files end in _test.dart...',
       () => verifyToolTestsEndInTestDart(flutterRoot),
     ),
-    Validation('no-sync-star-async-star', 'No sync*/async*', () async {}),
     Validation(
       'no-runtime-type',
       'No runtimeType in toString...',
@@ -2485,10 +2484,9 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final errors = <String>[];
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
-  final Iterable<Directory> subDirs = Directory(integrationTestsPath)
-      .listSync()
-      .toList()
-      .whereType<Directory>();
+  final Iterable<Directory> subDirs = Directory(
+    integrationTestsPath,
+  ).listSync().toList().whereType<Directory>();
   for (final testPath in subDirs) {
     final String projectName = path.basename(testPath.path);
     final String runnerPath = path.join(testPath.path, _kWindowsRunnerSubPath);

@@ -19,13 +19,21 @@ class NoSyncAsyncStarTest extends AnalysisRuleTest {
   @override
   String get analysisRule => NoSyncAsyncStar.code.name;
 
+  static const String _fooDeclaration =
+      'Stream<int> foo() async* {\n'
+      '        yield 1;\n'
+      '      }';
+
+  static const String _barDeclaration =
+      'Iterable<int> bar() sync* {\n'
+      '        yield 1;\n'
+      '      }';
+
+  static const String _nestedClosure = '() async* { yield 1; }';
+
   static const String source = '''
-      Stream<int> foo() async* {
-        yield 1;
-      }
-      Iterable<int> bar() sync* {
-        yield 1;
-      }
+      $_fooDeclaration
+      $_barDeclaration
       // The following uses async* because: Fake reason.
       Stream<int> baz() async* {
         yield 1;
@@ -35,13 +43,17 @@ class NoSyncAsyncStarTest extends AnalysisRuleTest {
         yield 1;
       }
       void nest() {
-        final f = () async* { yield 1; };
+        final f = $_nestedClosure;
       }
 ''';
 
   // ignore: non_constant_identifier_names
   Future<void> test_no_sync_async_star() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[lint(6, 51), lint(64, 52), lint(384, 22)]);
+    await assertDiagnostics(source, <ExpectedDiagnostic>[
+      lint(source.indexOf(_fooDeclaration), _fooDeclaration.length),
+      lint(source.indexOf(_barDeclaration), _barDeclaration.length),
+      lint(source.indexOf(_nestedClosure), _nestedClosure.length),
+    ]);
   }
 }
 
