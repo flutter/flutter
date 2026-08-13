@@ -394,14 +394,6 @@ List<Validation> _getValidations({
 
 FeatureSet _parsingFeatureSet() => FeatureSet.latestLanguageVersion();
 
-_Line _getLine(ParseStringResult parseResult, int offset) {
-  final int lineNumber = parseResult.lineInfo.getLocation(offset).lineNumber;
-  final String content = parseResult.content.substring(
-    parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
-    parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1,
-  );
-  return _Line(lineNumber, content);
-}
 
 Future<void> verifyReleaseBranchState(String workringDirerctory) async {
   final ProcessResult result = await Process.run(dart, <String>[
@@ -1107,12 +1099,6 @@ Future<void> _verifyNoMissingLicenseForExtension(
   }
 }
 
-class _Line {
-  _Line(this.line, this.content);
-
-  final int line;
-  final String content;
-}
 
 final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
 const Set<String> _exemptTestImports = <String>{
