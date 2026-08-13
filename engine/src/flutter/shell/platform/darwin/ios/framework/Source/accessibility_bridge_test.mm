@@ -113,6 +113,9 @@ class MockDelegate : public PlatformView::Delegate {
                                     bool transient) override {}
   void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
                                  flutter::AssetResolver::AssetResolverType type) override {}
+  std::shared_ptr<fml::BasicTaskRunner> OnPlatformViewGetShutdownSafeIOTaskRunner() const override {
+    return nullptr;
+  }
 
   flutter::Settings settings_;
 };
@@ -159,9 +162,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -182,9 +182,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -212,9 +209,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -259,9 +253,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -294,9 +285,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
         [[FlutterFMLTaskRunner alloc] initWithTaskRunner:thread_task_runner];
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_delegate,
-        /*rendering_api=*/mock_delegate.settings_.enable_impeller
-            ? flutter::IOSRenderingAPI::kMetal
-            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/flutterPlatformViewsController,
         /*task_runners=*/runners,
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -359,9 +347,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
         [[FlutterFMLTaskRunner alloc] initWithTaskRunner:thread_task_runner];
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_delegate,
-        /*rendering_api=*/mock_delegate.settings_.enable_impeller
-            ? flutter::IOSRenderingAPI::kMetal
-            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/flutterPlatformViewsController,
         /*task_runners=*/runners,
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -410,9 +395,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:thread_task_runner];
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -508,9 +490,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:thread_task_runner];
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -582,9 +561,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       [[FlutterPlatformViewsController alloc] init];
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -655,9 +631,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -724,9 +697,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -771,9 +741,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -815,9 +782,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -865,9 +829,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       [[FlutterPlatformViewsController alloc] init];
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -924,9 +885,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1009,9 +967,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1085,9 +1040,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1160,9 +1112,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1218,9 +1167,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1316,9 +1262,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1403,9 +1346,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1496,9 +1436,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1553,9 +1490,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1593,9 +1527,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1664,9 +1595,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1734,9 +1662,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1810,9 +1735,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1888,9 +1810,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -1962,9 +1881,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2038,9 +1954,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2096,9 +2009,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2159,9 +2069,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2230,9 +2137,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2264,9 +2168,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2314,9 +2215,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   thread_task_runner->PostTask([&] {
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/test_delegate,
-        /*rendering_api=*/test_delegate.settings_.enable_impeller
-            ? flutter::IOSRenderingAPI::kMetal
-            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/nil,
         /*task_runners=*/runners,
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2361,9 +2259,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   thread_task_runner->PostTask([&] {
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_delegate,
-        /*rendering_api=*/mock_delegate.settings_.enable_impeller
-            ? flutter::IOSRenderingAPI::kMetal
-            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/nil,
         /*task_runners=*/runners,
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2391,9 +2286,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2425,9 +2317,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -2496,9 +2385,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());

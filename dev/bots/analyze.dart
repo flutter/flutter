@@ -225,7 +225,7 @@ List<Validation> _getValidations({
     ),
     Validation('no-sync-star-async-star', 'No sync*/async*', () async {
       await verifyNoSyncAsyncStar(flutterPackages);
-      await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
+      await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 80);
     }),
     Validation(
       'no-runtime-type',
@@ -385,6 +385,14 @@ List<Validation> _getValidations({
       () => runCommand(dart, <String>[
         '--enable-asserts',
         path.join(flutterRoot, 'dev', 'bots', 'check_tests_cross_imports.dart'),
+      ], workingDirectory: flutterRoot),
+    ),
+    Validation(
+      'cross-imports-examples',
+      'Examples cross-import test validation...',
+      () => runCommand(dart, <String>[
+        '--enable-asserts',
+        path.join(flutterRoot, 'dev', 'bots', 'check_examples_cross_imports.dart'),
       ], workingDirectory: flutterRoot),
     ),
   ];

@@ -66,6 +66,9 @@ class CompositorOpenGL : public Compositor {
   // Whether the OpenGL context supports implicit MSAA.
   bool supports_implicit_msaa_ = false;
 
+  // Whether the OpenGL context supports offscreen MSAA.
+  bool supports_offscreen_msaa_ = false;
+
   // Initialize the compositor. This must run on the raster thread.
   bool Initialize();
 
