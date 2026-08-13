@@ -301,7 +301,34 @@ class Dart2JSTarget extends Dart2WebTarget {
   ];
 }
 
-enum _DryRunOutcome { crash, success, failure, findings, unknown }
+/// The classification of a wasm dry-run compile, derived from the compiler's
+/// exit code and output in [Dart2WasmTarget._logAndClassifyDryRunResult].
+///
+/// dart2wasm exits with code 254 when dry-run analysis completes with issues;
+/// any other non-zero exit code is unexpected.
+enum _DryRunOutcome {
+  /// The compiler exited with an unexpected exit code (anything other than 0
+  /// or 254), e.g. an internal compiler error.
+  crash,
+
+  /// The compiler exited with code 0: the app is wasm-compatible.
+  success,
+
+  /// The compiler exited with code 254 and wrote to stderr: compilation
+  /// failed for reasons other than dry-run findings (e.g. invalid Dart code
+  /// that does not compile for any web target).
+  failure,
+
+  /// The compiler exited with code 254 and wrote only to stdout: the
+  /// expected dry-run report of wasm-incompatible API usages, one finding
+  /// per line, e.g.:
+  ///
+  ///     package:bar/some/path.dart 120:5 - dart:js unsupported (1)
+  findings,
+
+  /// The compiler exited with code 254 but produced no output at all.
+  unknown,
+}
 
 /// Compiles a web entry point with dart2wasm.
 class Dart2WasmTarget extends Dart2WebTarget {
@@ -459,13 +486,16 @@ class Dart2WasmTarget extends Dart2WebTarget {
   @visibleForTesting
   Random? dryRunRandom;
 
+  /// Logs the outcome of a dry-run compile to the user and reports it to
+  /// analytics, including per-error-code package findings when the dry run
+  /// produced them.
   Future<void> _handleDryRunResult(Environment environment, RunResult runResult) async {
     final int exitCode = runResult.exitCode;
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
 
     final _DryRunOutcome outcome = _logAndClassifyDryRunResult(
-      environment.logger,
+      logger: environment.logger,
       exitCode: exitCode,
       stdout: stdout,
       stderr: stderr,
@@ -474,10 +504,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final Map<String, String> findingsInfo;
     if (outcome == _DryRunOutcome.findings) {
       final Map<String, String>? findings = await _collectFindingsInfo(
-        environment,
-        stdout,
-        exitCode,
-        outcome.name,
+        environment: environment,
+        stdout: stdout,
+        exitCode: exitCode,
+        result: outcome.name,
       );
       if (findings == null) {
         return;
@@ -500,16 +530,23 @@ class Dart2WasmTarget extends Dart2WebTarget {
     );
   }
 
-  static _DryRunOutcome _logAndClassifyDryRunResult(
-    Logger logger, {
+  /// Classifies the dry-run compile result into a [_DryRunOutcome] (see the
+  /// enum values for the classification rules) and logs the corresponding
+  /// warning output to [logger].
+  static _DryRunOutcome _logAndClassifyDryRunResult({
+    required Logger logger,
     required int exitCode,
     required String stdout,
     required String stderr,
   }) {
     if (exitCode != 0 && exitCode != 254) {
       logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
-      if (stderr.isNotEmpty) {
+      if (stdout.isNotEmpty) {
+        logger.printWarning('stdout:');
         logger.printWarning(stdout);
+      }
+      if (stderr.isNotEmpty) {
+        logger.printWarning('stderr:');
         logger.printWarning(stderr);
       }
       return _DryRunOutcome.crash;
@@ -524,7 +561,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
     }
     if (stderr.isNotEmpty) {
       logger.printWarning('Wasm dry run failed:');
-      logger.printWarning(stdout);
+      if (stdout.isNotEmpty) {
+        logger.printWarning('stdout:');
+        logger.printWarning(stdout);
+      }
+      logger.printWarning('stderr:');
       logger.printWarning(stderr);
       return _DryRunOutcome.failure;
     }
@@ -540,12 +581,18 @@ class Dart2WasmTarget extends Dart2WebTarget {
     return _DryRunOutcome.unknown;
   }
 
-  Future<Map<String, String>?> _collectFindingsInfo(
-    Environment environment,
-    String stdout,
-    int exitCode,
-    String result,
-  ) async {
+  /// Builds the per-error-code analytics payload for a dry run that produced
+  /// findings, mapping each error code (keyed as `E<code>`) to a formatted,
+  /// truncated summary of the pub-hosted packages it was found in.
+  ///
+  /// Returns null if the project's package config could not be loaded; in
+  /// that case an error event is sent to analytics instead.
+  Future<Map<String, String>?> _collectFindingsInfo({
+    required Environment environment,
+    required String stdout,
+    required int exitCode,
+    required String result,
+  }) async {
     final Map<String, Set<Uri>> errorCodeToImportUris = _parseWasmFindings(stdout);
 
     final PackageConfig packageConfigPackages;
@@ -583,8 +630,20 @@ class Dart2WasmTarget extends Dart2WebTarget {
     return findingsInfo;
   }
 
+  /// Matches the trailing error code of a dry-run finding line, e.g. the
+  /// `(1)` in:
+  ///
+  ///     package:bar/some/path.dart 120:5 - dart:js unsupported (1)
   static final RegExp _wasmErrorCodePattern = RegExp(r'\(([0-9]+)\)\s*$');
 
+  /// Parses the dry-run findings printed to [stdout], one finding per line
+  /// in the form `<uri> <location> - <message> (<errorCode>)`, e.g.:
+  ///
+  ///     package:bar/some/path.dart 120:5 - dart:js unsupported (1)
+  ///
+  /// Returns a map from error code (`'1'` above) to the set of URIs that
+  /// triggered it (`package:bar/some/path.dart` above). Lines without a
+  /// trailing error code are ignored.
   static Map<String, Set<Uri>> _parseWasmFindings(String stdout) {
     final errorCodeToImportUris = <String, Set<Uri>>{};
     for (final String line in stdout.split('\n')) {
@@ -597,6 +656,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
     return errorCodeToImportUris;
   }
 
+  /// Splits the packages in the project's package config into pub-hosted
+  /// packages (mapped to their resolved version, which is safe to report to
+  /// analytics) and private packages (path/git dependencies and the like,
+  /// whose names must not be reported).
   static ({Map<String, String> hosted, Set<String> private}) _categorizePackages(
     PackageConfig packageConfigPackages,
   ) {
@@ -620,27 +683,45 @@ class Dart2WasmTarget extends Dart2WebTarget {
     return (hosted: hostedPackages, private: privatePackages);
   }
 
+  /// Formats the [uris] associated with a single error code into the
+  /// analytics value string: an optional leading hint (`-h` if the host app
+  /// itself had findings, `-p` if a private package did, `-hp` for both)
+  /// followed by a truncated, comma-separated list of `name:version` entries
+  /// for the affected pub-hosted packages.
   static String _formatFindingsBuffer({
     required Set<Uri> uris,
     required Map<String, String> hostedPackages,
     required Set<String> privatePackages,
     Random? random,
   }) {
+    // Shuffle the URIs so that, when the analytics buffer is truncated to
+    // [_truncateAnalyticsBuffer]'s character limit below, the reported
+    // packages are a random sample rather than always the first few in
+    // iteration order.
     final urisList = <Uri>[...uris]..shuffle(random);
     final (:Set<String> hostedFindings, :bool hostApp, :bool privatePackage) = _classifyUris(
       urisList,
       hostedPackages,
       privatePackages,
     );
-    final String? hpHint = switch ((hostApp, privatePackage)) {
+    final String hpHint = switch ((hostApp, privatePackage)) {
       (true, true) => '-hp',
       (true, false) => '-h',
       (false, true) => '-p',
-      _ => null,
+      (false, false) => '',
     };
-    return _truncateAnalyticsBuffer(hpHint ?? '', hostedFindings);
+    return _truncateAnalyticsBuffer(hpHint, hostedFindings);
   }
 
+  /// Buckets the [uris] from a set of findings by where they came from:
+  /// `name:version` strings for each affected pub-hosted package
+  /// (`hostedFindings`), whether any URI belonged to a private package
+  /// (`privatePackage`), and whether any URI came from outside a package
+  /// entirely, i.e. from the host app itself (`hostApp`).
+  ///
+  /// Only pub-hosted package names are collected; private package names and
+  /// host app paths are reduced to booleans so nothing identifying is
+  /// reported to analytics.
   static ({Set<String> hostedFindings, bool hostApp, bool privatePackage}) _classifyUris(
     Iterable<Uri> uris,
     Map<String, String> hostedPackages,
@@ -652,9 +733,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
     for (final uri in uris) {
       if (uri.scheme == 'package' && uri.pathSegments.isNotEmpty) {
         final String packageName = uri.pathSegments.first;
-        final String? hostedPackageVersion = hostedPackages[packageName];
-        if (hostedPackageVersion != null) {
-          hostedFindings.add('$packageName:$hostedPackageVersion');
+        if (hostedPackages.containsKey(packageName)) {
+          hostedFindings.add('$packageName:${hostedPackages[packageName]}');
           continue;
         }
         if (privatePackages.contains(packageName)) {
@@ -667,6 +747,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
     return (hostedFindings: hostedFindings, hostApp: hostApp, privatePackage: privatePackage);
   }
 
+  /// Joins [prefix] and as many comma-separated [findings] as fit within
+  /// [maxLength] characters, silently dropping the rest.
   static String _truncateAnalyticsBuffer(
     String prefix,
     Iterable<String> findings, {
