@@ -146,34 +146,32 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     return file.basename;
   }
 
-  final bool isWasm = file.path.endsWith('.wasm');
-  if (sourceMapFile != null && sourceMapFile.existsSync() && !isWasm) {
-    final String oldMapBasename = sourceMapFile.basename;
-    final String mapContentHash = crypto.sha256
-        .convert(sourceMapFile.readAsBytesSync())
-        .toString()
-        .substring(0, 8);
-    final String newMapBasename = _computeHashedBasename(oldMapBasename, mapContentHash);
-    final File newMapFile = sourceMapFile.parent.childFile(newMapBasename);
-    sourceMapFile.renameSync(newMapFile.path);
-
-    final String ext = file.path;
-    if (ext.endsWith('.js') || ext.endsWith('.mjs')) {
-      final String content = file.readAsStringSync();
-      if (content.contains(oldMapBasename)) {
-        file.writeAsStringSync(content.replaceAll(oldMapBasename, newMapBasename));
-      }
-    }
-  }
-
-  final String oldBasename = file.basename;
+  // The hash is computed before the sourceMappingURL comment is rewritten
+  // below; deriving the map name from the hashed binary name would otherwise
+  // be circular. The compiler emits the binary and its map from the same
+  // compilation, so identical binaries imply identical maps.
   final String contentHash = crypto.sha256
       .convert(file.readAsBytesSync())
       .toString()
       .substring(0, 8);
-  final String newBasename = _computeHashedBasename(oldBasename, contentHash);
-  final File newFile = file.parent.childFile(newBasename);
-  file.renameSync(newFile.path);
+  final String newBasename = _computeHashedBasename(file.basename, contentHash);
+
+  // The source map shares the binary's hash so the pair stays discoverable as
+  // '<binary>.map'. A `.wasm` binary embeds its map name in a binary custom
+  // section that cannot be rewritten here, so its map keeps the unhashed name.
+  final bool isWasm = file.path.endsWith('.wasm');
+  if (sourceMapFile != null && sourceMapFile.existsSync() && !isWasm) {
+    final String oldMapBasename = sourceMapFile.basename;
+    final newMapBasename = '$newBasename.map';
+    sourceMapFile.renameSync(sourceMapFile.parent.childFile(newMapBasename).path);
+
+    final String content = file.readAsStringSync();
+    if (content.contains(oldMapBasename)) {
+      file.writeAsStringSync(content.replaceAll(oldMapBasename, newMapBasename));
+    }
+  }
+
+  file.renameSync(file.parent.childFile(newBasename).path);
   return newBasename;
 }
 
@@ -233,6 +231,7 @@ class Dart2JSTarget extends Dart2WebTarget {
 
   static final RegExp _mainJsRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.js$');
   static final RegExp _mainJsMapRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.js\.map$');
+  static final RegExp _partFileRegex = RegExp(r'main\.dart\.js_[0-9].*\.part\.js');
 
   @override
   final JsCompilerConfig compilerConfig;
@@ -324,6 +323,17 @@ class Dart2JSTarget extends Dart2WebTarget {
     }
     var finalOutputFile = outputJSFile;
     if (compilerConfig.webContentHash) {
+      final bool hasDeferredParts = environment.buildDir.listSync().whereType<File>().any(
+        (File file) => _partFileRegex.hasMatch(file.basename),
+      );
+      if (hasDeferredParts) {
+        throwToolExit(
+          '"--web-content-hash" does not yet support deferred imports: '
+          'deferred part files keep unhashed names and can be served stale '
+          'from the browser cache alongside a new entrypoint. Remove the '
+          'deferred imports or build without "--web-content-hash".',
+        );
+      }
       final String newBasename = _hashAndRenameWebOutput(
         file: outputJSFile,
         sourceMapFile: compilerConfig.sourceMaps
@@ -357,8 +367,8 @@ class Dart2JSTarget extends Dart2WebTarget {
           .where((File f) => _mainJsRegex.hasMatch(f.basename))
           .toList();
       if (candidates.isNotEmpty) {
-        candidates.sort((File a, File b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
-        mainJsPath = candidates.first.basename;
+        // The pre-compile cleanup in [build] guarantees at most one candidate.
+        mainJsPath = candidates.single.basename;
       }
     }
     return <String, Object?>{
@@ -380,8 +390,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       if (compilerConfig.sourceMaps && file.basename == mainJsMapName) {
         return true;
       }
-      final partFileRegex = RegExp(r'main\.dart\.js_[0-9].*\.part\.js');
-      if (partFileRegex.hasMatch(file.basename)) {
+      if (_partFileRegex.hasMatch(file.basename)) {
         return true;
       }
 
@@ -582,27 +591,20 @@ class Dart2WasmTarget extends Dart2WebTarget {
     var mainWasmPath = 'main.dart.wasm';
     var jsSupportRuntimePath = 'main.dart.mjs';
     if (compilerConfig.webContentHash) {
-      final List<File> wasmCandidates = environment.buildDir
-          .listSync()
-          .whereType<File>()
+      // The pre-compile cleanup in [build] guarantees at most one candidate
+      // per extension.
+      final List<File> files = environment.buildDir.listSync().whereType<File>().toList();
+      final List<File> wasmCandidates = files
           .where((File f) => _mainWasmRegex.hasMatch(f.basename))
           .toList();
       if (wasmCandidates.isNotEmpty) {
-        wasmCandidates.sort(
-          (File a, File b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()),
-        );
-        mainWasmPath = wasmCandidates.first.basename;
+        mainWasmPath = wasmCandidates.single.basename;
       }
-      final List<File> mjsCandidates = environment.buildDir
-          .listSync()
-          .whereType<File>()
+      final List<File> mjsCandidates = files
           .where((File f) => _mainMjsRegex.hasMatch(f.basename))
           .toList();
       if (mjsCandidates.isNotEmpty) {
-        mjsCandidates.sort(
-          (File a, File b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()),
-        );
-        jsSupportRuntimePath = mjsCandidates.first.basename;
+        jsSupportRuntimePath = mjsCandidates.single.basename;
       }
     }
     return <String, Object?>{
@@ -867,15 +869,40 @@ class WebReleaseBundle extends Target {
   @override
   List<String> get depfiles => const <String>['flutter_assets.d', 'web_resources.d'];
 
+  /// Matches the compiled entrypoint files (hashed or not) that this bundle
+  /// copies into the output directory.
+  static final RegExp _entrypointFileRegex = RegExp(
+    r'^main\.dart(\.[a-f0-9]+)?\.(js|wasm|mjs)(\.map)?$',
+  );
+
   @override
   Future<void> build(Environment environment) async {
     final FileSystem fileSystem = environment.fileSystem;
-    for (final Dart2WebTarget target in compileTargets) {
-      for (final File outputFile in target.buildFiles(environment)) {
-        outputFile.copySync(
-          environment.outputDir.childFile(fileSystem.path.basename(outputFile.path)).path,
-        );
+    final compiledFiles = <File>[
+      for (final Dart2WebTarget target in compileTargets) ...target.buildFiles(environment),
+    ];
+
+    // Hashed entrypoint filenames change whenever the compiled output
+    // changes, and the glob-based [outputs] patterns match the previous
+    // build's files too, so the build system's stale-output deletion never
+    // removes them. Delete outdated entrypoints before copying the current
+    // ones so that build/web does not accumulate dead files.
+    if (compileTargets.any((Dart2WebTarget target) => target.compilerConfig.webContentHash)) {
+      final currentBasenames = <String>{for (final File file in compiledFiles) file.basename};
+      if (environment.outputDir.existsSync()) {
+        for (final File file in environment.outputDir.listSync().whereType<File>()) {
+          if (_entrypointFileRegex.hasMatch(file.basename) &&
+              !currentBasenames.contains(file.basename)) {
+            file.deleteSync();
+          }
+        }
       }
+    }
+
+    for (final outputFile in compiledFiles) {
+      outputFile.copySync(
+        environment.outputDir.childFile(fileSystem.path.basename(outputFile.path)).path,
+      );
     }
 
     final String? buildModeEnvironment = environment.defines[kBuildMode];

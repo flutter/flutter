@@ -76,7 +76,17 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addFlag(
       'web-content-hash',
-      help: 'Include a content hash in the filename of web output files.',
+      help:
+          'Include a content hash in the filenames of the compiled web '
+          'entrypoints (for example, "main.dart.<hash>.js") so that browsers '
+          'fetch new versions after a deploy instead of serving stale cached '
+          'files. The web server must still serve "index.html" and '
+          '"flutter_bootstrap.js" with revalidation (for example, '
+          '"Cache-Control: no-cache") for a new deploy to be picked up. '
+          'Not supported with deferred imports. Custom "index.html" files '
+          'that reference "main.dart.js" directly, and the deprecated '
+          '"FlutterLoader.loadEntrypoint" JavaScript API, are incompatible '
+          'with this flag.',
     );
 
     //
@@ -199,6 +209,14 @@ class BuildWebCommand extends BuildSubCommand {
 
     final bool sourceMaps = boolArg('source-maps');
     final bool webContentHash = boolArg('web-content-hash');
+    if (webContentHash && boolArg('enable-wasm-deferred-loading')) {
+      throwToolExit(
+        '"--web-content-hash" does not yet support deferred loading: deferred '
+        'module files keep unhashed names and can be served stale from the '
+        'browser cache alongside a new entrypoint. Build without '
+        '"--enable-wasm-deferred-loading" or without "--web-content-hash".',
+      );
+    }
     final bool? minifyJs = argResults!.wasParsed('minify-js') ? boolArg('minify-js') : null;
     final bool? minifyWasm = argResults!.wasParsed('minify-wasm') ? boolArg('minify-wasm') : null;
 
