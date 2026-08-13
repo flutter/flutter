@@ -54,6 +54,44 @@ const int x = widget;
       <ExpectedDiagnostic>[lint(7, 30)],
     );
   }
+
+  // ignore: non_constant_identifier_names
+  Future<void> test_invalid_layer_dependency() async {
+    newPackage('flutter').addFile('lib/material.dart', 'const int mat = 1;');
+    await assertDiagnostics(
+      '''
+import 'package:flutter/material.dart';
+
+const int x = mat;
+''',
+      <ExpectedDiagnostic>[lint(7, 31)],
+    );
+  }
+
+  // ignore: non_constant_identifier_names
+  Future<void> test_invalid_export_name() async {
+    newPackage('flutter').addFile('lib/unknown_layer.dart', 'const int u = 1;');
+    await assertDiagnostics(
+      '''
+import 'package:flutter/unknown_layer.dart';
+
+const int x = u;
+''',
+      <ExpectedDiagnostic>[lint(7, 36)],
+    );
+  }
+
+  // ignore: non_constant_identifier_names
+  Future<void> test_valid_downward_import() async {
+    newPackage('flutter').addFile('lib/foundation.dart', 'const int f = 1;');
+    await assertNoDiagnostics(
+      '''
+import 'package:flutter/foundation.dart';
+
+const int x = f;
+''',
+    );
+  }
 }
 
 void main() {
