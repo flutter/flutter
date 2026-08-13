@@ -93,6 +93,12 @@ class AnalysisOptionsMigration extends ProjectMigrator {
     }
   }
 
+  /// Recursively collects analyzer `exclude:` patterns from [file] and any
+  /// configuration files referenced via `include:` directives.
+  ///
+  /// Supports both relative paths and `package:` URIs, handling single string
+  /// or list-based include directives while tracking [visited] canonical paths
+  /// to prevent infinite recursion on cyclic includes.
   Future<Set<String>> _collectExcludes(File file, {Set<String> visited = const <String>{}}) async {
     final String canonicalPath = file.fileSystem.path.normalize(file.absolute.path);
     if (visited.contains(canonicalPath)) {
@@ -122,21 +128,18 @@ class AnalysisOptionsMigration extends ProjectMigrator {
     }
 
     final Object? include = root['include'];
-    final List<String> includes = <String>[];
+    final includes = <String>[];
     if (include is String) {
       includes.add(include);
     } else if (include is YamlList) {
       includes.addAll(include.whereType<String>());
     }
 
-    for (final String includeUri in includes) {
+    for (final includeUri in includes) {
       final File? includedFile = await _resolveInclude(includeUri, file);
       if (includedFile != null) {
         excludes.addAll(
-          await _collectExcludes(
-            includedFile,
-            visited: <String>{...visited, canonicalPath},
-          ),
+          await _collectExcludes(includedFile, visited: <String>{...visited, canonicalPath}),
         );
       }
     }
