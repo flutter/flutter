@@ -555,6 +555,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   void _handleHistoryEntryRemoved() {
     _historyEntry = null;
+    if (!mounted) {
+      return;
+    }
     if (!_controller.isDismissed && _controller.status != AnimationStatus.reverse) {
       close();
     }
