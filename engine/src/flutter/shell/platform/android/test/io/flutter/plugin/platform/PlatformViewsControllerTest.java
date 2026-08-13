@@ -41,6 +41,7 @@ import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
 import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
@@ -2124,6 +2125,7 @@ public class PlatformViewsControllerTest {
     when(engine.getRenderer()).thenReturn(new FlutterRenderer(jni));
     when(engine.getMouseCursorChannel()).thenReturn(mock(MouseCursorChannel.class));
     when(engine.getTextInputChannel()).thenReturn(mock(TextInputChannel.class));
+    when(engine.getPlatformChannel()).thenReturn(mock(PlatformChannel.class));
     when(engine.getSettingsChannel()).thenReturn(new SettingsChannel(executor));
     when(engine.getScribeChannel()).thenReturn(mock(ScribeChannel.class));
     when(engine.getPlatformViewsController()).thenReturn(platformViewsController);
