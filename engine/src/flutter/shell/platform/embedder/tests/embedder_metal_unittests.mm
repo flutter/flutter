@@ -27,7 +27,7 @@
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace flutter {
@@ -219,9 +219,8 @@ TEST_F(EmbedderTest, MetalCompositorMustBeAbleToRenderPlatformViews) {
         latch.CountDown();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -487,9 +486,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneMetal) {
         return surface->makeImageSnapshot();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -546,9 +544,8 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreMetalTexture) {
         return true;
       };
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -704,9 +701,8 @@ TEST_F(EmbedderTest, CanRenderPlatformViewWithImpeller) {
 
   fml::CountDownLatch latch(3);
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   context.GetCompositor().SetPlatformViewRendererCallback(
       [&](const FlutterLayer& layer, GrDirectContext* context) -> sk_sp<SkImage> {

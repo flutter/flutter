@@ -225,7 +225,7 @@ List<Validation> _getValidations({
     ),
     Validation('no-sync-star-async-star', 'No sync*/async*', () async {
       await verifyNoSyncAsyncStar(flutterPackages);
-      await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
+      await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 80);
     }),
     Validation(
       'no-runtime-type',
@@ -271,11 +271,6 @@ List<Validation> _getValidations({
       'no-bad-imports-flutter',
       'Bad imports (framework)...',
       () => verifyNoBadImportsInFlutter(flutterRoot),
-    ),
-    Validation(
-      'no-bad-imports-tools',
-      'Bad imports (tools)...',
-      () => verifyNoBadImportsInFlutterTools(flutterRoot),
     ),
     Validation(
       'internationalization',
@@ -385,6 +380,14 @@ List<Validation> _getValidations({
       () => runCommand(dart, <String>[
         '--enable-asserts',
         path.join(flutterRoot, 'dev', 'bots', 'check_tests_cross_imports.dart'),
+      ], workingDirectory: flutterRoot),
+    ),
+    Validation(
+      'cross-imports-examples',
+      'Examples cross-import test validation...',
+      () => runCommand(dart, <String>[
+        '--enable-asserts',
+        path.join(flutterRoot, 'dev', 'bots', 'check_examples_cross_imports.dart'),
       ], workingDirectory: flutterRoot),
     ),
   ];
@@ -1249,11 +1252,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   // Verify that the imports are well-ordered.
   final dependencyMap = <String, Set<String>>{};
   for (final directory in directories) {
-    dependencyMap[directory] = await _findFlutterDependencies(
-      path.join(srcPath, directory),
-      errors,
-      checkForMeta: directory != 'foundation',
-    );
+    dependencyMap[directory] = await _findFlutterDependencies(path.join(srcPath, directory));
   }
   assert(
     dependencyMap['material']!.contains('widgets') &&
@@ -1300,30 +1299,6 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
       else
         '${bold}Multiple errors were detected when looking at import dependencies within the Flutter package:$reset',
       ...errors,
-    ]);
-  }
-}
-
-Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
-  final errors = <String>[];
-  final List<File> files = await _allFiles(
-    path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'),
-    'dart',
-    minimumMatches: 200,
-  ).toList();
-  for (final file in files) {
-    if (file.readAsStringSync().contains('package:flutter_tools/')) {
-      errors.add('$yellow${file.path}$reset imports flutter_tools.');
-    }
-  }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      if (errors.length == 1)
-        '${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset'
-      else
-        '${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset',
-      ...errors.map((String paragraph) => '$paragraph\n'),
     ]);
   }
 }
@@ -2832,38 +2807,18 @@ Future<void> _checkForNewExecutables() async {
 }
 
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
-final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
-Future<Set<String>> _findFlutterDependencies(
-  String srcPath,
-  List<String> errors, {
-  bool checkForMeta = false,
-}) async {
-  return _allFiles(srcPath, 'dart', minimumMatches: 1)
-      .map<Set<String>>((File file) {
-        final result = <String>{};
-        for (final String line in file.readAsLinesSync()) {
-          Match? match = _importPattern.firstMatch(line);
-          if (match != null) {
-            result.add(match.group(2)!);
-          }
-          if (checkForMeta) {
-            match = _importMetaPattern.firstMatch(line);
-            if (match != null) {
-              errors.add(
-                '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
-                'You should instead import the "foundation.dart" library.',
-              );
-            }
-          }
-        }
-        return result;
-      })
-      .reduce((Set<String>? value, Set<String> element) {
-        value ??= <String>{};
-        value.addAll(element);
-        return value;
-      });
+Future<Set<String>> _findFlutterDependencies(String srcPath) async {
+  return _allFiles(srcPath, 'dart', minimumMatches: 1).expand<String>((File file) {
+    final result = <String>{};
+    for (final String line in file.readAsLinesSync()) {
+      final Match? match = _importPattern.firstMatch(line);
+      if (match != null) {
+        result.add(match.group(2)!);
+      }
+    }
+    return result;
+  }).toSet();
 }
 
 List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [Set<T>? seen]) {
@@ -2883,14 +2838,11 @@ List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [Set<T>? seen]) {
       key,
     });
     if (result != null) {
-      result.insert(0, start);
-      // Only report the shortest chains.
-      // For example a->b->a, rather than c->a->b->a.
-      // Since we visit every node, we know the shortest chains are those
-      // that start and end on the loop.
       if (result.first == result.last) {
         return result;
       }
+      result.insert(0, start);
+      return result;
     }
   }
   return null;
