@@ -1142,7 +1142,6 @@ void main() {
   testWidgets('Drawer double tap to close does not leak LocalHistoryEntry', (
     WidgetTester tester,
   ) async {
-    // Regression test for https://github.com/flutter/flutter/issues/133740
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
@@ -1165,18 +1164,18 @@ void main() {
         );
     await tester.pumpAndSettle();
 
-    // Open the end drawer
+    // Open the end drawer.
     Scaffold.of(tester.element(find.text('Second Body'))).openEndDrawer();
     await tester.pumpAndSettle();
 
-    // Rapid double tap on the scrim
-    // Use manual pointer events to simulate tapping the scrim twice rapidly
+    // Rapid double tap on the scrim.
+    // Use manual pointer events to simulate tapping the scrim twice rapidly.
     final TestGesture gesture1 = await tester.startGesture(const Offset(10.0, 200.0));
     await gesture1.up();
 
-    // Pump once to start the closing animation ticker
+    // Pump once to start the closing animation ticker.
     await tester.pump();
-    // Advance time by 150ms so the drawer is more than half closed
+    // Advance time by 150ms so the drawer is more than half closed.
     await tester.pump(const Duration(milliseconds: 150));
 
     final TestGesture gesture2 = await tester.startGesture(const Offset(10.0, 200.0));
@@ -1187,13 +1186,13 @@ void main() {
     final BuildContext routeContext = tester.element(find.text('Second Body'));
     final ModalRoute<dynamic> route = ModalRoute.of(routeContext)!;
 
-    // The drawer should be closed
+    // The drawer should be closed.
     expect(find.text('Drawer Item'), findsNothing);
 
-    // The history entry should have been removed, meaning it won't handle pop internally
+    // The history entry should have been removed, meaning it won't handle pop internally.
     expect(route.willHandlePopInternally, false);
 
-    // Attempt iOS swipe to go back
+    // Attempt swipe to go back.
     await tester.dragFrom(const Offset(5.0, 200.0), const Offset(500.0, 0.0));
     await tester.pump();
     await tester.pumpAndSettle();
