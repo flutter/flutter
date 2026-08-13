@@ -9,6 +9,8 @@ import 'src/rules/no_double_clamp.dart';
 import 'src/rules/no_stopwatches.dart';
 import 'src/rules/protect_public_state_subtypes.dart';
 import 'src/rules/render_box_intrinsics.dart';
+import 'src/rules/skip_test_comments.dart';
+import 'src/rules/integration_test_timeouts.dart';
 
 final FlutterAnalyzerPlugin plugin = FlutterAnalyzerPlugin();
 
@@ -20,7 +22,9 @@ class FlutterAnalyzerPlugin extends Plugin {
       ..registerWarningRule(NoDoubleClamp())
       ..registerWarningRule(NoStopwatches())
       ..registerWarningRule(ProtectPublicStateSubtypes())
-      ..registerWarningRule(RenderBoxIntrinsicCalculationRule());
+      ..registerWarningRule(RenderBoxIntrinsicCalculationRule())
+      ..registerWarningRule(SkipTestComments())
+      ..registerWarningRule(IntegrationTestTimeouts());
   }
 
   @override

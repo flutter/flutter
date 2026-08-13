@@ -260,11 +260,7 @@ List<Validation> _getValidations({
     ),
     Validation('deprecations', 'Deprecations...', () => verifyDeprecations(flutterRoot)),
     Validation('golden-tags', 'Goldens...', () => verifyGoldenTags(flutterPackages)),
-    Validation(
-      'skip-test-comments',
-      'Skip test comments...',
-      () => verifySkipTestComments(flutterRoot),
-    ),
+    Validation('skip-test-comments', 'Skip test comments...'),
     Validation('no-missing-license', 'Licenses...', () => verifyNoMissingLicense(flutterRoot)),
     Validation('no-test-imports', 'Test imports...', () => verifyNoTestImports(flutterRoot)),
     Validation(
@@ -287,11 +283,7 @@ List<Validation> _getValidations({
       'Localization files of stocks app...',
       () => verifyStockAppLocalizations(flutterRoot),
     ),
-    Validation(
-      'integration-timeouts',
-      'Integration test timeouts...',
-      () => verifyIntegrationTestTimeouts(flutterRoot),
-    ),
+    Validation('integration-timeouts', 'Integration test timeouts...'),
     Validation(
       'null-fields',
       'null initialized debug fields...',
@@ -1122,73 +1114,6 @@ class _Line {
   final String content;
 }
 
-Iterable<_Line> _getTestSkips(File file) {
-  final ParseStringResult parseResult = parseFile(
-    featureSet: _parsingFeatureSet(),
-    path: file.absolute.path,
-  );
-  final visitor = _TestSkipLinesVisitor<CompilationUnit>(parseResult);
-  visitor.visitCompilationUnit(parseResult.unit);
-  return visitor.skips;
-}
-
-class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
-  _TestSkipLinesVisitor(this.parseResult) : skips = <_Line>{};
-
-  final ParseStringResult parseResult;
-  final Set<_Line> skips;
-
-  static bool isTestMethod(String name) {
-    return name.startsWith('test') || name == 'group' || name == 'expect';
-  }
-
-  static final Pattern _skipTestIntentionalPattern = RegExp(r'// .*[intended]');
-  static final Pattern _skipTestTrackingBugPattern = RegExp(
-    r'// .*https+?://github.com/.*/issues/\d+',
-  );
-  bool _hasValidJustificationComment(Label skipLabel) {
-    return hasInlineIgnore(skipLabel, parseResult, _skipTestIntentionalPattern) ||
-        hasInlineIgnore(skipLabel, parseResult, _skipTestTrackingBugPattern);
-  }
-
-  @override
-  T? visitMethodInvocation(MethodInvocation node) {
-    if (isTestMethod(node.methodName.toString())) {
-      for (final Expression argument in node.argumentList.arguments) {
-        if (argument is NamedExpression &&
-            argument.name.label.name == 'skip' &&
-            !_hasValidJustificationComment(argument.name)) {
-          skips.add(_getLine(parseResult, argument.beginToken.charOffset));
-        }
-      }
-    }
-    return super.visitMethodInvocation(node);
-  }
-}
-
-Future<void> verifySkipTestComments(String workingDirectory) async {
-  final errors = <String>[];
-  final Stream<File> testFiles = _allFiles(
-    workingDirectory,
-    'dart',
-    minimumMatches: 1500,
-  ).where((File f) => f.path.endsWith('_test.dart'));
-
-  await for (final File file in testFiles) {
-    for (final _Line skip in _getTestSkips(file)) {
-      errors.add('${file.path}:${skip.line}: skip test without a justification comment.');
-    }
-  }
-
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '\n${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#skipped-tests$reset',
-    ]);
-  }
-}
-
 final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
 const Set<String> _exemptTestImports = <String>{
   'package:flutter_test/flutter_test.dart',
@@ -1331,37 +1256,6 @@ Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
         '${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset'
       else
         '${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset',
-      ...errors.map((String paragraph) => '$paragraph\n'),
-    ]);
-  }
-}
-
-Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
-  final errors = <String>[];
-  final String dev = path.join(workingDirectory, 'dev');
-  final List<File> files = await _allFiles(dev, 'dart', minimumMatches: 1)
-      .where(
-        (File file) =>
-            file.path.contains('test_driver') &&
-            (file.path.endsWith('_test.dart') || file.path.endsWith('util.dart')),
-      )
-      .toList();
-  for (final file in files) {
-    final String contents = file.readAsStringSync();
-    final int testCount = ' test('.allMatches(contents).length;
-    final int timeoutNoneCount = 'timeout: Timeout.none'.allMatches(contents).length;
-    if (testCount != timeoutNoneCount) {
-      errors.add(
-        '$yellow${file.path}$reset has at least $testCount test(s) but only $timeoutNoneCount `Timeout.none`(s).',
-      );
-    }
-  }
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      if (errors.length == 1)
-        '${bold}An error was detected when looking at integration test timeouts:$reset'
-      else
-        '${bold}Multiple errors were detected when looking at integration test timeouts:$reset',
       ...errors.map((String paragraph) => '$paragraph\n'),
     ]);
   }
