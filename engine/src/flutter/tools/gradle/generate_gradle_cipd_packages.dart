@@ -50,6 +50,7 @@ Future<void> main(List<String> args) async {
       'basic',
       '--dsl',
       'groovy',
+      '--no-daemon',
     ], stagingProject!.path);
     final gradlewExecutable = isWindows ? '.\\gradlew.bat' : './gradlew';
 
@@ -74,6 +75,9 @@ Future<void> main(List<String> args) async {
         '-tag',
         'version:$versionStr',
       ]);
+      if (searchResult.exitCode != 0) {
+        throw Exception('Failed to search CIPD for $location/$versionStr: ${searchResult.stderr}');
+      }
       if (searchResult.stdout.toString().contains('Instances:')) {
         print(
           'Notice: Package $location/$versionStr with tag version:$versionStr already exists in CIPD.',
@@ -93,12 +97,13 @@ Future<void> main(List<String> args) async {
           version,
           '--distribution-type',
           distType,
+          '--no-daemon',
         ], stagingProject!.path);
 
         // 6. Trigger download into our isolated cache
         await _runCommand(
           gradlewExecutable,
-          ['--version'],
+          ['--version', '--no-daemon'],
           stagingProject.path,
           environment: {'GRADLE_USER_HOME': isolatedGradleHome!.path},
         );

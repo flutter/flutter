@@ -20,7 +20,7 @@ Some links in the instructions below are Google-internal.
 
 3. Identify the new Gradle Version to include in the upload script. From the dev folder run: 
    ```sh
-   git grep "distributionUrl" {} + | sed -E 's/.*\/gradle-([0-9.]+[^.]*)\.zip.*/\1/'
+   git grep "distributionUrl" | sed -E 's/.*\/gradle-([0-9.]+[^.]*)\.zip.*/\1/'
    ```
    For REPLACEME versions check the ModuleTest versions
    [here](https://github.com/flutter/flutter/blob/master/dev/devicelab/bin/tasks/build_android_host_app_with_module_aar.dart#L449-L456).
@@ -39,9 +39,7 @@ Some links in the instructions below are Google-internal.
    the flutter checkout:
 
     ```sh
-    dart run
-    engine/src/flutter/tools/gradle/generate_gradle_cipd_packages.dart
-    --dry-run
+    dart run engine/src/flutter/tools/gradle/generate_gradle_cipd_packages.dart --dry-run
     ```
 
 7. Ensure everything looks correct fo the dry run.
