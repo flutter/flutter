@@ -393,6 +393,50 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       expect(target.didSetCCompilerConfig, isTrue);
     },
   );
+
+  testUsingContext(
+    'installCodeAssets cleans up existing stale files in target directory without crashing '
+    '(regression test for https://github.com/flutter/flutter/issues/190234)',
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+    () async {
+      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+      final Uri nonFlutterTesterAssetUri = environment.buildDir
+          .childFile(InstallCodeAssets.nativeAssetsFilename)
+          .uri;
+      await packageConfig.parent.create();
+      await packageConfig.create();
+
+      final environmentDefines = <String, String>{kBuildMode: BuildMode.debug.cliName};
+      final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.windows_x64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['bar'],
+        ),
+        buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+        buildDataAssets: true,
+        recordedUsesFile: null,
+      );
+      final Directory targetDirectory = environment.buildDir.childDirectory('native_assets');
+      await targetDirectory.create(recursive: true);
+      final File staleFile = targetDirectory.childFile('stale.txt');
+      staleFile.writeAsStringSync('stale');
+
+      await installCodeAssets(
+        dartHookResult: dartHookResult,
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.windows_x64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        nativeAssetsFileUri: nonFlutterTesterAssetUri,
+        targetUri: targetDirectory.uri,
+      );
+      expect(targetDirectory, exists);
+      expect(staleFile, isNot(exists));
+    },
+  );
 }
 
 class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {

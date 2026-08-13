@@ -65,10 +65,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)attachView;
 - (void)notifyLowMemory;
 
-/// Blocks until the first frame is presented or the timeout is exceeded, then invokes callback.
-- (void)waitForFirstFrameSync:(NSTimeInterval)timeout
-                     callback:(NS_NOESCAPE void (^)(BOOL didTimeout))callback;
-
 /// Asynchronously waits until the first frame is presented or the timeout is exceeded, then invokes
 /// callback.
 - (void)waitForFirstFrame:(NSTimeInterval)timeout callback:(void (^)(BOOL didTimeout))callback;

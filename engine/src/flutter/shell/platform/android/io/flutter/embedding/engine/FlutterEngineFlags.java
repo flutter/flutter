@@ -240,15 +240,6 @@ public final class FlutterEngineFlags {
   private static final Flag IMPELLER_LAZY_SHADER_MODER =
       new Flag("--impeller-lazy-shader-mode", "ImpellerLazyShaderInitialization", true);
 
-  /**
-   * Enables antialiasing for lines in Impeller.
-   *
-   * <p>Allowed in release to control rendering quality in production. Only settable via the
-   * manifest.
-   */
-  private static final Flag IMPELLER_ANTIALIAS_LINES =
-      new Flag("--impeller-antialias-lines", "ImpellerAntialiasLines", true);
-
   // Manifest flags NOT allowed in release mode:
 
   /**
@@ -341,6 +332,9 @@ public final class FlutterEngineFlags {
    */
   private static final Flag DISABLE_SERVICE_AUTH_CODES =
       new Flag("--disable-service-auth-codes", "DisableServiceAuthCodes");
+
+  private static final Flag DISABLE_SERVICE_ORIGIN_CHECK =
+      new Flag("--disable-service-origin-check", "DisableServiceOriginCheck");
 
   /**
    * Enables an endless trace buffer for timeline events.
@@ -447,6 +441,7 @@ public final class FlutterEngineFlags {
               ENABLE_VULKAN_VALIDATION,
               START_PAUSED,
               DISABLE_SERVICE_AUTH_CODES,
+              DISABLE_SERVICE_ORIGIN_CHECK,
               ENDLESS_TRACE_BUFFER,
               ENABLE_DART_PROFILING,
               PROFILE_STARTUP,
@@ -471,7 +466,6 @@ public final class FlutterEngineFlags {
               TEST_FLAG,
               ENABLE_FLUTTER_GPU,
               IMPELLER_LAZY_SHADER_MODER,
-              IMPELLER_ANTIALIAS_LINES,
               IMPELLER_OPENGL_GPU_TRACING,
               IMPELLER_VULKAN_GPU_TRACING,
               ENABLE_HCPP));
