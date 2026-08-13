@@ -67,20 +67,14 @@ object BaseFlutterTaskHelper {
     internal fun generateRuleNames(baseFlutterTask: BaseFlutterTask): List<String> {
         val ruleNames: List<String> =
             when {
-                baseFlutterTask.buildMode == "debug" -> {
-                    listOf("debug_android_application")
-                }
-
-                baseFlutterTask.deferredComponents!! -> {
+                baseFlutterTask.buildMode == "debug" -> listOf("debug_android_application")
+                baseFlutterTask.deferredComponents!! ->
                     baseFlutterTask.targetPlatformValues!!
                         .map {
                             "android_aot_deferred_components_bundle_${baseFlutterTask.buildMode}_$it"
                         }
-                }
 
-                else -> {
-                    baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }
-                }
+                else -> baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }
             }
         return ruleNames
     }
