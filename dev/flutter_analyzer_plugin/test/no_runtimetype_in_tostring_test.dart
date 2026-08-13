@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names, use_raw_strings
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -46,7 +47,7 @@ class OtherMethodWithRuntimeType {
 }
 ''';
 
-  Future<void> testNoRuntimetype() async {
+  Future<void> test_no_runtimeType() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
       lint(173, 11),
       lint(273, 11),

@@ -2422,27 +2422,6 @@ Future<void> _checkConsumerDependencies() async {
   }
 }
 
-class _DebugOnlyFieldVisitor extends RecursiveAstVisitor<void> {
-  _DebugOnlyFieldVisitor(this.parseResult);
-
-  final ParseStringResult parseResult;
-  final List<AstNode> errors = <AstNode>[];
-
-  static const String _kDebugOnlyAnnotation = '_debugOnly';
-  static final RegExp _nullInitializedField = RegExp(r'kDebugMode \? [\w<> ,{}()]+ : null;');
-
-  @override
-  void visitFieldDeclaration(FieldDeclaration node) {
-    super.visitFieldDeclaration(node);
-    if (node.metadata.any(
-      (Annotation annotation) => annotation.name.name == _kDebugOnlyAnnotation,
-    )) {
-      if (!node.toSource().contains(_nullInitializedField)) {
-        errors.add(node.fields); // Use the fields node for line number.
-      }
-    }
-  }
-}
 
 
 final RegExp tabooPattern = RegExp(r'^ *///.*\b(simply|note:|note that)\b', caseSensitive: false);

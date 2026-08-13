@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names, use_raw_strings
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -51,7 +52,7 @@ const _debugOnly = Object();
 const kDebugMode = true;
 ''';
 
-  Future<void> testNullInitialized() async {
+  Future<void> test_null_initialized() async {
     await assertDiagnostics(source, <ExpectedDiagnostic>[
 
     ]);
