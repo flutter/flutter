@@ -21,7 +21,7 @@ class NullInitializedDebugExpensiveFields extends AnalysisRule {
     'null_initialized_debug_expensive_fields',
     'Fields annotated with @_debugOnly must null initialize.',
     correctionMessage: 'Initialize with: field = kDebugMode ? <DebugValue> : null;',
-    severity: DiagnosticSeverity.WARNING,
+    severity: DiagnosticSeverity.ERROR,
   );
 
   @override

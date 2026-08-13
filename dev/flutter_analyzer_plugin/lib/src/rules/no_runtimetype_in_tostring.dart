@@ -18,7 +18,7 @@ class NoRuntimeTypeInToString extends AnalysisRule {
     'no_runtimetype_in_tostring',
     'Avoid calling runtimeType in toString.',
     correctionMessage: 'Use a fast literal or omit it.',
-    severity: DiagnosticSeverity.WARNING,
+    severity: DiagnosticSeverity.ERROR,
   );
 
   @override
