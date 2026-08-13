@@ -183,7 +183,7 @@ Future<void> main() async {
       pluginPubspec.writeAsStringSync(pluginPubspecContent, flush: true);
 
       await inDirectory(appPath, () async {
-        await flutter('clean');
+        await flutter('clean', options: <String>['--include-xcode-workspace']);
         await flutter('build', options: <String>['ios', '--no-codesign']);
       });
 

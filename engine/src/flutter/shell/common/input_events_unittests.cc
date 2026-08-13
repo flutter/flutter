@@ -5,7 +5,7 @@
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/testing/testing.h"
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace flutter {
@@ -79,7 +79,7 @@ static void TestSimulatedInputEvents(
   int frame_drawn = 0;
   auto nativeOnPointerDataPacket = [&events_consumed_at_frame,
                                     &will_draw_new_frame, &events_consumed,
-                                    &frame_drawn](Dart_NativeArguments args) {
+                                    &frame_drawn](Dart_Handle sequences) {
     events_consumed += 1;
     if (will_draw_new_frame) {
       frame_drawn += 1;
@@ -89,8 +89,8 @@ static void TestSimulatedInputEvents(
       events_consumed_at_frame.back() = events_consumed;
     }
   };
-  fixture->AddNativeCallback("NativeOnPointerDataPacket",
-                             CREATE_NATIVE_ENTRY(nativeOnPointerDataPacket));
+  fixture->AddFfiNativeCallback("NativeOnPointerDataPacket",
+                                CREATE_FFI_LAMBDA(nativeOnPointerDataPacket));
 
   ASSERT_TRUE(configuration.IsValid());
   fixture->RunEngine(shell.get(), std::move(configuration));
@@ -327,16 +327,15 @@ TEST_F(ShellTest, CanCorrectlyPipePointerPacket) {
   // Sets up native handler.
   fml::AutoResetWaitableEvent reportLatch;
   std::vector<int64_t> result_sequence;
-  auto nativeOnPointerDataPacket = [&reportLatch, &result_sequence](
-                                       Dart_NativeArguments args) {
-    Dart_Handle exception = nullptr;
-    result_sequence = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
-        args, 0, exception);
+  auto nativeOnPointerDataPacket = [&reportLatch,
+                                    &result_sequence](Dart_Handle sequences) {
+    result_sequence =
+        tonic::DartConverter<std::vector<int64_t>>::FromDart(sequences);
     reportLatch.Signal();
   };
   // Starts engine.
-  AddNativeCallback("NativeOnPointerDataPacket",
-                    CREATE_NATIVE_ENTRY(nativeOnPointerDataPacket));
+  AddFfiNativeCallback("NativeOnPointerDataPacket",
+                       CREATE_FFI_LAMBDA(nativeOnPointerDataPacket));
   ASSERT_TRUE(configuration.IsValid());
   RunEngine(shell.get(), std::move(configuration));
   // Starts test.
@@ -392,16 +391,15 @@ TEST_F(ShellTest, CanCorrectlySynthesizePointerPacket) {
   // Sets up native handler.
   fml::AutoResetWaitableEvent reportLatch;
   std::vector<int64_t> result_sequence;
-  auto nativeOnPointerDataPacket = [&reportLatch, &result_sequence](
-                                       Dart_NativeArguments args) {
-    Dart_Handle exception = nullptr;
-    result_sequence = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
-        args, 0, exception);
+  auto nativeOnPointerDataPacket = [&reportLatch,
+                                    &result_sequence](Dart_Handle sequences) {
+    result_sequence =
+        tonic::DartConverter<std::vector<int64_t>>::FromDart(sequences);
     reportLatch.Signal();
   };
   // Starts engine.
-  AddNativeCallback("NativeOnPointerDataPacket",
-                    CREATE_NATIVE_ENTRY(nativeOnPointerDataPacket));
+  AddFfiNativeCallback("NativeOnPointerDataPacket",
+                       CREATE_FFI_LAMBDA(nativeOnPointerDataPacket));
   ASSERT_TRUE(configuration.IsValid());
   RunEngine(shell.get(), std::move(configuration));
   // Starts test.
