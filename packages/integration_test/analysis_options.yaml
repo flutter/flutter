@@ -1,5 +1,12 @@
 include: ../analysis_options.yaml
 
+plugins:
+  flutter_analyzer_plugin:
+    path: ../../dev/flutter_analyzer_plugin
+    diagnostics:
+      deprecation_syntax: true
+      no_sync_async_star: true
+
 analyzer:
   exclude:
     - "test_fixes/**"
