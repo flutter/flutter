@@ -46,7 +46,10 @@ class _Visitor extends SimpleAstVisitor<void> {
       return;
     }
 
-    if (node case MethodInvocation(methodName: SimpleIdentifier(name: 'test'), :final ArgumentList argumentList)) {
+    if (node case MethodInvocation(
+      methodName: SimpleIdentifier(name: 'test'),
+      :final ArgumentList argumentList,
+    )) {
       final bool hasTimeoutNone = argumentList.arguments.any((Expression argument) {
         if (argument case NamedExpression(
           name: Label(label: SimpleIdentifier(name: 'timeout')),

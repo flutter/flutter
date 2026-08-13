@@ -54,9 +54,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     final String content = compilationUnit.content;
 
     final int endOffset =
-        lineNumber < lineInfo.lineCount
-            ? lineInfo.getOffsetOfLine(lineNumber)
-            : content.length;
+        lineNumber < lineInfo.lineCount ? lineInfo.getOffsetOfLine(lineNumber) : content.length;
     final String textAfterNode = content.substring(node.offset, endOffset);
     if (textAfterNode.contains(ignoreDirectivePattern)) {
       return true;
