@@ -3968,6 +3968,8 @@ class IgnoreBaseline extends SingleChildRenderObjectWidget {
 /// which are more efficient because they instantiate only those children that
 /// are actually visible through the scroll view's viewport.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vWec9DrAbHE}
+///
 /// See also:
 ///
 ///  * [CustomScrollView], which displays a scrollable list of slivers.
@@ -6990,7 +6992,9 @@ class RawImage extends LeafRenderObjectWidget {
     );
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
-    properties.add(EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver));
+    properties.add(
+      EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver),
+    );
   }
 }
 
