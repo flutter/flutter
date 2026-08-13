@@ -26,7 +26,7 @@ void main() {
 }
 ''';
 
-  Future<void> test_skip_test_comments() async {
+  Future<void> testSkipTestComments() async {
     await assertDiagnostics(source, [
       lint(116, 4), // skip length is 4
     ]);

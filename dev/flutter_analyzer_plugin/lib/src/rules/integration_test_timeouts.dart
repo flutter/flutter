@@ -43,12 +43,12 @@ class _Visitor extends SimpleAstVisitor<void> {
   @override
   void visitMethodInvocation(MethodInvocation node) {
     final fullName = context.currentUnit!.file.path;
-    
+
     // Only applies to `dev/**/test_driver/**_test.dart` and `dev/**/test_driver/**util.dart`.
     if (!fullName.contains('test_driver')) {
       return;
     }
-    
+
     // We only care about dev directory in flutter root, but the easiest heuristic
     // here is checking if 'dev' and 'test_driver' are in the path.
     if (!fullName.split(path.separator).contains('dev')) {
