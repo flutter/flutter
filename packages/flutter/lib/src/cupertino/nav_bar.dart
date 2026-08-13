@@ -874,8 +874,6 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
 /// An iOS-styled navigation bar with iOS-11-style large titles using slivers.
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=xiTuAwvKxBY}
-///
 /// The [CupertinoSliverNavigationBar] must be placed in a sliver group such
 /// as the [CustomScrollView].
 ///
