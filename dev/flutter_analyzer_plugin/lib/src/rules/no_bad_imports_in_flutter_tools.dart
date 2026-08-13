@@ -43,7 +43,7 @@ class _Visitor extends SimpleAstVisitor<void> {
   @override
   void visitImportDirective(ImportDirective node) {
     if (node.uri.stringValue case final String uriStr
-        when uriStr.contains('package:flutter_tools/')) {
+        when uriStr.startsWith('package:flutter_tools/')) {
       final String? absolutePath = context.currentUnit?.unit.declaredFragment?.source.fullName;
       if (absolutePath == null) {
         return;

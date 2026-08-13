@@ -1252,10 +1252,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   // Verify that the imports are well-ordered.
   final dependencyMap = <String, Set<String>>{};
   for (final directory in directories) {
-    dependencyMap[directory] = await _findFlutterDependencies(
-      path.join(srcPath, directory),
-      errors,
-    );
+    dependencyMap[directory] = await _findFlutterDependencies(path.join(srcPath, directory));
   }
   assert(
     dependencyMap['material']!.contains('widgets') &&
@@ -2811,23 +2808,17 @@ Future<void> _checkForNewExecutables() async {
 
 final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+)\.dart\1''');
 
-Future<Set<String>> _findFlutterDependencies(String srcPath, List<String> errors) async {
-  return _allFiles(srcPath, 'dart', minimumMatches: 1)
-      .map<Set<String>>((File file) {
-        final result = <String>{};
-        for (final String line in file.readAsLinesSync()) {
-          final Match? match = _importPattern.firstMatch(line);
-          if (match != null) {
-            result.add(match.group(2)!);
-          }
-        }
-        return result;
-      })
-      .reduce((Set<String>? value, Set<String> element) {
-        value ??= <String>{};
-        value.addAll(element);
-        return value;
-      });
+Future<Set<String>> _findFlutterDependencies(String srcPath) async {
+  return _allFiles(srcPath, 'dart', minimumMatches: 1).expand<String>((File file) {
+    final result = <String>{};
+    for (final String line in file.readAsLinesSync()) {
+      final Match? match = _importPattern.firstMatch(line);
+      if (match != null) {
+        result.add(match.group(2)!);
+      }
+    }
+    return result;
+  }).toSet();
 }
 
 List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [Set<T>? seen]) {
@@ -2847,14 +2838,11 @@ List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [Set<T>? seen]) {
       key,
     });
     if (result != null) {
-      result.insert(0, start);
-      // Only report the shortest chains.
-      // For example a->b->a, rather than c->a->b->a.
-      // Since we visit every node, we know the shortest chains are those
-      // that start and end on the loop.
       if (result.first == result.last) {
         return result;
       }
+      result.insert(0, start);
+      return result;
     }
   }
   return null;

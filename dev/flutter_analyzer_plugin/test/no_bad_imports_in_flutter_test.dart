@@ -26,6 +26,9 @@ class NoBadImportsInFlutterTest extends AnalysisRuleTest with MetaPackage {
   String get analysisRule => NoBadImportsInFlutter.code.name;
 
   @override
+  String get testPackageRootPath => '$workspaceRootPath/packages/flutter';
+
+  @override
   String get testPackageLibPath => '$testPackageRootPath/lib/src/widgets';
 
   static const String source = '''

@@ -8,6 +8,7 @@ import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
+import 'package:path/path.dart' as path;
 
 /// Checks for bad imports in `package:flutter`.
 ///
@@ -50,8 +51,10 @@ class _Visitor extends SimpleAstVisitor<void> {
         return;
       }
 
-      final bool isSrc = absolutePath.contains('lib/src/') || absolutePath.contains(r'lib\src\');
-      if (!isSrc) {
+      final bool isFlutterSrc =
+          absolutePath.contains('packages/flutter/lib/src/') ||
+          absolutePath.contains(r'packages\flutter\lib\src\');
+      if (!isFlutterSrc) {
         return;
       }
 
@@ -64,8 +67,7 @@ class _Visitor extends SimpleAstVisitor<void> {
         return;
       }
 
-      final token = absolutePath.contains('/') ? '/' : r'\';
-      final List<String> pathParts = absolutePath.split(token);
+      final List<String> pathParts = path.split(absolutePath);
       final int srcIndex = pathParts.lastIndexOf('src');
       if (srcIndex != -1 && srcIndex + 1 < pathParts.length) {
         final String currentDir = pathParts[srcIndex + 1];
