@@ -75,7 +75,6 @@ class VersionFetcherTest {
         assertEquals(null, result)
     }
 
-    // CompileSdkVersion.isHigherThan
     @Test
     fun `isHigherThan compares numeric api levels numerically`() {
         val sdk35 = CompileSdkVersion(apiLevel = 35, previewCodename = null)

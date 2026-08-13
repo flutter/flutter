@@ -33,18 +33,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import testing.setUpMockAndroidExtension
+
 
 class PluginHandlerTest {
-    /** Mocks the new-DSL android extension read by [FlutterPluginUtils.getCompileSdkFromProject]. */
-    private fun mockCompileSdk(
-        project: Project,
-        compileSdk: Int
-    ) {
-        val androidExtension = mockk<ApplicationExtension>()
-        every { project.extensions.findByName("android") } returns androidExtension
-        every { androidExtension.compileSdk } returns compileSdk
-        every { androidExtension.compileSdkPreview } returns null
-    }
 
     // getPluginListWithoutDevDependencies
     @Test
@@ -226,8 +218,8 @@ class PluginHandlerTest {
                 mockBuildType
             ).iterator()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        mockCompileSdk(project, compileSdk = 35)
-        mockCompileSdk(pluginProject, compileSdk = 35)
+        setUpMockAndroidExtension(project, compileSdk = 35)
+        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -322,8 +314,8 @@ class PluginHandlerTest {
                 mockBuildType
             ).iterator()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        mockCompileSdk(project, compileSdk = 35)
-        mockCompileSdk(pluginProject, compileSdk = 35)
+        setUpMockAndroidExtension(project, compileSdk = 35)
+        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -464,8 +456,8 @@ class PluginHandlerTest {
         every { pluginProject.configurations.named(any<String>()) } returns mockk()
         every { pluginProject.dependencies.add(any(), any()) } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        mockCompileSdk(project, compileSdk = 35)
-        mockCompileSdk(pluginProject, compileSdk = 35)
+        setUpMockAndroidExtension(project, compileSdk = 35)
+        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
     }
 
     private fun setupPluginMocks(project: Project) {

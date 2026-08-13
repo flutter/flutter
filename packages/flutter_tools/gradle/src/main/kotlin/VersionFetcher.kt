@@ -144,13 +144,18 @@ internal data class CompileSdkVersion(
      *   returns false rather than guessing.
      * - if either side is unset, returns false.
      */
-    fun isHigherThan(other: CompileSdkVersion): Boolean =
-        when {
-            other.previewCodename != null -> false
-            previewCodename != null && other.apiLevel != null -> true
-            apiLevel != null && other.apiLevel != null -> apiLevel > other.apiLevel
-            else -> false
+    fun isHigherThan(other: CompileSdkVersion): Boolean {
+        if (other.previewCodename != null) {
+            return false
         }
+        if (previewCodename != null && other.apiLevel != null) {
+            return true
+        }
+        if (apiLevel != null && other.apiLevel != null) {
+            return apiLevel > other.apiLevel
+        }
+        return false
+    }
 
     /** The human-readable form used in log messages, e.g. "35" or "Baklava". */
     override fun toString(): String = previewCodename ?: apiLevel?.toString() ?: "unknown"

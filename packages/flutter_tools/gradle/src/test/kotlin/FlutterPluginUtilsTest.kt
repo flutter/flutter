@@ -62,6 +62,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import testing.setUpMockAndroidExtension
+
 
 /**
  * Configuration for a mock Gradle subproject.
@@ -90,18 +92,6 @@ private class TestEnvironment(
 }
 
 class FlutterPluginUtilsTest {
-    private fun setUpMockAndroidExtension(
-        project: Project,
-        ndkVersion: String = "29.0.13846066"
-    ): ApplicationExtension {
-        val mockAndroidExtension = mockk<ApplicationExtension>()
-        every { mockAndroidExtension.ndkVersion } returns ndkVersion
-        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockAndroidExtension
-        every { project.extensions.findByName("android") } returns mockAndroidExtension
-        every { project.gradle.startParameter.taskNames } returns emptyList()
-        every { project.gradle.startParameter.isOffline } returns false
-        return mockAndroidExtension
-    }
 
     companion object {
         const val EXAMPLE_ENGINE_VERSION = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
