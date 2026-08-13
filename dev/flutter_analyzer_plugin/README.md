@@ -269,7 +269,6 @@ import 'package:flutter/foundation.dart';
 - **Scope**: `packages/flutter` (classes extending `State`)
 - **Description**: Requires `@protected` annotations on overridden lifecycle methods in public classes extending `State`.
 - **Rationale**: Overridden lifecycle methods (`initState`, `build`, `dispose`, `setState`, `didUpdateWidget`, `didChangeDependencies`, `activate`, `deactivate`, `reassemble`, `debugFillProperties`) in public `State` subclasses become part of the public interface. Adding `@protected` prevents external consumers from invoking internal lifecycle logic directly.
-- **References**: [Dart SDK Issue #57094](https://github.com/dart-lang/sdk/issues/57094)
 
 ```dart
 // BAD:
