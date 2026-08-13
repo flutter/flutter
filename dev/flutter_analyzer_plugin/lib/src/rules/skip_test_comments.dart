@@ -50,21 +50,27 @@ class _Visitor extends SimpleAstVisitor<void> {
   bool _hasInlineIgnore(AstNode node, Pattern ignoreDirectivePattern) {
     final RuleContextUnit compilationUnit = context.currentUnit!;
     final LineInfo lineInfo = compilationUnit.unit.lineInfo;
+    final int lineNumber = lineInfo.getLocation(node.offset).lineNumber;
+    final String content = compilationUnit.content;
 
-    final String textAfterNode = compilationUnit.content.substring(
-      node.offset,
-      lineInfo.getOffsetOfLineAfter(node.offset) - 1,
-    );
+    final int endOffset =
+        lineNumber < lineInfo.lineCount
+            ? lineInfo.getOffsetOfLine(lineNumber)
+            : content.length;
+    final String textAfterNode = content.substring(node.offset, endOffset);
     if (textAfterNode.contains(ignoreDirectivePattern)) {
       return true;
     }
 
-    final int lineNumber = lineInfo.getLocation(node.offset).lineNumber - 1;
-    if (lineNumber <= 0) {
+    final int previousLineNumber = lineNumber - 1;
+    if (previousLineNumber <= 0) {
       return false;
     }
-    return compilationUnit.content
-        .substring(lineInfo.getOffsetOfLine(lineNumber - 1), lineInfo.getOffsetOfLine(lineNumber))
+    return content
+        .substring(
+          lineInfo.getOffsetOfLine(previousLineNumber - 1),
+          lineInfo.getOffsetOfLine(previousLineNumber),
+        )
         .trimLeft()
         .contains(ignoreDirectivePattern);
   }

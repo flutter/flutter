@@ -41,18 +41,24 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
-    if (node.methodName.name == 'test') {
-      var hasTimeoutNone = false;
-      for (final Expression argument in node.argumentList.arguments) {
-        if (argument is NamedExpression && argument.name.label.name == 'timeout') {
-          final Expression expression = argument.expression;
-          if (expression is PrefixedIdentifier &&
-              expression.prefix.name == 'Timeout' &&
-              expression.identifier.name == 'none') {
-            hasTimeoutNone = true;
-          }
+    final String fullName = context.currentUnit!.file.path;
+    if (!fullName.contains('test_driver') && !fullName.contains('test.dart')) {
+      return;
+    }
+
+    if (node case MethodInvocation(methodName: SimpleIdentifier(name: 'test'), :final ArgumentList argumentList)) {
+      final bool hasTimeoutNone = argumentList.arguments.any((Expression argument) {
+        if (argument case NamedExpression(
+          name: Label(label: SimpleIdentifier(name: 'timeout')),
+          expression: PrefixedIdentifier(
+            prefix: SimpleIdentifier(name: 'Timeout'),
+            identifier: SimpleIdentifier(name: 'none'),
+          ),
+        )) {
+          return true;
         }
-      }
+        return false;
+      });
 
       if (!hasTimeoutNone) {
         rule.reportAtNode(node.methodName);
