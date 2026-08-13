@@ -4,7 +4,6 @@ plugins:
   flutter_analyzer_plugin:
     path: ../../dev/flutter_analyzer_plugin
     diagnostics:
-      no_bad_imports_in_flutter: true
       no_double_clamp: true
       no_stopwatches: true
       protect_public_state_subtypes: true
