@@ -899,6 +899,7 @@ Information about project "Runner":
 /* Begin XCLocalSwiftPackageReference section */
 		1A2B3C4D /* XCLocalSwiftPackageReference "LocalPackages/LocalDependency" */ = {
 			isa = XCLocalSwiftPackageReference;
+			customName = MyLocalDependency;
 			relativePath = LocalPackages/LocalDependency;
 		};
 /* End XCLocalSwiftPackageReference section */

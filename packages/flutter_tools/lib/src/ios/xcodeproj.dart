@@ -35,7 +35,7 @@ final _varExpr = RegExp(r'\$\(([^)]*)\)');
 /// checkouts, they never appear under the derived data `checkouts`
 /// directory, so they must be located by parsing the project file directly.
 final _localSwiftPackageReferenceExpr = RegExp(
-  r'isa = XCLocalSwiftPackageReference;\s*relativePath = (?:"([^"]*)"|([^;]+));',
+  r'isa\s*=\s*XCLocalSwiftPackageReference\s*;[^}]*relativePath\s*=\s*(?:"([^"]*)"|([^;]+))\s*;',
   dotAll: true,
 );
 
