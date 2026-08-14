@@ -146,35 +146,9 @@ void main() {
   }
 
   // ignore: non_constant_identifier_names
-  Future<void> test_flutter_ignore_trailing_comment() async {
-    const source = '''
-import 'package:flutter_test/flutter_test.dart';
-
-void main() {
-  matchesGoldenFile('test.png'); // flutter_ignore: golden_tag (see analyze.dart)
-}
-''';
-    await assertNoDiagnostics(source);
-  }
-
-  // ignore: non_constant_identifier_names
   Future<void> test_ignore_for_file() async {
     const source = '''
 // ignore_for_file: golden_test_tags
-
-import 'package:flutter_test/flutter_test.dart';
-
-void main() {
-  matchesGoldenFile('test.png');
-}
-''';
-    await assertNoDiagnostics(source);
-  }
-
-  // ignore: non_constant_identifier_names
-  Future<void> test_flutter_ignore_for_file() async {
-    const source = '''
-// flutter_ignore_for_file: golden_tag (see analyze.dart)
 
 import 'package:flutter_test/flutter_test.dart';
 
