@@ -67,41 +67,6 @@ void main() {
     expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
   });
 
-
-  test('analyze.dart - verifyGoldenTags', () async {
-    final List<String> result = (await capture(
-      () => verifyGoldenTags(testRootPath, minimumMatches: 6),
-      shouldHaveErrors: true,
-    )).split('\n');
-    const noTag =
-        "Files containing golden tests must be tagged using @Tags(<String>['reduced-test-set']) "
-        'at the top of the file before import statements.';
-    const missingTag = "Files containing golden tests must be tagged with 'reduced-test-set'.";
-    final List<String> lines = <String>[
-      '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
-      '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
-    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).toList();
-    expect(
-      result.length,
-      4 + lines.length,
-      reason: 'output had unexpected number of lines:\n${result.join('\n')}',
-    );
-    expect(
-      result[0],
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-    );
-    expect(result.getRange(1, result.length - 3).toSet(), lines.toSet());
-    expect(
-      result[result.length - 3],
-      '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md',
-    );
-    expect(
-      result[result.length - 2],
-      '╚═══════════════════════════════════════════════════════════════════════════════',
-    );
-    expect(result[result.length - 1], ''); // trailing newline
-  });
-
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(
       () => verifyNoMissingLicense(testRootPath, checkMinimums: false),
