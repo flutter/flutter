@@ -10,10 +10,10 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
-const Set<String> _stops = <String>{'\n', ' ', "'", '"', r'\', ')', '>'};
-
-final RegExp _repoPattern = RegExp(
-  r'^(https:\/\/(?:cs\.opensource\.google|github|raw\.githubusercontent|source\.chromium|([a-z0-9\-]+)\.googlesource)\.)',
+// Pattern matching repository URLs from supported hosting domains.
+// Delimiters (whitespace, quotes, backslashes, parentheses, brackets) define the URL boundary.
+final RegExp _repoUrlPattern = RegExp(
+  r'''https:\/\/(?:cs\.opensource\.google|github|raw\.githubusercontent|source\.chromium|([a-z0-9\-]+)\.googlesource)\.[^\s'"\\)>]+''',
 );
 
 // Repos whose default branch is still 'master'
@@ -34,7 +34,6 @@ const Set<String> _repoExceptions = <String>{
   'tpn/winsdk-10',
 };
 
-const String _httpsPrefix = 'https://';
 const String _bannedBranch = 'master';
 
 /// Repository links must use the "main" branch rather than "master".
@@ -73,26 +72,20 @@ class _Visitor extends SimpleAstVisitor<void> {
   final RuleContext context;
 
   static bool _hasBannedRepositoryLink(String text) {
-    var start = 0;
-    while ((start = text.indexOf(_httpsPrefix, start)) >= 0) {
-      int end = start + _httpsPrefix.length;
-      while (end < text.length && !_stops.contains(text[end])) {
-        end += 1;
+    for (final RegExpMatch match in _repoUrlPattern.allMatches(text)) {
+      final String url = match[0]!.replaceAll('\r', '');
+      if (!_repoExceptions.any(url.contains) && url.contains(_bannedBranch)) {
+        return true;
       }
-      final String url = text.substring(start, end).replaceAll('\r', '');
-
-      if (_repoPattern.hasMatch(url) && !_repoExceptions.any(url.contains)) {
-        if (url.contains(_bannedBranch)) {
-          return true;
-        }
-      }
-      start = end;
     }
     return false;
   }
 
   @override
   void visitCompilationUnit(CompilationUnit node) {
+    // In the Dart analyzer AST, non-doc comments (`// ...`) are not represented
+    // as Comment AST nodes; they are attached to lexical tokens as precedingComments.
+    // We walk the token stream from beginToken to ensure all comments are inspected.
     Token? token = node.beginToken;
     while (token != null) {
       Token? comment = token.precedingComments;
@@ -111,6 +104,8 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitSimpleStringLiteral(SimpleStringLiteral node) {
+    // Ignore children of AdjacentStrings to avoid double-reporting;
+    // visitAdjacentStrings inspects the full concatenated literal.
     if (node.parent is AdjacentStrings) {
       return;
     }
@@ -121,6 +116,7 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitStringInterpolation(StringInterpolation node) {
+    // Ignore children of AdjacentStrings to avoid double-reporting.
     if (node.parent is AdjacentStrings) {
       return;
     }

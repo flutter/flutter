@@ -10,8 +10,13 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+// Pattern matching GitHub issue URLs starting with the Flutter issue creation prefix.
+// Delimiters (whitespace, quotes, backslashes, parentheses, brackets) define the URL boundary.
+final RegExp _issueUrlPattern = RegExp(
+  r'''https:\/\/github\.com\/flutter\/flutter\/issues\/new[^\s'"\\)>]*''',
+);
+
 const String _issueLinkPrefix = 'https://github.com/flutter/flutter/issues/new';
-const Set<String> _stops = <String>{'\n', ' ', "'", '"', r'\', ')', '>'};
 
 const Set<String> _validTemplates = <String>{
   '01_activation.yml',
@@ -68,6 +73,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (filePath == null) {
       return false;
     }
+    // Skip test files and this rule's own file (to prevent self-reporting on its constants/messages).
     return filePath.endsWith('_test.dart') || filePath.endsWith('issue_link_syntax.dart');
   }
 
@@ -99,17 +105,11 @@ class _Visitor extends SimpleAstVisitor<void> {
   }
 
   static bool _hasInvalidIssueLink(String text) {
-    var start = 0;
-    while ((start = text.indexOf(_issueLinkPrefix, start)) >= 0) {
-      int end = start + _issueLinkPrefix.length;
-      while (end < text.length && !_stops.contains(text[end])) {
-        end += 1;
-      }
-      final String url = text.substring(start, end);
+    for (final RegExpMatch match in _issueUrlPattern.allMatches(text)) {
+      final String url = match[0]!;
       if (!_isValidIssueUrl(url)) {
         return true;
       }
-      start = end;
     }
     return false;
   }
@@ -119,6 +119,9 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (_shouldSkip()) {
       return;
     }
+    // In the Dart analyzer AST, non-doc comments (`// ...`) are not represented
+    // as Comment AST nodes; they are attached to lexical tokens as precedingComments.
+    // We walk the token stream from beginToken to ensure all comments are inspected.
     Token? token = node.beginToken;
     while (token != null) {
       Token? comment = token.precedingComments;
@@ -140,6 +143,8 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (_shouldSkip()) {
       return;
     }
+    // Ignore children of AdjacentStrings to avoid double-reporting;
+    // visitAdjacentStrings inspects the full concatenated literal.
     if (node.parent is AdjacentStrings) {
       return;
     }
@@ -153,6 +158,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (_shouldSkip()) {
       return;
     }
+    // Ignore children of AdjacentStrings to avoid double-reporting.
     if (node.parent is AdjacentStrings) {
       return;
     }
