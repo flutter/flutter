@@ -45,6 +45,8 @@ class _Visitor extends SimpleAstVisitor<void> {
   final AnalysisRule rule;
   final RuleContext context;
 
+  bool? _hasReducedTestSetTagCache;
+
   bool _isReducedTestSetTag(Annotation annotation) {
     final String? name = switch (annotation.name) {
       SimpleIdentifier(:final String name) => name,
@@ -63,6 +65,11 @@ class _Visitor extends SimpleAstVisitor<void> {
         NamedExpression(:final Expression expression) => expression,
         _ => argument,
       };
+      if (expr case StringLiteral(
+        :final String? stringValue,
+      ) when stringValue == _reducedTestSetTag) {
+        return true;
+      }
       if (expr
           case ListLiteral(:final NodeList<CollectionElement> elements) ||
               SetOrMapLiteral(:final NodeList<CollectionElement> elements)) {
@@ -79,6 +86,10 @@ class _Visitor extends SimpleAstVisitor<void> {
   }
 
   bool _hasReducedTestSetTag(CompilationUnit unit) {
+    return _hasReducedTestSetTagCache ??= _computeHasReducedTestSetTag(unit);
+  }
+
+  bool _computeHasReducedTestSetTag(CompilationUnit unit) {
     for (final Directive directive in unit.directives) {
       for (final Annotation annotation in directive.metadata) {
         if (_isReducedTestSetTag(annotation)) {

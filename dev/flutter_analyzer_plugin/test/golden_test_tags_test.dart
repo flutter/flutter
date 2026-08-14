@@ -20,7 +20,7 @@ class GoldenTestTagsTest extends AnalysisRuleTest {
 
     newFile('$_flutterTestPackageRoot/lib/flutter_test.dart', '''
 class Tags {
-  const Tags(List<String> tags);
+  const Tags(Object tags);
 }
 
 void matchesGoldenFile(Object key) {}
@@ -66,6 +66,21 @@ void main() {
   Future<void> test_valid_tag_without_type_arg() async {
     const source = '''
 @Tags(['reduced-test-set'])
+library;
+
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  matchesGoldenFile('test.png');
+}
+''';
+    await assertNoDiagnostics(source);
+  }
+
+  // ignore: non_constant_identifier_names
+  Future<void> test_valid_tag_single_string_literal() async {
+    const source = '''
+@Tags('reduced-test-set')
 library;
 
 import 'package:flutter_test/flutter_test.dart';
