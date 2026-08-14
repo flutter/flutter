@@ -7,6 +7,7 @@ import 'package:analysis_server_plugin/registry.dart';
 
 import 'src/rules/avoid_future_catch_error.dart';
 import 'src/rules/deprecation_syntax.dart';
+import 'src/rules/golden_test_tags.dart';
 import 'src/rules/integration_test_timeouts.dart';
 import 'src/rules/no_bad_imports_in_flutter.dart';
 import 'src/rules/no_double_clamp.dart';
@@ -27,6 +28,7 @@ class FlutterAnalyzerPlugin extends Plugin {
     registry
       ..registerWarningRule(AvoidFutureCatchError())
       ..registerWarningRule(DeprecationSyntax())
+      ..registerWarningRule(GoldenTestTags())
       ..registerWarningRule(IntegrationTestTimeouts())
       ..registerWarningRule(NoBadImportsInFlutter())
       ..registerWarningRule(NoDoubleClamp())
