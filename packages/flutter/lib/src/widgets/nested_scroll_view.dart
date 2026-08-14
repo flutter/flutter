@@ -806,6 +806,19 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       correctionOffset = 0.0;
     } else {
       assert(innerPosition.pixels != innerPosition.minScrollExtent);
+      // Below, `extra`'s sign is asserted based on the assumption that the
+      // outer position is within its own [minScrollExtent, maxScrollExtent].
+      // That can be transiently false if a header sliver's extent (e.g. a
+      // SliverAppBar's expandedHeight) changes mid-fling: the next layout
+      // hasn't corrected the outer position yet, and
+      // `RangeMaintainingScrollPhysics` intentionally skips its own
+      // correction while a ballistic activity is in flight. Left alone, that
+      // can also make minRange/maxRange collapse to a single point below,
+      // which makes `createBallisticScrollActivity` treat the outer position
+      // as needing no activity at all — abandoning it out of range
+      // indefinitely instead of settling back within bounds. Correct it here
+      // so the rest of this branch can rely on the position being in range.
+      _outerPosition!.correctPixelsIfOutOfRange();
       if (innerPosition.pixels < innerPosition.minScrollExtent) {
         pixels =
             innerPosition.pixels - innerPosition.minScrollExtent + _outerPosition!.minScrollExtent;
@@ -1456,6 +1469,19 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
+    }
+  }
+
+  // A header sliver's extent (e.g. a SliverAppBar's expandedHeight) can
+  // change mid-fling, leaving this position transiently outside
+  // [minScrollExtent, maxScrollExtent] for one frame until the next layout
+  // catches up. `RangeMaintainingScrollPhysics` intentionally skips its usual
+  // correction while a ballistic activity is in flight, so nothing else
+  // corrects it in that window. Called by the coordinator before computing
+  // ballistic metrics so it never operates on a stale out-of-range position.
+  void correctPixelsIfOutOfRange() {
+    if (pixels < minScrollExtent || pixels > maxScrollExtent) {
+      forcePixels(clampDouble(pixels, minScrollExtent, maxScrollExtent));
     }
   }
 

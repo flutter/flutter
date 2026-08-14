@@ -3007,6 +3007,106 @@ void main() {
     await tester.pumpWidget(buildApp(nested: true));
   });
 
+  testWidgets('NestedScrollView does not crash when a header sliver shrinks mid-fling', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/191112.
+    //
+    // A SliverAppBar whose expandedHeight reacts to the scroll direction (a
+    // common "collapse on scroll down" pattern) can shrink or grow while a
+    // fling is in flight. That leaves the outer position transiently outside
+    // [minScrollExtent, maxScrollExtent] until the next layout catches up,
+    // which used to trip an assertion in `_NestedScrollCoordinator._getMetrics`.
+    final scrolledDown = ValueNotifier<bool>(false);
+    addTearDown(scrolledDown.dispose);
+    final key = GlobalKey<NestedScrollViewState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NotificationListener<UserScrollNotification>(
+            onNotification: (UserScrollNotification notification) {
+              switch (notification.direction) {
+                case ScrollDirection.forward:
+                  scrolledDown.value = false;
+                case ScrollDirection.reverse:
+                  scrolledDown.value = true;
+                case ScrollDirection.idle:
+                  break;
+              }
+              return false;
+            },
+            child: NestedScrollView(
+              key: key,
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverOverlapAbsorber(
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    sliver: ValueListenableBuilder<bool>(
+                      valueListenable: scrolledDown,
+                      builder: (BuildContext context, bool down, Widget? child) {
+                        return SliverAppBar(
+                          pinned: true,
+                          expandedHeight: down ? 80 : 340,
+                          flexibleSpace: const FlexibleSpaceBar(title: Text('Title')),
+                        );
+                      },
+                    ),
+                  ),
+                ];
+              },
+              body: Builder(
+                builder: (BuildContext context) {
+                  return CustomScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    slivers: <Widget>[
+                      SliverOverlapInjector(
+                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                      ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+                          childCount: 40,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder scrollable = find.byType(NestedScrollView);
+
+    void expectOuterPositionInRange() {
+      final ScrollPosition outer = key.currentState!.outerController.position;
+      expect(
+        outer.pixels,
+        inInclusiveRange(outer.minScrollExtent, outer.maxScrollExtent),
+        reason: 'outer position should settle back within range, not stay stuck '
+            'at a stale value from before the header sliver resized',
+      );
+    }
+
+    // Fling down hard: the header collapses (340 -> 80) while the fling is
+    // still carrying the outer position computed from the old, larger extent.
+    await tester.fling(scrollable, const Offset(0, -400), 3000);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.takeException(), isNull);
+    expectOuterPositionInRange();
+
+    // Fling back up: the header re-expands (80 -> 340) under the same conditions.
+    await tester.fling(scrollable, const Offset(0, 400), 3000);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.takeException(), isNull);
+    expectOuterPositionInRange();
+  });
+
   testWidgets('SliverOverlapInjector asserts when there is no SliverOverlapAbsorber', (
     WidgetTester tester,
   ) async {
