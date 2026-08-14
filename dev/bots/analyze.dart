@@ -22,7 +22,6 @@ import 'custom_rules/render_box_intrinsics.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
-final String flutterPackages = path.join(flutterRoot, 'packages');
 
 /// The path to the `dart` executable; set at the top of `main`
 late final String dart;
