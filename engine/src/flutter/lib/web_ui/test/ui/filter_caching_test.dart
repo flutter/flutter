@@ -19,15 +19,15 @@ void testMain() {
     test('EngineColorFilterImageFilter reuses the backend filter for the same color filter', () {
       const colorFilter = EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver);
 
-      final EngineColorFilterImageFilter filter1 = EngineColorFilterImageFilter(
-        colorFilter: colorFilter,
-      );
-      final EngineColorFilterImageFilter filter2 = EngineColorFilterImageFilter(
-        colorFilter: colorFilter,
-      );
+      final filter1 = EngineColorFilterImageFilter(colorFilter: colorFilter);
+      final filter2 = EngineColorFilterImageFilter(colorFilter: colorFilter);
 
-      final backendFilter1 = filter1.getBackendFilter(defaultBlurTileMode: ui.TileMode.clamp);
-      final backendFilter2 = filter2.getBackendFilter(defaultBlurTileMode: ui.TileMode.clamp);
+      final BackendImageFilter backendFilter1 = filter1.getBackendFilter(
+        defaultBlurTileMode: ui.TileMode.clamp,
+      );
+      final BackendImageFilter backendFilter2 = filter2.getBackendFilter(
+        defaultBlurTileMode: ui.TileMode.clamp,
+      );
 
       expect(backendFilter1, same(backendFilter2));
     });
