@@ -3697,13 +3697,18 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     var from = this;
     RenderObject to;
     if (target == null) {
-      // Find the root of this render tree by walking up the parent chain
-      // instead of reading `owner.rootNode`. `owner` is null when this render
-      // object is detached, and a `PipelineOwner` is not guaranteed to have a
-      // `rootNode`.
-      to = this;
-      while (to.parent != null) {
-        to = to.parent!;
+      final RenderObject? root = owner?.rootNode;
+      if (root != null) {
+        to = root;
+      } else {
+        // Find the root of this render tree by walking up the parent chain
+        // instead of reading `owner.rootNode`. `owner` is null when this render
+        // object is detached, and a `PipelineOwner` is not guaranteed to have a
+        // `rootNode`.
+        to = this;
+        while (to.parent != null) {
+          to = to.parent!;
+        }
       }
     } else {
       to = target;
