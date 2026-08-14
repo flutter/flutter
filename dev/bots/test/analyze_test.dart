@@ -63,7 +63,6 @@ void main() {
     expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
   });
 
-
   test('analyze.dart - verifyGoldenTags', () async {
     final List<String> result = (await capture(
       () => verifyGoldenTags(testRootPath, minimumMatches: 6),
@@ -265,22 +264,30 @@ void main() {
   });
 
   test('analyze.dart - verifyMaterialFilesAreUpToDateWithTemplateFiles', () async {
-    String result = await capture(
-      () => verifyMaterialFilesAreUpToDateWithTemplateFiles(testGenDefaultsPath, dartPath),
-      shouldHaveErrors: true,
+    final chipFile = File(
+      path.join(testGenDefaultsPath, 'packages', 'flutter', 'lib', 'src', 'material', 'chip.dart'),
     );
-    final String lines = <String>[
-      '║ chip.dart is not up-to-date with the token template file.',
-    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).join('\n');
-    const errorStart = '╔═';
-    result = result.substring(result.indexOf(errorStart));
-    expect(
-      result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n',
-    );
+    final String originalContent = chipFile.readAsStringSync();
+    try {
+      String result = await capture(
+        () => verifyMaterialFilesAreUpToDateWithTemplateFiles(testGenDefaultsPath, dartPath),
+        shouldHaveErrors: true,
+      );
+      final String lines = <String>[
+        '║ chip.dart is not up-to-date with the token template file.',
+      ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).join('\n');
+      const errorStart = '╔═';
+      result = result.substring(result.indexOf(errorStart));
+      expect(
+        result,
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+        '$lines\n'
+        '║ See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.\n'
+        '╚═══════════════════════════════════════════════════════════════════════════════\n',
+      );
+    } finally {
+      chipFile.writeAsStringSync(originalContent);
+    }
   });
 
   test('analyze.dart - help flag', () async {
