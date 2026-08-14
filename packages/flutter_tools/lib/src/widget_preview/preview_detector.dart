@@ -40,7 +40,15 @@ class PreviewDetector {
     required this.project,
     @visibleForTesting this.onPackageConfigChangeDetected,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
-  }) : projectRoot = project.directory;
+  }) : projectRoot = _resolveDirectory(project.directory);
+
+  static Directory _resolveDirectory(Directory directory) {
+    try {
+      return directory.fileSystem.directory(directory.resolveSymbolicLinksSync());
+    } on Exception catch (_) {
+      return directory.absolute;
+    }
+  }
 
   final Artifacts artifacts;
   final Platform platform;
