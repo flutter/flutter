@@ -26,18 +26,18 @@ class FlutterAnalyzerPlugin extends Plugin {
   void register(PluginRegistry registry) {
     registry
       ..registerWarningRule(AvoidFutureCatchError())
+      ..registerWarningRule(DeprecationSyntax())
+      ..registerWarningRule(IntegrationTestTimeouts())
+      ..registerWarningRule(NoBadImportsInFlutter())
       ..registerWarningRule(NoCheckedMode())
       ..registerWarningRule(NoDoubleClamp())
-      ..registerWarningRule(DeprecationSyntax())
       ..registerWarningRule(NoRuntimeTypeInToString())
       ..registerWarningRule(NoStopwatches())
       ..registerWarningRule(NoSyncAsyncStar())
       ..registerWarningRule(NullInitializedDebugExpensiveFields())
       ..registerWarningRule(ProtectPublicStateSubtypes())
       ..registerWarningRule(RenderBoxIntrinsicCalculationRule())
-      ..registerWarningRule(NoBadImportsInFlutter())
-      ..registerWarningRule(SkipTestComments())
-      ..registerWarningRule(IntegrationTestTimeouts());
+      ..registerWarningRule(SkipTestComments());
   }
 
   @override
