@@ -515,7 +515,7 @@ EllipticalVertexGenerator Tessellator::StrokedCircle(
     return FilledCircle(view_transform, center, radius + half_width);
   }
   auto divisions = ComputeQuadrantDivisions(
-      view_transform.GetMaxBasisLengthXY() * radius + half_width);
+      view_transform.GetMaxBasisLengthXY() * (radius + half_width));
   return EllipticalVertexGenerator(Tessellator::GenerateStrokedCircle,
                                    GetTrigsForDivisions(divisions),
                                    PrimitiveType::kTriangleStrip, 8,

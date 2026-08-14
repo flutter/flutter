@@ -187,6 +187,30 @@ TEST(TessellatorTest, CircleVertexCounts) {
   }
 }
 
+TEST(TessellatorTest, StrokedCircleVertexCounts) {
+  Tessellator tessellator;
+
+  // The outer edge of a stroked circle sits at |radius| + |half_width|, so it
+  // must be divided at least as finely as a filled circle of that radius to be
+  // within |kCircleTolerance|.
+  auto test = [&tessellator](const Matrix& transform, Scalar radius,
+                             Scalar half_width) {
+    ASSERT_LT(half_width, radius);
+    auto stroked = tessellator.StrokedCircle(transform, {}, radius, half_width);
+    auto filled = tessellator.FilledCircle(transform, {}, radius + half_width);
+
+    EXPECT_GE(stroked.GetVertexCount() / 8, filled.GetVertexCount() / 4)
+        << "transform = " << transform << ", radius = " << radius
+        << ", half_width = " << half_width;
+  };
+
+  test({}, 2.0, 1.0);
+  test({}, 100.0, 10.0);
+  test(Matrix::MakeScale({500.0, 500.0, 0.0}), 2.0, 1.0);
+  test(Matrix::MakeScale({500.0, 500.0, 0.0}), 100.0, 10.0);
+  test(Matrix::MakeScale({0.002, 0.002, 0.0}), 1000.0, 10.0);
+}
+
 TEST(TessellatorTest, FilledCircleTessellationVertices) {
   Tessellator tessellator;
 
