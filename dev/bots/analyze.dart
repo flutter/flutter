@@ -258,7 +258,6 @@ List<Validation> _getValidations({
       'Localization files of stocks app...',
       () => verifyStockAppLocalizations(flutterRoot),
     ),
-    Validation('taboo', 'Taboo words...', () => verifyTabooDocumentation(flutterRoot)),
     Validation('lint-kotlin', 'Lint Kotlin files...', () => lintKotlinFiles(flutterRoot)),
     Validation(
       'lint-kotlin-templates',
@@ -1926,37 +1925,6 @@ Future<void> _checkConsumerDependencies() async {
       'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
       'please remove ${plural(removed.length, "this", "these")} packages from the allow-list in dev/bots/allowlist.dart.',
       'Thanks!',
-    ]);
-  }
-}
-
-final RegExp tabooPattern = RegExp(r'^ *///.*\b(simply|note:|note that)\b', caseSensitive: false);
-
-Future<void> verifyTabooDocumentation(String workingDirectory, {int minimumMatches = 100}) async {
-  final errors = <String>[];
-  await for (final File file in _allFiles(
-    workingDirectory,
-    'dart',
-    minimumMatches: minimumMatches,
-  )) {
-    final List<String> lines = file.readAsLinesSync();
-    for (var index = 0; index < lines.length; index += 1) {
-      final String line = lines[index];
-      final Match? match = tabooPattern.firstMatch(line);
-      if (match != null) {
-        errors.add(
-          '${file.path}:${index + 1}: Found use of the taboo word "${match.group(1)}" in documentation string.',
-        );
-      }
-    }
-  }
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '',
-      '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
-      '${bold}In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
-      '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.$reset',
     ]);
   }
 }

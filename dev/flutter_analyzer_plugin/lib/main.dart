@@ -19,6 +19,7 @@ import 'src/rules/null_initialized_debug_expensive_fields.dart';
 import 'src/rules/protect_public_state_subtypes.dart';
 import 'src/rules/render_box_intrinsics.dart';
 import 'src/rules/skip_test_comments.dart';
+import 'src/rules/taboo_documentation.dart';
 
 final FlutterAnalyzerPlugin plugin = FlutterAnalyzerPlugin();
 
@@ -39,7 +40,8 @@ class FlutterAnalyzerPlugin extends Plugin {
       ..registerWarningRule(NullInitializedDebugExpensiveFields())
       ..registerWarningRule(ProtectPublicStateSubtypes())
       ..registerWarningRule(RenderBoxIntrinsicCalculationRule())
-      ..registerWarningRule(SkipTestComments());
+      ..registerWarningRule(SkipTestComments())
+      ..registerWarningRule(TabooDocumentation());
   }
 
   @override
