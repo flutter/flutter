@@ -19,7 +19,7 @@ void main() {
   // override pins the value to false so a sheet route is never reported as a
   // full-screen dialog.
   test('CupertinoSheetRoute.fullscreenDialog is always false', () {
-    final CupertinoSheetRoute<void> route = CupertinoSheetRoute<void>(
+    final route = CupertinoSheetRoute<void>(
       builder: (BuildContext context) => const SizedBox(),
     );
     expect(route.fullscreenDialog, isFalse);
