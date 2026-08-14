@@ -53,13 +53,13 @@ class SynchronousFuture<T> implements Future<T> {
   }
 
   @override
-  Future<T> whenComplete(FutureOr<dynamic> Function() action) {
+  Future<T> whenComplete(FutureOr<dynamic> Function() action) async {
     try {
       final FutureOr<dynamic> result = action();
       if (result is Future) {
-        return result.then<T>((dynamic value) => _value);
+        return await result.then<T>((dynamic value) => _value);
       }
-      return this;
+      return await this;
     } catch (e, stack) {
       return Future<T>.error(e, stack);
     }
