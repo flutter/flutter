@@ -757,7 +757,8 @@ class RelativeRectTween extends Tween<RelativeRect> {
 /// [Animation<RelativeRect>] to transition the child's position from a start
 /// position to an end position over the lifetime of the animation.
 ///
-/// Only works if it's the child of a [Stack].
+/// Only works if it's the child of a [Stack] or of an [Overlay]; see
+/// [Positioned] for the exact restrictions.
 ///
 /// Here's an illustration of the [PositionedTransition] widget, with it's [rect]
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
@@ -810,7 +811,8 @@ class PositionedTransition extends AnimatedWidget {
 /// based on the value of [rect] relative to a bounding box with the
 /// specified [size].
 ///
-/// Only works if it's the child of a [Stack].
+/// Only works if it's the child of a [Stack] or of an [Overlay]; see
+/// [Positioned] for the exact restrictions.
 ///
 /// Here's an illustration of the [RelativePositionedTransition] widget, with it's [rect]
 /// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
