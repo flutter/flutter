@@ -1527,9 +1527,12 @@ class CocoaPodPluginDependencies {
       if (_utils.project.isModule) {
         // Flutter modules generate a FlutterPluginRegistrant framework, but "flutter build
         // swift-package" uses a Swift package for the FlutterPluginRegistrant instead. Since
-        // SwiftPM compatible pods are skipped, the FlutterPluginRegistrant.podspec is overwritten
-        // to have no dependencies to avoid build failures and it will be skipped in
-        // [_findFrameworks] anyway.
+        // SwiftPM compatible pods are skipped, overwrite the FlutterPluginRegistrant.podspec to
+        // have no dependencies to avoid build failures due to missing dependencies (that are now
+        // SwiftPM). FlutterPluginRegistrant will be skipped in [_findFrameworks] anyway.
+        //
+        // TODO(vashworth): Find a way to prevent CocoaPods from building FlutterPluginRegistrant
+        // during this command when using a module in the first place.
         await writeIOSPluginRegistrant(
           _utils.project,
           [],
@@ -1599,7 +1602,9 @@ class CocoaPodPluginDependencies {
       // Normal module builds (like when running "flutter build ios" with a module), do not support
       // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods
       // separately, we need to force SwiftPM to be enabled so that CocoaPods will skip processing
-      // plugins that support SwiftPM.
+      // plugins that support SwiftPM. Forcing SwiftPM to be enabled here causes
+      // `swift_package_manager_enabled` to be set to true in .flutter-plugins-dependencies, which
+      // podhelper.rb then uses to skip processing SwiftPM-compatible pods.
       forceSwiftPM: true,
     );
   }
