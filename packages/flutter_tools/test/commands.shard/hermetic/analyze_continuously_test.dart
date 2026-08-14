@@ -16,13 +16,13 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/test_flutter_command_runner.dart';
+import 'analysis_server_mock.dart';
 
 void main() {
   setUpAll(() {
@@ -33,10 +33,12 @@ void main() {
   late FileSystem fileSystem;
   late Platform platform;
   late AnsiTerminal terminal;
-  late Logger logger;
+  late BufferLogger logger;
 
   setUp(() {
-    fileSystem = globals.localFileSystem;
+    fileSystem = MemoryFileSystem.test(
+      style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+    );
     platform = const LocalPlatform();
     terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     logger = BufferLogger(outputPreferences: OutputPreferences.test(), terminal: terminal);
@@ -69,74 +71,17 @@ void main() {
   ''');
   }
 
-  group('analyze --watch', () {
-    testUsingContext('AnalysisServer success', () async {
-      final fileSystem = MemoryFileSystem.test();
-      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-        'flutter_analysis_test.',
-      );
-      createSampleProject(tempDir);
-
-      final stdin = StreamController<List<int>>();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
-            'language-server',
-            '--dart-sdk',
-            'Artifact.engineDartSdkPath',
-            '--disable-server-feature-completion',
-            '--disable-server-feature-search',
-            '--suppress-analytics',
-          ],
-          stdin: IOSink(stdin.sink),
-          stdout:
-              'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
-              'Content-Length: 93\r\n\r\n'
-              r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-              '"value":{"kind":"begin"}}}'
-              'Content-Length: 91\r\n\r\n'
-              r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-              '"value":{"kind":"end"}}}',
-        ),
-      ]);
-
-      final server = AnalysisServer(
-        'Artifact.engineDartSdkPath',
-        <String>[tempDir.path],
-        fileSystem: fileSystem,
-        platform: FakePlatform(),
-        processManager: processManager,
-        logger: logger,
-        terminal: terminal,
-        suppressAnalytics: true,
-      );
-
-      var errorCount = 0;
-      server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
-
-      await server.start();
-      await server.waitForAnalysis();
-
-      expect(errorCount, 0);
-
-      await server.dispose();
-      expect(processManager, hasNoRemainingExpectations);
-    });
-  });
-
-  testUsingContext('AnalysisServer errors', () async {
-    final fileSystem = MemoryFileSystem.test();
+  testUsingContext('AnalysisServer success', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
-    createSampleProject(tempDir, brokenCode: true);
+    createSampleProject(tempDir);
 
-    final stdin = StreamController<List<int>>();
+    final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
-        command: const <String>[
-          'Artifact.engineDartSdkPath/bin/dart',
+        command: <String>[
+          fileSystem.path.join('Artifact.engineDartSdkPath', 'bin', 'dart'),
           'language-server',
           '--dart-sdk',
           'Artifact.engineDartSdkPath',
@@ -144,20 +89,7 @@ void main() {
           '--disable-server-feature-search',
           '--suppress-analytics',
         ],
-        stdin: IOSink(stdin.sink),
-        stdout:
-            'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
-            'Content-Length: 93\r\n\r\n'
-            r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-            '"value":{"kind":"begin"}}}'
-            'Content-Length: 249\r\n\r\n'
-            '{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{'
-            '"uri":"file:///directoryA/foo","diagnostics":[{"range":{"start":{"line":99,'
-            '"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500",'
-            '"message":"It\'s an error."}]}}'
-            'Content-Length: 91\r\n\r\n'
-            r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-            '"value":{"kind":"end"}}}',
+        process: process,
       ),
     ]);
 
@@ -176,6 +108,53 @@ void main() {
     server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
     await server.start();
+    process.triggerSimulatedAnalysis();
+    await server.waitForAnalysis();
+
+    expect(errorCount, 0);
+
+    await server.dispose();
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testUsingContext('AnalysisServer errors', () async {
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_analysis_test.',
+    );
+    createSampleProject(tempDir, brokenCode: true);
+
+    final process = MockLspServerProcess();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          fileSystem.path.join('Artifact.engineDartSdkPath', 'bin', 'dart'),
+          'language-server',
+          '--dart-sdk',
+          'Artifact.engineDartSdkPath',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
+          '--suppress-analytics',
+        ],
+        process: process,
+      ),
+    ]);
+
+    final server = AnalysisServer(
+      'Artifact.engineDartSdkPath',
+      <String>[tempDir.path],
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      processManager: processManager,
+      logger: logger,
+      terminal: terminal,
+      suppressAnalytics: true,
+    );
+
+    var errorCount = 0;
+    server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
+
+    await server.start();
+    process.triggerSimulatedAnalysis(diagnosticsFor: Uri.parse('file:///directoryA/foo'));
     await server.waitForAnalysis();
 
     expect(errorCount, greaterThan(0));
@@ -185,17 +164,16 @@ void main() {
   });
 
   testUsingContext('Returns no errors when source is error-free', () async {
-    final fileSystem = MemoryFileSystem.test();
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
     createSampleProject(tempDir);
 
-    final stdin = StreamController<List<int>>();
+    final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
-        command: const <String>[
-          'Artifact.engineDartSdkPath/bin/dart',
+        command: <String>[
+          fileSystem.path.join('Artifact.engineDartSdkPath', 'bin', 'dart'),
           'language-server',
           '--dart-sdk',
           'Artifact.engineDartSdkPath',
@@ -203,15 +181,7 @@ void main() {
           '--disable-server-feature-search',
           '--suppress-analytics',
         ],
-        stdin: IOSink(stdin.sink),
-        stdout:
-            'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
-            'Content-Length: 93\r\n\r\n'
-            r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-            '"value":{"kind":"begin"}}}'
-            'Content-Length: 91\r\n\r\n'
-            r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-            '"value":{"kind":"end"}}}',
+        process: process,
       ),
     ]);
 
@@ -231,6 +201,7 @@ void main() {
       errorCount += errors.errors.length;
     });
     await server.start();
+    process.triggerSimulatedAnalysis();
     await server.waitForAnalysis();
     expect(errorCount, 0);
     await server.dispose();
@@ -238,7 +209,7 @@ void main() {
   });
 
   testUsingContext('Can run AnalysisService without suppressing analytics', () async {
-    final stdin = StreamController<List<int>>();
+    final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
@@ -249,9 +220,7 @@ void main() {
           '--disable-server-feature-completion',
           '--disable-server-feature-search',
         ],
-        stdin: IOSink(stdin.sink),
-        stdout:
-            'Content-Length: 53\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{"capabilities":{}}}\r\n',
+        process: process,
       ),
     ]);
 
@@ -259,7 +228,7 @@ void main() {
     final command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
-      logger: BufferLogger.test(),
+      logger: logger,
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
@@ -270,13 +239,13 @@ void main() {
     final commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
-    await stdin.stream.first;
+    await process.initializeRequest;
 
     expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('Can run AnalysisService with customized cache location', () async {
-    final stdin = StreamController<List<int>>();
+    final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
@@ -288,9 +257,7 @@ void main() {
           '--disable-server-feature-search',
           '--suppress-analytics',
         ],
-        stdin: IOSink(stdin.sink),
-        stdout:
-            'Content-Length: 53\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{"capabilities":{}}}\r\n',
+        process: process,
       ),
     ]);
 
@@ -298,7 +265,7 @@ void main() {
     final command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
-      logger: BufferLogger.test(),
+      logger: logger,
       platform: FakePlatform(),
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
@@ -309,28 +276,13 @@ void main() {
     final commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
-    await stdin.stream.first;
+    await process.initializeRequest;
 
     expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
-    // Use Windows style on Windows host so Uri.toFilePath() parses it correctly with drive letters.
-    final fileSystem = MemoryFileSystem.test(
-      style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
-    );
-    fileSystem.directory('directoryA').childFile('foo').createSync(recursive: true);
-
-    final logger = BufferLogger.test();
-
-    final fooUri = fileSystem.path.toUri(fileSystem.path.absolute('directoryA', 'foo')).toString();
-    final diagnosticsJson =
-        '{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{'
-        '"uri":"$fooUri","diagnostics":[{"range":{"start":{"line":99,'
-        '"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500",'
-        '"message":"It\'s an error."}]}}';
-
-    final stdin = StreamController<List<int>>();
+    final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -342,17 +294,7 @@ void main() {
           '--disable-server-feature-search',
           '--suppress-analytics',
         ],
-        stdin: IOSink(stdin.sink),
-        stdout:
-            'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
-            'Content-Length: 93\r\n\r\n'
-            r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-            '"value":{"kind":"begin"}}}'
-            'Content-Length: ${diagnosticsJson.length}\r\n\r\n'
-            '$diagnosticsJson'
-            'Content-Length: 91\r\n\r\n'
-            r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-            '"value":{"kind":"end"}}}',
+        process: process,
       ),
     ]);
 
@@ -371,6 +313,13 @@ void main() {
     final commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await process.initializeRequest;
+
+    // Trigger analysis and diagnostics for an existing file.
+    final File targetFile = fileSystem.directory('directoryA').childFile('foo')
+      ..createSync(recursive: true);
+    final Uri targetUri = fileSystem.path.toUri(targetFile.path);
+    process.triggerSimulatedAnalysis(diagnosticsFor: targetUri);
 
     while (!logger.statusText.contains('analyzed 1 file')) {
       await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -383,8 +332,7 @@ void main() {
   });
 
   testUsingContext('AnalysisService --watch skips errors from non-files', () async {
-    final logger = BufferLogger.test();
-    final stdin = StreamController<List<int>>();
+    final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
@@ -396,20 +344,7 @@ void main() {
           '--disable-server-feature-search',
           '--suppress-analytics',
         ],
-        stdin: IOSink(stdin.sink),
-        stdout:
-            'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
-            'Content-Length: 93\r\n\r\n'
-            r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-            '"value":{"kind":"begin"}}}'
-            'Content-Length: 249\r\n\r\n'
-            '{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{'
-            '"uri":"file:///directoryA/bar","diagnostics":[{"range":{"start":{"line":99,'
-            '"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500",'
-            '"message":"It\'s an error."}]}}'
-            'Content-Length: 91\r\n\r\n'
-            r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-            '"value":{"kind":"end"}}}',
+        process: process,
       ),
     ]);
 
@@ -428,6 +363,12 @@ void main() {
     final commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await process.initializeRequest;
+
+    // Trigger analysis and diagnostics for a non-existing file.
+    final File targetFile = fileSystem.directory('directoryA').childFile('foo');
+    final Uri targetUri = fileSystem.path.toUri(targetFile.path);
+    process.triggerSimulatedAnalysis(diagnosticsFor: targetUri);
 
     while (!logger.statusText.contains('analyzed 1 file')) {
       await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -445,8 +386,7 @@ void main() {
       // invoke json.decode(...) on the VM service message.
       //
       // Regression test for https://github.com/flutter/flutter/issues/58391.
-      final logger = BufferLogger.test();
-      final stdin = StreamController<List<int>>();
+      final process = MockLspServerProcess();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
@@ -458,21 +398,7 @@ void main() {
             '--disable-server-feature-search',
             '--suppress-analytics',
           ],
-          stdin: IOSink(stdin.sink),
-          stdout:
-              'The Dart VM service is listening on http://127.0.0.1:65155/ZkxDXuYz2Aw=/\n'
-              'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
-              'Content-Length: 93\r\n\r\n'
-              r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-              '"value":{"kind":"begin"}}}'
-              'Content-Length: 249\r\n\r\n'
-              '{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{'
-              '"uri":"file:///directoryA/bar","diagnostics":[{"range":{"start":{"line":99,'
-              '"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500",'
-              '"message":"It\'s an error."}]}}'
-              'Content-Length: 91\r\n\r\n'
-              r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
-              '"value":{"kind":"end"}}}',
+          process: process,
         ),
       ]);
 
@@ -491,6 +417,10 @@ void main() {
       final commandRunner = TestFlutterCommandRunner();
       commandRunner.addCommand(command);
       unawaited(commandRunner.run(<String>['analyze', '--watch']));
+      await process.initializeRequest;
+      process
+        ..triggerVmServiceUriBanner()
+        ..triggerSimulatedAnalysis(diagnosticsFor: Uri.parse('file:///directoryA/foo'));
 
       while (!logger.statusText.contains('analyzed 1 file')) {
         await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -501,4 +431,66 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
   );
+
+  testUsingContext('AnalysisService --watch handles errors coming and going', () async {
+    final process = MockLspServerProcess();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          fileSystem.path.join('Artifact.engineDartSdkPath', 'bin', 'dart'),
+          'language-server',
+          '--dart-sdk',
+          'Artifact.engineDartSdkPath',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
+          '--suppress-analytics',
+        ],
+        process: process,
+      ),
+    ]);
+
+    final artifacts = Artifacts.test();
+    final command = AnalyzeCommand(
+      terminal: Terminal.test(),
+      artifacts: artifacts,
+      logger: logger,
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      processManager: processManager,
+      allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
+    );
+
+    final commandRunner = TestFlutterCommandRunner();
+    commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await process.initializeRequest;
+
+    // Simulate some diagnostics coming and going. The file must exist.
+    final File targetFile = fileSystem.directory('directoryA').childFile('foo')
+      ..createSync(recursive: true);
+    final Uri targetUri = fileSystem.path.toUri(targetFile.path);
+
+    await process.runSimulatedAnalysis(diagnosticsFor: targetUri); // 1 new
+    await process.runSimulatedAnalysis(diagnosticsFor: targetUri, diagnosticsCount: 0); // 1 fixed
+    await process.runSimulatedAnalysis(diagnosticsFor: targetUri, diagnosticsCount: 2); // 2 new
+    await process.runSimulatedAnalysis(diagnosticsFor: targetUri, diagnosticsCount: 0); // 2 fixed
+
+    // Wait for the final line we expect.
+    while (!logger.statusText.contains('2 fixed')) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+
+    expect(
+      logger.statusText.split('\n'),
+      containsAllInOrder([
+        contains('1 new'),
+        contains('1 fixed'),
+        contains('2 new'),
+        contains('2 fixed'),
+      ]),
+    );
+    expect(logger.errorText, isEmpty);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
