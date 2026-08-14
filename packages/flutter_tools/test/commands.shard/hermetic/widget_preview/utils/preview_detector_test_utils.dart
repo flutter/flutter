@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -83,7 +84,11 @@ PreviewDetector createTestPreviewDetector() {
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
   final FlutterProject project = FlutterProject.fromDirectory(_projectRoot!);
 
+  final String sdkPath = _fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk');
+  final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
+
   return PreviewDetector(
+    artifacts: artifacts,
     platform: FakePlatform(),
     previewAnalytics: WidgetPreviewAnalytics(
       analytics: getInitializedFakeAnalyticsInstance(

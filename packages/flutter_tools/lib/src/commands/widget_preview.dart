@@ -257,13 +257,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final _previewDetector = PreviewDetector(
+    artifacts: artifacts,
+    fs: fs,
+    logger: logger,
+    onChangeDetected: onLegacyChangeDetected,
+    onPubspecChangeDetected: _onPubspecChangeDetected,
     platform: platform,
     previewAnalytics: previewAnalytics,
     project: rootProject,
-    logger: logger,
-    fs: fs,
-    onChangeDetected: onLegacyChangeDetected,
-    onPubspecChangeDetected: _onPubspecChangeDetected,
   );
 
   late final _lspPreviewDetector = LspPreviewDetector(

@@ -12,6 +12,7 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -29,17 +30,19 @@ Watcher _defaultWatcherBuilder(String path) {
 
 class PreviewDetector {
   PreviewDetector({
-    required this.platform,
-    required this.previewAnalytics,
-    required this.project,
+    required this.artifacts,
     required this.fs,
     required this.logger,
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
-    @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
+    required this.platform,
+    required this.previewAnalytics,
+    required this.project,
     @visibleForTesting this.onPackageConfigChangeDetected,
+    @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
   }) : projectRoot = project.directory;
 
+  final Artifacts artifacts;
   final Platform platform;
   final WidgetPreviewAnalytics previewAnalytics;
   final FlutterProject project;
@@ -127,9 +130,13 @@ class PreviewDetector {
   }
 
   Future<void> _initializeAnalysisContextCollection() async {
+    final String sdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+    final bool sdkExists =
+        fs.path.isAbsolute(sdkPath) && PhysicalResourceProvider.INSTANCE.getFolder(sdkPath).exists;
     _collection = AnalysisContextCollection(
       includedPaths: <String>[projectRoot.absolute.path],
       resourceProvider: PhysicalResourceProvider.INSTANCE,
+      sdkPath: sdkExists ? sdkPath : null,
     );
 
     // Find the initial set of previews.
