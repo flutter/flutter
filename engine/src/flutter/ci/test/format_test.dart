@@ -183,7 +183,7 @@ void main() {
       final strayFile = io.File(path.join(gitRoot, '-'));
       try {
         fixture.gitAdd();
-        io.Process.runSync(
+        final io.ProcessResult result = io.Process.runSync(
           formatterPath,
           <String>['--check', 'clang', '--fix'],
           workingDirectory: repoDir.path,
@@ -194,6 +194,7 @@ void main() {
           },
         );
 
+        expect(result.exitCode, equals(0), reason: 'Formatter failed: ${result.stderr}');
         expect(strayFile.existsSync(), isFalse);
         final Iterable<FileContentPair> files = fixture.getFileContents();
         for (final pair in files) {

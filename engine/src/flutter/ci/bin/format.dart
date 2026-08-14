@@ -258,7 +258,10 @@ abstract class FormatChecker {
 
   /// RegExp that matches the to-file line of a patch whose destination is `-`
   /// (stdin), instead of the real path the caller should have rewritten it to.
-  static final RegExp _stdinPatchTarget = RegExp(r'^\+\+\+ b/-$', multiLine: true);
+  ///
+  /// The trailing `\r` is optional so the line is matched whether git emits LF
+  /// or CRLF line endings.
+  static final RegExp _stdinPatchTarget = RegExp(r'^\+\+\+ b/-\r?$', multiLine: true);
 
   /// Returns true if [patch] has a to-file line whose destination is `-`.
   static bool _patchTargetsStdin(String patch) => _stdinPatchTarget.hasMatch(patch);
