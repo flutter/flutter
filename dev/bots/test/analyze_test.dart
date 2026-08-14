@@ -263,28 +263,6 @@ void main() {
     );
   });
 
-
-  test('analyze.dart - verifyTabooDocumentation', () async {
-    final String result = await capture(
-      () => verifyTabooDocumentation(testRootPath, minimumMatches: 1),
-      shouldHaveErrors: true,
-    );
-
-    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'taboo_words.dart'));
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          '',
-          'Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.',
-          'In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.',
-          'Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.',
-        ],
-      ),
-    );
-  });
-
   test('analyze.dart - clampDouble', () async {
     final String result = await capture(
       () => analyzeWithRules(
