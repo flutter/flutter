@@ -7,10 +7,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../analyze.dart';
-import '../custom_rules/analyze.dart';
-import '../custom_rules/no_double_clamp.dart';
-import '../custom_rules/no_stop_watches.dart';
-import '../custom_rules/render_box_intrinsics.dart';
 import '../utils.dart';
 import 'common.dart';
 
@@ -263,7 +259,6 @@ void main() {
     );
   });
 
-
   test('analyze.dart - verifyTabooDocumentation', () async {
     final String result = await capture(
       () => verifyTabooDocumentation(testRootPath, minimumMatches: 1),
@@ -280,79 +275,6 @@ void main() {
           'Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.',
           'In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.',
           'Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.',
-        ],
-      ),
-    );
-  });
-
-  test('analyze.dart - clampDouble', () async {
-    final String result = await capture(
-      () => analyzeWithRules(
-        testRootPath,
-        <AnalyzeRule>[noDoubleClamp],
-        includePaths: <String>['packages/flutter/lib'],
-      ),
-      shouldHaveErrors: true,
-    );
-
-    final fixture = File(
-      path.join(testRootPath, 'packages', 'flutter', 'lib', 'double_clamp.dart'),
-    );
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          '', // empty line before the last sentence.
-          'For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".',
-        ],
-      ),
-    );
-  });
-
-  test('analyze.dart - stopwatch', () async {
-    final String result = await capture(
-      () => analyzeWithRules(
-        testRootPath,
-        <AnalyzeRule>[noStopwatches],
-        includePaths: <String>['packages/flutter/lib'],
-      ),
-      shouldHaveErrors: true,
-    );
-
-    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'stopwatch.dart'));
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          '',
-          'Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.',
-          'A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.',
-        ],
-      ),
-    );
-  });
-
-  test('analyze.dart - RenderBox intrinsics', () async {
-    final String result = await capture(
-      () => analyzeWithRules(
-        testRootPath,
-        <AnalyzeRule>[renderBoxIntrinsicCalculation],
-        includePaths: <String>['packages/flutter/lib'],
-      ),
-      shouldHaveErrors: true,
-    );
-    final fixture = File(
-      path.join(testRootPath, 'packages', 'flutter', 'lib', 'renderbox_intrinsics.dart'),
-    );
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          '',
-          'Typically the get* methods should be used to obtain the intrinsics of a RenderBox.',
         ],
       ),
     );

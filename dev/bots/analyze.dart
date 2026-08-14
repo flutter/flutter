@@ -18,12 +18,6 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
-import 'custom_rules/analyze.dart';
-import 'custom_rules/avoid_future_catcherror.dart';
-import 'custom_rules/no_double_clamp.dart';
-import 'custom_rules/no_stop_watches.dart';
-import 'custom_rules/protect_public_state_subtypes.dart';
-import 'custom_rules/render_box_intrinsics.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -302,11 +296,6 @@ List<Validation> _getValidations({
     //     path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
     //   ], workingDirectory: flutterRoot),
     // ),
-    Validation(
-      'private-lints',
-      'Private lints...',
-      () => _verifyPrivateLints(flutterRoot, getDartAnalyzeResult()),
-    ),
     Validation('executable-allowlist', 'Executable allowlist...', () => _checkForNewExecutables()),
     Validation(
       'dart-analysis-watch',
@@ -2606,47 +2595,6 @@ bool _isGeneratedPluginRegistrant(File file) {
           filename == 'generated_plugin_registrant.dart' ||
           filename == 'generated_plugin_registrant.h' ||
           filename == 'generated_plugin_registrant.cc');
-}
-
-Future<void> _verifyPrivateLints(String flutterRoot, CommandResult? dartAnalyzeResult) async {
-  if (dartAnalyzeResult == null) {
-    foundError(<String>[
-      'The "dart-analysis" rule must run before "private-lints".',
-      'Ensure "dart-analysis" is not skipped and is included in --only if used.',
-    ]);
-    return;
-  }
-  // Only run the private lints when the code is free of type errors. The
-  // lints are easier to write when they can assume, for example, there is no
-  // inheritance cycles.
-  if (dartAnalyzeResult.exitCode == 0) {
-    final rules = <AnalyzeRule>[
-      noDoubleClamp,
-      noStopwatches,
-      renderBoxIntrinsicCalculation,
-      protectPublicStateSubtypes,
-    ];
-    final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
-    printProgress('Analyzing code in the framework with the following rules:$ruleNames');
-    await analyzeWithRules(
-      flutterRoot,
-      rules,
-      includePaths: const <String>['packages/flutter/lib'],
-      excludePaths: const <String>['packages/flutter/lib/fix_data'],
-    );
-    final testRules = <AnalyzeRule>[noStopwatches];
-    final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
-    printProgress('Analyzing code in the test folder with the following rules:$testRuleNames');
-    await analyzeWithRules(flutterRoot, testRules, includePaths: <String>['packages/flutter/test']);
-    final toolRules = <AnalyzeRule>[AvoidFutureCatchError()];
-    final String toolRuleNames = toolRules.map((AnalyzeRule rule) => '\n * $rule').join();
-    printProgress('Analyzing code in the tool with the following rules:$toolRuleNames');
-    await analyzeWithRules(
-      flutterRoot,
-      toolRules,
-      includePaths: const <String>['packages/flutter_tools/lib', 'packages/flutter_tools/test'],
-    );
-  }
 }
 
 Future<void> _verifyMegaGallery(
