@@ -73,6 +73,16 @@ Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
 
+Future<gpu.RenderPipeline> createOptimizedOutSamplerRenderPipeline() async {
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['UnlitVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['OptimizedOutSamplerFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
 Future<gpu.RenderPipeline> createTextureRenderPipeline() async {
   final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
@@ -1196,6 +1206,35 @@ void main() async {
     } catch (e) {
       expect(e.toString(), contains('The stencil write mask must be in the range'));
     }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Binding a dead-code-eliminated sampler does not crash', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createOptimizedOutSamplerRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+
+    // `tex` is optimized out. Binding it used to crash; now it either binds or
+    // is skipped, and either way the pass must draw.
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 1, 1);
+    try {
+      state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
+    } on Exception {
+      // Optimized out; binding it is a no-op.
+    }
+
+    state.renderPass.draw(3);
+    state.commandBuffer.submit();
+    expect(state.renderTexture.asImage(), isNotNull);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('RenderPass.bindTexture throws for deviceTransient Textures', () async {

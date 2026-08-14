@@ -473,24 +473,12 @@ enum BlurStyle {
   inner,
 }
 
-class MaskFilter {
-  const MaskFilter.blur(this._style, this._sigma);
+abstract class MaskFilter {
+  // ignore: no_leading_underscores_for_local_identifiers
+  const factory MaskFilter.blur(BlurStyle _style, double _sigma) = engine.EngineMaskFilter.blur;
 
-  final BlurStyle _style;
-  final double _sigma;
-  double get webOnlySigma => _sigma;
-  BlurStyle get webOnlyBlurStyle => _style;
-
-  @override
-  bool operator ==(Object other) {
-    return other is MaskFilter && other._style == _style && other._sigma == _sigma;
-  }
-
-  @override
-  int get hashCode => Object.hash(_style, _sigma);
-
-  @override
-  String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
+  double get webOnlySigma;
+  BlurStyle get webOnlyBlurStyle;
 }
 
 abstract class _ColorTransform {
@@ -733,7 +721,7 @@ Future<Codec> instantiateImageCodec(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) => engine.renderer.instantiateImageCodec(
+}) => engine.engineInstantiateImageCodec(
   list,
   targetWidth: targetWidth,
   targetHeight: targetHeight,
@@ -747,7 +735,7 @@ Future<Codec> instantiateImageCodecFromBuffer(
   bool allowUpscaling = true,
 }) async {
   try {
-    return await engine.renderer.instantiateImageCodec(
+    return await engine.engineInstantiateImageCodec(
       buffer._list!,
       targetWidth: targetWidth,
       targetHeight: targetHeight,
@@ -766,14 +754,14 @@ Future<Codec> instantiateImageCodecWithSize(
   FrameInfo? info;
   try {
     if (getTargetSize == null) {
-      return await engine.renderer.instantiateImageCodec(buffer._list!);
+      return await engine.engineInstantiateImageCodec(buffer._list!);
     } else {
-      codec = await engine.renderer.instantiateImageCodec(buffer._list!);
+      codec = await engine.engineInstantiateImageCodec(buffer._list!);
       info = await codec.getNextFrame();
       final int width = info.image.width;
       final int height = info.image.height;
       final TargetImageSize targetSize = getTargetSize(width, height);
-      return await engine.renderer.instantiateImageCodec(
+      return await engine.engineInstantiateImageCodec(
         buffer._list!,
         targetWidth: targetSize.width,
         targetHeight: targetSize.height,
