@@ -38,7 +38,15 @@ class PreviewDetector {
     required this.onPubspecChangeDetected,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
     @visibleForTesting this.onPackageConfigChangeDetected,
-  }) : projectRoot = project.directory;
+  }) : projectRoot = _resolveDirectory(project.directory);
+
+  static Directory _resolveDirectory(Directory directory) {
+    try {
+      return directory.fileSystem.directory(directory.resolveSymbolicLinksSync());
+    } on Exception catch (_) {
+      return directory.absolute;
+    }
+  }
 
   final Platform platform;
   final WidgetPreviewAnalytics previewAnalytics;

@@ -166,6 +166,10 @@ Future<String> waitForPubspecChangeDetected({
     }
     completer.complete(path);
   };
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
   await changeOperation();
   return completer.future;
 }
@@ -181,6 +185,10 @@ Future<String> waitForPackageConfigChangeDetected({
     }
     completer.complete(path);
   };
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
   await changeOperation();
   return completer.future;
 }
@@ -200,6 +208,10 @@ Future<void> waitForChangeDetected({
     onChangeDetected(updated);
     completer.complete();
   };
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
   await changeOperation();
   await completer.future;
 }
@@ -220,6 +232,10 @@ Future<void> waitForNChangesDetected({
       completer.complete();
     }
   };
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
   await changeOperation();
   await completer.future;
 }
