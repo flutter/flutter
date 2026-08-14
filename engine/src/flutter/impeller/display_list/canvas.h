@@ -121,7 +121,9 @@ class LazyRenderingConfig {
 
 class Canvas {
  public:
-  static constexpr uint32_t kMaxDepth = 1 << 24;
+  /// Maximum discrete integer depth level within the 18-bit depth precision
+  /// limit defined by `Entity::kDepthEpsilon`.
+  static constexpr uint32_t kMaxDepth = (1 << 18) - 1;
 
   Canvas(ContentContext& renderer,
          const RenderTarget& render_target,
@@ -290,7 +292,31 @@ class Canvas {
   /// Visible for testing.
   static bool IsCompatibleWithSDFRendering(const Paint& paint);
 
+  /// Visible for testing.
+  static void SetOverrideShouldUseOnscreenForTesting(
+      std::optional<bool> override_value) {
+    override_should_use_onscreen_ = override_value;
+  }
+
+  /// Visible for testing.
+  class ScopedOnscreenOverrideForTesting {
+   public:
+    explicit ScopedOnscreenOverrideForTesting(bool override_value) {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(override_value);
+    }
+    ~ScopedOnscreenOverrideForTesting() {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(std::nullopt);
+    }
+
+    ScopedOnscreenOverrideForTesting(const ScopedOnscreenOverrideForTesting&) =
+        delete;
+    ScopedOnscreenOverrideForTesting& operator=(
+        const ScopedOnscreenOverrideForTesting&) = delete;
+  };
+
  private:
+  inline static thread_local std::optional<bool> override_should_use_onscreen_;
+
   class BlurShape {
    public:
     virtual ~BlurShape() = default;

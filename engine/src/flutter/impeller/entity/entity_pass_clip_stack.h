@@ -27,6 +27,7 @@ class EntityPassClipStack {
     Matrix transform;
     std::optional<Rect> clip_coverage;
     uint32_t clip_depth = 0;
+    size_t clip_height = 0;
   };
 
   struct ClipStateResult {
