@@ -3047,7 +3047,7 @@ void main() {
                       builder: (BuildContext context, bool down, Widget? child) {
                         return SliverAppBar(
                           pinned: true,
-                          expandedHeight: down ? 80 : 340,
+                          expandedHeight: down ? 80.0 : 340.0,
                           flexibleSpace: const FlexibleSpaceBar(title: Text('Title')),
                         );
                       },
