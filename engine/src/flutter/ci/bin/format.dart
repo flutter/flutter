@@ -227,8 +227,62 @@ abstract class FormatChecker {
     }
   }
 
+  /// Builds a job that diffs the file at [filePath] against
+  /// [formattedContents], the formatter's output for that file.
+  ///
+  /// Because the formatted side arrives on stdin, the resulting patch header
+  /// shows `-` (stdin) as the destination file. Callers rewrite that to the
+  /// real path before applying the patch.
+  ///
+  /// `--src-prefix` and `--dst-prefix` are passed explicitly so that the patch
+  /// always uses git's default `a/` and `b/` prefix. This prevents mismatches
+  /// due for users whose git config sets up alternate prefixes.
+  ///
+  /// See: `diff.mnemonicPrefix`, `diff.noprefix`, `diff.srcPrefix`,
+  /// `diff.dstPrefix`.
+  @protected
+  WorkerJob createDiffJob(String filePath, List<int>? formattedContents) {
+    return WorkerJob(<String>[
+      'git',
+      'diff',
+      '--no-index',
+      '--no-color',
+      '--ignore-cr-at-eol',
+      '--src-prefix=a/',
+      '--dst-prefix=b/',
+      '--',
+      filePath,
+      '-',
+    ], stdinRaw: codeUnitsAsStream(formattedContents));
+  }
+
+  /// RegExp that matches the to-file line of a patch whose destination is `-`
+  /// (stdin), instead of the real path the caller should have rewritten it to.
+  static final RegExp _stdinPatchTarget = RegExp(r'^\+\+\+ b/-$', multiLine: true);
+
+  /// Returns true if [patch] has a to-file line whose destination is `-`.
+  static bool _patchTargetsStdin(String patch) => _stdinPatchTarget.hasMatch(patch);
+
+  /// Applies each of [patches] to the work tree with `git apply`, and returns
+  /// whether they all applied cleanly.
+  ///
+  /// [createDiffJob] produces patches whose output path is `-` (stdin). Every
+  /// patch in [patches] is expected to have had its destination path rewritten
+  /// to the real destination path to prevent files from being written to a file
+  /// at the repository root named `-`.
   @protected
   Future<bool> applyPatch(List<String> patches) async {
+    final List<String> unrewritten = patches.where(_patchTargetsStdin).toList();
+    if (unrewritten.isNotEmpty) {
+      final bool plural = unrewritten.length > 1;
+      error(
+        '${unrewritten.length} patch${plural ? 'es' : ''} still '
+        "${plural ? 'have' : 'has'} '-' as the destination file. Patches must "
+        'have their destination path rewritten to the correct output path.',
+      );
+      unrewritten.forEach(message);
+      return false;
+    }
     final patchPool = ProcessPool(
       processRunner: _processRunner,
       printReport: namedReport('patch'),
@@ -421,18 +475,7 @@ class ClangFormatChecker extends FormatChecker {
     final diffJobs = <WorkerJob>[];
     await for (final WorkerJob completedJob in completedClangFormats) {
       if (completedJob.result.exitCode == 0) {
-        diffJobs.add(
-          WorkerJob(<String>[
-            'git',
-            'diff',
-            '--no-index',
-            '--no-color',
-            '--ignore-cr-at-eol',
-            '--',
-            completedJob.command.last,
-            '-',
-          ], stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw)),
-        );
+        diffJobs.add(createDiffJob(completedJob.command.last, completedJob.result.stdoutRaw));
       } else {
         final String formatterCommand = completedJob.command.join(' ');
         error(
@@ -619,18 +662,7 @@ class JavaFormatChecker extends FormatChecker {
     final diffJobs = <WorkerJob>[];
     await for (final WorkerJob completedJob in completedJavaFormats) {
       if (completedJob.result.exitCode == 0) {
-        diffJobs.add(
-          WorkerJob(<String>[
-            'git',
-            'diff',
-            '--no-index',
-            '--no-color',
-            '--ignore-cr-at-eol',
-            '--',
-            completedJob.command.last,
-            '-',
-          ], stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw)),
-        );
+        diffJobs.add(createDiffJob(completedJob.command.last, completedJob.result.stdoutRaw));
       } else {
         final String formatterCommand = completedJob.command.join(' ');
         error(
@@ -740,16 +772,7 @@ class GnFormatChecker extends FormatChecker {
     await for (final WorkerJob completedJob in completedJobs) {
       if (completedJob.result.exitCode == 0) {
         diffJobs.add(
-          WorkerJob(<String>[
-            'git',
-            'diff',
-            '--no-index',
-            '--no-color',
-            '--ignore-cr-at-eol',
-            '--',
-            completedJob.name.split(' ').last,
-            '-',
-          ], stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw)),
+          createDiffJob(completedJob.name.split(' ').last, completedJob.result.stdoutRaw),
         );
       } else {
         final String formatterCommand = completedJob.command.join(' ');
@@ -868,18 +891,7 @@ class DartFormatChecker extends FormatChecker {
           // The formatter had a problem formatting the file.
           errorJobs.add(completedJob);
         } else if (completedJob.result.exitCode == 1) {
-          diffJobs.add(
-            WorkerJob(<String>[
-              'git',
-              'diff',
-              '--no-index',
-              '--no-color',
-              '--ignore-cr-at-eol',
-              '--',
-              completedJob.command.last,
-              '-',
-            ], stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw)),
-          );
+          diffJobs.add(createDiffJob(completedJob.command.last, completedJob.result.stdoutRaw));
         }
       }
       final diffPool = ProcessPool(processRunner: _processRunner, printReport: namedReport('diff'));
