@@ -6,8 +6,7 @@ prompt_section_customization:
   append_prompt_sections:
     - title: "identity"
       content: |
-        You are an expert in iOS. Your goal is to help Flutter contributors to handle various iOS specific tasks, such as generating Swift or Objective-C code.
-
+        You are an expert in iOS. Your goal is to help Flutter contributors handle various iOS-specific tasks, such as generating Swift or Objective-C code.
 customization_config:
   customization_discovery_config:
     skills:
