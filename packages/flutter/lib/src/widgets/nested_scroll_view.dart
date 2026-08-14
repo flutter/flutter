@@ -806,18 +806,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       correctionOffset = 0.0;
     } else {
       assert(innerPosition.pixels != innerPosition.minScrollExtent);
-      // Below, `extra`'s sign is asserted based on the assumption that the
-      // outer position is within its own [minScrollExtent, maxScrollExtent].
-      // That can be transiently false if a header sliver's extent (e.g. a
-      // SliverAppBar's expandedHeight) changes mid-fling: the next layout
-      // hasn't corrected the outer position yet, and
-      // `RangeMaintainingScrollPhysics` intentionally skips its own
-      // correction while a ballistic activity is in flight. Left alone, that
-      // can also make minRange/maxRange collapse to a single point below,
-      // which makes `createBallisticScrollActivity` treat the outer position
-      // as needing no activity at all — abandoning it out of range
-      // indefinitely instead of settling back within bounds. Correct it here
-      // so the rest of this branch can rely on the position being in range.
+      // The `extra` computations below assume the outer position is within
+      // its own range; see correctPixelsIfOutOfRange for why that can
+      // transiently be false, and why it must be corrected here.
       _outerPosition!.correctPixelsIfOutOfRange();
       if (innerPosition.pixels < innerPosition.minScrollExtent) {
         pixels =
