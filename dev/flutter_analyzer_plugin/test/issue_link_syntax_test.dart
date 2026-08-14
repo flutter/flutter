@@ -94,6 +94,17 @@ void main() {
 ''';
     await assertDiagnostics(source, [lint(61, 52)]);
   }
+
+  // ignore: non_constant_identifier_names
+  Future<void> test_adjacent_strings_invalid_link() async {
+    const source = '''
+void main() {
+  const String s = 'https://github.com/flutter/'
+      'flutter/issues/new?title=bug';
+}
+''';
+    await assertDiagnostics(source, [lint(33, 66)]);
+  }
 }
 
 @reflectiveTest

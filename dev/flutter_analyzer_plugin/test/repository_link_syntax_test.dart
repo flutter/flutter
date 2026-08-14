@@ -91,6 +91,17 @@ void main() {
 ''';
     await assertDiagnostics(source, [lint(61, 54)]);
   }
+
+  // ignore: non_constant_identifier_names
+  Future<void> test_banned_master_in_adjacent_strings() async {
+    const source = '''
+void main() {
+  const String s = 'https://github.com/flutter/'
+      'flutter/tree/master/file1';
+}
+''';
+    await assertDiagnostics(source, [lint(33, 63)]);
+  }
 }
 
 void main() {

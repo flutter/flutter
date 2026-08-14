@@ -59,6 +59,7 @@ class RepositoryLinkSyntax extends AnalysisRule {
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry
+      ..addAdjacentStrings(this, visitor)
       ..addCompilationUnit(this, visitor)
       ..addSimpleStringLiteral(this, visitor)
       ..addStringInterpolation(this, visitor);
@@ -110,6 +111,9 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitSimpleStringLiteral(SimpleStringLiteral node) {
+    if (node.parent is AdjacentStrings) {
+      return;
+    }
     if (_hasBannedRepositoryLink(node.value)) {
       rule.reportAtNode(node);
     }
@@ -117,11 +121,22 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitStringInterpolation(StringInterpolation node) {
+    if (node.parent is AdjacentStrings) {
+      return;
+    }
     for (final InterpolationElement element in node.elements) {
       if (element is InterpolationString && _hasBannedRepositoryLink(element.value)) {
         rule.reportAtNode(node);
         return;
       }
+    }
+  }
+
+  @override
+  void visitAdjacentStrings(AdjacentStrings node) {
+    final String? value = node.stringValue;
+    if (value != null && _hasBannedRepositoryLink(value)) {
+      rule.reportAtNode(node);
     }
   }
 }

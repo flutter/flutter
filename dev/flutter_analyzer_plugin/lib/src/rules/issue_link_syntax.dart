@@ -50,6 +50,7 @@ class IssueLinkSyntax extends AnalysisRule {
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry
+      ..addAdjacentStrings(this, visitor)
       ..addCompilationUnit(this, visitor)
       ..addSimpleStringLiteral(this, visitor)
       ..addStringInterpolation(this, visitor);
@@ -62,9 +63,12 @@ class _Visitor extends SimpleAstVisitor<void> {
   final AnalysisRule rule;
   final RuleContext context;
 
-  bool _isTestFile() {
+  bool _shouldSkip() {
     final String? filePath = context.currentUnit?.file.path;
-    return filePath != null && filePath.endsWith('_test.dart');
+    if (filePath == null) {
+      return false;
+    }
+    return filePath.endsWith('_test.dart') || filePath.endsWith('issue_link_syntax.dart');
   }
 
   static bool _isValidIssueUrl(String url) {
@@ -112,7 +116,7 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitCompilationUnit(CompilationUnit node) {
-    if (_isTestFile()) {
+    if (_shouldSkip()) {
       return;
     }
     Token? token = node.beginToken;
@@ -133,7 +137,10 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitSimpleStringLiteral(SimpleStringLiteral node) {
-    if (_isTestFile()) {
+    if (_shouldSkip()) {
+      return;
+    }
+    if (node.parent is AdjacentStrings) {
       return;
     }
     if (_hasInvalidIssueLink(node.value)) {
@@ -143,7 +150,10 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitStringInterpolation(StringInterpolation node) {
-    if (_isTestFile()) {
+    if (_shouldSkip()) {
+      return;
+    }
+    if (node.parent is AdjacentStrings) {
       return;
     }
     for (final InterpolationElement element in node.elements) {
@@ -151,6 +161,17 @@ class _Visitor extends SimpleAstVisitor<void> {
         rule.reportAtNode(node);
         return;
       }
+    }
+  }
+
+  @override
+  void visitAdjacentStrings(AdjacentStrings node) {
+    if (_shouldSkip()) {
+      return;
+    }
+    final String? value = node.stringValue;
+    if (value != null && _hasInvalidIssueLink(value)) {
+      rule.reportAtNode(node);
     }
   }
 }
