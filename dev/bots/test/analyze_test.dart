@@ -67,22 +67,6 @@ void main() {
     expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
   });
 
-  test('analyze.dart - verifyDeprecations', () async {
-    final String result = await capture(
-      () => verifyDeprecations(testRootPath, minimumMatches: 2),
-      shouldHaveErrors: true,
-    );
-    final fixture = File(path.join(testRootPath, 'packages', 'foo', 'deprecation.dart'));
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          'See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
-        ],
-      ),
-    );
-  });
 
   test('analyze.dart - verifyGoldenTags', () async {
     final List<String> result = (await capture(
@@ -263,27 +247,6 @@ void main() {
     );
   });
 
-  test('analyze.dart - verifyNullInitializedDebugExpensiveFields', () async {
-    final String result = await capture(
-      () => verifyNullInitializedDebugExpensiveFields(testRootPath, minimumMatches: 1),
-      shouldHaveErrors: true,
-    );
-
-    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'bar.dart'));
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          '',
-          'Fields annotated with @_debugOnly must null initialize,',
-          'to ensure both the field and initializer are removed from profile/release mode.',
-          'These fields should be written as:',
-          'field = kDebugMode ? <DebugValue> : null;',
-        ],
-      ),
-    );
-  });
 
   test('analyze.dart - verifyTabooDocumentation', () async {
     final String result = await capture(

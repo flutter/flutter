@@ -2135,6 +2135,120 @@ platforms:
         },
       );
 
+      testUsingContext(
+        'Plugin.fromYaml rejects legacy-format identifiers with code-injection characters',
+        () async {
+          // The legacy plugin format is parsed by Plugin._fromLegacyYaml, which
+          // builds AndroidPlugin/IOSPlugin through their plain constructors and
+          // so never reaches the platform `fromYaml` validation. Its fields are
+          // interpolated into the generated registrant just the same.
+          const maliciousYaml = '''
+androidPackage: com.example.evil
+pluginClass: "Evil(); evilInjectedCall(); //"
+''';
+          expect(
+            () => Plugin.fromYaml(
+              'evil_legacy_plugin',
+              '',
+              loadYaml(maliciousYaml) as YamlMap,
+              null,
+              const <String>[],
+              fileSystem: globals.fs,
+              isDevDependency: false,
+            ),
+            throwsToolExit(message: 'The "pluginClass" must be a valid identifier'),
+          );
+        },
+      );
+
+      testUsingContext(
+        'Plugin.fromYaml rejects a legacy-format androidPackage injection',
+        () async {
+          const maliciousYaml = '''
+androidPackage: "com.example.evil.Payload.run(); //"
+pluginClass: EvilPlugin
+''';
+          expect(
+            () => Plugin.fromYaml(
+              'evil_legacy_plugin',
+              '',
+              loadYaml(maliciousYaml) as YamlMap,
+              null,
+              const <String>[],
+              fileSystem: globals.fs,
+              isDevDependency: false,
+            ),
+            throwsToolExit(message: 'The "androidPackage" must be a valid identifier'),
+          );
+        },
+      );
+
+      testUsingContext('Plugin.fromYaml rejects a legacy-format iosPrefix injection', () async {
+        const maliciousYaml = '''
+androidPackage: com.example.evil
+pluginClass: EvilPlugin
+iosPrefix: "FLT; evilInjectedCall(); //"
+''';
+        expect(
+          () => Plugin.fromYaml(
+            'evil_legacy_plugin',
+            '',
+            loadYaml(maliciousYaml) as YamlMap,
+            null,
+            const <String>[],
+            fileSystem: globals.fs,
+            isDevDependency: false,
+          ),
+          throwsToolExit(message: 'The "iosPrefix" must be a valid identifier'),
+        );
+      });
+
+      testUsingContext('Plugin.fromYaml reports every invalid legacy-format field at once', () async {
+        const maliciousYaml = '''
+androidPackage: "com.example.evil.Payload.run(); //"
+pluginClass: "Evil(); evilInjectedCall(); //"
+iosPrefix: "FLT; evilInjectedCall(); //"
+''';
+        expect(
+          () => Plugin.fromYaml(
+            'evil_legacy_plugin',
+            '',
+            loadYaml(maliciousYaml) as YamlMap,
+            null,
+            const <String>[],
+            fileSystem: globals.fs,
+            isDevDependency: false,
+          ),
+          throwsToolExit(
+            message:
+                'Invalid plugin specification evil_legacy_plugin.\n'
+                'The "androidPackage" must be a valid identifier, optionally with dot-separated segments.\n'
+                'The "iosPrefix" must be a valid identifier, optionally with dot-separated segments.\n'
+                'The "pluginClass" must be a valid identifier, optionally with dot-separated segments.',
+          ),
+        );
+      });
+
+      testUsingContext('Plugin.fromYaml accepts a legacy-format plugin declaration', () async {
+        const legacyYaml = '''
+androidPackage: com.example.sample
+pluginClass: SamplePlugin
+iosPrefix: FLT
+''';
+        final plugin = Plugin.fromYaml(
+          'sample_plugin',
+          '',
+          loadYaml(legacyYaml) as YamlMap,
+          null,
+          const <String>[],
+          fileSystem: globals.fs,
+          isDevDependency: false,
+        );
+
+        expect(plugin.platforms, contains(AndroidPlugin.kConfigKey));
+        expect(plugin.platforms, contains(IOSPlugin.kConfigKey));
+      });
+
       testUsingContext('createPlatformsYamlMap should create the correct map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(
           <String>['ios', 'android', 'linux'],

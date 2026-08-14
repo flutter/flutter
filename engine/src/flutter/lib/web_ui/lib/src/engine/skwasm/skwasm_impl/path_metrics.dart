@@ -64,7 +64,9 @@ class SkwasmPathMetric implements BackendPathMetric {
 
   @override
   BackendPathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
-    return SkwasmPath.fromHandle(contourMeasureGetSegment(handle, start, end, startWithMoveTo));
+    return SkwasmPathBuilder.fromHandle(
+      contourMeasureGetSegment(handle, start, end, startWithMoveTo),
+    );
   }
 
   @override
