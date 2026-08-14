@@ -15770,4 +15770,36 @@ void main() {
     );
     expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
   });
+
+  testWidgets('does not assert when an affix sibling merge group is under MergeSemantics', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/191095.
+    //
+    // The InputDecorator affix (here, the prefix) produces a sibling merge group
+    // in its semantics. When the field is wrapped in a MergeSemantics, that
+    // sibling node must be flagged as merged into its parent, otherwise the
+    // semantics compiler asserts `node.isMergedIntoParent`.
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MergeSemantics(
+            child: TextField(
+              focusNode: focusNode,
+              decoration: const InputDecoration(prefix: SizedBox(width: 12)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focusing reveals the prefix affix, which produces the sibling merge group.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
 }

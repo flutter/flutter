@@ -6400,7 +6400,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
             node.tags!.addAll(tags);
           }
         }
-        node.isMergedIntoParent = parentData?.mergeIntoParent ?? false;
+        node.isMergedIntoParent =
+            configProvider.effective.isMergingSemanticsOfDescendants ||
+            (parentData?.mergeIntoParent ?? false);
       }
     }
     _updateSiblingNodesGeometries();
