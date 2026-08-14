@@ -618,7 +618,7 @@ class FlutterPluginUtilsTest {
     @Test
     fun `getCompileSdkFromProject returns the compileSdk from the project`() {
         val project = mockk<Project>()
-        val androidExtension = mockk<com.android.build.api.dsl.ApplicationExtension>()
+        val androidExtension = mockk<ApplicationExtension>()
         every { project.extensions.findByName("android") } returns androidExtension
         every { androidExtension.compileSdk } returns 35
         every { androidExtension.compileSdkPreview } returns null
@@ -630,7 +630,7 @@ class FlutterPluginUtilsTest {
     @Test
     fun `getCompileSdkFromProject returns the preview codename from the project`() {
         val project = mockk<Project>()
-        val androidExtension = mockk<com.android.build.api.dsl.ApplicationExtension>()
+        val androidExtension = mockk<ApplicationExtension>()
         every { project.extensions.findByName("android") } returns androidExtension
         every { androidExtension.compileSdk } returns null
         every { androidExtension.compileSdkPreview } returns "Baklava"
