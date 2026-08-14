@@ -18,6 +18,7 @@ abstract class LayerVisitor<R> {
   R visitTransform(TransformEngineLayer transform);
   R visitOffset(OffsetEngineLayer offset);
   R visitImageFilter(ImageFilterEngineLayer imageFilter);
+  R visitOverscrollStretch(OverscrollStretchEngineLayer overscrollStretch);
   R visitShaderMask(ShaderMaskEngineLayer shaderMask);
   R visitPicture(PictureLayer picture);
   R visitColorFilter(ColorFilterEngineLayer colorFilter);
@@ -151,6 +152,20 @@ class PrerollVisitor extends LayerVisitor<void> {
     } else {
       imageFilter.paintBounds = imageFilter.filter.filterBounds(childPaintBounds);
     }
+    mutatorsStack.pop();
+  }
+
+  @override
+  void visitOverscrollStretch(OverscrollStretchEngineLayer overscrollStretch) {
+    mutatorsStack.pushTransform(
+      Matrix4.translationValues(overscrollStretch.offset.dx, overscrollStretch.offset.dy, 0.0),
+    );
+    ui.Rect childPaintBounds = prerollChildren(overscrollStretch);
+    childPaintBounds = childPaintBounds.translate(
+      overscrollStretch.offset.dx,
+      overscrollStretch.offset.dy,
+    );
+    overscrollStretch.paintBounds = overscrollStretch.filter.filterBounds(childPaintBounds);
     mutatorsStack.pop();
   }
 
@@ -396,6 +411,25 @@ class MeasureVisitor extends LayerVisitor<void> {
   }
 
   @override
+  void visitOverscrollStretch(OverscrollStretchEngineLayer overscrollStretch) {
+    assert(overscrollStretch.needsPainting);
+    final ui.Rect offsetPaintBounds = overscrollStretch.paintBounds.shift(
+      -overscrollStretch.offset,
+    );
+    measuringCanvas.save();
+    measuringCanvas.translate(overscrollStretch.offset.dx, overscrollStretch.offset.dy);
+    measuringCanvas.clipRect(offsetPaintBounds, doAntiAlias: false);
+    final ui.Paint paint = ui.Paint();
+    paint.imageFilter = overscrollStretch.filter;
+    measuringCanvas.saveLayer(offsetPaintBounds, paint);
+    imageFilterStack.add(overscrollStretch.filter);
+    measureChildren(overscrollStretch);
+    imageFilterStack.removeLast();
+    measuringCanvas.restore();
+    measuringCanvas.restore();
+  }
+
+  @override
   void visitShaderMask(ShaderMaskEngineLayer shaderMask) {
     assert(shaderMask.needsPainting);
 
@@ -629,6 +663,23 @@ class PaintVisitor extends LayerVisitor<void> {
     paint.imageFilter = imageFilter.filter;
     nWayCanvas.saveLayer(null, paint);
     paintChildren(imageFilter);
+    nWayCanvas.restore();
+    nWayCanvas.restore();
+  }
+
+  @override
+  void visitOverscrollStretch(OverscrollStretchEngineLayer overscrollStretch) {
+    assert(overscrollStretch.needsPainting);
+    final ui.Rect offsetPaintBounds = overscrollStretch.paintBounds.shift(
+      -overscrollStretch.offset,
+    );
+    nWayCanvas.save();
+    nWayCanvas.translate(overscrollStretch.offset.dx, overscrollStretch.offset.dy);
+    nWayCanvas.clipRect(offsetPaintBounds, ui.ClipOp.intersect, false);
+    final ui.Paint paint = ui.Paint();
+    paint.imageFilter = overscrollStretch.filter;
+    nWayCanvas.saveLayer(null, paint);
+    paintChildren(overscrollStretch);
     nWayCanvas.restore();
     nWayCanvas.restore();
   }
@@ -871,6 +922,18 @@ class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
       'filter': imageFilter.filter.toString(),
       'offset': {'x': imageFilter.offset.dx, 'y': imageFilter.offset.dy},
       'children': debugChildren(imageFilter),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitOverscrollStretch(OverscrollStretchEngineLayer overscrollStretch) {
+    return <String, dynamic>{
+      'type': 'overscrollStretch',
+      'filter': overscrollStretch.filter.toString(),
+      'offset': {'x': overscrollStretch.offset.dx, 'y': overscrollStretch.offset.dy},
+      'overscrollX': overscrollStretch.overscrollX,
+      'overscrollY': overscrollStretch.overscrollY,
+      'children': debugChildren(overscrollStretch),
     };
   }
 

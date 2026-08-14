@@ -7,3 +7,5 @@ Before declaring a task done:
    files. Run `dart analyze --fatal-infos <files>` or use the MCP server.
 2. Run `dart format` on the modified files. Run `dart format <files>` or use the
    MCP server.
+3. If engine files (C++, Java, Objective-C, GN, etc.) were modified, run
+   `./engine/src/flutter/bin/et format`.

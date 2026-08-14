@@ -165,6 +165,7 @@ static jmethodID g_mutators_stack_push_cliprect_method = nullptr;
 static jmethodID g_mutators_stack_push_cliprrect_method = nullptr;
 static jmethodID g_mutators_stack_push_opacity_method = nullptr;
 static jmethodID g_mutators_stack_push_clippath_method = nullptr;
+static jmethodID g_mutators_stack_push_stretch_effect_method = nullptr;
 
 // android.graphics.Path class, methods, and nested classes.
 static fml::jni::ScopedJavaGlobalRef<jclass>* path_class = nullptr;
@@ -1116,6 +1117,14 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  g_mutators_stack_push_stretch_effect_method = env->GetMethodID(
+      g_mutators_stack_class->obj(), "pushStretchEffect", "(FFFF)V");
+  if (g_mutators_stack_push_stretch_effect_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate FlutterMutatorsStack.pushStretchEffect method";
+    return false;
+  }
+
   g_java_weak_reference_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("java/lang/ref/WeakReference"));
   if (g_java_weak_reference_class->is_null()) {
@@ -1831,6 +1840,15 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
       case MutatorType::kBackdropClipRSuperellipse:
       case MutatorType::kBackdropClipPath:
         break;
+      case MutatorType::kOverscrollStretch: {
+        const OverscrollStretchMutation& stretch =
+            (*iter)->GetOverscrollStretch();
+        env->CallVoidMethod(
+            mutatorsStack, g_mutators_stack_push_stretch_effect_method,
+            stretch.overscroll_x, stretch.overscroll_y,
+            stretch.max_stretch_intensity, stretch.interpolation_strength);
+        break;
+      }
     }
     ++iter;
   }
@@ -2344,6 +2362,15 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
       case MutatorType::kBackdropClipRSuperellipse:
       case MutatorType::kBackdropClipPath:
         break;
+      case MutatorType::kOverscrollStretch: {
+        const OverscrollStretchMutation& stretch =
+            (*iter)->GetOverscrollStretch();
+        env->CallVoidMethod(
+            mutatorsStack, g_mutators_stack_push_stretch_effect_method,
+            stretch.overscroll_x, stretch.overscroll_y,
+            stretch.max_stretch_intensity, stretch.interpolation_strength);
+        break;
+      }
     }
     ++iter;
   }

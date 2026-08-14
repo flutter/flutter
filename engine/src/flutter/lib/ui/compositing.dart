@@ -219,6 +219,15 @@ class ImageFilterEngineLayer extends _EngineLayerWrapper {
   ImageFilterEngineLayer._(super.nativeLayer) : super._();
 }
 
+/// An opaque handle to an overscroll stretch engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushOverscrollStretch].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+class OverscrollStretchEngineLayer extends _EngineLayerWrapper {
+  OverscrollStretchEngineLayer._(super.nativeLayer) : super._();
+}
+
 /// An opaque handle to a backdrop filter engine layer.
 ///
 /// Instances of this class are created by [SceneBuilder.pushBackdropFilter].
@@ -410,6 +419,26 @@ abstract class SceneBuilder {
     ImageFilter filter, {
     Offset offset = Offset.zero,
     ImageFilterEngineLayer? oldLayer,
+  });
+
+  /// Pushes an overscroll stretch operation onto the operation stack.
+  ///
+  /// The given [filter] is applied to the children's rasterization, and the stretch
+  /// parameters are used for embedded platform view composition.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  OverscrollStretchEngineLayer pushOverscrollStretch(
+    ImageFilter filter, {
+    double overscrollX = 0.0,
+    double overscrollY = 0.0,
+    double maxStretchIntensity = 1.0,
+    double interpolationStrength = 0.7,
+    Offset offset = Offset.zero,
+    OverscrollStretchEngineLayer? oldLayer,
   });
 
   /// Pushes a backdrop filter operation onto the operation stack.
@@ -862,6 +891,61 @@ base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements Scene
   external void _pushImageFilter(
     EngineLayer outEngineLayer,
     _ImageFilter filter,
+    double dx,
+    double dy,
+    EngineLayer? oldLayer,
+  );
+
+  @override
+  OverscrollStretchEngineLayer pushOverscrollStretch(
+    ImageFilter filter, {
+    double overscrollX = 0.0,
+    double overscrollY = 0.0,
+    double maxStretchIntensity = 1.0,
+    double interpolationStrength = 0.7,
+    Offset offset = Offset.zero,
+    OverscrollStretchEngineLayer? oldLayer,
+  }) {
+    assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushOverscrollStretch'));
+    final _ImageFilter nativeFilter = filter._toNativeImageFilter();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
+    _pushOverscrollStretch(
+      engineLayer,
+      nativeFilter,
+      overscrollX,
+      overscrollY,
+      maxStretchIntensity,
+      interpolationStrength,
+      offset.dx,
+      offset.dy,
+      oldLayer?._nativeLayer,
+    );
+    final layer = OverscrollStretchEngineLayer._(engineLayer);
+    assert(_debugPushLayer(layer));
+    return layer;
+  }
+
+  @Native<
+    Void Function(
+      Pointer<Void>,
+      Handle,
+      Pointer<Void>,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Handle,
+    )
+  >(symbol: 'SceneBuilder::pushOverscrollStretch')
+  external void _pushOverscrollStretch(
+    EngineLayer outEngineLayer,
+    _ImageFilter filter,
+    double overscrollX,
+    double overscrollY,
+    double maxStretchIntensity,
+    double interpolationStrength,
     double dx,
     double dy,
     EngineLayer? oldLayer,
