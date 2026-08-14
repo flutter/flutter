@@ -208,6 +208,7 @@ void _setAssetManager(ui_web.AssetManager assetManager) {
   _assetManager = assetManager;
 }
 
+/// Sets the [ui_web.AssetManager] used by the Flutter Engine.
 void setAssetManager(ui_web.AssetManager assetManager) {
   _setAssetManager(assetManager);
 }
