@@ -1472,7 +1472,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   // ballistic metrics so it never operates on a stale out-of-range position.
   void correctPixelsIfOutOfRange() {
     if (pixels < minScrollExtent || pixels > maxScrollExtent) {
-      forcePixels(clampDouble(pixels, minScrollExtent, maxScrollExtent));
+      correctPixels(clampDouble(pixels, minScrollExtent, maxScrollExtent));
     }
   }
 
