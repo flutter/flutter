@@ -69,7 +69,8 @@ ClipCoverage ClipContents::GetClipCoverage(
 
 bool ClipContents::Render(const ContentContext& renderer,
                           RenderPass& pass,
-                          uint32_t clip_depth) const {
+                          uint32_t clip_depth,
+                          const std::optional<Matrix>& transform) const {
   if (!clip_geometry_.vertex_buffer) {
     return true;
   }
@@ -78,7 +79,9 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo info;
   info.depth = GetShaderClipDepth(clip_depth);
-  info.mvp = clip_geometry_.transform;
+  info.mvp = transform.has_value()
+                 ? (pass.GetOrthographicTransform() * *transform)
+                 : clip_geometry_.transform;
 
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kDst;
@@ -157,6 +160,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   pass.SetPipeline(renderer.GetClipPipeline(options));
 
   info.mvp = pass.GetOrthographicTransform();
+  info.depth = GetShaderClipDepth(clip_depth);
   VS::BindFrameInfo(pass,
                     renderer.GetTransientsDataBuffer().EmplaceUniform(info));
 
