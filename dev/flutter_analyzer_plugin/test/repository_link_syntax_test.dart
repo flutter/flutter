@@ -29,7 +29,6 @@ class RepositoryLinkSyntaxTest extends AnalysisRuleTest {
 // https://raw.githubusercontent.com/flutter/flutter/blob/main/file1
 
 // Exempt repositories whose default branch is master:
-// https://github.com/chromium/chromium/tree/master/file1
 // https://github.com/clojure/clojure/tree/master/file1
 // https://github.com/dart-lang/test/tree/master/file1
 // https://github.com/glfw/glfw/tree/master/file1
@@ -38,7 +37,7 @@ class RepositoryLinkSyntaxTest extends AnalysisRuleTest {
 
 void main() {
   const String link1 = 'https://github.com/flutter/flutter/tree/main/file1';
-  const String link2 = 'https://github.com/chromium/chromium/tree/master/file1';
+  const String link2 = 'https://github.com/clojure/clojure/tree/master/file1';
   final String name = 'test';
   final String interpolated = '$name: https://github.com/flutter/flutter/tree/main/file1';
 }
