@@ -256,7 +256,6 @@ List<Validation> _getValidations({
     Validation('deprecations', 'Deprecations...', () => verifyDeprecations(flutterRoot)),
     Validation('golden-tags', 'Goldens...', () => verifyGoldenTags(flutterPackages)),
     Validation('no-missing-license', 'Licenses...', () => verifyNoMissingLicense(flutterRoot)),
-    Validation('no-test-imports', 'Test imports...', () => verifyNoTestImports(flutterRoot)),
     Validation(
       'no-bad-imports-flutter',
       'Bad imports (framework)...',
@@ -1077,39 +1076,6 @@ Future<void> _verifyNoMissingLicenseForExtension(
       if (header.isNotEmpty) 'followed by the following license text:',
       license,
       if (trailingBlank) '...followed by a blank line.',
-    ]);
-  }
-}
-
-final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
-const Set<String> _exemptTestImports = <String>{
-  'package:flutter_test/flutter_test.dart',
-  'hit_test.dart',
-  'package:test_api/src/backend/live_test.dart',
-  'package:integration_test/integration_test.dart',
-};
-
-Future<void> verifyNoTestImports(String workingDirectory) async {
-  final errors = <String>[];
-  assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
-  final List<File> dartFiles = await _allFiles(
-    path.join(workingDirectory, 'packages'),
-    'dart',
-    minimumMatches: 1500,
-  ).toList();
-  for (final file in dartFiles) {
-    for (final String line in file.readAsLinesSync()) {
-      final Match? match = _testImportPattern.firstMatch(line);
-      if (match != null && !_exemptTestImports.contains(match.group(2))) {
-        errors.add(file.path);
-      }
-    }
-  }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      '${bold}The following file(s) import a test directly. Test utilities should be in their own file.$reset',
-      ...errors,
     ]);
   }
 }

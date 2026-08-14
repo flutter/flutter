@@ -263,7 +263,6 @@ void main() {
     );
   });
 
-
   test('analyze.dart - verifyTabooDocumentation', () async {
     final String result = await capture(
       () => verifyTabooDocumentation(testRootPath, minimumMatches: 1),
