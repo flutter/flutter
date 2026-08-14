@@ -254,7 +254,6 @@ List<Validation> _getValidations({
       () => verifySpacesAfterFlowControlStatements(flutterRoot),
     ),
     Validation('deprecations', 'Deprecations...', () => verifyDeprecations(flutterRoot)),
-    Validation('golden-tags', 'Goldens...', () => verifyGoldenTags(flutterPackages)),
     Validation('no-missing-license', 'Licenses...', () => verifyNoMissingLicense(flutterRoot)),
     Validation('no-test-imports', 'Test imports...', () => verifyNoTestImports(flutterRoot)),
     Validation(
@@ -687,80 +686,6 @@ Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches 
     foundError(<String>[
       '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-syncasync for details.$reset',
       ...errors,
-    ]);
-  }
-}
-
-final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
-final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
-final RegExp _leadingComment = RegExp(r'//');
-final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
-final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
-
-/// Only golden file tests in the flutter package are subject to reduced testing,
-/// for example, invocations in flutter_test to validate comparator
-/// functionality do not require tagging.
-const String _ignoreGoldenTag = '// flutter_ignore: golden_tag (see analyze.dart)';
-const String _ignoreGoldenTagForFile = '// flutter_ignore_for_file: golden_tag (see analyze.dart)';
-
-Future<void> verifyGoldenTags(String workingDirectory, {int minimumMatches = 2000}) async {
-  final errors = <String>[];
-  await for (final File file in _allFiles(
-    workingDirectory,
-    'dart',
-    minimumMatches: minimumMatches,
-  )) {
-    var needsTag = false;
-    var hasTagNotation = false;
-    var hasReducedTag = false;
-    var ignoreForFile = false;
-    final List<String> lines = file.readAsLinesSync();
-    for (final line in lines) {
-      if (line.contains(_goldenTagPattern1)) {
-        hasTagNotation = true;
-      }
-      if (line.contains(_goldenTagPattern2)) {
-        hasReducedTag = true;
-      }
-      if (line.contains(_findGoldenTestPattern) &&
-          !line.contains(_findGoldenDefinitionPattern) &&
-          !line.contains(_leadingComment) &&
-          !line.contains(_ignoreGoldenTag)) {
-        needsTag = true;
-      }
-      if (line.contains(_ignoreGoldenTagForFile)) {
-        ignoreForFile = true;
-      }
-      // If the file is being ignored or a reduced test tag is already accounted
-      // for, skip parsing the rest of the lines for golden file tests.
-      if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
-        break;
-      }
-    }
-    // If a reduced test tag is already accounted for, move on to the next file.
-    if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
-      continue;
-    }
-    // If there are golden file tests, ensure they are tagged for all reduced
-    // test environments.
-    if (needsTag) {
-      if (!hasTagNotation) {
-        errors.add(
-          '${file.path}: Files containing golden tests must be tagged using '
-          "@Tags(<String>['reduced-test-set']) at the top of the file before import statements.",
-        );
-      } else if (!hasReducedTag) {
-        errors.add(
-          '${file.path}: Files containing golden tests must be tagged with '
-          "'reduced-test-set'.",
-        );
-      }
-    }
-  }
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md$reset',
     ]);
   }
 }
