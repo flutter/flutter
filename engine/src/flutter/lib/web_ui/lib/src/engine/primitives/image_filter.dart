@@ -70,18 +70,30 @@ abstract class EngineImageFilter implements ui.ImageFilter {
   String toString() => 'ImageFilter.$debugShortDescription';
 }
 
+/// Caches the [BackendImageFilter] created for a given [EngineColorFilter].
+///
+/// This is an [Expando] keyed on the [EngineColorFilter] because
+/// [EngineColorFilterImageFilter] is a throwaway wrapper created every frame,
+/// which would otherwise cause a new backend filter to be instantiated
+/// constantly.
+final Expando<BackendImageFilter> _colorFilterImageFilters = Expando<BackendImageFilter>();
+
 class EngineColorFilterImageFilter extends EngineImageFilter {
   EngineColorFilterImageFilter({required this.colorFilter});
 
   final EngineColorFilter colorFilter;
 
-  BackendImageFilter? _cachedFilter;
-
   @override
   BackendImageFilter getBackendFilter({required ui.TileMode defaultBlurTileMode}) {
-    return _cachedFilter ??= _cacheAndAttach(
+    final BackendImageFilter? cached = _colorFilterImageFilters[colorFilter];
+    if (cached != null) {
+      return cached;
+    }
+    final BackendImageFilter backendFilter = _cacheAndAttach(
       renderer.createColorFilterImageFilter(filter: colorFilter.backendFilter),
     );
+    _colorFilterImageFilters[colorFilter] = backendFilter;
+    return backendFilter;
   }
 
   @override

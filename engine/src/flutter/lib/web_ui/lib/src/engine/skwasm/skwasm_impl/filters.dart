@@ -31,6 +31,8 @@ abstract class SkwasmImageFilter implements BackendImageFilter {
     }
     return withStackScope((StackScope scope) {
       final RawIRect rawRect = scope.convertIRectToNative(inputBounds);
+      // The skwasm C++ backend allocates a bounding box and writes to the memory address
+      // of `rawRect` safely in-place without returning a nullable pointer.
       imageFilterGetFilterBounds(_handle, rawRect);
       return scope.convertIRectFromNative(rawRect);
     });

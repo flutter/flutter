@@ -28,6 +28,8 @@ abstract class CkImageFilter implements BackendImageFilter {
       return inputBounds;
     }
     final Int32List? outputBounds = skFilter.getOutputBounds(toSkRect(inputBounds));
+    // The CanvasKit C++ API may return null if the output bounds cannot be
+    // computed. In such cases we fall back to the input bounds.
     if (outputBounds == null) {
       return inputBounds;
     }

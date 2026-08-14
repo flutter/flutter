@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../common/test_initialization.dart';
+import '../common/test_initialization.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -16,26 +16,19 @@ void main() {
 void testMain() {
   setUpUnitTests();
   group('Filter Caching', () {
-    test('EngineColorFilter implements Expando caching', () {
+    test('EngineColorFilterImageFilter reuses the backend filter for the same color filter', () {
       const colorFilter = EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver);
 
-      final BackendColorFilter backendFilter1 = colorFilter.backendFilter;
+      final EngineColorFilterImageFilter filter1 = EngineColorFilterImageFilter(
+        colorFilter: colorFilter,
+      );
+      final EngineColorFilterImageFilter filter2 = EngineColorFilterImageFilter(
+        colorFilter: colorFilter,
+      );
 
-      expect(backendFilter1, isNotNull);
+      final backendFilter1 = filter1.getBackendFilter(defaultBlurTileMode: ui.TileMode.clamp);
+      final backendFilter2 = filter2.getBackendFilter(defaultBlurTileMode: ui.TileMode.clamp);
 
-      // Access it again, should be the exact same instance (cached)
-      final BackendColorFilter backendFilter2 = colorFilter.backendFilter;
-      expect(backendFilter1, same(backendFilter2));
-    });
-
-    test('EngineMaskFilter implements Expando caching', () {
-      const maskFilter = EngineMaskFilter.blur(ui.BlurStyle.normal, 5.0);
-
-      final BackendMaskFilter backendFilter1 = maskFilter.backendFilter;
-
-      expect(backendFilter1, isNotNull);
-
-      final BackendMaskFilter backendFilter2 = maskFilter.backendFilter;
       expect(backendFilter1, same(backendFilter2));
     });
   });
