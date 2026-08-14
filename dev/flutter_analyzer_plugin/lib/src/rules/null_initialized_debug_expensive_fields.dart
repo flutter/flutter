@@ -57,7 +57,10 @@ class _Visitor extends SimpleAstVisitor<void> {
   }
 
   bool _isCorrectInitializer(Expression? initializer) {
-    if (initializer case ConditionalExpression(:final Expression condition, elseExpression: NullLiteral())) {
+    if (initializer case ConditionalExpression(
+      :final Expression condition,
+      elseExpression: NullLiteral(),
+    )) {
       var unwrappedCondition = condition;
       while (unwrappedCondition is ParenthesizedExpression) {
         unwrappedCondition = unwrappedCondition.expression;
