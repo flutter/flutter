@@ -228,11 +228,6 @@ List<Validation> _getValidations({
       await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 80);
     }),
     Validation(
-      'no-checked-mode',
-      'Debug mode instead of checked mode...',
-      () => verifyNoCheckedMode(flutterRoot),
-    ),
-    Validation(
       'issue-links',
       'Links for creating GitHub issues...',
       () => verifyIssueLinks(flutterRoot),
@@ -1299,31 +1294,6 @@ Future<void> verifyStockAppLocalizations(String workingDirectory) async {
       'Failed to run "git diff" on localization files of stocks app:',
       result.stderr,
     ]);
-  }
-}
-
-/// Verifies that all instances of "checked mode" have been migrated to "debug mode".
-Future<void> verifyNoCheckedMode(String workingDirectory) async {
-  final String flutterPackages = path.join(workingDirectory, 'packages');
-  final List<File> files = await _allFiles(
-    flutterPackages,
-    'dart',
-    minimumMatches: 400,
-  ).where((File file) => path.extension(file.path) == '.dart').toList();
-  final problems = <String>[];
-  for (final file in files) {
-    var lineCount = 0;
-    for (final String line in file.readAsLinesSync()) {
-      if (line.toLowerCase().contains('checked mode')) {
-        problems.add(
-          '${file.path}:$lineCount uses deprecated "checked mode" instead of "debug mode".',
-        );
-      }
-      lineCount += 1;
-    }
-  }
-  if (problems.isNotEmpty) {
-    foundError(problems);
   }
 }
 

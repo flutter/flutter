@@ -8,6 +8,7 @@ import 'package:analysis_server_plugin/registry.dart';
 import 'src/rules/avoid_future_catch_error.dart';
 import 'src/rules/integration_test_timeouts.dart';
 import 'src/rules/no_bad_imports_in_flutter.dart';
+import 'src/rules/no_checked_mode.dart';
 import 'src/rules/no_double_clamp.dart';
 import 'src/rules/no_runtimetype_in_tostring.dart';
 import 'src/rules/no_stopwatches.dart';
@@ -23,6 +24,7 @@ class FlutterAnalyzerPlugin extends Plugin {
   void register(PluginRegistry registry) {
     registry
       ..registerWarningRule(AvoidFutureCatchError())
+      ..registerWarningRule(NoCheckedMode())
       ..registerWarningRule(NoDoubleClamp())
       ..registerWarningRule(NoRuntimeTypeInToString())
       ..registerWarningRule(NoStopwatches())
