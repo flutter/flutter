@@ -523,6 +523,25 @@ void main() {
     });
   });
 
+  test('mutating OverscrollStretchLayer fields triggers needsAddToScene', () {
+    final layer = OverscrollStretchLayer(imageFilter: ImageFilter.blur());
+    checkNeedsAddToScene(layer, () {
+      layer.imageFilter = ImageFilter.blur(sigmaX: 1.0);
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.overscrollX = 0.5;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.overscrollY = 0.5;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.maxStretchIntensity = 0.8;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.interpolationStrength = 0.9;
+    });
+  });
+
   test('ContainerLayer.toImage can render interior layer', () {
     final parent = OffsetLayer();
     final child = OffsetLayer();
