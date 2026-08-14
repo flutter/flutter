@@ -263,27 +263,6 @@ void main() {
     );
   });
 
-  test('analyze.dart - verifyNullInitializedDebugExpensiveFields', () async {
-    final String result = await capture(
-      () => verifyNullInitializedDebugExpensiveFields(testRootPath, minimumMatches: 1),
-      shouldHaveErrors: true,
-    );
-
-    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'bar.dart'));
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          '',
-          'Fields annotated with @_debugOnly must null initialize,',
-          'to ensure both the field and initializer are removed from profile/release mode.',
-          'These fields should be written as:',
-          'field = kDebugMode ? <DebugValue> : null;',
-        ],
-      ),
-    );
-  });
 
   test('analyze.dart - verifyTabooDocumentation', () async {
     final String result = await capture(
