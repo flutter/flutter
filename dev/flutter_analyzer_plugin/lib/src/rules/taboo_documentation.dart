@@ -10,7 +10,7 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
-final RegExp _tabooPattern = RegExp(r'^ *///.*\b(simply|note:|note that)\b', caseSensitive: false);
+final RegExp _tabooPattern = RegExp(r'\b(simply\b|note:|note that\b)', caseSensitive: false);
 
 /// Avoid taboo words ('simply', 'note:', 'note that') in documentation comments.
 class TabooDocumentation extends AnalysisRule {

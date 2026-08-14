@@ -74,10 +74,10 @@ void badFunction() {}
   // ignore: non_constant_identifier_names
   Future<void> test_taboo_note_colon() async {
     const source = '''
-/// Note:foo is taboo.
+/// Note: foo is taboo.
 void badFunction() {}
 ''';
-    await assertDiagnostics(source, [lint(0, 22)]);
+    await assertDiagnostics(source, [lint(0, 23)]);
   }
 
   // ignore: non_constant_identifier_names
