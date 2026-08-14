@@ -23,9 +23,10 @@ class NoTestImports extends AnalysisRule {
   NoTestImports()
     : super(name: code.name, description: 'Verify that files do not import a test directly.');
 
+  /// The [LintCode] for this rule.
   static const code = LintCode(
     'no_test_imports',
-    'The following file imports a test directly. Test utilities should be in their own file.',
+    'Do not import a test file directly. Test utilities should be in their own file.',
     correctionMessage: 'Move test utilities to a non-test file or use an exempt test package.',
     severity: DiagnosticSeverity.ERROR,
   );
