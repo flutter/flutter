@@ -862,11 +862,12 @@ void Tessellator::GenerateStrokedArc(
     const TessellatedVertexProc& proc) {
   Point center = oval_bounds.GetCenter();
   Size base_radii = oval_bounds.GetSize() * 0.5f;
-  // A stroke at least as wide as the radii covers the center of the oval, so
-  // the inner edge is clamped to the center rather than allowed to fold back
-  // through it and self-intersect.
-  Size inner_radii =
-      (base_radii - Size(half_width, half_width)).Max(Size(0.0f, 0.0f));
+
+  // A stroke width wider than the radii would cross the center and
+  // self-intersect. Clamp inner edge to center.
+  Size inner_radii = base_radii - Size(half_width, half_width);
+  inner_radii = inner_radii.Max(Size(0.0f, 0.0f));
+
   Size outer_radii = base_radii + Size(half_width, half_width);
 
   // Starting cap
