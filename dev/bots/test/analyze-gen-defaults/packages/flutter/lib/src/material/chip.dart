@@ -13,7 +13,7 @@ final _ChipDefaultsM3 _chipDefaultsM3 = _ChipDefaultsM3();
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 class _ChipDefaultsM3 {
-  final String testString = 'This is chip_template.dart class.';
+  final String testString = 'This is chip.dart class.';
 }
 
 // END GENERATED TOKEN PROPERTIES - Chip
