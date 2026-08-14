@@ -2794,6 +2794,467 @@ void main() {
     );
     expect(tester.getSize(find.byType(RawTooltip)), Size.zero);
   });
+
+  testWidgets('AnimationStyle.reverseCurve is used for the hide animation', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late Animation<double> tooltipAnimation;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            key: tooltipKey,
+            semanticsTooltip: tooltipText,
+            animationStyle: const AnimationStyle(
+              curve: Curves.linear,
+              reverseCurve: Curves.easeInExpo,
+              duration: Duration(milliseconds: 100),
+              reverseDuration: Duration(milliseconds: 100),
+            ),
+            tooltipBuilder: (BuildContext context, Animation<double> animation) {
+              tooltipAnimation = animation;
+              return const Text(tooltipText);
+            },
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Halfway through the show animation, the forward curve applies.
+    expect(tooltipAnimation.value, moreOrLessEquals(0.5));
+    // CurvedAnimation only switches to the reverse curve when the direction
+    // changes from a completed state.
+    await tester.pumpAndSettle();
+    expect(tooltipAnimation.value, 1.0);
+
+    RawTooltip.dismissAllToolTips();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Halfway through the hide animation, the reverse curve applies.
+    expect(tooltipAnimation.value, moreOrLessEquals(Curves.easeInExpo.transform(0.5)));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Hide animation uses the forward curve when AnimationStyle.reverseCurve is null', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late Animation<double> tooltipAnimation;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            key: tooltipKey,
+            semanticsTooltip: tooltipText,
+            animationStyle: const AnimationStyle(
+              curve: Curves.easeInExpo,
+              duration: Duration(milliseconds: 100),
+              reverseDuration: Duration(milliseconds: 100),
+            ),
+            tooltipBuilder: (BuildContext context, Animation<double> animation) {
+              tooltipAnimation = animation;
+              return const Text(tooltipText);
+            },
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    RawTooltip.dismissAllToolTips();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // The hide animation follows the forward curve when no reverse curve is
+    // provided.
+    expect(tooltipAnimation.value, moreOrLessEquals(Curves.easeInExpo.transform(0.5)));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('AnimationStyle duration changes take effect after the first show', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late Animation<double> tooltipAnimation;
+
+    Widget buildApp(AnimationStyle animationStyle) {
+      return TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            key: tooltipKey,
+            semanticsTooltip: tooltipText,
+            animationStyle: animationStyle,
+            tooltipBuilder: (BuildContext context, Animation<double> animation) {
+              tooltipAnimation = animation;
+              return const Text(tooltipText);
+            },
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildApp(
+        const AnimationStyle(
+          curve: Curves.linear,
+          duration: Duration(milliseconds: 100),
+          reverseDuration: Duration(milliseconds: 100),
+        ),
+      ),
+    );
+
+    // Show once to instantiate the lazily-created animation controller.
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    RawTooltip.dismissAllToolTips();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+
+    await tester.pumpWidget(
+      buildApp(
+        const AnimationStyle(
+          curve: Curves.linear,
+          duration: Duration(milliseconds: 300),
+          reverseDuration: Duration(milliseconds: 100),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    // Halfway through the updated 300ms show duration, not the original 100ms
+    // duration which would have already completed the animation.
+    expect(tooltipAnimation.value, moreOrLessEquals(0.5));
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(tooltipAnimation.value, 1.0);
+
+    RawTooltip.dismissAllToolTips();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Null AnimationStyle durations fall back to the documented defaults', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late Animation<double> tooltipAnimation;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            key: tooltipKey,
+            semanticsTooltip: tooltipText,
+            animationStyle: const AnimationStyle(curve: Curves.linear),
+            tooltipBuilder: (BuildContext context, Animation<double> animation) {
+              tooltipAnimation = animation;
+              return const Text(tooltipText);
+            },
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 75));
+
+    // Halfway through the default 150ms show duration.
+    expect(tooltipAnimation.value, moreOrLessEquals(0.5));
+    await tester.pump(const Duration(milliseconds: 75));
+    expect(tooltipAnimation.value, 1.0);
+
+    RawTooltip.dismissAllToolTips();
+    await tester.pump();
+    await tester.pump(const Duration(microseconds: 37500));
+
+    // Halfway through the default 75ms hide duration.
+    expect(tooltipAnimation.value, moreOrLessEquals(0.5));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Hide animation defaults to 75ms even when AnimationStyle.duration is set', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late Animation<double> tooltipAnimation;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            key: tooltipKey,
+            semanticsTooltip: tooltipText,
+            animationStyle: const AnimationStyle(
+              curve: Curves.linear,
+              duration: Duration(milliseconds: 400),
+            ),
+            tooltipBuilder: (BuildContext context, Animation<double> animation) {
+              tooltipAnimation = animation;
+              return const Text(tooltipText);
+            },
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    expect(tooltipAnimation.value, 1.0);
+
+    RawTooltip.dismissAllToolTips();
+    await tester.pump();
+    await tester.pump(const Duration(microseconds: 37500));
+    // Halfway through the default 75ms hide duration, not the 400ms duration.
+    expect(tooltipAnimation.value, moreOrLessEquals(0.5));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('AnimationStyle curve changes take effect after the first show', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late Animation<double> tooltipAnimation;
+
+    Widget buildApp(AnimationStyle animationStyle) {
+      return TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            key: tooltipKey,
+            semanticsTooltip: tooltipText,
+            animationStyle: animationStyle,
+            tooltipBuilder: (BuildContext context, Animation<double> animation) {
+              tooltipAnimation = animation;
+              return const Text(tooltipText);
+            },
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildApp(
+        const AnimationStyle(
+          curve: Curves.linear,
+          duration: Duration(milliseconds: 100),
+          reverseDuration: Duration(milliseconds: 100),
+        ),
+      ),
+    );
+
+    // Show once to instantiate the lazily-created animation objects.
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    RawTooltip.dismissAllToolTips();
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      buildApp(
+        const AnimationStyle(
+          curve: Curves.easeInExpo,
+          reverseCurve: Curves.bounceOut,
+          duration: Duration(milliseconds: 100),
+          reverseDuration: Duration(milliseconds: 100),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Halfway through the show animation, the updated forward curve applies.
+    expect(tooltipAnimation.value, moreOrLessEquals(Curves.easeInExpo.transform(0.5)));
+    await tester.pumpAndSettle();
+
+    RawTooltip.dismissAllToolTips();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Halfway through the hide animation, the updated reverse curve applies.
+    expect(tooltipAnimation.value, moreOrLessEquals(Curves.bounceOut.transform(0.5)));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('AnimationStyle changes while the tooltip is shown apply to the next animation', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late Animation<double> tooltipAnimation;
+
+    Widget buildApp(AnimationStyle animationStyle) {
+      return TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            key: tooltipKey,
+            semanticsTooltip: tooltipText,
+            animationStyle: animationStyle,
+            tooltipBuilder: (BuildContext context, Animation<double> animation) {
+              tooltipAnimation = animation;
+              return const Text(tooltipText);
+            },
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildApp(
+        const AnimationStyle(
+          curve: Curves.linear,
+          duration: Duration(milliseconds: 100),
+          reverseDuration: Duration(milliseconds: 100),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pumpAndSettle();
+    expect(tooltipAnimation.value, 1.0);
+
+    // Update the style while the tooltip is fully shown.
+    await tester.pumpWidget(
+      buildApp(
+        const AnimationStyle(
+          curve: Curves.linear,
+          reverseCurve: Curves.easeInExpo,
+          duration: Duration(milliseconds: 100),
+          reverseDuration: Duration(milliseconds: 200),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    RawTooltip.dismissAllToolTips();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Halfway through the updated 200ms hide duration, following the updated
+    // reverse curve.
+    expect(tooltipAnimation.value, moreOrLessEquals(Curves.easeInExpo.transform(0.5)));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Changing animationStyle while the tooltip is animating in does not crash', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late Animation<double> tooltipAnimation;
+
+    Widget buildApp(AnimationStyle animationStyle) {
+      return TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            key: tooltipKey,
+            semanticsTooltip: tooltipText,
+            animationStyle: animationStyle,
+            tooltipBuilder: (BuildContext context, Animation<double> animation) {
+              tooltipAnimation = animation;
+              return const Text(tooltipText);
+            },
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildApp(
+        const AnimationStyle(
+          curve: Curves.linear,
+          duration: Duration(milliseconds: 100),
+          reverseDuration: Duration(milliseconds: 100),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 25));
+
+    // Update the style while the show animation is running.
+    await tester.pumpWidget(
+      buildApp(
+        const AnimationStyle(
+          curve: Curves.easeInExpo,
+          duration: Duration(milliseconds: 300),
+          reverseDuration: Duration(milliseconds: 100),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+
+    // The running show animation completes on its original 100ms timeline, of
+    // which 25ms have already elapsed. Duration changes take effect the next
+    // time an animation starts.
+    await tester.pump(const Duration(milliseconds: 75));
+    expect(tooltipAnimation.value, 1.0);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    RawTooltip.dismissAllToolTips();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Zero show duration shows instantly and hides with the default 75ms', (
+    WidgetTester tester,
+  ) async {
+    final tooltipKey = GlobalKey<RawTooltipState>();
+    late Animation<double> tooltipAnimation;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            key: tooltipKey,
+            semanticsTooltip: tooltipText,
+            animationStyle: const AnimationStyle(curve: Curves.linear, duration: Duration.zero),
+            tooltipBuilder: (BuildContext context, Animation<double> animation) {
+              tooltipAnimation = animation;
+              return const Text(tooltipText);
+            },
+            child: const SizedBox(width: 100.0, height: 100.0),
+          ),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState!.ensureTooltipVisible();
+    await tester.pump();
+    expect(tooltipAnimation.value, 1.0);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    RawTooltip.dismissAllToolTips();
+    await tester.pump();
+    await tester.pump(const Duration(microseconds: 37500));
+
+    // The hide animation uses the default 75ms reverse duration.
+    expect(tooltipAnimation.value, moreOrLessEquals(0.5));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
