@@ -461,12 +461,13 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
 
     // These paths are handed to the native loader in descending priority order: it tries them
     // first to last and stops at the first that loads (see FlutterJNI.loadDartDeferredLibrary).
-    // Ordering matters for security -- OS-installed signed APKs must be preferred over loose .so
-    // files in the app-writable internal storage dir (getFilesDir()), which are only a fallback
-    // and could be tampered with if anything else manages to write into internal storage.
+    // Ordering matters for security -- OS-installed signed APKs must be preferred over standalone,
+    // unbundled .so files in the app-writable internal storage dir (getFilesDir()), which are only
+    // a fallback and could be tampered with if anything else manages to write into internal
+    // storage.
     List<String> searchPaths = new ArrayList<>();
 
-    // Add the bare filename as the first search path. On some devices the so file can be
+    // Add the bare filename as the first search path. On some devices the .so file can be
     // dlopen-ed with just the file name (resolved via the linker's own trusted search path).
     searchPaths.add(aotSharedLibraryName);
 
@@ -475,8 +476,8 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
       searchPaths.add(path + "!lib/" + abi + "/" + aotSharedLibraryName);
     }
 
-    // Loose .so files discovered in getFilesDir(). App-writable, so least trusted: searched last
-    // and only used as a fallback when no signed APK contains the library.
+    // Standalone, unbundled .so files discovered in getFilesDir(). App-writable, so least trusted:
+    // searched last and only used as a fallback when no signed APK contains the library.
     searchPaths.addAll(soPaths);
 
     flutterJNI.loadDartDeferredLibrary(

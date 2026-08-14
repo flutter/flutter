@@ -178,8 +178,8 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
 // dlopen(): the property under test is purely the ordering (first-to-last,
 // stop at the first that loads), and a fake loader makes that deterministic
 // and free of any platform- or system-library-specific behavior. Whether a
-// given path format is actually loadable is covered end-to-end by the
-// deferred_components_test.
+// given path format is actually loadable is covered end-to-end by
+// dev/integration_tests/deferred_components_test.
 TEST(FindFirstLoadableLibraryTest, TriesInOrderAndStopsAtFirstSuccess) {
   std::vector<std::string> attempted;
   void* const handle = reinterpret_cast<void*>(0x1234);

@@ -687,9 +687,9 @@ void* FindFirstLoadableLibrary(
   // on FlutterJNI.loadDartDeferredLibrary): try them from first to last and
   // stop at the first one that loads. This matters for security as well as
   // correctness -- callers place the most trusted candidates (e.g.
-  // OS-installed signed APKs) ahead of less trusted fallbacks (e.g. loose .so
-  // files in app-writable storage), so the trusted candidate must win when
-  // more than one is loadable.
+  // OS-installed signed APKs) ahead of less trusted fallbacks (e.g. standalone
+  // unbundled .so files in app-writable storage), so the trusted candidate
+  // must win when more than one is loadable.
   for (const std::string& path : search_paths) {
     void* handle = open_library(path);
     if (handle != nullptr) {

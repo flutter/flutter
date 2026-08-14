@@ -248,7 +248,8 @@ public class PlayStoreDeferredComponentManagerTest {
     Context spyContext = createSpyContext(null);
     doReturn(null).when(spyContext).getAssets();
 
-    // A loose .so sitting in the app-writable internal storage dir (getFilesDir()).
+    // A standalone, unbundled .so file sitting directly in the app-writable internal storage dir
+    // (getFilesDir()).
     String soTestPath = "test/path/libapp.so-123.part.so";
     doReturn(new File(soTestPath)).when(spyContext).getFilesDir();
 
