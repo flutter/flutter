@@ -67,22 +67,6 @@ void main() {
     expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
   });
 
-  test('analyze.dart - verifyDeprecations', () async {
-    final String result = await capture(
-      () => verifyDeprecations(testRootPath, minimumMatches: 2),
-      shouldHaveErrors: true,
-    );
-    final fixture = File(path.join(testRootPath, 'packages', 'foo', 'deprecation.dart'));
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          'See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
-        ],
-      ),
-    );
-  });
 
   test('analyze.dart - verifyGoldenTags', () async {
     final List<String> result = (await capture(

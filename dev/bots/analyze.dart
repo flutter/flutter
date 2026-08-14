@@ -7,11 +7,6 @@ import 'dart:core' hide print;
 import 'dart:io' hide exit;
 import 'dart:typed_data';
 
-import 'package:analyzer/dart/analysis/features.dart';
-import 'package:analyzer/dart/analysis/results.dart';
-import 'package:analyzer/dart/analysis/utilities.dart';
-import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:collection/equality.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
@@ -28,7 +23,6 @@ import 'run_command.dart';
 import 'utils.dart';
 
 final String flutterPackages = path.join(flutterRoot, 'packages');
-final String flutterExamples = path.join(flutterRoot, 'examples');
 
 /// The path to the `dart` executable; set at the top of `main`
 late final String dart;
@@ -223,10 +217,6 @@ List<Validation> _getValidations({
       'All tool test files end in _test.dart...',
       () => verifyToolTestsEndInTestDart(flutterRoot),
     ),
-    Validation('no-sync-star-async-star', 'No sync*/async*', () async {
-      await verifyNoSyncAsyncStar(flutterPackages);
-      await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 80);
-    }),
     Validation(
       'no-checked-mode',
       'Debug mode instead of checked mode...',
@@ -253,7 +243,6 @@ List<Validation> _getValidations({
       'Spaces after flow control statements...',
       () => verifySpacesAfterFlowControlStatements(flutterRoot),
     ),
-    Validation('deprecations', 'Deprecations...', () => verifyDeprecations(flutterRoot)),
     Validation('golden-tags', 'Goldens...', () => verifyGoldenTags(flutterPackages)),
     Validation('no-missing-license', 'Licenses...', () => verifyNoMissingLicense(flutterRoot)),
     Validation(
@@ -373,8 +362,6 @@ List<Validation> _getValidations({
 }
 
 // TESTS
-
-FeatureSet _parsingFeatureSet() => FeatureSet.latestLanguageVersion();
 
 Future<void> verifyReleaseBranchState(String workringDirerctory) async {
   final ProcessResult result = await Process.run(dart, <String>[
@@ -647,49 +634,6 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
   }
 }
 
-Future<void> verifyNoSyncAsyncStar(String workingDirectory, {int minimumMatches = 2000}) async {
-  final syncPattern = RegExp(r'\s*?a?sync\*\s*?{');
-  final ignorePattern = RegExp(r'^\s*?// The following uses a?sync\* because:? ');
-  final commentPattern = RegExp(r'^\s*?//');
-  final errors = <String>[];
-  await for (final File file in _allFiles(
-    workingDirectory,
-    'dart',
-    minimumMatches: minimumMatches,
-  )) {
-    if (file.path.contains('test')) {
-      continue;
-    }
-    final List<String> lines = file.readAsLinesSync();
-    for (var index = 0; index < lines.length; index += 1) {
-      final String line = lines[index];
-      if (line.startsWith(commentPattern)) {
-        continue;
-      }
-      if (line.contains(syncPattern)) {
-        int lookBehindIndex = index - 1;
-        var hasExplanation = false;
-        while (lookBehindIndex >= 0 && lines[lookBehindIndex].startsWith(commentPattern)) {
-          if (lines[lookBehindIndex].startsWith(ignorePattern)) {
-            hasExplanation = true;
-            break;
-          }
-          lookBehindIndex -= 1;
-        }
-        if (!hasExplanation) {
-          errors.add('${file.path}:$index: sync*/async* without an explanation.');
-        }
-      }
-    }
-  }
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      '${bold}Do not use sync*/async* methods. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-syncasync for details.$reset',
-      ...errors,
-    ]);
-  }
-}
-
 final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
 final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
 final RegExp _leadingComment = RegExp(r'//');
@@ -760,172 +704,6 @@ Future<void> verifyGoldenTags(String workingDirectory, {int minimumMatches = 200
     foundError(<String>[
       ...errors,
       '${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md$reset',
-    ]);
-  }
-}
-
-class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
-  _DeprecationMessagesVisitor(this.parseResult, this.filePath);
-
-  final ParseStringResult parseResult;
-  final String filePath;
-  final List<String> errors = <String>[];
-
-  /// Some deprecation notices are special, for example they're used to annotate members that
-  /// will never go away and were never allowed but which we are trying to show messages for.
-  /// (One example would be a library that intentionally conflicts with a member in another
-  /// library to indicate that it is incompatible with that other library. Another would be
-  /// the regexp just above...)
-  static const Pattern ignoreDeprecration =
-      '// flutter_ignore: deprecation_syntax (see analyze.dart)';
-
-  /// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
-  static final RegExp legacyDeprecation = RegExp(
-    r'// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+',
-  );
-
-  static final RegExp deprecationVersionPattern = RegExp(
-    r'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.$',
-  );
-
-  void _addErrorWithLineInfo(AstNode node, {required String error}) {
-    final int lineNumber = parseResult.lineInfo.getLocation(node.offset).lineNumber;
-    errors.add('$filePath:$lineNumber: $error');
-  }
-
-  @override
-  void visitAnnotation(Annotation node) {
-    super.visitAnnotation(node);
-    final bool shouldCheckAnnotation =
-        node.name.name == 'Deprecated' &&
-        !hasInlineIgnore(node, parseResult, ignoreDeprecration) &&
-        !hasInlineIgnore(node, parseResult, legacyDeprecation);
-    if (!shouldCheckAnnotation) {
-      return;
-    }
-    final NodeList<Expression>? arguments = node.arguments?.arguments;
-    if (arguments == null || arguments.length != 1) {
-      _addErrorWithLineInfo(
-        node,
-        error: 'A @Deprecation annotation must have exactly one deprecation notice String.',
-      );
-      return;
-    }
-    final Expression deprecationNotice = arguments.first;
-    if (deprecationNotice is! AdjacentStrings) {
-      _addErrorWithLineInfo(node, error: 'Deprecation notice must be an adjacent string.');
-      return;
-    }
-    final List<StringLiteral> strings = deprecationNotice.strings;
-    final Iterator<StringLiteral> deprecationMessageIterator = strings.iterator;
-    final bool isNotEmpty = deprecationMessageIterator.moveNext();
-    assert(isNotEmpty); // An AdjacentString always has 2 or more string literals.
-
-    final [...List<StringLiteral> messageLiterals, StringLiteral versionLiteral] = strings;
-
-    // Verify the version literal has the correct pattern.
-    final RegExpMatch? versionMatch = versionLiteral is SimpleStringLiteral
-        ? deprecationVersionPattern.firstMatch(versionLiteral.value)
-        : null;
-    if (versionMatch == null) {
-      _addErrorWithLineInfo(
-        versionLiteral,
-        error:
-            'Deprecation notice must end with a line saying "This feature was deprecated after v<version>.".',
-      );
-      return;
-    }
-
-    final int major = int.parse(versionMatch.namedGroup('major')!);
-    final int minor = int.parse(versionMatch.namedGroup('minor')!);
-    final int patch = int.parse(versionMatch.namedGroup('patch')!);
-    final hasBuild = versionMatch.namedGroup('build') != null;
-    // There was a beta release that was mistakenly labeled 3.1.0 without a build.
-    final bool specialBeta = major == 3 && minor == 1 && patch == 0;
-    if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
-      if (!hasBuild) {
-        _addErrorWithLineInfo(
-          versionLiteral,
-          error:
-              'Deprecation notice does not accurately indicate a beta branch version number; please see https://docs.flutter.dev/install/archive to find the latest beta build version number.',
-        );
-        return;
-      }
-    }
-
-    // Verify the version literal has the correct pattern.
-    assert(messageLiterals.isNotEmpty); // An AdjacentString always has 2 or more string literals.
-    for (final message in messageLiterals) {
-      if (message is! SingleStringLiteral) {
-        _addErrorWithLineInfo(
-          message,
-          error: 'Deprecation notice does not match required pattern.',
-        );
-        return;
-      }
-      if (!message.isSingleQuoted) {
-        _addErrorWithLineInfo(
-          message,
-          error:
-              'Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
-        );
-        return;
-      }
-    }
-    final String fullExplanation = messageLiterals
-        .map((StringLiteral message) => message.stringValue ?? '')
-        .join()
-        .trimRight();
-    if (fullExplanation.isEmpty) {
-      _addErrorWithLineInfo(
-        messageLiterals.last,
-        error:
-            'Deprecation notice should be a grammatically correct sentence and end with a period; There might not be an explanatory message.',
-      );
-      return;
-    }
-    final firstChar = String.fromCharCode(fullExplanation.runes.first);
-    if (firstChar.toUpperCase() != firstChar) {
-      _addErrorWithLineInfo(
-        messageLiterals.first,
-        error:
-            'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md',
-      );
-      return;
-    }
-    if (!fullExplanation.endsWith('.') &&
-        !fullExplanation.endsWith('?') &&
-        !fullExplanation.endsWith('!')) {
-      _addErrorWithLineInfo(
-        messageLiterals.last,
-        error:
-            'Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "$fullExplanation".',
-      );
-      return;
-    }
-  }
-}
-
-Future<void> verifyDeprecations(String workingDirectory, {int minimumMatches = 2000}) async {
-  final errors = <String>[];
-  await for (final File file in _allFiles(
-    workingDirectory,
-    'dart',
-    minimumMatches: minimumMatches,
-  )) {
-    final ParseStringResult parseResult = parseFile(
-      featureSet: _parsingFeatureSet(),
-      path: file.absolute.path,
-    );
-    final visitor = _DeprecationMessagesVisitor(parseResult, file.path);
-    visitor.visitCompilationUnit(parseResult.unit);
-    errors.addAll(visitor.errors);
-  }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes$reset',
     ]);
   }
 }

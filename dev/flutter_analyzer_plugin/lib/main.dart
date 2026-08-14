@@ -6,11 +6,13 @@ import 'package:analysis_server_plugin/plugin.dart';
 import 'package:analysis_server_plugin/registry.dart';
 
 import 'src/rules/avoid_future_catch_error.dart';
+import 'src/rules/deprecation_syntax.dart';
 import 'src/rules/integration_test_timeouts.dart';
 import 'src/rules/no_bad_imports_in_flutter.dart';
 import 'src/rules/no_double_clamp.dart';
 import 'src/rules/no_runtimetype_in_tostring.dart';
 import 'src/rules/no_stopwatches.dart';
+import 'src/rules/no_sync_async_star.dart';
 import 'src/rules/no_test_imports.dart';
 import 'src/rules/null_initialized_debug_expensive_fields.dart';
 import 'src/rules/protect_public_state_subtypes.dart';
@@ -24,16 +26,18 @@ class FlutterAnalyzerPlugin extends Plugin {
   void register(PluginRegistry registry) {
     registry
       ..registerWarningRule(AvoidFutureCatchError())
+      ..registerWarningRule(DeprecationSyntax())
+      ..registerWarningRule(IntegrationTestTimeouts())
+      ..registerWarningRule(NoBadImportsInFlutter())
       ..registerWarningRule(NoDoubleClamp())
       ..registerWarningRule(NoRuntimeTypeInToString())
       ..registerWarningRule(NoStopwatches())
+      ..registerWarningRule(NoSyncAsyncStar())
       ..registerWarningRule(NoTestImports())
       ..registerWarningRule(NullInitializedDebugExpensiveFields())
       ..registerWarningRule(ProtectPublicStateSubtypes())
       ..registerWarningRule(RenderBoxIntrinsicCalculationRule())
-      ..registerWarningRule(NoBadImportsInFlutter())
-      ..registerWarningRule(SkipTestComments())
-      ..registerWarningRule(IntegrationTestTimeouts());
+      ..registerWarningRule(SkipTestComments());
   }
 
   @override
