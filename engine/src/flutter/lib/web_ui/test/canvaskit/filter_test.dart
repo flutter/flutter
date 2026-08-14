@@ -16,70 +16,39 @@ void main() {
 }
 
 void testMain() {
-  List<CkColorFilter> createColorFilters() {
-    return <CkColorFilter>[
-      createCkColorFilter(
-        const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver),
-      )!,
-      createCkColorFilter(
-        const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver),
-      )!,
-      createCkColorFilter(
-        const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver),
-      )!,
-      createCkColorFilter(
-        const EngineColorFilter.matrix(<double>[
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-        ]),
-      )!,
-      createCkColorFilter(
-        EngineColorFilter.matrix(
-          Float32List.fromList(<double>[
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            0,
-          ]),
-        ),
-      )!,
-      createCkColorFilter(const EngineColorFilter.linearToSrgbGamma())!,
-      createCkColorFilter(const EngineColorFilter.srgbToLinearGamma())!,
-      createCkColorFilter(EngineColorFilter.saturation(0.5))!,
+  List<EngineColorFilter> createColorFilters() {
+    return <EngineColorFilter>[
+      const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.srcOver),
+      const EngineColorFilter.mode(ui.Color(0x12345678), ui.BlendMode.dstOver),
+      const EngineColorFilter.mode(ui.Color(0x87654321), ui.BlendMode.dstOver),
+      const EngineColorFilter.matrix(<double>[
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+      ]),
+      EngineColorFilter.matrix(
+        Float32List.fromList(<double>[2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0]),
+      ),
+      const EngineColorFilter.linearToSrgbGamma(),
+      const EngineColorFilter.srgbToLinearGamma(),
+      EngineColorFilter.saturation(0.5),
     ];
   }
 
@@ -90,7 +59,7 @@ void testMain() {
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),
       CkImageFilter.dilate(radiusX: 5, radiusY: 6),
       CkImageFilter.erode(radiusX: 7, radiusY: 8),
-      for (final CkColorFilter colorFilter in createColorFilters())
+      for (final EngineColorFilter colorFilter in createColorFilters())
         CkImageFilter.color(colorFilter: colorFilter),
     ];
     filters.add(CkImageFilter.compose(outer: filters[0], inner: filters[1]));
@@ -101,25 +70,23 @@ void testMain() {
   setUpCanvasKitTest(withImplicitView: true);
 
   group('ImageFilters', () {
-    {
+    test('withSkImageFilter creates temp SkImageFilter', () {
       final List<CkImageFilter> testFilters = createImageFilters();
       for (final imageFilter in testFilters) {
-        test('${imageFilter.runtimeType}.withSkImageFilter creates temp SkImageFilter', () {
-          expect(imageFilter, isA<CkImageFilter>());
-          SkImageFilter? skFilter;
-          imageFilter.withSkImageFilter((value) {
-            expect(value.isDeleted(), isFalse);
-            skFilter = value;
-          });
-          expect(skFilter, isNotNull);
-          expect(
-            reason: 'Because the SkImageFilter instance is temporary',
-            skFilter!.isDeleted(),
-            isTrue,
-          );
+        expect(imageFilter, isA<CkImageFilter>());
+        SkImageFilter? skFilter;
+        imageFilter.withSkImageFilter((value) {
+          expect(value.isDeleted(), isFalse);
+          skFilter = value;
         });
+        expect(skFilter, isNotNull);
+        expect(
+          reason: 'Because the SkImageFilter instance is temporary',
+          skFilter!.isDeleted(),
+          isTrue,
+        );
       }
-    }
+    });
 
     test('reuses the Skia filter', () {
       final paint = CkPaint();

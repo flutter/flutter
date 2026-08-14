@@ -401,6 +401,14 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/lib/widgets/scrollbar/raw_scrollbar.desktop.0.dart',
     'packages/flutter/examples/api/lib/widgets/inherited_notifier/inherited_notifier.0.dart',
     'packages/flutter/examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart',
+    'packages/flutter/examples/api/lib/widgets/expansible/expansible.0.dart',
+    'packages/flutter/examples/api/lib/widgets/selection_container/selection_container.0.dart',
+    'packages/flutter/examples/api/lib/widgets/selection_container/selection_container_disabled.0.dart',
+    'packages/flutter/examples/api/lib/widgets/platform_menu_bar/platform_menu_bar.0.dart',
+    'packages/flutter/examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart',
+    'packages/flutter/examples/api/lib/widgets/context_menu/context_menu_controller.0.dart',
+    'packages/flutter/examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart',
+    'packages/flutter/examples/api/lib/widgets/selectable_region/selectable_region.0.dart',
     'packages/flutter/examples/api/test/widgets/animated_grid/animated_grid.0_test.dart',
     'packages/flutter/examples/api/test/widgets/animated_grid/sliver_animated_grid.0_test.dart',
     'packages/flutter/examples/api/test/widgets/navigator_pop_handler/navigator_pop_handler.1_test.dart',
@@ -585,10 +593,19 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/test/widgets/scrollbar/raw_scrollbar.1_test.dart',
     'packages/flutter/examples/api/test/widgets/inherited_notifier/inherited_notifier.0_test.dart',
     'packages/flutter/examples/api/test/widgets/text_magnifier/text_magnifier.0_test.dart',
+    'packages/flutter/examples/api/test/widgets/selection_container/selection_container_disabled.0_test.dart',
+    'packages/flutter/examples/api/test/widgets/selection_container/selection_container.0_test.dart',
+    'packages/flutter/examples/api/test/widgets/platform_menu_bar/platform_menu_bar.0_test.dart',
+    'packages/flutter/examples/api/test/widgets/context_menu/context_menu_controller.0_test.dart',
+    'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.0_test.dart',
+    'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.1_test.dart',
+    'packages/flutter/examples/api/test/widgets/selectable_region/selectable_region.0_test.dart',
     'examples/texture/lib/main.dart',
   };
 
-  static final RegExp _examplesPrefix = RegExp(r'packages[/\\]flutter[/\\]examples[/\\]api|examples');
+  static final RegExp _examplesPrefix = RegExp(
+    r'packages[/\\]flutter[/\\]examples[/\\]api|examples',
+  );
 
   /// Find the `packages/flutter/examples/api/lib` and
   /// `packages/flutter/examples/api/test` directories which contain the API
