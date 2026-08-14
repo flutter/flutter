@@ -557,5 +557,61 @@ TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
   EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
 }
 
+TEST_P(AiksTest, ClipDepthMaintainedAcrossBackdropFilterAndLayers) {
+  ContentContext& context = GetContentContext();
+  if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+    GTEST_SKIP() << "Test requires device with framebuffer fetch";
+  }
+
+  struct ScopedOnscreenOverride {
+    ScopedOnscreenOverride() {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(true);
+    }
+    ~ScopedOnscreenOverride() {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(std::nullopt);
+    }
+  } scoped_override;
+
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
+                                 /*requires_readback=*/true);
+
+  // 1. Root route saves and applies ClipRoundSuperellipse.
+  canvas->Save(/*total_content_depth=*/20);
+  Rect sheet_rect = Rect::MakeXYWH(0, 42, 400, 500);
+  canvas->ClipGeometry(*Geometry::MakeRoundSuperellipse(sheet_rect, 12.0f),
+                       Entity::ClipOperation::kIntersect);
+
+  uint64_t initial_clip_depth = canvas->GetMaxOpDepth();
+
+  // 2. Child layer (body Ink items) renders and restores.
+  canvas->Save(/*total_content_depth=*/5);
+  for (int i = 0; i < 5; i++) {
+    canvas->DrawRect(Rect::MakeXYWH(0, i * 50, 400, 45),
+                     Paint{.color = Color::Azure()});
+  }
+  canvas->Restore();
+
+  // 3. Child layer (_glassBar BackdropFilter) renders and restores.
+  auto blur = flutter::DlImageFilter::MakeBlur(12.0f, 12.0f,
+                                               flutter::DlTileMode::kClamp);
+  Rect glass_rect = Rect::MakeXYWH(20, 350, 360, 60);
+  canvas->SaveLayer(Paint{}, glass_rect, blur.get(),
+                    ContentBoundsPromise::kContainsContents,
+                    /*total_content_depth=*/2);
+  canvas->DrawRect(glass_rect, Paint{.color = Color::Orange()});
+  canvas->Restore();
+
+  // 4. Next layer (AppBar header) renders.
+  // Invariant: Subsequent draw operations must NOT exceed the active clip's
+  // depth.
+  canvas->Save(/*total_content_depth=*/2);
+  canvas->DrawRect(Rect::MakeXYWH(0, 0, 400, 80),
+                   Paint{.color = Color::White()});
+  EXPECT_LE(canvas->GetOpDepth(), initial_clip_depth);
+  canvas->Restore();
+
+  canvas->Restore();
+}
+
 }  // namespace testing
 }  // namespace impeller

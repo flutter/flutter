@@ -10,6 +10,7 @@
 #include "display_list/effects/dl_image_filter.h"
 #include "display_list/effects/dl_mask_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
+#include "flutter/impeller/display_list/canvas.h"
 #include "flutter/impeller/geometry/constants.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
@@ -1615,6 +1616,90 @@ TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
   builder.SaveLayer(clip_rect, &save_paint, backdrop_filter.get());
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderClippedBackdropFilterWithSuperellipse) {
+  struct ScopedOnscreenOverride {
+    ScopedOnscreenOverride() {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(true);
+    }
+    ~ScopedOnscreenOverride() {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(std::nullopt);
+    }
+  } scoped_override;
+
+  DisplayListBuilder root_builder;
+
+  root_builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  // 1. Draw a dark background on the root pass.
+  DlPaint bg_paint;
+  bg_paint.setColor(DlColor::kBlack());
+  root_builder.DrawPaint(bg_paint);
+
+  // 2. Wrap in TransformLayer (matching CupertinoSheetTransition scale +
+  // slide).
+  root_builder.Save();
+  root_builder.Scale(0.9f, 0.9f);
+  root_builder.Translate(33.4f, 3.5f);
+
+  // 3. Apply ClipRoundSuperellipse with top-only rounded corners (matching
+  // CupertinoSheet).
+  DlRect sheet_rect = DlRect::MakeXYWH(0, 42, 400, 500);
+  DlRoundingRadii top_radii = {
+      .top_left = {12, 12},
+      .top_right = {12, 12},
+      .bottom_left = {0, 0},
+      .bottom_right = {0, 0},
+  };
+  DlRoundSuperellipse clip_rse =
+      DlRoundSuperellipse::MakeRectRadii(sheet_rect, top_radii);
+  root_builder.ClipRoundSuperellipse(clip_rse, DlClipOp::kIntersect);
+
+  // 4. Wrap in OpacityLayer offset (matching CupertinoSheetRoute offset: (0,
+  // 42)).
+  root_builder.Save();
+  root_builder.Translate(0.0f, 42.0f);
+
+  // 5. Layer 1: DisplayListLayer for sheet body with Ink features.
+  for (int i = 0; i < 5; i++) {
+    DisplayListBuilder item_builder;
+    DlPaint ink_paint;
+    ink_paint.setColor(DlColor::RGBA(0.0f, 0.0f, 0.0f, 0.07f));
+    item_builder.DrawRect(DlRect::MakeXYWH(0, i * 50, 400, 45), ink_paint);
+    root_builder.DrawDisplayList(item_builder.Build());
+  }
+
+  // 6. Layer 2: BackdropFilterLayer (_glassBar).
+  root_builder.Save();
+  DlRect glass_rect = DlRect::MakeXYWH(20, 350, 360, 60);
+  DlRoundRect glass_rrect = DlRoundRect::MakeRectXY(glass_rect, 14, 14);
+  root_builder.ClipRoundRect(glass_rrect, DlClipOp::kIntersect);
+
+  DlPaint save_paint;
+  auto backdrop_filter =
+      DlImageFilter::MakeBlur(12.0f, 12.0f, DlTileMode::kClamp);
+  root_builder.SaveLayer(glass_rect, &save_paint, backdrop_filter.get());
+  DisplayListBuilder glass_builder;
+  DlPaint orange_paint;
+  orange_paint.setColor(DlColor::RGBA(1.0f, 0.6f, 0.0f, 0.6f));
+  glass_builder.DrawRect(glass_rect, orange_paint);
+  root_builder.DrawDisplayList(glass_builder.Build());
+  root_builder.Restore();  // Restore SaveLayer
+  root_builder.Restore();  // Restore glass clip
+
+  // 7. Layer 3: DisplayListLayer for Scaffold AppBar / header drawn AFTER
+  // backdrop filter.
+  DisplayListBuilder appbar_builder;
+  DlPaint white_paint;
+  white_paint.setColor(DlColor::kWhite());
+  appbar_builder.DrawRect(DlRect::MakeXYWH(0, 0, 400, 80), white_paint);
+  root_builder.DrawDisplayList(appbar_builder.Build());
+
+  root_builder.Restore();  // Restore OpacityLayer offset
+  root_builder.Restore();  // Restore TransformLayer
+
+  ASSERT_TRUE(OpenPlaygroundHere(root_builder.Build()));
 }
 
 TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
