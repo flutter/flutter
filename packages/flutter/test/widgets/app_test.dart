@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_page_tester.dart';
 
 class TestIntent extends Intent {
   const TestIntent();
@@ -44,14 +46,12 @@ void main() {
       WidgetsApp(
         key: key,
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _BasicCheckbox(
+            value: checked,
+            autofocus: true,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -76,14 +76,12 @@ void main() {
           SingleActivator(LogicalKeyboardKey.space): TestIntent(),
         },
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _BasicCheckbox(
+            value: checked,
+            autofocus: true,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -105,14 +103,12 @@ void main() {
     await tester.pumpWidget(
       WidgetsApp(
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _BasicCheckbox(
+            value: checked,
+            autofocus: true,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -189,7 +185,7 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: MaterialApp(navigatorKey: key, home: Container(), onGenerateRoute: (_) => null),
+        widget: TestWidgetsApp(navigatorKey: key, home: Container(), onGenerateRoute: (_) => null),
         errorMessage:
             'FlutterError\n'
             '   Could not find a generator for route RouteSettings("/path", null)\n'
@@ -213,7 +209,7 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: MaterialApp(
+        widget: TestWidgetsApp(
           navigatorKey: key,
           home: Container(),
           onGenerateRoute: (_) => null,
@@ -555,8 +551,8 @@ void main() {
     late final List<Locale>? localesArg;
     late final Iterable<Locale> supportedLocalesArg;
     await tester.pumpWidget(
-      MaterialApp(
-        // This uses a MaterialApp because it introduces some actual localizations.
+      TestWidgetsApp(
+        localizationsDelegates: const <LocalizationsDelegate<Object?>>[TestLocalizationsDelegate()],
         localeListResolutionCallback: (List<Locale>? locales, Iterable<Locale> supportedLocales) {
           localesArg = locales;
           supportedLocalesArg = supportedLocales;
@@ -869,12 +865,55 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const MaterialPage<void>(child: Text('base')),
-        MaterialPage<void>(
+        const TestPage<void>(child: Text('base')),
+        TestPage<void>(
           key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
       ],
+    );
+  }
+}
+
+class TestLocalizationsDelegate extends LocalizationsDelegate<Object> {
+  const TestLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'en';
+
+  @override
+  Future<Object> load(Locale locale) {
+    return SynchronousFuture<Object>(const Object());
+  }
+
+  @override
+  bool shouldReload(TestLocalizationsDelegate old) => false;
+}
+
+class _BasicCheckbox extends StatefulWidget {
+  const _BasicCheckbox({required this.value, required this.onChanged, this.autofocus = false});
+
+  final bool? value;
+  final ValueChanged<bool?>? onChanged;
+  final bool autofocus;
+
+  @override
+  State<_BasicCheckbox> createState() => _BasicCheckboxState();
+}
+
+class _BasicCheckboxState extends State<_BasicCheckbox> {
+  @override
+  Widget build(BuildContext context) {
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onChanged?.call(!(widget.value ?? false));
+            return null;
+          },
+        ),
+      },
+      child: Focus(autofocus: widget.autofocus, child: const SizedBox()),
     );
   }
 }
