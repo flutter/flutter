@@ -33,14 +33,19 @@ typedef DtdService = (String, DTDServiceCallback);
 /// Provides services, streams, and RPC invocations to interact with the Widget Preview Scaffold.
 class WidgetPreviewDtdServices {
   WidgetPreviewDtdServices({
-    required this.previewAnalytics,
+    required this.addUuidToServiceName,
+    required this.dtdLauncher,
     required this.fs,
     required this.logger,
-    required this.shutdownHooks,
-    required this.dtdLauncher,
     required this.onHotRestartPreviewerRequest,
+    required this.previewAnalytics,
     required this.project,
-    required this.addUuidToServiceName,
+    required this.shutdownHooks,
+    this.onClearSyntheticPreviews,
+    this.onHotReloadPreviewerRequest,
+    this.onRegisterSyntheticPreview,
+    this.onUnregisterSyntheticPreview,
+    this.webPreviewUri,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -85,12 +90,26 @@ class WidgetPreviewDtdServices {
 
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kHotReloadPreviewer = 'hotReloadPreviewer';
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
   static const kGetDevToolsUri = 'getDevToolsUri';
+  static const kGetWebPreviewUrl = 'getWebPreviewUrl';
+  static const kGetServiceInfo = 'getServiceInfo';
+  static const kRegisterSyntheticPreview = 'registerSyntheticPreview';
+  static const kUnregisterSyntheticPreview = 'unregisterSyntheticPreview';
+  static const kClearSyntheticPreviews = 'clearSyntheticPreviews';
 
   static const kWidgetPreviewConnectedEvent = 'Connected';
+  static const kLayoutExceptionEvent = 'LayoutException';
+  static const kCompilationSucceededEvent = 'CompilationSucceeded';
+  static const kCompilationFailedEvent = 'CompilationFailed';
+  static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
+  static const kSyntheticPreviewStateChangedEvent = 'SyntheticPreviewStateChanged';
+
+  /// Protocol version for agent widget preview services.
+  static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
@@ -99,11 +118,17 @@ class WidgetPreviewDtdServices {
   /// The list of DTD service methods registered by the tool.
   late final services = <DtdService>[
     (kHotRestartPreviewer, _hotRestart),
+    (kHotReloadPreviewer, _hotReload),
     (kIsWindows, _isWindows),
     (kResolveUri, _resolveUri),
     (kSetPreference, _setPreference),
     (kGetPreference, _getPreference),
     (kGetDevToolsUri, _getDevToolsUri),
+    (kGetWebPreviewUrl, _getWebPreviewUrl),
+    (kGetServiceInfo, _getServiceInfo),
+    (kRegisterSyntheticPreview, _registerSyntheticPreview),
+    (kUnregisterSyntheticPreview, _unregisterSyntheticPreview),
+    (kClearSyntheticPreviews, _clearSyntheticPreviews),
   ];
 
   // END KEEP SYNCED
@@ -120,6 +145,21 @@ class WidgetPreviewDtdServices {
   /// Invoked when the [kHotRestartPreviewer] service method is invoked by the widget preview
   /// scaffold.
   final VoidCallback onHotRestartPreviewerRequest;
+
+  /// Invoked when the [kHotReloadPreviewer] service method is invoked.
+  final Future<void> Function()? onHotReloadPreviewerRequest;
+
+  /// Invoked when a synthetic preview is registered dynamically.
+  final Future<bool> Function(SyntheticPreviewDetails details)? onRegisterSyntheticPreview;
+
+  /// Invoked when a synthetic preview is unregistered.
+  final Future<bool> Function(String previewId)? onUnregisterSyntheticPreview;
+
+  /// Invoked when all synthetic previews are cleared.
+  final Future<int> Function()? onClearSyntheticPreviews;
+
+  /// Returns the URI of the running web preview application, if available.
+  final Uri Function()? webPreviewUri;
 
   /// The widget_preview_scaffold project.
   final FlutterProject project;
@@ -332,6 +372,118 @@ class WidgetPreviewDtdServices {
 
   Future<Map<String, Object?>> _getDevToolsUri(Parameters _) async {
     return StringResponse((await _devToolsServerAddress.future).toString()).toJson();
+  }
+
+  Future<Map<String, Object?>> _hotReload(Parameters _) async {
+    if (onHotReloadPreviewerRequest != null) {
+      await onHotReloadPreviewerRequest!();
+    }
+    return const Success().toJson();
+  }
+
+  Future<Map<String, Object?>> _getWebPreviewUrl(Parameters _) async {
+    final Uri? uri = webPreviewUri?.call();
+    if (uri == null) {
+      throw RpcException(kNoValueForKey, 'Web preview server URL is not currently available.');
+    }
+    return WebPreviewUrlResult(host: uri.host, port: uri.port, url: uri.toString()).toJson();
+  }
+
+  Future<Map<String, Object?>> _getServiceInfo(Parameters _) async {
+    final Uri? uri = webPreviewUri?.call();
+    return PreviewServiceInfo(
+      dtdUri: _dtdUri?.toString() ?? '',
+      serviceName: widgetPreviewService,
+      version: kProtocolVersion,
+      webPreviewUrl: uri?.toString(),
+    ).toJson();
+  }
+
+  Future<Map<String, Object?>> _registerSyntheticPreview(Parameters params) async {
+    final SyntheticPreviewDetails details = SyntheticPreviewDetails.fromJson(
+      params.asMap.cast<String, Object?>(),
+    );
+    final bool success =
+        onRegisterSyntheticPreview == null || await onRegisterSyntheticPreview!(details);
+    if (success) {
+      await postSyntheticPreviewStateChangedEvent(previewId: details.previewId, registered: true);
+    }
+    return BoolResponse(success).toJson();
+  }
+
+  Future<Map<String, Object?>> _unregisterSyntheticPreview(Parameters params) async {
+    final String previewId = params['previewId'].asString;
+    final bool success =
+        onUnregisterSyntheticPreview == null || await onUnregisterSyntheticPreview!(previewId);
+    if (success) {
+      await postSyntheticPreviewStateChangedEvent(previewId: previewId, registered: false);
+    }
+    return BoolResponse(success).toJson();
+  }
+
+  Future<Map<String, Object?>> _clearSyntheticPreviews(Parameters _) async {
+    final int count = onClearSyntheticPreviews != null ? await onClearSyntheticPreviews!() : 0;
+    return <String, Object?>{'clearedCount': count};
+  }
+
+  /// Posts a [kLayoutExceptionEvent] to the widget preview stream.
+  Future<void> postLayoutExceptionEvent({
+    required String previewId,
+    required Map<String, Object?> diagnostic,
+  }) async {
+    final DartToolingDaemon? dtd = _dtd;
+    if (dtd == null) {
+      return;
+    }
+    await dtd.postEvent(widgetPreviewScaffoldStream, kLayoutExceptionEvent, <String, Object?>{
+      'previewId': previewId,
+      'diagnostic': diagnostic,
+    });
+  }
+
+  /// Posts a [kPreviewsUpdatedEvent] to the widget preview stream.
+  Future<void> postPreviewsUpdatedEvent({required List<Map<String, Object?>> previews}) async {
+    final DartToolingDaemon? dtd = _dtd;
+    if (dtd == null) {
+      return;
+    }
+    await dtd.postEvent(widgetPreviewScaffoldStream, kPreviewsUpdatedEvent, <String, Object?>{
+      'count': previews.length,
+      'previews': previews,
+    });
+  }
+
+  /// Posts a compilation status event to the widget preview stream.
+  Future<void> postCompilationEvent({required bool success, int? durationMs, String? error}) async {
+    final DartToolingDaemon? dtd = _dtd;
+    if (dtd == null) {
+      return;
+    }
+    await dtd.postEvent(
+      widgetPreviewScaffoldStream,
+      success ? kCompilationSucceededEvent : kCompilationFailedEvent,
+      <String, Object?>{
+        'success': success,
+        if (durationMs != null) 'durationMs': durationMs,
+        if (error != null) 'error': error,
+      },
+    );
+  }
+
+  /// Posts a [kSyntheticPreviewStateChangedEvent] to the widget preview stream.
+  Future<void> postSyntheticPreviewStateChangedEvent({
+    required String previewId,
+    required bool registered,
+  }) async {
+    final DartToolingDaemon? dtd = _dtd;
+    if (dtd == null) {
+      return;
+    }
+    await dtd.postEvent(
+      widgetPreviewScaffoldStream,
+      kSyntheticPreviewStateChangedEvent,
+      <String, Object?>{'previewId': previewId, 'registered': registered},
+    );
   }
 }
 

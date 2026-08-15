@@ -267,3 +267,181 @@ class Position {
     return Position(character: character, line: line);
   }
 }
+
+/// Represents an ephemeral, dynamically registered synthetic preview that can be rendered
+/// without requiring an explicit `@Preview` annotation in user source code.
+class SyntheticPreviewDetails {
+  const SyntheticPreviewDetails({
+    required this.constructorExpression,
+    required this.filePath,
+    required this.previewId,
+    required this.widgetName,
+    this.wrappers = const <String>[],
+  });
+
+  /// The Dart instantiation expression for the widget (e.g. `MyWidget(title: 'Test')`).
+  final String constructorExpression;
+
+  /// The absolute file path to the source file where the widget is defined.
+  final String filePath;
+
+  /// A unique identifier for this synthetic preview.
+  final String previewId;
+
+  /// The name of the widget class being previewed.
+  final String widgetName;
+
+  /// Optional list of wrapper widget types to wrap around the preview (e.g. `Material`, `Directionality`).
+  final List<String> wrappers;
+
+  @override
+  int get hashCode => Object.hash(
+    constructorExpression,
+    filePath,
+    previewId,
+    widgetName,
+    const DeepCollectionEquality().hash(wrappers),
+  );
+
+  @override
+  bool operator ==(Object other) {
+    return other is SyntheticPreviewDetails &&
+        other.runtimeType == SyntheticPreviewDetails &&
+        constructorExpression == other.constructorExpression &&
+        filePath == other.filePath &&
+        previewId == other.previewId &&
+        widgetName == other.widgetName &&
+        const DeepCollectionEquality().equals(wrappers, other.wrappers);
+  }
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      'constructorExpression': constructorExpression,
+      'filePath': filePath,
+      'previewId': previewId,
+      'widgetName': widgetName,
+      'wrappers': wrappers,
+    };
+  }
+
+  @override
+  String toString() => json.encode(toJson());
+
+  static SyntheticPreviewDetails fromJson(Map<String, Object?> json) {
+    final constructorExpression = json['constructorExpression']! as String;
+    final filePath = json['filePath']! as String;
+    final previewId = json['previewId']! as String;
+    final widgetName = json['widgetName']! as String;
+    final wrappersJson = json['wrappers'] as List<Object?>?;
+    final List<String> wrappers = wrappersJson != null
+        ? wrappersJson.map((Object? item) => item! as String).toList()
+        : const <String>[];
+    return SyntheticPreviewDetails(
+      constructorExpression: constructorExpression,
+      filePath: filePath,
+      previewId: previewId,
+      widgetName: widgetName,
+      wrappers: wrappers,
+    );
+  }
+}
+
+/// Information about the active web preview HTTP server.
+class WebPreviewUrlResult {
+  const WebPreviewUrlResult({required this.host, required this.port, required this.url});
+
+  /// The host interface (e.g. `127.0.0.1` or `localhost`).
+  final String host;
+
+  /// The port the web server is listening on.
+  final int port;
+
+  /// The full HTTP URL string for embedding or browser navigation.
+  final String url;
+
+  @override
+  int get hashCode => Object.hash(host, port, url);
+
+  @override
+  bool operator ==(Object other) {
+    return other is WebPreviewUrlResult &&
+        other.runtimeType == WebPreviewUrlResult &&
+        host == other.host &&
+        port == other.port &&
+        url == other.url;
+  }
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{'host': host, 'port': port, 'url': url};
+  }
+
+  @override
+  String toString() => json.encode(toJson());
+
+  static WebPreviewUrlResult fromJson(Map<String, Object?> json) {
+    final host = json['host']! as String;
+    final port = json['port']! as int;
+    final url = json['url']! as String;
+    return WebPreviewUrlResult(host: host, port: port, url: url);
+  }
+}
+
+/// Metadata describing the active widget preview service and connected endpoints.
+class PreviewServiceInfo {
+  const PreviewServiceInfo({
+    required this.dtdUri,
+    required this.serviceName,
+    required this.version,
+    this.webPreviewUrl,
+  });
+
+  /// The WebSocket URI of the Dart Tooling Daemon.
+  final String dtdUri;
+
+  /// The registered DTD service name (with UUID if enabled).
+  final String serviceName;
+
+  /// The version string of the widget preview tool service protocol.
+  final String version;
+
+  /// The active web preview HTTP URL, if available.
+  final String? webPreviewUrl;
+
+  @override
+  int get hashCode => Object.hash(dtdUri, serviceName, version, webPreviewUrl);
+
+  @override
+  bool operator ==(Object other) {
+    return other is PreviewServiceInfo &&
+        other.runtimeType == PreviewServiceInfo &&
+        dtdUri == other.dtdUri &&
+        serviceName == other.serviceName &&
+        version == other.version &&
+        webPreviewUrl == other.webPreviewUrl;
+  }
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      'dtdUri': dtdUri,
+      'serviceName': serviceName,
+      'version': version,
+      if (webPreviewUrl != null) 'webPreviewUrl': webPreviewUrl,
+    };
+  }
+
+  @override
+  String toString() => json.encode(toJson());
+
+  static PreviewServiceInfo fromJson(Map<String, Object?> json) {
+    final dtdUri = json['dtdUri']! as String;
+    final serviceName = json['serviceName']! as String;
+    final version = json['version']! as String;
+    final webPreviewUrl = json['webPreviewUrl'] as String?;
+    return PreviewServiceInfo(
+      dtdUri: dtdUri,
+      serviceName: serviceName,
+      version: version,
+      webPreviewUrl: webPreviewUrl,
+    );
+  }
+}
