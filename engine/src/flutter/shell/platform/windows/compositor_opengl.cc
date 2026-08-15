@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/compositor_opengl.h"
 
 #include "GLES3/gl3.h"
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
@@ -18,6 +19,7 @@ constexpr uint32_t kWindowFrameBufferId = 0;
 struct FramebufferBackingStore {
   uint32_t framebuffer_id = 0;
   uint32_t texture_id = 0;
+  uint32_t color_renderbuffer_id = 0;
   uint32_t depth_stencil_id = 0;
 };
 
@@ -51,48 +53,94 @@ bool CompositorOpenGL::CreateBackingStore(
 
   auto store = std::make_unique<FramebufferBackingStore>();
 
-  gl_->GenTextures(1, &store->texture_id);
   gl_->GenFramebuffers(1, &store->framebuffer_id);
-
   gl_->BindFramebuffer(GL_FRAMEBUFFER, store->framebuffer_id);
-
-  gl_->BindTexture(GL_TEXTURE_2D, store->texture_id);
-  gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.general_format, config.size.width,
-                  config.size.height, 0, format_.general_format,
-                  GL_UNSIGNED_BYTE, nullptr);
-  gl_->BindTexture(GL_TEXTURE_2D, 0);
 
   if (enable_impeller_) {
     if (supports_implicit_msaa_) {
+      gl_->GenTextures(1, &store->texture_id);
+      gl_->BindTexture(GL_TEXTURE_2D, store->texture_id);
+      gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.sized_format, config.size.width,
+                      config.size.height, 0, format_.general_format,
+                      GL_UNSIGNED_BYTE, nullptr);
+      gl_->BindTexture(GL_TEXTURE_2D, 0);
+
       // MSAA color attachment
       gl_->FramebufferTexture2DMultisampleEXT(
           GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
           store->texture_id, 0, 4);
-    } else {
-      gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                GL_TEXTURE_2D, store->texture_id, 0);
-    }
 
-    // Impeller always requires depth/stencil attachment.
-    gl_->GenRenderbuffers(1, &store->depth_stencil_id);
-    gl_->BindRenderbuffer(GL_RENDERBUFFER, store->depth_stencil_id);
-    if (supports_implicit_msaa_) {
+      // Impeller always requires depth/stencil attachment.
+      gl_->GenRenderbuffers(1, &store->depth_stencil_id);
+      gl_->BindRenderbuffer(GL_RENDERBUFFER, store->depth_stencil_id);
       gl_->RenderbufferStorageMultisampleEXT(
           GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, config.size.width,
           config.size.height);
+      gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                   GL_RENDERBUFFER, store->depth_stencil_id);
+      gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                   GL_RENDERBUFFER, store->depth_stencil_id);
+    } else if (supports_offscreen_msaa_) {
+      // MSAA color renderbuffer attachment
+      gl_->GenRenderbuffers(1, &store->color_renderbuffer_id);
+      gl_->BindRenderbuffer(GL_RENDERBUFFER, store->color_renderbuffer_id);
+      gl_->RenderbufferStorageMultisample(
+          GL_RENDERBUFFER, 4, format_.sized_format, config.size.width,
+          config.size.height);
+      gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                   GL_RENDERBUFFER,
+                                   store->color_renderbuffer_id);
+
+      // MSAA depth/stencil attachment
+      gl_->GenRenderbuffers(1, &store->depth_stencil_id);
+      gl_->BindRenderbuffer(GL_RENDERBUFFER, store->depth_stencil_id);
+      gl_->RenderbufferStorageMultisample(
+          GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, config.size.width,
+          config.size.height);
+      gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                   GL_RENDERBUFFER, store->depth_stencil_id);
+      gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                   GL_RENDERBUFFER, store->depth_stencil_id);
     } else {
+      gl_->GenTextures(1, &store->texture_id);
+      gl_->BindTexture(GL_TEXTURE_2D, store->texture_id);
+      gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.sized_format, config.size.width,
+                      config.size.height, 0, format_.general_format,
+                      GL_UNSIGNED_BYTE, nullptr);
+      gl_->BindTexture(GL_TEXTURE_2D, 0);
+
+      gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                GL_TEXTURE_2D, store->texture_id, 0);
+
+      gl_->GenRenderbuffers(1, &store->depth_stencil_id);
+      gl_->BindRenderbuffer(GL_RENDERBUFFER, store->depth_stencil_id);
       gl_->RenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
                                config.size.width, config.size.height);
+      gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                   GL_RENDERBUFFER, store->depth_stencil_id);
+      gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                   GL_RENDERBUFFER, store->depth_stencil_id);
     }
-    gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                 GL_RENDERBUFFER, store->depth_stencil_id);
-    gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                                 GL_RENDERBUFFER, store->depth_stencil_id);
   } else {
+    gl_->GenTextures(1, &store->texture_id);
+    gl_->BindTexture(GL_TEXTURE_2D, store->texture_id);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl_->TexImage2D(GL_TEXTURE_2D, 0, format_.sized_format, config.size.width,
+                    config.size.height, 0, format_.general_format,
+                    GL_UNSIGNED_BYTE, nullptr);
+    gl_->BindTexture(GL_TEXTURE_2D, 0);
+
     gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                               GL_TEXTURE_2D, store->texture_id, 0);
   }
@@ -118,8 +166,12 @@ bool CompositorOpenGL::CollectBackingStore(const FlutterBackingStore* store) {
       store->open_gl.framebuffer.user_data);
 
   gl_->DeleteFramebuffers(1, &user_data->framebuffer_id);
-  gl_->DeleteTextures(1, &user_data->texture_id);
-
+  if (user_data->texture_id != 0) {
+    gl_->DeleteTextures(1, &user_data->texture_id);
+  }
+  if (user_data->color_renderbuffer_id != 0) {
+    gl_->DeleteRenderbuffers(1, &user_data->color_renderbuffer_id);
+  }
   if (user_data->depth_stencil_id != 0) {
     gl_->DeleteRenderbuffers(1, &user_data->depth_stencil_id);
   }
@@ -237,6 +289,15 @@ bool CompositorOpenGL::Initialize() {
 
   supports_implicit_msaa_ =
       gl_->GetCapabilities()->SupportsImplicitResolvingMSAA();
+  supports_offscreen_msaa_ = gl_->GetCapabilities()->SupportsOffscreenMSAA();
+
+  if (enable_impeller_ && !supports_implicit_msaa_ &&
+      !supports_offscreen_msaa_) {
+    // TODO(190362): I suspect this branch is never taken since ANGLE will
+    // support offscreen MSAA. We should investigate removing this branch and
+    // the implicit MSAA branch in the rendering functions.
+    FML_LOG(WARNING) << "Rendering without MSAA.";
+  }
 
   is_initialized_ = true;
   return true;

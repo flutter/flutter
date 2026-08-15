@@ -155,6 +155,7 @@ void main() {
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
+    expect(data.reduceMotion, false);
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.onOffSwitchLabels, false);
@@ -172,6 +173,7 @@ void main() {
       accessibleNavigation: true,
       invertColors: true,
       disableAnimations: true,
+      reduceMotion: true,
       boldText: true,
       highContrast: true,
       onOffSwitchLabels: true,
@@ -206,6 +208,7 @@ void main() {
     expect(data.accessibleNavigation, platformData.accessibleNavigation);
     expect(data.invertColors, platformData.invertColors);
     expect(data.disableAnimations, platformData.disableAnimations);
+    expect(data.reduceMotion, platformData.reduceMotion);
     expect(data.boldText, platformData.boldText);
     expect(data.highContrast, platformData.highContrast);
     expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
@@ -257,6 +260,7 @@ void main() {
         data.disableAnimations,
         tester.platformDispatcher.accessibilityFeatures.disableAnimations,
       );
+      expect(data.reduceMotion, tester.platformDispatcher.accessibilityFeatures.reduceMotion);
       expect(data.boldText, tester.platformDispatcher.accessibilityFeatures.boldText);
       expect(data.highContrast, tester.platformDispatcher.accessibilityFeatures.highContrast);
       expect(
@@ -283,6 +287,7 @@ void main() {
         accessibleNavigation: true,
         invertColors: true,
         disableAnimations: true,
+        reduceMotion: true,
         boldText: true,
         highContrast: true,
         onOffSwitchLabels: true,
@@ -331,6 +336,7 @@ void main() {
       expect(data.accessibleNavigation, platformData.accessibleNavigation);
       expect(data.invertColors, platformData.invertColors);
       expect(data.disableAnimations, platformData.disableAnimations);
+      expect(data.reduceMotion, platformData.reduceMotion);
       expect(data.boldText, platformData.boldText);
       expect(data.highContrast, platformData.highContrast);
       expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
@@ -401,6 +407,7 @@ void main() {
         data.disableAnimations,
         tester.platformDispatcher.accessibilityFeatures.disableAnimations,
       );
+      expect(data.reduceMotion, tester.platformDispatcher.accessibilityFeatures.reduceMotion);
       expect(data.boldText, tester.platformDispatcher.accessibilityFeatures.boldText);
       expect(data.highContrast, tester.platformDispatcher.accessibilityFeatures.highContrast);
       expect(
@@ -592,6 +599,7 @@ void main() {
     expect(copied.accessibleNavigation, data.accessibleNavigation);
     expect(copied.invertColors, data.invertColors);
     expect(copied.disableAnimations, data.disableAnimations);
+    expect(copied.reduceMotion, data.reduceMotion);
     expect(copied.boldText, data.boldText);
     expect(copied.highContrast, data.highContrast);
     expect(copied.onOffSwitchLabels, data.onOffSwitchLabels);
@@ -634,6 +642,7 @@ void main() {
       accessibleNavigation: true,
       invertColors: true,
       disableAnimations: true,
+      reduceMotion: true,
       boldText: true,
       highContrast: true,
       onOffSwitchLabels: true,
@@ -654,6 +663,7 @@ void main() {
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);
     expect(copied.disableAnimations, true);
+    expect(copied.reduceMotion, true);
     expect(copied.boldText, true);
     expect(copied.highContrast, true);
     expect(copied.onOffSwitchLabels, true);
@@ -703,6 +713,7 @@ void main() {
     expect(updatedData.accessibleNavigation, data.accessibleNavigation);
     expect(updatedData.invertColors, data.invertColors);
     expect(updatedData.disableAnimations, data.disableAnimations);
+    expect(updatedData.reduceMotion, data.reduceMotion);
     expect(updatedData.boldText, data.boldText);
     expect(updatedData.highContrast, data.highContrast);
     expect(updatedData.onOffSwitchLabels, data.onOffSwitchLabels);
@@ -747,6 +758,7 @@ void main() {
     expect(updatedData.accessibleNavigation, data.accessibleNavigation);
     expect(updatedData.invertColors, data.invertColors);
     expect(updatedData.disableAnimations, data.disableAnimations);
+    expect(updatedData.reduceMotion, data.reduceMotion);
     expect(updatedData.boldText, data.boldText);
     expect(updatedData.highContrast, data.highContrast);
     expect(updatedData.onOffSwitchLabels, data.onOffSwitchLabels);
@@ -791,6 +803,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -828,6 +841,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -867,6 +881,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -901,6 +916,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -940,6 +956,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -977,6 +994,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -1016,6 +1034,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1050,6 +1069,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -1089,6 +1109,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1126,6 +1147,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -1165,6 +1187,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1199,6 +1222,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -1531,6 +1555,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1563,6 +1588,7 @@ void main() {
     expect(subScreenMediaQuery.accessibleNavigation, true);
     expect(subScreenMediaQuery.invertColors, true);
     expect(subScreenMediaQuery.disableAnimations, true);
+    expect(subScreenMediaQuery.reduceMotion, true);
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
@@ -1610,6 +1636,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1648,6 +1675,7 @@ void main() {
     expect(subScreenMediaQuery.accessibleNavigation, true);
     expect(subScreenMediaQuery.invertColors, true);
     expect(subScreenMediaQuery.disableAnimations, true);
+    expect(subScreenMediaQuery.reduceMotion, true);
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
@@ -1928,6 +1956,11 @@ void main() {
         const _MediaQueryAspectCase(
           MediaQuery.maybeDisableAnimationsOf,
           MediaQueryData(disableAnimations: true),
+        ),
+        const _MediaQueryAspectCase(MediaQuery.reduceMotionOf, MediaQueryData(reduceMotion: true)),
+        const _MediaQueryAspectCase(
+          MediaQuery.maybeReduceMotionOf,
+          MediaQueryData(reduceMotion: true),
         ),
         const _MediaQueryAspectCase(MediaQuery.boldTextOf, MediaQueryData(boldText: true)),
         const _MediaQueryAspectCase(MediaQuery.maybeBoldTextOf, MediaQueryData(boldText: true)),
