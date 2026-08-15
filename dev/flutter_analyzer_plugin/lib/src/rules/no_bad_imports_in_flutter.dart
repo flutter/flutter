@@ -32,6 +32,11 @@ class NoBadImportsInFlutter extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path;
+    if (!filePath.contains('packages/flutter/lib/src/') &&
+        !filePath.contains(r'packages\flutter\lib\src\')) {
+      return;
+    }
     final visitor = _Visitor(this, context);
     registry.addImportDirective(this, visitor);
   }
@@ -46,17 +51,7 @@ class _Visitor extends SimpleAstVisitor<void> {
   @override
   void visitImportDirective(ImportDirective node) {
     if (node.uri.stringValue case final String uriStr) {
-      final String? absolutePath = context.currentUnit?.unit.declaredFragment?.source.fullName;
-      if (absolutePath == null) {
-        return;
-      }
-
-      final bool isFlutterSrc =
-          absolutePath.contains('packages/flutter/lib/src/') ||
-          absolutePath.contains(r'packages\flutter\lib\src\');
-      if (!isFlutterSrc) {
-        return;
-      }
+      final String absolutePath = context.definingUnit.file.path;
 
       if (uriStr == 'package:meta/meta.dart') {
         final bool isFoundation =
