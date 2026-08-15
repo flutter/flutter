@@ -217,6 +217,7 @@ class Cache {
   final Platform _platform;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
+  OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
   final Stdio? _stdio;

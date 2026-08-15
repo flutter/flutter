@@ -96,13 +96,21 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
   /// checks for situations where failure is acceptable, such as the flutter
   /// persistent settings cache.
-  static void noExitOnFailure(void Function() operation) {
+  static T noExitOnFailure<T>(T Function() operation) {
     final bool previousValue = ErrorHandlingFileSystem._noExitOnFailure;
+    ErrorHandlingFileSystem._noExitOnFailure = true;
     try {
-      ErrorHandlingFileSystem._noExitOnFailure = true;
-      operation();
-    } finally {
+      final T result = operation();
+      if (result is Future) {
+        return (result.whenComplete(() {
+          ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+        })) as T;
+      }
       ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+      return result;
+    } catch (_) {
+      ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+      rethrow;
     }
   }
 

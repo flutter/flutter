@@ -6,10 +6,26 @@
 
 #include "gtest/gtest.h"
 
+#include "flutter/lib/gpu/render_pipeline.h"
+#include "flutter/lib/gpu/shader.h"
 #include "fml/memory/ref_ptr.h"
 
 namespace flutter::gpu {
 namespace {
+
+fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
+  return Shader::Make("library", "Entrypoint", stage,
+                      /*code_mapping=*/nullptr, /*inputs=*/{}, /*layouts=*/{},
+                      /*uniform_structs=*/{}, /*uniform_textures=*/{},
+                      /*descriptor_set_layouts=*/{});
+}
+
+fml::RefPtr<RenderPipeline> MakeRenderPipeline() {
+  auto vertex = MakeShader(impeller::ShaderStage::kVertex);
+  auto fragment = MakeShader(impeller::ShaderStage::kFragment);
+  return fml::MakeRefCounted<RenderPipeline>(vertex, fragment,
+                                             vertex->CreateVertexDescriptor());
+}
 
 // Regression test for https://github.com/flutter/flutter/issues/188712:
 // SetDepthWriteEnable must honor its argument. It previously ignored the
@@ -48,7 +64,49 @@ TEST(FlutterGpuRenderPassTest, PipelineStateMutationsMarkStateDirty) {
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
 
   render_pass->ClearPipelineStateDirtyForTesting();
-  render_pass->SetPipeline(nullptr);
+  render_pass->SetCullMode(impeller::CullMode::kBackFace);
+  EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
+
+  render_pass->ClearPipelineStateDirtyForTesting();
+  render_pass->SetWindingOrder(impeller::WindingOrder::kCounterClockwise);
+  EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
+
+  render_pass->ClearPipelineStateDirtyForTesting();
+  render_pass->SetPrimitiveType(impeller::PrimitiveType::kTriangleStrip);
+  EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
+
+  render_pass->ClearPipelineStateDirtyForTesting();
+  render_pass->SetPolygonMode(impeller::PolygonMode::kLine);
+  EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
+
+  render_pass->ClearPipelineStateDirtyForTesting();
+  render_pass->SetPipeline(MakeRenderPipeline());
+  EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
+}
+
+// Callers re-send the same fixed-function state and rebind the same pipeline
+// ahead of most draws. Dirtying on those redundant assignments would rebuild
+// the pipeline for every draw and leave the memoization doing nothing.
+TEST(FlutterGpuRenderPassTest, RedundantPipelineStateAssignmentsAreIgnored) {
+  auto render_pass = fml::MakeRefCounted<RenderPass>();
+  auto pipeline = MakeRenderPipeline();
+
+  render_pass->SetCullMode(impeller::CullMode::kBackFace);
+  render_pass->SetWindingOrder(impeller::WindingOrder::kCounterClockwise);
+  render_pass->SetPrimitiveType(impeller::PrimitiveType::kTriangleStrip);
+  render_pass->SetPolygonMode(impeller::PolygonMode::kLine);
+  render_pass->SetPipeline(pipeline);
+
+  render_pass->ClearPipelineStateDirtyForTesting();
+  render_pass->SetCullMode(impeller::CullMode::kBackFace);
+  render_pass->SetWindingOrder(impeller::WindingOrder::kCounterClockwise);
+  render_pass->SetPrimitiveType(impeller::PrimitiveType::kTriangleStrip);
+  render_pass->SetPolygonMode(impeller::PolygonMode::kLine);
+  render_pass->SetPipeline(pipeline);
+  EXPECT_FALSE(render_pass->IsPipelineStateDirtyForTesting());
+
+  // A real change still dirties.
+  render_pass->SetCullMode(impeller::CullMode::kFrontFace);
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
 }
 

@@ -237,7 +237,7 @@ class _FinancialView extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return FocusTraversalOrder(
-      order: NumericFocusOrder(order!),
+      order: .numeric(order!),
       child: ColoredBox(
         color: RallyColors.cardBackground,
         child: Column(
