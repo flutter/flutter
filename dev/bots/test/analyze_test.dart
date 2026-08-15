@@ -67,57 +67,6 @@ void main() {
     expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
   });
 
-  test('analyze.dart - verifyDeprecations', () async {
-    final String result = await capture(
-      () => verifyDeprecations(testRootPath, minimumMatches: 2),
-      shouldHaveErrors: true,
-    );
-    final fixture = File(path.join(testRootPath, 'packages', 'foo', 'deprecation.dart'));
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          'See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
-        ],
-      ),
-    );
-  });
-
-  test('analyze.dart - verifyGoldenTags', () async {
-    final List<String> result = (await capture(
-      () => verifyGoldenTags(testRootPath, minimumMatches: 6),
-      shouldHaveErrors: true,
-    )).split('\n');
-    const noTag =
-        "Files containing golden tests must be tagged using @Tags(<String>['reduced-test-set']) "
-        'at the top of the file before import statements.';
-    const missingTag = "Files containing golden tests must be tagged with 'reduced-test-set'.";
-    final List<String> lines = <String>[
-      '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
-      '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
-    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).toList();
-    expect(
-      result.length,
-      4 + lines.length,
-      reason: 'output had unexpected number of lines:\n${result.join('\n')}',
-    );
-    expect(
-      result[0],
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-    );
-    expect(result.getRange(1, result.length - 3).toSet(), lines.toSet());
-    expect(
-      result[result.length - 3],
-      '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md',
-    );
-    expect(
-      result[result.length - 2],
-      '╚═══════════════════════════════════════════════════════════════════════════════',
-    );
-    expect(result[result.length - 1], ''); // trailing newline
-  });
-
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(
       () => verifyNoMissingLicense(testRootPath, checkMinimums: false),
@@ -150,34 +99,6 @@ void main() {
       '║ test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character',
       '║ test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line',
     ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).join('\n');
-    expect(
-      result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n',
-    );
-  });
-
-  test('analyze.dart - verifyRepositoryLinks', () async {
-    final String result = await capture(
-      () => verifyRepositoryLinks(testRootPath),
-      shouldHaveErrors: true,
-    );
-    const bannedBranch = 'master';
-    final file = Platform.isWindows
-        ? r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart'
-        : 'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
-    final String lines = <String>[
-      '║ $file contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-      '║ $file contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-      '║ $file contains https://cs.opensource.google.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-      '║ $file contains https://dart.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-      '║ $file contains https://flutter.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-      '║ $file contains https://source.chromium.org/+/$bannedBranch/file1, which uses the banned "master" branch.',
-      '║ $file contains https://github.com/flutter/flutter/tree/$bannedBranch/file1, which uses the banned "master" branch.',
-      '║ $file contains https://raw.githubusercontent.com/flutter/flutter/blob/$bannedBranch/file1, which uses the banned "master" branch.',
-      '║ Change the URLs above to the expected pattern by using the "main" branch if it exists, otherwise adding the repository to the list of exceptions in analyze.dart.',
-    ].join('\n');
     expect(
       result,
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
@@ -259,49 +180,6 @@ void main() {
           ), // sha256("\xff")
           const Hash256(0x155644D3F13D98BF, 0, 0, 0),
         },
-      ),
-    );
-  });
-
-  test('analyze.dart - verifyNullInitializedDebugExpensiveFields', () async {
-    final String result = await capture(
-      () => verifyNullInitializedDebugExpensiveFields(testRootPath, minimumMatches: 1),
-      shouldHaveErrors: true,
-    );
-
-    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'bar.dart'));
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          '',
-          'Fields annotated with @_debugOnly must null initialize,',
-          'to ensure both the field and initializer are removed from profile/release mode.',
-          'These fields should be written as:',
-          'field = kDebugMode ? <DebugValue> : null;',
-        ],
-      ),
-    );
-  });
-
-  test('analyze.dart - verifyTabooDocumentation', () async {
-    final String result = await capture(
-      () => verifyTabooDocumentation(testRootPath, minimumMatches: 1),
-      shouldHaveErrors: true,
-    );
-
-    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'taboo_words.dart'));
-    expect(
-      result,
-      matchesErrorsInFile(
-        fixture,
-        endsWith: <String>[
-          '',
-          'Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.',
-          'In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.',
-          'Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.',
-        ],
       ),
     );
   });

@@ -187,6 +187,32 @@ TEST(TessellatorTest, CircleVertexCounts) {
   }
 }
 
+TEST(TessellatorTest, StrokedCircleVertexCounts) {
+  Tessellator tessellator;
+
+  // The outer edge of a stroked circle sits at |radius| + |half_width|, so it
+  // must be divided at least as finely as a filled circle of that radius to be
+  // within |kCircleTolerance|.
+  auto test = [&tessellator](const Matrix& transform, Scalar radius,
+                             Scalar half_width, const std::string& label) {
+    ASSERT_LT(half_width, radius) << label;
+    auto stroked = tessellator.StrokedCircle(transform, {}, radius, half_width);
+    auto filled = tessellator.FilledCircle(transform, {}, radius + half_width);
+
+    EXPECT_GE(stroked.GetVertexCount() / 8, filled.GetVertexCount() / 4)
+        << label;
+  };
+
+  test({}, 2.0, 1.0, "small radius");
+  test({}, 100.0, 10.0, "large radius");
+  test(Matrix::MakeScale({500.0, 500.0, 0.0}), 2.0, 1.0,
+       "small radius, scaled up");
+  test(Matrix::MakeScale({500.0, 500.0, 0.0}), 100.0, 10.0,
+       "large radius, scaled up");
+  test(Matrix::MakeScale({0.002, 0.002, 0.0}), 1000.0, 10.0,
+       "large radius, scaled down");
+}
+
 TEST(TessellatorTest, FilledCircleTessellationVertices) {
   Tessellator tessellator;
 
@@ -303,6 +329,48 @@ TEST(TessellatorTest, StrokedCircleTessellationVertices) {
   test(Matrix::MakeScale({0.002, 0.002, 0.0}), {}, 1000.0, 10.0);
 }
 
+TEST(TessellatorTest, StrokedCircleWideStrokeTessellationVertices) {
+  Tessellator tessellator;
+
+  // A stroke at least as wide as the radius fills the circle. Verify it
+  // tessellates as a filled circle out to the outer edge of the stroke.
+  auto test = [&tessellator](const Matrix& transform, const Point& center,
+                             Scalar radius, Scalar half_width,
+                             const std::string& label) {
+    ASSERT_GE(half_width, radius) << label;
+    auto generator =
+        tessellator.StrokedCircle(transform, center, radius, half_width);
+    auto filled =
+        tessellator.FilledCircle(transform, center, radius + half_width);
+
+    EXPECT_EQ(generator.GetTriangleType(), filled.GetTriangleType()) << label;
+    EXPECT_EQ(generator.GetVertexCount(), filled.GetVertexCount()) << label;
+
+    auto vertices = std::vector<Point>();
+    generator.GenerateVertices([&vertices](const Point& p) {  //
+      vertices.push_back(p);
+    });
+    auto filled_vertices = std::vector<Point>();
+    filled.GenerateVertices([&filled_vertices](const Point& p) {  //
+      filled_vertices.push_back(p);
+    });
+
+    EXPECT_EQ(vertices.size(), generator.GetVertexCount()) << label;
+    ASSERT_EQ(vertices.size(), filled_vertices.size()) << label;
+    for (size_t i = 0; i < vertices.size(); i++) {
+      EXPECT_POINT_NEAR(vertices[i], filled_vertices[i])
+          << label << ", vertex " << i;
+    }
+  };
+
+  test({}, {}, 2.0, 2.0, "half width == radius");
+  test({}, {}, 2.0, 4.0, "half width > radius");
+  test({}, {10, 10}, 2.0, 2.0, "offset center");
+  test(Matrix::MakeScale({500.0, 500.0, 0.0}), {}, 2.0, 2.0, "scaled up");
+  test(Matrix::MakeScale({0.002, 0.002, 0.0}), {}, 1000.0, 1000.0,
+       "scaled down");
+}
+
 TEST(TessellatorTest, FilledArcStripTessellationVertices) {
   Tessellator tessellator;
 
@@ -377,6 +445,43 @@ TEST(TessellatorTest, FilledArcStripTessellationVertices) {
        Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(94), Degrees(322), false));
   test({},
        Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(94), Degrees(322), true));
+}
+
+TEST(TessellatorTest, StrokedArcWideStrokeTessellationVertices) {
+  Tessellator tessellator;
+
+  // A stroke width wider than the radii would cross the center. Verify the
+  // inner edge stops there rather than folding through and self-intersecting.
+  auto test = [&tessellator](const Matrix& transform, const Arc& arc,
+                             Scalar half_width, const std::string& label) {
+    Scalar radius = arc.GetOvalSize().width * 0.5f;
+    ASSERT_GE(half_width, radius) << label;
+    auto generator =
+        tessellator.StrokedArc(transform, arc, Cap::kButt, half_width);
+
+    auto vertices = std::vector<Point>();
+    generator.GenerateVertices([&vertices](const Point& p) {  //
+      vertices.push_back(p);
+    });
+    EXPECT_EQ(vertices.size(), generator.GetVertexCount()) << label;
+    ASSERT_EQ(vertices.size() % 2, 0u) << label;
+
+    Point center = arc.GetOvalBounds().GetCenter();
+    for (size_t i = 0; i < vertices.size(); i += 2) {
+      EXPECT_POINT_NEAR(vertices[i], center) << label << ", inner vertex " << i;
+      EXPECT_NEAR((vertices[i + 1] - center).GetLength(), radius + half_width,
+                  kEhCloseEnough)
+          << label << ", outer vertex " << i + 1;
+    }
+  };
+
+  test({}, Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(0), Degrees(90), false),
+       50.0, "half width == radius");
+  test({}, Arc(Rect::MakeXYWH(0, 0, 100, 100), Degrees(0), Degrees(90), false),
+       75.0, "half width > radius");
+  test({},
+       Arc(Rect::MakeXYWH(10, 20, 100, 100), Degrees(94), Degrees(322), false),
+       60.0, "offset oval, oblique sweep");
 }
 
 TEST(TessellatorTest, RoundCapLineTessellationVertices) {
