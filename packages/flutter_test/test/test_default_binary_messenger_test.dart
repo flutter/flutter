@@ -114,8 +114,6 @@ void main() {
   });
 
   group('closure of MockStreamHandlerEventSink does not hang', () {
-    setUpAll(TestWidgetsFlutterBinding.ensureInitialized);
-
     const kTestEventChannelName = 'binary_messenger_test';
 
     setUp(() {
