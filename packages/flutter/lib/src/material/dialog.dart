@@ -1656,7 +1656,7 @@ Future<T?> showDialog<T>({
             barrierColor ??
             DialogTheme.of(context).barrierColor ??
             Theme.of(context).dialogTheme.barrierColor ??
-            Colors.black54,
+            Theme.of(context).colorScheme.scrim.withValues(alpha: Colors.black54.a),
         barrierDismissible: barrierDismissible,
         barrierLabel: barrierLabel,
         useSafeArea: useSafeArea,

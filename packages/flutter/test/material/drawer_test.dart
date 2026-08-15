@@ -209,6 +209,36 @@ void main() {
     await checkScrim(const Color(0xFF323232));
   });
 
+  testWidgets('Drawer scrim respects ColorScheme.scrim when not overridden', (
+    WidgetTester tester,
+  ) async {
+    Widget getScrim() {
+      return tester
+          .widget<Semantics>(
+            find.descendant(
+              of: find.byType(DrawerController),
+              matching: find.byWidgetPredicate((Widget widget) {
+                return widget is Semantics && widget.properties.label == 'Dismiss';
+              }),
+            ),
+          )
+          .child!;
+    }
+
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(colorScheme: const ColorScheme.light(scrim: Colors.red)),
+        home: Scaffold(key: scaffoldKey, drawer: const Drawer()),
+      ),
+    );
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    final scrim = getScrim() as ColoredBox;
+    expect(scrim.color, isSameColorAs(Colors.red.withValues(alpha: Colors.black54.a)));
+  });
+
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(

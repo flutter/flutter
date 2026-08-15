@@ -1328,7 +1328,10 @@ Future<T?> showModalBottomSheet<T>({
       clipBehavior: clipBehavior,
       constraints: constraints,
       isDismissible: isDismissible,
-      modalBarrierColor: barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
+      modalBarrierColor:
+          barrierColor ??
+          Theme.of(context).bottomSheetTheme.modalBarrierColor ??
+          Theme.of(context).colorScheme.scrim.withValues(alpha: Colors.black54.a),
       enableDrag: enableDrag,
       showDragHandle: showDragHandle,
       settings: routeSettings,

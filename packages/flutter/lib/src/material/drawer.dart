@@ -691,7 +691,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       };
 
       final Color scrimColor =
-          widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54;
+          widget.scrimColor ??
+          DrawerTheme.of(context).scrimColor ??
+          Theme.of(context).colorScheme.scrim.withValues(alpha: Colors.black54.a);
       final Color effectiveScrimColor = scrimColor.withValues(
         alpha: scrimColor.a * _controller.value,
       );

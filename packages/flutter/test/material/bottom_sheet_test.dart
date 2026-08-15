@@ -975,6 +975,35 @@ void main() {
     expect(modalBarrier.color, barrierColor);
   });
 
+  testWidgets('Modal barrier color respects ColorScheme.scrim when not overridden', (
+    WidgetTester tester,
+  ) async {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(colorScheme: const ColorScheme.light(scrim: Colors.red)),
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
+    );
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      builder: (BuildContext context) {
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
+    expect(modalBarrier.color, isSameColorAs(Colors.red.withValues(alpha: Colors.black54.a)));
+  });
+
   testWidgets('Material3 - BottomSheet uses fallback values', (WidgetTester tester) async {
     const Color surfaceColor = Colors.pink;
     const Color surfaceTintColor = Colors.blue;

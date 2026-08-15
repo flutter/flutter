@@ -593,6 +593,30 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
   });
 
+  testWidgets('Barrier color respects ColorScheme.scrim when not overridden', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(colorScheme: const ColorScheme.light(scrim: Colors.red)),
+        home: const Center(child: Text('Test')),
+      ),
+    );
+    final BuildContext context = tester.element(find.text('Test'));
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return const Text('Dialog');
+      },
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+      isSameColorAs(Colors.red.withValues(alpha: Colors.black54.a)),
+    );
+  });
+
   testWidgets('Dialog hides underlying semantics tree', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     const buttonText = 'A button covered by dialog overlay';
