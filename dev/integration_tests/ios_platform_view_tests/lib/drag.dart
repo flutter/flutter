@@ -19,11 +19,8 @@ class _DragScreenState extends State<DragScreen> {
 
   bool get isCorrectOrder => listEquals(items, targetOrder);
 
-  void _onReorder(int oldIndex, int newIndex) {
+  void _onReorderItem(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
       final int item = items.removeAt(oldIndex);
       items.insert(newIndex, item);
     });
@@ -59,7 +56,7 @@ class _DragScreenState extends State<DragScreen> {
           Expanded(
             child: ReorderableListView.builder(
               itemCount: items.length,
-              onReorderItem: _onReorder,
+              onReorderItem: _onReorderItem,
               buildDefaultDragHandles: false,
               proxyDecorator: (Widget child, int index, Animation<double> animation) {
                 return Material(elevation: 4, color: Colors.transparent, child: child);
