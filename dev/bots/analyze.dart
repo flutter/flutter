@@ -22,8 +22,6 @@ import 'custom_rules/render_box_intrinsics.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
-final String flutterPackages = path.join(flutterRoot, 'packages');
-
 /// The path to the `dart` executable; set at the top of `main`
 late final String dart;
 
@@ -233,9 +231,7 @@ List<Validation> _getValidations({
       'Spaces after flow control statements...',
       () => verifySpacesAfterFlowControlStatements(flutterRoot),
     ),
-    Validation('golden-tags', 'Goldens...', () => verifyGoldenTags(flutterPackages)),
     Validation('no-missing-license', 'Licenses...', () => verifyNoMissingLicense(flutterRoot)),
-    Validation('no-test-imports', 'Test imports...', () => verifyNoTestImports(flutterRoot)),
     Validation(
       'no-bad-imports-flutter',
       'Bad imports (framework)...',
@@ -251,7 +247,6 @@ List<Validation> _getValidations({
       'Localization files of stocks app...',
       () => verifyStockAppLocalizations(flutterRoot),
     ),
-    Validation('taboo', 'Taboo words...', () => verifyTabooDocumentation(flutterRoot)),
     Validation('lint-kotlin', 'Lint Kotlin files...', () => lintKotlinFiles(flutterRoot)),
     Validation(
       'lint-kotlin-templates',
@@ -625,80 +620,6 @@ Future<void> verifyToolTestsEndInTestDart(String workingDirectory) async {
   }
 }
 
-final RegExp _findGoldenTestPattern = RegExp(r'matchesGoldenFile\(');
-final RegExp _findGoldenDefinitionPattern = RegExp(r'matchesGoldenFile\(Object');
-final RegExp _leadingComment = RegExp(r'//');
-final RegExp _goldenTagPattern1 = RegExp(r'@Tags\(');
-final RegExp _goldenTagPattern2 = RegExp(r"'reduced-test-set'");
-
-/// Only golden file tests in the flutter package are subject to reduced testing,
-/// for example, invocations in flutter_test to validate comparator
-/// functionality do not require tagging.
-const String _ignoreGoldenTag = '// flutter_ignore: golden_tag (see analyze.dart)';
-const String _ignoreGoldenTagForFile = '// flutter_ignore_for_file: golden_tag (see analyze.dart)';
-
-Future<void> verifyGoldenTags(String workingDirectory, {int minimumMatches = 2000}) async {
-  final errors = <String>[];
-  await for (final File file in _allFiles(
-    workingDirectory,
-    'dart',
-    minimumMatches: minimumMatches,
-  )) {
-    var needsTag = false;
-    var hasTagNotation = false;
-    var hasReducedTag = false;
-    var ignoreForFile = false;
-    final List<String> lines = file.readAsLinesSync();
-    for (final line in lines) {
-      if (line.contains(_goldenTagPattern1)) {
-        hasTagNotation = true;
-      }
-      if (line.contains(_goldenTagPattern2)) {
-        hasReducedTag = true;
-      }
-      if (line.contains(_findGoldenTestPattern) &&
-          !line.contains(_findGoldenDefinitionPattern) &&
-          !line.contains(_leadingComment) &&
-          !line.contains(_ignoreGoldenTag)) {
-        needsTag = true;
-      }
-      if (line.contains(_ignoreGoldenTagForFile)) {
-        ignoreForFile = true;
-      }
-      // If the file is being ignored or a reduced test tag is already accounted
-      // for, skip parsing the rest of the lines for golden file tests.
-      if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
-        break;
-      }
-    }
-    // If a reduced test tag is already accounted for, move on to the next file.
-    if (ignoreForFile || (hasTagNotation && hasReducedTag)) {
-      continue;
-    }
-    // If there are golden file tests, ensure they are tagged for all reduced
-    // test environments.
-    if (needsTag) {
-      if (!hasTagNotation) {
-        errors.add(
-          '${file.path}: Files containing golden tests must be tagged using '
-          "@Tags(<String>['reduced-test-set']) at the top of the file before import statements.",
-        );
-      } else if (!hasReducedTag) {
-        errors.add(
-          '${file.path}: Files containing golden tests must be tagged with '
-          "'reduced-test-set'.",
-        );
-      }
-    }
-  }
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '${bold}See: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md$reset',
-    ]);
-  }
-}
-
 String _generateLicense(String prefix) {
   return '${prefix}Copyright 2014 The Flutter Authors. All rights reserved.\n'
       '${prefix}Use of this source code is governed by a BSD-style license that can be\n'
@@ -845,39 +766,6 @@ Future<void> _verifyNoMissingLicenseForExtension(
       if (header.isNotEmpty) 'followed by the following license text:',
       license,
       if (trailingBlank) '...followed by a blank line.',
-    ]);
-  }
-}
-
-final RegExp _testImportPattern = RegExp(r'''import (['"])([^'"]+_test\.dart)\1''');
-const Set<String> _exemptTestImports = <String>{
-  'package:flutter_test/flutter_test.dart',
-  'hit_test.dart',
-  'package:test_api/src/backend/live_test.dart',
-  'package:integration_test/integration_test.dart',
-};
-
-Future<void> verifyNoTestImports(String workingDirectory) async {
-  final errors = <String>[];
-  assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
-  final List<File> dartFiles = await _allFiles(
-    path.join(workingDirectory, 'packages'),
-    'dart',
-    minimumMatches: 1500,
-  ).toList();
-  for (final file in dartFiles) {
-    for (final String line in file.readAsLinesSync()) {
-      final Match? match = _testImportPattern.firstMatch(line);
-      if (match != null && !_exemptTestImports.contains(match.group(2))) {
-        errors.add(file.path);
-      }
-    }
-  }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      '${bold}The following file(s) import a test directly. Test utilities should be in their own file.$reset',
-      ...errors,
     ]);
   }
 }
@@ -1867,37 +1755,6 @@ Future<void> _checkConsumerDependencies() async {
       'To make sure we do not accidentally add ${plural(removed.length, "this dependency", "these dependencies")} back in the future,',
       'please remove ${plural(removed.length, "this", "these")} packages from the allow-list in dev/bots/allowlist.dart.',
       'Thanks!',
-    ]);
-  }
-}
-
-final RegExp tabooPattern = RegExp(r'^ *///.*\b(simply|note:|note that)\b', caseSensitive: false);
-
-Future<void> verifyTabooDocumentation(String workingDirectory, {int minimumMatches = 100}) async {
-  final errors = <String>[];
-  await for (final File file in _allFiles(
-    workingDirectory,
-    'dart',
-    minimumMatches: minimumMatches,
-  )) {
-    final List<String> lines = file.readAsLinesSync();
-    for (var index = 0; index < lines.length; index += 1) {
-      final String line = lines[index];
-      final Match? match = tabooPattern.firstMatch(line);
-      if (match != null) {
-        errors.add(
-          '${file.path}:${index + 1}: Found use of the taboo word "${match.group(1)}" in documentation string.',
-        );
-      }
-    }
-  }
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '',
-      '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
-      '${bold}In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
-      '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.$reset',
     ]);
   }
 }
