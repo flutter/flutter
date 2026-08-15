@@ -2505,7 +2505,7 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   @override
   void dispose() {
     assert(() {
-      debugViewMetricsOverridesNotifier.removeListener(_handleViewMetricsOverridesChanged);
+      debugViewMetricsOverridesNotifier.removeListener(_debugHandleViewMetricsOverridesChanged);
       return true;
     }());
     WidgetsBinding.instance.removeObserver(this);
