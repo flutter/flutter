@@ -164,6 +164,7 @@ source_set("InternalFlutterSwiftCommon") {
   # header, but defined in the framework, while avoiding linking errors.
   visibility = [ ":framework_common" ]
   configs += [ ":config" ]
+  swiftflags = [ "-swift-version", "6" ]
   bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
   sources = [
     "framework/Source/Logger.swift",
