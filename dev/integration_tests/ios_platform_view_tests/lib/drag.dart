@@ -15,7 +15,6 @@ class DragScreen extends StatefulWidget {
 class _DragScreenState extends State<DragScreen> {
   List<int> items = <int>[1, 2, 3, 4, 5];
 
-  // Target order for Maestro drag-and-drop test validation.
   static const List<int> targetOrder = <int>[3, 1, 4, 5, 2];
 
   bool get isCorrectOrder => listEquals(items, targetOrder);
