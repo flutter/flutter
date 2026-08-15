@@ -134,7 +134,7 @@ void main() {
       );
     });
 
-    testWidgets('test finishes without hanging when sink is not closed', (tester) async {
+    testWidgets('when sink is not closed', (WidgetTester tester) async {
       const EventChannel(
         kTestEventChannelName,
       ).receiveBroadcastStream({'close': false}).listen((_) {});
