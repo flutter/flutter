@@ -2418,12 +2418,13 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (!kReleaseMode) {
-      debugViewMetricsOverridesNotifier.addListener(_handleViewMetricsOverridesChanged);
-    }
+    assert(() {
+      debugViewMetricsOverridesNotifier.addListener(_debugHandleViewMetricsOverridesChanged);
+      return true;
+    }());
   }
 
-  void _handleViewMetricsOverridesChanged() {
+  void _debugHandleViewMetricsOverridesChanged() {
     // The override is read in build(), so an empty setState is enough to pick
     // up the new value.
     setState(() {});
@@ -2503,9 +2504,10 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void dispose() {
-    if (!kReleaseMode) {
+    assert(() {
       debugViewMetricsOverridesNotifier.removeListener(_handleViewMetricsOverridesChanged);
-    }
+      return true;
+    }());
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -2513,23 +2515,23 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   @override
   Widget build(BuildContext context) {
     MediaQueryData effectiveData = _data!;
-    // TODO(victorsanni): Remove this so all overrides are handled by debugViewMetricsOverrides.
-    // If we get our platformBrightness from the PlatformDispatcher (i.e. we have no parentData) replace it
-    // with the debugBrightnessOverride in non-release mode.
-    if (!kReleaseMode &&
-        _parentData == null &&
-        effectiveData.platformBrightness != debugBrightnessOverride) {
-      effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
-    }
-    // Developer tooling can override the metrics of an individual view. Unlike
-    // debugBrightnessOverride above, this applies even when there is a parent
-    // MediaQuery, because the override explicitly names the view it targets.
-    if (!kReleaseMode) {
+    assert(() {
+      // TODO(victorsanni): Remove this so all overrides are handled by debugViewMetricsOverrides.
+      // If we get our platformBrightness from the PlatformDispatcher (i.e. we
+      // have no parentData) replace it with the debugBrightnessOverride in
+      // non-release mode.
+      if (_parentData == null && effectiveData.platformBrightness != debugBrightnessOverride) {
+        effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
+      }
+      // Developer tooling can override the metrics of an individual view. Unlike
+      // debugBrightnessOverride above, this applies even when there is a parent
+      // MediaQuery, because the override explicitly names the view it targets.
       final ViewMetricsOverride? override = debugViewMetricsOverrides[widget.view.viewId];
       if (override != null) {
         effectiveData = _applyViewMetricsOverride(widget.view, effectiveData, override);
       }
-    }
+      return true;
+    }());
     return MediaQuery(data: effectiveData, child: widget.child);
   }
 

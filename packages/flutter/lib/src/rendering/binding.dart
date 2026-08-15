@@ -61,9 +61,10 @@ mixin RendererBinding
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
     addPersistentFrameCallback(_handlePersistentFrameCallback);
-    if (!kReleaseMode) {
-      debugViewMetricsOverridesNotifier.addListener(_handleViewMetricsOverridesChanged);
-    }
+    assert(() {
+      debugViewMetricsOverridesNotifier.addListener(_debugHandleViewMetricsOverridesChanged);
+      return true;
+    }());
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
@@ -374,33 +375,38 @@ mixin RendererBinding
   @protected
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
     final ui.FlutterView view = renderView.flutterView;
-    if (!kReleaseMode) {
+    ViewConfiguration? configuration;
+    assert(() {
       final ViewMetricsOverride? override = debugViewMetricsOverrides[view.viewId];
       if (override != null && override.affectsViewConfiguration) {
         final double devicePixelRatio = override.devicePixelRatio ?? view.devicePixelRatio;
         final physicalConstraints = override.physicalSize != null
             ? BoxConstraints.tight(override.physicalSize!)
             : BoxConstraints.fromViewConstraints(view.physicalConstraints);
-        return ViewConfiguration(
+        configuration = ViewConfiguration(
           logicalConstraints: physicalConstraints / devicePixelRatio,
           physicalConstraints: physicalConstraints,
           devicePixelRatio: devicePixelRatio,
         );
       }
-    }
-    return ViewConfiguration.fromView(view);
+      return true;
+    }());
+    return configuration ?? ViewConfiguration.fromView(view);
   }
 
   @override
   double? devicePixelRatioForView(int viewId) {
-    final double? devicePixelRatio = super.devicePixelRatioForView(viewId);
-    if (!kReleaseMode && devicePixelRatio != null) {
-      // Pointer data arrives in physical pixels and is converted to logical
-      // pixels with this ratio. The view lays out at the overridden ratio, so
-      // pointers have to use it too, otherwise a tap would land a factor of
-      // (real ratio / overridden ratio) away from the widget it was aimed at.
-      return debugViewMetricsOverrides[viewId]?.devicePixelRatio ?? devicePixelRatio;
-    }
+    double? devicePixelRatio = super.devicePixelRatioForView(viewId);
+    assert(() {
+      if (devicePixelRatio != null) {
+        // Pointer data arrives in physical pixels and is converted to logical
+        // pixels with this ratio. The view lays out at the overridden ratio, so
+        // pointers have to use it too, otherwise a tap would land a factor of
+        // (real ratio / overridden ratio) away from the widget it was aimed at.
+        devicePixelRatio = debugViewMetricsOverrides[viewId]?.devicePixelRatio ?? devicePixelRatio;
+      }
+      return true;
+    }());
     return devicePixelRatio;
   }
 
@@ -419,21 +425,21 @@ mixin RendererBinding
   /// unrelated setting.
   ///
   /// Has no effect in release mode.
-  void _handleViewMetricsOverridesChanged() {
-    if (kReleaseMode) {
-      return;
-    }
-    var forceFrame = false;
-    for (final RenderView renderView in renderViews) {
-      final ViewConfiguration configuration = createViewConfigurationFor(renderView);
-      if (!renderView.hasConfiguration || renderView.configuration != configuration) {
-        renderView.configuration = configuration;
-        forceFrame = forceFrame || renderView.child != null;
+  void _debugHandleViewMetricsOverridesChanged() {
+    assert(() {
+      var forceFrame = false;
+      for (final RenderView renderView in renderViews) {
+        final ViewConfiguration configuration = createViewConfigurationFor(renderView);
+        if (!renderView.hasConfiguration || renderView.configuration != configuration) {
+          renderView.configuration = configuration;
+          forceFrame = forceFrame || renderView.child != null;
+        }
       }
-    }
-    if (forceFrame) {
-      scheduleForcedFrame();
-    }
+      if (forceFrame) {
+        scheduleForcedFrame();
+      }
+      return true;
+    }());
   }
 
   /// Create a [SceneBuilder].
