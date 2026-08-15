@@ -140,7 +140,7 @@ void main() {
       ).receiveBroadcastStream({'close': false}).listen((_) {});
     });
 
-    testWidgets('test finishes without hanging when sink is closed', (tester) async {
+    testWidgets('when sink is closed', (WidgetTester tester) async {
       const EventChannel(
         kTestEventChannelName,
       ).receiveBroadcastStream({'close': true}).listen((_) {});
