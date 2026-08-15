@@ -131,8 +131,8 @@ class EmulatorsCommand extends FlutterCommand {
       globals.printStatus('');
     }
     globals.printStatus(
-      'You can find more information on managing emulators at the links below:\n'
-      '  https://docs.flutter.dev/platform-integration/android/setup',
+      'You can find more information on managing emulators at the link below:\n'
+      '  https://docs.flutter.dev/platform-integration/android/setup#set-up-devices',
     );
   }
 }
