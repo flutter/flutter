@@ -21,6 +21,15 @@ void main() {
       expect(parsed.contextUrl, 'https://flutter.dev');
     });
 
+    test('ValidationMessage handles unknown types gracefully', () {
+      final parsed = ValidationMessage.fromJson(const <String, Object?>{
+        'type': 'unsupported_future_type',
+        'message': 'Fallback message',
+      });
+      expect(parsed.type, ValidationMessageType.information);
+      expect(parsed.message, 'Fallback message');
+    });
+
     test('ValidationResult serializes and deserializes correctly', () {
       final result = ValidationResult(ValidationType.success, <ValidationMessage>[
         const ValidationMessage('Check passed'),
@@ -35,6 +44,14 @@ void main() {
       expect(parsed.statusInfo, 'Ready');
       expect(parsed.messages, hasLength(1));
       expect(parsed.messages.first.message, 'Check passed');
+    });
+
+    test('ValidationResult handles unknown types gracefully', () {
+      final parsed = ValidationResult.fromJson(const <String, Object?>{
+        'type': 'unsupported_future_type',
+        'messages': <Map<String, Object?>>[],
+      });
+      expect(parsed.type, ValidationType.success);
     });
   });
 }

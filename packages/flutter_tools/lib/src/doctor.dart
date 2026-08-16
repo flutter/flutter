@@ -168,8 +168,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           processManager: globals.processManager,
           userMessages: globals.userMessages,
         ),
-      if (extensionManager != null)
-        for (final DiagnosticsExtension extension in extensionManager!.diagnosticsExtensions)
+      if (extensionManager case final ExtensionManager manager)
+        for (final DiagnosticsExtension extension in manager.diagnosticsExtensions)
           ExtensionDoctorValidator(extension: extension, logger: globals.logger),
       if (windowsWorkflow!.appliesToHostPlatform) visualStudioValidator!,
       if (proxyValidator.shouldShow) proxyValidator,

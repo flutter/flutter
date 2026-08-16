@@ -60,7 +60,10 @@ class ValidationMessage {
     final piiStrippedMessage = json['piiStrippedMessage'] as String?;
     final contextUrl = json['contextUrl'] as String?;
     final String typeName = json['type'] as String? ?? 'information';
-    final ValidationMessageType type = ValidationMessageType.values.byName(typeName);
+    final ValidationMessageType type = ValidationMessageType.values.firstWhere(
+      (ValidationMessageType t) => t.name == typeName,
+      orElse: () => ValidationMessageType.information,
+    );
 
     return switch (type) {
       ValidationMessageType.error => ValidationMessage.error(
@@ -144,7 +147,10 @@ class ValidationResult {
   /// Deserializes a [ValidationResult] from a JSON-serializable map.
   factory ValidationResult.fromJson(Map<String, Object?> json) {
     final String typeName = json['type'] as String? ?? 'success';
-    final ValidationType type = ValidationType.values.byName(typeName);
+    final ValidationType type = ValidationType.values.firstWhere(
+      (ValidationType t) => t.name == typeName,
+      orElse: () => ValidationType.success,
+    );
     final statusInfo = json['statusInfo'] as String?;
 
     final Object? messagesJson = json['messages'];
