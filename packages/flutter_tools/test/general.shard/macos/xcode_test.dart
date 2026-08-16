@@ -513,7 +513,7 @@ void main() {
               ),
             );
 
-            expect(await xcode.sdkVersion(EnvironmentType.physical), '21.4');
+            expect(await xcode.sdkVersion('iphoneos'), '21.4');
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
@@ -527,8 +527,8 @@ void main() {
             );
 
             expect(
-              () async => xcode.sdkVersion(EnvironmentType.physical),
-              throwsToolExit(message: 'Could not find SDK version'),
+              () async => xcode.sdkVersion('iphoneos'),
+              throwsToolExit(message: 'Could not find SDK version: xcrun: error:'),
             );
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });

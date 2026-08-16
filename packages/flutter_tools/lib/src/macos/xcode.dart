@@ -267,11 +267,14 @@ class Xcode {
     return runResult.stdout.trim();
   }
 
-  Future<String> sdkVersion(EnvironmentType environmentType) async {
+  /// Returns the SDK version for the given [sdkName].
+  ///
+  /// Examples of [sdkName] include 'iphoneos', 'iphonesimulator', and 'macosx'.
+  Future<String> sdkVersion(String sdkName) async {
     final RunResult runResult = await _processUtils.run(<String>[
       ...xcrunCommand(),
       '--sdk',
-      getSDKNameForIOSEnvironmentType(environmentType),
+      sdkName,
       '--show-sdk-version',
     ]);
     if (runResult.exitCode != 0) {

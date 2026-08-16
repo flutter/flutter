@@ -267,7 +267,8 @@ class AOTSnapshotter {
       // gen_snapshot sets the sdk version to match the minOSVersion, which causes
       // App Store rejections because it expects the SDK version used to build the app.
       try {
-        final String sdkVersion = await _xcode.sdkVersion(EnvironmentType.physical);
+        final sdkName = platform == TargetPlatform.ios ? 'iphoneos' : 'macosx';
+        final String sdkVersion = await _xcode.sdkVersion(sdkName);
         final vtoolPlatform = platform == TargetPlatform.ios ? 'ios' : 'macos';
 
         final tempAotSharedLibrary = '$aotSharedLibrary.tmp';
