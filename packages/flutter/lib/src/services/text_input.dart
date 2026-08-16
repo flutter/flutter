@@ -1839,9 +1839,12 @@ class TextInputConnection {
 
   /// Platform sent a notification informing the connection is closed.
   ///
-  /// [TextInputConnection] should clean current client connection.
+  /// If this connection is still [attached], this cleans up the active client
+  /// connection and schedules a hide of the text input.
   void connectionClosedReceived() {
-    TextInput._instance._currentConnection = null;
+    if (attached) {
+      TextInput._instance._clearClient();
+    }
     assert(!attached);
   }
 }
