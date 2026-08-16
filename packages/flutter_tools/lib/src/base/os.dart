@@ -613,5 +613,3 @@ enum HostPlatform {
   final String cliName;
   final String platformName;
 }
-
-// flutter_ignore: deprecation_syntax (see analyze.dart)

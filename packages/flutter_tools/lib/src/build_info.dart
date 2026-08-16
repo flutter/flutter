@@ -1196,7 +1196,3 @@ String? _uncapitalize(String? s) {
   }
   return s.substring(0, 1).toLowerCase() + s.substring(1);
 }
-
-// flutter_ignore: deprecation_syntax (see analyze.dart)
-
-// flutter_ignore: deprecation_syntax (see analyze.dart)
