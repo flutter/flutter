@@ -62,8 +62,6 @@ typedef DwdsLauncher =
       bool useDwdsWebSocketConnection,
     });
 
-const kLuciEnvName = 'LUCI_CONTEXT';
-
 /// A web server which handles serving JavaScript and assets.
 ///
 /// This is only used in development mode.

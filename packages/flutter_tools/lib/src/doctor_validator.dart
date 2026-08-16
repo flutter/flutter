@@ -267,34 +267,3 @@ class ValidationMessage {
   @override
   int get hashCode => Object.hash(type, message, contextUrl);
 }
-
-class NoIdeValidator extends DoctorValidator {
-  NoIdeValidator() : super('Flutter IDE Support');
-
-  static const List<String> noIdeInstallationInfo = <String>[
-    'IntelliJ - https://www.jetbrains.com/idea/',
-    'Android Studio - https://developer.android.com/studio/',
-    'VS Code - https://code.visualstudio.com/',
-  ];
-
-  String get noIdeStatusInfo => 'No supported IDEs installed';
-
-  @override
-  Future<ValidationResult> validateImpl() async {
-    return ValidationResult(
-      // Info hint to user they do not have a supported IDE installed
-      ValidationType.notAvailable,
-      noIdeInstallationInfo.map((String ideInfo) => ValidationMessage(ideInfo)).toList(),
-      statusInfo: noIdeStatusInfo,
-    );
-  }
-}
-
-class ValidatorWithResult extends DoctorValidator {
-  ValidatorWithResult(super.title, this.result);
-
-  final ValidationResult result;
-
-  @override
-  Future<ValidationResult> validateImpl() async => result;
-}

@@ -615,5 +615,3 @@ enum HostPlatform {
 }
 
 // flutter_ignore: deprecation_syntax (see analyze.dart)
-@Deprecated('Use HostPlatform.cliName instead')
-String getNameForHostPlatform(HostPlatform platform) => platform.cliName;
