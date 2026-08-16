@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -99,6 +101,7 @@ class AOTSnapshotter {
     required Artifacts artifacts,
   }) : _logger = logger,
        _fileSystem = fileSystem,
+       _processManager = processManager,
        _xcode = xcode,
        _genSnapshot = GenSnapshot(
          artifacts: artifacts,
@@ -108,6 +111,7 @@ class AOTSnapshotter {
 
   final Logger _logger;
   final FileSystem _fileSystem;
+  final ProcessManager _processManager;
   final Xcode _xcode;
   final GenSnapshot _genSnapshot;
 
@@ -125,6 +129,12 @@ class AOTSnapshotter {
     bool quiet = false,
   }) async {
     assert(platform != TargetPlatform.ios || cpuArch != null);
+    // When the minimum version is updated, remember to update
+    // template MinimumOSVersion.
+    // https://github.com/flutter/flutter/pull/62902
+    final minOSVersion = platform == TargetPlatform.ios
+        ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
+        : FlutterDarwinPlatform.macos.deploymentTarget().toString();
 
     if (!_isValidAotPlatform(platform, buildMode)) {
       _logger.printError('${platform.getName()} does not support AOT compilation.');
@@ -181,12 +191,6 @@ class AOTSnapshotter {
       const frameworkSnapshotName = 'App';
       aotSharedLibrary = _fileSystem.path.join(frameworkPath, frameworkSnapshotName);
       final String relocatableObject = _fileSystem.path.join(outputPath, 'app.o');
-      // When the minimum version is updated, remember to update
-      // template MinimumOSVersion.
-      // https://github.com/flutter/flutter/pull/62902
-      final minOSVersion = platform == TargetPlatform.ios
-          ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
-          : FlutterDarwinPlatform.macos.deploymentTarget().toString();
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-macho-dylib',
         '--macho=$aotSharedLibrary',
@@ -254,6 +258,39 @@ class AOTSnapshotter {
     if (genSnapshotExitCode != 0) {
       _logger.printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
       return genSnapshotExitCode;
+    }
+
+    if (targetingApplePlatform) {
+      // TODO(okorohelijah): Remove this vtool workaround once
+      // https://github.com/dart-lang/sdk/issues/64059 lands.
+      // Use vtool to fix the SDK version in the generated Mach-O file.
+      // gen_snapshot sets the sdk version to match the minOSVersion, which causes
+      // App Store rejections because it expects the SDK version used to build the app.
+      try {
+        final String sdkVersion = await _xcode.sdkVersion(EnvironmentType.physical);
+        final vtoolPlatform = platform == TargetPlatform.ios ? 'ios' : 'macos';
+
+        final tempAotSharedLibrary = '$aotSharedLibrary.tmp';
+        final ProcessResult vtoolResult = await _processManager.run(<String>[
+          'xcrun',
+          'vtool',
+          '-set-build-version',
+          vtoolPlatform,
+          minOSVersion,
+          sdkVersion,
+          '-replace',
+          '-output',
+          tempAotSharedLibrary,
+          aotSharedLibrary,
+        ]);
+        if (vtoolResult.exitCode != 0) {
+          _logger.printError('vtool failed to update SDK version: ${vtoolResult.stderr}');
+        } else {
+          _fileSystem.file(tempAotSharedLibrary).renameSync(aotSharedLibrary);
+        }
+      } on Exception catch (e) {
+        _logger.printError('Failed to run vtool: $e');
+      }
     }
 
     if (targetingApplePlatform) {

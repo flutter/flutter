@@ -198,6 +198,24 @@ void main() {
         ),
         kWhichSysctlCommand,
         kx64CheckCommand,
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+          stdout: '27.0',
+        ),
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'vtool',
+            '-set-build-version',
+            'ios',
+            '15.0', // test defaults to 15.0 for deployment target
+            '27.0',
+            '-replace',
+            '-output',
+            '$outputPath/App.framework/App.tmp',
+            '$outputPath/App.framework/App',
+          ],
+        ),
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -258,6 +276,24 @@ void main() {
         ),
         kWhichSysctlCommand,
         kx64CheckCommand,
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+          stdout: '27.0',
+        ),
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'vtool',
+            '-set-build-version',
+            'ios',
+            '15.0', // test defaults to 15.0 for deployment target
+            '27.0',
+            '-replace',
+            '-output',
+            '$outputPath/App.framework/App.tmp',
+            '$outputPath/App.framework/App',
+          ],
+        ),
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -316,6 +352,24 @@ void main() {
         ),
         kWhichSysctlCommand,
         kx64CheckCommand,
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+          stdout: '27.0',
+        ),
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'vtool',
+            '-set-build-version',
+            'ios',
+            '15.0', // test defaults to 15.0 for deployment target
+            '27.0',
+            '-replace',
+            '-output',
+            '$outputPath/App.framework/App.tmp',
+            '$outputPath/App.framework/App',
+          ],
+        ),
         FakeCommand(
           command: <String>[
             'xcrun',

@@ -267,6 +267,19 @@ class Xcode {
     return runResult.stdout.trim();
   }
 
+  Future<String> sdkVersion(EnvironmentType environmentType) async {
+    final RunResult runResult = await _processUtils.run(<String>[
+      ...xcrunCommand(),
+      '--sdk',
+      getSDKNameForIOSEnvironmentType(environmentType),
+      '--show-sdk-version',
+    ]);
+    if (runResult.exitCode != 0) {
+      throwToolExit('Could not find SDK version: ${runResult.stderr}');
+    }
+    return runResult.stdout.trim();
+  }
+
   String? getSimulatorPath() {
     final String? selectPath = xcodeSelectPath;
     if (selectPath == null) {

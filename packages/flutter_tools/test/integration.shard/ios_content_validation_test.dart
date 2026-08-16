@@ -230,6 +230,37 @@ void main() {
             expect(localNetworkUsageFound, buildMode == BuildMode.debug);
           });
 
+          testWithoutContext('App.framework/App Mach-O header contains correct SDK version', () {
+            if (buildMode == BuildMode.debug) {
+              return; // vtool only modifies AOT snapshots
+            }
+            final ProcessResult result = processManager.runSync(<String>[
+              'otool',
+              '-l',
+              outputAppFrameworkBinary.path,
+            ]);
+            final output = result.stdout as String;
+
+            final sdkRegex = RegExp(r'sdk (\d+\.\d+)');
+            final Match? match = sdkRegex.firstMatch(output);
+            expect(match, isNotNull);
+            final String sdkVersion = match!.group(1)!;
+
+            final minOSVersion = FlutterDarwinPlatform.ios.deploymentTarget().toString();
+            final ProcessResult xcrunResult = processManager.runSync(<String>[
+              'xcrun',
+              '--sdk',
+              'iphoneos',
+              '--show-sdk-version',
+            ]);
+            final String expectedSdk = (xcrunResult.stdout as String).trim();
+
+            // gen_snapshot sets minOSVersion. Our vtool patch replaces the SDK version
+            // with the one currently installed on the build machine.
+            expect(sdkVersion, isNot(equals(minOSVersion)));
+            expect(sdkVersion, equals(expectedSdk));
+          });
+
           testWithoutContext('check symbols', () {
             final List<String> symbols = AppleTestUtils.getExportedSymbols(
               outputAppFrameworkBinary.path,
