@@ -552,7 +552,9 @@ void main() {
     expect(find.text('/second'), findsOneWidget);
   });
 
-  testWidgets('pushNamed can handle non-Object type argument', (WidgetTester tester) async {
+  testWidgets('pushNamed can handle subtype of Object as type argument', (
+    WidgetTester tester,
+  ) async {
     final routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('/'),
       '/second': (BuildContext context) => const Text('/second'),
