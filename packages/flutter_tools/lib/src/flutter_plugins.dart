@@ -125,6 +125,9 @@ Future<Plugin?> _pluginFromPackage(
     } on YamlException catch (err) {
       globals.printTrace('Failed to parse plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
+    } on FileSystemException catch (err) {
+      globals.printTrace('Failed to read plugin manifest for $name: $err');
+      // Do nothing, potentially not a plugin.
     }
   }
   if (pubspec == null) {
@@ -1454,6 +1457,7 @@ Future<void> injectPlugins(
             templateRenderer: globals.templateRenderer,
             processUtils: globals.processUtils,
             config: globals.config,
+            logger: globals.logger,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,

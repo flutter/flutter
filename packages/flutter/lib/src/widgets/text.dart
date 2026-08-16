@@ -486,7 +486,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// This sample demonstrates how to disable selection for a Text under a
 /// SelectionArea.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// See also:

@@ -1500,10 +1500,18 @@ class TextPainter {
         return heightFromCaretMetrics;
       }
     }
-    final TextBox textBox = _getOrCreateLayoutTemplate()
-        .getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut)
-        .single;
-    return textBox.toRect().height;
+    final List<TextBox> boxes = _getOrCreateLayoutTemplate().getBoxesForRange(
+      0,
+      1,
+      boxHeightStyle: .strut,
+    );
+    // The list may be empty under degenerate layout configurations (e.g., when
+    // the TextStyle.height is non-zero and TextStyle.fontSize or textScaler is
+    // 0.0). In such cases, we fall back to preferredLineHeight.
+    if (boxes.isEmpty) {
+      return preferredLineHeight;
+    }
+    return boxes.single.toRect().height;
   }
 
   bool _isNewlineAtOffset(int offset) =>

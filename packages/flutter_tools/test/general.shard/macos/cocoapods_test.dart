@@ -800,7 +800,7 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*.{h,m}'
   s.dependency 'Flutter'
   s.static_framework = true
-  s.osx.deployment_target = '10.15'
+  s.osx.deployment_target = '12.0'
   s.ios.deployment_target = '15.0'
 end''');
 
@@ -1478,19 +1478,16 @@ end''');
         FakeCommand(command: <String>['touch', 'project/ios/Podfile.lock']),
       ]);
 
-      final cocoaPodsUnderTestXcode143 = CocoaPods(
+      final cocoaPods = CocoaPods(
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: fakeProcessManager,
-          version: Version(14, 3, 0),
-        ),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
         analytics: fakeAnalytics,
       );
 
-      final bool didInstall = await cocoaPodsUnderTestXcode143.processPods(
+      final bool didInstall = await cocoaPods.processPods(
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       );

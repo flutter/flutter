@@ -27,7 +27,6 @@ import 'dart:ui'
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:meta/meta_meta.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -36,6 +35,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'icon_data.dart';
 import 'media_query.dart';
+import 'routes.dart';
 import 'service_extensions.dart';
 import 'view.dart';
 
@@ -1609,10 +1609,12 @@ mixin WidgetInspectorService {
   bool setSelection(Object? object, [String? groupName]) {
     switch (object) {
       case Element() when object != selection.currentElement:
+        selection.clearCandidates();
         selection.currentElement = object;
         _notifyToolsOfSelection(selection.currentElement);
         return true;
       case RenderObject() when object != selection.current:
+        selection.clearCandidates();
         selection.current = object;
         _notifyToolsOfSelection(selection.current);
         return true;
@@ -1637,7 +1639,7 @@ mixin WidgetInspectorService {
   void _notifyToolsOfSelection(Object? object, {bool restrictToProjectFiles = false}) {
     inspect(object);
 
-    final _Location? location = _getSelectedWidgetLocation(
+    final developer.CreationLocation? location = _getSelectedWidgetLocation(
       restrictToSummaryTree: restrictToProjectFiles,
     );
     if (location != null) {
@@ -1792,7 +1794,7 @@ mixin WidgetInspectorService {
   }
 
   bool _isValueCreatedByLocalProject(Object? value) {
-    final _Location? creationLocation = _getCreationLocation(value);
+    final developer.CreationLocation? creationLocation = _getCreationLocation(value);
     if (creationLocation == null) {
       return false;
     }
@@ -2478,7 +2480,7 @@ mixin WidgetInspectorService {
   /// not in the summary tree (i.e. not created by the current project), this
   /// method will instead return the location of its nearest ancestor widget
   /// that is in the summary tree.
-  _Location? _getSelectedWidgetLocation({bool restrictToSummaryTree = false}) {
+  developer.CreationLocation? _getSelectedWidgetLocation({bool restrictToSummaryTree = false}) {
     final DiagnosticsNode? selectedNode = restrictToSummaryTree
         ? _getSelectedSummaryDiagnosticsNode(null)
         : _getSelectedWidgetDiagnosticsNode(null);
@@ -2516,7 +2518,7 @@ mixin WidgetInspectorService {
   ///
   /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
   bool isWidgetCreationTracked() {
-    _widgetCreationTracked ??= const _WidgetForTypeTests() is _HasCreationLocation;
+    _widgetCreationTracked ??= (developer.CreationLocation.of(const _WidgetForTypeTests()) != null);
     return _widgetCreationTracked!;
   }
 
@@ -2639,7 +2641,7 @@ class _LocationCount {
   /// Whether the location is local to the current project.
   final bool local;
 
-  final _Location location;
+  final developer.CreationLocation location;
 
   int get count => _count;
   int _count = 0;
@@ -2691,11 +2693,7 @@ class _ElementLocationStatsTracker {
   /// the creation location is local to the current project.
   void add(Element element) {
     final Object widget = element.widget;
-    if (widget is! _HasCreationLocation) {
-      return;
-    }
-    final _HasCreationLocation creationLocationSource = widget;
-    final _Location? location = creationLocationSource._location;
+    final developer.CreationLocation? location = developer.CreationLocation.of(widget);
     if (location == null) {
       return;
     }
@@ -2769,7 +2767,7 @@ class _ElementLocationStatsTracker {
       // Add all newly used location ids to the JSON.
       final locationsJson = <String, List<int>>{};
       for (final _LocationCount entry in newLocations) {
-        final _Location location = entry.location;
+        final developer.CreationLocation location = entry.location;
         final List<int> jsonForFile = locationsJson.putIfAbsent(location.file, () => <int>[]);
         jsonForFile
           ..add(entry.id)
@@ -2783,7 +2781,7 @@ class _ElementLocationStatsTracker {
     if (newLocations.isNotEmpty) {
       final fileLocationsMap = <String, Map<String, List<Object?>>>{};
       for (final _LocationCount entry in newLocations) {
-        final _Location location = entry.location;
+        final developer.CreationLocation location = entry.location;
         final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
           location.file,
           () => <String, List<Object?>>{
@@ -3010,7 +3008,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     final RenderObject userRender = ignorePointer.child!;
     final List<RenderObject> selected = hitTest(position, userRender);
 
-    selection.candidates = selected;
+    selection.candidates = _filterInspectorHitCandidatesToModalRouteScope(selected);
   }
 
   void _handlePanDown(DragDownDetails event) {
@@ -3302,6 +3300,18 @@ class InspectorSelection with ChangeNotifier {
     _computeCurrent();
   }
 
+  /// Clears [candidates] without changing [current] or [currentElement].
+  ///
+  /// Used when the selection is updated from DevTools or another tool so stale
+  /// on-device hit-test candidates are not drawn on the overlay.
+  void clearCandidates() {
+    if (_candidates.isEmpty) {
+      return;
+    }
+    _candidates = <RenderObject>[];
+    _index = 0;
+  }
+
   /// Selected render object typically from the [candidates] list.
   ///
   /// Setting [candidates] or calling [clear] resets the selection.
@@ -3313,7 +3323,7 @@ class InspectorSelection with ChangeNotifier {
   set current(RenderObject? value) {
     if (_current != value) {
       _current = value;
-      _currentElement = (value?.debugCreator as DebugCreator?)?.element;
+      _currentElement = _elementForRenderObject(value);
       notifyListeners();
     }
   }
@@ -3473,6 +3483,87 @@ const Color _kTooltipBackgroundColor = Color.fromARGB(230, 60, 60, 60);
 const Color _kHighlightedRenderObjectFillColor = Color.fromARGB(128, 128, 128, 255);
 const Color _kHighlightedRenderObjectBorderColor = Color.fromARGB(128, 64, 64, 128);
 
+Element? _elementForRenderObject(RenderObject? object) {
+  final Object? creator = object?.debugCreator;
+  if (creator is DebugCreator) {
+    return creator.element;
+  }
+  return null;
+}
+
+ModalRoute<Object?>? _modalRouteForRenderObject(RenderObject? object) {
+  final Element? element = _elementForRenderObject(object);
+  if (element == null) {
+    return null;
+  }
+  return ModalRoute.of<Object?>(element);
+}
+
+double _inspectorHitArea(RenderObject object) {
+  final Size size = object.semanticBounds.size;
+  return size.width * size.height;
+}
+
+ModalRoute<Object?>? _inspectorScopeRouteForHits(List<RenderObject> hits) {
+  for (final hit in hits) {
+    final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
+    if (route?.isCurrent ?? false) {
+      return route;
+    }
+  }
+
+  // When multiple modal routes are hit (e.g. scaffold behind a bottom sheet),
+  // prefer the route for the most specific (smallest) target.
+  RenderObject? smallestHit;
+  double smallestArea = double.infinity;
+  for (final hit in hits) {
+    final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
+    if (route == null) {
+      continue;
+    }
+    final double area = _inspectorHitArea(hit);
+    if (area < smallestArea) {
+      smallestArea = area;
+      smallestHit = hit;
+    }
+  }
+  if (smallestHit != null) {
+    return _modalRouteForRenderObject(smallestHit);
+  }
+
+  return _modalRouteForRenderObject(hits.first);
+}
+
+List<RenderObject> _filterInspectorHitCandidatesToModalRouteScope(List<RenderObject> hits) {
+  if (hits.isEmpty) {
+    return hits;
+  }
+
+  // Ignore widgets that belong to offstage modal routes.
+  final List<RenderObject> onstageHits = hits
+      .where((RenderObject hit) {
+        final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
+        return route == null || !route.offstage;
+      })
+      .toList();
+  if (onstageHits.isEmpty) {
+    return onstageHits;
+  }
+
+  final ModalRoute<Object?>? scopeRoute = _inspectorScopeRouteForHits(onstageHits);
+  final List<RenderObject> scopedHits = onstageHits
+      .where(
+        (RenderObject hit) =>
+            identical(_modalRouteForRenderObject(hit), scopeRoute),
+      )
+      .toList();
+
+  scopedHits.sort(
+    (RenderObject a, RenderObject b) => _inspectorHitArea(a).compareTo(_inspectorHitArea(b)),
+  );
+  return scopedHits;
+}
+
 /// A layer that outlines the selected [RenderObject] and candidate render
 /// objects that also match the last pointer location.
 ///
@@ -3545,7 +3636,11 @@ class _InspectorOverlayLayer extends Layer {
     for (final RenderObject candidate in selection.candidates) {
       if (candidate == selected ||
           !candidate.attached ||
-          !_isInInspectorRenderObjectTree(candidate)) {
+          !_isInInspectorRenderObjectTree(candidate) ||
+          !identical(
+            _modalRouteForRenderObject(candidate),
+            _modalRouteForRenderObject(selected),
+          )) {
         continue;
       }
       candidates.add(_TransformedRect(candidate, rootRenderObject));
@@ -4071,45 +4166,6 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
   }
 }
 
-/// Interface for classes that track the source code location the their
-/// constructor was called from.
-///
-/// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
-// ignore: unused_element
-abstract class _HasCreationLocation {
-  _Location? get _location;
-}
-
-/// A tuple with file, line, and column number, for displaying human-readable
-/// file locations.
-class _Location {
-  const _Location({
-    required this.file,
-    required this.line,
-    required this.column,
-    this.name, // ignore: unused_element_parameter
-  });
-
-  /// File path of the location.
-  final String file;
-
-  /// 1-based line number.
-  final int line;
-
-  /// 1-based column number.
-  final int column;
-
-  /// Optional name of the parameter or function at this location.
-  final String? name;
-
-  Map<String, Object?> toJsonMap() {
-    return <String, Object?>{'file': file, 'line': line, 'column': column, 'name': ?name};
-  }
-
-  @override
-  String toString() => <String>[?name, file, '$line', '$column'].join(':');
-}
-
 bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 
 /// Transformer to parse and gather information about [DiagnosticsDebugCreator].
@@ -4269,7 +4325,7 @@ class DevToolsDeepLinkProperty extends DiagnosticsProperty<String> {
 bool debugIsLocalCreationLocation(Object object) {
   var isLocal = false;
   assert(() {
-    final _Location? location = _getCreationLocation(object);
+    final developer.CreationLocation? location = _getCreationLocation(object);
     if (location != null) {
       isLocal = WidgetInspectorService.instance._isLocalCreationLocation(location.file);
     }
@@ -4283,7 +4339,7 @@ bool debugIsLocalCreationLocation(Object object) {
 /// This is a faster variant of `debugIsLocalCreationLocation` that is available
 /// in debug and profile builds but only works for [Widget].
 bool debugIsWidgetLocalCreation(Widget widget) {
-  final _Location? location = _getObjectCreationLocation(widget);
+  final developer.CreationLocation? location = developer.CreationLocation.of(widget);
   return location != null &&
       WidgetInspectorService.instance._isLocalCreationLocation(location.file);
 }
@@ -4296,12 +4352,8 @@ bool debugIsWidgetLocalCreation(Widget widget) {
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
 String? _describeCreationLocation(Object object) {
-  final _Location? location = _getCreationLocation(object);
+  final developer.CreationLocation? location = _getCreationLocation(object);
   return location?.toString();
-}
-
-_Location? _getObjectCreationLocation(Object object) {
-  return object is _HasCreationLocation ? object._location : null;
 }
 
 /// Returns the creation location of an object if one is available.
@@ -4309,18 +4361,18 @@ _Location? _getObjectCreationLocation(Object object) {
 /// {@macro flutter.widgets.WidgetInspectorService.getChildrenSummaryTree}
 ///
 /// Currently creation locations are only available for [Widget] and [Element].
-_Location? _getCreationLocation(Object? object) {
+developer.CreationLocation? _getCreationLocation(Object? object) {
   final Object? candidate = object is Element && !object.debugIsDefunct ? object.widget : object;
-  return candidate == null ? null : _getObjectCreationLocation(candidate);
+  return candidate == null ? null : developer.CreationLocation.of(candidate);
 }
 
-// _Location objects are always const so we don't need to worry about the GC
+// CreationLocation objects are always const so we don't need to worry about the GC
 // issues that are a concern for other object ids tracked by
 // [WidgetInspectorService].
-final Map<_Location, int> _locationToId = <_Location, int>{};
-final List<_Location> _locations = <_Location>[];
+final Map<developer.CreationLocation, int> _locationToId = <developer.CreationLocation, int>{};
+final List<developer.CreationLocation> _locations = <developer.CreationLocation>[];
 
-int _toLocationId(_Location location) {
+int _toLocationId(developer.CreationLocation location) {
   int? id = _locationToId[location];
   if (id != null) {
     return id;
@@ -4338,8 +4390,8 @@ Map<String, dynamic> _locationIdMapToJson() {
   const namesKey = 'names';
 
   final fileLocationsMap = <String, Map<String, List<Object?>>>{};
-  for (final MapEntry<_Location, int> entry in _locationToId.entries) {
-    final _Location location = entry.key;
+  for (final MapEntry<developer.CreationLocation, int> entry in _locationToId.entries) {
+    final developer.CreationLocation location = entry.key;
     final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
       location.file,
       () => <String, List<Object?>>{
@@ -4427,7 +4479,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     if (_interactive) {
       result['valueId'] = service.toId(value, groupName!);
     }
-    final _Location? creationLocation = _getCreationLocation(value);
+    final developer.CreationLocation? creationLocation = _getCreationLocation(value);
     if (creationLocation != null) {
       if (fullDetails) {
         result['locationId'] = _toLocationId(creationLocation);
@@ -4501,11 +4553,6 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   }
 }
 
-@Target(<TargetKind>{TargetKind.method})
-class _WidgetFactory {
-  const _WidgetFactory();
-}
-
 /// Annotation which marks a function as a widget factory for the purpose of
 /// widget creation tracking.
 ///
@@ -4560,11 +4607,7 @@ class _WidgetFactory {
 /// See also:
 ///
 /// * the documentation for [Track widget creation](https://flutter.dev/to/track-widget-creation).
-// The below ignore is needed because the static type of the annotation is used
-// by the CFE kernel transformer that implements the instrumentation to
-// recognize the annotation.
-// ignore: library_private_types_in_public_api
-const _WidgetFactory widgetFactory = _WidgetFactory();
+const widgetFactory = pragma('track-creation-locations');
 
 /// Does not hold keys from garbage collection.
 @visibleForTesting
