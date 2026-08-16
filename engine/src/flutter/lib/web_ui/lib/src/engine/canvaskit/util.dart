@@ -8,8 +8,6 @@ import 'package:ui/ui.dart' as ui;
 
 import 'canvaskit_api.dart';
 
-/// An error related to the CanvasKit rendering backend.
-
 /// Creates a new color array.
 Float32List makeFreshSkColor(ui.Color color) {
   final result = Float32List(4);

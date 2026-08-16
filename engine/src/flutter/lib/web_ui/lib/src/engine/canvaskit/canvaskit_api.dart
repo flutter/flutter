@@ -1506,8 +1506,6 @@ Float32List toSkRRect(ui.RRect rrect) {
   return skRRect;
 }
 
-// TODO(hterkelsen): Use a shared malloc'ed array for performance.
-
 /// Encodes a list of offsets to CanvasKit-compatible point array.
 ///
 /// Uses `CanvasKit.Malloc` to allocate storage for the points in the WASM
