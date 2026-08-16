@@ -255,19 +255,6 @@ class _PathCubicTo extends _PathCommand {
   }
 }
 
-// ignore: unused_element
-class _PathLineTo extends _PathCommand {
-  const _PathLineTo(this.points);
-
-  final List<Offset> points;
-
-  @override
-  void apply(Path path, double progress) {
-    final Offset point = _interpolate<Offset?>(points, progress, Offset.lerp)!;
-    path.lineTo(point.dx, point.dy);
-  }
-}
-
 class _PathClose extends _PathCommand {
   const _PathClose();
 
