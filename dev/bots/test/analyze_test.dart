@@ -180,7 +180,6 @@ void main() {
     );
   });
 
-
   test('analyze.dart - verifyMaterialFilesAreUpToDateWithTemplateFiles', () async {
     final chipFile = File(
       path.join(testGenDefaultsPath, 'packages', 'flutter', 'lib', 'src', 'material', 'chip.dart'),
