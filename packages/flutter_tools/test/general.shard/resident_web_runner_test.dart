@@ -290,6 +290,26 @@ name: my_app
   );
 
   testUsingContext(
+    'Does not crash if DDS fails to upgrade WebSocket during startup',
+    () async {
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      webDevFS.exception = DartDevelopmentServiceException.connectionIssue(
+        'WebSocketChannelException: WebSocketException: Connection to '
+        "'http://127.0.0.1:62932/9fVOXxsamo0=/ws#' was not upgraded to websocket",
+      );
+
+      await expectLater(residentWebRunner.run(), throwsToolExit());
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'WebRunner copies compiled app.dill to cache during startup',
     () async {
       final debuggingOptions = DebuggingOptions.enabled(

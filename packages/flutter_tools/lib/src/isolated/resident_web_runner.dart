@@ -406,14 +406,12 @@ class ResidentWebRunner extends ResidentRunner {
         stackTrace: stackTrace,
       );
       throwToolExit('Failed to connect to the web debug service.');
-    } on DartDevelopmentServiceException catch (error) {
+    } on DartDevelopmentServiceException catch (error, stackTrace) {
       // The application may have started shutting down before DDS was able to finish establishing
       // its connection to DWDS. Don't treat this as an unhandled exception.
       appFailedToStart();
-      if (error.errorCode == DartDevelopmentServiceException.failedToStartError) {
-        throwToolExit(kExitMessage);
-      }
-      rethrow;
+      _logger.printError(error.toString(), stackTrace: stackTrace);
+      throwToolExit(kExitMessage);
     } on Exception {
       appFailedToStart();
       rethrow;
