@@ -136,7 +136,7 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   }
 
   @JS('fetch')
-  external JSPromise<JSAny?> _fetch(String url, [JSAny headers]);
+  external JSPromise<JSAny?> _fetch(String url);
 
   // ignore: non_constant_identifier_names
   external DomURL get URL;
@@ -1283,33 +1283,6 @@ Future<HttpFetchResponse> httpFetch(String url) async {
   }
 }
 
-Future<DomResponse> _rawHttpPost(String url, String data) => domWindow
-    ._fetch(
-      url,
-      <String, Object?>{
-        'method': 'POST',
-        'headers': <String, Object?>{'Content-Type': 'text/plain'},
-        'body': data,
-      }.toJSAnyDeep,
-    )
-    .toDart
-    .then((JSAny? value) => value! as DomResponse);
-
-/// Sends a [data] string as HTTP POST request to [url].
-///
-/// The web engine does not make POST requests in production code because it is
-/// designed to be able to run web apps served from plain file servers, so this
-/// is meant for tests only.
-@visibleForTesting
-Future<HttpFetchResponse> testOnlyHttpPost(String url, String data) async {
-  try {
-    final DomResponse domResponse = await _rawHttpPost(url, data);
-    return HttpFetchResponseImpl._(url, domResponse);
-  } catch (requestError) {
-    throw HttpFetchError(url, requestError: requestError);
-  }
-}
-
 /// Convenience function for making a fetch request and getting the data as a
 /// [ByteBuffer], when the default error handling mechanism is sufficient.
 Future<ByteBuffer> httpFetchByteBuffer(String url) async {
@@ -1925,55 +1898,6 @@ DomBlob createDomBlob(List<Object?> parts, [Map<String, dynamic>? options]) {
   }
 }
 
-typedef DomMutationCallback = void Function(JSArray<JSAny?> mutation, DomMutationObserver observer);
-
-@JS('MutationObserver')
-extension type DomMutationObserver._(JSObject _) implements JSObject {
-  external DomMutationObserver(JSFunction callback);
-
-  external void disconnect();
-
-  @JS('observe')
-  external void _observe(DomNode target, JSAny options);
-  void observe(DomNode target, {bool? childList, bool? attributes, List<String>? attributeFilter}) {
-    final options = <String, dynamic>{
-      'childList': ?childList,
-      'attributes': ?attributes,
-      'attributeFilter': ?attributeFilter,
-    };
-    return _observe(target, options.toJSAnyDeep);
-  }
-}
-
-DomMutationObserver createDomMutationObserver(DomMutationCallback callback) =>
-    DomMutationObserver(callback.toJS);
-
-@JS()
-extension type DomMutationRecord._(JSObject _) implements JSObject {
-  @JS('addedNodes')
-  external _DomList? get _addedNodes;
-  Iterable<DomNode>? get addedNodes {
-    final _DomList? list = _addedNodes;
-    if (list == null) {
-      return null;
-    }
-    return _createDomListWrapper<DomNode>(list);
-  }
-
-  @JS('removedNodes')
-  external _DomList? get _removedNodes;
-  Iterable<DomNode>? get removedNodes {
-    final _DomList? list = _removedNodes;
-    if (list == null) {
-      return null;
-    }
-    return _createDomListWrapper<DomNode>(list);
-  }
-
-  external String? get attributeName;
-  external String? get type;
-}
-
 @JS('MediaQueryList')
 extension type DomMediaQueryList._(JSObject _) implements DomEventTarget {
   external bool get matches;
@@ -1992,19 +1916,6 @@ extension type DomMediaQueryListEvent._(JSObject _) implements DomEvent {
 @visibleForTesting
 DomMediaQueryListEvent createDomMediaQueryListEvent(String type, Map<dynamic, dynamic> init) {
   return DomMediaQueryListEvent(type, init.toJSAnyDeep);
-}
-
-@JS('Path2D')
-extension type DomPath2D._(JSObject _) implements JSObject {
-  external DomPath2D([JSAny path]);
-}
-
-DomPath2D createDomPath2D([Object? path]) {
-  if (path == null) {
-    return DomPath2D();
-  } else {
-    return DomPath2D(path.toJSAnyShallow);
-  }
 }
 
 @JS('InputEvent')
@@ -2216,12 +2127,6 @@ extension type DomHTMLFormElement._(JSObject _) implements DomHTMLElement {
 DomHTMLFormElement createDomHTMLFormElement() =>
     domDocument.createElement('form') as DomHTMLFormElement;
 
-@JS('HTMLLabelElement')
-extension type DomHTMLLabelElement._(JSObject _) implements DomHTMLElement {}
-
-DomHTMLLabelElement createDomHTMLLabelElement() =>
-    domDocument.createElement('label') as DomHTMLLabelElement;
-
 @JS('OffscreenCanvas')
 extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget, DomCanvasImageSource {
   external DomOffscreenCanvas(int width, int height);
@@ -2263,15 +2168,6 @@ extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget, DomCa
 
 DomOffscreenCanvas createDomOffscreenCanvas(int width, int height) =>
     DomOffscreenCanvas(width, height);
-
-@JS('FileReader')
-extension type DomFileReader._(JSObject _) implements DomEventTarget {
-  external DomFileReader();
-
-  external void readAsDataURL(DomBlob blob);
-}
-
-DomFileReader createDomFileReader() => DomFileReader();
 
 @JS('DocumentFragment')
 extension type DomDocumentFragment._(JSObject _) implements DomNode {
@@ -2359,17 +2255,6 @@ class DomPoint {
   final num x;
   final num y;
 }
-
-@JS('WebSocket')
-extension type DomWebSocket._(JSObject _) implements DomEventTarget {
-  external DomWebSocket(String url);
-
-  @JS('send')
-  external void _send(JSAny? data);
-  void send(Object? data) => _send(data?.toJSAnyShallow);
-}
-
-DomWebSocket createDomWebSocket(String url) => DomWebSocket(url);
 
 @JS('MessageEvent')
 extension type DomMessageEvent._(JSObject _) implements DomEvent {

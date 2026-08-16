@@ -296,15 +296,6 @@ extension type SkAffinity(JSObject _) implements JSObject {
   external double get value;
 }
 
-final List<SkAffinity> _skAffinitys = <SkAffinity>[
-  canvasKit.Affinity.Upstream,
-  canvasKit.Affinity.Downstream,
-];
-
-SkAffinity toSkAffinity(ui.TextAffinity affinity) {
-  return _skAffinitys[affinity.index];
-}
-
 extension type SkTextDirectionEnum(JSObject _) implements JSObject {
   external SkTextDirection get RTL;
   external SkTextDirection get LTR;
@@ -1516,14 +1507,6 @@ Float32List toSkRRect(ui.RRect rrect) {
 }
 
 // TODO(hterkelsen): Use a shared malloc'ed array for performance.
-Float32List toOuterSkRect(ui.RRect rrect) {
-  final skRect = Float32List(4);
-  skRect[0] = rrect.left;
-  skRect[1] = rrect.top;
-  skRect[2] = rrect.right;
-  skRect[3] = rrect.bottom;
-  return skRect;
-}
 
 /// Encodes a list of offsets to CanvasKit-compatible point array.
 ///
