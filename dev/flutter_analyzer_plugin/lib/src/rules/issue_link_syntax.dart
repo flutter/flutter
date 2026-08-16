@@ -110,6 +110,7 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitCompilationUnit(CompilationUnit node) {
+
     // In the Dart analyzer AST, non-doc comments (`// ...`) are not represented
     // as Comment AST nodes; they are attached to lexical tokens as precedingComments.
     // We walk the token stream from beginToken to ensure all comments are inspected.
@@ -131,6 +132,7 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitSimpleStringLiteral(SimpleStringLiteral node) {
+
     // Ignore children of AdjacentStrings to avoid double-reporting;
     // visitAdjacentStrings inspects the full concatenated literal.
     if (node.parent is AdjacentStrings) {
