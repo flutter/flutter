@@ -535,35 +535,6 @@ Future<void> main() {
   ''';
 }
 
-/// Generate the unit test bootstrap file.
-String generateTestBootstrapFileContents(String mainUri, String requireUrl, String mapperUrl) {
-  return '''
-(function() {
-  if (typeof document != 'undefined') {
-    var el = document.createElement("script");
-    el.defer = true;
-    el.async = false;
-    el.src = '$mapperUrl';
-    document.head.appendChild(el);
-
-    el = document.createElement("script");
-    el.defer = true;
-    el.async = false;
-    el.src = '$requireUrl';
-    el.setAttribute("data-main", '$mainUri');
-    document.head.appendChild(el);
-  } else {
-    importScripts('$mapperUrl', '$requireUrl');
-    require.config({
-      baseUrl: baseUrl,
-    });
-    window = self;
-    require(['$mainUri']);
-  }
-})();
-''';
-}
-
 String generateDefaultFlutterBootstrapScript({required bool includeServiceWorkerSettings}) {
   final serviceWorkerSettings = includeServiceWorkerSettings
       ? '''
