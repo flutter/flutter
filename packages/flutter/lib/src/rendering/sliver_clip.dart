@@ -54,7 +54,7 @@ enum ClipOverlapBehavior {
 /// By default, [RenderSliverClipRect] uses its own bounds as the base
 /// rectangle for the clip, but the size and location of the clip can be
 /// customized using a custom [clipper].
-class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
+base class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
   /// Creates a rectangular clip.
   ///
   /// If [clipper] is null, the clip will match the layout size and position of
@@ -147,7 +147,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
 /// By default, [RenderSliverClipRRect] uses its own bounds as the base
 /// rectangle for the clip, but the size and location of the clip can be
 /// customized using a custom [clipper].
-class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
+base class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
   /// Creates a sliver render object for clipping with a rounded rectangle.
   ///
   /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
@@ -179,7 +179,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
       return;
     }
     _borderRadius = value;
-    _markNeedsClip();
+    markNeedsClip();
   }
 
   /// The text direction with which to resolve [borderRadius].
@@ -190,7 +190,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
       return;
     }
     _textDirection = value;
-    _markNeedsClip();
+    markNeedsClip();
   }
 
   @override
@@ -305,11 +305,11 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
         oldClipper == null ||
         newClipper.runtimeType != oldClipper.runtimeType ||
         newClipper.shouldReclip(oldClipper)) {
-      _markNeedsClip();
+      markNeedsClip();
     }
     if (attached) {
-      oldClipper?.removeListener(_markNeedsClip);
-      newClipper?.addListener(_markNeedsClip);
+      oldClipper?.removeListener(markNeedsClip);
+      newClipper?.addListener(markNeedsClip);
     }
   }
 
@@ -321,7 +321,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
       return;
     }
     _clipBehavior = value;
-    _markNeedsClip();
+    markNeedsClip();
   }
 
   /// Whether to clip starting from the overlap area.
@@ -332,14 +332,15 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
       return;
     }
     _clipOverlap = value;
-    _markNeedsClip();
+    markNeedsClip();
   }
 
   T? _clip;
 
-  /// Builds the clip to apply to the child. This method is called lazily from
-  /// [_getClip] and the result is cached until the next time the render object
-  /// is marked as needing paint.
+  /// Builds the clip to apply to the child.
+  ///
+  /// This method is called lazily during painting or hit testing. The result is
+  /// cached until the next time the render object is laid out or [markNeedsClip] is called.
   @protected
   T buildClip();
 
@@ -356,21 +357,40 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
 
   /// Returns whether the given offset is contained within the clip. This is used for hit testing and should be
   /// implemented by subclasses to match the shape of the clip.
+  @protected
   bool clipContains(Offset offset, T clip);
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _clipper?.addListener(_markNeedsClip);
+    _clipper?.addListener(markNeedsClip);
   }
 
   @override
   void detach() {
-    _clipper?.removeListener(_markNeedsClip);
+    _clipper?.removeListener(markNeedsClip);
     super.detach();
   }
 
-  void _markNeedsClip() {
+  /// Mark this render object as needing to recalculate its clip.
+  ///
+  /// Rather than eagerly recomputing the clip in response to writes, we instead
+  /// invalidate the cached clip and mark the render object as needing to paint,
+  /// which schedules a visual update. The clip is then recomputed lazily by
+  /// [buildClip] during the next paint or hit test pass.
+  ///
+  /// Subclasses should call this method whenever an aspect of the clip shape or
+  /// configuration changes without requiring a layout pass (for example, when
+  /// [RenderSliverClipRRect.borderRadius] changes).
+  ///
+  /// This method is also used as the listener callback when a listenable
+  /// [clipper] notifies that the clip needs to be recalculated.
+  ///
+  /// See also:
+  ///
+  ///  * [buildClip], which computes the clip applied to the child.
+  @protected
+  void markNeedsClip() {
     _clip = null;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
