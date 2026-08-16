@@ -22,3 +22,47 @@ abstract class BuildTargets {
     Analytics analytics,
   );
 }
+
+/// BuildTargets that return NoOpTarget for every action.
+class NoOpBuildTargets extends BuildTargets {
+  const NoOpBuildTargets();
+
+  @override
+  Target get copyFlutterBundle => const _NoOpTarget();
+
+  @override
+  Target get releaseCopyFlutterBundle => const _NoOpTarget();
+
+  @override
+  Target get generateLocalizationsTarget => const _NoOpTarget();
+
+  @override
+  Target get dartPluginRegistrantTarget => const _NoOpTarget();
+
+  @override
+  Target webServiceWorker(
+    FileSystem fileSystem,
+    List<WebCompilerConfig> compileConfigs,
+    Analytics analytics,
+  ) => const _NoOpTarget();
+}
+
+/// A [Target] that does nothing.
+class _NoOpTarget extends Target {
+  const _NoOpTarget();
+
+  @override
+  String get name => 'no_op';
+
+  @override
+  List<Source> get inputs => const <Source>[];
+
+  @override
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  Future<void> build(Environment environment) async {}
+}
