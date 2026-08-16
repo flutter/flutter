@@ -498,7 +498,13 @@ class CustomDevice extends Device {
   }) async {
     final List<String> interpolated = interpolateCommand(_config.pingCommand, replacementValues);
 
-    final RunResult result = await _processUtils.run(interpolated, timeout: timeout);
+    final RunResult result;
+    try {
+      result = await _processUtils.run(interpolated, timeout: timeout);
+    } on ProcessException catch (e) {
+      _logger.printError('Error pinging custom device $id: $e');
+      return false;
+    }
 
     if (result.exitCode != 0) {
       return false;
