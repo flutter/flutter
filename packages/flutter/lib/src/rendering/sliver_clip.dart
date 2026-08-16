@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'layer.dart';
 import 'object.dart';
@@ -464,7 +463,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     final double minClipOrigin = -math.min(flexibleClipExtent, constraints.scrollOffset);
 
     // When flexibleClipExtent is scrolled, we can push up the clip.
-    return ui.clampDouble(
+    return clampDouble(
       flexibleClipExtent - constraints.scrollOffset,
       minClipOrigin,
       effectiveOverlap,
