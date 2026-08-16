@@ -4766,9 +4766,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///    during state restoration.
   @awaitNotRequired
   @optionalTypeArgs
-  Future<T?> pushNamed<T extends Object?>(String routeName, {Object? arguments}) async {
-    final Object? result = await push<Object?>(_routeNamed(routeName, arguments: arguments)!);
-    return result as T?;
+  Future<T?> pushNamed<T extends Object?>(String routeName, {Object? arguments}) {
+    final Route<Object?> route = _routeNamed(routeName, arguments: arguments)!;
+    return push<Object?>(route).then((Object? result) => result as T?);
   }
 
   /// Push a named route onto the navigator.
@@ -4837,12 +4837,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     String routeName, {
     TO? result,
     Object? arguments,
-  }) async {
-    final Object? value = await pushReplacement<Object?, Object?>(
+  }) {
+    return pushReplacement<Object?, Object?>(
       _routeNamed(routeName, arguments: arguments)!,
       result: result,
-    );
-    return value as T?;
+    ).then((Object? value) => value as T?);
   }
 
   /// Replace the current route of the navigator by pushing the route named
@@ -4982,12 +4981,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     String newRouteName,
     RoutePredicate predicate, {
     Object? arguments,
-  }) async {
-    final Object? result = await pushAndRemoveUntil<Object?>(
+  }) {
+    return pushAndRemoveUntil<Object?>(
       _routeNamed(newRouteName, arguments: arguments)!,
       predicate,
-    );
-    return result as T?;
+    ).then((Object? result) => result as T?);
   }
 
   /// Push the route with the given name onto the navigator, and then remove all
