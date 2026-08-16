@@ -135,34 +135,61 @@ void main() {
   test('HSVColor lerps hue correctly.', () {
     final output = <Color>[];
     const startColor = HSVColor.fromAHSV(1.0, 0.0, 1.0, 1.0);
-    const endColor = HSVColor.fromAHSV(1.0, 360.0, 1.0, 1.0);
+    const endColor = HSVColor.fromAHSV(1.0, 180.0, 1.0, 1.0);
 
     for (var t = -0.5; t < 1.5; t += 0.1) {
       output.add(HSVColor.lerp(startColor, endColor, t)!.toColor());
     }
     final expectedColors = <Color>[
-      const Color(0xff00ffff),
-      const Color(0xff0066ff),
-      const Color(0xff3300ff),
+      const Color(0xff8000ff),
       const Color(0xffcc00ff),
+      const Color(0xffff00e6),
       const Color(0xffff0099),
+      const Color(0xffff004c),
       const Color(0xffff0000),
+      const Color(0xffff4c00),
       const Color(0xffff9900),
+      const Color(0xffffe600),
       const Color(0xffccff00),
+      const Color(0xff80ff00),
       const Color(0xff33ff00),
+      const Color(0xff00ff19),
       const Color(0xff00ff66),
+      const Color(0xff00ffb2),
       const Color(0xff00ffff),
+      const Color(0xff00b3ff),
       const Color(0xff0066ff),
+      const Color(0xff001aff),
       const Color(0xff3300ff),
-      const Color(0xffcc00ff),
-      const Color(0xffff0099),
-      const Color(0xffff0000),
-      const Color(0xffff9900),
-      const Color(0xffccff00),
-      const Color(0xff33ff00),
-      const Color(0xff00ff66),
     ];
     expect(output, equals(expectedColors));
+  });
+
+  test('HSVColor lerps hue along the shortest arc.', () {
+    HSVColor at(double startHue, double endHue, double t) => HSVColor.lerp(
+      HSVColor.fromAHSV(1.0, startHue, 1.0, 1.0),
+      HSVColor.fromAHSV(1.0, endHue, 1.0, 1.0),
+      t,
+    )!;
+
+    expect(at(300.0, 60.0, 0.25).hue, moreOrLessEquals(330.0));
+    expect(at(300.0, 60.0, 0.5).hue, moreOrLessEquals(0.0));
+    expect(at(300.0, 60.0, 0.75).hue, moreOrLessEquals(30.0));
+
+    expect(at(60.0, 300.0, 0.25).hue, moreOrLessEquals(30.0));
+    expect(at(60.0, 300.0, 0.5).hue, moreOrLessEquals(0.0));
+    expect(at(60.0, 300.0, 0.75).hue, moreOrLessEquals(330.0));
+
+    expect(at(350.0, 10.0, 0.5).hue, moreOrLessEquals(0.0));
+    expect(at(10.0, 350.0, 0.5).hue, moreOrLessEquals(0.0));
+
+    expect(at(20.0, 200.0, 0.5).hue, moreOrLessEquals(110.0));
+    expect(at(0.0, 90.0, 0.5).hue, moreOrLessEquals(45.0));
+
+    expect(at(0.0, 360.0, 0.5).hue, moreOrLessEquals(0.0));
+
+    expect(at(300.0, 60.0, 1.5).hue, moreOrLessEquals(120.0));
+    expect(at(300.0, 60.0, -0.5).hue, moreOrLessEquals(240.0));
   });
 
   test('HSVColor lerps saturation correctly.', () {
@@ -378,34 +405,61 @@ void main() {
   test('HSLColor lerps hue correctly.', () {
     final output = <Color>[];
     const startColor = HSLColor.fromAHSL(1.0, 0.0, 0.5, 0.5);
-    const endColor = HSLColor.fromAHSL(1.0, 360.0, 0.5, 0.5);
+    const endColor = HSLColor.fromAHSL(1.0, 180.0, 0.5, 0.5);
 
     for (var t = -0.5; t < 1.5; t += 0.1) {
       output.add(HSLColor.lerp(startColor, endColor, t)!.toColor());
     }
     final expectedColors = <Color>[
-      const Color(0xff40bfbf),
-      const Color(0xff4073bf),
-      const Color(0xff5940bf),
+      const Color(0xff8040bf),
       const Color(0xffa640bf),
+      const Color(0xffbf40b3),
       const Color(0xffbf408c),
+      const Color(0xffbf4066),
       const Color(0xffbf4040),
+      const Color(0xffbf6640),
       const Color(0xffbf8c40),
+      const Color(0xffbfb340),
       const Color(0xffa6bf40),
+      const Color(0xff80bf40),
       const Color(0xff59bf40),
+      const Color(0xff40bf4c),
       const Color(0xff40bf73),
+      const Color(0xff40bf99),
       const Color(0xff40bfbf),
+      const Color(0xff4099bf),
       const Color(0xff4073bf),
+      const Color(0xff404dbf),
       const Color(0xff5940bf),
-      const Color(0xffa640bf),
-      const Color(0xffbf408c),
-      const Color(0xffbf4040),
-      const Color(0xffbf8c40),
-      const Color(0xffa6bf40),
-      const Color(0xff59bf40),
-      const Color(0xff40bf73),
     ];
     expect(output, equals(expectedColors));
+  });
+
+  test('HSLColor lerps hue along the shortest arc.', () {
+    HSLColor at(double startHue, double endHue, double t) => HSLColor.lerp(
+      HSLColor.fromAHSL(1.0, startHue, 0.5, 0.5),
+      HSLColor.fromAHSL(1.0, endHue, 0.5, 0.5),
+      t,
+    )!;
+
+    expect(at(300.0, 60.0, 0.25).hue, moreOrLessEquals(330.0));
+    expect(at(300.0, 60.0, 0.5).hue, moreOrLessEquals(0.0));
+    expect(at(300.0, 60.0, 0.75).hue, moreOrLessEquals(30.0));
+
+    expect(at(60.0, 300.0, 0.25).hue, moreOrLessEquals(30.0));
+    expect(at(60.0, 300.0, 0.5).hue, moreOrLessEquals(0.0));
+    expect(at(60.0, 300.0, 0.75).hue, moreOrLessEquals(330.0));
+
+    expect(at(350.0, 10.0, 0.5).hue, moreOrLessEquals(0.0));
+    expect(at(10.0, 350.0, 0.5).hue, moreOrLessEquals(0.0));
+
+    expect(at(20.0, 200.0, 0.5).hue, moreOrLessEquals(110.0));
+    expect(at(0.0, 90.0, 0.5).hue, moreOrLessEquals(45.0));
+
+    expect(at(0.0, 360.0, 0.5).hue, moreOrLessEquals(0.0));
+
+    expect(at(300.0, 60.0, 1.5).hue, moreOrLessEquals(120.0));
+    expect(at(300.0, 60.0, -0.5).hue, moreOrLessEquals(240.0));
   });
 
   test('HSLColor lerps saturation correctly.', () {
