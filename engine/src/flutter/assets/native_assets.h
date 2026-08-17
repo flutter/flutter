@@ -34,6 +34,9 @@ class NativeAssetsManager {
   // `["system", "libsqlite3.so"]`.
   std::vector<std::string> LookupNativeAsset(std::string_view asset_id);
 
+  // Returns whether [asset_id] is present in the native assets mapping.
+  bool ContainsNativeAsset(std::string_view asset_id) const;
+
   // Lists the available asset ids.
   //
   // Used when a user tries to look up an asset with an ID that does not exist
