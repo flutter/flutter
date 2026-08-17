@@ -4153,23 +4153,6 @@ class EditableTextState extends State<EditableText>
     if (_hasFocus && widget.focusNode.consumeKeyboardToken()) {
       _openInputConnection();
     } else if (!_hasFocus) {
-      // On the web, a blur on an autofill field is usually transient: a browser
-      // or extension password manager steals focus while it fills the login
-      // form and then hands it back. Closing the input connection here tears the
-      // field down and recreates it on the return focus, which churns the
-      // autofill DOM; strict managers detect that churn as page interference and
-      // disable autofill. Keep the connection open across the transient blur --
-      // the engine side (DefaultTextEditingStrategy.handleBlur) already keeps its
-      // half alive and closes for real (via onConnectionClosed) when focus
-      // genuinely leaves the field. Focusing a different field still supersedes
-      // this connection with a new setClient, so the connection is not leaked.
-      //
-      // Restricted to the web because this churn is specific to the web engine's
-      // hidden-input autofill proxy; native platforms drive autofill through the
-      // OS and do not need the connection held open here.
-      if (kIsWeb && _needsAutofill) {
-        return;
-      }
       _closeInputConnectionIfNeeded();
       widget.controller.clearComposing();
     }
