@@ -330,6 +330,9 @@
 /dev/devicelab/bin/tasks/windowing_test_windows.dart @mattkae @flutter/desktop
 /dev/devicelab/bin/tasks/windows_desktop_impeller.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_engine_integration_golden_test.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/windows_gradient_consistent_perf__e2e_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/windows_gradient_dynamic_perf__e2e_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/windows_gradient_static_perf__e2e_summary.dart @b-luk @flutter/engine
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_text_shadow_perf__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
