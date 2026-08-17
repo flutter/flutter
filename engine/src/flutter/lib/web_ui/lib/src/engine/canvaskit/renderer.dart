@@ -73,28 +73,13 @@ class CanvasKitRenderer extends Renderer {
   ui.Paint createPaint() => CkPaint();
 
   @override
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  }) => CkVertices(
-    mode,
-    positions,
-    textureCoordinates: textureCoordinates,
-    colors: colors,
-    indices: indices,
-  );
-
-  @override
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
     Int32List? colors,
     Uint16List? indices,
-  }) => CkVertices.raw(
+  }) => CkVertices(
     mode,
     positions,
     textureCoordinates: textureCoordinates,
@@ -187,15 +172,19 @@ class CanvasKitRenderer extends Renderer {
     required ui.ImageFilter inner,
   }) {
     if (outer is EngineColorFilter) {
-      final CkColorFilter colorFilter = createCkColorFilter(outer)!;
-      outer = CkColorFilterImageFilter(colorFilter: colorFilter);
+      outer = CkColorFilterImageFilter(colorFilter: outer);
     }
     if (inner is EngineColorFilter) {
-      final CkColorFilter colorFilter = createCkColorFilter(inner)!;
-      inner = CkColorFilterImageFilter(colorFilter: colorFilter);
+      inner = CkColorFilterImageFilter(colorFilter: inner);
     }
     return CkImageFilter.compose(outer: outer as CkImageFilter, inner: inner as CkImageFilter);
   }
+
+  @override
+  BackendColorFilter createColorFilter(EngineColorFilter filter) => CkColorFilter(filter);
+
+  @override
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter) => CkMaskFilter(filter);
 
   @override
   BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight}) {
