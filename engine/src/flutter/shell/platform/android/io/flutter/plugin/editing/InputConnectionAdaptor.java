@@ -27,6 +27,10 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.TextAttribute;
+import android.view.accessibility.AccessibilityNodeProvider;
+import io.flutter.view.AccessibilityBridge;
+import android.view.accessibility.AccessibilityEvent;
 import androidx.annotation.NonNull;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import io.flutter.Log;
@@ -170,11 +174,39 @@ public class InputConnectionAdaptor extends BaseInputConnection
     return result;
   }
 
+  private void updateTextChangeType(TextAttribute textAttribute, boolean isComposing, String newValue) {
+    if (Build.VERSION.SDK_INT >= 37 && textAttribute != null) {
+      int changeType = 0;
+      if (textAttribute.isTextSuggestionSelected()) {
+        changeType = AccessibilityEvent.TEXT_CHANGE_TYPE_CONVERSION_SUGGESTION_SELECTED_BY_IME;
+      } else if (isComposing) {
+        changeType = AccessibilityEvent.TEXT_CHANGE_TYPE_IN_COMPOSITION;
+      } else {
+        changeType = AccessibilityEvent.TEXT_CHANGE_TYPE_COMMITTED_BY_IME;
+      }
+
+      if (mFlutterView != null) {
+        AccessibilityNodeProvider provider = mFlutterView.getAccessibilityNodeProvider();
+        if (provider instanceof AccessibilityBridge) {
+          ((AccessibilityBridge) provider).addImeTextChange(newValue, changeType);
+        }
+      }
+    }
+  }
+
   @Override
   public boolean commitText(CharSequence text, int newCursorPosition) {
     final boolean result = super.commitText(text, newCursorPosition);
     return result;
   }
+
+  @Override
+  public boolean commitText(CharSequence text, int newCursorPosition, TextAttribute textAttribute) {
+    final boolean result = super.commitText(text, newCursorPosition, textAttribute);
+    updateTextChangeType(textAttribute, false, mEditable.toString());
+    return result;
+  }
+
 
   @Override
   public boolean deleteSurroundingText(int beforeLength, int afterLength) {
@@ -199,6 +231,14 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   @Override
+  public boolean setComposingRegion(int start, int end, TextAttribute textAttribute) {
+    final boolean result = super.setComposingRegion(start, end, textAttribute);
+    updateTextChangeType(textAttribute, true, mEditable.toString());
+    return result;
+  }
+
+
+  @Override
   public boolean setComposingText(CharSequence text, int newCursorPosition) {
     boolean result;
     beginBatchEdit();
@@ -207,6 +247,20 @@ public class InputConnectionAdaptor extends BaseInputConnection
     } else {
       result = super.setComposingText(text, newCursorPosition);
     }
+    endBatchEdit();
+    return result;
+  }
+
+  @Override
+  public boolean setComposingText(CharSequence text, int newCursorPosition, TextAttribute textAttribute) {
+    boolean result;
+    beginBatchEdit();
+    if (text.length() == 0) {
+      result = super.commitText(text, newCursorPosition, textAttribute);
+    } else {
+      result = super.setComposingText(text, newCursorPosition, textAttribute);
+    }
+    updateTextChangeType(textAttribute, true, mEditable.toString());
     endBatchEdit();
     return result;
   }

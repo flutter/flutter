@@ -78,6 +78,25 @@ import java.util.regex.Pattern;
  * IDs".
  */
 public class AccessibilityBridge extends AccessibilityNodeProvider {
+
+  private static class ImeTextChange {
+      final String text;
+      final int type;
+      ImeTextChange(String text, int type) {
+          this.text = text;
+          this.type = type;
+      }
+  }
+
+  private final java.util.Queue<ImeTextChange> imeTextChanges = new java.util.ArrayDeque<>();
+
+  public void addImeTextChange(String text, int type) {
+      if (imeTextChanges.size() > 20) {
+          imeTextChanges.poll();
+      }
+      imeTextChanges.add(new ImeTextChange(text, type));
+  }
+
   private static final String TAG = "AccessibilityBridge";
 
   // Constants from higher API levels.
@@ -1730,6 +1749,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           && (lastInputFocusedSemanticsNode == null
               || lastInputFocusedSemanticsNode.id != inputFocusedSemanticsNode.id)) {
         lastInputFocusedSemanticsNode = inputFocusedSemanticsNode;
+        imeTextChanges.clear();
         sendAccessibilityEvent(
             obtainAccessibilityEvent(object.id, AccessibilityEvent.TYPE_VIEW_FOCUSED));
       } else if (inputFocusedSemanticsNode == null) {
@@ -1737,6 +1757,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         // null, then we just set the last one to null too, so that it sends the event again
         // when something regains focus.
         lastInputFocusedSemanticsNode = null;
+        imeTextChanges.clear();
       }
 
       if (inputFocusedSemanticsNode != null
@@ -1776,6 +1797,30 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     e.setBeforeText(oldValue);
     e.getText().add(newValue);
 
+    // Determine the type of change that occurred by analyzing the IME change history.
+    Integer changeType = null;
+    if (Build.VERSION.SDK_INT >= 37) {
+        int elementsToPoll = 0;
+        int index = 0;
+        for (ImeTextChange change : imeTextChanges) {
+            index++;
+            if (change.text.equals(newValue)) {
+                elementsToPoll = index;
+            }
+        }
+        
+        for (int j = 0; j < elementsToPoll; j++) {
+            ImeTextChange change = imeTextChanges.poll();
+            if (change.text.equals(newValue)) {
+                changeType = change.type;
+            }
+        }
+        
+        if (changeType != null) {
+            e.setTextChangeTypes(changeType);
+        }
+    }
+
     int i;
     for (i = 0; i < oldValue.length() && i < newValue.length(); ++i) {
       if (oldValue.charAt(i) != newValue.charAt(i)) {
@@ -1783,7 +1828,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
     }
     if (i >= oldValue.length() && i >= newValue.length()) {
-      return null; // Text did not change
+      if (changeType != null) {
+          return e;
+      } else {
+          return null; // Text did not change
+      }
     }
     int firstDifference = i;
     e.setFromIndex(firstDifference);
