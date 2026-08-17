@@ -88,18 +88,27 @@ class ExtensionManager {
     }
   }
 
+  final Map<ExtensionConnection, DiagnosticsExtensionClient> _diagnosticsClients =
+      <ExtensionConnection, DiagnosticsExtensionClient>{};
+
   /// Active [DiagnosticsExtension] proxies for extensions supporting `'diagnostics'`.
   List<DiagnosticsExtension> get diagnosticsExtensions {
     _logger.printTrace('ExtensionManager querying active diagnosticsExtensions.');
-    return _discovery.connections
-        .where(
-          (ExtensionConnection c) =>
-              c.capabilities.services.contains(DiagnosticsExtension.serviceNamespace),
-        )
-        .map<DiagnosticsExtension>(
-          (ExtensionConnection c) => DiagnosticsExtensionClient(c, logger: _logger),
-        )
-        .toList();
+    final extensions = <DiagnosticsExtension>[];
+    for (final ExtensionConnection connection in _discovery.connections) {
+      if (connection.capabilities.services.contains(DiagnosticsExtension.serviceNamespace)) {
+        extensions.add(
+          _diagnosticsClients.putIfAbsent(
+            connection,
+            () => DiagnosticsExtensionClient(connection, logger: _logger),
+          ),
+        );
+      }
+    }
+    _diagnosticsClients.removeWhere(
+      (ExtensionConnection connection, _) => !_discovery.connections.contains(connection),
+    );
+    return extensions;
   }
 
   /// Disposes all active extension isolate connections.

@@ -90,9 +90,17 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
     _logger.printTrace(
       'DiagnosticsExtensionClient fetching title via RPC ("${DiagnosticsExtension.getTitleMethod}")...',
     );
-    _titleCache = (await connection.sendRequest(DiagnosticsExtension.getTitleMethod))! as String;
-    _logger.printTrace('DiagnosticsExtensionClient received title: "$_titleCache".');
-    return _titleCache!;
+    try {
+      final Object? response = await connection.sendRequest(DiagnosticsExtension.getTitleMethod);
+      if (response is String) {
+        _titleCache = response;
+      } else {
+        _logger.printTrace('DiagnosticsExtensionClient received invalid title response: $response');
+      }
+    } on Object catch (err, stack) {
+      _logger.printTrace('DiagnosticsExtensionClient failed to fetch title: $err\n$stack');
+    }
+    return _titleCache ?? _defaultTitle;
   }
 
   @override
@@ -100,13 +108,28 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
     _logger.printTrace(
       'DiagnosticsExtensionClient running diagnostics via RPC ("${DiagnosticsExtension.runDiagnosticsMethod}")...',
     );
-    final rawResult =
-        (await connection.sendRequest(DiagnosticsExtension.runDiagnosticsMethod))! as List<Object?>;
-    final List<ValidationResult> results = rawResult
-        .cast<Map<String, Object?>>()
-        .map(ValidationResult.fromJson)
-        .toList();
-    _logger.printTrace('DiagnosticsExtensionClient received ${results.length} result(s) via RPC.');
-    return results;
+    try {
+      final Object? response = await connection.sendRequest(
+        DiagnosticsExtension.runDiagnosticsMethod,
+      );
+      if (response is List<Object?>) {
+        final results = <ValidationResult>[];
+        for (final Object? element in response) {
+          if (element is Map) {
+            results.add(ValidationResult.fromJson(element.cast<String, Object?>()));
+          }
+        }
+        _logger.printTrace(
+          'DiagnosticsExtensionClient received ${results.length} result(s) via RPC.',
+        );
+        return results;
+      }
+      _logger.printTrace(
+        'DiagnosticsExtensionClient received invalid diagnostics response: $response',
+      );
+    } on Object catch (err, stack) {
+      _logger.printTrace('DiagnosticsExtensionClient failed to run diagnostics: $err\n$stack');
+    }
+    return const <ValidationResult>[];
   }
 }
