@@ -162,6 +162,68 @@ void testMain() {
       isComposited: true,
     );
   });
+
+  test('Disposed picture is culled and does not throw during preroll, measure, and debug info', () {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint());
+    final ui.Picture picture = recorder.endRecording();
+    picture.dispose();
+
+    final pictureLayer = PictureLayer(
+      picture as LayerPicture,
+      const ui.Offset(10, 10),
+      false,
+      false,
+    );
+    final rootLayer = RootLayer();
+    rootLayer.children.add(pictureLayer);
+    final PlatformViewEmbedder embedder = createPlatformViewEmbedder();
+
+    final prerollVisitor = PrerollVisitor(embedder);
+    expect(() => rootLayer.accept(prerollVisitor), returnsNormally);
+    expect(pictureLayer.paintBounds, ui.Rect.zero);
+    expect(pictureLayer.isCulled, isTrue);
+
+    final measureVisitor = MeasureVisitor(const BitmapSize(100, 100), embedder);
+    expect(() => rootLayer.accept(measureVisitor), returnsNormally);
+    expect(pictureLayer.isCulled, isTrue);
+
+    final debugInfoVisitor = DebugInfoVisitor();
+    late Map<String, dynamic> debugInfo;
+    expect(() => debugInfo = rootLayer.accept(debugInfoVisitor), returnsNormally);
+    expect(debugInfo['children'], hasLength(1));
+    final pictureDebugInfo = (debugInfo['children'] as List<dynamic>).first as Map<String, dynamic>;
+    expect(pictureDebugInfo['type'], 'picture');
+    expect(pictureDebugInfo['localBounds'], <String, dynamic>{
+      'left': 0.0,
+      'top': 0.0,
+      'right': 0.0,
+      'bottom': 0.0,
+    });
+  });
+
+  test('LayerTree handles disposed pictures gracefully across all phases', () {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 10, 10), ui.Paint());
+    final ui.Picture picture = recorder.endRecording();
+    picture.dispose();
+
+    final pictureLayer = PictureLayer(picture as LayerPicture, const ui.Offset(5, 5), false, false);
+    final rootLayer = RootLayer();
+    rootLayer.children.add(pictureLayer);
+
+    final layerTree = LayerTree(rootLayer);
+    final PlatformViewEmbedder embedder = createPlatformViewEmbedder();
+    final frame = Frame(embedder);
+
+    expect(() => layerTree.preroll(frame), returnsNormally);
+    expect(() => layerTree.measure(frame, const BitmapSize(100, 100)), returnsNormally);
+    expect(() => layerTree.paint(frame), returnsNormally);
+    expect(() => layerTree.dumpDebugInfo(), returnsNormally);
+    expect(() => layerTree.flatten(const ui.Size(100, 100)), returnsNormally);
+  });
 }
 
 PlatformViewEmbedder createPlatformViewEmbedder() {

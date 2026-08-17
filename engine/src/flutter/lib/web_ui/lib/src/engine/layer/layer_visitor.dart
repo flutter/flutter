@@ -173,6 +173,14 @@ class PrerollVisitor extends LayerVisitor<void> {
 
   @override
   void visitPicture(PictureLayer picture) {
+    if (picture.picture.isDisposed) {
+      // The picture layer was disposed before the picture could be painted.
+      // Just ignore it then.
+      picture.paintBounds = ui.Rect.zero;
+      picture.isCulled = true;
+      return;
+    }
+
     picture.paintBounds = picture.picture.cullRect.shift(picture.offset);
     // The picture may have been culled on a previous frame, but has since
     // scrolled back into the clip region. Reset the `isCulled` flag.
@@ -893,7 +901,7 @@ class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
 
   @override
   Map<String, dynamic> visitPicture(PictureLayer picture) {
-    final ui.Rect cullRect = picture.picture.cullRect;
+    final ui.Rect cullRect = picture.picture.isDisposed ? ui.Rect.zero : picture.picture.cullRect;
     return <String, dynamic>{
       'type': 'picture',
       'offset': {'x': picture.offset.dx, 'y': picture.offset.dy},
