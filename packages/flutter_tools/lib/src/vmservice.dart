@@ -150,6 +150,8 @@ Future<io.WebSocket> _defaultOpenChannel(
       await handleError(e);
     } on io.SocketException catch (e) {
       await handleError(e);
+    } on io.HttpException catch (e) {
+      await handleError(e);
     }
   }
   return socket;
