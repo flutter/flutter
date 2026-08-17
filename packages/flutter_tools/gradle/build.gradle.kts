@@ -74,7 +74,6 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:$agpVersion")
-    testImplementation("org.mockito:mockito-core:5.8.0")
     testImplementation("io.mockk:mockk:1.13.16")
 }
 
