@@ -100,39 +100,39 @@ TaskFunction createIOSPlatformViewTests({String? deviceIdOverride}) {
   ).call;
 }
 
-TaskFunction createEndToEndKeyboardTest() {
+TaskFunction createEndToEndKeyboardTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/keyboard_resize.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createEndToEndFrameNumberTest() {
+TaskFunction createEndToEndFrameNumberTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/frame_number.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createEndToEndDriverTest({Map<String, String>? environment}) {
+TaskFunction createEndToEndDriverTest({
+  Map<String, String>? environment,
+  String? deviceIdOverride,
+}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/driver.dart',
     environment: environment,
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createEndToEndScreenshotTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/screenshot.dart',
-  ).call;
-}
-
-TaskFunction createEndToEndKeyboardTextfieldTest() {
+TaskFunction createEndToEndKeyboardTextfieldTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/keyboard_textfield.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 

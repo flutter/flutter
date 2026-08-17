@@ -8,12 +8,6 @@ import 'dart:js_interop';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-/// Overrides `domDocument.hasFocus()` in [ViewFocusBinding] for tests, so the
-/// iOS caret-drag deferral tests do not depend on the headless browser
-/// reporting the test document as focused. Mirrors
-/// `DefaultTextEditingStrategy.debugDocumentHasFocusOverride`.
-bool? debugViewFocusDocumentHasFocusOverride;
-
 /// Tracks the [FlutterView]s focus changes.
 final class ViewFocusBinding {
   ViewFocusBinding(this._viewManager, this._onViewFocusChange);
@@ -25,21 +19,6 @@ final class ViewFocusBinding {
   ui.ViewFocusDirection _viewFocusDirection = ui.ViewFocusDirection.forward;
 
   StreamSubscription<int>? _onViewCreatedListener;
-
-  /// A deferred report of a `focusout` that named no element to gain focus.
-  ///
-  /// A native iOS caret/selection drag transiently blurs the focused input to
-  /// <body> and WebKit refocuses it a frame later. Deferring the report lets
-  /// that refocus cancel it, so the view is not briefly reported unfocused.
-  /// See: https://github.com/flutter/flutter/issues/189744
-  Timer? _pendingFocusoutTimer;
-
-  /// Whether the document itself still has focus.
-  ///
-  /// Reads [debugViewFocusDocumentHasFocusOverride] when set, so tests do not
-  /// depend on the headless browser reporting the test document as focused.
-  /// Mirrors `DefaultTextEditingStrategy._documentHasFocus`.
-  bool get _documentHasFocus => debugViewFocusDocumentHasFocusOverride ?? domDocument.hasFocus();
 
   void init() {
     // We need a global listener here to know if the user was pressing "shift"
@@ -57,7 +36,6 @@ final class ViewFocusBinding {
     domDocument.body?.removeEventListener(_keyDown, _handleKeyDown);
     domDocument.body?.removeEventListener(_keyUp, _handleKeyUp);
     _onViewCreatedListener?.cancel();
-    _pendingFocusoutTimer?.cancel();
   }
 
   void changeViewFocus(int viewId, ui.ViewFocusState state) {
@@ -76,9 +54,6 @@ final class ViewFocusBinding {
 
   late final DomEventListener _handleFocusin = createDomEventListener((DomEvent event) {
     event as DomFocusEvent;
-    // Focus returned, so a deferred `focusout` was a transient blur; drop it.
-    _pendingFocusoutTimer?.cancel();
-    _pendingFocusoutTimer = null;
     _handleFocusChange(event.target as DomElement?);
   });
 
@@ -95,31 +70,7 @@ final class ViewFocusBinding {
     }
 
     event as DomFocusEvent;
-    final willGainFocus = event.relatedTarget as DomElement?;
-    final target = event.target as DomElement?;
-
-    // On iOS, a native caret/selection drag transiently blurs Flutter's active
-    // text-editing element to <body> (relatedTarget == null) while the document
-    // still has focus, and WebKit refocuses it a frame later. Reporting the view
-    // unfocused on that blink tears the text connection down and drops the
-    // keyboard. Defer only that precise case, re-deriving from the live focus so
-    // an immediate refocus is a no-op ([_handleFocusin] cancels the timer).
-    // Anything else, a non-editing element, a genuine focus loss, or the page
-    // itself losing focus, reports immediately.
-    // https://github.com/flutter/flutter/issues/189744
-    if (isIosSafari &&
-        willGainFocus == null &&
-        _documentHasFocus &&
-        textEditing.isActiveTextEditingElement(target)) {
-      _pendingFocusoutTimer?.cancel();
-      _pendingFocusoutTimer = Timer(kTransientBlurSettleDelay, () {
-        _pendingFocusoutTimer = null;
-        _handleFocusChange(domDocument.activeElement);
-      });
-      return;
-    }
-
-    _handleFocusChange(willGainFocus);
+    _handleFocusChange(event.relatedTarget as DomElement?);
   });
 
   late final DomEventListener _handleKeyDown = createDomEventListener((DomEvent event) {
