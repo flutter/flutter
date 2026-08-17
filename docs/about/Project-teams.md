@@ -2,9 +2,9 @@ The Flutter project has many teams, including, but not limited to:
 
 * Design languages, covering:
 
-  * The material library ([flutter/flutter packages/flutter/lib/src/material](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material); label ["p: material_ui"](https://github.com/flutter/flutter/labels/p%3A%20material_ui))
+  * The material library ([flutter/packages packages/material_ui](https://github.com/flutter/packages/blob/main/packages/material_ui); label ["p: material_ui"](https://github.com/flutter/flutter/labels/p%3A%20material_ui))
 
-  * The cupertino library ([flutter/flutter packages/flutter/lib/src/cupertino](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/cupertino); label ["f: cupertino"](https://github.com/flutter/flutter/labels/f%3A%20cupertino))
+  * The cupertino library ([flutter/packages packages/cupertino_ui](https://github.com/flutter/packages/blob/main/packages/cupertino_ui); label ["p: cupertino_ui"](https://github.com/flutter/flutter/labels/p%3A%20cupertino_ui))
 
 * The Flutter framework (code in [flutter/flutter packages/flutter/lib/src/widgets](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/widgets),  [...rendering/](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/rendering),  [...painting/](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/painting), etc; label ["framework"](https://github.com/flutter/flutter/labels/framework))
 

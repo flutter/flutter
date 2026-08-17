@@ -110,8 +110,10 @@ In general the flow chart for team assignment is as follows, stopping as soon as
     - `two_dimensional_scrollables`
     - `vector_math`
   - Apply `team-design` if it's about:
+    - `cupertino_ui`
     - `cupertino_icons`
     - `google_fonts`
+    - `material_ui`
   - Apply `team-engine` if it's about:
     - `flutter_svg`
     - `vector_graphics`
