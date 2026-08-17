@@ -17,6 +17,10 @@ import org.gradle.api.Project
  * Default parameter values (e.g. `compileSdk = 35`, `ndkVersion = "29.0.13846066"`) serve as representative
  * test fixtures reflecting modern AGP project configurations to avoid NPEs when tested logic reads project extensions.
  * In actual generated Flutter projects, these values are populated from template properties.
+ *
+ * Note: This helper also stubs `project.gradle.startParameter.taskNames` (empty) and
+ * `project.gradle.startParameter.isOffline` (`false`) because plugin lifecycle and reflection bridge
+ * utilities read Gradle execution parameters during project configuration.
  */
 fun setUpMockAndroidExtension(
     project: Project,

@@ -49,10 +49,16 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
-// The AGP version the Flutter Gradle Plugin compiles and tests against. CI additionally runs
-// this build with -PagpVersion=<AGP 9 line> to catch public-DSL binary incompatibilities
-// between the AGP major versions the plugin supports (see AgpCommonExtensionWrapper).
-val agpVersion: String = providers.gradleProperty("agpVersion").getOrElse("8.11.1")
+// The AGP version the Flutter Gradle Plugin compiles and tests against.
+//
+// Downstream Safety Note:
+// This build script is included via `includeBuild` in user app builds. Gradle propagates
+// root project `gradle.properties` to included builds. To avoid accidental name collisions
+// with user app properties (e.g. `agpVersion=...`), this property is namespaced as
+// `flutter.internal.agpVersion`. In user app builds where this property is unset, the plugin
+// safely defaults to its tested version (8.11.1). CI and integration tests supply
+// `-Pflutter.internal.agpVersion=<AGP 9 line>` to verify multi-AGP DSL compatibility.
+val agpVersion: String = providers.gradleProperty("flutter.internal.agpVersion").getOrElse("8.11.1")
 
 dependencies {
     // Versions available https://mvnrepository.com/artifact/androidx.annotation/annotation-jvm.

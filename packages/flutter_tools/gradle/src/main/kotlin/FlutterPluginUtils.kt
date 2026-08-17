@@ -475,12 +475,7 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("buildModeFor")
-    internal fun buildModeFor(buildType: ModelBuildType): String {
-        if (buildType.name == "profile") {
-            return "profile"
-        }
-        return buildModeFor(buildType.name, buildType.isDebuggable)
-    }
+    internal fun buildModeFor(buildType: ModelBuildType): String = buildModeFor(buildType.name, buildType.isDebuggable)
 
     /**
      * Returns a Flutter build mode for a build type identified by [buildTypeName] and its
@@ -512,9 +507,6 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("buildModeFor")
     internal fun buildModeFor(buildType: DslBuildType): String {
-        if (buildType.name == "profile") {
-            return "profile"
-        }
         val isDebuggable =
             when (buildType) {
                 is ApplicationBuildType -> buildType.isDebuggable
@@ -584,7 +576,7 @@ object FlutterPluginUtils {
     @JvmName("getCompileSdkFromProject")
     internal fun getCompileSdkFromProject(project: Project): CompileSdkVersion {
         val androidExtension = getAndroidExtension(project)
-        return CompileSdkVersion.from(
+        return CompileSdkVersion(
             apiLevel = androidExtension.compileSdk,
             previewCodename = androidExtension.compileSdkPreview
         )

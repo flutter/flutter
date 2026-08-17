@@ -13,23 +13,10 @@ internal data class CompileSdkVersion(
     val apiLevel: Int?,
     val previewCodename: String?
 ) {
-    companion object {
-        /**
-         * Creates a [CompileSdkVersion] from nullable numeric and preview values.
-         *
-         * Under AGP DSL setter semantics, setting `compileSdk` and `compileSdkPreview` are mutually exclusive.
-         * If both are unexpectedly populated (e.g. in custom extension mocks), the preview codename
-         * takes precedence without throwing an exception.
-         */
-        fun from(
-            apiLevel: Int?,
-            previewCodename: String?
-        ): CompileSdkVersion =
-            if (previewCodename != null) {
-                CompileSdkVersion(apiLevel = null, previewCodename = previewCodename)
-            } else {
-                CompileSdkVersion(apiLevel = apiLevel, previewCodename = null)
-            }
+    init {
+        require((apiLevel != null) xor (previewCodename != null) || (apiLevel == null && previewCodename == null)) {
+            "CompileSdkVersion cannot have both apiLevel ($apiLevel) and previewCodename ($previewCodename) set."
+        }
     }
 
     /**

@@ -45,7 +45,9 @@ void main() {
     // project templates. This also runs the bytecode check that no compiled class
     // references CommonExtension.
     await runFlutterGradlePluginTests(
-      extraGradleArguments: <String>['-PagpVersion=$templateAndroidGradlePluginVersion'],
+      extraGradleArguments: <String>[
+        '-Pflutter.internal.agpVersion=$templateAndroidGradlePluginVersion',
+      ],
     );
   });
 }
