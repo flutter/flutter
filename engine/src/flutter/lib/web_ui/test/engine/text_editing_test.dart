@@ -760,7 +760,7 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
-    test('keeps connection open when a blurred autofill field is focused again', () async {
+    test('keeps connection open across a transient autofill blur, closes on genuine unfocus', () async {
       // Password managers and browser autofill popups blur the hidden input
       // (with a null relatedTarget) while the page keeps focus, then hand focus
       // back to fill the field. For an autofill field that re-focus must cancel
@@ -808,7 +808,18 @@ Future<void> testMain() async {
 
       strategy.debugDocumentHasFocusOverride = null;
       strategy.debugDocumentVisibilityStateOverride = null;
+
+      // A genuine unfocus (the framework closes the connection) must actually
+      // tear the engine half down: the form goes dormant and the hidden input
+      // releases DOM focus, so the soft keyboard dismisses and physical
+      // keystrokes stop reaching the old field.
+      final DomHTMLElement? input = textEditing.strategy.domElement;
       send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing.isEditing, isFalse);
+      expect(dormantForms, hasLength(1));
+      // The DOM focus handoff (safeBlur) is asynchronous.
+      await Future<void>.delayed(Duration.zero);
+      expect(domDocument.activeElement, isNot(input));
       spy.tearDown();
     });
 
@@ -857,6 +868,143 @@ Future<void> testMain() async {
 
       strategy.debugDocumentHasFocusOverride = null;
       strategy.debugDocumentVisibilityStateOverride = null;
+
+      // When the framework does unfocus, the engine closes for real.
+      final DomHTMLElement? input = textEditing.strategy.domElement;
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing.isEditing, isFalse);
+      expect(dormantForms, hasLength(1));
+      await Future<void>.delayed(Duration.zero);
+      expect(domDocument.activeElement, isNot(input));
+      spy.tearDown();
+    });
+
+    test('forwards a fill on the previously focused field after the connection closes', () async {
+      // A password manager can write into the field after the framework
+      // already closed the connection (the user confirms the fill dialog after
+      // focus moved on). The dormant form's listeners must forward that value
+      // with the field's tag so it reaches the framework through the
+      // last-connection routing.
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      expect(textEditing.isEditing, isTrue);
+
+      final input = textEditing.strategy.domElement! as DomHTMLInputElement;
+
+      // A genuine unfocus closes the connection; the form goes dormant with
+      // its listeners still attached.
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing.isEditing, isFalse);
+      spy.messages.clear();
+
+      // The manager fills the previously focused field.
+      input.value = 'user@example.com';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingStateWithTag');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        0, // Client ID
+        <String, dynamic>{
+          'email': <String, dynamic>{
+            'text': 'user@example.com',
+            'selectionBase': 16,
+            'selectionExtent': 16,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      ]);
+
+      // The same value again is deduplicated, not re-forwarded.
+      spy.messages.clear();
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+      expect(spy.messages, isEmpty);
+
+      dormantForms.clear();
+      spy.tearDown();
+    });
+
+    test('typing into a refocused field is not re-forwarded as autofill', () async {
+      // When a connection closes and a new one opens on the same form, the
+      // adopted dormant form's old listeners must be cancelled. The old
+      // instance observed the now-focused field as a non-focused one, so its
+      // stale listener would re-forward the user's typing as an autofill,
+      // collapsing the selection to the end of the text on every keystroke.
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing.isEditing, isFalse);
+
+      // A new connection on the same form adopts the dormant DOM.
+      send(MethodCall('TextInput.setClient', <dynamic>[124, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      expect(textEditing.isEditing, isTrue);
+
+      final input = textEditing.strategy.domElement! as DomHTMLInputElement;
+      spy.messages.clear();
+
+      // The user types into the focused field.
+      input.value = 't';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      // Delivered once as a normal editing-state update, never as an autofill.
+      expect(
+        spy.messages.where(
+          (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingState',
+        ),
+        hasLength(1),
+      );
+      expect(
+        spy.messages.where(
+          (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingStateWithTag',
+        ),
+        isEmpty,
+      );
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
       spy.tearDown();
     });
 

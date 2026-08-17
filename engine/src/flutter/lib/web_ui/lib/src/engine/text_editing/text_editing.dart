@@ -378,6 +378,17 @@ class EngineAutofillForm {
         // framework update apart from a browser autofill.
         _lastSentAutofillText.addAll(existingForm._lastSentAutofillText);
         _lastFrameworkText.addAll(existingForm._lastFrameworkText);
+        // The adopted DOM elements still carry the dormant instance's
+        // listeners (goDormant deliberately keeps them so a late fill on the
+        // dormant form is not lost). This instance rebinds its own below in
+        // attachPersistentFormListeners; cancel the old ones so listener sets
+        // do not accumulate across focus cycles and, more importantly, so the
+        // old instance's listener for what is now the focused field does not
+        // re-forward the user's typing as an autofill. That listener was
+        // bound when the field was not focused, so it forwards
+        // unconditionally, and _sendAutofillEditingState collapses the
+        // selection to the end of the text on every keystroke.
+        existingForm._cancelFormSubscriptions();
       } else {
         formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
         _insertEditingElementInView(formElement!, viewId);
@@ -439,6 +450,13 @@ class EngineAutofillForm {
   /// mutates the tree mid-fill, so holding still avoids interfering with them.
   /// The filled values still arrive through the input/animationstart listeners.
   bool _fillWindowActive = false;
+
+  /// Whether this form instance has been deactivated ([goDormant]) and its
+  /// focused field no longer has a live connection. While dormant, the
+  /// persistent listeners forward the focused field's events too; while live,
+  /// the focused field is delivered by
+  /// [DefaultTextEditingStrategy.handleChange] instead.
+  bool _isDormant = false;
 
   /// Whether a password manager currently holds focus to fill the form, during
   /// which the proxy geometry is held still. See [beginFillWindow].
@@ -516,6 +534,7 @@ class EngineAutofillForm {
 
     // The form is deactivated; end any open fill window so it never stays frozen.
     endFillWindow();
+    _isDormant = true;
     dormantForms[formIdentifier] = this;
     _styleAutofillElements(formElement!, isOffScreen: true);
   }
@@ -711,8 +730,9 @@ class EngineAutofillForm {
   /// Unlike [addInputEventListeners] (used by the semantics strategy, whose
   /// subscriptions are owned by [DefaultTextEditingStrategy.subscriptions]),
   /// this owns its subscriptions in [_formSubscriptions] so they can be rebound
-  /// each time the form wakes. The focused field is skipped; its edits and
-  /// autofills are delivered by [handleChange] and the autofill scan.
+  /// each time the form wakes. The focused field is observed only after its
+  /// connection has closed (see the guard in the listener); while it is live its
+  /// edits and autofills are delivered by [handleChange].
   void attachPersistentFormListeners() {
     _ensureAutofillStyleInjected();
     _cancelFormSubscriptions();
@@ -723,19 +743,29 @@ class EngineAutofillForm {
       if (fieldItem == null) {
         continue;
       }
-      // The focused field's edits and autofills are already delivered by
-      // handleChange and the autofill scan; observing it here as well would
-      // re-forward the user's own typing as if it were a browser autofill.
-      if (key == focusedElementId) {
-        continue;
-      }
+      final bool isFocusedField = key == focusedElementId;
       final AutofillInfo autofillInfo = fieldItem.autofillInfo;
       for (final String type in _autofillEventTypes) {
         _formSubscriptions.add(
           DomSubscription(
             element,
             type,
-            createDomEventListener((DomEvent _) => _forwardAutofillIfChanged(element, autofillInfo)),
+            createDomEventListener((DomEvent _) {
+              // While the form is live the focused field's edits and autofills
+              // are delivered by handleChange; observing it here too would
+              // re-forward the user's own typing as a browser autofill. Once
+              // the form went dormant (its connection closed) forward from
+              // here, so a manager filling the focused field after it lost
+              // focus still reaches the framework (routed via the last
+              // connection on the framework side). Dormancy is tracked on the
+              // form itself rather than through textEditing.isEditing: the
+              // form belongs to one HybridTextEditing instance and must not
+              // consult the shared singleton's state.
+              if (isFocusedField && !_isDormant) {
+                return;
+              }
+              _forwardAutofillIfChanged(element, autofillInfo);
+            }),
           ),
         );
       }
