@@ -28,24 +28,22 @@ class IntegrationTestTimeouts extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final visitor = _Visitor(this, context);
+    final String filePath = context.definingUnit.file.path;
+    if (!filePath.contains('test_driver') && !filePath.contains('test.dart')) {
+      return;
+    }
+    final visitor = _Visitor(this);
     registry.addMethodInvocation(this, visitor);
   }
 }
 
 class _Visitor extends SimpleAstVisitor<void> {
-  _Visitor(this.rule, this.context);
+  _Visitor(this.rule);
 
   final AnalysisRule rule;
-  final RuleContext context;
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
-    final String fullName = context.currentUnit!.file.path;
-    if (!fullName.contains('test_driver') && !fullName.contains('test.dart')) {
-      return;
-    }
-
     if (node case MethodInvocation(
       methodName: SimpleIdentifier(name: 'test'),
       :final ArgumentList argumentList,
