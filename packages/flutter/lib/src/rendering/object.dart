@@ -976,7 +976,7 @@ class _LocalSemanticsHandle implements SemanticsHandle {
 
 /// Signature for a function that is called when the pipeline owner and child owner
 /// finished the paint phase.
-typedef OnFlushedPaintCallback = void Function(bool isDirty);
+typedef FlushedPaintCallback = void Function(bool isDirty);
 
 /// The pipeline owner manages the rendering pipeline.
 ///
@@ -1069,8 +1069,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   /// Called when this pipeline owner and child owner have finished the paint phase.
   ///
-  /// isDirty is true if the pipeline owner has dirty render objects that needed to be painted.
-  final OnFlushedPaintCallback? onFlushedPaint;
+  /// The isDirty parameter is true if the pipeline owner has dirty render objects that needed to be painted.
+  final FlushedPaintCallback? onFlushedPaint;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
   ///
