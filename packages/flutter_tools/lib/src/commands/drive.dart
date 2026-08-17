@@ -23,6 +23,7 @@ import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
+import '../drive/import_validator.dart';
 import '../drive/web_driver_service.dart' show Browser;
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
@@ -276,6 +277,38 @@ class DriveCommand extends RunCommandBase {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
     }
+
+    final String? testFile = _getTestFile();
+    if (testFile != null && await _fileSystem.type(testFile) == FileSystemEntityType.file) {
+      final File packageConfigFile = findPackageConfigFileOrDefault(_fileSystem.currentDirectory);
+      if (packageConfigFile.existsSync()) {
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: _logger,
+          throwOnError: false,
+        );
+        final validator = DriverTestImportValidator(
+          fileSystem: _fileSystem,
+          packageConfig: packageConfig,
+          projectRootPath: _fileSystem.currentDirectory.path,
+          logger: _logger,
+        );
+        final List<String> errors = validator.validate(_fileSystem.file(testFile));
+        if (errors.isNotEmpty) {
+          final buffer = StringBuffer();
+          buffer.writeln('flutter_driver test "$testFile" has invalid imports:');
+          for (final error in errors) {
+            buffer.writeln('  $error');
+          }
+          buffer.writeln(
+            'flutter_driver tests run on the host VM and cannot import libraries that '
+            'depend on dart:ui (like package:flutter or package:flutter_test).',
+          );
+          throwToolExit(buffer.toString());
+        }
+      }
+    }
+
     return super.validateCommand();
   }
 
