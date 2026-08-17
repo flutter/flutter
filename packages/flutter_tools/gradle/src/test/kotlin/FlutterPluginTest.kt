@@ -3,7 +3,6 @@ package com.flutter.gradle
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
@@ -76,9 +75,8 @@ class FlutterPluginTest {
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
         every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
         val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
-        val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
-        val mockDebugBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
-        val mockReleaseBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
+        val mockDebugBuildType = mockk<ApplicationBuildType>(relaxed = true)
+        val mockReleaseBuildType = mockk<ApplicationBuildType>(relaxed = true)
 
         // Cast our multi-interface mock instead of creating a brand new one
         val mockApplicationExtension = mockAbstractAppExtension as ApplicationExtension
@@ -87,12 +85,7 @@ class FlutterPluginTest {
         every { mockApplicationExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
         every { mockApplicationExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
 
-        // Keep the CommonExtension mocks just in case other parts of the plugin look for it
-        every { mockCommonExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
-        every { mockCommonExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
-
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
-        every { project.extensions.findByType(CommonExtension::class.java) } returns mockCommonExtension
 
         // Pass the dual-purpose mock for any ApplicationExtension lookups
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
@@ -173,9 +166,8 @@ class FlutterPluginTest {
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
         every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
         val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
-        val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
-        val mockDebugBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
-        val mockReleaseBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
+        val mockDebugBuildType = mockk<ApplicationBuildType>(relaxed = true)
+        val mockReleaseBuildType = mockk<ApplicationBuildType>(relaxed = true)
 
         // Cast our multi-interface mock instead of creating a brand new one
         val mockApplicationExtension = mockAbstractAppExtension as ApplicationExtension
@@ -184,12 +176,7 @@ class FlutterPluginTest {
         every { mockApplicationExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
         every { mockApplicationExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
 
-        // Keep the CommonExtension mocks just in case other parts of the plugin look for it
-        every { mockCommonExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
-        every { mockCommonExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
-
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
-        every { project.extensions.findByType(CommonExtension::class.java) } returns mockCommonExtension
 
         // Pass the dual-purpose mock for any ApplicationExtension lookups
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension

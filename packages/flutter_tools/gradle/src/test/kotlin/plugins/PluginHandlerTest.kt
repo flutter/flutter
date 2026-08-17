@@ -4,6 +4,8 @@
 
 package com.flutter.gradle.plugins
 
+import com.android.build.api.dsl.ApplicationBuildType
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.BaseExtension
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
@@ -26,7 +28,6 @@ import org.gradle.api.logging.Logger
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
-import testing.setUpMockAndroidExtension
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
@@ -35,6 +36,26 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PluginHandlerTest {
+    /**
+     * Mocks the new-DSL android extension read through [FlutterPluginUtils.getAndroidExtension]
+     * (compileSdk for the mismatch warning, buildTypes for the dependency-wiring loops).
+     */
+    private fun mockAndroidExtension(
+        project: Project,
+        compileSdk: Int = 35,
+        buildTypes: List<ApplicationBuildType> = emptyList()
+    ): ApplicationExtension {
+        val androidExtension = mockk<ApplicationExtension>()
+        every { project.extensions.findByName("android") } returns androidExtension
+        every { androidExtension.compileSdk } returns compileSdk
+        every { androidExtension.compileSdkPreview } returns null
+        val container = mockk<NamedDomainObjectContainer<ApplicationBuildType>>()
+        // A fresh iterator per call: the container is iterated by multiple loops.
+        every { container.iterator() } answers { buildTypes.toMutableList().iterator() }
+        every { androidExtension.buildTypes } returns container
+        return androidExtension
+    }
+
     // getPluginListWithoutDevDependencies
     @Test
     fun `getPluginListWithoutDevDependencies removes dev dependencies from list`() {
@@ -199,24 +220,14 @@ class PluginHandlerTest {
         every { pluginProject.configurations.named(any<String>()) } returns mockk()
         every { pluginProject.dependencies.add(any(), any()) } returns mockk()
 
-        every {
-            project.extensions
-                .findByType(BaseExtension::class.java)!!
-                .buildTypes
-                .iterator()
-        } returns
-            mutableListOf(
-                mockBuildType
-            ).iterator() andThen
-            mutableListOf( // can't return the same iterator as it is stateful
-                mockBuildType
-            ).iterator() andThen
-            mutableListOf( // and again
-                mockBuildType
-            ).iterator()
+        // The new-DSL dependency-wiring loops iterate the wrapper container; the legacy
+        // container is only read by the build-type copy block, which this test leaves empty.
+        every { mockProjectBuildTypes.iterator() } answers {
+            mutableListOf<com.android.build.gradle.internal.dsl.BuildType>().iterator()
+        }
         every { project.dependencies.add(any(), any()) } returns mockk()
-        setUpMockAndroidExtension(project, compileSdk = 35)
-        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
+        mockAndroidExtension(project, buildTypes = listOf(mockBuildType))
+        mockAndroidExtension(pluginProject)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -295,24 +306,9 @@ class PluginHandlerTest {
         every { pluginProject.configurations.named(any<String>()) } returns mockk()
         every { pluginProject.dependencies.add(any(), any()) } returns mockk()
 
-        every {
-            project.extensions
-                .findByType(BaseExtension::class.java)!!
-                .buildTypes
-                .iterator()
-        } returns
-            mutableListOf(
-                mockBuildType
-            ).iterator() andThen
-            mutableListOf( // can't return the same iterator as it is stateful
-                mockBuildType
-            ).iterator() andThen
-            mutableListOf( // and again
-                mockBuildType
-            ).iterator()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        setUpMockAndroidExtension(project, compileSdk = 35)
-        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
+        mockAndroidExtension(project, buildTypes = listOf(mockBuildType))
+        mockAndroidExtension(pluginProject)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -453,8 +449,8 @@ class PluginHandlerTest {
         every { pluginProject.configurations.named(any<String>()) } returns mockk()
         every { pluginProject.dependencies.add(any(), any()) } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        setUpMockAndroidExtension(project, compileSdk = 35)
-        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
+        mockAndroidExtension(project, buildTypes = listOf(mockBuildType))
+        mockAndroidExtension(pluginProject)
     }
 
     private fun setupPluginMocks(project: Project) {
