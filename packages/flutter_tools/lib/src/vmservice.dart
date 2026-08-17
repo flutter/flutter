@@ -146,11 +146,7 @@ Future<io.WebSocket> _defaultOpenChannel(
     attempts += 1;
     try {
       socket = await constructor(url, compression: compression, logger: logger);
-    } on io.WebSocketException catch (e) {
-      await handleError(e);
-    } on io.SocketException catch (e) {
-      await handleError(e);
-    } on io.HttpException catch (e) {
+    } on io.IOException catch (e) {
       await handleError(e);
     }
   }
