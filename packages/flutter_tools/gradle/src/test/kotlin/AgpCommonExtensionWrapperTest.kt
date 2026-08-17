@@ -17,6 +17,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.gradle.api.NamedDomainObjectContainer
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -38,39 +39,89 @@ class AgpCommonExtensionWrapperTest {
         AgpCommonExtensionWrapper(appExt).compileSdk = 36
         verify { appExt.compileSdk = 36 }
 
-        AgpCommonExtensionWrapper(libExt).compileSdk = 36
-        verify { libExt.compileSdk = 36 }
+        AgpCommonExtensionWrapper(libExt).compileSdk = 37
+        verify { libExt.compileSdk = 37 }
 
-        AgpCommonExtensionWrapper(dfExt).compileSdk = 36
-        verify { dfExt.compileSdk = 36 }
+        AgpCommonExtensionWrapper(dfExt).compileSdk = 38
+        verify { dfExt.compileSdk = 38 }
 
-        AgpCommonExtensionWrapper(testExt).compileSdk = 36
-        verify { testExt.compileSdk = 36 }
+        AgpCommonExtensionWrapper(testExt).compileSdk = 39
+        verify { testExt.compileSdk = 39 }
     }
 
     @Test
     fun `compileSdkPreview delegates to application, library, dynamicFeature, and test extensions`() {
         val appExt = mockk<ApplicationExtension>(relaxed = true) { every { compileSdkPreview } returns "Baklava" }
-        val libExt = mockk<LibraryExtension>(relaxed = true) { every { compileSdkPreview } returns "Vanilla" }
+        val libExt = mockk<LibraryExtension>(relaxed = true) { every { compileSdkPreview } returns "VanillaIceCream" }
         val dfExt = mockk<DynamicFeatureExtension>(relaxed = true) { every { compileSdkPreview } returns "UpsideDownCake" }
         val testExt = mockk<TestExtension>(relaxed = true) { every { compileSdkPreview } returns "Tiramisu" }
 
         assertEquals("Baklava", AgpCommonExtensionWrapper(appExt).compileSdkPreview)
-        assertEquals("Vanilla", AgpCommonExtensionWrapper(libExt).compileSdkPreview)
+        assertEquals("VanillaIceCream", AgpCommonExtensionWrapper(libExt).compileSdkPreview)
         assertEquals("UpsideDownCake", AgpCommonExtensionWrapper(dfExt).compileSdkPreview)
         assertEquals("Tiramisu", AgpCommonExtensionWrapper(testExt).compileSdkPreview)
 
-        AgpCommonExtensionWrapper(appExt).compileSdkPreview = "Next"
-        verify { appExt.compileSdkPreview = "Next" }
+        AgpCommonExtensionWrapper(appExt).compileSdkPreview = "AppPreview"
+        verify { appExt.compileSdkPreview = "AppPreview" }
 
-        AgpCommonExtensionWrapper(libExt).compileSdkPreview = "Next"
-        verify { libExt.compileSdkPreview = "Next" }
+        AgpCommonExtensionWrapper(libExt).compileSdkPreview = "LibPreview"
+        verify { libExt.compileSdkPreview = "LibPreview" }
 
-        AgpCommonExtensionWrapper(dfExt).compileSdkPreview = "Next"
-        verify { dfExt.compileSdkPreview = "Next" }
+        AgpCommonExtensionWrapper(dfExt).compileSdkPreview = "DfPreview"
+        verify { dfExt.compileSdkPreview = "DfPreview" }
 
-        AgpCommonExtensionWrapper(testExt).compileSdkPreview = "Next"
-        verify { testExt.compileSdkPreview = "Next" }
+        AgpCommonExtensionWrapper(testExt).compileSdkPreview = "TestPreview"
+        verify { testExt.compileSdkPreview = "TestPreview" }
+    }
+
+    @Test
+    fun `namespace delegates to application, library, dynamicFeature, and test extensions`() {
+        val appExt = mockk<ApplicationExtension>(relaxed = true) { every { namespace } returns "com.example.app" }
+        val libExt = mockk<LibraryExtension>(relaxed = true) { every { namespace } returns "com.example.lib" }
+        val dfExt = mockk<DynamicFeatureExtension>(relaxed = true) { every { namespace } returns "com.example.df" }
+        val testExt = mockk<TestExtension>(relaxed = true) { every { namespace } returns "com.example.test" }
+
+        assertEquals("com.example.app", AgpCommonExtensionWrapper(appExt).namespace)
+        assertEquals("com.example.lib", AgpCommonExtensionWrapper(libExt).namespace)
+        assertEquals("com.example.df", AgpCommonExtensionWrapper(dfExt).namespace)
+        assertEquals("com.example.test", AgpCommonExtensionWrapper(testExt).namespace)
+
+        AgpCommonExtensionWrapper(appExt).namespace = "com.example.app.updated"
+        verify { appExt.namespace = "com.example.app.updated" }
+
+        AgpCommonExtensionWrapper(libExt).namespace = "com.example.lib.updated"
+        verify { libExt.namespace = "com.example.lib.updated" }
+
+        AgpCommonExtensionWrapper(dfExt).namespace = "com.example.df.updated"
+        verify { dfExt.namespace = "com.example.df.updated" }
+
+        AgpCommonExtensionWrapper(testExt).namespace = "com.example.test.updated"
+        verify { testExt.namespace = "com.example.test.updated" }
+    }
+
+    @Test
+    fun `ndkVersion delegates to application, library, dynamicFeature, and test extensions`() {
+        val appExt = mockk<ApplicationExtension>(relaxed = true) { every { ndkVersion } returns "29.0.1" }
+        val libExt = mockk<LibraryExtension>(relaxed = true) { every { ndkVersion } returns "29.0.2" }
+        val dfExt = mockk<DynamicFeatureExtension>(relaxed = true) { every { ndkVersion } returns "29.0.3" }
+        val testExt = mockk<TestExtension>(relaxed = true) { every { ndkVersion } returns "29.0.4" }
+
+        assertEquals("29.0.1", AgpCommonExtensionWrapper(appExt).ndkVersion)
+        assertEquals("29.0.2", AgpCommonExtensionWrapper(libExt).ndkVersion)
+        assertEquals("29.0.3", AgpCommonExtensionWrapper(dfExt).ndkVersion)
+        assertEquals("29.0.4", AgpCommonExtensionWrapper(testExt).ndkVersion)
+
+        AgpCommonExtensionWrapper(appExt).ndkVersion = "29.0.5"
+        verify { appExt.ndkVersion = "29.0.5" }
+
+        AgpCommonExtensionWrapper(libExt).ndkVersion = "29.0.6"
+        verify { libExt.ndkVersion = "29.0.6" }
+
+        AgpCommonExtensionWrapper(dfExt).ndkVersion = "29.0.7"
+        verify { dfExt.ndkVersion = "29.0.7" }
+
+        AgpCommonExtensionWrapper(testExt).ndkVersion = "29.0.8"
+        verify { testExt.ndkVersion = "29.0.8" }
     }
 
     @Test
@@ -103,6 +154,44 @@ class AgpCommonExtensionWrapperTest {
         assertSame(mockSplits, AgpCommonExtensionWrapper(libExt).splits)
         assertSame(mockSplits, AgpCommonExtensionWrapper(dfExt).splits)
         assertSame(mockSplits, AgpCommonExtensionWrapper(testExt).splits)
+    }
+
+    @Test
+    fun `getDefaultProguardFile delegates to application, library, dynamicFeature, and test extensions`() {
+        val fileApp = File("/app/proguard.txt")
+        val fileLib = File("/lib/proguard.txt")
+        val fileDf = File("/df/proguard.txt")
+        val fileTest = File("/test/proguard.txt")
+
+        val appExt = mockk<ApplicationExtension>(relaxed = true) { every { getDefaultProguardFile("file.txt") } returns fileApp }
+        val libExt = mockk<LibraryExtension>(relaxed = true) { every { getDefaultProguardFile("file.txt") } returns fileLib }
+        val dfExt = mockk<DynamicFeatureExtension>(relaxed = true) { every { getDefaultProguardFile("file.txt") } returns fileDf }
+        val testExt = mockk<TestExtension>(relaxed = true) { every { getDefaultProguardFile("file.txt") } returns fileTest }
+
+        assertSame(fileApp, AgpCommonExtensionWrapper(appExt).getDefaultProguardFile("file.txt"))
+        assertSame(fileLib, AgpCommonExtensionWrapper(libExt).getDefaultProguardFile("file.txt"))
+        assertSame(fileDf, AgpCommonExtensionWrapper(dfExt).getDefaultProguardFile("file.txt"))
+        assertSame(fileTest, AgpCommonExtensionWrapper(testExt).getDefaultProguardFile("file.txt"))
+    }
+
+    @Test
+    fun `compileOptions delegates to application, library, dynamicFeature, and test extensions`() {
+        val appExt = mockk<ApplicationExtension>(relaxed = true)
+        val libExt = mockk<LibraryExtension>(relaxed = true)
+        val dfExt = mockk<DynamicFeatureExtension>(relaxed = true)
+        val testExt = mockk<TestExtension>(relaxed = true)
+
+        AgpCommonExtensionWrapper(appExt).compileOptions {}
+        verify { appExt.compileOptions(any()) }
+
+        AgpCommonExtensionWrapper(libExt).compileOptions {}
+        verify { libExt.compileOptions(any()) }
+
+        AgpCommonExtensionWrapper(dfExt).compileOptions {}
+        verify { dfExt.compileOptions(any()) }
+
+        AgpCommonExtensionWrapper(testExt).compileOptions {}
+        verify { testExt.compileOptions(any()) }
     }
 
     @Test

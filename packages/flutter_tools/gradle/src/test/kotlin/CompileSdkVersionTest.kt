@@ -6,14 +6,27 @@ package com.flutter.gradle
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class CompileSdkVersionTest {
     @Test
-    fun `CompileSdkVersion enforces invariant that only one of apiLevel or previewCodename is set`() {
-        assertFailsWith<IllegalArgumentException> {
-            CompileSdkVersion(apiLevel = 36, previewCodename = "Baklava")
-        }
+    fun `from prioritizes previewCodename when both apiLevel and previewCodename are non-null`() {
+        val version = CompileSdkVersion.from(apiLevel = 36, previewCodename = "Baklava")
+        assertEquals(null, version.apiLevel)
+        assertEquals("Baklava", version.previewCodename)
+    }
+
+    @Test
+    fun `from handles numeric api level correctly`() {
+        val version = CompileSdkVersion.from(apiLevel = 35, previewCodename = null)
+        assertEquals(35, version.apiLevel)
+        assertEquals(null, version.previewCodename)
+    }
+
+    @Test
+    fun `from handles unset values correctly`() {
+        val version = CompileSdkVersion.from(apiLevel = null, previewCodename = null)
+        assertEquals(null, version.apiLevel)
+        assertEquals(null, version.previewCodename)
     }
 
     @Test

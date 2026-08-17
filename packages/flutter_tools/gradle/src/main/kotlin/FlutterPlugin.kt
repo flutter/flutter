@@ -5,7 +5,6 @@
 package com.flutter.gradle
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.api.dsl.BuildType
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.LibraryExtension
@@ -32,6 +31,7 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
+import com.android.build.api.dsl.BuildType as DslBuildType
 
 class FlutterPlugin : Plugin<Project> {
     private var project: Project? = null
@@ -203,7 +203,7 @@ class FlutterPlugin : Plugin<Project> {
                     "flutter_proguard_rules.pro"
                 ).toFile()
         // TODO(gmackall): reconsider getting the android extension every time
-        val debugBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("debug")
+        val debugBuildType: DslBuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("debug")
         FlutterPluginUtils.getAndroidExtension(project).buildTypes.create(
             "profile",
             {
@@ -214,7 +214,7 @@ class FlutterPlugin : Plugin<Project> {
             }
         )
         if (FlutterPluginUtils.shouldShrinkResources(project)) {
-            val releaseBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("release")
+            val releaseBuildType: DslBuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("release")
             releaseBuildType.isMinifyEnabled = true
             releaseBuildType.isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
             releaseBuildType.proguardFiles.add(
@@ -251,7 +251,7 @@ class FlutterPlugin : Plugin<Project> {
         }
     }
 
-    private fun addFlutterDependencies(buildType: BuildType) {
+    private fun addFlutterDependencies(buildType: DslBuildType) {
         FlutterPluginUtils.addFlutterDependencies(
             project!!,
             buildType,

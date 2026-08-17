@@ -560,7 +560,9 @@ class FlutterPluginUtilsTest {
 
     @Test
     fun `buildModeFor falls back to the conventional debug name for new-DSL library build types`() {
-        // LibraryBuildType has no public isDebuggable flag, so the name is the only signal.
+        // LibraryBuildType has no public isDebuggable flag at DSL scope, so the name is the only signal.
+        // For custom build types (e.g. host app 'staging'), DSL-scope loops fall back to "release"
+        // until unified with Component.debuggable at variant scope in PR 8.
         val profileBuildType = mockk<LibraryBuildType>()
         every { profileBuildType.name } returns "profile"
         assertEquals("profile", FlutterPluginUtils.buildModeFor(profileBuildType))

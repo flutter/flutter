@@ -4,7 +4,6 @@
 
 package com.flutter.gradle.plugins
 
-import com.android.build.api.dsl.BuildType
 import com.flutter.gradle.CompileSdkVersion
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
@@ -20,6 +19,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
+import com.android.build.api.dsl.BuildType as DslBuildType
 import com.android.build.gradle.internal.dsl.BuildType as InternalDslBuildType
 
 /**
@@ -143,7 +143,7 @@ class PluginHandler(
         private fun addEmbeddingDependencyToPlugin(
             project: Project,
             pluginProject: Project,
-            buildType: BuildType,
+            buildType: DslBuildType,
             engineVersion: String
         ) {
             val flutterBuildMode: String = buildModeFor(buildType)

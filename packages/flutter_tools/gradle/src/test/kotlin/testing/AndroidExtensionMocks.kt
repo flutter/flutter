@@ -11,7 +11,13 @@ import io.mockk.mockk
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 
-/** Mocks the Android extension for tests reading compileSdk, ndkVersion, or buildTypes via the public DSL. */
+/**
+ * Mocks the Android extension for unit tests reading `compileSdk`, `ndkVersion`, or `buildTypes` via the public DSL.
+ *
+ * Default parameter values (e.g. `compileSdk = 35`, `ndkVersion = "29.0.13846066"`) serve as representative
+ * test fixtures reflecting modern AGP project configurations to avoid NPEs when tested logic reads project extensions.
+ * In actual generated Flutter projects, these values are populated from template properties.
+ */
 fun setUpMockAndroidExtension(
     project: Project,
     compileSdk: Int? = 35,
