@@ -39,6 +39,9 @@ void main() {
           'Connection closed before full header was received, '
           'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws',
         ),
+        vmServiceUri: Future<Uri>.value(
+          Uri.parse('http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
+        ),
       ),
     ];
 
@@ -130,7 +133,8 @@ void main() {
     testUsingContext(
       'with traceStartup, env variable',
       () async {
-        fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
+        fakePlatform.environment[kFlutterTestOutputsDirEnvName] =
+            'test_output_dir';
 
         final device = FakeDevice();
         final flutterDevice = FakeFlutterDevice(device);
@@ -166,7 +170,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   @override
-  Stream<Uri> get vmServiceUris => const Stream<Uri>.empty();
+  Future<Uri>? get vmServiceUri => null;
 
   @override
   final Device device;
@@ -222,7 +226,8 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake
+    implements DartDevelopmentService {
   @override
   late Future<void> done;
 
@@ -258,26 +263,28 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
+    Future<Uri>? vmServiceUri,
   }) : super(
          targetPlatform: .unsupported,
          device,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
-       );
+       ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
   }) async {
     throw exception;
   }
@@ -298,7 +305,9 @@ class FakeFlutterVmService extends Fake implements FlutterVmService {
   }
 
   @override
-  Future<bool> flutterAlreadyPaintedFirstUsefulFrame({String? isolateId}) async => true;
+  Future<bool> flutterAlreadyPaintedFirstUsefulFrame({
+    String? isolateId,
+  }) async => true;
 
   @override
   Future<Response?> getTimeline() async {
@@ -322,7 +331,11 @@ class FakeVmService extends Fake implements VmService {
   @override
   Stream<Event> get onExtensionEvent {
     return Stream<Event>.fromIterable(<Event>[
-      Event(kind: 'Extension', extensionKind: 'Flutter.FirstFrame', timestamp: 1),
+      Event(
+        kind: 'Extension',
+        extensionKind: 'Flutter.FirstFrame',
+        timestamp: 1,
+      ),
     ]);
   }
 }

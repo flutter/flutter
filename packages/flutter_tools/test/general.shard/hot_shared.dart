@@ -77,7 +77,10 @@ class FakeDevice extends Fake implements Device {
   String get name => 'Fake Device';
 
   @override
-  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(
+    ApplicationPackage? app, {
+    String? userIdentifier,
+  }) async {
     return true;
   }
 
@@ -87,7 +90,8 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake
+    implements DartDevelopmentService {
   bool wasShutdown = false;
 
   @override
@@ -146,35 +150,38 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
+    Future<Uri>? vmServiceUri,
   }) : super(
          device,
          targetPlatform: TargetPlatform.unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
-       );
+       ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
-    bool enableDevTools = false,
   }) async {
     throw exception;
   }
 }
 
 class TestHotRunnerConfig extends HotRunnerConfig {
-  TestHotRunnerConfig({this.successfulHotRestartSetup, this.successfulHotReloadSetup});
+  TestHotRunnerConfig({
+    this.successfulHotRestartSetup,
+    this.successfulHotReloadSetup,
+  });
   bool? successfulHotRestartSetup;
   bool? successfulHotReloadSetup;
   bool shutdownHookCalled = false;

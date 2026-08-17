@@ -25,9 +25,15 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/fake_vm_services.dart';
 
-final fakeUnpausedEvent = vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0);
+final fakeUnpausedEvent = vm_service.Event(
+  kind: vm_service.EventKind.kResume,
+  timestamp: 0,
+);
 
-final fakePausedEvent = vm_service.Event(kind: vm_service.EventKind.kPauseException, timestamp: 0);
+final fakePausedEvent = vm_service.Event(
+  kind: vm_service.EventKind.kPauseException,
+  timestamp: 0,
+);
 
 final fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -35,7 +41,11 @@ final fakeUnpausedIsolate = vm_service.Isolate(
   breakpoints: <vm_service.Breakpoint>[],
   extensionRPCs: <String>[],
   libraries: <vm_service.LibraryRef>[
-    vm_service.LibraryRef(id: '1', uri: 'file:///hello_world/main.dart', name: ''),
+    vm_service.LibraryRef(
+      id: '1',
+      uri: 'file:///hello_world/main.dart',
+      name: '',
+    ),
   ],
   livePorts: 0,
   name: 'test',
@@ -114,7 +124,11 @@ final listViews = FakeVmServiceRequest(
 
 const setAssetBundlePath = FakeVmServiceRequest(
   method: '_flutter.setAssetBundlePath',
-  args: <String, Object>{'viewId': 'a', 'assetDirectory': 'build/flutter_assets', 'isolateId': '1'},
+  args: <String, Object>{
+    'viewId': 'a',
+    'assetDirectory': 'build/flutter_assets',
+    'isolateId': '1',
+  },
 );
 
 const evict = FakeVmServiceRequest(
@@ -156,15 +170,18 @@ class FakeDartDevelopmentService extends Fake
   Future<void> shutdown() async {}
 }
 
-class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {
+class FakeDartDevelopmentServiceException
+    implements DartDevelopmentServiceException {
   FakeDartDevelopmentServiceException({this.message = defaultMessage});
 
   @override
-  final int errorCode = DartDevelopmentServiceException.existingDdsInstanceError;
+  final int errorCode =
+      DartDevelopmentServiceException.existingDdsInstanceError;
 
   @override
   final String message;
-  static const defaultMessage = 'A DDS instance is already connected at http://localhost:8181';
+  static const defaultMessage =
+      'A DDS instance is already connected at http://localhost:8181';
 
   @override
   Map<String, Object?> toJson() {
@@ -173,19 +190,15 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 }
 
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(super.device, {Stream<Uri>? vmServiceUris})
-    : _vmServiceUris = vmServiceUris,
-      super(
+  TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
+    : super(
         generator: FakeResidentCompiler(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         developmentShaderCompiler: const FakeShaderCompiler(),
-      );
-
-  final Stream<Uri>? _vmServiceUris;
-
-  @override
-  Stream<Uri> get vmServiceUris => _vmServiceUris!;
+      ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 }
 
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
@@ -203,7 +216,10 @@ class ThrowingForwardingFileSystem extends ForwardingFileSystem {
 class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeVmServiceHost? Function()? vmServiceHost;
   Uri? testUri;
-  UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
+  UpdateFSReport report = UpdateFSReport(
+    success: true,
+    invalidatedSourcesCount: 1,
+  );
   Exception? reportError;
   Exception? runColdError;
   Exception? connectError;
@@ -217,13 +233,15 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   ResidentCompiler? generator;
 
   @override
-  DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
+  DevelopmentShaderCompiler get developmentShaderCompiler =>
+      const FakeShaderCompiler();
 
   @override
   TargetPlatform targetPlatform = TargetPlatform.android;
 
   @override
-  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
+  Future<Uri>? get vmServiceUri =>
+      testUri != null ? Future<Uri>.value(testUri!) : null;
 
   @override
   FlutterVmService? get vmService => vmServiceHost?.call()?.vmService;
@@ -262,14 +280,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
   }) async {
     if (connectError != null) {
       throw connectError!;
@@ -308,24 +324,25 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     super.device,
     BuildInfo buildInfo,
     ResidentCompiler residentCompiler,
-    this.fakeDevFS,
-  ) : super(
-        targetPlatform: .unsupported,
-        buildInfo: buildInfo,
-        generator: residentCompiler,
-        developmentShaderCompiler: const FakeShaderCompiler(),
-      );
+    this.fakeDevFS, {
+    Future<Uri>? vmServiceUri,
+  }) : super(
+         targetPlatform: .unsupported,
+         buildInfo: buildInfo,
+         generator: residentCompiler,
+         developmentShaderCompiler: const FakeShaderCompiler(),
+       ) {
+    this.vmServiceUri = vmServiceUri ?? Future<Uri>.value(testUri);
+  }
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
   }) async {}
 
   final DevFS fakeDevFS;
@@ -370,7 +387,8 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   void reset() {}
 }
 
-class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator {
+class FakeProjectFileInvalidator extends Fake
+    implements ProjectFileInvalidator {
   @override
   Future<InvalidationResult> findInvalidated({
     required DateTime? lastCompiled,
@@ -417,7 +435,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   PlatformType get platformType =>
-      _targetPlatform == TargetPlatform.web_javascript ? PlatformType.web : PlatformType.android;
+      _targetPlatform == TargetPlatform.web_javascript
+      ? PlatformType.web
+      : PlatformType.android;
 
   @override
   Future<String> get sdkNameAndVersion async => _sdkNameAndVersion;
@@ -446,7 +466,10 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(
+    ApplicationPackage? app, {
+    String? userIdentifier,
+  }) async {
     appStopped = true;
     return true;
   }
@@ -460,8 +483,10 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      NoOpDeviceLogReader(name);
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+  }) => NoOpDeviceLogReader(name);
 
   @override
   DevicePortForwarder portForwarder = const NoOpDevicePortForwarder();

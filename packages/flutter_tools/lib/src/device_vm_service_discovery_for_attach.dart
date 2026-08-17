@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 
+import 'base/common.dart';
 import 'base/logger.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
@@ -23,11 +24,21 @@ abstract class VMServiceDiscoveryForAttach {
   /// Port forwarding is only attempted when this is invoked, for each VM
   /// Service URI in the stream.
   Stream<Uri> get uris;
+
+  /// Find the first URI discovered for attach.
+  Future<Uri> firstValidUri() async {
+    final List<Uri> candidateUris = await uris.take(1).toList();
+    if (candidateUris.isEmpty) {
+      throwToolExit('Failed to find VM Service URL.');
+    }
+    return candidateUris.first;
+  }
 }
 
 /// An implementation of [VMServiceDiscoveryForAttach] that uses log scanning
 /// for the discovery.
-class LogScanningVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
+class LogScanningVMServiceDiscoveryForAttach
+    extends VMServiceDiscoveryForAttach {
   LogScanningVMServiceDiscoveryForAttach(
     Future<DeviceLogReader> logReader, {
     DevicePortForwarder? portForwarder,
