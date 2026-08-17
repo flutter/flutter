@@ -490,7 +490,7 @@ class CustomDevice extends Device {
   ///
   /// If [timeout] is not null and the process doesn't finish in time,
   /// it will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [Logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printTrace]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> tryPing({
     Duration? timeout,
@@ -502,7 +502,7 @@ class CustomDevice extends Device {
     try {
       result = await _processUtils.run(interpolated, timeout: timeout);
     } on ProcessException catch (e) {
-      _logger.printError('Error pinging custom device $id: $e');
+      _logger.printTrace('Error pinging custom device $id: $e');
       return false;
     }
 

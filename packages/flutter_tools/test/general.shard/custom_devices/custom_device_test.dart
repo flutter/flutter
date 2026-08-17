@@ -316,20 +316,19 @@ void main() {
             exception: const ProcessException('testping', <String>[], 'Process timed out'),
           ),
         ]),
-        config: CustomDevicesConfig.test(
-          fileSystem: fs,
-          directory: dir,
-          logger: logger,
-        ),
+        config: CustomDevicesConfig.test(fileSystem: fs, directory: dir, logger: logger),
       );
 
       expect(await discovery.discoverDevices(), hasLength(0));
-      expect(logger.errorText, contains('Error pinging custom device testid: ProcessException: Process timed out'));
+      expect(
+        logger.traceText,
+        contains('Error pinging custom device testid: ProcessException: Process timed out'),
+      );
     },
   );
 
   testWithoutContext(
-    'CustomDevice.tryPing returns false and logs error when ping command times out',
+    'CustomDevice.tryPing returns false and logs trace when ping command times out',
     () async {
       final logger = BufferLogger.test();
       final device = CustomDevice(
@@ -344,7 +343,10 @@ void main() {
       );
 
       expect(await device.tryPing(), isFalse);
-      expect(logger.errorText, contains('Error pinging custom device testid: ProcessException: Process timed out'));
+      expect(
+        logger.traceText,
+        contains('Error pinging custom device testid: ProcessException: Process timed out'),
+      );
     },
   );
 
