@@ -295,23 +295,33 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 // Updates `isGpuDisabled` from the current lifecycle state and propagates to shell if available.
 //
-// The state has to be manually read at points where we don't receive a state transition:
-// * When the engine is created, to determine if background or foreground.
-// * In app extensions, when a view controller is attached or detached.
+// This is process-level state that controls whether or not it's safe to submit work to the GPU.
+// Submitting GPU work while the app is backgrounded results in immediate process termination.
+//
+// For apps, we can read the state from `UIApplication.sharedApplication`.
 //
 // In an app extension, the state may be unreadable: there is no `UIApplication`, and the scene is
 // nil until the attached view controller's view is attached to a window's view hierarchy. In these
 // cases, we leave `isGpuDisabled` unmodified. This avoids the possibility of a crash from
 // incorrectly re-enabling the GPU on an engine that was disabled during backgrounding.
+//
+// Aside from on state transitions, the state has to be manually read and updated at the following
+// points:
+//
+// * When the engine is created, to determine if background or foreground.
+// * In app extensions, when a view controller is attached or detached.
+//
 - (void)updateGpuAvailabilityFromLifecycleState {
-  // When UIApplication.sharedApplication is available, it's authoritative.
+  // When UIApplication.sharedApplication is available, it's authoritative for
+  // the process.
   UIApplication* application = FlutterSharedApplication.application;
   if (application) {
     self.isGpuDisabled = application.applicationState == UIApplicationStateBackground;
     return;
   }
 
-  // Otherwise, check if the view is attached to a Window, and query the scene.
+  // Otherwise, we're in an app extension.
+  // Check if the view is attached to a Window, and query the scene.
   UIWindowScene* scene = self.viewController.viewIfLoaded.window.windowScene;
   if (scene) {
     self.isGpuDisabled = scene.activationState == UISceneActivationStateBackground;
