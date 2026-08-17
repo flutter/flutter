@@ -67,20 +67,17 @@ Future<void> main() async {
       var linkReceived = false;
       final completer = Completer<void>();
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-        print('[stdout] $line');
-        if (line.contains(
-          'Engine sent: pushRouteInformation {location: https://flutter-dashboard.appspot.com/invalid_route',
-        )) {
-          linkReceived = true;
+      unawaited(
+        process.exitCode.then((int code) {
           if (!completer.isCompleted) {
+            print('Process exited early with code $code');
             completer.complete();
           }
-        }
-      });
+        }),
+      );
 
-      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-        print('[stderr] $line');
+      void handleLine(String line, String prefix) {
+        print('[$prefix] $line');
         if (line.contains(
           'Engine sent: pushRouteInformation {location: https://flutter-dashboard.appspot.com/invalid_route',
         )) {
@@ -89,7 +86,16 @@ Future<void> main() async {
             completer.complete();
           }
         }
-      });
+      }
+
+      process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) => handleLine(line, 'stdout'));
+      process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) => handleLine(line, 'stderr'));
 
       // Wait for the link or timeout
       try {
