@@ -1,0 +1,125 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_devicelab/framework/devices.dart';
+import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
+
+Future<void> main() async {
+  deviceOperatingSystem = DeviceOperatingSystem.ios;
+  await task(() async {
+    final Device device = await devices.workingDevice;
+    final String deviceId = device.deviceId;
+
+    final String projectDir = path.join(
+      flutterDirectory.path,
+      'dev',
+      'integration_tests',
+      'ios_universal_link',
+    );
+
+    try {
+      await inDirectory(projectDir, () async {
+        await flutter('build', options: <String>['ios', '--release']);
+      });
+
+      final String appPath = path.join(projectDir, 'build', 'ios', 'iphoneos', 'Runner.app');
+
+      if (!Directory(appPath).existsSync()) {
+        return TaskResult.failure('Failed to build iOS app. Missing at $appPath');
+      }
+
+      // 2. Install the app on the physical device
+      await exec('xcrun', <String>[
+        'devicectl',
+        'device',
+        'install',
+        'app',
+        '--device',
+        deviceId,
+        appPath,
+      ]);
+
+      print('Launching app via universal link...');
+
+      // Launch the app via universal link with --console to capture native stdout/stderr.
+      // (Dart print statements are hidden in iOS release mode, so the app uses stderr.writeln).
+      final Process process = await startProcess('xcrun', <String>[
+        'devicectl',
+        'device',
+        'process',
+        'launch',
+        '--device',
+        deviceId,
+        '--console',
+        '--payload-url',
+        'https://flutter-dashboard.appspot.com/invalid_route',
+        'com.google.experimental0.dev', // Bundle ID from the static project
+      ]);
+
+      var linkReceived = false;
+      final completer = Completer<void>();
+
+      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+        print('[stdout] $line');
+        if (line.contains(
+          'Engine sent: pushRouteInformation {location: https://flutter-dashboard.appspot.com/invalid_route',
+        )) {
+          linkReceived = true;
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        }
+      });
+
+      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+        print('[stderr] $line');
+        if (line.contains(
+          'Engine sent: pushRouteInformation {location: https://flutter-dashboard.appspot.com/invalid_route',
+        )) {
+          linkReceived = true;
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        }
+      });
+
+      // Wait for the link or timeout
+      try {
+        await completer.future.timeout(const Duration(minutes: 2));
+      } catch (e) {
+        print('Timeout waiting for universal link route to be printed.');
+      }
+
+      process.kill();
+
+      if (!linkReceived) {
+        return TaskResult.failure('App did not receive the universal link route.');
+      }
+
+      return TaskResult.success(null, benchmarkScoreKeys: <String>[]);
+    } finally {
+      // Uninstall the app to clean up the physical device
+      try {
+        await exec('xcrun', <String>[
+          'devicectl',
+          'device',
+          'uninstall',
+          'app',
+          '--device',
+          deviceId,
+          'com.google.experimental0.dev',
+        ]);
+      } catch (e) {
+        print('Failed to uninstall app: $e');
+      }
+    }
+  });
+}
