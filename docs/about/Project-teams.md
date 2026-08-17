@@ -2,7 +2,7 @@ The Flutter project has many teams, including, but not limited to:
 
 * Design languages, covering:
 
-  * The material library ([flutter/flutter packages/flutter/lib/src/material](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material); label ["f: material design"](https://github.com/flutter/flutter/labels/f%3A%20material%20design))
+  * The material library ([flutter/flutter packages/flutter/lib/src/material](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material); label ["p: material_ui"](https://github.com/flutter/flutter/labels/p%3A%20material_ui))
 
   * The cupertino library ([flutter/flutter packages/flutter/lib/src/cupertino](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/cupertino); label ["f: cupertino"](https://github.com/flutter/flutter/labels/f%3A%20cupertino))
 
