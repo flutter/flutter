@@ -174,7 +174,7 @@ class PrerollVisitor extends LayerVisitor<void> {
   @override
   void visitPicture(PictureLayer picture) {
     if (picture.picture.isDisposed) {
-      // The picture layer was disposed before the picture could be painted.
+      // The picture was disposed before the layer could be painted.
       // Just ignore it then.
       picture.paintBounds = ui.Rect.zero;
       picture.isCulled = true;
