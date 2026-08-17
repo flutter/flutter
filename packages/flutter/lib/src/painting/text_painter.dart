@@ -525,14 +525,14 @@ class _TextPainterLayoutCacheWithOffset {
       _cachedRawLineMetrics ??= paragraph.computeLineMetrics();
   List<ui.LineMetrics>? _cachedRawLineMetrics;
 
-  // The line metrics of the laid out paragraph, in the TextPainter's coordinate
-  // space (in other words, translated by `paintOffset`).
-  //
-  // The identity of the returned list only changes when the text layout or the
-  // paint offset changes, so callers may use `identical` to check whether the
-  // text layout has been invalidated since the last access.
-  // `VerticalCaretMovementRun` relies on that: creating a new list on every
-  // access makes it impossible for a vertical caret run to ever stay valid.
+  /// The line metrics of the laid out paragraph, in the TextPainter's
+  /// coordinate space (in other words, translated by [paintOffset]).
+  ///
+  /// The identity of the returned list only changes when the text layout or the
+  /// paint offset changes, so callers may use `identical` to check whether the
+  /// text layout has been invalidated since the last access.
+  /// `VerticalCaretMovementRun` relies on that: creating a new list on every
+  /// access makes it impossible for a vertical caret run to ever stay valid.
   List<ui.LineMetrics> get lineMetrics {
     final Offset offset = paintOffset;
     final List<ui.LineMetrics>? cachedMetrics = _cachedLineMetrics;
