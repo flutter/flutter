@@ -15,6 +15,7 @@ import com.flutter.gradle.FlutterPluginUtilsTest.Companion.flutterPluginAndroidL
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.pluginListWithDevDependency
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.pluginListWithoutDevDependency
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
+import com.flutter.gradle.testing.setUpMockAndroidExtension
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -36,26 +37,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PluginHandlerTest {
-    /**
-     * Mocks the new-DSL android extension read through [FlutterPluginUtils.getAndroidExtension]
-     * (compileSdk for the mismatch warning, buildTypes for the dependency-wiring loops).
-     */
-    private fun mockAndroidExtension(
-        project: Project,
-        compileSdk: Int = 35,
-        buildTypes: List<ApplicationBuildType> = emptyList()
-    ): ApplicationExtension {
-        val androidExtension = mockk<ApplicationExtension>()
-        every { project.extensions.findByName("android") } returns androidExtension
-        every { androidExtension.compileSdk } returns compileSdk
-        every { androidExtension.compileSdkPreview } returns null
-        val container = mockk<NamedDomainObjectContainer<ApplicationBuildType>>()
-        // A fresh iterator per call: the container is iterated by multiple loops.
-        every { container.iterator() } answers { buildTypes.toMutableList().iterator() }
-        every { androidExtension.buildTypes } returns container
-        return androidExtension
-    }
-
     // getPluginListWithoutDevDependencies
     @Test
     fun `getPluginListWithoutDevDependencies removes dev dependencies from list`() {
@@ -220,14 +201,13 @@ class PluginHandlerTest {
         every { pluginProject.configurations.named(any<String>()) } returns mockk()
         every { pluginProject.dependencies.add(any(), any()) } returns mockk()
 
-        // The new-DSL dependency-wiring loops iterate the wrapper container; the legacy
-        // container is only read by the build-type copy block, which this test leaves empty.
+        // In this unit test, the build-type copy block is stubbed with an empty container for isolation.
         every { mockProjectBuildTypes.iterator() } answers {
             mutableListOf<com.android.build.gradle.internal.dsl.BuildType>().iterator()
         }
         every { project.dependencies.add(any(), any()) } returns mockk()
-        mockAndroidExtension(project, buildTypes = listOf(mockBuildType))
-        mockAndroidExtension(pluginProject)
+        setUpMockAndroidExtension(project, buildTypes = listOf(mockBuildType))
+        setUpMockAndroidExtension(pluginProject)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -307,8 +287,8 @@ class PluginHandlerTest {
         every { pluginProject.dependencies.add(any(), any()) } returns mockk()
 
         every { project.dependencies.add(any(), any()) } returns mockk()
-        mockAndroidExtension(project, buildTypes = listOf(mockBuildType))
-        mockAndroidExtension(pluginProject)
+        setUpMockAndroidExtension(project, buildTypes = listOf(mockBuildType))
+        setUpMockAndroidExtension(pluginProject)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -449,8 +429,8 @@ class PluginHandlerTest {
         every { pluginProject.configurations.named(any<String>()) } returns mockk()
         every { pluginProject.dependencies.add(any(), any()) } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        mockAndroidExtension(project, buildTypes = listOf(mockBuildType))
-        mockAndroidExtension(pluginProject)
+        setUpMockAndroidExtension(project, buildTypes = listOf(mockBuildType))
+        setUpMockAndroidExtension(pluginProject)
     }
 
     private fun setupPluginMocks(project: Project) {
@@ -459,5 +439,69 @@ class PluginHandlerTest {
         every { project.extraProperties } returns mockk()
         every { project.extensions.findByType(FlutterExtension::class.java) } returns FlutterExtension()
         every { project.file(any()) } returns mockk()
+    }
+
+    @Test
+    fun `configurePlugins logs warning when plugin compileSdk is higher than project compileSdk`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<Project>()
+        val projectDir = tempDir.resolve("my-plugin")
+        projectDir.toFile().mkdirs()
+        every { project.projectDir } returns projectDir.toFile()
+        val settingsGradle = File(projectDir.parent.toFile(), "settings.gradle")
+        settingsGradle.createNewFile()
+        val mockLogger = mockk<Logger>(relaxed = true)
+        every { project.logger } returns mockLogger
+
+        val pluginProject = mockk<Project>()
+        val pluginDependencyProject = mockk<Project>()
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+        every { pluginProject.hasProperty("local-engine-repo") } returns false
+        every { pluginProject.hasProperty("android") } returns true
+        val mockPluginContainer = mockk<org.gradle.api.plugins.PluginContainer>()
+        every { pluginProject.plugins } returns mockPluginContainer
+        every { mockPluginContainer.hasPlugin("com.android.application") } returns false
+        every { mockBuildType.name } returns "debug"
+        every { mockBuildType.isDebuggable } returns true
+        every { project.rootProject.findProject(":${cameraDependency["name"]}") } returns pluginProject
+        every { project.rootProject.findProject(":${flutterPluginAndroidLifecycleDependency["name"]}") } returns pluginDependencyProject
+        every { pluginProject.extensions.create(any(), any<Class<Any>>()) } returns mockk()
+        val capturePluginActionSlot = mutableListOf<Action<Project>>()
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { pluginProject.afterEvaluate(any<Action<Project>>()) } returns Unit
+
+        val mockProjectBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        val mockPluginProjectBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        every { project.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockProjectBuildTypes
+        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockPluginProjectBuildTypes
+        every { mockPluginProjectBuildTypes.addAll(any()) } returns true
+        every { pluginProject.configurations.named(any<String>()) } returns mockk()
+        every { pluginProject.dependencies.add(any(), any()) } returns mockk()
+        every { mockProjectBuildTypes.iterator() } answers {
+            mutableListOf<com.android.build.gradle.internal.dsl.BuildType>().iterator()
+        }
+        every { project.dependencies.add(any(), any()) } returns mockk()
+
+        setUpMockAndroidExtension(project, compileSdk = 34, buildTypes = listOf(mockBuildType))
+        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
+
+        val pluginHandler = PluginHandler(project)
+        setupPluginMocks(project)
+
+        pluginHandler.configurePlugins(
+            engineVersionValue = EXAMPLE_ENGINE_VERSION
+        )
+
+        verify { pluginProject.afterEvaluate(capture(capturePluginActionSlot)) }
+        capturePluginActionSlot[0].execute(pluginProject)
+
+        verify {
+            mockLogger.quiet(
+                match { message ->
+                    message.contains("The plugin camera_android_camerax requires Android SDK version 35 or higher")
+                }
+            )
+        }
     }
 }

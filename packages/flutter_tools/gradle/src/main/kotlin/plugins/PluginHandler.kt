@@ -20,7 +20,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
-import com.android.build.gradle.internal.dsl.BuildType as dslBuildType
+import com.android.build.gradle.internal.dsl.BuildType as InternalDslBuildType
 
 /**
  * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
@@ -164,8 +164,8 @@ class PluginHandler(
             // However, only copy if the plugin is also an app project, since library projects
             // cannot have applicationIdSuffix and other app-specific properties.
             if (isBuiltAsApp(pluginProject)) {
-                (getLegacyAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<dslBuildType>)
-                    .addAll(getLegacyAndroidExtension(project).buildTypes as NamedDomainObjectContainer<dslBuildType>)
+                (getLegacyAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<InternalDslBuildType>)
+                    .addAll(getLegacyAndroidExtension(project).buildTypes as NamedDomainObjectContainer<InternalDslBuildType>)
             } else {
                 // For library projects, create compatible build types without app-specific properties
                 getLegacyAndroidExtension(project).buildTypes.forEach { appBuildType ->

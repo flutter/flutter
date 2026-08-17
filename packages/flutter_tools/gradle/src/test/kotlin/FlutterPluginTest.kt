@@ -81,9 +81,20 @@ class FlutterPluginTest {
         // Cast our multi-interface mock instead of creating a brand new one
         val mockApplicationExtension = mockAbstractAppExtension as ApplicationExtension
 
+        every { mockDebugBuildType.name } returns "debug"
+        every { mockDebugBuildType.isDebuggable } returns true
+        every { mockReleaseBuildType.name } returns "release"
+        every { mockReleaseBuildType.isDebuggable } returns false
+
         // Mock buildTypes on our new dual-purpose mock so AgpCommonExtensionWrapper can read them
         every { mockApplicationExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
         every { mockApplicationExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
+        every { mockApplicationExtension.buildTypes.all(any<Action<in ApplicationBuildType>>()) } answers {
+            val action = firstArg<Action<in ApplicationBuildType>>()
+            action.execute(mockDebugBuildType)
+            action.execute(mockReleaseBuildType)
+            mockApplicationExtension.buildTypes
+        }
 
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
 
@@ -125,6 +136,18 @@ class FlutterPluginTest {
         assertContains(registeredPrintTasks, "kgpVersion")
         assertContains(registeredPrintTasks, "printBuildVariants")
         assertContains(registeredPrintTasks, "printNdkVersion")
+        verify {
+            project.dependencies.add(
+                "debugCompile",
+                "io.flutter:flutter_embedding_debug:$FAKE_ENGINE_STAMP"
+            )
+        }
+        verify {
+            project.dependencies.add(
+                "releaseCompile",
+                "io.flutter:flutter_embedding_release:$FAKE_ENGINE_STAMP"
+            )
+        }
     }
 
     @Test

@@ -7,6 +7,7 @@ package com.flutter.gradle
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
@@ -23,6 +24,7 @@ import com.flutter.gradle.FlutterPluginUtils.detectApplyingKotlinGradlePlugin
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.EnableHcppManifestTask
 import com.flutter.gradle.tasks.PrintTask
+import com.flutter.gradle.testing.setUpMockAndroidExtension
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -53,7 +55,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
-import testing.setUpMockAndroidExtension
 import java.io.File
 import java.io.IOException
 import java.nio.file.Path
@@ -549,8 +550,21 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
+    fun `buildModeFor reads isDebuggable from new-DSL dynamic feature build types`() {
+        val buildType = mockk<DynamicFeatureBuildType>()
+        every { buildType.name } returns "staging"
+        every { buildType.isDebuggable } returns true
+
+        assertEquals("debug", FlutterPluginUtils.buildModeFor(buildType))
+    }
+
+    @Test
     fun `buildModeFor falls back to the conventional debug name for new-DSL library build types`() {
         // LibraryBuildType has no public isDebuggable flag, so the name is the only signal.
+        val profileBuildType = mockk<LibraryBuildType>()
+        every { profileBuildType.name } returns "profile"
+        assertEquals("profile", FlutterPluginUtils.buildModeFor(profileBuildType))
+
         val debugBuildType = mockk<LibraryBuildType>()
         every { debugBuildType.name } returns "debug"
         assertEquals("debug", FlutterPluginUtils.buildModeFor(debugBuildType))

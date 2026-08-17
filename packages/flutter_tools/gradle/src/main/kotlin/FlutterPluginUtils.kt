@@ -12,7 +12,6 @@ import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
-import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import com.flutter.gradle.tasks.EnableHcppManifestTask
@@ -32,6 +31,7 @@ import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
 import com.android.build.api.dsl.BuildType as DslBuildType
+import com.android.builder.model.BuildType as ModelBuildType
 
 /**
  * A collection of static utility functions used by the Flutter Gradle Plugin.
@@ -475,7 +475,7 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("buildModeFor")
-    internal fun buildModeFor(buildType: BuildType): String {
+    internal fun buildModeFor(buildType: ModelBuildType): String {
         if (buildType.name == "profile") {
             return "profile"
         }
@@ -485,9 +485,6 @@ object FlutterPluginUtils {
     /**
      * Returns a Flutter build mode for a build type identified by [buildTypeName] and its
      * [isDebuggable] flag.
-     *
-     * Variant-scope callers must pass the public `Component.debuggable` flag so that custom
-     * debuggable build types (e.g. a host app's `staging`) map to the debug engine artifacts.
      *
      * @return "debug", "profile", or "release" (fall-back).
      */
@@ -506,7 +503,7 @@ object FlutterPluginUtils {
     }
 
     /**
-     * Returns a Flutter build mode for a new-DSL [buildType].
+     * Returns a Flutter build mode for an AGP public DSL [buildType].
      *
      * Application and dynamic-feature build types expose a public `isDebuggable` flag.
      * Library build types do not, so for them the conventional "debug" name is the only
