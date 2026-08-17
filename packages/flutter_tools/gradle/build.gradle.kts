@@ -85,6 +85,9 @@ dependencies {
 // never crossing composite boundaries into included plugin builds. Included builds only run
 // tasks required to produce requested artifacts (`:jar`). Hooking this verification to
 // `test` and `check` guarantees CI enforcement without executing during user app builds.
+//
+// Keep the bytecode search pattern and filtering logic in sync with
+// packages/flutter_tools/gradle/src/test/kotlin/BytecodeValidatorTest.kt.
 val validateNoCommonExtensionInBytecode by tasks.registering {
     description =
         "Checks that no compiled main class references com.android.build.api.dsl.CommonExtension."

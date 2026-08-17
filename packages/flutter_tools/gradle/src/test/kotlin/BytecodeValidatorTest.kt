@@ -12,6 +12,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/**
+ * Validates the bytecode search pattern and file filtering algorithm used by the
+ * `:validateNoCommonExtensionInBytecode` task in packages/flutter_tools/gradle/build.gradle.kts.
+ *
+ * Keep the scanning needle and class filtering logic in sync with build.gradle.kts.
+ */
 class BytecodeValidatorTest {
     private val needle = "com/android/build/api/dsl/CommonExtension".toByteArray(Charsets.ISO_8859_1)
 
@@ -53,5 +59,17 @@ class BytecodeValidatorTest {
 
         val offenders = findOffendingClasses(root)
         assertEquals(listOf("ViolatingPlugin.class"), offenders)
+    }
+
+    @Test
+    fun `findOffendingClasses returns empty list for empty directory or non-class files`(
+        @TempDir tempDir: Path
+    ) {
+        val root = tempDir.toFile()
+        assertEquals(emptyList(), findOffendingClasses(root))
+
+        val nonClassFile = File(root, "Notes.md")
+        nonClassFile.writeText("No compiled classes here")
+        assertEquals(emptyList(), findOffendingClasses(root))
     }
 }

@@ -14,7 +14,7 @@ internal data class CompileSdkVersion(
     val previewCodename: String?
 ) {
     init {
-        require((apiLevel != null) xor (previewCodename != null) || (apiLevel == null && previewCodename == null)) {
+        require(apiLevel == null || previewCodename == null) {
             "CompileSdkVersion cannot have both apiLevel ($apiLevel) and previewCodename ($previewCodename) set."
         }
     }

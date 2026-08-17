@@ -576,9 +576,10 @@ object FlutterPluginUtils {
     @JvmName("getCompileSdkFromProject")
     internal fun getCompileSdkFromProject(project: Project): CompileSdkVersion {
         val androidExtension = getAndroidExtension(project)
+        val preview = androidExtension.compileSdkPreview
         return CompileSdkVersion(
-            apiLevel = androidExtension.compileSdk,
-            previewCodename = androidExtension.compileSdkPreview
+            apiLevel = if (preview != null) null else androidExtension.compileSdk,
+            previewCodename = preview
         )
     }
 

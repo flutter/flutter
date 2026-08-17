@@ -506,8 +506,9 @@ class FlutterPluginUtilsTest {
     // buildModeFor
     @Test
     fun `buildModeFor returns profile if the BuildType has name profile`() {
-        val buildType = mockk<BuildType>(relaxed = true)
+        val buildType = mockk<BuildType>()
         every { buildType.name } returns "profile"
+        every { buildType.isDebuggable } returns false
 
         val result = FlutterPluginUtils.buildModeFor(buildType)
         assertEquals("profile", result)
@@ -515,7 +516,7 @@ class FlutterPluginUtilsTest {
 
     @Test
     fun `buildModeFor returns debug if the BuildType is debuggable`() {
-        val buildType = mockk<BuildType>(relaxed = true)
+        val buildType = mockk<BuildType>()
         every { buildType.name } returns "something random"
         every { buildType.isDebuggable } returns true
 
@@ -525,7 +526,7 @@ class FlutterPluginUtilsTest {
 
     @Test
     fun `buildModeFor returns release if the BuildType is not debuggable and not named profile`() {
-        val buildType = mockk<BuildType>(relaxed = true)
+        val buildType = mockk<BuildType>()
         every { buildType.isDebuggable } returns false
         every { buildType.name } returns "something random"
 
@@ -679,6 +680,18 @@ class FlutterPluginUtilsTest {
         val androidExtension = mockk<ApplicationExtension>()
         every { project.extensions.findByName("android") } returns androidExtension
         every { androidExtension.compileSdk } returns null
+        every { androidExtension.compileSdkPreview } returns "Baklava"
+        val result = FlutterPluginUtils.getCompileSdkFromProject(project)
+        assertEquals(CompileSdkVersion(apiLevel = null, previewCodename = "Baklava"), result)
+        assertEquals("Baklava", result.toString())
+    }
+
+    @Test
+    fun `getCompileSdkFromProject prioritizes preview and sanitizes when both compileSdk and compileSdkPreview are set`() {
+        val project = mockk<Project>()
+        val androidExtension = mockk<ApplicationExtension>()
+        every { project.extensions.findByName("android") } returns androidExtension
+        every { androidExtension.compileSdk } returns 35
         every { androidExtension.compileSdkPreview } returns "Baklava"
         val result = FlutterPluginUtils.getCompileSdkFromProject(project)
         assertEquals(CompileSdkVersion(apiLevel = null, previewCodename = "Baklava"), result)

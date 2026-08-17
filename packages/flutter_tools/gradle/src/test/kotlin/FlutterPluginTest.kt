@@ -29,6 +29,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.io.TempDir
+import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.writeText
 import kotlin.test.Test
@@ -39,92 +40,18 @@ class FlutterPluginTest {
     fun `FlutterPlugin apply() adds expected tasks`(
         @TempDir tempDir: Path
     ) {
-        val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
-        projectDir.toFile().mkdirs()
-        val settingsFile = projectDir.parent.resolve("settings.gradle")
-        settingsFile.writeText("empty for now")
-        val fakeFlutterSdkDir = tempDir.resolve("fake-flutter-sdk")
-        fakeFlutterSdkDir.toFile().mkdirs()
-        val fakeCacheDir = fakeFlutterSdkDir.resolve("bin").resolve("cache")
-        fakeCacheDir.toFile().mkdirs()
-        val fakeEngineStampFile = fakeCacheDir.resolve("engine.stamp")
-        fakeEngineStampFile.writeText(FAKE_ENGINE_STAMP)
-        val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
-        fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
-        val project = mockk<Project>(relaxed = true)
-        val mockAbstractAppExtension =
-            mockk<AbstractAppExtension>(
-                moreInterfaces = arrayOf(ApplicationExtension::class),
-                relaxed = true
-            )
-        val mockLibraryExtension = mockk<LibraryExtension>(relaxed = true)
-        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
-        val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
-        every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
-        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
-        val mockSelector = mockk<com.android.build.api.variant.VariantSelector>(relaxed = true)
-        every { mockAndroidComponentsExtension.selector() } returns mockSelector
-        every { mockSelector.all() } returns mockSelector
-        every { mockSelector.withName(any<String>()) } returns mockSelector
-        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
-        every { project.extensions.getByType(LibraryExtension::class.java) } returns mockLibraryExtension
-        every { project.extensions.findByName("android") } returns mockAbstractAppExtension
-        every { project.projectDir } returns projectDir.toFile()
-        every { project.findProperty("flutter.sdk") } returns fakeFlutterSdkDir.toString()
-        every { project.file(fakeFlutterSdkDir.toString()) } returns fakeFlutterSdkDir.toFile()
-        val flutterExtension = FlutterExtension()
-        every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
-        every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
-        val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
-        val mockDebugBuildType = mockk<ApplicationBuildType>(relaxed = true)
-        val mockReleaseBuildType = mockk<ApplicationBuildType>(relaxed = true)
+        val env = setupTestProjectEnvironment(tempDir)
+        setupMockApplicationExtension(env.project)
+        setupMockComponentsExtension(env.project)
+        setupMockNativePluginLoader(env.project, env.flutterExtension)
 
-        // Cast our multi-interface mock instead of creating a brand new one
-        val mockApplicationExtension = mockAbstractAppExtension as ApplicationExtension
-
-        every { mockDebugBuildType.name } returns "debug"
-        every { mockDebugBuildType.isDebuggable } returns true
-        every { mockReleaseBuildType.name } returns "release"
-        every { mockReleaseBuildType.isDebuggable } returns false
-
-        // Mock buildTypes on our new dual-purpose mock so AgpCommonExtensionWrapper can read them
-        every { mockApplicationExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
-        every { mockApplicationExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
-
-        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
-
-        // Pass the dual-purpose mock for any ApplicationExtension lookups
-        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
-        every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
-
-        val mockApplicationDefaultConfig =
-            mockk<com.android.build.gradle.internal.dsl.DefaultConfig>(
-                moreInterfaces = arrayOf(ApplicationDefaultConfig::class),
-                relaxed = true
-            )
-        every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
-        every { project.rootProject } returns project
-        every { project.state.failure as Throwable? } returns null
-        val mockDirectory = mockk<Directory>(relaxed = true)
-        every { project.layout.buildDirectory.get() } returns mockDirectory
-        val mockAndroidSourceSet = mockk<com.android.build.gradle.api.AndroidSourceSet>(relaxed = true)
-        val mockAndroidSourceDirectorySet = mockk<AndroidSourceDirectorySet>(relaxed = true)
-        every { mockAndroidSourceSet.jniLibs.srcDir(any()) } returns mockAndroidSourceDirectorySet
-        every { mockAbstractAppExtension.sourceSets.getByName("main") } returns mockAndroidSourceSet
-        // mock return of NativePluginLoaderReflectionBridge.getPlugins
-        mockkObject(NativePluginLoaderReflectionBridge)
-        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns
-            listOf()
-        // mock method calls that are invoked by the args to NativePluginLoaderReflectionBridge
-        every { project.extraProperties } returns mockk()
-        every { project.file(flutterExtension.source!!) } returns mockk()
         val flutterPlugin = FlutterPlugin()
-        flutterPlugin.apply(project)
+        flutterPlugin.apply(env.project)
 
-        verify { project.tasks.register("generateLockfiles", any()) }
+        verify { env.project.tasks.register("generateLockfiles", any()) }
         val registeredPrintTasks = mutableListOf<String>()
         verify {
-            project.tasks.register(capture(registeredPrintTasks), PrintTask::class.java, any())
+            env.project.tasks.register(capture(registeredPrintTasks), PrintTask::class.java, any())
         }
 
         assertContains(registeredPrintTasks, "javaVersion")
@@ -137,102 +64,22 @@ class FlutterPluginTest {
     fun `FlutterPlugin apply wires flutter embedding dependencies on all build types`(
         @TempDir tempDir: Path
     ) {
-        val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
-        projectDir.toFile().mkdirs()
-        val settingsFile = projectDir.parent.resolve("settings.gradle")
-        settingsFile.writeText("empty for now")
-        val fakeFlutterSdkDir = tempDir.resolve("fake-flutter-sdk")
-        fakeFlutterSdkDir.toFile().mkdirs()
-        val fakeCacheDir = fakeFlutterSdkDir.resolve("bin").resolve("cache")
-        fakeCacheDir.toFile().mkdirs()
-        val fakeEngineStampFile = fakeCacheDir.resolve("engine.stamp")
-        fakeEngineStampFile.writeText(FAKE_ENGINE_STAMP)
-        val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
-        fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
-
-        val project = mockk<Project>(relaxed = true)
-        val mockAbstractAppExtension =
-            mockk<AbstractAppExtension>(
-                moreInterfaces = arrayOf(ApplicationExtension::class),
-                relaxed = true
-            )
-        val mockApplicationExtension = mockAbstractAppExtension as ApplicationExtension
-        every { project.extensions.findByName("android") } returns mockAbstractAppExtension
-        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
-        every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
-        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
-        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
-        every { project.extensions.findByType(BaseExtension::class.java) } returns mockk(relaxed = true)
-        every { project.projectDir } returns projectDir.toFile()
-        every { project.findProperty("flutter.sdk") } returns fakeFlutterSdkDir.toString()
-        every { project.file(fakeFlutterSdkDir.toString()) } returns fakeFlutterSdkDir.toFile()
-
-        val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
-        every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
-        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
-        val mockSelector = mockk<com.android.build.api.variant.VariantSelector>(relaxed = true)
-        every { mockAndroidComponentsExtension.selector() } returns mockSelector
-        every { mockSelector.all() } returns mockSelector
-        every { mockSelector.withName(any<String>()) } returns mockSelector
-
-        val flutterExtension = FlutterExtension()
-        every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
-        every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
-        every { project.plugins.hasPlugin("com.android.application") } returns true
-        every { project.configurations.named("api") } returns mockk()
-
-        val mockDebugBuildType =
-            mockk<ApplicationBuildType>(relaxed = true) {
-                every { name } returns "debug"
-                every { isDebuggable } returns true
-            }
-        val mockReleaseBuildType =
-            mockk<ApplicationBuildType>(relaxed = true) {
-                every { name } returns "release"
-                every { isDebuggable } returns false
-            }
-
-        val container = mockk<NamedDomainObjectContainer<ApplicationBuildType>>(relaxed = true)
-        every { container.getByName("debug") } returns mockDebugBuildType
-        every { container.getByName("release") } returns mockReleaseBuildType
-        every { container.all(any<Action<in ApplicationBuildType>>()) } answers {
-            val action = firstArg<Action<in ApplicationBuildType>>()
-            action.execute(mockDebugBuildType)
-            action.execute(mockReleaseBuildType)
-        }
-        every { mockApplicationExtension.buildTypes } returns container
-
-        val mockApplicationDefaultConfig =
-            mockk<com.android.build.gradle.internal.dsl.DefaultConfig>(
-                moreInterfaces = arrayOf(ApplicationDefaultConfig::class),
-                relaxed = true
-            )
-        every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
-        every { project.rootProject } returns project
-        every { project.state.failure as Throwable? } returns null
-        val mockDirectory = mockk<Directory>(relaxed = true)
-        every { project.layout.buildDirectory.get() } returns mockDirectory
-        val mockAndroidSourceSet = mockk<com.android.build.gradle.api.AndroidSourceSet>(relaxed = true)
-        val mockAndroidSourceDirectorySet = mockk<AndroidSourceDirectorySet>(relaxed = true)
-        every { mockAndroidSourceSet.jniLibs.srcDir(any()) } returns mockAndroidSourceDirectorySet
-        every { mockAbstractAppExtension.sourceSets.getByName("main") } returns mockAndroidSourceSet
-
-        mockkObject(NativePluginLoaderReflectionBridge)
-        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns listOf()
-        every { project.extraProperties } returns mockk()
-        every { project.file(flutterExtension.source!!) } returns mockk()
+        val env = setupTestProjectEnvironment(tempDir)
+        setupMockApplicationExtension(env.project)
+        setupMockComponentsExtension(env.project)
+        setupMockNativePluginLoader(env.project, env.flutterExtension)
 
         val flutterPlugin = FlutterPlugin()
-        flutterPlugin.apply(project)
+        flutterPlugin.apply(env.project)
 
         verify {
-            project.dependencies.add(
+            env.project.dependencies.add(
                 "debugApi",
                 "io.flutter:flutter_embedding_debug:1.0.0-$FAKE_ENGINE_STAMP"
             )
         }
         verify {
-            project.dependencies.add(
+            env.project.dependencies.add(
                 "releaseApi",
                 "io.flutter:flutter_embedding_release:1.0.0-$FAKE_ENGINE_STAMP"
             )
@@ -432,6 +279,128 @@ class FlutterPluginTest {
         } else {
             fail("FilePermissions configuration action was not captured")
         }
+    }
+
+    private data class TestProjectEnvironment(
+        val projectDir: File,
+        val fakeFlutterSdkDir: File,
+        val project: Project,
+        val flutterExtension: FlutterExtension
+    )
+
+    private fun setupTestProjectEnvironment(
+        tempDir: Path,
+        engineStamp: String = FAKE_ENGINE_STAMP,
+        engineRealm: String = FAKE_ENGINE_REALM
+    ): TestProjectEnvironment {
+        val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
+        projectDir.toFile().mkdirs()
+        val settingsFile = projectDir.parent.resolve("settings.gradle")
+        settingsFile.writeText("empty for now")
+        val fakeFlutterSdkDir = tempDir.resolve("fake-flutter-sdk")
+        fakeFlutterSdkDir.toFile().mkdirs()
+        val fakeCacheDir = fakeFlutterSdkDir.resolve("bin").resolve("cache")
+        fakeCacheDir.toFile().mkdirs()
+        val fakeEngineStampFile = fakeCacheDir.resolve("engine.stamp")
+        fakeEngineStampFile.writeText(engineStamp)
+        val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
+        fakeEngineRealmFile.writeText(engineRealm)
+
+        val project = mockk<Project>(relaxed = true)
+        every { project.projectDir } returns projectDir.toFile()
+        every { project.findProperty("flutter.sdk") } returns fakeFlutterSdkDir.toString()
+        every { project.file(fakeFlutterSdkDir.toString()) } returns fakeFlutterSdkDir.toFile()
+        every { project.plugins.hasPlugin("com.android.application") } returns true
+        every { project.rootProject } returns project
+        every { project.state.failure as Throwable? } returns null
+        every { project.configurations.named("api") } returns mockk()
+
+        val flutterExtension = FlutterExtension()
+        every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
+
+        return TestProjectEnvironment(
+            projectDir.toFile(),
+            fakeFlutterSdkDir.toFile(),
+            project,
+            flutterExtension
+        )
+    }
+
+    private fun setupMockApplicationExtension(
+        project: Project,
+        mockDebugBuildType: ApplicationBuildType =
+            mockk<ApplicationBuildType>(relaxed = true) {
+                every { name } returns "debug"
+                every { isDebuggable } returns true
+            },
+        mockReleaseBuildType: ApplicationBuildType =
+            mockk<ApplicationBuildType>(relaxed = true) {
+                every { name } returns "release"
+                every { isDebuggable } returns false
+            }
+    ): ApplicationExtension {
+        val mockAbstractAppExtension =
+            mockk<AbstractAppExtension>(
+                moreInterfaces = arrayOf(ApplicationExtension::class),
+                relaxed = true
+            )
+        val mockApplicationExtension = mockAbstractAppExtension as ApplicationExtension
+        val mockLibraryExtension = mockk<LibraryExtension>(relaxed = true)
+        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
+        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
+        every { project.extensions.getByType(LibraryExtension::class.java) } returns mockLibraryExtension
+        every { project.extensions.findByName("android") } returns mockAbstractAppExtension
+
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockk(relaxed = true)
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
+        every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
+
+        val container = mockk<NamedDomainObjectContainer<ApplicationBuildType>>(relaxed = true)
+        every { container.getByName("debug") } returns mockDebugBuildType
+        every { container.getByName("release") } returns mockReleaseBuildType
+        every { container.all(any<Action<in ApplicationBuildType>>()) } answers {
+            val action = firstArg<Action<in ApplicationBuildType>>()
+            action.execute(mockDebugBuildType)
+            action.execute(mockReleaseBuildType)
+        }
+        every { mockApplicationExtension.buildTypes } returns container
+
+        val mockApplicationDefaultConfig =
+            mockk<com.android.build.gradle.internal.dsl.DefaultConfig>(
+                moreInterfaces = arrayOf(ApplicationDefaultConfig::class),
+                relaxed = true
+            )
+        every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
+        val mockDirectory = mockk<Directory>(relaxed = true)
+        every { project.layout.buildDirectory.get() } returns mockDirectory
+        val mockAndroidSourceSet = mockk<com.android.build.gradle.api.AndroidSourceSet>(relaxed = true)
+        val mockAndroidSourceDirectorySet = mockk<AndroidSourceDirectorySet>(relaxed = true)
+        every { mockAndroidSourceSet.jniLibs.srcDir(any()) } returns mockAndroidSourceDirectorySet
+        every { mockAbstractAppExtension.sourceSets.getByName("main") } returns mockAndroidSourceSet
+
+        return mockApplicationExtension
+    }
+
+    private fun setupMockComponentsExtension(project: Project): AndroidComponentsExtension<*, *, *> {
+        val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
+        every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        val mockSelector = mockk<com.android.build.api.variant.VariantSelector>(relaxed = true)
+        every { mockAndroidComponentsExtension.selector() } returns mockSelector
+        every { mockSelector.all() } returns mockSelector
+        every { mockSelector.withName(any<String>()) } returns mockSelector
+        return mockAndroidComponentsExtension
+    }
+
+    private fun setupMockNativePluginLoader(
+        project: Project,
+        flutterExtension: FlutterExtension
+    ) {
+        mockkObject(NativePluginLoaderReflectionBridge)
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns listOf()
+        every { project.extraProperties } returns mockk()
+        every { project.file(flutterExtension.source!!) } returns mockk()
     }
 
     companion object {
