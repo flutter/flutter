@@ -76,11 +76,13 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.16")
 }
 
-// CommonExtension is binary-incompatible between AGP 8 and 9, which is why DSL access is
-// routed through AgpCommonExtensionWrapper. If the compiler emits a reference to
-// CommonExtension as the owner of a call, the plugin breaks on one of the two AGP lines at
-// runtime even though it compiles on both. Fail fast if such a reference appears in the
-// main bytecode (test bytecode intentionally references AGP types directly).
+// CommonExtension is binary-incompatible between AGP 8 and 9, so main bytecode must route
+// DSL access through AgpCommonExtensionWrapper.
+//
+// This task scans main class bytecode to fail fast if CommonExtension references appear.
+// It is hooked to `test` and `check` for CI enforcement, but not to `jar` or `classes`,
+// so it does not run during customer app builds (where composite builds only execute
+// artifact-producing tasks).
 val validateNoCommonExtensionInBytecode by tasks.registering {
     description =
         "Checks that no compiled main class references com.android.build.api.dsl.CommonExtension."
