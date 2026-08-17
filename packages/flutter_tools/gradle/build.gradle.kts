@@ -79,10 +79,12 @@ dependencies {
 // CommonExtension is binary-incompatible between AGP 8 and 9, so main bytecode must route
 // DSL access through AgpCommonExtensionWrapper.
 //
-// This task scans main class bytecode to fail fast if CommonExtension references appear.
-// It is hooked to `test` and `check` for CI enforcement, but not to `jar` or `classes`,
-// so it does not run during customer app builds (where composite builds only execute
-// artifact-producing tasks).
+// Downstream Safety:
+// In Gradle composite builds (`includeBuild`), root task execution (e.g. `./gradlew test` or
+// `./gradlew check` in a customer app) only runs tasks in direct subprojects (`:app:test`),
+// never crossing composite boundaries into included plugin builds. Included builds only run
+// tasks required to produce requested artifacts (`:jar`). Hooking this verification to
+// `test` and `check` guarantees CI enforcement without executing during user app builds.
 val validateNoCommonExtensionInBytecode by tasks.registering {
     description =
         "Checks that no compiled main class references com.android.build.api.dsl.CommonExtension."
