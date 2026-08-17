@@ -37,8 +37,7 @@ abstract class VMServiceDiscoveryForAttach {
 
 /// An implementation of [VMServiceDiscoveryForAttach] that uses log scanning
 /// for the discovery.
-class LogScanningVMServiceDiscoveryForAttach
-    extends VMServiceDiscoveryForAttach {
+class LogScanningVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   LogScanningVMServiceDiscoveryForAttach(
     Future<DeviceLogReader> logReader, {
     DevicePortForwarder? portForwarder,

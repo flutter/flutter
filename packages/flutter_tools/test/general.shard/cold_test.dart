@@ -39,9 +39,7 @@ void main() {
           'Connection closed before full header was received, '
           'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws',
         ),
-        vmServiceUri: Future<Uri>.value(
-          Uri.parse('http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
-        ),
+        vmServiceUri: Future<Uri>.value(Uri.parse('http://127.0.0.1:63394/5ZmLv8A59xY=/ws')),
       ),
     ];
 
@@ -133,8 +131,7 @@ void main() {
     testUsingContext(
       'with traceStartup, env variable',
       () async {
-        fakePlatform.environment[kFlutterTestOutputsDirEnvName] =
-            'test_output_dir';
+        fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
 
         final device = FakeDevice();
         final flutterDevice = FakeFlutterDevice(device);
@@ -226,8 +223,7 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class FakeDartDevelopmentService extends Fake
-    implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   @override
   late Future<void> done;
 
@@ -305,9 +301,7 @@ class FakeFlutterVmService extends Fake implements FlutterVmService {
   }
 
   @override
-  Future<bool> flutterAlreadyPaintedFirstUsefulFrame({
-    String? isolateId,
-  }) async => true;
+  Future<bool> flutterAlreadyPaintedFirstUsefulFrame({String? isolateId}) async => true;
 
   @override
   Future<Response?> getTimeline() async {
@@ -331,11 +325,7 @@ class FakeVmService extends Fake implements VmService {
   @override
   Stream<Event> get onExtensionEvent {
     return Stream<Event>.fromIterable(<Event>[
-      Event(
-        kind: 'Extension',
-        extensionKind: 'Flutter.FirstFrame',
-        timestamp: 1,
-      ),
+      Event(kind: 'Extension', extensionKind: 'Flutter.FirstFrame', timestamp: 1),
     ]);
   }
 }

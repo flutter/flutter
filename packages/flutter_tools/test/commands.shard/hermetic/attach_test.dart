@@ -74,9 +74,7 @@ void main() {
       platform = FakePlatform();
       testFileSystem = MemoryFileSystem.test();
       testFileSystem.directory('lib').createSync();
-      testFileSystem
-          .file(testFileSystem.path.join('lib', 'main.dart'))
-          .createSync();
+      testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
       artifacts = Artifacts.test(fileSystem: testFileSystem);
       stdio = FakeStdio();
       terminal = FakeTerminal();
@@ -88,9 +86,7 @@ void main() {
     group('with one device and no specified target file', () {
       const devicePort = 499;
       const hostPort = 42;
-      final int future = DateTime.now()
-          .add(const Duration(days: 1))
-          .millisecondsSinceEpoch;
+      final int future = DateTime.now().add(const Duration(days: 1)).millisecondsSinceEpoch;
 
       late FakeDeviceLogReader fakeLogReader;
       late RecordingPortForwarder portForwarder;
@@ -126,10 +122,10 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final completer = Completer<void>();
-          final StreamSubscription<String>
-          loggerSubscription = logger.stream.listen((String message) {
-            if (message ==
-                '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
               // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
               completer.complete();
             }
@@ -143,8 +139,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -163,11 +158,7 @@ void main() {
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
             isA<ForwardedPort>()
-                .having(
-                  (ForwardedPort d) => d.devicePort,
-                  'devicePort',
-                  devicePort,
-                )
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
                 .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
           ]);
 
@@ -180,10 +171,7 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[],
               <String, List<SrvResourceRecord>>{},
@@ -210,10 +198,10 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final completer = Completer<void>();
-          final StreamSubscription<String>
-          loggerSubscription = logger.stream.listen((String message) {
-            if (message ==
-                '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
               // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
               completer.complete();
             }
@@ -230,8 +218,7 @@ void main() {
               };
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -259,10 +246,7 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[],
               <String, List<SrvResourceRecord>>{},
@@ -295,10 +279,10 @@ void main() {
           );
           testDeviceManager.devices = <Device>[device];
           final completer = Completer<void>();
-          final StreamSubscription<String>
-          loggerSubscription = logger.stream.listen((String message) {
-            if (message ==
-                '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
               // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
               completer.complete();
             }
@@ -351,10 +335,7 @@ void main() {
           FileSystem: () => testFileSystem,
           Logger: () => logger,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[],
               <String, List<SrvResourceRecord>>{},
@@ -390,8 +371,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -415,11 +395,7 @@ void main() {
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
             isA<ForwardedPort>()
-                .having(
-                  (ForwardedPort d) => d.devicePort,
-                  'devicePort',
-                  devicePort,
-                )
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
                 .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
           ]);
           expect(hotRunnerFactory.devices, hasLength(1));
@@ -430,14 +406,9 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[
-                PtrResourceRecord('foo', future, domainName: 'bar'),
-              ],
+              <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
               <String, List<SrvResourceRecord>>{
                 'bar': <SrvResourceRecord>[
                   SrvResourceRecord(
@@ -480,8 +451,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -512,14 +482,9 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[
-                PtrResourceRecord('foo', future, domainName: 'srv-foo'),
-              ],
+              <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-foo')],
               <String, List<SrvResourceRecord>>{
                 'srv-foo': <SrvResourceRecord>[
                   SrvResourceRecord(
@@ -571,8 +536,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -603,10 +567,7 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[
                 PtrResourceRecord('bar', future, domainName: 'srv-bar'),
@@ -673,8 +634,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -705,10 +665,7 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[
                 PtrResourceRecord('bar', future, domainName: 'srv-bar'),
@@ -769,10 +726,10 @@ void main() {
           };
           testDeviceManager.devices = <Device>[device];
           final completer = Completer<void>();
-          final StreamSubscription<String>
-          loggerSubscription = logger.stream.listen((String message) {
-            if (message ==
-                '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
               // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
               completer.complete();
             }
@@ -792,11 +749,7 @@ void main() {
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
             isA<ForwardedPort>()
-                .having(
-                  (ForwardedPort d) => d.devicePort,
-                  'devicePort',
-                  devicePort,
-                )
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
                 .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
           ]);
 
@@ -874,8 +827,7 @@ void main() {
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
 
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           final command = AttachCommand(
             hotRunnerFactory: hotRunnerFactory,
@@ -911,9 +863,7 @@ void main() {
           final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
 
           expect(flutterDevice.buildInfo.fileSystemScheme, filesystemScheme);
-          expect(flutterDevice.buildInfo.fileSystemRoots, const <String>[
-            filesystemRoot,
-          ]);
+          expect(flutterDevice.buildInfo.fileSystemRoots, const <String>[filesystemRoot]);
         },
         overrides: <Type, Generator>{
           FileSystem: () => testFileSystem,
@@ -960,18 +910,16 @@ void main() {
             majorSdkVersion: 12,
             onGetLogReader: () {
               fakeLogReader.addLine('Foo');
-              fakeLogReader.addLine(
-                'The Dart VM service is listening on http://[::1]:$devicePort',
-              );
+              fakeLogReader.addLine('The Dart VM service is listening on http://[::1]:$devicePort');
               return fakeLogReader;
             },
           );
           testDeviceManager.devices = <Device>[device];
           final completer = Completer<void>();
-          final StreamSubscription<String>
-          loggerSubscription = logger.stream.listen((String message) {
-            if (message ==
-                '[verbose] VM Service URL on device: http://[::1]:$devicePort') {
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://[::1]:$devicePort') {
               // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
               completer.complete();
             }
@@ -985,8 +933,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -1004,11 +951,7 @@ void main() {
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
             isA<ForwardedPort>()
-                .having(
-                  (ForwardedPort d) => d.devicePort,
-                  'devicePort',
-                  devicePort,
-                )
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
                 .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
           ]);
 
@@ -1021,10 +964,7 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-            mdnsClient: FakeMDnsClient(
-              <PtrResourceRecord>[],
-              <String, List<SrvResourceRecord>>{},
-            ),
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
             preliminaryMDnsClient: FakeMDnsClient(
               <PtrResourceRecord>[],
               <String, List<SrvResourceRecord>>{},
@@ -1057,9 +997,7 @@ void main() {
             fileSystem: testFileSystem,
           );
           await expectLater(
-            createTestCommandRunner(
-              command,
-            ).run(<String>['attach', '--vm-service-port', '100']),
+            createTestCommandRunner(command).run(<String>['attach', '--vm-service-port', '100']),
             throwsToolExit(
               message:
                   'When the --debug-port or --debug-url is unknown, this command does not use '
@@ -1095,10 +1033,10 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final completer = Completer<void>();
-          final StreamSubscription<String>
-          loggerSubscription = logger.stream.listen((String message) {
-            if (message ==
-                '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
               // Wait until resident_runner.dart tries to connect.
               // There's nothing to connect _to_, so that's as far as we care to go.
               completer.complete();
@@ -1119,11 +1057,7 @@ void main() {
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
             isA<ForwardedPort>()
-                .having(
-                  (ForwardedPort d) => d.devicePort,
-                  'devicePort',
-                  devicePort,
-                )
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
                 .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
           ]);
 
@@ -1144,10 +1078,10 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final completer = Completer<void>();
-          final StreamSubscription<String>
-          loggerSubscription = logger.stream.listen((String message) {
-            if (message ==
-                '[verbose] Connecting to service protocol: http://[::1]:42/') {
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
               // Wait until resident_runner.dart tries to connect.
               // There's nothing to connect _to_, so that's as far as we care to go.
               completer.complete();
@@ -1168,11 +1102,7 @@ void main() {
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
             isA<ForwardedPort>()
-                .having(
-                  (ForwardedPort d) => d.devicePort,
-                  'devicePort',
-                  devicePort,
-                )
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
                 .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
           ]);
 
@@ -1193,10 +1123,10 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final completer = Completer<void>();
-          final StreamSubscription<String>
-          loggerSubscription = logger.stream.listen((String message) {
-            if (message ==
-                '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
               // Wait until resident_runner.dart tries to connect.
               // There's nothing to connect _to_, so that's as far as we care to go.
               completer.complete();
@@ -1244,10 +1174,10 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final completer = Completer<void>();
-          final StreamSubscription<String>
-          loggerSubscription = logger.stream.listen((String message) {
-            if (message ==
-                '[verbose] Connecting to service protocol: http://[::1]:42/') {
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
               // Wait until resident_runner.dart tries to connect.
               // There's nothing to connect _to_, so that's as far as we care to go.
               completer.complete();
@@ -1307,10 +1237,7 @@ void main() {
           createTestCommandRunner(command).run(<String>['attach']),
           throwsToolExit(),
         );
-        expect(
-          testLogger.statusText,
-          containsIgnoringWhitespace('No supported devices connected'),
-        );
+        expect(testLogger.statusText, containsIgnoringWhitespace('No supported devices connected'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
@@ -1336,9 +1263,7 @@ void main() {
               fileSystem: testFileSystem,
             ),
           ).run(<String>['attach', '--device-user', '10']),
-          throwsToolExit(
-            message: '--device-user is only supported for Android',
-          ),
+          throwsToolExit(message: '--device-user is only supported for Android'),
         );
       },
       overrides: <Type, Generator>{
@@ -1368,10 +1293,7 @@ void main() {
           createTestCommandRunner(command).run(<String>['attach']),
           throwsToolExit(),
         );
-        expect(
-          testLogger.statusText,
-          containsIgnoringWhitespace('More than one device'),
-        );
+        expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
         expect(testLogger.statusText, contains('xx1'));
         expect(testLogger.statusText, contains('yy2'));
         expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
@@ -1576,11 +1498,8 @@ void main() {
     testUsingContext(
       'does not try to attach to a new target when the original application disappears',
       () async {
-        // Regression test for https://github.com/flutter/flutter/issues/156692.
         final fakeLogReader = FakeDeviceLogReader();
-        fakeLogReader.addLine(
-          'The Dart VM service is listening on http://127.0.0.1:1234',
-        );
+        fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:1234');
         final device = FakeAndroidDevice(id: '1')
           ..portForwarder = const NoOpDevicePortForwarder()
           ..onGetLogReader = () => fakeLogReader;
@@ -1613,9 +1532,7 @@ void main() {
           processInfo: processInfo,
           fileSystem: testFileSystem,
         );
-        await createTestCommandRunner(
-          command,
-        ).run(<String>['attach', '--verbose']);
+        await createTestCommandRunner(command).run(<String>['attach', '--verbose']);
 
         // Ensure `HotRunner.attach` was only called once.
         expect(attachCount, 1);
@@ -1676,12 +1593,7 @@ void main() {
 }
 
 class FakeHotRunner extends Fake implements HotRunner {
-  late Future<int> Function(
-    Completer<DebugConnectionInfo>?,
-    Completer<void>?,
-    bool,
-  )
-  onAttach;
+  late Future<int> Function(Completer<DebugConnectionInfo>?, Completer<void>?, bool) onAttach;
 
   @override
   List<FlutterDevice> flutterDevices = <FlutterDevice>[];
@@ -1699,11 +1611,7 @@ class FakeHotRunner extends Fake implements HotRunner {
     bool enableDevTools = false,
     bool needsFullRestart = true,
   }) {
-    return onAttach(
-      connectionInfoCompleter,
-      appStartedCompleter,
-      enableDevTools,
-    );
+    return onAttach(connectionInfoCompleter, appStartedCompleter, enableDevTools);
   }
 
   @override
@@ -1742,9 +1650,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
   }) {
     if (_artifactTester != null) {
       for (final device in devices) {
-        _artifactTester!(
-          (device.generator! as DefaultResidentCompiler).artifacts,
-        );
+        _artifactTester!((device.generator! as DefaultResidentCompiler).artifacts);
       }
     }
     this.devices = devices;
@@ -1918,21 +1824,15 @@ class LoggerInterrupted implements Exception {
   const LoggerInterrupted();
 }
 
-Future<void> expectLoggerInterruptEndsTask(
-  Future<void> task,
-  StreamLogger logger,
-) async {
+Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logger) async {
   logger.interrupt(); // an exception during the task should cause it to fail...
   await expectLater(
     () => task,
-    throwsA(
-      isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', 2),
-    ),
+    throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', 2)),
   );
 }
 
-class FakeDartDevelopmentService extends Fake
-    implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   @override
   Future<void> get done => noopCompleter.future;
   final noopCompleter = Completer<void>();
@@ -1983,8 +1883,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
-  DeviceConnectionInterface get connectionInterface =>
-      DeviceConnectionInterface.attached;
+  DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
 
   @override
   Future<bool> isSupported() async => true;
@@ -2007,10 +1906,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   DeviceLogReader Function()? onGetLogReader;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
-  }) {
+  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
     if (onGetLogReader == null) {
       throw UnimplementedError(
         'Called getLogReader but no onGetLogReader callback was supplied in the constructor to FakeAndroidDevice.',
@@ -2067,15 +1963,13 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   final DeviceConnectionInterface connectionInterface;
 
   @override
-  bool get isWirelesslyConnected =>
-      connectionInterface == DeviceConnectionInterface.wireless;
+  bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
   DevicePortForwarder get portForwarder => _portForwarder!;
 
   @override
-  DartDevelopmentService get dds =>
-      throw UnimplementedError('getter dds not implemented');
+  DartDevelopmentService get dds => throw UnimplementedError('getter dds not implemented');
 
   final DeviceLogReader Function()? onGetLogReader;
 
@@ -2127,8 +2021,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     required Logger logger,
   }) {
     final bool compatibleWithProtocolDiscovery =
-        majorSdkVersion <
-            IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
+        majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
         !isWirelesslyConnected;
     final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
@@ -2174,8 +2067,7 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
   bool get isConnected => true;
 
   @override
-  DeviceConnectionInterface get connectionInterface =>
-      DeviceConnectionInterface.attached;
+  DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
 
   @override
   bool get ephemeral => true;
@@ -2190,9 +2082,7 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
   bool get isWirelesslyConnected => false;
 
   @override
-  DevicePortForwarder portForwarder = RecordingPortForwarder(
-    defaultHostPort: 42,
-  );
+  DevicePortForwarder portForwarder = RecordingPortForwarder(defaultHostPort: 42);
 
   @override
   VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
@@ -2254,16 +2144,12 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     }
     if (T == SrvResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<SrvResourceRecord>.fromIterable(
-            srvResponse[key] ?? <SrvResourceRecord>[],
-          )
+      return Stream<SrvResourceRecord>.fromIterable(srvResponse[key] ?? <SrvResourceRecord>[])
           as Stream<T>;
     }
     if (T == TxtResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<TxtResourceRecord>.fromIterable(
-            txtResponse[key] ?? <TxtResourceRecord>[],
-          )
+      return Stream<TxtResourceRecord>.fromIterable(txtResponse[key] ?? <TxtResourceRecord>[])
           as Stream<T>;
     }
     if (T == IPAddressResourceRecord) {

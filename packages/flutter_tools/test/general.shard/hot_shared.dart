@@ -77,10 +77,7 @@ class FakeDevice extends Fake implements Device {
   String get name => 'Fake Device';
 
   @override
-  Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
-  }) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     return true;
   }
 
@@ -90,8 +87,7 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
-class FakeDartDevelopmentService extends Fake
-    implements DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   bool wasShutdown = false;
 
   @override
@@ -178,10 +174,7 @@ class TestFlutterDevice extends FlutterDevice {
 }
 
 class TestHotRunnerConfig extends HotRunnerConfig {
-  TestHotRunnerConfig({
-    this.successfulHotRestartSetup,
-    this.successfulHotReloadSetup,
-  });
+  TestHotRunnerConfig({this.successfulHotRestartSetup, this.successfulHotReloadSetup});
   bool? successfulHotRestartSetup;
   bool? successfulHotReloadSetup;
   bool shutdownHookCalled = false;
