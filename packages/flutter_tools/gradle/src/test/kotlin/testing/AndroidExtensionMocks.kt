@@ -36,6 +36,7 @@ fun setUpMockAndroidExtension(
     every { project.extensions.findByName("android") } returns mockAndroidExtension
 
     every { project.gradle.startParameter.taskNames } returns emptyList()
+    every { project.gradle.startParameter.isOffline } returns false
 
     return mockAndroidExtension
 }
