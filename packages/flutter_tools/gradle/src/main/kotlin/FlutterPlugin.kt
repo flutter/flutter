@@ -42,7 +42,6 @@ class FlutterPlugin : Plugin<Project> {
     private var localEngineSrcPath: String? = null
     private var localProperties: Properties? = null
     private var engineVersion: String? = null
-    private var engineRealm: String? = null
     private var pluginHandler: PluginHandler? = null
 
     override fun apply(project: Project) {
@@ -51,6 +50,17 @@ class FlutterPlugin : Plugin<Project> {
         val rootProject = project.rootProject
         if (FlutterPluginUtils.isFlutterAppProject(project)) {
             addTaskForLockfileGeneration(rootProject)
+            if (project.hasProperty("flutter.hasMigratedPlugins") &&
+                project.property("flutter.hasMigratedPlugins") == "true"
+            ) {
+                project.pluginManager.withPlugin("com.android.application") {
+                    val agpVersion = VersionFetcher.getAGPVersion(project)
+                    if (agpVersion != null) {
+                        val versionStr = "${agpVersion.major}.${agpVersion.minor}.${agpVersion.micro}"
+                        System.setProperty("flutter.agp.version", versionStr)
+                    }
+                }
+            }
         }
 
         val flutterRootSystemVal: String? = System.getenv("FLUTTER_ROOT")
@@ -66,39 +76,16 @@ class FlutterPlugin : Plugin<Project> {
             throw GradleException("flutter.sdk must point to the Flutter SDK directory")
         }
 
-        engineVersion =
-            if (FlutterPluginUtils.shouldProjectUseLocalEngine(project)) {
-                "+" // Match any version since there's only one.
-            } else {
-                val engineStampPath =
-                    Paths.get(flutterRoot!!.absolutePath, "bin", "cache", "engine.stamp")
-                val engineStampContent = engineStampPath.toFile().readText().trim()
-                "1.0.0-$engineStampContent"
-            }
+        engineVersion = FlutterPluginUtils.getFlutterEngineVersion(project, flutterRoot!!)
 
-        engineRealm =
-            Paths
-                .get(flutterRoot!!.absolutePath, "bin", "cache", "engine.realm")
-                .toFile()
-                .readText()
-                .trim()
-        if (engineRealm!!.isNotEmpty()) {
-            engineRealm += "/"
-        }
-
-        // Configure the Maven repository.
-        val hostedRepository: String =
-            System.getenv(FlutterPluginConstants.FLUTTER_STORAGE_BASE_URL)
-                ?: FlutterPluginConstants.DEFAULT_MAVEN_HOST
-        val repository: String? =
-            if (FlutterPluginUtils.shouldProjectUseLocalEngine(project)) {
-                project.property(PROP_LOCAL_ENGINE_REPO) as String?
-            } else {
-                "$hostedRepository/${engineRealm}download.flutter.io"
-            }
+        // Configure the Maven repository that hosts the Flutter engine artifacts. The URL is
+        // derived once (it depends only on the SDK + storage host) and applied to all projects.
+        // FlutterPluginGradlePlugin uses the same helper so migrated plugin builds resolve the
+        // engine identically (honoring the engine realm, FLUTTER_STORAGE_BASE_URL, and local engine).
+        val engineRepoUrl: String = FlutterPluginUtils.getFlutterEngineRepoUrl(project, flutterRoot!!)
         rootProject.allprojects {
             repositories.maven {
-                url = uri(repository!!)
+                url = uri(engineRepoUrl)
             }
         }
 
@@ -213,6 +200,28 @@ class FlutterPlugin : Plugin<Project> {
                 this.matchingFallbacks.addAll(listOf("debug", "release"))
             }
         )
+
+        // When migrated (composite-build) plugins are present, the app may declare build types that
+        // the included plugin builds do not. The legacy model copied the app's build types into each
+        // plugin; composite builds cannot, and FlutterPluginGradlePlugin only recreates the standard
+        // debug/profile/release variants. Point any *custom* app build type at its Flutter build mode
+        // so AGP can resolve a matching plugin variant across the composite-build boundary. This is a
+        // no-op for debug/profile/release (provided directly by the plugins) and is gated on migrated
+        // plugins so non-composite apps are unaffected.
+        // TODO(gmackall): Revisit once AGP natively handles variant matching across composite builds.
+        val hasMigratedPlugins: Boolean =
+            getPluginHandler(project).getPluginList().any { it["is_migrated"] == true }
+        if (hasMigratedPlugins) {
+            FlutterPluginUtils.getLegacyAndroidExtension(project).buildTypes.configureEach {
+                val isStandardFlutterBuildType: Boolean = name == "debug" || name == "profile" || name == "release"
+                if (!isStandardFlutterBuildType) {
+                    val fallbackMode: String = if (isDebuggable) "debug" else "release"
+                    if (!matchingFallbacks.contains(fallbackMode)) {
+                        matchingFallbacks.add(fallbackMode)
+                    }
+                }
+            }
+        }
         if (FlutterPluginUtils.shouldShrinkResources(project)) {
             val releaseBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("release")
             releaseBuildType.isMinifyEnabled = true
@@ -291,6 +300,8 @@ class FlutterPlugin : Plugin<Project> {
             }
         }
     }
+
+
 
     private fun addFlutterTasks(projectToAddTasksTo: Project) {
         if (projectToAddTasksTo.state.failure != null) {
