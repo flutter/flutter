@@ -21,11 +21,13 @@ import kotlin.test.assertTrue
 class BytecodeValidatorTest {
     private val needle = "com/android/build/api/dsl/CommonExtension".toByteArray(Charsets.ISO_8859_1)
 
+    /** Returns true if [bytes] contains the forbidden binary needle pattern. */
     private fun containsForbiddenReference(bytes: ByteArray): Boolean =
         (0..bytes.size - needle.size).any { start ->
             needle.indices.all { i -> bytes[start + i] == needle[i] }
         }
 
+    /** Walks [dir] recursively and returns names of any `.class` files containing forbidden references. */
     private fun findOffendingClasses(dir: File): List<String> =
         dir
             .walkTopDown()
