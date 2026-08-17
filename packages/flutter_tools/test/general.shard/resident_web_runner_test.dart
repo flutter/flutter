@@ -275,12 +275,14 @@ name: my_app
     'Does not crash if the application exits during DDS startup',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/178151
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
       webDevFS.exception = DartDevelopmentServiceException.failedToStart();
 
       await expectLater(residentWebRunner.run(), throwsToolExit());
+      expect(logger.errorText, isEmpty);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -292,15 +294,17 @@ name: my_app
   testUsingContext(
     'Does not crash if DDS fails to upgrade WebSocket during startup',
     () async {
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
-      webDevFS.exception = DartDevelopmentServiceException.connectionIssue(
-        'WebSocketChannelException: WebSocketException: Connection to '
-        "'http://127.0.0.1:62932/9fVOXxsamo0=/ws#' was not upgraded to websocket",
-      );
+      const errorMessage =
+          'WebSocketChannelException: WebSocketException: Connection to '
+          "'http://127.0.0.1:62932/9fVOXxsamo0=/ws#' was not upgraded to websocket";
+      webDevFS.exception = DartDevelopmentServiceException.connectionIssue(errorMessage);
 
       await expectLater(residentWebRunner.run(), throwsToolExit());
+      expect(logger.errorText, contains(errorMessage));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

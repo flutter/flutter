@@ -410,7 +410,9 @@ class ResidentWebRunner extends ResidentRunner {
       // The application may have started shutting down before DDS was able to finish establishing
       // its connection to DWDS. Don't treat this as an unhandled exception.
       appFailedToStart();
-      _logger.printError(error.toString(), stackTrace: stackTrace);
+      if (error.errorCode != DartDevelopmentServiceException.failedToStartError) {
+        _logger.printError(error.message, stackTrace: stackTrace);
+      }
       throwToolExit(kExitMessage);
     } on Exception {
       appFailedToStart();
