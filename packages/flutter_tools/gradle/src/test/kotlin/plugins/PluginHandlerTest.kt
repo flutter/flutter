@@ -26,6 +26,7 @@ import org.gradle.api.logging.Logger
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
+import testing.setUpMockAndroidExtension
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
@@ -214,8 +215,8 @@ class PluginHandlerTest {
                 mockBuildType
             ).iterator()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
-        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        setUpMockAndroidExtension(project, compileSdk = 35)
+        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -310,8 +311,8 @@ class PluginHandlerTest {
                 mockBuildType
             ).iterator()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
-        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        setUpMockAndroidExtension(project, compileSdk = 35)
+        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
 
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
@@ -452,8 +453,8 @@ class PluginHandlerTest {
         every { pluginProject.configurations.named(any<String>()) } returns mockk()
         every { pluginProject.dependencies.add(any(), any()) } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
-        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
-        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        setUpMockAndroidExtension(project, compileSdk = 35)
+        setUpMockAndroidExtension(pluginProject, compileSdk = 35)
     }
 
     private fun setupPluginMocks(project: Project) {
