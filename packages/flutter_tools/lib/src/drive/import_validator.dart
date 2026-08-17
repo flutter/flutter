@@ -11,36 +11,62 @@ import 'package:package_config/package_config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 
-/// Validates that a driver test file and its transitive imports do not import
-/// libraries that are not supported on the host VM (like `dart:ui` or `package:flutter`).
+/// Validates that a `flutter_driver` test file and its transitive dependencies do
+/// not import libraries that require the device Flutter engine runtime (such as
+/// `dart:ui`, `package:flutter`, or `package:flutter_test`).
+///
+/// `flutter_driver` test scripts execute on the host machine using the standard
+/// standalone Dart VM, whereas the Flutter framework and `dart:ui` require the
+/// Flutter engine runtime on the target device. Importing libraries dependent on
+/// `dart:ui` into a host-side driver test results in hundreds of thousands of
+/// confusing compilation errors during test execution.
+///
+/// This validator performs static AST analysis using [parseString] on the driver
+/// test file and recursively inspects referenced files located within the project
+/// root. It avoids traversing third-party package dependencies outside the project
+/// root to ensure rapid validation (< 10 ms).
 class DriverTestImportValidator {
+  /// Creates a validator for driver test imports.
+  ///
+  /// Required arguments:
+  /// * [fileSystem]: Used to read files and resolve canonical paths.
+  /// * [logger]: Used to log trace messages during parsing failures.
+  /// * [packageConfig]: Used to resolve `package:` URIs within the project.
+  /// * [projectRootPath]: The root directory of the Flutter project, used as a
+  ///   boundary to restrict transitive analysis to project-local sources.
   DriverTestImportValidator({
     required FileSystem fileSystem,
+    required Logger logger,
     required PackageConfig packageConfig,
     required String projectRootPath,
-    required Logger logger,
   }) : _fileSystem = fileSystem,
+       _logger = logger,
        _packageConfig = packageConfig,
-       _projectRootPath = projectRootPath,
-       _logger = logger;
+       _projectRootPath = fileSystem.path.canonicalize(projectRootPath);
 
   final FileSystem _fileSystem;
+  final Logger _logger;
   final PackageConfig _packageConfig;
   final String _projectRootPath;
-  final Logger _logger;
 
+  /// Tracks canonical file paths already visited during recursive traversal to
+  /// prevent infinite loops caused by circular import dependencies.
   final Set<String> _visitedFiles = <String>{};
 
+  /// Package prefixes forbidden in host-side driver tests.
   static const List<String> _forbiddenPrefixes = <String>[
     'package:flutter/',
     'package:flutter_test/',
   ];
 
+  /// Direct library imports forbidden in host-side driver tests.
   static const List<String> _forbiddenImports = <String>['dart:ui'];
 
-  /// Validates the [driverTestFile] and its transitive imports.
+  /// Validates the [driverTestFile] and all its transitive imports within the
+  /// project root.
   ///
-  /// Returns a list of error messages. If empty, validation passed.
+  /// Returns a list of error descriptions. If the returned list is empty, all
+  /// imports are valid.
   List<String> validate(File driverTestFile) {
     _visitedFiles.clear();
     final errors = <String>[];
@@ -48,6 +74,8 @@ class DriverTestImportValidator {
     return errors;
   }
 
+  /// Recursively inspects [file] and its import/export directives for forbidden
+  /// dependencies.
   void _validateFile(File file, List<String> errors) {
     final String canonicalPath = _fileSystem.path.canonicalize(file.path);
     if (_visitedFiles.contains(canonicalPath)) {
@@ -79,10 +107,8 @@ class DriverTestImportValidator {
           }
 
           final File? resolvedFile = _resolveUri(uriString, file);
-          if (resolvedFile != null) {
-            if (_isWithinProjectRoot(resolvedFile)) {
-              _validateFile(resolvedFile, errors);
-            }
+          if (resolvedFile != null && _isWithinProjectRoot(resolvedFile)) {
+            _validateFile(resolvedFile, errors);
           }
         }
       }
@@ -91,6 +117,7 @@ class DriverTestImportValidator {
     }
   }
 
+  /// Checks whether [uriString] references a forbidden library or package prefix.
   bool _isForbidden(String uriString) {
     if (_forbiddenImports.contains(uriString)) {
       return true;
@@ -103,6 +130,9 @@ class DriverTestImportValidator {
     return false;
   }
 
+  /// Resolves [uriString] relative to [referencingFile] or via [_packageConfig].
+  ///
+  /// Returns a [File] if the URI resolves to a local file path, or `null` otherwise.
   File? _resolveUri(String uriString, File referencingFile) {
     final Uri uri = Uri.parse(uriString);
     if (uri.scheme == 'package') {
@@ -120,9 +150,9 @@ class DriverTestImportValidator {
     return null;
   }
 
+  /// Determines whether [file] resides within [_projectRootPath].
   bool _isWithinProjectRoot(File file) {
     final String canonicalPath = _fileSystem.path.canonicalize(file.path);
-    final String canonicalRoot = _fileSystem.path.canonicalize(_projectRootPath);
-    return _fileSystem.path.isWithin(canonicalRoot, canonicalPath);
+    return _fileSystem.path.isWithin(_projectRootPath, canonicalPath);
   }
 }

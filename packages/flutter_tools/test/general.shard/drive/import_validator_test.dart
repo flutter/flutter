@@ -28,9 +28,9 @@ void main() {
   DriverTestImportValidator createValidator() {
     return DriverTestImportValidator(
       fileSystem: fileSystem,
+      logger: logger,
       packageConfig: packageConfig,
       projectRootPath: projectRoot,
-      logger: logger,
     );
   }
 

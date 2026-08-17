@@ -278,8 +278,10 @@ class DriveCommand extends RunCommandBase {
       }
     }
 
+    // Ensure host-side flutter_driver test scripts do not import device-side
+    // libraries (e.g. dart:ui, package:flutter, package:flutter_test).
     final String? testFile = _getTestFile();
-    if (testFile != null && await _fileSystem.type(testFile) == FileSystemEntityType.file) {
+    if (testFile != null && _fileSystem.isFileSync(testFile)) {
       final File packageConfigFile = findPackageConfigFileOrDefault(_fileSystem.currentDirectory);
       if (packageConfigFile.existsSync()) {
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -289,9 +291,9 @@ class DriveCommand extends RunCommandBase {
         );
         final validator = DriverTestImportValidator(
           fileSystem: _fileSystem,
+          logger: _logger,
           packageConfig: packageConfig,
           projectRootPath: _fileSystem.currentDirectory.path,
-          logger: _logger,
         );
         final List<String> errors = validator.validate(_fileSystem.file(testFile));
         if (errors.isNotEmpty) {
