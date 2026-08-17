@@ -719,6 +719,16 @@ def to_gn_args(args):
     # dartdevc, web SDK kernel and source files.
     gn_args['dart_platform_sdk'] = not args.full_dart_sdk
 
+  # When the Dart SDK is built from source (i.e. no usable prebuilt is
+  # available for the target, such as for riscv64 Linux cross builds), exclude
+  # the wasm-opt target. Binaryen's wasm-opt is built with exceptions enabled
+  # and links the toolchain libc++, whose bundled libcxxabi exception symbols
+  # collide with the no-exceptions stubs in the engine's libcxxabi. The
+  # prebuilt Dart SDK already ships a wasm-opt binary for platforms that have
+  # one, so this only affects from-source builds.
+  if not gn_args.get('flutter_prebuilt_dart_sdk'):
+    gn_args['dart_include_wasm_opt'] = False
+
   if args.build_glfw_shell is not None:
     gn_args['build_glfw_shell'] = args.build_glfw_shell
 
