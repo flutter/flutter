@@ -49,15 +49,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
-// The AGP version the Flutter Gradle Plugin compiles and tests against.
-//
-// Downstream Safety Note:
-// This build script is included via `includeBuild` in user app builds. Gradle propagates
-// root project `gradle.properties` to included builds. To avoid accidental name collisions
-// with user app properties (e.g. `agpVersion=...`), this property is namespaced as
-// `flutter.internal.agpVersion`. In user app builds where this property is unset, the plugin
-// safely defaults to its tested version (8.11.1). CI and integration tests supply
-// `-Pflutter.internal.agpVersion=<AGP 9 line>` to verify multi-AGP DSL compatibility.
+// The AGP version to compile and test against. Namespaced with `flutter.internal.` to
+// avoid collision with user app properties when evaluated as an included build.
 val agpVersion: String = providers.gradleProperty("flutter.internal.agpVersion").getOrElse("8.11.1")
 
 dependencies {
