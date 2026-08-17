@@ -10,7 +10,9 @@
 library;
 
 import 'dart:async';
-import 'dart:ui' as ui show PictureRecorder, Rect, SceneBuilder, SemanticsUpdate;
+import 'dart:ui'
+    as ui
+    show PictureRecorder, Rect, SceneBuilder, SemanticsUpdate, TextureFrameAvailableCallback;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -28,12 +30,6 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 
 // Examples can assume:
 // late BuildContext context;
-
-/// Signature for callbacks passed to
-/// [RendererBinding.addTextureFrameAvailableCallback].
-///
-/// Called with the ID of the texture that has a new frame available.
-typedef TextureFrameAvailableCallback = void Function(int textureId);
 
 /// The glue between the render trees and the Flutter engine.
 ///
@@ -75,8 +71,8 @@ mixin RendererBinding
     rootPipelineOwner.attach(_manifold);
   }
 
-  final List<TextureFrameAvailableCallback> _textureFrameAvailableCallbacks =
-      <TextureFrameAvailableCallback>[];
+  final List<ui.TextureFrameAvailableCallback> _textureFrameAvailableCallbacks =
+      <ui.TextureFrameAvailableCallback>[];
 
   /// Registers a [handler] to be notified when any texture has a new frame
   /// available from the engine.
@@ -84,13 +80,13 @@ mixin RendererBinding
   /// The handler receives the ID of the texture that has a new frame and is
   /// responsible for checking whether that ID matches the texture it cares
   /// about.
-  void addTextureFrameAvailableCallback(TextureFrameAvailableCallback handler) {
+  void addTextureFrameAvailableCallback(ui.TextureFrameAvailableCallback handler) {
     _textureFrameAvailableCallbacks.add(handler);
   }
 
   /// Unregisters a handler previously added with
   /// [addTextureFrameAvailableCallback].
-  void removeTextureFrameAvailableCallback(TextureFrameAvailableCallback handler) {
+  void removeTextureFrameAvailableCallback(ui.TextureFrameAvailableCallback handler) {
     _textureFrameAvailableCallbacks.remove(handler);
   }
 
@@ -106,7 +102,7 @@ mixin RendererBinding
   @visibleForTesting
   void handleTextureFrameAvailable(int textureId) {
     // Iterate a copy so handlers may add/remove themselves mid-dispatch.
-    for (final callback in List<TextureFrameAvailableCallback>.of(
+    for (final callback in List<ui.TextureFrameAvailableCallback>.of(
       _textureFrameAvailableCallbacks,
     )) {
       callback(textureId);
