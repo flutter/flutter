@@ -160,7 +160,7 @@ class PluginHandlerTest {
 
         val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<InternalDslBuildType>>(relaxed = true)
         val projectBuildTypes = mockk<NamedDomainObjectContainer<InternalDslBuildType>>(relaxed = true)
-        setupLegacyBuildTypeContainers(project, pluginProject, projectBuildTypes, pluginProjectBuildTypes)
+        setupBaseExtensionBuildTypeContainers(project, pluginProject, projectBuildTypes, pluginProjectBuildTypes)
 
         setUpMockAndroidExtension(project, compileSdk = 35, buildTypes = listOf(mockBuildType))
         setUpMockAndroidExtension(pluginProject, compileSdk = 35)
@@ -212,7 +212,7 @@ class PluginHandlerTest {
 
         setupMockProjectDir(project, tempDir)
         setupMockPluginProject(project, pluginProject)
-        setupLegacyBuildTypeContainers(
+        setupBaseExtensionBuildTypeContainers(
             project,
             pluginProject,
             mockk(relaxed = true),
@@ -251,7 +251,7 @@ class PluginHandlerTest {
 
         val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<InternalDslBuildType>>(relaxed = true)
         val projectBuildTypes = mockk<NamedDomainObjectContainer<InternalDslBuildType>>(relaxed = true)
-        setupLegacyBuildTypeContainers(project, pluginProject, projectBuildTypes, pluginProjectBuildTypes)
+        setupBaseExtensionBuildTypeContainers(project, pluginProject, projectBuildTypes, pluginProjectBuildTypes)
 
         setUpMockAndroidExtension(project, compileSdk = 35, buildTypes = listOf(mockBuildType))
         setUpMockAndroidExtension(pluginProject, compileSdk = 35)
@@ -310,7 +310,7 @@ class PluginHandlerTest {
             }
         every { projectBuildTypes.iterator() } returns mutableListOf(testBuildType).iterator()
 
-        setupLegacyBuildTypeContainers(project, pluginProject, projectBuildTypes, pluginProjectBuildTypes)
+        setupBaseExtensionBuildTypeContainers(project, pluginProject, projectBuildTypes, pluginProjectBuildTypes)
 
         setUpMockAndroidExtension(project, compileSdk = 35, buildTypes = listOf(mockBuildType))
         setUpMockAndroidExtension(pluginProject, compileSdk = 35)
@@ -369,7 +369,7 @@ class PluginHandlerTest {
 
         setupMockProjectDir(project, tempDir)
         setupMockPluginProject(project, pluginProject)
-        setupLegacyBuildTypeContainers(
+        setupBaseExtensionBuildTypeContainers(
             project,
             pluginProject,
             mockk(relaxed = true),
@@ -445,7 +445,7 @@ class PluginHandlerTest {
         every { project.dependencies.add(any(), any()) } returns mockk()
     }
 
-    private fun setupLegacyBuildTypeContainers(
+    private fun setupBaseExtensionBuildTypeContainers(
         project: Project,
         pluginProject: Project,
         projectBuildTypes: NamedDomainObjectContainer<InternalDslBuildType>,
