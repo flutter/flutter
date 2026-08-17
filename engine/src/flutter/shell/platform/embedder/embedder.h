@@ -1047,6 +1047,10 @@ typedef struct {
 /// Display refers to a graphics hardware system consisting of a framebuffer,
 /// typically a monitor or a screen. This ID is unique per display and is
 /// stable until the Flutter application restarts.
+///
+/// Dart integers are signed 64-bit, so an id above `INT64_MAX` reaches Dart as
+/// a negative value. The conversion is a bijection, so distinct ids stay
+/// distinct.
 typedef uint64_t FlutterEngineDisplayId;
 
 typedef struct {

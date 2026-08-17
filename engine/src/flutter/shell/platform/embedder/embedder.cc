@@ -1667,7 +1667,9 @@ MakeViewportMetricsFromWindowMetrics(
       SAFE_ACCESS(flutter_metrics, physical_view_inset_bottom, 0.0);
   metrics.physical_view_inset_left =
       SAFE_ACCESS(flutter_metrics, physical_view_inset_left, 0.0);
-  metrics.display_id = SAFE_ACCESS(flutter_metrics, display_id, 0);
+  // Reinterpreted, not range-checked. See `DisplayId`.
+  metrics.display_id =
+      static_cast<int64_t>(SAFE_ACCESS(flutter_metrics, display_id, 0));
 
   if (metrics.device_pixel_ratio <= 0.0) {
     return "Device pixel ratio was invalid. It must be greater than zero.";
@@ -3677,8 +3679,11 @@ FlutterEngineResult FlutterEngineNotifyDisplayUpdate(
       std::vector<std::unique_ptr<flutter::Display>> displays;
       const auto* display = embedder_displays;
       for (size_t i = 0; i < display_count; i++) {
+        // Reinterpreted, not range-checked. See `DisplayId`.
+        const int64_t id =
+            static_cast<int64_t>(SAFE_ACCESS(display, display_id, i));
         displays.push_back(std::make_unique<flutter::Display>(
-            SAFE_ACCESS(display, display_id, i),    //
+            id,                                     //
             SAFE_ACCESS(display, refresh_rate, 0),  //
             SAFE_ACCESS(display, width, 0),         //
             SAFE_ACCESS(display, height, 0),        //

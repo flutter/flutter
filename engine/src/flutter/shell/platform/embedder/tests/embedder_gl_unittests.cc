@@ -4051,6 +4051,71 @@ TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithDisplayId) {
   latch.Wait();
 }
 
+// Display ids are unsigned in the embedder ABI but Dart integers are signed, so
+// an id above `INT64_MAX` must arrive in Dart as the corresponding negative
+// value, both through the display list and through the window metrics that
+// reference it. Sign-extended HMONITOR handles are how such an id arises in
+// practice.
+TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithDisplayIdAboveInt64Max) {
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("reportViewDisplayId");
+  fml::AutoResetWaitableEvent ready_latch;
+  fml::AutoResetWaitableEvent report_latch;
+  int64_t reported_display_id = 0;
+  context.AddNativeCallback("SignalNativeTest",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              ready_latch.Signal();
+                            }));
+  context.AddNativeCallback(
+      "SignalNativeCount", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        reported_display_id = tonic::DartConverter<int64_t>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        report_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  // The isolate registers its metrics handler before signaling, so the
+  // display update sent below cannot arrive before anything is listening.
+  ready_latch.Wait();
+
+  constexpr uint64_t kSignExtendedHandle = 0xFFFFFFFFE02E16A5ull;
+  // The same bits read as signed, which is what Dart sees.
+  constexpr int64_t kExpectedDisplayId =
+      static_cast<int64_t>(kSignExtendedHandle);
+
+  FlutterEngineDisplay display = {};
+  display.struct_size = sizeof(FlutterEngineDisplay);
+  display.display_id = kSignExtendedHandle;
+  display.refresh_rate = 60;
+
+  std::vector<FlutterEngineDisplay> displays = {display};
+
+  const FlutterEngineResult result = FlutterEngineNotifyDisplayUpdate(
+      engine.get(), kFlutterEngineDisplaysUpdateTypeStartup, displays.data(),
+      displays.size());
+  ASSERT_EQ(result, kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  event.display_id = kSignExtendedHandle;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  report_latch.Wait();
+
+  EXPECT_EQ(reported_display_id, kExpectedDisplayId);
+}
+
 TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithoutDisplayId) {
   auto& context = GetEmbedderContext<EmbedderTestContextGL>();
 

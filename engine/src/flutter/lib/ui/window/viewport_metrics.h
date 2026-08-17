@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_WINDOW_VIEWPORT_METRICS_H_
 #define FLUTTER_LIB_UI_WINDOW_VIEWPORT_METRICS_H_
 
+#include <cstdint>
 #include <ostream>
 #include <vector>
 
@@ -16,7 +17,7 @@ struct ViewportMetrics {
                   double p_physical_width,
                   double p_physical_height,
                   double p_physical_touch_slop,
-                  size_t display_id);
+                  int64_t display_id);
   ViewportMetrics(double p_device_pixel_ratio,
                   double p_physical_width,
                   double p_physical_height,
@@ -40,7 +41,7 @@ struct ViewportMetrics {
                   const std::vector<double>& p_physical_display_features_bounds,
                   const std::vector<int>& p_physical_display_features_type,
                   const std::vector<int>& p_physical_display_features_state,
-                  size_t p_display_id,
+                  int64_t p_display_id,
                   double p_physical_display_corner_radius_top_left,
                   double p_physical_display_corner_radius_top_right,
                   double p_physical_display_corner_radius_bottom_right,
@@ -68,7 +69,7 @@ struct ViewportMetrics {
   std::vector<double> physical_display_features_bounds;
   std::vector<int> physical_display_features_type;
   std::vector<int> physical_display_features_state;
-  size_t display_id = 0;
+  int64_t display_id = 0;
   double physical_display_corner_radius_top_left = -1.0;
   double physical_display_corner_radius_top_right = -1.0;
   double physical_display_corner_radius_bottom_right = -1.0;

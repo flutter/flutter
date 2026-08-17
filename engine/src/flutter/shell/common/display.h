@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_COMMON_DISPLAY_H_
 #define FLUTTER_SHELL_COMMON_DISPLAY_H_
 
+#include <cstdint>
 #include <optional>
 
 #include "flutter/fml/macros.h"
@@ -13,8 +14,12 @@
 namespace flutter {
 
 /// Unique ID per display that is stable until the Flutter application restarts.
+///
+/// The embedder API supplies ids as unsigned `FlutterEngineDisplayId` and they
+/// are reinterpreted as signed here, so ids above `INT64_MAX` are negative.
+///
 /// See also: `flutter::Display`
-typedef size_t DisplayId;
+typedef int64_t DisplayId;
 
 /// To be used when the display refresh rate is unknown.
 static constexpr double kUnknownDisplayRefreshRate = 0;

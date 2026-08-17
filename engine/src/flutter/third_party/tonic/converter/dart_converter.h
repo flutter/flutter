@@ -149,58 +149,11 @@ template <>
 struct DartConverter<unsigned long>
     : public DartConverterInteger<unsigned long> {};
 
+// Dart integers are signed 64-bit, so values above `INT64_MAX` arrive in Dart
+// as the corresponding negative integers.
 template <>
-struct DartConverter<unsigned long long> {
-  using FfiType = unsigned long long;
-  static constexpr const char* kFfiRepresentation = "Uint64";
-  static constexpr const char* kDartRepresentation = "int";
-  static constexpr bool kAllowedInLeafCall = true;
-
-  // TODO(abarth): The Dart VM API doesn't yet have an entry-point for
-  // an unsigned 64-bit type. We will need to add a Dart API for
-  // constructing an integer from uint64_t.
-  //
-  // (In the meantime, we have asserts below to check that we're never
-  // converting values that have the 64th bit set.)
-
-  static Dart_Handle ToDart(unsigned long long val) {
-    TONIC_DCHECK(val <= 0x7fffffffffffffffLL);
-    return Dart_NewInteger(static_cast<int64_t>(val));
-  }
-
-  static void SetReturnValue(Dart_NativeArguments args,
-                             unsigned long long val) {
-    TONIC_DCHECK(val <= 0x7fffffffffffffffLL);
-    Dart_SetIntegerReturnValue(args, val);
-  }
-
-  static unsigned long long FromDart(Dart_Handle handle) {
-    int64_t result = 0;
-    Dart_IntegerToInt64(handle, &result);
-    return result;
-  }
-
-  static unsigned long long FromArguments(Dart_NativeArguments args,
-                                          int index,
-                                          Dart_Handle& exception) {
-    int64_t result = 0;
-    Dart_GetNativeIntegerArgument(args, index, &result);
-    return result;
-  }
-
-  static const char* GetFfiRepresentation() { return kFfiRepresentation; }
-  static const char* GetDartRepresentation() { return kDartRepresentation; }
-  static bool AllowedInLeafCall() { return kAllowedInLeafCall; }
-  static FfiType FromFfi(FfiType val) {
-    TONIC_DCHECK(val <= 0x7fffffffffffffffLL);
-    return val;
-  }
-  // FFI does a bitwise conversion from uint64_t in C to int64 in Dart.
-  static FfiType ToFfi(FfiType val) {
-    TONIC_DCHECK(val <= 0x7fffffffffffffffLL);
-    return val;
-  }
-};
+struct DartConverter<unsigned long long>
+    : public DartConverterInteger<unsigned long long> {};
 
 // There is intentionally no DartConverter<float>, to avoid UB when Dart code
 // gives us a double that is greater than the max float or less than -max float.
