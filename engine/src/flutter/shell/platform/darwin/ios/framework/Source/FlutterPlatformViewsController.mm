@@ -946,8 +946,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (void)bringLayersIntoView:(const LayersMap&)layerMap
        withCompositionOrder:(const std::vector<int64_t>&)compositionOrder {
-  FML_DCHECK(self.flutterView);
   UIView* flutterView = self.flutterView;
+  if (flutterView == nil) {
+    return;
+  }
 
   _previousCompositionOrder.clear();
   NSMutableArray* desiredPlatformSubviews = [NSMutableArray array];
