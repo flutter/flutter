@@ -222,10 +222,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return false;
     }
 
-    // Swift Package Manager requires Xcode 15 or greater.
     final Xcode? xcode = globals.xcode;
-    final Version? xcodeVersion = xcode?.currentVersion;
-    if (xcodeVersion == null || xcodeVersion.major < 15) {
+    if (xcode == null || !xcode.isInstalled) {
       return false;
     }
 
@@ -405,6 +403,11 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     required ProcessUtils processUtils,
     required Logger logger,
   }) async {
+    // If the project has not migrated to SwiftPM, we don't need to prefetch Swift packages.
+    if (!usesSwiftPackageManager || !flutterPluginSwiftPackageInProjectSettings) {
+      return;
+    }
+
     Status? status;
     try {
       final command = <String>[...xcodebuildProjectCommandArguments, '-resolvePackageDependencies'];

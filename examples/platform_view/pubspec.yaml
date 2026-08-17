@@ -1,13 +1,14 @@
 name: platform_view
 
 environment:
-  sdk: ^3.10.0-0
+  sdk: ^3.11.0-0
 
 resolution: workspace
 
 dependencies:
   flutter:
     sdk: flutter
+  material_ui: ^0.0.2
 
 
 flutter:
@@ -16,4 +17,4 @@ flutter:
   assets:
     - assets/flutter-mark-square-64.png
 
-# PUBSPEC CHECKSUM: h86dcv
+# PUBSPEC CHECKSUM: dmrod6

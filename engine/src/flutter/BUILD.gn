@@ -227,6 +227,10 @@ group("unittests") {
       "//flutter/txt:txt_unittests",
     ]
 
+    if (!is_fuchsia) {
+      public_deps += [ "//flutter/lib/gpu:gpu_unittests" ]
+    }
+
     # The accessibility library only supports Mac and Windows at the moment.
     if (is_mac || is_win) {
       public_deps +=

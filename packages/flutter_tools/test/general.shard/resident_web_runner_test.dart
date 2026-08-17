@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -311,10 +312,14 @@ name: my_app
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
-      expect(
-        await fileSystem.file(fileSystem.path.join('build', 'cache.dill')).readAsString(),
-        'ABC',
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: false,
+        dartDefines: const <String>[],
+        config: globals.config,
+        fileSystem: fileSystem,
+        targetModel: TargetModel.dartdevc,
       );
+      expect(await fileSystem.file(expectedPath).readAsString(), 'ABC');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -335,12 +340,14 @@ name: my_app
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
-      expect(
-        await fileSystem
-            .file(fileSystem.path.join('build', 'cache.dill.track.dill'))
-            .readAsString(),
-        'ABC',
+      final String expectedPath = getDefaultCachedKernelPath(
+        trackWidgetCreation: true,
+        dartDefines: const <String>[],
+        config: globals.config,
+        fileSystem: fileSystem,
+        targetModel: TargetModel.dartdevc,
       );
+      expect(await fileSystem.file(expectedPath).readAsString(), 'ABC');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1135,7 +1142,7 @@ name: my_app
       expect(debugConnectionInfo, isNotNull);
 
       final OperationResult result = await residentWebRunner.restart();
-      expect(logger.statusText, contains(kNoClientConnectedMessage));
+      expect(logger.statusText, contains('Reloaded application in'));
       expect(result.code, 0);
     },
     overrides: <Type, Generator>{
@@ -2176,6 +2183,117 @@ flutter:
       ProcessManager: () => processManager,
     },
   );
+
+  group('web-defines', () {
+    testUsingContext(
+      'passes web-defines to the build in profile mode',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+        setupMocks();
+        final residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+          stayResident: false,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          terminal: Terminal.test(),
+          platform: FakePlatform(),
+          outputPreferences: OutputPreferences.test(),
+          analytics: globals.analytics,
+          systemClock: globals.systemClock,
+          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
+        );
+
+        expect(await residentWebRunner.run(), 0);
+      },
+      overrides: <Type, Generator>{
+        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
+        }),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+
+    testUsingContext(
+      'passes web-defines to the rebuild after a hot restart in release mode',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+        setupMocks();
+        final residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          terminal: Terminal.test(),
+          platform: FakePlatform(),
+          outputPreferences: OutputPreferences.test(),
+          analytics: globals.analytics,
+          systemClock: globals.systemClock,
+          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
+        );
+
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+        await connectionInfoCompleter.future;
+
+        final OperationResult result = await residentWebRunner.restart();
+        expect(result.code, 0);
+      },
+      overrides: <Type, Generator>{
+        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
+        }),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+
+    testUsingContext(
+      'passes web-defines to the build in debug --wasm mode',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+        setupMocks();
+        final residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webUseWasm: true),
+          stayResident: false,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          terminal: Terminal.test(),
+          platform: FakePlatform(),
+          outputPreferences: OutputPreferences.test(),
+          analytics: globals.analytics,
+          systemClock: globals.systemClock,
+          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
+        );
+
+        expect(await residentWebRunner.run(), 0);
+      },
+      overrides: <Type, Generator>{
+        BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
+        }),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
+  });
 }
 
 ResidentRunner setUpResidentRunner(
@@ -2588,4 +2706,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

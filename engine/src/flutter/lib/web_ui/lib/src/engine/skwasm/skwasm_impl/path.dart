@@ -14,15 +14,15 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath implements DisposablePath, DisposablePathBuilder {
-  factory SkwasmPath() {
-    return SkwasmPath.fromHandle(pathCreate());
-  }
+ui.Rect _getPathBounds(Pointer<RawPath> handle) {
+  return withStackScope((StackScope s) {
+    final Pointer<Float> rectBuffer = s.allocFloatArray(4);
+    pathGetBounds(handle, rectBuffer);
+    return s.convertRectFromNative(rectBuffer);
+  });
+}
 
-  factory SkwasmPath.from(SkwasmPath source) {
-    return SkwasmPath.fromHandle(pathCopy(source.handle));
-  }
-
+class SkwasmPath implements BackendPath {
   SkwasmPath.fromHandle(this.handle);
 
   final Pointer<RawPath> handle;
@@ -31,12 +31,62 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
   @override
   void dispose() {
     assert(!_isDisposed, 'SkwasmPath has already been disposed.');
-    pathDispose(handle);
-    _isDisposed = true;
+    if (!_isDisposed) {
+      pathDispose(handle);
+      _isDisposed = true;
+    }
+  }
+
+  bool contains(ui.Offset point) => pathContains(handle, point.dx, point.dy);
+  ui.PathFillType get fillType => ui.PathFillType.values[pathGetFillType(handle)];
+
+  @override
+  ui.Rect getBounds() => _getPathBounds(handle);
+
+  @override
+  SkwasmPathMetricIterator computeMetrics({bool forceClosed = false}) {
+    return SkwasmPathMetricIterator(this, forceClosed);
   }
 
   @override
-  SkwasmPath build() => this;
+  String toSvgString() {
+    final SkStringHandle skString = pathGetSvgString(handle);
+    final Pointer<Int8> buffer = skStringGetData(skString);
+    final int length = skStringGetLength(skString);
+    final String svgString = utf8.decode(buffer.toUint8List(length));
+    skStringFree(skString);
+    return svgString;
+  }
+}
+
+class SkwasmPathBuilder implements BackendPathBuilder {
+  factory SkwasmPathBuilder() {
+    return SkwasmPathBuilder.fromHandle(pathCreate());
+  }
+
+  factory SkwasmPathBuilder.from(SkwasmPath source) {
+    return SkwasmPathBuilder.fromHandle(pathCopy(source.handle));
+  }
+
+  SkwasmPathBuilder.fromHandle(this.handle);
+
+  final Pointer<RawPath> handle;
+  bool _isDisposed = false;
+
+  @override
+  SkwasmPath build() {
+    assert(!_isDisposed, 'SkwasmPathBuilder has been disposed.');
+    return SkwasmPath.fromHandle(pathCopy(handle));
+  }
+
+  @override
+  void dispose() {
+    assert(!_isDisposed, 'SkwasmPathBuilder has already been disposed.');
+    if (!_isDisposed) {
+      pathDispose(handle);
+      _isDisposed = true;
+    }
+  }
 
   @override
   ui.PathFillType get fillType => ui.PathFillType.values[pathGetFillType(handle)];
@@ -184,20 +234,20 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
-    addPath((path as LazyPath).builtPath, offset);
+    addPath((path as EnginePath).backendPath, offset);
   }
 
   @override
-  void addPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
+  void addPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, false, matrix4: matrix4);
   }
 
   @override
-  void extendWithPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
+  void extendWithPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, true, matrix4: matrix4);
   }
 
-  void _addPath(DisposablePath path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
+  void _addPath(BackendPath path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
     assert(path is SkwasmPath);
     withStackScope((StackScope s) {
       final Pointer<Float> convertedMatrix = s.convertMatrix4toSkMatrix(
@@ -231,43 +281,25 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
   }
 
   @override
-  ui.Rect getBounds() {
-    return withStackScope((StackScope s) {
-      final Pointer<Float> rectBuffer = s.allocFloatArray(4);
-      pathGetBounds(handle, rectBuffer);
-      return s.convertRectFromNative(rectBuffer);
-    });
-  }
+  ui.Rect getBounds() => _getPathBounds(handle);
 
-  static SkwasmPath combine(ui.PathOperation operation, SkwasmPath path1, SkwasmPath path2) =>
-      SkwasmPath.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
-
-  @override
-  SkwasmPathMetricIterator getMetricsIterator({bool forceClosed = false}) {
-    return SkwasmPathMetricIterator(this, forceClosed);
-  }
-
-  @override
-  String toSvgString() {
-    final SkStringHandle skString = pathGetSvgString(handle);
-    final Pointer<Int8> buffer = skStringGetData(skString);
-    final int length = skStringGetLength(skString);
-    final String svgString = utf8.decode(buffer.toUint8List(length));
-    skStringFree(skString);
-    return svgString;
-  }
+  static SkwasmPathBuilder combine(
+    ui.PathOperation operation,
+    SkwasmPath path1,
+    SkwasmPath path2,
+  ) => SkwasmPathBuilder.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
 }
 
-class SkwasmPathConstructors implements DisposablePathConstructors {
+class SkwasmPathConstructors implements BackendPathConstructors {
   @override
-  SkwasmPath createNew() => SkwasmPath();
+  SkwasmPathBuilder createNew() => SkwasmPathBuilder();
 
   @override
-  DisposablePathBuilder fromPath(DisposablePath path) => SkwasmPath.from(path as SkwasmPath);
+  BackendPathBuilder fromPath(BackendPath path) => SkwasmPathBuilder.from(path as SkwasmPath);
 
   @override
-  SkwasmPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
-    return SkwasmPath.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
+  SkwasmPathBuilder combinePaths(ui.PathOperation operation, BackendPath path1, BackendPath path2) {
+    return SkwasmPathBuilder.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
   }
 }
 

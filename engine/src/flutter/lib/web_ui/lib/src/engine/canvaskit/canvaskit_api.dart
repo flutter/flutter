@@ -95,9 +95,14 @@ extension type CanvasKit(JSObject _) implements JSObject {
     Uint16List? indices,
   ) => _MakeVertices(mode, positions.toJS, textureCoordinates?.toJS, colors?.toJS, indices?.toJS);
 
-  external BidiNamespace get Bidi;
-
-  external CodeUnitsNamespace get CodeUnits;
+  @JS('Bidi')
+  external BidiNamespace? get _Bidi;
+  BidiNamespace get Bidi {
+    if (_Bidi == null) {
+      throw StateError('The downloaded CanvasKit version does not support WebParagraph');
+    }
+    return _Bidi!;
+  }
 
   external SkParagraphBuilderNamespace get ParagraphBuilder;
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
@@ -1047,7 +1052,7 @@ extension type SkColorFilter(JSObject _) implements JSObject {
 }
 
 extension type SkImageFilterNamespace(JSObject _) implements JSObject {
-  external SkImageFilter MakeBlur(
+  external SkImageFilter? MakeBlur(
     double sigmaX,
     double sigmaY,
     SkTileMode tileMode,
@@ -1066,20 +1071,20 @@ extension type SkImageFilterNamespace(JSObject _) implements JSObject {
     void input, // we don't use this yet
   ) => _MakeMatrixTransform(matrix.toJS, filterOptions, input);
 
-  external SkImageFilter MakeColorFilter(
+  external SkImageFilter? MakeColorFilter(
     SkColorFilter colorFilter,
     void input, // we don't use this yet
   );
 
-  external SkImageFilter MakeCompose(SkImageFilter outer, SkImageFilter inner);
+  external SkImageFilter? MakeCompose(SkImageFilter? outer, SkImageFilter? inner);
 
-  external SkImageFilter MakeDilate(
+  external SkImageFilter? MakeDilate(
     double radiusX,
     double radiusY,
     void input, // we don't use this yet
   );
 
-  external SkImageFilter MakeErode(
+  external SkImageFilter? MakeErode(
     double radiusX,
     double radiusY,
     void input, // we don't use this yet
@@ -1092,8 +1097,8 @@ extension type SkImageFilter(JSObject _) implements JSObject {
   external bool isDeleted();
 
   @JS('getOutputBounds')
-  external JSInt32Array _getOutputBounds(JSFloat32Array bounds);
-  Int32List getOutputBounds(Float32List bounds) => _getOutputBounds(bounds.toJS).toDart;
+  external JSInt32Array? _getOutputBounds(JSFloat32Array bounds);
+  Int32List? getOutputBounds(Float32List bounds) => _getOutputBounds(bounds.toJS)?.toDart;
 }
 
 extension type SkPathNamespace(JSObject _) implements JSObject {
@@ -1632,6 +1637,7 @@ extension type SkCanvas(JSObject _) implements JSObject {
     SkPaint paint,
     SkBlendMode blendMode,
     JSUint32Array? colors,
+    CkFilterOptions sampling,
   );
   void drawAtlas(
     SkImage image,
@@ -1640,7 +1646,8 @@ extension type SkCanvas(JSObject _) implements JSObject {
     SkPaint paint,
     SkBlendMode blendMode,
     Uint32List? colors,
-  ) => _drawAtlas(image, rects.toJS, rstTransforms.toJS, paint, blendMode, colors?.toJS);
+    CkFilterOptions sampling,
+  ) => _drawAtlas(image, rects.toJS, rstTransforms.toJS, paint, blendMode, colors?.toJS, sampling);
 
   external void drawCircle(double x, double y, double radius, SkPaint paint);
   external void drawColorInt(double color, SkBlendMode blendMode);
@@ -1847,16 +1854,6 @@ extension type BidiNamespace(JSObject _) implements JSObject {
   external JSArray<JSAny?> _reorderVisual(JSUint8Array visuals);
   List<BidiIndex> reorderVisual(Uint8List visuals) =>
       _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
-}
-
-extension type CodeUnitInfo(JSObject _) implements JSObject {
-  external int get flags;
-}
-
-extension type CodeUnitsNamespace(JSObject _) implements JSObject {
-  @JS('compute')
-  external JSArray<JSAny?> _compute(String text);
-  List<CodeUnitInfo> compute(String text) => _compute(text).toDart.cast<CodeUnitInfo>();
 }
 
 extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
@@ -2425,21 +2422,25 @@ SkRuntimeEffect? MakeRuntimeEffect(String program) => _MakeRuntimeEffect(program
 
 const String _kFullCanvasKitJsFileName = 'canvaskit.js';
 const String _kChromiumCanvasKitJsFileName = 'chromium/canvaskit.js';
-const String _kWebParagraphCanvasKitJsFileName = 'experimental_webparagraph/canvaskit.js';
+const String _kWebParagraphCanvasKitJsFileName = 'webparagraph/canvaskit.js';
 
 String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
 @visibleForTesting
 List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
-  return switch (variant) {
-    CanvasKitVariant.auto => <String>[
-      if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
-      _kFullCanvasKitJsFileName,
-    ],
-    CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
-    CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
-    CanvasKitVariant.experimentalWebParagraph => <String>[_kWebParagraphCanvasKitJsFileName],
-  };
+  if (isWebParagraphEnabled) {
+    return <String>[_kWebParagraphCanvasKitJsFileName];
+  }
+  return [
+    ...switch (variant) {
+      CanvasKitVariant.auto => <String>[
+        if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
+        _kFullCanvasKitJsFileName,
+      ],
+      CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
+      CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
+    },
+  ];
 }
 
 Iterable<String> get _canvasKitJsUrls {
