@@ -1052,7 +1052,7 @@ extension type SkColorFilter(JSObject _) implements JSObject {
 }
 
 extension type SkImageFilterNamespace(JSObject _) implements JSObject {
-  external SkImageFilter MakeBlur(
+  external SkImageFilter? MakeBlur(
     double sigmaX,
     double sigmaY,
     SkTileMode tileMode,
@@ -1071,20 +1071,20 @@ extension type SkImageFilterNamespace(JSObject _) implements JSObject {
     void input, // we don't use this yet
   ) => _MakeMatrixTransform(matrix.toJS, filterOptions, input);
 
-  external SkImageFilter MakeColorFilter(
+  external SkImageFilter? MakeColorFilter(
     SkColorFilter colorFilter,
     void input, // we don't use this yet
   );
 
-  external SkImageFilter MakeCompose(SkImageFilter outer, SkImageFilter inner);
+  external SkImageFilter? MakeCompose(SkImageFilter? outer, SkImageFilter? inner);
 
-  external SkImageFilter MakeDilate(
+  external SkImageFilter? MakeDilate(
     double radiusX,
     double radiusY,
     void input, // we don't use this yet
   );
 
-  external SkImageFilter MakeErode(
+  external SkImageFilter? MakeErode(
     double radiusX,
     double radiusY,
     void input, // we don't use this yet
@@ -1097,8 +1097,8 @@ extension type SkImageFilter(JSObject _) implements JSObject {
   external bool isDeleted();
 
   @JS('getOutputBounds')
-  external JSInt32Array _getOutputBounds(JSFloat32Array bounds);
-  Int32List getOutputBounds(Float32List bounds) => _getOutputBounds(bounds.toJS).toDart;
+  external JSInt32Array? _getOutputBounds(JSFloat32Array bounds);
+  Int32List? getOutputBounds(Float32List bounds) => _getOutputBounds(bounds.toJS)?.toDart;
 }
 
 extension type SkPathNamespace(JSObject _) implements JSObject {
