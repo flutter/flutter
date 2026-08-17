@@ -938,8 +938,7 @@ void main() {
       expect(result, true);
       expect(dds.calledLaunchDevToolsInBrowser, true);
 
-      // Wait for any microtasks to complete to ensure the unawaited future error would have bubbled up.
-      await null;
+      await pumpEventQueue();
 
       expect(
         bufferLogger.errorText,
