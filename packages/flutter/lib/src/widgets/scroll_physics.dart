@@ -511,7 +511,8 @@ class ScrollPhysics {
   /// false, the update might be optimized away.
   ///
   /// Subclasses that contain configuration parameters should override this
-  /// method to return true when those parameters change. 
+  /// method to return true when those parameters change, and should call
+  /// `super.shouldUpdate(old)` to also update when the [parent] changes.
   ///
   /// The base class implementation returns true if the [runtimeType] or
   /// [parent] changes.
