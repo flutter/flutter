@@ -163,6 +163,52 @@ void main() {
     }
   });
 
+  // The formatter diffs each file against the formatter's output on stdin
+  // (`-`). That causes `git diff` to list a to-file of `-` as well.
+  //
+  // The following settings change the path prefixes git emits in its diffs.
+  // Verify that formatting handles users with these settings.
+  for (final gitSetting in <String>['diff.mnemonicPrefix', 'diff.noprefix']) {
+    test('Can fix C++ formatting errors with $gitSetting set', () {
+      final fixture = TestFileFixture(target.FormatCheck.clang);
+      // git apply resolves paths against the top of the work tree, so a patch
+      // that still targets '-' writes it there rather than under repoDir.
+      final String gitRoot =
+          (io.Process.runSync('git', <String>[
+                    'rev-parse',
+                    '--show-toplevel',
+                  ], workingDirectory: repoDir.path).stdout
+                  as String)
+              .trim();
+      final strayFile = io.File(path.join(gitRoot, '-'));
+      try {
+        fixture.gitAdd();
+        final io.ProcessResult result = io.Process.runSync(
+          formatterPath,
+          <String>['--check', 'clang', '--fix'],
+          workingDirectory: repoDir.path,
+          environment: <String, String>{
+            'GIT_CONFIG_COUNT': '1',
+            'GIT_CONFIG_KEY_0': gitSetting,
+            'GIT_CONFIG_VALUE_0': 'true',
+          },
+        );
+
+        expect(result.exitCode, equals(0), reason: 'Formatter failed: ${result.stderr}');
+        expect(strayFile.existsSync(), isFalse);
+        final Iterable<FileContentPair> files = fixture.getFileContents();
+        for (final pair in files) {
+          expect(pair.original, equals(pair.formatted));
+        }
+      } finally {
+        if (strayFile.existsSync()) {
+          strayFile.deleteSync();
+        }
+        fixture.gitRemove();
+      }
+    });
+  }
+
   test('Can fix Dart formatting errors', () {
     final fixture = TestFileFixture(target.FormatCheck.dart);
     try {
