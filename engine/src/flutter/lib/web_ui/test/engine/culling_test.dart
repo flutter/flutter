@@ -220,6 +220,7 @@ void testMain() {
 
     expect(() => layerTree.preroll(frame), returnsNormally);
     expect(() => layerTree.measure(frame, const BitmapSize(100, 100)), returnsNormally);
+    embedder.optimizeComposition();
     expect(() => layerTree.paint(frame), returnsNormally);
     expect(() => layerTree.dumpDebugInfo(), returnsNormally);
     expect(() => layerTree.flatten(const ui.Size(100, 100)), returnsNormally);

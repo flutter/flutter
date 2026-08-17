@@ -133,5 +133,26 @@ void testMain() {
         region: const ui.Rect.fromLTRB(0, 0, 200, 200),
       );
     });
+
+    test('handles disposed pictures gracefully when rendering scene and scene.toImage', () async {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 100, 100));
+      canvas.drawRect(
+        const ui.Rect.fromLTWH(0, 0, 100, 100),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
+      picture.dispose();
+
+      final sb = LayerSceneBuilder();
+      sb.addPicture(const ui.Offset(10, 10), picture);
+      final LayerScene scene = sb.build();
+
+      // Rendering scene executes preroll, measure, and paint on LayerTree.
+      await expectLater(renderScene(scene), completes);
+
+      // scene.toImage flattens the LayerTree (preroll + flatten paint).
+      await expectLater(scene.toImage(200, 200), completes);
+    });
   });
 }
