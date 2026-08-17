@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/analysis_rule/analysis_rule.dart';
+import 'package:analyzer/analysis_rule/rule_context.dart';
+import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/error/error.dart';
 import 'package:path/path.dart' as path;
-
-import '../utils.dart';
-import 'analyze.dart';
 
 // The comment pattern representing the "flutter_ignore" inline directive that
 // indicates the line should be exempt from the stopwatch check.
@@ -20,53 +20,40 @@ final Pattern _ignoreStopwatch = RegExp(r'// flutter_ignore: .*stopwatch .*\(see
 /// stopwatch can fall out of sync with the mocked time of FakeAsync in testing.
 /// The Clock object provides a safe stopwatch instead, which is paired with
 /// FakeAsync as part of the test binding.
-final AnalyzeRule noStopwatches = _NoStopwatches();
+class NoStopwatches extends AnalysisRule {
+  NoStopwatches() : super(name: code.name, description: ruleDescription);
 
-class _NoStopwatches implements AnalyzeRule {
-  final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
+  static const String ruleDescription =
+      'Use of Stopwatches can introduce test flakes as the logical time of a stopwatch can fall '
+      'out of sync with the mocked time of FakeAsync in testing.';
+
+  static const LintCode code = LintCode(
+    'no_stopwatches',
+    ruleDescription,
+    correctionMessage: 'Use clock.stopwatch() from package:clock instead.',
+    severity: DiagnosticSeverity.ERROR,
+  );
 
   @override
-  void applyTo(ResolvedUnitResult unit) {
-    final visitor = _StopwatchVisitor(unit);
-    unit.unit.visitChildren(visitor);
-    final List<AstNode> violationsInUnit = visitor.stopwatchAccessNodes;
-    if (violationsInUnit.isNotEmpty) {
-      _errors.putIfAbsent(unit, () => <AstNode>[]).addAll(violationsInUnit);
-    }
+  DiagnosticCode get diagnosticCode => code;
+
+  @override
+  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final visitor = _Visitor(this, context);
+    registry
+      ..addConstructorName(this, visitor)
+      ..addSimpleIdentifier(this, visitor);
   }
-
-  @override
-  void reportViolations(String workingDirectory) {
-    if (_errors.isEmpty) {
-      return;
-    }
-
-    String locationInFile(ResolvedUnitResult unit, AstNode node) {
-      return '${path.relative(path.relative(unit.path, from: workingDirectory))}:${unit.lineInfo.getLocation(node.offset).lineNumber}';
-    }
-
-    foundError(<String>[
-      for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry in _errors.entries)
-        for (final AstNode node in entry.value)
-          '${locationInFile(entry.key, node)}: ${node.parent}',
-      '\n${bold}Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.$reset',
-      'A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.',
-    ]);
-  }
-
-  @override
-  String toString() => 'No "Stopwatch"';
 }
 
 // This visitor finds invocation sites of Stopwatch (and subclasses) constructors
 // and references to "external" functions that return a Stopwatch (and subclasses),
-// including constructors, and put them in the stopwatchAccessNodes list.
-class _StopwatchVisitor extends RecursiveAstVisitor<void> {
-  _StopwatchVisitor(this.compilationUnit);
+// including constructors.
+class _Visitor extends SimpleAstVisitor<void> {
+  _Visitor(this.rule, this.context);
 
-  final ResolvedUnitResult compilationUnit;
-
-  final List<AstNode> stopwatchAccessNodes = <AstNode>[];
+  final AnalysisRule rule;
+  final RuleContext context;
 
   final Map<ClassElement, bool> _isStopwatchClassElementCache = <ClassElement, bool>{};
 
@@ -85,69 +72,59 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
     return classElement.library.isDartCore
         ? classElement.name == 'Stopwatch'
         : _isStopwatchClassElementCache.putIfAbsent(
-            classElement,
-            () => _checkIfImplementsStopwatchRecursively(classElement),
-          );
+          classElement,
+          () => _checkIfImplementsStopwatchRecursively(classElement),
+        );
   }
 
   bool _isInternal(LibraryElement libraryElement) {
     return path.isWithin(
-      compilationUnit.session.analysisContext.contextRoot.root.path,
+      libraryElement.session.analysisContext.contextRoot.root.path,
       libraryElement.firstFragment.source.fullName,
     );
   }
 
   bool _hasTrailingFlutterIgnore(AstNode node) {
-    return compilationUnit.content
+    return context.currentUnit!.content
         .substring(
           node.offset + node.length,
-          compilationUnit.lineInfo.getOffsetOfLineAfter(node.offset + node.length),
+          context.currentUnit!.unit.lineInfo.getOffsetOfLineAfter(node.offset + node.length),
         )
         .contains(_ignoreStopwatch);
   }
 
-  // We don't care about directives or comments, skip them.
-  @override
-  void visitImportDirective(ImportDirective node) {}
-
-  @override
-  void visitExportDirective(ExportDirective node) {}
-
-  @override
-  void visitComment(Comment node) {}
-
   @override
   void visitConstructorName(ConstructorName node) {
-    final Element? element = node.element;
-    if (element is! ConstructorElement) {
-      assert(false, '$element of $node is not a ConstructorElement.');
+    final ConstructorElement? element = node.element;
+    if (element == null) {
       return;
     }
     final bool isAllowed = switch (element.returnType) {
-      InterfaceType(element: final ClassElement classElement) => !_implementsStopwatch(
-        classElement,
-      ),
+      InterfaceType(element: final ClassElement classElement) =>
+        !_implementsStopwatch(classElement),
       InterfaceType(element: InterfaceElement()) => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {
       return;
     }
-    stopwatchAccessNodes.add(node);
+    rule.reportAtNode(node);
   }
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
     final bool isAllowed = switch (node.element) {
       ExecutableElement(
-        returnType: DartType(element: final ClassElement classElement),
+        returnType: InterfaceType(element: final ClassElement classElement),
         library: final LibraryElement libraryElement,
-      ) =>
+      )
+          // Don't double report constructors and factories.
+          when node.element is! ConstructorElement =>
         _isInternal(libraryElement) || !_implementsStopwatch(classElement),
       Element() || null => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {
       return;
     }
-    stopwatchAccessNodes.add(node);
+    rule.reportAtNode(node);
   }
 }
