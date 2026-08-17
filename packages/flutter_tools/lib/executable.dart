@@ -42,7 +42,6 @@ import 'src/commands/logs.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
-import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
 import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
