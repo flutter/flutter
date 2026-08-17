@@ -498,6 +498,9 @@ class ReactiveScrollPhysics extends ScrollPhysics {
 
   @override
   bool shouldUpdate(covariant ReactiveScrollPhysics old) {
-    return value != old.value;
+    if (value != old.value) {
+      return true;
+    }
+    return super.shouldUpdate(old);
   }
 }
