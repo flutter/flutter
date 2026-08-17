@@ -11,9 +11,9 @@ import 'package:package_config/package_config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 
-/// Validates that a `flutter_driver` test file and its transitive dependencies do
-/// not import libraries that require the device Flutter engine runtime (such as
-/// `dart:ui`, `package:flutter`, or `package:flutter_test`).
+/// Validates that a `flutter_driver` test file and its transitive project-local
+/// imports do not import libraries that require the device Flutter engine runtime
+/// (such as `dart:ui`, `package:flutter`, or `package:flutter_test`).
 ///
 /// `flutter_driver` test scripts execute on the host machine using the standard
 /// standalone Dart VM, whereas the Flutter framework and `dart:ui` require the
