@@ -3668,6 +3668,20 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf__timeline_summary
 
+  - name: Mac_ios ios_universal_link_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      dependencies: >-
+        [
+          {"dependency": "apple_signing", "version": "version:to_2027"}
+        ]
+      task_name: ios_universal_link_test
+
   - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
