@@ -516,14 +516,15 @@ class ScrollPhysics {
   ///
   /// The base class implementation returns true if the [runtimeType] or
   /// [parent] changes.
+  @mustCallSuper
   bool shouldUpdate(covariant ScrollPhysics old) {
     if (old.runtimeType != runtimeType) {
       return true;
     }
-    if (parent != old.parent) {
-      if (parent == null || old.parent == null) {
-        return true;
-      }
+    if (parent?.runtimeType != old.parent?.runtimeType) {
+      return true;
+    }
+    if (parent != null) {
       return parent!.shouldUpdate(old.parent!);
     }
     return false;
