@@ -6138,6 +6138,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         );
   }
 
+  /// Clears the geometry of all semantics nodes in the subtree, including any
+  /// explicit sibling children in sibling merge groups.
   void _clearSubtreeGeometry() {
     if (!contributesToSemanticsTree) {
       for (final _RenderObjectSemantics child in mergeUp.whereType<_RenderObjectSemantics>()) {
