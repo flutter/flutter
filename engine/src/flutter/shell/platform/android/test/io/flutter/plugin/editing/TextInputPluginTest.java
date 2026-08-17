@@ -75,6 +75,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -2996,6 +2997,116 @@ public class TextInputPluginTest {
 
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
             assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
+          });
+    }
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/191156.
+  //
+  // ImeSyncDeferringInsetsCallback only refreshes lastWindowInsets while needsSave is true, that
+  // is, between an onPrepare and the next onApplyWindowInsets. An IME animation that is prepared
+  // and then cancelled without the platform delivering a WindowInsets in between therefore ends on
+  // a lastWindowInsets that was captured while the IME was still visible, and onEnd re-dispatches
+  // it. On device this is the resume path: the app is backgrounded part way through the IME show
+  // animation, and the hide request issued on resume finds the IME already gone and is cancelled
+  // immediately. The stale dispatch overwrites the zero IME inset the platform had just reported
+  // and nothing corrects it afterwards, because Android sees no further inset change - which is
+  // why the wrong MediaQuery.viewInsets.bottom survives a hot restart.
+  //
+  // The correction belongs in ImeSyncDeferringInsetsCallback and is deferred to the follow-up
+  // milestone: lastWindowInsets must not outlive the insets the platform last reported, so onEnd
+  // must not re-dispatch a snapshot that is older than the most recent onApplyWindowInsets call.
+  // Remove the @Ignore below together with that fix.
+  @Test
+  @Ignore(
+      "Reproduces https://github.com/flutter/flutter/issues/191156 and fails until the "
+          + "ImeSyncDeferringInsetsCallback fix lands.")
+  @TargetApi(API_LEVELS.API_35)
+  @Config(minSdk = API_LEVELS.API_35)
+  @SuppressWarnings("deprecation")
+  // getWindowSystemUiVisibility, SYSTEM_UI_FLAG_LAYOUT_STABLE.
+  // flutter#133074 tracks migration work.
+  public void ime_windowInsetsSync_cancelledAnimationAfterResume_keepsHiddenImeInset() {
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            FlutterView testView = spy(new FlutterView(activity));
+            when(testView.getWindowSystemUiVisibility())
+                .thenReturn(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+
+            TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+            ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+            TextInputPlugin textInputPlugin =
+                new TextInputPlugin(
+                    testView,
+                    textInputChannel,
+                    scribeChannel,
+                    mock(PlatformViewsController.class),
+                    mock(PlatformViewsController2.class));
+            ImeSyncDeferringInsetsCallback imeSyncCallback = textInputPlugin.getImeSyncCallback();
+            FlutterEngine flutterEngine =
+                spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+            FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+            when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+            testView.attachToFlutterEngine(flutterEngine);
+
+            WindowInsetsAnimation showAnimation = mock(WindowInsetsAnimation.class);
+            when(showAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+            WindowInsetsAnimation cancelledHideAnimation = mock(WindowInsetsAnimation.class);
+            when(cancelledHideAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+            List<WindowInsetsAnimation> animationList = new ArrayList();
+            animationList.add(showAnimation);
+
+            ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+                ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+
+            WindowInsets.Builder builder = new WindowInsets.Builder();
+            builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 0));
+
+            // The IME starts out hidden.
+            imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, builder.build());
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            // The IME is shown. Android sends the final insets up front; they are cached in
+            // lastWindowInsets and deferred until the animation ends.
+            imeSyncCallback.getAnimationCallback().onPrepare(showAnimation);
+            builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 1000));
+            imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, builder.build());
+            imeSyncCallback.getAnimationCallback().onStart(showAnimation, null);
+
+            builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 500));
+            imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(500, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            // The app is backgrounded part way through the show animation, so the animation ends
+            // on the cached final insets rather than on a fresh report from the platform.
+            imeSyncCallback.getAnimationCallback().onEnd(showAnimation);
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(1000, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            // On resume the platform reports the IME as gone ("WindowInsets changed: ime:null").
+            builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 0));
+            imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, builder.build());
+
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            // The hide request issued on resume finds the IME already hidden and is cancelled
+            // straight away, so onEnd arrives with no onApplyWindowInsets in between and
+            // lastWindowInsets is still the snapshot taken while the IME was visible.
+            imeSyncCallback.getAnimationCallback().onPrepare(cancelledHideAnimation);
+            imeSyncCallback.getAnimationCallback().onEnd(cancelledHideAnimation);
+
+            // The platform says the IME is hidden, so the stale keyboard height must not come
+            // back.
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
           });
     }
   }
