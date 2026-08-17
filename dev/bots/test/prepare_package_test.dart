@@ -155,174 +155,109 @@ void main() {
         tryToDelete(tempDir);
       });
 
-      test('sets PUB_CACHE properly', () async {
+      /// The subprocesses expected during archive creation, keyed by command-line.
+      ///
+      /// [dartArch] is the architecture `dart --version` reports for the Dart
+      /// SDK downloaded into the archive. [archiveArch] is the architecture
+      /// expected in the archive filename, or null for x64, which is unadorned.
+      /// [precacheArgs] are appended to the `flutter precache` invocation.
+      Map<String, List<ProcessResult>?> expectedCalls({
+        required String dartArch,
+        String? archiveArch,
+        List<String> precacheArgs = const <String>[],
+      }) {
         final String createBase = path.join(tempDir.absolute.path, 'create_');
+        final archPrefix = archiveArch == null ? '' : '${archiveArch}_';
         final String archiveName = path.join(
           tempDir.absolute.path,
-          'flutter_${platformName}_v1.2.3-beta${platform.isLinux ? '.tar.xz' : '.zip'}',
+          'flutter_${platformName}_${archPrefix}v1.2.3-beta'
+          '${platform.isLinux ? '.tar.xz' : '.zip'}',
         );
+        return <String, List<ProcessResult>?>{
+          'git clone -b beta https://flutter.googlesource.com/mirrors/flutter': null,
+          'git reset --hard $testRef': null,
+          'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git gc --prune=now --aggressive': null,
+          'git describe --tags --exact-match $testRef': <ProcessResult>[
+            ProcessResult(0, 0, 'v1.2.3', ''),
+          ],
+          '$flutter --version --machine': <ProcessResult>[
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
+          ],
+          '$dart --version': <ProcessResult>[
+            ProcessResult(
+              0,
+              0,
+              'Dart SDK version: 2.17.0-63.0.beta (beta) (Wed Jan 26 03:48:52 2022 -0800) on "${platformName}_$dartArch"',
+              '',
+            ),
+          ],
+          if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
+          '$flutter doctor': null,
+          '$flutter update-packages': null,
+          <String>['$flutter precache', ...precacheArgs].join(' '): null,
+          '$flutter ide-config': null,
+          '$flutter create --template=app ${createBase}app': null,
+          '$flutter create --template=package ${createBase}package': null,
+          '$flutter create --template=plugin ${createBase}plugin': null,
+          '$flutter pub cache list': <ProcessResult>[ProcessResult(0, 0, '{"packages":{}}', '')],
+          'git clean -f -x -- **/.packages': null,
+          'git clean -f -x -- **/.dart_tool/': null,
+          if (platform.isMacOS)
+            'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}':
+                null,
+          if (platform.isWindows) 'attrib -h .git': null,
+          if (platform.isWindows)
+            '7za a -tzip -mx=9 $archiveName flutter': null
+          else if (platform.isMacOS)
+            'zip -r -9 --symlinks $archiveName flutter': null
+          else if (platform.isLinux)
+            'tar cJf $archiveName --verbose flutter': null,
+        };
+      }
 
+      /// The environment expected on every [ArchiveCreator] subprocess.
+      ///
+      /// This is the ambient environment, plus the archive's own pub cache,
+      /// plus the host architecture override when one was requested.
+      Map<String, String> expectedEnvironment({TargetArch? targetArch}) {
+        return <String, String>{
+          ...platform.environment,
+          'PUB_CACHE': path.join(tempDir.path, '.pub-cache'),
+          if (targetArch != null) 'FLUTTER_HOST_ARCH': targetArch.name,
+        };
+      }
+
+      test('sets PUB_CACHE properly', () async {
         processManager.addCommands(
-          convertResults(<String, List<ProcessResult>?>{
-            'git clone -b beta https://flutter.googlesource.com/mirrors/flutter': null,
-            'git reset --hard $testRef': null,
-            'git remote set-url origin https://github.com/flutter/flutter.git': null,
-            'git gc --prune=now --aggressive': null,
-            'git describe --tags --exact-match $testRef': <ProcessResult>[
-              ProcessResult(0, 0, 'v1.2.3', ''),
-            ],
-            '$flutter --version --machine': <ProcessResult>[
-              ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
-              ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
-            ],
-            '$dart --version': <ProcessResult>[
-              ProcessResult(
-                0,
-                0,
-                'Dart SDK version: 2.17.0-63.0.beta (beta) (Wed Jan 26 03:48:52 2022 -0800) on "${platformName}_x64"',
-                '',
-              ),
-            ],
-            if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
-            '$flutter doctor': null,
-            '$flutter update-packages': null,
-            '$flutter precache': null,
-            '$flutter ide-config': null,
-            '$flutter create --template=app ${createBase}app': null,
-            '$flutter create --template=package ${createBase}package': null,
-            '$flutter create --template=plugin ${createBase}plugin': null,
-            '$flutter pub cache list': <ProcessResult>[ProcessResult(0, 0, '{"packages":{}}', '')],
-            'git clean -f -x -- **/.packages': null,
-            'git clean -f -x -- **/.dart_tool/': null,
-            if (platform.isMacOS)
-              'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}':
-                  null,
-            if (platform.isWindows) 'attrib -h .git': null,
-            if (platform.isWindows)
-              '7za a -tzip -mx=9 $archiveName flutter': null
-            else if (platform.isMacOS)
-              'zip -r -9 --symlinks $archiveName flutter': null
-            else if (platform.isLinux)
-              'tar cJf $archiveName --verbose flutter': null,
-          }),
+          convertResults(expectedCalls(dartArch: 'x64'), environment: expectedEnvironment()),
         );
         await creator.initializeRepo();
         await creator.createArchive();
       });
 
       test('calls the right commands for archive output', () async {
-        final String createBase = path.join(tempDir.absolute.path, 'create_');
-        final String archiveName = path.join(
-          tempDir.absolute.path,
-          'flutter_${platformName}_v1.2.3-beta${platform.isLinux ? '.tar.xz' : '.zip'}',
-        );
-        final calls = <String, List<ProcessResult>?>{
-          'git clone -b beta https://flutter.googlesource.com/mirrors/flutter': null,
-          'git reset --hard $testRef': null,
-          'git remote set-url origin https://github.com/flutter/flutter.git': null,
-          'git gc --prune=now --aggressive': null,
-          'git describe --tags --exact-match $testRef': <ProcessResult>[
-            ProcessResult(0, 0, 'v1.2.3', ''),
-          ],
-          '$flutter --version --machine': <ProcessResult>[
-            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
-            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
-          ],
-          '$dart --version': <ProcessResult>[
-            ProcessResult(
-              0,
-              0,
-              'Dart SDK version: 2.17.0-63.0.beta (beta) (Wed Jan 26 03:48:52 2022 -0800) on "${platformName}_x64"',
-              '',
-            ),
-          ],
-          if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
-          '$flutter doctor': null,
-          '$flutter update-packages': null,
-          '$flutter precache': null,
-          '$flutter ide-config': null,
-          '$flutter create --template=app ${createBase}app': null,
-          '$flutter create --template=package ${createBase}package': null,
-          '$flutter create --template=plugin ${createBase}plugin': null,
-          '$flutter pub cache list': <ProcessResult>[ProcessResult(0, 0, '{"packages":{}}', '')],
-          'git clean -f -x -- **/.packages': null,
-          'git clean -f -x -- **/.dart_tool/': null,
-          if (platform.isMacOS)
-            'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}':
-                null,
-          if (platform.isWindows) 'attrib -h .git': null,
-          if (platform.isWindows)
-            '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS)
-            'zip -r -9 --symlinks $archiveName flutter': null
-          else if (platform.isLinux)
-            'tar cJf $archiveName --verbose flutter': null,
-        };
-        processManager.addCommands(convertResults(calls));
-        creator = ArchiveCreator(
-          tempDir,
-          tempDir,
-          testRef,
-          Branch.beta,
-          fs: fs,
-          processManager: processManager,
-          subprocessOutput: false,
-          platform: platform,
-          httpReader: fakeHttpReader,
-        );
+        processManager.addCommands(convertResults(expectedCalls(dartArch: 'x64')));
         await creator.initializeRepo();
         await creator.createArchive();
       });
 
       test('adds the arch name to the archive for non-x64', () async {
-        final String createBase = path.join(tempDir.absolute.path, 'create_');
-        final String archiveName = path.join(
-          tempDir.absolute.path,
-          'flutter_${platformName}_arm64_v1.2.3-beta${platform.isLinux ? '.tar.xz' : '.zip'}',
+        processManager.addCommands(
+          convertResults(expectedCalls(dartArch: 'arm64', archiveArch: 'arm64')),
         );
-        final calls = <String, List<ProcessResult>?>{
-          'git clone -b beta https://flutter.googlesource.com/mirrors/flutter': null,
-          'git reset --hard $testRef': null,
-          'git remote set-url origin https://github.com/flutter/flutter.git': null,
-          'git gc --prune=now --aggressive': null,
-          'git describe --tags --exact-match $testRef': <ProcessResult>[
-            ProcessResult(0, 0, 'v1.2.3', ''),
-          ],
-          '$flutter --version --machine': <ProcessResult>[
-            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
-            ProcessResult(0, 0, '{"dartSdkVersion": "3.2.1"}', ''),
-          ],
-          '$dart --version': <ProcessResult>[
-            ProcessResult(
-              0,
-              0,
-              'Dart SDK version: 2.17.0-63.0.beta (beta) (Wed Jan 26 03:48:52 2022 -0800) on "${platformName}_arm64"',
-              '',
-            ),
-          ],
-          if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
-          '$flutter doctor': null,
-          '$flutter update-packages': null,
-          '$flutter precache': null,
-          '$flutter ide-config': null,
-          '$flutter create --template=app ${createBase}app': null,
-          '$flutter create --template=package ${createBase}package': null,
-          '$flutter create --template=plugin ${createBase}plugin': null,
-          '$flutter pub cache list': <ProcessResult>[ProcessResult(0, 0, '{"packages":{}}', '')],
-          'git clean -f -x -- **/.packages': null,
-          'git clean -f -x -- **/.dart_tool/': null,
-          if (platform.isMacOS)
-            'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}':
-                null,
-          if (platform.isWindows) 'attrib -h .git': null,
-          if (platform.isWindows)
-            '7za a -tzip -mx=9 $archiveName flutter': null
-          else if (platform.isMacOS)
-            'zip -r -9 --symlinks $archiveName flutter': null
-          else if (platform.isLinux)
-            'tar cJf $archiveName --verbose flutter': null,
-        };
-        processManager.addCommands(convertResults(calls));
+        await creator.initializeRepo();
+        await creator.createArchive();
+      });
+
+      test('targetArch drives the precache arch and the tool environment', () async {
+        processManager.addCommands(
+          convertResults(
+            expectedCalls(dartArch: 'x64', precacheArgs: <String>['--host-arch=x64']),
+            environment: expectedEnvironment(targetArch: TargetArch.x64),
+          ),
+        );
         creator = ArchiveCreator(
           tempDir,
           tempDir,
@@ -333,9 +268,76 @@ void main() {
           subprocessOutput: false,
           platform: platform,
           httpReader: fakeHttpReader,
+          targetArch: TargetArch.x64,
         );
         await creator.initializeRepo();
         await creator.createArchive();
+      });
+
+      test('targetArch names a non-x64 archive after the requested arch', () async {
+        processManager.addCommands(
+          convertResults(
+            expectedCalls(
+              dartArch: 'arm64',
+              archiveArch: 'arm64',
+              precacheArgs: <String>['--host-arch=arm64'],
+            ),
+            environment: expectedEnvironment(targetArch: TargetArch.arm64),
+          ),
+        );
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
+          testRef,
+          Branch.beta,
+          fs: fs,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+          httpReader: fakeHttpReader,
+          targetArch: TargetArch.arm64,
+        );
+        await creator.initializeRepo();
+        await creator.createArchive();
+      });
+
+      test('throws if the archived Dart SDK does not match targetArch', () async {
+        // The requested arch names the archive, but the arch published in the
+        // release metadata comes from the Dart SDK that was downloaded, so a
+        // disagreement has to fail the build rather than ship a mislabelled
+        // archive.
+        //
+        // The mismatch is caught in initializeRepo, so only the commands up to
+        // and including `dart --version` are ever run.
+        final Map<String, List<ProcessResult>?> calls = expectedCalls(dartArch: 'arm64');
+        final int callsBeforeThrow = calls.keys.toList().indexOf('$dart --version') + 1;
+        processManager.addCommands(
+          convertResults(
+            Map<String, List<ProcessResult>?>.fromEntries(calls.entries.take(callsBeforeThrow)),
+          ),
+        );
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
+          testRef,
+          Branch.beta,
+          fs: fs,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+          httpReader: fakeHttpReader,
+          targetArch: TargetArch.x64,
+        );
+        await expectLater(
+          creator.initializeRepo,
+          throwsA(
+            isA<PreparePackageException>().having(
+              (PreparePackageException error) => error.message,
+              'message',
+              contains('Requested an archive for x64, but the Dart SDK in the archive is arm64'),
+            ),
+          ),
+        );
       });
 
       test('throws when a command errors out', () async {
@@ -1228,18 +1230,26 @@ void main() {
   }
 }
 
-List<FakeCommand> convertResults(Map<String, List<ProcessResult>?> results) {
+/// Converts a map of command lines to their results into [FakeCommand]s.
+///
+/// If [environment] is given, each command is additionally expected to run with
+/// exactly that environment.
+List<FakeCommand> convertResults(
+  Map<String, List<ProcessResult>?> results, {
+  Map<String, String>? environment,
+}) {
   final commands = <FakeCommand>[];
   for (final String key in results.keys) {
     final List<ProcessResult>? candidates = results[key];
     final List<String> args = key.split(' ');
     if (candidates == null) {
-      commands.add(FakeCommand(command: args));
+      commands.add(FakeCommand(command: args, environment: environment));
     } else {
       for (final ProcessResult result in candidates) {
         commands.add(
           FakeCommand(
             command: args,
+            environment: environment,
             exitCode: result.exitCode,
             stderr: result.stderr.toString(),
             stdout: result.stdout.toString(),

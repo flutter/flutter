@@ -147,7 +147,7 @@ class MockCommandBuffer : public CommandBuffer {
   MOCK_METHOD(std::shared_ptr<BlitPass>, OnCreateBlitPass, (), (override));
   MOCK_METHOD(bool,
               OnSubmitCommands,
-              (bool block_on_schedule, CompletionCallback callback),
+              (CompletionCallback callback),
               (override));
   MOCK_METHOD(void, OnWaitUntilCompleted, (), (override));
   MOCK_METHOD(void, OnWaitUntilScheduled, (), (override));
@@ -207,6 +207,11 @@ class MockImpellerContext : public Context {
               GetCommandQueue,
               (),
               (const, override));
+
+  MOCK_METHOD(void,
+              TrackPendingImageUpload,
+              (const std::shared_ptr<CommandBufferSchedulingReceipt>& receipt),
+              (override));
 
   MOCK_METHOD(RuntimeStageBackend,
               GetRuntimeStageBackend,
@@ -275,8 +280,12 @@ class MockCommandQueue : public CommandQueue {
   MOCK_METHOD(fml::Status,
               Submit,
               (const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
-               const CompletionCallback& cb,
-               bool block_on_schedule),
+               const CompletionCallback& cb),
+              (override));
+  MOCK_METHOD(SubmitResult,
+              SubmitWithReceipt,
+              (const std::shared_ptr<CommandBuffer>& buffer,
+               const CompletionCallback& cb),
               (override));
 };
 

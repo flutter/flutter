@@ -55,39 +55,44 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
-    ui.Rect? bounds,
-  }) =>
-      // TODO(dkwingsmt): `bounds` is currently not implemented in Skwasm.
-      // Fall back to unbounded blur.
-      // https://github.com/flutter/flutter/issues/175899
-      SkwasmImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
+  }) {
+    return SkwasmBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  }
 
   @override
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      SkwasmImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY}) {
+    return SkwasmDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
 
   @override
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      SkwasmImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY}) {
+    return SkwasmErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
 
   @override
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
-  }) => SkwasmImageFilter.compose(
-    SkwasmImageFilter.fromUiFilter(outer),
-    SkwasmImageFilter.fromUiFilter(inner),
-  );
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
+  }) {
+    return SkwasmMatrixImageFilter(matrix: matrix, filterQuality: filterQuality);
+  }
 
   @override
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
-  }) => SkwasmImageFilter.matrix(matrix4, filterQuality: filterQuality);
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
+  }) {
+    return SkwasmComposeImageFilter(outer: outer, inner: inner);
+  }
+
+  @override
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter}) {
+    return SkwasmColorFilterImageFilter(filter as SkwasmColorFilter);
+  }
 
   @override
   ui.ImageShader createImageShader(
@@ -117,6 +122,12 @@ class SkwasmRenderer extends Renderer {
 
   @override
   ui.Paint createPaint() => SkwasmPaint();
+
+  @override
+  BackendColorFilter createColorFilter(EngineColorFilter filter) => SkwasmColorFilter(filter);
+
+  @override
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter) => SkwasmMaskFilter(filter);
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
@@ -269,28 +280,13 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  }) => SkwasmVertices(
-    mode,
-    positions,
-    textureCoordinates: textureCoordinates,
-    colors: colors,
-    indices: indices,
-  );
-
-  @override
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
     Int32List? colors,
     Uint16List? indices,
-  }) => SkwasmVertices.raw(
+  }) => SkwasmVertices(
     mode,
     positions,
     textureCoordinates: textureCoordinates,
