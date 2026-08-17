@@ -207,7 +207,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
           : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
@@ -340,7 +339,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
           : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   UIView* previousView = [[UIView alloc] init];
   UIView* nextView = [[UIView alloc] init];
@@ -377,7 +375,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
           : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   UIView* previousView = [[UIView alloc] init];
   UIView* nextView = [[UIView alloc] init];
@@ -422,7 +419,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
           : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   UIView* previousView = [[UIView alloc] init];
   UIView* nextView = [[UIView alloc] init];
@@ -459,7 +455,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
           : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   UIView* previousView = [[UIView alloc] init];
   UIView* nextView = [[UIView alloc] init];

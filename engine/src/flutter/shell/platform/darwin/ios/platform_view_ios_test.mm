@@ -141,7 +141,6 @@ class MockDelegate : public PlatformView::Delegate {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   platform_view->SetOwnerViewController(firstViewController);
   platform_view->SetSemanticsTreeEnabled(true);
@@ -203,14 +202,12 @@ class MockDelegate : public PlatformView::Delegate {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   auto second_platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/second_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   first_platform_view->SetOwnerViewController(firstViewController);
@@ -273,7 +270,6 @@ class MockDelegate : public PlatformView::Delegate {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   platform_view->SetOwnerViewController(flutterViewController);
   platform_view->SetSemanticsTreeEnabled(true);
@@ -324,7 +320,6 @@ class MockDelegate : public PlatformView::Delegate {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   platform_view->SetOwnerViewController(flutterViewController);
   platform_view->SetSemanticsTreeEnabled(true);
@@ -396,7 +391,6 @@ class MockDelegate : public PlatformView::Delegate {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   platform_view->SetOwnerViewController(firstViewController);
   platform_view->SetSemanticsTreeEnabled(true);
@@ -467,7 +461,6 @@ class MockDelegate : public PlatformView::Delegate {
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   platform_view->SetOwnerViewController(firstViewController);
   platform_view->SetSemanticsTreeEnabled(true);
