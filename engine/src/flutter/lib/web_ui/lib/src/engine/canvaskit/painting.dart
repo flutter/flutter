@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../primitives/color_filter.dart';
+import '../primitives/image_filter.dart';
 import '../primitives/mask_filter.dart';
 import '../shader_data.dart';
 import '../vector_math.dart';
@@ -76,11 +77,15 @@ class CkPaint implements ui.Paint {
       }
     }
 
-    final CkManagedSkImageFilterConvertible? localImageFilter = _imageFilter;
+    final EngineImageFilter? localImageFilter = _imageFilter;
     if (localImageFilter != null) {
-      localImageFilter.withSkImageFilter((skImageFilter) {
+      final backendFilter =
+          localImageFilter.getBackendFilter(defaultBlurTileMode: defaultBlurTileMode)
+              as CkImageFilter;
+      final SkImageFilter? skImageFilter = backendFilter.nativeFilter;
+      if (skImageFilter != null) {
         skPaint.setImageFilter(skImageFilter);
-      }, defaultBlurTileMode: defaultBlurTileMode);
+      }
     }
 
     if (composedSkColorFilter != null) {
@@ -168,13 +173,13 @@ class CkPaint implements ui.Paint {
     }
 
     if (value is ui.ColorFilter) {
-      _imageFilter = CkColorFilterImageFilter(colorFilter: value as EngineColorFilter);
+      _imageFilter = EngineColorFilterImageFilter(colorFilter: value as EngineColorFilter);
     } else {
-      _imageFilter = value as CkManagedSkImageFilterConvertible?;
+      _imageFilter = value as EngineImageFilter?;
     }
   }
 
-  CkManagedSkImageFilterConvertible? _imageFilter;
+  EngineImageFilter? _imageFilter;
 
   // Must be kept in sync with the default in paint.cc.
   static const double _kStrokeMiterLimitDefault = 4.0;
