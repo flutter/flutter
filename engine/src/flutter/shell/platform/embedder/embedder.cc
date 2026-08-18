@@ -723,9 +723,16 @@ InferVulkanPlatformViewCreationCallback(
     if (out_surface_size_updater) {
       auto surface_context = embedder_surface->GetSurfaceContext();
       if (surface_context) {
-        *out_surface_size_updater = [surface_context](int64_t width,
-                                                      int64_t height) {
-          surface_context->UpdateSurfaceSize(impeller::ISize{width, height});
+        // Captured weakly: the updater is owned by the engine and outlives the
+        // surface, so a strong reference here would keep the Vulkan context
+        // and its resources alive until the engine itself is torn down.
+        std::weak_ptr<impeller::SurfaceContextVK> weak_surface_context =
+            surface_context;
+        *out_surface_size_updater = [weak_surface_context](int64_t width,
+                                                           int64_t height) {
+          if (auto context = weak_surface_context.lock()) {
+            context->UpdateSurfaceSize(impeller::ISize{width, height});
+          }
         };
       }
     }

@@ -34,6 +34,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <new>
 #include <set>
 #include <string>
 #include <utility>
@@ -803,15 +804,17 @@ static void fl_vulkan_manager_dispose(GObject* object) {
 
 static void fl_vulkan_manager_finalize(GObject* object) {
   FlVulkanManager* self = FL_VULKAN_MANAGER(object);
-  // Explicitly destruct C++ members whose destructors would not be called
-  // by GObject's raw memory deallocation. The RefPtr and vector contents
-  // are already cleaned up in dispose; this frees the backing buffers.
-  self->vk.~RefPtr();
-  self->enabled_instance_extensions.~vector();
-  self->enabled_device_extensions.~vector();
-  self->swapchain_images.~vector();
-  self->deferred_deletions.~vector();
-  self->present_resources.~vector();
+  // Explicitly destruct the C++ members constructed in fl_vulkan_manager_init;
+  // GObject's raw memory deallocation would not call their destructors. The
+  // RefPtr and vector contents are already cleaned up in dispose; this frees
+  // the backing buffers.
+  self->vk.~decltype(self->vk)();
+  self->enabled_instance_extensions
+      .~decltype(self->enabled_instance_extensions)();
+  self->enabled_device_extensions.~decltype(self->enabled_device_extensions)();
+  self->swapchain_images.~decltype(self->swapchain_images)();
+  self->deferred_deletions.~decltype(self->deferred_deletions)();
+  self->present_resources.~decltype(self->present_resources)();
   G_OBJECT_CLASS(fl_vulkan_manager_parent_class)->finalize(object);
 }
 
@@ -821,7 +824,18 @@ static void fl_vulkan_manager_class_init(FlVulkanManagerClass* klass) {
 }
 
 static void fl_vulkan_manager_init(FlVulkanManager* self) {
-  self->vk = nullptr;
+  // GObject allocates the instance as zeroed raw memory, so the C++ members
+  // never had a constructor run. Construct them in place before first use;
+  // fl_vulkan_manager_finalize destroys them again.
+  new (&self->vk) decltype(self->vk)();
+  new (
+      &self->enabled_instance_extensions) decltype(self->enabled_instance_extensions)();
+  new (
+      &self->enabled_device_extensions) decltype(self->enabled_device_extensions)();
+  new (&self->swapchain_images) decltype(self->swapchain_images)();
+  new (&self->deferred_deletions) decltype(self->deferred_deletions)();
+  new (&self->present_resources) decltype(self->present_resources)();
+
   self->instance = VK_NULL_HANDLE;
   self->physical_device = VK_NULL_HANDLE;
   self->device = VK_NULL_HANDLE;
