@@ -134,12 +134,13 @@ class DapTestSession {
   }
 
   static Future<DapTestSession> setUp({List<String>? additionalArgs}) async {
-    final DapTestServer server = await _startServer(additionalArgs: additionalArgs);
+    // ignore: avoid_print
+    final Logger? logger = verboseLogging ? print : null;
+    final DapTestServer server = await _startServer(logger: logger, additionalArgs: additionalArgs);
     final DapTestClient client = await DapTestClient.connect(
       server,
       captureVmServiceTraffic: verboseLogging,
-      // ignore: avoid_print
-      logger: verboseLogging ? print : null,
+      logger: logger,
     );
     return DapTestSession._(server, client);
   }

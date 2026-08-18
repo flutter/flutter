@@ -119,6 +119,16 @@ void main() {
 
     standardTests(toolArgs: toolArgs);
   });
+
+  group('fail fast', () {
+    test('launch fails if process exits early', () async {
+      await client.initialize();
+      expect(
+        client.launch(program: 'non_existent_file.dart', cwd: tempDir.path),
+        throwsA(isA<Response>().having((Response r) => r.success, 'success', isFalse)),
+      );
+    });
+  });
 }
 
 /// Matchers for the expected console output of [TestsProject].
