@@ -45,7 +45,7 @@ struct TextRenderOptions {
 };
 
 std::shared_ptr<TextFrame> RePositionTextFrame(
-    std::shared_ptr<TextFrame>& original,
+    const std::shared_ptr<TextFrame>& original,
     Point translation) {
   std::vector<TextRun> repositioned_runs;
   for (const TextRun& run : original->GetRuns()) {
