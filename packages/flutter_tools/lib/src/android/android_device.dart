@@ -630,9 +630,11 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
-      if (traceStartup) ...<String>['--ez', AndroidEngineCliFlags.traceStartup, 'true'],
-      if (route != null) ...<String>['--es', AndroidEngineCliFlags.route, route],
+      if (debuggingOptions.buildInfo.mode != BuildMode.release) ...<String>[
+        ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
+        if (traceStartup) ...<String>['--ez', AndroidEngineCliFlags.traceStartup, 'true'],
+        if (route != null) ...<String>['--es', AndroidEngineCliFlags.route, route],
+      ],
       if (debuggingOptions.debuggingEnabled && userIdentifier != null) ...<String>[
         '--user',
         userIdentifier,
