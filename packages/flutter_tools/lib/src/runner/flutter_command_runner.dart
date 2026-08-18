@@ -52,7 +52,14 @@ abstract final class FlutterGlobalOptions {
 
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({bool verboseHelp = false})
-    : super(
+    : _verboseHelp = verboseHelp,
+      _argParser = ArgParser(
+        allowTrailingOptions: false,
+        usageLineLength: globals.outputPreferences.wrapText
+            ? globals.outputPreferences.wrapColumn
+            : null,
+      ),
+      super(
         'flutter',
         'Manage your Flutter app development.\n'
             '\n'
@@ -64,7 +71,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
             '  flutter run [options]\n'
             '    Run your Flutter application on an attached device or in an emulator.',
       ) {
-    argParser.addFlag(
+    _populateOptions(_argParser, verboseHelp: verboseHelp);
+  }
+
+  final bool _verboseHelp;
+
+  @override
+  ArgParser get argParser => _argParser;
+  ArgParser _argParser;
+
+  void _populateOptions(ArgParser parser, {required bool verboseHelp}) {
+    parser.addFlag(
       FlutterGlobalOptions.kVerboseFlag,
       abbr: 'v',
       negatable: false,
@@ -74,25 +91,25 @@ class FlutterCommandRunner extends CommandRunner<void> {
           'If used with "flutter doctor", shows additional diagnostic information. '
           '(Use "-vv" to force verbose logging in those cases.)',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kPrefixedErrorsFlag,
       negatable: false,
       help: 'Causes lines sent to stderr to be prefixed with "ERROR:".',
       hide: !verboseHelp,
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kQuietFlag,
       negatable: false,
       hide: !verboseHelp,
       help: 'Reduce the amount of output from some commands.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kWrapFlag,
       hide: !verboseHelp,
       help: 'Toggles output word wrapping, regardless of whether or not the output is a terminal.',
       defaultsTo: true,
     );
-    argParser.addOption(
+    parser.addOption(
       FlutterGlobalOptions.kWrapColumnOption,
       hide: !verboseHelp,
       help:
@@ -100,59 +117,59 @@ class FlutterCommandRunner extends CommandRunner<void> {
           'wrapping occurs if not writing to a terminal. Use "--no-wrap" to turn off wrapping '
           'when connected to a terminal.',
     );
-    argParser.addOption(
+    parser.addOption(
       FlutterGlobalOptions.kDeviceIdOption,
       abbr: 'd',
       help: 'Target device id or name (prefixes allowed).',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kVersionFlag,
       negatable: false,
       help: 'Reports the version of this tool.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kMachineFlag,
       negatable: false,
       hide: !verboseHelp,
       help: 'When used with the "--version" flag, outputs the information using JSON.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kColorFlag,
       hide: !verboseHelp,
       help: 'Whether to use terminal colors (requires support for ANSI escape sequences).',
       defaultsTo: true,
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kVersionCheckFlag,
       defaultsTo: true,
       hide: !verboseHelp,
       help: 'Allow Flutter to check for updates when this command runs.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kEnableAnalyticsFlag,
       negatable: false,
       help:
           'Enable telemetry reporting each time a flutter or dart '
           'command runs.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kDisableAnalyticsFlag,
       negatable: false,
       help:
           'Disable telemetry reporting each time a flutter or dart '
           'command runs, until it is re-enabled.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kSuppressAnalyticsFlag,
       negatable: false,
       help: 'Suppress analytics reporting for the current CLI invocation.',
     );
-    argParser.addOption(
+    parser.addOption(
       FlutterGlobalOptions.kPackagesOption,
       hide: !verboseHelp,
       help: 'Path to your "package_config.json" file.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kPrintDtd,
       negatable: false,
       help: 'Print the address of the Dart Tooling Daemon, if one is hosted by the Flutter CLI.',
@@ -160,10 +177,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     );
 
     if (verboseHelp) {
-      argParser.addSeparator('Local build selection options (not normally required):');
+      parser.addSeparator('Local build selection options (not normally required):');
     }
 
-    argParser.addOption(
+    parser.addOption(
       FlutterGlobalOptions.kLocalEngineSrcPathOption,
       hide: !verboseHelp,
       help:
@@ -173,7 +190,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           'if any.',
     );
 
-    argParser.addOption(
+    parser.addOption(
       FlutterGlobalOptions.kLocalEngineOption,
       hide: !verboseHelp,
       help:
@@ -182,7 +199,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           'This path is relative to "--local-engine-src-path" (see above).',
     );
 
-    argParser.addOption(
+    parser.addOption(
       FlutterGlobalOptions.kLocalEngineHostOption,
       hide: !verboseHelp,
       help:
@@ -192,7 +209,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           'platform (e.g. MacOS ARM64) but intend to run Flutter on another (e.g. Android).',
     );
 
-    argParser.addOption(
+    parser.addOption(
       FlutterGlobalOptions.kLocalWebSDKOption,
       hide: !verboseHelp,
       help:
@@ -202,9 +219,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     );
 
     if (verboseHelp) {
-      argParser.addSeparator('Options for testing the "flutter" tool itself:');
+      parser.addSeparator('Options for testing the "flutter" tool itself:');
     }
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kShowTestDeviceFlag,
       negatable: false,
       hide: !verboseHelp,
@@ -212,33 +229,43 @@ class FlutterCommandRunner extends CommandRunner<void> {
           'List the special "flutter-tester" device in device listings. '
           'This headless device is used to test Flutter tooling.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kShowWebServerDeviceFlag,
       negatable: false,
       hide: !verboseHelp,
       help: 'List the special "web-server" device in device listings.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       FlutterGlobalOptions.kContinuousIntegrationFlag,
       negatable: false,
       help: 'Enable a set of CI-specific test debug settings.',
       hide: !verboseHelp,
     );
-    argParser.addOption(
+    parser.addOption(
       FlutterGlobalOptions.kDebugLogsDirectoryFlag,
       help: 'Path to a directory where logs for debugging may be added.',
       hide: !verboseHelp,
     );
   }
 
-  @override
-  ArgParser get argParser => _argParser;
-  final _argParser = ArgParser(
-    allowTrailingOptions: false,
-    usageLineLength: globals.outputPreferences.wrapText
-        ? globals.outputPreferences.wrapColumn
-        : null,
-  );
+  void _updateArgParser({required int? wrapColumn}) {
+    final newArgParser = ArgParser(allowTrailingOptions: false, usageLineLength: wrapColumn);
+
+    newArgParser.addFlag(
+      'help',
+      abbr: 'h',
+      negatable: false,
+      help: 'Print this usage information.',
+    );
+
+    _populateOptions(newArgParser, verboseHelp: _verboseHelp);
+
+    commands.forEach((String name, Command<void> command) {
+      newArgParser.addCommand(name, command.argParser);
+    });
+
+    _argParser = newArgParser;
+  }
 
   @override
   String get usageFooter {
@@ -401,6 +428,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       wrapText: useWrapping,
       showColor: topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?,
       wrapColumn: wrapColumn,
+    );
+
+    _updateArgParser(
+      wrapColumn: useWrapping ? (wrapColumn ?? globals.stdio.terminalColumns) : null,
     );
 
     if (((topLevelResults[FlutterGlobalOptions.kShowTestDeviceFlag] as bool?) ?? false) ||
