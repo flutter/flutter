@@ -1,0 +1,20 @@
+name: ios_universal_link
+description: "Integration test for iOS Universal Links."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.14.0-53.0.dev
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: 60tfp7
