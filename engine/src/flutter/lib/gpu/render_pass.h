@@ -54,12 +54,32 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
 
+  /// Set the face culling mode for subsequent draws.
+  void SetCullMode(impeller::CullMode mode);
+
+  /// Set the front-face winding order for subsequent draws.
+  void SetWindingOrder(impeller::WindingOrder order);
+
+  /// Set the primitive topology for subsequent draws.
+  void SetPrimitiveType(impeller::PrimitiveType type);
+
+  /// Set the polygon fill mode for subsequent draws.
+  void SetPolygonMode(impeller::PolygonMode mode);
+
   void ClearBindings();
 
   /// Append a draw to the underlying render pass. [element_count] is the
   /// vertex count for a non-indexed draw, or the index count when
   /// [indexed] is true. [instance_count] is the number of instances to draw.
   bool Draw(size_t element_count, size_t instance_count, bool indexed);
+
+  /// Whether the next draw must rebuild its backend pipeline. Exposed for
+  /// testing the memoization's dirty tracking.
+  bool IsPipelineStateDirtyForTesting() const;
+
+  /// Clears the pipeline dirty flag without building a pipeline, so tests
+  /// can observe which mutations re-dirty it.
+  void ClearPipelineStateDirtyForTesting();
 
   struct BufferAndUniformSlot {
     impeller::ShaderUniformSlot slot;
@@ -97,9 +117,27 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
  private:
   /// Lookup an Impeller pipeline by building a descriptor based on the current
-  /// command state.
+  /// command state, or return the memoized pipeline when that state is
+  /// unchanged since the last draw. Returns null (after a validation log)
+  /// when a stage function cannot be resolved or the backend fails to build
+  /// the pipeline.
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
   GetOrCreatePipeline();
+
+  // The non-dirtying counterpart of GetColorAttachmentDescriptor, for the
+  // pipeline rebuild itself.
+  impeller::ColorAttachmentDescriptor& ColorAttachmentDescriptorAt(
+      size_t color_attachment_index);
+
+  // The result of building a pipeline for the current pipeline-affecting
+  // state, null when that build failed (memoized so a broken pipeline is
+  // reported once, not per draw). Every mutable-state accessor above marks
+  // the state dirty; consecutive draws with unchanged state reuse this
+  // directly, skipping the descriptor rebuild, hash, and pipeline-library
+  // lookup.
+  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
+      memoized_pipeline_;
+  bool pipeline_state_dirty_ = true;
 
   impeller::RenderTarget render_target_;
   std::shared_ptr<impeller::RenderPass> render_pass_;
