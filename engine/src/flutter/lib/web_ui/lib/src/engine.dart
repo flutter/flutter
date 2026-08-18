@@ -105,6 +105,7 @@ export 'engine/pointer_converter.dart';
 export 'engine/primitives/codec.dart';
 export 'engine/primitives/color_filter.dart';
 export 'engine/primitives/image.dart';
+export 'engine/primitives/image_filter.dart';
 export 'engine/primitives/image_source.dart';
 export 'engine/primitives/mask_filter.dart';
 export 'engine/primitives/path.dart';
