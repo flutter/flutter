@@ -469,8 +469,7 @@ public class FlutterLoader {
                 continue;
               } else if (!flag.allowedInRelease) {
                 Log.e(
-                    TAG,
-                    "Flag " + arg + " is not allowed in release builds and will be ignored.");
+                    TAG, "Flag " + arg + " is not allowed in release builds and will be ignored.");
                 continue;
               } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
                   || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {

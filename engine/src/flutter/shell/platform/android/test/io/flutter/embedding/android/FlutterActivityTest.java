@@ -24,6 +24,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.window.BackEvent;
@@ -335,6 +336,51 @@ public class FlutterActivityTest {
     assertEquals(BackgroundMode.transparent, flutterActivity.getBackgroundMode());
     assertEquals(RenderMode.texture, flutterActivity.getRenderMode());
     assertEquals(TransparencyMode.transparent, flutterActivity.getTransparencyMode());
+  }
+
+  @Test
+  public void getInitialRoute_readsFromApplicationInfo() throws Exception {
+    Intent intent = FlutterActivity.withNewEngine().build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    FlutterActivity spyFlutterActivity = spy(flutterActivity);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(spyFlutterActivity.getPackageManager()).thenReturn(mockPackageManager);
+    ApplicationInfo mockApplicationInfo = new ApplicationInfo();
+    mockApplicationInfo.metaData = new Bundle();
+    mockApplicationInfo.metaData.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"--route=/custom/route\"]");
+    when(mockPackageManager.getApplicationInfo(
+            org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyInt()))
+        .thenReturn(mockApplicationInfo);
+
+    assertEquals("/custom/route", spyFlutterActivity.getInitialRoute());
+  }
+
+  @Test
+  public void getInitialRoute_readsFromActivityInfoFallback() throws Exception {
+    Intent intent = FlutterActivity.withNewEngine().build(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    FlutterActivity spyFlutterActivity = spy(flutterActivity);
+
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(spyFlutterActivity.getPackageManager()).thenReturn(mockPackageManager);
+    ApplicationInfo mockApplicationInfo = new ApplicationInfo();
+    when(mockPackageManager.getApplicationInfo(
+            org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyInt()))
+        .thenReturn(mockApplicationInfo);
+
+    Bundle activityMetaData = new Bundle();
+    activityMetaData.putString(
+        FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/fallback/route");
+    when(spyFlutterActivity.getMetaData()).thenReturn(activityMetaData);
+
+    assertEquals("/fallback/route", spyFlutterActivity.getInitialRoute());
   }
 
   @Test
