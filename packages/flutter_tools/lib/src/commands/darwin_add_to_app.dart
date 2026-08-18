@@ -348,7 +348,13 @@ class DarwinAddToAppNativeAssets {
         // [KernelAssetAbsolutePath]), and the second string is the actual path.
         if (pathInfo is List<Object?> && pathInfo.length >= 2) {
           final path = pathInfo[1]! as String;
-          result[assetId] = path;
+          // A code asset is recorded under the name it is loaded with, which for
+          // a framework is its `@rpath`-relative install name. Drop the prefix
+          // to get back to where it sits in the bundle.
+          const rpathPrefix = '@rpath/';
+          result[assetId] = path.startsWith(rpathPrefix)
+              ? path.substring(rpathPrefix.length)
+              : path;
         }
       }
     }
