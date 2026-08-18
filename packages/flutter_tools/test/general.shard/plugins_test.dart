@@ -2227,6 +2227,29 @@ iosPrefix: FLT
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>[], 'foo', 'bar');
         expect(map.isEmpty, true);
       });
+
+      testUsingContext('Platform plugin fromYaml factories perform validation', () async {
+        expect(
+          () => AndroidPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{}), '', globals.fs),
+          throwsToolExit(),
+        );
+        expect(
+          () => IOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
+          throwsToolExit(),
+        );
+        expect(
+          () => MacOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
+          throwsToolExit(),
+        );
+        expect(
+          () => WindowsPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
+          throwsToolExit(),
+        );
+        expect(
+          () => LinuxPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
+          throwsToolExit(),
+        );
+      });
     });
 
     group('Plugin files', () {
