@@ -79,6 +79,12 @@ import java.util.regex.Pattern;
  */
 public class AccessibilityBridge extends AccessibilityNodeProvider {
 
+  /**
+   * Represents a pending text change from the IME.
+   * This bridges the synchronous IME input with the asynchronous framework semantics update,
+   * allowing us to attach the correct change type to the accessibility event when the 
+   * framework eventually processes the text change.
+   */
   private static class ImeTextChange {
       final String text;
       final int type;
@@ -88,9 +94,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
   }
 
-  private final java.util.Queue<ImeTextChange> imeTextChanges = new java.util.ArrayDeque<>();
+  private final Queue<ImeTextChange> imeTextChanges = new ArrayDeque<>();
 
   public void addImeTextChange(String text, int type) {
+      // Cap the queue at 20 items to prevent memory leaks in the edge case where Dart text 
+      // formatters aggressively alter the text, preventing queue items from ever matching 
+      // the semantics update and being naturally dequeued. 20 is large enough to safely 
+      // hold multiple rapid keystrokes that are batched into a single frame.
       if (imeTextChanges.size() > 20) {
           imeTextChanges.poll();
       }
@@ -1749,6 +1759,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           && (lastInputFocusedSemanticsNode == null
               || lastInputFocusedSemanticsNode.id != inputFocusedSemanticsNode.id)) {
         lastInputFocusedSemanticsNode = inputFocusedSemanticsNode;
+        // Focus just shifted to a new text field. Clear the queue to prevent stale 
+        // IME events from the previous text field from bleeding into the new one.
         imeTextChanges.clear();
         sendAccessibilityEvent(
             obtainAccessibilityEvent(object.id, AccessibilityEvent.TYPE_VIEW_FOCUSED));
@@ -1757,6 +1769,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         // null, then we just set the last one to null too, so that it sends the event again
         // when something regains focus.
         lastInputFocusedSemanticsNode = null;
+        // Focus was lost completely. Clear the queue because there is no longer a valid 
+        // text field to receive the pending IME events.
         imeTextChanges.clear();
       }
 
