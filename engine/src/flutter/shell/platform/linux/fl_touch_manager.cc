@@ -102,14 +102,13 @@ static uint32_t get_generated_id(_FlTouchManager* self, uint32_t number) {
     }
     return id;
   }
-  auto values = g_hash_table_get_values(self->number_to_id);
+  g_autoptr(GList) values = g_hash_table_get_values(self->number_to_id);
   while (values != nullptr &&
          g_list_find(values, GUINT_TO_POINTER(self->min_touch_device_id)) !=
              nullptr &&
          self->min_touch_device_id < kMaxTouchDeviceId) {
     ++self->min_touch_device_id;
   }
-  g_list_free(values);
   if (self->min_touch_device_id >= kMaxTouchDeviceId) {
     self->min_touch_device_id = kMinTouchDeviceId;
   }
