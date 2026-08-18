@@ -350,7 +350,7 @@ public class FlutterRenderer implements TextureRegistry {
               return;
             }
             textureWrapper.markDirty();
-            flutterJNI.markTextureFrameAvailable(id);
+            scheduleEngineFrame();
           };
       // The callback relies on being executed on the UI thread (un-synchronised read of
       // mNativeView and also the engine code check for platform thread in
@@ -657,7 +657,7 @@ public class FlutterRenderer implements TextureRegistry {
           lastQueueTime = System.nanoTime();
         }
       }
-      flutterJNI.markTextureFrameAvailable(id);
+      scheduleEngineFrame();
     }
 
     PerImage dequeueImage() {
@@ -727,7 +727,7 @@ public class FlutterRenderer implements TextureRegistry {
         handler.post(
             () -> {
               if (!released) {
-                flutterJNI.markTextureFrameAvailable(id);
+                scheduleEngineFrame();
               }
             });
       }
@@ -889,7 +889,7 @@ public class FlutterRenderer implements TextureRegistry {
         }
         lastScheduleTime = now;
       }
-      flutterJNI.markTextureFrameAvailable(id);
+      scheduleEngineFrame();
     }
 
     @Override
@@ -1060,7 +1060,7 @@ public class FlutterRenderer implements TextureRegistry {
         toClose.close();
       }
       if (image != null) {
-        flutterJNI.markTextureFrameAvailable(id);
+        scheduleEngineFrame();
       }
     }
 

@@ -202,9 +202,7 @@ class TestRenderingFlutterBinding extends BindingBase
         return;
       }
       for (final RenderView renderView in renderViews) {
-        if (renderView.needsCompositeFrame) {
-          renderView.compositeFrame();
-        }
+        renderView.compositeFrame();
       }
       if (phase == EnginePhase.composite) {
         return;
