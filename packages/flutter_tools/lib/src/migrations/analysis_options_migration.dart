@@ -80,6 +80,9 @@ class AnalysisOptionsMigration extends ProjectMigrator {
         if (exclude is! YamlList) {
           editor.update(<String>['analyzer', 'exclude'], missingExcludes);
         } else if (exclude.style == CollectionStyle.FLOW) {
+          // Workaround for https://github.com/dart-lang/tools/issues/2532.
+          // Appending to a multiline flow-style list with a trailing comma crashes YamlEditor.
+          // Instead, rewrite the entire exclude list as a block list.
           final newExcludes = <Object?>[...exclude, ...missingExcludes];
           editor.update(<String>['analyzer', 'exclude'], newExcludes);
         } else {
