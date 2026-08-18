@@ -1,1 +1,7 @@
-{}
+{
+  "projects": {
+    "default": "rusifa-survey-db-9482"
+  },
+  "targets": {},
+  "etags": {}
+}
