@@ -139,9 +139,11 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
     mv "$DART_SDK_PATH" "$DART_SDK_PATH_OLD"
   fi
 
-  # install the new sdk
-  rm -rf -- "$DART_SDK_PATH"
-  mkdir -m 755 -p -- "$DART_SDK_PATH"
+  # Create a temporary directory for extraction to ensure atomicity
+  DART_SDK_PATH_TEMP="$FLUTTER_ROOT/bin/cache/dart-sdk.tmp"
+  rm -rf -- "$DART_SDK_PATH_TEMP"
+  mkdir -m 755 -p -- "$DART_SDK_PATH_TEMP"
+
   DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/$DART_ZIP_NAME"
 
   # Conditionally set verbose flag for LUCI
@@ -172,20 +174,34 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
     >&2 echo "  https://flutter.dev/community/china"
     >&2 echo
     rm -f -- "$DART_SDK_ZIP"
+    rm -rf -- "$DART_SDK_PATH_TEMP"
     exit 1
   }
-  unzip -o -q "$DART_SDK_ZIP" -d "$FLUTTER_ROOT/bin/cache" || {
+  unzip -o -q "$DART_SDK_ZIP" -d "$DART_SDK_PATH_TEMP" || {
     >&2 echo
     >&2 echo "It appears that the downloaded file is corrupt; please try again."
     >&2 echo "If this problem persists, please report the problem at:"
     >&2 echo "  https://github.com/flutter/flutter/issues/new?template=01_activation.yml"
     >&2 echo
     rm -f -- "$DART_SDK_ZIP"
+    rm -rf -- "$DART_SDK_PATH_TEMP"
     exit 1
   }
   rm -f -- "$DART_SDK_ZIP"
-  $FIND "$DART_SDK_PATH" -type d -exec chmod 755 {} +
-  $FIND "$DART_SDK_PATH" -type f $IS_USER_EXECUTABLE -exec chmod a+x,a+r {} +
+
+  # The unzip might have extracted LICENSE.dart_sdk_archive.md to the temp dir
+  if [ -f "$DART_SDK_PATH_TEMP/LICENSE.dart_sdk_archive.md" ]; then
+    mv "$DART_SDK_PATH_TEMP/LICENSE.dart_sdk_archive.md" "$FLUTTER_ROOT/bin/cache/LICENSE.dart_sdk_archive.md"
+  fi
+
+  $FIND "$DART_SDK_PATH_TEMP/dart-sdk" -type d -exec chmod 755 {} +
+  $FIND "$DART_SDK_PATH_TEMP/dart-sdk" -type f $IS_USER_EXECUTABLE -exec chmod a+x,a+r {} +
+
+  # Move the extracted SDK to the final location
+  rm -rf -- "$DART_SDK_PATH"
+  mv "$DART_SDK_PATH_TEMP/dart-sdk" "$DART_SDK_PATH"
+  rm -rf -- "$DART_SDK_PATH_TEMP"
+
   echo "$ENGINE_VERSION" > "$ENGINE_STAMP"
 
   # delete any temporary sdk path

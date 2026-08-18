@@ -83,7 +83,11 @@ if ((Test-Path $dartSdkPath) -or (Test-Path $dartSdkLicense)) {
         Rename-Item $dartSdkLicense "$oldDartSdkPrefix$oldDartSdkSuffix.LICENSE.md"
     }
 }
-New-Item $dartSdkPath -force -type directory | Out-Null
+$dartSdkPathTemp = "$cachePath\dart-sdk.tmp"
+if (Test-Path $dartSdkPathTemp) {
+    Remove-Item $dartSdkPathTemp -Recurse -Force
+}
+New-Item $dartSdkPathTemp -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\$dartZipName"
 
 Try {
@@ -106,27 +110,43 @@ Catch {
 If (Get-Command 7z -errorAction SilentlyContinue) {
     Write-Host "Expanding downloaded archive with 7z..."
     # The built-in unzippers are painfully slow. Use 7-Zip, if available.
-    & 7z x $dartSdkZip "-o$cachePath" -bd | Out-Null
+    & 7z x $dartSdkZip "-o$dartSdkPathTemp" -bd | Out-Null
 } ElseIf (Get-Command 7za -errorAction SilentlyContinue) {
     Write-Host "Expanding downloaded archive with 7za..."
     # Use 7-Zip's standalone version 7za.exe, if available.
-    & 7za x $dartSdkZip "-o$cachePath" -bd | Out-Null
+    & 7za x $dartSdkZip "-o$dartSdkPathTemp" -bd | Out-Null
 } ElseIf (Get-Command Microsoft.PowerShell.Archive\Expand-Archive -errorAction SilentlyContinue) {
     Write-Host "Expanding downloaded archive with PowerShell..."
     # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
     $global:ProgressPreference='SilentlyContinue'
-    Microsoft.PowerShell.Archive\Expand-Archive $dartSdkZip -DestinationPath $cachePath
+    Microsoft.PowerShell.Archive\Expand-Archive $dartSdkZip -DestinationPath $dartSdkPathTemp
 } Else {
     Write-Host "Expanding downloaded archive with Windows..."
     # As last resort: fall back to the Windows GUI.
     $shell = New-Object -com shell.application
     $zip = $shell.NameSpace($dartSdkZip)
     foreach($item in $zip.items()) {
-        $shell.Namespace($cachePath).copyhere($item)
+        $shell.Namespace($dartSdkPathTemp).copyhere($item)
     }
 }
 
 Remove-Item $dartSdkZip
+
+# The unzip might have extracted LICENSE.dart_sdk_archive.md to the temp dir
+$tempLicense = "$dartSdkPathTemp\LICENSE.dart_sdk_archive.md"
+if (Test-Path $tempLicense) {
+    if (Test-Path $dartSdkLicense) {
+        Remove-Item $dartSdkLicense -Force
+    }
+    Move-Item $tempLicense $dartSdkLicense
+}
+
+# Move the extracted SDK to the final location
+if (Test-Path $dartSdkPath) {
+    Remove-Item $dartSdkPath -Recurse -Force
+}
+Move-Item "$dartSdkPathTemp\dart-sdk" $dartSdkPath
+Remove-Item $dartSdkPathTemp -Recurse -Force
 $engineVersion | Out-File $engineStamp -Encoding ASCII
 
 # Try to delete all old SDKs and license files.
