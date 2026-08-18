@@ -314,16 +314,9 @@ class DwarfSymbolizationService {
               });
             }
           },
-          onDone: () {
-            if (!onDone.isCompleted) {
-              onDone.complete();
-            }
-          },
-          onError: (Object error, StackTrace stackTrace) {
-            if (!onDone.isCompleted) {
-              onDone.completeError(error, stackTrace);
-            }
-          },
+          onDone: onDone.complete,
+          onError: onDone.completeError,
+          cancelOnError: true,
         );
 
     try {
