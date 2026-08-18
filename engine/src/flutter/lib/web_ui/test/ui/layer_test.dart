@@ -134,7 +134,7 @@ void testMain() {
       );
     });
 
-    test('handles disposed pictures gracefully when rendering scene and scene.toImage', () async {
+    test('SceneBuilder.addPicture ignores already disposed picture', () async {
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 100, 100));
       canvas.drawRect(
@@ -147,6 +147,31 @@ void testMain() {
       final sb = LayerSceneBuilder();
       sb.addPicture(const ui.Offset(10, 10), picture);
       final LayerScene scene = sb.build();
+
+      // Rendering scene executes preroll, measure, and paint on LayerTree.
+      await expectLater(renderScene(scene), completes);
+
+      // scene.toImage flattens the LayerTree (preroll + flatten paint).
+      await expectLater(scene.toImage(200, 200), completes);
+    });
+
+    test('handles picture disposed after scene was built', () async {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 100, 100));
+      canvas.drawRect(
+        const ui.Rect.fromLTWH(0, 0, 100, 100),
+        ui.Paint()..style = ui.PaintingStyle.fill,
+      );
+      final ui.Picture picture = recorder.endRecording();
+
+      final sb = LayerSceneBuilder();
+      sb.addPicture(const ui.Offset(10, 10), picture);
+      final LayerScene scene = sb.build();
+
+      // Dispose the picture cloned into the layer tree.
+      final pictureLayer = scene.layerTree.rootLayer.debugLayers.single as PictureLayer;
+      pictureLayer.picture.dispose();
+      picture.dispose();
 
       // Rendering scene executes preroll, measure, and paint on LayerTree.
       await expectLater(renderScene(scene), completes);
