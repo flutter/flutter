@@ -2053,7 +2053,7 @@ class EditableText extends StatefulWidget {
   ///
   /// Spell check is disabled for password input, including when [obscureText]
   /// is true, [keyboardType] is [TextInputType.visiblePassword],
-  /// [keyboardType.password] is true, or [autofillHints] contains
+  /// [TextInputType.password] is true, or [autofillHints] contains
   /// [AutofillHints.password] or [AutofillHints.newPassword].
   ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
