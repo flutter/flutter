@@ -10,9 +10,7 @@
 library;
 
 import 'dart:async';
-import 'dart:ui'
-    as ui
-    show PictureRecorder, Rect, SceneBuilder, SemanticsUpdate, TextureFrameAvailableCallback;
+import 'dart:ui' as ui show PictureRecorder, Rect, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -59,66 +57,13 @@ mixin RendererBinding
     platformDispatcher
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
-      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
-      ..onTextureFrameAvailable = handleTextureFrameAvailable
-      ..onMarkAllViewsNeedRender = handleMarkAllViewsNeedRender;
-
+      ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
     }
     rootPipelineOwner.attach(_manifold);
-  }
-
-  final List<ui.TextureFrameAvailableCallback> _textureFrameAvailableCallbacks =
-      <ui.TextureFrameAvailableCallback>[];
-
-  /// Registers a [handler] to be notified when any texture has a new frame
-  /// available from the engine.
-  ///
-  /// The handler receives the ID of the texture that has a new frame and is
-  /// responsible for checking whether that ID matches the texture it cares
-  /// about.
-  void addTextureFrameAvailableCallback(ui.TextureFrameAvailableCallback handler) {
-    _textureFrameAvailableCallbacks.add(handler);
-  }
-
-  /// Unregisters a handler previously added with
-  /// [addTextureFrameAvailableCallback].
-  void removeTextureFrameAvailableCallback(ui.TextureFrameAvailableCallback handler) {
-    _textureFrameAvailableCallbacks.remove(handler);
-  }
-
-  /// Dispatches a texture-frame-available notification to every registered
-  /// [TextureFrameAvailableCallback].
-  ///
-  /// This is invoked automatically by the binding when the engine reports a
-  /// new texture frame. It is also exposed so tests can simulate that
-  /// notification without going through the engine.
-  ///
-  /// See [dart:ui.PlatformDispatcher.onTextureFrameAvailable].
-  @protected
-  @visibleForTesting
-  void handleTextureFrameAvailable(int textureId) {
-    // Iterate a copy so handlers may add/remove themselves mid-dispatch.
-    for (final callback in List<ui.TextureFrameAvailableCallback>.of(
-      _textureFrameAvailableCallbacks,
-    )) {
-      callback(textureId);
-    }
-  }
-
-  /// Marks all views to require compositing, which will force them to re-render
-  /// on the next frame.
-  ///
-  /// See [dart:ui.PlatformDispatcher.onMarkAllViewsNeedRender].
-  @protected
-  @visibleForTesting
-  void handleMarkAllViewsNeedRender() {
-    for (final RenderView view in renderViews) {
-      view.markNeedsCompositeFrame();
-    }
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -325,11 +270,6 @@ mixin RendererBinding
     onSemanticsOwnerDisposed: () {
       (pipelineOwner.rootNode as RenderView?)?.clearSemantics();
     },
-    onFlushedPaint: (bool isDirty) {
-      if (isDirty) {
-        (pipelineOwner.rootNode as RenderView?)?.markNeedsCompositeFrame();
-      }
-    },
   );
 
   /// Deprecated. Will be removed in a future version of Flutter.
@@ -406,9 +346,6 @@ mixin RendererBinding
     assert(!_viewIdToRenderView.containsKey(viewId));
     _viewIdToRenderView[viewId] = view;
     view.configuration = createViewConfigurationFor(view);
-    // Ensure the view composites at least once in a non-warm-up frame after
-    // being added, so its contents appear even if no descendants are dirty.
-    view.markNeedsCompositeFrame();
   }
 
   /// Removes a [RenderView] previously added with [addRenderView] from the
@@ -755,18 +692,9 @@ mixin RendererBinding
     rootPipelineOwner.flushLayout();
     rootPipelineOwner.flushCompositingBits();
     rootPipelineOwner.flushPaint();
-
     if (sendFramesToEngine) {
       for (final RenderView renderView in renderViews) {
-        if (renderView.needsCompositeFrame) {
-          renderView.compositeFrame(); // this sends the bits to the GPU
-        }
-        if (isWarmUpFrame) {
-          // Warm-up frame does not guarantee that the content is actually
-          // painted (see [SchedulerBinding.scheduleWarmUpFrame]). This is to
-          // ensure that on the subsequent real frame the view is recomposited.
-          renderView.markNeedsCompositeFrame();
-        }
+        renderView.compositeFrame(); // this sends the bits to the GPU
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
@@ -787,9 +715,6 @@ mixin RendererBinding
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
-    }
-    for (final RenderView renderView in renderViews) {
-      renderView.markNeedsCompositeFrame();
     }
     scheduleWarmUpFrame();
     await endOfFrame;

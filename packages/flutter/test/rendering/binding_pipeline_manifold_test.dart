@@ -25,7 +25,7 @@ void main() {
       final child = PipelineOwner();
       RendererBinding.instance.rootPipelineOwner.adoptChild(child);
 
-      final renderObject = TestRenderObject();
+      final RenderObject renderObject = TestRenderObject();
       child.rootNode = renderObject;
       renderObject.scheduleInitialLayout();
       RendererBinding.instance.rootPipelineOwner.flushLayout();
