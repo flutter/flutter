@@ -196,7 +196,7 @@ public class FlutterEngineConnectionRegistryTest {
     when(flutterLoader.getSofwareRenderingEnabledViaManifest()).thenReturn(false);
     when(appComponent.getAppComponent()).thenReturn(activity);
     Intent intent = mock(Intent.class);
-    when(intent.getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false))
+    when(intent.getBooleanExtra("enable-software-rendering", false))
         .thenReturn(true);
     when(activity.getIntent()).thenReturn(intent);
 
@@ -228,7 +228,7 @@ public class FlutterEngineConnectionRegistryTest {
     when(flutterLoader.getSofwareRenderingEnabledViaManifest()).thenReturn(false);
     when(appComponent.getAppComponent()).thenReturn(activity);
     Intent intent = mock(Intent.class);
-    when(intent.getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false))
+    when(intent.getBooleanExtra("enable-software-rendering", false))
         .thenReturn(false);
     when(activity.getIntent()).thenReturn(intent);
 
