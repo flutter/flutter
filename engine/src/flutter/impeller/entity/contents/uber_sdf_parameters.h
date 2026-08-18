@@ -83,10 +83,6 @@ struct UberSDFParameters {
   /// The degree (n) of the superellipse curve for the top and right octants.
   Point superellipse_degree;
 
-  /// The semi-axis length of the superellipse curve for the top and right
-  /// octants.
-  Point superellipse_semi_axis;
-
   /// The angular span of the circular cap for the top and right octants.
   Point angle_span;
 

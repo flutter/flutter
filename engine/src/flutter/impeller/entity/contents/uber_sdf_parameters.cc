@@ -93,7 +93,6 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
       .size = size,
       .stroke = stroke,
       .superellipse_degree = Point(top_right.top.se_n, top_right.right.se_n),
-      .superellipse_semi_axis = Point(top_right.top.se_a, top_right.right.se_a),
       .angle_span = Point(top_right.top.circle_max_angle.radians,
                           top_right.right.circle_max_angle.radians),
       .octant_offset_c = top_right.top.se_a - top_right.right.se_a,

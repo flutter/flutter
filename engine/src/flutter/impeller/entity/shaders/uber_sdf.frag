@@ -21,7 +21,6 @@ uniform FragInfo {
   float stroked;
   float type;
   vec2 superellipse_degree;
-  vec2 superellipse_semi_axis;
   vec2 angle_span;
   float octant_offset_c;
   vec2 circle_center_top;
@@ -74,7 +73,7 @@ float distanceFromChamferRect(vec2 p, vec2 half_size, float chamfer_size) {
 
 float distanceFromRoundedSuperellipse(vec2 p,
                                       vec2 degree,
-                                      vec2 se_a,
+                                      vec2 size,
                                       vec2 radii,
                                       vec2 angle_span,
                                       vec2 circle_center_top,
@@ -99,7 +98,7 @@ float distanceFromRoundedSuperellipse(vec2 p,
     span = angle_span.x;
     radius = radii.x;
     circle_center = circle_center_top;
-    axis_length = se_a.x;
+    axis_length = size.x;
   } else {
     // For the 'right' octant, we flip the point and shift it according to
     // the CPU's OctantContains/Flip logic.
@@ -108,7 +107,7 @@ float distanceFromRoundedSuperellipse(vec2 p,
     span = angle_span.y;
     radius = radii.y;
     circle_center = circle_center_right;
-    axis_length = se_a.y;
+    axis_length = size.y;
   }
 
   return distanceFromRSEOctant(p_oct, circle_center, radius, span, axis_length,
@@ -194,8 +193,8 @@ vec2 filledSDF(vec2 p) {
     pixel_size = roundRectPixelSize(p);
   } else {  // Symmetric Rounded Superellipse
     sdf = distanceFromRoundedSuperellipse(
-        p, frag_info.superellipse_degree, frag_info.superellipse_semi_axis,
-        frag_info.radii.xy, frag_info.angle_span, frag_info.circle_center_top,
+        p, frag_info.superellipse_degree, frag_info.size, frag_info.radii.xy,
+        frag_info.angle_span, frag_info.circle_center_top,
         frag_info.circle_center_right, frag_info.octant_offset_c);
     pixel_size = pixelSize(sdf);
   }
