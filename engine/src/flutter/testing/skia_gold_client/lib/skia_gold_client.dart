@@ -615,6 +615,7 @@ interface class SkiaGoldClient {
         return null;
       }
       if (response.statusCode != 200) {
+        await response.drain<void>();
         throw io.HttpException(
           'Failed to fetch expectation from $requestForExpectations: HTTP ${response.statusCode}',
           uri: requestForExpectations,
@@ -647,6 +648,7 @@ interface class SkiaGoldClient {
     final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
     final io.HttpClientResponse response = await request.close();
     if (response.statusCode != 200) {
+      await response.drain<void>();
       throw io.HttpException(
         'Failed to fetch image from $requestForImage: HTTP ${response.statusCode}',
         uri: requestForImage,

@@ -714,6 +714,23 @@ void main() {
     }
   });
 
+  test('getExpectationForTest throws HttpException on non-200 error', () async {
+    final fixture = _TestFixture();
+    try {
+      final SkiaGoldClient client = createClient(fixture, environment: presubmitEnv);
+
+      final String hash = client.getTraceID('error-test');
+      fixture.httpClient.setErrorResponse(
+        Uri.parse('https://flutter-gold.skia.org/json/v2/latestpositivedigest/$hash'),
+        500,
+      );
+
+      expect(() => client.getExpectationForTest('error-test'), throwsA(isA<io.HttpException>()));
+    } finally {
+      fixture.dispose();
+    }
+  });
+
   test('getImageBytes returns raw image bytes from Skia Gold', () async {
     final fixture = _TestFixture();
     try {
@@ -727,6 +744,22 @@ void main() {
 
       final List<int> bytes = await client.getImageBytes('test_digest');
       expect(bytes, expectedBytes);
+    } finally {
+      fixture.dispose();
+    }
+  });
+
+  test('getImageBytes throws HttpException on non-200 error', () async {
+    final fixture = _TestFixture();
+    try {
+      final SkiaGoldClient client = createClient(fixture, environment: presubmitEnv);
+
+      fixture.httpClient.setErrorResponse(
+        Uri.parse('https://flutter-gold.skia.org/img/images/error_digest.png'),
+        500,
+      );
+
+      expect(() => client.getImageBytes('error_digest'), throwsA(isA<io.HttpException>()));
     } finally {
       fixture.dispose();
     }
@@ -792,14 +825,19 @@ final class _FakeHttpClient implements io.HttpClient {
     _expectedResponses[request] = 404;
   }
 
+  /// Sets an expected error response with the given [statusCode] for [request].
+  void setErrorResponse(Uri request, int statusCode) {
+    _expectedResponses[request] = statusCode;
+  }
+
   @override
   Future<io.HttpClientRequest> getUrl(Uri url) async {
     final Object? response = _expectedResponses[url];
     if (response == null) {
       throw StateError('No request expected for $url');
     }
-    if (response == 404) {
-      return _FakeHttpClientRequest._(_FakeHttpClientResponse(Uint8List(0), statusCode: 404));
+    if (response is int) {
+      return _FakeHttpClientRequest._(_FakeHttpClientResponse(Uint8List(0), statusCode: response));
     }
     if (response is Uint8List) {
       return _FakeHttpClientRequest.withBytes(response);

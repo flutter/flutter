@@ -106,22 +106,30 @@ PixelComparisonResult comparePixels(
         }
       } else {
         // Fuzzy 3x3 neighborhood matching.
-        var matched = false;
-        final int minX = math.max(0, x - 1);
-        final int maxX = math.min(expected.width - 1, x + 1);
-        final int minY = math.max(0, y - 1);
-        final int maxY = math.min(expected.height - 1, y + 1);
+        // Check the exact pixel first to short-circuit the 3x3 search in the common case.
+        expectedPixel = expected.getPixel(x, y, expectedPixel);
+        bool matched = colorDelta(actualPixel, expectedPixel) <= pixelDeltaThreshold;
 
-        for (var ny = minY; ny <= maxY; ny++) {
-          for (var nx = minX; nx <= maxX; nx++) {
-            expectedPixel = expected.getPixel(nx, ny, expectedPixel);
-            if (colorDelta(actualPixel, expectedPixel) <= pixelDeltaThreshold) {
-              matched = true;
+        if (!matched) {
+          final int minX = math.max(0, x - 1);
+          final int maxX = math.min(expected.width - 1, x + 1);
+          final int minY = math.max(0, y - 1);
+          final int maxY = math.min(expected.height - 1, y + 1);
+
+          for (var ny = minY; ny <= maxY; ny++) {
+            for (var nx = minX; nx <= maxX; nx++) {
+              if (nx == x && ny == y) {
+                continue;
+              }
+              expectedPixel = expected.getPixel(nx, ny, expectedPixel);
+              if (colorDelta(actualPixel, expectedPixel) <= pixelDeltaThreshold) {
+                matched = true;
+                break;
+              }
+            }
+            if (matched) {
               break;
             }
-          }
-          if (matched) {
-            break;
           }
         }
 
