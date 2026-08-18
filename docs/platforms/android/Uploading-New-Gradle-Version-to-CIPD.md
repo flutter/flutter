@@ -16,9 +16,9 @@ Some links in the instructions below are Google-internal.
    you are a member of this
    group [here](https://chrome-infra-auth.appspot.com/auth/groups/google%2Fflutter-cipd-writers@twosync.google.com).
 
-### Identify the New Gradle Version 
+### Identify the New Gradle Version
 
-3. Identify the new Gradle Version to include in the upload script. From the dev folder run: 
+3. Identify the new Gradle Version to include in the upload script. From the dev folder run:
    ```sh
    git grep "distributionUrl" | sed -E 's/.*\/gradle-([0-9.]+[^.]*)\.zip.*/\1/'
    ```
