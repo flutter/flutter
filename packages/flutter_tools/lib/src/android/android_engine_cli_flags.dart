@@ -26,8 +26,8 @@ abstract final class AndroidEngineCliFlags {
   static const String dartFlags = 'dart-flags';
 
   static const List<String> allFlags = <String>[
-    traceStartup,
     route,
+    traceStartup,
     traceSkia,
     traceAllowlist,
     traceSkiaAllowlist,
