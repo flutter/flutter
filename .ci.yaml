@@ -7344,8 +7344,7 @@ targets:
 
   - name: Windows windows_engine_integration_golden_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
-    bringup: true
+    presubmit: true
     timeout: 60
     properties:
       tags: >
