@@ -304,7 +304,7 @@ struct ContentContext::Pipelines {
   Variants<VerticesUber1Shader> vertices_uber_1_;
   Variants<VerticesUber2Shader> vertices_uber_2_;
   Variants<UberSDFPipeline> uber_sdf;
-  Variants<ComplexRSEPipeline> complex_rse;
+  Variants<RoundSuperellipsePipeline> round_superellipse;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
 // Web doesn't support external texture OpenGL extensions
@@ -639,7 +639,7 @@ ContentContext::ContentContext(
     pipelines_->circle.CreateDefault(*context_, options);
     if (context_->GetFlags().use_sdfs) {
       pipelines_->uber_sdf.CreateDefault(*context_, options);
-      pipelines_->complex_rse.CreateDefault(*context_, options);
+      pipelines_->round_superellipse.CreateDefault(*context_, options);
     }
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
@@ -1209,9 +1209,9 @@ PipelineRef ContentContext::GetUberSDFPipeline(
   return GetPipeline(this, pipelines_->uber_sdf, opts);
 }
 
-PipelineRef ContentContext::GetComplexRSEPipeline(
+PipelineRef ContentContext::GetRoundSuperellipsePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->complex_rse, opts);
+  return GetPipeline(this, pipelines_->round_superellipse, opts);
 }
 
 PipelineRef ContentContext::GetPorterDuffPipeline(

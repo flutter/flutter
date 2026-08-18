@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_COMPLEX_RSE_CONTENTS_H_
-#define FLUTTER_IMPELLER_ENTITY_CONTENTS_COMPLEX_RSE_CONTENTS_H_
+#ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_ROUND_SUPERELLIPSE_CONTENTS_H_
+#define FLUTTER_IMPELLER_ENTITY_CONTENTS_ROUND_SUPERELLIPSE_CONTENTS_H_
 
 #include <memory>
 #include <optional>
@@ -18,12 +18,10 @@
 
 namespace impeller {
 
-/// A Contents class that renders asymmetric rounded superellipses using SDFs.
-///
-/// Separated from 'UberSDFContents' to reduce uniform bloat
-class ComplexRoundedSuperellipseContents : public ColorSourceContents {
+/// A Contents class that renders round superellipses using SDFs.
+class RoundSuperellipseContents : public ColorSourceContents {
  public:
-  static std::unique_ptr<ComplexRoundedSuperellipseContents> Make(
+  static std::unique_ptr<RoundSuperellipseContents> Make(
       Color color,
       const Rect& bounds,
       const RoundSuperellipseParam& round_superellipse_params,
@@ -38,7 +36,7 @@ class ComplexRoundedSuperellipseContents : public ColorSourceContents {
   const Geometry* GetGeometry() const override;
 
  private:
-  explicit ComplexRoundedSuperellipseContents(
+  explicit RoundSuperellipseContents(
       Color color,
       const Rect& bounds,
       const RoundSuperellipseParam& round_superellipse_params,
@@ -50,13 +48,12 @@ class ComplexRoundedSuperellipseContents : public ColorSourceContents {
   std::optional<StrokeParameters> stroke_;
   std::unique_ptr<Geometry> geometry_;
 
-  ComplexRoundedSuperellipseContents(
-      const ComplexRoundedSuperellipseContents&) = delete;
+  RoundSuperellipseContents(const RoundSuperellipseContents&) = delete;
 
-  ComplexRoundedSuperellipseContents& operator=(
-      const ComplexRoundedSuperellipseContents&) = delete;
+  RoundSuperellipseContents& operator=(const RoundSuperellipseContents&) =
+      delete;
 };
 
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_COMPLEX_RSE_CONTENTS_H_
+#endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_ROUND_SUPERELLIPSE_CONTENTS_H_
