@@ -91,12 +91,15 @@ PixelComparisonResult comparePixels(
         (p1.a - p2.a).abs().toInt();
   }
 
+  Pixel? actualPixel;
+  Pixel? expectedPixel;
+
   for (var y = 0; y < actual.height; y++) {
     for (var x = 0; x < actual.width; x++) {
-      final Pixel actualPixel = actual.getPixel(x, y);
+      actualPixel = actual.getPixel(x, y, actualPixel);
 
       if (pixelComparison == PixelComparison.precise) {
-        final Pixel expectedPixel = expected.getPixel(x, y);
+        expectedPixel = expected.getPixel(x, y, expectedPixel);
         if (colorDelta(actualPixel, expectedPixel) > pixelDeltaThreshold) {
           diffCount += 1;
           diffImage.setPixel(x, y, highlightColor);
@@ -111,7 +114,8 @@ PixelComparisonResult comparePixels(
 
         for (var ny = minY; ny <= maxY; ny++) {
           for (var nx = minX; nx <= maxX; nx++) {
-            if (colorDelta(actualPixel, expected.getPixel(nx, ny)) <= pixelDeltaThreshold) {
+            expectedPixel = expected.getPixel(nx, ny, expectedPixel);
+            if (colorDelta(actualPixel, expectedPixel) <= pixelDeltaThreshold) {
               matched = true;
               break;
             }
@@ -307,10 +311,10 @@ Future<_GoldenLookupResult> _getGolden(
 
   if (isOffline) {
     if (digestFile.existsSync()) {
-      final String digest = digestFile.readAsStringSync().trim();
+      final String digest = (await digestFile.readAsString()).trim();
       final imageFile = File(p.join(baselinesDir.path, '$digest.png'));
       if (imageFile.existsSync()) {
-        final Image? decoded = decodePng(imageFile.readAsBytesSync());
+        final Image? decoded = decodePng(await imageFile.readAsBytes());
         if (decoded != null) {
           return _GoldenFound(decoded);
         }
@@ -341,7 +345,7 @@ Future<_GoldenLookupResult> _getGolden(
 
   final imageFile = File(p.join(baselinesDir.path, '$digest.png'));
   if (imageFile.existsSync() && !refreshGoldens) {
-    final Image? decoded = decodePng(imageFile.readAsBytesSync());
+    final Image? decoded = decodePng(await imageFile.readAsBytes());
     if (decoded != null) {
       return _GoldenFound(decoded);
     }
@@ -371,7 +375,17 @@ Future<_GoldenLookupResult> _getGolden(
       // Ignored if deleted concurrently.
     }
   }
-  await tempFile.rename(imageFile.path);
+  try {
+    await tempFile.rename(imageFile.path);
+  } on FileSystemException {
+    if (imageFile.existsSync()) {
+      try {
+        tempFile.deleteSync();
+      } catch (_) {}
+    } else {
+      rethrow;
+    }
+  }
 
   final Image? decoded = decodePng(bytes);
   if (decoded == null) {

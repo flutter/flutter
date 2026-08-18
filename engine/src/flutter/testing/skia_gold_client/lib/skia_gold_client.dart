@@ -611,6 +611,7 @@ interface class SkiaGoldClient {
       // HTTP 404 (with a plain text body). Returning null indicates to callers
       // that there is no existing positive baseline expectation for this test yet.
       if (response.statusCode == 404) {
+        await response.drain<void>();
         return null;
       }
       if (response.statusCode != 200) {
@@ -703,7 +704,6 @@ interface class SkiaGoldClient {
   /// Returns a trace id based on the current testing environment to lookup
   /// the latest positive digest on Skia Gold with a hex-encoded md5 hash of
   /// the image keys.
-  @visibleForTesting
   String getTraceID(String testName) {
     final keys = <String, dynamic>{..._getKeys(), 'name': testName, 'source_type': _instance};
     final sorted = <String, dynamic>{};

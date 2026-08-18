@@ -697,6 +697,23 @@ void main() {
     }
   });
 
+  test('getExpectationForTest returns null when test expectation is not found (404)', () async {
+    final fixture = _TestFixture();
+    try {
+      final SkiaGoldClient client = createClient(fixture, environment: presubmitEnv);
+
+      final String hash = client.getTraceID('nonexistent-test');
+      fixture.httpClient.setNotFoundResponse(
+        Uri.parse('https://flutter-gold.skia.org/json/v2/latestpositivedigest/$hash'),
+      );
+
+      final String? digest = await client.getExpectationForTest('nonexistent-test');
+      expect(digest, isNull);
+    } finally {
+      fixture.dispose();
+    }
+  });
+
   test('getImageBytes returns raw image bytes from Skia Gold', () async {
     final fixture = _TestFixture();
     try {
@@ -770,11 +787,19 @@ final class _FakeHttpClient implements io.HttpClient {
     _expectedResponses[request] = bytes;
   }
 
+  /// Sets an expected 404 Not Found response for the given [request].
+  void setNotFoundResponse(Uri request) {
+    _expectedResponses[request] = 404;
+  }
+
   @override
   Future<io.HttpClientRequest> getUrl(Uri url) async {
     final Object? response = _expectedResponses[url];
     if (response == null) {
       throw StateError('No request expected for $url');
+    }
+    if (response == 404) {
+      return _FakeHttpClientRequest._(_FakeHttpClientResponse(Uint8List(0), statusCode: 404));
     }
     if (response is Uint8List) {
       return _FakeHttpClientRequest.withBytes(response);
@@ -814,9 +839,12 @@ final class _FakeHttpClientRequest implements io.HttpClientRequest {
 }
 
 final class _FakeHttpClientResponse extends Stream<List<int>> implements io.HttpClientResponse {
-  _FakeHttpClientResponse(this._bytes);
+  _FakeHttpClientResponse(this._bytes, {this.statusCode = 200});
 
   final Uint8List _bytes;
+
+  @override
+  final int statusCode;
 
   @override
   StreamSubscription<List<int>> listen(
@@ -828,9 +856,6 @@ final class _FakeHttpClientResponse extends Stream<List<int>> implements io.Http
     return Stream<List<int>>.fromIterable(<List<int>>[_bytes])
         .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
-
-  @override
-  int get statusCode => 200;
 
   @override
   Object? noSuchMethod(Invocation invocation) {

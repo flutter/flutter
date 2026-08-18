@@ -286,7 +286,7 @@ void main() {
       final client = FakeSkiaGoldClient(expectationToReturn: 'digest_offline');
 
       // Prepopulate cache with trace ID digest and image.
-      final traceID = client.getTraceID('engine.offline_cached');
+      final String traceID = client.getTraceID('engine.offline_cached');
       final digestFile = File(p.join(tempDir.path, 'baselines', '$traceID.digest'));
       await digestFile.create(recursive: true);
       await digestFile.writeAsString('digest_offline', flush: true);
