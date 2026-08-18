@@ -2876,7 +2876,9 @@ class _DayItemState extends State<_DayItem> {
       if (widget.isSelectedDayStart || widget.isSelectedDayEnd) WidgetState.selected,
     };
 
-    _statesController.value = states;
+    for (final state in states) {
+      _statesController.update(state, true);
+    }
 
     final Color? dayForegroundColor = resolve<Color?>(
       (DatePickerThemeData? theme) => theme?.dayForegroundColor,
