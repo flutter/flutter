@@ -608,24 +608,29 @@ TaskFunction createOpacityPeepholeColOfAlphaSaveLayerRowsPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createGradientDynamicPerfE2ETest() {
+TaskFunction createGradientDynamicPerfE2ETest({List<String> createPlatforms = const <String>[]}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_dynamic_perf_e2e.dart',
+    createPlatforms: createPlatforms,
   ).run;
 }
 
-TaskFunction createGradientConsistentPerfE2ETest() {
+TaskFunction createGradientConsistentPerfE2ETest({
+  List<String> createPlatforms = const <String>[],
+}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_consistent_perf_e2e.dart',
+    createPlatforms: createPlatforms,
   ).run;
 }
 
-TaskFunction createGradientStaticPerfE2ETest() {
+TaskFunction createGradientStaticPerfE2ETest({List<String> createPlatforms = const <String>[]}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_static_perf_e2e.dart',
+    createPlatforms: createPlatforms,
   ).run;
 }
 
