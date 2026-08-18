@@ -2034,16 +2034,17 @@ class _TabBarViewState extends State<TabBarView> {
     _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(
       widget.children.map<Widget>((Widget child) {
         final int tabIndex = index++;
+        final Widget semanticsChild = Semantics(role: SemanticsRole.tabPanel, child: child);
         final Widget wrappedChild;
         if (tabIndex == _currentIndex && ancestor != null && ancestor.controller != null) {
           wrappedChild = PrimaryScrollController(
             controller: ancestor.controller!,
             automaticallyInheritForPlatforms: ancestor.automaticallyInheritForPlatforms,
             scrollDirection: ancestor.scrollDirection,
-            child: child,
+            child: semanticsChild,
           );
         } else {
-          wrappedChild = PrimaryScrollController.none(child: child);
+          wrappedChild = PrimaryScrollController.none(child: semanticsChild);
         }
         return wrappedChild;
       }).toList(),
