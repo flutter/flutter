@@ -203,6 +203,8 @@ class ExpansibleController extends ChangeNotifier {
 
 /// A [StatefulWidget] that expands and collapses.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=TfoJ55nx1S4}
+///
 /// An [Expansible] consists of a header, which is always shown, and a
 /// body, which is hidden in its collapsed state and shown in its expanded
 /// state.
