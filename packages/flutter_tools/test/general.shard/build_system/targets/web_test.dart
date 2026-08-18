@@ -1426,7 +1426,6 @@ _flutter.loader.load();
           '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
           '--extra-compiler-option=--depfile=${environment.buildDir.childFile('dart2wasm.d').absolute.path}',
           '--recorded-uses=${environment.buildDir.childFile('recorded_uses_wasm.json').absolute.path}',
-          '--enable-experiment=record-use',
           '-O2',
           '--no-strip-wasm',
           '--no-source-maps',

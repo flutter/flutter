@@ -161,6 +161,9 @@ mergeInto(LibraryManager.library, {
               data.callbackId,
             );
             return;
+          case 'setResourceCacheLimit':
+            _surface_setResourceCacheLimitOnWorker(data.surface, data.bytes);
+            return;
           default:
             console.warn(`unrecognized skwasm message: ${skwasmMessage}`);
         }
@@ -210,11 +213,10 @@ mergeInto(LibraryManager.library, {
         callbackId,
       }, [canvas], threadId);
     };
-    _skwasm_reportInitialized = function (surfaceHandle, contextLostCallbackId, callbackId) {
+    _skwasm_reportInitialized = function (surfaceHandle, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'onInitialized',
         surface: surfaceHandle,
-        contextLostCallbackId,
         callbackId,
       }, []);
     };
@@ -289,6 +291,15 @@ mergeInto(LibraryManager.library, {
         callbackId,
       });
     }
+
+    // Resource Cache
+    _skwasm_dispatchSetResourceCacheLimit = function(threadId, surface, bytes) {
+      skwasm_postMessage({
+        skwasmMessage: 'setResourceCacheLimit',
+        surface,
+        bytes,
+      }, [], threadId);
+    };
 
     // Context Loss
     _skwasm_dispatchTriggerContextLoss = function (threadId, surfaceHandle, callbackId) {
@@ -421,6 +432,8 @@ mergeInto(LibraryManager.library, {
   skwasm_createGlTextureFromTextureSource__deps: ['$skwasm_support_setup'],
   skwasm_dispatchDisposeSurface: function() {},
   skwasm_dispatchDisposeSurface__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchSetResourceCacheLimit: function() {},
+  skwasm_dispatchSetResourceCacheLimit__deps: ['$skwasm_support_setup'],
   skwasm_dispatchRasterizeImage: function() {},
   skwasm_dispatchRasterizeImage__deps: ['$skwasm_support_setup'],
   skwasm_postRasterizeResult: function() {},
