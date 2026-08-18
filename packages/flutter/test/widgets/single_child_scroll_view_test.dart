@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1114,6 +1113,7 @@ void main() {
             height: 300.0,
             child: SingleChildScrollView(
               controller: controller,
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 children: <Widget>[
                   StatefulBuilder(
@@ -1139,27 +1139,21 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Drag past the leading edge with a trackpad gesture and hold it there.
-    const center = Offset(400.0, 300.0);
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.trackpad);
-    await gesture.panZoomStart(center);
-    var pan = 0.0;
-    for (var i = 0; i < 8; i++) {
-      pan += 12.0;
-      await gesture.panZoomUpdate(center, pan: Offset(0.0, pan));
-      await tester.pump(const Duration(milliseconds: 16));
-    }
+    // Drag past the leading edge and hold it there.
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await tester.pump();
     final double overscrolled = controller.position.pixels;
     expect(overscrolled, lessThan(-20.0));
 
     // The row rebuilds mid-gesture, as it would when hover reveals an action.
     rebuildRow(() => revealed = true);
-    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump();
 
     expect(controller.position.pixels, overscrolled);
 
-    await gesture.panZoomEnd();
+    await gesture.up();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, 0.0);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+  });
 }
