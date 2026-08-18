@@ -136,7 +136,7 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   }
 
   @JS('fetch')
-  external JSPromise<JSAny?> _fetch(String url);
+  external JSPromise<JSAny?> _fetch(String url, [JSAny headers]);
 
   // ignore: non_constant_identifier_names
   external DomURL get URL;
@@ -1283,6 +1283,33 @@ Future<HttpFetchResponse> httpFetch(String url) async {
   }
 }
 
+Future<DomResponse> _rawHttpPost(String url, String data) => domWindow
+    ._fetch(
+      url,
+      <String, Object?>{
+        'method': 'POST',
+        'headers': <String, Object?>{'Content-Type': 'text/plain'},
+        'body': data,
+      }.toJSAnyDeep,
+    )
+    .toDart
+    .then((JSAny? value) => value! as DomResponse);
+
+/// Sends a [data] string as HTTP POST request to [url].
+///
+/// The web engine does not make POST requests in production code because it is
+/// designed to be able to run web apps served from plain file servers, so this
+/// is meant for tests only.
+@visibleForTesting
+Future<HttpFetchResponse> testOnlyHttpPost(String url, String data) async {
+  try {
+    final DomResponse domResponse = await _rawHttpPost(url, data);
+    return HttpFetchResponseImpl._(url, domResponse);
+  } catch (requestError) {
+    throw HttpFetchError(url, requestError: requestError);
+  }
+}
+
 /// Convenience function for making a fetch request and getting the data as a
 /// [ByteBuffer], when the default error handling mechanism is sufficient.
 Future<ByteBuffer> httpFetchByteBuffer(String url) async {
@@ -2255,6 +2282,17 @@ class DomPoint {
   final num x;
   final num y;
 }
+
+@JS('WebSocket')
+extension type DomWebSocket._(JSObject _) implements DomEventTarget {
+  external DomWebSocket(String url);
+
+  @JS('send')
+  external void _send(JSAny? data);
+  void send(Object? data) => _send(data?.toJSAnyShallow);
+}
+
+DomWebSocket createDomWebSocket(String url) => DomWebSocket(url);
 
 @JS('MessageEvent')
 extension type DomMessageEvent._(JSObject _) implements DomEvent {
