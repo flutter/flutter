@@ -44,6 +44,22 @@ struct TextRenderOptions {
   bool is_subpixel = false;
 };
 
+std::shared_ptr<TextFrame> RePositionTextFrame(
+    std::shared_ptr<TextFrame>& original,
+    Point translation) {
+  std::vector<TextRun> repositioned_runs;
+  for (const TextRun& run : original->GetRuns()) {
+    std::vector<TextRun::GlyphPosition> new_positions;
+    for (const TextRun::GlyphPosition& glyph : run.GetGlyphPositions()) {
+      new_positions.emplace_back(glyph.glyph, glyph.position + translation);
+    }
+    repositioned_runs.emplace_back(run.GetFont(), new_positions);
+  }
+  return std::make_shared<TextFrame>(repositioned_runs,
+                                     original->GetBounds().Shift(translation),
+                                     original->HasColor());
+}
+
 bool RenderTextInCanvasSkia(
     const std::shared_ptr<Context>& context,
     DisplayListBuilder& canvas,
@@ -1150,7 +1166,7 @@ std::shared_ptr<TextFrame> MakeDefaultTextFrame(const std::string& text,
 
   sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
   SkFont sk_font(font_mgr->makeFromData(mapping), font_size);
-  sk_sp<SkTextBlob> blob = SkTextBlob::MakeFromString("Hi", sk_font);
+  sk_sp<SkTextBlob> blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
 
   std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
   return text_frame;
@@ -1314,7 +1330,7 @@ TEST_P(AiksTest, TextWithShadowAndPosition) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.Clear(DlColor::kWhite());
 
-  auto frame = MakeDefaultTextFrame("Hello", 25.0f);
+  auto frame = MakeDefaultTextFrame("Hi", 25.0f);
   auto text = DlTextImpeller::Make(frame);
   DlPaint paint = DlPaint().setColor(DlColor::kMagenta());
   DlPaint shadow_paint_ctm = DlPaint().setMaskFilter(
@@ -1330,6 +1346,33 @@ TEST_P(AiksTest, TextWithShadowAndPosition) {
 
     builder.DrawText(text, x, 50, shadow_paint_no_ctm);
     builder.DrawText(text, x, 50, paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, SingleGlyphTextWithShadowAndPosition) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.Clear(DlColor::kWhite());
+
+  std::shared_ptr<TextFrame> frame = MakeDefaultTextFrame("X", 25.0f);
+
+  DlPaint paint = DlPaint().setColor(DlColor::kMagenta());
+  DlPaint shadow_paint_ctm = DlPaint().setMaskFilter(
+      DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5.0f, true));
+
+  builder.Translate(100, 100);
+
+  for (int offset = 10; offset < 300; offset += 40) {
+    std::shared_ptr<DlText> text =
+        DlTextImpeller::Make(RePositionTextFrame(frame, Point(offset, 0)));
+    builder.DrawText(text, 0, offset + 30, paint);
+    builder.DrawText(text, 0, offset + 30, shadow_paint_ctm);
+
+    text = DlTextImpeller::Make(RePositionTextFrame(frame, Point(0, offset)));
+    builder.DrawText(text, offset + 30, 0, paint);
+    builder.DrawText(text, offset + 30, 0, shadow_paint_ctm);
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
