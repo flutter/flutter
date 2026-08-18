@@ -16,14 +16,6 @@ enum SwipeEdge {
 
   /// Indicates that the swipe gesture starts from the right edge of the screen.
   right,
-
-  /// Indicates that there was no swipe edge at all.
-  ///
-  /// This corresponds to Android's `BackEvent.EDGE_NONE` and is used when
-  /// the back gesture is triggered by a button press rather than a swipe.
-  ///
-  /// See also: https://developer.android.com/reference/android/window/BackEvent#EDGE_NONE
-  none,
 }
 
 /// Object used to report back gesture progress in Android.
@@ -48,10 +40,12 @@ final class PredictiveBackEvent {
           ? null
           : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
       progress: (map['progress']! as num).toDouble(),
-      swipeEdge: switch (map['swipeEdge']) {
+      swipeEdge: switch (map['swipeEdge']! as int) {
         0 => SwipeEdge.left,
         1 => SwipeEdge.right,
-        2 || _ => SwipeEdge.none,
+        // Android BackEvent.EDGE_NONE is 2. Unknown values (including
+        // EDGE_NONE) fall back to left so fromMap never throws a RangeError.
+        _ => SwipeEdge.left,
       },
     );
   }
@@ -95,6 +89,10 @@ final class PredictiveBackEvent {
   final double progress;
 
   /// The screen edge from which the swipe gesture starts.
+  ///
+  /// Android's `BackEvent.EDGE_NONE` (value 2) and any unknown platform value
+  /// are mapped to [SwipeEdge.left] so that [PredictiveBackEvent.fromMap] does
+  /// not throw. Button-triggered events are identified by [isButtonEvent].
   final SwipeEdge swipeEdge;
 
   /// Indicates if the event was triggered by a system back button press.
@@ -107,9 +105,7 @@ final class PredictiveBackEvent {
       // back button is pressed, but in practice it seems to return 0.0, hence
       // the check for Offset.zero here. This was tested directly in the engine
       // on Android emulator running API 34.
-      swipeEdge == SwipeEdge.none ||
-      touchOffset == null ||
-      (progress == 0.0 && touchOffset == Offset.zero);
+      touchOffset == null || (progress == 0.0 && touchOffset == Offset.zero);
 
   @override
   bool operator ==(Object other) {

@@ -66,33 +66,35 @@ void main() {
     );
   });
 
-  test('fromMap maps swipeEdge 2 (EDGE_NONE) to SwipeEdge.none', () async {
-    // Android's BackEvent.EDGE_NONE has value 2, and is sent when the back
-    // gesture is triggered by a button press rather than a swipe gesture.
+  test('fromMap maps swipeEdge 2 (EDGE_NONE) without throwing', () async {
+    // Android's BackEvent.EDGE_NONE has value 2. Mapping it to an existing
+    // enum value avoids a RangeError; button events are detected via
+    // isButtonEvent (null or zero touchOffset).
     final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
-      'touchOffset': <double>[0.0, 100.0],
+      'touchOffset': <double>[0.0, 0.0],
       'progress': 0.0,
       'swipeEdge': 2,
     });
-    expect(event.swipeEdge, SwipeEdge.none);
+    expect(event.swipeEdge, SwipeEdge.left);
+    expect(event.isButtonEvent, isTrue);
   });
 
-  test('fromMap maps negative swipeEdge to SwipeEdge.none', () async {
+  test('fromMap maps negative swipeEdge without throwing', () async {
     final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': -1,
     });
-    expect(event.swipeEdge, SwipeEdge.none);
+    expect(event.swipeEdge, SwipeEdge.left);
   });
 
-  test('fromMap maps large swipeEdge index to SwipeEdge.none', () async {
+  test('fromMap maps large swipeEdge index without throwing', () async {
     final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 99,
     });
-    expect(event.swipeEdge, SwipeEdge.none);
+    expect(event.swipeEdge, SwipeEdge.left);
   });
 
   test('equality when created with the same parameters', () async {
@@ -128,7 +130,8 @@ void main() {
   });
 
   test('isButtonEvent detection', () async {
-    // Case 1: SwipeEdge.none always indicates a button event
+    // Case 1: Android EDGE_NONE (swipeEdge 2) with zero offset — the crash
+    // payload from https://github.com/flutter/flutter/issues/186168.
     final event1 = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 0.0],
       'progress': 0.0,
@@ -225,16 +228,5 @@ void main() {
     });
     expect(eventA, isNot(equals(eventB)));
     expect(eventA.hashCode, isNot(equals(eventB.hashCode)));
-  });
-
-  test('fromMap maps SwipeEdge.none and verifies SwipeEdge.none isButtonEvent', () async {
-    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
-      'touchOffset': <double>[50.0, 50.0],
-      'progress': 0.5,
-      'swipeEdge': 2,
-    });
-    expect(event.swipeEdge, SwipeEdge.none);
-    // SwipeEdge.none always means button event, even with non-zero offset/progress
-    expect(event.isButtonEvent, isTrue);
   });
 }
