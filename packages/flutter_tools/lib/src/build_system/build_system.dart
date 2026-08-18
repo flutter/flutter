@@ -830,25 +830,39 @@ class FlutterBuildSystem extends BuildSystem {
     }
     final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
         .cast<String>();
-    final String sharedHooksPath = fileSystem.path.join(
-      environment.projectDir.resolveSymbolicLinksSync(),
-      '.dart_tool',
-      'hooks_runner',
-      'shared',
+    _deleteStaleOutputs(
+      currentOutputs: currentOutputs,
+      environment: environment,
+      fileSystem: fileSystem,
+      preservedOutputFilePaths: preservedOutputFilePaths,
+      previousOutputs: lastOutputs,
     );
-    for (final lastOutput in lastOutputs) {
-      if (!currentOutputs.containsKey(lastOutput)) {
-        final File lastOutputFile = fileSystem.file(lastOutput);
-        if (preservedOutputFilePaths.contains(lastOutputFile.path) ||
-            fileSystem.path.isWithin(
-              sharedHooksPath,
-              fileSystem.path.absolute(lastOutputFile.path),
-            )) {
-          continue;
-        }
-        ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
-      }
+  }
+}
+
+void _deleteStaleOutputs({
+  required Map<String, File> currentOutputs,
+  required Environment environment,
+  required FileSystem fileSystem,
+  required Set<String> preservedOutputFilePaths,
+  required Iterable<String> previousOutputs,
+}) {
+  final String sharedHooksPath = fileSystem.path.join(
+    environment.projectDir.resolveSymbolicLinksSync(),
+    '.dart_tool',
+    'hooks_runner',
+    'shared',
+  );
+  for (final previousOutput in previousOutputs) {
+    if (currentOutputs.containsKey(previousOutput)) {
+      continue;
     }
+    final File previousFile = fileSystem.file(previousOutput);
+    if (preservedOutputFilePaths.contains(previousFile.path) ||
+        fileSystem.path.isWithin(sharedHooksPath, fileSystem.path.absolute(previousFile.path))) {
+      continue;
+    }
+    ErrorHandlingFileSystem.deleteIfExists(previousFile);
   }
 }
 
@@ -874,12 +888,6 @@ class _BuildInstance {
   final inputFiles = <String, File>{};
   final outputFiles = <String, File>{};
   final Set<String> preservedOutputFilePaths;
-  late final String _sharedHooksPath = fileSystem.path.join(
-    environment.projectDir.resolveSymbolicLinksSync(),
-    '.dart_tool',
-    'hooks_runner',
-    'shared',
-  );
 
   // Timings collected during target invocation.
   final stepTimings = <String, PerformanceMeasurement>{};
@@ -969,20 +977,13 @@ class _BuildInstance {
 
       // Delete outputs from previous stages that are no longer a part of the
       // build.
-      for (final String previousOutput in node.previousOutputs) {
-        if (outputFiles.containsKey(previousOutput)) {
-          continue;
-        }
-        final File previousFile = fileSystem.file(previousOutput);
-        if (preservedOutputFilePaths.contains(previousFile.path) ||
-            fileSystem.path.isWithin(
-              _sharedHooksPath,
-              fileSystem.path.absolute(previousFile.path),
-            )) {
-          continue;
-        }
-        ErrorHandlingFileSystem.deleteIfExists(previousFile);
-      }
+      _deleteStaleOutputs(
+        currentOutputs: outputFiles,
+        environment: environment,
+        fileSystem: fileSystem,
+        preservedOutputFilePaths: preservedOutputFilePaths,
+        previousOutputs: node.previousOutputs,
+      );
     } on Exception catch (exception, stackTrace) {
       node.target.clearStamp(environment);
       succeeded = false;
