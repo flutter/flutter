@@ -1006,7 +1006,7 @@ extension OSArchitectures on OS {
   Set<Architecture> get architectures => _osTargets[this]!;
 }
 
-const _osTargets = <OS, Set<Architecture>>{
+final Map<OS, Set<Architecture>> _osTargets = <OS, Set<Architecture>>{
   OS.android: <Architecture>{
     Architecture.arm,
     Architecture.arm64,
