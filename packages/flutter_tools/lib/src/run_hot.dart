@@ -1489,6 +1489,8 @@ class ProjectFileInvalidator {
 
     final bool Function(DateTime) isInvalidated;
     if (_platform.isWindows) {
+      // On Windows, FileStat.modified truncates to second precision (via GetFileAttributesExW).
+      // However, lastCompiled is recorded with millisecond precision.
       final lastCompiledTruncated = DateTime.fromMillisecondsSinceEpoch(
         (lastCompiled.millisecondsSinceEpoch ~/ 1000) * 1000,
         isUtc: lastCompiled.isUtc,
