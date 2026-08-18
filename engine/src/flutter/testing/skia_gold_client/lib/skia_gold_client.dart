@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
@@ -176,6 +177,9 @@ interface class SkiaGoldClient {
 
   /// Prefix to add to all test names, if any.
   final String? _prefix;
+
+  /// Prefix to add to all test names.
+  String get prefix => _prefix ?? 'engine.';
 
   String get _tempPath => path.join(workDirectory.path, 'temp');
   String get _keysPath => path.join(workDirectory.path, 'keys.json');
@@ -602,12 +606,28 @@ interface class SkiaGoldClient {
     try {
       final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
       final io.HttpClientResponse response = await request.close();
+      // When querying Skia Gold for a newly added test that has not yet had any
+      // baseline images uploaded or approved, the Skia Gold REST endpoint returns
+      // HTTP 404 (with a plain text body). Returning null indicates to callers
+      // that there is no existing positive baseline expectation for this test yet.
+      if (response.statusCode == 404) {
+        return null;
+      }
+      if (response.statusCode != 200) {
+        throw io.HttpException(
+          'Failed to fetch expectation from $requestForExpectations: HTTP ${response.statusCode}',
+          uri: requestForExpectations,
+        );
+      }
       rawResponse = await utf8.decodeStream(response);
       final dynamic jsonResponse = json.decode(rawResponse);
       if (jsonResponse is! Map<String, dynamic>) {
         throw const FormatException('Skia gold expectations do not match expected format.');
       }
       expectation = jsonResponse['digest'] as String?;
+      if (expectation != null && expectation.isEmpty) {
+        expectation = null;
+      }
     } on FormatException catch (error) {
       _stderr.writeln(
         'Formatting error detected requesting expectations from Flutter Gold.\n'
@@ -618,6 +638,24 @@ interface class SkiaGoldClient {
       rethrow;
     }
     return expectation;
+  }
+
+  /// Returns the raw PNG bytes for the given [digest] from Skia Gold.
+  Future<Uint8List> getImageBytes(String digest) async {
+    final Uri requestForImage = Uri.parse('$_skiaGoldHost/img/images/$digest.png');
+    final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
+    final io.HttpClientResponse response = await request.close();
+    if (response.statusCode != 200) {
+      throw io.HttpException(
+        'Failed to fetch image from $requestForImage: HTTP ${response.statusCode}',
+        uri: requestForImage,
+      );
+    }
+    final BytesBuilder bytesBuilder = await response.fold<BytesBuilder>(
+      BytesBuilder(),
+      (BytesBuilder builder, List<int> chunk) => builder..add(chunk),
+    );
+    return bytesBuilder.takeBytes();
   }
 
   /// Returns the current commit hash of the engine repository.
@@ -668,7 +706,11 @@ interface class SkiaGoldClient {
   @visibleForTesting
   String getTraceID(String testName) {
     final keys = <String, dynamic>{..._getKeys(), 'name': testName, 'source_type': _instance};
-    final String jsonTrace = json.encode(keys);
+    final sorted = <String, dynamic>{};
+    for (final String key in keys.keys.toList()..sort()) {
+      sorted[key] = keys[key];
+    }
+    final String jsonTrace = json.encode(sorted);
     final md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
     return md5Sum;
   }

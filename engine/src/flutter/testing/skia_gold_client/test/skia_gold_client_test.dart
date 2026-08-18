@@ -696,6 +696,24 @@ void main() {
       fixture.dispose();
     }
   });
+
+  test('getImageBytes returns raw image bytes from Skia Gold', () async {
+    final fixture = _TestFixture();
+    try {
+      final SkiaGoldClient client = createClient(fixture, environment: presubmitEnv);
+
+      final expectedBytes = Uint8List.fromList([1, 2, 3, 4, 5]);
+      fixture.httpClient.setBytesResponse(
+        Uri.parse('https://flutter-gold.skia.org/img/images/test_digest.png'),
+        expectedBytes,
+      );
+
+      final List<int> bytes = await client.getImageBytes('test_digest');
+      expect(bytes, expectedBytes);
+    } finally {
+      fixture.dispose();
+    }
+  });
 }
 
 final class _TestFixture {
@@ -747,11 +765,19 @@ final class _FakeHttpClient implements io.HttpClient {
     _expectedResponses[request] = jsonEncodableValue;
   }
 
+  /// Sets an expected response for the given [request] to [bytes].
+  void setBytesResponse(Uri request, Uint8List bytes) {
+    _expectedResponses[request] = bytes;
+  }
+
   @override
   Future<io.HttpClientRequest> getUrl(Uri url) async {
     final Object? response = _expectedResponses[url];
     if (response == null) {
       throw StateError('No request expected for $url');
+    }
+    if (response is Uint8List) {
+      return _FakeHttpClientRequest.withBytes(response);
     }
     return _FakeHttpClientRequest.withJsonResponse(response);
   }
@@ -765,6 +791,10 @@ final class _FakeHttpClient implements io.HttpClient {
 final class _FakeHttpClientRequest implements io.HttpClientRequest {
   factory _FakeHttpClientRequest.withJsonResponse(Object? jsonResponse) {
     final Uint8List bytes = utf8.encoder.convert(jsonEncode(jsonResponse));
+    return _FakeHttpClientRequest._(_FakeHttpClientResponse(bytes));
+  }
+
+  factory _FakeHttpClientRequest.withBytes(Uint8List bytes) {
     return _FakeHttpClientRequest._(_FakeHttpClientResponse(bytes));
   }
 
@@ -795,9 +825,8 @@ final class _FakeHttpClientResponse extends Stream<List<int>> implements io.Http
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(<List<int>>[
-      _bytes,
-    ]).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    return Stream<List<int>>.fromIterable(<List<int>>[_bytes])
+        .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override
