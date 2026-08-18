@@ -18,6 +18,14 @@
 # * Fixes in this file are from the Cupertino library. *
 version: 1
 transforms:
+  # TODO(Piinks): Link eventual deprecation PR, add testing support once available.
+  - title: 'Migrate from flutter/cupertino.dart to cupertino_ui/cupertino_ui.dart.'
+    date: 2026-07-08
+    library: 'package:flutter/cupertino.dart'
+    changes:
+      - kind: 'replacedBy'
+        newLibrary: 'package:cupertino_ui/cupertino_ui.dart'
+
   # Change made in https://github.com/flutter/flutter/pull/20649
   # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
   - title: "Replace with 'CupertinoPopupSurface'"

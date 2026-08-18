@@ -7,13 +7,12 @@
 // golden harness and have their output uploaded to Skia Gold. They only build
 // as part of the golden test executable.
 
-#ifdef IMPELLER_GOLDEN_TESTS
-
 #include <array>
 #include <cstdint>
 #include <vector>
 
 #include "flutter/impeller/golden_tests/golden_playground_test.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/sampler_descriptor.h"
@@ -22,11 +21,16 @@
 #include "impeller/fixtures/baby.vert.h"
 #include "impeller/fixtures/instanced_attributes.frag.h"
 #include "impeller/fixtures/instanced_attributes.vert.h"
+#include "impeller/fixtures/mipmaps.frag.h"
+#include "impeller/fixtures/mipmaps.vert.h"
 #include "impeller/fixtures/texture.frag.h"
 #include "impeller/fixtures/texture.vert.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/playground/playground_test.h"
+#include "impeller/renderer/blit_pass.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
@@ -38,7 +42,12 @@
 namespace impeller {
 namespace testing {
 
+#ifdef IMPELLER_GOLDEN_TESTS
 using RendererGoldenTest = GoldenPlaygroundTest;
+#else
+using RendererGoldenTest = PlaygroundTestWithGoldens;
+#endif
+
 INSTANTIATE_PLAYGROUND_SUITE(RendererGoldenTest);
 
 // Ported from RendererTest.BabysFirstTriangle. Draws a single gradient
@@ -53,14 +62,7 @@ TEST_P(RendererGoldenTest, BabysFirstTriangle) {
 
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  // Match the golden harness render target: single-sampled, no depth/stencil.
-  // `ClearStencilAttachments` also resets the stencil pixel format on the
-  // pipeline, which Metal validation requires to match the target's lack of a
-  // stencil texture; `SetStencilAttachmentDescriptors(nullopt)` alone leaves
-  // the format set and trips that validation.
-  desc->SetSampleCount(SampleCount::kCount1);
-  desc->ClearStencilAttachments();
-  desc->ClearDepthAttachment();
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
   auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_TRUE(pipeline);
 
@@ -106,10 +108,7 @@ TEST_P(RendererGoldenTest, CanRenderInstancedWithVertexAttributes) {
 
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  // Match the golden harness render target: single-sampled, no depth/stencil.
-  desc->SetSampleCount(SampleCount::kCount1);
-  desc->ClearStencilAttachments();
-  desc->ClearDepthAttachment();
+  ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
 
   // Per-instance data is laid out contiguously, one record per instance.
   struct InstanceData {
@@ -205,7 +204,7 @@ TEST_P(RendererGoldenTest, CanRenderInstancedWithVertexAttributes) {
 // through the golden harness. The pixel format and the raw block bytes are the
 // only things that differ between the compressed families; the texture upload,
 // pipeline, quad, and draw are shared by every compressed-format golden below.
-static void DrawCompressedTextureGolden(GoldenPlaygroundTest& test,
+static void DrawCompressedTextureGolden(RendererGoldenTest& test,
                                         PixelFormat format,
                                         const std::vector<uint8_t>& block_data,
                                         ISize size) {
@@ -227,9 +226,7 @@ static void DrawCompressedTextureGolden(GoldenPlaygroundTest& test,
 
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
-  desc->SetSampleCount(SampleCount::kCount1);
-  desc->ClearStencilAttachments();
-  desc->ClearDepthAttachment();
+  ASSERT_TRUE(test.InitializePipelineDescriptorForRendering(*desc));
   auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_TRUE(pipeline);
 
@@ -372,9 +369,140 @@ TEST_P(RendererGoldenTest, CanRenderASTCCompressedTexture) {
                               ISize{8, 8});
 }
 
+// Samples a texture whose mip chain was populated by hand (the base level via
+// SetContents, the 4x4 second level via a blit copy) rather than by the
+// GenerateMipmap blit, then samples it at the given LOD. Such a texture has
+// mip_count > 1 with NeedsMipmapGeneration() == true; sampling it used to fail
+// the (now-removed) bind-time mipmap validation on desktop Metal and OpenGL ES,
+// so the golden would have been blank there. The base is four colored quadrants
+// and the second level is solid orange, so LOD 0 renders the quadrants and LOD
+// 1 renders solid orange.
+static void DrawManuallyMippedTextureGolden(RendererGoldenTest& test,
+                                            float lod) {
+  using VS = MipmapsVertexShader;
+  using FS = MipmapsFragmentShader;
+
+  std::shared_ptr<Context> context = test.GetContext();
+  ASSERT_TRUE(context);
+
+  TextureDescriptor texture_desc;
+  texture_desc.storage_mode = StorageMode::kHostVisible;
+  texture_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_desc.size = ISize{8, 8};
+  texture_desc.mip_count = 2u;  // base 8x8 + one 4x4 mip; populated by hand.
+  texture_desc.usage = TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(texture_desc);
+  ASSERT_TRUE(texture);
+
+  // Base level: a 2x2 grid of red/green/blue/white quadrants.
+  std::vector<uint8_t> base_data(8 * 8 * 4);
+  for (int y = 0; y < 8; ++y) {
+    for (int x = 0; x < 8; ++x) {
+      const size_t i = (static_cast<size_t>(y) * 8 + x) * 4;
+      const bool right = x >= 4;
+      const bool bottom = y >= 4;
+      uint8_t r = 0, g = 0, b = 0;
+      if (!right && !bottom) {
+        r = 0xFF;  // top-left: red.
+      } else if (right && !bottom) {
+        g = 0xFF;  // top-right: green.
+      } else if (!right && bottom) {
+        b = 0xFF;  // bottom-left: blue.
+      } else {
+        r = g = b = 0xFF;  // bottom-right: white.
+      }
+      base_data[i] = r;
+      base_data[i + 1] = g;
+      base_data[i + 2] = b;
+      base_data[i + 3] = 0xFF;
+    }
+  }
+  ASSERT_TRUE(texture->SetContents(base_data.data(), base_data.size()));
+
+  // Second level (4x4), solid orange so it is distinct from the base and from
+  // an empty level. Uploaded by hand via a blit copy rather than the
+  // GenerateMipmap blit, which keeps NeedsMipmapGeneration() true. This
+  // initializes the whole mip chain so the texture is complete on backends
+  // that require it (OpenGL ES samples a mipmapped texture as incomplete
+  // otherwise).
+  std::vector<uint8_t> mip_data(4 * 4 * 4);
+  for (size_t i = 0; i < mip_data.size(); i += 4) {
+    mip_data[i] = 0xFF;      // r
+    mip_data[i + 1] = 0x80;  // g
+    mip_data[i + 2] = 0x00;  // b
+    mip_data[i + 3] = 0xFF;  // a
+  }
+  auto mip_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      mip_data.data(), mip_data.size());
+  ASSERT_TRUE(mip_buffer);
+  auto cmd_buffer = context->CreateCommandBuffer();
+  ASSERT_TRUE(cmd_buffer);
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+  ASSERT_TRUE(blit_pass);
+  // The destination region must match the 4x4 second level, not the 8x8 base,
+  // or the copy size check rejects the smaller source buffer.
+  ASSERT_TRUE(
+      blit_pass->AddCopy(DeviceBuffer::AsBufferView(mip_buffer), texture,
+                         /*destination_region=*/IRect::MakeSize(ISize{4, 4}),
+                         /*label=*/"Upload mip 1", /*mip_level=*/1u));
+  ASSERT_TRUE(blit_pass->EncodeCommands());
+  ASSERT_TRUE(context->GetCommandQueue()->Submit({cmd_buffer}).ok());
+
+  auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  ASSERT_TRUE(test.InitializePipelineDescriptorForRendering(*desc));
+  auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
+  ASSERT_TRUE(pipeline);
+
+  // A fullscreen quad in normalized device coordinates with an identity MVP.
+  VertexBufferBuilder<VS::PerVertexData> vertex_buffer_builder;
+  vertex_buffer_builder.AddVertices({
+      {{-1, -1}, {0.0, 0.0}},
+      {{1, -1}, {1.0, 0.0}},
+      {{1, 1}, {1.0, 1.0}},
+      {{-1, -1}, {0.0, 0.0}},
+      {{1, 1}, {1.0, 1.0}},
+      {{-1, 1}, {0.0, 1.0}},
+  });
+  auto vertex_buffer = vertex_buffer_builder.CreateVertexBuffer(
+      *context->GetResourceAllocator());
+
+  const auto& sampler = context->GetSamplerLibrary()->GetSampler({});
+
+  auto host_buffer = HostBuffer::Create(
+      context->GetResourceAllocator(), context->GetIdleWaiter(),
+      context->GetCapabilities()->GetMinimumUniformAlignment());
+
+  ASSERT_TRUE(test.OpenPlaygroundHere([&](RenderPass& pass) -> bool {
+    host_buffer->Reset();
+    pass.SetPipeline(pipeline);
+    pass.SetVertexBuffer(vertex_buffer);
+
+    VS::FrameInfo frame_info;
+    frame_info.mvp = Matrix();
+    VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
+
+    FS::FragInfo frag_info;
+    frag_info.lod = lod;
+    FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
+
+    FS::BindTex(pass, texture, sampler);
+
+    return pass.Draw().ok();
+  }));
+}
+
+// LOD 0 reads the base level, so the golden is the four colored quadrants.
+TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
+  DrawManuallyMippedTextureGolden(*this, /*lod=*/0.0f);
+}
+
+// LOD 1 reads the hand-uploaded second level, so the golden is solid orange.
+TEST_P(RendererGoldenTest, CanSampleManuallyMippedTextureLod1) {
+  DrawManuallyMippedTextureGolden(*this, /*lod=*/1.0f);
+}
+
 }  // namespace testing
 }  // namespace impeller
 
 // NOLINTEND(bugprone-unchecked-optional-access)
-
-#endif  // IMPELLER_GOLDEN_TESTS

@@ -12,6 +12,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/synchronization/sync_switch.h"
+#include "flutter/fml/trace_event.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/core/sampler_descriptor.h"
@@ -87,6 +88,9 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
       .SetSupportsTriangleFan(false)
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
+      // Anisotropic filtering with a clamp in the range [1, 16] is supported
+      // on all Metal devices.
+      .SetMaxSamplerAnisotropy(16)
       .SetSupportsExtendedRangeFormats(
           DeviceSupportsExtendedRangeFormats(device))
       .SetSupportsTextureCompression(CompressedTextureFamily::kBC,
@@ -391,6 +395,16 @@ std::shared_ptr<Allocator> ContextMTL::GetResourceAllocator() const {
   return resource_allocator_;
 }
 
+std::shared_ptr<const GpuSubmissionTracker> ContextMTL::GetSubmissionTracker()
+    const {
+  return submission_tracker_;
+}
+
+const std::shared_ptr<GpuSubmissionTracker>&
+ContextMTL::GetMutableSubmissionTracker() const {
+  return submission_tracker_;
+}
+
 id<MTLDevice> ContextMTL::GetMTLDevice() const {
   return device_;
 }
@@ -445,6 +459,22 @@ void ContextMTL::StoreTaskForGPU(const fml::closure& task,
   }
 }
 
+void ContextMTL::TrackPendingImageUpload(
+    const std::shared_ptr<CommandBufferSchedulingReceipt>& receipt) {
+  pending_image_uploads_.Track(receipt);
+}
+
+void ContextMTL::DrainPendingImageUploads() {
+  const size_t pending_count = pending_image_uploads_.GetPendingCount();
+  if (pending_count == 0u) {
+    return;
+  }
+  const std::string pending_count_string = std::to_string(pending_count);
+  TRACE_EVENT1("impeller", "ImpellerMetalImageUploadScheduleDrain",
+               "PendingCount", pending_count_string.c_str());
+  pending_image_uploads_.WaitUntilScheduled();
+}
+
 void ContextMTL::FlushTasksAwaitingGPU() {
   std::deque<PendingTasks> tasks_awaiting_gpu;
   {
@@ -492,7 +522,9 @@ ContextMTL::SyncSwitchObserver::SyncSwitchObserver(ContextMTL& parent)
     : parent_(parent) {}
 
 void ContextMTL::SyncSwitchObserver::OnSyncSwitchUpdate(bool new_is_disabled) {
-  if (!new_is_disabled) {
+  if (new_is_disabled) {
+    parent_.DrainPendingImageUploads();
+  } else {
     parent_.FlushTasksAwaitingGPU();
   }
 }

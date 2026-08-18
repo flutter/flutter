@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -124,7 +125,6 @@ void main() {
         expect(response.data['id'], 0);
         expect(response.data['result'], isNotEmpty);
         expect(response.data['result']! as Map<String, Object?>, const <String, Object>{
-          'platforms': <String>['macos', 'windows'],
           'platformTypes': <String, Map<String, Object>>{
             'web': <String, Object>{
               'isSupported': false,
@@ -427,6 +427,7 @@ void main() {
               'emulator': false,
               'category': 'mobile',
               'platformType': 'android',
+              'cpuArch': 'armv7',
               'ephemeral': false,
               'emulatorId': 'device',
               'sdk': 'Android 12',
@@ -660,7 +661,7 @@ void main() {
         expect(device.dds.enableDevTools, true);
         expect(device.dds.startAppName, contains('Kind: Flutter'));
         expect(device.dds.startAppName, contains('Device: android device'));
-        expect(device.dds.startAppName, contains('Package: flutter_tools'));
+        expect(device.dds.startAppName, contains('Package: '));
 
         // dds.done event should be sent to the client.
         ddsDoneCompleter.complete();
@@ -939,6 +940,45 @@ void main() {
         expect(firstResponse.data['error'], isNotNull);
       }, ioOverrides);
     });
+
+    testUsingContext(
+      'app.start throws DaemonException if app fails to start early',
+      () async {
+        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        final ResidentRunner runner = FakeResidentRunner();
+        final Device device = FakeAndroidDevice();
+
+        await expectLater(
+          () => daemon.appDomain.launch(
+            runner,
+            ({
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+            }) async {
+              // App exits immediately without completing appStartedCompleter
+              return;
+            },
+            device,
+            null, // projectDirectory
+            false, // enableHotReload
+            globals.fs.directory('/'), // cwd
+            LaunchMode.run,
+            MachineOutputLogger(parent: notifyingLogger),
+          ),
+          throwsA(
+            isA<DaemonException>().having(
+              (DaemonException e) => e.message,
+              'message',
+              'App failed to start',
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 
   group('notifyingLogger', () {
@@ -1122,6 +1162,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.armv7;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -1343,4 +1386,15 @@ class FakeSocket extends Fake implements io.Socket {
 
   @override
   void destroy() {}
+}
+
+class FakeResidentRunner extends Fake implements ResidentRunner {
+  @override
+  bool get supportsServiceProtocol => false;
+
+  @override
+  bool get debuggingEnabled => false;
+
+  @override
+  DebuggingOptions get debuggingOptions => DebuggingOptions.enabled(BuildInfo.debug);
 }

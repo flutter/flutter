@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dart_style/dart_style.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:process/process.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -84,8 +86,15 @@ const Brightness brightnessConstant = Brightness.dark;
 
 const kThemeDart = '''
 import 'package:flutter/widget_previews.dart';
+import 'package:flutter/widgets.dart';
 
-PreviewThemeData myThemeData() => PreviewThemeData();
+final class MyThemeData extends PreviewThemeData {
+  const MyThemeData();
+  @override
+  Widget apply(BuildContext context, Widget child) => child;
+}
+
+PreviewThemeData myThemeData() => const MyThemeData();
 ''';
 
 const kWrapperDart = '''
@@ -466,16 +475,15 @@ List<_i1.WidgetPreview> previews() => [];
           projectRootPath: project.directory.absolute.path,
         );
 
-        final expectedDtdConnectionInfo =
-            '''
+        final String expectedDtdConnectionInfo = DartFormatter(languageVersion: Version.none)
+            .format('''
 // ignore_for_file: implementation_imports
 
 const String kWidgetPreviewDtdUri = '$dtdUri';
 const String kWidgetPreviewService = 'widget-preview-service';
 const String kWidgetPreviewScaffoldStream = 'widget-preview-stream';
-const String kProjectRootPath =
-    r'${project.directory.absolute.path}';
-''';
+const String kProjectRootPath = r'${project.directory.absolute.path}';
+''');
         expect(generatedDtdConnectionInfoFile.readAsStringSync(), expectedDtdConnectionInfo);
       },
     );

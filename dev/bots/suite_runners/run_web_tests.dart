@@ -17,6 +17,7 @@ import 'dart:io'
         SocketDirection,
         SocketException;
 import 'dart:math' as math;
+
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
@@ -176,6 +177,9 @@ class WebTestsSuite {
         buildMode: 'profile',
         useWasm: false,
       ),
+
+      () => _runWebE2eTest('deferred_loading_integration', buildMode: 'release', useWasm: false),
+      () => _runWebE2eTest('deferred_loading_integration', buildMode: 'release', useWasm: true),
 
       () => _runWebTreeshakeTest(),
 
@@ -586,7 +590,7 @@ class WebTestsSuite {
     //
     // We make sure the last shard ends in _last so it's easier to catch mismatches
     // between `.ci.yaml` and `test.dart`.
-    subshards['${webShardCount - 1}_last'] = () async {
+    Future<void> lastShardRunner() async {
       await _runFlutterWebTest(
         flutterPackageDirectory.path,
         allTests.sublist((webShardCount - 1) * testsPerShard, allTests.length),
@@ -598,7 +602,10 @@ class WebTestsSuite {
       await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_driver'), <String>[
         path.join('test', 'src', 'web_tests', 'web_extension_test.dart'),
       ], useWasm);
-    };
+    }
+
+    subshards['${webShardCount - 1}'] = lastShardRunner;
+    subshards['${webShardCount - 1}_last'] = lastShardRunner;
 
     await selectSubshard(subshards);
   }

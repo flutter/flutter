@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, ClipOp, Paragraph, TextBox;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -396,6 +397,57 @@ void main() {
 
     paragraph.paint(MockPaintingContext(), Offset.zero);
     expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
+  });
+
+  test('RenderParagraph devicePixelRatio control test', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello'),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+    pumpFrame(phase: EnginePhase.paint);
+
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isFalse);
+    expect(paragraph.devicePixelRatio, 1.0);
+
+    paragraph.devicePixelRatio = 2.0;
+    expect(paragraph.devicePixelRatio, 2.0);
+    expect(paragraph.debugNeedsLayout, isFalse);
+    // On the web, changing devicePixelRatio triggers a repaint.
+    expect(paragraph.debugNeedsPaint, kIsWeb);
+
+    if (kIsWeb) {
+      pumpFrame(phase: EnginePhase.paint);
+      expect(paragraph.debugNeedsPaint, isFalse);
+      paragraph.devicePixelRatio = 2.0;
+      expect(paragraph.debugNeedsPaint, isFalse);
+    }
+  });
+
+  test('RenderParagraph devicePixelRatio constructor test', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello'),
+      textDirection: TextDirection.ltr,
+      devicePixelRatio: 2.0,
+    );
+    expect(paragraph.devicePixelRatio, 2.0);
+  });
+
+  test('RenderParagraph.debugFillProperties', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello'),
+      textDirection: TextDirection.ltr,
+      devicePixelRatio: 2.5,
+    );
+    final builder = DiagnosticPropertiesBuilder();
+    paragraph.debugFillProperties(builder);
+
+    final List<DiagnosticsNode> nodes = builder.properties;
+    expect(
+      nodes.any((DiagnosticsNode node) => node.name == 'devicePixelRatio' && node.value == 2.5),
+      isTrue,
+    );
   });
 
   group('didExceedMaxLines', () {

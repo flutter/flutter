@@ -56,12 +56,40 @@ static gboolean get_mouse_button(guint gdk_button, int64_t* button) {
   }
 }
 
+static gboolean get_button(FlutterPointerDeviceKind device_kind,
+                           guint gdk_button,
+                           int64_t* button) {
+  if (device_kind == kFlutterPointerDeviceKindStylus ||
+      device_kind == kFlutterPointerDeviceKindInvertedStylus) {
+    // GDK button names describe the physical button action, where "primary"
+    // is the stylus tip contact. Flutter stylus button names reserve "primary"
+    // for the first barrel button, so the GDK secondary button maps there.
+    switch (gdk_button) {
+      case GDK_BUTTON_PRIMARY:
+        *button = kFlutterPointerButtonStylusContact;
+        return TRUE;
+      case GDK_BUTTON_SECONDARY:
+        *button = kFlutterPointerButtonStylusPrimary;
+        return TRUE;
+      case GDK_BUTTON_MIDDLE:
+        *button = kFlutterPointerButtonStylusSecondary;
+        return TRUE;
+      default:
+        return FALSE;
+    }
+  }
+
+  return get_mouse_button(gdk_button, button);
+}
+
 // Generates a mouse pointer event if the pointer appears inside the window.
 static void ensure_pointer_added(FlPointerManager* self,
                                  guint event_time,
                                  FlutterPointerDeviceKind device_kind,
                                  gdouble x,
-                                 gdouble y) {
+                                 gdouble y,
+                                 gdouble rotation,
+                                 gdouble pressure) {
   if (self->pointer_inside) {
     return;
   }
@@ -74,7 +102,7 @@ static void ensure_pointer_added(FlPointerManager* self,
 
   fl_engine_send_mouse_pointer_event(
       engine, self->view_id, kAdd, event_time * kMicrosecondsPerMillisecond, x,
-      y, device_kind, 0, 0, self->button_state);
+      y, device_kind, 0, 0, self->button_state, rotation, pressure);
 }
 
 static void fl_pointer_manager_dispose(GObject* object) {
@@ -108,15 +136,17 @@ gboolean fl_pointer_manager_handle_button_press(
     FlutterPointerDeviceKind device_kind,
     gdouble x,
     gdouble y,
-    guint gdk_button) {
+    guint gdk_button,
+    gdouble rotation,
+    gdouble pressure) {
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   int64_t button;
-  if (!get_mouse_button(gdk_button, &button)) {
+  if (!get_button(device_kind, gdk_button, &button)) {
     return FALSE;
   }
 
-  ensure_pointer_added(self, event_time, device_kind, x, y);
+  ensure_pointer_added(self, event_time, device_kind, x, y, rotation, pressure);
 
   // Drop the event if Flutter already thinks the button is down.
   if ((self->button_state & button) != 0) {
@@ -135,7 +165,7 @@ gboolean fl_pointer_manager_handle_button_press(
 
   fl_engine_send_mouse_pointer_event(
       engine, self->view_id, phase, event_time * kMicrosecondsPerMillisecond, x,
-      y, device_kind, 0, 0, self->button_state);
+      y, device_kind, 0, 0, self->button_state, rotation, pressure);
 
   return TRUE;
 }
@@ -146,11 +176,13 @@ gboolean fl_pointer_manager_handle_button_release(
     FlutterPointerDeviceKind device_kind,
     gdouble x,
     gdouble y,
-    guint gdk_button) {
+    guint gdk_button,
+    gdouble rotation,
+    gdouble pressure) {
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   int64_t button;
-  if (!get_mouse_button(gdk_button, &button)) {
+  if (!get_button(device_kind, gdk_button, &button)) {
     return FALSE;
   }
 
@@ -171,7 +203,7 @@ gboolean fl_pointer_manager_handle_button_release(
 
   fl_engine_send_mouse_pointer_event(
       engine, self->view_id, phase, event_time * kMicrosecondsPerMillisecond, x,
-      y, device_kind, 0, 0, self->button_state);
+      y, device_kind, 0, 0, self->button_state, rotation, pressure);
 
   return TRUE;
 }
@@ -180,7 +212,9 @@ gboolean fl_pointer_manager_handle_motion(FlPointerManager* self,
                                           guint event_time,
                                           FlutterPointerDeviceKind device_kind,
                                           gdouble x,
-                                          gdouble y) {
+                                          gdouble y,
+                                          gdouble rotation,
+                                          gdouble pressure) {
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -188,12 +222,12 @@ gboolean fl_pointer_manager_handle_motion(FlPointerManager* self,
     return FALSE;
   }
 
-  ensure_pointer_added(self, event_time, device_kind, x, y);
+  ensure_pointer_added(self, event_time, device_kind, x, y, rotation, pressure);
 
   fl_engine_send_mouse_pointer_event(
       engine, self->view_id, self->button_state != 0 ? kMove : kHover,
       event_time * kMicrosecondsPerMillisecond, x, y, device_kind, 0, 0,
-      self->button_state);
+      self->button_state, rotation, pressure);
 
   return TRUE;
 }
@@ -202,7 +236,9 @@ gboolean fl_pointer_manager_handle_enter(FlPointerManager* self,
                                          guint event_time,
                                          FlutterPointerDeviceKind device_kind,
                                          gdouble x,
-                                         gdouble y) {
+                                         gdouble y,
+                                         gdouble rotation,
+                                         gdouble pressure) {
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -210,7 +246,7 @@ gboolean fl_pointer_manager_handle_enter(FlPointerManager* self,
     return FALSE;
   }
 
-  ensure_pointer_added(self, event_time, device_kind, x, y);
+  ensure_pointer_added(self, event_time, device_kind, x, y, rotation, pressure);
 
   return TRUE;
 }
@@ -219,7 +255,9 @@ gboolean fl_pointer_manager_handle_leave(FlPointerManager* self,
                                          guint event_time,
                                          FlutterPointerDeviceKind device_kind,
                                          gdouble x,
-                                         gdouble y) {
+                                         gdouble y,
+                                         gdouble rotation,
+                                         gdouble pressure) {
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -234,7 +272,7 @@ gboolean fl_pointer_manager_handle_leave(FlPointerManager* self,
     fl_engine_send_mouse_pointer_event(engine, self->view_id, kRemove,
                                        event_time * kMicrosecondsPerMillisecond,
                                        x, y, device_kind, 0, 0,
-                                       self->button_state);
+                                       self->button_state, rotation, pressure);
     self->pointer_inside = FALSE;
   }
 

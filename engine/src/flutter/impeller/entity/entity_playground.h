@@ -22,20 +22,11 @@ class EntityPlayground : public PlaygroundTest {
 
   ~EntityPlayground();
 
-  void SetTypographerContext(
-      std::shared_ptr<TypographerContext> typographer_context);
-
-  std::shared_ptr<TypographerContext> GetTypographerContext() const;
-
   bool OpenPlaygroundHere(Entity entity);
 
   bool OpenPlaygroundHere(EntityPlaygroundCallback callback);
 
-  std::shared_ptr<ContentContext> GetContentContext() const;
-
  private:
-  std::shared_ptr<TypographerContext> typographer_context_;
-
   EntityPlayground(const EntityPlayground&) = delete;
 
   EntityPlayground& operator=(const EntityPlayground&) = delete;

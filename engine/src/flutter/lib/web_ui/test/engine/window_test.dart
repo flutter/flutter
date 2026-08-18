@@ -546,23 +546,46 @@ void testMain() {
     expect(localeChangedCount, 1);
   });
 
-  test('dispatches browser event on flutter/service_worker channel', () async {
-    final completer = Completer<void>();
-    domWindow.addEventListener(
-      'flutter-first-frame',
-      createDomEventListener((DomEvent e) => completer.complete()),
+  test('dispatches browser event asynchronously on flutter/service_worker channel', () async {
+    // Each dispatcher tracks its own first frame, and only the first one. The
+    // singleton's is already over by now, because previous tests pump frames on
+    // it, so this test brings its own dispatcher, like 'registration' below, to
+    // make the frame it pumps really the first one.
+    final ownDispatcher = EnginePlatformDispatcher();
+    addTearDown(ownDispatcher.dispose);
+
+    var eventCount = 0;
+    final DomEventListener listener = createDomEventListener((DomEvent e) => eventCount++);
+    domWindow.addEventListener('flutter-first-frame', listener);
+    addTearDown(() => domWindow.removeEventListener('flutter-first-frame', listener));
+
+    // The event is dispatched from an animation frame callback, so an animation
+    // frame is long enough to observe one that was sent.
+    Future<void> awaitAnimationFrame() {
+      final completer = Completer<void>();
+      domWindow.requestAnimationFrame((_) => Timer.run(completer.complete));
+      return completer.future;
+    }
+
+    ownDispatcher.sendPlatformMessage(
+      'flutter/service_worker',
+      ByteData(0),
+      (ByteData? outputData) {},
     );
-    final Zone innerZone = Zone.current.fork();
 
-    innerZone.runGuarded(() {
-      myWindow.sendPlatformMessage(
-        'flutter/service_worker',
-        ByteData(0),
-        (ByteData? outputData) {},
-      );
-    });
+    // The event waits for the first frame to be on screen, which hasn't happened
+    // yet.
+    await awaitAnimationFrame();
+    expect(eventCount, 0);
 
-    await expectLater(completer.future, completes);
+    // This frame renders no scene, but a first frame that rendered nothing is
+    // still a first frame, so ending it releases the event with nothing left to
+    // wait for. Ending the frame resolves what the dispatch is waiting on
+    // synchronously, so the dispatch is queued from a microtask, which runs
+    // before the animation frame below.
+    ownDispatcher.invokeOnDrawFrame();
+    await awaitAnimationFrame();
+    expect(eventCount, 1);
   });
 
   test('sets global html attributes', () {
@@ -593,8 +616,12 @@ void testMain() {
     expect(newMeta.name, 'viewport');
     expect(newMeta.content, contains('width=device-width'));
     expect(newMeta.content, contains('initial-scale=1.0'));
-    expect(newMeta.content, contains('maximum-scale=1.0'));
-    expect(newMeta.content, contains('user-scalable=no'));
+    // WCAG 2 compliance checks
+    expect(newMeta.content, contains('maximum-scale=5.0'));
+    expect(
+      newMeta.content,
+      allOf(isNot(contains('maximum-scale=1.0')), isNot(contains('user-scalable=no'))),
+    );
     implicitView.dispose();
   });
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
@@ -22,6 +23,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('Basic info', () {
@@ -169,14 +171,13 @@ void main() {
             'FLUTTER_ENGINE_SWITCH_11': 'endless-trace-buffer=true',
             'FLUTTER_ENGINE_SWITCH_12': 'profile-microtasks=true',
             'FLUTTER_ENGINE_SWITCH_13': 'purge-persistent-cache=true',
-            'FLUTTER_ENGINE_SWITCH_14': 'enable-impeller=false',
-            'FLUTTER_ENGINE_SWITCH_15': 'enable-checked-mode=true',
-            'FLUTTER_ENGINE_SWITCH_16': 'verify-entry-points=true',
-            'FLUTTER_ENGINE_SWITCH_17': 'start-paused=true',
-            'FLUTTER_ENGINE_SWITCH_18': 'disable-service-auth-codes=true',
-            'FLUTTER_ENGINE_SWITCH_19': 'use-test-fonts=true',
-            'FLUTTER_ENGINE_SWITCH_20': 'verbose-logging=true',
-            'FLUTTER_ENGINE_SWITCHES': '20',
+            'FLUTTER_ENGINE_SWITCH_14': 'enable-checked-mode=true',
+            'FLUTTER_ENGINE_SWITCH_15': 'verify-entry-points=true',
+            'FLUTTER_ENGINE_SWITCH_16': 'start-paused=true',
+            'FLUTTER_ENGINE_SWITCH_17': 'disable-service-auth-codes=true',
+            'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
+            'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
+            'FLUTTER_ENGINE_SWITCHES': '19',
           },
         ),
       ]);
@@ -223,8 +224,7 @@ void main() {
             'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
             'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
             'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
-            'FLUTTER_ENGINE_SWITCH_4': 'enable-impeller=false',
-            'FLUTTER_ENGINE_SWITCHES': '4',
+            'FLUTTER_ENGINE_SWITCHES': '3',
           },
         ),
       ]);
@@ -429,6 +429,156 @@ void main() {
       });
     },
   );
+
+  group('DesktopLogReader', () {
+    testWithoutContext('does not close logLines when a process exits', () async {
+      final logReader = DesktopLogReader();
+      final receivedLines = <String>[];
+      final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
+
+      final firstProcess = FakeProcess(
+        stdout: Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('first line\n')]),
+      );
+      logReader.listenToProcessOutput(firstProcess);
+      await firstProcess.exitCode;
+      await pumpEventQueue();
+
+      final secondProcess = FakeProcess(
+        stdout: Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('second line\n')]),
+      );
+      logReader.listenToProcessOutput(secondProcess);
+      await secondProcess.exitCode;
+      await pumpEventQueue();
+
+      expect(receivedLines, <String>['first line', 'second line']);
+
+      await subscription.cancel();
+      logReader.dispose();
+    });
+
+    testWithoutContext('dispose does not close logLines', () async {
+      // We should not close loglines on dispose, since Device.dispose() is called
+      // once per launch (e.g. once per integration test file), not once at true end-of-life
+      final logReader = DesktopLogReader();
+      final receivedLines = <String>[];
+      final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
+
+      logReader.dispose();
+
+      final process = FakeProcess(
+        stdout: Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('still here\n')]),
+      );
+      logReader.listenToProcessOutput(process);
+      await process.exitCode;
+      await pumpEventQueue();
+
+      expect(receivedLines, <String>['still here']);
+
+      await subscription.cancel();
+    });
+  });
+
+  group('SingleLaunchLogReader', () {
+    testWithoutContext('mirrors the source stream until scope completes', () async {
+      final sourceController = StreamController<String>.broadcast();
+      final scopeCompleter = Completer<void>();
+      final reader = SingleLaunchLogReader(sourceController.stream, scopeCompleter.future);
+
+      final receivedLines = <String>[];
+      final StreamSubscription<String> subscription = reader.logLines.listen(receivedLines.add);
+
+      sourceController.add('hello');
+      await pumpEventQueue();
+      expect(receivedLines, <String>['hello']);
+
+      scopeCompleter.complete();
+      await pumpEventQueue();
+
+      // No longer relayed once scope has completed.
+      sourceController.add('goodbye');
+      await pumpEventQueue();
+      expect(receivedLines, <String>['hello']);
+
+      await subscription.cancel();
+      await sourceController.close();
+    });
+
+    testWithoutContext('closes logLines when scope completes without closing the source', () async {
+      final sourceController = StreamController<String>.broadcast();
+      final scopeCompleter = Completer<void>();
+      final reader = SingleLaunchLogReader(sourceController.stream, scopeCompleter.future);
+
+      final Future<void> done = reader.logLines.listen((String _) {}).asFuture<void>();
+      scopeCompleter.complete();
+      await done;
+
+      expect(sourceController.isClosed, false);
+      await sourceController.close();
+    });
+  });
+
+  testWithoutContext('getLogReader() observes multiple launches of startApp', () async {
+    final firstProcessCompleter = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        stdout:
+            'The Dart VM service is listening on http://127.0.0.1/0\n'
+            'first app output\n',
+        completer: firstProcessCompleter,
+      ),
+      FakeCommand(
+        command: const <String>['debug'],
+        stdout:
+            'The Dart VM service is listening on http://127.0.0.1/1\n'
+            'second app output\n',
+        completer: Completer<void>(),
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final package = FakeApplicationPackage();
+
+    // Subscribe to the device's log reader up front, before any launch —
+    // this mirrors how `flutter drive`/`flutter logs` observe device
+    // output, and should keep working across the relaunch below.
+    final logLines = <String>[];
+    final StreamSubscription<String> subscription = device.getLogReader().logLines.listen(
+      logLines.add,
+    );
+
+    final LaunchResult firstResult = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    expect(firstResult.started, true);
+    expect(firstResult.vmServiceUri, Uri.parse('http://127.0.0.1/0'));
+
+    // Regression test for https://github.com/flutter/flutter/issues/135673:
+    // let the first process actually exit before the second launch
+    // begins, which previously crashed with "Bad state: Cannot add new
+    // events after calling close".
+    firstProcessCompleter.complete();
+    await pumpEventQueue();
+
+    // `flutter test`'s IntegrationTestTestDevice calls `device.dispose()`
+    // once per test file, not once at the very end of the whole run —
+    // this must not tear down anything the next launch needs.
+    await device.dispose();
+
+    final LaunchResult secondResult = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    expect(secondResult.started, true);
+    expect(secondResult.vmServiceUri, Uri.parse('http://127.0.0.1/1'));
+
+    await pumpEventQueue();
+    expect(logLines, containsAll(<String>['first app output', 'second app output']));
+
+    await subscription.cancel();
+  });
 }
 
 FakeDesktopDevice setUpDesktopDevice({
@@ -470,6 +620,9 @@ class FakeDesktopDevice extends DesktopDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.unknown;
 
   @override
   Future<bool> isSupported() async => true;
