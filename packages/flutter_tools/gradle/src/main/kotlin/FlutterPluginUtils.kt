@@ -14,6 +14,7 @@ import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import com.flutter.gradle.tasks.EnableHcppManifestTask
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
@@ -531,18 +532,21 @@ object FlutterPluginUtils {
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
 
-    internal fun getConfiguredNdkVersion(project: Project): String? =
-        project.extensions.findByType(ApplicationExtension::class.java)?.ndkVersion
-            ?: getLegacyAndroidExtension(project).ndkVersion
+    internal fun getConfiguredNdkVersion(project: Project): String? = getAndroidExtension(project).ndkVersion
 
     /**
-     * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
-     * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
-     * e.g. `android-UpsideDownCake`.
+     * Returns the compile SDK configured on the project's Android extension: the numeric
+     * API level (`compileSdk = 36`) or a preview codename (`compileSdkPreview = "Baklava"`).
      */
     @JvmStatic
     @JvmName("getCompileSdkFromProject")
-    internal fun getCompileSdkFromProject(project: Project): String = getLegacyAndroidExtension(project).compileSdkVersion!!.substring(8)
+    internal fun getCompileSdkFromProject(project: Project): CompileSdkVersion {
+        val androidExtension = getAndroidExtension(project)
+        return CompileSdkVersion(
+            apiLevel = androidExtension.compileSdk,
+            previewCodename = androidExtension.compileSdkPreview
+        )
+    }
 
     /**
      * Returns:
@@ -1157,6 +1161,38 @@ object FlutterPluginUtils {
                     DeepLinkJsonFromManifestTask::manifestFile,
                     DeepLinkJsonFromManifestTask::updatedManifest
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
+        }
+    }
+
+    /**
+     * Creates a task to generate an AndroidManifest.xml containing the engine shell arguments
+     * and adds it to the variant's manifests.
+     */
+    @JvmStatic
+    @JvmName("addTaskForGeneratingEngineShellArgumentManifest")
+    internal fun addTaskForGeneratingEngineShellArgumentManifest(project: Project) {
+        val engineShellArgsJson = project.findProperty("flutter.engineShellArgs") as? String ?: return
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+
+        androidComponents.onVariants { variant ->
+            val capitalizeVariantName = capitalize(variant.name)
+            val generateManifestTaskProvider =
+                project.tasks.register(
+                    "generateEngineFlagsManifest$capitalizeVariantName",
+                    GenerateEngineFlagsManifestTask::class.java
+                ) {
+                    this.engineShellArgsJson.set(engineShellArgsJson)
+                    this.manifestOutputFile.set(
+                        project.layout.buildDirectory.file(
+                            "intermediates/flutter/${variant.name}/AndroidManifest.xml"
+                        )
+                    )
+                }
+
+            variant.sources.manifests?.addGeneratedManifestFile(
+                generateManifestTaskProvider,
+                GenerateEngineFlagsManifestTask::manifestOutputFile
+            )
         }
     }
 

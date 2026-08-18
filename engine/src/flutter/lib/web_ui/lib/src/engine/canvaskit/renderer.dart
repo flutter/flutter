@@ -141,43 +141,43 @@ class CanvasKitRenderer extends Renderer {
   ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
 
   @override
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
-    ui.Rect? bounds,
-  }) =>
-      // TODO(dkwingsmt): `bounds` is currently not implemented in CanvasKit.
-      // Fall back to unbounded blur.
-      // https://github.com/flutter/flutter/issues/175899
-      CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
-
-  @override
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      CkImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
-
-  @override
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      CkImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
-
-  @override
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
-  }) => CkImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
-
-  @override
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
   }) {
-    if (outer is EngineColorFilter) {
-      outer = CkColorFilterImageFilter(colorFilter: outer);
-    }
-    if (inner is EngineColorFilter) {
-      inner = CkColorFilterImageFilter(colorFilter: inner);
-    }
-    return CkImageFilter.compose(outer: outer as CkImageFilter, inner: inner as CkImageFilter);
+    return CkBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  }
+
+  @override
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY}) {
+    return CkDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
+
+  @override
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY}) {
+    return CkErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
+
+  @override
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
+  }) {
+    return CkMatrixImageFilter(matrix: matrix, filterQuality: filterQuality);
+  }
+
+  @override
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
+  }) {
+    return CkComposeImageFilter(outer: outer, inner: inner);
+  }
+
+  @override
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter}) {
+    return CkColorFilterImageFilter(filter as CkColorFilter);
   }
 
   @override

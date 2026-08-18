@@ -303,6 +303,9 @@ class FlutterPlugin : Plugin<Project> {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
             FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
+
+            // Task required to pass command line flags for apps to the Flutter Android embedding.
+            FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(projectToAddTasksTo)
         }
         // Only applies to app projects. For module (aar) projects the host app's manifest is
         // the source of truth for HCPP; see addTasksForEnableHcppManifest for why injecting
