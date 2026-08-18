@@ -1277,7 +1277,8 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
 
-    if (round_superellipse_params.all_corners_same) {
+    if (round_superellipse_params.all_corners_same &&
+        round_superellipse.GetRadii().AreAllCornersCircular()) {
       auto params = UberSDFParameters::MakeRoundedSuperellipse(
           /*color=*/paint.color,
           /*bounds=*/round_superellipse.GetBounds(),
