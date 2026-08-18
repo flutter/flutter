@@ -830,10 +830,20 @@ class FlutterBuildSystem extends BuildSystem {
     }
     final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
         .cast<String>();
+    final String sharedHooksPath = fileSystem.path.join(
+      environment.projectDir.resolveSymbolicLinksSync(),
+      '.dart_tool',
+      'hooks_runner',
+      'shared',
+    );
     for (final lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
-        if (preservedOutputFilePaths.contains(lastOutputFile.path)) {
+        if (preservedOutputFilePaths.contains(lastOutputFile.path) ||
+            fileSystem.path.isWithin(
+              sharedHooksPath,
+              fileSystem.path.absolute(lastOutputFile.path),
+            )) {
           continue;
         }
         ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
@@ -864,6 +874,12 @@ class _BuildInstance {
   final inputFiles = <String, File>{};
   final outputFiles = <String, File>{};
   final Set<String> preservedOutputFilePaths;
+  late final String _sharedHooksPath = fileSystem.path.join(
+    environment.projectDir.resolveSymbolicLinksSync(),
+    '.dart_tool',
+    'hooks_runner',
+    'shared',
+  );
 
   // Timings collected during target invocation.
   final stepTimings = <String, PerformanceMeasurement>{};
@@ -958,7 +974,11 @@ class _BuildInstance {
           continue;
         }
         final File previousFile = fileSystem.file(previousOutput);
-        if (preservedOutputFilePaths.contains(previousFile.path)) {
+        if (preservedOutputFilePaths.contains(previousFile.path) ||
+            fileSystem.path.isWithin(
+              _sharedHooksPath,
+              fileSystem.path.absolute(previousFile.path),
+            )) {
           continue;
         }
         ErrorHandlingFileSystem.deleteIfExists(previousFile);
