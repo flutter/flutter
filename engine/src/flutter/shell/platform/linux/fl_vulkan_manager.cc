@@ -1010,9 +1010,15 @@ void fl_vulkan_manager_set_subsurface_position(FlVulkanManager* manager,
 #ifdef GDK_WINDOWING_WAYLAND
   if (manager->subsurface != nullptr) {
     wl_subsurface_set_position(manager->subsurface, x, y);
-    // Commit the child surface to apply the position change.
-    if (manager->child_surface != nullptr) {
-      wl_surface_commit(manager->child_surface);
+    // set_position is double-buffered state on the *parent* surface: "the
+    // scheduled coordinates will take effect whenever the state of the parent
+    // surface is applied". Committing the child does not apply it.
+    if (manager->window != nullptr) {
+      struct wl_surface* parent =
+          gdk_wayland_window_get_wl_surface(manager->window);
+      if (parent != nullptr) {
+        wl_surface_commit(parent);
+      }
     }
   }
 #endif
