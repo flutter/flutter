@@ -167,7 +167,13 @@ class RenderAndroidView extends PlatformViewRenderBox {
     // Android virtual displays cannot have a zero size.
     // Trying to size it to 0 crashes the app, which was happening when starting the app
     // with a locked screen (see: https://github.com/flutter/flutter/issues/20456).
-    if (_state == _PlatformViewState.resizing || size.isEmpty) {
+    //
+    // Don't ask for the size before the first layout either. The controller can be swapped
+    // while a route transition is in flight, and reading the size of a render box that has
+    // not been laid out throws out of this future, where nothing can catch it.
+    // performResize() sizes the platform view once layout has run.
+    // See https://github.com/flutter/flutter/issues/190833.
+    if (_state == _PlatformViewState.resizing || !hasSize || size.isEmpty) {
       return;
     }
 
