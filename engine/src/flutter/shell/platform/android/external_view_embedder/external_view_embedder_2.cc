@@ -239,11 +239,9 @@ void AndroidExternalViewEmbedder2::PrepareFlutterView(
     double device_pixel_ratio) {
   Reset();
 
-  // The surface size changed. Therefore, destroy existing surfaces as
-  // the existing surfaces in the pool can't be recycled.
+  // The singular overlay surface is persistent, so it is resized in place by
+  // |SurfacePool::GetLayer| rather than destroyed and recreated here.
   if (frame_size_ != frame_size) {
-    DestroySurfaces();
-
     // This should not block to prevent deadlocks with
     // setViewportMetrics.
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(

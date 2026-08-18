@@ -417,6 +417,8 @@ class BuildInfo {
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
+      'BUILD_NAME': ?buildName,
+      'BUILD_NUMBER': ?buildNumber,
       'SPLIT_DEBUG_INFO': ?splitDebugInfoPath,
       'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
       'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
@@ -461,6 +463,7 @@ class AndroidBuildInfo {
     this.buildInfo, {
     this.targetArchs = const <CpuArch>[.armv7, .arm64, .x64],
     this.splitPerAbi = false,
+    this.releaseManifestEngineShellArgs,
   });
 
   // The build info containing the mode and flavor.
@@ -475,6 +478,13 @@ class AndroidBuildInfo {
 
   /// The target platforms for the build.
   final Iterable<CpuArch> targetArchs;
+
+  /// Engine shell arguments to be injected into the application's AndroidManifest.xml.
+  ///
+  /// This is exclusively used in release mode to allow the Flutter CLI to pass debugging
+  /// options to the engine without relying on Intent extras. It is only relevant when building
+  /// from source (i.e., not using a prebuilt application binary).
+  final List<String>? releaseManifestEngineShellArgs;
 }
 
 /// A summary of the compilation strategy used for Dart.
