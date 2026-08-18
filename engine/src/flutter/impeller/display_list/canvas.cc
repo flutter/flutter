@@ -1240,10 +1240,18 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
 
-    if (round_superellipse_params.all_corners_same) {
+    const Rect& bounds = round_superellipse.GetBounds();
+    const RoundingRadii& radii = round_superellipse.GetRadii();
+
+    bool is_square_like_symmetric =
+        (bounds.GetWidth() == bounds.GetHeight()) &&
+        radii.AreAllCornersSame() &&
+        (radii.top_left.width == radii.top_left.height);
+
+    if (is_square_like_symmetric) {
       auto params = UberSDFParameters::MakeRoundedSuperellipse(
           /*color=*/paint.color,
-          /*bounds=*/round_superellipse.GetBounds(),
+          /*bounds=*/bounds,
           /*round_superellipse_params=*/round_superellipse_params,
           /*stroke=*/paint.GetStroke());
 
@@ -1252,7 +1260,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
     } else {
       auto contents = ComplexRoundedSuperellipseContents::Make(
           /*color=*/paint.color_source ? Color::White() : paint.color,
-          /*bounds=*/round_superellipse.GetBounds(),
+          /*bounds=*/bounds,
           /*round_superellipse_params=*/round_superellipse_params,
           /*stroke=*/paint.GetStroke());
 

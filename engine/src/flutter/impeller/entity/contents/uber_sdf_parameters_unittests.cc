@@ -147,18 +147,13 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
 
   EXPECT_EQ(params.radii.x,
             round_superellipse_params.top_right.top.circle_radius);
-  EXPECT_EQ(params.radii.y,
-            round_superellipse_params.top_right.right.circle_radius);
 
-  EXPECT_EQ(params.superellipse_degree.x,
+  EXPECT_EQ(params.superellipse_degree,
             round_superellipse_params.top_right.top.se_n);
-  EXPECT_EQ(params.superellipse_degree.y,
-            round_superellipse_params.top_right.right.se_n);
-
-  EXPECT_EQ(params.superellipse_scale.x,
-            round_superellipse_params.top_right.signed_scale.Abs().x);
-  EXPECT_EQ(params.superellipse_scale.y,
-            round_superellipse_params.top_right.signed_scale.Abs().y);
+  EXPECT_EQ(params.superellipse_angle_span,
+            round_superellipse_params.top_right.top.circle_max_angle.radians);
+  EXPECT_EQ(params.circle_center,
+            round_superellipse_params.top_right.top.circle_center);
 }
 
 }  // namespace testing

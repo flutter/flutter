@@ -92,16 +92,10 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
       .center = center,
       .size = size,
       .stroke = stroke,
-      .superellipse_degree = Point(top_right.top.se_n, top_right.right.se_n),
-      .superellipse_semi_axis = Point(top_right.top.se_a, top_right.right.se_a),
-      .angle_span = Point(top_right.top.circle_max_angle.radians,
-                          top_right.right.circle_max_angle.radians),
-      .octant_offset_c = top_right.top.se_a - top_right.right.se_a,
-      .circle_center_top = top_right.top.circle_center,
-      .circle_center_right = top_right.right.circle_center,
-      .superellipse_scale = top_right.signed_scale.Abs(),
-      .radii = Vector4(top_right.top.circle_radius,
-                       top_right.right.circle_radius, 0.0f, 0.0f)};
+      .superellipse_degree = top_right.top.se_n,
+      .superellipse_angle_span = top_right.top.circle_max_angle.radians,
+      .circle_center = top_right.top.circle_center,
+      .radii = Vector4(top_right.top.circle_radius, 0.0f, 0.0f, 0.0f)};
 }
 
 }  // namespace impeller

@@ -86,14 +86,12 @@ struct RoundSuperellipseParam {
   };
 
   // The parameters for the four quadrants that make up the full contour.
-  //
-  // If `all_corners_same` is true, then only `top_right` is popularized.
   Quadrant top_right;
   Quadrant bottom_right;
   Quadrant bottom_left;
   Quadrant top_left;
 
-  // If true, all corners are the same and only `top_right` is popularized.
+  // If true, all corners are the same.
   bool all_corners_same;
 
   Scalar top_split;

@@ -55,7 +55,8 @@ struct UberSDFParameters {
       const RoundingRadii& radii,
       std::optional<StrokeParameters> stroke);
 
-  /// Creates UberSDFParameters for an asymmetric round superellipse.
+  /// Creates UberSDFParameters for a square-like rounded superellipse with
+  /// symmetric corner radii.
   static UberSDFParameters MakeRoundedSuperellipse(
       Color color,
       const Rect& bounds,
@@ -79,33 +80,17 @@ struct UberSDFParameters {
   /// The stroke parameters. If std::nullopt, the shape is filled.
   std::optional<StrokeParameters> stroke;
 
-  /// The degree (n) of the superellipse curve for the top and right octants.
-  Point superellipse_degree;
+  /// The degree (n) of the superellipse curve.
+  Scalar superellipse_degree;
 
-  /// The semi-axis length of the superellipse curve for the top and right
-  /// octants.
-  Point superellipse_semi_axis;
+  /// The angular span of the circular cap for the superellipse.
+  Scalar superellipse_angle_span;
 
-  /// The angular span of the circular cap for the top and right octants.
-  Point angle_span;
+  /// The circular cap center for the superellipse.
+  Point circle_center;
 
-  /// The geometric offset 'c' used to connect the two octants of each quadrant.
-  float octant_offset_c;
-
-  /// The circular cap center for the top octant of each
-  /// quadrant.
-  Point circle_center_top;
-
-  /// The circular cap center for the right octant of each
-  /// quadrant.
-  Point circle_center_right;
-
-  /// The scaling factors used to transform normalized superellipses to their
-  /// true size.
-  Point superellipse_scale;
-
-  /// Rounding radii for standard rounded rects and corner radii for circular
-  /// caps of superellipses for top and right octants.
+  /// Rounding radii for standard rounded rects and corner radius for circular
+  /// caps of superellipses.
   Vector4 radii;
 };
 
