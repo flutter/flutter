@@ -191,8 +191,10 @@ bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
   if (offset_from_cursor < 0) {
     for (int i = 0; i < -offset_from_cursor; i++) {
       // If requested start is before the available text then reduce the
-      // number of characters to delete.
-      if (start == editable_range().start()) {
+      // number of characters to delete. Use <= rather than == because a step
+      // of 2 (crossing a surrogate pair) can land before the start of the
+      // range rather than exactly on it.
+      if (start <= editable_range().start()) {
         count = i;
         break;
       }

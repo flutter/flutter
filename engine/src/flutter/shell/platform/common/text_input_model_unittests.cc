@@ -921,6 +921,38 @@ TEST(TextInputModel, DeleteSurroundingWideCharacterComposing) {
   EXPECT_STREQ(model->GetText().c_str(), "B");
 }
 
+// Regression test isolating the `end != max_pos` -> `end < max_pos` guard
+// change: a surrogate pair straddling the end of the composing range forces
+// |end| past |max_pos| in a single 2-wide step. With the old `!=` guard the
+// loop would never see |end| land exactly on |max_pos| and would keep
+// deleting past the composing range; `<` stops it as soon as |end| reaches
+// or passes |max_pos|.
+TEST(TextInputModel, DeleteSurroundingGuardStopsAtComposingEnd) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄B");
+  model->BeginComposing();
+  // Composing range deliberately ends in the middle of the surrogate pair.
+  EXPECT_TRUE(model->SetComposingRange(TextRange(0, 2), 0));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 3));
+  EXPECT_STREQ(model->GetText().c_str(), "B");
+}
+
+// Regression test for the mirror-image guard on the backward walk that
+// computes |start|: stepping back by 2 across a surrogate pair can land
+// |start| before the start of the editable range instead of exactly on it,
+// the same hazard fixed above for |end|. The old `start ==
+// editable_range().start()` check could never fire in that case, letting the
+// loop keep reading backward past the start of the composing range.
+TEST(TextInputModel, DeleteSurroundingGuardStopsAtComposingStart) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄B");
+  model->BeginComposing();
+  // Composing range deliberately starts in the middle of the surrogate pair.
+  EXPECT_TRUE(model->SetComposingRange(TextRange(2, 4), 2));
+  EXPECT_TRUE(model->DeleteSurrounding(-3, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "A");
+}
+
 TEST(TextInputModel, BackspaceStart) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
