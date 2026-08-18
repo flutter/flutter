@@ -929,6 +929,26 @@ void main() {
       expect(buttonNode2.hasFocus, isFalse);
     });
 
+    testWidgets('FocusableActionDetector forwards skipTraversal to Focus', (
+      WidgetTester tester,
+    ) async {
+      Focus innerFocus() => tester.widget<Focus>(
+        find
+            .descendant(of: find.byType(FocusableActionDetector), matching: find.byType(Focus))
+            .first,
+      );
+
+      await tester.pumpWidget(
+        const TestWidgetsApp(home: FocusableActionDetector(child: Text('a'))),
+      );
+      expect(innerFocus().skipTraversal, isFalse);
+
+      await tester.pumpWidget(
+        const TestWidgetsApp(home: FocusableActionDetector(skipTraversal: true, child: Text('a'))),
+      );
+      expect(innerFocus().skipTraversal, isTrue);
+    });
+
     testWidgets('FocusableActionDetector can exclude Focus semantics', (WidgetTester tester) async {
       await tester.pumpWidget(
         TestWidgetsApp(
