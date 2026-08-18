@@ -52,7 +52,7 @@ class RepositoryLinkSyntax extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final visitor = _Visitor(this, context);
+    final visitor = _Visitor(this);
     registry
       ..addAdjacentStrings(this, visitor)
       ..addCompilationUnit(this, visitor)
@@ -62,10 +62,9 @@ class RepositoryLinkSyntax extends AnalysisRule {
 }
 
 class _Visitor extends SimpleAstVisitor<void> {
-  _Visitor(this.rule, this.context);
+  _Visitor(this.rule);
 
   final AnalysisRule rule;
-  final RuleContext context;
 
   static bool _hasBannedRepositoryLink(String text) {
     for (final RegExpMatch match in _repoUrlPattern.allMatches(text)) {

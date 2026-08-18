@@ -5918,20 +5918,6 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: hot_mode_dev_cycle_ios_simulator
 
-  - name: Mac_ios ios_debug_workflow
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: ios_debug_workflow
-      os: Mac-15.7
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "17c52"
-        }
-
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -7260,6 +7246,48 @@ targets:
         ]
       task_name: windows_home_scroll_perf__timeline_summary
 
+  - name: Windows windows_gradient_consistent_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_gradient_consistent_perf__e2e_summary
+
+  - name: Windows windows_gradient_dynamic_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_gradient_dynamic_perf__e2e_summary
+
+  - name: Windows windows_gradient_static_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_gradient_static_perf__e2e_summary
+
   - name: Windows windows_text_shadow_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -7316,8 +7344,7 @@ targets:
 
   - name: Windows windows_engine_integration_golden_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
-    bringup: true
+    presubmit: true
     timeout: 60
     properties:
       tags: >
