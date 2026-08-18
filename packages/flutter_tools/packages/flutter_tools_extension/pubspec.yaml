@@ -9,5 +9,7 @@ dependencies:
   meta: 1.19.0
   flutter_tools_core:
     path: ../flutter_tools_core
+  json_rpc_2: 4.1.0
+  stream_channel: 2.1.4
 
-# PUBSPEC CHECKSUM: foiaro
+# PUBSPEC CHECKSUM: 608ed1
