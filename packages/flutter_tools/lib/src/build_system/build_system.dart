@@ -840,6 +840,17 @@ class FlutterBuildSystem extends BuildSystem {
   }
 }
 
+/// Deletes stale output files from previous builds or build stages that are no
+/// longer part of the current build configuration or output graph.
+///
+/// Files located in the shared hooks runner output directory
+/// (`.dart_tool/hooks_runner/shared/`) and files in [preservedOutputFilePaths]
+/// are explicitly spared from deletion. Shared native asset hook outputs manage
+/// their own caching and invalidation lifecycles independently, so cleaning
+/// them up when switching to build configurations or stages that do not invoke
+/// native assets hooks would incorrectly cause subsequent hook-enabled builds
+/// to skip running hooks (due to valid metadata) while failing to locate the
+/// deleted output files.
 void _deleteStaleOutputs({
   required Map<String, File> currentOutputs,
   required Environment environment,
