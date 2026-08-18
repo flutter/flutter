@@ -6,6 +6,7 @@
 #define RSE_SDF_GLSL_
 
 #include "sdf_functions.glsl"
+#include "sdf_utils.glsl"
 
 float distanceFromRSEOctant(vec2 p_oct,
                             vec2 circle_center,
