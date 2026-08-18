@@ -204,6 +204,36 @@ analyzer:
       expect(migratedContents, contains('linux/**'));
     });
 
+    testWithoutContext(
+      'migrates and merges excludes when list is in flow style with newlines',
+      () async {
+        final _TestContext context = _createTestContext();
+        const analysisOptionsContents = '''
+analyzer:
+  exclude:
+    [
+      foo/**,
+      build/**,
+    ]
+''';
+
+        context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+        final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+        await migration.migrate();
+
+        final String migratedContents = context.analysisOptionsFile.readAsStringSync();
+        expect(migratedContents, contains('foo/**'));
+        expect(migratedContents, contains('build/**'));
+        expect(migratedContents, contains('android/**'));
+        expect(migratedContents, contains('ios/**'));
+        expect(migratedContents, contains('web/**'));
+        expect(migratedContents, contains('windows/**'));
+        expect(migratedContents, contains('macos/**'));
+        expect(migratedContents, contains('linux/**'));
+      },
+    );
+
     testWithoutContext('skipped if exclusions are inherited via relative include', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''

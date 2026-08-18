@@ -79,6 +79,9 @@ class AnalysisOptionsMigration extends ProjectMigrator {
         final exclude = analyzer['exclude'] as Object?;
         if (exclude is! YamlList) {
           editor.update(<String>['analyzer', 'exclude'], missingExcludes);
+        } else if (exclude.style == CollectionStyle.FLOW) {
+          final newExcludes = <Object?>[...exclude, ...missingExcludes];
+          editor.update(<String>['analyzer', 'exclude'], newExcludes);
         } else {
           for (final missingExclude in missingExcludes) {
             if (!exclude.contains(missingExclude)) {
