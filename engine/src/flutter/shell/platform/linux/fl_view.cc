@@ -476,8 +476,11 @@ static void realize_cb(FlView* self) {
                           G_CONNECT_SWAPPED);
 
   // Flutter engine will need to make the context current from raster thread
-  // during initialization.
-  fl_opengl_manager_clear_current(fl_engine_get_opengl_manager(self->engine));
+  // during initialization. The Vulkan renderer has no FlOpenGLManager - see
+  // where it is created in fl_engine.cc.
+  if (fl_engine_get_renderer_type(self->engine) != kVulkan) {
+    fl_opengl_manager_clear_current(fl_engine_get_opengl_manager(self->engine));
+  }
 
   g_autoptr(GError) error = nullptr;
   if (!fl_engine_start(self->engine, &error)) {
