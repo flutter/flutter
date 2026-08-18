@@ -330,11 +330,14 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
     SliverGeometry geometry,
   ) {
     super.setChildParentData(child, constraints, geometry);
+    if (child is! RenderBox || !child.hasSize) {
+      return;
+    }
     // A child stretched into the overscroll area is larger than the
     // scrollExtent, so for reversed axis directions it must be anchored by its
     // actual size to keep its leading edge glued to the viewport's edge.
     final childParentData = child.parentData! as SliverPhysicalParentData;
-    final Size childSize = (child as RenderBox).size;
+    final Size childSize = child.size;
     switch (applyGrowthDirectionToAxisDirection(
       constraints.axisDirection,
       constraints.growthDirection,
