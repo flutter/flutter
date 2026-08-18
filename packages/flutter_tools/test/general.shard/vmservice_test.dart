@@ -638,6 +638,16 @@ void main() {
     expect(processVmServiceMessage(event), 'Hello There');
   });
 
+  testWithoutContext('Can process log events containing a valid replacement character', () {
+    final event = vm_service.Event(
+      bytes: base64.encode(utf8ForTesting.encode('flutter: \u{FFFD}\n')),
+      timestamp: 0,
+      kind: vm_service.EventKind.kLogging,
+    );
+
+    expect(processVmServiceMessage(event), 'flutter: \u{FFFD}');
+  });
+
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
     final completer = Completer<String>();
     openChannelForTesting =
