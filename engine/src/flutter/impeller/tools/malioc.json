@@ -8869,18 +8869,18 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 31,
+          "fp16_arithmetic": 32,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "arith_total",
-              "arith_fma"
+              "arith_sfu"
             ],
             "longest_path_cycles": [
-              3.799999952316284,
-              3.799999952316284,
-              1.4375,
-              3.75,
+              4.0,
+              3.875,
+              1.65625,
+              4.0,
               0.0,
               0.25,
               0.0
@@ -8912,10 +8912,10 @@
               "arith_fma"
             ],
             "total_cycles": [
-              13.375,
-              13.375,
-              3.9375,
-              12.9375,
+              13.625,
+              13.625,
+              4.53125,
+              13.4375,
               0.0,
               0.25,
               0.0
@@ -8935,14 +8935,14 @@
       "type": "Fragment",
       "variants": {
         "Main": {
-          "has_stack_spilling": false,
+          "has_stack_spilling": true,
           "performance": {
             "longest_path_bound_pipelines": [
               "arithmetic"
             ],
             "longest_path_cycles": [
-              41.90999984741211,
-              1.0,
+              43.88999938964844,
+              3.0,
               4.0
             ],
             "pipelines": [
@@ -8962,8 +8962,8 @@
               "arithmetic"
             ],
             "total_cycles": [
-              101.33333587646484,
-              1.0,
+              105.66666412353516,
+              3.0,
               24.0
             ]
           },
@@ -12285,10 +12285,10 @@
               "arith_sfu"
             ],
             "longest_path_cycles": [
-              3.75,
-              3.299999952316284,
-              1.71875,
-              3.75,
+              4.0,
+              3.387500047683716,
+              1.9375,
+              4.0,
               0.0,
               0.25,
               0.0
@@ -12320,10 +12320,10 @@
               "arith_sfu"
             ],
             "total_cycles": [
-              12.9375,
-              12.1875,
-              4.28125,
-              12.9375,
+              13.4375,
+              12.4375,
+              4.875,
+              13.4375,
               0.0,
               0.25,
               0.0
@@ -12331,7 +12331,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 42,
+          "uniform_registers_used": 48,
           "work_registers_used": 32
         }
       }
