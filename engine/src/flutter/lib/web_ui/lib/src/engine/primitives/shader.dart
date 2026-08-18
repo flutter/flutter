@@ -91,7 +91,6 @@ class EngineLinearGradient extends EngineGradient {
   ]) : assert(_offsetIsValid(from)),
        assert(_offsetIsValid(to)),
        assert(matrix4 == null || _matrix4IsValid(matrix4)),
-       assert(_validateColorStops(colors, colorStops)),
        super._();
 
   final ui.Offset from;
@@ -137,7 +136,6 @@ class EngineRadialGradient extends EngineGradient {
     this.focalRadius = 0.0,
   ]) : assert(_offsetIsValid(center)),
        assert(matrix4 == null || _matrix4IsValid(matrix4)),
-       assert(_validateColorStops(colors, colorStops)),
        assert(
          focal == null ||
              (focal == center && focalRadius == 0.0) ||
@@ -214,7 +212,6 @@ class EngineSweepGradient extends EngineGradient {
   ]) : assert(_offsetIsValid(center)),
        assert(startAngle < endAngle),
        assert(matrix4 == null || _matrix4IsValid(matrix4)),
-       assert(_validateColorStops(colors, colorStops)),
        super._();
 
   final ui.Offset center;
@@ -251,19 +248,6 @@ class EngineSweepGradient extends EngineGradient {
     }
     return _backendShader!;
   }
-}
-
-bool _validateColorStops(List<ui.Color> colors, List<double>? colorStops) {
-  if (colorStops == null) {
-    if (colors.length != 2) {
-      throw ArgumentError('"colors" must have length 2 if "colorStops" is omitted.');
-    }
-  } else {
-    if (colors.length != colorStops.length) {
-      throw ArgumentError('"colors" and "colorStops" arguments must have equal length.');
-    }
-  }
-  return true;
 }
 
 Uint32List _encodeColors(List<ui.Color> colors) {
@@ -360,6 +344,7 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
 
   @override
   void setFloat(int index, double value) {
+    assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     _backendShader.setFloat(index, value);
   }
 
@@ -369,6 +354,7 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
     ui.Image image, {
     ui.FilterQuality filterQuality = ui.FilterQuality.none,
   }) {
+    assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     final BackendImageShader sampler = renderer.createImageShader(
       image as EngineImage,
       ui.TileMode.clamp,

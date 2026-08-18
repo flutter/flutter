@@ -367,10 +367,7 @@ abstract class Gradient implements Shader {
     TileMode tileMode = TileMode.clamp,
     Float64List? matrix4,
   ]) {
-    assert(() {
-      _validateColorStops(colors, colorStops);
-      return true;
-    }());
+    _validateColorStops(colors, colorStops);
     return engine.EngineGradient.linear(
       from,
       to,
@@ -391,10 +388,7 @@ abstract class Gradient implements Shader {
     Offset? focal,
     double focalRadius = 0.0,
   ]) {
-    assert(() {
-      _validateColorStops(colors, colorStops);
-      return true;
-    }());
+    _validateColorStops(colors, colorStops);
     return engine.EngineGradient.radial(
       center,
       radius,
@@ -416,10 +410,7 @@ abstract class Gradient implements Shader {
     double endAngle = math.pi * 2,
     Float64List? matrix4,
   ]) {
-    assert(() {
-      _validateColorStops(colors, colorStops);
-      return true;
-    }());
+    _validateColorStops(colors, colorStops);
     return engine.EngineGradient.sweep(
       center,
       colors,

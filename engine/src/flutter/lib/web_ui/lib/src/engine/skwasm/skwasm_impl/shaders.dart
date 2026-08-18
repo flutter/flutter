@@ -261,6 +261,7 @@ class SkwasmFragmentShader extends BackendFragmentShader implements SkwasmShader
 
   @override
   ShaderHandle get handle {
+    assert(!_isDisposed, 'Cannot get the handle of a disposed FragmentShader.');
     if (_handle == null) {
       final ShaderHandle newHandle = withStackScope((StackScope s) {
         Pointer<ShaderHandle> childShaders = nullptr;
@@ -317,6 +318,7 @@ class SkwasmFragmentShader extends BackendFragmentShader implements SkwasmShader
 
   @override
   void setFloat(int index, double value) {
+    assert(!_isDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     if (_handle != null) {
       // Invalidate the previous shader so that it is recreated with the new
       // uniform data.
@@ -329,6 +331,7 @@ class SkwasmFragmentShader extends BackendFragmentShader implements SkwasmShader
 
   @override
   void setImageSampler(int index, BackendImageShader shader, double width, double height) {
+    assert(!_isDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     if (_handle != null) {
       // Invalidate the previous shader so that it is recreated with the new
       // child shaders.

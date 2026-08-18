@@ -878,6 +878,10 @@ Future<void> testMain() async {
 
     // Verify it is marked as disposed
     expect(shader.debugDisposed, true);
+    expect(() => shader.setFloat(0, 5.0), throwsA(isA<AssertionError>()));
+    final ui.Image dummyImage = _createOvalGradientImage(imageDimension: 16);
+    expect(() => shader.setImageSampler(0, dummyImage), throwsA(isA<AssertionError>()));
+    dummyImage.dispose();
   });
 
   test('fragment shader', () async {

@@ -17,6 +17,10 @@ abstract class CkShader implements BackendShader {
   SkShader get skShader;
 }
 
+Float32List _toSkPoint(double x, double y) => Float32List(2)
+  ..[0] = x
+  ..[1] = y;
+
 class CkGradient extends BackendGradient implements CkShader {
   CkGradient.linear(
     Float32List endPoints,
@@ -26,8 +30,8 @@ class CkGradient extends BackendGradient implements CkShader {
     Float32List? matrix4,
   ) {
     _skShader = canvasKit.Shader.MakeLinearGradient(
-      Float32List.fromList(<double>[endPoints[0], endPoints[1]]),
-      Float32List.fromList(<double>[endPoints[2], endPoints[3]]),
+      _toSkPoint(endPoints[0], endPoints[1]),
+      _toSkPoint(endPoints[2], endPoints[3]),
       colors,
       toSkColorStops(colorStops),
       toSkTileMode(tileMode),
@@ -45,7 +49,7 @@ class CkGradient extends BackendGradient implements CkShader {
     Float32List? matrix4,
   ) {
     _skShader = canvasKit.Shader.MakeRadialGradient(
-      Float32List.fromList(<double>[centerX, centerY]),
+      _toSkPoint(centerX, centerY),
       radius,
       colors,
       toSkColorStops(colorStops),
@@ -68,9 +72,9 @@ class CkGradient extends BackendGradient implements CkShader {
     Float32List? matrix4,
   ) {
     _skShader = canvasKit.Shader.MakeTwoPointConicalGradient(
-      toSkPoint(ui.Offset(startX, startY)),
+      _toSkPoint(startX, startY),
       startRadius,
-      toSkPoint(ui.Offset(endX, endY)),
+      _toSkPoint(endX, endY),
       endRadius,
       colors,
       toSkColorStops(colorStops),
@@ -125,14 +129,13 @@ class CkImageShader extends BackendImageShader implements CkShader {
     this.tileModeY,
     Float64List? matrix4,
     this.filterQuality,
-  ) {
-    this.matrix4 = matrix4 ?? Matrix4.identity().toFloat64();
+  ) : matrix4 = matrix4 ?? Matrix4.identity().toFloat64() {
     _initializeSkImageShader(filterQuality);
   }
 
   final ui.TileMode tileModeX;
   final ui.TileMode tileModeY;
-  late Float64List matrix4;
+  final Float64List matrix4;
   final ui.FilterQuality filterQuality;
   final CkImageDelegate _image;
 

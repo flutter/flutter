@@ -113,6 +113,34 @@ void testMain() {
       // Done with the shader.
       imageShader.dispose();
     });
+
+    test('Gradient validates color stops count', () {
+      final threeColors = <ui.Color>[
+        const ui.Color(0xFF000000),
+        const ui.Color(0xFF888888),
+        const ui.Color(0xFFFFFFFF),
+      ];
+      final twoStops = <double>[0.0, 1.0];
+
+      // Throws if colorStops is omitted but colors does not have length 2.
+      expect(
+        () => ui.Gradient.linear(ui.Offset.zero, const ui.Offset(0, 1), threeColors),
+        throwsArgumentError,
+      );
+      expect(() => ui.Gradient.radial(ui.Offset.zero, 10, threeColors), throwsArgumentError);
+      expect(() => ui.Gradient.sweep(ui.Offset.zero, threeColors), throwsArgumentError);
+
+      // Throws if colors and colorStops have mismatched lengths.
+      expect(
+        () => ui.Gradient.linear(ui.Offset.zero, const ui.Offset(0, 1), threeColors, twoStops),
+        throwsArgumentError,
+      );
+      expect(
+        () => ui.Gradient.radial(ui.Offset.zero, 10, threeColors, twoStops),
+        throwsArgumentError,
+      );
+      expect(() => ui.Gradient.sweep(ui.Offset.zero, threeColors, twoStops), throwsArgumentError);
+    });
   });
 }
 
