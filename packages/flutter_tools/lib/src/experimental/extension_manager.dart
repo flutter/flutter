@@ -33,7 +33,10 @@ class ExtensionManager {
   final ExtensionDiscovery _discovery;
   final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
+  bool get isInitialized => _isInitialized;
+  bool _isInitialized = false;
   Future<void>? _initFuture;
+  final List<DiagnosticsExtension> _diagnosticsExtensions = <DiagnosticsExtension>[];
 
   /// Ensures entrypoints are initialized; idempotent.
   Future<void> ensureInitialized() {
@@ -42,10 +45,13 @@ class ExtensionManager {
 
   Future<void> _doInitialize() async {
     if (!_featureFlags.isToolExtensionsEnabled) {
+      _isInitialized = true;
       return;
     }
     if (_entryPoints.isNotEmpty) {
       await initialize(entryPoints: _entryPoints);
+    } else {
+      _isInitialized = true;
     }
   }
 
@@ -86,34 +92,32 @@ class ExtensionManager {
         await connection.dispose();
       }
     }
+    _diagnosticsExtensions.clear();
+    for (final ExtensionConnection connection in _discovery.connections) {
+      if (connection.capabilities.services.contains(DiagnosticsExtension.serviceNamespace)) {
+        final client = DiagnosticsExtensionClient(connection, logger: _logger);
+        await client.fetchTitle();
+        _diagnosticsExtensions.add(client);
+      }
+    }
+    _isInitialized = true;
   }
-
-  final Map<ExtensionConnection, DiagnosticsExtensionClient> _diagnosticsClients =
-      <ExtensionConnection, DiagnosticsExtensionClient>{};
 
   /// Active [DiagnosticsExtension] proxies for extensions supporting `'diagnostics'`.
   List<DiagnosticsExtension> get diagnosticsExtensions {
-    _logger.printTrace('ExtensionManager querying active diagnosticsExtensions.');
-    final extensions = <DiagnosticsExtension>[];
-    for (final ExtensionConnection connection in _discovery.connections) {
-      if (connection.capabilities.services.contains(DiagnosticsExtension.serviceNamespace)) {
-        extensions.add(
-          _diagnosticsClients.putIfAbsent(
-            connection,
-            () => DiagnosticsExtensionClient(connection, logger: _logger),
-          ),
-        );
-      }
-    }
-    _diagnosticsClients.removeWhere(
-      (ExtensionConnection connection, _) => !_discovery.connections.contains(connection),
+    assert(
+      _isInitialized,
+      'ExtensionManager.ensureInitialized() must be called before accessing diagnosticsExtensions.',
     );
-    return extensions;
+    return List<DiagnosticsExtension>.unmodifiable(_diagnosticsExtensions);
   }
 
   /// Disposes all active extension isolate connections.
   Future<void> dispose() async {
     _logger.printTrace('ExtensionManager disposing all active connections.');
+    _diagnosticsExtensions.clear();
+    _isInitialized = false;
+    _initFuture = null;
     await _discovery.dispose();
   }
 }

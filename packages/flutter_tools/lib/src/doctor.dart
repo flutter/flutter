@@ -216,15 +216,6 @@ class Doctor {
   Future<List<ValidatorTask>> startValidatorTasks({ExtensionManager? extensionManager}) async {
     if (extensionManager != null) {
       await extensionManager.ensureInitialized();
-      for (final DiagnosticsExtension extension in extensionManager.diagnosticsExtensions) {
-        if (extension is DiagnosticsExtensionClient) {
-          try {
-            await extension.fetchTitle();
-          } on Object {
-            // Ignore pre-fetch errors, they will be handled during validation.
-          }
-        }
-      }
     }
     final List<DoctorValidator> validatorList = extensionManager != null
         ? DoctorValidatorsProvider.create(

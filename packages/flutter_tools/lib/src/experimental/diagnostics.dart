@@ -28,11 +28,7 @@ class ExtensionDoctorValidator extends DoctorValidator {
     _logger.printTrace(
       'ExtensionDoctorValidator validating diagnostics for extension "${extension.title}".',
     );
-    final DiagnosticsExtension ext = extension;
-    if (ext is DiagnosticsExtensionClient) {
-      await ext.fetchTitle();
-    }
-    final List<ValidationResult> results = await ext.runDiagnostics();
+    final List<ValidationResult> results = await extension.runDiagnostics();
     _logger.printTrace(
       'ExtensionDoctorValidator received ${results.length} validation result(s) from "${extension.title}".',
     );
@@ -43,19 +39,25 @@ class ExtensionDoctorValidator extends DoctorValidator {
     for (final result in results) {
       statusInfo ??= result.statusInfo;
       allMessages.addAll(result.messages);
-      if (result.type == ValidationType.crash) {
-        aggregateType = ValidationType.crash;
-      } else if (result.type == ValidationType.missing && aggregateType != ValidationType.crash) {
-        aggregateType = ValidationType.missing;
-      } else if (result.type == ValidationType.partial &&
-          aggregateType != ValidationType.crash &&
-          aggregateType != ValidationType.missing) {
-        aggregateType = ValidationType.partial;
-      } else if (result.type == ValidationType.notAvailable &&
-          aggregateType != ValidationType.crash &&
-          aggregateType != ValidationType.missing &&
-          aggregateType != ValidationType.partial) {
-        aggregateType = ValidationType.notAvailable;
+      switch (result.type) {
+        case ValidationType.crash:
+          aggregateType = ValidationType.crash;
+        case ValidationType.missing:
+          if (aggregateType != ValidationType.crash) {
+            aggregateType = ValidationType.missing;
+          }
+        case ValidationType.partial:
+          if (aggregateType != ValidationType.crash && aggregateType != ValidationType.missing) {
+            aggregateType = ValidationType.partial;
+          }
+        case ValidationType.notAvailable:
+          if (aggregateType != ValidationType.crash &&
+              aggregateType != ValidationType.missing &&
+              aggregateType != ValidationType.partial) {
+            aggregateType = ValidationType.notAvailable;
+          }
+        case ValidationType.success:
+          break;
       }
     }
 
