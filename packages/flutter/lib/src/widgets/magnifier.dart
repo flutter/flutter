@@ -429,6 +429,8 @@ class MagnifierDecoration {
 
 /// A common base class for magnifiers.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=YBRkVCRP1Gw}
+///
 /// {@tool dartpad}
 /// This sample demonstrates what a magnifier is, and how it can be used.
 ///

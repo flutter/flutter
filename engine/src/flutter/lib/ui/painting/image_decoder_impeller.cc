@@ -533,20 +533,30 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     result_texture = std::move(resize_texture);
   }
   blit_pass->EncodeCommands();
-  if (!context->GetCommandQueue()
-           ->Submit(
-               {command_buffer},
-               [](impeller::CommandBuffer::Status status) {
-                 if (status == impeller::CommandBuffer::Status::kError) {
-                   FML_LOG(ERROR)
-                       << "GPU Error submitting image decoding command buffer.";
-                 }
-               },
-               /*block_on_schedule=*/true)
-           .ok()) {
-    std::string decode_error("Failed to submit image decoding command buffer.");
-    FML_DLOG(ERROR) << decode_error;
-    return std::make_pair(nullptr, decode_error);
+  {
+    TRACE_EVENT0("impeller", "ImpellerImageUploadSubmit");
+    impeller::CommandQueue::SubmitResult submit_result =
+        context->GetCommandQueue()->SubmitWithReceipt(
+            command_buffer, [](impeller::CommandBuffer::Status status) {
+              if (status == impeller::CommandBuffer::Status::kError) {
+                FML_LOG(ERROR)
+                    << "GPU Error submitting image decoding command buffer.";
+              }
+            });
+    if (!submit_result.status.ok()) {
+      std::string decode_error(
+          "Failed to submit image decoding command buffer.");
+      FML_DLOG(ERROR) << decode_error;
+      return std::make_pair(nullptr, decode_error);
+    }
+
+    if (submit_result.scheduling_receipt) {
+      // UploadTextureToPrivate calls this method while holding the shared side
+      // of the GPU SyncSwitch. Registering before returning ensures that a
+      // concurrent disable transition cannot pass the switch's unique lock and
+      // miss a committed upload.
+      context->TrackPendingImageUpload(submit_result.scheduling_receipt);
+    }
   }
 
   // Flush the pending command buffer to ensure that its output becomes visible
@@ -586,9 +596,8 @@ void ImageDecoderImpeller::UploadTextureToPrivate(
           .SetIfFalse([&result, context, buffer, image_info, resize_info] {
             sk_sp<DlImage> image;
             std::string decode_error;
-            std::tie(image, decode_error) = std::tie(image, decode_error) =
-                UnsafeUploadTextureToPrivate(context, buffer, image_info,
-                                             resize_info);
+            std::tie(image, decode_error) = UnsafeUploadTextureToPrivate(
+                context, buffer, image_info, resize_info);
             result(image, decode_error);
           })
           .SetIfTrue([&result, context, buffer, image_info, resize_info] {
