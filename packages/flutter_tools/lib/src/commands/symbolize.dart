@@ -314,8 +314,16 @@ class DwarfSymbolizationService {
               });
             }
           },
-          onDone: onDone.complete,
-          onError: onDone.completeError,
+          onDone: () {
+            if (!onDone.isCompleted) {
+              onDone.complete();
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (!onDone.isCompleted) {
+              onDone.completeError(error, stackTrace);
+            }
+          },
         );
 
     try {
