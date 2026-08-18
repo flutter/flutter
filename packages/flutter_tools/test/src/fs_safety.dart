@@ -37,8 +37,26 @@ bool _isDangerousDirectory(String dirPath) {
   return false;
 }
 
+String _canonicalizeWithSymlinks(String entityPath) {
+  String current = path.canonicalize(entityPath);
+  var suffix = '';
+  while (current != '/' && current != '.' && current.isNotEmpty) {
+    try {
+      final String resolved = io.Directory(current).resolveSymbolicLinksSync();
+      return path.canonicalize(path.join(resolved, suffix));
+    } on Object catch (_) {}
+    final String parent = path.dirname(current);
+    if (parent == current) {
+      break;
+    }
+    suffix = suffix.isEmpty ? path.basename(current) : path.join(path.basename(current), suffix);
+    current = parent;
+  }
+  return path.canonicalize(entityPath);
+}
+
 bool _isAllowedPath(String entityPath) {
-  final String canonicalEntity = path.canonicalize(entityPath);
+  final String canonicalEntity = _canonicalizeWithSymlinks(entityPath);
 
   // Allow system temp
   String canonicalTemp;
