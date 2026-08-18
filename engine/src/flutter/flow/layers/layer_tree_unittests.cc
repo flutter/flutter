@@ -12,6 +12,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/testing/canvas_test.h"
 #include "flutter/testing/display_list_testing.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -275,6 +276,44 @@ TEST_F(LayerTreeTest, PaintContextInitialization) {
       .texture_registry = mock_registry,
   };
   expect_defaults(context);
+}
+
+namespace {
+
+class MockFlattenLayer : public Layer {
+ public:
+  MockFlattenLayer() { set_paint_bounds(DlRect::MakeWH(100, 100)); }
+
+  MOCK_METHOD(void, Preroll, (PrerollContext*), (override));
+  MOCK_METHOD(void, Paint, (PaintContext&), (const, override));
+};
+
+}  // namespace
+
+TEST_F(LayerTreeTest, FlattenInitializesContexts) {
+  auto layer = std::make_shared<MockFlattenLayer>();
+  auto layer_tree = BuildLayerTree(layer);
+
+  EXPECT_CALL(*layer, Preroll(::testing::_)).Times(2);
+
+  // Default: null contexts
+  EXPECT_CALL(*layer, Paint(::testing::_)).WillOnce([](PaintContext& context) {
+    EXPECT_EQ(context.gr_context, nullptr);
+    EXPECT_EQ(context.aiks_context, nullptr);
+    EXPECT_FALSE(context.impeller_enabled);
+  });
+  layer_tree->Flatten(DlRect::MakeWH(100, 100));
+
+  // With a fake AiksContext pointer
+  auto fake_aiks = reinterpret_cast<impeller::AiksContext*>(0x1234);
+  EXPECT_CALL(*layer, Paint(::testing::_))
+      .WillOnce([fake_aiks](PaintContext& context) {
+        EXPECT_EQ(context.gr_context, nullptr);
+        EXPECT_EQ(context.aiks_context, fake_aiks);
+        EXPECT_TRUE(context.impeller_enabled);
+      });
+  layer_tree->Flatten(DlRect::MakeWH(100, 100), /*texture_registry=*/nullptr,
+                      /*gr_context=*/nullptr, fake_aiks);
 }
 
 }  // namespace testing

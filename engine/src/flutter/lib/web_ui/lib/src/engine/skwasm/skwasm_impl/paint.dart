@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
+
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
@@ -29,11 +31,8 @@ class SkwasmPaint implements ui.Paint {
 
     final EngineColorFilter? localColorFilter = _colorFilter;
     if (localColorFilter != null) {
-      SkwasmColorFilter.fromEngineColorFilter(localColorFilter).withRawColorFilter((
-        nativeFilterHandle,
-      ) {
-        paintSetColorFilter(rawPaint, nativeFilterHandle);
-      });
+      final backendFilter = localColorFilter.backendFilter as SkwasmColorFilter;
+      paintSetColorFilter(rawPaint, backendFilter.handle);
     }
 
     final ShaderHandle? shaderHandle = _shader?.handle;
@@ -41,19 +40,27 @@ class SkwasmPaint implements ui.Paint {
       paintSetShader(rawPaint, shaderHandle);
     }
 
-    final ui.MaskFilter? localMaskFilter = maskFilter;
+    final localMaskFilter = maskFilter as EngineMaskFilter?;
     if (localMaskFilter != null) {
-      final nativeFilter = SkwasmMaskFilter.fromUiMaskFilter(localMaskFilter);
-      paintSetMaskFilter(rawPaint, nativeFilter.handle);
-      nativeFilter.dispose();
+      final backendFilter = localMaskFilter.backendFilter as SkwasmMaskFilter;
+      paintSetMaskFilter(rawPaint, backendFilter.handle);
     }
 
     final ui.ImageFilter? filter = imageFilter;
     if (filter != null) {
-      final skwasmImageFilter = SkwasmImageFilter.fromUiFilter(filter);
-      skwasmImageFilter.withRawImageFilter((nativeHandle) {
+      final EngineImageFilter engineFilter;
+      if (filter is ui.ColorFilter) {
+        engineFilter = EngineColorFilterImageFilter(colorFilter: filter as EngineColorFilter);
+      } else {
+        engineFilter = filter as EngineImageFilter;
+      }
+      final backendFilter =
+          engineFilter.getBackendFilter(defaultBlurTileMode: defaultBlurTileMode)
+              as SkwasmImageFilter;
+      final ImageFilterHandle nativeHandle = backendFilter.nativeFilter;
+      if (nativeHandle != nullptr) {
         paintSetImageFilter(rawPaint, nativeHandle);
-      }, defaultBlurTileMode: defaultBlurTileMode);
+      }
     }
 
     return rawPaint;
