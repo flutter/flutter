@@ -18,6 +18,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1350,6 +1351,157 @@ public class FlutterLoaderTest {
             + expectedArg
             + "' was found in the arguments passed to FlutterJNI.init",
         arguments.contains(expectedArg));
+  }
+
+  @Test
+  public void itSetsSingleCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-impeller=true\"]", new String[] {"--enable-impeller=true"}, true, true);
+  }
+
+  @Test
+  public void itSetsMultipleCommandLineFlagsFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-impeller=true\",\"--enable-dart-profiling\"]",
+        new String[] {"--enable-impeller=true", "--enable-dart-profiling"},
+        true,
+        true);
+  }
+
+  @Test
+  public void
+      itSetsMultipleCommandLineFlagsWithSpecialCharactersFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--flutter-assets-dir=\\\"path/<to>/'a'& file\\\"\",\"--enable-impeller=true\"]",
+        new String[] {"--flutter-assets-dir=\"path/<to>/'a'& file\"", "--enable-impeller=true"},
+        true,
+        true);
+  }
+
+  @Test
+  public void itIgnoresCommandLineFlagsFromManifestMetadataInDebugMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-impeller=true\"]", new String[] {"--enable-impeller=true"}, false, false);
+  }
+
+  @Test
+  public void itDoesNotReadAndroidEngineShellArgsFromManifestInDebugMode() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = spy(new Bundle());
+
+    metadata.putString(
+        "io.flutter.app.androidEngineShellArgs",
+        "[\"--enable-impeller=true\",\"--enable-dart-profiling\"]");
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null, false);
+    shadowOf(getMainLooper()).idle();
+
+    verify(metadata, never()).getString("io.flutter.app.androidEngineShellArgs");
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertFalse(arguments.contains("--enable-impeller=true"));
+    assertFalse(arguments.contains("--enable-dart-profiling"));
+  }
+
+  @Test
+  public void itSetsCommandLineFlagsFromManifestMetadataInReleaseModeAndTakesPrecedence() {
+    String expectedImpellerArgFromMetadata = "--enable-impeller=false";
+    String expectedImpellerArgFromShellArgs = "--enable-impeller=true";
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    // Place metadata key and value into the metadata bundle used to mock the manifest.
+    metadata.putBoolean("io.flutter.embedding.android.EnableImpeller", false);
+
+    // Mock metadata put into the manifest by the Flutter tool when command line flag specified.
+    metadata.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"" + expectedImpellerArgFromShellArgs + "\"]");
+
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null, true);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // Verify that the command line argument takes precedence over the manifest metadata.
+    assertTrue(
+        arguments.indexOf(expectedImpellerArgFromMetadata)
+            < arguments.indexOf(expectedImpellerArgFromShellArgs));
+  }
+
+  private void testMultipleFlagsFromManifestMetadata(
+      String jsonFlags, String[] expectedArgs, boolean shouldBeSet, boolean isReleaseMode) {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    metadata.putString("io.flutter.app.androidEngineShellArgs", jsonFlags);
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null, isReleaseMode);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    for (String expectedArg : expectedArgs) {
+      if (shouldBeSet) {
+        assertTrue(
+            "Expected argument '"
+                + expectedArg
+                + "' was not found in the arguments passed to FlutterJNI.init",
+            arguments.contains(expectedArg));
+      } else {
+        assertFalse(
+            "Unexpected argument '"
+                + expectedArg
+                + "' was found in the arguments passed to FlutterJNI.init",
+            arguments.contains(expectedArg));
+      }
+    }
   }
 
   private void testFlagFromMetadataPresentInReleaseMode(
