@@ -5,12 +5,11 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_PIPELINE_COMPILE_QUEUE_H_
 #define FLUTTER_IMPELLER_RENDERER_PIPELINE_COMPILE_QUEUE_H_
 
-#include <unordered_map>
-
 #include "flutter/fml/closure.h"
 #include "flutter/fml/concurrent_message_loop.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "third_party/abseil-cpp/absl/container/linked_hash_map.h"
 
 namespace impeller {
 
@@ -39,13 +38,12 @@ namespace impeller {
 ///             entirely optional. The queue skipping mechanism all assume the
 ///             optional availability of a compile queue.
 ///
-class PipelineCompileQueue final
+class PipelineCompileQueue
     : public std::enable_shared_from_this<PipelineCompileQueue> {
  public:
-  static std::shared_ptr<PipelineCompileQueue> Create(
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner);
+  PipelineCompileQueue() = default;
 
-  ~PipelineCompileQueue();
+  virtual ~PipelineCompileQueue();
 
   PipelineCompileQueue(const PipelineCompileQueue&) = delete;
 
@@ -72,26 +70,68 @@ class PipelineCompileQueue final
   ///
   void PerformJobEagerly(const PipelineDescriptor& desc);
 
- private:
-  std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
-  Mutex pending_jobs_mutex_;
-  size_t priorities_elevated_ = {};
+ protected:
+  //----------------------------------------------------------------------------
+  /// @brief      Post a compilation job to the worker task runner.
+  ///
+  ///             This is a pure virtual function that must be implemented by
+  ///             subclasses. It is responsible for actually dispatching the
+  ///             job closure to the appropriate task runner for execution.
+  ///
+  /// @param[in]  job  The compilation job closure to post
+  ///
+  virtual void PostJob(const fml::closure& job) = 0;
 
-  std::unordered_map<PipelineDescriptor,
-                     fml::closure,
-                     ComparableHash<PipelineDescriptor>,
-                     ComparableEqual<PipelineDescriptor>>
-      pending_jobs_ IPLR_GUARDED_BY(pending_jobs_mutex_);
+  //----------------------------------------------------------------------------
+  /// @brief      Called by PostJobForDescriptor after a job has been
+  ///             successfully added to the queue. Subclasses must implement
+  ///             this to define their scheduling strategy.
+  ///
+  ///             The default implementation for duplicate descriptors is to
+  ///             run the job eagerly. Subclasses can override this behavior
+  ///             by checking for duplicates before calling the base class.
+  ///
+  virtual void OnJobAdded() = 0;
 
-  explicit PipelineCompileQueue(
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner);
-
-  fml::closure TakeJob(const PipelineDescriptor& desc);
-
-  fml::closure TakeNextJob();
-
+  //----------------------------------------------------------------------------
+  /// @brief      Execute one pending compilation job from the queue.
+  ///
+  ///             This method retrieves and executes a single job from the
+  ///             pending jobs queue. It is typically called by subclasses
+  ///             when they are ready to process the next job in the queue.
+  ///
   void DoOneJob();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Add a compilation job to the pending queue for the specified
+  ///             descriptor.
+  ///
+  /// @param[in]  desc  The pipeline descriptor that identifies the job
+  /// @param[in]  job   The compilation job closure to add
+  ///
+  /// @return     True if the job was successfully added to the queue, false
+  ///             if a job for this descriptor already exists.
+  ///
+  bool AddJob(const PipelineDescriptor& desc, const fml::closure& job);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Check if there are any pending compilation jobs in the queue.
+  ///
+  /// @return     True if there are pending jobs waiting to be processed,
+  ///             false otherwise.
+  ///
+  bool HasPendingJobs();
+
+ private:
+  Mutex pending_jobs_mutex_;
+  absl::linked_hash_map<PipelineDescriptor,
+                        fml::closure,
+                        ComparableHash<PipelineDescriptor>,
+                        ComparableEqual<PipelineDescriptor>>
+      pending_jobs_ IPLR_GUARDED_BY(pending_jobs_mutex_);
+  size_t priorities_elevated_ = {};
+  fml::closure TakeJob(const PipelineDescriptor& desc);
+  fml::closure TakeNextJob();
   void FinishAllJobs();
 };
 

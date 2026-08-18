@@ -34,7 +34,6 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
-#include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/shadow_vertices_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
@@ -66,10 +65,52 @@
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/command_buffer.h"
+#include "third_party/abseil-cpp/absl/hash/hash.h"
 
 namespace impeller {
 
 namespace {
+
+uint32_t PackGlyphId(const Glyph& glyph) {
+  return (static_cast<uint32_t>(glyph.type) << 16) | glyph.index;
+}
+
+TextFrameFingerprint ComputeTextFrameFingerprint(const TextFrame& text_frame) {
+  TextFrameFingerprint fp;
+  const std::vector<TextRun>& runs = text_frame.GetRuns();
+  fp.run_count = runs.size();
+
+  size_t hash = absl::HashOf(text_frame.HasColor(),
+                             text_frame.GetEnableGammaCorrection());
+
+  for (const TextRun& run : runs) {
+    hash = absl::HashOf(hash, run.GetFont().GetHash());
+    const std::vector<TextRun::GlyphPosition>& glyphs = run.GetGlyphPositions();
+    fp.total_glyph_count += glyphs.size();
+
+    for (const TextRun::GlyphPosition& glyph_pos : glyphs) {
+      hash = absl::HashOf(hash, static_cast<uint32_t>(glyph_pos.glyph.type),
+                          glyph_pos.glyph.index, glyph_pos.position.x,
+                          glyph_pos.position.y);
+    }
+  }
+
+  if (!runs.empty()) {
+    const std::vector<TextRun::GlyphPosition>& first_glyphs =
+        runs.front().GetGlyphPositions();
+    if (!first_glyphs.empty()) {
+      fp.first_glyph_id = PackGlyphId(first_glyphs.front().glyph);
+    }
+    const std::vector<TextRun::GlyphPosition>& last_glyphs =
+        runs.back().GetGlyphPositions();
+    if (!last_glyphs.empty()) {
+      fp.last_glyph_id = PackGlyphId(last_glyphs.back().glyph);
+    }
+  }
+
+  fp.full_hash = hash;
+  return fp;
+}
 
 constexpr Scalar kAntialiasPadding = 1.0f;
 
@@ -810,8 +851,7 @@ bool Canvas::AttemptDrawLineSDF(const Point& p0,
                                 const Point& p1,
                                 const Paint& paint,
                                 bool reuse_depth) {
-  if (!(renderer_.GetContext()->GetFlags().use_sdfs ||
-        renderer_.GetContext()->GetFlags().antialiased_lines) ||
+  if (!renderer_.GetContext()->GetFlags().use_sdfs ||
       !IsCompatibleWithSDFRendering(paint)) {
     return false;
   }
@@ -1113,36 +1153,27 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
+    Color effective_color = paint.color;
+    Rect bounds = round_rect.GetBounds();
+
     // Expand rrect bounds to 1 pixel minimum dimensions if applicable.
     if (paint.style == Paint::Style::kFill &&
         !GetCurrentTransform().HasPerspective2D()) {
-      Rect rrect_bounds = round_rect.GetBounds();
-      auto [expanded, alpha_scaled_color] =
-          ExpandRectToPixelMinimum(rrect_bounds, paint.color,
-                                   GetCurrentTransform(), /*scale_alpha=*/true);
+      auto [expanded, alpha_scaled_color] = ExpandRectToPixelMinimum(
+          bounds, paint.color, GetCurrentTransform(), /*scale_alpha=*/true);
 
       if (expanded.IsEmpty()) {
         // RRect is invisible due to transform scaling or alpha scaling.
         return;
       }
 
-      // Pixel-minimum expansion is applicable if the expanded bounds is
-      // different from the original bounds.
-      if (expanded != rrect_bounds) {
-        // At a 1-pixel size, the rounded corners can be ignored. Draw a regular
-        // rect matching the expanded bounds.
-        auto params = UberSDFParameters::MakeRect(
-            /*color=*/alpha_scaled_color,
-            /*rect=*/expanded,
-            /*stroke=*/std::nullopt);
-        AddRenderSDFEntityToCurrentPass(paint, params);
-        return;
-      }
+      bounds = expanded;
+      effective_color = alpha_scaled_color;
     }
 
     auto params = UberSDFParameters::MakeRoundedRect(
-        /*color=*/paint.color,
-        /*rect=*/round_rect.GetBounds(),
+        /*color=*/effective_color,
+        /*rect=*/bounds,
         /*radii=*/radii,
         /*stroke=*/paint.style == Paint::Style::kStroke
             ? std::make_optional(paint.stroke)
@@ -2112,16 +2143,17 @@ bool Canvas::AttemptBlurredTextOptimization(
           /*is_solid_color=*/true, GetCurrentTransform());
 
   std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
-  int64_t identifier = maybe_glyph.has_value()
-                           ? maybe_glyph.value().index
-                           : reinterpret_cast<int64_t>(text_frame.get());
+  TextFrameFingerprint fingerprint =
+      maybe_glyph.has_value()
+          ? TextFrameFingerprint{.full_hash = PackGlyphId(maybe_glyph.value())}
+          : ComputeTextFrameFingerprint(*text_frame);
   TextShadowCache::TextShadowCacheKey cache_key(
       /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
-      /*p_identifier=*/identifier,
       /*p_is_single_glyph=*/maybe_glyph.has_value(),
       /*p_font=*/text_frame->GetFont(),
       /*p_sigma=*/paint.mask_blur_descriptor->sigma,
-      /*p_color=*/paint.color);
+      /*p_color=*/paint.color,
+      /*p_fingerprint=*/fingerprint);
 
   std::optional<Entity> result = renderer_.GetTextShadowCache().Lookup(
       renderer_, entity, filter, cache_key);

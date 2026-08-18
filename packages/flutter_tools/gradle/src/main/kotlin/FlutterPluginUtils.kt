@@ -14,6 +14,8 @@ import com.android.build.gradle.BaseExtension
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
+import com.flutter.gradle.tasks.EnableHcppManifestTask
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
@@ -39,6 +41,8 @@ object FlutterPluginUtils {
     // recommended to use these const values in tests.
     internal const val PROP_SHOULD_SHRINK_RESOURCES = "shrink"
     internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
+    internal const val PROP_ENABLE_HCPP = "enable-hcpp"
+    internal const val PROP_EXPLICIT_ENABLE_HCPP = "explicit-enable-hcpp"
     internal const val PROP_LOCAL_ENGINE_REPO = "local-engine-repo"
     internal const val PROP_IS_VERBOSE = "verbose"
     internal const val PROP_TARGET = "target"
@@ -529,18 +533,21 @@ object FlutterPluginUtils {
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
 
-    internal fun getConfiguredNdkVersion(project: Project): String? =
-        project.extensions.findByType(ApplicationExtension::class.java)?.ndkVersion
-            ?: getLegacyAndroidExtension(project).ndkVersion
+    internal fun getConfiguredNdkVersion(project: Project): String? = getAndroidExtension(project).ndkVersion
 
     /**
-     * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
-     * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
-     * e.g. `android-UpsideDownCake`.
+     * Returns the compile SDK configured on the project's Android extension: the numeric
+     * API level (`compileSdk = 36`) or a preview codename (`compileSdkPreview = "Baklava"`).
      */
     @JvmStatic
     @JvmName("getCompileSdkFromProject")
-    internal fun getCompileSdkFromProject(project: Project): String = getLegacyAndroidExtension(project).compileSdkVersion!!.substring(8)
+    internal fun getCompileSdkFromProject(project: Project): CompileSdkVersion {
+        val androidExtension = getAndroidExtension(project)
+        return CompileSdkVersion(
+            apiLevel = androidExtension.compileSdk,
+            previewCodename = androidExtension.compileSdkPreview
+        )
+    }
 
     /**
      * Returns:
@@ -796,8 +803,10 @@ object FlutterPluginUtils {
 
         // If the project is already configuring a native build, we don't need to do anything.
         val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
+        val externalNativeBuild = gradleProjectAndroidExtension.externalNativeBuild
         val forcingNotRequired: Boolean =
-            gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null
+            externalNativeBuild?.cmake?.path != null ||
+                externalNativeBuild?.ndkBuild?.path != null
         if (forcingNotRequired) {
             return
         }
@@ -1156,6 +1165,89 @@ object FlutterPluginUtils {
                     DeepLinkJsonFromManifestTask::manifestFile,
                     DeepLinkJsonFromManifestTask::updatedManifest
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
+        }
+    }
+
+    /**
+     * Creates a task to generate an AndroidManifest.xml containing the engine shell arguments
+     * and adds it to the variant's manifests.
+     */
+    @JvmStatic
+    @JvmName("addTaskForGeneratingEngineShellArgumentManifest")
+    internal fun addTaskForGeneratingEngineShellArgumentManifest(project: Project) {
+        val engineShellArgsJson = project.findProperty("flutter.engineShellArgs") as? String ?: return
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+
+        androidComponents.onVariants { variant ->
+            val capitalizeVariantName = capitalize(variant.name)
+            val generateManifestTaskProvider =
+                project.tasks.register(
+                    "generateEngineFlagsManifest$capitalizeVariantName",
+                    GenerateEngineFlagsManifestTask::class.java
+                ) {
+                    this.engineShellArgsJson.set(engineShellArgsJson)
+                    this.manifestOutputFile.set(
+                        project.layout.buildDirectory.file(
+                            "intermediates/flutter/${variant.name}/AndroidManifest.xml"
+                        )
+                    )
+                }
+
+            variant.sources.manifests?.addGeneratedManifestFile(
+                generateManifestTaskProvider,
+                GenerateEngineFlagsManifestTask::manifestOutputFile
+            )
+        }
+    }
+
+    /**
+     * Adds tasks that inject the `io.flutter.embedding.android.EnableHcpp` meta-data into the
+     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true` (i.e.
+     * when the `--enable-hcpp` flag was passed).
+     *
+     * The meta-data is only added when not already present in the merged manifest, so an
+     * explicit value in the developer's manifest always takes priority over the tool's default.
+     * An explicit `--enable-hcpp`/`--no-enable-hcpp` on `flutter run`/`flutter test` is passed
+     * to the engine at launch instead, which takes priority over the manifest at runtime.
+     *
+     * Only applies to application projects. Injecting into a module (aar) library manifest
+     * would propagate into the host app's merged manifest, and if the host app explicitly sets
+     * the meta-data to a different value the manifest merger fails the host build with an
+     * attribute conflict ("Attribute meta-data#...EnableHcpp@value value=(false) ... is also
+     * present at [library] ... value=(true)") instead of letting the host win. Add-to-app hosts
+     * therefore control HCPP exclusively through their own manifest.
+     */
+    @JvmStatic
+    @JvmName("addTasksForEnableHcppManifest")
+    internal fun addTasksForEnableHcppManifest(project: Project) {
+        if (!isFlutterAppProject(project)) {
+            return
+        }
+        val enableHcpp: Boolean =
+            project.findProperty(PROP_ENABLE_HCPP)?.toString()?.toBoolean() ?: false
+        val explicitEnableHcpp: Boolean? =
+            project.findProperty(PROP_EXPLICIT_ENABLE_HCPP)?.toString()?.toBoolean()
+        if (!enableHcpp && explicitEnableHcpp == null) {
+            return
+        }
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        androidComponents.onVariants { variant ->
+            val hcppManifestUpdater =
+                project.tasks.register(
+                    "enableHcppInManifest${capitalize(variant.name)}",
+                    EnableHcppManifestTask::class.java
+                ) {
+                    this.requestedEnableHcpp.set(enableHcpp)
+                    if (explicitEnableHcpp != null) {
+                        this.explicitEnableHcpp.set(explicitEnableHcpp)
+                    }
+                }
+            variant.artifacts
+                .use(hcppManifestUpdater)
+                .wiredWithFiles(
+                    EnableHcppManifestTask::manifestFile,
+                    EnableHcppManifestTask::updatedManifest
+                ).toTransform(SingleArtifact.MERGED_MANIFEST)
         }
     }
 }
