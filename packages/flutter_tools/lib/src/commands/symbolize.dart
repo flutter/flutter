@@ -322,7 +322,7 @@ class DwarfSymbolizationService {
     try {
       await onDone.future;
       await output.close();
-    } on Exception catch (err) {
+    } on Object catch (err) {
       throwToolExit('Failed to symbolize stack trace:\n $err');
     }
   }

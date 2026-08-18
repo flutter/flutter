@@ -59,7 +59,7 @@ void main() {
       symbolsTransformer: (Uint8List symbols) {
         return StreamTransformer<String, String>.fromHandlers(
           handleData: (String data, EventSink<String> sink) {
-            sink.addError(Exception('Test error'));
+            sink.addError('Test error');
           },
         );
       },
