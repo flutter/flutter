@@ -81,6 +81,8 @@ class RenderSliverCrossAxisGroup extends RenderSliver
 
     child = firstChild;
 
+    late final bool canUseFlex = remainingExtent > 0.0;
+
     // At this point, all slivers with constrained cross axis should already be laid out.
     // Layout the rest and keep track of the child geometry with greatest scrollExtent.
     geometry = SliverGeometry.zero;
@@ -89,12 +91,16 @@ class RenderSliverCrossAxisGroup extends RenderSliver
       final int flex = childParentData.crossAxisFlex ?? 0;
       double childExtent;
       if (flex != 0) {
-        childExtent = extentPerFlexValue * flex;
-        assert(_assertOutOfExtent(childExtent));
-        child.layout(
-          constraints.copyWith(crossAxisExtent: extentPerFlexValue * flex),
-          parentUsesSize: true,
-        );
+        if (canUseFlex) {
+          childExtent = extentPerFlexValue * flex;
+          assert(_assertOutOfExtent(childExtent));
+          child.layout(
+            constraints.copyWith(crossAxisExtent: extentPerFlexValue * flex),
+            parentUsesSize: true,
+          );
+        } else {
+          child.layout(constraints.copyWith(crossAxisExtent: 0.0), parentUsesSize: true);
+        }
       } else {
         childExtent = child.geometry!.crossAxisExtent!;
       }
