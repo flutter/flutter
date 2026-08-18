@@ -623,17 +623,6 @@ class AndroidDevice extends Device {
       );
     }
 
-<<<<<<< HEAD
-    final String? traceAllowlist = debuggingOptions.traceAllowlist;
-    final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
-    final String? traceToFile = debuggingOptions.traceToFile;
-
-    // TODO(camillesimon): Restrict this intent pathway to debug/profile mode only once
-    // https://github.com/flutter/flutter/pull/190222 lands. For release mode, these flags 
-    // should be encoded in the manifest. If a prebuilt application binary is used, we can 
-    // throw a tool exit (though it should already be rejected by the CLI).
-=======
->>>>>>> upstream/master
     final cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
