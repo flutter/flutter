@@ -147,13 +147,59 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
 
   EXPECT_EQ(params.radii.x,
             round_superellipse_params.top_right.top.circle_radius);
+  EXPECT_EQ(params.radii.y,
+            round_superellipse_params.top_right.right.circle_radius);
 
-  EXPECT_EQ(params.superellipse_degree,
+  EXPECT_EQ(params.superellipse_degree.x,
             round_superellipse_params.top_right.top.se_n);
-  EXPECT_EQ(params.superellipse_angle_span,
+  EXPECT_EQ(params.superellipse_degree.y,
+            round_superellipse_params.top_right.right.se_n);
+
+  EXPECT_EQ(params.superellipse_semi_axis.x,
+            round_superellipse_params.top_right.top.se_a);
+  EXPECT_EQ(params.superellipse_semi_axis.y,
+            round_superellipse_params.top_right.right.se_a);
+
+  EXPECT_EQ(params.angle_span.x,
             round_superellipse_params.top_right.top.circle_max_angle.radians);
-  EXPECT_EQ(params.circle_center,
+  EXPECT_EQ(params.angle_span.y,
+            round_superellipse_params.top_right.right.circle_max_angle.radians);
+
+  EXPECT_EQ(params.octant_offset_c,
+            round_superellipse_params.top_right.top.se_a -
+                round_superellipse_params.top_right.right.se_a);
+
+  EXPECT_EQ(params.circle_center_top,
             round_superellipse_params.top_right.top.circle_center);
+  EXPECT_EQ(params.circle_center_right,
+            round_superellipse_params.top_right.right.circle_center);
+}
+
+TEST(UberSDFParametersTest, MakeRectangularRoundedSuperellipse) {
+  Rect rect = Rect::MakeXYWH(10, 20, 100, 200);
+  RoundingRadii radii = {
+      .top_left = Size(10.0f, 10.0f),
+      .top_right = Size(10.0f, 10.0f),
+      .bottom_left = Size(10.0f, 10.0f),
+      .bottom_right = Size(10.0f, 10.0f),
+  };
+  auto round_superellipse_params =
+      RoundSuperellipseParam::MakeBoundsRadii(rect, radii);
+  auto params = UberSDFParameters::MakeRoundedSuperellipse(
+      /*color=*/Color::Red(), /*bounds=*/rect,
+      /*round_superellipse_params=*/round_superellipse_params,
+      /*stroke=*/std::nullopt);
+
+  EXPECT_EQ(params.type,
+            UberSDFParameters::Type::kRoundedSuperellipseSymmetric);
+  EXPECT_EQ(params.color, Color::Red());
+  EXPECT_EQ(params.center, Point(60, 120));
+  EXPECT_EQ(params.size, Point(50, 100));
+  EXPECT_FALSE(params.stroke.has_value());
+
+  EXPECT_EQ(params.superellipse_semi_axis.x, 50.0f);
+  EXPECT_EQ(params.superellipse_semi_axis.y, 100.0f);
+  EXPECT_EQ(params.octant_offset_c, -50.0f);
 }
 
 }  // namespace testing
