@@ -788,7 +788,6 @@ class FlutterBuildSystem extends BuildSystem {
   /// files, if these were not already covered by the built-in cleanup. This
   /// cleanup is only necessary when multiple different build configurations
   /// output to the same directory.
-  @visibleForTesting
   void trackSharedBuildDirectory(
     Environment environment,
     FileSystem fileSystem,
