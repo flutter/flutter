@@ -1487,18 +1487,15 @@ class ProjectFileInvalidator {
     ];
     final invalidatedFiles = <Uri>[];
 
-    final bool isWindows = _platform.isWindows;
-    final DateTime? lastCompiledTruncated = isWindows
-        ? DateTime.fromMillisecondsSinceEpoch(
-            (lastCompiled.millisecondsSinceEpoch ~/ 1000) * 1000,
-            isUtc: lastCompiled.isUtc,
-          )
-        : null;
-    bool isInvalidated(DateTime updatedAt) {
-      if (isWindows) {
-        return !updatedAt.isBefore(lastCompiledTruncated!);
-      }
-      return updatedAt.isAfter(lastCompiled);
+    final bool Function(DateTime) isInvalidated;
+    if (_platform.isWindows) {
+      final lastCompiledTruncated = DateTime.fromMillisecondsSinceEpoch(
+        (lastCompiled.millisecondsSinceEpoch ~/ 1000) * 1000,
+        isUtc: lastCompiled.isUtc,
+      );
+      isInvalidated = (DateTime updatedAt) => !updatedAt.isBefore(lastCompiledTruncated);
+    } else {
+      isInvalidated = (DateTime updatedAt) => updatedAt.isAfter(lastCompiled);
     }
 
     if (asyncScanning) {
