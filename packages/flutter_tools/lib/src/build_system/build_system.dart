@@ -858,11 +858,14 @@ void _deleteStaleOutputs({
   required Set<String> preservedOutputFilePaths,
   required Iterable<String> previousOutputs,
 }) {
-  final String sharedHooksPath = fileSystem.path.join(
-    environment.projectDir.resolveSymbolicLinksSync(),
-    '.dart_tool',
-    'hooks_runner',
-    'shared',
+  String projectDirPath;
+  try {
+    projectDirPath = environment.projectDir.resolveSymbolicLinksSync();
+  } on FileSystemException {
+    projectDirPath = environment.projectDir.absolute.path;
+  }
+  final String sharedHooksPath = fileSystem.path.canonicalize(
+    fileSystem.path.join(projectDirPath, '.dart_tool', 'hooks_runner', 'shared'),
   );
   for (final previousOutput in previousOutputs) {
     if (currentOutputs.containsKey(previousOutput)) {
@@ -870,7 +873,10 @@ void _deleteStaleOutputs({
     }
     final File previousFile = fileSystem.file(previousOutput);
     if (preservedOutputFilePaths.contains(previousFile.path) ||
-        fileSystem.path.isWithin(sharedHooksPath, fileSystem.path.absolute(previousFile.path))) {
+        fileSystem.path.isWithin(
+          sharedHooksPath,
+          fileSystem.path.canonicalize(previousFile.path),
+        )) {
       continue;
     }
     ErrorHandlingFileSystem.deleteIfExists(previousFile);
