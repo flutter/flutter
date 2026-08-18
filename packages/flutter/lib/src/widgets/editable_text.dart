@@ -2023,14 +2023,14 @@ class EditableText extends StatefulWidget {
   /// This example shows how to customize the menu, in this case by keeping the
   /// default buttons for the platform but modifying their appearance.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.0.dart **
+  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart **
   /// {@end-tool}
   ///
   /// {@tool dartpad}
   /// This example shows how to show a custom button only when an email address
   /// is currently selected.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.1.dart **
+  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -2052,9 +2052,9 @@ class EditableText extends StatefulWidget {
   /// [TextStyle] used to style text with misspelled words.
   ///
   /// Spell check is disabled for password input, including when [obscureText]
-  /// is true, [keyboardType] is [TextInputType.visiblePassword], or
-  /// [autofillHints] contains [AutofillHints.password] or
-  /// [AutofillHints.newPassword].
+  /// is true, [keyboardType] is [TextInputType.visiblePassword],
+  /// [TextInputType.password] is true, or [autofillHints] contains
+  /// [AutofillHints.password] or [AutofillHints.newPassword].
   ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
@@ -3111,6 +3111,7 @@ class EditableTextState extends State<EditableText>
   }) {
     return obscureText ||
         keyboardType == TextInputType.visiblePassword ||
+        keyboardType.password == true ||
         (autofillHints?.any(
               (String hint) => hint == AutofillHints.password || hint == AutofillHints.newPassword,
             ) ??

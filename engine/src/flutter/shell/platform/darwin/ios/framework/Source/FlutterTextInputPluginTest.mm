@@ -125,6 +125,9 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                                     bool transient) override {}
   void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
                                  flutter::AssetResolver::AssetResolverType type) override {}
+  std::shared_ptr<fml::BasicTaskRunner> OnPlatformViewGetShutdownSafeIOTaskRunner() const override {
+    return nullptr;
+  }
 
   flutter::Settings settings_;
 };
@@ -888,9 +891,6 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   thread_task_runner->PostTask([&] {
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_platform_view_delegate,
-        /*rendering_api=*/mock_platform_view_delegate.settings_.enable_impeller
-            ? flutter::IOSRenderingAPI::kMetal
-            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/nil,
         /*task_runners=*/runners,
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());

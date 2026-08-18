@@ -99,8 +99,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       SliceViews(frame->Canvas(),     //
                  composition_order_,  //
                  slices_,             //
-                 view_rects,          //
-                 {}                   //
+                 view_rects           //
       );
 
   // If there is no overlay Surface, initialize one on the platform thread. This
@@ -177,7 +176,6 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         } else {
           HideOverlayLayerIfNeeded();
         }
-        jni_facade->swapTransaction();
 
         for (int64_t view_id : composition_order) {
           DlRect view_rect = GetViewRect(view_id, view_params);
@@ -200,6 +198,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           jni_facade->hidePlatformView2(view_id);
         }
 
+        jni_facade->swapTransaction();
         jni_facade_->onEndFrame2();
       }));
 
@@ -240,11 +239,9 @@ void AndroidExternalViewEmbedder2::PrepareFlutterView(
     double device_pixel_ratio) {
   Reset();
 
-  // The surface size changed. Therefore, destroy existing surfaces as
-  // the existing surfaces in the pool can't be recycled.
+  // The singular overlay surface is persistent, so it is resized in place by
+  // |SurfacePool::GetLayer| rather than destroyed and recreated here.
   if (frame_size_ != frame_size) {
-    DestroySurfaces();
-
     // This should not block to prevent deadlocks with
     // setViewportMetrics.
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
