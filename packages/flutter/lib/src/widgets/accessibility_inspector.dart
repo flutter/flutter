@@ -42,16 +42,24 @@ class AccessibilityInspector {
     _semanticsHandle = null;
   }
 
+  /// Enables semantics inspection on the connected application.
+  ///
+  /// Returns a mutable map as required by [BindingBase.registerServiceExtension],
+  /// which mutates the returned map to append metadata.
   Future<Map<String, Object?>> _enableSemantics(Map<String, String> parameters) async {
     _semanticsHandle ??= SemanticsBinding.instance.ensureSemantics();
-    return const <String, Object?>{};
+    return <String, Object?>{};
   }
 
+  /// Disposes accessibility semantics state.
+  ///
+  /// Returns a mutable map as required by [BindingBase.registerServiceExtension].
   Future<Map<String, Object?>> _disposeSemantics(Map<String, String> parameters) async {
     resetAllState();
-    return const <String, Object?>{};
+    return <String, Object?>{};
   }
 
+  /// Evaluates and returns the semantics tree hierarchy of the application.
   Future<Map<String, Object?>> _getSemanticsTree(Map<String, String> parameters) async {
     if (!SemanticsBinding.instance.semanticsEnabled) {
       return <String, Object?>{'error': 'Semantics not enabled.'};
