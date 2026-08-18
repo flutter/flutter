@@ -4,14 +4,8 @@
 
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../primitives/path.dart';
-import '../util.dart';
-import '../vector_math.dart';
-import 'layer.dart';
-import 'layer_painting.dart';
-import 'layer_tree.dart';
 
 // Warn about performance overlay on Web only once per page load.
 bool _webPerfOverlayWarned = false;
@@ -180,9 +174,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilterEngineLayer? oldLayer,
     ui.Offset offset = ui.Offset.zero,
   }) {
-    return pushLayer<ImageFilterEngineLayer>(
-      ImageFilterEngineLayer(filter as LayerImageFilter, offset),
-    );
+    return pushLayer<ImageFilterEngineLayer>(ImageFilterEngineLayer(filter, offset));
   }
 
   @override
