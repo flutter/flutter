@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../android/android_engine_cli_flags.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -152,30 +153,6 @@ abstract final class FlutterOptions {
   static const kEnableImpeller = 'enable-impeller';
   static const kCodesignIdentity = 'codesign-identity';
   static const kCodesign = 'codesign';
-
-  // TODO(camsim99): make sure that debuggingoptions uses this/the same list as well after 
-  // https://github.com/flutter/flutter/pull/190222 lands.
-  /// The list of CLI flags that are sent to the Android embedding via an Intent.
-  static const List<String> kAndroidEngineConfigOptions = <String>[
-    'trace-startup',
-    'route',
-    'trace-skia',
-    'trace-allowlist',
-    'trace-skia-allowlist',
-    'trace-systrace',
-    'trace-to-file',
-    'enable-dart-profiling',
-    'enable-software-rendering',
-    'skia-deterministic-rendering',
-    'endless-trace-buffer',
-    'profile-microtasks',
-    'purge-persistent-cache',
-    kEnableImpeller,
-    'enable-vulkan-validation',
-    'enable-flutter-gpu',
-    'start-paused',
-    'dart-flags',
-  ];
 }
 
 /// flutter command categories for usage.
@@ -2186,8 +2163,10 @@ abstract class FlutterCommand extends Command<void> {
     if (applicationBinary != null && applicationBinary.toLowerCase().endsWith('.apk')) {
       final BuildMode buildMode = getBuildMode();
       if (buildMode == BuildMode.release) {
-        final Iterable<String> intentFlags = FlutterOptions.kAndroidEngineConfigOptions
-            .where((String flag) => argParser.options.containsKey(flag) && argResults?.wasParsed(flag) == true);
+        final Iterable<String> intentFlags = AndroidEngineCliFlags.allFlags.where(
+          (String flag) =>
+              argParser.options.containsKey(flag) && argResults?.wasParsed(flag) == true,
+        );
 
         if (intentFlags.isNotEmpty) {
           throwToolExit(

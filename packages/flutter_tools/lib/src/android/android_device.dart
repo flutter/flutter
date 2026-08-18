@@ -26,6 +26,7 @@ import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
+import 'android_engine_cli_flags.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
 import 'gradle_utils.dart' as gradle_utils;
@@ -570,7 +571,8 @@ class AndroidDevice extends Device {
       final releaseManifestEngineShellArgs = <String>[
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
           ...debuggingOptions.getAndroidLaunchArguments(),
-          if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+          if (platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false)
+            '--${AndroidEngineCliFlags.traceStartup}',
         ],
       ];
 
@@ -606,7 +608,7 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
+    final bool traceStartup = platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false;
     ProtocolDiscovery? vmServiceDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
@@ -629,8 +631,8 @@ class AndroidDevice extends Device {
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
-      if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
-      if (route != null) ...<String>['--es', 'route', route],
+      if (traceStartup) ...<String>['--ez', AndroidEngineCliFlags.traceStartup, 'true'],
+      if (route != null) ...<String>['--es', AndroidEngineCliFlags.route, route],
       if (debuggingOptions.debuggingEnabled && userIdentifier != null) ...<String>[
         '--user',
         userIdentifier,
