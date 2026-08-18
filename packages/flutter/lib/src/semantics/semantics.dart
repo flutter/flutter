@@ -110,11 +110,13 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 /// The return value is the arrangement of these configs, including which
 /// configs continue to merge upward and which configs form sibling merge group.
 ///
-/// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
-/// value.
-typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(
-  List<SemanticsConfiguration>,
-);
+/// Deprecated. Use [RenderObject.assembleSemanticsNodes] instead.
+@Deprecated(
+  'Use RenderObject.assembleSemanticsNodes instead. '
+  'This feature was deprecated after v3.25.0-0.0.pre.',
+)
+typedef ChildSemanticsConfigurationsDelegate =
+    ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
 /// Controls how accessibility focus is blocked.
 ///
@@ -632,8 +634,16 @@ class SemanticsTag {
 /// [SemanticsConfiguration.childConfigurationsDelegate] to decide how semantics nodes
 /// should form.
 ///
-/// Use [ChildSemanticsConfigurationsResultBuilder] to build the result.
+/// Deprecated. Use [RenderObject.assembleSemanticsNodes] instead.
+@Deprecated(
+  'Use RenderObject.assembleSemanticsNodes instead. '
+  'This feature was deprecated after v3.25.0-0.0.pre.',
+)
 class ChildSemanticsConfigurationsResult {
+  @Deprecated(
+    'Use RenderObject.assembleSemanticsNodes instead. '
+    'This feature was deprecated after v3.25.0-0.0.pre.',
+  )
   ChildSemanticsConfigurationsResult._(this.mergeUp, this.siblingMergeGroups);
 
   /// Returns the [SemanticsConfiguration]s that are supposed to be merged into
@@ -668,8 +678,18 @@ class ChildSemanticsConfigurationsResult {
 /// [markAsSiblingMergeGroup] to annotate the arrangement of
 /// [SemanticsConfiguration]s. Once all the configs are annotated, use [build]
 /// to generate the [ChildSemanticsConfigurationsResult].
+///
+/// Deprecated. Use [RenderObject.assembleSemanticsNodes] instead.
+@Deprecated(
+  'Use RenderObject.assembleSemanticsNodes instead. '
+  'This feature was deprecated after v3.25.0-0.0.pre.',
+)
 class ChildSemanticsConfigurationsResultBuilder {
   /// Creates a [ChildSemanticsConfigurationsResultBuilder].
+  @Deprecated(
+    'Use RenderObject.assembleSemanticsNodes instead. '
+    'This feature was deprecated after v3.25.0-0.0.pre.',
+  )
   ChildSemanticsConfigurationsResultBuilder();
 
   final List<SemanticsConfiguration> _mergeUp = <SemanticsConfiguration>[];
@@ -3828,6 +3848,28 @@ class SemanticsNode with DiagnosticableTreeMixin {
     );
   }
 
+  /// Merges [other] into this semantics node.
+  ///
+  /// Combines bounding rectangles, flags, strings, actions, and child nodes
+  /// from [other] into this node.
+  void mergeWith(SemanticsNode other) {
+    rect = rect.expandToInclude(other.rect);
+
+    final combinedConfig = SemanticsConfiguration.fromSemanticsNode(this)
+      ..absorb(SemanticsConfiguration.fromSemanticsNode(other));
+
+    combinedConfig._actions
+      ..addAll(_actions)
+      ..addAll(other._actions);
+    combinedConfig._customSemanticsActions
+      ..addAll(_customSemanticsActions)
+      ..addAll(other._customSemanticsActions);
+
+    final mergedChildren = <SemanticsNode>[...?_children, ...?other._children];
+
+    updateWith(config: combinedConfig, childrenInInversePaintOrder: mergedChildren);
+  }
+
   /// Returns a summary of the semantics for this node.
   ///
   /// If this node has [mergeAllDescendantsIntoThisNode], then the returned data
@@ -5263,6 +5305,54 @@ class SemanticsOwner extends ChangeNotifier {
 /// The information provided in the configuration is used to generate the
 /// semantics tree.
 class SemanticsConfiguration {
+  /// Creates an empty semantics configuration.
+  SemanticsConfiguration();
+
+  /// Creates a [SemanticsConfiguration] from a [SemanticsNode].
+  factory SemanticsConfiguration.fromSemanticsNode(SemanticsNode node) {
+    return SemanticsConfiguration()
+      .._identifier = node._identifier
+      .._traversalParentIdentifier = node._traversalParentIdentifier
+      .._traversalChildIdentifier = node._traversalChildIdentifier
+      .._attributedLabel = node._attributedLabel
+      .._attributedValue = node._attributedValue
+      .._attributedIncreasedValue = node._attributedIncreasedValue
+      .._attributedDecreasedValue = node._attributedDecreasedValue
+      .._attributedHint = node._attributedHint
+      .._tooltip = node._tooltip
+      .._hintOverrides = node._hintOverrides
+      .._flags = node._flags
+      .._textDirection = node._textDirection
+      .._sortKey = node._sortKey
+      .._actions.addAll(node._actions)
+      .._customSemanticsActions.addAll(node._customSemanticsActions)
+      .._actionsAsBits = node._actionsAsBits
+      .._textSelection = node._textSelection
+      ..isMultiline = node._isMultiline ?? false
+      .._scrollPosition = node._scrollPosition
+      .._scrollExtentMax = node._scrollExtentMax
+      .._scrollExtentMin = node._scrollExtentMin
+      .._isMergingSemanticsOfDescendants = node._mergeAllDescendantsIntoThisNode
+      ..scrollChildCount = node._scrollChildCount
+      ..scrollIndex = node._scrollIndex
+      ..indexInParent = node.indexInParent
+      .._platformViewId = node._platformViewId
+      .._maxValueLength = node._maxValueLength
+      .._currentValueLength = node._currentValueLength
+      .._headingLevel = node._headingLevel
+      .._linkUrl = node._linkUrl
+      .._role = node._role
+      .._controlsNodes = node._controlsNodes
+      .._validationResult = node._validationResult
+      .._hitTestBehavior = node._hitTestBehavior
+      .._inputType = node._inputType
+      ..locale = node._locale
+      .._minValue = node._minValue
+      .._maxValue = node._maxValue
+      .._tagsForChildren = node.tags == null ? null : Set<SemanticsTag>.of(node.tags!)
+      .._hasBeenAnnotated = true;
+  }
+
   // SEMANTIC BOUNDARY BEHAVIOR
 
   /// Whether the [RenderObject] owner of this configuration wants to own its
@@ -5840,9 +5930,19 @@ class SemanticsConfiguration {
   /// The input list of [SemanticsConfiguration]s can be empty if the rendering
   /// object of this semantics configuration is a leaf node or child rendering
   /// objects do not contribute to the semantics.
+  /// Deprecated. Override [RenderObject.assembleSemanticsNodes] instead.
+  @Deprecated(
+    'Override RenderObject.assembleSemanticsNodes instead. '
+    'This feature was deprecated after v3.25.0-0.0.pre.',
+  )
   ChildSemanticsConfigurationsDelegate? get childConfigurationsDelegate =>
       _childConfigurationsDelegate;
   ChildSemanticsConfigurationsDelegate? _childConfigurationsDelegate;
+
+  @Deprecated(
+    'Override RenderObject.assembleSemanticsNodes instead. '
+    'This feature was deprecated after v3.25.0-0.0.pre.',
+  )
   set childConfigurationsDelegate(ChildSemanticsConfigurationsDelegate? value) {
     assert(value != null);
     _childConfigurationsDelegate = value;
@@ -6742,6 +6842,12 @@ class SemanticsConfiguration {
 
   /// Whether this configuration will tag the child semantics nodes with a
   /// given [SemanticsTag].
+  ///
+  /// Deprecated. Check [SemanticsNode.isTagged] in [RenderObject.assembleSemanticsNodes] instead.
+  @Deprecated(
+    'Check SemanticsNode.isTagged in RenderObject.assembleSemanticsNodes instead. '
+    'This feature was deprecated after v3.25.0-0.0.pre.',
+  )
   bool tagsChildrenWith(SemanticsTag tag) => _tagsForChildren?.contains(tag) ?? false;
 
   Set<SemanticsTag>? _tagsForChildren;
