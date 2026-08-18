@@ -21,6 +21,8 @@
 
 #if defined(OS_WIN)
 #include <BaseTsd.h>
+#include <io.h>
+#include <windows.h>
 typedef SSIZE_T ssize_t;
 #endif
 
@@ -29,6 +31,25 @@ typedef SSIZE_T ssize_t;
 
 namespace filesystem {
 namespace {
+
+#if defined(OS_WIN)
+std::wstring Utf8ToWide(const std::string& utf8_string) {
+  if (utf8_string.empty()) {
+    return std::wstring();
+  }
+  int target_len = MultiByteToWideChar(CP_UTF8, 0, utf8_string.c_str(),
+                                      static_cast<int>(utf8_string.length()),
+                                      nullptr, 0);
+  if (target_len == 0) {
+    return std::wstring();
+  }
+  std::wstring wide_string(target_len, L'\0');
+  MultiByteToWideChar(CP_UTF8, 0, utf8_string.c_str(),
+                      static_cast<int>(utf8_string.length()),
+                      &wide_string[0], target_len);
+  return wide_string;
+}
+#endif
 
 template <typename T>
 bool ReadFileDescriptor(int fd, T* result) {
@@ -84,7 +105,12 @@ std::pair<uint8_t*, intptr_t> ReadFileDescriptorToBytes(int fd) {
 }
 
 bool ReadFileToString(const std::string& path, std::string* result) {
+#if defined(OS_WIN)
+  std::wstring wide_path = Utf8ToWide(path);
+  Descriptor fd(_wopen(wide_path.c_str(), O_RDONLY));
+#else
   Descriptor fd(open(path.c_str(), O_RDONLY));
+#endif
   return ReadFileDescriptor(fd.get(), result);
 }
 
@@ -94,7 +120,12 @@ bool ReadFileDescriptorToString(int fd, std::string* result) {
 
 std::pair<uint8_t*, intptr_t> ReadFileToBytes(const std::string& path) {
   std::pair<uint8_t*, intptr_t> failure_pair{nullptr, -1};
+#if defined(OS_WIN)
+  std::wstring wide_path = Utf8ToWide(path);
+  Descriptor fd(_wopen(wide_path.c_str(), O_RDONLY | BINARY_MODE));
+#else
   Descriptor fd(open(path.c_str(), O_RDONLY | BINARY_MODE));
+#endif
   if (!fd.is_valid())
     return failure_pair;
   return ReadFileDescriptorToBytes(fd.get());
