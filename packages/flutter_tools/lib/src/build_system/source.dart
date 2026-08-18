@@ -7,6 +7,7 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../project.dart';
 import 'build_system.dart';
+import 'depfile.dart';
 import 'exceptions.dart';
 
 //////////////////////////////////////////////////////////////////////
@@ -53,47 +54,22 @@ class SourceVisitor implements ResolvedFiles {
   bool get containsNewDepfile => _containsNewDepfile;
   var _containsNewDepfile = false;
 
-  /// Visit a depfile which contains both input and output files.
+  /// Visit a depfile.
   ///
-  /// If the file is missing, this visitor is marked as [containsNewDepfile].
-  /// This is used by the [Node] class to tell the [BuildSystem] to
-  /// defer hash computation until after executing the target.
-  // depfile logic adopted from https://github.com/flutter/flutter/blob/7065e4330624a5a216c8ffbace0a462617dc1bf5/dev/devicelab/lib/framework/apk_utils.dart#L390
+  /// If the depfile does not exist, marks [containsNewDepfile] as true and
+  /// returns.
   void visitDepfile(String name) {
     final File depfile = environment.buildDir.childFile(name);
     if (!depfile.existsSync()) {
       _containsNewDepfile = true;
       return;
     }
-    final String contents = depfile.readAsStringSync();
-    final List<String> colonSeparated = contents.split(': ');
-    if (colonSeparated.length != 2) {
-      environment.logger.printError('Invalid depfile: ${depfile.path}');
-      return;
-    }
+    final Depfile parsedDepfile = environment.depFileService.parse(depfile);
     if (inputs) {
-      sources.addAll(_processList(colonSeparated[1].trim()));
+      sources.addAll(parsedDepfile.inputs);
     } else {
-      sources.addAll(_processList(colonSeparated[0].trim()));
+      sources.addAll(parsedDepfile.outputs);
     }
-  }
-
-  final _separatorExpr = RegExp(r'([^\\]) ');
-  final _escapeExpr = RegExp(r'\\(.)');
-
-  Iterable<File> _processList(String rawText) {
-    return rawText
-        // Put every file on right-hand side on the separate line
-        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
-        .split('\n')
-        // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map<String>(
-          (String path) =>
-              path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)!).trim(),
-        )
-        .where((String path) => path.isNotEmpty)
-        .toSet()
-        .map(environment.fileSystem.file);
   }
 
   /// Visit a [Source] which contains a file URL.
