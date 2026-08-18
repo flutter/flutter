@@ -14,6 +14,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
+import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.embedding.android.ExclusiveAppComponent;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -342,10 +343,10 @@ import java.util.Set;
     // developers about the new method for doing so if this was attempted.
     // TODO(camsim99): Remove this warning after a stable release has passed:
     // https://github.com/flutter/flutter/issues/179274.
-    if (useSoftwareRendering) {
+    if (useSoftwareRendering && BuildConfig.RELEASE) {
       Log.i(
           TAG,
-          "If you are attempting to set --enable-software-rendering via Intent extras to launch a Flutter component outside of using the Flutter CLI, note that support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set the "
+          "If you are attempting to set --enable-software-rendering via Intent extras to launch a Flutter component outside of using the Flutter CLI, note that support for setting engine flags on Android via Intents in release mode will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set the "
               + FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING.metadataKey
               + " metadata in the application manifest. See https://github.com/flutter/flutter/blob/main/docs/engine/Flutter-Android-Engine-Flags.md for more info.");
     } else {
