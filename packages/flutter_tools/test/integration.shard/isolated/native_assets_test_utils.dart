@@ -15,7 +15,11 @@ import '../../src/common.dart';
 import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin, platform;
 import '../transition_test_utils.dart';
 
-Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
+Future<Directory> createTestProject(
+  String packageName,
+  Directory tempDirectory, {
+  bool withProcessGlobalState = false,
+}) async {
   final ProcessResult result = processManager.runSync(<String>[
     flutterBin,
     'create',
@@ -48,6 +52,10 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await addUserDefine(packageName, packageDirectory);
 
   await addDynamicallyLinkedNativeLibrary(packageName, packageDirectory);
+
+  if (withProcessGlobalState) {
+    await addProcessGlobalState(packageName, packageDirectory);
+  }
 
   final ProcessResult result2 = await processManager.run(<String>[
     flutterBin,
@@ -273,6 +281,92 @@ extension on BuildInput {
   final Directory hookDirectory = packageDirectory.childDirectory('hook');
   final File builderFile = hookDirectory.childFile('build.dart');
   await builderFile.writeAsString(builderSource);
+}
+
+/// Adds a pair of native functions that share state through a heap allocation
+/// the native library holds on to.
+///
+/// `storeState` allocates and remembers a value, `loadState` reads it back
+/// through the remembered pointer. Reading it back only works while both calls
+/// land in the same copy of the library, which makes the pair a probe for
+/// whether the code asset was mapped into the process more than once.
+///
+/// `loadState` gets its own binding so that it resolves the asset again on
+/// first use, rather than reusing whatever `storeState` resolved.
+Future<void> addProcessGlobalState(String packageName, Directory packageDirectory) async {
+  final Directory srcDirectory = packageDirectory.childDirectory('src');
+
+  await srcDirectory.childFile('$packageName.h').writeAsString('''
+
+FFI_PLUGIN_EXPORT void store_state(intptr_t value);
+
+FFI_PLUGIN_EXPORT intptr_t load_state(void);
+''', mode: FileMode.append);
+
+  await srcDirectory.childFile('$packageName.c').writeAsString('''
+
+typedef struct {
+  intptr_t value;
+} state_t;
+
+static state_t* state = NULL;
+
+FFI_PLUGIN_EXPORT void store_state(intptr_t value) {
+  state = malloc(sizeof(state_t));
+  state->value = value;
+}
+
+// Reads through `state` without checking it, on purpose. A second copy of this
+// library in the same process gets its own `state`, which no one has stored
+// anything in, and reading through it takes the process down the same way a
+// real code asset does.
+FFI_PLUGIN_EXPORT intptr_t load_state(void) {
+  return state->value;
+}
+''', mode: FileMode.append);
+
+  final Directory libDirectory = packageDirectory.childDirectory('lib');
+
+  await libDirectory.childFile('${packageName}_bindings_generated.dart').writeAsString('''
+
+@ffi.Native<ffi.Void Function(ffi.IntPtr)>()
+external void store_state(int value);
+
+@ffi.Native<ffi.IntPtr Function()>()
+external int load_state();
+''', mode: FileMode.append);
+
+  await libDirectory.childFile('$packageName.dart').writeAsString('''
+
+/// Remembers [value] in an allocation held by the native library.
+void storeState(int value) => bindings.store_state(value);
+
+/// Reads back what [storeState] remembered.
+int loadState() => bindings.load_state();
+''', mode: FileMode.append);
+}
+
+/// The framework binary a macOS app bundle resolves its code asset to.
+File bundledFrameworkBinaryMacOS(Directory appDirectory, String buildMode) {
+  return appDirectory
+      .childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/')
+      .childDirectory('$exampleAppName.app')
+      .childDirectory('Contents/Frameworks')
+      .childDirectory('$packageName.framework')
+      .childDirectory('Versions')
+      .childDirectory('A')
+      .childFile(packageName);
+}
+
+/// Replaces [file] with a byte for byte copy of itself.
+///
+/// The copy occupies a different inode, which is the identity dyld falls back
+/// on for an image it cannot match by install name. Rebuilding a bundle that a
+/// debug instance is still running does the same thing to it.
+void replaceWithCopy(File file) {
+  final File copy = file.parent.childFile('${file.basename}.copy');
+  file.copySync(copy.path);
+  copy.renameSync(file.path);
 }
 
 Future<void> pinDependencies(File pubspecFile) async {
