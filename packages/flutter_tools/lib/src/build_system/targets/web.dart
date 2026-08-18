@@ -54,10 +54,16 @@ class WebEntrypointTarget extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/web.dart'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{PROJECT_DIR}/.flutter-plugins-dependencies', optional: true),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/main.dart')];
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/main.dart'),
+    Source.pattern('{BUILD_DIR}/web_plugin_registrant.dart'),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
