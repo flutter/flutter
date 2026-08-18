@@ -53,7 +53,11 @@ class IssueLinkSyntax extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final visitor = _Visitor(this, context);
+    final String filePath = context.definingUnit.file.path;
+    if (filePath.endsWith('_test.dart') || filePath.endsWith('issue_link_syntax.dart')) {
+      return;
+    }
+    final visitor = _Visitor(this);
     registry
       ..addAdjacentStrings(this, visitor)
       ..addCompilationUnit(this, visitor)
@@ -63,19 +67,9 @@ class IssueLinkSyntax extends AnalysisRule {
 }
 
 class _Visitor extends SimpleAstVisitor<void> {
-  _Visitor(this.rule, this.context);
+  _Visitor(this.rule);
 
   final AnalysisRule rule;
-  final RuleContext context;
-
-  bool _shouldSkip() {
-    final String? filePath = context.currentUnit?.file.path;
-    if (filePath == null) {
-      return false;
-    }
-    // Skip test files and this rule's own file (to prevent self-reporting on its constants/messages).
-    return filePath.endsWith('_test.dart') || filePath.endsWith('issue_link_syntax.dart');
-  }
 
   static bool _isValidIssueUrl(String url) {
     if (url == _issueLinkPrefix) {
@@ -116,9 +110,7 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitCompilationUnit(CompilationUnit node) {
-    if (_shouldSkip()) {
-      return;
-    }
+
     // In the Dart analyzer AST, non-doc comments (`// ...`) are not represented
     // as Comment AST nodes; they are attached to lexical tokens as precedingComments.
     // We walk the token stream from beginToken to ensure all comments are inspected.
@@ -140,9 +132,7 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitSimpleStringLiteral(SimpleStringLiteral node) {
-    if (_shouldSkip()) {
-      return;
-    }
+
     // Ignore children of AdjacentStrings to avoid double-reporting;
     // visitAdjacentStrings inspects the full concatenated literal.
     if (node.parent is AdjacentStrings) {
@@ -155,9 +145,6 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitStringInterpolation(StringInterpolation node) {
-    if (_shouldSkip()) {
-      return;
-    }
     // Ignore children of AdjacentStrings to avoid double-reporting.
     if (node.parent is AdjacentStrings) {
       return;
@@ -172,9 +159,6 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitAdjacentStrings(AdjacentStrings node) {
-    if (_shouldSkip()) {
-      return;
-    }
     final String? value = node.stringValue;
     if (value != null && _hasInvalidIssueLink(value)) {
       rule.reportAtNode(node);
