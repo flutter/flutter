@@ -1192,28 +1192,30 @@ public class FlutterActivity extends Activity
     }
 
     try {
-      Bundle metaData = getMetaData();
-      if (metaData != null) {
-        String shellArgsValue = metaData.getString("io.flutter.app.androidEngineShellArgs");
-        if (shellArgsValue != null) {
-          try {
-            org.json.JSONArray shellArgsJson = new org.json.JSONArray(shellArgsValue);
-            for (int i = 0; i < shellArgsJson.length(); i++) {
-              String arg = shellArgsJson.optString(i);
-              if (arg != null && arg.startsWith("--route=")) {
-                return arg.substring("--route=".length());
-              }
-            }
-          } catch (Exception e) {
-            // Ignore parsing errors and fall through.
+      ApplicationInfo appInfo =
+          getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+      List<String> shellArgs =
+          io.flutter.embedding.engine.loader.FlutterLoader.getManifestEngineShellArgs(
+              appInfo.metaData);
+      if (shellArgs != null) {
+        for (String arg : shellArgs) {
+          if (arg != null && arg.startsWith("--route=")) {
+            return arg.substring("--route=".length());
           }
         }
-        return metaData.getString(INITIAL_ROUTE_META_DATA_KEY);
       }
+    } catch (PackageManager.NameNotFoundException e) {
+      // Ignore
+    }
+
+    try {
+      Bundle metaData = getMetaData();
+      String desiredInitialRoute =
+          metaData != null ? metaData.getString(INITIAL_ROUTE_META_DATA_KEY) : null;
+      return desiredInitialRoute;
     } catch (PackageManager.NameNotFoundException e) {
       return null;
     }
-    return null;
   }
 
   /**
