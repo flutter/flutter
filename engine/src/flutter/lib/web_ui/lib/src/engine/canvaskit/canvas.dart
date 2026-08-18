@@ -361,32 +361,35 @@ class CkCanvas implements LayerCanvas {
 
   @override
   void saveLayerWithFilter(ui.Rect? bounds, ui.Paint? paint, ui.ImageFilter filter) {
-    final CkManagedSkImageFilterConvertible convertible;
+    final EngineImageFilter engineFilter;
     if (filter is ui.ColorFilter) {
-      convertible = CkColorFilterImageFilter(colorFilter: filter as EngineColorFilter);
+      engineFilter = EngineColorFilterImageFilter(colorFilter: filter as EngineColorFilter);
     } else {
-      convertible = filter as CkManagedSkImageFilterConvertible;
+      engineFilter = filter as EngineImageFilter;
     }
+
     // There are 2 ImageFilter objects applied here. The filter in the paint
     // object is applied to the contents and its default tile mode is decal
     // (automatically applied by toSkPaint).
-    // The filter supplied as an argument to this function [convertible] will
+    // The filter supplied as an argument to this function [engineFilter] will
     // be applied to the backdrop and its default tile mode will be mirror.
     // We also pass in the blur tile mode as an argument to saveLayer because
     // that operation will not adopt the tile mode from the backdrop filter
     // and instead needs it supplied to the saveLayer call itself as a
     // separate argument.
-    convertible.withSkImageFilter((SkImageFilter filter) {
-      final SkPaint? skPaint = (paint as CkPaint?)?.toSkPaint(/*ui.TileMode.decal*/);
-      skCanvas.saveLayer(
-        skPaint,
-        bounds == null ? null : toSkRect(bounds),
-        filter,
-        0,
-        toSkTileMode(convertible.backdropTileMode ?? ui.TileMode.mirror),
-      );
-      skPaint?.delete();
-    }, defaultBlurTileMode: ui.TileMode.mirror);
+    final backendFilter =
+        engineFilter.getBackendFilter(defaultBlurTileMode: ui.TileMode.mirror) as CkImageFilter;
+    final SkImageFilter? skFilter = backendFilter.nativeFilter;
+
+    final SkPaint? skPaint = (paint as CkPaint?)?.toSkPaint(/*ui.TileMode.decal*/);
+    skCanvas.saveLayer(
+      skPaint,
+      bounds == null ? null : toSkRect(bounds),
+      skFilter,
+      0,
+      toSkTileMode(engineFilter.backdropTileMode ?? ui.TileMode.mirror),
+    );
+    skPaint?.delete();
   }
 
   @override
