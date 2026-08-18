@@ -48,8 +48,8 @@ void main() {}
     final File file = fileSystem.file('$projectRoot/test_driver/my_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
+import 'package:collection/collection.dart';
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:path/path.dart';
 void main() {}
 ''');
     final List<String> errors = createValidator().validate(file);
