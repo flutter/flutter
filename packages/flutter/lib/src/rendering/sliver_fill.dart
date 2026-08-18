@@ -267,7 +267,16 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
     // The maxExtent includes any overscrolled area. Can be < 0 if we have
     // overscroll in the opposite direction, away from the end of the list.
-    double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
+    //
+    // When overscrolling past this sliver, the viewport clamps
+    // remainingPaintExtent to the viewport extent and delivers the
+    // overscrolled distance as this sliver's scrollOffset, so the
+    // scrollOffset term is needed for the stretched child to still reach the
+    // viewport's trailing edge.
+    double maxExtent =
+        constraints.remainingPaintExtent -
+        math.min(constraints.overlap, 0.0) +
+        constraints.scrollOffset;
 
     if (child != null) {
       final double childExtent = switch (constraints.axis) {
@@ -283,7 +292,10 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
       // size or overscrolling at the top of the scrollable (rather than at the
       // end where this sliver is).
       maxExtent = math.max(extent, maxExtent);
-      child!.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: maxExtent));
+      child!.layout(
+        constraints.asBoxConstraints(minExtent: extent, maxExtent: maxExtent),
+        parentUsesSize: true,
+      );
     }
 
     assert(
@@ -308,6 +320,38 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
     );
     if (child != null) {
       setChildParentData(child!, constraints, geometry!);
+    }
+  }
+
+  @override
+  void setChildParentData(
+    RenderObject child,
+    SliverConstraints constraints,
+    SliverGeometry geometry,
+  ) {
+    super.setChildParentData(child, constraints, geometry);
+    // A child stretched into the overscroll area is larger than the
+    // scrollExtent, so for reversed axis directions it must be anchored by its
+    // actual size to keep its leading edge glued to the viewport's edge.
+    final childParentData = child.parentData! as SliverPhysicalParentData;
+    final Size childSize = (child as RenderBox).size;
+    switch (applyGrowthDirectionToAxisDirection(
+      constraints.axisDirection,
+      constraints.growthDirection,
+    )) {
+      case AxisDirection.up:
+        childParentData.paintOffset = Offset(
+          0.0,
+          geometry.paintExtent + constraints.scrollOffset - childSize.height,
+        );
+      case AxisDirection.left:
+        childParentData.paintOffset = Offset(
+          geometry.paintExtent + constraints.scrollOffset - childSize.width,
+          0.0,
+        );
+      case AxisDirection.right:
+      case AxisDirection.down:
+        break;
     }
   }
 }
