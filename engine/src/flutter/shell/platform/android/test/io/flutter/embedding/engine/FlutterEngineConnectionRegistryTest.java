@@ -145,7 +145,7 @@ public class FlutterEngineConnectionRegistryTest {
   }
 
   @Test
-  public void attachToActivityConfiguresSoftwareRendering() {
+  public void attachToActivityConfiguresSoftwareRenderingViaManifest() {
     Context context = mock(Context.class);
     FlutterEngine flutterEngine = mock(FlutterEngine.class);
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
@@ -171,6 +171,70 @@ public class FlutterEngineConnectionRegistryTest {
     registry.attachToActivity(appComponent, lifecycle);
 
     verify(platformViewsController).setSoftwareRendering(true);
+  }
+
+  @Test
+  public void attachToActivityConfiguresSoftwareRenderingViaIntent() {
+    Context context = mock(Context.class);
+    FlutterEngine flutterEngine = mock(FlutterEngine.class);
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    FlutterLoader flutterLoader = mock(FlutterLoader.class);
+    ExclusiveAppComponent<Activity> appComponent = mock(ExclusiveAppComponent.class);
+    Activity activity = mock(Activity.class);
+    Lifecycle lifecycle = mock(Lifecycle.class);
+
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        mock(PlatformViewsControllerDelegator.class);
+    when(flutterEngine.getPlatformViewsControllerDelegator())
+        .thenReturn(platformViewsControllerDelegator);
+    when(flutterEngine.getDartExecutor()).thenReturn(mock(DartExecutor.class));
+    when(flutterEngine.getRenderer()).thenReturn(mock(FlutterRenderer.class));
+    FlutterEngineConnectionRegistry registry =
+        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader, null);
+
+    when(flutterLoader.getSofwareRenderingEnabledViaManifest()).thenReturn(false);
+    when(appComponent.getAppComponent()).thenReturn(activity);
+    Intent intent = mock(Intent.class);
+    when(intent.getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false))
+        .thenReturn(true);
+    when(activity.getIntent()).thenReturn(intent);
+
+    registry.attachToActivity(appComponent, lifecycle);
+
+    verify(platformViewsController).setSoftwareRendering(true);
+  }
+
+  @Test
+  public void attachToActivityDisablesSoftwareRendering() {
+    Context context = mock(Context.class);
+    FlutterEngine flutterEngine = mock(FlutterEngine.class);
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    FlutterLoader flutterLoader = mock(FlutterLoader.class);
+    ExclusiveAppComponent<Activity> appComponent = mock(ExclusiveAppComponent.class);
+    Activity activity = mock(Activity.class);
+    Lifecycle lifecycle = mock(Lifecycle.class);
+
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        mock(PlatformViewsControllerDelegator.class);
+    when(flutterEngine.getPlatformViewsControllerDelegator())
+        .thenReturn(platformViewsControllerDelegator);
+    when(flutterEngine.getDartExecutor()).thenReturn(mock(DartExecutor.class));
+    when(flutterEngine.getRenderer()).thenReturn(mock(FlutterRenderer.class));
+    FlutterEngineConnectionRegistry registry =
+        new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader, null);
+
+    when(flutterLoader.getSofwareRenderingEnabledViaManifest()).thenReturn(false);
+    when(appComponent.getAppComponent()).thenReturn(activity);
+    Intent intent = mock(Intent.class);
+    when(intent.getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false))
+        .thenReturn(false);
+    when(activity.getIntent()).thenReturn(intent);
+
+    registry.attachToActivity(appComponent, lifecycle);
+
+    verify(platformViewsController).setSoftwareRendering(false);
   }
 
   private static class FakeFlutterPlugin implements FlutterPlugin {
