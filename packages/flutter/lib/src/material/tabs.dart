@@ -1990,6 +1990,7 @@ class _TabBarViewState extends State<TabBarView> {
     } else {
       _pageController!.jumpToPage(_currentIndex!);
     }
+    context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
     _updateChildren();
   }
 
