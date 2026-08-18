@@ -509,8 +509,8 @@ class _RenderSingleChildViewport extends RenderBox
     // physics says so, and correcting here would discard that overscroll: an
     // unrelated relayout — a row reacting to hover, content growing — would cut
     // the gesture short.
-    final ScrollPosition? position = offset is ScrollPosition ? offset as ScrollPosition : null;
-    final bool driven = position?.isScrollingNotifier.value ?? false;
+    final ViewportOffset currentOffset = offset;
+    final bool driven = currentOffset is ScrollPosition && currentOffset.isScrollingNotifier.value;
     if (offset.hasPixels && !driven) {
       if (offset.pixels > _maxScrollExtent) {
         offset.correctBy(_maxScrollExtent - offset.pixels);
