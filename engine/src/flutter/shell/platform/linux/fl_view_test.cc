@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_renderable.h"
 #include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
@@ -33,6 +34,29 @@ TEST_F(FlViewTest, GetEngine) {
   // realized).
   FlEngine* engine = fl_view_get_engine(view);
   EXPECT_NE(engine, nullptr);
+}
+
+static void count_first_frame_cb(FlView* view, int* count) {
+  (*count)++;
+}
+
+// Backends that present outside the GTK draw cycle announce their first frame
+// through the FlRenderable interface. The signal must reach the runner before
+// the widget is realized - the runner shows the window on it - and must not
+// be re-emitted for later frames.
+TEST_F(FlViewTest, NotifyFirstFrameEmitsFirstFrameSignal) {
+  FlView* view = fl_view_new(project);
+
+  int first_frame_count = 0;
+  g_signal_connect(view, "first-frame", G_CALLBACK(count_first_frame_cb),
+                   &first_frame_count);
+
+  fl_renderable_notify_first_frame(FL_RENDERABLE(view));
+  EXPECT_EQ(first_frame_count, 1);
+
+  // Later frames must not announce again.
+  fl_renderable_notify_first_frame(FL_RENDERABLE(view));
+  EXPECT_EQ(first_frame_count, 1);
 }
 
 TEST_F(FlViewTest, StateUpdateDoesNotHappenInInit) {

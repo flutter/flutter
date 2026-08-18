@@ -560,6 +560,33 @@ static void fl_engine_on_pre_engine_restart_cb(void* user_data) {
   g_signal_emit(self, fl_engine_signals[SIGNAL_ON_PRE_ENGINE_RESTART], 0);
 }
 
+// Called on the platform thread after the first frame has been rasterized.
+static gboolean fl_engine_first_frame_idle_cb(gpointer user_data) {
+  FlEngine* self = FL_ENGINE(user_data);
+
+  // get_renderable returns a strong reference.
+  g_autoptr(FlRenderable) renderable =
+      fl_engine_get_renderable(self, flutter::kFlutterImplicitViewId);
+  if (renderable != nullptr) {
+    fl_renderable_notify_first_frame(renderable);
+  }
+
+  return G_SOURCE_REMOVE;
+}
+
+// Called on the raster thread when the first frame has been rasterized -
+// which, on the Vulkan backend, means Impeller has presented it to the
+// swapchain. Only wired up for that backend: the others announce their first
+// frame from their draw handler, but the Vulkan draw handler cannot run
+// before the runner shows the window, and the runner shows the window on the
+// first-frame announcement.
+static void fl_engine_first_frame_cb(void* user_data) {
+  FlEngine* self = FL_ENGINE(user_data);
+
+  g_idle_add_full(G_PRIORITY_DEFAULT, fl_engine_first_frame_idle_cb,
+                  g_object_ref(self), g_object_unref);
+}
+
 // Called when a response to a sent platform message is received from the
 // engine.
 static void fl_engine_platform_message_response_cb(const uint8_t* data,
@@ -1051,6 +1078,16 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
     g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
                 "Failed to run Flutter engine");
     return FALSE;
+  }
+
+  if (self->renderer_type == kVulkan) {
+    // No frame can have been rasterized yet: rasterization is driven through
+    // the main loop, which cannot have run since RunInitialized. So the
+    // callback cannot be missed.
+    if (self->embedder_api.SetNextFrameCallback(
+            self->engine, fl_engine_first_frame_cb, self) != kSuccess) {
+      g_warning("Failed to register the first frame callback");
+    }
   }
 
   setup_locales(self);

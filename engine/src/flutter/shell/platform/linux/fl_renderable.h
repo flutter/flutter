@@ -28,6 +28,8 @@ struct _FlRenderableInterface {
   void (*present_layers)(FlRenderable* renderable,
                          const FlutterLayer** layers,
                          size_t layers_count);
+
+  void (*notify_first_frame)(FlRenderable* renderable);
 };
 
 /**
@@ -41,6 +43,16 @@ struct _FlRenderableInterface {
 void fl_renderable_present_layers(FlRenderable* renderable,
                                   const FlutterLayer** layers,
                                   size_t layers_count);
+
+/**
+ * fl_renderable_notify_first_frame:
+ * @renderable: an #FlRenderable
+ *
+ * Tells this renderable its first frame has been rendered. Used by backends
+ * that present outside the GTK draw cycle, where the renderable cannot
+ * observe this itself.
+ */
+void fl_renderable_notify_first_frame(FlRenderable* renderable);
 
 G_END_DECLS
 

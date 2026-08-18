@@ -15,3 +15,14 @@ void fl_renderable_present_layers(FlRenderable* self,
 
   FL_RENDERABLE_GET_IFACE(self)->present_layers(self, layers, layers_count);
 }
+
+void fl_renderable_notify_first_frame(FlRenderable* self) {
+  g_return_if_fail(FL_IS_RENDERABLE(self));
+
+  FlRenderableInterface* iface = FL_RENDERABLE_GET_IFACE(self);
+  if (iface->notify_first_frame == nullptr) {
+    return;
+  }
+
+  iface->notify_first_frame(self);
+}

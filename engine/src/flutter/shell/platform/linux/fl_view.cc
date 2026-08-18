@@ -274,8 +274,19 @@ static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
                                  fl_engine_get_texture_registrar(self->engine));
 }
 
+static void fl_view_notify_first_frame(FlRenderable* renderable) {
+  FlView* self = FL_VIEW(renderable);
+
+  if (self->renderer == nullptr) {
+    return;
+  }
+
+  fl_view_renderer_notify_frame(self->renderer);
+}
+
 static void fl_renderable_iface_init(FlRenderableInterface* iface) {
   iface->present_layers = fl_view_present_layers;
+  iface->notify_first_frame = fl_view_notify_first_frame;
 }
 
 static void fl_view_plugin_registry_iface_init(
