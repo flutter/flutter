@@ -413,7 +413,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async {
     return <String>['xcrun', 'xcodebuild'];
   }
