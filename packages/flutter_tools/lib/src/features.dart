@@ -91,6 +91,9 @@ abstract class FeatureFlags {
   /// Whether the HCPP platform view rendering mode is enabled by default.
   bool get isHcppEnabled;
 
+  /// Whether support for tool extensions is enabled.
+  bool get isToolExtensionsEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -119,6 +122,7 @@ abstract class FeatureFlags {
     riscv64,
     macOSArm64Only,
     hcpp,
+    toolExtensionsFeature,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -345,12 +349,17 @@ const hcpp = Feature(
       'Devices that do not support it fall back to the previous platform view rendering mode.',
   configSetting: 'enable-hcpp',
   environmentOverride: 'FLUTTER_ENABLE_HCPP',
-  // Enabled by default on master only for now: the fix for an ANR when an HCPP
-  // platform view is rotated (https://github.com/flutter/flutter/pull/190638)
-  // has not reached beta yet.
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
-  beta: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true),
+);
+
+/// Enable tool extensions feature.
+const toolExtensionsFeature = Feature(
+  name: 'support for tool extensions',
+  configSetting: 'enable-tool-extensions',
+  environmentOverride: 'FLUTTER_TOOL_EXTENSIONS',
+  master: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

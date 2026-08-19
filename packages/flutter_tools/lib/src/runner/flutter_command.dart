@@ -1348,7 +1348,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The HCPP value for an Android artifact when the developer did not pass
   /// `--[no-]enable-hcpp`: the `enable-hcpp` feature flag, which is on by
-  /// default on master.
+  /// default on master and beta.
   ///
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
@@ -1983,6 +1983,20 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
+
+    if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
+        (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
+      if (getBuildMode().isRelease) {
+        final bool enableImpeller = boolArg(FlutterOptions.kEnableImpeller);
+        final flagName = enableImpeller
+            ? '--${FlutterOptions.kEnableImpeller}'
+            : '--no-${FlutterOptions.kEnableImpeller}';
+        globals.logger.printWarning(
+          'The "$flagName" flag is ignored in release builds. '
+          'The rendering backend is determined at build time.',
+        );
+      }
+    }
 
     if (globals.os.hostPlatform == .darwin_x64 &&
         globals.persistentToolState!.shouldShowIntelMacWarning) {

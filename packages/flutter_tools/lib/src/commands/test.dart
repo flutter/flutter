@@ -187,7 +187,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'update-goldens',
         negatable: false,
         help:
-            'Whether "matchesGoldenFile()" calls within your test methods should ' // flutter_ignore: golden_tag (see analyze.dart)
+            'Whether "matchesGoldenFile()" calls within your test methods should ' // ignore: golden_test_tags
             'update the golden files rather than test for an existing match.',
       )
       ..addOption(
