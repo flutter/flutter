@@ -50,7 +50,6 @@ import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
-import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
@@ -1194,20 +1193,9 @@ public class FlutterActivity extends Activity
     }
 
     // Check if defined via command line flags.
-    try {
-      ApplicationInfo appInfo =
-          getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
-      List<String> shellArgs = FlutterLoader.getManifestEngineShellArgs(appInfo.metaData);
-      if (shellArgs != null) {
-        final String routeFlag = "--route=";
-        for (String arg : shellArgs) {
-          if (arg != null && arg.startsWith(routeFlag)) {
-            return arg.substring(routeFlag.length());
-          }
-        }
-      }
-    } catch (PackageManager.NameNotFoundException e) {
-      // Ignore
+    String routeFromManifest = FlutterActivityLaunchConfigs.getInitialRouteFromManifest(this);
+    if (routeFromManifest != null) {
+      return routeFromManifest;
     }
 
     // Check if defined via AndroidManifest.xml meta-data.

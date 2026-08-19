@@ -4,7 +4,14 @@
 
 package io.flutter.embedding.android;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import io.flutter.embedding.engine.loader.FlutterLoader;
+import java.util.List;
 
 /** Collection of Flutter launch configuration options. */
 // This class is public so that Flutter app developers can reference
@@ -60,6 +67,34 @@ public class FlutterActivityLaunchConfigs {
       // Return true if the deep linking flag is not found in metadata.
       return true;
     }
+  }
+
+  /**
+   * Extracts the initial route from the application's manifest shell arguments, if present.
+   *
+   * @param context The application context.
+   * @return The initial route if defined in the manifest shell arguments, otherwise null.
+   */
+  @Nullable
+  public static String getInitialRouteFromManifest(@NonNull Context context) {
+    try {
+      ApplicationInfo appInfo =
+          context
+              .getPackageManager()
+              .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+      List<String> shellArgs = FlutterLoader.getManifestEngineShellArgs(appInfo.metaData);
+      if (shellArgs != null) {
+        final String routeFlag = "--route=";
+        for (String arg : shellArgs) {
+          if (arg != null && arg.startsWith(routeFlag)) {
+            return arg.substring(routeFlag.length());
+          }
+        }
+      }
+    } catch (PackageManager.NameNotFoundException e) {
+      // Ignore
+    }
+    return null;
   }
 
   private FlutterActivityLaunchConfigs() {}
