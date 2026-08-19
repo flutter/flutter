@@ -21,6 +21,40 @@
 namespace filesystem {
 namespace {
 
+std::wstring Utf8ToWide(const std::string& utf8_string) {
+  if (utf8_string.empty()) {
+    return std::wstring();
+  }
+  int target_len = MultiByteToWideChar(CP_UTF8, 0, utf8_string.c_str(),
+                                       static_cast<int>(utf8_string.length()),
+                                       nullptr, 0);
+  if (target_len == 0) {
+    return std::wstring();
+  }
+  std::wstring wide_string(target_len, L'\0');
+  MultiByteToWideChar(CP_UTF8, 0, utf8_string.c_str(),
+                      static_cast<int>(utf8_string.length()),
+                      &wide_string[0], target_len);
+  return wide_string;
+}
+
+std::string WideToUtf8(const std::wstring& wide_string) {
+  if (wide_string.empty()) {
+    return std::string();
+  }
+  int target_len = WideCharToMultiByte(
+      CP_UTF8, 0, wide_string.c_str(), static_cast<int>(wide_string.length()),
+      nullptr, 0, nullptr, nullptr);
+  if (target_len == 0) {
+    return std::string();
+  }
+  std::string utf8_string(target_len, '\0');
+  WideCharToMultiByte(
+      CP_UTF8, 0, wide_string.c_str(), static_cast<int>(wide_string.length()),
+      &utf8_string[0], target_len, nullptr, nullptr);
+  return utf8_string;
+}
+
 size_t RootLength(const std::string& path) {
   if (path.empty())
     return 0;
@@ -181,9 +215,12 @@ std::string SimplifyPath(std::string path) {
 }
 
 std::string AbsolutePath(const std::string& path) {
-  char absPath[MAX_PATH];
-  _fullpath(absPath, path.c_str(), MAX_PATH);
-  return std::string(absPath);
+  std::wstring wide_path = Utf8ToWide(path);
+  wchar_t absPath[MAX_PATH];
+  if (_wfullpath(absPath, wide_path.c_str(), MAX_PATH) == nullptr) {
+    return std::string();
+  }
+  return WideToUtf8(absPath);
 }
 
 std::string GetDirectoryName(const std::string& path) {
@@ -204,16 +241,17 @@ std::string GetBaseName(const std::string& path) {
 }
 
 std::string GetAbsoluteFilePath(const std::string& path) {
+  std::wstring wide_path = Utf8ToWide(path);
   HANDLE file =
-      CreateFileA(path.c_str(), FILE_READ_ATTRIBUTES,
+      CreateFileW(wide_path.c_str(), FILE_READ_ATTRIBUTES,
                   FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
                   OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
   if (file == INVALID_HANDLE_VALUE) {
     return std::string();
   }
-  char buffer[MAX_PATH];
+  wchar_t buffer[MAX_PATH];
   DWORD ret =
-      GetFinalPathNameByHandleA(file, buffer, MAX_PATH, FILE_NAME_NORMALIZED);
+      GetFinalPathNameByHandleW(file, buffer, MAX_PATH, FILE_NAME_NORMALIZED);
   if (ret == 0 || ret > MAX_PATH) {
     std::string result;
     if (GetLastError() == ERROR_ACCESS_DENIED) {
@@ -231,10 +269,15 @@ std::string GetAbsoluteFilePath(const std::string& path) {
     CloseHandle(file);
     return result;
   }
-  std::string result(buffer);
-  result.erase(0, strlen("\\\\?\\"));
+  std::wstring wide_result(buffer);
+  constexpr const wchar_t kLongPathPrefix[] = L"\\\\?\\";
+  constexpr size_t kLongPathPrefixLen =
+      sizeof(kLongPathPrefix) / sizeof(wchar_t) - 1;
+  if (wide_result.rfind(kLongPathPrefix, 0) == 0) {
+    wide_result.erase(0, kLongPathPrefixLen);
+  }
   CloseHandle(file);
-  return result;
+  return WideToUtf8(wide_result);
 }
 
 }  // namespace filesystem

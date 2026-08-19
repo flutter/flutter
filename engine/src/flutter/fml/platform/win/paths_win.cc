@@ -68,9 +68,12 @@ std::pair<bool, std::string> GetExecutablePath() {
 }
 
 std::string AbsolutePath(const std::string& path) {
-  char absPath[MAX_PATH];
-  _fullpath(absPath, path.c_str(), MAX_PATH);
-  return std::string(absPath);
+  std::wstring wide_path = Utf8ToWideString(path);
+  wchar_t absPath[MAX_PATH];
+  if (_wfullpath(absPath, wide_path.c_str(), MAX_PATH) == nullptr) {
+    return std::string();
+  }
+  return WideStringToUtf8(absPath);
 }
 
 std::string GetDirectoryName(const std::string& path) {
