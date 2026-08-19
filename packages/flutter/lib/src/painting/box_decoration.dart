@@ -384,8 +384,9 @@ class BoxDecoration extends Decoration {
       case BoxShape.circle:
         // Circles are inscribed into our smallest dimension.
         final Offset center = size.center(Offset.zero);
-        final double distance = (position - center).distance;
-        return distance <= math.min(size.width, size.height) / 2.0;
+        final double radius = math.min(size.width, size.height) / 2.0;
+        // Comparing squared distances avoids computing sqrt(dx * dx + dy * dy).
+        return (position - center).distanceSquared <= radius * radius;
     }
   }
 
@@ -445,12 +446,19 @@ class _BoxDecorationPainter extends BoxPainter {
     }
   }
 
+  List<Paint>? _shadowPaints;
+
   void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
-    if (_decoration.boxShadow == null) {
+    final List<BoxShadow>? boxShadows = _decoration.boxShadow;
+    if (boxShadows == null) {
       return;
     }
-    for (final BoxShadow boxShadow in _decoration.boxShadow!) {
-      final Paint paint = boxShadow.toPaint();
+    final List<Paint> shadowPaints = _shadowPaints ??= <Paint>[
+      for (final BoxShadow boxShadow in boxShadows) boxShadow.toPaint(),
+    ];
+    for (var i = 0; i < boxShadows.length; i += 1) {
+      final BoxShadow boxShadow = boxShadows[i];
+      final Paint paint = shadowPaints[i];
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
       assert(() {
         if (debugDisableShadows && boxShadow.blurStyle == BlurStyle.outer) {

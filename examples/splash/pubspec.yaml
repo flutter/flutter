@@ -8,6 +8,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  material_ui: ^0.0.2
 
 
 dev_dependencies:
@@ -15,4 +16,4 @@ dev_dependencies:
     sdk: flutter
 
 
-# PUBSPEC CHECKSUM: 60tfp7
+# PUBSPEC CHECKSUM: oescuq

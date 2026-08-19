@@ -73,6 +73,16 @@ Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
 
+Future<gpu.RenderPipeline> createOptimizedOutSamplerRenderPipeline() async {
+  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['UnlitVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['OptimizedOutSamplerFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
 Future<gpu.RenderPipeline> createTextureRenderPipeline() async {
   final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
@@ -1198,6 +1208,35 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('Binding a dead-code-eliminated sampler does not crash', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createOptimizedOutSamplerRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[-0.5, -0.5, 0.5, -0.5, 0.0, 0.5]),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+
+    // `tex` is optimized out. Binding it used to crash; now it either binds or
+    // is skipped, and either way the pass must draw.
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 1, 1);
+    try {
+      state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
+    } on Exception {
+      // Optimized out; binding it is a no-op.
+    }
+
+    state.renderPass.draw(3);
+    state.commandBuffer.submit();
+    expect(state.renderTexture.asImage(), isNotNull);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('RenderPass.bindTexture throws for deviceTransient Textures', () async {
     final RenderPassState state = createSimpleRenderPass();
 
@@ -1405,6 +1444,34 @@ void main() async {
     try {
       state.renderPass.bindUniform(vertInfo, badUniformBufferView);
       fail('Exception not thrown for bad buffer view range.');
+    } catch (e) {
+      expect(e.toString(), contains('Failed to bind uniform'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Shader.getUniformSlot returns the same slot for repeat lookups', () async {
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.UniformSlot first = pipeline.vertexShader.getUniformSlot('VertInfo');
+    final gpu.UniformSlot second = pipeline.vertexShader.getUniformSlot('VertInfo');
+    expect(identical(first, second), isTrue);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass.bindUniform throws for an unknown uniform name', () async {
+    final RenderPassState state = createSimpleRenderPass();
+
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.DeviceBuffer uniformBuffer = gpu.gpuContext.createDeviceBufferWithCopy(
+      float32(<double>[1, 2, 3, 4]),
+    );
+    final uniformBufferView = gpu.BufferView(
+      uniformBuffer,
+      offsetInBytes: 0,
+      lengthInBytes: uniformBuffer.sizeInBytes,
+    );
+    final gpu.UniformSlot unknownSlot = pipeline.vertexShader.getUniformSlot('DoesNotExist');
+    try {
+      state.renderPass.bindUniform(unknownSlot, uniformBufferView);
+      fail('Exception not thrown for an unknown uniform name.');
     } catch (e) {
       expect(e.toString(), contains('Failed to bind uniform'));
     }
