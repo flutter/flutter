@@ -23,8 +23,8 @@ using OverscrollStretchLayerTest = LayerTest;
 
 #ifndef NDEBUG
 TEST_F(OverscrollStretchLayerTest, PaintingEmptyLayerDies) {
-  auto layer = std::make_shared<OverscrollStretchLayer>(nullptr, 0.0f, 0.0f,
-                                                        1.0f, 0.7f);
+  auto layer =
+      std::make_shared<OverscrollStretchLayer>(nullptr, 0.0f, 0.0f, 1.0f, 0.7f);
 
   layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), DlRect());
@@ -38,8 +38,8 @@ TEST_F(OverscrollStretchLayerTest, PaintBeforePrerollDies) {
   const DlRect child_bounds = DlRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const DlPath child_path = DlPath::MakeRect(child_bounds);
   auto mock_layer = std::make_shared<MockLayer>(child_path);
-  auto layer = std::make_shared<OverscrollStretchLayer>(nullptr, 0.0f, 0.0f,
-                                                        1.0f, 0.7f);
+  auto layer =
+      std::make_shared<OverscrollStretchLayer>(nullptr, 0.0f, 0.0f, 1.0f, 0.7f);
   layer->Add(mock_layer);
 
   EXPECT_EQ(layer->paint_bounds(), DlRect());
@@ -52,8 +52,8 @@ TEST_F(OverscrollStretchLayerTest, PaintBeforePrerollDies) {
 TEST_F(OverscrollStretchLayerTest, Getters) {
   auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
-  auto layer = std::make_shared<OverscrollStretchLayer>(
-      dl_image_filter, 0.3f, 0.6f, 1.2f, 0.8f);
+  auto layer = std::make_shared<OverscrollStretchLayer>(dl_image_filter, 0.3f,
+                                                        0.6f, 1.2f, 0.8f);
 
   EXPECT_FLOAT_EQ(layer->overscroll_x(), 0.3f);
   EXPECT_FLOAT_EQ(layer->overscroll_y(), 0.6f);
@@ -67,8 +67,8 @@ TEST_F(OverscrollStretchLayerTest, EmptyFilter) {
   const DlPath child_path = DlPath::MakeRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
-  auto layer = std::make_shared<OverscrollStretchLayer>(nullptr, 0.0f, 0.0f,
-                                                        1.0f, 0.7f);
+  auto layer =
+      std::make_shared<OverscrollStretchLayer>(nullptr, 0.0f, 0.0f, 1.0f, 0.7f);
   layer->Add(mock_layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -98,8 +98,8 @@ TEST_F(OverscrollStretchLayerTest, SimpleFilter) {
   auto dl_image_filter = DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({1.0, 2.0}), DlImageSampling::kMipmapLinear);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
-  auto layer = std::make_shared<OverscrollStretchLayer>(
-      dl_image_filter, 0.1f, 0.2f, 1.0f, 0.7f);
+  auto layer = std::make_shared<OverscrollStretchLayer>(dl_image_filter, 0.1f,
+                                                        0.2f, 1.0f, 0.7f);
   layer->Add(mock_layer);
 
   const DlRect child_rounded_bounds =
@@ -176,8 +176,8 @@ TEST_F(OverscrollStretchLayerDiffTest, DiffWhenOverscrollChanges) {
   auto dl_blur_filter = DlImageFilter::MakeBlur(10, 10, DlTileMode::kClamp);
 
   MockLayerTree l1;
-  auto layer1 = std::make_shared<OverscrollStretchLayer>(
-      dl_blur_filter, 0.1f, 0.2f, 1.0f, 0.7f);
+  auto layer1 = std::make_shared<OverscrollStretchLayer>(dl_blur_filter, 0.1f,
+                                                         0.2f, 1.0f, 0.7f);
   auto path = DlPath::MakeRectLTRB(100, 100, 110, 110);
   layer1->Add(std::make_shared<MockLayer>(path));
   l1.root()->Add(layer1);
@@ -186,8 +186,8 @@ TEST_F(OverscrollStretchLayerDiffTest, DiffWhenOverscrollChanges) {
   EXPECT_EQ(damage1.frame_damage, DlIRect::MakeLTRB(70, 70, 140, 140));
 
   MockLayerTree l2;
-  auto layer2 = std::make_shared<OverscrollStretchLayer>(
-      dl_blur_filter, 0.3f, 0.4f, 1.0f, 0.7f);
+  auto layer2 = std::make_shared<OverscrollStretchLayer>(dl_blur_filter, 0.3f,
+                                                         0.4f, 1.0f, 0.7f);
   layer2->Add(std::make_shared<MockLayer>(path));
   l2.root()->Add(layer2);
 
