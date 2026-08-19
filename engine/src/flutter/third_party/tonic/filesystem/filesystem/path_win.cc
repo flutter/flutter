@@ -18,42 +18,10 @@
 #include <list>
 #include <memory>
 
+#include "tonic/filesystem/filesystem/windows_utils.h"
+
 namespace filesystem {
 namespace {
-
-std::wstring Utf8ToWide(const std::string& utf8_string) {
-  if (utf8_string.empty()) {
-    return std::wstring();
-  }
-  int target_len = MultiByteToWideChar(CP_UTF8, 0, utf8_string.c_str(),
-                                       static_cast<int>(utf8_string.length()),
-                                       nullptr, 0);
-  if (target_len == 0) {
-    return std::wstring();
-  }
-  std::wstring wide_string(target_len, L'\0');
-  MultiByteToWideChar(CP_UTF8, 0, utf8_string.c_str(),
-                      static_cast<int>(utf8_string.length()),
-                      &wide_string[0], target_len);
-  return wide_string;
-}
-
-std::string WideToUtf8(const std::wstring& wide_string) {
-  if (wide_string.empty()) {
-    return std::string();
-  }
-  int target_len = WideCharToMultiByte(
-      CP_UTF8, 0, wide_string.c_str(), static_cast<int>(wide_string.length()),
-      nullptr, 0, nullptr, nullptr);
-  if (target_len == 0) {
-    return std::string();
-  }
-  std::string utf8_string(target_len, '\0');
-  WideCharToMultiByte(
-      CP_UTF8, 0, wide_string.c_str(), static_cast<int>(wide_string.length()),
-      &utf8_string[0], target_len, nullptr, nullptr);
-  return utf8_string;
-}
 
 size_t RootLength(const std::string& path) {
   if (path.empty())

@@ -28,28 +28,10 @@ typedef SSIZE_T ssize_t;
 
 #include "tonic/filesystem/filesystem/eintr_wrapper.h"
 #include "tonic/filesystem/filesystem/portable_unistd.h"
+#include "tonic/filesystem/filesystem/windows_utils.h"
 
 namespace filesystem {
 namespace {
-
-#if defined(OS_WIN)
-std::wstring Utf8ToWide(const std::string& utf8_string) {
-  if (utf8_string.empty()) {
-    return std::wstring();
-  }
-  int target_len = MultiByteToWideChar(CP_UTF8, 0, utf8_string.c_str(),
-                                      static_cast<int>(utf8_string.length()),
-                                      nullptr, 0);
-  if (target_len == 0) {
-    return std::wstring();
-  }
-  std::wstring wide_string(target_len, L'\0');
-  MultiByteToWideChar(CP_UTF8, 0, utf8_string.c_str(),
-                      static_cast<int>(utf8_string.length()),
-                      &wide_string[0], target_len);
-  return wide_string;
-}
-#endif
 
 template <typename T>
 bool ReadFileDescriptor(int fd, T* result) {
