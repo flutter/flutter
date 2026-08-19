@@ -492,6 +492,7 @@ class RunCommand extends RunCommandBase {
       ..addFlag(
         'build',
         defaultsTo: true,
+        hide: !verboseHelp,
         help:
             '(deprecated) If necessary, build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
             'flag with an existing application artifact.',
