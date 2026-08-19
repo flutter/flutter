@@ -680,7 +680,9 @@ class RunCommand extends RunCommandBase {
       runIsTest: targetFile.endsWith('_test.dart'),
       // Best-effort estimate from the main manifest; does not account for build-type
       // or flavor overlay manifests (e.g. EnableHcpp set only in src/debug/).
-      runEnableHcpp: explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp),
+      runEnableHcpp: anyAndroidDevices && project.android.existsSync()
+          ? (explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp))
+          : null,
     );
   })();
 
