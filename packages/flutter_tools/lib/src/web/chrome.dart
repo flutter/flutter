@@ -263,7 +263,9 @@ class ChromiumLauncher {
       if (headless) ...<String>[
         '--no-sandbox',
         '--headless',
-        '--window-size=1024,1024',
+        // Only supply default 1024x1024 window size if caller has not specified a custom --window-size.
+        if (!webBrowserFlags.any((String flag) => flag.startsWith('--window-size=')))
+          '--window-size=1024,1024',
         '--disable-background-networking',
         '--disable-sync',
         '--disable-client-side-phishing-detection',
