@@ -481,7 +481,7 @@ deps = {
    Var('flutter_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
 
   'engine/src/flutter/third_party/libpng':
-   Var('flutter_git') + '/third_party/libpng' + '@' + 'b6004397d2ab98f0250376d9b357337b7f422d13',
+   Var('flutter_git') + '/third_party/libpng' + '@' + 'ced6b6c0c1e24716423a417b399d3c7d4623890d',
 
   'engine/src/flutter/third_party/libwebp':
    Var('chromium_git') + '/webm/libwebp.git' + '@' + 'ca332209cb5567c9b249c86788cb2dbf8847e760', # 1.3.2
