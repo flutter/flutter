@@ -43,13 +43,17 @@ class FlutterActivityTest {
         @JvmStatic
         @AfterClass
         fun tearDownClass() {
-            MainActivity.evictEngineCache()
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                MainActivity.evictEngineCache()
+            }
         }
 
         private fun verifyNoGraphicsPipelineErrors(marker: String) {
             val errors = getGraphicsPipelineErrors(marker)
             if (errors.isNotEmpty()) {
-                MainActivity.evictEngineCache()
+                InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                    MainActivity.evictEngineCache()
+                }
                 throw EglInitializationException(
                     "Graphics pipeline/EGL failure detected in process logcat:\n${errors.joinToString("\n")}"
                 )
@@ -317,7 +321,9 @@ class FlutterActivityTest {
                 if (cropped == null) {
                     // Evict engine cache if a screenshot is blank but no logcat EGL error was detected,
                     // ensuring any subsequent test run attempt starts with a clean engine instance.
-                    MainActivity.evictEngineCache()
+                    InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                        MainActivity.evictEngineCache()
+                    }
                     throw BlankScreenshotException(
                         "Captured screenshot is blank/empty after $maxAttempts attempts."
                     )

@@ -7,8 +7,6 @@ import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -32,33 +30,11 @@ class MainActivity : FlutterActivity() {
         private var activeActivity: WeakReference<MainActivity>? = null
 
         // Destroys and removes the cached FlutterEngine and resets lastConfiguredEngine.
-        // Synchronously blocks if called from a background thread to prevent race conditions
-        // where a subsequent test attempt allocates a new engine before eviction finishes.
         fun evictEngineCache() {
-            val action =
-                Runnable {
-                    val engine = FlutterEngineCache.getInstance().get(CACHED_ENGINE_KEY)
-                    engine?.destroy()
-                    FlutterEngineCache.getInstance().remove(CACHED_ENGINE_KEY)
-                    lastConfiguredEngine = null
-                }
-            if (Looper.myLooper() == Looper.getMainLooper()) {
-                action.run()
-            } else {
-                val latch = java.util.concurrent.CountDownLatch(1)
-                Handler(Looper.getMainLooper()).post {
-                    try {
-                        action.run()
-                    } finally {
-                        latch.countDown()
-                    }
-                }
-                try {
-                    latch.await()
-                } catch (e: InterruptedException) {
-                    Thread.currentThread().interrupt()
-                }
-            }
+            val engine = FlutterEngineCache.getInstance().get(CACHED_ENGINE_KEY)
+            engine?.destroy()
+            FlutterEngineCache.getInstance().remove(CACHED_ENGINE_KEY)
+            lastConfiguredEngine = null
         }
     }
 
