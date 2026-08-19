@@ -26,7 +26,6 @@ import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 Matcher matchesMethodCall(String method, {dynamic args}) =>
     _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
@@ -16091,6 +16090,36 @@ void main() {
             controller: controller,
             focusNode: focusNode,
             keyboardType: TextInputType.visiblePassword,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
+    testWidgets('Spell check disabled for numeric password input type', (
+      WidgetTester tester,
+    ) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: const TextInputType.numberWithOptions(password: true),
             style: const TextStyle(),
             cursorColor: const Color(0xFF0000FF),
             backgroundCursorColor: const Color(0xFF808080),

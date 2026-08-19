@@ -106,7 +106,8 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     const flutter::TaskRunners& task_runners,
     AndroidRenderingAPI android_rendering_api,
     bool enable_opengl_gpu_tracing,
-    const AndroidContext::ContextSettings& settings) {
+    const AndroidContext::ContextSettings& settings,
+    std::shared_ptr<fml::BasicTaskRunner> io_task_runner) {
   switch (android_rendering_api) {
 #if !SLIMPELLER
     case AndroidRenderingAPI::kSoftware:
@@ -121,11 +122,12 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
       return std::make_unique<AndroidContextVKImpeller>(settings);
     case AndroidRenderingAPI::kImpellerOpenGLES:
       return std::make_unique<AndroidContextGLImpeller>(
-          std::make_unique<impeller::egl::Display>(),
-          enable_opengl_gpu_tracing);
+          std::make_unique<impeller::egl::Display>(), enable_opengl_gpu_tracing,
+          std::move(io_task_runner));
     case AndroidRenderingAPI::kImpellerAutoselect:
       // Determine if we're using GL or Vulkan.
-      return std::make_unique<AndroidContextDynamicImpeller>(settings);
+      return std::make_unique<AndroidContextDynamicImpeller>(
+          settings, std::move(io_task_runner));
   }
   FML_UNREACHABLE();
 }
@@ -143,7 +145,8 @@ PlatformViewAndroid::PlatformViewAndroid(
               task_runners,
               rendering_api,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
-              CreateContextSettings(delegate.OnPlatformViewGetSettings()))) {}
+              CreateContextSettings(delegate.OnPlatformViewGetSettings()),
+              delegate.OnPlatformViewGetShutdownSafeIOTaskRunner())) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,

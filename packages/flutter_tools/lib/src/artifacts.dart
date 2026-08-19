@@ -82,6 +82,8 @@ enum Artifact {
 
   /// Tools related to subsetting or icon font files.
   fontSubset('font-subset', isExecutable: true),
+
+  /// Still used in g3 so cannot be deleted yet.
   constFinder('const_finder.dart.snapshot'),
 
   /// The location of file generators.
@@ -161,8 +163,9 @@ enum HostArtifact {
 
   iosDeploy('ios-deploy'),
   idevicesyslog('idevicesyslog'),
-  idevicescreenshot('idevicescreenshot'),
   iproxy('iproxy'),
+
+  idevicescreenshot('idevicescreenshot'),
 
   /// The root of the sky_engine package.
   skyEnginePath('sky_engine'),

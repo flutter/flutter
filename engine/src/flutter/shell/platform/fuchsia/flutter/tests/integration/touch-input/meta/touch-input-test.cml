@@ -42,7 +42,6 @@
                 "fuchsia.ui.test.input.TouchInputListener",
                 "fuchsia.intl.PropertyProvider",
                 "fuchsia.posix.socket.Provider",
-                "fuchsia.ui.pointerinjector.Registry",
             ],
             from: "parent",
             to: "#realm_builder",
