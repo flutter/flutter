@@ -258,6 +258,8 @@ void main() {
             RegExp(r'^--write-service-info=(.*)$'),
           ],
           onRun: (List<String> command) {
+            // Extract the path passed to --write-service-info and write a mock VM Service JSON file
+            // to simulate Dart VM writing connection info on startup.
             final String writeServiceInfoArg = command.firstWhere(
               (String arg) => arg.startsWith('--write-service-info='),
             );
@@ -292,6 +294,7 @@ void main() {
     final device = MacOSDevice(
       fileSystem: fileSystem,
       processManager: FakeProcessManager.list(<FakeCommand>[
+        // Verifies pkill is invoked targeting the executable path.
         const FakeCommand(command: <String>['pkill', '-f', 'debug/executable']),
       ]),
       logger: BufferLogger.test(),

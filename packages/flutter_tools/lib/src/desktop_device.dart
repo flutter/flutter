@@ -391,6 +391,11 @@ class DesktopLogReader extends DeviceLogReader {
     unawaited(_stderrSubscription?.cancel());
   }
 
+  /// Connects to the [FlutterVmService] to stream stdout and stderr logs.
+  ///
+  /// This is used when standard process stdout and stderr streams are not available,
+  /// such as when launching applications via external mechanisms (e.g. `open` on macOS).
+  /// If the log reader is already listening to a running process, this is a no-op.
   @override
   Future<void> provideVmService(FlutterVmService connectedVmService) async {
     if (_listeningToProcess) {

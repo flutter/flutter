@@ -94,23 +94,26 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) {
-    if (package is! MacOSApp) {
-      return null;
-    }
-    return package.executable(buildInfo);
-  }
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) =>
+      switch (package) {
+        final MacOSApp macosApp => macosApp.executable(buildInfo),
+        _ => null,
+      };
 
+  /// Converts engine switches from environment variables into CLI arguments.
+  ///
+  /// When launching via the macOS `open` command, environment variables cannot be
+  /// passed directly to the subprocess in the same manner as `ProcessManager.start`.
+  /// Instead, engine switches (like `--enable-dart-profiling`) must be passed as
+  /// command-line arguments following the `--args` flag.
   List<String> _computeArgs(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
     final Map<String, String> env = computeEnvironment(debuggingOptions, traceStartup, route);
     final args = <String>[];
 
-    final String? countStr = env['FLUTTER_ENGINE_SWITCHES'];
-    if (countStr != null) {
+    if (env['FLUTTER_ENGINE_SWITCHES'] case final String countStr) {
       final int count = int.tryParse(countStr) ?? 0;
       for (var i = 1; i <= count; i++) {
-        final String? value = env['FLUTTER_ENGINE_SWITCH_$i'];
-        if (value != null) {
+        if (env['FLUTTER_ENGINE_SWITCH_$i'] case final String value) {
           args.add('--$value');
         }
       }
@@ -154,6 +157,9 @@ class MacOSDevice extends DesktopDevice {
       return LaunchResult.failed();
     }
 
+    // In release mode, the VM Service is disabled and cannot be discovered via
+    // `--write-service-info`. Fall back to direct binary execution to preserve
+    // stdout/stderr log streaming.
     if (buildInfo.isRelease) {
       return super.startApp(
         package,
@@ -166,6 +172,16 @@ class MacOSDevice extends DesktopDevice {
       );
     }
 
+    // Under macOS Transparency, Consent, and Control (TCC), running an application
+    // binary directly from an IDE or terminal process attributes permission requests
+    // (e.g. Camera, Microphone, Contacts) to the parent IDE/terminal process rather
+    // than the app bundle itself. This often leads to silent permission denials or crashes.
+    // Launching via `open -a <bundle> --args <args>` runs the application within its proper
+    // bundle context, ensuring correct TCC attribution.
+    //
+    // However, `open` exits immediately after launching the application, losing direct
+    // stdout/stderr pipes. To discover the VM Service URI, pass `--write-service-info` with
+    // a temporary file path and poll until the VM writes its connection info.
     final File vmServiceInfoFile = _fileSystem.systemTempDirectory
         .createTempSync('flutter_tools_macos_device.')
         .childFile('vm_service_info.json');
@@ -209,13 +225,9 @@ class MacOSDevice extends DesktopDevice {
         try {
           final String content = vmServiceInfoFile.readAsStringSync();
           if (content.isNotEmpty) {
-            final Object? decoded = jsonDecode(content);
-            if (decoded is Map<String, dynamic>) {
-              final uriStr = decoded['uri'] as String?;
-              if (uriStr != null) {
-                vmServiceUri = Uri.parse(uriStr);
-                break;
-              }
+            if (jsonDecode(content) case {'uri': final String uriStr}) {
+              vmServiceUri = Uri.parse(uriStr);
+              break;
             }
           }
         } on Exception catch (e) {
@@ -223,23 +235,21 @@ class MacOSDevice extends DesktopDevice {
         }
       }
 
+      // Check if the application exited or crashed prematurely before writing the VM Service URI.
       final ProcessResult pgrepResult = await _processManager.run(<String>[
         'pgrep',
         '-f',
         executable,
       ]);
       if (pgrepResult.exitCode != 0) {
+        // App is no longer running. Check one last time if the file was written before exiting.
         if (vmServiceInfoFile.existsSync()) {
           try {
             final String content = vmServiceInfoFile.readAsStringSync();
             if (content.isNotEmpty) {
-              final Object? decoded = jsonDecode(content);
-              if (decoded is Map<String, dynamic>) {
-                final uriStr = decoded['uri'] as String?;
-                if (uriStr != null) {
-                  vmServiceUri = Uri.parse(uriStr);
-                  break;
-                }
+              if (jsonDecode(content) case {'uri': final String uriStr}) {
+                vmServiceUri = Uri.parse(uriStr);
+                break;
               }
             }
           } on Exception catch (_) {}
@@ -282,7 +292,9 @@ class MacOSDevice extends DesktopDevice {
     if (app is! MacOSApp) {
       return false;
     }
+    final MacOSApp macosApp = app;
 
+    // Find the executable for the application across build modes.
     String? executable;
     for (final BuildMode mode in BuildMode.values) {
       final buildInfo = BuildInfo(
@@ -291,8 +303,8 @@ class MacOSDevice extends DesktopDevice {
         treeShakeIcons: false,
         packageConfigPath: '.dart_tool/package_config.json',
       );
-      final String? path = app.executable(buildInfo);
-      if (path != null && _fileSystem.file(path).existsSync()) {
+      if (macosApp.executable(buildInfo) case final String path
+          when _fileSystem.file(path).existsSync()) {
         executable = path;
         break;
       }
@@ -303,6 +315,9 @@ class MacOSDevice extends DesktopDevice {
       return false;
     }
 
+    // Because debug and profile applications are launched via `open`, we do not
+    // have a persistent `Process` instance to kill directly. Use `pkill` to terminate
+    // matching application processes.
     final ProcessResult result = await _processManager.run(<String>['pkill', '-f', executable]);
     return result.exitCode == 0;
   }
