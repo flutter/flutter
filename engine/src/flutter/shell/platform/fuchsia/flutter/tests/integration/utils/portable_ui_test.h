@@ -29,8 +29,6 @@ class PortableUITest : public ::loop_fixture::RealLoop {
       "fuchsia.vulkan.loader.Loader";
   static constexpr auto kPosixSocketProviderName =
       "fuchsia.posix.socket.Provider";
-  static constexpr auto kPointerInjectorRegistryName =
-      "fuchsia.ui.pointerinjector.Registry";
 
   // The naming and references used by Realm Builder
   static constexpr auto kTestUIStack = "ui";
