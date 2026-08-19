@@ -101,9 +101,20 @@ class TextLayout {
     }
     allClusters.sort((a, b) => a.start.compareTo(b.start));
     for (var i = 0; i < allClusters.length; ++i) {
-      final WebCluster cluster = allClusters[i];
+      if (allClusters[i] is! TextCluster) {
+        continue;
+      }
+      final cluster = allClusters[i] as TextCluster;
       for (int j = cluster.start; j < cluster.end; ++j) {
         _mapping.add(textIndex: j, clusterIndex: i);
+      }
+      if (codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak)) {
+        cluster.advance = ui.Rect.fromLTWH(
+          cluster.advance.left,
+          cluster.advance.top,
+          0,
+          cluster.advance.height,
+        );
       }
     }
 
@@ -247,7 +258,7 @@ class TextLayout {
     final ui.TextRange hardlineTextRange = _mapping.toTextRange(hardlineRange);
     final allTextRange = ui.TextRange(
       start: contentTextRange.start,
-      end: specialCase ? hardlineRange.end : whitespaceTextRange.end,
+      end: specialCase ? hardlineTextRange.end : whitespaceTextRange.end,
     );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(
@@ -259,6 +270,7 @@ class TextLayout {
       whitespaceTextRange,
       hardlineTextRange,
       allTextRange,
+      hardlineTextRange.isNotEmpty || specialCase,
     );
 
     // Get logical bidi levels belonging to the line.
@@ -733,8 +745,8 @@ class TextLayout {
         }
 
         // Calculate left and right edges of the block
-        final double left = block.advance.left + lineShift - epsilon;
-        final double right = block.advance.right + lineShift + epsilon;
+        final double left = block.advance.left + lineShift;
+        final double right = block.advance.right + lineShift;
 
         if (right < offset.dx) {
           // We are not there yet; we need a block containing the offset (or the closest to it)
@@ -787,20 +799,12 @@ class TextLayout {
         assert(false);
       }
       // We found the line but not the block because the offset is to the right of all blocks in this line.
-      // We deal with it the same way as if we didn't find the line (taking the last block of the last line)
-      final LineBlock? lastVisualBlockInParagraph = lines.reversed
-          .where((line) => line.visualBlocks.isNotEmpty)
-          .firstOrNull
-          ?.visualBlocks
-          .last;
-      return lastVisualBlockInParagraph == null
-          ? ui.TextPosition(offset: paragraph.text.length) // "\n\n\n"
-          : lastVisualBlockInParagraph.isLtr
-          ? ui.TextPosition(
-              offset: lastVisualBlockInParagraph.textRange.end,
-              affinity: ui.TextAffinity.upstream,
-            )
-          : ui.TextPosition(offset: lastVisualBlockInParagraph.textRange.start);
+      final LineBlock? lastVisualBlockInLine = line.visualBlocks.lastOrNull;
+      return lastVisualBlockInLine == null
+          ? ui.TextPosition(offset: line.allLineTextRange.start, affinity: ui.TextAffinity.upstream)
+          : lastVisualBlockInLine.isLtr
+          ? ui.TextPosition(offset: line.textRange.end, affinity: ui.TextAffinity.upstream)
+          : ui.TextPosition(offset: lastVisualBlockInLine.textRange.start);
     }
 
     // This is the default result for any position outside of the paragraph width and height
@@ -1025,7 +1029,9 @@ abstract class WebCluster {
 }
 
 class TextCluster extends WebCluster {
-  TextCluster(this.span, this._cluster) : startInSpan = _cluster.start, endInSpan = _cluster.end;
+  TextCluster(this.span, this._cluster) : startInSpan = _cluster.start, endInSpan = _cluster.end {
+    _advance = span.getClusterSelection(this);
+  }
 
   @override
   final TextSpan span;
@@ -1039,7 +1045,10 @@ class TextCluster extends WebCluster {
   final int endInSpan;
 
   @override
-  late final ui.Rect advance = span.getClusterSelection(this);
+  ui.Rect get advance => _advance;
+
+  set advance(ui.Rect value) => _advance = value;
+  ui.Rect _advance = ui.Rect.zero;
 
   final DomTextCluster _cluster;
 
@@ -1147,9 +1156,11 @@ abstract class LineBlock {
       _multipliedFontBoundingBoxAscent + _multipliedFontBoundingBoxDescent;
 
   late final double _multipliedFontBoundingBoxAscent;
+
   double get multipliedFontBoundingBoxAscent => _multipliedFontBoundingBoxAscent;
 
   late final double _multipliedFontBoundingBoxDescent;
+
   double get multipliedFontBoundingBoxDescent => _multipliedFontBoundingBoxDescent;
 
   final ParagraphSpan span;
@@ -1202,12 +1213,14 @@ class TextBlock extends LineBlock {
   late final ui.Rect paintBounds = span.getBlockBounds(this);
 
   double get paintBoundsAscent => -paintBounds.top;
+
   double get paintBoundsDescent => paintBounds.bottom;
 
   @override
   double spanShiftFromLineStart;
 
   int get visualClusterStart => isLtr ? clusterRange.start : clusterRange.end - 1;
+
   int get visualClusterEnd => isLtr ? clusterRange.end : clusterRange.start - 1;
 
   /// Returns a list of pairs of clusters and their directions in the visual order.
@@ -1329,6 +1342,7 @@ class TextLine {
     this.whitespacesRange,
     this.hardLineBreakRange,
     this.allLineTextRange,
+    this.hasHardLineBreak,
   );
 
   ui.LineMetrics getMetrics() {
@@ -1349,8 +1363,8 @@ class TextLine {
   }
 
   double get baseline => advance.top + fontBoundingBoxAscent;
+
   double get height => fontBoundingBoxAscent + fontBoundingBoxDescent;
-  bool get hasHardLineBreak => hardLineBreakRange.isNotEmpty || lastLine;
 
   final ClusterRange textClusterRange;
   final ClusterRange whitespacesClusterRange;
@@ -1359,6 +1373,7 @@ class TextLine {
   final ui.TextRange whitespacesRange;
   final ui.TextRange hardLineBreakRange;
   final ui.TextRange allLineTextRange;
+  final bool hasHardLineBreak;
   final int lineNumber;
   bool lastLine = false;
 

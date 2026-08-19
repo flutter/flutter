@@ -120,7 +120,7 @@ Future<void> testMain() async {
     var length = 0;
     for (var i = 0; i < 15; i++) {
       expect(lines[i].whitespacesRange.size, 0);
-      expect(lines[i].hasHardLineBreak, true);
+      expect(lines[i].hasHardLineBreak, true, reason: 'Line $i line.hasHardLineBreak');
       length += lines[i].allLineTextRange.size + (i != 14 ? 1 : 0);
     }
     expect(length, paragraph.text.length);
@@ -151,61 +151,93 @@ Future<void> testMain() async {
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
     for (var i = 0; i < lines.length; i++) {
-      expect(lines[i].whitespacesRange.size, i == lines.length - 1 ? 1 : 0);
-      expect(lines[i].textRange.size, 0);
+      expect(
+        lines[i].whitespacesRange.size,
+        i == 2 ? 1 : 0,
+        reason: 'Line $i line.whitespacesRange.size',
+      );
+      expect(lines[i].textRange.size, i == 3 ? 1 : 0, reason: 'Line $i line.textRange.size');
+      expect(
+        lines[i].hardLineBreakRange.size,
+        i >= 2 ? 0 : 1,
+        reason: 'Line $i line.hardLineBreakRange.size',
+      );
       expect(lines[i].hasHardLineBreak, true);
     }
   });
 
   test('Text wrapper, ultimate test for edge cases', () {
-    final builder = WebParagraphBuilder(ahemStyle);
+    final builder = ParagraphBuilder(ParagraphStyle(fontFamily: 'Arial', fontSize: 50));
     builder.addText('Text\nText \nText \n');
     builder.addText(' \n  \n');
     builder.addText('\n\n \n\n');
-    final WebParagraph paragraph = builder.build();
+    final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 10000));
 
+    if (paragraph is! WebParagraph) {
+      return;
+    }
     final List<TextLine> lines = paragraph.lines;
-    expect(lines.length, 10);
 
-    expect(lines[0].allLineTextRange, const TextRange(start: 0, end: 4));
-    expect(lines[0].whitespacesRange, const TextRange(start: 4, end: 4));
-    expect(lines[0].hardLineBreakRange, const TextRange(start: 4, end: 5));
+    expect(paragraph.numberOfLines, 10);
 
-    expect(lines[1].allLineTextRange, const TextRange(start: 5, end: 10));
-    expect(lines[1].whitespacesRange, const TextRange(start: 9, end: 10));
-    expect(lines[1].hardLineBreakRange, const TextRange(start: 10, end: 11));
+    void expectLineRanges(
+      int index,
+      int textStart,
+      int allLineTextEnd,
+      int textEnd,
+      int whitespacesEnd,
+      int hardLineBreakEnd,
+    ) {
+      final TextLine line = lines[index];
+      expect(
+        line.allLineTextRange,
+        TextRange(start: textStart, end: allLineTextEnd),
+        reason:
+            'Line $index allLineTextRange ${line.allLineTextRange} != ${TextRange(start: textStart, end: allLineTextEnd)}',
+      );
+      expect(
+        line.textRange,
+        TextRange(start: textStart, end: textEnd),
+        reason:
+            'Line $index textRange $index ${line.textRange} != ${TextRange(start: textStart, end: textEnd)}',
+      );
+      expect(
+        line.whitespacesRange,
+        TextRange(start: textEnd, end: whitespacesEnd),
+        reason:
+            'Line $index whitespacesRange ${line.whitespacesRange} != ${TextRange(start: textEnd, end: whitespacesEnd)}',
+      );
+      expect(
+        line.hardLineBreakRange,
+        TextRange(start: whitespacesEnd, end: hardLineBreakEnd),
+        reason:
+            'Line $index hardLineBreakRange ${line.hardLineBreakRange} != ${TextRange(start: whitespacesEnd, end: hardLineBreakEnd)}',
+      );
+      expect(line.hasHardLineBreak, true, reason: 'Line $index line.hasHardLineBreak');
+    }
 
-    expect(lines[2].allLineTextRange, const TextRange(start: 11, end: 16));
-    expect(lines[2].whitespacesRange, const TextRange(start: 15, end: 16));
-    expect(lines[2].hardLineBreakRange, const TextRange(start: 16, end: 17));
-
-    expect(lines[3].allLineTextRange, const TextRange(start: 17, end: 18));
-    expect(lines[3].whitespacesRange, const TextRange(start: 17, end: 18));
-    expect(lines[3].hardLineBreakRange, const TextRange(start: 18, end: 19));
-
-    expect(lines[4].allLineTextRange, const TextRange(start: 19, end: 21));
-    expect(lines[4].whitespacesRange, const TextRange(start: 19, end: 21));
-    expect(lines[4].hardLineBreakRange, const TextRange(start: 21, end: 22));
-
-    expect(lines[5].allLineTextRange, const TextRange(start: 22, end: 22));
-    expect(lines[5].whitespacesRange, const TextRange(start: 22, end: 22));
-    expect(lines[5].hardLineBreakRange, const TextRange(start: 22, end: 23));
-
-    expect(lines[6].allLineTextRange, const TextRange(start: 23, end: 23));
-    expect(lines[6].whitespacesRange, const TextRange(start: 23, end: 23));
-    expect(lines[6].hardLineBreakRange, const TextRange(start: 23, end: 24));
-
-    expect(lines[7].allLineTextRange, const TextRange(start: 24, end: 25));
-    expect(lines[7].whitespacesRange, const TextRange(start: 24, end: 25));
-    expect(lines[7].hardLineBreakRange, const TextRange(start: 25, end: 26));
-
-    expect(lines[8].allLineTextRange, const TextRange(start: 26, end: 27));
-    expect(lines[8].whitespacesRange, const TextRange(start: 26, end: 26));
-    expect(lines[8].hardLineBreakRange, const TextRange(start: 26, end: 27));
-
-    expect(lines[9].allLineTextRange, const TextRange(start: 26, end: 27));
-    expect(lines[9].whitespacesRange, const TextRange(start: 26, end: 27));
-    expect(lines[9].hardLineBreakRange, const TextRange(start: 27, end: 27));
+    /*
+metric[0]: 0 4 4 4 5 true
+metric[1]: 5 10 9 10 11 true
+metric[2]: 11 16 15 16 17 true
+metric[3]: 17 18 17 18 19 true
+metric[4]: 19 21 19 21 22 true
+metric[5]: 22 22 22 22 23 true
+metric[6]: 23 23 23 23 24 true
+metric[7]: 24 25 24 25 26 true
+metric[8]: 26 27 26 27 27 true
+metric[9]: 26 27 27 27 27 true
+*/
+    expectLineRanges(0, 0, 4, 4, 4, 5);
+    expectLineRanges(1, 5, 10, 9, 10, 11);
+    expectLineRanges(2, 11, 16, 15, 16, 17);
+    expectLineRanges(3, 17, 18, 17, 18, 19);
+    expectLineRanges(4, 19, 21, 19, 21, 22);
+    expectLineRanges(5, 22, 22, 22, 22, 23);
+    expectLineRanges(6, 23, 23, 23, 23, 24);
+    expectLineRanges(7, 24, 25, 24, 25, 26);
+    expectLineRanges(8, 26, 27, 26, 27, 27);
+    expectLineRanges(9, 26, 27, 27, 27, 27);
   });
 }

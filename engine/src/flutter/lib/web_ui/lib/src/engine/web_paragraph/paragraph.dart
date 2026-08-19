@@ -969,7 +969,7 @@ class WebParagraph implements ui.Paragraph {
       ui.TextAffinity.downstream => position.offset,
     };
     if (codepointPosition < 0) {
-      return const ui.TextRange(start: 0, end: 0);
+      return ui.TextRange(start: text.length, end: text.length);
     }
     if (codepointPosition >= text.length) {
       return ui.TextRange(start: text.length, end: text.length);

@@ -29,11 +29,6 @@ class TextWrapper {
   double get height => _height;
   double _height = 0.0;
 
-  bool _isWhitespace(WebCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.whitespace) &&
-        !_layout.codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
-  }
-
   bool _isSoftLineBreak(WebCluster cluster) {
     return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.softLineBreak);
   }
@@ -81,7 +76,7 @@ class TextWrapper {
       }
 
       // Check if this is a (trailing) whitespace that does not affect the line width
-      if (_isWhitespace(cluster)) {
+      if (line._isWhitespace(cluster)) {
         line.consumePendingText();
         // Add the cluster to the current whitespace sequence (empty or not)
         line.addWhitespace(index, widthCluster);
@@ -360,12 +355,13 @@ class _LineBuilder {
       _widthConsumedText + _widthWhitespaces,
     );
 
+    final int correctedWhitespaceEnd = specialCase ? _newlineEnd : _whitespaceEnd;
     final double height = _layout.addLine(
       ClusterRange(start: start, end: _whitespaceStart),
-      ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
-      ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
+      ClusterRange(start: _whitespaceStart, end: correctedWhitespaceEnd),
+      ClusterRange(start: correctedWhitespaceEnd, end: _newlineEnd),
       _top,
-      specialCase,
+      specialCase || reachedEndOfText() || reachedMaxLines(),
     );
     _top += height;
 
@@ -373,8 +369,8 @@ class _LineBuilder {
     // This empty line gets in a way of detecting line visual runs (there isn't any)
     if (specialCase) {
       _top += _layout.addLine(
-        ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
         ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
+        ClusterRange(start: _newlineEnd, end: _newlineEnd),
         ClusterRange(start: _newlineEnd, end: _newlineEnd),
         _top,
         true,
@@ -464,6 +460,7 @@ class _LineBuilder {
   }
 
   bool _isWhitespace(WebCluster cluster) {
-    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.whitespace);
+    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.whitespace) &&
+        !_layout.codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
   }
 }
