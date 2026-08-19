@@ -9,6 +9,7 @@ import 'package:clock/clock.dart';
 
 import 'package:process/process.dart';
 
+import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -17,12 +18,11 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../application_package.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_macos.dart';
 import 'macos_workflow.dart';
-import '../globals.dart' as globals;
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
@@ -35,7 +35,8 @@ class MacOSDevice extends DesktopDevice {
        _logger = logger,
        _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
-       super('macos',
+       super(
+         'macos',
          platformType: PlatformType.macos,
          ephemeral: false,
          processManager: processManager,
@@ -102,12 +103,12 @@ class MacOSDevice extends DesktopDevice {
 
   List<String> _computeArgs(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
     final Map<String, String> env = computeEnvironment(debuggingOptions, traceStartup, route);
-    final List<String> args = <String>[];
+    final args = <String>[];
 
     final String? countStr = env['FLUTTER_ENGINE_SWITCHES'];
     if (countStr != null) {
       final int count = int.tryParse(countStr) ?? 0;
-      for (int i = 1; i <= count; i++) {
+      for (var i = 1; i <= count; i++) {
         final String? value = env['FLUTTER_ENGINE_SWITCH_$i'];
         if (value != null) {
           args.add('--$value');
@@ -169,13 +170,17 @@ class MacOSDevice extends DesktopDevice {
         .createTempSync('flutter_tools_macos_device.')
         .childFile('vm_service_info.json');
 
-    final List<String> args = _computeArgs(debuggingOptions, platformArgs['trace-startup'] as bool? ?? false, route);
+    final List<String> args = _computeArgs(
+      debuggingOptions,
+      platformArgs['trace-startup'] as bool? ?? false,
+      route,
+    );
     args.add('--write-service-info=${vmServiceInfoFile.path}');
     if (debuggingOptions.dartEntrypointArgs.isNotEmpty) {
       args.addAll(debuggingOptions.dartEntrypointArgs);
     }
 
-    final List<String> openCommand = <String>[
+    final openCommand = <String>[
       'open',
       '-a',
       bundlePath,
@@ -188,13 +193,15 @@ class MacOSDevice extends DesktopDevice {
       _logger.printError('Failed to launch app via open: ${result.stderr}');
       try {
         vmServiceInfoFile.parent.deleteSync(recursive: true);
-      } catch (_) {}
+      } on Exception catch (_) {}
       return LaunchResult.failed();
     }
 
     Uri? vmServiceUri;
     final DateTime start = clock.now();
-    final Duration timeout = (await globals.isRunningOnBot) ? const Duration(minutes: 5) : const Duration(seconds: 30);
+    final timeout = (await globals.isRunningOnBot)
+        ? const Duration(minutes: 5)
+        : const Duration(seconds: 30);
 
     _logger.printTrace('Waiting for VM Service info file at ${vmServiceInfoFile.path}');
     while (clock.now().difference(start) < timeout) {
@@ -202,32 +209,40 @@ class MacOSDevice extends DesktopDevice {
         try {
           final String content = vmServiceInfoFile.readAsStringSync();
           if (content.isNotEmpty) {
-            final Map<String, dynamic> json = jsonDecode(content) as Map<String, dynamic>;
-            final String? uriStr = json['uri'] as String?;
-            if (uriStr != null) {
-              vmServiceUri = Uri.parse(uriStr);
-              break;
-            }
-          }
-        } catch (e) {
-          _logger.printTrace('Error reading VM Service info file: $e. Retrying...');
-        }
-      }
-
-      final ProcessResult pgrepResult = await _processManager.run(<String>['pgrep', '-f', executable]);
-      if (pgrepResult.exitCode != 0) {
-        if (vmServiceInfoFile.existsSync()) {
-          try {
-            final String content = vmServiceInfoFile.readAsStringSync();
-            if (content.isNotEmpty) {
-              final Map<String, dynamic> json = jsonDecode(content) as Map<String, dynamic>;
-              final String? uriStr = json['uri'] as String?;
+            final Object? decoded = jsonDecode(content);
+            if (decoded is Map<String, dynamic>) {
+              final uriStr = decoded['uri'] as String?;
               if (uriStr != null) {
                 vmServiceUri = Uri.parse(uriStr);
                 break;
               }
             }
-          } catch (_) {}
+          }
+        } on Exception catch (e) {
+          _logger.printTrace('Error reading VM Service info file: $e. Retrying...');
+        }
+      }
+
+      final ProcessResult pgrepResult = await _processManager.run(<String>[
+        'pgrep',
+        '-f',
+        executable,
+      ]);
+      if (pgrepResult.exitCode != 0) {
+        if (vmServiceInfoFile.existsSync()) {
+          try {
+            final String content = vmServiceInfoFile.readAsStringSync();
+            if (content.isNotEmpty) {
+              final Object? decoded = jsonDecode(content);
+              if (decoded is Map<String, dynamic>) {
+                final uriStr = decoded['uri'] as String?;
+                if (uriStr != null) {
+                  vmServiceUri = Uri.parse(uriStr);
+                  break;
+                }
+              }
+            }
+          } on Exception catch (_) {}
         }
         _logger.printError('Application exited before VM Service connected.');
         break;
@@ -238,13 +253,13 @@ class MacOSDevice extends DesktopDevice {
 
     try {
       vmServiceInfoFile.parent.deleteSync(recursive: true);
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.printTrace('Failed to delete temp directory: $e');
     }
 
     if (vmServiceUri == null) {
       if (await globals.isRunningOnBot) {
-        final String sandboxingMessage = debuggingOptions.usingCISystem
+        final sandboxingMessage = debuggingOptions.usingCISystem
             ? 'Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS.'
             : 'Consider codesigning your app or disabling sandboxing. Flutter will attempt to disable sandboxing if the `--ci` flag is provided.';
         _logger.printError(
@@ -270,7 +285,7 @@ class MacOSDevice extends DesktopDevice {
 
     String? executable;
     for (final BuildMode mode in BuildMode.values) {
-      final BuildInfo buildInfo = BuildInfo(
+      final buildInfo = BuildInfo(
         mode,
         null,
         treeShakeIcons: false,

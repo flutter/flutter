@@ -18,9 +18,8 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 final macOS = FakePlatform(operatingSystem: 'macos');
 
@@ -242,9 +241,9 @@ void main() {
 
   testUsingContext('startApp in debug mode launches via open and parses VM Service URI', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
 
-    final MacOSDevice device = MacOSDevice(
+    final device = MacOSDevice(
       fileSystem: fileSystem,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
@@ -259,9 +258,13 @@ void main() {
             RegExp(r'^--write-service-info=(.*)$'),
           ],
           onRun: (List<String> command) {
-            final String writeServiceInfoArg = command.firstWhere((String arg) => arg.startsWith('--write-service-info='));
+            final String writeServiceInfoArg = command.firstWhere(
+              (String arg) => arg.startsWith('--write-service-info='),
+            );
             final String filePath = writeServiceInfoArg.substring('--write-service-info='.length);
-            fileSystem.file(filePath).writeAsStringSync('{"uri":"http://127.0.0.1:12345/auth_code/"}');
+            fileSystem
+                .file(filePath)
+                .writeAsStringSync('{"uri":"http://127.0.0.1:12345/auth_code/"}');
             completer.complete();
           },
         ),
@@ -270,7 +273,7 @@ void main() {
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
-    final FakeMacOSApp package = FakeMacOSApp();
+    final package = FakeMacOSApp();
 
     final LaunchResult result = await device.startApp(
       package,
@@ -286,18 +289,16 @@ void main() {
 
   testWithoutContext('stopApp uses pkill for all build modes', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final MacOSDevice device = MacOSDevice(
+    final device = MacOSDevice(
       fileSystem: fileSystem,
       processManager: FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>['pkill', '-f', 'debug/executable'],
-        ),
+        const FakeCommand(command: <String>['pkill', '-f', 'debug/executable']),
       ]),
       logger: BufferLogger.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
-    final FakeMacOSApp package = FakeMacOSApp();
+    final package = FakeMacOSApp();
     fileSystem.file('debug/executable').createSync(recursive: true);
 
     final bool result = await device.stopApp(package);
