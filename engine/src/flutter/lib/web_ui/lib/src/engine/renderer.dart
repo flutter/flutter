@@ -99,14 +99,7 @@ abstract class Renderer {
 
   ui.Paint createPaint();
 
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  });
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
@@ -154,22 +147,24 @@ abstract class Renderer {
     Float32List? matrix4,
   ]);
 
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
-    ui.Rect? bounds,
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
   });
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0});
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0});
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY});
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY});
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
   });
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
   });
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter});
+  BackendColorFilter createColorFilter(EngineColorFilter filter);
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter);
 
   bool get isMultiThreaded;
 

@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:dds/dap.dart' hide PidTracker;
+import 'package:dap_adapters/dap_adapters.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/io.dart';
@@ -228,9 +228,20 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       return;
     }
 
-    FlutterErrorFormatter()
+    final formatter = FlutterErrorFormatter()
       ..formatError(errorData)
       ..sendOutput(sendOutput);
+
+    // Forward any DevTools deep-links in a 'dart.flutter.devToolsDeepLink'
+    // event.
+    if (formatter case FlutterErrorFormatter(:final errorSummary?, :final devToolsDeepLinkUrl?)) {
+      // This event is interpreted by IDEs extensions like like Dart-Code and
+      // should not be changed in breaking ways without coordination.
+      sendEvent(
+        RawEventBody({'summary': errorSummary, 'deepLinkUrl': devToolsDeepLinkUrl}),
+        eventType: 'dart.flutter.devToolsDeepLink',
+      );
+    }
   }
 
   /// Called by [launchRequest] to request that we actually start the app to be run/debugged.
@@ -452,7 +463,17 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // This may be useful when there's no VM Service (for example Profile mode)
     // but the editor still wants to know that startup has finished.
     if (enableDebugger) {
-      await debuggerInitialized; // Ensure we're fully initialized before sending.
+      waitingForDebugger = true;
+      try {
+        await Future.any<void>([debuggerInitialized, debuggerInitializationFailedCompleter.future]);
+      } catch (e) {
+        if (!isTerminating) {
+          rethrow;
+        }
+        return;
+      } finally {
+        waitingForDebugger = false;
+      }
     }
     sendEvent(RawEventBody(<String, Object?>{}), eventType: 'flutter.appStarted');
   }
