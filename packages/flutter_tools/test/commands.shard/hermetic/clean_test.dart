@@ -59,7 +59,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
           final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
-          await runner.run(<String>['clean']);
+          await runner.run(<String>['clean', '--include-xcode-workspace']);
 
           expect(buildDirectory, isNot(exists));
           expect(projectUnderTest.dartTool, isNot(exists));
@@ -103,6 +103,31 @@ void main() {
       );
 
       testUsingContext(
+        '$CleanCommand does not clean Xcode by default',
+        () async {
+          final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory, true);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean']);
+
+          expect(buildDirectory, isNot(exists));
+          expect(projectUnderTest.dartTool, isNot(exists));
+          expect(projectUnderTest.android.ephemeralDirectory, isNot(exists));
+          expect(projectUnderTest.ios.ephemeralDirectory, isNot(exists));
+
+          // The workspaces should be empty since we didn't pass --include-xcode-workspace.
+          expect(xcodeProjectInterpreter.workspaces, isEmpty);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Xcode: () => xcode,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        },
+      );
+
+      testUsingContext(
         '$CleanCommand does not clean the example directory by default',
         () async {
           setupProjectUnderTest(fs.currentDirectory, true);
@@ -116,7 +141,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
           final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
-          await runner.run(<String>['clean']);
+          await runner.run(<String>['clean', '--include-xcode-workspace']);
 
           expect(buildDirectory, isNot(exists));
 
@@ -159,7 +184,7 @@ void main() {
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
           final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
-          await runner.run(<String>['clean', '--include-example']);
+          await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
 
           expect(buildDirectory, isNot(exists));
           expect(projectUnderTest.dartTool, isNot(exists));
@@ -209,7 +234,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
           final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
-          await runner.run(<String>['clean', '--include-example']);
+          await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
 
           expect(testLogger.statusText, contains('No example app found'));
         },
@@ -302,7 +327,7 @@ void main() {
 
           final command = CleanCommand(verbose: true);
           final CommandRunner<void> runner = createTestCommandRunner(command);
-          await runner.run(<String>['clean']);
+          await runner.run(<String>['clean', '--include-xcode-workspace']);
 
           expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
             CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', true),
