@@ -486,6 +486,43 @@ void main() {
   });
 
   group(FocusScopeNode, () {
+    testWidgets('innermostFocusedChild returns the innermost focused node.', (
+      WidgetTester tester,
+    ) async {
+      final BuildContext context = await setupWidget(tester);
+      final outerScope = FocusScopeNode(debugLabel: 'Outer Scope');
+      addTearDown(outerScope.dispose);
+      final FocusAttachment outerScopeAttachment = outerScope.attach(context);
+      final innerScope = FocusScopeNode(debugLabel: 'Inner Scope');
+      addTearDown(innerScope.dispose);
+      final FocusAttachment innerScopeAttachment = innerScope.attach(context);
+      final child = FocusNode(debugLabel: 'Child');
+      addTearDown(child.dispose);
+      final FocusAttachment childAttachment = child.attach(context);
+      outerScopeAttachment.reparent(
+        parent: tester.binding.focusManager.rootScope,
+      );
+      innerScopeAttachment.reparent(parent: outerScope);
+      childAttachment.reparent(parent: innerScope);
+
+      // A regular node returns itself.
+      expect(child.innermostFocusedChild, equals(child));
+
+      // A scope with no focused child returns itself.
+      expect(outerScope.focusedChild, isNull);
+      expect(outerScope.innermostFocusedChild, equals(outerScope));
+      expect(innerScope.innermostFocusedChild, equals(innerScope));
+
+      child.requestFocus();
+      await tester.pump();
+
+      // Nested scopes return the innermost focused node.
+      expect(outerScope.focusedChild, equals(innerScope));
+      expect(outerScope.innermostFocusedChild, equals(child));
+      expect(innerScope.innermostFocusedChild, equals(child));
+      expect(child.innermostFocusedChild, equals(child));
+    });
+
     testWidgets('Can setFirstFocus on a scope with no manager.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final scope = FocusScopeNode(debugLabel: 'Scope');
