@@ -184,11 +184,13 @@ std::string SimplifyPath(std::string path) {
 
 std::string AbsolutePath(const std::string& path) {
   std::wstring wide_path = Utf8ToWide(path);
-  wchar_t absPath[MAX_PATH];
-  if (_wfullpath(absPath, wide_path.c_str(), MAX_PATH) == nullptr) {
+  wchar_t* abs_path = _wfullpath(nullptr, wide_path.c_str(), 0);
+  if (abs_path == nullptr) {
     return std::string();
   }
-  return WideToUtf8(absPath);
+  std::string result = WideToUtf8(abs_path);
+  free(abs_path);
+  return result;
 }
 
 std::string GetDirectoryName(const std::string& path) {
@@ -220,7 +222,19 @@ std::string GetAbsoluteFilePath(const std::string& path) {
   wchar_t buffer[MAX_PATH];
   DWORD ret =
       GetFinalPathNameByHandleW(file, buffer, MAX_PATH, FILE_NAME_NORMALIZED);
-  if (ret == 0 || ret > MAX_PATH) {
+  std::wstring wide_result;
+  if (ret > 0 && ret < MAX_PATH) {
+    wide_result.assign(buffer, ret);
+  } else if (ret >= MAX_PATH) {
+    std::vector<wchar_t> dyn_buffer(ret);
+    DWORD dyn_ret = GetFinalPathNameByHandleW(file, dyn_buffer.data(), ret,
+                                             FILE_NAME_NORMALIZED);
+    if (dyn_ret > 0 && dyn_ret < ret) {
+      wide_result.assign(dyn_buffer.data(), dyn_ret);
+    }
+  }
+
+  if (wide_result.empty()) {
     std::string result;
     if (GetLastError() == ERROR_ACCESS_DENIED) {
       // In sandboxed apps, GetFinalPathNameByHandle requires the app to
@@ -237,7 +251,6 @@ std::string GetAbsoluteFilePath(const std::string& path) {
     CloseHandle(file);
     return result;
   }
-  std::wstring wide_result(buffer);
   constexpr const wchar_t kUncPrefix[] = L"\\\\?\\UNC\\";
   constexpr size_t kUncPrefixLen = sizeof(kUncPrefix) / sizeof(wchar_t) - 1;
   constexpr const wchar_t kLongPathPrefix[] = L"\\\\?\\";
