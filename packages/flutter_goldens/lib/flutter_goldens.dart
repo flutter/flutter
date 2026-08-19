@@ -752,43 +752,139 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     final ui.Codec actualCodec = await ui.instantiateImageCodec(actualBytes);
     final ui.Image actualImage = (await actualCodec.getNextFrame()).image;
     actualCodec.dispose();
-    final ByteData? actualRgba = await actualImage.toByteData();
 
     final ui.Codec expectedCodec = await ui.instantiateImageCodec(
       Uint8List.fromList(expectedBytes),
     );
     final ui.Image expectedImage = (await expectedCodec.getNextFrame()).image;
     expectedCodec.dispose();
-    final ByteData? expectedRgba = await expectedImage.toByteData();
 
-    final int width = actualImage.width;
-    final int height = actualImage.height;
-    final int expectedWidth = expectedImage.width;
-    final int expectedHeight = expectedImage.height;
+    ui.Image? diffImage;
+    try {
+      final ByteData? actualRgba = await actualImage.toByteData();
+      final ByteData? expectedRgba = await expectedImage.toByteData();
 
-    // Maximum allowed Manhattan color delta across RGBA channels (7 per RGB channel = 21)
-    // to tolerate subtle antialiasing differences.
-    const int maxColorDelta = 7 * 3;
-    // Maximum proportion of differing pixels allowed (10%) to absorb perimeter antialiasing fringes.
-    const maxDifferentPixelsRate = 0.1;
-    if (width != expectedWidth ||
-        height != expectedHeight ||
-        actualRgba == null ||
-        expectedRgba == null) {
+      final int width = actualImage.width;
+      final int height = actualImage.height;
+      final int expectedWidth = expectedImage.width;
+      final int expectedHeight = expectedImage.height;
+
+      // Maximum allowed Manhattan color delta across RGBA channels (7 per RGB channel = 21)
+      // to tolerate subtle antialiasing differences.
+      const int maxColorDelta = 7 * 3;
+      // Maximum proportion of differing pixels allowed (10%) to absorb perimeter antialiasing fringes.
+      const maxDifferentPixelsRate = 0.1;
+
+      if (width != expectedWidth ||
+          height != expectedHeight ||
+          actualRgba == null ||
+          expectedRgba == null) {
+        final diffBytes = ByteData(width * height * 4);
+        for (var i = 0; i < width * height * 4; i += 4) {
+          diffBytes.setUint8(i, 255);
+          diffBytes.setUint8(i + 1, 0);
+          diffBytes.setUint8(i + 2, 127);
+          diffBytes.setUint8(i + 3, 255);
+        }
+        diffImage = await _createImageFromPixels(diffBytes, width, height);
+        final ByteData? diffPngData = await diffImage.toByteData(format: ui.ImageByteFormat.png);
+        final Uint8List diffPngBytes = diffPngData!.buffer.asUint8List();
+
+        await _writeFailureAndThrow(
+          golden: golden,
+          testName: testName,
+          actualBytes: actualBytes,
+          expectedBytes: Uint8List.fromList(expectedBytes),
+          diffPngBytes: diffPngBytes,
+          diffPixelCount: width * height,
+          totalPixels: width * height,
+          maxDifferentPixelsRate: maxDifferentPixelsRate,
+          customMessage:
+              'Image dimensions do not match (actual: ${width}x$height, expected: ${expectedWidth}x$expectedHeight).',
+        );
+        return false;
+      }
+
+      final Uint8List actualPixels = actualRgba.buffer.asUint8List(
+        actualRgba.offsetInBytes,
+        actualRgba.lengthInBytes,
+      );
+      final Uint8List expectedPixels = expectedRgba.buffer.asUint8List(
+        expectedRgba.offsetInBytes,
+        expectedRgba.lengthInBytes,
+      );
+
+      final int totalPixels = width * height;
+      var diffPixelCount = 0;
       final diffBytes = ByteData(width * height * 4);
 
-      for (var i = 0; i < width * height * 4; i += 4) {
-        diffBytes.setUint8(i, 255);
-        diffBytes.setUint8(i + 1, 0);
-        diffBytes.setUint8(i + 2, 127);
-        diffBytes.setUint8(i + 3, 255);
+      for (var y = 0; y < height; y += 1) {
+        for (var x = 0; x < width; x += 1) {
+          final int offset = (y * width + x) * 4;
+          final int r1 = actualPixels[offset];
+          final int g1 = actualPixels[offset + 1];
+          final int b1 = actualPixels[offset + 2];
+          final int a1 = actualPixels[offset + 3];
+
+          var pixelMatched = false;
+
+          // Check direct pixel first
+          final int r2 = expectedPixels[offset];
+          final int g2 = expectedPixels[offset + 1];
+          final int b2 = expectedPixels[offset + 2];
+          final int a2 = expectedPixels[offset + 3];
+          if (_colorDelta(r1, g1, b1, a1, r2, g2, b2, a2) <= maxColorDelta) {
+            pixelMatched = true;
+          } else {
+            // Search 3x3 neighborhood in expected image
+            neighborhoodSearch:
+            for (var dy = -1; dy <= 1; dy += 1) {
+              final int ny = y + dy;
+              if (ny < 0 || ny >= height) {
+                continue;
+              }
+              for (var dx = -1; dx <= 1; dx += 1) {
+                final int nx = x + dx;
+                if (nx < 0 || nx >= width) {
+                  continue;
+                }
+                final int neighborOffset = (ny * width + nx) * 4;
+                final int nr2 = expectedPixels[neighborOffset];
+                final int ng2 = expectedPixels[neighborOffset + 1];
+                final int nb2 = expectedPixels[neighborOffset + 2];
+                final int na2 = expectedPixels[neighborOffset + 3];
+                if (_colorDelta(r1, g1, b1, a1, nr2, ng2, nb2, na2) <= maxColorDelta) {
+                  pixelMatched = true;
+                  break neighborhoodSearch;
+                }
+              }
+            }
+          }
+
+          if (pixelMatched) {
+            diffBytes.setUint8(offset, r1);
+            diffBytes.setUint8(offset + 1, g1);
+            diffBytes.setUint8(offset + 2, b1);
+            diffBytes.setUint8(offset + 3, a1);
+          } else {
+            diffPixelCount += 1;
+            // Highlight mismatched pixels with bright Magenta (#FF007F) for clear visual diffing.
+            diffBytes.setUint8(offset, 255);
+            diffBytes.setUint8(offset + 1, 0);
+            diffBytes.setUint8(offset + 2, 127);
+            diffBytes.setUint8(offset + 3, 255);
+          }
+        }
       }
-      final ui.Image diffImage = await _createImageFromPixels(diffBytes, width, height);
+
+      final double diffRate = totalPixels == 0 ? 0.0 : diffPixelCount / totalPixels;
+      if (diffRate <= maxDifferentPixelsRate) {
+        return true;
+      }
+
+      diffImage = await _createImageFromPixels(diffBytes, width, height);
       final ByteData? diffPngData = await diffImage.toByteData(format: ui.ImageByteFormat.png);
       final Uint8List diffPngBytes = diffPngData!.buffer.asUint8List();
-      diffImage.dispose();
-      actualImage.dispose();
-      expectedImage.dispose();
 
       await _writeFailureAndThrow(
         golden: golden,
@@ -796,103 +892,16 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         actualBytes: actualBytes,
         expectedBytes: Uint8List.fromList(expectedBytes),
         diffPngBytes: diffPngBytes,
-        diffPixelCount: width * height,
-        totalPixels: width * height,
+        diffPixelCount: diffPixelCount,
+        totalPixels: totalPixels,
         maxDifferentPixelsRate: maxDifferentPixelsRate,
-        customMessage:
-            'Image dimensions do not match (actual: ${width}x$height, expected: ${expectedWidth}x$expectedHeight).',
       );
       return false;
-    }
-
-    final int totalPixels = width * height;
-    var diffPixelCount = 0;
-    final diffBytes = ByteData(width * height * 4);
-
-    for (var y = 0; y < height; y++) {
-      for (var x = 0; x < width; x++) {
-        final int offset = (y * width + x) * 4;
-        final int r1 = actualRgba.getUint8(offset);
-        final int g1 = actualRgba.getUint8(offset + 1);
-        final int b1 = actualRgba.getUint8(offset + 2);
-        final int a1 = actualRgba.getUint8(offset + 3);
-
-        var pixelMatched = false;
-
-        // Check direct pixel first
-        final int r2 = expectedRgba.getUint8(offset);
-        final int g2 = expectedRgba.getUint8(offset + 1);
-        final int b2 = expectedRgba.getUint8(offset + 2);
-        final int a2 = expectedRgba.getUint8(offset + 3);
-        if (_colorDelta(r1, g1, b1, a1, r2, g2, b2, a2) <= maxColorDelta) {
-          pixelMatched = true;
-        } else {
-          // Search 3x3 neighborhood in expected image
-          neighborhoodSearch:
-          for (var dy = -1; dy <= 1; dy++) {
-            final int ny = y + dy;
-            if (ny < 0 || ny >= height) {
-              continue;
-            }
-            for (var dx = -1; dx <= 1; dx++) {
-              final int nx = x + dx;
-              if (nx < 0 || nx >= width) {
-                continue;
-              }
-              final int neighborOffset = (ny * width + nx) * 4;
-              final int nr2 = expectedRgba.getUint8(neighborOffset);
-              final int ng2 = expectedRgba.getUint8(neighborOffset + 1);
-              final int nb2 = expectedRgba.getUint8(neighborOffset + 2);
-              final int na2 = expectedRgba.getUint8(neighborOffset + 3);
-              if (_colorDelta(r1, g1, b1, a1, nr2, ng2, nb2, na2) <= maxColorDelta) {
-                pixelMatched = true;
-                break neighborhoodSearch;
-              }
-            }
-          }
-        }
-
-        if (pixelMatched) {
-          diffBytes.setUint8(offset, r1);
-          diffBytes.setUint8(offset + 1, g1);
-          diffBytes.setUint8(offset + 2, b1);
-          diffBytes.setUint8(offset + 3, a1);
-        } else {
-          diffPixelCount += 1;
-          // Highlight mismatched pixels with bright Magenta (#FF007F) for clear visual diffing.
-          diffBytes.setUint8(offset, 255);
-          diffBytes.setUint8(offset + 1, 0);
-          diffBytes.setUint8(offset + 2, 127);
-          diffBytes.setUint8(offset + 3, 255);
-        }
-      }
-    }
-
-    final double diffRate = totalPixels == 0 ? 0.0 : diffPixelCount / totalPixels;
-    if (diffRate <= maxDifferentPixelsRate) {
+    } finally {
       actualImage.dispose();
       expectedImage.dispose();
-      return true;
+      diffImage?.dispose();
     }
-
-    final ui.Image diffImage = await _createImageFromPixels(diffBytes, width, height);
-    final ByteData? diffPngData = await diffImage.toByteData(format: ui.ImageByteFormat.png);
-    final Uint8List diffPngBytes = diffPngData!.buffer.asUint8List();
-    diffImage.dispose();
-    actualImage.dispose();
-    expectedImage.dispose();
-
-    await _writeFailureAndThrow(
-      golden: golden,
-      testName: testName,
-      actualBytes: actualBytes,
-      expectedBytes: Uint8List.fromList(expectedBytes),
-      diffPngBytes: diffPngBytes,
-      diffPixelCount: diffPixelCount,
-      totalPixels: totalPixels,
-      maxDifferentPixelsRate: maxDifferentPixelsRate,
-    );
-    return false;
   }
 
   /// Writes failure artifacts (`actual.png`, `expected.png`, `diff.png`) to the

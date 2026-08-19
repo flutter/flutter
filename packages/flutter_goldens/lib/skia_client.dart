@@ -440,17 +440,19 @@ class SkiaGoldClient {
         final File tempFile = cacheDirectory.childFile('$imageHash.png.tmp.${pid}_$counter');
         await tempFile.writeAsBytes(imageBytes, flush: true);
         final File targetFile = cacheDirectory.childFile('$imageHash.png');
-        if (!targetFile.existsSync()) {
-          try {
+        try {
+          if (!targetFile.existsSync()) {
             await tempFile.rename(targetFile.path);
-          } on FileSystemException {
-            if (!targetFile.existsSync()) {
-              rethrow;
-            }
           }
-        } else {
+        } on FileSystemException {
+          if (!targetFile.existsSync()) {
+            rethrow;
+          }
+        } finally {
           try {
-            tempFile.deleteSync();
+            if (tempFile.existsSync()) {
+              tempFile.deleteSync();
+            }
           } catch (_) {}
         }
       } catch (_) {
