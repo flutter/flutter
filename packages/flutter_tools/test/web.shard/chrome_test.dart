@@ -647,7 +647,6 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
             '--window-size=800,600',
             'example_url',
           ],
-
           stderr: kDevtoolsStderr,
         ),
       );
