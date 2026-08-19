@@ -161,10 +161,12 @@ Future<bool> _checkForTransientEglFailure(String driverOutput) async {
         logcatOutput.contains('Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED') ||
         logcatOutput.contains('EGL_NOT_INITIALIZED') ||
         logcatOutput.contains('EGL_BAD_CONFIG');
-    final bool hasBlankImageError =
-        driverOutput.contains('blank/empty') || driverOutput.contains('BlankScreenshotException');
+    final bool hasRenderingError =
+        driverOutput.contains('blank/empty') ||
+        driverOutput.contains('BlankScreenshotException') ||
+        driverOutput.contains('EglInitializationException');
 
-    return hasEglWarning && hasBlankImageError;
+    return hasEglWarning && hasRenderingError;
   } catch (e) {
     io.stderr.writeln('Warning: Failed to check logcat for EGL failure: $e');
     return false;
