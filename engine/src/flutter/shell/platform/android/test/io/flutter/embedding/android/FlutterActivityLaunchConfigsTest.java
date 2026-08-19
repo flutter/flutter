@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -63,5 +64,80 @@ public class FlutterActivityLaunchConfigsTest {
             eq("io.flutter.test"), eq(PackageManager.GET_META_DATA)))
         .thenThrow(new PackageManager.NameNotFoundException());
     assertNull(FlutterActivityLaunchConfigs.getInitialRouteFromManifest(mockContext));
+  }
+
+  @Test
+  public void getInitialRoute_readsFromIntent() throws Exception {
+    Context mockContext = mock(Context.class);
+    Intent intent = new Intent();
+    intent.putExtra(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE, "/intent/route");
+
+    Bundle metaData = new Bundle();
+    metaData.putString(FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/metadata/route");
+
+    assertEquals(
+        "/intent/route",
+        FlutterActivityLaunchConfigs.getInitialRoute(intent, mockContext, metaData));
+  }
+
+  @Test
+  public void getInitialRoute_readsFromManifestArgsWhenNoIntentExtra() throws Exception {
+    Context mockContext = mock(Context.class);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(mockContext.getPackageManager()).thenReturn(mockPackageManager);
+    when(mockContext.getPackageName()).thenReturn("io.flutter.test");
+
+    ApplicationInfo applicationInfo = new ApplicationInfo();
+    applicationInfo.metaData = new Bundle();
+    applicationInfo.metaData.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"--route=/manifest/route\"]");
+    when(mockPackageManager.getApplicationInfo(
+            eq("io.flutter.test"), eq(PackageManager.GET_META_DATA)))
+        .thenReturn(applicationInfo);
+
+    Intent intent = new Intent();
+    Bundle metaData = new Bundle();
+    metaData.putString(FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/metadata/route");
+
+    assertEquals(
+        "/manifest/route",
+        FlutterActivityLaunchConfigs.getInitialRoute(intent, mockContext, metaData));
+  }
+
+  @Test
+  public void getInitialRoute_readsFromMetaDataFallbackWhenNoManifestArgs() throws Exception {
+    Context mockContext = mock(Context.class);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(mockContext.getPackageManager()).thenReturn(mockPackageManager);
+    when(mockContext.getPackageName()).thenReturn("io.flutter.test");
+
+    ApplicationInfo applicationInfo = new ApplicationInfo();
+    when(mockPackageManager.getApplicationInfo(
+            eq("io.flutter.test"), eq(PackageManager.GET_META_DATA)))
+        .thenReturn(applicationInfo);
+
+    Intent intent = new Intent();
+    Bundle metaData = new Bundle();
+    metaData.putString(FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/metadata/route");
+
+    assertEquals(
+        "/metadata/route",
+        FlutterActivityLaunchConfigs.getInitialRoute(intent, mockContext, metaData));
+  }
+
+  @Test
+  public void getInitialRoute_returnsNullWhenNothingProvided() throws Exception {
+    Context mockContext = mock(Context.class);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(mockContext.getPackageManager()).thenReturn(mockPackageManager);
+    when(mockContext.getPackageName()).thenReturn("io.flutter.test");
+
+    ApplicationInfo applicationInfo = new ApplicationInfo();
+    when(mockPackageManager.getApplicationInfo(
+            eq("io.flutter.test"), eq(PackageManager.GET_META_DATA)))
+        .thenReturn(applicationInfo);
+
+    Intent intent = new Intent();
+    assertNull(FlutterActivityLaunchConfigs.getInitialRoute(intent, mockContext, null));
   }
 }

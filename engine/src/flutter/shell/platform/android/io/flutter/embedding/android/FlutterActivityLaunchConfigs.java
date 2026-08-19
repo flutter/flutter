@@ -5,6 +5,7 @@
 package io.flutter.embedding.android;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -95,6 +96,30 @@ public class FlutterActivityLaunchConfigs {
       // Ignore
     }
     return null;
+  }
+
+  /**
+   * Resolves the initial route for an activity based on Intent extras, manifest engine arguments,
+   * or Activity meta-data.
+   *
+   * @param intent The launching intent.
+   * @param context The application context.
+   * @param metaData The Activity's metadata bundle, or null.
+   * @return The initial route if defined, otherwise null.
+   */
+  @Nullable
+  public static String getInitialRoute(
+      @NonNull Intent intent, @NonNull Context context, @Nullable Bundle metaData) {
+    if (intent.hasExtra(EXTRA_INITIAL_ROUTE)) {
+      return intent.getStringExtra(EXTRA_INITIAL_ROUTE);
+    }
+
+    String routeFromManifest = getInitialRouteFromManifest(context);
+    if (routeFromManifest != null) {
+      return routeFromManifest;
+    }
+
+    return metaData != null ? metaData.getString(INITIAL_ROUTE_META_DATA_KEY) : null;
   }
 
   private FlutterActivityLaunchConfigs() {}
