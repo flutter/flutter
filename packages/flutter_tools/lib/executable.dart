@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
@@ -62,6 +64,7 @@ import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
+import 'src/runner/flutter_command_runner.dart';
 import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
@@ -81,13 +84,12 @@ Future<void> main(List<String> args) async {
     args[slashQuestionHelpIndex] = '-h';
   }
 
-  final bool doctor =
-      (args.isNotEmpty && args.first == 'doctor') ||
-      (args.length == 2 && verbose && args.last == 'doctor');
+  final String? commandName = findCommandName(args);
+  final doctor = commandName == 'doctor';
   final bool help =
       args.contains('-h') ||
       args.contains('--help') ||
-      (args.isNotEmpty && args.first == 'help') ||
+      commandName == 'help' ||
       (args.length == 1 && verbose);
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
@@ -170,6 +172,25 @@ Future<void> main(List<String> args) async {
     },
     shutdownHooks: globals.shutdownHooks,
   );
+}
+
+/// The name of the command in [args], or null if there isn't one.
+///
+/// Global options can come before the command, so it can't be found by
+/// position. A throwaway parser walks past them instead: trailing options are
+/// disabled, so parsing stops at the command and leaves it at the head of
+/// [ArgResults.rest]. `help` is the exception, since the command runner
+/// registers it on the parser itself and so reports it as a parsed command.
+@visibleForTesting
+String? findCommandName(List<String> args) {
+  final ArgResults results;
+  try {
+    results = FlutterCommandRunner().argParser.parse(args);
+  } on ArgParserException {
+    // The real parser will complain about these later.
+    return null;
+  }
+  return results.command?.name ?? results.rest.firstOrNull;
 }
 
 List<FlutterCommand> generateCommands({
