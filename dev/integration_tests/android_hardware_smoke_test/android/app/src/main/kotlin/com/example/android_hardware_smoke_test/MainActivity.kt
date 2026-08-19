@@ -31,6 +31,9 @@ class MainActivity : FlutterActivity() {
         // Tracks the active activity to prevent transition race conditions on the cached engine.
         private var activeActivity: WeakReference<MainActivity>? = null
 
+        // Destroys and removes the cached FlutterEngine and resets lastConfiguredEngine.
+        // Synchronously blocks if called from a background thread to prevent race conditions
+        // where a subsequent test attempt allocates a new engine before eviction finishes.
         fun evictEngineCache() {
             val action =
                 Runnable {
@@ -42,14 +45,28 @@ class MainActivity : FlutterActivity() {
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 action.run()
             } else {
-                Handler(Looper.getMainLooper()).post(action)
+                val latch = java.util.concurrent.CountDownLatch(1)
+                Handler(Looper.getMainLooper()).post {
+                    try {
+                        action.run()
+                    } finally {
+                        latch.countDown()
+                    }
+                }
+                try {
+                    latch.await()
+                } catch (e: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                }
             }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        // Lock window pixel format to 8-bit sRGB before FlutterActivity initialization
+        // to prevent HWUI 10-bit format negotiation errors on SwiftShader drivers.
         window.setFormat(PixelFormat.RGBA_8888)
+        super.onCreate(savedInstanceState)
     }
 
     // Accessed by FlutterActivityTest to send orchestration messages.
