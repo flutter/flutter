@@ -77,7 +77,7 @@ class CupertinoScrollbar extends RawScrollbar {
     super.key,
     required super.child,
     super.controller,
-    bool? thumbVisibility,
+    super.thumbVisibility,
     double super.thickness = defaultThickness,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
     Radius super.radius = defaultRadius,
@@ -88,7 +88,6 @@ class CupertinoScrollbar extends RawScrollbar {
   }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
        super(
-         thumbVisibility: thumbVisibility ?? false,
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),

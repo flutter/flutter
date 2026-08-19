@@ -98,6 +98,9 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.onOffSwitchLabels].
   onOffSwitchLabels,
 
+  /// Specifies the aspect corresponding to [MediaQueryData.persistentScrollbars].
+  persistentScrollbars,
+
   /// Specifies the aspect corresponding to [MediaQueryData.disableAnimations].
   disableAnimations,
 
@@ -230,6 +233,7 @@ class MediaQueryData {
     this.invertColors = false,
     this.highContrast = false,
     this.onOffSwitchLabels = false,
+    this.persistentScrollbars = false,
     this.disableAnimations = false,
     this.reduceMotion = false,
     this.boldText = false,
@@ -334,6 +338,10 @@ class MediaQueryData {
       onOffSwitchLabels =
           platformData?.onOffSwitchLabels ??
           view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
+      // No embedder reports the platform scrollbar preference yet, so this
+      // falls back to the historical default. The per-platform producers are
+      // tracked by https://github.com/flutter/flutter/issues/191257.
+      persistentScrollbars = platformData?.persistentScrollbars ?? false,
       alwaysUse24HourFormat =
           platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
       navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
@@ -666,6 +674,27 @@ class MediaQueryData {
   ///    originates.
   final bool onOffSwitchLabels;
 
+  /// Whether the platform prefers scrollbars that stay visible instead of
+  /// scrollbars that overlay the content and fade out when a scroll is not
+  /// underway.
+  ///
+  /// This mirrors the desktop preference that selects between persistent and
+  /// overlay scrollbars, such as "Show scroll bars" on macOS
+  /// (`NSScroller.preferredScrollerStyle`) and the "Always show scrollbars"
+  /// accessibility preference on Windows (`AutoHideScrollBars`).
+  ///
+  /// Flutter-drawn scrollbars consult this value only when neither the widget
+  /// nor the ambient theme states a visibility. The resolution order is
+  /// [RawScrollbar.thumbVisibility], then
+  /// [ScrollbarThemeData.thumbVisibility], then this preference. An
+  /// application that overrides scrollbar visibility therefore keeps winning
+  /// over the platform.
+  ///
+  /// No platform reports this preference yet, so it defaults to false and
+  /// scrollbar behaviour is unchanged. The per-platform producers are tracked
+  /// by https://github.com/flutter/flutter/issues/191257.
+  final bool persistentScrollbars;
+
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
   ///
@@ -880,6 +909,7 @@ class MediaQueryData {
     bool? alwaysUse24HourFormat,
     bool? highContrast,
     bool? onOffSwitchLabels,
+    bool? persistentScrollbars,
     bool? disableAnimations,
     bool? reduceMotion,
     bool? invertColors,
@@ -908,6 +938,7 @@ class MediaQueryData {
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
       onOffSwitchLabels: onOffSwitchLabels ?? this.onOffSwitchLabels,
+      persistentScrollbars: persistentScrollbars ?? this.persistentScrollbars,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       reduceMotion: reduceMotion ?? this.reduceMotion,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
@@ -957,6 +988,7 @@ class MediaQueryData {
       invertColors: invertColors,
       highContrast: highContrast,
       onOffSwitchLabels: onOffSwitchLabels,
+      persistentScrollbars: persistentScrollbars,
       disableAnimations: disableAnimations,
       reduceMotion: reduceMotion,
       accessibleNavigation: accessibleNavigation,
@@ -993,6 +1025,7 @@ class MediaQueryData {
       invertColors: invertColors,
       highContrast: highContrast,
       onOffSwitchLabels: onOffSwitchLabels,
+      persistentScrollbars: persistentScrollbars,
       disableAnimations: disableAnimations,
       reduceMotion: reduceMotion,
       accessibleNavigation: accessibleNavigation,
@@ -1197,6 +1230,7 @@ class MediaQueryData {
         other.alwaysUse24HourFormat == alwaysUse24HourFormat &&
         other.highContrast == highContrast &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
+        other.persistentScrollbars == persistentScrollbars &&
         other.disableAnimations == disableAnimations &&
         other.reduceMotion == reduceMotion &&
         other.invertColors == invertColors &&
@@ -1241,6 +1275,7 @@ class MediaQueryData {
       wordSpacingOverride,
       paragraphSpacingOverride,
       displayCornerRadii,
+      persistentScrollbars,
     ),
   );
 
@@ -1259,6 +1294,7 @@ class MediaQueryData {
       'accessibleNavigation: $accessibleNavigation',
       'highContrast: $highContrast',
       'onOffSwitchLabels: $onOffSwitchLabels',
+      'persistentScrollbars: $persistentScrollbars',
       'disableAnimations: $disableAnimations',
       'reduceMotion: $reduceMotion',
       'invertColors: $invertColors',
@@ -2040,6 +2076,28 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeOnOffSwitchLabelsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels;
 
+  /// Returns [MediaQueryData.persistentScrollbars] for the nearest [MediaQuery]
+  /// ancestor or false, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.persistentScrollbars] property of the ancestor
+  /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static bool persistentScrollbarsOf(BuildContext context) =>
+      maybePersistentScrollbarsOf(context) ?? false;
+
+  /// Returns [MediaQueryData.persistentScrollbars] for the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.persistentScrollbars] property of the ancestor
+  /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static bool? maybePersistentScrollbarsOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.persistentScrollbars)?.persistentScrollbars;
+
   /// Returns [MediaQueryData.disableAnimations] for the nearest [MediaQuery]
   /// ancestor or false, if no such ancestor exists.
   ///
@@ -2329,6 +2387,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             _MediaQueryAspect.highContrast => data.highContrast != oldWidget.data.highContrast,
             _MediaQueryAspect.onOffSwitchLabels =>
               data.onOffSwitchLabels != oldWidget.data.onOffSwitchLabels,
+            _MediaQueryAspect.persistentScrollbars =>
+              data.persistentScrollbars != oldWidget.data.persistentScrollbars,
             _MediaQueryAspect.disableAnimations =>
               data.disableAnimations != oldWidget.data.disableAnimations,
             _MediaQueryAspect.reduceMotion => data.reduceMotion != oldWidget.data.reduceMotion,
