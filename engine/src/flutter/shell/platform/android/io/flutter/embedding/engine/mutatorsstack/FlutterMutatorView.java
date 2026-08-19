@@ -226,7 +226,6 @@ public class FlutterMutatorView extends FrameLayout {
     private static final String STRETCH_SHADER =
         "uniform shader u_texture;\n"
             + "uniform float2 u_size;\n"
-            + "uniform float u_max_stretch_intensity;\n"
             + "uniform float u_overscroll_x;\n"
             + "uniform float u_overscroll_y;\n"
             + "uniform float u_interpolation_strength;\n"
@@ -373,7 +372,6 @@ public class FlutterMutatorView extends FrameLayout {
         runtimeShader = new RuntimeShader(STRETCH_SHADER);
       }
       runtimeShader.setFloatUniform("u_size", width, height);
-      runtimeShader.setFloatUniform("u_max_stretch_intensity", maxStretchIntensity);
       runtimeShader.setFloatUniform("u_overscroll_x", overscrollX);
       runtimeShader.setFloatUniform("u_overscroll_y", overscrollY);
       runtimeShader.setFloatUniform("u_interpolation_strength", interpolationStrength);
