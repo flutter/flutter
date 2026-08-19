@@ -7291,7 +7291,6 @@ targets:
   - name: Windows windows_text_shadow_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7344,8 +7343,7 @@ targets:
 
   - name: Windows windows_engine_integration_golden_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
-    bringup: true
+    presubmit: true
     timeout: 60
     properties:
       tags: >
