@@ -330,10 +330,6 @@ void TextInputPlugin::HandleMethodCall(
       composing_base = composing_extent = 0;
     }
 
-    // Apply the framework's editing state in a single SetText call so the
-    // composing range is preserved: SetText derives composing state from the
-    // range, whereas a later SetComposingRange call would be a no-op because
-    // the single-argument SetText resets composing state first.
     active_model_->SetText(text->value.GetString(),
                            TextRange(selection_base, selection_extent),
                            TextRange(composing_base, composing_extent));
