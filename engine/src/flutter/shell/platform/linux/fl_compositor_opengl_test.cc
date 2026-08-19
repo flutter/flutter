@@ -24,7 +24,6 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
   void SetUp() override {
     opengl_manager = fl_opengl_manager_new();
     renderable = fl_mock_renderable_new();
-    compositor = fl_compositor_opengl_new(opengl_manager);
     fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   }
 
@@ -43,6 +42,7 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
 TEST_F(FlCompositorOpenGLTest, Composite) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;
+  compositor = fl_compositor_opengl_new(opengl_manager);
   g_autoptr(FlFramebuffer) target =
       fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
@@ -72,6 +72,8 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
           ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
+
+  compositor = fl_compositor_opengl_new(opengl_manager);
 
   g_autoptr(FlFramebuffer) target =
       fl_framebuffer_new(GL_RGBA, width, height, FALSE);
@@ -118,6 +120,8 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
   g_autoptr(FlFramebuffer) target =
       fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
@@ -155,6 +159,8 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
   g_autoptr(FlFramebuffer) target =
       fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
@@ -184,6 +190,10 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
           ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
+
+  EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
+
+  compositor = fl_compositor_opengl_new(opengl_manager);
 
   g_autoptr(FlFramebuffer) target =
       fl_framebuffer_new(GL_RGBA, width, height, FALSE);
@@ -215,6 +225,10 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
           ::testing::Return(reinterpret_cast<const GLubyte*>("NVIDIA")));
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
+
+  EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
+
+  compositor = fl_compositor_opengl_new(opengl_manager);
 
   g_autoptr(FlFramebuffer) target =
       fl_framebuffer_new(GL_RGBA, width, height, FALSE);
