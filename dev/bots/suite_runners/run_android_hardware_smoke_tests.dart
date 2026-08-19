@@ -69,6 +69,9 @@ Future<void> runAndroidHardwareSmokeTests({
         '-s',
       ], workingDirectory: androidDir);
     }
+  } on _InfrastructureException catch (e) {
+    foundError(<String>[e.message]);
+    io.exitCode = 2;
   } finally {
     // Restore original contents.
     androidManifestXml.writeAsStringSync(androidManifestContents);
@@ -142,7 +145,9 @@ Future<bool> _runRetryLoop(String testDir) async {
       io.stderr.writeln(
         'INFRASTRUCTURE FAILURE: EGL / graphics driver pipeline collapsed on emulator after $maxAttempts attempts.',
       );
-      io.exit(2);
+      throw _InfrastructureException(
+        'INFRASTRUCTURE FAILURE: EGL / graphics driver pipeline collapsed on emulator after $maxAttempts attempts.',
+      );
     }
 
     foundError(<String>[
@@ -152,6 +157,13 @@ Future<bool> _runRetryLoop(String testDir) async {
   }
 
   return false;
+}
+
+class _InfrastructureException implements Exception {
+  _InfrastructureException(this.message);
+  final String message;
+  @override
+  String toString() => message;
 }
 
 Future<bool> _checkForTransientEglFailure(String driverOutput) async {
