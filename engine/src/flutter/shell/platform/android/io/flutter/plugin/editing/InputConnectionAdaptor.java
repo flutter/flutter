@@ -20,6 +20,8 @@ import android.text.Selection;
 import android.text.TextPaint;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
@@ -28,15 +30,13 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.TextAttribute;
-import android.view.accessibility.AccessibilityNodeProvider;
-import io.flutter.view.AccessibilityBridge;
-import android.view.accessibility.AccessibilityEvent;
 import androidx.annotation.NonNull;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.view.AccessibilityBridge;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -175,13 +175,14 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   /**
-   * Translates the IME's text change state into an Android AccessibilityEvent change type,
-   * and queues it into the AccessibilityBridge.
+   * Translates the IME's text change state into an Android AccessibilityEvent change type, and
+   * queues it into the AccessibilityBridge.
    *
-   * @param isComposing true if the text is still in the composition phase,
-   *                    false if the text has been finalized by the user.
+   * @param isComposing true if the text is still in the composition phase, false if the text has
+   *     been finalized by the user.
    */
-  private void updateTextChangeType(TextAttribute textAttribute, boolean isComposing, String newValue) {
+  private void updateTextChangeType(
+      TextAttribute textAttribute, boolean isComposing, String newValue) {
     if (Build.VERSION.SDK_INT >= 37) {
       boolean isSuggestion = textAttribute != null && textAttribute.isTextSuggestionSelected();
       int changeType;
@@ -215,7 +216,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
     return result;
   }
 
-
   @Override
   public boolean deleteSurroundingText(int beforeLength, int afterLength) {
     if (mEditable.getSelectionStart() == -1) {
@@ -245,7 +245,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
     return result;
   }
 
-
   @Override
   public boolean setComposingText(CharSequence text, int newCursorPosition) {
     boolean result;
@@ -260,7 +259,8 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   @Override
-  public boolean setComposingText(CharSequence text, int newCursorPosition, TextAttribute textAttribute) {
+  public boolean setComposingText(
+      CharSequence text, int newCursorPosition, TextAttribute textAttribute) {
     boolean result;
     beginBatchEdit();
     if (text.length() == 0) {

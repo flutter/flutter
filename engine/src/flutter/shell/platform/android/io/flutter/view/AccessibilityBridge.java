@@ -80,31 +80,31 @@ import java.util.regex.Pattern;
 public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   /**
-   * Represents a pending text change from the IME.
-   * This bridges the synchronous IME input with the asynchronous framework semantics update,
-   * allowing us to attach the correct change type to the accessibility event when the 
-   * framework eventually processes the text change.
+   * Represents a pending text change from the IME. This bridges the synchronous IME input with the
+   * asynchronous framework semantics update, allowing us to attach the correct change type to the
+   * accessibility event when the framework eventually processes the text change.
    */
   private static class ImeTextChange {
-      final String text;
-      final int type;
-      ImeTextChange(String text, int type) {
-          this.text = text;
-          this.type = type;
-      }
+    final String text;
+    final int type;
+
+    ImeTextChange(String text, int type) {
+      this.text = text;
+      this.type = type;
+    }
   }
 
   private final Queue<ImeTextChange> imeTextChanges = new ArrayDeque<>();
 
   public void addImeTextChange(String text, int type) {
-      // Cap the queue at 20 items to prevent memory leaks in the edge case where Dart text 
-      // formatters aggressively alter the text, preventing queue items from ever matching 
-      // the semantics update and being naturally dequeued. 20 is large enough to safely 
-      // hold multiple rapid keystrokes that are batched into a single frame.
-      if (imeTextChanges.size() > 20) {
-          imeTextChanges.poll();
-      }
-      imeTextChanges.add(new ImeTextChange(text, type));
+    // Cap the queue at 20 items to prevent memory leaks in the edge case where Dart text
+    // formatters aggressively alter the text, preventing queue items from ever matching
+    // the semantics update and being naturally dequeued. 20 is large enough to safely
+    // hold multiple rapid keystrokes that are batched into a single frame.
+    if (imeTextChanges.size() > 20) {
+      imeTextChanges.poll();
+    }
+    imeTextChanges.add(new ImeTextChange(text, type));
   }
 
   private static final String TAG = "AccessibilityBridge";
@@ -1759,7 +1759,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           && (lastInputFocusedSemanticsNode == null
               || lastInputFocusedSemanticsNode.id != inputFocusedSemanticsNode.id)) {
         lastInputFocusedSemanticsNode = inputFocusedSemanticsNode;
-        // Focus just shifted to a new text field. Clear the queue to prevent stale 
+        // Focus just shifted to a new text field. Clear the queue to prevent stale
         // IME events from the previous text field from bleeding into the new one.
         imeTextChanges.clear();
         sendAccessibilityEvent(
@@ -1769,7 +1769,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         // null, then we just set the last one to null too, so that it sends the event again
         // when something regains focus.
         lastInputFocusedSemanticsNode = null;
-        // Focus was lost completely. Clear the queue because there is no longer a valid 
+        // Focus was lost completely. Clear the queue because there is no longer a valid
         // text field to receive the pending IME events.
         imeTextChanges.clear();
       }
@@ -1814,25 +1814,25 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // Determine the type of change that occurred by analyzing the IME change history.
     Integer changeType = null;
     if (Build.VERSION.SDK_INT >= 37) {
-        int elementsToPoll = 0;
-        int index = 0;
-        for (ImeTextChange change : imeTextChanges) {
-            index++;
-            if (change.text.equals(newValue)) {
-                elementsToPoll = index;
-            }
+      int elementsToPoll = 0;
+      int index = 0;
+      for (ImeTextChange change : imeTextChanges) {
+        index++;
+        if (change.text.equals(newValue)) {
+          elementsToPoll = index;
         }
-        
-        for (int j = 0; j < elementsToPoll; j++) {
-            ImeTextChange change = imeTextChanges.poll();
-            if (change.text.equals(newValue)) {
-                changeType = change.type;
-            }
+      }
+
+      for (int j = 0; j < elementsToPoll; j++) {
+        ImeTextChange change = imeTextChanges.poll();
+        if (change.text.equals(newValue)) {
+          changeType = change.type;
         }
-        
-        if (changeType != null) {
-            e.setTextChangeTypes(changeType);
-        }
+      }
+
+      if (changeType != null) {
+        e.setTextChangeTypes(changeType);
+      }
     }
 
     int i;
@@ -1843,9 +1843,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     if (i >= oldValue.length() && i >= newValue.length()) {
       if (changeType != null) {
-          return e;
+        return e;
       } else {
-          return null; // Text did not change
+        return null; // Text did not change
       }
     }
     int firstDifference = i;
