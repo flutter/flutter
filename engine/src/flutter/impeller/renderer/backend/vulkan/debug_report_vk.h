@@ -20,7 +20,7 @@ class DebugReportVK {
   bool IsValid() const;
 
  private:
-  vk::UniqueDebugUtilsMessengerEXT messenger_;
+  std::unique_ptr<vk::UniqueDebugUtilsMessengerEXT> messenger_;
   bool is_valid_ = false;
 
   enum class Result {
