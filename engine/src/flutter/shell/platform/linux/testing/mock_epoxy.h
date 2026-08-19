@@ -52,7 +52,47 @@ class MockEpoxy {
   MOCK_METHOD(void, glGenFramebuffers, (GLsizei n, GLuint* framebuffers));
   MOCK_METHOD(void, glGenRenderbuffers, (GLsizei n, GLuint* renderbuffers));
   MOCK_METHOD(void, glGenTextures, (GLsizei n, GLuint* textures));
+  MOCK_METHOD(void,
+              glFramebufferRenderbuffer,
+              (GLenum target,
+               GLenum attachment,
+               GLenum renderbuffertarget,
+               GLuint renderbuffer));
+  MOCK_METHOD(void,
+              glFramebufferTexture2D,
+              (GLenum target,
+               GLenum attachment,
+               GLenum textarget,
+               GLuint texture,
+               GLint level));
+  MOCK_METHOD(void,
+              glFramebufferTexture2DMultisampleEXT,
+              (GLenum target,
+               GLenum attachment,
+               GLenum textarget,
+               GLuint texture,
+               GLint level,
+               GLsizei samples));
+  MOCK_METHOD(void, glGetIntegerv, (GLenum pname, GLint* data));
   MOCK_METHOD(const GLubyte*, glGetString, (GLenum pname));
+  MOCK_METHOD(
+      void,
+      glRenderbufferStorage,
+      (GLenum target, GLenum internalformat, GLsizei width, GLsizei height));
+  MOCK_METHOD(void,
+              glRenderbufferStorageMultisample,
+              (GLenum target,
+               GLsizei samples,
+               GLenum internalformat,
+               GLsizei width,
+               GLsizei height));
+  MOCK_METHOD(void,
+              glRenderbufferStorageMultisampleEXT,
+              (GLenum target,
+               GLsizei samples,
+               GLenum internalformat,
+               GLsizei width,
+               GLsizei height));
 };
 
 }  // namespace testing

@@ -83,9 +83,6 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
       fl_framebuffer_get_width(self->framebuffer) != width ||
       fl_framebuffer_get_height(self->framebuffer) != height) {
     GLint general_format = GL_RGBA;
-    if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
-      general_format = GL_BGRA_EXT;
-    }
     g_clear_object(&self->framebuffer);
     self->framebuffer =
         fl_framebuffer_new(general_format, width, height, self->shareable);

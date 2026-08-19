@@ -8,9 +8,11 @@
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
+#include "flutter/shell/platform/linux/testing/mock_epoxy.h"
 #include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 // MOCK_ENGINE_PROC is leaky by design
@@ -1058,6 +1060,70 @@ TEST_F(FlEngineTest, EnableFlutterGpu) {
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
   EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, CreateOpenGLBackingStoreWithImpellerMSAA) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillByDefault(::testing::Return(false));
+  ON_CALL(epoxy, glGetIntegerv(GL_MAX_SAMPLES, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(4));
+
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4,
+                                                      GL_RGBA8, 800, 600));
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(
+                         GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, 800, 600));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        GL_RENDERBUFFER, ::testing::_));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                        GL_RENDERBUFFER, ::testing::_));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                        GL_RENDERBUFFER, ::testing::_));
+
+  FlutterCompositor compositor = {};
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&compositor](size_t version, const FlutterRendererConfig* config,
+                     const FlutterProjectArgs* args, void* user_data,
+                     FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        if (args->compositor != nullptr) {
+          compositor = *args->compositor;
+        }
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  fl_dart_project_set_enable_impeller(project, TRUE);
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  ASSERT_NE(compositor.create_backing_store_callback, nullptr);
+
+  FlutterBackingStoreConfig config = {
+      .struct_size = sizeof(FlutterBackingStoreConfig),
+      .size = {.width = 800, .height = 600},
+  };
+  FlutterBackingStore backing_store = {};
+  EXPECT_TRUE(compositor.create_backing_store_callback(&config, &backing_store,
+                                                       compositor.user_data));
+  EXPECT_EQ(backing_store.type, kFlutterBackingStoreTypeOpenGL);
+  EXPECT_EQ(backing_store.open_gl.type, kFlutterOpenGLTargetTypeFramebuffer);
+  EXPECT_EQ(backing_store.open_gl.framebuffer.target,
+            static_cast<uint32_t>(GL_RGBA8));
+
+  FlFramebuffer* fb =
+      FL_FRAMEBUFFER(backing_store.open_gl.framebuffer.user_data);
+  EXPECT_NE(fb, nullptr);
+  EXPECT_EQ(fl_framebuffer_get_texture_id(fb), 0u);
+
+  EXPECT_TRUE(compositor.collect_backing_store_callback(&backing_store,
+                                                        compositor.user_data));
 }
 
 TEST_F(FlEngineTest, ChildObjects) {

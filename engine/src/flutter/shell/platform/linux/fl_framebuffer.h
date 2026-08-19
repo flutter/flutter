@@ -37,6 +37,25 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
                                   gboolean shareable);
 
 /**
+ * fl_framebuffer_new_multisample:
+ * @sized_format: sized format, e.g. GL_RGBA8, GL_BGRA8_EXT.
+ * @general_format: general format, e.g. GL_RGBA, GL_BGRA_EXT.
+ * @width: width of framebuffer in pixels.
+ * @height: height of framebuffer in pixels.
+ * @enable_impeller: %TRUE if Impeller is enabled.
+ *
+ * Creates a new frame buffer, configuring MSAA attachments if supported and
+ * Impeller is enabled. Requires a valid OpenGL context to create.
+ *
+ * Returns: a new #FlFramebuffer.
+ */
+FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
+                                              GLint general_format,
+                                              size_t width,
+                                              size_t height,
+                                              gboolean enable_impeller);
+
+/**
  * fl_framebuffer_get_shareable:
  * @framebuffer: an #FlFramebuffer.
  *
