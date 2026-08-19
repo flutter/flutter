@@ -4,7 +4,11 @@ package com.example.android_hardware_smoke_test
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -26,6 +30,26 @@ class MainActivity : FlutterActivity() {
 
         // Tracks the active activity to prevent transition race conditions on the cached engine.
         private var activeActivity: WeakReference<MainActivity>? = null
+
+        fun evictEngineCache() {
+            val action =
+                Runnable {
+                    val engine = FlutterEngineCache.getInstance().get(CACHED_ENGINE_KEY)
+                    engine?.destroy()
+                    FlutterEngineCache.getInstance().remove(CACHED_ENGINE_KEY)
+                    lastConfiguredEngine = null
+                }
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                action.run()
+            } else {
+                Handler(Looper.getMainLooper()).post(action)
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        window.setFormat(PixelFormat.RGBA_8888)
     }
 
     // Accessed by FlutterActivityTest to send orchestration messages.
