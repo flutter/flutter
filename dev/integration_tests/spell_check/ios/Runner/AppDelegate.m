@@ -12,7 +12,7 @@
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
-- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge {
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge> *)engineBridge {
   [GeneratedPluginRegistrant registerWithRegistry:engineBridge.pluginRegistry];
 }
 
