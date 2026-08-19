@@ -573,6 +573,7 @@ class AndroidDevice extends Device {
           ...debuggingOptions.getAndroidLaunchArguments(),
           if (platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false)
             '--${AndroidEngineCliFlags.traceStartup}',
+          if (route != null) '--${AndroidEngineCliFlags.route}=$route',
         ],
       ];
 
