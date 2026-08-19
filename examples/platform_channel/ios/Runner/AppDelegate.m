@@ -52,7 +52,11 @@
   UIDevice* device = UIDevice.currentDevice;
   device.batteryMonitoringEnabled = YES;
   if (device.batteryState == UIDeviceBatteryStateUnknown) {
+#if TARGET_OS_SIMULATOR
+    return 100;
+#else
     return -1;
+#endif
   } else {
     return ((int)(device.batteryLevel * 100));
   }
@@ -87,9 +91,13 @@
       _eventSink(@"discharging");
       break;
     default:
+#if TARGET_OS_SIMULATOR
+      _eventSink(@"charging");
+#else
       _eventSink([FlutterError errorWithCode:@"UNAVAILABLE"
                                      message:@"Charging status unavailable"
                                      details:nil]);
+#endif
       break;
   }
 }

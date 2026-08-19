@@ -53,9 +53,13 @@ enum MyFlutterErrorCode {
     let device = UIDevice.current
     device.isBatteryMonitoringEnabled = true
     guard device.batteryState != .unknown  else {
+#if targetEnvironment(simulator)
+      result(100)
+#else
       result(FlutterError(code: MyFlutterErrorCode.unavailable,
                           message: "Battery info unavailable",
                           details: nil))
+#endif
       return
     }
     result(Int(device.batteryLevel * 100))
@@ -91,9 +95,13 @@ enum MyFlutterErrorCode {
     case .unplugged:
       eventSink(BatteryState.discharging)
     default:
+#if targetEnvironment(simulator)
+      eventSink(BatteryState.charging)
+#else
       eventSink(FlutterError(code: MyFlutterErrorCode.unavailable,
                              message: "Charging status unavailable",
                              details: nil))
+#endif
     }
   }
 
