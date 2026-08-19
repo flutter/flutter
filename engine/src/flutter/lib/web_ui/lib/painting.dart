@@ -651,19 +651,15 @@ class ImageFilter {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     TileMode? tileMode,
+    // ignore: avoid_unused_constructor_parameters
     Rect? bounds,
-  }) => engine.renderer.createBlurImageFilter(
-    sigmaX: sigmaX,
-    sigmaY: sigmaY,
-    tileMode: tileMode,
-    bounds: bounds,
-  );
+  }) => engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
-      engine.renderer.createDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+      engine.EngineImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
 
   factory ImageFilter.erode({double radiusX = 0.0, double radiusY = 0.0}) =>
-      engine.renderer.createErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+      engine.EngineImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
 
   factory ImageFilter.matrix(
     Float64List matrix4, {
@@ -672,11 +668,19 @@ class ImageFilter {
     if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
-    return engine.renderer.createMatrixImageFilter(matrix4, filterQuality: filterQuality);
+    return engine.EngineImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
   }
 
-  factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) =>
-      engine.renderer.composeImageFilters(outer: outer, inner: inner);
+  factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) {
+    engine.EngineImageFilter convert(ImageFilter filter) {
+      if (filter is engine.EngineColorFilter) {
+        return engine.EngineColorFilterImageFilter(colorFilter: filter);
+      }
+      return filter as engine.EngineImageFilter;
+    }
+
+    return engine.EngineImageFilter.compose(outer: convert(outer), inner: convert(inner));
+  }
 
   factory ImageFilter.shader(
     // ignore: avoid_unused_constructor_parameters
