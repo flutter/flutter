@@ -62,8 +62,8 @@ public class FlutterLoader {
       "io.flutter.app.androidEngineShellArgs";
 
   /**
-   * Reads the `io.flutter.app.androidEngineShellArgs` metadata from the application manifest and
-   * parses it into a List of strings.
+   * Reads the {@code io.flutter.app.androidEngineShellArgs} metadata from the application manifest
+   * and parses it into a List of Strings.
    *
    * @param applicationMetaData The application's metadata bundle.
    * @return A List of shell arguments if present and valid, otherwise null.

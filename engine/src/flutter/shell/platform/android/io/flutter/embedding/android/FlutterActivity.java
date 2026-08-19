@@ -50,6 +50,7 @@ import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
@@ -1187,20 +1188,21 @@ public class FlutterActivity extends Activity
    * initial route is derived from the {@code Intent} through the Intent.getData() instead.
    */
   public String getInitialRoute() {
+    // Check if defined via Intent extra.
     if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
       return getIntent().getStringExtra(EXTRA_INITIAL_ROUTE);
     }
 
+    // Check if defined via command line flags.
     try {
       ApplicationInfo appInfo =
           getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
-      List<String> shellArgs =
-          io.flutter.embedding.engine.loader.FlutterLoader.getManifestEngineShellArgs(
-              appInfo.metaData);
+      List<String> shellArgs = FlutterLoader.getManifestEngineShellArgs(appInfo.metaData);
       if (shellArgs != null) {
+        final String routeFlag = "--route=";
         for (String arg : shellArgs) {
-          if (arg != null && arg.startsWith("--route=")) {
-            return arg.substring("--route=".length());
+          if (arg != null && arg.startsWith(routeFlag)) {
+            return arg.substring(routeFlag.length());
           }
         }
       }
@@ -1208,6 +1210,7 @@ public class FlutterActivity extends Activity
       // Ignore
     }
 
+    // Check if defined via AndroidManifest.xml meta-data.
     try {
       Bundle metaData = getMetaData();
       String desiredInitialRoute =

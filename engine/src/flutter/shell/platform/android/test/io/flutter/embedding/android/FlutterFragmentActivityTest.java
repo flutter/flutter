@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -45,6 +46,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
+import org.robolectric.android.controller.ActivityController;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterFragmentActivityTest {
@@ -75,8 +77,31 @@ public class FlutterFragmentActivityTest {
   }
 
   @Test
-  public void getInitialRoute_readsFromApplicationInfo() throws Exception {
+  public void getInitialRoute_readsFromIntent() throws Exception {
+    Intent intent =
+        FlutterFragmentActivity.withNewEngine().initialRoute("/custom/route/intent").build(ctx);
+    ActivityController<FlutterFragmentActivity> activityController =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
+    FlutterFragmentActivity flutterActivity = activityController.get();
+
+    FlutterFragmentActivity spyFlutterActivity = spy(flutterActivity);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(spyFlutterActivity.getPackageManager()).thenReturn(mockPackageManager);
+    ApplicationInfo mockApplicationInfo = new ApplicationInfo();
+    mockApplicationInfo.metaData = new Bundle();
+    mockApplicationInfo.metaData.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"--route=/custom/route/args\"]");
+    when(mockPackageManager.getApplicationInfo(
+            org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyInt()))
+        .thenReturn(mockApplicationInfo);
+
+    assertEquals("/custom/route/intent", spyFlutterActivity.getInitialRoute());
+  }
+
+  @Test
+  public void getInitialRoute_readsFromCommandLineArgs() throws Exception {
     Intent intent = FlutterFragmentActivity.withNewEngine().build(ctx);
+    intent.removeExtra(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE);
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
     FlutterFragmentActivity flutterActivity = activityController.get();
@@ -92,12 +117,18 @@ public class FlutterFragmentActivityTest {
             org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyInt()))
         .thenReturn(mockApplicationInfo);
 
+    Bundle activityMetaData = new Bundle();
+    activityMetaData.putString(
+        FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/fallback/route");
+    doReturn(activityMetaData).when(spyFlutterActivity).getMetaData();
+
     assertEquals("/custom/route", spyFlutterActivity.getInitialRoute());
   }
 
   @Test
   public void getInitialRoute_readsFromActivityInfoFallback() throws Exception {
     Intent intent = FlutterFragmentActivity.withNewEngine().build(ctx);
+    intent.removeExtra(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE);
     ActivityController<FlutterFragmentActivity> activityController =
         Robolectric.buildActivity(FlutterFragmentActivity.class, intent);
     FlutterFragmentActivity flutterActivity = activityController.get();
@@ -114,7 +145,7 @@ public class FlutterFragmentActivityTest {
     Bundle activityMetaData = new Bundle();
     activityMetaData.putString(
         FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY, "/fallback/route");
-    when(spyFlutterActivity.getMetaData()).thenReturn(activityMetaData);
+    doReturn(activityMetaData).when(spyFlutterActivity).getMetaData();
 
     assertEquals("/fallback/route", spyFlutterActivity.getInitialRoute());
   }
