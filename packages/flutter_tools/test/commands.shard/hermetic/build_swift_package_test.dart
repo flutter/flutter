@@ -34,6 +34,7 @@ import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const _flutterAppPath = '/path/to/my_flutter_app';
 const _flutterRoot = '/path/to/flutter';
@@ -89,7 +90,11 @@ void main() {
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
-        final runner = FlutterCommandRunner(verboseHelp: true);
+        final runner = FlutterCommandRunner(
+          analytics: FakeAnalytics(),
+          toolContext: FakeToolContext(),
+          verboseHelp: true,
+        );
         runner.addCommand(command);
 
         expect(
@@ -125,7 +130,11 @@ void main() {
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
-        final runner = FlutterCommandRunner(verboseHelp: true);
+        final runner = FlutterCommandRunner(
+          analytics: FakeAnalytics(),
+          toolContext: FakeToolContext(),
+          verboseHelp: true,
+        );
         runner.addCommand(command);
 
         expect(
@@ -175,7 +184,11 @@ void main() {
             projectDir.childFile('pubspec.yaml').createSync();
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
-            final runner = FlutterCommandRunner(verboseHelp: true);
+            final runner = FlutterCommandRunner(
+              analytics: FakeAnalytics(),
+              toolContext: FakeToolContext(),
+              verboseHelp: true,
+            );
             runner.addCommand(command);
 
             // We expect this to fail because we're not competely mocking it out, we're just testing the output creation
@@ -231,7 +244,11 @@ void main() {
             projectDir.childFile('pubspec.yaml').createSync();
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
-            final runner = FlutterCommandRunner(verboseHelp: true);
+            final runner = FlutterCommandRunner(
+              analytics: FakeAnalytics(),
+              toolContext: FakeToolContext(),
+              verboseHelp: true,
+            );
             runner.addCommand(command);
 
             // We expect this to fail because we're not competely mocking it out, we're just testing the output creation
@@ -498,6 +515,14 @@ import PluginB
               xcframeworkOutput.path,
             ],
           ),
+          FakeCommand(
+            command: <String>[
+              'chmod',
+              '-R',
+              'u+w',
+              xcframeworkOutput.childDirectory('Flutter.xcframework').path,
+            ],
+          ),
         ]);
         const FlutterDarwinPlatform targetPlatform = .ios;
         final BuildSwiftPackageUtils testUtils = _createTestUtils(
@@ -536,6 +561,14 @@ import PluginB
               '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
               _engineArtifactPath,
               xcframeworkOutput.path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'chmod',
+              '-R',
+              'u+w',
+              flutterXCFramework.path,
             ],
           ),
           FakeCommand(
