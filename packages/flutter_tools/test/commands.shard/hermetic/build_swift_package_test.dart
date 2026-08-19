@@ -650,10 +650,12 @@ let package = Package(
         final Directory generatedAppFramework = cacheDirectory.childDirectory(
           'Debug/macosx/App.framework',
         )..createSync(recursive: true);
+        // Bundled code assets are recorded under their install name, which is
+        // where the framework sits in the bundle prefixed with `@rpath/`.
         generatedAppFramework.childFile('Resources/flutter_assets/NativeAssetsManifest.json')
           ..createSync(recursive: true)
           ..writeAsStringSync(
-            '{"native-assets":{"macos_x64":{"package:my_native_asset/my_native_asset.dylib":["absolute","my_native_asset.framework/my_native_asset"]},"macos_arm64":{"package:my_native_asset/my_native_asset.dylib":["absolute","my_native_asset.framework/my_native_asset"]}}}',
+            '{"native-assets":{"macos_x64":{"package:my_native_asset/my_native_asset.dylib":["absolute","@rpath/my_native_asset.framework/my_native_asset"]},"macos_arm64":{"package:my_native_asset/my_native_asset.dylib":["absolute","@rpath/my_native_asset.framework/my_native_asset"]}}}',
           );
         final Directory nativeAssetFramework = cacheDirectory.childDirectory(
           'Debug/macosx/native_assets/my_native_asset.framework',
