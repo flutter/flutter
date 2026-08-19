@@ -64,11 +64,12 @@ class LogScanningVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach
 class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   MdnsVMServiceDiscoveryForAttach({
     required this.device,
-    this.appId,
-    required this.usesIpv6,
     required this.useDeviceIPAsHost,
+    required this.usesIpv6,
+    this.appId,
     this.deviceVmservicePort,
     this.hostVmservicePort,
+    this.throwOnMissingLocalNetworkPermissionsError = true,
   });
 
   final Device device;
@@ -77,6 +78,7 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   final bool useDeviceIPAsHost;
   final int? deviceVmservicePort;
   final int? hostVmservicePort;
+  final bool throwOnMissingLocalNetworkPermissionsError;
 
   @override
   Stream<Uri> get uris {
@@ -84,10 +86,11 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
         .getVMServiceUriForAttach(
           appId,
           device,
-          usesIpv6: usesIpv6,
-          useDeviceIPAsHost: useDeviceIPAsHost,
           deviceVmservicePort: deviceVmservicePort,
           hostVmservicePort: hostVmservicePort,
+          throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+          useDeviceIPAsHost: useDeviceIPAsHost,
+          usesIpv6: usesIpv6,
         );
 
     return Stream<Uri?>.fromFuture(
