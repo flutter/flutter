@@ -2231,23 +2231,23 @@ iosPrefix: FLT
       testUsingContext('Platform plugin fromYaml factories perform validation', () async {
         expect(
           () => AndroidPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{}), '', globals.fs),
-          throwsToolExit(),
+          throwsToolExit(message: 'Invalid "android" plugin specification for plugin "foo".'),
         );
         expect(
           () => IOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(),
+          throwsToolExit(message: 'Invalid "ios" plugin specification for plugin "foo".'),
         );
         expect(
           () => MacOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(),
+          throwsToolExit(message: 'Invalid "macos" plugin specification for plugin "foo".'),
         );
         expect(
           () => WindowsPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(),
+          throwsToolExit(message: 'Invalid "windows" plugin specification for plugin "foo".'),
         );
         expect(
           () => LinuxPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(),
+          throwsToolExit(message: 'Invalid "linux" plugin specification for plugin "foo".'),
         );
       });
     });

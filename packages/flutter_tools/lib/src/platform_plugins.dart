@@ -126,7 +126,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     FileSystem fileSystem,
   ) {
     if (!validate(yaml)) {
-      throwToolExit('Invalid "android" plugin specification.');
+      throwToolExit('Invalid "android" plugin specification for plugin "$name".');
     }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
@@ -321,7 +321,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
     if (!validate(yaml)) {
-      throwToolExit('Invalid "ios" plugin specification.');
+      throwToolExit('Invalid "ios" plugin specification for plugin "$name".');
     }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
@@ -436,7 +436,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
 
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     if (!validate(yaml)) {
-      throwToolExit('Invalid "macos" plugin specification.');
+      throwToolExit('Invalid "macos" plugin specification for plugin "$name".');
     }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
@@ -548,7 +548,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     if (!validate(yaml)) {
-      throwToolExit('Invalid "windows" plugin specification.');
+      throwToolExit('Invalid "windows" plugin specification for plugin "$name".');
     }
     final pluginClass = yaml[kPluginClass] as String?;
     final variants = <PluginPlatformVariant>{};
@@ -673,7 +673,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     if (!validate(yaml)) {
-      throwToolExit('Invalid "linux" plugin specification.');
+      throwToolExit('Invalid "linux" plugin specification for plugin "$name".');
     }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
