@@ -117,9 +117,11 @@ float getQuadrantDistance(vec2 p,
     axis_length = se_a_right;
   }
 
-  vec2 grad_oct;
-  float dist_raw = distanceFromRSEOctantWithGrad(
-      p_oct, circle_center, radius, span, axis_length, se_degree, grad_oct);
+  vec3 dist_with_grad = distanceFromRSEOctantWithGrad(
+      p_oct, circle_center, radius, span, axis_length, se_degree);
+
+  float dist_raw = dist_with_grad.x;
+  vec2 grad_oct = dist_with_grad.yz;
 
   if (p_norm.y + c <= p_norm.x) {
     grad_oct = grad_oct.yx;
