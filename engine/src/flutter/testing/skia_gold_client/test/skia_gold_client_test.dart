@@ -891,8 +891,9 @@ final class _FakeHttpClientResponse extends Stream<List<int>> implements io.Http
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(<List<int>>[_bytes])
-        .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    return Stream<List<int>>.fromIterable(<List<int>>[
+      _bytes,
+    ]).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override
