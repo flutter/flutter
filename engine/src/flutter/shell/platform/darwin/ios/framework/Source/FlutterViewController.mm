@@ -1033,9 +1033,6 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
 - (void)appOrSceneBecameActive {
   self.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground = NO;
-  if (_viewportMetrics.physical_width) {
-    [self surfaceUpdated:YES];
-  }
   [self performSelector:@selector(goToApplicationLifecycle:)
              withObject:@"AppLifecycleState.resumed"
              afterDelay:0.0f];
@@ -1060,6 +1057,9 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (void)appOrSceneWillEnterForeground {
+  if (_viewportMetrics.physical_width) {
+    [self surfaceUpdated:YES];
+  }
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
