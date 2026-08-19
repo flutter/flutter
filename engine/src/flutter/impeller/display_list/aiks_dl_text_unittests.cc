@@ -44,7 +44,7 @@ struct TextRenderOptions {
   bool is_subpixel = false;
 };
 
-std::shared_ptr<TextFrame> RePositionTextFrame(
+std::shared_ptr<TextFrame> RepositionTextFrame(
     const std::shared_ptr<TextFrame>& original,
     Point translation) {
   std::vector<TextRun> repositioned_runs;
@@ -979,16 +979,12 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
   // last_glyph_id).
   TextShadowCache::TextShadowCacheKey key1(
       /*p_max_basis=*/1.0f,
-      /*p_is_single_glyph=*/false,
-      /*p_font=*/impeller_font,
       /*p_sigma=*/Sigma{4.0f},
       /*p_color=*/Color::Blue(),
       /*p_fingerprint=*/fp1);
 
   TextShadowCache::TextShadowCacheKey key2(
       /*p_max_basis=*/1.0f,
-      /*p_is_single_glyph=*/false,
-      /*p_font=*/impeller_font,
       /*p_sigma=*/Sigma{4.0f},
       /*p_color=*/Color::Blue(),
       /*p_fingerprint=*/fp2);
@@ -1000,8 +996,6 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
 
   TextShadowCache::TextShadowCacheKey key3(
       /*p_max_basis=*/1.0f,
-      /*p_is_single_glyph=*/false,
-      /*p_font=*/impeller_font,
       /*p_sigma=*/Sigma{4.0f},
       /*p_color=*/Color::Blue(),
       /*p_fingerprint=*/fp1);
@@ -1366,11 +1360,11 @@ TEST_P(AiksTest, SingleGlyphTextWithShadowAndPosition) {
 
   for (int offset = 10; offset < 300; offset += 40) {
     std::shared_ptr<DlText> text =
-        DlTextImpeller::Make(RePositionTextFrame(frame, Point(offset, 0)));
+        DlTextImpeller::Make(RepositionTextFrame(frame, Point(offset, 0)));
     builder.DrawText(text, 0, offset + 30, paint);
     builder.DrawText(text, 0, offset + 30, shadow_paint_ctm);
 
-    text = DlTextImpeller::Make(RePositionTextFrame(frame, Point(0, offset)));
+    text = DlTextImpeller::Make(RepositionTextFrame(frame, Point(0, offset)));
     builder.DrawText(text, offset + 30, 0, paint);
     builder.DrawText(text, offset + 30, 0, shadow_paint_ctm);
   }
