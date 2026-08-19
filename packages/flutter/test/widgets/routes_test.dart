@@ -542,6 +542,16 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
+  group('PageRoute', () {
+    test('includes route semantics by default', () {
+      expect(_TestPageRoute().includeRouteSemantics, isTrue);
+    });
+
+    test('can opt out of route semantics', () {
+      expect(_TestPageRoute(includeRouteSemantics: false).includeRouteSemantics, isFalse);
+    });
+  });
+
   group('PageRouteBuilder', () {
     testWidgets('reverseTransitionDuration defaults to 300ms', (WidgetTester tester) async {
       // Default PageRouteBuilder reverse transition duration should be 300ms.
@@ -3116,6 +3126,31 @@ class _SimulationRoute extends PageRouteBuilder<void> {
     Widget child,
   ) {
     return transitionBuilder(context, animation, child);
+  }
+}
+
+class _TestPageRoute extends PageRoute<void> {
+  _TestPageRoute({super.includeRouteSemantics});
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  bool get maintainState => false;
+
+  @override
+  Duration get transitionDuration => Duration.zero;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return const SizedBox.shrink();
   }
 }
 
