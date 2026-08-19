@@ -3539,4 +3539,20 @@ String helloNameAndAge({required String name, required int age}) {
       containsIgnoringWhitespace(r'''String get test => 'No placeholder in here'''),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/191072.
+  testWithoutContext('localizationsDelegates uses GlobalMaterialLocalizations.delegates', () {
+    setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+    final String localizationsFile = getGeneratedFileContent();
+    expect(
+      localizationsFile,
+      containsIgnoringWhitespace(r'''
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    ...GlobalMaterialLocalizations.delegates,
+  ];
+'''),
+    );
+  });
 }
