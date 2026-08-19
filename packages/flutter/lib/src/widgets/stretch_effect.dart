@@ -15,6 +15,19 @@ import 'framework.dart';
 /// When shader-based effects are supported, this effect replicates the native Android stretch overscroll effect.
 /// Otherwise, a matrix transform provides an approximation.
 ///
+/// On Android 13 (API level 33) and above, this stretch effect is applied to
+/// embedded Android Platform Views across all composition modes:
+/// - Virtual Display (VD)
+/// - Texture Layer Hybrid Composition (TLHC)
+/// - Hybrid Composition (HC)
+/// - Hybrid Composition++ (HCPP)
+///
+/// On Android 12 (API levels 31-32) and earlier:
+/// - Platform views rendered via Virtual Display (VD) and Texture Layer Hybrid
+///   Composition (TLHC) are fully supported and will stretch via the GPU shader.
+/// - Platform views rendered via Hybrid Composition (HC) and Hybrid Composition++ (HCPP)
+///   will remain unstretched while the surrounding Flutter content stretches.
+///
 /// Used by [StretchingOverscrollIndicator] widget.
 class StretchEffect extends StatelessWidget {
   /// Creates a [StretchEffect] widget that applies a stretch effect
@@ -151,6 +164,9 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
   ui.FragmentShader? _fragmentShader;
 
   /// The maximum scale multiplier applied during a stretch effect.
+  ///
+  /// Retained for cross-platform support and forward compatibility with future
+  /// shader parameterizations.
   static const double maxStretchIntensity = 1.0;
 
   /// The strength of the interpolation used for smoothing the effect.

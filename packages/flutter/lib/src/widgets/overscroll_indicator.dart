@@ -651,6 +651,19 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 /// [ThemeData.useMaterial3] is true. Otherwise, when [ThemeData.useMaterial3]
 /// is false, a [GlowingOverscrollIndicator] is used instead.
 ///
+/// On Android 13 (API level 33) and above, this stretch effect is applied to
+/// embedded Android Platform Views across all composition modes:
+/// - Virtual Display (VD)
+/// - Texture Layer Hybrid Composition (TLHC)
+/// - Hybrid Composition (HC)
+/// - Hybrid Composition++ (HCPP)
+///
+/// On Android 12 (API levels 31-32) and earlier:
+/// - Platform views rendered via Virtual Display (VD) and Texture Layer Hybrid
+///   Composition (TLHC) are fully supported and will stretch via the GPU shader.
+/// - Platform views rendered via Hybrid Composition (HC) and Hybrid Composition++ (HCPP)
+///   will remain unstretched while the surrounding Flutter content stretches.
+///
 /// See also:
 ///
 ///  * [OverscrollIndicatorNotification], which can be used to prevent the

@@ -2078,6 +2078,9 @@ class OverscrollStretchLayer extends OffsetLayer {
   }
 
   /// The maximum stretch intensity multiplier.
+  ///
+  /// Retained for cross-platform support and forward compatibility with future
+  /// shader parameterizations.
   double get maxStretchIntensity => _maxStretchIntensity;
   double _maxStretchIntensity;
   set maxStretchIntensity(double value) {

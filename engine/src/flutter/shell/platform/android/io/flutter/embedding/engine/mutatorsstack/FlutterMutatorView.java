@@ -368,6 +368,9 @@ public class FlutterMutatorView extends FrameLayout {
         view.setRenderEffect(null);
         return;
       }
+      // Note: maxStretchIntensity is retained across the mutators stack for cross-platform
+      // parity and forward compatibility, but is not currently parameterized in the AGSL
+      // stretch shader.
       if (runtimeShader == null) {
         runtimeShader = new RuntimeShader(STRETCH_SHADER);
       }
