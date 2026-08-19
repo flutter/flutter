@@ -3955,6 +3955,8 @@ class IgnoreBaseline extends SingleChildRenderObjectWidget {
 
 /// A sliver that contains a single box widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vWec9DrAbHE}
+///
 /// Slivers are special-purpose widgets that can be combined using a
 /// [CustomScrollView] to create custom scroll effects. A [SliverToBoxAdapter]
 /// is a basic sliver that creates a bridge back to one of the usual box-based
@@ -4397,6 +4399,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
 ///
 /// {@macro flutter.widgets.SemanticsBase}
 ///  * [Semantics], the widget variant of this sliver.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lPWrd08swlw}
+///
 @immutable
 class SliverSemantics extends _SemanticsBase {
   /// Creates a semantic annotation.
@@ -6987,7 +6992,9 @@ class RawImage extends LeafRenderObjectWidget {
     );
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
-    properties.add(EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver));
+    properties.add(
+      EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver),
+    );
   }
 }
 

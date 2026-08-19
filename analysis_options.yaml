@@ -1,13 +1,15 @@
 include: analysis_options_common.yaml
 
-# Note: Analyzer plugins (such as flutter_analyzer_plugin) are intentionally
-# configured directly in subpackages (e.g. packages/flutter/lib,
-# packages/flutter/test, packages/flutter_tools) rather than here at the root.
-# This prevents plugins from leaking into excluded or standalone subtrees (like
-# engine/src/flutter) that do not use the framework plugin.
+# Note: Analyzer plugins (such as flutter_analyzer_plugin) must be configured
+# directly in each subpackage's analysis_options.yaml (with the appropriate
+# relative depth) rather than at the repository root. The Dart analyzer resolves
+# plugin paths relative to the subpackage directory evaluating the options, so
+# relative plugin paths cannot be inherited from root options.
 
 analyzer:
   errors:
+    # This error code will no longer be reported here. Until dart rolls in, we need to just ignore the issue.
+    # ignore: unrecognized_error_code
     plugins_in_inner_options: ignore
   exclude:
     - "bin/cache/**"
