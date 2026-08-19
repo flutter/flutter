@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
+
+#include <cmath>
+
 #include "flow/view_slicer.h"
 #include "flutter/common/constants.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -10,6 +13,26 @@
 #include "fml/make_copyable.h"
 
 namespace flutter {
+
+namespace {
+
+// Converts a size in logical pixels to the whole number of physical pixels the
+// platform view should be laid out at.
+//
+// Android view geometry is integral, so this conversion is lossy no matter
+// what, but it must *round* rather than truncate. `size_points * dpr` is
+// computed in double precision from a float `size_points`, so a platform view
+// that exactly covers the screen lands a hair under the physical size (e.g.
+// 1079.99996 for a 1080px wide screen at a device pixel ratio of 2.625).
+// Truncating that drops a pixel off the right and bottom edges, and the Flutter
+// content behind the platform view shows through as a thin line.
+//
+// See https://github.com/flutter/flutter/issues/189834.
+int32_t ToPhysicalPixels(DlScalar size_points, double device_pixel_ratio) {
+  return static_cast<int32_t>(std::round(size_points * device_pixel_ratio));
+}
+
+}  // namespace
 
 AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
     const AndroidContext& android_context,
@@ -100,7 +123,9 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
   }
 
   for (int64_t view_id : composition_order_) {
-    DlRect view_rect = GetViewRect(view_id);
+    // Round, rather than truncate, the bounds onto the pixel grid. See
+    // `ToPhysicalPixels` for why.
+    const DlIRect view_rect = DlIRect::Round(GetViewRect(view_id));
     const EmbeddedViewParams& params = view_params_.at(view_id);
     // Display the platform view. If it's already displayed, then it's
     // just positioned and sized.
@@ -110,8 +135,8 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
         view_rect.GetY(),       //
         view_rect.GetWidth(),   //
         view_rect.GetHeight(),  //
-        params.sizePoints().width * device_pixel_ratio_,
-        params.sizePoints().height * device_pixel_ratio_,
+        ToPhysicalPixels(params.sizePoints().width, device_pixel_ratio_),
+        ToPhysicalPixels(params.sizePoints().height, device_pixel_ratio_),
         params.mutatorsStack()  //
     );
     std::unordered_map<int64_t, DlRect>::const_iterator overlay =

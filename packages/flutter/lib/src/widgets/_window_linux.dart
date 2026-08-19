@@ -14,10 +14,12 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -294,6 +296,147 @@ abstract interface class BaseWindowControllerLinux {
   ffi.Pointer<ffi.Void> get flutterViewHandle;
 }
 
+/// Deferred-show and reposition-on-resize behavior shared by the anchored,
+/// sized-to-content Linux windows: [TooltipWindowControllerLinux] and
+/// [PopupWindowControllerLinux].
+///
+/// Rather than being shown as soon as its view renders its first frame, the
+/// window is shown once the view has been allocated the size of that content
+/// (see [_handleFirstFrame]) so that it is placed correctly for the size it
+/// maps with. On Wayland that first placement is final; on X11 a later resize
+/// is corrected (see [_handleConfigure]).
+mixin _SizedToContentWindowMixin on ChangeNotifier {
+  // Provided by the mixing-in controller: the native window being shown, the
+  // view rendering the Flutter content into it, whether it has been destroyed,
+  // and how to place it against its anchor rectangle.
+  _GtkWindow get _window;
+  FlutterView get rootView;
+  bool get isDestroyed;
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
+
+  // The window size when it was mapped; null until [_showFirstTime] has shown
+  // the window. Compared in [_handleConfigure] to detect a resize that
+  // requires repositioning the window.
+  Size? _mappedSize;
+
+  // Guards [_handleConfigure] against re-entrancy from the configure events
+  // that repositioning itself emits.
+  bool _repositioning = false;
+
+  // Latest size allocated to the view, in logical pixels; null until the
+  // first size-allocate has been reported.
+  Size? _viewSize;
+
+  // Whether the view has rendered its first frame. The window is not shown
+  // before then.
+  bool _firstFrameReceived = false;
+
+  // Shows the window if the view's allocation fails to converge on the
+  // content size — see [_handleFirstFrame].
+  Timer? _showFallbackTimer;
+
+  /// Handles the view rendering its first frame.
+  ///
+  /// The first-frame signal is emitted when the renderer produces a frame,
+  /// before the renderer's idle callback has applied the sized-to-content size
+  /// request to the window; showing here would map the window at its
+  /// pre-content size and the (one-shot on Wayland, see [updatePosition])
+  /// positioner would place it using that wrong size. Instead the show is
+  /// deferred until [_handleViewSizeChanged] observes the view being allocated
+  /// the content size, so the window maps at that size and is placed correctly
+  /// — fully on screen — on the first show.
+  void _handleFirstFrame() {
+    _firstFrameReceived = true;
+    // If the view's allocation fails to converge on the content size, show
+    // anyway; on X11 [_handleConfigure] will then correct the placement.
+    _showFallbackTimer = Timer(const Duration(milliseconds: 250), _showFirstTime);
+    _maybeShowFirstTime();
+  }
+
+  /// Handles the view being allocated a new size of [width] x [height] logical
+  /// pixels.
+  void _handleViewSizeChanged(int width, int height) {
+    _viewSize = Size(width.toDouble(), height.toDouble());
+    _maybeShowFirstTime();
+  }
+
+  /// Shows the window for the first time once the first frame has been
+  /// rendered and the view has been allocated the size of that content — see
+  /// [_handleFirstFrame].
+  void _maybeShowFirstTime() {
+    if (_mappedSize == null && _firstFrameReceived && _viewMatchesContentSize()) {
+      _showFirstTime();
+    }
+  }
+
+  void _showFirstTime() {
+    if (isDestroyed || _mappedSize != null) {
+      return;
+    }
+    _showFallbackTimer?.cancel();
+    updatePosition();
+    _window.show();
+    _mappedSize = _window.getSize();
+  }
+
+  /// Whether the size allocated to the view matches the size of the Flutter
+  /// content rendered into it.
+  ///
+  /// Both sizes are in logical pixels.
+  bool _viewMatchesContentSize() {
+    final Size? viewSize = _viewSize;
+    if (viewSize == null) {
+      return false;
+    }
+    final RenderView? renderView = RendererBinding.instance.renderViews.firstWhereOrNull(
+      (RenderView view) => view.flutterView == rootView,
+    );
+    if (renderView == null) {
+      return true;
+    }
+    final Size contentSize = renderView.size;
+    return viewSize == contentSize;
+  }
+
+  /// Handles the window's configure events, repositioning the window when its
+  /// size has changed since it was mapped.
+  ///
+  /// On X11 move-to-rect is computed client-side and repositions the mapped
+  /// window immediately, so the new size is taken into account as soon as it
+  /// is known.
+  ///
+  /// On Wayland the window is left where it was placed when it was mapped.
+  /// GDK3's Wayland backend applies the xdg_positioner parameters only while
+  /// mapping the window (the positioner is not reactive and GDK3 has no
+  /// reposition support), so the only way to re-evaluate them at the new size
+  /// is to remap the window (hide + show) and have GDK create a fresh
+  /// xdg_popup. That makes the window blink on every resize, which for content
+  /// that resizes repeatedly is worse than the stale placement it corrects.
+  void _handleConfigure() {
+    if (!_isWaylandDisplay && !isDestroyed && !_repositioning && _mappedSize != null) {
+      final Size size = _window.getSize();
+      if (size != _mappedSize) {
+        _mappedSize = size;
+        // Guarded so that an overridden [updatePosition] that throws cannot
+        // wedge the flag and disable repositioning for good.
+        _repositioning = true;
+        try {
+          updatePosition();
+        } finally {
+          _repositioning = false;
+        }
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Releases the resources held while waiting to show the window. Called by
+  /// the mixing-in controller when it destroys the window.
+  void _cancelDeferredShow() {
+    _showFallbackTimer?.cancel();
+  }
+}
+
 /// Implementation of [WindowController] for the Linux platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -301,8 +444,7 @@ abstract interface class BaseWindowControllerLinux {
 /// See also:
 ///
 ///  * [WindowController], the base class for regular windows.
-class WindowControllerLinux extends WindowController
-    implements BaseWindowControllerLinux {
+class WindowControllerLinux extends WindowController implements BaseWindowControllerLinux {
   /// Creates a new regular window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -509,7 +651,8 @@ class WindowControllerLinux extends WindowController
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerLinux extends DialogWindowController implements BaseWindowControllerLinux {
+class DialogWindowControllerLinux extends DialogWindowController
+    implements BaseWindowControllerLinux {
   /// Creates a new dialog window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -700,6 +843,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Base
 ///
 ///  * [TooltipWindowController], the base class for tooltip windows.
 class TooltipWindowControllerLinux extends TooltipWindowController
+    with _SizedToContentWindowMixin
     implements BaseWindowControllerLinux {
   /// Creates a new tooltip window controller for Linux.
   ///
@@ -735,7 +879,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 
     _windowMonitor = _FlWindowMonitor(
       _window,
-      onConfigure: notifyListeners,
+      onConfigure: _handleConfigure,
       onDestroy: _delegate.onWindowDestroyed,
     );
     setConstraints(constraints);
@@ -743,9 +887,8 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     _view = _FlView(engine, isSizedToContent: true);
     _viewMonitor = _FlViewMonitor(
       _view,
-      onFirstFrame: () {
-        _window.show();
-      },
+      onFirstFrame: _handleFirstFrame,
+      onSizeChanged: _handleViewSizeChanged,
     );
     final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
@@ -764,6 +907,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 
   final WindowingOwnerLinux _owner;
   final TooltipWindowControllerDelegate _delegate;
+  @override
   final _GtkWindow _window;
   late Rect _anchorRect;
   late WindowPositioner _positioner;
@@ -791,6 +935,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     _window.destroy();
     _windowMonitor.close();
     _windowMonitor.unref();
+    _cancelDeferredShow();
     _destroyed = true;
     _owner.registrar.unregister(rootView.viewId);
     notifyListeners();
@@ -811,11 +956,13 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     if (parentWindow != null && view != null) {
       offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
     }
-    // This is only applied in GTK3 the first time the tooltip is shown as GTK3
-    // only sends updates when the popup surface configure event is
-    // received. Since GTK3 does not set the [reactive flag](https://wayland.app/protocols/xdg-shell#xdg_positioner:request:set_reactive)
-    // on the positioner it is only [received once](https://wayland.app/protocols/xdg-shell#xdg_popup:event:configure).
-    // This means if a Linux tooltip is resized it will not be repositioned.
+    // On Wayland GTK3 applies this only while mapping the window as it does
+    // not set the
+    // [reactive flag](https://wayland.app/protocols/xdg-shell#xdg_positioner:request:set_reactive)
+    // on the positioner, so the placement is only [received once](https://wayland.app/protocols/xdg-shell#xdg_popup:event:configure);
+    // a tooltip that is resized after mapping keeps the placement computed at
+    // the size it was mapped with — see [_handleConfigure]. On X11 this call
+    // repositions the window immediately.
     _window.getWindow().moveToRect(
       x: _anchorRect.left.toInt() + offset.$1,
       y: _anchorRect.top.toInt() + offset.$2,
@@ -895,7 +1042,9 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 /// See also:
 ///
 ///  * [PopupWindowController], the base class for popup windows.
-class PopupWindowControllerLinux extends PopupWindowController implements BaseWindowControllerLinux {
+class PopupWindowControllerLinux extends PopupWindowController
+    with _SizedToContentWindowMixin
+    implements BaseWindowControllerLinux {
   /// Creates a new popup window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -928,7 +1077,7 @@ class PopupWindowControllerLinux extends PopupWindowController implements BaseWi
 
     _windowMonitor = _FlWindowMonitor(
       _window,
-      onConfigure: notifyListeners,
+      onConfigure: _handleConfigure,
       onMovedToRect: (x, y, width, height) {
         _offsetFromParent = Offset(x.toDouble(), y.toDouble());
       },
@@ -939,9 +1088,8 @@ class PopupWindowControllerLinux extends PopupWindowController implements BaseWi
     _view = _FlView(engine, isSizedToContent: true);
     _viewMonitor = _FlViewMonitor(
       _view,
-      onFirstFrame: () {
-        _window.show();
-      },
+      onFirstFrame: _handleFirstFrame,
+      onSizeChanged: _handleViewSizeChanged,
     );
     final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
@@ -960,6 +1108,7 @@ class PopupWindowControllerLinux extends PopupWindowController implements BaseWi
 
   final WindowingOwnerLinux _owner;
   final PopupWindowControllerDelegate _delegate;
+  @override
   final _GtkWindow _window;
   late Rect _anchorRect;
   late WindowPositioner _positioner;
@@ -988,6 +1137,7 @@ class PopupWindowControllerLinux extends PopupWindowController implements BaseWi
     _window.destroy();
     _windowMonitor.close();
     _windowMonitor.unref();
+    _cancelDeferredShow();
     _destroyed = true;
     _owner.registrar.unregister(rootView.viewId);
     notifyListeners();
@@ -1008,11 +1158,13 @@ class PopupWindowControllerLinux extends PopupWindowController implements BaseWi
     if (parentWindow != null && view != null) {
       offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
     }
-    // This is only applied in GTK3 the first time the popup is shown as GTK3
-    // only sends updates when the popup surface configure event is
-    // received. Since GTK3 does not set the [reactive flag](https://wayland.app/protocols/xdg-shell#xdg_positioner:request:set_reactive)
-    // on the positioner it is only [received once](https://wayland.app/protocols/xdg-shell#xdg_popup:event:configure).
-    // This means if a Linux popup is resized it will not be repositioned.
+    // On Wayland GTK3 applies this only while mapping the window as it does
+    // not set the
+    // [reactive flag](https://wayland.app/protocols/xdg-shell#xdg_positioner:request:set_reactive)
+    // on the positioner, so the placement is only [received once](https://wayland.app/protocols/xdg-shell#xdg_popup:event:configure);
+    // a popup that is resized after mapping keeps the placement computed at
+    // the size it was mapped with — see [_handleConfigure]. On X11 this call
+    // repositions the window immediately.
     _window.getWindow().moveToRect(
       x: _anchorRect.left.toInt() + offset.$1,
       y: _anchorRect.top.toInt() + offset.$2,
@@ -1200,6 +1352,31 @@ String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
   }
   return utf8.decode(value.asTypedList(length));
 }
+
+/// Whether the default GDK display is a Wayland display (as opposed to X11).
+///
+/// Determined from the display's GType name rather than GDK_IS_WAYLAND_DISPLAY,
+/// which is a C macro over symbols that are only present when GDK is built with
+/// the Wayland backend; the GObject type name lookup succeeds on any build.
+final bool _isWaylandDisplay = () {
+  final ffi.Pointer<ffi.NativeType> display = _gdkDisplayGetDefault();
+  if (display == ffi.nullptr) {
+    return false;
+  }
+  final ffi.Pointer<ffi.NativeType> typeName = _gTypeNameFromInstance(display);
+  if (typeName == ffi.nullptr) {
+    return false;
+  }
+  return _nativeToString(typeName.cast<ffi.Uint8>()) == 'GdkWaylandDisplay';
+}();
+
+@ffi.Native<ffi.Pointer<ffi.NativeType> Function()>(symbol: 'gdk_display_get_default')
+external ffi.Pointer<ffi.NativeType> _gdkDisplayGetDefault();
+
+@ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
+  symbol: 'g_type_name_from_instance',
+)
+external ffi.Pointer<ffi.NativeType> _gTypeNameFromInstance(ffi.Pointer<ffi.NativeType> instance);
 
 /// Wraps GObject.
 class _GObject {
@@ -1726,33 +1903,54 @@ class _FlView extends _GtkWidget {
 /// Wraps FlViewMonitor (helper object for handling signals from FlView).
 class _FlViewMonitor extends _GObject {
   /// Create a new FlViewMonitor.
-  factory _FlViewMonitor(_FlView view, {VoidCallback? onFirstFrame}) {
+  factory _FlViewMonitor(
+    _FlView view, {
+    VoidCallback? onFirstFrame,
+    void Function(int, int)? onSizeChanged,
+  }) {
     void noop() {}
+    void noopSizeChanged(int width, int height) {}
     return _FlViewMonitor._internal(
       view.instance,
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onFirstFrame ?? noop),
+      ffi.NativeCallable<ffi.Void Function(ffi.Int, ffi.Int)>.isolateLocal(
+        onSizeChanged ?? noopSizeChanged,
+      ),
     );
   }
 
-  _FlViewMonitor._internal(ffi.Pointer<ffi.NativeType> view, this._onFirstFrameFunction)
-    : super(_flViewMonitorNew(view, _onFirstFrameFunction.nativeFunction));
+  _FlViewMonitor._internal(
+    ffi.Pointer<ffi.NativeType> view,
+    this._onFirstFrameFunction,
+    this._onSizeChangedFunction,
+  ) : super(
+        _flViewMonitorNew(
+          view,
+          _onFirstFrameFunction.nativeFunction,
+          _onSizeChangedFunction.nativeFunction,
+        ),
+      );
 
   final ffi.NativeCallable<ffi.Void Function()> _onFirstFrameFunction;
+  final ffi.NativeCallable<ffi.Void Function(ffi.Int, ffi.Int)> _onSizeChangedFunction;
 
   /// Close all FFI resources used in the monitor.
   void close() {
     _onFirstFrameFunction.close();
+    _onSizeChangedFunction.close();
   }
 
   @ffi.Native<
     ffi.Pointer<ffi.NativeType> Function(
       ffi.Pointer<ffi.NativeType>,
       ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
+      ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int, ffi.Int)>>,
     )
   >(symbol: 'fl_view_monitor_new')
   external static ffi.Pointer<ffi.NativeType> _flViewMonitorNew(
     ffi.Pointer<ffi.NativeType> view,
     ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onFirstFrame,
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int, ffi.Int)>> onSizeChanged,
   );
 }
 
