@@ -473,24 +473,12 @@ enum BlurStyle {
   inner,
 }
 
-class MaskFilter {
-  const MaskFilter.blur(this._style, this._sigma);
+abstract class MaskFilter {
+  // ignore: no_leading_underscores_for_local_identifiers
+  const factory MaskFilter.blur(BlurStyle _style, double _sigma) = engine.EngineMaskFilter.blur;
 
-  final BlurStyle _style;
-  final double _sigma;
-  double get webOnlySigma => _sigma;
-  BlurStyle get webOnlyBlurStyle => _style;
-
-  @override
-  bool operator ==(Object other) {
-    return other is MaskFilter && other._style == _style && other._sigma == _sigma;
-  }
-
-  @override
-  int get hashCode => Object.hash(_style, _sigma);
-
-  @override
-  String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
+  double get webOnlySigma;
+  BlurStyle get webOnlyBlurStyle;
 }
 
 abstract class _ColorTransform {
@@ -663,19 +651,15 @@ class ImageFilter {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     TileMode? tileMode,
+    // ignore: avoid_unused_constructor_parameters
     Rect? bounds,
-  }) => engine.renderer.createBlurImageFilter(
-    sigmaX: sigmaX,
-    sigmaY: sigmaY,
-    tileMode: tileMode,
-    bounds: bounds,
-  );
+  }) => engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
-      engine.renderer.createDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+      engine.EngineImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
 
   factory ImageFilter.erode({double radiusX = 0.0, double radiusY = 0.0}) =>
-      engine.renderer.createErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+      engine.EngineImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
 
   factory ImageFilter.matrix(
     Float64List matrix4, {
@@ -684,11 +668,19 @@ class ImageFilter {
     if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
-    return engine.renderer.createMatrixImageFilter(matrix4, filterQuality: filterQuality);
+    return engine.EngineImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
   }
 
-  factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) =>
-      engine.renderer.composeImageFilters(outer: outer, inner: inner);
+  factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) {
+    engine.EngineImageFilter convert(ImageFilter filter) {
+      if (filter is engine.EngineColorFilter) {
+        return engine.EngineColorFilterImageFilter(colorFilter: filter);
+      }
+      return filter as engine.EngineImageFilter;
+    }
+
+    return engine.EngineImageFilter.compose(outer: convert(outer), inner: convert(inner));
+  }
 
   factory ImageFilter.shader(
     // ignore: avoid_unused_constructor_parameters

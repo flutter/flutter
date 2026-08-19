@@ -1436,6 +1436,7 @@ Future<void> injectPlugins(
             templateRenderer: globals.templateRenderer,
             processUtils: globals.processUtils,
             config: globals.config,
+            logger: globals.logger,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
