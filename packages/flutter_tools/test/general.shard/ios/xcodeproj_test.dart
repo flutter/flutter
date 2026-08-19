@@ -758,7 +758,8 @@ void main() {
     () async {
       const workingDirectory = '/';
       final Directory buildDirectory = fileSystem.directory('build/ios');
-      const stderr = 'xcrun: error: unable to find utility "xcodebuild", not a developer tool or in PATH';
+      const stderr =
+          'xcrun: error: unable to find utility "xcodebuild", not a developer tool or in PATH';
 
       fakeProcessManager.addCommands(const <FakeCommand>[
         kWhichSysctlCommand,
@@ -804,6 +805,7 @@ void main() {
       const workingDirectory = '/';
       final Directory buildDirectory = fileSystem.directory('build/ios');
       const errorMessage = 'xcrun: error: unable to find utility "xcodebuild"';
+      const processException = ProcessException('xcrun', <String>['xcodebuild'], errorMessage, 72);
 
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
@@ -820,7 +822,7 @@ void main() {
             '-list',
           ],
           onRun: (_) {
-            throw const ProcessException('xcrun', <String>['xcodebuild'], errorMessage, 72);
+            throw processException;
           },
         ),
       ]);
@@ -838,7 +840,7 @@ void main() {
           FakeXcodeBasedProject(workingDirectory, fileSystem),
           buildDirectory: buildDirectory,
         ),
-        throwsToolExit(message: errorMessage),
+        throwsToolExit(message: processException.toString()),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },

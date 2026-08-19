@@ -439,7 +439,7 @@ class XcodeProjectInterpreter {
         ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
       );
     } on ProcessException catch (exception) {
-      throwToolExit('Unable to get Xcode project information:\n ${exception.message}');
+      throwToolExit('Unable to get Xcode project information:\n $exception');
     }
   }
 
