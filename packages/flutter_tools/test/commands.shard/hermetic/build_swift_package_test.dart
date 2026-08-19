@@ -515,6 +515,14 @@ import PluginB
               xcframeworkOutput.path,
             ],
           ),
+          FakeCommand(
+            command: <String>[
+              'chmod',
+              '-R',
+              'u+w',
+              xcframeworkOutput.childDirectory('Flutter.xcframework').path,
+            ],
+          ),
         ]);
         const FlutterDarwinPlatform targetPlatform = .ios;
         final BuildSwiftPackageUtils testUtils = _createTestUtils(
@@ -553,6 +561,14 @@ import PluginB
               '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
               _engineArtifactPath,
               xcframeworkOutput.path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'chmod',
+              '-R',
+              'u+w',
+              flutterXCFramework.path,
             ],
           ),
           FakeCommand(
