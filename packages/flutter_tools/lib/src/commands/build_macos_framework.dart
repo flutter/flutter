@@ -57,6 +57,27 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   bool get regeneratePlatformSpecificToolingDuringVerify => false;
 
   @override
+  Future<List<BuildInfo>> getBuildInfos() async {
+    return <BuildInfo>[
+      if (boolArg('debug'))
+        await getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+          forcedTargetPlatform: TargetPlatform.darwin,
+        ),
+      if (boolArg('profile'))
+        await getBuildInfo(
+          forcedBuildMode: BuildMode.profile,
+          forcedTargetPlatform: TargetPlatform.darwin,
+        ),
+      if (boolArg('release'))
+        await getBuildInfo(
+          forcedBuildMode: BuildMode.release,
+          forcedTargetPlatform: TargetPlatform.darwin,
+        ),
+    ];
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??

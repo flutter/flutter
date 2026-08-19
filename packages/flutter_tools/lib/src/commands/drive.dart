@@ -366,7 +366,9 @@ class DriveCommand extends RunCommandBase {
       throwOnError: false,
     );
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
-    final BuildInfo buildInfo = await getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo(
+      forcedTargetPlatform: await device.targetPlatform,
+    );
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(
       webDevServerConfig: webDevServerConfig,
     );

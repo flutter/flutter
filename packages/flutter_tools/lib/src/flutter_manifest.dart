@@ -14,10 +14,20 @@ import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'build_info.dart';
 import 'platform_plugins.dart';
 import 'plugins.dart';
 
 const _kValidPluginPlatforms = <String>{'android', 'ios', 'web', 'windows', 'linux', 'macos'};
+const _kValidDefaultFlavorPlatforms = <String>{
+  'android',
+  'ios',
+  'web',
+  'windows',
+  'linux',
+  'macos',
+  'default',
+};
 
 /// A wrapper for a platform-specific plugin configuration.
 class PluginPlatformConfig {
@@ -436,7 +446,39 @@ class FlutterManifest {
   /// Whether localization Dart files should be generated.
   late final generateLocalizations = _flutterDescriptor['generate'] == true;
 
-  String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;
+  /// The default flavor specified in pubspec.yaml for the given [platform].
+  ///
+  /// If a map of platform names to flavors was specified in pubspec.yaml,
+  /// this method returns the flavor for the specified [platform] if found,
+  /// or falls back to the 'default' flavor key. If a single string was specified,
+  /// that string is returned for all platforms.
+  String? defaultFlavorForPlatform([TargetPlatform? platform]) {
+    final Object? rawDefaultFlavor = _flutterDescriptor['default-flavor'];
+    if (rawDefaultFlavor is String) {
+      return rawDefaultFlavor;
+    }
+    if (rawDefaultFlavor is Map<Object?, Object?>) {
+      if (platform != null) {
+        final String osName = platform.osName;
+        for (final MapEntry<Object?, Object?>(:Object? key, :Object? value)
+            in rawDefaultFlavor.entries) {
+          if (key is String && key.toLowerCase() == osName) {
+            return value as String?;
+          }
+        }
+      }
+      for (final MapEntry<Object?, Object?>(:Object? key, :Object? value)
+          in rawDefaultFlavor.entries) {
+        if (key is String && key.toLowerCase() == 'default') {
+          return value as String?;
+        }
+      }
+    }
+    return null;
+  }
+
+  /// The default flavor specified in pubspec.yaml.
+  String? get defaultFlavor => defaultFlavorForPlatform();
 
   YamlMap toYaml() {
     return YamlMap.wrap(_descriptor);
@@ -613,9 +655,34 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           '    enable-swift-package-manager: false\n',
         );
       case 'default-flavor':
-        if (yamlValue is! String) {
+        if (yamlValue is String) {
+          break;
+        }
+        if (yamlValue is YamlMap) {
+          for (final MapEntry<Object?, Object?> entry in yamlValue.entries) {
+            final Object? platform = entry.key;
+            if (platform is! String) {
+              errors.add(
+                'Expected key under "$yamlKey" to be a string, but got $platform (${platform.runtimeType}).',
+              );
+              continue;
+            }
+            if (!_kValidDefaultFlavorPlatforms.contains(platform.toLowerCase())) {
+              errors.add(
+                'Invalid platform "$platform" under "$yamlKey". Supported platforms are: '
+                '"${_kValidDefaultFlavorPlatforms.join('", "')}".',
+              );
+            }
+            final Object? flavor = entry.value;
+            if (flavor is! String) {
+              errors.add(
+                'Expected value for "$platform" under "$yamlKey" to be a string, but got $flavor (${flavor.runtimeType}).',
+              );
+            }
+          }
+        } else {
           errors.add(
-            'Expected "$yamlKey" to be a string, but got $yamlValue (${yamlValue.runtimeType}).',
+            'Expected "$yamlKey" to be a string or map, but got $yamlValue (${yamlValue.runtimeType}).',
           );
         }
       default:

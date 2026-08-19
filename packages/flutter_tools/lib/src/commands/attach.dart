@@ -352,7 +352,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
     final Stream<Uri> vmServiceUri = _discoverVmService(device: device);
 
-    final BuildInfo buildInfo = await getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo(
+      forcedTargetPlatform: await device.targetPlatform,
+    );
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,

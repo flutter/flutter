@@ -1547,6 +1547,78 @@ flutter:
           ProcessManager: () => FakeProcessManager.empty(),
         },
       );
+
+      testUsingContext(
+        'tool loads platform-specific default flavor from manifest',
+        () async {
+          final File pubspec = fileSystem.file('pubspec.yaml');
+          await pubspec.create();
+          await pubspec.writeAsString('''
+name: test
+flutter:
+  default-flavor:
+    android: android_flavor
+    ios: ios_flavor
+    default: fallback_flavor
+        ''');
+
+          final flutterCommand = DummyFlutterCommand();
+          final BuildInfo androidBuildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+            forcedTargetPlatform: TargetPlatform.android,
+          );
+          expect(androidBuildInfo.flavor, 'android_flavor');
+
+          final BuildInfo iosBuildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+            forcedTargetPlatform: TargetPlatform.ios,
+          );
+          expect(iosBuildInfo.flavor, 'ios_flavor');
+
+          final BuildInfo linuxBuildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+            forcedTargetPlatform: TargetPlatform.linux_x64,
+          );
+          expect(linuxBuildInfo.flavor, 'fallback_flavor');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.empty(),
+        },
+      );
+
+      testUsingContext(
+        'tool loads platform-specific default flavor from manifest, but cli overrides',
+        () async {
+          final File pubspec = fileSystem.file('pubspec.yaml');
+          await pubspec.create();
+          await pubspec.writeAsString('''
+name: test
+flutter:
+  default-flavor:
+    android: android_flavor
+    ios: ios_flavor
+        ''');
+
+          final flutterCommand = DummyFlutterCommand(
+            commandFunction: () async {
+              return FlutterCommandResult.success();
+            },
+          );
+          flutterCommand.usesFlavorOption();
+          final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+          await runner.run(<String>['dummy', '--flavor', 'custom_flavor']);
+          final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+            forcedTargetPlatform: TargetPlatform.android,
+          );
+          expect(buildInfo.flavor, 'custom_flavor');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.empty(),
+        },
+      );
     });
 
     testUsingContext(

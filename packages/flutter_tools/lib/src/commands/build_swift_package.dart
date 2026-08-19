@@ -176,7 +176,11 @@ class BuildSwiftPackage extends BuildSubCommand {
     final List<String> buildModes = stringsArg('build-mode');
     return <BuildInfo>[
       for (final mode in availableBuildModes)
-        if (buildModes.contains(mode.cliName)) await getBuildInfo(forcedBuildMode: mode),
+        if (buildModes.contains(mode.cliName))
+          await getBuildInfo(
+            forcedBuildMode: mode,
+            forcedTargetPlatform: _targetPlatform.targetPlatform,
+          ),
     ];
   }
 

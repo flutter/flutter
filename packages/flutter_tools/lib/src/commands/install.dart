@@ -7,6 +7,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
@@ -65,10 +66,11 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device targetDevice = device!;
+    final TargetPlatform targetPlatform = await targetDevice.targetPlatform;
     final ApplicationPackage? package = await applicationPackages?.getPackageForPlatform(
-      await targetDevice.targetPlatform,
+      targetPlatform,
       applicationBinary: _applicationBinary,
-      buildInfo: await getBuildInfo(),
+      buildInfo: await getBuildInfo(forcedTargetPlatform: targetPlatform),
     );
     if (package == null) {
       throwToolExit('Could not find or build package');

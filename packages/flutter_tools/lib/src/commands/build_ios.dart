@@ -931,7 +931,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   bool get shouldCodesign => boolArg('codesign');
 
-  late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
+  late final Future<BuildInfo> cachedBuildInfo = getBuildInfo(
+    forcedTargetPlatform: TargetPlatform.ios,
+  );
 
   late final Future<BuildableIOSApp> buildableIOSApp = () async {
     final app =

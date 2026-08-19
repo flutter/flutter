@@ -251,7 +251,9 @@ class BuildWebCommand extends BuildSubCommand {
       ];
     }
 
-    final BuildInfo buildInfo = await getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo(
+      forcedTargetPlatform: TargetPlatform.web_javascript,
+    );
     final String? baseHref = stringArg('base-href');
     final String? staticAssetsUrl = stringArg('static-assets-url');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
