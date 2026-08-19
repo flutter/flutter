@@ -87,16 +87,16 @@ class RenderSliverCrossAxisGroup extends RenderSliver
     while (child != null) {
       final childParentData = child.parentData! as SliverPhysicalParentData;
       final int flex = childParentData.crossAxisFlex ?? 0;
-      double childExtent;
       if (flex != 0) {
-        childExtent = extentPerFlexValue * flex;
-        assert(_assertOutOfExtent(childExtent));
+        // Unlike the flex == 0 case above, a flexible child dividing up
+        // extent that has already been exhausted by constrained siblings is
+        // not an error: it degrades gracefully to a zero cross axis extent,
+        // matching how RenderFlex collapses flexible children when there is
+        // no free space (see https://github.com/flutter/flutter/issues/191275).
         child.layout(
           constraints.copyWith(crossAxisExtent: extentPerFlexValue * flex),
           parentUsesSize: true,
         );
-      } else {
-        childExtent = child.geometry!.crossAxisExtent!;
       }
       final SliverGeometry childLayoutGeometry = child.geometry!;
       if (geometry!.scrollExtent < childLayoutGeometry.scrollExtent) {

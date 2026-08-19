@@ -625,13 +625,9 @@ void main() {
     );
   });
 
-  testWidgets('Assertion error when expanded widget runs out of cross axis extent', (
-    WidgetTester tester,
-  ) async {
-    final errors = <FlutterErrorDetails>[];
-    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
-
+  // Regression test for https://github.com/flutter/flutter/issues/191275.
+  testWidgets('Expanded widget collapses to zero cross axis extent instead of asserting '
+      'when constrained siblings consume all available extent', (WidgetTester tester) async {
     final items = List<int>.generate(20, (int i) => i);
     await tester.pumpWidget(
       _buildSliverCrossAxisGroup(
@@ -660,14 +656,15 @@ void main() {
         ],
       ),
     );
+    // No assertion error: the third (flexible) sliver gets 0.0 cross axis
+    // extent instead of crashing, matching how RenderFlex collapses
+    // flexible children when there is no free space.
     await tester.pumpAndSettle();
-    FlutterError.onError = oldHandler;
-    expect(errors, isNotEmpty);
-    final error = errors.first.exception as AssertionError;
-    expect(
-      error.toString(),
-      contains('SliverCrossAxisGroup ran out of extent before child could be laid out.'),
-    );
+
+    final RenderSliverList third = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .last;
+    expect(third.constraints.crossAxisExtent, equals(0.0));
   });
 
   testWidgets('applyPaintTransform is implemented properly', (WidgetTester tester) async {
