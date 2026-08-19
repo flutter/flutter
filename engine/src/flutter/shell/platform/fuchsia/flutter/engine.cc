@@ -487,10 +487,6 @@ void Engine::Initialize(
                [this](FireCallbackCallback cb) {
                  flatland_connection_->AwaitVsync(cb);
                },
-           await_vsync_for_secondary_callback_callback =
-               [this](FireCallbackCallback cb) {
-                 flatland_connection_->AwaitVsyncForSecondaryCallback(cb);
-               },
            product_config, svc](flutter::Shell& shell) mutable {
             OnShaderWarmupCallback on_shader_warmup_callback = nullptr;
             if (product_config.enable_shader_warmup()) {
@@ -540,9 +536,7 @@ void Engine::Initialize(
                 std::move(on_semantics_node_update_callback),
                 std::move(on_request_announce_callback),
                 std::move(on_shader_warmup_callback),
-                std::move(await_vsync_callback),
-                std::move(await_vsync_for_secondary_callback_callback),
-                std::move(svc));
+                std::move(await_vsync_callback), std::move(svc));
           });
 
   // Setup the callback that will instantiate the rasterizer.
