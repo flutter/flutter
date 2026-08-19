@@ -566,7 +566,11 @@ class RoundSuperellipseBuilder {
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadius(
     const Rect& bounds,
     Scalar radius) {
-  return MakeBoundsRadii(bounds, RoundingRadii::MakeRadius(radius));
+  return RoundSuperellipseParam{
+      .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
+                                   {radius, radius}, {-1, 1}),
+      .all_corners_same = true,
+  };
 }
 
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
@@ -575,21 +579,14 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
   if (radii.AreAllCornersSame() && !radii.top_left.IsEmpty()) {
     // Having four empty corners indicate a rectangle, which needs special
     // treatment on border containment and therefore is not `all_corners_same`.
-    Point center = bounds.GetCenter();
     return RoundSuperellipseParam{
-        .top_right = ComputeQuadrant(center, bounds.GetRightTop(),
-                                     radii.top_right, {1, -1}),
-        .bottom_right = ComputeQuadrant(center, bounds.GetRightBottom(),
-                                        radii.bottom_right, {1, 1}),
-        .bottom_left = ComputeQuadrant(center, bounds.GetLeftBottom(),
-                                       radii.bottom_left, {-1, 1}),
-        .top_left = ComputeQuadrant(center, bounds.GetLeftTop(), radii.top_left,
-                                    {-1, -1}),
+        .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
+                                     radii.top_right, {-1, 1}),
         .all_corners_same = true,
-        .top_split = center.x,
-        .bottom_split = center.x,
-        .left_split = center.y,
-        .right_split = center.y,
+        .top_split = bounds.GetCenter().x,
+        .bottom_split = bounds.GetCenter().x,
+        .left_split = bounds.GetCenter().y,
+        .right_split = bounds.GetCenter().y,
     };
   }
   Scalar top_split = Split(bounds.GetLeft(), bounds.GetRight(),

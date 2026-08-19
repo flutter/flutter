@@ -1243,8 +1243,8 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
     const Rect& bounds = round_superellipse.GetBounds();
     const RoundingRadii& radii = round_superellipse.GetRadii();
 
-    bool is_uniform_circular = radii.AreAllCornersSame() &&
-                               (radii.top_left.width == radii.top_left.height);
+    bool is_uniform_circular = round_superellipse_params.all_corners_same &&
+                               radii.AreAllCornersCircular();
 
     if (is_uniform_circular) {
       auto params = UberSDFParameters::MakeRoundedSuperellipse(

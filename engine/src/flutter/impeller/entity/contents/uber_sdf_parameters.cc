@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/contents/uber_sdf_parameters.h"
+#include "fml/logging.h"
 
 namespace impeller {
 
