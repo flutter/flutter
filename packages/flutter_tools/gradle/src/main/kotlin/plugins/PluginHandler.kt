@@ -5,6 +5,7 @@
 package com.flutter.gradle.plugins
 
 import com.android.builder.model.BuildType
+import com.flutter.gradle.CompileSdkVersion
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.FlutterPluginUtils.addApiDependencies
@@ -121,12 +122,9 @@ class PluginHandler(
             // Wait until the Android plugin loaded.
             pluginProject.afterEvaluate {
                 // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
-                val projectCompileSdkVersion: String = getCompileSdkFromProject(project)
-                val pluginCompileSdkVersion: String = getCompileSdkFromProject(pluginProject)
-                // TODO(gmackall): This is doing a string comparison, which is odd and also can be wrong
-                //                 when comparing preview versions (against non preview, and also in the
-                //                 case of alphabet reset which happened with "Baklava".
-                if (pluginCompileSdkVersion > projectCompileSdkVersion) {
+                val projectCompileSdkVersion: CompileSdkVersion = getCompileSdkFromProject(project)
+                val pluginCompileSdkVersion: CompileSdkVersion = getCompileSdkFromProject(pluginProject)
+                if (pluginCompileSdkVersion.isHigherThan(projectCompileSdkVersion)) {
                     project.logger.quiet(
                         "Warning: The plugin $pluginName requires Android SDK version $pluginCompileSdkVersion or higher."
                     )
