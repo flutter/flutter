@@ -489,7 +489,13 @@ class RunCommand extends RunCommandBase {
             'a test using "flutter run" for debugging purposes. This flag is '
             'only available when running in debug mode.',
       )
-      ..addFlag('build', defaultsTo: true, help: 'If necessary, build the app before running.')
+      ..addFlag(
+        'build',
+        defaultsTo: true,
+        help:
+            '(deprecated) If necessary, build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
+            'flag with an existing application artifact.',
+      )
       ..addOption('project-root', hide: !verboseHelp, help: 'Specify the project root directory.')
       ..addFlag(
         'hot',
@@ -749,6 +755,13 @@ class RunCommand extends RunCommandBase {
         '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
         'Flavor-related features may not function properly and could '
         'behave differently in a future release.',
+      );
+    }
+
+    if (argResults!.wasParsed('build')) {
+      globals.printWarning(
+        'The "--build" and "--no-build" flags are deprecated and will be removed in a future release. '
+        'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
       );
     }
   }
