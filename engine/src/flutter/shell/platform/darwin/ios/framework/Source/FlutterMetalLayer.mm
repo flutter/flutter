@@ -20,6 +20,8 @@ FLUTTER_ASSERT_ARC
 
 extern CFTimeInterval display_link_target;
 
+bool FlutterDidPresentSurface;
+
 @interface FlutterMetalLayer () {
   id<MTLDevice> _preferredDevice;
   CGSize _drawableSize;
@@ -439,9 +441,10 @@ extern CFTimeInterval display_link_target;
       [self presentOnMainThread:texture];
     } else {
       // Core animation layers can only be updated on main thread.
-      dispatch_async(dispatch_get_main_queue(), ^{
+      [FlutterRunLoop.mainRunLoop performBlock:^{
         [self presentOnMainThread:texture];
-      });
+        FlutterDidPresentSurface = true;
+      }];
     }
   }
 }

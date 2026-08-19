@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
@@ -12,6 +13,10 @@ FLUTTER_ASSERT_ARC
 
 // When calculating refresh rate diffrence, anything within 0.1 fps is ignored.
 const static double kRefreshRateDiffToIgnore = 0.1;
+
+extern bool FlutterDispatchingTouches;
+extern bool FlutterDidPresentSurface;
+extern dispatch_block_t FlutterAfterDispatchingTouchesBlock;
 
 namespace flutter {
 
@@ -65,6 +70,20 @@ void VsyncWaiterIOS::AwaitVSync() {
   if (fabs(new_max_refresh_rate - max_refresh_rate_) > kRefreshRateDiffToIgnore) {
     max_refresh_rate_ = new_max_refresh_rate;
     [client_ setMaxRefreshRate:max_refresh_rate_];
+  }
+
+  // When dispatching touches, start rendering the frame immediately and then
+  // hold the main thred inside touches Dispatch until the frame is presented.
+  if (FlutterDispatchingTouches) {
+    FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now(), false);
+    FlutterAfterDispatchingTouchesBlock = ^{
+      FlutterDidPresentSurface = false;
+      CFTimeInterval startTime = CACurrentMediaTime();
+      while (!FlutterDidPresentSurface && CACurrentMediaTime() - startTime < 0.5) {
+        [FlutterRunLoop.mainRunLoop pollFlutterMessagesOnce];
+      }
+    };
+    return;
   }
 
   if (client_.displayLink.paused) {
