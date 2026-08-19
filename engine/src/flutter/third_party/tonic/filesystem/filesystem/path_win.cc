@@ -238,10 +238,15 @@ std::string GetAbsoluteFilePath(const std::string& path) {
     return result;
   }
   std::wstring wide_result(buffer);
+  constexpr const wchar_t kUncPrefix[] = L"\\\\?\\UNC\\";
+  constexpr size_t kUncPrefixLen = sizeof(kUncPrefix) / sizeof(wchar_t) - 1;
   constexpr const wchar_t kLongPathPrefix[] = L"\\\\?\\";
   constexpr size_t kLongPathPrefixLen =
       sizeof(kLongPathPrefix) / sizeof(wchar_t) - 1;
-  if (wide_result.rfind(kLongPathPrefix, 0) == 0) {
+  if (wide_result.rfind(kUncPrefix, 0) == 0) {
+    wide_result.erase(0, kUncPrefixLen);
+    wide_result = L"\\\\" + wide_result;
+  } else if (wide_result.rfind(kLongPathPrefix, 0) == 0) {
     wide_result.erase(0, kLongPathPrefixLen);
   }
   CloseHandle(file);

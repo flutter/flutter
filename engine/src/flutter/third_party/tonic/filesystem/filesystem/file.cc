@@ -23,12 +23,13 @@
 #include <BaseTsd.h>
 #include <io.h>
 #include <windows.h>
+
+#include "tonic/filesystem/filesystem/windows_utils.h"
 typedef SSIZE_T ssize_t;
 #endif
 
 #include "tonic/filesystem/filesystem/eintr_wrapper.h"
 #include "tonic/filesystem/filesystem/portable_unistd.h"
-#include "tonic/filesystem/filesystem/windows_utils.h"
 
 namespace filesystem {
 namespace {
