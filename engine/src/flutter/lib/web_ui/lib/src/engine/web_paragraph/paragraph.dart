@@ -783,8 +783,11 @@ class TextSpan extends ParagraphSpan {
   }
 
   ui.Rect getTextRangeSelectionInBlock(LineBlock block, ui.TextRange textRange) {
-    // Let's normalize the ranges
-    final ui.TextRange intersect = block.textRange.intersect(textRange);
+    final ui.TextRange physicalRange = block is TextBlock
+        ? block.physicalTextRange
+        : block.textRange;
+    // Let's normalize the ranges against physical content range (excluding \n)
+    final ui.TextRange intersect = physicalRange.intersect(textRange);
     if (intersect.isEmpty) {
       return ui.Rect.zero;
     }
@@ -796,9 +799,12 @@ class TextSpan extends ParagraphSpan {
   }
 
   ui.Rect getBlockBounds(TextBlock block) {
+    if (block.physicalTextRange.isEmpty) {
+      return ui.Rect.fromLTWH(block.shiftFromLineStart, 0.0, 0.0, 0.0);
+    }
     final ui.Rect bounds = _metrics.getBounds(
-      block.textRange.start - start,
-      block.textRange.end - start,
+      block.physicalTextRange.start - start,
+      block.physicalTextRange.end - start,
     );
     return ui.Rect.fromLTWH(
       bounds.left + block.spanShiftFromLineStart,
@@ -809,10 +815,16 @@ class TextSpan extends ParagraphSpan {
   }
 
   ui.Rect getBlockSelection(LineBlock block) {
+    final ui.TextRange physicalRange = block is TextBlock
+        ? block.physicalTextRange
+        : block.textRange;
+    if (physicalRange.isEmpty) {
+      return ui.Rect.fromLTWH(block.shiftFromLineStart, 0.0, 0.0, 0.0);
+    }
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
     final ui.Rect selection = _metrics.getSelection(
-      block.textRange.start - start,
-      block.textRange.end - start,
+      physicalRange.start - start,
+      physicalRange.end - start,
     );
 
     // TODO(mdebbar): Consider moving this block-aware code to `TextBlock`.

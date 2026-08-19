@@ -247,6 +247,7 @@ class TextLayout {
         _ellipsisBidiLevel!,
         ClusterRange(start: 0, end: ellipsisSpan.size),
         ui.TextRange(start: 0, end: ellipsisSpan.text.length),
+        ui.TextRange(start: 0, end: ellipsisSpan.text.length),
         0.0,
         0.0,
       );
@@ -258,7 +259,7 @@ class TextLayout {
     final ui.TextRange hardlineTextRange = _mapping.toTextRange(hardlineRange);
     final allTextRange = ui.TextRange(
       start: contentTextRange.start,
-      end: specialCase ? hardlineTextRange.end : whitespaceTextRange.end,
+      end: specialCase ? hardlineRange.end : whitespaceTextRange.end,
     );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(
@@ -280,7 +281,7 @@ class TextLayout {
       final BidiRun bidiRun = bidiRuns[i];
       final bool isOverlapping = bidiRun.clusterRange.overlapsWith(
         contentRange.start,
-        whitespaceRange.end,
+        hardlineRange.end,
       );
 
       final bool isFirstOverlap = isOverlapping && overlapStart == -1;
@@ -322,20 +323,21 @@ class TextLayout {
       final ClusterRange hardlineRangeIntersection = bidiRun.clusterRange.intersect(hardlineRange);
 
       assert(() {
-        final ClusterRange whitespaceIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
         // One of the intersections must be non-empty
         return textIntersection.isNotEmpty ||
-            whitespaceIntersection.isNotEmpty ||
-            hardlineRange.isNotEmpty;
+            whitespacesIntersection.isNotEmpty ||
+            hardlineRangeIntersection.isNotEmpty;
       }());
 
       // We cannot ignore whitespaces or newlines because they are expected to be counted in some query apis (getBoxesForRange)
       final ClusterRange fullIntersection = textIntersection
           .merge(whitespacesIntersection)
           .merge(hardlineRangeIntersection);
+      final ClusterRange physicalIntersection = textIntersection.merge(whitespacesIntersection);
 
       // This is the part of the line that intersects with the `bidiRun` being processed now.
       final ui.TextRange bidiLineTextRange = _mapping.toTextRange(fullIntersection);
+      final ui.TextRange bidiLinePhysicalTextRange = _mapping.toTextRange(physicalIntersection);
       final ui.TextRange bidiWhitespacesTextRange =
           whitespacesIntersection.start < whitespacesIntersection.end
           ? _mapping.toTextRange(whitespacesIntersection)
@@ -357,6 +359,9 @@ class TextLayout {
 
         // This is the intersection of the bidi region + line + span.
         final ui.TextRange bidiLineSpanTextRange = bidiLineTextRange.intersect(span);
+        final ui.TextRange bidiLineSpanPhysicalTextRange = bidiLinePhysicalTextRange.intersect(
+          span,
+        );
         final ClusterRange bidiLineSpanRange = _mapping.toClusterRange(
           bidiLineSpanTextRange.start,
           bidiLineSpanTextRange.end,
@@ -386,6 +391,7 @@ class TextLayout {
               bidiRun.bidiLevel,
               bidiLineSpanRange,
               bidiLineSpanTextRange,
+              bidiLineSpanPhysicalTextRange,
               blockShiftFromLineStart,
               blockShiftFromSpanStart,
             ),
@@ -547,7 +553,8 @@ class TextLayout {
       // We take whitespaces and newlines into account
       final lineTextRange = ui.TextRange(
         start: line.allLineTextRange.start,
-        end: line.hardLineBreakRange.end,
+        // The only way the last line has hard line break is if the text ends with \n and we have a special case for it
+        end: line.lastLine ? line.whitespacesRange.end : line.hardLineBreakRange.end,
       );
       if (!lineTextRange.overlapsWith(start, end)) {
         continue;
@@ -728,7 +735,7 @@ class TextLayout {
       if ((line.fullWidth - line.trailingSpacesWidth) < epsilon &&
           line.trailingSpacesWidth < epsilon) {
         // Accordingly to SkParagraph this is a special Flutter case
-        return ui.TextPosition(offset: line.textRange.end);
+        return ui.TextPosition(offset: line.hardLineBreakRange.end);
       }
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
@@ -925,7 +932,7 @@ extension EnhancedTextRange on ui.TextRange {
   /// Whether this range overlaps with the given range from [start] to [end].
   bool overlapsWith(int start, int end) {
     // `end` is exclusive.
-    return !isBefore(start) && !isAfter(end - 1);
+    return start < end && isNotEmpty && !isBefore(start) && !isAfter(end - 1);
   }
 }
 
@@ -1198,11 +1205,14 @@ class TextBlock extends LineBlock {
     super._bidiLevel,
     super.clusterRange,
     super.textRange,
+    this.physicalTextRange,
     super.shiftFromLineStart,
     double shiftFromSpanStart,
   ) : spanShiftFromLineStart = shiftFromLineStart - shiftFromSpanStart,
       clusterRangeWithoutWhitespaces = clusterRange,
       whitespacesWidth = 0.0;
+
+  final ui.TextRange physicalTextRange;
 
   @override
   TextSpan get span => super.span as TextSpan;
@@ -1327,6 +1337,7 @@ class EllipsisBlock extends TextBlock {
     super._bidiLevel,
     super.clusterRange,
     super.textRange,
+    super.physicalTextRange,
     super.shiftFromLineStart,
     super.shiftFromSpanStart,
   );

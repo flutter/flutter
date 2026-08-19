@@ -355,13 +355,12 @@ class _LineBuilder {
       _widthConsumedText + _widthWhitespaces,
     );
 
-    final int correctedWhitespaceEnd = specialCase ? _newlineEnd : _whitespaceEnd;
     final double height = _layout.addLine(
       ClusterRange(start: start, end: _whitespaceStart),
-      ClusterRange(start: _whitespaceStart, end: correctedWhitespaceEnd),
-      ClusterRange(start: correctedWhitespaceEnd, end: _newlineEnd),
+      ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
+      ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
       _top,
-      specialCase || reachedEndOfText() || reachedMaxLines(),
+      specialCase,
     );
     _top += height;
 
@@ -369,9 +368,9 @@ class _LineBuilder {
     // This empty line gets in a way of detecting line visual runs (there isn't any)
     if (specialCase) {
       _top += _layout.addLine(
+        ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
+        ClusterRange(start: _whitespaceEnd, end: _whitespaceEnd),
         ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
-        ClusterRange(start: _newlineEnd, end: _newlineEnd),
-        ClusterRange(start: _newlineEnd, end: _newlineEnd),
         _top,
         true,
       );
