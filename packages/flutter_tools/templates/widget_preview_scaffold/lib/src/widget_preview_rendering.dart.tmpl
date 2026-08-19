@@ -281,16 +281,25 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
             title: Text(group.name),
             initiallyExpanded: true,
             children: [
-              ValueListenableBuilder<LayoutType>(
-                valueListenable: controller.layoutTypeListenable,
-                builder: (context, selectedLayout, _) {
-                  return switch (selectedLayout) {
-                    LayoutType.gridView => _buildGridViewFlex(group.previews),
-                    LayoutType.listView => _buildVerticalListView(
-                      group.previews,
-                    ),
-                  };
-                },
+              // Wrap children in a PageStorage to create a storage boundary.
+              // Without this, descendant scrollables (which search ancestor
+              // elements for a PageStorageKey when restoring scroll offset)
+              // inherit the PageStorageKey from the ExpansionTile and attempt
+              // to read the ExpansionTile's boolean expansion state as a double,
+              // throwing a TypeError (see https://github.com/flutter/flutter/issues/191242).
+              PageStorage(
+                bucket: PageStorageBucket(),
+                child: ValueListenableBuilder<LayoutType>(
+                  valueListenable: controller.layoutTypeListenable,
+                  builder: (context, selectedLayout, _) {
+                    return switch (selectedLayout) {
+                      LayoutType.gridView => _buildGridViewFlex(group.previews),
+                      LayoutType.listView => _buildVerticalListView(
+                        group.previews,
+                      ),
+                    };
+                  },
+                ),
               ),
             ],
           ),
