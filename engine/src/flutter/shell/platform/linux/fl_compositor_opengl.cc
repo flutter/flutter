@@ -7,6 +7,8 @@
 #include <epoxy/egl.h>
 #include <epoxy/gl.h>
 
+#include <cstring>
+
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_compositor_opengl_shader.h"
@@ -18,6 +20,9 @@ struct _FlCompositorOpenGL {
 
   // TRUE if can share framebuffers between contexts.
   gboolean shareable;
+
+  // TRUE if glBlitFramebuffer can be used to composite the first layer.
+  gboolean can_blit;
 
   // Flutter OpenGL contexts.
   FlOpenGLManager* opengl_manager;
@@ -52,6 +57,41 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {}
 
+// Checks if the current OpenGL driver is known to have a broken or unsupported
+// glBlitFramebuffer implementation.
+static gboolean driver_supports_blit() {
+  const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
+  if (vendor == nullptr) {
+    return TRUE;
+  }
+
+  // Note: List of unsupported vendors due to issue
+  // https://github.com/flutter/flutter/issues/152099
+  const char* unsupported_vendors_exact[] = {"Vivante Corporation", "ARM"};
+  const char* unsupported_vendors_fuzzy[] = {"NVIDIA"};
+
+  for (const char* unsupported : unsupported_vendors_fuzzy) {
+    if (strstr(vendor, unsupported) != nullptr) {
+      return FALSE;
+    }
+  }
+  for (const char* unsupported : unsupported_vendors_exact) {
+    if (strcmp(vendor, unsupported) == 0) {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+// Checks if glBlitFramebuffer can be used. It is a GLES3 / OpenGL 3.0 function
+// and may not be present on older drivers, so treat it as optional and fall
+// back to compositing with the shader when it is unavailable.
+static gboolean can_blit_framebuffer() {
+  return driver_supports_blit() &&
+         (epoxy_gl_version() >= 30 ||
+          epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
+}
+
 FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
                                              gboolean shareable) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
@@ -60,6 +100,10 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
   self->shareable = shareable;
   self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
   self->shader = fl_compositor_opengl_shader_new(opengl_manager);
+
+  // Determine once whether glBlitFramebuffer is available on this driver.
+  fl_opengl_manager_make_current(opengl_manager);
+  self->can_blit = can_blit_framebuffer();
 
   return self;
 }
@@ -165,21 +209,22 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
         const FlutterBackingStore* backing_store = layer->backing_store;
         FlFramebuffer* framebuffer =
             FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER,
-                          fl_framebuffer_get_id(framebuffer));
         // The first layer can be blitted, and following layers composited with
-        // this.
-        if (first_layer) {
+        // this. If glBlitFramebuffer is unavailable, composite the first layer
+        // with the shader instead.
+        if (first_layer && self->can_blit) {
+          glBindFramebuffer(GL_READ_FRAMEBUFFER,
+                            fl_framebuffer_get_id(framebuffer));
           glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,
                             layer->size.height, layer->offset.x,
                             layer->offset.y, layer->size.width,
                             layer->size.height, GL_COLOR_BUFFER_BIT,
                             GL_NEAREST);
-          first_layer = FALSE;
         } else {
           composite_layer(self, framebuffer, layer->offset.x, layer->offset.y,
                           width, height);
         }
+        first_layer = FALSE;
       } break;
       case kFlutterLayerContentTypePlatformView: {
         // TODO(robert-ancell) Not implemented -
