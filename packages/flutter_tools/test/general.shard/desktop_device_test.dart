@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
+import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import 'package:test/fake.dart';
@@ -408,7 +409,7 @@ void main() {
         logger: logger,
       );
 
-      final package = FakeApplicationPackage();
+      final package = FakeMacOSApp();
 
       FakeAsync().run((FakeAsync fakeAsync) {
         device.startApp(
@@ -651,6 +652,17 @@ class FakeDesktopDevice extends DesktopDevice {
 }
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+
+class FakeMacOSApp extends Fake implements MacOSApp {
+  @override
+  String get name => 'app';
+
+  @override
+  String? applicationBundle(BuildInfo buildInfo) => 'bundle';
+
+  @override
+  String executable(BuildInfo buildInfo) => 'executable';
+}
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override

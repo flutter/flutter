@@ -20,6 +20,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/context.dart';
 
 final macOS = FakePlatform(operatingSystem: 'macos');
 
@@ -238,6 +239,71 @@ void main() {
     expect(device.executablePathForDevice(package, BuildInfo.profile), profilePath);
     expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
+
+  testUsingContext('startApp in debug mode launches via open and parses VM Service URI', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Completer<void> completer = Completer<void>();
+
+    final MacOSDevice device = MacOSDevice(
+      fileSystem: fileSystem,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            'open',
+            '-a',
+            'release/bundle.app',
+            '--args',
+            '--enable-dart-profiling=true',
+            '--enable-checked-mode=true',
+            '--verify-entry-points=true',
+            RegExp(r'^--write-service-info=(.*)$'),
+          ],
+          onRun: (List<String> command) {
+            final String writeServiceInfoArg = command.firstWhere((String arg) => arg.startsWith('--write-service-info='));
+            final String filePath = writeServiceInfoArg.substring('--write-service-info='.length);
+            fileSystem.file(filePath).writeAsStringSync('{"uri":"http://127.0.0.1:12345/auth_code/"}');
+            completer.complete();
+          },
+        ),
+      ]),
+      logger: BufferLogger.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    final FakeMacOSApp package = FakeMacOSApp();
+
+    final LaunchResult result = await device.startApp(
+      package,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      prebuiltApplication: true,
+    );
+
+    expect(result.started, true);
+    expect(result.vmServiceUri, Uri.parse('http://127.0.0.1:12345/auth_code/'));
+
+    await completer.future;
+  });
+
+  testWithoutContext('stopApp uses pkill for all build modes', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final MacOSDevice device = MacOSDevice(
+      fileSystem: fileSystem,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['pkill', '-f', 'debug/executable'],
+        ),
+      ]),
+      logger: BufferLogger.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    final FakeMacOSApp package = FakeMacOSApp();
+    fileSystem.file('debug/executable').createSync(recursive: true);
+
+    final bool result = await device.stopApp(package);
+
+    expect(result, true);
+  });
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
@@ -250,12 +316,20 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeMacOSApp extends Fake implements MacOSApp {
   @override
+  String get name => 'app';
+
+  @override
+  String? applicationBundle(BuildInfo buildInfo) {
+    return 'release/bundle.app';
+  }
+
+  @override
   String executable(BuildInfo buildInfo) {
-    return switch (buildInfo) {
-      BuildInfo.debug => 'debug/executable',
-      BuildInfo.profile => 'profile/executable',
-      BuildInfo.release => 'release/executable',
-      _ => throw StateError(''),
+    return switch (buildInfo.mode) {
+      BuildMode.debug => 'debug/executable',
+      BuildMode.profile => 'profile/executable',
+      BuildMode.release => 'release/executable',
+      BuildMode.jitRelease => 'jitRelease/executable',
     };
   }
 }

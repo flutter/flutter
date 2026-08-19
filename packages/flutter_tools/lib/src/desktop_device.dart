@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:process/process.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'application_package.dart';
 import 'base/file_system.dart';
@@ -126,7 +128,7 @@ abstract class DesktopDevice extends Device {
     try {
       process = await _processManager.start(
         command,
-        environment: _computeEnvironment(debuggingOptions, traceStartup, route),
+        environment: computeEnvironment(debuggingOptions, traceStartup, route),
       );
     } on ProcessException catch (e) {
       _logger.printError('Unable to start executable "${command.join(' ')}": $e');
@@ -236,7 +238,7 @@ abstract class DesktopDevice extends Device {
   /// The format of the environment variables is:
   ///   * `FLUTTER_ENGINE_SWITCHES` to the number of switches.
   ///   * `FLUTTER_ENGINE_SWITCH_<N>` (indexing from 1) to the individual switches.
-  Map<String, String> _computeEnvironment(
+  Map<String, String> computeEnvironment(
     DebuggingOptions debuggingOptions,
     bool traceStartup,
     String? route,
@@ -360,16 +362,24 @@ abstract class DesktopDevice extends Device {
 /// discovery — see [SingleLaunchLogReader] for that.
 class DesktopLogReader extends DeviceLogReader {
   final _inputController = StreamController<List<int>>.broadcast();
+  final _stringController = StreamController<String>.broadcast();
+  bool _listeningToProcess = false;
+  StreamSubscription<void>? _stdoutSubscription;
+  StreamSubscription<void>? _stderrSubscription;
 
   /// Adds the stdout and stderr streams of the provided [process] to [logLines].
   void listenToProcessOutput(Process process) {
+    _listeningToProcess = true;
     process.stdout.listen(_inputController.add, onError: _inputController.addError);
     process.stderr.listen(_inputController.add, onError: _inputController.addError);
   }
 
   @override
   Stream<String> get logLines {
-    return _inputController.stream.transform(utf8LineDecoder);
+    return StreamGroup.merge<String>(<Stream<String>>[
+      _inputController.stream.transform(utf8LineDecoder),
+      _stringController.stream,
+    ]);
   }
 
   @override
@@ -377,11 +387,35 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   void dispose() {
-    // Nothing to dispose.
+    unawaited(_stdoutSubscription?.cancel());
+    unawaited(_stderrSubscription?.cancel());
   }
 
   @override
-  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {
+    if (_listeningToProcess) {
+      return;
+    }
+    try {
+      unawaited(connectedVmService.service.streamListen('Debug'));
+      await Future.wait(<Future<void>>[
+        connectedVmService.service.streamListen(vm_service.EventStreams.kStdout),
+        connectedVmService.service.streamListen(vm_service.EventStreams.kStderr),
+      ]);
+    } on vm_service.RPCError {
+      // Already subscribed.
+    }
+
+    void logMessage(vm_service.Event event) {
+      final String message = processVmServiceMessage(event);
+      if (message.isNotEmpty) {
+        _stringController.add(message);
+      }
+    }
+
+    _stdoutSubscription = connectedVmService.service.onStdoutEvent.listen(logMessage);
+    _stderrSubscription = connectedVmService.service.onStderrEvent.listen(logMessage);
+  }
 }
 
 /// A [DeviceLogReader] that mirrors `source` but closes [logLines] as soon
