@@ -69,6 +69,18 @@ public class FlutterActivityLaunchConfigsTest {
   @Test
   public void getInitialRoute_readsFromIntent() throws Exception {
     Context mockContext = mock(Context.class);
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    when(mockContext.getPackageManager()).thenReturn(mockPackageManager);
+    when(mockContext.getPackageName()).thenReturn("io.flutter.test");
+
+    ApplicationInfo applicationInfo = new ApplicationInfo();
+    applicationInfo.metaData = new Bundle();
+    applicationInfo.metaData.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"--route=/manifest/route\"]");
+    when(mockPackageManager.getApplicationInfo(
+            eq("io.flutter.test"), eq(PackageManager.GET_META_DATA)))
+        .thenReturn(applicationInfo);
+
     Intent intent = new Intent();
     intent.putExtra(FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE, "/intent/route");
 
