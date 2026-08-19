@@ -55,8 +55,7 @@ public class FlutterActivityLaunchConfigsTest {
 
     // Metadata without --route
     applicationInfo.metaData = new Bundle();
-    applicationInfo.metaData.putString(
-        "io.flutter.app.androidEngineShellArgs", "[\"--foo=bar\"]");
+    applicationInfo.metaData.putString("io.flutter.app.androidEngineShellArgs", "[\"--foo=bar\"]");
     assertNull(FlutterActivityLaunchConfigs.getInitialRouteFromManifest(mockContext));
 
     // NameNotFoundException
