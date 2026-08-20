@@ -62,6 +62,37 @@ void main() {
     expect(result.stdout, isNot(contains('exiting with code 0')));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/124793
+  testWithoutContext('flutter doctor is not verbose when preceded by a global flag', () async {
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      '--no-version-check',
+      'doctor',
+      '-v',
+    ]);
+
+    // Only printed by verbose tool.
+    expect(result.stdout, isNot(contains('exiting with code 0')));
+  });
+
+  testWithoutContext(
+    'flutter help -v shows hidden options when preceded by a global flag',
+    () async {
+      final ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        '--no-version-check',
+        'help',
+        '-v',
+      ]);
+
+      // Only shown in verbose help.
+      expect(result.stdout, contains('--local-engine'));
+
+      // Only printed by verbose tool.
+      expect(result.stdout, isNot(contains('exiting with code 0')));
+    },
+  );
+
   testWithoutContext('flutter doctor -vv super verbose', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, 'doctor', '-vv']);
 
