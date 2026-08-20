@@ -175,12 +175,18 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
 static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
 
+  // Hold frame_mutex while releasing these objects so the raster thread cannot
+  // be using them in present_layers concurrently. The unref may run their
+  // destructors, so the calling code (here) owns the locking rather than the
+  // objects themselves.
+  g_mutex_lock(&self->frame_mutex);
   g_clear_object(&self->compositor);
 
   // The EGL context and surface are released here; the EGL display is owned by
   // the engine and is left untouched by FlSubsurfaceEGL.
   g_clear_object(&self->egl);
   g_clear_object(&self->subsurface);
+  g_mutex_unlock(&self->frame_mutex);
 
   GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->unrealize(widget);
 }
@@ -255,12 +261,15 @@ static void fl_view_renderer_subsurface_present_layers(
     size_t layers_count) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(renderer);
 
-  // Frames may be presented before the widget is realized; ignore them.
+  g_mutex_lock(&self->frame_mutex);
+
+  // Frames may be presented before the widget is realized, or after it has been
+  // unrealized; ignore them. Checked under frame_mutex so unrealize cannot
+  // release these objects while a frame is being presented.
   if (self->compositor == nullptr || self->egl == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
     return;
   }
-
-  g_mutex_lock(&self->frame_mutex);
 
   if (layers_count == 0) {
     g_mutex_unlock(&self->frame_mutex);
