@@ -422,11 +422,7 @@ class ResidentWebRunner extends ResidentRunner {
 
   WebCompilerConfig get _compilerConfig {
     if (debuggingOptions.webUseWasm) {
-      return WasmCompilerConfig(
-        optimizationLevel: 0,
-        stripWasm: false,
-        renderer: debuggingOptions.webRenderer,
-      );
+      return WasmCompilerConfig(renderer: debuggingOptions.webRenderer);
     }
     return JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
