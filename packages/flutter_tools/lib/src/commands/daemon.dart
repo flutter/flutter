@@ -908,14 +908,10 @@ class AppDomain extends Domain {
     );
   }
 
-  /// Returns an error, or the service extension result (a map with two fixed
-  /// keys, `type` and `method`). The result may have one or more additional keys,
-  /// depending on the specific service extension end-point. For example:
+  /// Returns an error, or the service extension result. For example:
   ///
   ///     {
-  ///       "value":"android",
-  ///       "type":"_extensionType",
-  ///       "method":"ext.flutter.platformOverride"
+  ///       "value":"android"
   ///     }
   Future<Map<String, Object?>> callServiceExtension(Map<String, Object?> args) async {
     final String? appId = _getStringArg(args, 'appId', required: true);
