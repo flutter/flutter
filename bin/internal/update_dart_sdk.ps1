@@ -70,19 +70,6 @@ if ($env:FLUTTER_HOST_ARCH -eq "arm64") {
 }
 $dartSdkUrl = "$dartSdkBaseUrl/flutter_infra_release/flutter/$engineVersion/$dartZipName"
 
-if ((Test-Path $dartSdkPath) -or (Test-Path $dartSdkLicense)) {
-    # Move old SDK to a new location instead of deleting it in case it is still in use (e.g. by IntelliJ).
-    $oldDartSdkSuffix = 1
-    while (Test-Path "$cachePath\$oldDartSdkPrefix$oldDartSdkSuffix") { $oldDartSdkSuffix++ }
-
-    if (Test-Path $dartSdkPath) {
-        Rename-Item $dartSdkPath "$oldDartSdkPrefix$oldDartSdkSuffix"
-    }
-
-    if (Test-Path $dartSdkLicense) {
-        Rename-Item $dartSdkLicense "$oldDartSdkPrefix$oldDartSdkSuffix.LICENSE.md"
-    }
-}
 $dartSdkPathTemp = "$cachePath\dart-sdk.tmp"
 if (Test-Path $dartSdkPathTemp) {
     Remove-Item $dartSdkPathTemp -Recurse -Force
@@ -138,6 +125,20 @@ if (-not (Test-Path "$dartSdkPathTemp\dart-sdk")) {
     exit 1
 }
 
+# Move old SDK to a new location instead of deleting it in case it is still in use (e.g. by IntelliJ).
+if ((Test-Path $dartSdkPath) -or (Test-Path $dartSdkLicense)) {
+    $oldDartSdkSuffix = 1
+    while (Test-Path "$cachePath\$oldDartSdkPrefix$oldDartSdkSuffix") { $oldDartSdkSuffix++ }
+
+    if (Test-Path $dartSdkPath) {
+        Rename-Item $dartSdkPath "$oldDartSdkPrefix$oldDartSdkSuffix" -ErrorAction Stop
+    }
+
+    if (Test-Path $dartSdkLicense) {
+        Rename-Item $dartSdkLicense "$oldDartSdkPrefix$oldDartSdkSuffix.LICENSE.md" -ErrorAction Stop
+    }
+}
+
 # The unzip might have extracted LICENSE.dart_sdk_archive.md to the temp dir
 $tempLicense = "$dartSdkPathTemp\LICENSE.dart_sdk_archive.md"
 if (Test-Path $tempLicense) {
@@ -148,9 +149,6 @@ if (Test-Path $tempLicense) {
 }
 
 # Move the extracted SDK to the final location
-if (Test-Path $dartSdkPath) {
-    Remove-Item $dartSdkPath -Recurse -Force -ErrorAction Stop
-}
 try {
     Move-Item "$dartSdkPathTemp\dart-sdk" $dartSdkPath -ErrorAction Stop
 } finally {

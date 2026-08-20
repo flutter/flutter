@@ -133,12 +133,6 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
   DART_SDK_BASE_URL="${FLUTTER_STORAGE_BASE_URL:-https://storage.googleapis.com}${ENGINE_REALM:+/$ENGINE_REALM}"
   DART_SDK_URL="$DART_SDK_BASE_URL/flutter_infra_release/flutter/$ENGINE_VERSION/$DART_ZIP_NAME"
 
-  # if the sdk path exists, copy it to a temporary location
-  if [ -d "$DART_SDK_PATH" ]; then
-    rm -rf "$DART_SDK_PATH_OLD"
-    mv "$DART_SDK_PATH" "$DART_SDK_PATH_OLD"
-  fi
-
   # Create a temporary directory for extraction to ensure atomicity
   DART_SDK_PATH_TEMP="$FLUTTER_ROOT/bin/cache/dart-sdk.tmp"
   rm -rf -- "$DART_SDK_PATH_TEMP"
@@ -203,8 +197,13 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
   $FIND "$DART_SDK_PATH_TEMP/dart-sdk" -type d -exec chmod 755 {} +
   $FIND "$DART_SDK_PATH_TEMP/dart-sdk" -type f $IS_USER_EXECUTABLE -exec chmod a+x,a+r {} +
 
+  # Move old SDK to a temporary location in case it is still in use (e.g. by an IDE).
+  if [ -d "$DART_SDK_PATH" ]; then
+    rm -rf "$DART_SDK_PATH_OLD"
+    mv "$DART_SDK_PATH" "$DART_SDK_PATH_OLD"
+  fi
+
   # Move the extracted SDK to the final location
-  rm -rf -- "$DART_SDK_PATH"
   mv "$DART_SDK_PATH_TEMP/dart-sdk" "$DART_SDK_PATH" || {
     >&2 echo "Failed to move Dart SDK to final destination."
     rm -rf -- "$DART_SDK_PATH_TEMP"
