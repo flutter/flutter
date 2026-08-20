@@ -606,6 +606,11 @@ class TextLayout {
         );
       }
 
+      if (result.isEmpty) {
+        // We didn't find any intersections between the range and the line's visual blocks
+        continue;
+      }
+
       if (boxWidthStyle == ui.BoxWidthStyle.max && lineIndex < lines.length - 1) {
         // Add whitespaces box left/right for all the lines except the last one
         if (result.first.left > epsilon) {
