@@ -4259,16 +4259,19 @@ Future<void> testMain() async {
 
       expect(username.name, 'username');
       expect(password.name, 'current-password');
-      // Non-focused autofill fields are kept discoverable (a non-zero size,
-      // positioned next to the focused field) but non-interactive, so password
-      // managers detect and fill them without the invisible field intercepting
-      // taps meant for the app UI.
+      // Non-focused autofill fields are kept discoverable: a non-zero size,
+      // positioned next to the focused field, and taking part in hit testing.
+      // A password manager only fills a field whose own centre point hit-tests
+      // back to it, so a field excluded from hit testing is one it will not
+      // fill, and a login form can never be filled as a pair. Pointer input on
+      // them is swallowed instead (see the pointerdown/mousedown listeners),
+      // which keeps taps meant for the app from landing on an invisible field.
       expect(username.style.width, isNot('0px'));
       expect(username.style.height, isNot('0px'));
-      expect(username.style.pointerEvents, 'none');
+      expect(username.style.pointerEvents, isSafari ? 'none' : 'all');
       expect(password.style.width, isNot('0px'));
       expect(password.style.height, isNot('0px'));
-      expect(password.style.pointerEvents, 'none');
+      expect(password.style.pointerEvents, isSafari ? 'none' : 'all');
       expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
       // They are also removed from the tab order and the accessibility tree so
       // keyboard Tab and screen readers do not land on the invisible fields, while

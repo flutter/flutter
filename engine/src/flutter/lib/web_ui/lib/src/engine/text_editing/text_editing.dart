@@ -424,7 +424,7 @@ class EngineAutofillForm {
     // them from intercepting taps meant for the app UI.
     for (final MapEntry<String, DomHTMLElement> entry in elements.entries) {
       final bool isFocused = entry.key == focusedAutofill.uniqueIdentifier;
-      entry.value.style.pointerEvents = isFocused ? 'all' : 'none';
+      entry.value.style.pointerEvents = isFocused || !_isSafariStrategy ? 'all' : 'none';
       // The focused field stays interactive (its tabIndex is set in
       // _reuseDormantAutofillElementOrCreate); the others are kept discoverable for
       // password managers but out of the tab order and the accessibility tree, so
@@ -577,13 +577,27 @@ class EngineAutofillForm {
         _styleAutofillElements(
           htmlElement,
           shouldHideElement: false,
-          shouldDisablePointerEvents: true,
+          shouldDisablePointerEvents: _isSafariStrategy,
         );
         // Keep the proxy discoverable to password managers (which scan the DOM)
         // but out of the tab order and the accessibility tree, so keyboard Tab
         // and screen readers do not land on this invisible field.
         htmlElement.tabIndex = -1;
         htmlElement.setAttribute('aria-hidden', 'true');
+        // The proxy has to hit-test back to itself for a manager to consider it
+        // fillable, which also makes it a target for real clicks. Swallow those:
+        // a manager focuses a field with .focus(), which fires no pointer event,
+        // so it loses nothing, while a click on the invisible field becomes a
+        // no-op instead of moving the browser's focus somewhere the framework
+        // does not know about.
+        for (final String type in <String>['pointerdown', 'mousedown']) {
+          htmlElement.addEventListener(
+            type,
+            createDomEventListener((DomEvent event) {
+              event.preventDefault();
+            }),
+          );
+        }
       }
 
       elements[field.autofillInfo.uniqueIdentifier] = htmlElement;
