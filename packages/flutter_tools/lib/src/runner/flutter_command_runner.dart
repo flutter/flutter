@@ -60,8 +60,8 @@ abstract final class FlutterGlobalOptions {
 
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
+    required ToolContext toolContext,
     Analytics analytics = const NoOpAnalytics(),
-    ToolContext? toolContext,
     bool verboseHelp = false,
   }) : _analytics = analytics,
        _toolContext = toolContext,
@@ -248,29 +248,29 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ArgParser get argParser => _argParser;
   late final _argParser = ArgParser(
     allowTrailingOptions: false,
-    usageLineLength: _toolContext?.outputPreferences.wrapText ?? false
-        ? _toolContext?.outputPreferences.wrapColumn
+    usageLineLength: _toolContext.outputPreferences.wrapText
+        ? _toolContext.outputPreferences.wrapColumn
         : null,
   );
 
   @override
   String get usageFooter {
-    final OutputPreferences? outputPreferences = _toolContext?.outputPreferences;
+    final OutputPreferences outputPreferences = _toolContext.outputPreferences;
     return wrapText(
       'Run "flutter help -v" for verbose help output, including less commonly used options.',
-      columnWidth: outputPreferences?.wrapColumn ?? OutputPreferences.kDefaultTerminalColumns,
-      shouldWrap: outputPreferences?.wrapText ?? false,
+      columnWidth: outputPreferences.wrapColumn,
+      shouldWrap: outputPreferences.wrapText,
     );
   }
 
   @override
   String get usage {
     final String usageWithoutDescription = super.usage.substring(description.length + 2);
-    final OutputPreferences? outputPreferences = _toolContext?.outputPreferences;
+    final OutputPreferences outputPreferences = _toolContext.outputPreferences;
     final String prefix = wrapText(
       description,
-      shouldWrap: outputPreferences?.wrapText ?? false,
-      columnWidth: outputPreferences?.wrapColumn ?? OutputPreferences.kDefaultTerminalColumns,
+      shouldWrap: outputPreferences.wrapText,
+      columnWidth: outputPreferences.wrapColumn,
     );
     return '$prefix\n\n$usageWithoutDescription';
   }
@@ -298,20 +298,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   final Analytics _analytics;
-  final ToolContext? _toolContext;
+  final ToolContext _toolContext;
 
   /// The [Analytics] instance.
   Analytics get analytics => _analytics;
 
   /// The [ToolContext] instance.
-  ToolContext? get toolContext => _toolContext;
+  ToolContext get toolContext => _toolContext;
 
   // See https://github.com/flutter/flutter/issues/145158.
   late bool _machineFlagPresentInAnyCliArg;
 
   @override
   Future<void> run(Iterable<String> args) {
-    final ToolContext? toolContext = _toolContext;
     var exitWithCodeOne = false;
 
     // Have invocations of 'build', 'custom-devices', and 'pub' print out
@@ -332,7 +331,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return super.run(args).then((_) async {
       if (exitWithCodeOne) {
         // No need to print anything because the help was already printed.
-        await exitWithHooks(1, shutdownHooks: toolContext?.shutdownHooks ?? globals.shutdownHooks);
+        await exitWithHooks(1, shutdownHooks: _toolContext.shutdownHooks);
       }
     });
   }
@@ -346,8 +345,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// }
   /// ```
   Future<bool> _shouldCheckForUpdates(ArgResults topLevelResults) async {
-    final Stdio stdio = _toolContext?.stdio ?? globals.stdio;
-    final BotDetector botDetector = _toolContext?.botDetector ?? globals.botDetector;
+    final Stdio stdio = _toolContext.stdio;
+    final BotDetector botDetector = _toolContext.botDetector;
     // Check if the user has explicitly requested a version check.
     final bool versionCheckFlag =
         topLevelResults[FlutterGlobalOptions.kVersionCheckFlag] as bool? ?? false;
@@ -386,15 +385,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Stdio stdio = _toolContext?.stdio ?? globals.stdio;
-    final UserMessages userMessages = _toolContext?.userMessages ?? globals.userMessages;
-    final LocalEngineLocator? localEngineLocator =
-        _toolContext?.localEngineLocator ?? globals.localEngineLocator;
-    final Platform platform = _toolContext?.platform ?? globals.platform;
-    final Cache cache = _toolContext?.cache ?? globals.cache;
-    final FlutterVersion flutterVersion = _toolContext?.flutterVersion ?? globals.flutterVersion;
-    final Logger logger = _toolContext?.logger ?? globals.logger;
-    final SystemClock systemClock = _toolContext?.systemClock ?? globals.systemClock;
+    final Stdio stdio = _toolContext.stdio;
+    final UserMessages userMessages = _toolContext.userMessages;
+    final LocalEngineLocator localEngineLocator = _toolContext.localEngineLocator;
+    final Platform platform = _toolContext.platform;
+    final Cache cache = _toolContext.cache;
+    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
+    final Logger logger = _toolContext.logger;
+    final SystemClock systemClock = _toolContext.systemClock;
 
     final contextOverrides = <Type, Object?>{};
 
@@ -451,7 +449,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     // Set up the tooling configuration.
-    final EngineBuildPaths? engineBuildPaths = await localEngineLocator?.findEnginePath(
+    final EngineBuildPaths? engineBuildPaths = await localEngineLocator.findEnginePath(
       engineSourcePath: topLevelResults[FlutterGlobalOptions.kLocalEngineSrcPathOption] as String?,
       localEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineOption] as String?,
       localHostEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineHostOption] as String?,
@@ -536,7 +534,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
-    final FileSystem fs = _toolContext?.fs ?? globals.fs;
+    final FileSystem fs = _toolContext.fs;
     final String root = fs.path.absolute(Cache.flutterRoot!);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
@@ -546,7 +544,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// Get all pub packages in the Flutter repo.
   List<Directory> getRepoPackages() {
-    final FileSystem fs = _toolContext?.fs ?? globals.fs;
+    final FileSystem fs = _toolContext.fs;
     return getRepoRoots()
         .expand<String>((String root) => _gatherProjectPaths(fs, root))
         .map<Directory>((String dir) => fs.directory(dir))
