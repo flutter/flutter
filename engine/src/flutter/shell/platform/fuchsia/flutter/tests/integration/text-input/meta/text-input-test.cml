@@ -41,7 +41,6 @@
                 "fuchsia.ui.input3.Keyboard",
                 "fuchsia.intl.PropertyProvider",
                 "fuchsia.posix.socket.Provider",
-                "fuchsia.ui.pointerinjector.Registry",
                 "fuchsia.fonts.Provider",
                 "fuchsia.feedback.CrashReportingProductRegister",
                 "fuchsia.settings.Keyboard",
