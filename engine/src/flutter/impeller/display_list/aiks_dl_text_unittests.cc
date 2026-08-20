@@ -956,7 +956,8 @@ TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
 
   Font impeller_font(
       MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("Text A", font))
-          ->GetFont());
+          ->GetRuns()[0]
+          .GetFont());
 
   TextFrameFingerprint fp1{
       .run_count = 1,

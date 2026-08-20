@@ -2168,7 +2168,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
   Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
-  if (max_scale * text_frame->GetFont().GetMetrics().point_size >
+  if (max_scale * text_frame->GetRuns()[0].GetFont().GetMetrics().point_size >
       kMaxTextScale) {
     fml::StatusOr<flutter::DlPath> path = text_frame->GetPath();
     if (path.ok()) {
