@@ -20,6 +20,27 @@ final class ViewFocusBinding {
 
   StreamSubscription<int>? _onViewCreatedListener;
 
+  /// How long a blur that landed on nothing is given to turn out to be a focus
+  /// change inside the view after all. See [_handleFocusout].
+  ///
+  /// This waits on a pair of browser events, not on anything a user does. The
+  /// browser dispatches the `focusout` and the `focusin` that follows it in
+  /// adjacent tasks, about a millisecond apart when something steps between two
+  /// fields of a form, and the wait only has to outlast that. The rest is
+  /// headroom for a busy main thread: any value between a few milliseconds and
+  /// a tenth of a second behaves identically, so the exact number is not
+  /// load-bearing. It is deliberately not derived from a frame budget, which
+  /// depends on the display and has nothing to do with the task scheduling this
+  /// waits on.
+  ///
+  /// It cannot be zero: a zero timer is queued before the task carrying the
+  /// next focus, so it would fire first and defeat the point.
+  ///
+  /// Nothing waits on a password manager here. If focus never comes back, the
+  /// view is reported unfocused this much later than it once was.
+  static const Duration _unfocusGracePeriod = Duration(milliseconds: 32);
+  Timer? _pendingUnfocus;
+
   void init() {
     // We need a global listener here to know if the user was pressing "shift"
     // when the Flutter view receives focus, to move the Flutter focus to the
@@ -36,6 +57,8 @@ final class ViewFocusBinding {
     domDocument.body?.removeEventListener(_keyDown, _handleKeyDown);
     domDocument.body?.removeEventListener(_keyUp, _handleKeyUp);
     _onViewCreatedListener?.cancel();
+    _pendingUnfocus?.cancel();
+    _pendingUnfocus = null;
   }
 
   void changeViewFocus(int viewId, ui.ViewFocusState state) {
@@ -53,6 +76,10 @@ final class ViewFocusBinding {
   }
 
   late final DomEventListener _handleFocusin = createDomEventListener((DomEvent event) {
+    // Focus returned before the pending report went out, so the view never lost
+    // it. See [_handleFocusout].
+    _pendingUnfocus?.cancel();
+    _pendingUnfocus = null;
     event as DomFocusEvent;
     _handleFocusChange(event.target as DomElement?);
   });
@@ -70,7 +97,28 @@ final class ViewFocusBinding {
     }
 
     event as DomFocusEvent;
-    _handleFocusChange(event.relatedTarget as DomElement?);
+    final DomElement? willGainFocus = event.relatedTarget as DomElement?;
+
+    // A field of an autofill form blurring to nothing is not yet a view losing
+    // focus. A password manager fills a login form one field at a time, blurring
+    // each as it finishes before focusing the next, and reporting the view
+    // unfocused in between makes the framework drop its focus, which tears the
+    // text connection down and builds it back up between every field. Managers
+    // that give up when the form churns under them then fill only the first
+    // field. Wait a moment: a focus landing back in the view cancels the report.
+    //
+    // Only these fields defer. Anything else losing focus is reported at once,
+    // as before.
+    if (_isAutofillFormField(event.target as DomElement?)) {
+      _pendingUnfocus?.cancel();
+      _pendingUnfocus = Timer(_unfocusGracePeriod, () {
+        _pendingUnfocus = null;
+        _handleFocusChange(willGainFocus);
+      });
+      return;
+    }
+
+    _handleFocusChange(willGainFocus);
   });
 
   late final DomEventListener _handleKeyDown = createDomEventListener((DomEvent event) {
@@ -85,6 +133,21 @@ final class ViewFocusBinding {
   late final DomEventListener _handleKeyUp = createDomEventListener((DomEvent event) {
     _viewFocusDirection = ui.ViewFocusDirection.forward;
   });
+
+  /// Whether [element] is one of the text fields the engine synthesises for an
+  /// autofill group, which are the only elements a password manager moves the
+  /// focus between. They are the engine's own inputs, so they always sit in a
+  /// `<form>` it created.
+  bool _isAutofillFormField(DomElement? element) {
+    if (element == null) {
+      return false;
+    }
+    final String tag = element.tagName.toLowerCase();
+    if (tag != 'input' && tag != 'textarea') {
+      return false;
+    }
+    return element.closest('form') != null;
+  }
 
   void _handleFocusChange(DomElement? focusedElement) {
     final int? viewId = _viewId(focusedElement);
