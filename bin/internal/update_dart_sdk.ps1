@@ -132,21 +132,30 @@ If (Get-Command 7z -errorAction SilentlyContinue) {
 
 Remove-Item $dartSdkZip
 
+if (-not (Test-Path "$dartSdkPathTemp\dart-sdk")) {
+    Remove-Item $dartSdkPathTemp -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Error "Dart SDK extraction failed: '$dartSdkPathTemp\dart-sdk' not found."
+    exit 1
+}
+
 # The unzip might have extracted LICENSE.dart_sdk_archive.md to the temp dir
 $tempLicense = "$dartSdkPathTemp\LICENSE.dart_sdk_archive.md"
 if (Test-Path $tempLicense) {
     if (Test-Path $dartSdkLicense) {
-        Remove-Item $dartSdkLicense -Force
+        Remove-Item $dartSdkLicense -Force -ErrorAction Stop
     }
-    Move-Item $tempLicense $dartSdkLicense
+    Move-Item $tempLicense $dartSdkLicense -ErrorAction Stop
 }
 
 # Move the extracted SDK to the final location
 if (Test-Path $dartSdkPath) {
-    Remove-Item $dartSdkPath -Recurse -Force
+    Remove-Item $dartSdkPath -Recurse -Force -ErrorAction Stop
 }
-Move-Item "$dartSdkPathTemp\dart-sdk" $dartSdkPath
-Remove-Item $dartSdkPathTemp -Recurse -Force
+try {
+    Move-Item "$dartSdkPathTemp\dart-sdk" $dartSdkPath -ErrorAction Stop
+} finally {
+    Remove-Item $dartSdkPathTemp -Recurse -Force -ErrorAction SilentlyContinue
+}
 $engineVersion | Out-File $engineStamp -Encoding ASCII
 
 # Try to delete all old SDKs and license files.

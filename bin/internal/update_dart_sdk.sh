@@ -189,6 +189,12 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
   }
   rm -f -- "$DART_SDK_ZIP"
 
+  if [ ! -d "$DART_SDK_PATH_TEMP/dart-sdk" ]; then
+    >&2 echo "Dart SDK extraction failed: '$DART_SDK_PATH_TEMP/dart-sdk' not found."
+    rm -rf -- "$DART_SDK_PATH_TEMP"
+    exit 1
+  fi
+
   # The unzip might have extracted LICENSE.dart_sdk_archive.md to the temp dir
   if [ -f "$DART_SDK_PATH_TEMP/LICENSE.dart_sdk_archive.md" ]; then
     mv "$DART_SDK_PATH_TEMP/LICENSE.dart_sdk_archive.md" "$FLUTTER_ROOT/bin/cache/LICENSE.dart_sdk_archive.md"
@@ -199,7 +205,11 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
 
   # Move the extracted SDK to the final location
   rm -rf -- "$DART_SDK_PATH"
-  mv "$DART_SDK_PATH_TEMP/dart-sdk" "$DART_SDK_PATH"
+  mv "$DART_SDK_PATH_TEMP/dart-sdk" "$DART_SDK_PATH" || {
+    >&2 echo "Failed to move Dart SDK to final destination."
+    rm -rf -- "$DART_SDK_PATH_TEMP"
+    exit 1
+  }
   rm -rf -- "$DART_SDK_PATH_TEMP"
 
   echo "$ENGINE_VERSION" > "$ENGINE_STAMP"
