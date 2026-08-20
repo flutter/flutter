@@ -1813,7 +1813,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Determine the type of change that occurred by analyzing the IME change history.
     Integer changeType = null;
-    if (Build.VERSION.SDK_INT >= 37) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
       int elementsToPoll = 0;
       int index = 0;
       for (ImeTextChange change : imeTextChanges) {

@@ -178,12 +178,14 @@ public class InputConnectionAdaptor extends BaseInputConnection
    * Translates the IME's text change state into an Android AccessibilityEvent change type, and
    * queues it into the AccessibilityBridge.
    *
+   * @param textAttribute the TextAttribute passed in with the text change, or null if none.
    * @param isComposing true if the text is still in the composition phase, false if the text has
    *     been finalized by the user.
+   * @param newValue the new text string value.
    */
   private void updateTextChangeType(
       TextAttribute textAttribute, boolean isComposing, String newValue) {
-    if (Build.VERSION.SDK_INT >= 37) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
       boolean isSuggestion = textAttribute != null && textAttribute.isTextSuggestionSelected();
       int changeType;
       if (isSuggestion) {
