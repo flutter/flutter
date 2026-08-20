@@ -394,15 +394,70 @@ void main() {
           initializeFlutterRoot: false,
         );
       });
+
+      group('toolContext', () {
+        test('is null by default when not provided', () {
+          final runner = FlutterCommandRunner();
+          expect(runner.toolContext, isNull);
+        });
+
+        test('is preserved when provided to constructor', () {
+          final fakeToolContext = FakeToolContext();
+          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
+          expect(runner.toolContext, same(fakeToolContext));
+        });
+
+        test(
+          'command attached to runner without toolContext evaluates toolContext to null without throwing',
+          () {
+            final runner = FlutterCommandRunner();
+            final command = FakeFlutterCommand();
+            runner.addCommand(command);
+            expect(command.toolContext, isNull);
+          },
+        );
+
+        test('command attached to runner with toolContext inherits runner toolContext', () {
+          final fakeToolContext = FakeToolContext();
+          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
+          final command = FakeFlutterCommand();
+          runner.addCommand(command);
+          expect(command.toolContext, same(fakeToolContext));
+        });
+
+        testUsingContext(
+          'runs command attached to runner without toolContext falling back to ambient globals',
+          () async {
+            final runner = FlutterCommandRunner();
+            final command = FakeFlutterCommand();
+            runner.addCommand(command);
+            await runner.run(<String>['fake']);
+            expect(command.ran, isTrue);
+            expect(command.preferences.wrapText, isFalse);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Stdio: () => FakeStdio(hasFakeTerminal: false),
+            OutputPreferences: () => OutputPreferences.test(),
+            FlutterVersion: () => FakeFlutterVersion(),
+            BotDetector: () => const FakeBotDetector(false),
+            Platform: () => platform,
+          },
+          initializeFlutterRoot: false,
+        );
+      });
     });
   });
 }
 
 class FakeFlutterCommand extends FlutterCommand {
+  bool ran = false;
   late OutputPreferences preferences;
 
   @override
   Future<FlutterCommandResult> runCommand() {
+    ran = true;
     preferences = globals.outputPreferences;
     return Future<FlutterCommandResult>.value(const FlutterCommandResult(ExitStatus.success));
   }
