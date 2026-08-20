@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:test/fake.dart';
 import 'package:test/test.dart';
 
 import '../../src/context.dart';
@@ -40,6 +41,34 @@ class _SecondaryConfigurationExtension extends ConfigurationExtension {
       ),
     ];
   }
+}
+
+class _FailingConfigurationExtension extends ConfigurationExtension {
+  @override
+  String get title => 'Failing Configuration Extension';
+
+  @override
+  Future<List<FeatureFlag>> getFeatureFlags() async {
+    throw Exception('Simulated feature flags error');
+  }
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() async {
+    throw Exception('Simulated config options error');
+  }
+}
+
+class _FakeExtensionConnection extends Fake implements ExtensionConnection {
+  _FakeExtensionConnection({this.response});
+
+  final Object? response;
+
+  @override
+  Future<Object?> sendRequest(
+    String method, [
+    Object? params,
+    Duration timeout = const Duration(seconds: 5),
+  ]) async => response;
 }
 
 void _secondaryExtensionEntryPoint(SendPort sendPort) {
@@ -148,6 +177,55 @@ void main() {
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+      },
+    );
+
+    testUsingContext(
+      'ExtensionConfiguration handles failing extensions gracefully without failing other extensions',
+      () async {
+        final logger = BufferLogger.test();
+        final config = ExtensionConfiguration(
+          extensions: <ConfigurationExtension>[
+            _FailingConfigurationExtension(),
+            _SecondaryConfigurationExtension(),
+          ],
+          logger: logger,
+        );
+
+        final List<FeatureFlag> flags = await config.fetchFeatureFlags();
+        expect(flags, hasLength(1));
+        expect(flags.first.name, 'enable-secondary-feature');
+
+        final List<ConfigOption> options = await config.fetchConfigurations();
+        expect(options, hasLength(1));
+        expect(options.first.name, 'secondary-config-key');
+
+        final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
+        expect(groups, hasLength(1));
+        expect(groups.first.title, 'Secondary Configuration Extension');
+      },
+    );
+
+    testUsingContext(
+      'ConfigurationExtensionClient handles null and invalid responses gracefully',
+      () async {
+        final logger = BufferLogger.test();
+        final clientWithNull = ConfigurationExtensionClient(
+          _FakeExtensionConnection(),
+          logger: logger,
+        );
+
+        expect(await clientWithNull.fetchTitle(), 'Tool Extension Configuration');
+        expect(await clientWithNull.getFeatureFlags(), isEmpty);
+        expect(await clientWithNull.getConfigurations(), isEmpty);
+
+        final clientWithInvalid = ConfigurationExtensionClient(
+          _FakeExtensionConnection(response: 'not-a-list'),
+          logger: logger,
+        );
+
+        expect(await clientWithInvalid.getFeatureFlags(), isEmpty);
+        expect(await clientWithInvalid.getConfigurations(), isEmpty);
       },
     );
   });

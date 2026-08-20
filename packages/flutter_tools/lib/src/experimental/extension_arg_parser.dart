@@ -93,7 +93,9 @@ mixin ExtensionArgParserMixin on FlutterCommand {
       _customArgParser = buildDynamicArgParser(baseArgParser);
       // Re-add subcommands to the custom parser to ensure they are not lost.
       for (final MapEntry<String, Command<void>> entry in subcommands.entries) {
-        _customArgParser!.addCommand(entry.key, entry.value.argParser);
+        if (!_customArgParser!.commands.containsKey(entry.key)) {
+          _customArgParser!.addCommand(entry.key, entry.value.argParser);
+        }
       }
     }
     return _customArgParser!;

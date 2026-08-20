@@ -27,6 +27,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   final bool _verboseHelp;
 
+  List<ExtensionSettingsGroup> _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
   List<FeatureFlag> _extensionFeatureFlags = const <FeatureFlag>[];
   List<ConfigOption> _extensionConfigOptions = const <ConfigOption>[];
 
@@ -112,6 +113,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
     if (activeConfig != null) {
       final List<ExtensionSettingsGroup> groups = await activeConfig.fetchExtensionSettings();
+      _extensionSettingsGroups = groups;
       _extensionFeatureFlags = groups.expand((ExtensionSettingsGroup g) => g.featureFlags).toList();
       _extensionConfigOptions = groups
           .expand((ExtensionSettingsGroup g) => g.configOptions)
@@ -178,10 +180,22 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       }
     }
     for (final FeatureFlag flag in _extensionFeatureFlags) {
-      newParser.addFlag(flag.name, help: flag.help, defaultsTo: flag.enabledByDefault);
+      if (!newParser.options.containsKey(flag.name)) {
+        newParser.addFlag(flag.name, help: flag.help, defaultsTo: flag.enabledByDefault);
+      } else {
+        globals.printTrace(
+          'Extension feature flag "${flag.name}" conflicts with an existing option and was skipped.',
+        );
+      }
     }
     for (final ConfigOption option in _extensionConfigOptions) {
-      newParser.addOption(option.name, help: option.help, defaultsTo: option.value);
+      if (!newParser.options.containsKey(option.name)) {
+        newParser.addOption(option.name, help: option.help, defaultsTo: option.value);
+      } else {
+        globals.printTrace(
+          'Extension config option "${option.name}" conflicts with an existing option and was skipped.',
+        );
+      }
     }
     return newParser;
   }
@@ -400,8 +414,10 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     }
 
     final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
-    if (activeConfig != null) {
-      final List<ExtensionSettingsGroup> groups = await activeConfig.fetchExtensionSettings();
+    final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
+        ? _extensionSettingsGroups
+        : (await activeConfig?.fetchExtensionSettings()) ?? const <ExtensionSettingsGroup>[];
+    if (groups.isNotEmpty) {
       if (groups.any(
         (ExtensionSettingsGroup g) => g.featureFlags.isNotEmpty || g.configOptions.isNotEmpty,
       )) {

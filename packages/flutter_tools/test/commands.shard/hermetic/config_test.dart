@@ -344,6 +344,34 @@ void main() {
         Analytics: () => fakeAnalytics,
       },
     );
+
+    testUsingContext(
+      'conflicting extension options and feature flags are skipped without throwing',
+      () async {
+        final mockExtension = FakeConfigurationExtension(
+          title: 'Conflicting Extension',
+          featureFlags: <FeatureFlag>[
+            const FeatureFlag(name: 'analytics', help: 'Conflicting analytics flag'),
+          ],
+          configOptions: <ConfigOption>[
+            const ConfigOption(name: 'android-sdk', help: 'Conflicting android-sdk option'),
+          ],
+        );
+        final fakeExtensionManager = FakeExtensionManager(
+          extensions: <ConfigurationExtension>[mockExtension],
+        );
+
+        final configCommand = ConfigCommand(extensionManager: fakeExtensionManager);
+        await configCommand.initializeDynamicOptions();
+        final ArgParser parser = configCommand.argParser;
+
+        expect(parser.options.containsKey('analytics'), isTrue);
+        expect(parser.options.containsKey('android-sdk'), isTrue);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
+      },
+    );
   });
 }
 
