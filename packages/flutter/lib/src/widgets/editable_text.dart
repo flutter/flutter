@@ -282,8 +282,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases. This property can
   /// be set from a listener added to this [TextEditingController].
   ///
-  /// Setting this does not run [TextInputFormatter]s. See the discussion at
-  /// [TextEditingController].
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
@@ -292,8 +292,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     );
   }
 
-  /// Setting this does not run [TextInputFormatter]s. See the discussion at
-  /// [TextEditingController].
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   @override
   set value(TextEditingValue newValue) {
     assert(
@@ -356,8 +356,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// If the new selection is outside the composing range, the composing range is
   /// cleared.
   ///
-  /// Setting this does not run [TextInputFormatter]s. See the discussion at
-  /// [TextEditingController].
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   set selection(TextSelection newSelection) {
     if (text.length < newSelection.end || text.length < newSelection.start) {
       throw FlutterError('invalid text selection: $newSelection');
@@ -378,8 +378,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   ///
-  /// Calling this method does not run [TextInputFormatter]s. See the
-  /// discussion at [TextEditingController].
+  /// Calling this method does not run [TextInputFormatter]s. Apply them
+  /// manually if needed.
   void clear() {
     value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
   }
@@ -395,8 +395,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   ///
-  /// Calling this method does not run [TextInputFormatter]s. See the
-  /// discussion at [TextEditingController].
+  /// Calling this method does not run [TextInputFormatter]s. Apply them
+  /// manually if needed.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
   }
