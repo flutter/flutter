@@ -1598,6 +1598,7 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       // events (like blur). These events might invalidate the current
       // inputConfiguration or disable the strategy before placeForm() returns.
       // Therefore, we must defensively check if the element is still valid/present.
+      //
       focusedFormElement?.focusWithoutScroll();
       moveFocusToActiveDomElement();
     }
@@ -1794,6 +1795,7 @@ abstract class DefaultTextEditingStrategy
   bool _appendedToForm = false;
 
   DomHTMLFormElement? get focusedFormElement => inputConfiguration.autofillGroup?.formElement;
+
 
   /// Scrolls the active DOM element into view if running inside an iframe
   /// or in multi-view mode.
@@ -2286,19 +2288,7 @@ abstract class DefaultTextEditingStrategy
       // UX. We should reevaluate what it is we're trying to do here. Perhaps
       // there's a better way.
       //
-      // Exception: do not grab focus back when it is moving to another field of
-      // the same autofill form. Password managers focus each field of the login
-      // form in turn as they fill it; fighting that movement tears the text
-      // connection down and recreates it repeatedly, and strict managers (e.g.
-      // Bitwarden) detect that churn as page interference and disable autofill.
-      // Let the manager walk the fields -- the field listeners still forward the
-      // values it fills.
-      final DomHTMLFormElement? autofillForm = inputConfiguration.autofillGroup?.formElement;
-      final bool movingWithinAutofillForm =
-          autofillForm != null && autofillForm.contains(willGainFocusElement);
-      if (!movingWithinAutofillForm) {
-        moveFocusToActiveDomElement();
-      }
+      moveFocusToActiveDomElement();
     }
   }
 
@@ -2426,6 +2416,8 @@ abstract class DefaultTextEditingStrategy
   void moveFocusToActiveDomElement() {
     activeDomElement.focusWithoutScroll();
   }
+
+
 }
 
 /// IOS/Safari behaviour for text editing.

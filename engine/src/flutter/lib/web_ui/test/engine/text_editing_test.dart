@@ -3621,6 +3621,30 @@ Future<void> testMain() async {
       });
     }
 
+    test('moving to another field of the same form focuses the field moved to', () async {
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+
+      final fields = openFormFocusing('email', send);
+      expect(domDocument.activeElement, fields.username);
+
+      // The user taps the password field, so the framework connects a new
+      // client for it. The field being left still holds the browser's focus at
+      // that point, because the engine blurs it asynchronously, which looks
+      // exactly like a password manager holding a field of the form. The field
+      // the framework moved to still has to end up focused, or there is
+      // nothing for the user to type into.
+      final fieldsAfterMove = openFormFocusing('password', send);
+
+      // Compared by name too, so a failure says which field ended up focused.
+      expect((domDocument.activeElement! as DomHTMLInputElement).name, 'current-password');
+      expect(domDocument.activeElement, fieldsAfterMove.password);
+      expect(domDocument.activeElement, textEditing!.strategy.domElement);
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
     test('forwards a fill on the previously focused field after the connection closes', () async {
       // A password manager can write into the field after the framework
       // already closed the connection (the user confirms the fill dialog after
