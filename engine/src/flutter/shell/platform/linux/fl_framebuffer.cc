@@ -96,7 +96,7 @@ static GLuint create_texture(GLint format, size_t width, size_t height) {
   return texture_id;
 }
 
-static void attach_depth_stencil(GLuint framebuffer_id, GLuint depth_stencil) {
+static void attach_depth_stencil(GLuint depth_stencil) {
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                             GL_RENDERBUFFER, depth_stencil);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
@@ -128,7 +128,7 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
   glGenRenderbuffers(1, &self->depth_stencil);
   glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-  attach_depth_stencil(self->framebuffer_id, self->depth_stencil);
+  attach_depth_stencil(self->depth_stencil);
 
   return self;
 }
@@ -161,7 +161,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
       glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
       glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, 4,
                                           GL_DEPTH24_STENCIL8, width, height);
-      attach_depth_stencil(self->framebuffer_id, self->depth_stencil);
+      attach_depth_stencil(self->depth_stencil);
     } else if (check_supports_offscreen_msaa()) {
       // Offscreen MSAA uses a multisample renderbuffer instead of a texture.
       // The multisample resolve occurs in fl_compositor_opengl_composite_layers
@@ -178,7 +178,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
       glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
       glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8,
                                        width, height);
-      attach_depth_stencil(self->framebuffer_id, self->depth_stencil);
+      attach_depth_stencil(self->depth_stencil);
     } else {
       self->texture_id = create_texture(general_format, width, height);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -188,7 +188,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
       glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width,
                             height);
-      attach_depth_stencil(self->framebuffer_id, self->depth_stencil);
+      attach_depth_stencil(self->depth_stencil);
     }
   } else {
     self->texture_id = create_texture(general_format, width, height);
@@ -198,7 +198,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
     glGenRenderbuffers(1, &self->depth_stencil);
     glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-    attach_depth_stencil(self->framebuffer_id, self->depth_stencil);
+    attach_depth_stencil(self->depth_stencil);
   }
 
   return self;
