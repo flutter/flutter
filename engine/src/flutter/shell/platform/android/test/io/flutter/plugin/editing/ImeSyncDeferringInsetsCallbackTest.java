@@ -25,6 +25,7 @@ import org.robolectric.annotation.Config;
 @TargetApi(API_LEVELS.API_30)
 @Config(sdk = {API_LEVELS.API_30, API_LEVELS.API_34})
 @RunWith(AndroidJUnit4.class)
+@SuppressWarnings("deprecation")
 public class ImeSyncDeferringInsetsCallbackTest {
   // Target settled IME keyboard height in pixels.
   private static final int FINAL_IME_BOTTOM_INSET = 100;
@@ -584,13 +585,14 @@ public class ImeSyncDeferringInsetsCallbackTest {
             .build();
     callback.getInsetsListener().onApplyWindowInsets(view, imeTargetInsets);
 
-    // 2. A non-IME animation (e.g. status bar transition) prepares during IME animation.
+    // 2. A non-IME animation (e.g. status bar transition) prepares during IME animation,
+    // followed by target insets delivery per Android WindowInsetsAnimation contract.
     WindowInsetsAnimation statusBarAnimation = mock(WindowInsetsAnimation.class);
     when(statusBarAnimation.getTypeMask()).thenReturn(WindowInsets.Type.statusBars());
     callback.getAnimationCallback().onPrepare(statusBarAnimation);
+    callback.getInsetsListener().onApplyWindowInsets(view, imeTargetInsets);
 
-    // 3. onProgress for IME animation should NOT be stalled by needsSave from the status bar
-    // animation.
+    // 3. onProgress for IME animation smoothly continues after target insets capture.
     when(imeAnimation.getInterpolatedFraction()).thenReturn(0.5f);
     WindowInsets midProgressInsets =
         new WindowInsets.Builder()
@@ -623,5 +625,141 @@ public class ImeSyncDeferringInsetsCallbackTest {
     callback.remove();
     verify(view).setWindowInsetsAnimationCallback(null);
     verify(view).setOnApplyWindowInsetsListener(null);
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.IDLE,
+        callback.getStateMachine().getState());
+    assertEquals(0, callback.getStateMachine().getStartImeBottom());
+    assertEquals(0, callback.getStateMachine().getCurrentImeBottom());
+  }
+
+  /**
+   * Tests discrete state transitions of AnimationStateMachine across a full animation lifecycle.
+   *
+   * <p>Rationale / Added for: Validates the encapsulated State Machine helper class transitions
+   * explicitly: IDLE -> PREPARED -> ANIMATING -> IDLE.
+   */
+  @Test
+  public void stateMachine_fullLifecycleTransitions() {
+    View view = mock(View.class);
+    ImeSyncDeferringInsetsCallback.AnimationStateMachine stateMachine =
+        new ImeSyncDeferringInsetsCallback.AnimationStateMachine(WindowInsets.Type.ime());
+
+    // 1. Initial State: IDLE
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.IDLE, stateMachine.getState());
+
+    // 2. onPrepare -> PREPARED
+    WindowInsetsAnimation imeAnimation = mock(WindowInsetsAnimation.class);
+    when(imeAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+    stateMachine.onPrepare(imeAnimation);
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.PREPARED,
+        stateMachine.getState());
+
+    // 3. onApplyWindowInsets -> ANIMATING
+    WindowInsets targetInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, FINAL_IME_BOTTOM_INSET))
+            .build();
+    WindowInsets consumedResult = stateMachine.onApplyWindowInsets(view, targetInsets);
+    assertEquals(WindowInsets.CONSUMED, consumedResult);
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.ANIMATING,
+        stateMachine.getState());
+
+    // 4. onProgress -> remains ANIMATING
+    when(imeAnimation.getInterpolatedFraction()).thenReturn(0.5f);
+    WindowInsets progressInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50))
+            .build();
+    stateMachine.onProgress(view, progressInsets, Collections.singletonList(imeAnimation));
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.ANIMATING,
+        stateMachine.getState());
+    assertEquals(50, stateMachine.getCurrentImeBottom());
+
+    // 5. onEnd -> settles and transitions to IDLE
+    stateMachine.onEnd(view, imeAnimation);
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.IDLE, stateMachine.getState());
+    assertEquals(100, stateMachine.getCurrentImeBottom());
+  }
+
+  /**
+   * Tests discrete state transition when an animation is aborted before onApplyWindowInsets.
+   *
+   * <p>Rationale / Added for: Verifies that onEnd while in PREPARED state resets cleanly to IDLE
+   * without applying stale insets.
+   */
+  @Test
+  public void stateMachine_abortedLifecycle_resetsToIdle() {
+    View view = mock(View.class);
+    ImeSyncDeferringInsetsCallback.AnimationStateMachine stateMachine =
+        new ImeSyncDeferringInsetsCallback.AnimationStateMachine(WindowInsets.Type.ime());
+
+    WindowInsetsAnimation imeAnimation = mock(WindowInsetsAnimation.class);
+    when(imeAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+    stateMachine.onPrepare(imeAnimation);
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.PREPARED,
+        stateMachine.getState());
+
+    // Aborted: onEnd called immediately
+    stateMachine.onEnd(view, imeAnimation);
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.IDLE, stateMachine.getState());
+  }
+
+  /**
+   * Tests that onEnd transitions to IDLE before invoking view.dispatchApplyWindowInsets.
+   *
+   * <p>Rationale / Added for: Fixes a critical defect identified in adversarial review. In a real
+   * Android View hierarchy, view.dispatchApplyWindowInsets immediately forwards to the view's
+   * OnApplyWindowInsetsListener (the callback's insets listener). If state is still ANIMATING,
+   * onApplyWindowInsets returns CONSUMED and drops the final insets. Transitioning to IDLE before
+   * dispatching ensures the settled insets are delivered to view.onApplyWindowInsets.
+   */
+  @Test
+  public void stateMachine_onEnd_transitionsToIdleBeforeDispatchingSoViewReceivesSettledInsets() {
+    View view = mock(View.class);
+    ImeSyncDeferringInsetsCallback.AnimationStateMachine stateMachine =
+        new ImeSyncDeferringInsetsCallback.AnimationStateMachine(WindowInsets.Type.ime());
+
+    WindowInsetsAnimation imeAnimation = mock(WindowInsetsAnimation.class);
+    when(imeAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+    // 1. Prepare and capture target insets
+    stateMachine.onPrepare(imeAnimation);
+    WindowInsets targetInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, FINAL_IME_BOTTOM_INSET))
+            .build();
+    stateMachine.onApplyWindowInsets(view, targetInsets);
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.ANIMATING,
+        stateMachine.getState());
+
+    // 2. Simulate Android framework forwarding: dispatchApplyWindowInsets invokes
+    // onApplyWindowInsets
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              WindowInsets insets = invocation.getArgument(0);
+              return stateMachine.onApplyWindowInsets(view, insets);
+            })
+        .when(view)
+        .dispatchApplyWindowInsets(org.mockito.ArgumentMatchers.any(WindowInsets.class));
+
+    // 3. onEnd is called
+    stateMachine.onEnd(view, imeAnimation);
+
+    // State is IDLE, and view.onApplyWindowInsets was invoked with targetInsets
+    assertEquals(
+        ImeSyncDeferringInsetsCallback.AnimationStateMachine.State.IDLE, stateMachine.getState());
+    ArgumentCaptor<WindowInsets> captor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view, org.mockito.Mockito.atLeastOnce()).onApplyWindowInsets(captor.capture());
+    assertEquals(
+        FINAL_IME_BOTTOM_INSET, captor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
   }
 }
