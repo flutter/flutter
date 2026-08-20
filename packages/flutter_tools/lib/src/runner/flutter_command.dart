@@ -169,7 +169,13 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
+  FlutterCommand({this.verboseHelp = false});
+
+  /// Whether this command was invoked with verbose help enabled.
+  final bool verboseHelp;
+
   /// The currently executing command (or sub-command).
+
   ///
   /// Will be `null` until the top-most command has begun execution.
   static FlutterCommand? get current => context.get<FlutterCommand>();

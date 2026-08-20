@@ -102,6 +102,7 @@ abstract final class CommonOptions {
 
   static const enableExperiment = MultiOptionDescriptor(
     name: FlutterOptions.kEnableExperiment,
+    verboseOnly: true,
     help:
         'The name of an experimental Dart feature to enable. '
         'Multiple experiments can be enabled by repeating "--enable-experiment".',

@@ -14,6 +14,7 @@ class _FakeCommand extends FlutterCommand {
   _FakeCommand({
     required this.name,
     required this.description,
+    super.verboseHelp = false,
     List<OptionBundle> bundles = const <OptionBundle>[],
   }) {
     registerOptionBundles(bundles);
@@ -253,6 +254,44 @@ void main() {
 
       expect(command.usage, contains('Section Header'));
       expect(command.usage, contains('--[no-]titled-flag'));
+    });
+
+    testUsingContext('auto-wires verboseHelp to dynamically hide or show verboseOnly options', () {
+      const verboseFlag = FlagOptionDescriptor(
+        name: 'internal-flag',
+        verboseOnly: true,
+        help: 'Internal flag help',
+      );
+      const standardFlag = FlagOptionDescriptor(name: 'public-flag', help: 'Public flag help');
+      const bundle = _SimpleBundle(
+        descriptors: <OptionDescriptor<Object?>>[verboseFlag, standardFlag],
+      );
+
+      final normalCommand = _FakeCommand(
+        name: 'build',
+        description: 'Build command',
+        bundles: const <OptionBundle>[bundle],
+      );
+
+      createTestCommandRunner(normalCommand);
+
+      expect(normalCommand.argParser.options['internal-flag']!.hide, isTrue);
+      expect(normalCommand.argParser.options['public-flag']!.hide, isFalse);
+      expect(normalCommand.usage, isNot(contains('internal-flag')));
+      expect(normalCommand.usage, contains('public-flag'));
+
+      final verboseCommand = _FakeCommand(
+        name: 'build',
+        description: 'Build command',
+        verboseHelp: true,
+        bundles: const <OptionBundle>[bundle],
+      );
+      createTestCommandRunner(verboseCommand);
+
+      expect(verboseCommand.argParser.options['internal-flag']!.hide, isFalse);
+      expect(verboseCommand.argParser.options['public-flag']!.hide, isFalse);
+      expect(verboseCommand.usage, contains('internal-flag'));
+      expect(verboseCommand.usage, contains('public-flag'));
     });
   });
 }

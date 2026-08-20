@@ -36,7 +36,7 @@ abstract class OptionBundle {
     }
     onRegister(command);
     for (final OptionDescriptor<Object?> descriptor in descriptors) {
-      descriptor.addTo(parser, registry: registry);
+      descriptor.addTo(parser, registry: registry, verboseHelp: command.verboseHelp);
     }
     for (final OptionBundle subBundle in subBundles) {
       subBundle.register(command, parser, registry);

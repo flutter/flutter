@@ -100,6 +100,7 @@ abstract final class WebOptions {
   static const dumpInfo = FlagOptionDescriptor(
     name: 'dump-info',
     negatable: false,
+    verboseOnly: true,
     help:
         'Passes "--dump-info" to the Javascript compiler which generates '
         'information about the generated code in main.dart.js.info.json.',
@@ -107,6 +108,7 @@ abstract final class WebOptions {
 
   static const minifyJs = NullableFlagOptionDescriptor(
     name: 'minify-js',
+    verboseOnly: true,
     help:
         'Generate minified output for js. '
         'If not explicitly set, uses the compilation mode (debug, profile, release).',
@@ -114,6 +116,7 @@ abstract final class WebOptions {
 
   static const minifyWasm = NullableFlagOptionDescriptor(
     name: 'minify-wasm',
+    verboseOnly: true,
     help:
         'Generate minified output for wasm. '
         'If not explicitly set, uses the compilation mode (debug, profile, release).',
@@ -121,6 +124,7 @@ abstract final class WebOptions {
 
   static const enableWasmDeferredLoading = FlagOptionDescriptor(
     name: 'enable-wasm-deferred-loading',
+    verboseOnly: true,
     help: 'Enable multi-module deferred loading for Wasm.',
   );
 
@@ -135,6 +139,7 @@ abstract final class WebOptions {
   static const noFrequencyBasedMinification = FlagOptionDescriptor(
     name: 'no-frequency-based-minification',
     negatable: false,
+    verboseOnly: true,
     help:
         'Disables the frequency based minifier. '
         'Useful for comparing the output between builds.',

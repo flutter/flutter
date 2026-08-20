@@ -28,6 +28,7 @@ abstract class OptionDescriptor<T> {
     this.allowedHelp,
     this.scope = OptionScope.local,
     this.hide = false,
+    this.verboseOnly = false,
   });
 
   /// The CLI option name (without leading dashes).
@@ -57,6 +58,9 @@ abstract class OptionDescriptor<T> {
   /// Whether to hide this option from usage output by default.
   final bool hide;
 
+  /// Whether to hide this option from usage output unless verbose help is requested.
+  final bool verboseOnly;
+
   /// The CLI flag representation (e.g., `--target`).
   String get flag => '--$name';
 
@@ -64,6 +68,7 @@ abstract class OptionDescriptor<T> {
   void addTo(
     ArgParser parser, {
     Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
     bool? hideOverride,
   });
 
@@ -116,6 +121,7 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
     super.allowedHelp,
     super.scope,
     super.hide,
+    super.verboseOnly,
   });
 
   /// Alternative names for this option.
@@ -125,6 +131,7 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
   void addTo(
     ArgParser parser, {
     Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
     bool? hideOverride,
   }) {
     if (parser.options.containsKey(name)) {
@@ -135,6 +142,8 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
       _throwConflictError(name, existing);
     }
 
+    final bool effectiveHide = hideOverride ?? (hide || (verboseOnly && !verboseHelp));
+
     parser.addOption(
       name,
       abbr: abbr,
@@ -144,7 +153,7 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
       defaultsTo: defaultsTo,
       allowed: allowed,
       allowedHelp: allowedHelp,
-      hide: hideOverride ?? hide,
+      hide: effectiveHide,
     );
     registry?[name] = this;
   }
@@ -176,6 +185,7 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
     this.negatable = true,
     super.scope,
     super.hide,
+    super.verboseOnly,
   });
 
   /// Whether the flag can be negated with `--no-<name>`.
@@ -185,6 +195,7 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
   void addTo(
     ArgParser parser, {
     Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
     bool? hideOverride,
   }) {
     if (parser.options.containsKey(name)) {
@@ -194,13 +205,14 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
       }
       _throwConflictError(name, existing);
     }
+    final bool effectiveHide = hideOverride ?? (hide || (verboseOnly && !verboseHelp));
     parser.addFlag(
       name,
       abbr: abbr,
       help: help,
       defaultsTo: defaultsTo ?? false,
       negatable: negatable,
-      hide: hideOverride ?? hide,
+      hide: effectiveHide,
     );
     registry?[name] = this;
   }
@@ -226,6 +238,7 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
     this.negatable = true,
     super.scope,
     super.hide,
+    super.verboseOnly,
   }) : super(defaultsTo: null);
 
   /// Whether the flag can be negated with `--no-<name>`.
@@ -235,6 +248,7 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
   void addTo(
     ArgParser parser, {
     Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
     bool? hideOverride,
   }) {
     if (parser.options.containsKey(name)) {
@@ -244,28 +258,29 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
       }
       _throwConflictError(name, existing);
     }
+    final bool effectiveHide = hideOverride ?? (hide || (verboseOnly && !verboseHelp));
     parser.addFlag(
       name,
       abbr: abbr,
       help: help,
       defaultsTo: null,
       negatable: negatable,
-      hide: hideOverride ?? hide,
+      hide: effectiveHide,
     );
     registry?[name] = this;
   }
 
   @override
   bool? getValue(ArgResults? results, {ArgResults? globalResults}) {
-    if (!wasProvided(results, globalResults: globalResults)) {
-      return null;
+    if (wasProvided(results, globalResults: globalResults)) {
+      final ArgResults? target = _resolveTargetResults(results, globalResults);
+      return target?[name] as bool?;
     }
-    final ArgResults? target = _resolveTargetResults(results, globalResults);
-    return target?[name] as bool?;
+    return defaultsTo;
   }
 }
 
-/// A descriptor for multi-value options (lists of strings).
+/// A descriptor for multi-value options (passed multiple times or comma-separated).
 class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
   const MultiOptionDescriptor({
     required super.name,
@@ -278,9 +293,10 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
     super.allowedHelp,
     super.scope,
     super.hide,
+    super.verboseOnly,
   }) : super(defaultsTo: const <String>[]);
 
-  /// Whether multiple values can be separated by commas in a single flag.
+  /// Whether values containing commas are split into multiple entries.
   final bool splitCommas;
 
   /// Alternative names for this option.
@@ -290,6 +306,7 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
   void addTo(
     ArgParser parser, {
     Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
     bool? hideOverride,
   }) {
     if (parser.options.containsKey(name)) {
@@ -299,17 +316,17 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       }
       _throwConflictError(name, existing);
     }
-
+    final bool effectiveHide = hideOverride ?? (hide || (verboseOnly && !verboseHelp));
     parser.addMultiOption(
       name,
       abbr: abbr,
+      aliases: aliases,
       help: help,
       valueHelp: valueHelp,
       splitCommas: splitCommas,
-      aliases: aliases,
       allowed: allowed,
       allowedHelp: allowedHelp,
-      hide: hideOverride ?? hide,
+      hide: effectiveHide,
     );
     registry?[name] = this;
   }
@@ -318,13 +335,7 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
   List<String> getValue(ArgResults? results, {ArgResults? globalResults}) {
     if (wasProvided(results, globalResults: globalResults)) {
       final ArgResults? target = _resolveTargetResults(results, globalResults);
-      final Object? raw = target?[name];
-      if (raw is List<String>) {
-        return raw;
-      }
-      if (raw is List) {
-        return raw.cast<String>();
-      }
+      return (target?[name] as List<dynamic>?)?.cast<String>() ?? const <String>[];
     }
     return defaultsTo ?? const <String>[];
   }
