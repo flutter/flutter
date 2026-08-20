@@ -101,7 +101,7 @@ class Animator final {
   ///           secondary callback will still be executed at vsync.
   ///
   ///           This callback is used to provide the vsync signal needed by
-  ///           `SmoothPointerDataDispatcher`, and for our own flow events.
+  ///           our own flow events.
   ///
   /// @see      `PointerDataDispatcher::ScheduleSecondaryVsyncCallback`.
   void ScheduleSecondaryVsyncCallback(uintptr_t id,

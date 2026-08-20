@@ -287,9 +287,6 @@ void Animator::ScheduleSecondaryVsyncCallback(uintptr_t id,
 }
 
 void Animator::ScheduleMaybeClearTraceFlowIds() {
-  // Don't schedule the secondary callback nonsense, just to not get
-  // confused while debugging the vsync client.
-#if 0
   waiter_->ScheduleSecondaryCallback(
       reinterpret_cast<uintptr_t>(this), [self = weak_factory_.GetWeakPtr()] {
         if (!self) {
@@ -314,7 +311,6 @@ void Animator::ScheduleMaybeClearTraceFlowIds() {
           }
         }
       });
-#endif
 }
 
 }  // namespace flutter
