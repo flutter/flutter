@@ -163,9 +163,7 @@ class BuildWebCommand extends BuildSubCommand {
       );
     }
 
-    final String? outputDirectoryPath =
-        getValue(CommonOptions.outputDir) ??
-        (argResults?.options.contains('output') == true ? stringArg('output') : null);
+    final String? outputDirectoryPath = getValue(CommonOptions.outputDir);
 
     final Map<String, String> webDefines = extractWebDefines();
 

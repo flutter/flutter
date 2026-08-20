@@ -89,6 +89,17 @@ abstract class OptionDescriptor<T> {
             : (globalResults ?? results),
     };
   }
+
+  void _throwConflictError(String name, OptionDescriptor<Object?>? existing) {
+    final existingInfo = existing != null
+        ? '${existing.runtimeType} (help: "${existing.help}")'
+        : 'non-descriptor option';
+    throw ArgumentError(
+      'Conflicting option descriptor registered for "$name"!\n'
+      'Existing: $existingInfo\n'
+      'New: $runtimeType (help: "$help")',
+    );
+  }
 }
 
 /// A descriptor for single-value string options.
@@ -120,8 +131,9 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
       if (existing != null && (identical(existing, this) || existing == this)) {
         return;
       }
-      throw ArgumentError('Conflicting option descriptor registered for "$name"!');
+      _throwConflictError(name, existing);
     }
+
     parser.addOption(
       name,
       abbr: abbr,
@@ -183,7 +195,7 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
       if (existing != null && (identical(existing, this) || existing == this)) {
         return;
       }
-      throw ArgumentError('Conflicting flag descriptor registered for "$name"!');
+      _throwConflictError(name, existing);
     }
     parser.addFlag(
       name,
@@ -242,8 +254,9 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       if (existing != null && (identical(existing, this) || existing == this)) {
         return;
       }
-      throw ArgumentError('Conflicting multi-option descriptor registered for "$name"!');
+      _throwConflictError(name, existing);
     }
+
     parser.addMultiOption(
       name,
       abbr: abbr,
