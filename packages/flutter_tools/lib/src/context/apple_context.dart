@@ -13,6 +13,7 @@ import '../macos/xcode.dart';
 
 /// Holds Apple-specific dependencies.
 class AppleContext {
+  /// Creates an instance of [AppleContext] with the required dependencies.
   AppleContext({
     required this.cocoaPods,
     required this.cocoapodsValidator,
