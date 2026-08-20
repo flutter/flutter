@@ -11,7 +11,7 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/round_rect.h"
-#include "impeller/geometry/round_superellipse_param.h"
+#include "impeller/geometry/round_superellipse.h"
 #include "impeller/geometry/stroke_parameters.h"
 #include "impeller/geometry/vector.h"
 
@@ -56,11 +56,11 @@ struct UberSDFParameters {
       std::optional<StrokeParameters> stroke);
 
   /// Creates UberSDFParameters for a rounded superellipse with
-  /// uniform circular corner radii.
-  static UberSDFParameters MakeRoundedSuperellipse(
+  /// uniform circular corner radii. Returns std::nullopt if given an
+  /// incompatible rounded superellipse.
+  static std::optional<UberSDFParameters> MakeRoundedSuperellipse(
       Color color,
-      const Rect& bounds,
-      const RoundSuperellipseParam& round_superellipse_params,
+      const RoundSuperellipse& round_superellipse,
       std::optional<StrokeParameters> stroke);
 
   /// The type of shape to render.

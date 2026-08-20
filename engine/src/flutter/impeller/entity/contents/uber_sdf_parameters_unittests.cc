@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <optional>
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/geometry/round_superellipse.h"
+#include "impeller/geometry/round_superellipse_param.h"
 
 namespace impeller {
 namespace testing {
@@ -131,12 +134,15 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
       .bottom_left = Size(10.0f, 10.0f),
       .bottom_right = Size(10.0f, 10.0f),
   };
+  auto round_superellipse = RoundSuperellipse::MakeRectRadii(rect, radii);
   auto round_superellipse_params =
       RoundSuperellipseParam::MakeBoundsRadii(rect, radii);
-  auto params = UberSDFParameters::MakeRoundedSuperellipse(
-      /*color=*/Color::Red(), /*bounds=*/rect,
-      /*round_superellipse_params=*/round_superellipse_params,
+  auto maybe_params = UberSDFParameters::MakeRoundedSuperellipse(
+      /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
       /*stroke=*/std::nullopt);
+
+  ASSERT_NE(maybe_params, std::nullopt);
+  auto params = maybe_params.value();
 
   EXPECT_EQ(params.type,
             UberSDFParameters::Type::kRoundedSuperellipseSymmetric);
@@ -178,12 +184,13 @@ TEST(UberSDFParametersTest, MakeRectangularRoundedSuperellipse) {
       .bottom_left = Size(10.0f, 10.0f),
       .bottom_right = Size(10.0f, 10.0f),
   };
-  auto round_superellipse_params =
-      RoundSuperellipseParam::MakeBoundsRadii(rect, radii);
-  auto params = UberSDFParameters::MakeRoundedSuperellipse(
-      /*color=*/Color::Red(), /*bounds=*/rect,
-      /*round_superellipse_params=*/round_superellipse_params,
+  auto round_superellipse = RoundSuperellipse::MakeRectRadii(rect, radii);
+  auto maybe_params = UberSDFParameters::MakeRoundedSuperellipse(
+      /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
       /*stroke=*/std::nullopt);
+
+  ASSERT_NE(maybe_params, std::nullopt);
+  auto params = maybe_params.value();
 
   EXPECT_EQ(params.type,
             UberSDFParameters::Type::kRoundedSuperellipseSymmetric);
@@ -193,6 +200,38 @@ TEST(UberSDFParametersTest, MakeRectangularRoundedSuperellipse) {
   EXPECT_FALSE(params.stroke.has_value());
 
   EXPECT_EQ(params.octant_offset_c, -50.0f);
+}
+
+TEST(UberSDFParametersTest, MakeRoundedSuperellipseRejectsNonSymmetric) {
+  Rect rect = Rect::MakeXYWH(10, 20, 100, 200);
+  RoundingRadii radii = {
+      .top_left = Size(10.0f, 10.0f),
+      .top_right = Size(9.0f, 9.0f),
+      .bottom_left = Size(10.0f, 10.0f),
+      .bottom_right = Size(10.0f, 10.0f),
+  };
+  auto round_superellipse = RoundSuperellipse::MakeRectRadii(rect, radii);
+  auto params = UberSDFParameters::MakeRoundedSuperellipse(
+      /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
+      /*stroke=*/std::nullopt);
+
+  EXPECT_FALSE(params.has_value());
+}
+
+TEST(UberSDFParametersTest, MakeRoundedSuperellipseRejectsNonCircular) {
+  Rect rect = Rect::MakeXYWH(10, 20, 100, 200);
+  RoundingRadii radii = {
+      .top_left = Size(9.0f, 10.0f),
+      .top_right = Size(9.0f, 10.0f),
+      .bottom_left = Size(9.0f, 10.0f),
+      .bottom_right = Size(9.0f, 10.0f),
+  };
+  auto round_superellipse = RoundSuperellipse::MakeRectRadii(rect, radii);
+  auto params = UberSDFParameters::MakeRoundedSuperellipse(
+      /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
+      /*stroke=*/std::nullopt);
+
+  EXPECT_FALSE(params.has_value());
 }
 
 }  // namespace testing

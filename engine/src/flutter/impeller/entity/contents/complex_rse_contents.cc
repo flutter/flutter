@@ -25,22 +25,22 @@ using FS = ComplexRSEPipeline::FragmentShader;
 std::unique_ptr<ComplexRoundedSuperellipseContents>
 ComplexRoundedSuperellipseContents::Make(
     Color color,
-    const Rect& bounds,
-    const RoundSuperellipseParam& round_superellipse_params,
+    const RoundSuperellipse& round_superellipse,
     std::optional<StrokeParameters> stroke) {
   return std::unique_ptr<ComplexRoundedSuperellipseContents>(
-      new ComplexRoundedSuperellipseContents(
-          color, bounds, round_superellipse_params, stroke));
+      new ComplexRoundedSuperellipseContents(color, round_superellipse,
+                                             stroke));
 }
 
 ComplexRoundedSuperellipseContents::ComplexRoundedSuperellipseContents(
     Color color,
-    const Rect& bounds,
-    const RoundSuperellipseParam& round_superellipse_params,
+    const RoundSuperellipse& round_superellipse,
     std::optional<StrokeParameters> stroke)
     : color_(color),
-      bounds_(bounds),
-      round_superellipse_params_(round_superellipse_params),
+      bounds_(round_superellipse.GetBounds()),
+      round_superellipse_params_(RoundSuperellipseParam::MakeBoundsRadii(
+          round_superellipse.GetBounds(),
+          round_superellipse.GetRadii())),
       stroke_(stroke) {
   if (stroke) {
     geometry_ = Geometry::MakeRect(bounds_.Expand(stroke->width / 2.0f));
