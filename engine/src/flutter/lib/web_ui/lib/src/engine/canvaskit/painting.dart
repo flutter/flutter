@@ -5,19 +5,8 @@
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../primitives/color_filter.dart';
-import '../primitives/image_filter.dart';
-import '../primitives/mask_filter.dart';
-import '../shader_data.dart';
-import '../vector_math.dart';
-import 'canvaskit_api.dart';
-import 'color_filter.dart';
-import 'image_filter.dart';
-import 'mask_filter.dart';
-import 'native_memory.dart';
-import 'shader.dart';
 
 /// The implementation of [ui.Paint] used by the CanvasKit backend.
 ///
@@ -60,9 +49,9 @@ class CkPaint implements ui.Paint {
       skPaint.setColorFilter((colorFilter.backendFilter as CkColorFilter).skiaObject);
     }
 
-    final CkShader? shader = _shader;
+    final shader = _shader?.getBackendShader(filterQuality) as CkShader?;
     if (shader != null) {
-      skPaint.setShader(shader.getSkShader(filterQuality));
+      skPaint.setShader(shader.skShader);
       if (shader.isGradient) {
         skPaint.setDither(true);
       }
@@ -139,10 +128,10 @@ class CkPaint implements ui.Paint {
     if (_shader == value) {
       return;
     }
-    _shader = value as CkShader?;
+    _shader = value as EngineShader?;
   }
 
-  CkShader? _shader;
+  EngineShader? _shader;
 
   @override
   ui.MaskFilter? maskFilter;
@@ -288,7 +277,7 @@ class CkFragmentProgram implements ui.FragmentProgram {
 
   @override
   ui.FragmentShader fragmentShader() {
-    return CkFragmentShader(name, effect, this);
+    return EngineFragmentShader(CkFragmentShader(name, effect, this));
   }
 
   UniformData _getUniformFloatInfo(String name) {
@@ -301,7 +290,7 @@ class CkFragmentProgram implements ui.FragmentProgram {
   }
 }
 
-class CkFragmentShader implements ui.FragmentShader, CkShader {
+class CkFragmentShader extends BackendFragmentShader implements CkShader {
   CkFragmentShader(this.name, this.effect, this._program)
     : floats = mallocFloat32List(_program.floatCount + _program.textureCount * 2),
       samplers = List<SkShader?>.filled(_program.textureCount, null),
@@ -321,7 +310,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   bool get isGradient => false;
 
   @override
-  SkShader getSkShader(ui.FilterQuality contextualQuality) {
+  SkShader get skShader {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
     ref?.dispose();
 
@@ -347,21 +336,11 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   }
 
   @override
-  void setImageSampler(
-    int index,
-    ui.Image image, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.none,
-  }) {
+  void setImageSampler(int index, BackendImageShader shader, double width, double height) {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
-    final sampler = ui.ImageShader(
-      image,
-      ui.TileMode.clamp,
-      ui.TileMode.clamp,
-      toMatrix64(Matrix4.identity().storage),
-    );
-    samplers[index] = (sampler as CkShader).getSkShader(filterQuality);
-    setFloat(lastFloatIndex + 2 * index, (sampler as CkImageShader).imageWidth.toDouble());
-    setFloat(lastFloatIndex + 2 * index + 1, sampler.imageHeight.toDouble());
+    samplers[index] = (shader as CkImageShader).skShader;
+    setFloat(lastFloatIndex + 2 * index, width);
+    setFloat(lastFloatIndex + 2 * index + 1, height);
   }
 
   @override
@@ -378,7 +357,6 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
   bool _debugDisposed = false;
 
-  @override
   bool get debugDisposed => _debugDisposed;
 
   @override
