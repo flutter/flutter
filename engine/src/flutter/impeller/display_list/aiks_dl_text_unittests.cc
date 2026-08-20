@@ -952,13 +952,6 @@ TEST_P(AiksTest, DuplicateTextWithShadowCache) {
 }
 
 TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
-  SkFont font = flutter::testing::CreateTestFontOfSize(12);
-
-  Font impeller_font(
-      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("Text A", font))
-          ->GetRuns()[0]
-          .GetFont());
-
   TextFrameFingerprint fp1{
       .run_count = 1,
       .total_glyph_count = 6,
