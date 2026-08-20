@@ -879,6 +879,126 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
+    // A password manager fills a login form by focusing each field in turn and
+    // writing into it, and the field it starts from is whichever one the user
+    // invoked it on. Whatever it writes has to reach the framework in every
+    // combination: the engine must not depend on which field happens to be the
+    // active editing element while the manager walks the form.
+    //
+    // These drive the DOM the way an extension does (focus, assign value,
+    // dispatch input/change) rather than going through the manager itself,
+    // which is the part outside our control.
+    void managerFill(DomHTMLInputElement element, String value) {
+      element.focusWithoutScroll();
+      element.value = value;
+      element.dispatchEvent(createDomEvent('Event', 'input'));
+      element.dispatchEvent(createDomEvent('Event', 'change'));
+    }
+
+    ({DomHTMLInputElement username, DomHTMLInputElement password}) openFormFocusing(
+      String focusedHint,
+      void Function(MethodCall) send,
+    ) {
+      final config = createFlutterConfig(
+        focusedHint == 'password' ? 'text' : 'text',
+        autofillHint: focusedHint == 'password' ? 'password' : 'email',
+        autofillHintsForFields: <String>['email', 'password'],
+      );
+      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      final form = textEditing.strategy.domElement!.parent! as DomHTMLFormElement;
+      final fields = form.childNodes.toList() as List<DomHTMLInputElement>;
+      return (
+        username: fields.firstWhere((DomHTMLInputElement e) => e.name == 'email'),
+        password: fields.firstWhere((DomHTMLInputElement e) => e.name == 'current-password'),
+      );
+    }
+
+    // A value can arrive two ways: tagged (updateEditingStateWithTag, used for
+    // fields the manager fills while they are not the active editing element)
+    // or untagged (updateEditingState, used for the active element itself).
+    // Both mean the framework got it, which is what these tests are about.
+    bool frameworkReceived(PlatformMessagesSpy spy, String value) {
+      for (final PlatformMessage message in spy.messages) {
+        final dynamic args = message.methodArguments;
+        if (args is! List || args.length < 2) {
+          continue;
+        }
+        final dynamic payload = args[1];
+        if (payload is! Map) {
+          continue;
+        }
+        if (payload['text'] == value) {
+          return true;
+        }
+        for (final dynamic field in payload.values) {
+          if (field is Map && field['text'] == value) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    for (final String focused in <String>['email', 'password']) {
+      test('a manager filling both fields is forwarded when $focused is active', () async {
+        final spy = PlatformMessagesSpy();
+        spy.setUp();
+        void send(MethodCall call) =>
+            textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+
+        final fields = openFormFocusing(focused, send);
+        spy.messages.clear();
+
+        // The manager walks the form: username first, then the password.
+        managerFill(fields.username, 'user@example.com');
+        managerFill(fields.password, 'hunter2secret');
+
+        expect(
+          frameworkReceived(spy, 'user@example.com'),
+          isTrue,
+          reason: 'the username fill must reach the framework',
+        );
+        expect(
+          frameworkReceived(spy, 'hunter2secret'),
+          isTrue,
+          reason: 'the password fill must reach the framework',
+        );
+
+        send(const MethodCall('TextInput.clearClient'));
+        dormantForms.clear();
+        spy.tearDown();
+      });
+
+      test('a manager filling only the other field is forwarded when $focused is active', () async {
+        final spy = PlatformMessagesSpy();
+        spy.setUp();
+        void send(MethodCall call) =>
+            textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+
+        final fields = openFormFocusing(focused, send);
+        spy.messages.clear();
+
+        // Some managers fill a single field. Whichever one it is, and whichever
+        // field is active, the value still has to arrive.
+        final DomHTMLInputElement other = focused == 'email' ? fields.password : fields.username;
+        managerFill(other, 'only-one-field');
+
+        expect(frameworkReceived(spy, 'only-one-field'), isTrue);
+
+        send(const MethodCall('TextInput.clearClient'));
+        dormantForms.clear();
+        spy.tearDown();
+      });
+    }
+
     test('forwards a fill on the previously focused field after the connection closes', () async {
       // A password manager can write into the field after the framework
       // already closed the connection (the user confirms the fill dialog after
