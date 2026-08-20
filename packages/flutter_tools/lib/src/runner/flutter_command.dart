@@ -179,9 +179,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The [ToolContext] providing explicit dependency injection for this command.
   ToolContext? get toolContext =>
-      _explicitToolContext ??
-      (super.runner as FlutterCommandRunner?)?.toolDependencies?.toolContext ??
-      (super.runner as FlutterCommandRunner?)?.toolContext;
+      _explicitToolContext ?? (super.runner as FlutterCommandRunner?)?.toolContext;
 
   SystemClock? get _clock => toolContext?.systemClock;
   Logger? get _logger => toolContext?.logger;
@@ -192,7 +190,7 @@ abstract class FlutterCommand extends Command<void> {
   Platform? get _platform => toolContext?.platform;
   FileSystem? get _fs => toolContext?.fs;
   FlutterProjectFactory? get _projectFactory => toolContext?.projectFactory;
-  Analytics? get _analytics => (super.runner as FlutterCommandRunner?)?.toolDependencies?.analytics;
+  Analytics? get _analytics => (super.runner as FlutterCommandRunner?)?.analytics;
   Cache? get _cache => toolContext?.cache;
 
   /// The currently executing command (or sub-command).
@@ -1703,38 +1701,40 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime? startTime = _clock?.now();
+    final SystemClock clock = _clock ?? globals.systemClock;
+    final DateTime startTime = clock.now();
 
     return context.run<void>(
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (_usesFatalWarnings && _logger != null) {
-          _logger!.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
+        final Logger logger = _logger ?? globals.logger;
+        if (_usesFatalWarnings) {
+          logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
-        if (commandPath != null && startTime != null && _signals != null) {
-          _registerSignalHandlers(commandPath, startTime);
+        if (commandPath != null) {
+          final Signals signals = _signals ?? globals.signals;
+          _registerSignalHandlers(commandPath, startTime, signals: signals, clock: clock);
         }
         var commandResult = FlutterCommandResult.fail();
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
-          final DateTime? endTime = _clock?.now();
-          if (startTime != null && endTime != null && _logger != null && _userMessages != null) {
-            _logger!.printTrace(
-              _userMessages!.flutterElapsedTime(
-                name,
-                getElapsedAsMilliseconds(endTime.difference(startTime)),
-              ),
-            );
-            if (commandPath != null && _analytics != null) {
-              _sendPostUsage(commandPath, commandResult, startTime, endTime);
-            }
+          final DateTime endTime = clock.now();
+          final UserMessages userMessages = _userMessages ?? globals.userMessages;
+          logger.printTrace(
+            userMessages.flutterElapsedTime(
+              name,
+              getElapsedAsMilliseconds(endTime.difference(startTime)),
+            ),
+          );
+          if (commandPath != null) {
+            _sendPostUsage(commandPath, commandResult, startTime, endTime);
           }
-          if (_usesFatalWarnings && _logger != null) {
-            _logger!.checkForFatalLogs();
+          if (_usesFatalWarnings) {
+            logger.checkForFatalLogs();
           }
         }
       },
@@ -1743,7 +1743,8 @@ abstract class FlutterCommand extends Command<void> {
 
   @override
   void printUsage() {
-    _logger?.printStatus(usage);
+    final Logger logger = _logger ?? globals.logger;
+    logger.printStatus(usage);
   }
 
   @visibleForOverriding
@@ -1807,15 +1808,25 @@ abstract class FlutterCommand extends Command<void> {
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final List<String> configFilePaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
+      final FileSystem fileSystem = _fs ?? globals.fs;
 
       for (final path in configFilePaths) {
-        if (!globals.fs.isFileSync(path)) {
+        if (!fileSystem.isFileSync(path)) {
           throwToolExit(
             'Did not find the file passed to "--${FlutterOptions.kDartDefineFromFileOption}". Path: $path',
           );
         }
 
-        final String configRaw = globals.fs.file(path).readAsStringSync();
+        String configRaw;
+        try {
+          configRaw = decodeUtf8OrUtf16(fileSystem.file(path).readAsBytesSync());
+        } on Exception catch (err) {
+          throwToolExit(
+            'Unable to decode the file at path "$path". '
+            'Ensure that the file is encoded in UTF-8 or UTF-16.\n'
+            'Error details: $err',
+          );
+        }
 
         // Determine whether the file content is JSON or .env format.
         String configJsonRaw;
@@ -1946,7 +1957,12 @@ abstract class FlutterCommand extends Command<void> {
     return webHeaders;
   }
 
-  void _registerSignalHandlers(String commandPath, DateTime startTime) {
+  void _registerSignalHandlers(
+    String commandPath,
+    DateTime startTime, {
+    Signals? signals,
+    SystemClock? clock,
+  }) {
     void handler(io.ProcessSignal s) {
       final Cache cache = _cache ?? globals.cache;
       cache.releaseLock();
@@ -1954,13 +1970,13 @@ abstract class FlutterCommand extends Command<void> {
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
         startTime,
-        _clock?.now() ?? globals.systemClock.now(),
+        (clock ?? _clock ?? globals.systemClock).now(),
       );
     }
 
-    final Signals signals = _signals ?? globals.signals;
-    signals.addHandler(ProcessSignal.sigterm, handler);
-    signals.addHandler(ProcessSignal.sigint, handler);
+    final Signals effectiveSignals = signals ?? _signals ?? globals.signals;
+    effectiveSignals.addHandler(ProcessSignal.sigterm, handler);
+    effectiveSignals.addHandler(ProcessSignal.sigint, handler);
   }
 
   /// Logs data about this command.
@@ -1973,12 +1989,8 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    final FlutterCommandRunner? commandRunner = runner;
     final Analytics effectiveAnalytics =
-        _analytics ??
-        commandRunner?.toolDependencies?.analytics ??
-        context.get<Analytics>() ??
-        globals.analytics;
+        _analytics ?? context.get<Analytics>() ?? globals.analytics;
 
     // Send command result.
     int? maxRss;
@@ -2083,12 +2095,8 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final FlutterCommandRunner? commandRunner = runner;
       final Analytics effectiveAnalytics =
-          _analytics ??
-          commandRunner?.toolDependencies?.analytics ??
-          context.get<Analytics>() ??
-          globals.analytics;
+          _analytics ?? context.get<Analytics>() ?? globals.analytics;
       effectiveAnalytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
 

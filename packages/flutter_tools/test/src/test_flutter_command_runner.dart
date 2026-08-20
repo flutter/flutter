@@ -26,7 +26,8 @@ CommandRunner<void> createTestCommandRunner([
   Analytics? analytics,
   ToolContext? toolContext,
 ]) {
-  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: toolContext);
+  final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
+  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: effectiveToolContext);
   if (command != null) {
     runner.addCommand(command);
   }
