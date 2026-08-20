@@ -1670,14 +1670,6 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  void setupApplicationPackages() {
-    try {
-      applicationPackages ??= ApplicationPackageFactory.instance;
-    } on UnsupportedError {
-      // Context is not available in hermetic unit tests.
-    }
-  }
-
   /// The path to send to Google Analytics. Return null here to disable
   /// tracking of the command.
   Future<String?> get usagePath async {
@@ -2077,8 +2069,6 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    setupApplicationPackages();
-
     if (commandPath != null) {
       _analytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
@@ -2252,7 +2242,13 @@ abstract class FlutterCommand extends Command<void> {
     return help;
   }
 
-  ApplicationPackageFactory? applicationPackages;
+  ApplicationPackageFactory? get applicationPackages =>
+      _applicationPackages ?? ApplicationPackageFactory.instance;
+  set applicationPackages(ApplicationPackageFactory? value) {
+    _applicationPackages = value;
+  }
+
+  ApplicationPackageFactory? _applicationPackages;
 
   /// Gets the parsed command-line flag named [name] as a `bool`.
   ///
