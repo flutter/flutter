@@ -277,7 +277,9 @@ class _WidgetPreviewGroupWidgetState extends State<WidgetPreviewGroupWidget> {
         data: ListTileTheme.of(context).copyWith(
           dense: true,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(WidgetPreviewGroupWidget._kCardRadius),
+            borderRadius: BorderRadius.all(
+              WidgetPreviewGroupWidget._kCardRadius,
+            ),
           ),
         ),
         child: Theme(
@@ -301,7 +303,9 @@ class _WidgetPreviewGroupWidgetState extends State<WidgetPreviewGroupWidget> {
                   valueListenable: widget.controller.layoutTypeListenable,
                   builder: (context, selectedLayout, _) {
                     return switch (selectedLayout) {
-                      LayoutType.gridView => _buildGridViewFlex(widget.group.previews),
+                      LayoutType.gridView => _buildGridViewFlex(
+                        widget.group.previews,
+                      ),
                       LayoutType.listView => _buildVerticalListView(
                         widget.group.previews,
                       ),
@@ -316,7 +320,6 @@ class _WidgetPreviewGroupWidgetState extends State<WidgetPreviewGroupWidget> {
     );
   }
 }
-
 
 class WidgetPreviewWidget extends StatefulWidget {
   const WidgetPreviewWidget({
