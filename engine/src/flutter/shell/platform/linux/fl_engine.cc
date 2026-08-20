@@ -50,9 +50,6 @@ struct _FlEngine {
   // Type of rendering performed.
   FlutterRendererType renderer_type;
 
-  // Whether Impeller is enabled.
-  gboolean enable_impeller;
-
   // Manages OpenGL contexts.
   FlOpenGLManager* opengl_manager;
 
@@ -295,7 +292,7 @@ static bool create_opengl_backing_store(
 
   FlFramebuffer* framebuffer = fl_framebuffer_new_multisample(
       sized_format, general_format, config->size.width, config->size.height,
-      self->enable_impeller);
+      fl_dart_project_get_enable_impeller(self->project));
   if (!framebuffer) {
     g_warning("Failed to create backing store");
     return false;
@@ -691,7 +688,6 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
   FlEngine* self = FL_ENGINE(g_object_new(fl_engine_get_type(), nullptr));
 
   self->project = FL_DART_PROJECT(g_object_ref(project));
-  self->enable_impeller = fl_dart_project_get_enable_impeller(self->project);
   const gchar* renderer = g_getenv("FLUTTER_LINUX_RENDERER");
   if (g_strcmp0(renderer, "software") == 0) {
     self->renderer_type = kSoftware;
@@ -828,7 +824,6 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       has_enable_impeller = TRUE;
     }
   }
-  self->enable_impeller = enable_impeller;
 
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);

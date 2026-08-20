@@ -137,7 +137,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
                                               GLint general_format,
                                               size_t width,
                                               size_t height,
-                                              gboolean enable_impeller) {
+                                              gboolean use_msaa) {
   FlFramebuffer* self =
       FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
 
@@ -147,7 +147,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
   glGenFramebuffers(1, &self->framebuffer_id);
   glBindFramebuffer(GL_FRAMEBUFFER, self->framebuffer_id);
 
-  if (enable_impeller) {
+  if (use_msaa) {
     if (check_supports_implicit_msaa()) {
       // Implicit MSAA uses GL_EXT_multisampled_render_to_texture, where the
       // OpenGL driver automatically resolves multisamples into the attached

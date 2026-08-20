@@ -71,7 +71,7 @@ TEST_F(FlFramebufferTest, ImpellerOffscreenMSAA) {
                                         GL_RENDERBUFFER, ::testing::_));
 
   FlFramebuffer* framebuffer = fl_framebuffer_new_multisample(
-      GL_RGBA8, GL_RGBA, 100, 100, /*enable_impeller=*/TRUE);
+      GL_RGBA8, GL_RGBA, 100, 100, /*use_msaa=*/TRUE);
   EXPECT_EQ(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
@@ -93,7 +93,7 @@ TEST_F(FlFramebufferTest, ImpellerImplicitMSAA) {
                          GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, 100, 100));
 
   FlFramebuffer* framebuffer = fl_framebuffer_new_multisample(
-      GL_RGBA8, GL_RGBA, 100, 100, /*enable_impeller=*/TRUE);
+      GL_RGBA8, GL_RGBA, 100, 100, /*use_msaa=*/TRUE);
   EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
@@ -115,7 +115,7 @@ TEST_F(FlFramebufferTest, ImpellerNoMSAA) {
                                            100, 100));
 
   FlFramebuffer* framebuffer = fl_framebuffer_new_multisample(
-      GL_RGBA8, GL_RGBA, 100, 100, /*enable_impeller=*/TRUE);
+      GL_RGBA8, GL_RGBA, 100, 100, /*use_msaa=*/TRUE);
   EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
@@ -137,7 +137,7 @@ TEST_F(FlFramebufferTest, SkiaNoMSAA) {
                                            100, 100));
 
   FlFramebuffer* framebuffer = fl_framebuffer_new_multisample(
-      GL_RGBA8, GL_RGBA, 100, 100, /*enable_impeller=*/FALSE);
+      GL_RGBA8, GL_RGBA, 100, 100, /*use_msaa=*/FALSE);
   EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
