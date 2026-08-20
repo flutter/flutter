@@ -31,6 +31,16 @@ public class ImeSyncDeferringInsetsCallbackTest {
   // Navigation bar height in pixels.
   private static final int NAVIGATION_BAR_BOTTOM_INSET = 40;
 
+  /**
+   * Tests soft keyboard opening animation in modern edge-to-edge mode (API 30-34).
+   *
+   * <p>Rationale / Added for: Fixes flutter/flutter#190974. In modern edge-to-edge mode (where
+   * legacy systemUiVisibility flags are 0), onProgress previously subtracted the navigation bar
+   * height (e.g. 40px) during animation, while onEnd dispatched the full target insets (100px),
+   * causing a visible terminal jump. This test verifies that onProgress smoothly interpolates
+   * towards the settled target inset (100px) so that at fraction 1.0f the animated insets exactly
+   * match the onEnd settled insets.
+   */
   @SuppressWarnings("deprecation")
   // getWindowSystemUiVisibility.
   @Test
@@ -97,6 +107,13 @@ public class ImeSyncDeferringInsetsCallbackTest {
         endInsetsCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
   }
 
+  /**
+   * Tests soft keyboard opening animation in standard non-edge-to-edge mode.
+   *
+   * <p>Rationale / Added for: Verifies that in non-edge-to-edge mode, target-inset interpolation
+   * smoothly scales from 0 to the target IME inset without jumping or clipping, regardless of raw
+   * OS animated insets.
+   */
   @SuppressWarnings("deprecation")
   // getWindowSystemUiVisibility.
   @Test
@@ -159,6 +176,12 @@ public class ImeSyncDeferringInsetsCallbackTest {
         endInsetsCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
   }
 
+  /**
+   * Tests soft keyboard opening animation with legacy SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION flags.
+   *
+   * <p>Rationale / Added for: Ensures backward compatibility with legacy apps that explicitly
+   * configure View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION on their root view.
+   */
   @SuppressWarnings("deprecation")
   // SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION, getWindowSystemUiVisibility.
   @Test
@@ -204,6 +227,13 @@ public class ImeSyncDeferringInsetsCallbackTest {
         endInsetsCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
   }
 
+  /**
+   * Tests soft keyboard dismissal (closing) animation.
+   *
+   * <p>Rationale / Added for: Verifies that during dismissal, animated insets interpolate smoothly
+   * from the established keyboard height (100px) down to 0px without dropping by the navigation bar
+   * height on frame 0.
+   */
   @SuppressWarnings("deprecation")
   // getWindowSystemUiVisibility.
   @Test
@@ -272,5 +302,326 @@ public class ImeSyncDeferringInsetsCallbackTest {
     verify(view, org.mockito.Mockito.atLeastOnce())
         .dispatchApplyWindowInsets(endInsetsCaptor.capture());
     assertEquals(0, endInsetsCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+  }
+
+  /**
+   * Tests interrupted animations (e.g. keyboard closing gesture triggered while opening is
+   * in-flight).
+   *
+   * <p>Rationale / Added for: Fixes a critical flaw identified in adversarial review. If
+   * startImeBottom was read from lastWindowInsets (which stored the prior target of 100px),
+   * interrupting an opening animation at 50px would calculate 100 + (0 - 100) * fraction, snapping
+   * instantly from 50px up to 100px on frame 0 of the closing animation. This test verifies that
+   * tracking currentImeBottom enables smooth interpolation from the in-flight inset (50px) down to
+   * 0px (reaching 25px at 50% closing).
+   */
+  @Test
+  public void imeAnimation_interruptedAnimation_smoothlyInterpolatesFromInFlightInset() {
+    View view = mock(View.class);
+    when(view.getWindowSystemUiVisibility()).thenReturn(0);
+
+    ImeSyncDeferringInsetsCallback callback = new ImeSyncDeferringInsetsCallback(view);
+    WindowInsetsAnimation openAnimation = mock(WindowInsetsAnimation.class);
+    when(openAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+    // 1. Start opening animation towards 100px.
+    callback.getAnimationCallback().onPrepare(openAnimation);
+    WindowInsets openTargetInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, FINAL_IME_BOTTOM_INSET))
+            .build();
+    callback.getInsetsListener().onApplyWindowInsets(view, openTargetInsets);
+
+    // Advance opening animation to 50% (fraction = 0.5f -> in-flight = 50px).
+    when(openAnimation.getInterpolatedFraction()).thenReturn(0.5f);
+    WindowInsets midOpenInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50))
+            .build();
+    callback
+        .getAnimationCallback()
+        .onProgress(midOpenInsets, Collections.singletonList(openAnimation));
+
+    ArgumentCaptor<WindowInsets> midOpenCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view).onApplyWindowInsets(midOpenCaptor.capture());
+    assertEquals(50, midOpenCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+
+    // 2. Interrupt mid-flight with a closing animation towards 0px (without onEnd of the open).
+    WindowInsetsAnimation interruptCloseAnimation = mock(WindowInsetsAnimation.class);
+    when(interruptCloseAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+    callback.getAnimationCallback().onPrepare(interruptCloseAnimation);
+
+    WindowInsets closeTargetInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 0))
+            .build();
+    callback.getInsetsListener().onApplyWindowInsets(view, closeTargetInsets);
+
+    // At 50% fraction of the closing animation, it must smoothly interpolate
+    // from the in-flight starting inset (50px) down to 0px: 50 + (0 - 50) * 0.5 = 25px!
+    when(interruptCloseAnimation.getInterpolatedFraction()).thenReturn(0.5f);
+    WindowInsets midInterruptCloseInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 25))
+            .build();
+    callback
+        .getAnimationCallback()
+        .onProgress(midInterruptCloseInsets, Collections.singletonList(interruptCloseAnimation));
+
+    ArgumentCaptor<WindowInsets> midInterruptCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view, org.mockito.Mockito.times(2)).onApplyWindowInsets(midInterruptCaptor.capture());
+    assertEquals(25, midInterruptCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+
+    // At 100% closing, reaches 0px.
+    when(interruptCloseAnimation.getInterpolatedFraction()).thenReturn(1.0f);
+    WindowInsets finalInterruptCloseInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 0))
+            .build();
+    callback
+        .getAnimationCallback()
+        .onProgress(finalInterruptCloseInsets, Collections.singletonList(interruptCloseAnimation));
+
+    ArgumentCaptor<WindowInsets> finalInterruptCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view, org.mockito.Mockito.times(3)).onApplyWindowInsets(finalInterruptCaptor.capture());
+    assertEquals(0, finalInterruptCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+
+    callback.getAnimationCallback().onEnd(interruptCloseAnimation);
+    ArgumentCaptor<WindowInsets> endInsetsCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view).dispatchApplyWindowInsets(endInsetsCaptor.capture());
+    assertEquals(0, endInsetsCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+  }
+
+  /**
+   * Tests aborted animation lifecycles (onPrepare immediately followed by onEnd without
+   * onApplyWindowInsets).
+   *
+   * <p>Rationale / Added for: Fixes a state-machine leak identified in adversarial review. If
+   * onPrepare sets needsSave = true and the animation is aborted before onApplyWindowInsets fires,
+   * onEnd must reset needsSave = false so subsequent animations are not stalled by dropped
+   * onProgress frames.
+   */
+  @Test
+  public void imeAnimation_abortedLifecycle_resetsNeedsSaveAndAllowsSubsequentAnimations() {
+    View view = mock(View.class);
+    when(view.getWindowSystemUiVisibility()).thenReturn(0);
+
+    ImeSyncDeferringInsetsCallback callback = new ImeSyncDeferringInsetsCallback(view);
+    WindowInsetsAnimation abortedAnimation = mock(WindowInsetsAnimation.class);
+    when(abortedAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+    // 1. Animation prepared but immediately ended without onApplyWindowInsets or onProgress.
+    callback.getAnimationCallback().onPrepare(abortedAnimation);
+    callback.getAnimationCallback().onEnd(abortedAnimation);
+
+    // 2. Subsequent animation should not be blocked or stalled by stale needsSave state.
+    WindowInsetsAnimation nextAnimation = mock(WindowInsetsAnimation.class);
+    when(nextAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+    callback.getAnimationCallback().onPrepare(nextAnimation);
+    WindowInsets targetInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, FINAL_IME_BOTTOM_INSET))
+            .build();
+    callback.getInsetsListener().onApplyWindowInsets(view, targetInsets);
+
+    when(nextAnimation.getInterpolatedFraction()).thenReturn(1.0f);
+    callback
+        .getAnimationCallback()
+        .onProgress(targetInsets, Collections.singletonList(nextAnimation));
+
+    ArgumentCaptor<WindowInsets> progressCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view).onApplyWindowInsets(progressCaptor.capture());
+    assertEquals(
+        FINAL_IME_BOTTOM_INSET,
+        progressCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+
+    callback.getAnimationCallback().onEnd(nextAnimation);
+    ArgumentCaptor<WindowInsets> endInsetsCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view).dispatchApplyWindowInsets(endInsetsCaptor.capture());
+    assertEquals(
+        FINAL_IME_BOTTOM_INSET,
+        endInsetsCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+  }
+
+  /**
+   * Tests concurrent animation of IME and other system bars (status bars / navigation bars).
+   *
+   * <p>Rationale / Added for: Fixes a bug identified in adversarial review where
+   * WindowInsets.Builder used a stale lastWindowInsets snapshot, freezing non-IME system bar
+   * animations during IME transitions. This test verifies that non-IME insets from the current
+   * frame's insets object are preserved.
+   */
+  @Test
+  public void imeAnimation_concurrentSystemBarAnimations_preservesNonImeInsets() {
+    View view = mock(View.class);
+    when(view.getWindowSystemUiVisibility()).thenReturn(0);
+
+    ImeSyncDeferringInsetsCallback callback = new ImeSyncDeferringInsetsCallback(view);
+    WindowInsetsAnimation imeAnimation = mock(WindowInsetsAnimation.class);
+    when(imeAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+    callback.getAnimationCallback().onPrepare(imeAnimation);
+    WindowInsets initialInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, FINAL_IME_BOTTOM_INSET))
+            .setInsets(WindowInsets.Type.statusBars(), Insets.of(0, 50, 0, 0))
+            .setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40))
+            .build();
+    callback.getInsetsListener().onApplyWindowInsets(view, initialInsets);
+
+    // During onProgress, status bar insets change concurrently from 50px to 60px.
+    when(imeAnimation.getInterpolatedFraction()).thenReturn(0.5f);
+    WindowInsets progressInsetsWithChangedStatusBar =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50))
+            .setInsets(WindowInsets.Type.statusBars(), Insets.of(0, 60, 0, 0))
+            .setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40))
+            .build();
+    callback
+        .getAnimationCallback()
+        .onProgress(progressInsetsWithChangedStatusBar, Collections.singletonList(imeAnimation));
+
+    ArgumentCaptor<WindowInsets> progressCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view).onApplyWindowInsets(progressCaptor.capture());
+
+    // IME insets interpolated to 50px.
+    assertEquals(50, progressCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+    // Non-IME status bar insets from the current frame (60px) are preserved and not locked to 50px.
+    assertEquals(60, progressCaptor.getValue().getInsets(WindowInsets.Type.statusBars()).top);
+  }
+
+  /**
+   * Tests arrival of non-animated window insets while !animating.
+   *
+   * <p>Rationale / Added for: Fixes a critical desynchronization defect identified in adversarial
+   * review. When window insets arrive without an animation (e.g. initial layout, orientation
+   * change, split screen, or hardware keyboard toggle), onApplyWindowInsets must update
+   * currentImeBottom and lastWindowInsets. If not updated, currentImeBottom remains 0, causing any
+   * subsequent animated dismissal to start from 0 and immediately collapse on frame 1.
+   */
+  @Test
+  public void
+      imeAnimation_nonAnimatedInsetsArrival_synchronizesCurrentImeBottomAndAllowsSubsequentAnimatedDismissal() {
+    View view = mock(View.class);
+    when(view.getWindowSystemUiVisibility()).thenReturn(0);
+
+    ImeSyncDeferringInsetsCallback callback = new ImeSyncDeferringInsetsCallback(view);
+
+    // 1. Non-animated insets arrive (e.g. keyboard shown instantly or orientation changed).
+    WindowInsets nonAnimatedInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, FINAL_IME_BOTTOM_INSET))
+            .build();
+    callback.getInsetsListener().onApplyWindowInsets(view, nonAnimatedInsets);
+
+    // 2. An animated dismissal is initiated.
+    WindowInsetsAnimation closeAnimation = mock(WindowInsetsAnimation.class);
+    when(closeAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+    callback.getAnimationCallback().onPrepare(closeAnimation);
+
+    WindowInsets closeTargetInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 0))
+            .build();
+    callback.getInsetsListener().onApplyWindowInsets(view, closeTargetInsets);
+
+    // At 50% fraction, animated insets must smoothly interpolate from 100px down to 0px (reaching
+    // 50px).
+    // Without synchronizing currentImeBottom, startImeBottom would have been 0px and output 0px.
+    when(closeAnimation.getInterpolatedFraction()).thenReturn(0.5f);
+    WindowInsets midCloseInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50))
+            .build();
+    callback
+        .getAnimationCallback()
+        .onProgress(midCloseInsets, Collections.singletonList(closeAnimation));
+
+    ArgumentCaptor<WindowInsets> midCloseCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view, org.mockito.Mockito.atLeastOnce()).onApplyWindowInsets(midCloseCaptor.capture());
+    assertEquals(50, midCloseCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+
+    // Dismissal reaches 0px at fraction 1.0f.
+    when(closeAnimation.getInterpolatedFraction()).thenReturn(1.0f);
+    WindowInsets terminalCloseInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 0))
+            .build();
+    callback
+        .getAnimationCallback()
+        .onProgress(terminalCloseInsets, Collections.singletonList(closeAnimation));
+
+    callback.getAnimationCallback().onEnd(closeAnimation);
+    ArgumentCaptor<WindowInsets> endInsetsCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view, org.mockito.Mockito.atLeastOnce())
+        .dispatchApplyWindowInsets(endInsetsCaptor.capture());
+    assertEquals(0, endInsetsCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+  }
+
+  /**
+   * Tests non-IME animation preparation (e.g. status bar / caption bar animations).
+   *
+   * <p>Rationale / Added for: Fixes a state pollution defect identified in adversarial review.
+   * onPrepare for non-IME animations must not set needsSave = true, ensuring that running IME
+   * animations are not stalled or interrupted.
+   */
+  @Test
+  public void imeAnimation_nonImeAnimationPrepare_doesNotSetNeedsSaveOrStallRunningImeAnimations() {
+    View view = mock(View.class);
+    when(view.getWindowSystemUiVisibility()).thenReturn(0);
+
+    ImeSyncDeferringInsetsCallback callback = new ImeSyncDeferringInsetsCallback(view);
+
+    // 1. IME animation prepared and started.
+    WindowInsetsAnimation imeAnimation = mock(WindowInsetsAnimation.class);
+    when(imeAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+    callback.getAnimationCallback().onPrepare(imeAnimation);
+
+    WindowInsets imeTargetInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, FINAL_IME_BOTTOM_INSET))
+            .build();
+    callback.getInsetsListener().onApplyWindowInsets(view, imeTargetInsets);
+
+    // 2. A non-IME animation (e.g. status bar transition) prepares during IME animation.
+    WindowInsetsAnimation statusBarAnimation = mock(WindowInsetsAnimation.class);
+    when(statusBarAnimation.getTypeMask()).thenReturn(WindowInsets.Type.statusBars());
+    callback.getAnimationCallback().onPrepare(statusBarAnimation);
+
+    // 3. onProgress for IME animation should NOT be stalled by needsSave from the status bar
+    // animation.
+    when(imeAnimation.getInterpolatedFraction()).thenReturn(0.5f);
+    WindowInsets midProgressInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50))
+            .build();
+    callback
+        .getAnimationCallback()
+        .onProgress(midProgressInsets, Collections.singletonList(imeAnimation));
+
+    ArgumentCaptor<WindowInsets> progressCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view).onApplyWindowInsets(progressCaptor.capture());
+    assertEquals(50, progressCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+  }
+
+  /**
+   * Tests cleanup of callbacks and internal state in remove().
+   *
+   * <p>Rationale / Added for: Verifies that unhooking listeners from the view resets all internal
+   * state flags (animating, needsSave, startImeBottom, currentImeBottom) to prevent stale state on
+   * re-install.
+   */
+  @Test
+  public void imeAnimation_remove_cleansUpAllState() {
+    View view = mock(View.class);
+    ImeSyncDeferringInsetsCallback callback = new ImeSyncDeferringInsetsCallback(view);
+    callback.install();
+    verify(view).setWindowInsetsAnimationCallback(callback.getAnimationCallback());
+    verify(view).setOnApplyWindowInsetsListener(callback.getInsetsListener());
+
+    callback.remove();
+    verify(view).setWindowInsetsAnimationCallback(null);
+    verify(view).setOnApplyWindowInsetsListener(null);
   }
 }

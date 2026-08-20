@@ -2682,6 +2682,7 @@ public class TextInputPluginTest {
 
             // Progress the animation and ensure that the IME insets smoothly interpolate
             // to the settled target IME insets.
+            when(animation.getInterpolatedFraction()).thenReturn(0.25f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 25));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
@@ -2689,6 +2690,7 @@ public class TextInputPluginTest {
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
             assertEquals(25, viewportMetricsCaptor.getValue().viewInsetBottom);
 
+            when(animation.getInterpolatedFraction()).thenReturn(0.50f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
@@ -2776,6 +2778,7 @@ public class TextInputPluginTest {
 
             // Progress the animation and ensure that the navigation bar insets have not been
             // subtracted from the IME insets
+            when(animation.getInterpolatedFraction()).thenReturn(0.25f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 25));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
@@ -2783,6 +2786,7 @@ public class TextInputPluginTest {
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
             assertEquals(25, viewportMetricsCaptor.getValue().viewInsetBottom);
 
+            when(animation.getInterpolatedFraction()).thenReturn(0.50f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
@@ -2873,6 +2877,7 @@ public class TextInputPluginTest {
 
             // Progress the animation and ensure that the navigation bar insets have not been
             // subtracted from the IME insets
+            when(animation.getInterpolatedFraction()).thenReturn(0.25f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 25));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
@@ -2880,6 +2885,7 @@ public class TextInputPluginTest {
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
             assertEquals(25, viewportMetricsCaptor.getValue().viewInsetBottom);
 
+            when(animation.getInterpolatedFraction()).thenReturn(0.50f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
