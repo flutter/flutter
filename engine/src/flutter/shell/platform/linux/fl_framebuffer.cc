@@ -71,16 +71,9 @@ static bool check_supports_implicit_msaa() {
 }
 
 static bool check_supports_offscreen_msaa() {
-  if (epoxy_gl_version() >= 30 ||
-      epoxy_has_gl_extension("GL_ANGLE_framebuffer_multisample") ||
-      epoxy_has_gl_extension("GL_EXT_framebuffer_multisample")) {
+  if (epoxy_gl_version() >= 30) {
     GLint max_samples = 0;
     glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
-    return max_samples >= 4;
-  }
-  if (epoxy_has_gl_extension("GL_EXT_multisampled_render_to_texture2")) {
-    GLint max_samples = 0;
-    glGetIntegerv(GL_MAX_SAMPLES_EXT, &max_samples);
     return max_samples >= 4;
   }
   return false;
