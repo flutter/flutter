@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -49,6 +50,8 @@ import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/devtools_launcher.dart';
+import 'src/experimental/extension_discovery.dart';
+import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
@@ -106,11 +109,20 @@ Future<void> main(List<String> args) async {
 
   await runner.run(
     args,
-    (ToolDependencies toolDependencies) => generateCommands(
-      toolDependencies: toolDependencies,
-      verbose: verbose,
-      verboseHelp: verboseHelp,
-    ),
+    (ToolDependencies toolDependencies) {
+      final manager = ExtensionManager(
+        hostPlatform: globals.os.hostPlatform,
+        logger: globals.logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      return generateCommands(
+        toolDependencies: toolDependencies,
+        verboseHelp: verboseHelp,
+        verbose: verbose,
+        extensionManager: manager,
+      );
+    },
     verbose: verbose,
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
@@ -187,6 +199,7 @@ List<FlutterCommand> generateCommands({
   required ToolDependencies toolDependencies,
   required bool verbose,
   required bool verboseHelp,
+  ExtensionManager? extensionManager,
 }) => <FlutterCommand>[
   AnalyzeCommand(
     verboseHelp: verboseHelp,
@@ -256,7 +269,7 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
-  DoctorCommand(verbose: verbose),
+  DoctorCommand(verbose: verbose, extensionManager: extensionManager),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(
     verboseHelp: verboseHelp,

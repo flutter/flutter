@@ -4,10 +4,13 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../features.dart';
+import 'diagnostics.dart';
 import 'extension_discovery.dart';
 
 /// Manages active tool extension isolate connections and exposes capability proxies.
@@ -16,9 +19,11 @@ class ExtensionManager {
   ExtensionManager({
     required this.hostPlatform,
     required Logger logger,
+    List<ExtensionEntryPoint> entryPoints = const <ExtensionEntryPoint>[],
     ExtensionDiscovery? discovery,
     FeatureFlags? featureFlags,
   }) : _logger = logger,
+       _entryPoints = entryPoints,
        _discovery = discovery ?? ExtensionDiscovery(logger: logger),
        _featureFlags = featureFlags ?? context.get<FeatureFlags>()!;
 
@@ -26,7 +31,29 @@ class ExtensionManager {
   final HostPlatform hostPlatform;
   final Logger _logger;
   final ExtensionDiscovery _discovery;
+  final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
+  bool get isInitialized => _isInitialized;
+  bool _isInitialized = false;
+  Future<void>? _initFuture;
+  final List<DiagnosticsExtension> _diagnosticsExtensions = <DiagnosticsExtension>[];
+
+  /// Ensures entrypoints are initialized; idempotent.
+  Future<void> ensureInitialized() {
+    return _initFuture ??= _doInitialize();
+  }
+
+  Future<void> _doInitialize() async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      _isInitialized = true;
+      return;
+    }
+    if (_entryPoints.isNotEmpty) {
+      await initialize(entryPoints: _entryPoints);
+    } else {
+      _isInitialized = true;
+    }
+  }
 
   /// Active extension connections compatible with [hostPlatform].
   List<ExtensionConnection> get connections => _discovery.connections;
@@ -43,9 +70,6 @@ class ExtensionManager {
   Future<void> initialize({
     List<ExtensionEntryPoint> entryPoints = const <ExtensionEntryPoint>[],
   }) async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
-      return;
-    }
     _logger.printTrace(
       'ExtensionManager initializing for platform "$hostPlatformName" with ${entryPoints.length} entrypoint(s).',
     );
@@ -68,11 +92,32 @@ class ExtensionManager {
         await connection.dispose();
       }
     }
+    _diagnosticsExtensions.clear();
+    for (final ExtensionConnection connection in _discovery.connections) {
+      if (connection.capabilities.services.contains(DiagnosticsExtension.serviceNamespace)) {
+        final client = DiagnosticsExtensionClient(connection, logger: _logger);
+        await client.fetchTitle();
+        _diagnosticsExtensions.add(client);
+      }
+    }
+    _isInitialized = true;
+  }
+
+  /// Active [DiagnosticsExtension] proxies for extensions supporting `'diagnostics'`.
+  List<DiagnosticsExtension> get diagnosticsExtensions {
+    assert(
+      _isInitialized,
+      'ExtensionManager.ensureInitialized() must be called before accessing diagnosticsExtensions.',
+    );
+    return List<DiagnosticsExtension>.unmodifiable(_diagnosticsExtensions);
   }
 
   /// Disposes all active extension isolate connections.
   Future<void> dispose() async {
     _logger.printTrace('ExtensionManager disposing all active connections.');
+    _diagnosticsExtensions.clear();
+    _isInitialized = false;
+    _initFuture = null;
     await _discovery.dispose();
   }
 }
