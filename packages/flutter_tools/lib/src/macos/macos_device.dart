@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../ios/plist_parser.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'build_macos.dart';
@@ -27,23 +28,15 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required super.fileSystem,
+    required super.logger,
+    required super.operatingSystemUtils,
+    required super.processManager,
   }) : _processManager = processManager,
        _logger = logger,
        _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
-       super(
-         'macos',
-         platformType: PlatformType.macos,
-         ephemeral: false,
-         processManager: processManager,
-         logger: logger,
-         fileSystem: fileSystem,
-         operatingSystemUtils: operatingSystemUtils,
-       );
+       super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -179,10 +172,40 @@ class MacOSDevice extends DesktopDevice {
     // Launching via `open -a <bundle> --args <args>` runs the application within its proper
     // bundle context, ensuring correct TCC attribution.
     //
-    // However, `open` exits immediately after launching the application, losing direct
-    // stdout/stderr pipes. To discover the VM Service URI, pass `--write-service-info` with
-    // a temporary file path and poll until the VM writes its connection info.
-    final File vmServiceInfoFile = _fileSystem.systemTempDirectory
+    // Under macOS App Sandbox, sandboxed applications are forbidden by kernel sandbox policy
+    // from writing outside their sandbox container directory (`~/Library/Containers/<bundleId>/Data/tmp/`)
+    // unless granted specific user-selected file entitlements.
+    //
+    // Attempting to write `--write-service-info` to the system temporary directory (e.g. `/tmp` or
+    // `/Volumes/Work/...`) is blocked by `sandboxd`, preventing the Dart VM from creating `vm_service_info.json`.
+    //
+    // To ensure the VM can write the connection file, resolve the application's bundle identifier
+    // from `Info.plist` and create the temporary file inside the application's sandbox container:
+    // `~/Library/Containers/<bundleId>/Data/tmp/`
+    // If the bundle identifier cannot be resolved or container directory creation fails, fall back to
+    // `_fileSystem.systemTempDirectory`.
+    Directory tempDirectory = _fileSystem.systemTempDirectory;
+    final String plistPath = _fileSystem.path.join(bundlePath, 'Contents', 'Info.plist');
+    if (_fileSystem.file(plistPath).existsSync()) {
+      try {
+        final String? bundleId = globals.plistParser.getValueFromFile<String>(
+          plistPath,
+          PlistParser.kCFBundleIdentifierKey,
+        );
+        final String? homeDirPath = globals.fsUtils.homeDirPath;
+        if (bundleId != null && bundleId.isNotEmpty && homeDirPath != null) {
+          final Directory containerTmpDir = _fileSystem.directory(
+            _fileSystem.path.join(homeDirPath, 'Library', 'Containers', bundleId, 'Data', 'tmp'),
+          );
+          containerTmpDir.createSync(recursive: true);
+          tempDirectory = containerTmpDir;
+        }
+      } on Exception catch (e) {
+        _logger.printTrace('Could not resolve or create sandbox container tmp directory: $e');
+      }
+    }
+
+    final File vmServiceInfoFile = tempDirectory
         .createTempSync('flutter_tools_macos_device.')
         .childFile('vm_service_info.json');
 
@@ -325,18 +348,18 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    required Platform platform,
-    required MacOSWorkflow macOSWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
     required FileSystem fileSystem,
+    required Logger logger,
+    required MacOSWorkflow macOSWorkflow,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _platform = platform,
+    required Platform platform,
+    required ProcessManager processManager,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
        _macOSWorkflow = macOSWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
+       _platform = platform,
+       _processManager = processManager,
        super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
@@ -362,10 +385,10 @@ class MacOSDevices extends PollingDeviceDiscovery {
     }
     return <Device>[
       MacOSDevice(
-        processManager: _processManager,
-        logger: _logger,
         fileSystem: _fileSystem,
+        logger: _logger,
         operatingSystemUtils: _operatingSystemUtils,
+        processManager: _processManager,
       ),
     ];
   }
