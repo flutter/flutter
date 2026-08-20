@@ -36,7 +36,7 @@ void ShellTestVsyncWaiter::AwaitVSync() {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
   auto vsync_future = clock_->NextVSync();
 
-  auto async_wait = std::async([&vsync_future, this]() {
+  std::thread([this, vsync_future = std::move(vsync_future)]() mutable {
     vsync_future.wait();
 
     // Post the `FireCallback` to the Platform thread so earlier Platform tasks
@@ -53,7 +53,7 @@ void ShellTestVsyncWaiter::AwaitVSync() {
     task_runners_.GetPlatformTaskRunner()->PostTask([this]() {
       FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now());
     });
-  });
+  }).detach();
 }
 
 void ConstantFiringVsyncWaiter::AwaitVSync() {
