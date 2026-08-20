@@ -48,6 +48,7 @@ import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/native_assets.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
@@ -1154,6 +1155,7 @@ class FakeToolContext extends Fake implements ToolContext {
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     OperatingSystemUtils? os,
     OutputPreferences? outputPreferences,
+    PersistentToolState? persistentToolState,
     Platform? platform,
     PreRunValidator? preRunValidator,
     ProcessInfo? processInfo,
@@ -1179,6 +1181,7 @@ class FakeToolContext extends Fake implements ToolContext {
        _nativeAssetsBuilder = nativeAssetsBuilder,
        _os = os,
        _outputPreferences = outputPreferences,
+       _persistentToolState = persistentToolState,
        _platform = platform,
        _preRunValidator = preRunValidator,
        _processInfo = processInfo,
@@ -1205,6 +1208,7 @@ class FakeToolContext extends Fake implements ToolContext {
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
   final OperatingSystemUtils? _os;
   final OutputPreferences? _outputPreferences;
+  final PersistentToolState? _persistentToolState;
   final Platform? _platform;
   final PreRunValidator? _preRunValidator;
   final ProcessInfo? _processInfo;
@@ -1268,6 +1272,14 @@ class FakeToolContext extends Fake implements ToolContext {
   late final OutputPreferences outputPreferences = _outputPreferences ?? OutputPreferences.test();
 
   @override
+  late final PersistentToolState persistentToolState =
+      _persistentToolState ??
+      PersistentToolState.test(
+        directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
+        logger: logger,
+      );
+
+  @override
   late final Platform platform = _platform ?? FakePlatform();
 
   @override
@@ -1324,6 +1336,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
     Logger? logger,
     OperatingSystemUtils? os,
     OutputPreferences? outputPreferences,
+    PersistentToolState? persistentToolState,
     Platform? platform,
     PreRunValidator? preRunValidator,
     ProcessInfo? processInfo,
@@ -1348,6 +1361,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
        _logger = logger,
        _os = os,
        _outputPreferences = outputPreferences,
+       _persistentToolState = persistentToolState,
        _platform = platform,
        _preRunValidator = preRunValidator,
        _processInfo = processInfo,
@@ -1373,6 +1387,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
   final Logger? _logger;
   final OperatingSystemUtils? _os;
   final OutputPreferences? _outputPreferences;
+  final PersistentToolState? _persistentToolState;
   final Platform? _platform;
   final PreRunValidator? _preRunValidator;
   final ProcessInfo? _processInfo;
@@ -1431,6 +1446,15 @@ class DelegatingToolContext extends Fake implements ToolContext {
 
   @override
   OutputPreferences get outputPreferences => _outputPreferences ?? globals.outputPreferences;
+
+  @override
+  PersistentToolState get persistentToolState =>
+      _persistentToolState ??
+      globals.persistentToolState ??
+      PersistentToolState.test(
+        directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
+        logger: logger,
+      );
 
   @override
   Platform get platform => _platform ?? globals.platform;

@@ -32,6 +32,7 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
 import '../reporting/unified_analytics.dart';
@@ -187,6 +188,8 @@ abstract class FlutterCommand extends Command<void> {
   UserMessages get _userMessages => toolContext?.userMessages ?? globals.userMessages;
   PreRunValidator get _preRunValidator => toolContext?.preRunValidator ?? globals.preRunValidator;
   OperatingSystemUtils get _os => toolContext?.os ?? globals.os;
+  PersistentToolState? get _persistentToolState =>
+      toolContext?.persistentToolState ?? globals.persistentToolState;
   Platform get _platform => toolContext?.platform ?? globals.platform;
   FileSystem get _fs => toolContext?.fs ?? globals.fs;
   FlutterProjectFactory get _projectFactory =>
@@ -2053,13 +2056,14 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     final OperatingSystemUtils os = _os;
+    final PersistentToolState? persistentToolState = _persistentToolState;
     if (os.hostPlatform == HostPlatform.darwin_x64 &&
-        (globals.persistentToolState?.shouldShowIntelMacWarning ?? true)) {
+        (persistentToolState?.shouldShowIntelMacWarning ?? true)) {
       _logger.printWarning(
         'Flutter is deprecating support for Intel-based Macs. '
         'A future version of Flutter will require an Apple Silicon Mac to build applications.',
       );
-      globals.persistentToolState?.shouldShowIntelMacWarning = false;
+      persistentToolState?.shouldShowIntelMacWarning = false;
     }
 
     if (refreshWirelessDevices && toolContext == null) {
