@@ -22,6 +22,7 @@ void main() {
       ),
       r'^(?!Golden).+',
     ]);
+    expect(result.exitCode, 0, reason: 'Process failed with stderr: ${result.stderr}');
     expect(result.stdout, contains(r'args: [^(?!Golden).+]'));
   }, skip: !platform.isWindows);
 }
