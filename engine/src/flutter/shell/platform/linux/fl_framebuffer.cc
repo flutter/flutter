@@ -41,15 +41,19 @@ static void fl_framebuffer_dispose(GObject* object) {
 
   if (self->framebuffer_id != 0) {
     glDeleteFramebuffers(1, &self->framebuffer_id);
+    self->framebuffer_id = 0;
   }
   if (self->texture_id != 0) {
     glDeleteTextures(1, &self->texture_id);
+    self->texture_id = 0;
   }
   if (self->color_renderbuffer != 0) {
     glDeleteRenderbuffers(1, &self->color_renderbuffer);
+    self->color_renderbuffer = 0;
   }
   if (self->depth_stencil != 0) {
     glDeleteRenderbuffers(1, &self->depth_stencil);
+    self->depth_stencil = 0;
   }
   g_clear_object(&self->image);
 
