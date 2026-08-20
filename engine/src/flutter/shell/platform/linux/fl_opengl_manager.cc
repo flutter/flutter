@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 #include <epoxy/egl.h>
+#include <epoxy/gl.h>
 #include <gdk/gdkwayland.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
 #endif
+
+#include <cstring>
 
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 
@@ -121,4 +124,41 @@ EGLDisplay fl_opengl_manager_get_display(FlOpenGLManager* self) {
 
 EGLContext fl_opengl_manager_get_context(FlOpenGLManager* self) {
   return self->render_context;
+}
+
+// Checks if the current OpenGL driver is known to have a broken or unsupported
+// glBlitFramebuffer implementation.
+static gboolean driver_supports_blit() {
+  const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
+  if (vendor == nullptr) {
+    return TRUE;
+  }
+
+  // Note: List of unsupported vendors due to issue
+  // https://github.com/flutter/flutter/issues/152099
+  const char* unsupported_vendors_exact[] = {"Vivante Corporation", "ARM"};
+  const char* unsupported_vendors_fuzzy[] = {"NVIDIA"};
+
+  for (const char* unsupported : unsupported_vendors_fuzzy) {
+    if (strstr(vendor, unsupported) != nullptr) {
+      return FALSE;
+    }
+  }
+  for (const char* unsupported : unsupported_vendors_exact) {
+    if (strcmp(vendor, unsupported) == 0) {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+gboolean fl_opengl_manager_can_blit(FlOpenGLManager* self) {
+  g_return_val_if_fail(FL_IS_OPENGL_MANAGER(self), FALSE);
+
+  // glBlitFramebuffer is a GLES3 / OpenGL 3.0 function and may not be present
+  // on older drivers, so treat it as optional. Evaluated for whichever OpenGL
+  // context is current.
+  return driver_supports_blit() &&
+         (epoxy_gl_version() >= 30 ||
+          epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
 }

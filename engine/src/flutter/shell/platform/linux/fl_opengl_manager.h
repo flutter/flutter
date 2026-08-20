@@ -92,6 +92,20 @@ EGLDisplay fl_opengl_manager_get_display(FlOpenGLManager* manager);
  */
 EGLContext fl_opengl_manager_get_context(FlOpenGLManager* manager);
 
+/**
+ * fl_opengl_manager_can_blit:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Checks whether glBlitFramebuffer can be used on the currently current OpenGL
+ * context. glBlitFramebuffer is a GLES3 / OpenGL 3.0 function that may be
+ * missing or broken on some drivers, so callers should fall back to shader
+ * compositing when this returns %FALSE. Requires an OpenGL context to be
+ * current.
+ *
+ * Returns: %TRUE if glBlitFramebuffer is available.
+ */
+gboolean fl_opengl_manager_can_blit(FlOpenGLManager* manager);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_OPENGL_MANAGER_H_

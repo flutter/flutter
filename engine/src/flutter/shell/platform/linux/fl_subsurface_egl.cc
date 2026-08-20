@@ -9,6 +9,8 @@
 #include <wayland-client.h>
 #include <wayland-egl.h>
 
+#include "flutter/shell/platform/linux/fl_compositor_opengl_shader.h"
+
 struct _FlSubsurfaceEGL {
   GObject parent_instance;
 
@@ -26,9 +28,17 @@ struct _FlSubsurfaceEGL {
   // EGL surface that draws onto egl_window.
   EGLSurface egl_surface;
 
+  // TRUE if glBlitFramebuffer can be used to copy the engine frame to the
+  // window surface. When FALSE the frame is drawn with [shader] instead.
+  gboolean can_blit;
+
   // Framebuffer used to read the engine's frame texture. Created lazily on the
-  // first present and reused for subsequent frames.
+  // first present and reused for subsequent frames. Only used when [can_blit].
   GLuint read_framebuffer;
+
+  // Shader used to draw the engine frame when glBlitFramebuffer is unavailable.
+  // NULL when [can_blit].
+  FlCompositorOpenGLShader* shader;
 };
 
 G_DEFINE_TYPE(FlSubsurfaceEGL, fl_subsurface_egl, G_TYPE_OBJECT)
@@ -108,7 +118,20 @@ static gboolean setup(FlSubsurfaceEGL* self,
   eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
   eglSwapInterval(egl_display, 0);
+
+  // Determine whether this context can use glBlitFramebuffer to copy the engine
+  // frame to the window surface; if not, fall back to compositing the frame
+  // with a shader, matching the OpenGL renderer.
+  self->can_blit = fl_opengl_manager_can_blit(self->opengl_manager);
   eglMakeCurrent(egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+  if (!self->can_blit) {
+    // The shader is created in the engine's context, which the subsurface
+    // context shares, so its program and buffers are usable when the subsurface
+    // context is current.
+    self->shader = fl_compositor_opengl_shader_new(self->opengl_manager);
+    fl_opengl_manager_clear_current(self->opengl_manager);
+  }
   return TRUE;
 }
 
@@ -143,6 +166,7 @@ static void fl_subsurface_egl_dispose(GObject* object) {
     wl_egl_window_destroy(self->egl_window);
     self->egl_window = nullptr;
   }
+  g_clear_object(&self->shader);
   g_clear_object(&self->opengl_manager);
 
   G_OBJECT_CLASS(fl_subsurface_egl_parent_class)->dispose(object);
@@ -190,8 +214,8 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
                                size_t height) {
   g_return_if_fail(FL_IS_SUBSURFACE_EGL(self));
 
-  // Blit the composited frame directly to the subsurface window surface using
-  // the subsurface's own EGL context.
+  // Present the composited frame to the subsurface window surface using the
+  // subsurface's own EGL context.
   EGLDisplay egl_display = get_display(self);
   eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
@@ -205,18 +229,31 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
   }
 
   // The subsurface context shares resources with the engine, so the engine's
-  // frame texture can be read directly. Attach it to a persistent framebuffer
-  // and blit it to the subsurface window surface. The framebuffer is created
-  // lazily on the first present and reused for subsequent frames.
-  if (self->read_framebuffer == 0) {
-    glGenFramebuffers(1, &self->read_framebuffer);
+  // frame texture can be read directly without using EGLImage.
+  if (self->can_blit) {
+    // Attach the frame texture to a persistent framebuffer and blit it to the
+    // window surface. The framebuffer is created lazily on the first present
+    // and reused for subsequent frames.
+    if (self->read_framebuffer == 0) {
+      glGenFramebuffers(1, &self->read_framebuffer);
+    }
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, self->read_framebuffer);
+    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D, texture_id, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
+                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
+  } else {
+    // glBlitFramebuffer is unavailable; draw the frame texture as a fullscreen
+    // quad with the shader instead.
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, width, height);
+    fl_compositor_opengl_shader_use(self->shader);
+    fl_compositor_opengl_shader_set_offset(self->shader, 0, 0);
+    fl_compositor_opengl_shader_set_scale(self->shader, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
   }
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, self->read_framebuffer);
-  glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                         GL_TEXTURE_2D, texture_id, 0);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-  glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
-                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
   eglSwapBuffers(egl_display, self->egl_surface);
 
   // Restore the engine's rendering context so the raster thread can continue
