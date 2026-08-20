@@ -35,7 +35,8 @@ class SkwasmPaint implements ui.Paint {
       paintSetColorFilter(rawPaint, backendFilter.handle);
     }
 
-    final ShaderHandle? shaderHandle = _shader?.handle;
+    final ShaderHandle? shaderHandle =
+        (_shader?.getBackendShader(filterQuality) as SkwasmShader?)?.handle;
     if (shaderHandle != null) {
       paintSetShader(rawPaint, shaderHandle);
     }
@@ -106,11 +107,10 @@ class SkwasmPaint implements ui.Paint {
 
   @override
   set shader(ui.Shader? uiShader) {
-    uiShader as SkwasmShader?;
-    _shader = uiShader;
+    _shader = uiShader as EngineShader?;
   }
 
-  SkwasmShader? _shader;
+  EngineShader? _shader;
 
   @override
   ui.FilterQuality filterQuality = ui.FilterQuality.none;
