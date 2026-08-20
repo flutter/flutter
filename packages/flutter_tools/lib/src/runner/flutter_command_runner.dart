@@ -261,9 +261,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     _populateOptions(verboseHelp: _verboseHelp);
 
-    commands.forEach((String name, Command<void> command) {
-      argParser.addCommand(name, command.argParser);
-    });
+    for (final MapEntry<String, Command<void>> entry in commands.entries) {
+      argParser.addCommand(entry.key, entry.value.argParser);
+    }
   }
 
   @override
