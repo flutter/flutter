@@ -1671,8 +1671,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void setupApplicationPackages() {
-    if (applicationPackages == null && toolContext == null) {
-      applicationPackages = ApplicationPackageFactory.instance;
+    try {
+      applicationPackages ??= ApplicationPackageFactory.instance;
+    } on UnsupportedError {
+      // Context is not available in hermetic unit tests.
     }
   }
 
@@ -1719,17 +1721,15 @@ abstract class FlutterCommand extends Command<void> {
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
         if (commandPath != null) {
-          final Signals signals = _signals;
-          _registerSignalHandlers(commandPath, startTime, signals: signals, clock: clock);
+          _registerSignalHandlers(commandPath, startTime);
         }
         var commandResult = FlutterCommandResult.fail();
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
           final DateTime endTime = clock.now();
-          final UserMessages userMessages = _userMessages;
           logger.printTrace(
-            userMessages.flutterElapsedTime(
+            _userMessages.flutterElapsedTime(
               name,
               getElapsedAsMilliseconds(endTime.difference(startTime)),
             ),
@@ -1752,8 +1752,7 @@ abstract class FlutterCommand extends Command<void> {
 
   @visibleForOverriding
   String get deprecationWarning {
-    final String warningMark = _logger.terminal.warningMark;
-    return '$warningMark The "$name" command is '
+    return '${_logger.terminal.warningMark} The "$name" command is '
         'deprecated and will be removed in a future version of Flutter. '
         'See https://flutter.dev/to/previous-releases '
         'for previous releases of Flutter.\n';
@@ -1958,25 +1957,19 @@ abstract class FlutterCommand extends Command<void> {
     return webHeaders;
   }
 
-  void _registerSignalHandlers(
-    String commandPath,
-    DateTime startTime, {
-    Signals? signals,
-    SystemClock? clock,
-  }) {
+  void _registerSignalHandlers(String commandPath, DateTime startTime) {
     void handler(io.ProcessSignal s) {
       _cache.releaseLock();
       _sendPostUsage(
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
         startTime,
-        (clock ?? _clock).now(),
+        _clock.now(),
       );
     }
 
-    final Signals effectiveSignals = signals ?? _signals;
-    effectiveSignals.addHandler(ProcessSignal.sigterm, handler);
-    effectiveSignals.addHandler(ProcessSignal.sigint, handler);
+    _signals.addHandler(ProcessSignal.sigterm, handler);
+    _signals.addHandler(ProcessSignal.sigint, handler);
   }
 
   /// Logs data about this command.
@@ -2038,8 +2031,7 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
-    final PreRunValidator validator = _preRunValidator;
-    validator.validate();
+    _preRunValidator.validate();
 
     if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
         (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
@@ -2055,9 +2047,8 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    final OperatingSystemUtils os = _os;
     final PersistentToolState? persistentToolState = _persistentToolState;
-    if (os.hostPlatform == HostPlatform.darwin_x64 &&
+    if (_os.hostPlatform == HostPlatform.darwin_x64 &&
         (persistentToolState?.shouldShowIntelMacWarning ?? true)) {
       _logger.printWarning(
         'Flutter is deprecating support for Intel-based Macs. '
@@ -2089,8 +2080,7 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Analytics effectiveAnalytics = _analytics;
-      effectiveAnalytics.send(await unifiedAnalyticsUsageValues(commandPath));
+      _analytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
 
     return runCommand();
@@ -2229,9 +2219,9 @@ abstract class FlutterCommand extends Command<void> {
       }
       if (path != fileSystem.currentDirectory.path) {
         fileSystem.currentDirectory = path;
-        final message =
-            'Changing current working directory to: ${fileSystem.currentDirectory.path}';
-        _logger.printStatus(message);
+        _logger.printStatus(
+          'Changing current working directory to: ${fileSystem.currentDirectory.path}',
+        );
       }
     }
 
