@@ -156,7 +156,7 @@ Future<bool> _runRetryLoop(String testDir) async {
     return false;
   }
 
-  return false;
+  throw StateError('Unreachable');
 }
 
 class _InfrastructureException implements Exception {
