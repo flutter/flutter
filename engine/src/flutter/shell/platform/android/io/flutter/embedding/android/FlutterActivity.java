@@ -1309,7 +1309,7 @@ public class FlutterActivity extends Activity
   protected Bundle getMetaData() throws PackageManager.NameNotFoundException {
     ActivityInfo activityInfo =
         getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
-    return activityInfo.metaData;
+    return activityInfo != null ? activityInfo.metaData : null;
   }
 
   @Nullable
