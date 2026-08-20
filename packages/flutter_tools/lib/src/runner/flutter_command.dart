@@ -2033,6 +2033,21 @@ abstract class FlutterCommand extends Command<void> {
     final PreRunValidator validator = _preRunValidator ?? globals.preRunValidator;
     validator.validate();
 
+    if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
+        (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
+      if (getBuildMode().isRelease) {
+        final bool enableImpeller = boolArg(FlutterOptions.kEnableImpeller);
+        final flagName = enableImpeller
+            ? '--${FlutterOptions.kEnableImpeller}'
+            : '--no-${FlutterOptions.kEnableImpeller}';
+        final Logger logger = _logger ?? globals.logger;
+        logger.printWarning(
+          'The "$flagName" flag is ignored in release builds. '
+          'The rendering backend is determined at build time.',
+        );
+      }
+    }
+
     final OperatingSystemUtils os = _os ?? globals.os;
     final Logger logger = _logger ?? globals.logger;
     if (os.hostPlatform == HostPlatform.darwin_x64 &&
