@@ -644,6 +644,28 @@ class FlutterFrameworkDependency {
           '${result.stdout}\n---\n${result.stderr}',
         );
       }
+      final String copiedPath = xcframeworkOutput
+          .childDirectory('${_targetPlatform.binaryName}.xcframework')
+          .path;
+      try {
+        final ProcessResult chmodResult = await _utils.processManager.run(<String>[
+          'chmod',
+          '-R',
+          'u+w',
+          copiedPath,
+        ]);
+        if (chmodResult.exitCode != 0) {
+          _utils.logger.printWarning(
+            'Failed to make the XCFramework writable. This may cause the build to '
+            'fail when using lipo.\nError: $copiedPath: ${chmodResult.stderr}',
+          );
+        }
+      } on ProcessException catch (e) {
+        _utils.logger.printWarning(
+          'Failed to make the XCFramework writable. This may cause the build to '
+          'fail when using lipo.\nError: $copiedPath: $e',
+        );
+      }
       if (codesignIdentity != null) {
         final Directory copiedXCFramework = xcframeworkOutput.childDirectory(
           '${_targetPlatform.binaryName}.xcframework',
