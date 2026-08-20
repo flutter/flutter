@@ -760,510 +760,6 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
-    test('keeps connection open across a transient autofill blur, closes on genuine unfocus', () async {
-      // Password managers and browser autofill popups blur the hidden input
-      // (with a null relatedTarget) while the page keeps focus, then hand focus
-      // back to fill the field. For an autofill field that re-focus must cancel
-      // the pending close, or the autofilled value is dropped.
-      final spy = PlatformMessagesSpy();
-      spy.setUp();
-
-      final config = createFlutterConfig(
-        'text',
-        autofillHint: 'email',
-        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
-      );
-      void send(MethodCall call) =>
-          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
-
-      expect(textEditing.isEditing, isTrue);
-
-      final strategy = textEditing.strategy;
-      strategy.debugDocumentHasFocusOverride = true;
-      strategy.debugDocumentVisibilityStateOverride = 'visible';
-
-      // The popup takes focus: the field blurs while the page keeps focus.
-      strategy.handleBlur(createDomEvent('Event', 'blur'));
-
-      // The close is deferred, never synchronous.
-      expect(connectionClosedMessages(spy), isEmpty);
-
-      // The browser hands focus back to the field to autofill it.
-      strategy.handleFocus(createDomEvent('Event', 'focus'));
-
-      await Future<void>.delayed(const Duration(milliseconds: 150));
-
-      // The re-focus cancelled the close, so the connection stays open.
-      expect(connectionClosedMessages(spy), isEmpty);
-      expect(textEditing.isEditing, isTrue);
-
-      strategy.debugDocumentHasFocusOverride = null;
-      strategy.debugDocumentVisibilityStateOverride = null;
-
-      // A genuine unfocus (the framework closes the connection) must actually
-      // tear the engine half down: the form goes dormant and the hidden input
-      // releases DOM focus, so the soft keyboard dismisses and physical
-      // keystrokes stop reaching the old field.
-      final DomHTMLElement? input = textEditing.strategy.domElement;
-      send(const MethodCall('TextInput.clearClient'));
-      expect(textEditing.isEditing, isFalse);
-      expect(dormantForms, hasLength(1));
-      // The DOM focus handoff (safeBlur) is asynchronous.
-      await Future<void>.delayed(Duration.zero);
-      expect(domDocument.activeElement, isNot(input));
-      spy.tearDown();
-    });
-
-    test('keeps connection open for an autofill field that blurs without refocus', () async {
-      final spy = PlatformMessagesSpy();
-      spy.setUp();
-
-      final config = createFlutterConfig(
-        'text',
-        autofillHint: 'email',
-        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
-      );
-      void send(MethodCall call) =>
-          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
-
-      expect(textEditing.isEditing, isTrue);
-
-      final strategy = textEditing.strategy;
-      strategy.debugDocumentHasFocusOverride = true;
-      strategy.debugDocumentVisibilityStateOverride = 'visible';
-
-      // A password manager takes focus to fill the form (relatedTarget is null)
-      // and may keep its dialog open for several seconds without returning focus
-      // to the field.
-      strategy.handleBlur(createDomEvent('Event', 'blur'));
-
-      // The close is deferred, never synchronous.
-      expect(connectionClosedMessages(spy), isEmpty);
-
-      await Future<void>.delayed(const Duration(milliseconds: 150));
-
-      // The connection is kept alive so the pending fill is not dropped; it is
-      // closed normally later when the framework unfocuses the field
-      // (clearClient), not on this transient blur.
-      expect(connectionClosedMessages(spy), isEmpty);
-      expect(textEditing.isEditing, isTrue);
-
-      strategy.debugDocumentHasFocusOverride = null;
-      strategy.debugDocumentVisibilityStateOverride = null;
-
-      // When the framework does unfocus, the engine closes for real.
-      final DomHTMLElement? input = textEditing.strategy.domElement;
-      send(const MethodCall('TextInput.clearClient'));
-      expect(textEditing.isEditing, isFalse);
-      expect(dormantForms, hasLength(1));
-      await Future<void>.delayed(Duration.zero);
-      expect(domDocument.activeElement, isNot(input));
-      spy.tearDown();
-    });
-
-    // A password manager fills a login form by focusing each field in turn and
-    // writing into it, and the field it starts from is whichever one the user
-    // invoked it on. Whatever it writes has to reach the framework in every
-    // combination: the engine must not depend on which field happens to be the
-    // active editing element while the manager walks the form.
-    //
-    // These drive the DOM the way an extension does (focus, assign value,
-    // dispatch input/change) rather than going through the manager itself,
-    // which is the part outside our control.
-    void managerFill(DomHTMLInputElement element, String value) {
-      element.focusWithoutScroll();
-      element.value = value;
-      element.dispatchEvent(createDomEvent('Event', 'input'));
-      element.dispatchEvent(createDomEvent('Event', 'change'));
-    }
-
-    ({DomHTMLInputElement username, DomHTMLInputElement password}) openFormFocusing(
-      String focusedHint,
-      void Function(MethodCall) send,
-    ) {
-      final config = createFlutterConfig(
-        focusedHint == 'password' ? 'text' : 'text',
-        autofillHint: focusedHint == 'password' ? 'password' : 'email',
-        autofillHintsForFields: <String>['email', 'password'],
-      );
-      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
-      final form = textEditing.strategy.domElement!.parent! as DomHTMLFormElement;
-      final fields = form.childNodes.toList() as List<DomHTMLInputElement>;
-      return (
-        username: fields.firstWhere((DomHTMLInputElement e) => e.name == 'email'),
-        password: fields.firstWhere((DomHTMLInputElement e) => e.name == 'current-password'),
-      );
-    }
-
-    // A value can arrive two ways: tagged (updateEditingStateWithTag, used for
-    // fields the manager fills while they are not the active editing element)
-    // or untagged (updateEditingState, used for the active element itself).
-    // Both mean the framework got it, which is what these tests are about.
-    bool frameworkReceived(PlatformMessagesSpy spy, String value) {
-      for (final PlatformMessage message in spy.messages) {
-        final dynamic args = message.methodArguments;
-        if (args is! List || args.length < 2) {
-          continue;
-        }
-        final dynamic payload = args[1];
-        if (payload is! Map) {
-          continue;
-        }
-        if (payload['text'] == value) {
-          return true;
-        }
-        for (final dynamic field in payload.values) {
-          if (field is Map && field['text'] == value) {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
-    for (final String focused in <String>['email', 'password']) {
-      test('a manager filling both fields is forwarded when $focused is active', () async {
-        final spy = PlatformMessagesSpy();
-        spy.setUp();
-        void send(MethodCall call) =>
-            textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-
-        final fields = openFormFocusing(focused, send);
-        spy.messages.clear();
-
-        // The manager walks the form: username first, then the password.
-        managerFill(fields.username, 'user@example.com');
-        managerFill(fields.password, 'hunter2secret');
-
-        expect(
-          frameworkReceived(spy, 'user@example.com'),
-          isTrue,
-          reason: 'the username fill must reach the framework',
-        );
-        expect(
-          frameworkReceived(spy, 'hunter2secret'),
-          isTrue,
-          reason: 'the password fill must reach the framework',
-        );
-
-        send(const MethodCall('TextInput.clearClient'));
-        dormantForms.clear();
-        spy.tearDown();
-      });
-
-      test('a manager filling only the other field is forwarded when $focused is active', () async {
-        final spy = PlatformMessagesSpy();
-        spy.setUp();
-        void send(MethodCall call) =>
-            textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-
-        final fields = openFormFocusing(focused, send);
-        spy.messages.clear();
-
-        // Some managers fill a single field. Whichever one it is, and whichever
-        // field is active, the value still has to arrive.
-        final DomHTMLInputElement other = focused == 'email' ? fields.password : fields.username;
-        managerFill(other, 'only-one-field');
-
-        expect(frameworkReceived(spy, 'only-one-field'), isTrue);
-
-        send(const MethodCall('TextInput.clearClient'));
-        dormantForms.clear();
-        spy.tearDown();
-      });
-    }
-
-    test('forwards a fill on the previously focused field after the connection closes', () async {
-      // A password manager can write into the field after the framework
-      // already closed the connection (the user confirms the fill dialog after
-      // focus moved on). The dormant form's listeners must forward that value
-      // with the field's tag so it reaches the framework through the
-      // last-connection routing.
-      final spy = PlatformMessagesSpy();
-      spy.setUp();
-
-      final config = createFlutterConfig(
-        'text',
-        autofillHint: 'email',
-        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
-      );
-      void send(MethodCall call) =>
-          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
-      expect(textEditing.isEditing, isTrue);
-
-      final input = textEditing.strategy.domElement! as DomHTMLInputElement;
-
-      // A genuine unfocus closes the connection; the form goes dormant with
-      // its listeners still attached.
-      send(const MethodCall('TextInput.clearClient'));
-      expect(textEditing.isEditing, isFalse);
-      spy.messages.clear();
-
-      // The manager fills the previously focused field.
-      input.value = 'user@example.com';
-      input.dispatchEvent(createDomEvent('Event', 'input'));
-
-      expect(spy.messages, hasLength(1));
-      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingStateWithTag');
-      expect(spy.messages[0].methodArguments, <dynamic>[
-        0, // Client ID
-        <String, dynamic>{
-          'email': <String, dynamic>{
-            'text': 'user@example.com',
-            'selectionBase': 16,
-            'selectionExtent': 16,
-            'composingBase': -1,
-            'composingExtent': -1,
-          },
-        },
-      ]);
-
-      // The same value again is deduplicated, not re-forwarded.
-      spy.messages.clear();
-      input.dispatchEvent(createDomEvent('Event', 'input'));
-      expect(spy.messages, isEmpty);
-
-      dormantForms.clear();
-      spy.tearDown();
-    });
-
-    test('a reused dormant element does not carry the previous value', () async {
-      // A dormant element is reused for the next connection on the same form.
-      // It must start out like a freshly created one: the framework's value
-      // arrives later over the platform channel, and until it does the stale
-      // value is what a password manager reads. Managers that skip a field
-      // already containing the value they are about to write then fill
-      // nothing at all.
-      final config = createFlutterConfig(
-        'text',
-        autofillHint: 'email',
-        autofillHintsForFields: <String>['email', 'password'],
-      );
-      void send(MethodCall call) =>
-          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
-
-      final first = textEditing.strategy.domElement! as DomHTMLInputElement;
-      first.value = 'left-over-secret';
-      send(const MethodCall('TextInput.clearClient'));
-      expect(dormantForms, hasLength(1));
-
-      // A new connection on the same form reuses that element.
-      send(MethodCall('TextInput.setClient', <dynamic>[124, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
-
-      final second = textEditing.strategy.domElement! as DomHTMLInputElement;
-      expect(second, first, reason: 'the dormant element should be reused');
-      expect(second.value, isEmpty);
-
-      send(const MethodCall('TextInput.clearClient'));
-      dormantForms.clear();
-    });
-
-    test('typing into a refocused field is not re-forwarded as autofill', () async {
-      // When a connection closes and a new one opens on the same form, the
-      // adopted dormant form's old listeners must be cancelled. The old
-      // instance observed the now-focused field as a non-focused one, so its
-      // stale listener would re-forward the user's typing as an autofill,
-      // collapsing the selection to the end of the text on every keystroke.
-      final spy = PlatformMessagesSpy();
-      spy.setUp();
-
-      final config = createFlutterConfig(
-        'text',
-        autofillHint: 'email',
-        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
-      );
-      void send(MethodCall call) =>
-          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
-      send(const MethodCall('TextInput.clearClient'));
-      expect(textEditing.isEditing, isFalse);
-
-      // A new connection on the same form adopts the dormant DOM.
-      send(MethodCall('TextInput.setClient', <dynamic>[124, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
-      expect(textEditing.isEditing, isTrue);
-
-      final input = textEditing.strategy.domElement! as DomHTMLInputElement;
-      spy.messages.clear();
-
-      // The user types into the focused field.
-      input.value = 't';
-      input.dispatchEvent(createDomEvent('Event', 'input'));
-
-      // Delivered once as a normal editing-state update, never as an autofill.
-      expect(
-        spy.messages.where(
-          (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingState',
-        ),
-        hasLength(1),
-      );
-      expect(
-        spy.messages.where(
-          (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingStateWithTag',
-        ),
-        isEmpty,
-      );
-
-      send(const MethodCall('TextInput.clearClient'));
-      dormantForms.clear();
-      spy.tearDown();
-    });
-
-    test('does not echo a programmatic setEditingState change as an autofill', () async {
-      // A programmatic controller.text change on a focused autofill field arrives
-      // through setEditingState. The next autofill rescan (e.g. after the tab is
-      // switched away and back) must not mistake that framework value for a browser
-      // autofill and forward it, which would collapse the cursor to the end.
-      final spy = PlatformMessagesSpy();
-      spy.setUp();
-
-      final config = createFlutterConfig(
-        'text',
-        autofillHint: 'email',
-        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
-      );
-      void send(MethodCall call) =>
-          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
-      send(
-        configureSetSizeAndTransformMethodCall(
-          150,
-          50,
-          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-        ),
-      );
-      send(const MethodCall('TextInput.show'));
-
-      // The framework programmatically sets a new value on the focused field.
-      send(
-        const MethodCall('TextInput.setEditingState', <String, dynamic>{
-          'text': 'from-code@example.com',
-          'selectionBase': 21,
-          'selectionExtent': 21,
-          'composingBase': -1,
-          'composingExtent': -1,
-        }),
-      );
-
-      final strategy = textEditing.strategy;
-      strategy.debugDocumentHasFocusOverride = true;
-      strategy.debugDocumentVisibilityStateOverride = 'visible';
-
-      spy.messages.clear();
-
-      // The tab is switched away: the field blurs (null relatedTarget) and an
-      // autofill rescan runs. The programmatic value was recorded, so it must not
-      // be re-forwarded as a fake autofill.
-      strategy.handleBlur(createDomEvent('Event', 'blur'));
-
-      final Iterable<PlatformMessage> autofillMessages = spy.messages.where(
-        (PlatformMessage message) =>
-            message.methodName == 'TextInputClient.updateEditingStateWithTag',
-      );
-      expect(autofillMessages, isEmpty);
-
-      strategy.debugDocumentHasFocusOverride = null;
-      strategy.debugDocumentVisibilityStateOverride = null;
-      send(const MethodCall('TextInput.clearClient'));
-      spy.tearDown();
-    });
-
-    test('geometry update before the input is shown does not throw (autofill)', () async {
-      // A setEditableSizeAndTransform can arrive before TextInput.show enables
-      // the strategy (for example a password manager forcing a relayout of the
-      // not-yet-shown field). updateElementPlacement must not read the late
-      // `inputConfiguration` before the strategy is enabled. Regression test for
-      // a LateInitializationError thrown from the autofill fill-window check.
-      final config = createFlutterConfig(
-        'text',
-        autofillHint: 'email',
-        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
-      );
-      void send(MethodCall call) =>
-          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
-      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
-
-      // No TextInput.show yet, so the strategy is not enabled.
-      expect(
-        () => send(
-          configureSetSizeAndTransformMethodCall(
-            150,
-            50,
-            Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
-          ),
-        ),
-        returnsNormally,
-      );
-
-      send(const MethodCall('TextInput.clearClient'));
-    });
 
     test(
       'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
@@ -3897,6 +3393,489 @@ Future<void> testMain() async {
 
     tearDown(() {
       clearForms();
+    });
+
+    test('keeps connection open across a transient autofill blur, closes on genuine unfocus', () async {
+      // Password managers and browser autofill popups blur the hidden input
+      // (with a null relatedTarget) while the page keeps focus, then hand focus
+      // back to fill the field. For an autofill field that re-focus must cancel
+      // the pending close, or the autofilled value is dropped.
+
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      expect(textEditing!.isEditing, isTrue);
+
+      final strategy = textEditing!.strategy;
+      strategy.debugDocumentHasFocusOverride = true;
+      strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+      // The popup takes focus: the field blurs while the page keeps focus.
+      strategy.handleBlur(createDomEvent('Event', 'blur'));
+
+      // The close is deferred, never synchronous.
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      // The browser hands focus back to the field to autofill it.
+      strategy.handleFocus(createDomEvent('Event', 'focus'));
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      // The re-focus cancelled the close, so the connection stays open.
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing!.isEditing, isTrue);
+
+      strategy.debugDocumentHasFocusOverride = null;
+      strategy.debugDocumentVisibilityStateOverride = null;
+
+      // A genuine unfocus (the framework closes the connection) must actually
+      // tear the engine half down: the form goes dormant and the hidden input
+      // releases DOM focus, so the soft keyboard dismisses and physical
+      // keystrokes stop reaching the old field.
+      final DomHTMLElement? input = textEditing!.strategy.domElement;
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing!.isEditing, isFalse);
+      expect(dormantForms, hasLength(1));
+      // The DOM focus handoff (safeBlur) is asynchronous.
+      await Future<void>.delayed(Duration.zero);
+      expect(domDocument.activeElement, isNot(input));
+    });
+
+    test('keeps connection open for an autofill field that blurs without refocus', () async {
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      expect(textEditing!.isEditing, isTrue);
+
+      final strategy = textEditing!.strategy;
+      strategy.debugDocumentHasFocusOverride = true;
+      strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+      // A password manager takes focus to fill the form (relatedTarget is null)
+      // and may keep its dialog open for several seconds without returning focus
+      // to the field.
+      strategy.handleBlur(createDomEvent('Event', 'blur'));
+
+      // The close is deferred, never synchronous.
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      // The connection is kept alive so the pending fill is not dropped; it is
+      // closed normally later when the framework unfocuses the field
+      // (clearClient), not on this transient blur.
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing!.isEditing, isTrue);
+
+      strategy.debugDocumentHasFocusOverride = null;
+      strategy.debugDocumentVisibilityStateOverride = null;
+
+      // When the framework does unfocus, the engine closes for real.
+      final DomHTMLElement? input = textEditing!.strategy.domElement;
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing!.isEditing, isFalse);
+      expect(dormantForms, hasLength(1));
+      await Future<void>.delayed(Duration.zero);
+      expect(domDocument.activeElement, isNot(input));
+    });
+
+    // A password manager fills a login form by focusing each field in turn and
+    // writing into it, and the field it starts from is whichever one the user
+    // invoked it on. Whatever it writes has to reach the framework in every
+    // combination: the engine must not depend on which field happens to be the
+    // active editing element while the manager walks the form.
+    //
+    // These drive the DOM the way an extension does (focus, assign value,
+    // dispatch input/change) rather than going through the manager itself,
+    // which is the part outside our control.
+    void managerFill(DomHTMLInputElement element, String value) {
+      element.focusWithoutScroll();
+      element.value = value;
+      element.dispatchEvent(createDomEvent('Event', 'input'));
+      element.dispatchEvent(createDomEvent('Event', 'change'));
+    }
+
+    ({DomHTMLInputElement username, DomHTMLInputElement password}) openFormFocusing(
+      String focusedHint,
+      void Function(MethodCall) send,
+    ) {
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: focusedHint,
+        autofillHintsForFields: <String>['email', 'password'],
+      );
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      final form = textEditing!.strategy.domElement!.parent! as DomHTMLFormElement;
+      final fields = form.childNodes.toList() as List<DomHTMLInputElement>;
+      return (
+        username: fields.firstWhere((DomHTMLInputElement e) => e.name == 'email'),
+        password: fields.firstWhere((DomHTMLInputElement e) => e.name == 'current-password'),
+      );
+    }
+
+    // A value can arrive two ways: tagged (updateEditingStateWithTag, used for
+    // fields the manager fills while they are not the active editing element)
+    // or untagged (updateEditingState, used for the active element itself).
+    // Both mean the framework got it, which is what these tests are about.
+    bool frameworkReceived(PlatformMessagesSpy spy, String value) {
+      for (final PlatformMessage message in spy.messages) {
+        final dynamic args = message.methodArguments;
+        if (args is! List || args.length < 2) {
+          continue;
+        }
+        final dynamic payload = args[1];
+        if (payload is! Map) {
+          continue;
+        }
+        if (payload['text'] == value) {
+          return true;
+        }
+        for (final dynamic field in payload.values) {
+          if (field is Map && field['text'] == value) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    for (final String focused in <String>['email', 'password']) {
+      test('a manager filling both fields is forwarded when $focused is active', () async {
+        void send(MethodCall call) =>
+            textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+
+        final fields = openFormFocusing(focused, send);
+        spy.messages.clear();
+
+        // The manager walks the form: username first, then the password.
+        managerFill(fields.username, 'user@example.com');
+        managerFill(fields.password, 'hunter2secret');
+
+        expect(
+          frameworkReceived(spy, 'user@example.com'),
+          isTrue,
+          reason: 'the username fill must reach the framework',
+        );
+        expect(
+          frameworkReceived(spy, 'hunter2secret'),
+          isTrue,
+          reason: 'the password fill must reach the framework',
+        );
+
+        send(const MethodCall('TextInput.clearClient'));
+        dormantForms.clear();
+      });
+
+      test('a manager filling only the other field is forwarded when $focused is active', () async {
+        void send(MethodCall call) =>
+            textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+
+        final fields = openFormFocusing(focused, send);
+        spy.messages.clear();
+
+        // Some managers fill a single field. Whichever one it is, and whichever
+        // field is active, the value still has to arrive.
+        final DomHTMLInputElement other = focused == 'email' ? fields.password : fields.username;
+        managerFill(other, 'only-one-field');
+
+        expect(frameworkReceived(spy, 'only-one-field'), isTrue);
+
+        send(const MethodCall('TextInput.clearClient'));
+        dormantForms.clear();
+      });
+    }
+
+    test('forwards a fill on the previously focused field after the connection closes', () async {
+      // A password manager can write into the field after the framework
+      // already closed the connection (the user confirms the fill dialog after
+      // focus moved on). The dormant form's listeners must forward that value
+      // with the field's tag so it reaches the framework through the
+      // last-connection routing.
+
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      expect(textEditing!.isEditing, isTrue);
+
+      final input = textEditing!.strategy.domElement! as DomHTMLInputElement;
+
+      // A genuine unfocus closes the connection; the form goes dormant with
+      // its listeners still attached.
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing!.isEditing, isFalse);
+      spy.messages.clear();
+
+      // The manager fills the previously focused field.
+      input.value = 'user@example.com';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingStateWithTag');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        0, // Client ID
+        <String, dynamic>{
+          'email': <String, dynamic>{
+            'text': 'user@example.com',
+            'selectionBase': 16,
+            'selectionExtent': 16,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      ]);
+
+      // The same value again is deduplicated, not re-forwarded.
+      spy.messages.clear();
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+      expect(spy.messages, isEmpty);
+
+      dormantForms.clear();
+    });
+
+    test('a reused dormant element does not carry the previous value', () async {
+      // A dormant element is reused for the next connection on the same form.
+      // It must start out like a freshly created one: the framework's value
+      // arrives later over the platform channel, and until it does the stale
+      // value is what a password manager reads. Managers that skip a field
+      // already containing the value they are about to write then fill
+      // nothing at all.
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['email', 'password'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      final first = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      first.value = 'left-over-secret';
+      send(const MethodCall('TextInput.clearClient'));
+      expect(dormantForms, hasLength(1));
+
+      // A new connection on the same form reuses that element.
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      final second = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      expect(second, first, reason: 'the dormant element should be reused');
+      expect(second.value, isEmpty);
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
+    test('typing into a refocused field is not re-forwarded as autofill', () async {
+      // When a connection closes and a new one opens on the same form, the
+      // adopted dormant form's old listeners must be cancelled. The old
+      // instance observed the now-focused field as a non-focused one, so its
+      // stale listener would re-forward the user's typing as an autofill,
+      // collapsing the selection to the end of the text on every keystroke.
+
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      send(const MethodCall('TextInput.clearClient'));
+      expect(textEditing!.isEditing, isFalse);
+
+      // A new connection on the same form adopts the dormant DOM.
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+      expect(textEditing!.isEditing, isTrue);
+
+      final input = textEditing!.strategy.domElement! as DomHTMLInputElement;
+      spy.messages.clear();
+
+      // The user types into the focused field.
+      input.value = 't';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      // Delivered once as a normal editing-state update, never as an autofill.
+      expect(
+        spy.messages.where(
+          (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingState',
+        ),
+        hasLength(1),
+      );
+      expect(
+        spy.messages.where(
+          (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingStateWithTag',
+        ),
+        isEmpty,
+      );
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
+    test('does not echo a programmatic setEditingState change as an autofill', () async {
+      // A programmatic controller.text change on a focused autofill field arrives
+      // through setEditingState. The next autofill rescan (e.g. after the tab is
+      // switched away and back) must not mistake that framework value for a browser
+      // autofill and forward it, which would collapse the cursor to the end.
+
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      // The framework programmatically sets a new value on the focused field.
+      send(
+        const MethodCall('TextInput.setEditingState', <String, dynamic>{
+          'text': 'from-code@example.com',
+          'selectionBase': 21,
+          'selectionExtent': 21,
+          'composingBase': -1,
+          'composingExtent': -1,
+        }),
+      );
+
+      final strategy = textEditing!.strategy;
+      strategy.debugDocumentHasFocusOverride = true;
+      strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+      spy.messages.clear();
+
+      // The tab is switched away: the field blurs (null relatedTarget) and an
+      // autofill rescan runs. The programmatic value was recorded, so it must not
+      // be re-forwarded as a fake autofill.
+      strategy.handleBlur(createDomEvent('Event', 'blur'));
+
+      final Iterable<PlatformMessage> autofillMessages = spy.messages.where(
+        (PlatformMessage message) =>
+            message.methodName == 'TextInputClient.updateEditingStateWithTag',
+      );
+      expect(autofillMessages, isEmpty);
+
+      strategy.debugDocumentHasFocusOverride = null;
+      strategy.debugDocumentVisibilityStateOverride = null;
+      send(const MethodCall('TextInput.clearClient'));
+    });
+
+    test('geometry update before the input is shown does not throw (autofill)', () async {
+      // A setEditableSizeAndTransform can arrive before TextInput.show enables
+      // the strategy (for example a password manager forcing a relayout of the
+      // not-yet-shown field). updateElementPlacement must not read the late
+      // `inputConfiguration` before the strategy is enabled. Regression test for
+      // a LateInitializationError thrown from the autofill fill-window check.
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['familyName', 'email', 'givenName', 'telephoneNumber'],
+      );
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[++clientId, config]));
+
+      // No TextInput.show yet, so the strategy is not enabled.
+      expect(
+        () => send(
+          configureSetSizeAndTransformMethodCall(
+            150,
+            50,
+            Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+          ),
+        ),
+        returnsNormally,
+      );
+
+      send(const MethodCall('TextInput.clearClient'));
     });
   });
 
