@@ -57,7 +57,8 @@ class SourceVisitor implements ResolvedFiles {
   /// Visit a depfile.
   ///
   /// If the depfile does not exist, marks [containsNewDepfile] as true and
-  /// returns.
+  /// returns. This is used by the [Node] class to tell the [BuildSystem] to
+  /// defer hash computation until after executing the target.
   void visitDepfile(String name) {
     final File depfile = environment.buildDir.childFile(name);
     if (!depfile.existsSync()) {

@@ -120,7 +120,7 @@ class DepfileService {
         .toSet()
         // Normalize the path before creating a file object.
         .map((String path) {
-          if (isWindows && path.toLowerCase().startsWith(r'\unc\')) {
+          if (isWindows && path.length >= 5 && path.substring(0, 5).toLowerCase() == r'\unc\') {
             path = r'\\' + path.substring(5);
           }
           if (baseDirectory != null && _fileSystem.path.isRelative(path)) {
