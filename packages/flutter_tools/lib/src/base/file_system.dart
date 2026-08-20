@@ -150,21 +150,51 @@ void copyDirectory(
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is Link) {
       final Link newLink = destDir.fileSystem.link(newPath);
+      final FileSystemEntityType destType = destDir.fileSystem.typeSync(
+        newPath,
+        followLinks: false,
+      );
+      if (destType == FileSystemEntityType.link) {
+        newLink.deleteSync();
+      } else if (destType == FileSystemEntityType.file) {
+        destDir.fileSystem.file(newPath).deleteSync();
+      } else if (destType == FileSystemEntityType.directory) {
+        destDir.fileSystem.directory(newPath).deleteSync(recursive: true);
+      }
       newLink.createSync(entity.targetSync());
     } else if (entity is File) {
       final File newFile = destDir.fileSystem.file(newPath);
+      final FileSystemEntityType destType = destDir.fileSystem.typeSync(
+        newPath,
+        followLinks: false,
+      );
+      if (destType == FileSystemEntityType.link) {
+        destDir.fileSystem.link(newPath).deleteSync();
+      } else if (destType == FileSystemEntityType.directory) {
+        destDir.fileSystem.directory(newPath).deleteSync(recursive: true);
+      }
       if (shouldCopyFile != null && !shouldCopyFile(entity, newFile)) {
         continue;
       }
       newFile.writeAsBytesSync(entity.readAsBytesSync());
       onFileCopied?.call(entity, newFile);
     } else if (entity is Directory) {
+      final Directory newSubDir = destDir.fileSystem.directory(newPath);
+      final FileSystemEntityType destType = destDir.fileSystem.typeSync(
+        newPath,
+        followLinks: false,
+      );
+      if (destType == FileSystemEntityType.link) {
+        destDir.fileSystem.link(newPath).deleteSync();
+      } else if (destType == FileSystemEntityType.file) {
+        destDir.fileSystem.file(newPath).deleteSync();
+      }
       if (shouldCopyDirectory != null && !shouldCopyDirectory(entity)) {
         continue;
       }
       copyDirectory(
         entity,
-        destDir.fileSystem.directory(newPath),
+        newSubDir,
         shouldCopyFile: shouldCopyFile,
         onFileCopied: onFileCopied,
         followLinks: followLinks,

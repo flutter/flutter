@@ -332,6 +332,25 @@ void main() {
       expect(destination.childDirectory('nested').childFile('b.txt'), exists);
       expect(destination.childDirectory('nested').childDirectory('deep'), isNot(exists));
     });
+
+    testWithoutContext('Overwrites existing destination files and links without failing', () {
+      final fileSystem = MemoryFileSystem.test();
+      final Directory origin = fileSystem.directory('/origin')..createSync();
+      origin.childFile('file.txt').writeAsStringSync('origin file');
+      origin.childLink('link.txt').createSync('/some/target');
+
+      final Directory destination = fileSystem.directory('/destination')..createSync();
+      // Create existing conflicting destination entities (e.g. stale files or directories).
+      destination.childLink('file.txt').createSync('/stale/target');
+      destination.childFile('link.txt').writeAsStringSync('stale link file');
+
+      copyDirectory(origin, destination, followLinks: false);
+
+      expect(destination.childFile('file.txt'), exists);
+      expect(destination.childFile('file.txt').readAsStringSync(), 'origin file');
+      expect(destination.childLink('link.txt'), exists);
+      expect(destination.childLink('link.txt').targetSync(), '/some/target');
+    });
   });
 
   group('escapePath', () {

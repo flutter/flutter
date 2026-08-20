@@ -1269,8 +1269,18 @@ void _createPlatformPluginSymlinks(
     final name = pluginInfo[_kFlutterPluginsNameKey]! as String;
     final path = pluginInfo[_kFlutterPluginsPathKey]! as String;
     final Link link = symlinkDirectory.childLink(name);
-    if (link.existsSync()) {
-      continue;
+    final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
+    if (entityType == FileSystemEntityType.link) {
+      try {
+        if (link.targetSync() == path && link.existsSync()) {
+          continue;
+        }
+      } on FileSystemException {
+        // Fall through to delete and recreate if resolving target throws.
+      }
+      ErrorHandlingFileSystem.deleteIfExists(link);
+    } else if (entityType != FileSystemEntityType.notFound) {
+      ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
     }
     try {
       link.createSync(path);
