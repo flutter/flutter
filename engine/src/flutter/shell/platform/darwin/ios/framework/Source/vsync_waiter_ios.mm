@@ -16,7 +16,6 @@ const static double kRefreshRateDiffToIgnore = 0.1;
 
 extern bool FlutterDispatchingTouches;
 extern bool FlutterDidPresentSurface;
-extern dispatch_block_t FlutterAfterDispatchingTouchesBlock;
 
 namespace flutter {
 
@@ -26,10 +25,13 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
   FML_DCHECK(display_link_manager);
   auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
     if (!waiting_for_vsync_) {
-      [client_ pause];
+      if (--idle_countdown_ == 0) {
+        [client_ pause];
+      }
       return;
     }
     waiting_for_vsync_ = false;
+    idle_countdown_ = 10;
 
     // Compute delay using the same CACurrentMediaTime() clock.
     CFTimeInterval delay = CACurrentMediaTime() - startTime;
@@ -47,6 +49,15 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
     // Align target time to the C++ steady_clock used by fml::TimePoint.
     fml::TimePoint target_time = start_time + fml::TimeDelta::FromSecondsF(duration);
     FireCallback(start_time, target_time, true);
+
+    if (block_until_frame_available_) {
+      block_until_frame_available_ = false;
+      FlutterDidPresentSurface = false;
+      CFTimeInterval startTime = CACurrentMediaTime();
+      while (!FlutterDidPresentSurface && CACurrentMediaTime() - startTime < 0.5) {
+        [FlutterRunLoop.mainRunLoop pollFlutterMessagesOnce];
+      }
+    }
   };
   FlutterFMLTaskRunner* uiTaskRunner =
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()];
@@ -72,25 +83,14 @@ void VsyncWaiterIOS::AwaitVSync() {
     [client_ setMaxRefreshRate:max_refresh_rate_];
   }
 
-  // When dispatching touches, start rendering the frame immediately and then
-  // hold the main thred inside touches Dispatch until the frame is presented.
-  if (FlutterDispatchingTouches) {
-    FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now(), false);
-    FlutterAfterDispatchingTouchesBlock = ^{
-      FlutterDidPresentSurface = false;
-      CFTimeInterval startTime = CACurrentMediaTime();
-      while (!FlutterDidPresentSurface && CACurrentMediaTime() - startTime < 0.5) {
-        [FlutterRunLoop.mainRunLoop pollFlutterMessagesOnce];
-      }
-    };
-    return;
-  }
-
   if (client_.displayLink.paused) {
     [client_ await];
     FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now(), false);
   } else {
     waiting_for_vsync_ = true;
+    if (FlutterDispatchingTouches) {
+      block_until_frame_available_ = true;
+    }
   }
 }
 

@@ -49,6 +49,8 @@ class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateRepor
   FlutterDisplayLinkManager* display_link_manager_;
   double max_refresh_rate_;
   bool waiting_for_vsync_ = false;
+  bool block_until_frame_available_ = false;
+  int idle_countdown_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);
 };

@@ -39,7 +39,6 @@
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
 bool FlutterDispatchingTouches;
-dispatch_block_t FlutterAfterDispatchingTouchesBlock;
 
 FLUTTER_ASSERT_ARC
 
@@ -1283,10 +1282,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   FlutterDispatchingTouches = true;
   [self.engine dispatchPointerDataPacket:std::move(packet)];
   FlutterDispatchingTouches = false;
-  if (FlutterAfterDispatchingTouchesBlock != nullptr) {
-    FlutterAfterDispatchingTouchesBlock();
-    FlutterAfterDispatchingTouchesBlock = nullptr;
-  }
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
@@ -1294,6 +1289,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+  NSLog(@"Touches moved %f", CACurrentMediaTime());
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
