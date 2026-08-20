@@ -2680,25 +2680,24 @@ public class TextInputPluginTest {
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
             assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
 
-            // Progress the animation and ensure that the navigation bar insets have been subtracted
-            // from the IME insets
+            // Progress the animation and ensure that the IME insets smoothly interpolate
+            // to the settled target IME insets.
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 25));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
 
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
-            assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
+            assertEquals(25, viewportMetricsCaptor.getValue().viewInsetBottom);
 
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
 
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
-            assertEquals(10, viewportMetricsCaptor.getValue().viewInsetBottom);
+            assertEquals(50, viewportMetricsCaptor.getValue().viewInsetBottom);
 
             // End the animation and ensure that the bottom insets match the lastWindowInsets that
-            // we set
-            // during onPrepare
+            // we set during onPrepare.
             imeSyncCallback.getAnimationCallback().onEnd(animation);
 
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());

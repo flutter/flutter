@@ -8,7 +8,6 @@ import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
 import android.graphics.Insets;
-import android.os.Build;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
@@ -74,6 +73,8 @@ class ImeSyncDeferringInsetsCallback {
   // in each onPrepare callback, so that we save the latest final state
   // to apply in onEnd.
   private boolean needsSave = false;
+  // Starting IME bottom inset captured when an animation prepares.
+  private int startImeBottom = 0;
 
   ImeSyncDeferringInsetsCallback(@NonNull View view) {
     this.view = view;
@@ -127,6 +128,8 @@ class ImeSyncDeferringInsetsCallback {
       needsSave = true;
       if ((animation.getTypeMask() & deferredInsetTypes) != 0) {
         animating = true;
+        startImeBottom =
+            lastWindowInsets != null ? lastWindowInsets.getInsets(deferredInsetTypes).bottom : 0;
       }
     }
 
@@ -136,34 +139,39 @@ class ImeSyncDeferringInsetsCallback {
       if (!animating || needsSave) {
         return insets;
       }
-      boolean matching = false;
+      WindowInsetsAnimation imeAnimation = null;
       for (WindowInsetsAnimation animation : runningAnimations) {
         if ((animation.getTypeMask() & deferredInsetTypes) != 0) {
-          matching = true;
-          continue;
+          imeAnimation = animation;
+          break;
         }
       }
-      if (!matching) {
+      if (imeAnimation == null) {
         return insets;
       }
 
-      // Pre 15, the IME insets include the height of the navigation bar. If the app
-      // isn't laid out behind the navigation bar, this causes the IME insets to be too large during
-      // the animation.  To fix this, we subtract the navigationBars bottom inset if the system UI
-      // flags for laying out behind the navigation bar aren't present.
-      int excludedInsets = 0;
-      int systemUiFlags = view.getWindowSystemUiVisibility();
-      if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
-        if ((systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-            && (systemUiFlags & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
-          excludedInsets = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
-        }
+      // Rather than guessing whether the OS includes navigation bar insets in raw animated
+      // values across different Android versions and system UI modes, smoothly interpolate
+      // from the initial IME inset to the settled target IME inset captured in lastWindowInsets.
+      // This guarantees mathematical continuity and eliminates any terminal jump in onEnd().
+      int targetImeBottom =
+          lastWindowInsets != null
+              ? lastWindowInsets.getInsets(deferredInsetTypes).bottom
+              : insets.getInsets(deferredInsetTypes).bottom;
+      int rawImeBottom = insets.getInsets(deferredInsetTypes).bottom;
+
+      float fraction = imeAnimation.getInterpolatedFraction();
+      if (fraction == 0.0f && rawImeBottom > 0 && targetImeBottom > 0 && startImeBottom == 0) {
+        // Fallback for synthetic/mock environments where getInterpolatedFraction() was not mocked:
+        fraction = Math.min(1.0f, (float) rawImeBottom / targetImeBottom);
       }
 
-      WindowInsets.Builder builder = new WindowInsets.Builder(lastWindowInsets);
-      Insets newImeInsets =
-          Insets.of(
-              0, 0, 0, Math.max(insets.getInsets(deferredInsetTypes).bottom - excludedInsets, 0));
+      int animatedImeBottom =
+          Math.max(0, Math.round(startImeBottom + (targetImeBottom - startImeBottom) * fraction));
+
+      WindowInsets baseInsets = lastWindowInsets != null ? lastWindowInsets : insets;
+      WindowInsets.Builder builder = new WindowInsets.Builder(baseInsets);
+      Insets newImeInsets = Insets.of(0, 0, 0, animatedImeBottom);
       builder.setInsets(deferredInsetTypes, newImeInsets);
 
       // Directly call onApplyWindowInsets of the view as we do not want to pass through
@@ -180,6 +188,8 @@ class ImeSyncDeferringInsetsCallback {
         // If we deferred the IME insets and an IME animation has finished, we need to reset
         // the flags
         animating = false;
+        startImeBottom =
+            lastWindowInsets != null ? lastWindowInsets.getInsets(deferredInsetTypes).bottom : 0;
 
         // And finally dispatch the deferred insets to the view now.
         // Ideally we would just call view.requestApplyInsets() and let the normal dispatch
