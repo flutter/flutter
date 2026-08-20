@@ -942,6 +942,54 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
+    test('a reused dormant element does not carry the previous value', () async {
+      // A dormant element is reused for the next connection on the same form.
+      // It must start out like a freshly created one: the framework's value
+      // arrives later over the platform channel, and until it does the stale
+      // value is what a password manager reads. Managers that skip a field
+      // already containing the value they are about to write then fill
+      // nothing at all.
+      final config = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>['email', 'password'],
+      );
+      void send(MethodCall call) =>
+          textEditing.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      send(MethodCall('TextInput.setClient', <dynamic>[123, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      final first = textEditing.strategy.domElement! as DomHTMLInputElement;
+      first.value = 'left-over-secret';
+      send(const MethodCall('TextInput.clearClient'));
+      expect(dormantForms, hasLength(1));
+
+      // A new connection on the same form reuses that element.
+      send(MethodCall('TextInput.setClient', <dynamic>[124, config]));
+      send(
+        configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        ),
+      );
+      send(const MethodCall('TextInput.show'));
+
+      final second = textEditing.strategy.domElement! as DomHTMLInputElement;
+      expect(second, first, reason: 'the dormant element should be reused');
+      expect(second.value, isEmpty);
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
     test('typing into a refocused field is not re-forwarded as autofill', () async {
       // When a connection closes and a new one opens on the same form, the
       // adopted dormant form's old listeners must be cancelled. The old

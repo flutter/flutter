@@ -1824,6 +1824,17 @@ abstract class DefaultTextEditingStrategy
       // mismatched element would give the field the wrong DOM type.
       if (reused != null && reused.tagName == freshElement.tagName) {
         reused.tabIndex = tabIndex;
+        // Start from the same state a freshly created element would have. The
+        // dormant element still holds the value from the previous connection,
+        // and the framework's own value only arrives later over the platform
+        // channel. Until it does, the stale value is what password managers
+        // read: managers that skip a field which already contains the value
+        // they are about to write (Bitwarden does) then fill nothing at all.
+        if (reused.isA<DomHTMLInputElement>()) {
+          (reused as DomHTMLInputElement).value = '';
+        } else if (reused.isA<DomHTMLTextAreaElement>()) {
+          (reused as DomHTMLTextAreaElement).value = '';
+        }
         // Pointer events (disabled while it was a non-focused field) are
         // re-enabled for the focused element in wakeUp.
         return reused;
