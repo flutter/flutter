@@ -89,7 +89,7 @@ std::pair<uint8_t*, intptr_t> ReadFileDescriptorToBytes(int fd) {
 
 bool ReadFileToString(const std::string& path, std::string* result) {
 #if defined(OS_WIN)
-  std::wstring wide_path = Utf8ToWide(path);
+  std::wstring wide_path = Utf8PathToWide(path);
   Descriptor fd(_wopen(wide_path.c_str(), O_RDONLY));
 #else
   Descriptor fd(open(path.c_str(), O_RDONLY));
@@ -104,7 +104,7 @@ bool ReadFileDescriptorToString(int fd, std::string* result) {
 std::pair<uint8_t*, intptr_t> ReadFileToBytes(const std::string& path) {
   std::pair<uint8_t*, intptr_t> failure_pair{nullptr, -1};
 #if defined(OS_WIN)
-  std::wstring wide_path = Utf8ToWide(path);
+  std::wstring wide_path = Utf8PathToWide(path);
   Descriptor fd(_wopen(wide_path.c_str(), O_RDONLY | BINARY_MODE));
 #else
   Descriptor fd(open(path.c_str(), O_RDONLY | BINARY_MODE));

@@ -14,21 +14,21 @@
 
 namespace filesystem {
 
-inline std::wstring Utf8ToWide(std::string_view utf8_string) {
-  if (utf8_string.empty()) {
+inline std::wstring Utf8PathToWide(std::string_view utf8_path) {
+  if (utf8_path.empty()) {
     return std::wstring();
   }
   const char8_t* u8_data =
-      reinterpret_cast<const char8_t*>(utf8_string.data());
-  std::u8string_view u8_view(u8_data, utf8_string.size());
+      reinterpret_cast<const char8_t*>(utf8_path.data());
+  std::u8string_view u8_view(u8_data, utf8_path.size());
   return std::filesystem::path(u8_view).wstring();
 }
 
-inline std::string WideToUtf8(std::wstring_view wide_string) {
-  if (wide_string.empty()) {
+inline std::string WidePathToUtf8(std::wstring_view wide_path) {
+  if (wide_path.empty()) {
     return std::string();
   }
-  std::u8string u8_str = std::filesystem::path(wide_string).u8string();
+  std::u8string u8_str = std::filesystem::path(wide_path).u8string();
   return std::string(reinterpret_cast<const char*>(u8_str.data()),
                      u8_str.size());
 }

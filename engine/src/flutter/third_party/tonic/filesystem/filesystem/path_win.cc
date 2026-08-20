@@ -20,6 +20,7 @@
 #include <memory>
 #include <string_view>
 
+#include "tonic/common/log.h"
 #include "tonic/filesystem/filesystem/windows_utils.h"
 
 namespace filesystem {
@@ -190,6 +191,8 @@ std::string AbsolutePath(const std::string& path) {
       std::u8string_view(reinterpret_cast<const char8_t*>(path.data()), path.size()));
   std::filesystem::path abs_path = std::filesystem::absolute(p, ec);
   if (ec) {
+    tonic::Log("Failed to resolve absolute path for '%s': %s", path.c_str(),
+               ec.message().c_str());
     return std::string();
   }
   abs_path = abs_path.lexically_normal();
@@ -215,7 +218,7 @@ std::string GetBaseName(const std::string& path) {
 }
 
 std::string GetAbsoluteFilePath(const std::string& path) {
-  std::wstring wide_path = Utf8ToWide(path);
+  std::wstring wide_path = Utf8PathToWide(path);
   HANDLE file =
       CreateFileW(wide_path.c_str(), FILE_READ_ATTRIBUTES,
                   FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
@@ -269,7 +272,7 @@ std::string GetAbsoluteFilePath(const std::string& path) {
     wide_result.erase(0, kLongPathPrefix.size());
   }
   CloseHandle(file);
-  return WideToUtf8(wide_result);
+  return WidePathToUtf8(wide_result);
 }
 
 }  // namespace filesystem

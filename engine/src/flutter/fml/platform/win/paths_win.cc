@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <filesystem>
 
-#include "flutter/fml/paths.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 
 namespace fml {
@@ -49,16 +49,8 @@ size_t RootLength(const std::string& path) {
   return 0;
 }
 
-size_t IsSeparator(const char sep) {
-  return sep == '/' || sep == '\\';
-}
-
 size_t LastSeparator(const std::string& path) {
   return path.find_last_of("/\\");
-}
-
-size_t LastSeparator(const std::string& path, size_t pos) {
-  return path.find_last_of("/\\", pos);
 }
 
 }  // namespace
@@ -82,6 +74,8 @@ std::string AbsolutePath(const std::string& path) {
       std::u8string_view(reinterpret_cast<const char8_t*>(path.data()), path.size()));
   std::filesystem::path abs_path = std::filesystem::absolute(p, ec);
   if (ec) {
+    FML_DLOG(ERROR) << "Failed to resolve absolute path for '" << path
+                    << "': " << ec.message();
     return std::string();
   }
   abs_path = abs_path.lexically_normal();
