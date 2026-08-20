@@ -132,6 +132,23 @@ input:-webkit-autofill, input:autofill {
 /// element.
 ///
 /// They are assigned once during the creation of the DOM element.
+/// Hides a non-focused autofill proxy from assistive technology, but only when
+/// semantics is on.
+///
+/// With semantics on the field has a real semantics node, so the proxy is a
+/// duplicate and screen readers should skip it. With semantics off there is no
+/// other representation of the field, so hiding the proxy hides nothing useful
+/// and costs a great deal: password managers reject an `aria-hidden` input
+/// outright, and one that is never a candidate is one they never fill.
+void _hideFromAssistiveTechnology(DomHTMLElement element) {
+  if (EngineSemantics.instance.semanticsEnabled) {
+    element.setAttribute('aria-hidden', 'true');
+  } else {
+    // Elements are reused across connections, so clear a stale attribute.
+    element.removeAttribute('aria-hidden');
+  }
+}
+
 void _styleAutofillElements(
   DomHTMLElement domElement, {
   bool isOffScreen = false,
@@ -426,14 +443,15 @@ class EngineAutofillForm {
       final bool isFocused = entry.key == focusedAutofill.uniqueIdentifier;
       entry.value.style.pointerEvents = isFocused || !_isSafariStrategy ? 'all' : 'none';
       // The focused field stays interactive (its tabIndex is set in
-      // _reuseDormantAutofillElementOrCreate); the others are kept discoverable for
-      // password managers but out of the tab order and the accessibility tree, so
-      // Tab and screen readers do not land on an invisible field.
+      // _reuseDormantAutofillElementOrCreate); the others are kept discoverable
+      // for password managers but out of the tab order. See
+      // [_hideFromAssistiveTechnology] for why they are only hidden from the
+      // accessibility tree in semantics mode.
       if (isFocused) {
         entry.value.removeAttribute('aria-hidden');
       } else {
         entry.value.tabIndex = -1;
-        entry.value.setAttribute('aria-hidden', 'true');
+        _hideFromAssistiveTechnology(entry.value);
       }
     }
 
@@ -580,10 +598,10 @@ class EngineAutofillForm {
           shouldDisablePointerEvents: _isSafariStrategy,
         );
         // Keep the proxy discoverable to password managers (which scan the DOM)
-        // but out of the tab order and the accessibility tree, so keyboard Tab
-        // and screen readers do not land on this invisible field.
+        // but out of the tab order, so keyboard Tab does not land on this
+        // invisible field. See [_hideFromAssistiveTechnology].
         htmlElement.tabIndex = -1;
-        htmlElement.setAttribute('aria-hidden', 'true');
+        _hideFromAssistiveTechnology(htmlElement);
         // The proxy has to hit-test back to itself for a manager to consider it
         // fillable, which also makes it a target for real clicks. Swallow those:
         // a manager focuses a field with .focus(), which fires no pointer event,

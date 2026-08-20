@@ -4297,13 +4297,18 @@ Future<void> testMain() async {
       expect(password.style.height, isNot('0px'));
       expect(password.style.pointerEvents, isSafari ? 'none' : 'all');
       expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
-      // They are also removed from the tab order and the accessibility tree so
-      // keyboard Tab and screen readers do not land on the invisible fields, while
-      // the focused field stays reachable.
+      // They are also removed from the tab order, so keyboard Tab does not land
+      // on the invisible fields, while the focused field stays reachable.
       expect(username.tabIndex, -1);
-      expect(username.getAttribute('aria-hidden'), 'true');
       expect(password.tabIndex, -1);
-      expect(password.getAttribute('aria-hidden'), 'true');
+      // With semantics off there is no other representation of these fields, so
+      // they are not hidden from assistive technology either: a password
+      // manager rejects an aria-hidden input outright, and a field it never
+      // considers is a field it never fills. Semantics mode, where the field
+      // does have a real semantics node, hides them instead.
+      expect(EngineSemantics.instance.semanticsEnabled, isFalse);
+      expect(username.getAttribute('aria-hidden'), isNull);
+      expect(password.getAttribute('aria-hidden'), isNull);
       expect(email.getAttribute('aria-hidden'), isNull);
     }, skip: isSafari);
 
