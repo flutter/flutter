@@ -29,7 +29,6 @@ import '../version.dart';
 
 /// Holds core, platform-independent dependencies.
 class ToolContext {
-  /// Creates an instance of [ToolContext] with the required dependencies.
   ToolContext({
     required this.artifacts,
     required this.botDetector,

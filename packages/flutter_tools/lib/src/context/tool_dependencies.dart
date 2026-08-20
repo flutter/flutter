@@ -57,7 +57,6 @@ import 'tool_context.dart';
 
 /// Bootstraps and manages tool dependencies.
 class ToolDependencies {
-  /// Creates an instance of [ToolDependencies] with the specified dependencies.
   ToolDependencies({
     required this.analytics,
     required this.androidContext,

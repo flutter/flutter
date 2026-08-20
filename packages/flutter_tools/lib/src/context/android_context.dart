@@ -9,7 +9,6 @@ import '../android/java.dart';
 
 /// Holds Android-specific dependencies.
 class AndroidContext {
-  /// Creates an instance of [AndroidContext] with the required dependencies.
   AndroidContext({
     required this.androidSdk,
     required this.androidStudio,
