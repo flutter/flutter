@@ -6,7 +6,6 @@ package io.flutter.embedding.engine.mutatorsstack;
 
 import android.graphics.Matrix;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -45,7 +44,7 @@ public class FlutterMutatorsStack {
   public class FlutterMutator {
 
     @Nullable private Matrix matrix;
-    @Nullable private Rect rect;
+    @Nullable private RectF rect;
     @Nullable private Path path;
     @Nullable private float[] radiis;
     private float opacity = 1.f;
@@ -61,7 +60,7 @@ public class FlutterMutatorsStack {
      *
      * @param rect the rect to be clipped.
      */
-    public FlutterMutator(Rect rect) {
+    public FlutterMutator(RectF rect) {
       this.type = FlutterMutatorType.CLIP_RECT;
       this.rect = rect;
     }
@@ -73,7 +72,7 @@ public class FlutterMutatorsStack {
      * @param radiis the radiis of the rrect. Array of 8 values, 4 pairs of [X,Y]. This value cannot
      *     be null.
      */
-    public FlutterMutator(Rect rect, float[] radiis) {
+    public FlutterMutator(RectF rect, float[] radiis) {
       this.type = FlutterMutatorType.CLIP_RRECT;
       this.rect = rect;
       this.radiis = radiis;
@@ -143,7 +142,7 @@ public class FlutterMutatorsStack {
      *
      * @return the clipping rect if the type is FlutterMutatorType.CLIP_RECT; otherwise null.
      */
-    public Rect getRect() {
+    public RectF getRect() {
       return rect;
     }
 
@@ -239,13 +238,20 @@ public class FlutterMutatorsStack {
     finalMatrix.preConcat(mutator.getMatrix());
   }
 
-  /** Push a clipRect {@link FlutterMutatorsStack.FlutterMutator} to the stack. */
-  public void pushClipRect(int left, int top, int right, int bottom) {
-    Rect rect = new Rect(left, top, right, bottom);
+  /**
+   * Push a clipRect {@link FlutterMutatorsStack.FlutterMutator} to the stack.
+   *
+   * <p>The bounds are in (fractional) physical pixels. Rounding them to whole pixels here would
+   * shrink the clip by up to a pixel, which shows up as a sliver of Flutter content along the right
+   * and bottom edges of the clipped platform view. See
+   * https://github.com/flutter/flutter/issues/189834.
+   */
+  public void pushClipRect(float left, float top, float right, float bottom) {
+    RectF rect = new RectF(left, top, right, bottom);
     FlutterMutator mutator = new FlutterMutator(rect);
     mutators.add(mutator);
     Path path = new Path();
-    path.addRect(new RectF(rect), Path.Direction.CCW);
+    path.addRect(rect, Path.Direction.CCW);
     path.transform(finalMatrix);
     finalClippingPaths.add(path);
   }
@@ -260,12 +266,12 @@ public class FlutterMutatorsStack {
    * @param radiis the radiis of the rrect. It must be size of 8, including an x and y for each
    *     corner.
    */
-  public void pushClipRRect(int left, int top, int right, int bottom, float[] radiis) {
-    Rect rect = new Rect(left, top, right, bottom);
+  public void pushClipRRect(float left, float top, float right, float bottom, float[] radiis) {
+    RectF rect = new RectF(left, top, right, bottom);
     FlutterMutator mutator = new FlutterMutator(rect, radiis);
     mutators.add(mutator);
     Path path = new Path();
-    path.addRoundRect(new RectF(rect), radiis, Path.Direction.CCW);
+    path.addRoundRect(rect, radiis, Path.Direction.CCW);
     path.transform(finalMatrix);
     finalClippingPaths.add(path);
   }

@@ -1925,55 +1925,6 @@ DomBlob createDomBlob(List<Object?> parts, [Map<String, dynamic>? options]) {
   }
 }
 
-typedef DomMutationCallback = void Function(JSArray<JSAny?> mutation, DomMutationObserver observer);
-
-@JS('MutationObserver')
-extension type DomMutationObserver._(JSObject _) implements JSObject {
-  external DomMutationObserver(JSFunction callback);
-
-  external void disconnect();
-
-  @JS('observe')
-  external void _observe(DomNode target, JSAny options);
-  void observe(DomNode target, {bool? childList, bool? attributes, List<String>? attributeFilter}) {
-    final options = <String, dynamic>{
-      'childList': ?childList,
-      'attributes': ?attributes,
-      'attributeFilter': ?attributeFilter,
-    };
-    return _observe(target, options.toJSAnyDeep);
-  }
-}
-
-DomMutationObserver createDomMutationObserver(DomMutationCallback callback) =>
-    DomMutationObserver(callback.toJS);
-
-@JS()
-extension type DomMutationRecord._(JSObject _) implements JSObject {
-  @JS('addedNodes')
-  external _DomList? get _addedNodes;
-  Iterable<DomNode>? get addedNodes {
-    final _DomList? list = _addedNodes;
-    if (list == null) {
-      return null;
-    }
-    return _createDomListWrapper<DomNode>(list);
-  }
-
-  @JS('removedNodes')
-  external _DomList? get _removedNodes;
-  Iterable<DomNode>? get removedNodes {
-    final _DomList? list = _removedNodes;
-    if (list == null) {
-      return null;
-    }
-    return _createDomListWrapper<DomNode>(list);
-  }
-
-  external String? get attributeName;
-  external String? get type;
-}
-
 @JS('MediaQueryList')
 extension type DomMediaQueryList._(JSObject _) implements DomEventTarget {
   external bool get matches;
@@ -1992,19 +1943,6 @@ extension type DomMediaQueryListEvent._(JSObject _) implements DomEvent {
 @visibleForTesting
 DomMediaQueryListEvent createDomMediaQueryListEvent(String type, Map<dynamic, dynamic> init) {
   return DomMediaQueryListEvent(type, init.toJSAnyDeep);
-}
-
-@JS('Path2D')
-extension type DomPath2D._(JSObject _) implements JSObject {
-  external DomPath2D([JSAny path]);
-}
-
-DomPath2D createDomPath2D([Object? path]) {
-  if (path == null) {
-    return DomPath2D();
-  } else {
-    return DomPath2D(path.toJSAnyShallow);
-  }
 }
 
 @JS('InputEvent')
@@ -2216,12 +2154,6 @@ extension type DomHTMLFormElement._(JSObject _) implements DomHTMLElement {
 DomHTMLFormElement createDomHTMLFormElement() =>
     domDocument.createElement('form') as DomHTMLFormElement;
 
-@JS('HTMLLabelElement')
-extension type DomHTMLLabelElement._(JSObject _) implements DomHTMLElement {}
-
-DomHTMLLabelElement createDomHTMLLabelElement() =>
-    domDocument.createElement('label') as DomHTMLLabelElement;
-
 @JS('OffscreenCanvas')
 extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget, DomCanvasImageSource {
   external DomOffscreenCanvas(int width, int height);
@@ -2263,15 +2195,6 @@ extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget, DomCa
 
 DomOffscreenCanvas createDomOffscreenCanvas(int width, int height) =>
     DomOffscreenCanvas(width, height);
-
-@JS('FileReader')
-extension type DomFileReader._(JSObject _) implements DomEventTarget {
-  external DomFileReader();
-
-  external void readAsDataURL(DomBlob blob);
-}
-
-DomFileReader createDomFileReader() => DomFileReader();
 
 @JS('DocumentFragment')
 extension type DomDocumentFragment._(JSObject _) implements DomNode {

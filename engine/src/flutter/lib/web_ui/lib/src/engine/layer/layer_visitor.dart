@@ -150,7 +150,9 @@ class PrerollVisitor extends LayerVisitor<void> {
       // entire screen, which is not what we want.
       imageFilter.paintBounds = childPaintBounds;
     } else {
-      imageFilter.paintBounds = imageFilter.filter.filterBounds(childPaintBounds);
+      imageFilter.paintBounds = (imageFilter.filter as EngineImageFilter).filterBounds(
+        childPaintBounds,
+      );
     }
     mutatorsStack.pop();
   }
@@ -188,6 +190,14 @@ class PrerollVisitor extends LayerVisitor<void> {
 
   @override
   void visitPicture(PictureLayer picture) {
+    if (picture.picture.isDisposed) {
+      // The picture was disposed before the layer could be painted.
+      // Just ignore it then.
+      picture.paintBounds = ui.Rect.zero;
+      picture.isCulled = true;
+      return;
+    }
+
     picture.paintBounds = picture.picture.cullRect.shift(picture.offset);
     // The picture may have been culled on a previous frame, but has since
     // scrolled back into the clip region. Reset the `isCulled` flag.
@@ -238,7 +248,7 @@ class MeasureVisitor extends LayerVisitor<void> {
   }
 
   /// A stack of image filters which apply their transforms to measured bounds.
-  List<LayerImageFilter> imageFilterStack = <LayerImageFilter>[];
+  List<EngineImageFilter> imageFilterStack = <EngineImageFilter>[];
 
   final LayerPictureRecorder measuringRecorder;
 
@@ -400,7 +410,7 @@ class MeasureVisitor extends LayerVisitor<void> {
     paint.imageFilter = imageFilter.filter;
     measuringCanvas.saveLayer(offsetPaintBounds, paint);
     if (imageFilter.filter is! ui.ColorFilter) {
-      imageFilterStack.add(imageFilter.filter);
+      imageFilterStack.add(imageFilter.filter as EngineImageFilter);
     }
     measureChildren(imageFilter);
     if (imageFilter.filter is! ui.ColorFilter) {
@@ -458,7 +468,7 @@ class MeasureVisitor extends LayerVisitor<void> {
       localTransform,
     ).transformRect(picture.picture.cullRect);
     // Modify the bounds with the image filters.
-    for (final LayerImageFilter imageFilter in imageFilterStack.reversed) {
+    for (final EngineImageFilter imageFilter in imageFilterStack.reversed) {
       transformedBounds = imageFilter.filterBounds(transformedBounds);
     }
     picture.sceneBounds = transformedBounds;
@@ -956,7 +966,7 @@ class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
 
   @override
   Map<String, dynamic> visitPicture(PictureLayer picture) {
-    final ui.Rect cullRect = picture.picture.cullRect;
+    final ui.Rect cullRect = picture.picture.isDisposed ? ui.Rect.zero : picture.picture.cullRect;
     return <String, dynamic>{
       'type': 'picture',
       'offset': {'x': picture.offset.dx, 'y': picture.offset.dy},

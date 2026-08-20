@@ -69,6 +69,10 @@ config("skia_public") {
     defines += [ "SK_USE_PERFETTO" ]
   }
 
+  if (skia_enable_threadlocal_strikecache) {
+    defines += [ "SK_ENABLE_THREADLOCAL_STRIKECACHE" ]
+  }
+
   # Some older versions of the Clang toolchain change the visibility of
   # symbols decorated with API_AVAILABLE macro to be visible. Users of such
   # toolchains suppress the use of this macro till toolchain updates are made.
