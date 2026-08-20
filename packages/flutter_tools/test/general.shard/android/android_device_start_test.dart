@@ -650,14 +650,19 @@ void main() {
               'android.intent.category.LAUNCHER',
               '-f',
               '0x20000000',
-              'FlutterActivity',
+              '--ez',
+              'enable-impeller',
+              'true',
+              '--es',
+              'route',
+              '/custom/route',
+              'FlutterApp/FlutterActivity',
             ],
           ),
         );
 
         final LaunchResult launchResult = await device.startApp(
           apk,
-          prebuiltApplication: false,
           route: '/custom/route',
           debuggingOptions: DebuggingOptions.disabled(
             BuildInfo.release,
@@ -673,6 +678,8 @@ void main() {
       },
       overrides: <Type, Generator>{
         AndroidBuilder: () => fakeAndroidBuilder,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
       },
     );
 
