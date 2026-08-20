@@ -2066,7 +2066,7 @@ abstract class FlutterCommand extends Command<void> {
       persistentToolState?.shouldShowIntelMacWarning = false;
     }
 
-    if (refreshWirelessDevices && toolContext == null) {
+    if (refreshWirelessDevices) {
       _targetDevices.startExtendedWirelessDeviceDiscovery(
         deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       );
