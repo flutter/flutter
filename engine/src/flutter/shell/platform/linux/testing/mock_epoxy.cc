@@ -608,9 +608,14 @@ static void _glTexImage2D(GLenum target,
                           GLenum format,
                           GLenum type,
                           const void* pixels) {
+  if (mock) {
+    mock->glTexImage2D(target, level, internalformat, width, height, border,
+                       format, type, pixels);
+  }
   if (pixels != nullptr) {
-    FML_CHECK(internalformat == GL_RGBA || internalformat == GL_RGBA8);
-    FML_CHECK(format == GL_RGBA);
+    FML_CHECK(internalformat == GL_RGBA || internalformat == GL_RGBA8 ||
+              internalformat == GL_BGRA_EXT);
+    FML_CHECK(format == GL_RGBA || format == GL_BGRA_EXT);
     FML_CHECK(type == GL_UNSIGNED_BYTE);
 
     // Simple mock read to detect out-of-bounds reads in tests.

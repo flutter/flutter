@@ -137,8 +137,7 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
   return self;
 }
 
-FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
-                                              GLint general_format,
+FlFramebuffer* fl_framebuffer_new_multisample(GLint format,
                                               size_t width,
                                               size_t height,
                                               gboolean use_msaa) {
@@ -156,7 +155,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
       // Implicit MSAA uses GL_EXT_multisampled_render_to_texture, where the
       // OpenGL driver automatically resolves multisamples into the attached
       // texture when rendering is completed.
-      self->texture_id = create_texture(general_format, width, height);
+      self->texture_id = create_texture(format, width, height);
       glFramebufferTexture2DMultisampleEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                            GL_TEXTURE_2D, self->texture_id, 0,
                                            4);
@@ -173,7 +172,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
       // single-sample framebuffer texture.
       glGenRenderbuffers(1, &self->color_renderbuffer);
       glBindRenderbuffer(GL_RENDERBUFFER, self->color_renderbuffer);
-      glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, sized_format, width,
+      glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, width,
                                        height);
       glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                 GL_RENDERBUFFER, self->color_renderbuffer);
@@ -184,7 +183,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
                                        width, height);
       attach_depth_stencil(self->depth_stencil);
     } else {
-      self->texture_id = create_texture(general_format, width, height);
+      self->texture_id = create_texture(format, width, height);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                              GL_TEXTURE_2D, self->texture_id, 0);
 
@@ -195,7 +194,7 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
       attach_depth_stencil(self->depth_stencil);
     }
   } else {
-    self->texture_id = create_texture(general_format, width, height);
+    self->texture_id = create_texture(format, width, height);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                            self->texture_id, 0);
 

@@ -1062,28 +1062,14 @@ TEST_F(FlEngineTest, EnableFlutterGpu) {
   EXPECT_TRUE(called);
 }
 
-TEST_F(FlEngineTest, CreateOpenGLBackingStoreWithImpellerMSAA) {
-  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
-  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
-  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
-      .WillByDefault(::testing::Return(false));
-  ON_CALL(epoxy, glGetIntegerv(GL_MAX_SAMPLES, ::testing::_))
-      .WillByDefault(::testing::SetArgPointee<1>(4));
+namespace {
 
-  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4,
-                                                      GL_RGBA8, 800, 600));
-  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(
-                         GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, 800, 600));
-  EXPECT_CALL(epoxy,
-              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                        GL_RENDERBUFFER, ::testing::_));
-  EXPECT_CALL(epoxy,
-              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                        GL_RENDERBUFFER, ::testing::_));
-  EXPECT_CALL(epoxy,
-              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                                        GL_RENDERBUFFER, ::testing::_));
-
+// Helper to start the engine with Impeller enabled, create an OpenGL backing
+// store, verify its target and texture presence, and collect it.
+void test_impeller_backing_store(FlEngine* engine,
+                                 FlDartProject* project,
+                                 uint32_t expected_target,
+                                 bool expect_texture) {
   FlutterCompositor compositor = {};
   fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
       Initialize,
@@ -1107,23 +1093,93 @@ TEST_F(FlEngineTest, CreateOpenGLBackingStoreWithImpellerMSAA) {
 
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
-      .size = {.width = 800, .height = 600},
+      .size = {.width = 800.0, .height = 600.0},
   };
   FlutterBackingStore backing_store = {};
   EXPECT_TRUE(compositor.create_backing_store_callback(&config, &backing_store,
                                                        compositor.user_data));
   EXPECT_EQ(backing_store.type, kFlutterBackingStoreTypeOpenGL);
   EXPECT_EQ(backing_store.open_gl.type, kFlutterOpenGLTargetTypeFramebuffer);
-  EXPECT_EQ(backing_store.open_gl.framebuffer.target,
-            static_cast<uint32_t>(GL_RGBA8));
+  EXPECT_EQ(backing_store.open_gl.framebuffer.target, expected_target);
 
   FlFramebuffer* fb =
       FL_FRAMEBUFFER(backing_store.open_gl.framebuffer.user_data);
   EXPECT_NE(fb, nullptr);
-  EXPECT_EQ(fl_framebuffer_get_texture_id(fb), 0u);
+  if (expect_texture) {
+    EXPECT_NE(fl_framebuffer_get_texture_id(fb), 0u);
+  } else {
+    EXPECT_EQ(fl_framebuffer_get_texture_id(fb), 0u);
+  }
 
   EXPECT_TRUE(compositor.collect_backing_store_callback(&backing_store,
                                                         compositor.user_data));
+}
+
+}  // namespace
+
+TEST_F(FlEngineTest, CreateOpenGLBackingStoreWithImpellerMSAA) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillByDefault(::testing::Return(false));
+  ON_CALL(epoxy, glGetIntegerv(GL_MAX_SAMPLES, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(4));
+
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4,
+                                                      GL_RGBA8, 800, 600));
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(
+                         GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, 800, 600));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        GL_RENDERBUFFER, ::testing::_));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                        GL_RENDERBUFFER, ::testing::_));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                        GL_RENDERBUFFER, ::testing::_));
+
+  test_impeller_backing_store(engine, project, GL_RGBA8,
+                              /*expect_texture=*/false);
+}
+
+TEST_F(FlEngineTest, CreateOpenGLBackingStoreWithImpellerMSAAAndBgraExtension) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillByDefault(::testing::Return(false));
+  ON_CALL(epoxy, epoxy_has_gl_extension(
+                     ::testing::StrEq("GL_EXT_texture_format_BGRA8888")))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(epoxy, glGetIntegerv(GL_MAX_SAMPLES, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(4));
+
+  // GL_EXT_texture_format_BGRA8888 only defines BGRA for textures, not
+  // renderbuffers. When explicit offscreen MSAA is used without
+  // GL_EXT_multisampled_render_to_texture, a multisample renderbuffer is
+  // created which must use GL_RGBA8.
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4,
+                                                      GL_RGBA8, 800, 600));
+  EXPECT_CALL(epoxy, glRenderbufferStorageMultisample(
+                         GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, 800, 600));
+
+  test_impeller_backing_store(engine, project, GL_RGBA8,
+                              /*expect_texture=*/false);
+}
+
+TEST_F(FlEngineTest, CreateOpenGLBackingStoreWithImplicitMSAAAndBgraExtension) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillByDefault(::testing::Return(false));
+  ON_CALL(epoxy, epoxy_has_gl_extension(
+                     ::testing::StrEq("GL_EXT_texture_format_BGRA8888")))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(epoxy, epoxy_has_gl_extension(
+                     ::testing::StrEq("GL_EXT_multisampled_render_to_texture")))
+      .WillByDefault(::testing::Return(true));
+
+  test_impeller_backing_store(engine, project, GL_BGRA8_EXT,
+                              /*expect_texture=*/true);
 }
 
 TEST_F(FlEngineTest, ChildObjects) {

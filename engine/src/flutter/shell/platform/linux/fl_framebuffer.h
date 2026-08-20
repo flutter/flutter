@@ -38,8 +38,7 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
 
 /**
  * fl_framebuffer_new_multisample:
- * @sized_format: sized format, e.g. GL_RGBA8, GL_BGRA8_EXT.
- * @general_format: general format, e.g. GL_RGBA, GL_BGRA_EXT.
+ * @format: texture format, e.g. GL_RGBA, GL_BGRA_EXT.
  * @width: width of framebuffer in pixels.
  * @height: height of framebuffer in pixels.
  * @use_msaa: %TRUE to enable multisample anti-aliasing (MSAA) attachments.
@@ -49,18 +48,19 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
  *
  * When @use_msaa is %TRUE, the framebuffer will configure 4x MSAA attachments
  * using either implicit MSAA (multisampled texture via
- * GL_EXT_multisampled_render_to_texture) or offscreen MSAA (multisample color
- * renderbuffer). If offscreen MSAA is used, the framebuffer is not backed by a
- * texture (fl_framebuffer_get_texture_id() returns 0) and must be resolved
- * into a single-sample texture via glBlitFramebuffer before compositing.
+ * GL_EXT_multisampled_render_to_texture) with the requested @format or
+ * offscreen MSAA (multisample color renderbuffer). If offscreen MSAA is used,
+ * the framebuffer is backed by a GL_RGBA8 renderbuffer instead of a texture
+ * (fl_framebuffer_get_texture_id() returns 0) and must be resolved into a
+ * single-sample texture via glBlitFramebuffer before compositing.
  *
  * If @use_msaa is %FALSE or MSAA is not supported by the OpenGL context, a
- * standard single-sample texture and depth/stencil renderbuffer are created.
+ * standard single-sample texture with @format and depth/stencil renderbuffer
+ * are created.
  *
  * Returns: a new #FlFramebuffer.
  */
-FlFramebuffer* fl_framebuffer_new_multisample(GLint sized_format,
-                                              GLint general_format,
+FlFramebuffer* fl_framebuffer_new_multisample(GLint format,
                                               size_t width,
                                               size_t height,
                                               gboolean use_msaa);
