@@ -61,6 +61,56 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   @protected
   ArgParser buildDynamicArgParser(ArgParser baseParser);
 
+  /// Clones all options from [source] into a new [ArgParser] instance.
+  @protected
+  static ArgParser cloneParser(ArgParser source) {
+    final newParser = ArgParser(
+      allowTrailingOptions: source.allowTrailingOptions,
+      usageLineLength: source.usageLineLength,
+    );
+    for (final Option opt in source.options.values) {
+      if (opt.isFlag) {
+        newParser.addFlag(
+          opt.name,
+          abbr: opt.abbr,
+          help: opt.help,
+          defaultsTo: opt.defaultsTo as bool?,
+          negatable: opt.negatable ?? true,
+          hide: opt.hide,
+          hideNegatedUsage: opt.hideNegatedUsage ?? false,
+          aliases: opt.aliases,
+        );
+      } else if (opt.isSingle) {
+        newParser.addOption(
+          opt.name,
+          abbr: opt.abbr,
+          help: opt.help,
+          valueHelp: opt.valueHelp,
+          allowed: opt.allowed,
+          allowedHelp: opt.allowedHelp,
+          defaultsTo: opt.defaultsTo as String?,
+          mandatory: opt.mandatory,
+          hide: opt.hide,
+          aliases: opt.aliases,
+        );
+      } else if (opt.isMultiple) {
+        newParser.addMultiOption(
+          opt.name,
+          abbr: opt.abbr,
+          help: opt.help,
+          valueHelp: opt.valueHelp,
+          allowed: opt.allowed,
+          allowedHelp: opt.allowedHelp,
+          defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
+          splitCommas: opt.splitCommas,
+          hide: opt.hide,
+          aliases: opt.aliases,
+        );
+      }
+    }
+    return newParser;
+  }
+
   /// Returns the base static `ArgParser` for this command, initializing it if needed.
   ArgParser get baseArgParser {
     if (_baseArgParser != null) {

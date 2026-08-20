@@ -137,10 +137,25 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
 
   /// Fetches the extension title from the remote extension isolate.
   Future<String> fetchTitle() async {
-    final Object? response = await connection.sendRequest(ConfigurationExtension.getTitleMethod);
-    _titleCache = response is String ? response : _defaultTitle;
-    _logger.printTrace('ConfigurationExtensionClient received title: "$_titleCache".');
-    return _titleCache!;
+    if (_titleCache != null) {
+      return _titleCache!;
+    }
+    _logger.printTrace(
+      'ConfigurationExtensionClient fetching title via RPC ("${ConfigurationExtension.getTitleMethod}")...',
+    );
+    try {
+      final Object? response = await connection.sendRequest(ConfigurationExtension.getTitleMethod);
+      if (response is String) {
+        _titleCache = response;
+      } else {
+        _logger.printTrace(
+          'ConfigurationExtensionClient received invalid title response: $response',
+        );
+      }
+    } on Object catch (err, stack) {
+      _logger.printTrace('ConfigurationExtensionClient failed to fetch title: $err\n$stack');
+    }
+    return _titleCache ?? _defaultTitle;
   }
 
   @override
@@ -148,23 +163,28 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
     _logger.printTrace(
       'ConfigurationExtensionClient fetching feature flags via RPC ("${ConfigurationExtension.getFeatureFlagsMethod}")...',
     );
-    final Object? rawResult = await connection.sendRequest(
-      ConfigurationExtension.getFeatureFlagsMethod,
-    );
-    if (rawResult is! List<Object?>) {
-      _logger.printTrace(
-        'ConfigurationExtensionClient received invalid or null feature flags response.',
+    try {
+      final Object? rawResult = await connection.sendRequest(
+        ConfigurationExtension.getFeatureFlagsMethod,
       );
-      return const <FeatureFlag>[];
+      if (rawResult is List<Object?>) {
+        final flags = <FeatureFlag>[
+          for (final Object? element in rawResult)
+            if (element case final Map<Object?, Object?> map)
+              FeatureFlag.fromJson(map.cast<String, Object?>()),
+        ];
+        _logger.printTrace(
+          'ConfigurationExtensionClient received ${flags.length} feature flag(s) via RPC.',
+        );
+        return flags;
+      }
+      _logger.printTrace(
+        'ConfigurationExtensionClient received invalid or null feature flags response: $rawResult',
+      );
+    } on Object catch (err, stack) {
+      _logger.printTrace('ConfigurationExtensionClient failed to get feature flags: $err\n$stack');
     }
-    final List<FeatureFlag> flags = rawResult
-        .cast<Map<String, Object?>>()
-        .map(FeatureFlag.fromJson)
-        .toList();
-    _logger.printTrace(
-      'ConfigurationExtensionClient received ${flags.length} feature flag(s) via RPC.',
-    );
-    return flags;
+    return const <FeatureFlag>[];
   }
 
   @override
@@ -172,22 +192,27 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
     _logger.printTrace(
       'ConfigurationExtensionClient fetching config options via RPC ("${ConfigurationExtension.getConfigurationsMethod}")...',
     );
-    final Object? rawResult = await connection.sendRequest(
-      ConfigurationExtension.getConfigurationsMethod,
-    );
-    if (rawResult is! List<Object?>) {
-      _logger.printTrace(
-        'ConfigurationExtensionClient received invalid or null configurations response.',
+    try {
+      final Object? rawResult = await connection.sendRequest(
+        ConfigurationExtension.getConfigurationsMethod,
       );
-      return const <ConfigOption>[];
+      if (rawResult is List<Object?>) {
+        final options = <ConfigOption>[
+          for (final Object? element in rawResult)
+            if (element case final Map<Object?, Object?> map)
+              ConfigOption.fromJson(map.cast<String, Object?>()),
+        ];
+        _logger.printTrace(
+          'ConfigurationExtensionClient received ${options.length} config option(s) via RPC.',
+        );
+        return options;
+      }
+      _logger.printTrace(
+        'ConfigurationExtensionClient received invalid or null configurations response: $rawResult',
+      );
+    } on Object catch (err, stack) {
+      _logger.printTrace('ConfigurationExtensionClient failed to get configurations: $err\n$stack');
     }
-    final List<ConfigOption> options = rawResult
-        .cast<Map<String, Object?>>()
-        .map(ConfigOption.fromJson)
-        .toList();
-    _logger.printTrace(
-      'ConfigurationExtensionClient received ${options.length} config option(s) via RPC.',
-    );
-    return options;
+    return const <ConfigOption>[];
   }
 }

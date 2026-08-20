@@ -135,50 +135,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   @override
   ArgParser buildDynamicArgParser(ArgParser baseParser) {
-    final newParser = ArgParser(
-      allowTrailingOptions: baseParser.allowTrailingOptions,
-      usageLineLength: baseParser.usageLineLength,
-    );
-    for (final Option opt in baseParser.options.values) {
-      if (opt.isFlag) {
-        newParser.addFlag(
-          opt.name,
-          abbr: opt.abbr,
-          help: opt.help,
-          defaultsTo: opt.defaultsTo as bool?,
-          negatable: opt.negatable ?? true,
-          hide: opt.hide,
-          hideNegatedUsage: opt.hideNegatedUsage ?? false,
-          aliases: opt.aliases,
-        );
-      } else if (opt.isSingle) {
-        newParser.addOption(
-          opt.name,
-          abbr: opt.abbr,
-          help: opt.help,
-          valueHelp: opt.valueHelp,
-          allowed: opt.allowed,
-          allowedHelp: opt.allowedHelp,
-          defaultsTo: opt.defaultsTo as String?,
-          mandatory: opt.mandatory,
-          hide: opt.hide,
-          aliases: opt.aliases,
-        );
-      } else if (opt.isMultiple) {
-        newParser.addMultiOption(
-          opt.name,
-          abbr: opt.abbr,
-          help: opt.help,
-          valueHelp: opt.valueHelp,
-          allowed: opt.allowed,
-          allowedHelp: opt.allowedHelp,
-          defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
-          splitCommas: opt.splitCommas,
-          hide: opt.hide,
-          aliases: opt.aliases,
-        );
-      }
-    }
+    final ArgParser newParser = ExtensionArgParserMixin.cloneParser(baseParser);
     for (final FeatureFlag flag in _extensionFeatureFlags) {
       if (!newParser.options.containsKey(flag.name)) {
         newParser.addFlag(flag.name, help: flag.help, defaultsTo: flag.enabledByDefault);
@@ -257,7 +214,11 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
           globals.config.removeValue(configSetting);
         }
       }
-      for (final FeatureFlag flag in _extensionFeatureFlags) {
+      final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
+      final List<FeatureFlag> flags = _extensionFeatureFlags.isNotEmpty
+          ? _extensionFeatureFlags
+          : await activeConfig?.fetchFeatureFlags() ?? const <FeatureFlag>[];
+      for (final flag in flags) {
         globals.config.removeValue(flag.name);
       }
       globals.printStatus(requireReloadTipText);

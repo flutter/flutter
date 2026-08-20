@@ -17,18 +17,20 @@ class FeatureFlag {
 
   /// Deserializes a [FeatureFlag] from a JSON-serializable map.
   factory FeatureFlag.fromJson(Map<String, Object?> json) {
-    final Object? nameObj = json['name'];
-    final String name = nameObj is String ? nameObj : '';
-    final Object? helpObj = json['help'];
-    final String help = helpObj is String ? helpObj : '';
-    final environmentVariable = json['environmentVariable'] as String?;
-    final enabledByDefault = json['enabledByDefault'] == true;
-
     return FeatureFlag(
-      name: name,
-      help: help,
-      environmentVariable: environmentVariable,
-      enabledByDefault: enabledByDefault,
+      name: switch (json['name']) {
+        final String v => v,
+        _ => '',
+      },
+      help: switch (json['help']) {
+        final String v => v,
+        _ => '',
+      },
+      environmentVariable: switch (json['environmentVariable']) {
+        final String v => v,
+        _ => null,
+      },
+      enabledByDefault: json['enabledByDefault'] == true,
     );
   }
 
@@ -54,6 +56,10 @@ class FeatureFlag {
   };
 
   @override
+  String toString() =>
+      'FeatureFlag(name: $name, help: $help, environmentVariable: $environmentVariable, enabledByDefault: $enabledByDefault)';
+
+  @override
   bool operator ==(Object other) {
     return other is FeatureFlag &&
         other.name == name &&
@@ -74,13 +80,20 @@ class ConfigOption {
 
   /// Deserializes a [ConfigOption] from a JSON-serializable map.
   factory ConfigOption.fromJson(Map<String, Object?> json) {
-    final Object? nameObj = json['name'];
-    final String name = nameObj is String ? nameObj : '';
-    final Object? helpObj = json['help'];
-    final String help = helpObj is String ? helpObj : '';
-    final value = json['value'] as String?;
-
-    return ConfigOption(name: name, help: help, value: value);
+    return ConfigOption(
+      name: switch (json['name']) {
+        final String v => v,
+        _ => '',
+      },
+      help: switch (json['help']) {
+        final String v => v,
+        _ => '',
+      },
+      value: switch (json['value']) {
+        final String v => v,
+        _ => null,
+      },
+    );
   }
 
   /// The configuration key name used in `flutter config --<name>=<value>`.
@@ -94,6 +107,9 @@ class ConfigOption {
 
   /// Serializes the configuration option to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{'name': name, 'help': help, 'value': ?value};
+
+  @override
+  String toString() => 'ConfigOption(name: $name, help: $help, value: $value)';
 
   @override
   bool operator ==(Object other) {

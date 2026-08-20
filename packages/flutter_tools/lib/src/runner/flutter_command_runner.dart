@@ -18,6 +18,8 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../experimental/extension_arg_parser.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
@@ -303,7 +305,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   late bool _machineFlagPresentInAnyCliArg;
 
   @override
-  Future<void> run(Iterable<String> args) {
+  Future<void> run(Iterable<String> args) async {
     final ToolContext toolContext = _toolContext!;
     var exitWithCodeOne = false;
 
@@ -322,12 +324,78 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     _machineFlagPresentInAnyCliArg = args.contains('--${FlutterGlobalOptions.kMachineFlag}');
-    return super.run(args).then((_) async {
-      if (exitWithCodeOne) {
-        // No need to print anything because the help was already printed.
-        await exitWithHooks(1, shutdownHooks: toolContext.shutdownHooks);
+    await _initializeDynamicOptions(args);
+    await super.run(args);
+    if (exitWithCodeOne) {
+      // No need to print anything because the help was already printed.
+      await exitWithHooks(1, shutdownHooks: toolContext.shutdownHooks);
+    }
+  }
+
+  Future<void> _initializeDynamicOptions(Iterable<String> args) async {
+    if (!featureFlags.isToolExtensionsEnabled) {
+      return;
+    }
+    Command<void>? command = _findTargetCommand(args);
+    if (command != null) {
+      if (command.name == 'help') {
+        if (command.parent == null) {
+          final Iterable<String> helpArgs = args.skipWhile(
+            (String arg) => arg == 'help' || arg.startsWith('-'),
+          );
+          command = _findTargetCommand(helpArgs) ?? command;
+        } else {
+          command = command.parent;
+        }
       }
-    });
+      if (command is ExtensionArgParserMixin) {
+        await command.initializeDynamicOptions();
+      }
+    }
+  }
+
+  /// Helper to find the target command from the list of arguments, traversing subcommands and skipping options.
+  Command<void>? _findTargetCommand(Iterable<String> args) {
+    Map<String, Command<void>> commandsMap = commands;
+    Command<void>? lastFoundCommand;
+    ArgParser currentParser = argParser;
+    final List<String> argsList = args.toList();
+    var i = 0;
+    while (i < argsList.length) {
+      final String arg = argsList[i];
+      if (arg.startsWith('-')) {
+        var name = arg;
+        while (name.startsWith('-')) {
+          name = name.substring(1);
+        }
+        if (name.contains('=')) {
+          i++;
+          continue;
+        }
+        Option? option;
+        for (final Option opt in currentParser.options.values) {
+          if (opt.name == name || opt.abbr == name) {
+            option = opt;
+            break;
+          }
+        }
+        if (option != null && !option.isFlag) {
+          i += 2; // Skip option and its value
+        } else {
+          i++;
+        }
+      } else {
+        if (commandsMap.containsKey(arg)) {
+          lastFoundCommand = commandsMap[arg];
+          commandsMap = lastFoundCommand!.subcommands;
+          currentParser = lastFoundCommand.argParser;
+          i++;
+        } else {
+          i++;
+        }
+      }
+    }
+    return lastFoundCommand;
   }
 
   /// Whether to perform a flutter version check, which prints a warning if old.

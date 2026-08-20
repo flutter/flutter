@@ -26,10 +26,10 @@ abstract class ConfigurationExtension extends ToolExtensionService {
   String get title;
 
   /// Returns the feature flags contributed by this extension.
-  Future<List<FeatureFlag>> getFeatureFlags();
+  Future<List<FeatureFlag>> getFeatureFlags() async => const <FeatureFlag>[];
 
   /// Returns the configuration options supported by this extension.
-  Future<List<ConfigOption>> getConfigurations();
+  Future<List<ConfigOption>> getConfigurations() async => const <ConfigOption>[];
 
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
