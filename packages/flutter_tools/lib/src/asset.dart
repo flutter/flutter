@@ -1214,7 +1214,8 @@ class ManifestAssetBundle implements AssetBundle {
     );
 
     final bool isPackageAsset =
-        assetUri.pathSegments.isNotEmpty &&
+        assetUri.pathSegments.length >= 2 &&
+        assetUri.pathSegments[1].isNotEmpty &&
         assetUri.pathSegments.first == 'packages' &&
         !_fileSystem.directory(localDirectoryPath).existsSync();
 

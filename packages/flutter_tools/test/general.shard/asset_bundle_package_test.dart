@@ -880,5 +880,30 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    testUsingContext(
+      'Directory asset path consisting only of packages/ does not crash when directory does not exist',
+      () async {
+        final assetEntries = <String>['packages/'];
+        writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
+        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'test');
+
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
+
+        expect(
+          testLogger.errorText,
+          contains('Error: unable to find directory entry in pubspec.yaml:'),
+        );
+        expect(testLogger.errorText, isNot(contains('Could not resolve package for asset')));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 }
