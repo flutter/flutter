@@ -48,7 +48,8 @@ class LayerTree {
   sk_sp<DisplayList> Flatten(
       const DlRect& bounds,
       const std::shared_ptr<TextureRegistry>& texture_registry = nullptr,
-      GrDirectContext* gr_context = nullptr);
+      GrDirectContext* gr_context = nullptr,
+      impeller::AiksContext* aiks_context = nullptr);
 
   Layer* root_layer() const { return root_layer_.get(); }
   const DlISize& frame_size() const { return frame_size_; }

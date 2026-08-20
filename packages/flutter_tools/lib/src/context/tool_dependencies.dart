@@ -356,7 +356,7 @@ class ToolDependencies {
           platform: finalPlatform,
           xcode: finalXcode,
           iproxy: IProxy(
-            iproxyPath: finalArtifacts.getHostArtifact(HostArtifact.iproxy).path,
+            artifacts: finalArtifacts,
             logger: finalLogger,
             processManager: finalProcessManager,
             dyLdLibEntry: finalCache.dyLdLibEntry,

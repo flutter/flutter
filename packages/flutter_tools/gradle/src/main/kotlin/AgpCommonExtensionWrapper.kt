@@ -40,6 +40,25 @@ class AgpCommonExtensionWrapper(
             }
         }
 
+    var compileSdkPreview: String?
+        get() =
+            when (backingExtension) {
+                is ApplicationExtension -> backingExtension.compileSdkPreview
+                is LibraryExtension -> backingExtension.compileSdkPreview
+                is DynamicFeatureExtension -> backingExtension.compileSdkPreview
+                is TestExtension -> backingExtension.compileSdkPreview
+                else -> throw IllegalArgumentException(unsupportedMessage())
+            }
+        set(value) {
+            when (backingExtension) {
+                is ApplicationExtension -> backingExtension.compileSdkPreview = value
+                is LibraryExtension -> backingExtension.compileSdkPreview = value
+                is DynamicFeatureExtension -> backingExtension.compileSdkPreview = value
+                is TestExtension -> backingExtension.compileSdkPreview = value
+                else -> throw IllegalArgumentException(unsupportedMessage())
+            }
+        }
+
     var namespace: String?
         get() =
             when (backingExtension) {
