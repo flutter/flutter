@@ -160,10 +160,10 @@ class CkFragmentShader extends BackendFragmentShader implements CkShader {
     final int numElements = info.floatCount ~/ elementSize;
 
     final elements = List<T>.generate(numElements, (i) {
-      final slots = List<CkUniformFloatSlot>.generate(
-        info.floatCount,
-        (j) => CkUniformFloatSlot._(this, j, name, info.floatOffset + i * elementSize + j),
-      );
+      final slots = List<CkUniformFloatSlot>.generate(elementSize, (j) {
+        final int index = i * elementSize + j;
+        return CkUniformFloatSlot._(this, index, name, info.floatOffset + index);
+      });
       return elementFactory(slots);
     });
 
