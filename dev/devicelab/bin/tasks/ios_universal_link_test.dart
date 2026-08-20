@@ -34,7 +34,13 @@ Future<void> main() async {
           await flutter('build', options: <String>['ios', '--simulator']);
         });
 
-        final String appPath = path.join(projectDir, 'build', 'ios', 'iphonesimulator', 'Runner.app');
+        final String appPath = path.join(
+          projectDir,
+          'build',
+          'ios',
+          'iphonesimulator',
+          'Runner.app',
+        );
 
         if (!Directory(appPath).existsSync()) {
           result = TaskResult.failure('Failed to build iOS app. Missing at $appPath');
@@ -120,8 +126,7 @@ Future<void> main() async {
     } finally {
       await removeIOSSimulator(simulatorDeviceId);
     }
-    
+
     return result ?? TaskResult.failure('Test failed to set a result');
   });
 }
-
