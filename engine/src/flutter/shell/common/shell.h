@@ -121,7 +121,6 @@ class Shell final : public PlatformView::Delegate,
   using CreateCallback = std::function<std::unique_ptr<T>(Shell&)>;
   typedef std::function<std::unique_ptr<Engine>(
       Engine::Delegate& delegate,
-      const PointerDataDispatcherMaker& dispatcher_maker,
       DartVM& vm,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       TaskRunners task_runners,
