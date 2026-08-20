@@ -478,16 +478,21 @@ class BoxConstraints extends Constraints {
   /// If either is null, this function interpolates from a [BoxConstraints]
   /// object whose fields are all set to 0.0.
   ///
+  /// The result is [normalize]d, so that a `t` value outside of the range 0.0
+  /// to 1.0 (for example from an overshooting [Curve] such as
+  /// [Curves.easeOutBack]) never produces constraints with negative or
+  /// contradictory values.
+  ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxConstraints? lerp(BoxConstraints? a, BoxConstraints? b, double t) {
     if (identical(a, b)) {
       return a;
     }
     if (a == null) {
-      return b! * t;
+      return (b! * t).normalize();
     }
     if (b == null) {
-      return a * (1.0 - t);
+      return (a * (1.0 - t)).normalize();
     }
     assert(a.debugAssertIsValid());
     assert(b.debugAssertIsValid());
@@ -520,7 +525,7 @@ class BoxConstraints extends Constraints {
       maxHeight: a.maxHeight.isFinite
           ? ui.lerpDouble(a.maxHeight, b.maxHeight, t)!
           : double.infinity,
-    );
+    ).normalize();
   }
 
   /// Returns whether the object's constraints are normalized.
