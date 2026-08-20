@@ -59,7 +59,6 @@ namespace {
 
 std::unique_ptr<Engine> CreateEngine(
     Engine::Delegate& delegate,
-    const PointerDataDispatcherMaker& dispatcher_maker,
     DartVM& vm,
     const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
     const TaskRunners& task_runners,
@@ -73,7 +72,6 @@ std::unique_ptr<Engine> CreateEngine(
     const std::shared_future<impeller::RuntimeStageBackend>&
         runtime_stage_backend) {
   return std::make_unique<Engine>(delegate,             //
-                                  dispatcher_maker,     //
                                   vm,                   //
                                   isolate_snapshot,     //
                                   task_runners,         //
@@ -391,10 +389,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         io_manager->NotifyResourceContextAvailable(resource_context);
       });
 
-  // Send dispatcher_maker to the engine constructor because shell won't have
-  // platform_view set until Shell::Setup is called later.
-  auto dispatcher_maker = platform_view->GetDispatcherMaker();
-
   // Create the engine on the UI thread.
   std::promise<std::unique_ptr<Engine>> engine_promise;
   auto engine_future = engine_promise.get_future();
@@ -402,7 +396,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       shell->GetTaskRunners().GetUITaskRunner(),
       fml::MakeCopyable([&engine_promise,                                 //
                          shell = shell.get(),                             //
-                         &dispatcher_maker,                               //
                          &platform_data,                                  //
                          isolate_snapshot = std::move(isolate_snapshot),  //
                          vsync_waiter = std::move(vsync_waiter),          //
@@ -421,7 +414,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
         engine_promise.set_value(
             on_create_engine(*shell,                               //
-                             dispatcher_maker,                     //
                              *shell->GetDartVM(),                  //
                              std::move(isolate_snapshot),          //
                              task_runners,                         //
@@ -721,8 +713,7 @@ std::unique_ptr<Shell> Shell::Spawn(
       vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
       on_create_rasterizer,
       [engine = this->engine_.get(), initial_route](
-          Engine::Delegate& delegate,
-          const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
+          Engine::Delegate& delegate, DartVM& vm,
           const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
           const TaskRunners& task_runners, const PlatformData& platform_data,
           const Settings& settings, std::unique_ptr<Animator> animator,
@@ -734,7 +725,6 @@ std::unique_ptr<Shell> Shell::Spawn(
               runtime_stage_backend) {
         return engine->Spawn(
             /*delegate=*/delegate,
-            /*dispatcher_maker=*/dispatcher_maker,
             /*settings=*/settings,
             /*animator=*/std::move(animator),
             /*initial_route=*/initial_route,

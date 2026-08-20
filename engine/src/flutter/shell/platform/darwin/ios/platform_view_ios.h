@@ -80,9 +80,6 @@ class PlatformViewIOS final : public PlatformView {
   void RegisterExternalTexture(int64_t id, NSObject<FlutterTexture>* texture);
 
   // |PlatformView|
-  PointerDataDispatcherMaker GetDispatcherMaker() override;
-
-  // |PlatformView|
   void SetSemanticsTreeEnabled(bool enabled) override;
 
   // |PlatformView|

@@ -56,9 +56,6 @@ class ShellTestPlatformViewGL : public ShellTestPlatformView,
   // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
-  // |PlatformView|
-  PointerDataDispatcherMaker GetDispatcherMaker() override;
-
   // |GPUSurfaceGLDelegate|
   std::unique_ptr<GLContextResult> GLContextMakeCurrent() override;
 
