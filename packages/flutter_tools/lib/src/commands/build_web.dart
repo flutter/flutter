@@ -72,8 +72,8 @@ class BuildWebCommand extends BuildSubCommand {
     final webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
     final bool sourceMaps = getValue(WebOptions.sourceMaps);
-    final bool? minifyJs = getParsedValue(WebOptions.minifyJs);
-    final bool? minifyWasm = getParsedValue(WebOptions.minifyWasm);
+    final bool? minifyJs = getValue(WebOptions.minifyJs);
+    final bool? minifyWasm = getValue(WebOptions.minifyWasm);
 
     final List<WebCompilerConfig> compilerConfigs;
 

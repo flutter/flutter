@@ -67,16 +67,17 @@ abstract class OptionDescriptor<T> {
     bool? hideOverride,
   });
 
-  /// Checks if this option was explicitly parsed in [results] or [globalResults].
-  bool wasParsed(ArgResults? results, {ArgResults? globalResults}) {
+  /// Checks if this option was explicitly provided on the command line.
+  bool wasProvided(ArgResults? results, {ArgResults? globalResults}) {
     final ArgResults? target = _resolveTargetResults(results, globalResults);
     return target != null && target.options.contains(name) && target.wasParsed(name);
   }
 
-  /// Returns the explicitly parsed value or `null` if the option was omitted.
-  T? getParsedValue(ArgResults? results, {ArgResults? globalResults});
+  /// Checks if this option was explicitly parsed (alias for [wasProvided]).
+  bool wasParsed(ArgResults? results, {ArgResults? globalResults}) =>
+      wasProvided(results, globalResults: globalResults);
 
-  /// Returns the parsed value, falling back to [defaultsTo].
+  /// Returns the resolved value for this option.
   T getValue(ArgResults? results, {ArgResults? globalResults});
 
   ArgResults? _resolveTargetResults(ArgResults? results, ArgResults? globalResults) {
@@ -149,17 +150,13 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
   }
 
   @override
-  String? getParsedValue(ArgResults? results, {ArgResults? globalResults}) {
-    if (!wasParsed(results, globalResults: globalResults)) {
-      return null;
+  String? getValue(ArgResults? results, {ArgResults? globalResults}) {
+    if (wasProvided(results, globalResults: globalResults)) {
+      final ArgResults? target = _resolveTargetResults(results, globalResults);
+      return target?[name] as String?;
     }
-    final ArgResults? target = _resolveTargetResults(results, globalResults);
-    return target?[name] as String?;
+    return defaultsTo;
   }
-
-  @override
-  String? getValue(ArgResults? results, {ArgResults? globalResults}) =>
-      getParsedValue(results, globalResults: globalResults) ?? defaultsTo;
 
   /// Returns the resolved value or [fallback] if null.
   String getValueOrDefault(
@@ -169,7 +166,7 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
   }) => getValue(results, globalResults: globalResults) ?? fallback;
 }
 
-/// A descriptor for boolean flags.
+/// A descriptor for boolean flags with a concrete default value.
 class FlagOptionDescriptor extends OptionDescriptor<bool> {
   const FlagOptionDescriptor({
     required super.name,
@@ -209,17 +206,63 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
   }
 
   @override
-  bool? getParsedValue(ArgResults? results, {ArgResults? globalResults}) {
-    if (!wasParsed(results, globalResults: globalResults)) {
+  bool getValue(ArgResults? results, {ArgResults? globalResults}) {
+    if (wasProvided(results, globalResults: globalResults)) {
+      final ArgResults? target = _resolveTargetResults(results, globalResults);
+      return (target?[name] as bool?) ?? defaultsTo ?? false;
+    }
+    return defaultsTo ?? false;
+  }
+}
+
+/// A descriptor for tri-state boolean flags without a default value.
+///
+/// When omitted from the command line, [getValue] returns `null`.
+class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
+  const NullableFlagOptionDescriptor({
+    required super.name,
+    required super.help,
+    super.abbr,
+    this.negatable = true,
+    super.scope,
+    super.hide,
+  }) : super(defaultsTo: null);
+
+  /// Whether the flag can be negated with `--no-<name>`.
+  final bool negatable;
+
+  @override
+  void addTo(
+    ArgParser parser, {
+    Map<String, OptionDescriptor<Object?>>? registry,
+    bool? hideOverride,
+  }) {
+    if (parser.options.containsKey(name)) {
+      final OptionDescriptor<Object?>? existing = registry?[name];
+      if (existing != null && (identical(existing, this) || existing == this)) {
+        return;
+      }
+      _throwConflictError(name, existing);
+    }
+    parser.addFlag(
+      name,
+      abbr: abbr,
+      help: help,
+      defaultsTo: null,
+      negatable: negatable,
+      hide: hideOverride ?? hide,
+    );
+    registry?[name] = this;
+  }
+
+  @override
+  bool? getValue(ArgResults? results, {ArgResults? globalResults}) {
+    if (!wasProvided(results, globalResults: globalResults)) {
       return null;
     }
     final ArgResults? target = _resolveTargetResults(results, globalResults);
     return target?[name] as bool?;
   }
-
-  @override
-  bool getValue(ArgResults? results, {ArgResults? globalResults}) =>
-      getParsedValue(results, globalResults: globalResults) ?? defaultsTo ?? false;
 }
 
 /// A descriptor for multi-value options (lists of strings).
@@ -272,22 +315,17 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
   }
 
   @override
-  List<String>? getParsedValue(ArgResults? results, {ArgResults? globalResults}) {
-    if (!wasParsed(results, globalResults: globalResults)) {
-      return null;
+  List<String> getValue(ArgResults? results, {ArgResults? globalResults}) {
+    if (wasProvided(results, globalResults: globalResults)) {
+      final ArgResults? target = _resolveTargetResults(results, globalResults);
+      final Object? raw = target?[name];
+      if (raw is List<String>) {
+        return raw;
+      }
+      if (raw is List) {
+        return raw.cast<String>();
+      }
     }
-    final ArgResults? target = _resolveTargetResults(results, globalResults);
-    final Object? raw = target?[name];
-    if (raw is List<String>) {
-      return raw;
-    }
-    if (raw is List) {
-      return raw.cast<String>();
-    }
-    return null;
+    return defaultsTo ?? const <String>[];
   }
-
-  @override
-  List<String> getValue(ArgResults? results, {ArgResults? globalResults}) =>
-      getParsedValue(results, globalResults: globalResults) ?? defaultsTo ?? const <String>[];
 }

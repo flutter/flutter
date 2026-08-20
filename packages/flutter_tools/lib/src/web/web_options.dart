@@ -105,14 +105,14 @@ abstract final class WebOptions {
         'information about the generated code in main.dart.js.info.json.',
   );
 
-  static const minifyJs = FlagOptionDescriptor(
+  static const minifyJs = NullableFlagOptionDescriptor(
     name: 'minify-js',
     help:
         'Generate minified output for js. '
         'If not explicitly set, uses the compilation mode (debug, profile, release).',
   );
 
-  static const minifyWasm = FlagOptionDescriptor(
+  static const minifyWasm = NullableFlagOptionDescriptor(
     name: 'minify-wasm',
     help:
         'Generate minified output for wasm. '

@@ -11,10 +11,10 @@ extension SafeArgResults on FlutterCommand {
       descriptor.getValue(argResults, globalResults: globalResults);
 
   /// Returns whether [descriptor] was explicitly provided on the command line.
-  bool wasParsed(OptionDescriptor<Object?> descriptor) =>
-      descriptor.wasParsed(argResults, globalResults: globalResults);
+  bool wasProvided(OptionDescriptor<Object?> descriptor) =>
+      descriptor.wasProvided(argResults, globalResults: globalResults);
 
-  /// Returns the explicitly provided value for [descriptor], or `null` if omitted.
-  T? getParsedValue<T>(OptionDescriptor<T> descriptor) =>
-      descriptor.getParsedValue(argResults, globalResults: globalResults);
+  /// Checks if this option was explicitly parsed (alias for [wasProvided]).
+  bool wasParsed(OptionDescriptor<Object?> descriptor) =>
+      descriptor.wasProvided(argResults, globalResults: globalResults);
 }
