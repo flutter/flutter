@@ -2052,9 +2052,9 @@ class EditableText extends StatefulWidget {
   /// [TextStyle] used to style text with misspelled words.
   ///
   /// Spell check is disabled for password input, including when [obscureText]
-  /// is true, [keyboardType] is [TextInputType.visiblePassword], or
-  /// [autofillHints] contains [AutofillHints.password] or
-  /// [AutofillHints.newPassword].
+  /// is true, [keyboardType] is [TextInputType.visiblePassword],
+  /// [TextInputType.password] is true, or [autofillHints] contains
+  /// [AutofillHints.password] or [AutofillHints.newPassword].
   ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
@@ -3111,6 +3111,7 @@ class EditableTextState extends State<EditableText>
   }) {
     return obscureText ||
         keyboardType == TextInputType.visiblePassword ||
+        keyboardType.password == true ||
         (autofillHints?.any(
               (String hint) => hint == AutofillHints.password || hint == AutofillHints.newPassword,
             ) ??

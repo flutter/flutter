@@ -18,6 +18,7 @@ dependencies:
   analyzer: 10.1.0
   archive: 3.6.1
   args: 2.7.0
+  dap_adapters: 1.0.0
   dds: 5.4.0
   dwds: 27.1.2
   code_builder: 4.11.1
@@ -139,5 +140,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-
-# PUBSPEC CHECKSUM: abnfae
+# PUBSPEC CHECKSUM: 1leejj
