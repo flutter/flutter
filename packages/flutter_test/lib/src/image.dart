@@ -93,14 +93,17 @@ Future<void> precacheTestImage(
   Future<void> resolveImage() async {
     final completer = Completer<void>.sync();
     final ImageStream stream = provider.resolve(configuration);
-    final listener = ImageStreamListener(
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
       (ImageInfo info, bool syncCall) {
         if (!completer.isCompleted) {
+          stream.removeListener(listener);
           completer.complete();
         }
       },
       onError: (Object error, StackTrace? stackTrace) {
         if (!completer.isCompleted) {
+          stream.removeListener(listener);
           if (onError != null) {
             onError(error, stackTrace);
           } else {
