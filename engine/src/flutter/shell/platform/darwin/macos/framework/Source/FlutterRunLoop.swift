@@ -26,11 +26,13 @@ import Foundation
   @MainActor
   private override init() {
     super.init()
+    // The timer will not be explicitly invalidated, as the `.mainRunLoop` static
+    // variable has the same lifespan as the program.
     runLoop.add(timer: lockScope.timer, forModes: [.common, Self.flutterRunLoopMode])
   }
 
   /// Schedules a block to be executed on the main thread after the given delay.
-  @objc func perform(afterDelay delay: TimeInterval, block: @MainActor @escaping () -> Void) {
+  @objc func perform(afterDelay delay: TimeInterval = 0, block: @MainActor @escaping () -> Void) {
     if delay > 0 {
       let task = LockScope.Task(block: block, targetDate: .now + delay)
       lockScope.addTaskAndRearm(task)
@@ -47,10 +49,10 @@ import Foundation
     }
   }
 
-  /// Schedules a block to be executed on the main thread.
-  @objc(performBlock:)
-  func perform(_ block: @MainActor @escaping () -> Void) {
-    perform(afterDelay: 0, block: block)
+  /// Schedules a block to be executed on the main thread. This method is Objective-C only.
+  @available(swift, obsoleted: 1.0)
+  @objc func performBlock(_ block: @MainActor @escaping () -> Void) {
+    perform(block: block)
   }
 
   /// Executes single iteration of the run loop in the mode where only Flutter
@@ -97,14 +99,15 @@ private final class LockScope: @unchecked Sendable {
     lock: NSLock, unsafeTaskQueue: UnsafeTaskQueue, timer: Timer
   ) -> [Task] {
     lock.withLock {
-      let now = Date.now
-      let (tasks, newFireDate) = unsafeTaskQueue.popTasks(expiringBy: now)
+      let (tasks, newFireDate) = unsafeTaskQueue.popTasks(expiringBy: .now)
       timer.fireDate = newFireDate
       return tasks
     }
   }
 
-  /// Pops all expired task from the task queue and updates the Timer's fire date.
+  /// Pops all expired tasks from the task queue and updates the Timer's fire date.
+  ///
+  /// Returns an unsorted array of all expired tasks popped from the task queue.
   @MainActor
   func popExpiredTasksAndRearm() -> [Task] {
     Self.popExpiredTasksAndRearm(lock: lock, unsafeTaskQueue: unsafeTaskQueue, timer: timer)
@@ -156,14 +159,15 @@ extension LockScope {
   }
 }
 
-// Unlike NSRunLoop, CFRunLoop APIs are "generally" thread-safe, but
+// According to Apple's Threading Programming Guide, Unlike NSRunLoop,
+// CFRunLoop APIs are "generally" thread-safe, but
 // "If you are performing operations that alter the configuration of the run loop,
 // however, it is still good practice to do so from the thread that owns the run loop
 // whenever possible."
 private final class SendableCFRunLoop: @unchecked Sendable {
   private let runLoop: CFRunLoop = CFRunLoopGetCurrent()
 
-  // Calls CFRunLoopPerformBlock on the run loop and then wake up the run loop.
+  // Calls CFRunLoopPerformBlock on the run loop and then wakes up the run loop.
   func perform(inModes modes: [RunLoop.Mode], block: @escaping @Sendable () -> Void) {
     let cfModes = modes.map { $0.cfRunLoopMode } as NSArray
     CFRunLoopPerformBlock(runLoop, cfModes, block)
