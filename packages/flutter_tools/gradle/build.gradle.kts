@@ -92,7 +92,7 @@ val validateNoCommonExtensionInBytecode by tasks.registering {
     description =
         "Checks that no compiled main class references com.android.build.api.dsl.CommonExtension."
     dependsOn(tasks.named("compileKotlin"))
-    val classesDir = layout.buildDirectory.dir("classes/kotlin/main")
+    val classesDir = tasks.named<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>("compileKotlin").flatMap { it.destinationDirectory }
     doLast {
         val needle = "com/android/build/api/dsl/CommonExtension".toByteArray(Charsets.ISO_8859_1)
         val offenders =

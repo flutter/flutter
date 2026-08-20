@@ -164,8 +164,14 @@ class PluginHandler(
             // However, only copy if the plugin is also an app project, since library projects
             // cannot have applicationIdSuffix and other app-specific properties.
             if (isBuiltAsApp(pluginProject)) {
-                (getLegacyAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<InternalDslBuildType>)
-                    .addAll(getLegacyAndroidExtension(project).buildTypes as NamedDomainObjectContainer<InternalDslBuildType>)
+                getLegacyAndroidExtension(project).buildTypes.forEach { appBuildType ->
+                    val pluginBuildTypes = getLegacyAndroidExtension(pluginProject).buildTypes
+                    if (pluginBuildTypes.findByName(appBuildType.name) == null) {
+                        pluginBuildTypes.create(appBuildType.name) {
+                            initWith(appBuildType)
+                        }
+                    }
+                }
             } else {
                 // For library projects, create compatible build types without app-specific properties
                 getLegacyAndroidExtension(project).buildTypes.forEach { appBuildType ->

@@ -234,7 +234,7 @@ class PluginHandlerTest {
     }
 
     @Test
-    fun `configurePlugins uses addAll for app plugins`(
+    fun `configurePlugins mirrors build types using initWith for app plugins`(
         @TempDir tempDir: Path
     ) {
         val project = mockk<Project>()
@@ -251,6 +251,7 @@ class PluginHandlerTest {
 
         val pluginProjectBuildTypes = mockk<NamedDomainObjectContainer<InternalDslBuildType>>(relaxed = true)
         val projectBuildTypes = mockk<NamedDomainObjectContainer<InternalDslBuildType>>(relaxed = true)
+        every { projectBuildTypes.iterator() } returns mutableListOf(mockBuildType).iterator()
         setupBaseExtensionBuildTypeContainers(project, pluginProject, projectBuildTypes, pluginProjectBuildTypes)
 
         setUpMockAndroidExtension(project, compileSdk = 35, buildTypes = listOf(mockBuildType))
@@ -266,6 +267,19 @@ class PluginHandlerTest {
 
         val capturePluginActionSlot = mutableListOf<Action<Project>>()
 
+        val createdBuildType = mockk<InternalDslBuildType>(relaxed = true)
+        every { pluginProjectBuildTypes.findByName("debug") } returns null
+        every {
+            pluginProjectBuildTypes.create(
+                "debug",
+                any<Action<InternalDslBuildType>>()
+            )
+        } answers {
+            val action = secondArg<Action<InternalDslBuildType>>()
+            action.execute(createdBuildType)
+            createdBuildType
+        }
+
         val pluginHandler = PluginHandler(project)
         pluginHandler.configurePlugins(
             engineVersionValue = EXAMPLE_ENGINE_VERSION
@@ -274,14 +288,14 @@ class PluginHandlerTest {
         verify { pluginProject.afterEvaluate(capture(capturePluginActionSlot)) }
         capturePluginActionSlot.forEach { it.execute(pluginProject) }
 
-        // App plugins mirror all project build types via addAll and do not create individual types manually.
-        verify { pluginProjectBuildTypes.addAll(projectBuildTypes) }
-        verify(exactly = 0) {
+        // App plugins mirror project build types using initWith.
+        verify {
             pluginProjectBuildTypes.create(
-                any<String>(),
+                "debug",
                 any<Action<InternalDslBuildType>>()
             )
         }
+        verify { createdBuildType.initWith(mockBuildType) }
     }
 
     @Test
