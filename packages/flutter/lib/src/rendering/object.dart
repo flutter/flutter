@@ -5946,6 +5946,15 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   List<_RenderObjectSemantics> _getNonBlockedChildren() {
     final result = <_RenderObjectSemantics>[];
     renderObject.visitChildrenForSemantics((RenderObject renderChild) {
+      // A child that still needs layout was skipped during the layout phase, so
+      // it has no up-to-date geometry and cannot contribute to semantics. Skip
+      // it here as well, mirroring what the paint phase does in
+      // `_paintWithContext`. Laying the child out again marks the semantics
+      // dirty (see `RenderObject.layout`), so it rejoins the semantics tree once
+      // it has valid geometry.
+      if (renderChild._needsLayout) {
+        return;
+      }
       if (renderChild._semantics.isBlockingPreviousSibling) {
         result.clear();
       }
@@ -6014,7 +6023,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       effectiveChildParentData = childParentData;
     }
     for (final _RenderObjectSemantics childSemantics in _getNonBlockedChildren()) {
-      assert(!childSemantics.renderObject._needsLayout);
       childSemantics._didUpdateParentData(effectiveChildParentData);
       for (final _SemanticsFragment fragment in childSemantics.mergeUp) {
         if (hasChildConfigurationsDelegate && fragment.configToMergeUp != null) {
