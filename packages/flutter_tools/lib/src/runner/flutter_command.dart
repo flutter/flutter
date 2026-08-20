@@ -2242,6 +2242,7 @@ abstract class FlutterCommand extends Command<void> {
     return help;
   }
 
+  // TODO(bkonyi): Remove once commands using ApplicationPackageFactory are migrated to explicit dependency injection, https://github.com/flutter/flutter/issues/47161.
   ApplicationPackageFactory? get applicationPackages =>
       _applicationPackages ?? ApplicationPackageFactory.instance;
   set applicationPackages(ApplicationPackageFactory? value) {
