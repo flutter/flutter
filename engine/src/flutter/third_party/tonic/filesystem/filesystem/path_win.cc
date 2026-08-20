@@ -14,9 +14,11 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
+#include <filesystem>
 #include <functional>
 #include <list>
 #include <memory>
+#include <string_view>
 
 #include "tonic/filesystem/filesystem/windows_utils.h"
 
@@ -183,14 +185,16 @@ std::string SimplifyPath(std::string path) {
 }
 
 std::string AbsolutePath(const std::string& path) {
-  std::wstring wide_path = Utf8ToWide(path);
-  wchar_t* abs_path = _wfullpath(nullptr, wide_path.c_str(), 0);
-  if (abs_path == nullptr) {
+  std::error_code ec;
+  std::filesystem::path p(
+      std::u8string_view(reinterpret_cast<const char8_t*>(path.data()), path.size()));
+  std::filesystem::path abs_path = std::filesystem::absolute(p, ec);
+  if (ec) {
     return std::string();
   }
-  std::string result = WideToUtf8(abs_path);
-  free(abs_path);
-  return result;
+  abs_path = abs_path.lexically_normal();
+  std::u8string u8_str = abs_path.u8string();
+  return std::string(reinterpret_cast<const char*>(u8_str.data()), u8_str.size());
 }
 
 std::string GetDirectoryName(const std::string& path) {
@@ -251,16 +255,18 @@ std::string GetAbsoluteFilePath(const std::string& path) {
     CloseHandle(file);
     return result;
   }
-  constexpr const wchar_t kUncPrefix[] = L"\\\\?\\UNC\\";
-  constexpr size_t kUncPrefixLen = sizeof(kUncPrefix) / sizeof(wchar_t) - 1;
-  constexpr const wchar_t kLongPathPrefix[] = L"\\\\?\\";
-  constexpr size_t kLongPathPrefixLen =
-      sizeof(kLongPathPrefix) / sizeof(wchar_t) - 1;
-  if (wide_result.rfind(kUncPrefix, 0) == 0) {
-    wide_result.erase(0, kUncPrefixLen);
+  // GetFinalPathNameByHandleW with FILE_NAME_NORMALIZED returns paths with
+  // either a "\\?\UNC\server\share" prefix for network shares or a "\\?\"
+  // prefix for local drive paths (e.g. "\\?\C:\..."). We normalize network
+  // paths to standard UNC format ("\\server\share") and strip the "\\?\" prefix
+  // for standard local paths.
+  constexpr std::wstring_view kUncPrefix = L"\\\\?\\UNC\\";
+  constexpr std::wstring_view kLongPathPrefix = L"\\\\?\\";
+  if (wide_result.starts_with(kUncPrefix)) {
+    wide_result.erase(0, kUncPrefix.size());
     wide_result = L"\\\\" + wide_result;
-  } else if (wide_result.rfind(kLongPathPrefix, 0) == 0) {
-    wide_result.erase(0, kLongPathPrefixLen);
+  } else if (wide_result.starts_with(kLongPathPrefix)) {
+    wide_result.erase(0, kLongPathPrefix.size());
   }
   CloseHandle(file);
   return WideToUtf8(wide_result);
