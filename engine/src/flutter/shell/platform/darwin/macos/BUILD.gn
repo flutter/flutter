@@ -61,6 +61,11 @@ source_set("InternalFlutterSwift") {
     "//flutter/shell/platform/darwin/macos/framework/Headers",
     "//flutter/shell/platform/darwin/macos/framework",  # For module.modulemap
   ]
+
+  swiftflags = [
+    "-swift-version",
+    "6",
+  ]
   bridge_header = "InternalFlutterSwift-Bridging-Header.h"
   sources = [
     "framework/Source/FlutterRunLoop.swift",

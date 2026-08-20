@@ -147,11 +147,11 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
     }
 
     [_mainRunLoop performAfterDelay:delay
-                            block:^{
-                                              CFTimeInterval targetTime = start + tick_interval;
-                                              TRACE_VSYNC("SynthesizedInitialVSync", baton);
-                                              _block(start, targetTime, baton);
-                                            }];
+                              block:^{
+                                CFTimeInterval targetTime = start + tick_interval;
+                                TRACE_VSYNC("SynthesizedInitialVSync", baton);
+                                _block(start, targetTime, baton);
+                              }];
     _displayLink.paused = NO;
   } else {
     _pendingBaton = baton;
