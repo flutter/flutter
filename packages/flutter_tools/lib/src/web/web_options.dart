@@ -163,7 +163,7 @@ class WebCoreOptionsBundle extends OptionBundle {
   String? get title => 'Flutter web options';
 
   @override
-  List<OptionDescriptor<dynamic>> get descriptors => [
+  List<OptionDescriptor<Object?>> get descriptors => [
     WebOptions.baseHref,
     WebOptions.staticAssetsUrl,
     WebOptions.pwaStrategy,
@@ -185,7 +185,7 @@ class WebJsOptionsBundle extends OptionBundle {
   String? get title => 'JavaScript compilation options';
 
   @override
-  List<OptionDescriptor<dynamic>> get descriptors => [
+  List<OptionDescriptor<Object?>> get descriptors => [
     WebOptions.csp,
     WebOptions.dart2jsOptimization,
     WebOptions.dumpInfo,
@@ -204,7 +204,7 @@ class WebWasmOptionsBundle extends OptionBundle {
   String? get title => 'WebAssembly compilation options';
 
   @override
-  List<OptionDescriptor<dynamic>> get descriptors => [
+  List<OptionDescriptor<Object?>> get descriptors => [
     WebOptions.wasm,
     WebOptions.stripWasm,
     WebOptions.minifyWasm,

@@ -16,7 +16,7 @@ abstract class OptionBundle {
   String? get title => null;
 
   /// The list of option descriptors contained within this bundle.
-  List<OptionDescriptor<dynamic>> get descriptors => const <OptionDescriptor<dynamic>>[];
+  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[];
 
   /// Optional child bundles composed inside this bundle.
   List<OptionBundle> get subBundles => const <OptionBundle>[];
@@ -29,13 +29,13 @@ abstract class OptionBundle {
   void register(
     FlutterCommand command,
     ArgParser parser,
-    Map<String, OptionDescriptor<dynamic>> registry,
+    Map<String, OptionDescriptor<Object?>> registry,
   ) {
     if (title != null) {
       parser.addSeparator(title!);
     }
     onRegister(command);
-    for (final OptionDescriptor<dynamic> descriptor in descriptors) {
+    for (final OptionDescriptor<Object?> descriptor in descriptors) {
       descriptor.addTo(parser, registry: registry);
     }
     for (final OptionBundle subBundle in subBundles) {

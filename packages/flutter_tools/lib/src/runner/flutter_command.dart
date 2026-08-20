@@ -285,11 +285,11 @@ abstract class FlutterCommand extends Command<void> {
   /// easily reference it or overwrite as necessary.
   Analytics get analytics => globals.analytics;
 
-  final Map<String, OptionDescriptor<dynamic>> _optionRegistry =
-      <String, OptionDescriptor<dynamic>>{};
+  final Map<String, OptionDescriptor<Object?>> _optionRegistry =
+      <String, OptionDescriptor<Object?>>{};
 
   /// Option descriptor registry for type-safe lookups.
-  Map<String, OptionDescriptor<dynamic>> get optionRegistry => _optionRegistry;
+  Map<String, OptionDescriptor<Object?>> get optionRegistry => _optionRegistry;
 
   /// Registers an [OptionBundle] with this command.
   void registerOptionBundle(OptionBundle bundle) {

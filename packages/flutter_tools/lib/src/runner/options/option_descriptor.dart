@@ -63,7 +63,7 @@ abstract class OptionDescriptor<T> {
   /// Registers this option with [parser], maintaining descriptor identity in [registry].
   void addTo(
     ArgParser parser, {
-    Map<String, OptionDescriptor<dynamic>>? registry,
+    Map<String, OptionDescriptor<Object?>>? registry,
     bool? hideOverride,
   });
 
@@ -112,11 +112,11 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
   @override
   void addTo(
     ArgParser parser, {
-    Map<String, OptionDescriptor<dynamic>>? registry,
+    Map<String, OptionDescriptor<Object?>>? registry,
     bool? hideOverride,
   }) {
     if (parser.options.containsKey(name)) {
-      final OptionDescriptor<dynamic>? existing = registry?[name];
+      final OptionDescriptor<Object?>? existing = registry?[name];
       if (existing != null && (identical(existing, this) || existing == this)) {
         return;
       }
@@ -175,11 +175,11 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
   @override
   void addTo(
     ArgParser parser, {
-    Map<String, OptionDescriptor<dynamic>>? registry,
+    Map<String, OptionDescriptor<Object?>>? registry,
     bool? hideOverride,
   }) {
     if (parser.options.containsKey(name)) {
-      final OptionDescriptor<dynamic>? existing = registry?[name];
+      final OptionDescriptor<Object?>? existing = registry?[name];
       if (existing != null && (identical(existing, this) || existing == this)) {
         return;
       }
@@ -234,11 +234,11 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
   @override
   void addTo(
     ArgParser parser, {
-    Map<String, OptionDescriptor<dynamic>>? registry,
+    Map<String, OptionDescriptor<Object?>>? registry,
     bool? hideOverride,
   }) {
     if (parser.options.containsKey(name)) {
-      final OptionDescriptor<dynamic>? existing = registry?[name];
+      final OptionDescriptor<Object?>? existing = registry?[name];
       if (existing != null && (identical(existing, this) || existing == this)) {
         return;
       }

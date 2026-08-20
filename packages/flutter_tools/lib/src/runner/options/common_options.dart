@@ -142,7 +142,7 @@ class BuildModeOptionsBundle extends OptionBundle {
   }
 
   @override
-  List<OptionDescriptor<dynamic>> get descriptors => const [
+  List<OptionDescriptor<Object?>> get descriptors => const [
     CommonOptions.debugMode,
     CommonOptions.profileMode,
     CommonOptions.releaseMode,
@@ -157,7 +157,7 @@ class DartCompileOptionsBundle extends OptionBundle {
   final bool verboseHelp;
 
   @override
-  List<OptionDescriptor<dynamic>> get descriptors => const [
+  List<OptionDescriptor<Object?>> get descriptors => const [
     CommonOptions.dartDefines,
     CommonOptions.dartDefineFromFile,
     CommonOptions.enableExperiment,
@@ -178,7 +178,7 @@ class CommonBuildOptionsBundle extends OptionBundle {
   }
 
   @override
-  List<OptionDescriptor<dynamic>> get descriptors => const [
+  List<OptionDescriptor<Object?>> get descriptors => const [
     CommonOptions.treeShakeIcons,
     CommonOptions.target,
     CommonOptions.outputDir,
