@@ -246,10 +246,10 @@ packages:
     dependency: transitive
     description:
       name: cupertino_ui
-      sha256: "427360789a03b76eaf659c37131570d2fc98e381f80d55f252bd9e30f37e7126"
+      sha256: "7ed8ce4159d342eec4c65f4ea6eec57adaf9365404378541f38efc1da20a5b3d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.2"
+    version: "1.0.0"
   dap:
     dependency: transitive
     description:
@@ -723,10 +723,10 @@ packages:
     dependency: transitive
     description:
       name: material_ui
-      sha256: e1fa67393d807bd1841e5ece1ec260ed84f440ae7351e40b6406f733e4fe31cf
+      sha256: "4f3f38b9953df0a87d6bf5f21880029f77c47048487d5339410c39936be4683b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.2"
+    version: "1.0.1"
   meta:
     dependency: "direct main"
     description:
