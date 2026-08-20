@@ -1925,8 +1925,8 @@ server:
         expect(
           testLogger.warningText,
           contains(
-            'The "--build" and "--no-build" flags are deprecated and will be removed in a future release. '
-            'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
+            'The "--build" flag is deprecated and will be removed in a future release. '
+            'Building is the default behavior, so this flag can be safely removed.',
           ),
         );
       },
@@ -1950,7 +1950,7 @@ server:
         expect(
           testLogger.warningText,
           contains(
-            'The "--build" and "--no-build" flags are deprecated and will be removed in a future release. '
+            'The "--no-build" flag is deprecated and will be removed in a future release. '
             'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
           ),
         );
@@ -1974,7 +1974,7 @@ server:
 
         expect(
           testLogger.warningText,
-          isNot(contains('The "--build" and "--no-build" flags are deprecated')),
+          isNot(contains('is deprecated')),
         );
       },
       overrides: <Type, Generator>{

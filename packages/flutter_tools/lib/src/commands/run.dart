@@ -760,10 +760,17 @@ class RunCommand extends RunCommandBase {
     }
 
     if (argResults!.wasParsed('build')) {
-      globals.printWarning(
-        'The "--build" and "--no-build" flags are deprecated and will be removed in a future release. '
-        'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
-      );
+      if (boolArg('build')) {
+        globals.printWarning(
+          'The "--build" flag is deprecated and will be removed in a future release. '
+          'Building is the default behavior, so this flag can be safely removed.',
+        );
+      } else {
+        globals.printWarning(
+          'The "--no-build" flag is deprecated and will be removed in a future release. '
+          'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
+        );
+      }
     }
   }
 
