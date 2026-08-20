@@ -25,6 +25,10 @@ struct _FlSubsurfaceEGL {
 
   // EGL surface that draws onto egl_window.
   EGLSurface egl_surface;
+
+  // Framebuffer used to read the engine's frame texture. Created lazily on the
+  // first present and reused for subsequent frames.
+  GLuint read_framebuffer;
 };
 
 G_DEFINE_TYPE(FlSubsurfaceEGL, fl_subsurface_egl, G_TYPE_OBJECT)
@@ -116,6 +120,16 @@ static void fl_subsurface_egl_dispose(GObject* object) {
   // terminated.
   if (self->opengl_manager != nullptr) {
     EGLDisplay egl_display = get_display(self);
+    if (self->egl_context != EGL_NO_CONTEXT) {
+      if (self->read_framebuffer != 0) {
+        eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
+                       self->egl_context);
+        glDeleteFramebuffers(1, &self->read_framebuffer);
+        self->read_framebuffer = 0;
+        eglMakeCurrent(egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                       EGL_NO_CONTEXT);
+      }
+    }
     if (self->egl_surface != EGL_NO_SURFACE) {
       eglDestroySurface(egl_display, self->egl_surface);
       self->egl_surface = EGL_NO_SURFACE;
@@ -191,19 +205,19 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
   }
 
   // The subsurface context shares resources with the engine, so the engine's
-  // frame texture can be read directly. Attach it to a framebuffer and blit it
-  // to the subsurface window surface. The framebuffer is created and deleted
-  // while the context is current.
-  GLuint read_framebuffer;
-  glGenFramebuffers(1, &read_framebuffer);
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, read_framebuffer);
+  // frame texture can be read directly. Attach it to a persistent framebuffer
+  // and blit it to the subsurface window surface. The framebuffer is created
+  // lazily on the first present and reused for subsequent frames.
+  if (self->read_framebuffer == 0) {
+    glGenFramebuffers(1, &self->read_framebuffer);
+  }
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, self->read_framebuffer);
   glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                          GL_TEXTURE_2D, texture_id, 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
                     GL_COLOR_BUFFER_BIT, GL_NEAREST);
   eglSwapBuffers(egl_display, self->egl_surface);
-  glDeleteFramebuffers(1, &read_framebuffer);
 
   // Restore the engine's rendering context so the raster thread can continue
   // rendering after this present.
