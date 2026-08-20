@@ -16,11 +16,13 @@ TextFrame::TextFrame() = default;
 TextFrame::TextFrame(std::vector<TextRun>& runs,
                      Rect bounds,
                      bool has_color,
-                     const PathCreator& path_creator)
+                     const PathCreator& path_creator,
+                     const ColorPathCreator& color_path_creator)
     : runs_(std::move(runs)),
       bounds_(bounds),
       has_color_(has_color),
-      path_creator_(path_creator) {}
+      path_creator_(path_creator),
+      color_path_creator_(color_path_creator) {}
 
 TextFrame::~TextFrame() = default;
 
@@ -116,6 +118,13 @@ fml::StatusOr<flutter::DlPath> TextFrame::GetPath() const {
     return path_creator_();
   }
   return fml::Status(fml::StatusCode::kCancelled, "no path creator specified.");
+}
+
+std::vector<ColorGlyphLayer> TextFrame::GetColorPaths() const {
+  if (color_path_creator_) {
+    return color_path_creator_();
+  }
+  return {};
 }
 
 const Font& TextFrame::GetFont() const {
