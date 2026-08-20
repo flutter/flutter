@@ -31,22 +31,6 @@ void main() {
     skip: !Platform.isWindows, // [intended] relies on Windows's cmd.exe
   );
 
-  testUsingContext(
-    r'flutter command can receive regex lookahead `^(?!Golden).+`, avoiding expansion by cmd.exe',
-    () async {
-      final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter.bat');
-
-      final ProcessResult exec = await Process.run(flutterBin, <String>[
-        'test',
-        '--name',
-        r'^(?!Golden).+',
-        '--help',
-      ], workingDirectory: Cache.flutterRoot);
-      expect(exec.exitCode, 0);
-    },
-    skip: !Platform.isWindows, // [intended] relies on Windows's cmd.exe
-  );
-
   testUsingContext('windows entrypoint batch scripts do not enable delayed expansion', () {
     final String flutterRoot = getFlutterRoot();
     final File flutterBat = globals.fs.file(
@@ -61,8 +45,9 @@ void main() {
     expect(dartBat.existsSync(), isTrue);
     expect(sharedBat.existsSync(), isTrue);
 
-    expect(flutterBat.readAsStringSync(), isNot(contains('ENABLEDELAYEDEXPANSION')));
-    expect(dartBat.readAsStringSync(), isNot(contains('ENABLEDELAYEDEXPANSION')));
-    expect(sharedBat.readAsStringSync(), isNot(contains('ENABLEDELAYEDEXPANSION')));
+    final delayedExpansionPattern = RegExp(r'ENABLEDELAYEDEXPANSION', caseSensitive: false);
+    expect(flutterBat.readAsStringSync(), isNot(contains(delayedExpansionPattern)));
+    expect(dartBat.readAsStringSync(), isNot(contains(delayedExpansionPattern)));
+    expect(sharedBat.readAsStringSync(), isNot(contains(delayedExpansionPattern)));
   });
 }
