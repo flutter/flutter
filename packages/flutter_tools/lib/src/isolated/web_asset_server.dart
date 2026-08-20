@@ -692,6 +692,10 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     );
   }
 
+  // File extensions that may legitimately be requested from the project and
+  // Flutter SDK roots for source-map resolution.
+  static const Set<String> _sourceMapExtensions = <String>{'.dart', '.map'};
+
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
@@ -706,12 +710,16 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       return entrypointCacheDirectory.childFile('web_entrypoint.dart');
     }
 
+    final String extension = fileSystem.path.extension(path);
+
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. The tool doesn't currently
     // consider the case of Dart files as assets.
-    final File dartFile = fileSystem.file(fileSystem.currentDirectory.uri.resolve(path));
-    if (dartFile.existsSync()) {
-      return dartFile;
+    if (_sourceMapExtensions.contains(extension)) {
+      final File dartFile = fileSystem.file(fileSystem.currentDirectory.uri.resolve(path));
+      if (dartFile.existsSync()) {
+        return dartFile;
+      }
     }
 
     final List<String> segments = path.split('/');
@@ -721,7 +729,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
     // The file might have been a package file which is signaled by a
     // `/packages/<package>/<path>` request.
-    if (segments.first == 'packages') {
+    if (segments.first == 'packages' && _sourceMapExtensions.contains(extension)) {
       final Uri? filePath = _packages.resolve(
         Uri(scheme: 'package', pathSegments: segments.skip(1)),
       );
@@ -733,26 +741,31 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       }
     }
 
-    // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
-    final Directory dartSdkParent = fileSystem
-        .directory(
-          globals.artifacts!.getArtifactPath(
-            Artifact.engineDartSdkPath,
-            platform: TargetPlatform.web_javascript,
-          ),
-        )
-        .parent;
-    final File dartSdkFile = fileSystem.file(dartSdkParent.uri.resolve(path));
-    if (dartSdkFile.existsSync()) {
-      return dartSdkFile;
+    if (_sourceMapExtensions.contains(extension)) {
+      // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
+      final Directory dartSdkParent = fileSystem
+          .directory(
+            globals.artifacts!.getArtifactPath(
+              Artifact.engineDartSdkPath,
+              platform: TargetPlatform.web_javascript,
+            ),
+          )
+          .parent;
+      final File dartSdkFile = fileSystem.file(dartSdkParent.uri.resolve(path));
+      if (dartSdkFile.existsSync()) {
+        return dartSdkFile;
+      }
+
+      final Directory flutterWebSdk = fileSystem.directory(
+        globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk),
+      );
+      final File webSdkFile = fileSystem.file(flutterWebSdk.uri.resolve(path));
+      if (webSdkFile.existsSync()) {
+        return webSdkFile;
+      }
     }
 
-    final Directory flutterWebSdk = fileSystem.directory(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk),
-    );
-    final File webSdkFile = fileSystem.file(flutterWebSdk.uri.resolve(path));
-
-    return webSdkFile;
+    return fileSystem.file(fileSystem.currentDirectory.childFile('.non_existent_file'));
   }
 
   File get _resolveDartSdkJsFile {

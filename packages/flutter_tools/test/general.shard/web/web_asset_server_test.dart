@@ -4,6 +4,7 @@
 
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools/src/web/web_constants.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 
 const kTransparentImage = <int>[
   0x89,
@@ -509,5 +511,56 @@ void main() {
 
       expect(server.basePath, isEmpty);
     });
+
+    testUsingContext(
+      'serves assets with exact key and does not serve non-source project files as assets',
+      () async {
+        final WebAssetServer server = await WebAssetServer.start(
+          null,
+          null,
+          false,
+          false,
+          false,
+          BuildInfo.debug,
+          false,
+          const DartDevelopmentServiceConfiguration(enable: false),
+          Uri.base,
+          null,
+          crossOriginIsolation: false,
+          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webRenderer: WebRendererMode.canvaskit,
+          isWasm: false,
+          useLocalCanvasKit: false,
+          testMode: true,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        );
+
+        // Project source file exists in assets/ directory.
+        fileSystem.file('assets/my_asset.txt')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('project file');
+
+        // Built asset exists in build/flutter_assets/assets/my_asset.txt.
+        fileSystem.file('build/flutter_assets/assets/my_asset.txt')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('built asset');
+
+        // Correct key 'assets/my_asset.txt' (URL /assets/assets/my_asset.txt) succeeds.
+        final Response validResponse = await server.handleRequest(
+          Request('GET', Uri.parse('http://localhost:8080/assets/assets/my_asset.txt')),
+        );
+        expect(validResponse.statusCode, HttpStatus.ok);
+        expect(await validResponse.readAsString(), 'built asset');
+
+        // Incorrect key 'my_asset.txt' (URL /assets/my_asset.txt) must return 404.
+        final Response invalidResponse = await server.handleRequest(
+          Request('GET', Uri.parse('http://localhost:8080/assets/my_asset.txt')),
+        );
+        expect(invalidResponse.statusCode, HttpStatus.notFound);
+      },
+      overrides: <Type, Generator>{Artifacts: () => Artifacts.test()},
+    );
   });
 }
