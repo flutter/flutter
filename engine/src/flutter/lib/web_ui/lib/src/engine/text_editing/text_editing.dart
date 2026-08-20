@@ -2065,8 +2065,37 @@ abstract class DefaultTextEditingStrategy
     // until the autofill context of the form is finalized.
     // More details on `TextInput.finishAutofillContext` call.
     if (_appendedToForm && inputConfiguration.autofillGroup?.formElement != null) {
-      _styleAutofillElements(activeDomElement, isOffScreen: true);
-      inputConfiguration.autofillGroup?.goDormant();
+      final EngineAutofillForm group = inputConfiguration.autofillGroup!;
+      if (group.fillWindowActive) {
+        // A password manager took the focus to fill the form, and that is what
+        // closed this connection. Parking this field off screen at 1x1 now
+        // would hide the one field the manager was invoked from, which is the
+        // field the user was in: managers do not fill a field they cannot see,
+        // so filling from the password field would deliver only the username
+        // and filling from the username field only the password. Leave it
+        // discoverable, like the fields it now sits beside. Read before
+        // goDormant, which closes the window.
+        _styleAutofillElements(
+          activeDomElement,
+          shouldHideElement: false,
+          shouldDisablePointerEvents: group._isSafariStrategy,
+        );
+      } else {
+        // Off screen, but at its real size. A manager measures a field's box to
+        // decide whether it is one it can ever fill, and at least one of them
+        // memoises that verdict against the element: a field measured while it
+        // was a pixel tall is written off for as long as that element lives,
+        // and these elements are reused for the life of the form. Position is
+        // not part of that judgement, so moving it away is enough to get it out
+        // of the way, and shrinking it only makes it unfillable later.
+        _styleAutofillElements(
+          activeDomElement,
+          isOffScreen: true,
+          shouldHideElement: false,
+          shouldDisablePointerEvents: group._isSafariStrategy,
+        );
+      }
+      group.goDormant();
       EnginePlatformDispatcher.instance.viewManager.safeBlur(activeDomElement);
     } else {
       EnginePlatformDispatcher.instance.viewManager.safeRemove(activeDomElement);
