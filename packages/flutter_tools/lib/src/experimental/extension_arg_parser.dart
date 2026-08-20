@@ -150,10 +150,4 @@ mixin ExtensionArgParserMixin on FlutterCommand {
     }
     return _customArgParser!;
   }
-
-  @override
-  void addSubcommand(Command<void> command) {
-    final ArgParser _ = argParser;
-    super.addSubcommand(command);
-  }
 }
