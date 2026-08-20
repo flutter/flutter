@@ -44,6 +44,7 @@ class ToolContext {
     required this.outputPreferences,
     required this.platform,
     required this.preRunValidator,
+    required this.processInfo,
     required this.processManager,
     required this.processUtils,
     required this.projectFactory,
@@ -99,6 +100,9 @@ class ToolContext {
 
   /// Validates environment prerequisites and file permissions before command execution.
   final PreRunValidator preRunValidator;
+
+  /// Process resource and memory usage reporting.
+  final ProcessInfo processInfo;
 
   /// Spawns and manages external host processes.
   final ProcessManager processManager;

@@ -1156,6 +1156,7 @@ class FakeToolContext extends Fake implements ToolContext {
     OutputPreferences? outputPreferences,
     Platform? platform,
     PreRunValidator? preRunValidator,
+    ProcessInfo? processInfo,
     ProcessManager? processManager,
     ProcessUtils? processUtils,
     FlutterProjectFactory? projectFactory,
@@ -1180,6 +1181,7 @@ class FakeToolContext extends Fake implements ToolContext {
        _outputPreferences = outputPreferences,
        _platform = platform,
        _preRunValidator = preRunValidator,
+       _processInfo = processInfo,
        _processManager = processManager,
        _processUtils = processUtils,
        _projectFactory = projectFactory,
@@ -1205,6 +1207,7 @@ class FakeToolContext extends Fake implements ToolContext {
   final OutputPreferences? _outputPreferences;
   final Platform? _platform;
   final PreRunValidator? _preRunValidator;
+  final ProcessInfo? _processInfo;
   final ProcessManager? _processManager;
   final ProcessUtils? _processUtils;
   final FlutterProjectFactory? _projectFactory;
@@ -1271,6 +1274,9 @@ class FakeToolContext extends Fake implements ToolContext {
   late final PreRunValidator preRunValidator = _preRunValidator ?? const NoOpPreRunValidator();
 
   @override
+  late final ProcessInfo processInfo = _processInfo ?? ProcessInfo.test(fs);
+
+  @override
   late final ProcessManager processManager = _processManager ?? FakeProcessManager.any();
 
   @override
@@ -1320,6 +1326,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
     OutputPreferences? outputPreferences,
     Platform? platform,
     PreRunValidator? preRunValidator,
+    ProcessInfo? processInfo,
     ProcessManager? processManager,
     ProcessUtils? processUtils,
     FlutterProjectFactory? projectFactory,
@@ -1343,6 +1350,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
        _outputPreferences = outputPreferences,
        _platform = platform,
        _preRunValidator = preRunValidator,
+       _processInfo = processInfo,
        _processManager = processManager,
        _processUtils = processUtils,
        _projectFactory = projectFactory,
@@ -1367,6 +1375,7 @@ class DelegatingToolContext extends Fake implements ToolContext {
   final OutputPreferences? _outputPreferences;
   final Platform? _platform;
   final PreRunValidator? _preRunValidator;
+  final ProcessInfo? _processInfo;
   final ProcessManager? _processManager;
   final ProcessUtils? _processUtils;
   final FlutterProjectFactory? _projectFactory;
@@ -1428,6 +1437,9 @@ class DelegatingToolContext extends Fake implements ToolContext {
 
   @override
   PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+
+  @override
+  ProcessInfo get processInfo => _processInfo ?? globals.processInfo;
 
   @override
   ProcessManager get processManager => _processManager ?? globals.processManager;

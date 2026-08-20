@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -53,15 +54,24 @@ Future<String> createProject(
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   TestFlutterCommandRunner({Analytics? analytics, ToolContext? toolContext})
     : super(
-        analytics: analytics ?? const NoOpAnalytics(),
+        analytics: analytics ?? _defaultAnalytics(),
         toolContext: toolContext ?? DelegatingToolContext(),
       );
+
+  static Analytics _defaultAnalytics() {
+    try {
+      return context.get<Analytics>() ?? const NoOpAnalytics();
+    } on UnsupportedError {
+      return const NoOpAnalytics();
+    }
+  }
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Logger topLevelLogger = toolContext.logger;
     final contextOverrides = <Type, dynamic>{
       if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
+      ProcessInfo: toolContext.processInfo,
     };
     return context.run<void>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
