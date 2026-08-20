@@ -100,8 +100,6 @@ source_set("common") {
     "pipeline.h",
     "platform_view.cc",
     "platform_view.h",
-    "pointer_data_dispatcher.cc",
-    "pointer_data_dispatcher.h",
     "rasterizer.cc",
     "rasterizer.h",
     "resource_cache_limit_calculator.cc",

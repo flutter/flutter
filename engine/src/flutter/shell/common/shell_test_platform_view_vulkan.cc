@@ -74,13 +74,6 @@ ShellTestPlatformViewVulkan::CreateExternalViewEmbedder() {
   return shell_test_external_view_embedder_;
 }
 
-// |PlatformView|
-PointerDataDispatcherMaker ShellTestPlatformViewVulkan::GetDispatcherMaker() {
-  return [](DefaultPointerDataDispatcher::Delegate& delegate) {
-    return std::make_unique<SmoothPointerDataDispatcher>(delegate);
-  };
-}
-
 // TODO(gw280): This code was forked from vulkan_window.cc specifically for
 // shell_test.
 //              We need to merge this functionality back into //vulkan.
