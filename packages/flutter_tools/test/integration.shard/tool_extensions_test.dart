@@ -66,7 +66,6 @@ void main() {
     ], environment: baseEnv);
     expect(doctorResult.stdout, isNot(contains('Linux Custom Extension Prototype')));
     expect(doctorResult.exitCode, 0);
-
     final ProcessResult configResult = await processManager.run(<String>[
       flutterBin,
       'config',

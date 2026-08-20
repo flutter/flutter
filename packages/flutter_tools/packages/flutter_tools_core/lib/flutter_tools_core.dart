@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Core data structures, contracts, and host-side abstractions for Flutter
-/// tools extensibility.
+/// Core shared data models, interfaces, and DTO contracts for Flutter tool extensions.
 ///
-/// This library provides platform-agnostic representations of devices,
-/// diagnostic validators, project templates, configuration flags, and plugin
-/// bindings shared across host tools and extension packages.
+/// This package defines platform-agnostic diagnostic and configuration data types
+/// shared directly across host tool logic and extension isolates.
 library flutter_tools_core;
 
 export 'src/config.dart';
