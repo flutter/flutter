@@ -1989,8 +1989,7 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    final Analytics effectiveAnalytics =
-        _analytics ?? context.get<Analytics>() ?? globals.analytics;
+    final Analytics effectiveAnalytics = _analytics ?? globals.analytics;
 
     // Send command result.
     int? maxRss;
@@ -2095,8 +2094,7 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Analytics effectiveAnalytics =
-          _analytics ?? context.get<Analytics>() ?? globals.analytics;
+      final Analytics effectiveAnalytics = _analytics ?? globals.analytics;
       effectiveAnalytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
 
