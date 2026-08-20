@@ -101,20 +101,9 @@ class TextLayout {
     }
     allClusters.sort((a, b) => a.start.compareTo(b.start));
     for (var i = 0; i < allClusters.length; ++i) {
-      if (allClusters[i] is! TextCluster) {
-        continue;
-      }
-      final cluster = allClusters[i] as TextCluster;
+      final WebCluster cluster = allClusters[i];
       for (int j = cluster.start; j < cluster.end; ++j) {
         _mapping.add(textIndex: j, clusterIndex: i);
-      }
-      if (codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak)) {
-        cluster.advance = ui.Rect.fromLTWH(
-          cluster.advance.left,
-          cluster.advance.top,
-          0,
-          cluster.advance.height,
-        );
       }
     }
 
@@ -840,8 +829,18 @@ class TextLayout {
       ) {
         final WebCluster cluster = allClusters[start];
         if (cluster.start <= codeUnitOffset && codeUnitOffset < cluster.end) {
+          final bool isNewline = codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
+          final ui.Rect rect = isNewline
+              ? ui.Rect.fromLTWH(
+                  cluster.advance.left,
+                  cluster.advance.top,
+                  0.0,
+                  cluster.advance.height,
+                )
+              : cluster.advance;
+
           return ui.GlyphInfo(
-            cluster.advance.translate(
+            rect.translate(
               line.advance.left + line.formattingShift + visualBlock.spanShiftFromLineStart,
               line.advance.top + line.fontBoundingBoxAscent,
             ),
@@ -1358,7 +1357,7 @@ class TextLine {
 
   ui.LineMetrics getMetrics() {
     return ui.LineMetrics(
-      hardBreak: hardLineBreakRange.isNotEmpty || lastLine,
+      hardBreak: hasHardLineBreak,
       ascent: fontBoundingBoxAscent,
       descent: fontBoundingBoxDescent,
       // It was not implemented in SkParagraph either; kept it as is

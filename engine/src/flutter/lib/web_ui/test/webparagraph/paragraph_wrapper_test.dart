@@ -152,16 +152,13 @@ Future<void> testMain() async {
     expect(lines.length, 4);
     for (var i = 0; i < lines.length; i++) {
       expect(
-        lines[i].whitespacesRange.size,
-        i == 2 ? 1 : 0,
-        reason: 'Line $i line.whitespacesRange.size',
+        lines[i].allLineTextRange.size,
+        i >= 2 ? 1 : 0,
+        reason: 'Line $i line.allLineTextRange.size',
       );
-      expect(lines[i].textRange.size, i == 3 ? 1 : 0, reason: 'Line $i line.textRange.size');
-      expect(
-        lines[i].hardLineBreakRange.size,
-        i >= 2 ? 0 : 1,
-        reason: 'Line $i line.hardLineBreakRange.size',
-      );
+      expect(lines[i].whitespacesRange.size, 0, reason: 'Line $i line.whitespacesRange.size');
+      expect(lines[i].textRange.size, 0, reason: 'Line $i line.textRange.size');
+      expect(lines[i].hardLineBreakRange.size, 1, reason: 'Line $i line.hardLineBreakRange.size');
       expect(lines[i].hasHardLineBreak, true);
     }
   });
@@ -217,18 +214,7 @@ Future<void> testMain() async {
       expect(line.hasHardLineBreak, true, reason: 'Line $index line.hasHardLineBreak');
     }
 
-    /*
-metric[0]: 0 4 4 4 5 true
-metric[1]: 5 10 9 10 11 true
-metric[2]: 11 16 15 16 17 true
-metric[3]: 17 18 17 18 19 true
-metric[4]: 19 21 19 21 22 true
-metric[5]: 22 22 22 22 23 true
-metric[6]: 23 23 23 23 24 true
-metric[7]: 24 25 24 25 26 true
-metric[8]: 26 27 26 27 27 true
-metric[9]: 26 27 27 27 27 true
-*/
+    // In some cases (line #8,#9 SkParagraph does not match WebParagraph but it's internal data only and we align on the public output)
     expectLineRanges(0, 0, 4, 4, 4, 5);
     expectLineRanges(1, 5, 10, 9, 10, 11);
     expectLineRanges(2, 11, 16, 15, 16, 17);
@@ -237,7 +223,7 @@ metric[9]: 26 27 27 27 27 true
     expectLineRanges(5, 22, 22, 22, 22, 23);
     expectLineRanges(6, 23, 23, 23, 23, 24);
     expectLineRanges(7, 24, 25, 24, 25, 26);
-    expectLineRanges(8, 26, 27, 26, 27, 27);
-    expectLineRanges(9, 26, 27, 27, 27, 27);
+    expectLineRanges(8, 26, 27, 26, 26, 27);
+    expectLineRanges(9, 26, 27, 26, 26, 27);
   });
 }

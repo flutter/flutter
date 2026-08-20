@@ -360,7 +360,7 @@ class _LineBuilder {
       ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
       ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
       _top,
-      specialCase,
+      specialCase || reachedEndOfText() || reachedMaxLines(), // Force hard line break
     );
     _top += height;
 
