@@ -2061,4 +2061,39 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelViewport)), Size.zero);
     },
   );
+
+  testWidgets('fling snaps to an item when accessible navigation is enabled', (
+    WidgetTester tester,
+  ) async {
+    // Accessible navigation must not alter the ballistic simulation that
+    // settles the wheel on a multiple of the item extent after a fling.
+    final controller = FixedExtentScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(accessibleNavigation: true),
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 50.0,
+            physics: const FixedExtentScrollPhysics(),
+            children: List<Widget>.generate(10, (int index) => Text('Item $index')),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.selectedItem, 0);
+
+    await tester.fling(find.byType(ListWheelScrollView), const Offset(0.0, -80.0), 500.0);
+    await tester.pumpAndSettle();
+
+    // The wheel settles on a multiple of the item extent (up to the tolerance
+    // of the settling simulation), not at an arbitrary offset.
+    final double nearestItemOffset = (controller.offset / 50.0).roundToDouble() * 50.0;
+    expect(controller.offset, moreOrLessEquals(nearestItemOffset, epsilon: 1.0));
+    expect(controller.selectedItem, greaterThan(0));
+  });
 }
