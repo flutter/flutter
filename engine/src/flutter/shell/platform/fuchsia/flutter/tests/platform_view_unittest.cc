@@ -107,6 +107,11 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     return settings_;
   }
   // |flutter::PlatformView::Delegate|
+  std::shared_ptr<fml::BasicTaskRunner>
+  OnPlatformViewGetShutdownSafeIOTaskRunner() const {
+    return nullptr;
+  }
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message) {
     message_ = std::move(message);
@@ -415,12 +420,6 @@ class PlatformViewBuilder {
     return *this;
   }
 
-  PlatformViewBuilder& SetPointerInjectorRegistry(
-      fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry) {
-    pointerinjector_registry_ = std::move(pointerinjector_registry);
-    return *this;
-  }
-
   PlatformViewBuilder& SetEnableWireframeCallback(
       OnEnableWireframeCallback callback) {
     wireframe_enabled_callback_ = std::move(callback);
@@ -471,7 +470,6 @@ class PlatformViewBuilder {
         std::move(keyboard_), std::move(touch_source_),
         std::move(mouse_source_), std::move(focuser_),
         std::move(view_ref_focused_), std::move(parent_viewport_watcher_),
-        std::move(pointerinjector_registry_),
         std::move(wireframe_enabled_callback_),
         std::move(on_create_view_callback_),
         std::move(on_update_view_callback_),
@@ -499,7 +497,6 @@ class PlatformViewBuilder {
   fuchsia::ui::pointer::MouseSourceHandle mouse_source_;
   fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused_;
   fuchsia::ui::views::FocuserHandle focuser_;
-  fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry_;
   fit::closure on_session_listener_error_callback_;
   OnEnableWireframeCallback wireframe_enabled_callback_;
   fuchsia::ui::composition::ParentViewportWatcherHandle
