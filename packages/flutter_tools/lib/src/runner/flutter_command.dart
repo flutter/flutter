@@ -1445,7 +1445,7 @@ abstract class FlutterCommand extends Command<void> {
       throwOnError: false,
     );
 
-    final List<String> experiments = getValue(CommonOptions.enableExperiment).toList();
+    final List<String> experiments = getValue(CommonOptions.enableExperiment);
     final List<String> extraGenSnapshotOptions = getValue(
       BuildInfoOptions.extraGenSnapshotOptions,
     ).toList();
