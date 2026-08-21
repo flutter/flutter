@@ -152,7 +152,11 @@ class MaterialFonts extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    final Uri archiveUri = _toStorageUri(version!);
+    final String? version = this.version;
+    if (version == null) {
+      return;
+    }
+    final Uri archiveUri = _toStorageUri(version);
     return artifactUpdater.downloadZipArchive(displayName, archiveUri, location);
   }
 
@@ -551,7 +555,11 @@ class GradleWrapper extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    final Uri archiveUri = _toStorageUri(version!);
+    final String? version = this.version;
+    if (version == null) {
+      return;
+    }
+    final Uri archiveUri = _toStorageUri(version);
     await artifactUpdater.downloadZippedTarball(displayName, archiveUri, location);
     // Delete property file, allowing templates to provide it.
     // Remove NOTICE file. Should not be part of the template.
@@ -693,8 +701,12 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
   String? get version => cache.engineRevision;
 
   Future<void> _downloadDebugSymbols(String targetArch, ArtifactUpdater artifactUpdater) async {
+    final String? version = this.version;
+    if (version == null) {
+      return;
+    }
     final packageName = 'fuchsia-debug-symbols-$targetArch';
-    final String url = packageResolver.resolveUrl(packageName, version!);
+    final String url = packageResolver.resolveUrl(packageName, version);
     await artifactUpdater.downloadZipArchive(
       '$displayName - $targetArch',
       Uri.parse(url),
