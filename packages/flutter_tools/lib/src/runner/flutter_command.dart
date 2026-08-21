@@ -1462,13 +1462,13 @@ abstract class FlutterCommand extends Command<void> {
     }
     String? codeSizeDirectory;
     if (getValue(BuildInfoOptions.analyzeSize)) {
-      Directory directory = globals.fsUtils.getUniqueDirectory(
-        globals.fs.directory(getBuildDirectory()),
-        'flutter_size',
-      );
-      if (getValue(BuildInfoOptions.codeSizeDirectory) != null) {
-        directory = globals.fs.directory(getValue(BuildInfoOptions.codeSizeDirectory));
-      }
+      final String? customDir = getValue(BuildInfoOptions.codeSizeDirectory);
+      final Directory directory = (customDir != null)
+          ? globals.fs.directory(customDir)
+          : globals.fsUtils.getUniqueDirectory(
+              globals.fs.directory(getBuildDirectory()),
+              'flutter_size',
+            );
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
