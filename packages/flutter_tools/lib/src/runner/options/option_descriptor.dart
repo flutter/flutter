@@ -143,11 +143,6 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
       _throwConflictError(name, existing);
     }
 
-    final bool effectiveHide = _computeEffectiveHide(
-      verboseHelp: verboseHelp,
-      hideOverride: hideOverride,
-    );
-
     parser.addOption(
       name,
       abbr: abbr,
@@ -157,7 +152,7 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
       defaultsTo: defaultsTo,
       allowed: allowed,
       allowedHelp: allowedHelp,
-      hide: effectiveHide,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
     registry?[name] = this;
   }
@@ -209,17 +204,13 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
       }
       _throwConflictError(name, existing);
     }
-    final bool effectiveHide = _computeEffectiveHide(
-      verboseHelp: verboseHelp,
-      hideOverride: hideOverride,
-    );
     parser.addFlag(
       name,
       abbr: abbr,
       help: help,
       defaultsTo: defaultsTo ?? false,
       negatable: negatable,
-      hide: effectiveHide,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
     registry?[name] = this;
   }
@@ -265,17 +256,13 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
       }
       _throwConflictError(name, existing);
     }
-    final bool effectiveHide = _computeEffectiveHide(
-      verboseHelp: verboseHelp,
-      hideOverride: hideOverride,
-    );
     parser.addFlag(
       name,
       abbr: abbr,
       help: help,
       defaultsTo: null,
       negatable: negatable,
-      hide: effectiveHide,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
     registry?[name] = this;
   }
@@ -327,10 +314,6 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       }
       _throwConflictError(name, existing);
     }
-    final bool effectiveHide = _computeEffectiveHide(
-      verboseHelp: verboseHelp,
-      hideOverride: hideOverride,
-    );
     parser.addMultiOption(
       name,
       abbr: abbr,
@@ -341,7 +324,7 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       splitCommas: splitCommas,
       allowed: allowed,
       allowedHelp: allowedHelp,
-      hide: effectiveHide,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
     registry?[name] = this;
   }
