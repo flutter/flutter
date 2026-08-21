@@ -31,7 +31,10 @@ import '../version.dart';
 import 'flutter_command_runner.dart';
 
 import 'options/option_bundle.dart';
+import 'options/common_options.dart';
 import 'options/option_descriptor.dart';
+import 'options/safe_arg_results.dart';
+import '../web/web_options.dart';
 import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
@@ -1430,14 +1433,15 @@ abstract class FlutterCommand extends Command<void> {
     bool? forcedWebEnableHotReload,
   }) async {
     final bool trackWidgetCreation =
-        argParser.options.containsKey('track-widget-creation') && boolArg('track-widget-creation');
+        wasParsed(BuildInfoOptions.trackWidgetCreation) &&
+        getValue(BuildInfoOptions.trackWidgetCreation);
 
-    final String? buildNumber = argParser.options.containsKey('build-number')
-        ? stringArg('build-number')
+    final String? buildNumber = wasParsed(CommonOptions.buildNumber)
+        ? getValue(CommonOptions.buildNumber)
         : null;
 
-    final String? buildName = argParser.options.containsKey('build-name')
-        ? stringArg('build-name')
+    final String? buildName = wasParsed(CommonOptions.buildName)
+        ? getValue(CommonOptions.buildName)
         : null;
 
     final File packageConfigFile = globals.fs.file(packageConfigPath());
@@ -1448,16 +1452,14 @@ abstract class FlutterCommand extends Command<void> {
       throwOnError: false,
     );
 
-    final List<String> experiments = argParser.options.containsKey(FlutterOptions.kEnableExperiment)
-        ? stringsArg(FlutterOptions.kEnableExperiment).toList()
+    final List<String> experiments = wasParsed(CommonOptions.enableExperiment)
+        ? getValue(CommonOptions.enableExperiment).toList()
         : <String>[];
-    final List<String> extraGenSnapshotOptions =
-        argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions).toList()
+    final List<String> extraGenSnapshotOptions = wasParsed(BuildInfoOptions.extraGenSnapshotOptions)
+        ? getValue(BuildInfoOptions.extraGenSnapshotOptions).toList()
         : <String>[];
-    final List<String> extraFrontEndOptions =
-        argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-        ? stringsArg(FlutterOptions.kExtraFrontEndOptions).toList()
+    final List<String> extraFrontEndOptions = wasParsed(BuildInfoOptions.extraFrontEndOptions)
+        ? getValue(BuildInfoOptions.extraFrontEndOptions).toList()
         : <String>[];
 
     if (experiments.isNotEmpty) {
@@ -1468,45 +1470,40 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
     String? codeSizeDirectory;
-    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
-        boolArg(FlutterOptions.kAnalyzeSize)) {
+    if (wasParsed(BuildInfoOptions.analyzeSize) && getValue(BuildInfoOptions.analyzeSize)) {
       Directory directory = globals.fsUtils.getUniqueDirectory(
         globals.fs.directory(getBuildDirectory()),
         'flutter_size',
       );
-      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) &&
-          stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
-        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
+      if (wasParsed(BuildInfoOptions.codeSizeDirectory) &&
+          getValue(BuildInfoOptions.codeSizeDirectory) != null) {
+        directory = globals.fs.directory(getValue(BuildInfoOptions.codeSizeDirectory));
       }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
 
     final bool dartObfuscation =
-        argParser.options.containsKey(FlutterOptions.kDartObfuscationOption) &&
-        boolArg(FlutterOptions.kDartObfuscationOption);
+        wasParsed(BuildInfoOptions.obfuscate) && getValue(BuildInfoOptions.obfuscate);
 
-    final String? splitDebugInfoPath =
-        argParser.options.containsKey(FlutterOptions.kSplitDebugInfoOption)
-        ? stringArg(FlutterOptions.kSplitDebugInfoOption)
+    final String? splitDebugInfoPath = wasParsed(BuildInfoOptions.splitDebugInfo)
+        ? getValue(BuildInfoOptions.splitDebugInfo)
         : null;
 
     final bool androidGradleDaemon =
-        !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon) ||
-        boolArg(FlutterOptions.kAndroidGradleDaemon);
+        !wasParsed(BuildInfoOptions.androidGradleDaemon) ||
+        getValue(BuildInfoOptions.androidGradleDaemon);
 
     final bool androidSkipBuildDependencyValidation =
-        !argParser.options.containsKey(FlutterOptions.kAndroidSkipBuildDependencyValidation) ||
-        boolArg(FlutterOptions.kAndroidSkipBuildDependencyValidation);
+        !wasParsed(BuildInfoOptions.androidSkipBuildDependencyValidation) ||
+        getValue(BuildInfoOptions.androidSkipBuildDependencyValidation);
 
-    final List<String> androidProjectArgs =
-        argParser.options.containsKey(FlutterOptions.kAndroidProjectArgs)
-        ? stringsArg(FlutterOptions.kAndroidProjectArgs)
+    final List<String> androidProjectArgs = wasParsed(BuildInfoOptions.androidProjectArg)
+        ? getValue(BuildInfoOptions.androidProjectArg)
         : <String>[];
 
-    final String? androidGradleProjectCacheDir =
-        argParser.options.containsKey(FlutterOptions.kAndroidGradleProjectCacheDir)
-        ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
+    final String? androidGradleProjectCacheDir = wasParsed(BuildInfoOptions.androidProjectCacheDir)
+        ? getValue(BuildInfoOptions.androidProjectCacheDir)
         : null;
 
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
@@ -1526,21 +1523,20 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     final bool treeShakeIcons =
-        argParser.options.containsKey('tree-shake-icons') &&
+        wasParsed(CommonOptions.treeShakeIcons) &&
         buildMode.isPrecompiled &&
-        boolArg('tree-shake-icons');
+        getValue(CommonOptions.treeShakeIcons);
 
     final String? performanceMeasurementFile =
-        argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
-        ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
+        wasParsed(BuildInfoOptions.performanceMeasurementFile)
+        ? getValue(BuildInfoOptions.performanceMeasurementFile)
         : null;
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     final bool useCdn =
-        !argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag) ||
-        boolArg(FlutterOptions.kWebResourcesCdnFlag);
+        !wasParsed(WebOptions.webResourcesCdn) || getValue(WebOptions.webResourcesCdn);
     var useLocalWebSdk = false;
     if (globalResults?.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ?? false) {
       useLocalWebSdk = stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
@@ -1548,7 +1544,9 @@ abstract class FlutterCommand extends Command<void> {
     final bool useLocalCanvasKit = forcedUseLocalCanvasKit ?? (!useCdn || useLocalWebSdk);
 
     final String? defaultFlavor = project.manifest.defaultFlavor;
-    final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
+    final String? cliFlavor = wasParsed(BuildInfoOptions.flavor)
+        ? getValue(BuildInfoOptions.flavor)
+        : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
 
     _ensureReservedDartDefineIsUnset(kAppFlavor, dartDefines);
@@ -1571,9 +1569,8 @@ abstract class FlutterCommand extends Command<void> {
       buildMode,
       flavor,
       trackWidgetCreation: trackWidgetCreation,
-      frontendServerStarterPath:
-          argParser.options.containsKey(FlutterOptions.kFrontendServerStarterPath)
-          ? stringArg(FlutterOptions.kFrontendServerStarterPath)
+      frontendServerStarterPath: wasParsed(BuildInfoOptions.frontendServerStarterPath)
+          ? getValue(BuildInfoOptions.frontendServerStarterPath)
           : null,
       extraFrontEndOptions: extraFrontEndOptions.isNotEmpty ? extraFrontEndOptions : null,
       extraGenSnapshotOptions: extraGenSnapshotOptions.isNotEmpty ? extraGenSnapshotOptions : null,
@@ -1596,12 +1593,12 @@ abstract class FlutterCommand extends Command<void> {
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,
-      initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
-          ? stringArg(FlutterOptions.kInitializeFromDill)
+      initializeFromDill: wasParsed(BuildInfoOptions.initializeFromDill)
+          ? getValue(BuildInfoOptions.initializeFromDill)
           : null,
       assumeInitializeFromDillUpToDate:
-          argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
-          boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
+          wasParsed(BuildInfoOptions.assumeInitializeFromDillUpToDate) &&
+          getValue(BuildInfoOptions.assumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
       webEnableHotReload: true,
     );
