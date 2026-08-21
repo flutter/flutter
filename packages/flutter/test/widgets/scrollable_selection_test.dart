@@ -24,6 +24,66 @@ Offset globalize(Offset point, RenderBox box) {
   return box.localToGlobal(point);
 }
 
+// Drag-selects past the edge of a ListView nested in a PageView along [axis],
+// and checks the ListView edge scrolls while the PageView stays on its page.
+Future<void> selectPastNestedListEdge(WidgetTester tester, Axis axis) async {
+  final pageController = PageController();
+  addTearDown(pageController.dispose);
+  final listController = ScrollController();
+  addTearDown(listController.dispose);
+  await tester.pumpWidget(
+    TestWidgetsApp(
+      home: SelectableRegion(
+        selectionControls: testTextSelectionHandleControls,
+        child: PageView(
+          scrollDirection: axis,
+          controller: pageController,
+          children: <Widget>[
+            ListView.builder(
+              scrollDirection: axis,
+              controller: listController,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return Center(child: Text('Item $index'));
+              },
+            ),
+            const Center(child: Text('Second page')),
+          ],
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  expect(pageController.page, 0.0);
+  expect(listController.offset, 0.0);
+
+  final RenderParagraph item0 = tester.renderObject<RenderParagraph>(
+    find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+  );
+  final Rect box = tester.getRect(find.byType(PageView));
+  final target = axis == Axis.vertical
+      ? Offset(box.center.dx, box.bottom + 40.0)
+      : Offset(box.right + 40.0, box.center.dy);
+
+  final TestGesture gesture = await tester.startGesture(
+    textOffsetToPosition(item0, 2),
+    kind: PointerDeviceKind.mouse,
+  );
+  addTearDown(gesture.removePointer);
+  await tester.pump();
+  await gesture.moveTo(target);
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1));
+
+  // The inner ListView edge scrolled, but the PageView did not flip pages.
+  expect(listController.offset, greaterThan(0.0));
+  expect(pageController.page, 0.0);
+  expect(tester.takeException(), isNull);
+
+  await gesture.up();
+  await tester.pumpAndSettle();
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final mockClipboard = MockClipboard();
@@ -1598,6 +1658,18 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('vertical ListView inside a PageView still edge scrolls during selection', (
+    WidgetTester tester,
+  ) async {
+    await selectPastNestedListEdge(tester, Axis.vertical);
+  });
+
+  testWidgets('horizontal ListView inside a PageView still edge scrolls during selection', (
+    WidgetTester tester,
+  ) async {
+    await selectPastNestedListEdge(tester, Axis.horizontal);
   });
 
   group('Complex cases', () {

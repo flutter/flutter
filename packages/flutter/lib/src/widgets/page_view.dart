@@ -573,6 +573,8 @@ class PageScrollPhysics extends ScrollPhysics {
     return PageScrollPhysics(parent: buildParent(ancestor));
   }
 
+  // Selection gestures such as dragging to select text must not scroll a
+  // PageView to an adjacent page, so edge scrolling is disallowed here.
   @override
   bool get allowSelectionEdgeScrolling => false;
 
