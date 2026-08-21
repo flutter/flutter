@@ -379,8 +379,6 @@ void main() {
       redLoader.dispose();
       imageCache.clear();
     },
-    // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
-    skip: kIsWeb,
   );
 
   testWidgets(
@@ -903,8 +901,6 @@ void main() {
       wrgbLoader.dispose();
       imageCache.clear();
     },
-    // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
-    skip: kIsWeb,
   );
 
   testWidgets(
@@ -1365,8 +1361,6 @@ void main() {
       wrgbLoader.dispose();
       imageCache.clear();
     },
-    // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
-    skip: kIsWeb,
   );
 }
 
