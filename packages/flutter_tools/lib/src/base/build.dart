@@ -7,8 +7,8 @@ import 'package:process/process.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../darwin/darwin.dart';
+import '../ios/xcodeproj.dart';
 import '../macos/xcode.dart';
-
 import 'file_system.dart';
 import 'logger.dart';
 import 'process.dart';
@@ -188,7 +188,11 @@ class AOTSnapshotter {
           ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
           : FlutterDarwinPlatform.macos.deploymentTarget().toString();
 
-      final sdkName = platform == TargetPlatform.ios ? 'iphoneos' : 'macosx';
+      final String sdkName =
+          sdkRoot ??
+          (platform == TargetPlatform.ios
+              ? XcodeSdk.IPhoneOS.platformName
+              : XcodeSdk.MacOSX.platformName);
       final String sdkVersion = await _xcode.sdkVersion(sdkName);
 
       genSnapshotArgs.addAll(<String>[

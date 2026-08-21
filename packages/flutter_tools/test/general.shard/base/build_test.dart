@@ -183,7 +183,7 @@ void main() {
         kWhichSysctlCommand,
         kx64CheckCommand,
         const FakeCommand(
-          command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+          command: <String>['xcrun', '--sdk', 'path/to/sdk', '--show-sdk-version'],
           stdout: '27.0',
         ),
         FakeCommand(
@@ -250,7 +250,7 @@ void main() {
         kWhichSysctlCommand,
         kx64CheckCommand,
         const FakeCommand(
-          command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+          command: <String>['xcrun', '--sdk', 'path/to/sdk', '--show-sdk-version'],
           stdout: '27.0',
         ),
         FakeCommand(
@@ -314,7 +314,7 @@ void main() {
         kWhichSysctlCommand,
         kx64CheckCommand,
         const FakeCommand(
-          command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+          command: <String>['xcrun', '--sdk', 'path/to/sdk', '--show-sdk-version'],
           stdout: '27.0',
         ),
         FakeCommand(
