@@ -27,9 +27,9 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   final bool _verboseHelp;
 
-  List<ExtensionSettingsGroup> _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
-  List<FeatureFlag> _extensionFeatureFlags = const <FeatureFlag>[];
-  List<ConfigOption> _extensionConfigOptions = const <ConfigOption>[];
+  var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
+  var _extensionFeatureFlags = const <FeatureFlag>[];
+  var _extensionConfigOptions = const <ConfigOption>[];
 
   @override
   void populateBaseArgParser(ArgParser parser) {
@@ -110,14 +110,11 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   @override
   Future<void> initializeDynamicOptions() async {
-    final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
-    if (activeConfig != null) {
+    if (await _activeExtensionConfig case final activeConfig?) {
       final List<ExtensionSettingsGroup> groups = await activeConfig.fetchExtensionSettings();
       _extensionSettingsGroups = groups;
-      _extensionFeatureFlags = groups.expand((ExtensionSettingsGroup g) => g.featureFlags).toList();
-      _extensionConfigOptions = groups
-          .expand((ExtensionSettingsGroup g) => g.configOptions)
-          .toList();
+      _extensionFeatureFlags = <FeatureFlag>[for (final g in groups) ...g.featureFlags];
+      _extensionConfigOptions = <ConfigOption>[for (final g in groups) ...g.configOptions];
     }
   }
 
@@ -127,8 +124,8 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       return null;
     }
     final names = <String>[
-      ..._extensionFeatureFlags.map((FeatureFlag f) => f.name),
-      ..._extensionConfigOptions.map((ConfigOption o) => o.name),
+      for (final f in _extensionFeatureFlags) f.name,
+      for (final o in _extensionConfigOptions) o.name,
     ]..sort();
     return names.join(',');
   }
@@ -308,10 +305,9 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   Future<void> handleMachine() async {
     // Get all the current values.
-    final results = <String, Object?>{};
-    for (final String key in globals.config.keys) {
-      results[key] = globals.config.getValue(key);
-    }
+    final results = <String, Object?>{
+      for (final String key in globals.config.keys) key: globals.config.getValue(key),
+    };
 
     // Ensure we send any calculated ones, if overrides don't exist.
     final AndroidStudio? androidStudio = globals.androidStudio;
@@ -342,14 +338,11 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   /// List all config settings. for feature flags, include whether they are available.
   Future<String> get settingsText async {
-    final featuresByName = <String, Feature>{};
+    final featuresByName = <String, Feature>{
+      for (final feature in featureFlags.allFeatures)
+        if (feature.configSetting case final configSetting?) configSetting: feature,
+    };
     final String channel = globals.flutterVersion.channel;
-    for (final Feature feature in featureFlags.allFeatures) {
-      final String? configSetting = feature.configSetting;
-      if (configSetting != null) {
-        featuresByName[configSetting] = feature;
-      }
-    }
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       ...globals.config.keys,
@@ -358,8 +351,8 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       Object? value = globals.config.getValue(key);
       value ??= '(Not set)';
       final buffer = StringBuffer('  $key: $value');
-      if (featuresByName.containsKey(key)) {
-        final FeatureChannelSetting setting = featuresByName[key]!.getSettingForChannel(channel);
+      if (featuresByName[key] case final feature?) {
+        final FeatureChannelSetting setting = feature.getSettingForChannel(channel);
         if (!setting.available) {
           buffer.write(' (Unavailable)');
         }
@@ -378,24 +371,20 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
         ? _extensionSettingsGroups
         : (await activeConfig?.fetchExtensionSettings()) ?? const <ExtensionSettingsGroup>[];
-    if (groups.isNotEmpty) {
-      if (groups.any(
-        (ExtensionSettingsGroup g) => g.featureFlags.isNotEmpty || g.configOptions.isNotEmpty,
-      )) {
-        buffer.writeln('\nExtension Settings:');
-        for (final group in groups) {
-          if (group.featureFlags.isEmpty && group.configOptions.isEmpty) {
-            continue;
-          }
-          buffer.writeln('  ${group.title}:');
-          for (final FeatureFlag flag in group.featureFlags) {
-            final Object val = globals.config.getValue(flag.name) ?? flag.enabledByDefault;
-            buffer.writeln('    ${flag.name}: $val');
-          }
-          for (final ConfigOption option in group.configOptions) {
-            final Object val = globals.config.getValue(option.name) ?? option.value ?? '(Not set)';
-            buffer.writeln('    ${option.name}: $val');
-          }
+    if (groups.any((ExtensionSettingsGroup g) => g.isNotEmpty)) {
+      buffer.writeln('\nExtension Settings:');
+      for (final group in groups) {
+        if (group.isEmpty) {
+          continue;
+        }
+        buffer.writeln('  ${group.title}:');
+        for (final FeatureFlag flag in group.featureFlags) {
+          final Object val = globals.config.getValue(flag.name) ?? flag.enabledByDefault;
+          buffer.writeln('    ${flag.name}: $val');
+        }
+        for (final ConfigOption option in group.configOptions) {
+          final Object val = globals.config.getValue(option.name) ?? option.value ?? '(Not set)';
+          buffer.writeln('    ${option.name}: $val');
         }
       }
     }

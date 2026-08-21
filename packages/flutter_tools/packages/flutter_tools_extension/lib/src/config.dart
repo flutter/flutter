@@ -25,6 +25,9 @@ abstract class ConfigurationExtension extends ToolExtensionService {
   /// The human-readable title of the extension providing these configuration settings.
   String get title;
 
+  /// Fetches the extension title asynchronously.
+  Future<String> fetchTitle() async => title;
+
   /// Returns the feature flags contributed by this extension.
   Future<List<FeatureFlag>> getFeatureFlags() async => const <FeatureFlag>[];
 
@@ -44,11 +47,11 @@ abstract class ConfigurationExtension extends ToolExtensionService {
 
   Future<List<Map<String, Object?>>> _getFeatureFlagsRpc(Map<String, Object?> params) async {
     final List<FeatureFlag> flags = await getFeatureFlags();
-    return flags.map((FeatureFlag flag) => flag.toMap()).toList();
+    return <Map<String, Object?>>[for (final FeatureFlag flag in flags) flag.toMap()];
   }
 
   Future<List<Map<String, Object?>>> _getConfigurationsRpc(Map<String, Object?> params) async {
     final List<ConfigOption> configs = await getConfigurations();
-    return configs.map((ConfigOption config) => config.toMap()).toList();
+    return <Map<String, Object?>>[for (final ConfigOption config in configs) config.toMap()];
   }
 }

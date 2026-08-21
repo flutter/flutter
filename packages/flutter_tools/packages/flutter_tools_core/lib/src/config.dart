@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 /// Representation of an experimental or platform-specific feature flag.
 @immutable
 class FeatureFlag {
-  /// Creates a [FeatureFlag] definition.
   const FeatureFlag({
     required this.name,
     required this.help,
@@ -17,19 +16,18 @@ class FeatureFlag {
 
   /// Deserializes a [FeatureFlag] from a JSON-serializable map.
   factory FeatureFlag.fromJson(Map<String, Object?> json) {
+    if (json case {'name': final String name, 'help': final String help}) {
+      return FeatureFlag(
+        name: name,
+        help: help,
+        environmentVariable: json['environmentVariable'] as String?,
+        enabledByDefault: json['enabledByDefault'] == true,
+      );
+    }
     return FeatureFlag(
-      name: switch (json['name']) {
-        final String v => v,
-        _ => '',
-      },
-      help: switch (json['help']) {
-        final String v => v,
-        _ => '',
-      },
-      environmentVariable: switch (json['environmentVariable']) {
-        final String v => v,
-        _ => null,
-      },
+      name: json['name'] as String? ?? '',
+      help: json['help'] as String? ?? '',
+      environmentVariable: json['environmentVariable'] as String?,
       enabledByDefault: json['enabledByDefault'] == true,
     );
   }
@@ -75,24 +73,17 @@ class FeatureFlag {
 /// Representation of a custom configuration setting key and value pair.
 @immutable
 class ConfigOption {
-  /// Creates a [ConfigOption] definition.
   const ConfigOption({required this.name, required this.help, this.value});
 
   /// Deserializes a [ConfigOption] from a JSON-serializable map.
   factory ConfigOption.fromJson(Map<String, Object?> json) {
+    if (json case {'name': final String name, 'help': final String help}) {
+      return ConfigOption(name: name, help: help, value: json['value'] as String?);
+    }
     return ConfigOption(
-      name: switch (json['name']) {
-        final String v => v,
-        _ => '',
-      },
-      help: switch (json['help']) {
-        final String v => v,
-        _ => '',
-      },
-      value: switch (json['value']) {
-        final String v => v,
-        _ => null,
-      },
+      name: json['name'] as String? ?? '',
+      help: json['help'] as String? ?? '',
+      value: json['value'] as String?,
     );
   }
 

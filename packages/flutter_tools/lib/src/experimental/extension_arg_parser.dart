@@ -9,7 +9,6 @@
 library experimental.extension_arg_parser;
 
 import 'package:args/args.dart';
-import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 
 import '../runner/flutter_command.dart';
@@ -69,43 +68,44 @@ mixin ExtensionArgParserMixin on FlutterCommand {
       usageLineLength: source.usageLineLength,
     );
     for (final Option opt in source.options.values) {
-      if (opt.isFlag) {
-        newParser.addFlag(
-          opt.name,
-          abbr: opt.abbr,
-          help: opt.help,
-          defaultsTo: opt.defaultsTo as bool?,
-          negatable: opt.negatable ?? true,
-          hide: opt.hide,
-          hideNegatedUsage: opt.hideNegatedUsage ?? false,
-          aliases: opt.aliases,
-        );
-      } else if (opt.isSingle) {
-        newParser.addOption(
-          opt.name,
-          abbr: opt.abbr,
-          help: opt.help,
-          valueHelp: opt.valueHelp,
-          allowed: opt.allowed,
-          allowedHelp: opt.allowedHelp,
-          defaultsTo: opt.defaultsTo as String?,
-          mandatory: opt.mandatory,
-          hide: opt.hide,
-          aliases: opt.aliases,
-        );
-      } else if (opt.isMultiple) {
-        newParser.addMultiOption(
-          opt.name,
-          abbr: opt.abbr,
-          help: opt.help,
-          valueHelp: opt.valueHelp,
-          allowed: opt.allowed,
-          allowedHelp: opt.allowedHelp,
-          defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
-          splitCommas: opt.splitCommas,
-          hide: opt.hide,
-          aliases: opt.aliases,
-        );
+      switch (opt.type) {
+        case OptionType.flag:
+          newParser.addFlag(
+            opt.name,
+            abbr: opt.abbr,
+            help: opt.help,
+            defaultsTo: opt.defaultsTo as bool?,
+            negatable: opt.negatable ?? true,
+            hide: opt.hide,
+            hideNegatedUsage: opt.hideNegatedUsage ?? false,
+            aliases: opt.aliases,
+          );
+        case OptionType.single:
+          newParser.addOption(
+            opt.name,
+            abbr: opt.abbr,
+            help: opt.help,
+            valueHelp: opt.valueHelp,
+            allowed: opt.allowed,
+            allowedHelp: opt.allowedHelp,
+            defaultsTo: opt.defaultsTo as String?,
+            mandatory: opt.mandatory,
+            hide: opt.hide,
+            aliases: opt.aliases,
+          );
+        case OptionType.multiple:
+          newParser.addMultiOption(
+            opt.name,
+            abbr: opt.abbr,
+            help: opt.help,
+            valueHelp: opt.valueHelp,
+            allowed: opt.allowed,
+            allowedHelp: opt.allowedHelp,
+            defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
+            splitCommas: opt.splitCommas,
+            hide: opt.hide,
+            aliases: opt.aliases,
+          );
       }
     }
     return newParser;
@@ -142,9 +142,9 @@ mixin ExtensionArgParserMixin on FlutterCommand {
       _lastDynamicCacheKey = cacheKey;
       _customArgParser = buildDynamicArgParser(baseArgParser);
       // Re-add subcommands to the custom parser to ensure they are not lost.
-      for (final MapEntry<String, Command<void>> entry in subcommands.entries) {
-        if (!_customArgParser!.commands.containsKey(entry.key)) {
-          _customArgParser!.addCommand(entry.key, entry.value.argParser);
+      for (final MapEntry(:key, :value) in subcommands.entries) {
+        if (!_customArgParser!.commands.containsKey(key)) {
+          _customArgParser!.addCommand(key, value.argParser);
         }
       }
     }

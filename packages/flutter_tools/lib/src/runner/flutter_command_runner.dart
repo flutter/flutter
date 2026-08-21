@@ -336,20 +336,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (!featureFlags.isToolExtensionsEnabled) {
       return;
     }
-    Command<void>? command = _findTargetCommand(args);
-    if (command != null) {
+    if (_findTargetCommand(args) case var command?) {
       if (command.name == 'help') {
-        if (command.parent == null) {
-          final Iterable<String> helpArgs = args.skipWhile(
-            (String arg) => arg == 'help' || arg.startsWith('-'),
-          );
-          command = _findTargetCommand(helpArgs) ?? command;
-        } else {
-          command = command.parent;
-        }
+        command = switch (command.parent) {
+          final Command<void> parent => parent,
+          _ =>
+            _findTargetCommand(
+                  args.skipWhile((String arg) => arg == 'help' || arg.startsWith('-')),
+                ) ??
+                command,
+        };
       }
-      if (command is ExtensionArgParserMixin) {
-        await command.initializeDynamicOptions();
+      if (command case final ExtensionArgParserMixin dynamicCommand) {
+        await dynamicCommand.initializeDynamicOptions();
       }
     }
   }
@@ -385,14 +384,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
           i++;
         }
       } else {
-        if (commandsMap.containsKey(arg)) {
-          lastFoundCommand = commandsMap[arg];
-          commandsMap = lastFoundCommand!.subcommands;
-          currentParser = lastFoundCommand.argParser;
-          i++;
-        } else {
-          i++;
+        if (commandsMap[arg] case final matchedCommand?) {
+          lastFoundCommand = matchedCommand;
+          commandsMap = matchedCommand.subcommands;
+          currentParser = matchedCommand.argParser;
         }
+        i++;
       }
     }
     return lastFoundCommand;

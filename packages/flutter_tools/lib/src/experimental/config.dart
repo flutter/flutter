@@ -10,7 +10,6 @@ import 'extension_discovery.dart';
 
 /// Represents a group of configuration settings provided by a specific extension.
 class ExtensionSettingsGroup {
-  /// Creates an [ExtensionSettingsGroup] with the given [title], [featureFlags], and [configOptions].
   const ExtensionSettingsGroup({
     required this.title,
     required this.featureFlags,
@@ -25,11 +24,16 @@ class ExtensionSettingsGroup {
 
   /// Config options registered by the extension.
   final List<ConfigOption> configOptions;
+
+  /// Whether this group contains any feature flags or configuration options.
+  bool get isNotEmpty => featureFlags.isNotEmpty || configOptions.isNotEmpty;
+
+  /// Whether this group is empty.
+  bool get isEmpty => !isNotEmpty;
 }
 
 /// A host-side configuration manager that delegates feature flag and option queries to extensions.
 class ExtensionConfiguration {
-  /// Creates an [ExtensionConfiguration] for the provided [extensions].
   ExtensionConfiguration({required List<ConfigurationExtension> extensions, required Logger logger})
     : extensions = List<ConfigurationExtension>.unmodifiable(extensions),
       _logger = logger;
@@ -55,7 +59,7 @@ class ExtensionConfiguration {
         }
       }),
     );
-    final List<FeatureFlag> flags = results.expand((List<FeatureFlag> flags) => flags).toList();
+    final flags = <FeatureFlag>[for (final list in results) ...list];
     _logger.printTrace('ExtensionConfiguration retrieved ${flags.length} total feature flag(s).');
     return flags;
   }
@@ -77,9 +81,7 @@ class ExtensionConfiguration {
         }
       }),
     );
-    final List<ConfigOption> options = results
-        .expand((List<ConfigOption> options) => options)
-        .toList();
+    final options = <ConfigOption>[for (final list in results) ...list];
     _logger.printTrace(
       'ExtensionConfiguration retrieved ${options.length} total config option(s).',
     );
@@ -94,12 +96,9 @@ class ExtensionConfiguration {
     final List<ExtensionSettingsGroup> groups = (await Future.wait(
       extensions.map((ConfigurationExtension ext) async {
         try {
-          String title;
-          if (ext is ConfigurationExtensionClient) {
-            title = await ext.fetchTitle();
-          } else {
-            title = ext.title;
-          }
+          final String title = ext is ConfigurationExtensionClient
+              ? await ext.fetchTitle()
+              : ext.title;
           final List<FeatureFlag> flags = await ext.getFeatureFlags();
           final List<ConfigOption> options = await ext.getConfigurations();
           return ExtensionSettingsGroup(title: title, featureFlags: flags, configOptions: options);
@@ -118,7 +117,6 @@ class ExtensionConfiguration {
 
 /// A host-side [ConfigurationExtension] client adapter that delegates RPC queries to an [ExtensionConnection].
 class ConfigurationExtensionClient extends ConfigurationExtension {
-  /// Creates a [ConfigurationExtensionClient] wrapping the host [connection].
   ConfigurationExtensionClient(
     this.connection, {
     required Logger logger,
@@ -135,7 +133,7 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
   @override
   String get title => _titleCache ?? _defaultTitle;
 
-  /// Fetches the extension title from the remote extension isolate.
+  @override
   Future<String> fetchTitle() async {
     if (_titleCache != null) {
       return _titleCache!;
@@ -145,8 +143,8 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
     );
     try {
       final Object? response = await connection.sendRequest(ConfigurationExtension.getTitleMethod);
-      if (response is String) {
-        _titleCache = response;
+      if (response case final String title) {
+        _titleCache = title;
       } else {
         _logger.printTrace(
           'ConfigurationExtensionClient received invalid title response: $response',
@@ -158,61 +156,44 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
     return _titleCache ?? _defaultTitle;
   }
 
-  @override
-  Future<List<FeatureFlag>> getFeatureFlags() async {
-    _logger.printTrace(
-      'ConfigurationExtensionClient fetching feature flags via RPC ("${ConfigurationExtension.getFeatureFlagsMethod}")...',
-    );
+  Future<List<T>> _fetchList<T>(
+    String method,
+    String entityName,
+    T Function(Map<String, Object?>) fromJson,
+  ) async {
+    _logger.printTrace('ConfigurationExtensionClient fetching $entityName via RPC ("$method")...');
     try {
-      final Object? rawResult = await connection.sendRequest(
-        ConfigurationExtension.getFeatureFlagsMethod,
-      );
-      if (rawResult is List<Object?>) {
-        final flags = <FeatureFlag>[
-          for (final Object? element in rawResult)
-            if (element case final Map<Object?, Object?> map)
-              FeatureFlag.fromJson(map.cast<String, Object?>()),
+      final Object? rawResult = await connection.sendRequest(method);
+      if (rawResult case final List<Object?> list) {
+        final results = <T>[
+          for (final Object? element in list)
+            if (element case final Map<Object?, Object?> map) fromJson(map.cast<String, Object?>()),
         ];
         _logger.printTrace(
-          'ConfigurationExtensionClient received ${flags.length} feature flag(s) via RPC.',
+          'ConfigurationExtensionClient received ${results.length} $entityName via RPC.',
         );
-        return flags;
+        return results;
       }
       _logger.printTrace(
-        'ConfigurationExtensionClient received invalid or null feature flags response: $rawResult',
+        'ConfigurationExtensionClient received invalid or null $entityName response: $rawResult',
       );
     } on Object catch (err, stack) {
-      _logger.printTrace('ConfigurationExtensionClient failed to get feature flags: $err\n$stack');
+      _logger.printTrace('ConfigurationExtensionClient failed to get $entityName: $err\n$stack');
     }
-    return const <FeatureFlag>[];
+    return <T>[];
   }
 
   @override
-  Future<List<ConfigOption>> getConfigurations() async {
-    _logger.printTrace(
-      'ConfigurationExtensionClient fetching config options via RPC ("${ConfigurationExtension.getConfigurationsMethod}")...',
-    );
-    try {
-      final Object? rawResult = await connection.sendRequest(
-        ConfigurationExtension.getConfigurationsMethod,
-      );
-      if (rawResult is List<Object?>) {
-        final options = <ConfigOption>[
-          for (final Object? element in rawResult)
-            if (element case final Map<Object?, Object?> map)
-              ConfigOption.fromJson(map.cast<String, Object?>()),
-        ];
-        _logger.printTrace(
-          'ConfigurationExtensionClient received ${options.length} config option(s) via RPC.',
-        );
-        return options;
-      }
-      _logger.printTrace(
-        'ConfigurationExtensionClient received invalid or null configurations response: $rawResult',
-      );
-    } on Object catch (err, stack) {
-      _logger.printTrace('ConfigurationExtensionClient failed to get configurations: $err\n$stack');
-    }
-    return const <ConfigOption>[];
-  }
+  Future<List<FeatureFlag>> getFeatureFlags() => _fetchList(
+    ConfigurationExtension.getFeatureFlagsMethod,
+    'feature flag(s)',
+    FeatureFlag.fromJson,
+  );
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() => _fetchList(
+    ConfigurationExtension.getConfigurationsMethod,
+    'config option(s)',
+    ConfigOption.fromJson,
+  );
 }

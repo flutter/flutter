@@ -7,14 +7,18 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 /// Prototype Linux platform extension configuration and feature flag provider.
 class LinuxConfigurationExtension extends ConfigurationExtension {
+  static const String kEnableLinuxCustomPrototype = 'enable-linux-custom-prototype';
+  static const String kLinuxGtkVersion = 'linux-gtk-version';
+
   @override
   String get title => 'Linux Custom Extension Prototype';
+
   @override
   Future<List<FeatureFlag>> getFeatureFlags() async {
     // TODO(bkonyi): return prototype feature flags for Linux target platform.
     return const <FeatureFlag>[
       FeatureFlag(
-        name: 'enable-linux-custom-prototype',
+        name: kEnableLinuxCustomPrototype,
         help: 'Enable custom platform extension prototype workflows for Linux.',
         enabledByDefault: true,
       ),
@@ -26,7 +30,7 @@ class LinuxConfigurationExtension extends ConfigurationExtension {
     // TODO(bkonyi): return configuration settings for Linux target platform.
     return const <ConfigOption>[
       ConfigOption(
-        name: 'linux-gtk-version',
+        name: kLinuxGtkVersion,
         help: 'Target GTK version for custom Linux desktop application builds.',
         value: '3',
       ),
