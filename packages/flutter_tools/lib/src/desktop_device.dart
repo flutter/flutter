@@ -389,6 +389,7 @@ class DesktopLogReader extends DeviceLogReader {
   void dispose() {
     unawaited(_stdoutSubscription?.cancel());
     unawaited(_stderrSubscription?.cancel());
+    unawaited(_stringController.close());
   }
 
   /// Connects to the [FlutterVmService] to stream stdout and stderr logs.
@@ -413,7 +414,7 @@ class DesktopLogReader extends DeviceLogReader {
 
     void logMessage(vm_service.Event event) {
       final String message = processVmServiceMessage(event);
-      if (message.isNotEmpty) {
+      if (message.isNotEmpty && !_stringController.isClosed) {
         _stringController.add(message);
       }
     }
