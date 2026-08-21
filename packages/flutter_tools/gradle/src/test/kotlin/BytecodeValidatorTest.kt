@@ -13,10 +13,16 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Validates the bytecode search pattern and file filtering algorithm used by the
- * `:validateNoCommonExtensionInBytecode` task in packages/flutter_tools/gradle/build.gradle.kts.
+ * Validates that no compiled main class in the Flutter Gradle Plugin references
+ * `com.android.build.api.dsl.CommonExtension`.
  *
- * Keep the scanning needle and class filtering logic in sync with build.gradle.kts.
+ * `CommonExtension` is binary-incompatible between AGP 8 and AGP 9 (the interface methods and
+ * generic descriptors changed when `android.newDsl=true` became default in AGP 9.0). FGP routes
+ * all DSL access through [AgpCommonExtensionWrapper] to maintain binary compatibility across both
+ * AGP 8 and 9.
+ *
+ * This test and [AgpCommonExtensionWrapper] can be safely deleted when Flutter drops support for
+ * AGP 8.x (i.e. when the minimum supported AGP version is >= 9.0.0).
  */
 class BytecodeValidatorTest {
     private val needle = "com/android/build/api/dsl/CommonExtension".toByteArray(Charsets.ISO_8859_1)
@@ -27,14 +33,35 @@ class BytecodeValidatorTest {
             needle.indices.all { i -> bytes[start + i] == needle[i] }
         }
 
-    /** Walks [dir] recursively and returns names of any `.class` files containing forbidden references. */
+    /** Walks [dir] recursively and returns relative paths of any `.class` files containing forbidden references. */
     private fun findOffendingClasses(dir: File): List<String> =
         dir
             .walkTopDown()
             .filter { it.isFile && it.extension == "class" }
             .filter { containsForbiddenReference(it.readBytes()) }
-            .map { it.name }
+            .map { it.relativeTo(dir).path }
             .toList()
+
+    @Test
+    fun `no compiled main classes reference CommonExtension`() {
+        val testClassesUri =
+            BytecodeValidatorTest::class.java
+                .protectionDomain
+                .codeSource
+                .location
+                .toURI()
+        val testClassesDir = File(testClassesUri)
+        val mainClassesDir = testClassesDir.parentFile.resolve("main")
+        assertTrue(mainClassesDir.exists(), "Main classes directory does not exist at: ${mainClassesDir.absolutePath}")
+
+        val offendingClasses = findOffendingClasses(mainClassesDir)
+        assertTrue(
+            offendingClasses.isEmpty(),
+            "CommonExtension must not be referenced from Flutter Gradle Plugin bytecode " +
+                "(binary incompatible between AGP 8 and 9). Route DSL access through " +
+                "AgpCommonExtensionWrapper instead. Offending classes: $offendingClasses"
+        )
+    }
 
     @Test
     fun `detects forbidden CommonExtension byte sequence in class bytes`() {

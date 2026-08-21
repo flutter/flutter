@@ -47,6 +47,7 @@ void main() {
     await runFlutterGradlePluginTests(
       extraGradleArguments: <String>[
         '-Pflutter.internal.agpVersion=$templateAndroidGradlePluginVersion',
+        '--rerun-tasks', // Required to run tests back to back with different agp versions.
       ],
     );
   });
