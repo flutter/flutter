@@ -19,15 +19,16 @@
 - **Structured Compatibility Layers**: When bridging binary- or DSL-incompatible AGP versions (e.g., AGP 8 vs 9), introduce explicit, type-safe abstraction wrappers or reflection bridges.
 
 ## 3. Lazy Configuration & Execution Avoidance
-- **Never Eagerly Resolve at Configuration Time**: Never call `.get()` or `.getOrNull()` during plugin application or task configuration (`afterEvaluate`, task creation). Wire inputs and outputs lazily using `Property<T>`, `Provider<T>`, `DirectoryProperty`, and `RegularFileProperty`.
+- **Never Eagerly Resolve at Configuration Time**: Never call .get() or .getOrNull() during plugin application or task configuration (afterEvaluate, task creation). Wire inputs and outputs lazily using Property, Provider, ListProperty, MapProperty, DirectoryProperty, and RegularFileProperty.
 - **Wire Providers Directly**: Pass providers directly into task inputs (e.g., `task.inputDir.set(extension.path)`).
 
 ## 4. Strict Configuration Cache Compatibility
 - **No Project State in Tasks**: Tasks must never hold references to `Project`, `SourceSet`, `Configuration`, or other non-serializable Gradle model objects in fields or action closures.
-- **Pass Serializable Inputs**: Inject required values as primitive types, serializable data structures, or Gradle `Property` instances annotated with `@Input`, `@InputFiles`, or `@InputDirectory`.
+- **Pass Serializable Inputs**: Inject required values as primitive types, serializable data structures, or Gradle Property instances annotated with @Input, @InputFiles, or @InputDirectory.
+- **Use Injected Services**: Use Gradle service injection (e.g., @Inject for FileSystemOperations, ArchiveOperations, or ExecOperations) inside tasks instead of calling Project helper methods.
 
 ## 5. Build Avoidance & Path Normalization
-- **Path Normalization**: Annotate all file inputs with `@PathSensitive(PathSensitivity.RELATIVE)` or `PathSensitivity.NAME_ONLY` (instead of absolute paths) to ensure cache hits across different machines and CI environments.
+- **Path Normalization**: Annotate all file inputs (such as @InputFile or @InputDirectory) with @PathSensitive(PathSensitivity.RELATIVE) or @PathSensitive(PathSensitivity.NAME_ONLY) (instead of absolute paths) to ensure cache hits across different machines and CI environments.
 - **Deterministic Cache Keys**: Never mark non-deterministic inputs (such as timestamps or machine-dependent environment variables) as `@Input`.
 - **Explicit Outputs**: Declare `@OutputFile` or `@OutputDirectory` for every produced artifact.
 
