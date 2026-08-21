@@ -40,8 +40,8 @@ final int _kPhysicalAltLeft = kWebToPhysicalKey['AltLeft']!;
 final int _kPhysicalAltRight = kWebToPhysicalKey['AltRight']!;
 final int kPhysicalControlLeft = kWebToPhysicalKey['ControlLeft']!;
 final int kPhysicalControlRight = kWebToPhysicalKey['ControlRight']!;
-final int _kPhysicalShiftLeft = kWebToPhysicalKey['ShiftLeft']!;
-final int _kPhysicalShiftRight = kWebToPhysicalKey['ShiftRight']!;
+final int kPhysicalShiftLeft = kWebToPhysicalKey['ShiftLeft']!;
+final int kPhysicalShiftRight = kWebToPhysicalKey['ShiftRight']!;
 final int _kPhysicalMetaLeft = kWebToPhysicalKey['MetaLeft']!;
 final int _kPhysicalMetaRight = kWebToPhysicalKey['MetaRight']!;
 
@@ -669,8 +669,8 @@ class KeyboardConverter {
       eventTimestamp,
     );
     _synthesizeModifierIfNeeded(
-      _kPhysicalShiftLeft,
-      _kPhysicalShiftRight,
+      kPhysicalShiftLeft,
+      kPhysicalShiftRight,
       _kLogicalShiftLeft,
       shiftPressed ? ui.KeyEventType.down : ui.KeyEventType.up,
       eventTimestamp,
