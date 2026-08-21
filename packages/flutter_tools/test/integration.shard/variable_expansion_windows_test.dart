@@ -20,9 +20,10 @@ void main() {
         'integration.shard',
         'variable_expansion_windows.dart',
       ),
-      r'^(?!Golden).+',
+      '"^(?!Golden).+"',
     ]);
     expect(result.exitCode, 0, reason: 'Process failed with stderr: ${result.stderr}');
-    expect(result.stdout, contains(r'args: [^(?!Golden).+]'));
+    expect(result.stdout, contains('(?!Golden)'));
+    expect(result.stdout, isNot(contains('(?Golden)')));
   }, skip: !platform.isWindows);
 }
