@@ -368,7 +368,7 @@ void main() {
               '--macho=$outputPath/App.framework/App',
               '--macho-object=$outputPath/app.o',
               '--macho-min-os-version=15.0',
-              '--macho-ios-simulator',
+              '--macho-platform-simulated',
               '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
               '--macho-install-name=@rpath/App.framework/App',
               'main.dill',

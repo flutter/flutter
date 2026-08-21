@@ -196,7 +196,7 @@ class AOTSnapshotter {
         '--macho=$aotSharedLibrary',
         '--macho-object=$relocatableObject',
         '--macho-min-os-version=$minOSVersion',
-        if (targetingIOSSimulator) '--macho-ios-simulator',
+        if (targetingIOSSimulator) '--macho-platform-simulated',
         '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
         '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',
       ]);
