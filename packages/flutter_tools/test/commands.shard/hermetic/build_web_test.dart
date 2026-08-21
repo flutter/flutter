@@ -246,6 +246,113 @@ void main() {
     },
   );
 
+  for (final useWasm in <bool>[false, true]) {
+    // The build system receives only the top-level WebServiceWorker target, so
+    // the compile targets are found by walking the dependency graph. A flag
+    // asserted after the run proves the expectations actually executed.
+    var sawCompileTargets = false;
+    void expectContentHashConfigs(Target target, Environment environment) {
+      if (target is WebReleaseBundle) {
+        expect(target.compileTargets, isNotEmpty);
+        for (final Dart2WebTarget compileTarget in target.compileTargets) {
+          expect(compileTarget.compilerConfig.webContentHash, true);
+        }
+        sawCompileTargets = true;
+      }
+      for (final Target dependency in target.dependencies) {
+        expectContentHashConfigs(dependency, environment);
+      }
+    }
+
+    testUsingContext(
+      'Passes --web-content-hash flag to compiler configs (wasm: $useWasm)',
+      () async {
+        final buildCommand = BuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: logger,
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+        setupFileSystemForEndToEndTest(fileSystem);
+        await runner.run(<String>[
+          'build',
+          'web',
+          '--no-pub',
+          '--web-content-hash',
+          if (useWasm) '--wasm',
+        ]);
+        expect(sawCompileTargets, isTrue);
+      },
+      overrides: <Type, Generator>{
+        Platform: () => fakePlatform,
+        FileSystem: () => fileSystem,
+        FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+        ProcessManager: () => processManager,
+        BuildSystem: () =>
+            TestBuildSystem.all(BuildResult(success: true), expectContentHashConfigs),
+      },
+    );
+  }
+
+  testUsingContext(
+    'Rejects --web-content-hash combined with --enable-wasm-deferred-loading',
+    () async {
+      final buildCommand = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+      await expectLater(
+        runner.run(<String>[
+          'build',
+          'web',
+          '--no-pub',
+          '--wasm',
+          '--web-content-hash',
+          '--enable-wasm-deferred-loading',
+        ]),
+        throwsToolExit(message: 'deferred loading'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+    },
+  );
+
   testUsingContext(
     'Builds successfully without --web-define',
     () async {
