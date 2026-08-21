@@ -101,17 +101,6 @@ void onBeginFrameMain() {
 }
 
 @pragma('vm:entry-point')
-void onPointerDataPacketMain() {
-  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket packet) {
-    final sequence = <int>[];
-    for (final PointerData data in packet.data) {
-      sequence.add(PointerChange.values.indexOf(data.change));
-    }
-    nativeOnPointerDataPacket(sequence);
-  };
-}
-
-@pragma('vm:entry-point')
 void emptyMain() {}
 
 @pragma('vm:entry-point')
