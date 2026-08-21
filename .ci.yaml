@@ -7310,6 +7310,33 @@ targets:
         ]
       task_name: windows_home_scroll_perf__timeline_summary
 
+  - name: Windows new_gallery_windows_impeller__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: new_gallery_windows_impeller__transition_perf
+
+  - name: Windows new_gallery_windows_skia__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: new_gallery_windows_skia__transition_perf
 
   - name: Windows hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone

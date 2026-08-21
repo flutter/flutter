@@ -144,7 +144,8 @@ class AnalysisServer {
   Future<int?>? _onExit;
 
   void _writeMessage({required String message}) {
-    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
+    final List<int> encodedMessage = utf8.encode(message);
+    _process?.stdin.write('Content-Length: ${encodedMessage.length}\r\n\r\n$message');
   }
 
   Future<Map<String, Object?>?> sendRequest(String method, Map<String, Object?> params) async {

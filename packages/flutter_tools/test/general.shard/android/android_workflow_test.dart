@@ -15,7 +15,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
