@@ -28,8 +28,6 @@ void mainNotifyNative() {
 external void nativeReportTimingsCallback(List<int> timings);
 @Native<Void Function(Int64)>(symbol: 'NativeOnBeginFrame')
 external void nativeOnBeginFrame(int microseconds);
-@Native<Void Function(Handle)>(symbol: 'NativeOnPointerDataPacket')
-external void nativeOnPointerDataPacket(List<int> sequences);
 
 @pragma('vm:entry-point')
 void onErrorA() {
