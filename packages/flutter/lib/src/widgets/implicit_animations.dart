@@ -182,12 +182,12 @@ class Matrix4Tween extends Tween<Matrix4> {
   /// filled in later.
   Matrix4Tween({super.begin, super.end});
 
-  late final Vector3 _beginTranslation = Vector3.zero();
-  late final Vector3 _endTranslation = Vector3.zero();
-  late final Quaternion _beginRotation = Quaternion.identity();
-  late final Quaternion _endRotation = Quaternion.identity();
-  late final Vector3 _beginScale = Vector3.zero();
-  late final Vector3 _endScale = Vector3.zero();
+  final Vector3 _beginTranslation = Vector3.zero();
+  final Vector3 _endTranslation = Vector3.zero();
+  final Quaternion _beginRotation = Quaternion.identity();
+  final Quaternion _endRotation = Quaternion.identity();
+  final Vector3 _beginScale = Vector3.zero();
+  final Vector3 _endScale = Vector3.zero();
 
   @override
   Matrix4 lerp(double t) {
