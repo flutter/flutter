@@ -82,10 +82,22 @@ class LLDB {
   /// Example: "- Hook 1 (thread backtrace all)"
   static final _stopHookProcessedPattern = RegExp(r'- Hook \d+');
 
+  /// Pattern of lldb log when the application has started.
+  ///
+  /// Example: Target 0: (Flutter Gallery) stopped.
+  static final _targetStoppedPattern = RegExp(r'Target .* stopped.');
+
+  static const _processContinueCommand = 'process continue';
+
+  static const _threadBacktraceAllCommand = 'thread backtrace all';
+
+  static const _detachCommand = 'detach';
+
   /// A list of log patterns to ignore.
   static final _ignorePatterns = <Pattern>[
     RegExp(r'\d+ location added to breakpoint \d+'),
     _stopHookProcessedPattern,
+    _targetStoppedPattern,
   ];
 
   /// Pattern of lldb log when libobjc.A.dylib is being read from process memory. This indicates
@@ -252,13 +264,13 @@ if not error.Success():
             if (processIsStoppedAfterAttaching) {
               stopLogs.add(line);
             }
-            if (line.contains(RegExp('Target.*stopped'))) {
+            if (line.contains(_targetStoppedPattern)) {
               if (stopLogs.any((log) => log.contains('stop reason = breakpoint'))) {
-                await _lldbProcess?.stdinWriteln('process continue');
+                await _lldbProcess?.stdinWriteln(_processContinueCommand);
               } else {
                 stopLogs.forEach(printLine);
-                await _lldbProcess?.stdinWriteln('thread backtrace all');
-                await _lldbProcess?.stdinWriteln('detach');
+                await _lldbProcess?.stdinWriteln(_threadBacktraceAllCommand);
+                await _lldbProcess?.stdinWriteln(_detachCommand);
                 processIsStoppedAfterAttaching = false;
               }
               return;
@@ -397,7 +409,7 @@ if not error.Success():
       mode == BuildMode.debug ? _lldbBreakpointAdded : _lldbProcessResuming,
     ).then((value) => value, onError: _handleAsyncError);
 
-    await _lldbProcess?.stdinWriteln('process continue');
+    await _lldbProcess?.stdinWriteln(_processContinueCommand);
     await futureLog;
   }
 
@@ -409,7 +421,9 @@ if not error.Success():
     final Future<String> futureLog = _startWaitingForLog(
       _stopHookAddedPattern,
     ).then((value) => value, onError: _handleAsyncError);
-    await _lldbProcess?.stdinWriteln('target stop-hook add -o "thread backtrace all" -o "detach"');
+    await _lldbProcess?.stdinWriteln(
+      'target stop-hook add -o "$_threadBacktraceAllCommand" -o "$_detachCommand"',
+    );
     await futureLog;
   }
 

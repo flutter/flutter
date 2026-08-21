@@ -102,7 +102,7 @@ void main() {
     );
 
     final Map<String, ({Completer<List<int>> completer, String out})?>
-    inputsAndOutputs = processAttach(
+    inputsAndOutputs = buildAttachInputsAndOutputs(
       breakPointMatcher:
           r"breakpoint set --auto-continue true --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
       processResumingOutput: '1 location added to breakpoint 1\n',
@@ -173,7 +173,7 @@ void main() {
     );
 
     final Map<String, ({Completer<List<int>> completer, String out})?>
-    inputsAndOutputs = processAttach(
+    inputsAndOutputs = buildAttachInputsAndOutputs(
       breakPointMatcher:
           r"breakpoint set --auto-continue true --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
       processResumingOutput: 'Process $_appProcessId resuming\n',
@@ -418,7 +418,7 @@ void main() {
     );
 
     final Map<String, ({Completer<List<int>> completer, String out})?>
-    inputsAndOutputs = processAttach(
+    inputsAndOutputs = buildAttachInputsAndOutputs(
       breakPointMatcher:
           r"breakpoint set --auto-continue true --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
       processResumingOutput: '1 location added to breakpoint 1\n',
@@ -587,7 +587,7 @@ void main() {
         );
 
         final Map<String, ({Completer<List<int>> completer, String out})?>
-        inputsAndOutputs = processAttach(
+        inputsAndOutputs = buildAttachInputsAndOutputs(
           breakPointMatcher:
               r"breakpoint set --auto-continue true --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
           processResumingOutput: 'Process $_appProcessId resuming\n',
@@ -683,7 +683,7 @@ void main() {
         );
 
         final Map<String, ({Completer<List<int>> completer, String out})?>
-        inputsAndOutputs = processAttach(
+        inputsAndOutputs = buildAttachInputsAndOutputs(
           breakPointMatcher:
               r"breakpoint set --auto-continue true --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
           processResumingOutput: 'Process $_appProcessId resuming\n',
@@ -811,7 +811,7 @@ void main() {
     const breakPointMatcher = r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
     final unexpectedInputs = ['Stop hook #1 added.\n'];
     final Map<String, ({Completer<List<int>> completer, String out})?> inputsAndOutputs =
-        processAttach(
+        buildAttachInputsAndOutputs(
           breakPointMatcher: breakPointMatcher,
           processResumingOutput: '1 location added to breakpoint 1\n',
           breakPointCompleter: breakPointCompleter,
@@ -1122,7 +1122,9 @@ IOSDeviceSupport createDeviceSupport({
   );
 }
 
-Map<String, ({Completer<List<int>> completer, String out})?> processAttach({
+/// Builds a map of expected stdin command inputs sent to LLDB during [LLDB.attachAndStart]
+/// and their corresponding simulated stdout outputs and completers.
+Map<String, ({Completer<List<int>> completer, String out})?> buildAttachInputsAndOutputs({
   required String breakPointMatcher,
   required String processResumingOutput,
   required Completer<List<int>>? breakPointCompleter,
@@ -1133,7 +1135,6 @@ Map<String, ({Completer<List<int>> completer, String out})?> processAttach({
 }) {
   const processAttachMatcher = 'device process attach --pid $_appProcessId';
   const processContinueMatcher = 'process continue';
-  // const process = '1 location added to breakpoint 1\n';
   const setupStopHooksMatcher = 'target stop-hook add -o "thread backtrace all" -o "detach"';
   const platformStatusMatcher = 'platform status';
   return {
@@ -1146,7 +1147,6 @@ Map<String, ({Completer<List<int>> completer, String out})?> processAttach({
       'breakpoint command add --script-type python $_breakpointId': null,
       'script lldb.debugger.SetAsync(False)': null,
     },
-
     processAttachMatcher: (
       out: '''
 Process 568 stopped

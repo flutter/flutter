@@ -868,7 +868,7 @@ class IOSCoreDeviceControl {
       unawaited(
         launchProcess.exitCode
             .then((int status) async {
-              _logger.printTrace('lldb exited with code $status');
+              _logger.printTrace('devicectl exited with code $status');
               await stdoutSubscription.cancel();
               await stderrSubscription.cancel();
             })
