@@ -1275,26 +1275,20 @@ void _createPlatformPluginSymlinks(
     // that broken symlinks or conflicting entities can be cleaned up before
     // creating the symlink, preventing FileSystemException collisions (such as
     // ERROR_ALREADY_EXISTS on Windows or EEXIST on POSIX).
-    switch (link.fileSystem.typeSync(link.path, followLinks: false)) {
-      case FileSystemEntityType.link:
-        try {
-          final String target = link.targetSync();
-          if (link.fileSystem.path.canonicalize(target) ==
-                  link.fileSystem.path.canonicalize(path) &&
-              link.existsSync()) {
-            continue;
-          }
-        } on FileSystemException {
-          // Fall through to delete and recreate if resolving target throws.
+    final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
+    if (entityType == FileSystemEntityType.link) {
+      try {
+        final String target = link.targetSync();
+        if (link.fileSystem.path.canonicalize(target) == link.fileSystem.path.canonicalize(path) &&
+            link.existsSync()) {
+          continue;
         }
-        ErrorHandlingFileSystem.deleteIfExists(link);
-      case FileSystemEntityType.notFound:
-        break;
-      case FileSystemEntityType.file:
-      case FileSystemEntityType.directory:
-      case FileSystemEntityType.pipe:
-      case FileSystemEntityType.unixDomainSock:
-        ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
+      } on FileSystemException {
+        // Fall through to delete and recreate if resolving target throws.
+      }
+      ErrorHandlingFileSystem.deleteIfExists(link);
+    } else if (entityType != FileSystemEntityType.notFound) {
+      ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
     }
     try {
       link.createSync(path);
