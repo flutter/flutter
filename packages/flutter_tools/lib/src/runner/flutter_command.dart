@@ -28,13 +28,12 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
+import '../web/web_options.dart';
 import 'flutter_command_runner.dart';
-
-import 'options/option_bundle.dart';
 import 'options/common_options.dart';
+import 'options/option_bundle.dart';
 import 'options/option_descriptor.dart';
 import 'options/safe_arg_results.dart';
-import '../web/web_options.dart';
 import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
@@ -1436,13 +1435,9 @@ abstract class FlutterCommand extends Command<void> {
         wasParsed(BuildInfoOptions.trackWidgetCreation) &&
         getValue(BuildInfoOptions.trackWidgetCreation);
 
-    final String? buildNumber = wasParsed(CommonOptions.buildNumber)
-        ? getValue(CommonOptions.buildNumber)
-        : null;
+    final String? buildNumber = getValue(CommonOptions.buildNumber);
 
-    final String? buildName = wasParsed(CommonOptions.buildName)
-        ? getValue(CommonOptions.buildName)
-        : null;
+    final String? buildName = getValue(CommonOptions.buildName);
 
     final File packageConfigFile = globals.fs.file(packageConfigPath());
 
@@ -1486,9 +1481,7 @@ abstract class FlutterCommand extends Command<void> {
     final bool dartObfuscation =
         wasParsed(BuildInfoOptions.obfuscate) && getValue(BuildInfoOptions.obfuscate);
 
-    final String? splitDebugInfoPath = wasParsed(BuildInfoOptions.splitDebugInfo)
-        ? getValue(BuildInfoOptions.splitDebugInfo)
-        : null;
+    final String? splitDebugInfoPath = getValue(BuildInfoOptions.splitDebugInfo);
 
     final bool androidGradleDaemon =
         !wasParsed(BuildInfoOptions.androidGradleDaemon) ||
@@ -1502,9 +1495,7 @@ abstract class FlutterCommand extends Command<void> {
         ? getValue(BuildInfoOptions.androidProjectArg)
         : <String>[];
 
-    final String? androidGradleProjectCacheDir = wasParsed(BuildInfoOptions.androidProjectCacheDir)
-        ? getValue(BuildInfoOptions.androidProjectCacheDir)
-        : null;
+    final String? androidGradleProjectCacheDir = getValue(BuildInfoOptions.androidProjectCacheDir);
 
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
@@ -1527,10 +1518,9 @@ abstract class FlutterCommand extends Command<void> {
         buildMode.isPrecompiled &&
         getValue(CommonOptions.treeShakeIcons);
 
-    final String? performanceMeasurementFile =
-        wasParsed(BuildInfoOptions.performanceMeasurementFile)
-        ? getValue(BuildInfoOptions.performanceMeasurementFile)
-        : null;
+    final String? performanceMeasurementFile = getValue(
+      BuildInfoOptions.performanceMeasurementFile,
+    );
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
@@ -1544,9 +1534,7 @@ abstract class FlutterCommand extends Command<void> {
     final bool useLocalCanvasKit = forcedUseLocalCanvasKit ?? (!useCdn || useLocalWebSdk);
 
     final String? defaultFlavor = project.manifest.defaultFlavor;
-    final String? cliFlavor = wasParsed(BuildInfoOptions.flavor)
-        ? getValue(BuildInfoOptions.flavor)
-        : null;
+    final String? cliFlavor = getValue(BuildInfoOptions.flavor);
     final String? flavor = cliFlavor ?? defaultFlavor;
 
     _ensureReservedDartDefineIsUnset(kAppFlavor, dartDefines);
@@ -1569,9 +1557,7 @@ abstract class FlutterCommand extends Command<void> {
       buildMode,
       flavor,
       trackWidgetCreation: trackWidgetCreation,
-      frontendServerStarterPath: wasParsed(BuildInfoOptions.frontendServerStarterPath)
-          ? getValue(BuildInfoOptions.frontendServerStarterPath)
-          : null,
+      frontendServerStarterPath: getValue(BuildInfoOptions.frontendServerStarterPath),
       extraFrontEndOptions: extraFrontEndOptions.isNotEmpty ? extraFrontEndOptions : null,
       extraGenSnapshotOptions: extraGenSnapshotOptions.isNotEmpty ? extraGenSnapshotOptions : null,
       fileSystemRoots: fileSystemRoots,
@@ -1593,9 +1579,7 @@ abstract class FlutterCommand extends Command<void> {
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,
-      initializeFromDill: wasParsed(BuildInfoOptions.initializeFromDill)
-          ? getValue(BuildInfoOptions.initializeFromDill)
-          : null,
+      initializeFromDill: getValue(BuildInfoOptions.initializeFromDill),
       assumeInitializeFromDillUpToDate:
           wasParsed(BuildInfoOptions.assumeInitializeFromDillUpToDate) &&
           getValue(BuildInfoOptions.assumeInitializeFromDillUpToDate),
