@@ -122,29 +122,30 @@ class FlutterProject {
       }
       candidate = parent;
       final File pubspec = candidate.childFile('pubspec.yaml');
-      if (pubspec.existsSync()) {
-        try {
-          final FlutterManifest manifest = FlutterProject._readManifest(
-            pubspec.path,
-            logger: globals.logger,
-            fileSystem: fileSystem,
+      if (!pubspec.existsSync()) {
+        continue;
+      }
+      try {
+        final FlutterManifest manifest = FlutterProject._readManifest(
+          pubspec.path,
+          logger: globals.logger,
+          fileSystem: fileSystem,
+        );
+        if (manifest.workspace.isNotEmpty) {
+          final String relativePath = fileSystem.path.relative(
+            normalizedPath,
+            from: candidate.path,
           );
-          if (manifest.workspace.isNotEmpty) {
-            final String relativePath = fileSystem.path.relative(
-              normalizedPath,
-              from: candidate.path,
-            );
-            final bool isMember = manifest.workspace.any((String entry) {
-              final glob = Glob(entry, context: fileSystem.path);
-              return glob.matches(relativePath);
-            });
-            if (isMember) {
-              return FlutterProject.fromDirectory(candidate);
-            }
+          final bool isMember = manifest.workspace.any((String entry) {
+            final glob = Glob(entry, context: fileSystem.path);
+            return glob.matches(relativePath);
+          });
+          if (isMember) {
+            return FlutterProject.fromDirectory(candidate);
           }
-        } on Exception catch (_) {
-          // Ignore manifest reading errors.
         }
+      } on Exception catch (_) {
+        // Ignore manifest reading errors.
       }
     }
     return null;
