@@ -30,7 +30,9 @@ import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.nio.file.Path
+import java.util.Base64
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -278,6 +280,30 @@ class FlutterPluginTest {
             }
         } else {
             fail("FilePermissions configuration action was not captured")
+        }
+    }
+
+    @Test
+    fun `apply adds task for generating manifest with engine shell arguments`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        val engineShellArgsJson = """["--enable-impeller=true"]"""
+        val base64EngineShellArgs =
+            Base64.getEncoder().encodeToString(engineShellArgsJson.toByteArray(StandardCharsets.UTF_8))
+        every { project.findProperty("flutter.engineShellArgs") } returns base64EngineShellArgs
+
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+
+        mockkObject(FlutterPluginUtils)
+        val flutterPlugin = FlutterPlugin()
+        flutterPlugin.apply(project)
+
+        verify {
+            FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(project)
         }
     }
 
