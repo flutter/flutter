@@ -655,7 +655,7 @@
         "--no-goma"
       ],
       "name": "macos/host_debug_unopt_arm64",
-      "description": "Builds a debug mode engine for a macOS host on arm64.",
+      "description": "Builds an unoptimized debug mode engine for a macOS host on arm64.",
       "ninja": {
         "config": "host_debug_unopt_arm64",
         "targets": []
@@ -835,6 +835,35 @@
       "description": "Builds an unoptimized debug mode engine for a Windows host.",
       "ninja": {
         "config": "host_debug_unopt",
+        "targets": []
+      }
+    },
+    {
+      "cas_archive": false,
+      "drone_dimensions": [
+        "os=Windows-10",
+        "device_type=none"
+      ],
+      "gclient_variables": {
+        "download_android_deps": false,
+        "download_jdk": false,
+        "use_rbe": true
+      },
+      "gn": [
+        "--runtime-mode",
+        "debug",
+        "--unoptimized",
+        "--windows-cpu",
+        "arm64",
+        "--no-stripped",
+        "--no-lto",
+        "--rbe",
+        "--no-goma"
+      ],
+      "name": "windows/host_debug_unopt_arm64",
+      "description": "Builds an unoptimized debug mode engine for a Windows host on arm64.",
+      "ninja": {
+        "config": "host_debug_unopt_arm64",
         "targets": []
       }
     },

@@ -22,8 +22,14 @@ Make sure you have the following dependencies available:
  * On macOS and Linux: `curl` and `unzip` (used by `gclient sync`).
  * On Linux: The `pkg-config` package.
  * On Windows:
-   - Visual Studio 2017 or later (required for non-Googlers only).
-   - [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/) (required for non-Googlers only). Be sure to install the "Debugging Tools for Windows" feature.
+   - Visual Studio 2019 or later (required for non-Googlers only).
+     - Desktop Development with C++
+     - C++ ATL (Latest MSVC)
+   - [Windows SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/) (required for non-Googlers only).\
+     Be sure to enable the "Debugging Tools for Windows" feature via:
+     Windows System Settings → Apps → Installed Apps
+     → "Windows Software Development Kit" → Modify → Change
+     → Enable "Debugging Tools for Windows" → Change.
  * On macOS:
    - Install the latest Xcode.
    - On Apple Silicon arm64 Macs, install the Rosetta translation environment by running `softwareupdate --install-rosetta`.

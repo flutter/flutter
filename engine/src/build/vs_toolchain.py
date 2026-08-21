@@ -42,6 +42,10 @@ MSVS_VERSIONS = collections.OrderedDict([
   ('2026', '18'),
 ])
 
+# Provide inverse of MSVS_VERSIONS for the numeric version folder (e.g. "18"),
+# which some VS releases (e.g. 2026) install under instead of the year-named folder.
+MSVS_VERSION_ALIASES = {v: k for k, v in MSVS_VERSIONS.items()}
+
 VC_VERSIONS = {
   '2017': 'VC141',
   '2019': 'VC142',
@@ -170,7 +174,7 @@ def GetVisualStudioVersion():
       for k,v in list(MSVS_VERSIONS.items()))
   available_versions = []
   # Also look for the numeric version folder (e.g. "18")
-  search_versions = list(supported_versions) + list(MSVS_VERSIONS.values())
+  search_versions = list(supported_versions) + list(MSVS_VERSION_ALIASES.keys())
 
   for version in search_versions:
     for path in (
@@ -264,7 +268,12 @@ def _CopyUCRTRuntime(target_dir, source_dir, target_cpu, dll_pattern, suffix):
   exist, but the target directory does exist."""
   if target_cpu == 'arm64':
     env_version = GetVisualStudioVersion()
-    vc_version = VC_VERSIONS[env_version]
+    vc_version = VC_VERSIONS.get(env_version)
+    if not vc_version:
+      # Fall back to MSVS version, when not installed by year
+      vc_version = VC_VERSIONS.get(MSVS_VERSION_ALIASES.get(env_version))
+    if not vc_version:
+      raise KeyError(env_version)
     prefix = 'Microsoft.' + vc_version
 
     # Windows ARM64 VCRuntime is located at {toolchain_root}/VC/Redist/MSVC/
@@ -420,9 +429,9 @@ def _CopyDebugger(target_dir, target_cpu):
         continue
       else:
         # TODO(crbug.com/773476): remove version requirement.
-        raise Exception('%s not found in "%s"\r\nYou must install the '
-                        '"Debugging Tools for Windows" feature from the Windows'
-                        ' 10 SDK.'
+        raise Exception('%s not found in "%s"\r\nYou must enable the '
+                        '"Debugging Tools for Windows" feature from the "Windows'
+                        ' Software Development Kit" contained in the Windows 10 SDK.'
                         % (debug_file, full_path))
     target_path = os.path.join(target_dir, debug_file)
     _CopyRuntimeImpl(target_path, full_path)
