@@ -114,6 +114,14 @@ void main() {
     expect(resized.width, 1);
   });
 
+  test('pixels: resize height with constrained width - rounding', () async {
+    final rect = BlackSquare.create(width: 3);
+    final Image resized = await rect.resize(targetWidth: 4);
+    expect(resized.width, 4);
+    expect(resized.height, 3);
+    resized.dispose();
+  });
+
   test('pixels: upscale image by 5x', () async {
     final blackSquare = BlackSquare.create();
     final Image resized = await blackSquare.resize(targetWidth: 10, allowUpscaling: true);
