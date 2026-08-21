@@ -132,10 +132,9 @@ abstract final class CommonOptions {
 
 /// A bundle encapsulating standard build mode flags (`--debug`, `--profile`, `--release`, `--jit-release`).
 class BuildModeOptionsBundle extends OptionBundle {
-  const BuildModeOptionsBundle({this.defaultToRelease = true, this.verboseHelp = false});
+  const BuildModeOptionsBundle({this.defaultToRelease = true});
 
   final bool defaultToRelease;
-  final bool verboseHelp;
 
   @override
   void onRegister(FlutterCommand command) {
@@ -153,9 +152,7 @@ class BuildModeOptionsBundle extends OptionBundle {
 
 /// A bundle encapsulating general Dart compilation options.
 class DartCompileOptionsBundle extends OptionBundle {
-  const DartCompileOptionsBundle({this.verboseHelp = false});
-
-  final bool verboseHelp;
+  const DartCompileOptionsBundle();
 
   @override
   List<OptionDescriptor<Object?>> get descriptors => const [
@@ -168,9 +165,7 @@ class DartCompileOptionsBundle extends OptionBundle {
 
 /// A bundle encapsulating basic build parameters (target, output-dir, pub, build-number/name).
 class CommonBuildOptionsBundle extends OptionBundle {
-  const CommonBuildOptionsBundle({this.verboseHelp = false});
-
-  final bool verboseHelp;
+  const CommonBuildOptionsBundle();
 
   @override
   void onRegister(FlutterCommand command) {

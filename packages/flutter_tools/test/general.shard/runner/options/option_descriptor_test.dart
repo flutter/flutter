@@ -174,6 +174,22 @@ void main() {
       expect(descriptor.getValue(results), isEmpty);
     });
 
+    test('returns default values when omitted with custom defaultsTo', () {
+      const descriptor = MultiOptionDescriptor(
+        name: 'tags',
+        defaultsTo: <String>['alpha', 'beta'],
+        help: 'Tags',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      expect(parser.options['tags']!.defaultsTo, <String>['alpha', 'beta']);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), <String>['alpha', 'beta']);
+    });
+
     test('returns all parsed items in order', () {
       const descriptor = MultiOptionDescriptor(name: 'define', splitCommas: false, help: 'Defines');
       final parser = ArgParser();

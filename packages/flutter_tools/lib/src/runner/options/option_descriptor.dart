@@ -136,7 +136,7 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
   }) {
     if (parser.options.containsKey(name)) {
       final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && (identical(existing, this) || existing == this)) {
+      if (existing != null && identical(existing, this)) {
         return;
       }
       _throwConflictError(name, existing);
@@ -200,7 +200,7 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
   }) {
     if (parser.options.containsKey(name)) {
       final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && (identical(existing, this) || existing == this)) {
+      if (existing != null && identical(existing, this)) {
         return;
       }
       _throwConflictError(name, existing);
@@ -253,7 +253,7 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
   }) {
     if (parser.options.containsKey(name)) {
       final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && (identical(existing, this) || existing == this)) {
+      if (existing != null && identical(existing, this)) {
         return;
       }
       _throwConflictError(name, existing);
@@ -289,12 +289,13 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
     super.valueHelp,
     this.splitCommas = true,
     this.aliases = const <String>[],
+    super.defaultsTo = const <String>[],
     super.allowed,
     super.allowedHelp,
     super.scope,
     super.hide,
     super.verboseOnly,
-  }) : super(defaultsTo: const <String>[]);
+  });
 
   /// Whether values containing commas are split into multiple entries.
   final bool splitCommas;
@@ -311,7 +312,7 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
   }) {
     if (parser.options.containsKey(name)) {
       final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && (identical(existing, this) || existing == this)) {
+      if (existing != null && identical(existing, this)) {
         return;
       }
       _throwConflictError(name, existing);
@@ -323,6 +324,7 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       aliases: aliases,
       help: help,
       valueHelp: valueHelp,
+      defaultsTo: defaultsTo,
       splitCommas: splitCommas,
       allowed: allowed,
       allowedHelp: allowedHelp,

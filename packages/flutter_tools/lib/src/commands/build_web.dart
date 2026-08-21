@@ -19,14 +19,13 @@ class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
     required super.logger,
     required FileSystem fileSystem,
-    required bool verboseHelp,
-  }) : _fileSystem = fileSystem,
-       super(verboseHelp: verboseHelp) {
-    registerOptionBundles(<OptionBundle>[
-      CommonBuildOptionsBundle(verboseHelp: verboseHelp),
-      BuildModeOptionsBundle(verboseHelp: verboseHelp),
-      DartCompileOptionsBundle(verboseHelp: verboseHelp),
-      WebOptionsBundle(verboseHelp: verboseHelp),
+    required super.verboseHelp,
+  }) : _fileSystem = fileSystem {
+    registerOptionBundles(const <OptionBundle>[
+      CommonBuildOptionsBundle(),
+      BuildModeOptionsBundle(),
+      DartCompileOptionsBundle(),
+      WebOptionsBundle(),
     ]);
   }
 
