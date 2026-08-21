@@ -42,7 +42,7 @@ import Foundation
 ///     actions between the platform thread and the raster thread.
 @objc(FlutterResizeSynchronizer)
 @MainActor
-final class ResizeSynchronizer: NSObject, @unchecked Sendable {
+final class ResizeSynchronizer: NSObject {
   private static let invalidSize = CGSize(width: -1, height: -1)
 
   // Synchronizes access to _isInResize_unsafe: isInResize is accessed from

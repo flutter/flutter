@@ -78,3 +78,147 @@ struct FlutterRunLoopTests {
     task1CanFinish.signal()
   }
 }
+
+@Suite
+struct UnsafeTaskQueueTests {
+  typealias Task = FlutterRunLoop.Task
+
+  @Test
+  func `UnsafeTaskQueue sorts tasks by targetDate in ascending order`() throws {
+    let queue = FlutterRunLoop.UnsafeTaskQueue()
+
+    let task1 = Task(expiresAt: 5)
+    let task2 = Task(expiresAt: 1)
+    let task3 = Task(expiresAt: 3)
+
+    _ = queue.add(task: task1)
+    _ = queue.add(task: task2)
+    _ = queue.add(task: task3)
+
+    // task2 (1s), task3 (3s), task1 (5s)
+    let (expired, _) = try #require(queue.popTasks(expiringBy: .distantFuture))
+    #expect(expired.map(\.targetDate) == [task2.targetDate, task3.targetDate, task1.targetDate])
+  }
+
+  @Test
+  func `UnsafeTaskQueue add and popTasks return the earliest fire date`() throws {
+    let queue = FlutterRunLoop.UnsafeTaskQueue()
+
+    // Adding Tasks
+    #expect(queue.add(task: Task(expiresAt: 5)) == Date(5))  // Queue: [5s] -> Earliest: 5s
+    #expect(queue.add(task: Task(expiresAt: 1)) == Date(1))  // Queue: [1s, 5s] -> Earliest: 1s
+    #expect(queue.add(task: Task(expiresAt: 3)) == Date(1))  // Queue: [1s, 3s, 5s] -> Earliest: 1s
+
+    // Poping tasks
+    let (_, newFireDate1) = try #require(queue.popTasks(expiringBy: Date(2)))
+    #expect(newFireDate1 == Date(3))
+
+    let (_, newFireDate2) = try #require(queue.popTasks(expiringBy: Date(4)))
+    #expect(newFireDate2 == Date(5))
+
+    let (_, newFireDate3) = try #require(queue.popTasks(expiringBy: Date(6)))
+    #expect(newFireDate3 == .distantFuture)
+  }
+
+  @Test
+  func `UnsafeTaskQueue popTasks only pops expired tasks and leaves unexpired tasks`() throws {
+    let queue = FlutterRunLoop.UnsafeTaskQueue()
+
+    let expiredTask = Task(expiresAt: 1)
+    let unexpiredTask = Task(expiresAt: 5)
+
+    _ = queue.add(task: expiredTask)
+    _ = queue.add(task: unexpiredTask)
+
+    let (expired, newFireDate) = try #require(queue.popTasks(expiringBy: Date(3)))
+
+    #expect(expired.count == 1)
+    #expect(expired.first?.targetDate == expiredTask.targetDate)
+    #expect(newFireDate == unexpiredTask.targetDate)
+  }
+
+  @Test(arguments: [
+    // Interleaved dates (B, A, C, B, A, C)
+    (
+      insertions: [
+        Task(expiresAt: 2),
+        Task(expiresAt: 1),
+        Task(expiresAt: 3),
+        Task(expiresAt: 2),
+        Task(expiresAt: 1),
+        Task(expiresAt: 3),
+      ],
+      expectedOrder: [2, 5, 1, 4, 3, 6]
+    ),
+    // Reverse dates (C, C, B, B, A, A)
+    (
+      insertions: [
+        Task(expiresAt: 3),
+        Task(expiresAt: 3),
+        Task(expiresAt: 2),
+        Task(expiresAt: 2),
+        Task(expiresAt: 1),
+        Task(expiresAt: 1),
+      ],
+      expectedOrder: [5, 6, 3, 4, 1, 2]
+    ),
+    // Already sorted dates (A, A, B, B, C, C)
+    (
+      insertions: [
+        Task(expiresAt: 1),
+        Task(expiresAt: 1),
+        Task(expiresAt: 2),
+        Task(expiresAt: 2),
+        Task(expiresAt: 3),
+        Task(expiresAt: 3),
+      ],
+      expectedOrder: [1, 2, 3, 4, 5, 6]
+    ),
+    // All same date (A, A, A, A, A, A)
+    (
+      insertions: [
+        Task(expiresAt: 1),
+        Task(expiresAt: 1),
+        Task(expiresAt: 1),
+        Task(expiresAt: 1),
+        Task(expiresAt: 1),
+        Task(expiresAt: 1),
+      ],
+      expectedOrder: [1, 2, 3, 4, 5, 6]
+    ),
+  ])
+  @MainActor
+  func `UnsafeTaskQueue preserves insertion order for tasks with the same targetDate`(
+    testCase: (insertions: [Task], expectedOrder: [Int])
+  ) throws {
+    let queue = FlutterRunLoop.UnsafeTaskQueue()
+
+    var executionOrder: [Int] = []
+
+    for (index, task) in testCase.insertions.enumerated() {
+      let id = index + 1
+      _ = queue.add(task: Task(block: { executionOrder.append(id) }, targetDate: task.targetDate))
+    }
+
+    let (expired, _) = try #require(queue.popTasks(expiringBy: .distantFuture))
+    for task in expired {
+      task.block()
+    }
+
+    #expect(executionOrder == testCase.expectedOrder)
+  }
+}
+
+// MARK: - Test Helpers
+
+extension FlutterRunLoop.Task {
+  fileprivate init(expiresAt targetDate: Int, block: @escaping @MainActor () -> Void = {}) {
+    self.init(block: block, targetDate: Date(targetDate))
+  }
+}
+
+extension Date {
+  fileprivate init(_ seconds: Int) {
+    self.init(timeIntervalSinceReferenceDate: Double(seconds))
+  }
+}
