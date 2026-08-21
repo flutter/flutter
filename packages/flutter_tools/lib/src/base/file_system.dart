@@ -148,6 +148,9 @@ void copyDirectory(
 
   for (final FileSystemEntity entity in srcDir.listSync(followLinks: followLinks)) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
+    // Remove conflicting destination entities prior to copying. In particular,
+    // existing symlinks or mismatched file/directory types at newPath will
+    // cause file creation or symlink creation to fail unless removed first.
     switch (destDir.fileSystem.typeSync(newPath, followLinks: false)) {
       case FileSystemEntityType.link:
         destDir.fileSystem.link(newPath).deleteSync();
