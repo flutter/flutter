@@ -170,7 +170,8 @@ class BorderTween extends Tween<Border?> {
 /// This class specializes the interpolation of [Tween<Matrix4>] to be
 /// appropriate for transformation matrices.
 ///
-/// Currently this class works only for translations.
+/// The matrices are decomposed into translation, rotation, and scale
+/// components, which are interpolated separately.
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
 class Matrix4Tween extends Tween<Matrix4> {
@@ -181,24 +182,33 @@ class Matrix4Tween extends Tween<Matrix4> {
   /// filled in later.
   Matrix4Tween({super.begin, super.end});
 
+  final Vector3 _beginTranslation = Vector3.zero();
+  final Vector3 _endTranslation = Vector3.zero();
+  final Quaternion _beginRotation = Quaternion.identity();
+  final Quaternion _endRotation = Quaternion.identity();
+  final Vector3 _beginScale = Vector3.zero();
+  final Vector3 _endScale = Vector3.zero();
+
   @override
   Matrix4 lerp(double t) {
     assert(begin != null);
     assert(end != null);
-    final beginTranslation = Vector3.zero();
-    final endTranslation = Vector3.zero();
-    final beginRotation = Quaternion.identity();
-    final endRotation = Quaternion.identity();
-    final beginScale = Vector3.zero();
-    final endScale = Vector3.zero();
-    begin!.decompose(beginTranslation, beginRotation, beginScale);
-    end!.decompose(endTranslation, endRotation, endScale);
-    final Vector3 lerpTranslation = beginTranslation * (1.0 - t) + endTranslation * t;
+    begin!.decompose(_beginTranslation, _beginRotation, _beginScale);
+    end!.decompose(_endTranslation, _endRotation, _endScale);
+    final double inverseT = 1.0 - t;
+    _beginTranslation.scale(inverseT);
+    _endTranslation.scale(t);
+    _beginTranslation.add(_endTranslation);
     // TODO(alangardner): Implement lerp for constant rotation
-    final Quaternion lerpRotation = (beginRotation.scaled(1.0 - t) + endRotation.scaled(t))
-        .normalized();
-    final Vector3 lerpScale = beginScale * (1.0 - t) + endScale * t;
-    return Matrix4.compose(lerpTranslation, lerpRotation, lerpScale);
+    _beginRotation.scale(inverseT);
+    _endRotation.scale(t);
+    _beginRotation
+      ..add(_endRotation)
+      ..normalize();
+    _beginScale.scale(inverseT);
+    _endScale.scale(t);
+    _beginScale.add(_endScale);
+    return Matrix4.compose(_beginTranslation, _beginRotation, _beginScale);
   }
 }
 
