@@ -563,14 +563,7 @@ import PluginB
               xcframeworkOutput.path,
             ],
           ),
-          FakeCommand(
-            command: <String>[
-              'chmod',
-              '-R',
-              'u+w',
-              flutterXCFramework.path,
-            ],
-          ),
+          FakeCommand(command: <String>['chmod', '-R', 'u+w', flutterXCFramework.path]),
           FakeCommand(
             command: ['codesign', '-d', flutterXCFramework.path],
             stderr: '${flutterXCFramework.path}: code object is not signed at all',
@@ -3770,6 +3763,9 @@ class FakePlugin extends Fake implements Plugin {
 class FakeFeatureFlags extends Fake implements FeatureFlags {
   @override
   bool get isSwiftPackageManagerEnabled => true;
+
+  @override
+  bool get isToolExtensionsEnabled => false;
 }
 
 class CocoaPodPluginDependenciesSkipPodProcessing extends CocoaPodPluginDependencies {
