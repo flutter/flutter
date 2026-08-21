@@ -559,6 +559,14 @@ void main() {
           Request('GET', Uri.parse('http://localhost:8080/assets/my_asset.txt')),
         );
         expect(invalidResponse.statusCode, HttpStatus.notFound);
+
+        // Legitimate source files (e.g. lib/main.dart) are served for debugging.
+        fileSystem.file('lib/main.dart').writeAsStringSync('void main() {}');
+        final Response dartSourceResponse = await server.handleRequest(
+          Request('GET', Uri.parse('http://localhost:8080/lib/main.dart')),
+        );
+        expect(dartSourceResponse.statusCode, HttpStatus.ok);
+        expect(await dartSourceResponse.readAsString(), 'void main() {}');
       },
       overrides: <Type, Generator>{Artifacts: () => Artifacts.test()},
     );

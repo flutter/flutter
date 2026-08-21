@@ -692,7 +692,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     );
   }
 
-  // File extensions that may legitimately be requested from the project and
+  /// File extensions that may legitimately be requested from the project and
   // Flutter SDK roots for source-map resolution.
   static const _sourceMapExtensions = <String>{'.dart', '.map'};
 
@@ -704,10 +704,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         return _resolveDartSdkJsFile;
       case 'dart_sdk.js.map':
         return _resolveDartSdkJsMapFile;
-    }
-    // This is the special generated entrypoint.
-    if (path == 'web_entrypoint.dart') {
-      return entrypointCacheDirectory.childFile('web_entrypoint.dart');
+      case 'web_entrypoint.dart':
+        return entrypointCacheDirectory.childFile('web_entrypoint.dart');
     }
 
     final String extension = fileSystem.path.extension(path);
@@ -762,7 +760,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       }
     }
 
-    return fileSystem.file(fileSystem.currentDirectory.childFile('.non_existent_file'));
+    return fileSystem.currentDirectory.childFile('.non_existent_file');
   }
 
   File get _resolveDartSdkJsFile {
