@@ -1278,7 +1278,10 @@ void _createPlatformPluginSymlinks(
     switch (link.fileSystem.typeSync(link.path, followLinks: false)) {
       case FileSystemEntityType.link:
         try {
-          if (link.targetSync() == path && link.existsSync()) {
+          final String target = link.targetSync();
+          if (link.fileSystem.path.canonicalize(target) ==
+                  link.fileSystem.path.canonicalize(path) &&
+              link.existsSync()) {
             continue;
           }
         } on FileSystemException {
