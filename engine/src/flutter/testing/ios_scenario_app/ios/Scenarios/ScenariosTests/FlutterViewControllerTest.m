@@ -159,8 +159,8 @@ FLUTTER_ASSERT_ARC
   // Install as the window's root view controller so it receives a real non-zero
   // safe area. Modal presentation gives safeAreaInsets.top == 0 on iOS 18,
   // so hiding the status bar has nothing to change and the callbacks never fire.
-  AppDelegate* appDelegate = (AppDelegate*)UIApplication.sharedApplication.delegate;
-  UIWindow* window = appDelegate.window;
+  UIWindow* window = SceneDelegate.mainWindowOfFirstConnectedScene;
+  XCTAssertNotNil(window, @"The host app must have a connected scene for test");
   UIViewController* originalRootVC = window.rootViewController;
   [self addTeardownBlock:^{
     window.rootViewController = originalRootVC;
