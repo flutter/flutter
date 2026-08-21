@@ -6,6 +6,14 @@
 
 static const CGFloat kStandardTimeOut = 60.0;
 
+static NSArray<NSString *> *ElementLabels(XCUIElementQuery *query) {
+  NSMutableArray<NSString *> *labels = [[NSMutableArray alloc] init];
+  for (XCUIElement *element in query.allElementsBoundByIndex) {
+    [labels addObject:element.label];
+  }
+  return labels;
+}
+
 @interface XCUIElement(Test)
 @property (nonatomic, readonly) BOOL flt_hasKeyboardFocus;
 - (void)flt_forceTap;
@@ -66,6 +74,101 @@ static const CGFloat kStandardTimeOut = 60.0;
   [platformView tap];
   XCTAssertTrue(platformView.flt_hasKeyboardFocus);
   XCTAssertFalse(flutterTextField.flt_hasKeyboardFocus);
+}
+
+- (void)testReorderableListAccessibilityHierarchyUpdates {
+  // Regression test for https://github.com/flutter/flutter/issues/100946.
+  XCUIElement *entranceButton =
+      self.app.buttons[@"reorderable list semantics test"];
+  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+  [entranceButton tap];
+
+  XCUIElement *item2 = self.app.staticTexts[@"Item 2"];
+  XCUIElement *item4 = self.app.staticTexts[@"Item 4"];
+  XCTAssertTrue([item2 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+  XCTAssertTrue([item4 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+
+  XCUIElementQuery *items = [self.app.staticTexts
+      matchingPredicate:[NSPredicate
+                            predicateWithFormat:@"label MATCHES 'Item [1-4]'"]];
+  NSArray<NSString *> *initialOrder =
+      @[ @"Item 1", @"Item 2", @"Item 3", @"Item 4" ];
+  XCTAssertEqualObjects(ElementLabels(items), initialOrder,
+                        @"The element tree is %@", self.app.debugDescription);
+
+  CGRect item2FrameBeforeReorder = item2.frame;
+  CGRect expectedItem2FrameAfterReorder = item4.frame;
+  XCUICoordinate *dragStart =
+      [item2 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
+  XCUICoordinate *dragEnd =
+      [item4 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
+  [dragStart pressForDuration:1.0 thenDragToCoordinate:dragEnd];
+
+  NSArray<NSString *> *reorderedItems =
+      @[ @"Item 1", @"Item 3", @"Item 4", @"Item 2" ];
+  NSPredicate *hierarchyUpdated =
+      [NSPredicate predicateWithBlock:^BOOL(XCUIElementQuery *query,
+                                            NSDictionary *bindings) {
+        return [ElementLabels(query) isEqualToArray:reorderedItems];
+      }];
+  XCTNSPredicateExpectation *hierarchyExpectation =
+      [[XCTNSPredicateExpectation alloc] initWithPredicate:hierarchyUpdated
+                                                    object:items];
+  XCTWaiterResult result =
+      [XCTWaiter waitForExpectations:@[ hierarchyExpectation ]
+                             timeout:kStandardTimeOut];
+  CGRect item2FrameAfterReorder = item2.frame;
+  XCTAssertEqual(result, XCTWaiterResultCompleted,
+                 @"Item 2 frame before: %@; after: %@. The element tree is %@",
+                 NSStringFromCGRect(item2FrameBeforeReorder),
+                 NSStringFromCGRect(item2FrameAfterReorder),
+                 self.app.debugDescription);
+  XCTAssertEqualObjects(ElementLabels(items), reorderedItems,
+                        @"The element tree is %@", self.app.debugDescription);
+  XCTAssertTrue(
+      CGRectEqualToRect(item2FrameAfterReorder, expectedItem2FrameAfterReorder),
+      @"Expected Item 2 frame %@ after reorder, but found %@. The element tree "
+      @"is %@",
+      NSStringFromCGRect(expectedItem2FrameAfterReorder),
+      NSStringFromCGRect(item2FrameAfterReorder), self.app.debugDescription);
+}
+
+- (void)testDragScreen {
+  XCUIElement *entranceButton = self.app.buttons[@"drag test"];
+  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+  [entranceButton tap];
+
+  XCUIElement *item3 = self.app.staticTexts[@"Item 3"];
+  XCUIElement *item1 = self.app.staticTexts[@"Item 1"];
+  XCTAssertTrue([item3 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+  XCTAssertTrue([item1 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+
+  XCUICoordinate *dragStart =
+      [item3 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
+  XCUICoordinate *dragEnd =
+      [item1 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
+  [dragStart pressForDuration:1.0 thenDragToCoordinate:dragEnd];
+
+  XCUIElement *item2 = self.app.staticTexts[@"Item 2"];
+  XCUIElement *item5 = self.app.staticTexts[@"Item 5"];
+  XCTAssertTrue([item2 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+  XCTAssertTrue([item5 waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
+
+  dragStart = [item2 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
+  dragEnd = [item5 coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.9)];
+  [dragStart pressForDuration:1.0 thenDragToCoordinate:dragEnd];
+
+  XCUIElement *success = self.app.staticTexts[@"Drag Success"];
+  XCTAssertTrue([success waitForExistenceWithTimeout:kStandardTimeOut],
+                @"The element tree is %@", self.app.debugDescription);
 }
 
 - (void)testPlatformViewZOrder {
