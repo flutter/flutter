@@ -215,7 +215,73 @@ Future<List<Plugin>> findPlugins(
       plugins.add(plugin);
     }
   }
-  return plugins;
+  return sortByDependencies(plugins);
+}
+
+/// Sorts [plugins] according to their dependency graph so that dependencies
+/// are listed before dependent plugins.
+///
+/// If multiple plugins have no dependency relationship with each other, they are
+/// sorted alphabetically by name to keep ordering stable and deterministic.
+/// If dependency cycles exist, cycles are broken predictably.
+List<Plugin> sortByDependencies(Iterable<Plugin> plugins) {
+  final pluginMap = <String, Plugin>{for (final Plugin p in plugins) p.name: p};
+  if (pluginMap.length <= 1) {
+    return plugins.toList();
+  }
+
+  final inDegree = <String, int>{};
+  final dependents = <String, List<String>>{
+    for (final String name in pluginMap.keys) name: <String>[],
+  };
+
+  for (final Plugin p in pluginMap.values) {
+    final Set<String> directDeps = p.dependencies
+        .where((String dep) => dep != p.name && pluginMap.containsKey(dep))
+        .toSet();
+    inDegree[p.name] = directDeps.length;
+    for (final dep in directDeps) {
+      dependents[dep]!.add(p.name);
+    }
+  }
+
+  final List<String> available =
+      inDegree.entries
+          .where((MapEntry<String, int> entry) => entry.value == 0)
+          .map((MapEntry<String, int> entry) => entry.key)
+          .toList()
+        ..sort();
+
+  final sortedPlugins = <Plugin>[];
+  final placed = <String>{};
+
+  while (placed.length < pluginMap.length) {
+    if (available.isEmpty) {
+      // Cycle detected among remaining unplaced plugins.
+      // Select the unplaced plugin with smallest in-degree, breaking ties alphabetically.
+      final List<String> unplaced = pluginMap.keys
+          .where((String k) => !placed.contains(k))
+          .toList();
+      unplaced.sort((String a, String b) {
+        final int degComp = inDegree[a]!.compareTo(inDegree[b]!);
+        return degComp != 0 ? degComp : a.compareTo(b);
+      });
+      available.add(unplaced.first);
+    }
+    final String current = available.removeAt(0);
+    if (placed.add(current)) {
+      sortedPlugins.add(pluginMap[current]!);
+      for (final String dependent in dependents[current]!) {
+        inDegree[dependent] = inDegree[dependent]! - 1;
+        if (inDegree[dependent] == 0) {
+          available.add(dependent);
+          available.sort();
+        }
+      }
+    }
+  }
+
+  return sortedPlugins;
 }
 
 /// Plugin resolution type to determine the injection mechanism.
@@ -1310,8 +1376,6 @@ Future<void> refreshPluginsList(
     packageGraph: packageGraph,
     packageConfig: packageConfig,
   );
-  // Sort the plugins by name to keep ordering stable in generated files.
-  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
 
   var swiftPackageManagerEnabledIos = false;
   var swiftPackageManagerEnabledMacos = false;
@@ -1709,9 +1773,8 @@ _resolvePluginImplementationsByPlatform(
     }
   }
 
-  // Sort the plugins by name to keep ordering stable in generated files.
-  final List<Plugin> pluginImplementations = pluginResolution.values.toList()
-    ..sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
+  // Sort the plugins by dependency order to ensure dependencies are initialized first.
+  final List<Plugin> pluginImplementations = sortByDependencies(pluginResolution.values);
   return (pluginImplementations, hasPluginPubspecError, hasResolutionError);
 }
 

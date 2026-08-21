@@ -311,7 +311,6 @@ class BuildSwiftPackage extends BuildSubCommand {
     }
 
     final List<Plugin> plugins = await findPlugins(project);
-    plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
     await pluginSwiftDependencies.processPlugins(
       cacheDirectory: cacheDirectory,
       plugins: plugins,
