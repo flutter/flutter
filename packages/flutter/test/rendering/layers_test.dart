@@ -1018,6 +1018,30 @@ void main() {
 
     expect(platformViewLayer.supportsRasterization(), false);
   });
+
+  test('PlatformViewLayer cannot be a descendant of a filter-based layer', () {
+    final List<ContainerLayer> conflictingLayers = [
+      ImageFilterLayer(),
+      ColorFilterLayer(),
+      ShaderMaskLayer(),
+    ];
+    for (final conflictingLayer in conflictingLayers) {
+      final middleLayer = ContainerLayer();
+      middleLayer.append(PlatformViewLayer(rect: Rect.zero, viewId: 1));
+      expect(
+        () => conflictingLayer.append(middleLayer),
+        throwsA(
+          isA<FlutterError>().having(
+            (error) => error.message,
+            'message',
+            startsWith(
+              'PlatformViewLayer cannot be a descendant of ${conflictingLayer.runtimeType}',
+            ),
+          ),
+        ),
+      );
+    }
+  });
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {
