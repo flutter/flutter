@@ -342,7 +342,7 @@ class Stdio {
   void _safePrint(String message) {
     try {
       print(message);
-    } on Object catch (_) {
+    } on Exception catch (_) {
       // If print also throws (e.g. broken pipe on stdout), we ignore it.
     }
   }
