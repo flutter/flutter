@@ -87,10 +87,13 @@ class LLDB {
   /// Example: Target 0: (Flutter Gallery) stopped.
   static final _targetStoppedPattern = RegExp(r'Target .* stopped.');
 
+  /// LLDB command to continue execution of all threads in the current process.
   static const _processContinueCommand = 'process continue';
 
+  /// LLDB command to show backtraces of all thread call stacks.
   static const _threadBacktraceAllCommand = 'thread backtrace all';
 
+  /// LLDB command to detach from the current target process.
   static const _detachCommand = 'detach';
 
   /// A list of log patterns to ignore.
