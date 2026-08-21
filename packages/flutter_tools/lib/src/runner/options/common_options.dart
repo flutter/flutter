@@ -130,8 +130,6 @@ abstract final class CommonOptions {
   );
 }
 
-/// A bundle encapsulating standard build mode flags (`--debug`, `--profile`, `--release`, `--jit-release`).
-
 /// Typed option descriptors specific to [BuildInfo].
 abstract final class BuildInfoOptions {
   static const trackWidgetCreation = FlagOptionDescriptor(
@@ -260,7 +258,7 @@ abstract final class BuildInfoOptions {
 
   static const extraFrontEndOptions = MultiOptionDescriptor(
     name: FlutterOptions.kExtraFrontEndOptions,
-    aliases: <String>['extra-front-end-options'], // supported for historical reasons
+    aliases: <String>[kExtraFrontEndOptions], // supported for historical reasons
     help:
         'A comma-separated list of additional command line arguments that will be passed directly to the Dart front end. '
         'For example, "--${FlutterOptions.kExtraFrontEndOptions}=--enable-experiment=nonfunction-type-aliases".',
@@ -270,7 +268,7 @@ abstract final class BuildInfoOptions {
 
   static const extraGenSnapshotOptions = MultiOptionDescriptor(
     name: FlutterOptions.kExtraGenSnapshotOptions,
-    aliases: <String>['extra-gen-snapshot-options'], // supported for historical reasons
+    aliases: <String>[kExtraGenSnapshotOptions], // supported for historical reasons
     help:
         'A comma-separated list of additional command line arguments that will be passed directly to the Dart native compiler. '
         '(Requires the "--release", "--profile", or "--jit-release" flag.)',
@@ -313,6 +311,7 @@ class BuildInfoOptionsBundle extends OptionBundle {
   ];
 }
 
+/// A bundle encapsulating standard build mode flags (`--debug`, `--profile`, `--release`, `--jit-release`).
 class BuildModeOptionsBundle extends OptionBundle {
   const BuildModeOptionsBundle({this.defaultToRelease = true});
 

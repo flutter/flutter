@@ -45,6 +45,8 @@ void main() {
         'flavor',
         'codesign',
         'frontend-server-starter-path',
+        'extra-front-end-options',
+        'extra-gen-snapshot-options',
         'initialize-from-dill',
         'assume-initialize-from-dill-up-to-date',
       ]),

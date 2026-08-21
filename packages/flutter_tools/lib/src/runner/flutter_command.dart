@@ -1431,9 +1431,7 @@ abstract class FlutterCommand extends Command<void> {
     // https://github.com/flutter/flutter/issues/142060.
     bool? forcedWebEnableHotReload,
   }) async {
-    final bool trackWidgetCreation =
-        wasParsed(BuildInfoOptions.trackWidgetCreation) &&
-        getValue(BuildInfoOptions.trackWidgetCreation);
+    final bool trackWidgetCreation = getValue(BuildInfoOptions.trackWidgetCreation);
 
     final String? buildNumber = getValue(CommonOptions.buildNumber);
 
@@ -1447,15 +1445,13 @@ abstract class FlutterCommand extends Command<void> {
       throwOnError: false,
     );
 
-    final List<String> experiments = wasParsed(CommonOptions.enableExperiment)
-        ? getValue(CommonOptions.enableExperiment).toList()
-        : <String>[];
-    final List<String> extraGenSnapshotOptions = wasParsed(BuildInfoOptions.extraGenSnapshotOptions)
-        ? getValue(BuildInfoOptions.extraGenSnapshotOptions).toList()
-        : <String>[];
-    final List<String> extraFrontEndOptions = wasParsed(BuildInfoOptions.extraFrontEndOptions)
-        ? getValue(BuildInfoOptions.extraFrontEndOptions).toList()
-        : <String>[];
+    final List<String> experiments = getValue(CommonOptions.enableExperiment).toList();
+    final List<String> extraGenSnapshotOptions = getValue(
+      BuildInfoOptions.extraGenSnapshotOptions,
+    ).toList();
+    final List<String> extraFrontEndOptions = getValue(
+      BuildInfoOptions.extraFrontEndOptions,
+    ).toList();
 
     if (experiments.isNotEmpty) {
       for (final expFlag in experiments) {
@@ -1465,35 +1461,29 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
     String? codeSizeDirectory;
-    if (wasParsed(BuildInfoOptions.analyzeSize) && getValue(BuildInfoOptions.analyzeSize)) {
+    if (getValue(BuildInfoOptions.analyzeSize)) {
       Directory directory = globals.fsUtils.getUniqueDirectory(
         globals.fs.directory(getBuildDirectory()),
         'flutter_size',
       );
-      if (wasParsed(BuildInfoOptions.codeSizeDirectory) &&
-          getValue(BuildInfoOptions.codeSizeDirectory) != null) {
+      if (getValue(BuildInfoOptions.codeSizeDirectory) != null) {
         directory = globals.fs.directory(getValue(BuildInfoOptions.codeSizeDirectory));
       }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
 
-    final bool dartObfuscation =
-        wasParsed(BuildInfoOptions.obfuscate) && getValue(BuildInfoOptions.obfuscate);
+    final bool dartObfuscation = getValue(BuildInfoOptions.obfuscate);
 
     final String? splitDebugInfoPath = getValue(BuildInfoOptions.splitDebugInfo);
 
-    final bool androidGradleDaemon =
-        !wasParsed(BuildInfoOptions.androidGradleDaemon) ||
-        getValue(BuildInfoOptions.androidGradleDaemon);
+    final bool androidGradleDaemon = getValue(BuildInfoOptions.androidGradleDaemon);
 
-    final bool androidSkipBuildDependencyValidation =
-        !wasParsed(BuildInfoOptions.androidSkipBuildDependencyValidation) ||
-        getValue(BuildInfoOptions.androidSkipBuildDependencyValidation);
+    final bool androidSkipBuildDependencyValidation = getValue(
+      BuildInfoOptions.androidSkipBuildDependencyValidation,
+    );
 
-    final List<String> androidProjectArgs = wasParsed(BuildInfoOptions.androidProjectArg)
-        ? getValue(BuildInfoOptions.androidProjectArg)
-        : <String>[];
+    final List<String> androidProjectArgs = getValue(BuildInfoOptions.androidProjectArg);
 
     final String? androidGradleProjectCacheDir = getValue(BuildInfoOptions.androidProjectCacheDir);
 
@@ -1513,10 +1503,7 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final bool treeShakeIcons =
-        wasParsed(CommonOptions.treeShakeIcons) &&
-        buildMode.isPrecompiled &&
-        getValue(CommonOptions.treeShakeIcons);
+    final bool treeShakeIcons = buildMode.isPrecompiled && getValue(CommonOptions.treeShakeIcons);
 
     final String? performanceMeasurementFile = getValue(
       BuildInfoOptions.performanceMeasurementFile,
@@ -1525,8 +1512,7 @@ abstract class FlutterCommand extends Command<void> {
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
-    final bool useCdn =
-        !wasParsed(WebOptions.webResourcesCdn) || getValue(WebOptions.webResourcesCdn);
+    final bool useCdn = getValue(WebOptions.webResourcesCdn);
     var useLocalWebSdk = false;
     if (globalResults?.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ?? false) {
       useLocalWebSdk = stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
@@ -1580,9 +1566,7 @@ abstract class FlutterCommand extends Command<void> {
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,
       initializeFromDill: getValue(BuildInfoOptions.initializeFromDill),
-      assumeInitializeFromDillUpToDate:
-          wasParsed(BuildInfoOptions.assumeInitializeFromDillUpToDate) &&
-          getValue(BuildInfoOptions.assumeInitializeFromDillUpToDate),
+      assumeInitializeFromDillUpToDate: getValue(BuildInfoOptions.assumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
       webEnableHotReload: true,
     );
