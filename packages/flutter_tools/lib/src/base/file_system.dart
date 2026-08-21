@@ -148,60 +148,44 @@ void copyDirectory(
 
   for (final FileSystemEntity entity in srcDir.listSync(followLinks: followLinks)) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
-    if (entity is Link) {
-      final Link newLink = destDir.fileSystem.link(newPath);
-      final FileSystemEntityType destType = destDir.fileSystem.typeSync(
-        newPath,
-        followLinks: false,
-      );
-      if (destType == FileSystemEntityType.link) {
-        newLink.deleteSync();
-      } else if (destType == FileSystemEntityType.file) {
-        destDir.fileSystem.file(newPath).deleteSync();
-      } else if (destType == FileSystemEntityType.directory) {
-        destDir.fileSystem.directory(newPath).deleteSync(recursive: true);
-      }
-      newLink.createSync(entity.targetSync());
-    } else if (entity is File) {
-      final File newFile = destDir.fileSystem.file(newPath);
-      final FileSystemEntityType destType = destDir.fileSystem.typeSync(
-        newPath,
-        followLinks: false,
-      );
-      if (destType == FileSystemEntityType.link) {
+    switch (destDir.fileSystem.typeSync(newPath, followLinks: false)) {
+      case FileSystemEntityType.link:
         destDir.fileSystem.link(newPath).deleteSync();
-      } else if (destType == FileSystemEntityType.directory) {
-        destDir.fileSystem.directory(newPath).deleteSync(recursive: true);
-      }
-      if (shouldCopyFile != null && !shouldCopyFile(entity, newFile)) {
-        continue;
-      }
-      newFile.writeAsBytesSync(entity.readAsBytesSync());
-      onFileCopied?.call(entity, newFile);
-    } else if (entity is Directory) {
-      final Directory newSubDir = destDir.fileSystem.directory(newPath);
-      final FileSystemEntityType destType = destDir.fileSystem.typeSync(
-        newPath,
-        followLinks: false,
-      );
-      if (destType == FileSystemEntityType.link) {
-        destDir.fileSystem.link(newPath).deleteSync();
-      } else if (destType == FileSystemEntityType.file) {
+      case FileSystemEntityType.file when entity is! File:
         destDir.fileSystem.file(newPath).deleteSync();
-      }
-      if (shouldCopyDirectory != null && !shouldCopyDirectory(entity)) {
-        continue;
-      }
-      copyDirectory(
-        entity,
-        newSubDir,
-        shouldCopyFile: shouldCopyFile,
-        onFileCopied: onFileCopied,
-        followLinks: followLinks,
-        shouldCopyDirectory: shouldCopyDirectory,
-      );
-    } else {
-      throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
+      case FileSystemEntityType.directory when entity is! Directory:
+        destDir.fileSystem.directory(newPath).deleteSync(recursive: true);
+      case FileSystemEntityType.file:
+      case FileSystemEntityType.directory:
+      case FileSystemEntityType.notFound:
+      case FileSystemEntityType.pipe:
+      case FileSystemEntityType.unixDomainSock:
+        break;
+    }
+    switch (entity) {
+      case Link():
+        destDir.fileSystem.link(newPath).createSync(entity.targetSync());
+      case File():
+        final File newFile = destDir.fileSystem.file(newPath);
+        if (shouldCopyFile != null && !shouldCopyFile(entity, newFile)) {
+          continue;
+        }
+        newFile.writeAsBytesSync(entity.readAsBytesSync());
+        onFileCopied?.call(entity, newFile);
+      case Directory():
+        if (shouldCopyDirectory != null && !shouldCopyDirectory(entity)) {
+          continue;
+        }
+        copyDirectory(
+          entity,
+          destDir.fileSystem.directory(newPath),
+          shouldCopyFile: shouldCopyFile,
+          onFileCopied: onFileCopied,
+          followLinks: followLinks,
+          shouldCopyDirectory: shouldCopyDirectory,
+        );
+      case _:
+        throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
     }
   }
 }
