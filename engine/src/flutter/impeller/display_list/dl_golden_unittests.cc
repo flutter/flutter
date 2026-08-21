@@ -33,7 +33,7 @@ TEST_P(DlGoldenTest, CanDrawPaint) {
                  const std::vector<std::unique_ptr<DlImage>>& images) {
     canvas->Scale(0.2, 0.2);
     DlPaint paint;
-    paint.setColor(DlColor::kCyan());
+    paint.setColor(DlColor::kYellow());
     canvas->DrawPaint(paint);
   };
 
