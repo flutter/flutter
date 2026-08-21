@@ -9,6 +9,7 @@ import 'package:splash/main.dart' as entrypoint;
 void main() {
   testWidgets('Displays flutter logo and message', (WidgetTester tester) async {
     entrypoint.main();
+    await tester.pump();
 
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(
@@ -19,6 +20,7 @@ void main() {
 
   testWidgets('Uses the original splash palette', (WidgetTester tester) async {
     entrypoint.main();
+    await tester.pump();
 
     // The outermost DecoratedBox is the app background; FlutterLogo builds one
     // of its own further down the tree.
