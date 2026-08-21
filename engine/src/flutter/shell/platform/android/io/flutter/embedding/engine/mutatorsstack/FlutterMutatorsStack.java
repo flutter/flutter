@@ -30,7 +30,8 @@ public class FlutterMutatorsStack {
     CLIP_RRECT,
     CLIP_PATH,
     TRANSFORM,
-    OPACITY
+    OPACITY,
+    STRETCH_EFFECT
   }
 
   /**
@@ -47,6 +48,10 @@ public class FlutterMutatorsStack {
     @Nullable private Path path;
     @Nullable private float[] radiis;
     private float opacity = 1.f;
+    private float overscrollX;
+    private float overscrollY;
+    private float maxStretchIntensity = 1.0f;
+    private float interpolationStrength = 0.7f;
 
     private FlutterMutatorType type;
 
@@ -104,6 +109,26 @@ public class FlutterMutatorsStack {
     }
 
     /**
+     * Initialize a stretch effect mutator.
+     *
+     * @param overscrollX the overscroll amount along the x axis.
+     * @param overscrollY the overscroll amount along the y axis.
+     * @param maxStretchIntensity the maximum stretch intensity.
+     * @param interpolationStrength the interpolation strength.
+     */
+    public FlutterMutator(
+        float overscrollX,
+        float overscrollY,
+        float maxStretchIntensity,
+        float interpolationStrength) {
+      this.type = FlutterMutatorType.STRETCH_EFFECT;
+      this.overscrollX = overscrollX;
+      this.overscrollY = overscrollY;
+      this.maxStretchIntensity = maxStretchIntensity;
+      this.interpolationStrength = interpolationStrength;
+    }
+
+    /**
      * Get the mutator type.
      *
      * @return The type of the mutator.
@@ -147,6 +172,38 @@ public class FlutterMutatorsStack {
     public float getOpacity() {
       return opacity;
     }
+
+    /**
+     * Get the overscroll x of the mutator if the {@link #getType()} returns
+     * FlutterMutatorType.STRETCH_EFFECT.
+     */
+    public float getOverscrollX() {
+      return overscrollX;
+    }
+
+    /**
+     * Get the overscroll y of the mutator if the {@link #getType()} returns
+     * FlutterMutatorType.STRETCH_EFFECT.
+     */
+    public float getOverscrollY() {
+      return overscrollY;
+    }
+
+    /**
+     * Get the max stretch intensity of the mutator if the {@link #getType()} returns
+     * FlutterMutatorType.STRETCH_EFFECT.
+     */
+    public float getMaxStretchIntensity() {
+      return maxStretchIntensity;
+    }
+
+    /**
+     * Get the interpolation strength of the mutator if the {@link #getType()} returns
+     * FlutterMutatorType.STRETCH_EFFECT.
+     */
+    public float getInterpolationStrength() {
+      return interpolationStrength;
+    }
   }
 
   private @NonNull List<FlutterMutator> mutators;
@@ -154,6 +211,10 @@ public class FlutterMutatorsStack {
   private List<Path> finalClippingPaths;
   private Matrix finalMatrix;
   private float finalOpacity;
+  private float finalOverscrollX;
+  private float finalOverscrollY;
+  private float finalMaxStretchIntensity = 1.0f;
+  private float finalInterpolationStrength = 0.7f;
 
   /** Initialize the mutator stack. */
   public FlutterMutatorsStack() {
@@ -239,6 +300,28 @@ public class FlutterMutatorsStack {
   }
 
   /**
+   * Push a stretch effect {@link FlutterMutatorsStack.FlutterMutator} to the stack.
+   *
+   * @param overscrollX the overscroll amount along the x axis.
+   * @param overscrollY the overscroll amount along the y axis.
+   * @param maxStretchIntensity the maximum stretch intensity.
+   * @param interpolationStrength the interpolation strength.
+   */
+  public void pushStretchEffect(
+      float overscrollX,
+      float overscrollY,
+      float maxStretchIntensity,
+      float interpolationStrength) {
+    FlutterMutator mutator =
+        new FlutterMutator(overscrollX, overscrollY, maxStretchIntensity, interpolationStrength);
+    mutators.add(mutator);
+    finalOverscrollX += overscrollX;
+    finalOverscrollY += overscrollY;
+    finalMaxStretchIntensity = maxStretchIntensity;
+    finalInterpolationStrength = interpolationStrength;
+  }
+
+  /**
    * Get a list of all the raw mutators. The 0 index of the returned list is the top of the stack.
    */
   public List<FlutterMutator> getMutators() {
@@ -272,5 +355,25 @@ public class FlutterMutatorsStack {
    */
   public float getFinalOpacity() {
     return finalOpacity;
+  }
+
+  /** Returns the final accumulated overscroll along the x axis. */
+  public float getFinalOverscrollX() {
+    return finalOverscrollX;
+  }
+
+  /** Returns the final accumulated overscroll along the y axis. */
+  public float getFinalOverscrollY() {
+    return finalOverscrollY;
+  }
+
+  /** Returns the final max stretch intensity. */
+  public float getFinalMaxStretchIntensity() {
+    return finalMaxStretchIntensity;
+  }
+
+  /** Returns the final interpolation strength. */
+  public float getFinalInterpolationStrength() {
+    return finalInterpolationStrength;
   }
 }

@@ -2030,6 +2030,103 @@ class ImageFilterLayer extends OffsetLayer {
   }
 }
 
+/// A composite layer that applies an overscroll stretch effect to its children.
+class OverscrollStretchLayer extends OffsetLayer {
+  /// Creates a layer that applies an overscroll stretch effect to its children.
+  OverscrollStretchLayer({
+    ui.ImageFilter? imageFilter,
+    double overscrollX = 0.0,
+    double overscrollY = 0.0,
+    double maxStretchIntensity = 1.0,
+    double interpolationStrength = 0.7,
+    super.offset,
+  }) : _imageFilter = imageFilter,
+       _overscrollX = overscrollX,
+       _overscrollY = overscrollY,
+       _maxStretchIntensity = maxStretchIntensity,
+       _interpolationStrength = interpolationStrength;
+
+  /// The image filter to apply to children.
+  ui.ImageFilter? get imageFilter => _imageFilter;
+  ui.ImageFilter? _imageFilter;
+  set imageFilter(ui.ImageFilter? value) {
+    assert(value != null);
+    if (value != _imageFilter) {
+      _imageFilter = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  /// The horizontal overscroll value.
+  double get overscrollX => _overscrollX;
+  double _overscrollX;
+  set overscrollX(double value) {
+    if (value != _overscrollX) {
+      _overscrollX = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  /// The vertical overscroll value.
+  double get overscrollY => _overscrollY;
+  double _overscrollY;
+  set overscrollY(double value) {
+    if (value != _overscrollY) {
+      _overscrollY = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  /// The maximum stretch intensity multiplier.
+  ///
+  /// Retained for cross-platform support and forward compatibility with future
+  /// shader parameterizations.
+  double get maxStretchIntensity => _maxStretchIntensity;
+  double _maxStretchIntensity;
+  set maxStretchIntensity(double value) {
+    if (value != _maxStretchIntensity) {
+      _maxStretchIntensity = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  /// The interpolation strength used for non-linear smoothing.
+  double get interpolationStrength => _interpolationStrength;
+  double _interpolationStrength;
+  set interpolationStrength(double value) {
+    if (value != _interpolationStrength) {
+      _interpolationStrength = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder) {
+    assert(imageFilter != null);
+    engineLayer = builder.pushOverscrollStretch(
+      imageFilter!,
+      overscrollX: overscrollX,
+      overscrollY: overscrollY,
+      maxStretchIntensity: maxStretchIntensity,
+      interpolationStrength: interpolationStrength,
+      offset: offset,
+      oldLayer: _engineLayer as ui.OverscrollStretchEngineLayer?,
+    );
+    addChildrenToScene(builder);
+    builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('imageFilter', imageFilter));
+    properties.add(DoubleProperty('overscrollX', overscrollX));
+    properties.add(DoubleProperty('overscrollY', overscrollY));
+    properties.add(DoubleProperty('maxStretchIntensity', maxStretchIntensity));
+    properties.add(DoubleProperty('interpolationStrength', interpolationStrength));
+  }
+}
+
 /// A composited layer that applies a given transformation matrix to its
 /// children.
 ///

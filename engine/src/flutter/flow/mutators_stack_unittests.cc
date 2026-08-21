@@ -99,6 +99,19 @@ TEST(MutatorsStack, PushOpacity) {
   ASSERT_TRUE(iter->get()->GetAlpha() == 240);
 }
 
+TEST(MutatorsStack, PushOverscrollStretch) {
+  MutatorsStack stack;
+  stack.PushOverscrollStretch(0.2f, 0.5f, 1.0f, 0.7f);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kOverscrollStretch);
+  const OverscrollStretchMutation& stretch =
+      iter->get()->GetOverscrollStretch();
+  ASSERT_FLOAT_EQ(stretch.overscroll_x, 0.2f);
+  ASSERT_FLOAT_EQ(stretch.overscroll_y, 0.5f);
+  ASSERT_FLOAT_EQ(stretch.max_stretch_intensity, 1.0f);
+  ASSERT_FLOAT_EQ(stretch.interpolation_strength, 0.7f);
+}
+
 TEST(MutatorsStack, PushPlatformViewClipRect) {
   MutatorsStack stack;
   auto rect = DlRect();
@@ -343,6 +356,11 @@ TEST(Mutator, Equality) {
   Mutator mutator6 = Mutator(filter1, DlRect());
   Mutator other_mutator6 = Mutator(filter2, DlRect());
   ASSERT_TRUE(mutator6 == other_mutator6);
+
+  Mutator mutator7 = Mutator(OverscrollStretchMutation(0.2f, 0.5f, 1.0f, 0.7f));
+  Mutator other_mutator7 =
+      Mutator(OverscrollStretchMutation(0.2f, 0.5f, 1.0f, 0.7f));
+  ASSERT_TRUE(mutator7 == other_mutator7);
 }
 
 TEST(Mutator, UnEquality) {
@@ -363,6 +381,11 @@ TEST(Mutator, UnEquality) {
   Mutator mutator3 = Mutator(filter, DlRect());
   Mutator other_mutator3 = Mutator(filter2, DlRect());
   ASSERT_TRUE(mutator3 != other_mutator3);
+
+  Mutator mutator4 = Mutator(OverscrollStretchMutation(0.2f, 0.5f, 1.0f, 0.7f));
+  Mutator other_mutator4 =
+      Mutator(OverscrollStretchMutation(0.3f, 0.5f, 1.0f, 0.7f));
+  ASSERT_TRUE(mutator4 != other_mutator4);
 }
 
 }  // namespace testing

@@ -43,6 +43,7 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   double scale = 1.0;
   Offset translation = Offset.zero;
   bool flippedX = false;
+  double stretchStrength = 0.0;
 
   void _incrementAngle() {
     setState(() {
@@ -80,6 +81,12 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
     });
   }
 
+  void _toggleStretch() {
+    setState(() {
+      stretchStrength = stretchStrength == 0.0 ? 0.5 : 0.0;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -92,23 +99,27 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
       ..scale(scale)
       ..rotateZ(angle * math.pi);
 
-    final Widget transformedView = Transform.flip(
-      flipX: flippedX,
-      child: Transform(
-        transform: transformMatrix,
-        alignment: Alignment.center,
-        child: const Stack(
+    final Widget transformedView = StretchEffect(
+      stretchStrength: stretchStrength,
+      axis: Axis.vertical,
+      child: Transform.flip(
+        flipX: flippedX,
+        child: Transform(
+          transform: transformMatrix,
           alignment: Alignment.center,
-          children: <Widget>[
-            SizedBox(width: 300, height: 500, child: ColoredBox(color: Colors.green)),
-            SizedBox(
-              width: 200,
-              height: 400,
-              child: _HybridCompositionAndroidPlatformView(
-                viewType: 'blue_orange_gradient_platform_view',
+          child: const Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              SizedBox(width: 300, height: 500, child: ColoredBox(color: Colors.green)),
+              SizedBox(
+                width: 200,
+                height: 400,
+                child: _HybridCompositionAndroidPlatformView(
+                  viewType: 'blue_orange_gradient_platform_view',
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -147,6 +158,11 @@ class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
               onPressed: _toggleFlip,
               key: const ValueKey<String>('Flip X'),
               child: const Text('Flip X'),
+            ),
+            TextButton(
+              onPressed: _toggleStretch,
+              key: const ValueKey<String>('Stretch'),
+              child: const Text('Stretch'),
             ),
           ],
         ),
