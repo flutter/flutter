@@ -542,6 +542,69 @@ void main() {
         await subscription.cancel();
       },
     );
+
+    testWithoutContext('logLines supports multiple listeners', () async {
+      final logReader = DesktopLogReader();
+      final receivedLines1 = <String>[];
+      final receivedLines2 = <String>[];
+      final StreamSubscription<String> sub1 = logReader.logLines.listen(receivedLines1.add);
+      final StreamSubscription<String> sub2 = logReader.logLines.listen(receivedLines2.add);
+
+      final fakeVmService = FakeVmService();
+      final fakeFlutterVmService = FakeFlutterVmService(fakeVmService);
+
+      await logReader.provideVmService(fakeFlutterVmService);
+
+      fakeVmService.stdoutController.add(
+        vm_service.Event(
+          bytes: base64.encode(utf8.encode('broadcast line\n')),
+          kind: vm_service.EventKind.kWriteEvent,
+          timestamp: 0,
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(receivedLines1, <String>['broadcast line']);
+      expect(receivedLines2, <String>['broadcast line']);
+
+      await sub1.cancel();
+      await sub2.cancel();
+      logReader.dispose();
+    });
+
+    testWithoutContext('provideVmService cancels previous subscriptions on reconnect', () async {
+      final logReader = DesktopLogReader();
+      final receivedLines = <String>[];
+      final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
+
+      final firstVmService = FakeVmService();
+      await logReader.provideVmService(FakeFlutterVmService(firstVmService));
+
+      final secondVmService = FakeVmService();
+      await logReader.provideVmService(FakeFlutterVmService(secondVmService));
+
+      // Events from old service should no longer be delivered.
+      firstVmService.stdoutController.add(
+        vm_service.Event(
+          bytes: base64.encode(utf8.encode('old service\n')),
+          kind: vm_service.EventKind.kWriteEvent,
+          timestamp: 0,
+        ),
+      );
+      secondVmService.stdoutController.add(
+        vm_service.Event(
+          bytes: base64.encode(utf8.encode('new service\n')),
+          kind: vm_service.EventKind.kWriteEvent,
+          timestamp: 0,
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(receivedLines, <String>['new service']);
+
+      await subscription.cancel();
+      logReader.dispose();
+    });
   });
 
   group('SingleLaunchLogReader', () {

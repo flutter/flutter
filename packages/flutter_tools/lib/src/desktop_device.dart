@@ -376,7 +376,7 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   Stream<String> get logLines {
-    return StreamGroup.merge<String>(<Stream<String>>[
+    return StreamGroup.mergeBroadcast<String>(<Stream<String>>[
       _inputController.stream.transform(utf8LineDecoder),
       _stringController.stream,
     ]);
@@ -403,8 +403,8 @@ class DesktopLogReader extends DeviceLogReader {
       return;
     }
     try {
-      unawaited(connectedVmService.service.streamListen('Debug'));
       await Future.wait(<Future<void>>[
+        connectedVmService.service.streamListen('Debug'),
         connectedVmService.service.streamListen(vm_service.EventStreams.kStdout),
         connectedVmService.service.streamListen(vm_service.EventStreams.kStderr),
       ]);
@@ -419,7 +419,9 @@ class DesktopLogReader extends DeviceLogReader {
       }
     }
 
+    await _stdoutSubscription?.cancel();
     _stdoutSubscription = connectedVmService.service.onStdoutEvent.listen(logMessage);
+    await _stderrSubscription?.cancel();
     _stderrSubscription = connectedVmService.service.onStderrEvent.listen(logMessage);
   }
 }
