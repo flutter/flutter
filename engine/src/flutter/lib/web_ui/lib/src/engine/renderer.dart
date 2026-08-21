@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -111,59 +110,64 @@ abstract class Renderer {
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]);
   ui.SceneBuilder createSceneBuilder();
 
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]);
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix4,
-  ]);
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]);
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float32List? matrix4,
-  ]);
+  );
 
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
-    ui.Rect? bounds,
-  });
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0});
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0});
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
-  });
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
-  });
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  );
 
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  );
+
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  );
+
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
+  });
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY});
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY});
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
+  });
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
+  });
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter});
   BackendColorFilter createColorFilter(EngineColorFilter filter);
   BackendMaskFilter createMaskFilter(EngineMaskFilter filter);
 
@@ -317,12 +321,12 @@ abstract class Renderer {
     });
   }
 
-  ui.ImageShader createImageShader(
-    ui.Image image,
+  BackendImageShader createImageShader(
+    EngineImage image,
     ui.TileMode tmx,
     ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
   );
 
   void clearFragmentProgramCache();

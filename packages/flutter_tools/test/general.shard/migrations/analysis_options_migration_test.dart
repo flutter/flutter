@@ -8,9 +8,12 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/migrations/analysis_options_migration.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+
+const _allPlatforms = <String>['android', 'ios', 'web', 'windows', 'macos', 'linux'];
 
 void main() {
   group('Analysis options migration', () {
@@ -160,6 +163,47 @@ analyzer:
       expect(migratedContents, contains('- linux/**'));
     });
 
+    testWithoutContext(
+      'skipped entirely for a Dart-only package (no flutter dependency)',
+      () async {
+        final _TestContext context = _createTestContext(
+          isFlutterProject: false,
+          platforms: <String>['web'],
+        );
+        const analysisOptionsContents = '''
+include: package:lints/recommended.yaml
+''';
+        context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+        final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+        await migration.migrate();
+
+        expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+        expect(context.testLogger.statusText, isEmpty);
+      },
+    );
+
+    testWithoutContext('only excludes platform directories that actually exist', () async {
+      final _TestContext context = _createTestContext(platforms: <String>['android', 'ios']);
+      const analysisOptionsContents = '''
+include: package:flutter_lints/flutter.yaml
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
+
+      final String migratedContents = context.analysisOptionsFile.readAsStringSync();
+      expect(migratedContents, contains('- build/**'));
+      expect(migratedContents, contains('- android/**'));
+      expect(migratedContents, contains('- ios/**'));
+      expect(migratedContents, isNot(contains('- web/**')));
+      expect(migratedContents, isNot(contains('- windows/**')));
+      expect(migratedContents, isNot(contains('- macos/**')));
+      expect(migratedContents, isNot(contains('- linux/**')));
+    });
+
     testWithoutContext('migrates and preserves comments inside exclude list', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
@@ -202,6 +246,228 @@ analyzer:
       expect(migratedContents, contains('macos/**'));
       expect(migratedContents, contains('linux/**'));
     });
+
+    testWithoutContext('skipped if exclusions are inherited via relative include', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
+include: shared_options.yaml
+''';
+      const sharedOptionsContents = '''
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+      context.memoryFileSystem.file('shared_options.yaml').writeAsStringSync(sharedOptionsContents);
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
+
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if exclusions are inherited via package include', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
+include: package:shared_options/analysis_options.yaml
+''';
+      const sharedOptionsContents = '''
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+      final Directory sharedPackageDir = context.memoryFileSystem.directory('/shared_options');
+      final File sharedOptionsFile = sharedPackageDir.childFile('lib/analysis_options.yaml');
+      sharedOptionsFile.createSync(recursive: true);
+      sharedOptionsFile.writeAsStringSync(sharedOptionsContents);
+
+      final packageConfig = FakePackageConfig(<String, Uri>{
+        'shared_options': sharedPackageDir.childDirectory('lib').uri,
+      });
+
+      final migration = AnalysisOptionsMigration(
+        context.mockProject,
+        context.testLogger,
+        packageConfig: packageConfig,
+      );
+      await migration.migrate();
+
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if exclusions are inherited via multiple includes', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
+include:
+  - shared_options_1.yaml
+  - shared_options_2.yaml
+''';
+      const sharedOptions1Contents = '''
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+''';
+      const sharedOptions2Contents = '''
+analyzer:
+  exclude:
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+      context.memoryFileSystem
+          .file('shared_options_1.yaml')
+          .writeAsStringSync(sharedOptions1Contents);
+      context.memoryFileSystem
+          .file('shared_options_2.yaml')
+          .writeAsStringSync(sharedOptions2Contents);
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
+
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('handles cyclic includes without crashing', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
+include: shared_options_1.yaml
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+''';
+      const sharedOptions1Contents = '''
+include: shared_options_2.yaml
+''';
+      const sharedOptions2Contents = '''
+include: shared_options_1.yaml
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+      context.memoryFileSystem
+          .file('shared_options_1.yaml')
+          .writeAsStringSync(sharedOptions1Contents);
+      context.memoryFileSystem
+          .file('shared_options_2.yaml')
+          .writeAsStringSync(sharedOptions2Contents);
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+
+      // Should not throw StackOverflowError or hang
+      await migration.migrate();
+
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('handles invalid exclude types without crashing', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+    - 123 # Invalid exclude type (int)
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+
+      // Should not throw TypeError
+      await migration.migrate();
+
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('handles unreadable include file without crashing', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
+include: some_dir
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+      // Create 'some_dir' as a directory so reading it throws FileSystemException
+      context.memoryFileSystem.directory('some_dir').createSync();
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
+
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('handles cyclic includes with different casing without crashing', () async {
+      final _TestContext context = _createTestContext();
+      const analysisOptionsContents = '''
+include: shared_options.yaml
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+''';
+      const sharedOptionsContents = '''
+include: SHARED_OPTIONS.YAML
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+      context.memoryFileSystem.file('shared_options.yaml').writeAsStringSync(sharedOptionsContents);
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
+
+      expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+      expect(context.testLogger.statusText, isEmpty);
+    });
   });
 }
 
@@ -209,17 +475,63 @@ typedef _TestContext = ({
   MemoryFileSystem memoryFileSystem,
   File analysisOptionsFile,
   BufferLogger testLogger,
-  FakeFlutterProject mockProject,
+  FlutterProject mockProject,
 });
 
-_TestContext _createTestContext() {
+/// Builds a test context backed by a real [FlutterProject] view of an
+/// in-memory directory, so that platform existence checks (`android.existsSync()`,
+/// etc.) reflect the directories actually created here, matching production
+/// behavior instead of being separately mocked.
+_TestContext _createTestContext({
+  bool isFlutterProject = true,
+  List<String> platforms = _allPlatforms,
+}) {
   final memoryFileSystem = MemoryFileSystem.test();
-  final File analysisOptionsFile = memoryFileSystem.file('analysis_options.yaml');
+  final Directory projectDirectory = memoryFileSystem.currentDirectory;
+  final File analysisOptionsFile = projectDirectory.childFile('analysis_options.yaml');
   final testLogger = BufferLogger(
     terminal: Terminal.test(),
     outputPreferences: OutputPreferences.test(),
   );
-  final mockProject = FakeFlutterProject(directory: memoryFileSystem.currentDirectory);
+
+  projectDirectory
+      .childFile('pubspec.yaml')
+      .writeAsStringSync(
+        isFlutterProject
+            ? '''
+name: test_project
+dependencies:
+  flutter:
+    sdk: flutter
+'''
+            : '''
+name: test_project
+''',
+      );
+
+  if (platforms.contains('android')) {
+    projectDirectory.childDirectory('android').createSync(recursive: true);
+  }
+  if (platforms.contains('ios')) {
+    projectDirectory.childDirectory('ios').createSync(recursive: true);
+  }
+  if (platforms.contains('web')) {
+    projectDirectory.childDirectory('web').childFile('index.html').createSync(recursive: true);
+  }
+  if (platforms.contains('windows')) {
+    projectDirectory
+        .childDirectory('windows')
+        .childFile('CMakeLists.txt')
+        .createSync(recursive: true);
+  }
+  if (platforms.contains('macos')) {
+    projectDirectory.childDirectory('macos').createSync(recursive: true);
+  }
+  if (platforms.contains('linux')) {
+    projectDirectory.childDirectory('linux').createSync(recursive: true);
+  }
+
+  final FlutterProject mockProject = FlutterProject.fromDirectoryTest(projectDirectory);
   return (
     memoryFileSystem: memoryFileSystem,
     analysisOptionsFile: analysisOptionsFile,
@@ -228,9 +540,27 @@ _TestContext _createTestContext() {
   );
 }
 
-class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject({required this.directory});
+class FakePackageConfig extends Fake implements PackageConfig {
+  FakePackageConfig(this._packages);
+
+  final Map<String, Uri> _packages;
 
   @override
-  final Directory directory;
+  Uri? resolve(Uri packageUri) {
+    if (packageUri.scheme != 'package') {
+      return null;
+    }
+    final String path = packageUri.path;
+    final int slashIndex = path.indexOf('/');
+    if (slashIndex == -1) {
+      return null;
+    }
+    final String packageName = path.substring(0, slashIndex);
+    final String packagePath = path.substring(slashIndex + 1);
+    final Uri? packageRoot = _packages[packageName];
+    if (packageRoot == null) {
+      return null;
+    }
+    return packageRoot.resolve(packagePath);
+  }
 }

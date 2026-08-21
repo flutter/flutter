@@ -840,7 +840,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     final uisceneCrashInterceptor = LogInterceptor(
       identifier: 'uiscene_crash',
       pattern: RegExp(r'UIScene life\s?cycle is required'),
-      action: () {
+      action: (String message) {
         throwToolExit(kUISceneMigrationRequiredError);
       },
       excludeFromStream: false,

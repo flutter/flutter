@@ -25,6 +25,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.7"
+  analysis_server_plugin:
+    dependency: transitive
+    description:
+      name: analysis_server_plugin
+      sha256: "63a41a9c0e12574c39f0207a193f8bdb65c78aa1d791c98f0aee6a91c4387df4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.9"
   analyzer:
     dependency: "direct main"
     description:
@@ -33,6 +41,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.1.0"
+  analyzer_plugin:
+    dependency: transitive
+    description:
+      name: analyzer_plugin
+      sha256: "383e9d91be2ae8ab4a423656f1b39152d2ac5aaa88051d4bc178f89d071a90e0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.14.3"
+  analyzer_testing:
+    dependency: transitive
+    description:
+      name: analyzer_testing
+      sha256: "2cdc399ca5110d9059b0ef3c73a25d8d5357318d9057bf68e5358a013b5e9c4d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   animations:
     dependency: "direct main"
     description:
@@ -1124,6 +1148,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.18"
+  test_reflective_loader:
+    dependency: transitive
+    description:
+      name: test_reflective_loader
+      sha256: d828d5ca15179aaac2aaf8f510cf0a52ec28e0031681b044ec5e581a4b8002e7
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
   typed_data:
     dependency: "direct main"
     description:
