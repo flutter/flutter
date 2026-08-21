@@ -63,7 +63,7 @@ abstract final class WebOptions {
     defaultsTo: true,
     help:
         'Use WebAssembly, CanvasKit, and other web resources from a content delivery network (CDN).\n'
-        'Set to --no-web-resources-cdn to embed all web resources locally in the built app.',
+        'Set to "--no-web-resources-cdn" to embed all web resources locally in the built app.',
   );
 
   static const optimizationLevel = StringOptionDescriptor(
