@@ -28,9 +28,11 @@ double _getHue(double red, double green, double blue, double max, double delta) 
 }
 
 double _lerpHue(double a, double b, double t) {
-  double delta = (b - a) % 360.0;
+  double delta = b - a;
   if (delta > 180.0) {
     delta -= 360.0;
+  } else if (delta < -180.0) {
+    delta += 360.0;
   }
   return (a + delta * t) % 360.0;
 }

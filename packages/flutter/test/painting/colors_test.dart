@@ -192,6 +192,20 @@ void main() {
     expect(at(300.0, 60.0, -0.5).hue, moreOrLessEquals(240.0));
   });
 
+  test('HSVColor lerps antipodal hues reversibly.', () {
+    HSVColor at(double startHue, double endHue, double t) => HSVColor.lerp(
+      HSVColor.fromAHSV(1.0, startHue, 1.0, 1.0),
+      HSVColor.fromAHSV(1.0, endHue, 1.0, 1.0),
+      t,
+    )!;
+
+    expect(at(0.0, 180.0, 0.5).hue, moreOrLessEquals(90.0));
+    expect(at(180.0, 0.0, 0.5).hue, moreOrLessEquals(90.0));
+
+    expect(at(60.0, 240.0, 0.75).hue, moreOrLessEquals(195.0));
+    expect(at(240.0, 60.0, 0.25).hue, moreOrLessEquals(195.0));
+  });
+
   test('HSVColor lerps saturation correctly.', () {
     final output = <Color>[];
     const startColor = HSVColor.fromAHSV(1.0, 0.0, 0.0, 1.0);
@@ -460,6 +474,20 @@ void main() {
 
     expect(at(300.0, 60.0, 1.5).hue, moreOrLessEquals(120.0));
     expect(at(300.0, 60.0, -0.5).hue, moreOrLessEquals(240.0));
+  });
+
+  test('HSLColor lerps antipodal hues reversibly.', () {
+    HSLColor at(double startHue, double endHue, double t) => HSLColor.lerp(
+      HSLColor.fromAHSL(1.0, startHue, 0.5, 0.5),
+      HSLColor.fromAHSL(1.0, endHue, 0.5, 0.5),
+      t,
+    )!;
+
+    expect(at(0.0, 180.0, 0.5).hue, moreOrLessEquals(90.0));
+    expect(at(180.0, 0.0, 0.5).hue, moreOrLessEquals(90.0));
+
+    expect(at(60.0, 240.0, 0.75).hue, moreOrLessEquals(195.0));
+    expect(at(240.0, 60.0, 0.25).hue, moreOrLessEquals(195.0));
   });
 
   test('HSLColor lerps saturation correctly.', () {
