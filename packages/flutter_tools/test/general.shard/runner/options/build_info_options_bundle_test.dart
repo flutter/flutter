@@ -1,6 +1,9 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/runner/options/common_options.dart';
 import 'package:test/test.dart';
 
 class DummyCommand extends FlutterCommand {
@@ -22,8 +25,8 @@ class DummyCommand extends FlutterCommand {
 
 void main() {
   test('BuildInfoOptionsBundle registers all descriptors successfully', () {
-    final DummyCommand command = DummyCommand();
-    final CommandRunner<void> runner = CommandRunner<void>('test', 'test');
+    final command = DummyCommand();
+    final runner = CommandRunner<void>('test', 'test');
     runner.addCommand(command);
 
     // Verify all keys are present in the argParser
