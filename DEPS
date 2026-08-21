@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': '09b1b810850a58d4973c9f9e9dbc983fae2bbe6f',
+  'skia_revision': '2c25efd2e3691106c9a0d8d22c9710e7ff7e9af6',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
