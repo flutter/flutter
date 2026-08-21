@@ -4,11 +4,11 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/widgets/widget_state/widget_state_mouse_cursor.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets('ListTile displays correct mouse cursor when disabled', (

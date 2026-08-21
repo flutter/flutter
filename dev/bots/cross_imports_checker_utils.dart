@@ -56,8 +56,14 @@ enum LibraryCrossImportStatementType {
   /// A cross import of the Material library.
   material('Material', "import 'package:flutter/material.dart'"),
 
+  /// A cross import of the material_ui package.
+  materialUI('MaterialUI', "import 'package:material_ui/material_ui.dart'"),
+
   /// A cross import of the Cupertino library.
-  cupertino('Cupertino', "import 'package:flutter/cupertino.dart'");
+  cupertino('Cupertino', "import 'package:flutter/cupertino.dart'"),
+
+  /// A cross import of the cupertino_ui package.
+  cupertinoUI('CupertinoUI', "import 'package:cupertino_ui/cupertino_ui.dart'");
 
   const LibraryCrossImportStatementType(this.readableName, this.importString);
 
@@ -109,12 +115,16 @@ Map<CrossImportCheckedLibrary, CrossImportingFiles> getCrossImports(
       for (final LibraryCrossImportStatementType importStatement
           in LibraryCrossImportStatementType.values) {
         switch (importStatement) {
-          case .cupertino:
+          case .cupertino || .cupertinoUI:
             if (!entry.key.canImport(importStatement) &&
                 contents.contains(importStatement.importString)) {
               cupertinoImports.add(file);
             }
-          case .material:
+            if (!entry.key.canImport(importStatement) &&
+                contents.contains(importStatement.importString)) {
+              cupertinoImports.add(file);
+            }
+          case .material || .materialUI:
             if (!entry.key.canImport(importStatement) &&
                 contents.contains(importStatement.importString)) {
               materialImports.add(file);

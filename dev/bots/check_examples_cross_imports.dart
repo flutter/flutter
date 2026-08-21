@@ -600,6 +600,35 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.0_test.dart',
     'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.1_test.dart',
     'packages/flutter/examples/api/test/widgets/selectable_region/selectable_region.0_test.dart',
+    'examples/image_list/lib/main.dart',
+    'examples/layers/test/gestures_test.dart',
+    'examples/layers/widgets/spinning_mixed.dart',
+    'examples/layers/widgets/sectors.dart',
+    'examples/layers/widgets/media_query.dart',
+    'examples/layers/widgets/styled_text.dart',
+    'examples/layers/widgets/gestures.dart',
+    'examples/layers/rendering/touch_input.dart',
+    'examples/layers/services/isolate.dart',
+    'examples/multiple_windows/test/multiple_windows_test.dart',
+    'examples/multiple_windows/lib/main.dart',
+    'examples/multiple_windows/lib/app/popup_window_content.dart',
+    'examples/multiple_windows/lib/app/window_content.dart',
+    'examples/multiple_windows/lib/app/popup_button.dart',
+    'examples/multiple_windows/lib/app/window_edit_dialog.dart',
+    'examples/multiple_windows/lib/app/popup_window_edit_dialog.dart',
+    'examples/multiple_windows/lib/app/rotated_wire_cube.dart',
+    'examples/multiple_windows/lib/app/main_window.dart',
+    'examples/multiple_windows/lib/app/window_settings_dialog.dart',
+    'examples/multiple_windows/lib/app/tooltip_window_edit_dialog.dart',
+    'examples/multiple_windows/lib/app/dialog_window_content.dart',
+    'examples/multiple_windows/lib/app/dialog_window_edit_dialog.dart',
+    'examples/multiple_windows/lib/app/tooltip_button.dart',
+    'examples/multiple_windows/lib/app/tooltip_window_content.dart',
+    'examples/platform_channel/lib/main.dart',
+    'examples/platform_channel_swift/lib/main.dart',
+    'examples/platform_view/lib/main.dart',
+    'examples/splash/test/splash_test.dart',
+    'examples/splash/lib/main.dart',
     'examples/texture/lib/main.dart',
   };
 
@@ -1066,6 +1095,9 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
         : 'The following $filesCount files in $libraryName have a disallowed import of $importedLibraryName. '
               'Refactor them or move them to the $importedLibraryName examples.\n';
   }
+
+  @override
+  String toString() => '_ExamplesLibrary(libraryName:$libraryName)';
 }
 
 /// Any API example - not related to Material or Cupertino - inside
@@ -1151,7 +1183,9 @@ final class _SampleTemplatesLibraryFile extends _ExamplesLibrary {
   bool canImport(LibraryCrossImportStatementType import) {
     return switch (import) {
       LibraryCrossImportStatementType.material => _filePath.contains('material'),
+      LibraryCrossImportStatementType.materialUI => _filePath.contains('material'),
       LibraryCrossImportStatementType.cupertino => _filePath.contains('cupertino'),
+      LibraryCrossImportStatementType.cupertinoUI => _filePath.contains('cupertino'),
     };
   }
 }

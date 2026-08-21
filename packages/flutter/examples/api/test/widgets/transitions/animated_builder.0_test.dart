@@ -4,10 +4,10 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/widgets/transitions/animated_builder.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets('Rotates text and container', (WidgetTester tester) async {

@@ -6,7 +6,7 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Flutter code sample for a [RawMenuAnchor] that animates a simple menu using
 /// [RawMenuAnchor.onOpenRequested] and [RawMenuAnchor.onCloseRequested].
