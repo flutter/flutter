@@ -445,7 +445,8 @@ FLUTTER_DARWIN_EXPORT
  *
  * Typically this is set when the app is backgrounded and foregrounded.
  */
-@property(nonatomic, assign) BOOL isGpuDisabled;
+@property(nonatomic, assign) BOOL isGpuDisabled FLUTTER_DEPRECATED(
+    "This property is managed by the engine and will be removed from the public API.");
 
 @end
 

@@ -90,7 +90,6 @@ class MockDelegate : public PlatformView::Delegate {
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -526,7 +525,6 @@ class MockDelegate : public PlatformView::Delegate {
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());

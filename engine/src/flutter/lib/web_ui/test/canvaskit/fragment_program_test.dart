@@ -279,12 +279,14 @@ void testMain() {
     expect(program.name, 'test');
 
     {
-      final shader = program.fragmentShader() as CkFragmentShader;
+      final shader =
+          (program.fragmentShader() as EngineFragmentShader).getBackendShader(ui.FilterQuality.none)
+              as CkFragmentShader;
 
       shader.setFloat(0, 4);
       expect(reason: 'SkShaders are created lazily', shader.ref, isNull);
 
-      final SkShader skShader = shader.getSkShader(ui.FilterQuality.none);
+      final SkShader skShader = shader.skShader;
       final CkUniqueRef<SkShader> ref = shader.ref!;
       expect(skShader, same(ref.nativeObject));
       expect(ref.isDisposed, false);
@@ -296,18 +298,19 @@ void testMain() {
     }
 
     {
-      final shader = program.fragmentShader() as CkFragmentShader;
+      final shader =
+          (program.fragmentShader() as EngineFragmentShader).getBackendShader(ui.FilterQuality.none)
+              as CkFragmentShader;
       shader.setFloat(0, 5);
 
-      final SkShader skShader1 = shader.getSkShader(ui.FilterQuality.none);
+      final SkShader skShader1 = shader.skShader;
       final CkUniqueRef<SkShader> ref1 = shader.ref!;
 
-      final SkShader skShader2 = shader.getSkShader(ui.FilterQuality.none);
+      final SkShader skShader2 = shader.skShader;
       final CkUniqueRef<SkShader> ref2 = shader.ref!;
       expect(ref1, isNot(same(ref2)));
       expect(
-        reason:
-            'getSkShader creates a new shader every time. Old references should be disposed of.',
+        reason: 'skShader creates a new shader every time. Old references should be disposed of.',
         ref1.isDisposed,
         true,
       );
