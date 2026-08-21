@@ -141,26 +141,24 @@ void main() {
     parent.explicitChildNode = true;
 
     TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
+    layout(parent, phase: EnginePhase.flushSemantics);
 
-    expect(() {
-      layout(parent, phase: EnginePhase.flushSemantics);
+    // Exclude `child` from the semantics tree while its geometry is dirty,
+    // leaving its geometry marked dirty (blocked).
+    middle1.markNeedsLayout();
+    middle2.markNeedsLayout();
+    child.markNeedsLayout();
+    final child2 = RenderBlockSemanticsBoundary();
+    parent.add(child2);
+    pumpFrame(phase: EnginePhase.flushSemantics);
 
-      // Exclude `child` from the semantics tree while its geometry is dirty,
-      // leaving its geometry marked dirty (blocked).
-      middle1.markNeedsLayout();
-      middle2.markNeedsLayout();
-      child.markNeedsLayout();
-      final child2 = RenderBlockSemanticsBoundary();
-      parent.add(child2);
-      pumpFrame(phase: EnginePhase.flushSemantics);
-
-      // Re-include `child` while its geometry is still dirty. This drives the
-      // geometry-update enqueue in `updateChildren`.
-      middle1.markNeedsLayout();
-      child.markNeedsLayout();
-      parent.remove(child2);
-      pumpFrame(phase: EnginePhase.flushSemantics);
-    }, returnsNormally);
+    // Re-include `child` while its geometry is still dirty. This drives the
+    // geometry-update enqueue in `updateChildren`.
+    middle1.markNeedsLayout();
+    child.markNeedsLayout();
+    parent.remove(child2);
+    pumpFrame(phase: EnginePhase.flushSemantics);
+    // Does not crash.
   });
 
   test('Skip update for invisible child being dropped from tree', () {
