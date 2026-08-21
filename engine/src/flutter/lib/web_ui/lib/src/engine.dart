@@ -30,6 +30,7 @@ export 'engine/canvaskit/canvas.dart';
 export 'engine/canvaskit/canvaskit_api.dart';
 export 'engine/canvaskit/color_filter.dart';
 export 'engine/canvaskit/fonts.dart';
+export 'engine/canvaskit/fragment_shader.dart';
 export 'engine/canvaskit/image.dart';
 export 'engine/canvaskit/image_filter.dart';
 export 'engine/canvaskit/mask_filter.dart';
