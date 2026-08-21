@@ -786,6 +786,47 @@ void main() {
     );
 
     testUsingContext(
+      'getBuildInfo default flag values with options registered',
+      () async {
+        final command = DummyAllBuildOptionsFlutterCommand();
+        await createTestCommandRunner(command).run(<String>['dummy']);
+
+        final BuildInfo debugBuildInfo = await command.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(debugBuildInfo.trackWidgetCreation, isTrue);
+        expect(debugBuildInfo.androidSkipBuildDependencyValidation, isFalse);
+
+        final BuildInfo releaseBuildInfo = await command.getBuildInfo(
+          forcedBuildMode: BuildMode.release,
+        );
+        expect(releaseBuildInfo.treeShakeIcons, isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'getBuildInfo respects historical ExtraFrontEndOptions and ExtraGenSnapshotOptions aliases',
+      () async {
+        final command = DummyAllBuildOptionsFlutterCommand();
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['dummy', '--ExtraFrontEndOptions=--foo', '--ExtraGenSnapshotOptions=--bar']);
+
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.release);
+        expect(buildInfo.extraFrontEndOptions, contains('--foo'));
+        expect(buildInfo.extraGenSnapshotOptions, contains('--bar'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'use fileSystemScheme to generate BuildInfo',
       () async {
         final flutterCommand = DummyFlutterCommand(fileSystemScheme: 'foo');
@@ -2300,5 +2341,14 @@ class DummyMachineFlutterCommand extends DummyFlutterCommand {
 class DummyHcppFlutterCommand extends DummyFlutterCommand {
   DummyHcppFlutterCommand() : super(name: 'dummy') {
     addEnableHcppFlag(verboseHelp: false);
+  }
+}
+
+class DummyAllBuildOptionsFlutterCommand extends DummyFlutterCommand {
+  DummyAllBuildOptionsFlutterCommand() : super(name: 'dummy') {
+    usesTrackWidgetCreation(verboseHelp: false);
+    addTreeShakeIconsFlag();
+    usesExtraDartFlagOptions(verboseHelp: false);
+    addAndroidSpecificBuildOptions();
   }
 }
