@@ -194,6 +194,17 @@ abstract class InheritedModel<T> extends InheritedWidget {
       return context.dependOnInheritedWidgetOfExactType<T>();
     }
 
+    // Fast path: the nearest model supports the aspect, which is always the
+    // case when isSupportedAspect is not overridden.
+    final InheritedElement? nearestModel = context.getElementForInheritedWidgetOfExactType<T>();
+    if (nearestModel == null) {
+      return null;
+    }
+    assert(nearestModel.widget is T);
+    if ((nearestModel.widget as T).isSupportedAspect(aspect)) {
+      return context.dependOnInheritedElement(nearestModel, aspect: aspect) as T;
+    }
+
     // Create a dependency on all of the type T ancestor models up until
     // a model is found for which isSupportedAspect(aspect) is true.
     final models = <InheritedElement>[];
