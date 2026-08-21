@@ -693,10 +693,10 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   /// File extensions that may legitimately be requested from the project and
-  // Flutter SDK roots for source-map resolution.
+  /// Flutter SDK roots for source-map resolution.
   static const _sourceMapExtensions = <String>{'.dart', '.map'};
 
-  // Attempt to resolve `path` to a dart file.
+  /// Attempts to resolve [path] to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
