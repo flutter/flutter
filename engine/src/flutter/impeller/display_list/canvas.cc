@@ -2142,15 +2142,9 @@ bool Canvas::AttemptBlurredTextOptimization(
           FilterInput::Make(text_contents),
           /*is_solid_color=*/true, GetCurrentTransform());
 
-  std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
-  TextFrameFingerprint fingerprint =
-      maybe_glyph.has_value()
-          ? TextFrameFingerprint{.full_hash = PackGlyphId(maybe_glyph.value())}
-          : ComputeTextFrameFingerprint(*text_frame);
+  TextFrameFingerprint fingerprint = ComputeTextFrameFingerprint(*text_frame);
   TextShadowCache::TextShadowCacheKey cache_key(
       /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
-      /*p_is_single_glyph=*/maybe_glyph.has_value(),
-      /*p_font=*/text_frame->GetFont(),
       /*p_sigma=*/paint.mask_blur_descriptor->sigma,
       /*p_color=*/paint.color,
       /*p_fingerprint=*/fingerprint);
@@ -2174,7 +2168,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
   Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
-  if (max_scale * text_frame->GetFont().GetMetrics().point_size >
+  if (max_scale * text_frame->GetRuns()[0].GetFont().GetMetrics().point_size >
       kMaxTextScale) {
     fml::StatusOr<flutter::DlPath> path = text_frame->GetPath();
     if (path.ok()) {
