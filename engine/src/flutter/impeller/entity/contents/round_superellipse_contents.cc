@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/entity/contents/complex_rse_contents.h"
+#include "impeller/entity/contents/round_superellipse_contents.h"
 
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
@@ -16,23 +16,22 @@ namespace {
 using PipelineBuilderCallback =
     std::function<PipelineRef(ContentContextOptions)>;
 
-using VS = ComplexRSEPipeline::VertexShader;
-using FS = ComplexRSEPipeline::FragmentShader;
+using VS = RoundSuperellipsePipeline::VertexShader;
+using FS = RoundSuperellipsePipeline::FragmentShader;
 
 }  // namespace
 
-std::unique_ptr<ComplexRoundedSuperellipseContents>
-ComplexRoundedSuperellipseContents::Make(
+std::unique_ptr<RoundSuperellipseContents> RoundSuperellipseContents::Make(
     Color color,
     const Rect& bounds,
     const RoundSuperellipseParam& round_superellipse_params,
     std::optional<StrokeParameters> stroke) {
-  return std::unique_ptr<ComplexRoundedSuperellipseContents>(
-      new ComplexRoundedSuperellipseContents(
-          color, bounds, round_superellipse_params, stroke));
+  return std::unique_ptr<RoundSuperellipseContents>(
+      new RoundSuperellipseContents(color, bounds, round_superellipse_params,
+                                    stroke));
 }
 
-ComplexRoundedSuperellipseContents::ComplexRoundedSuperellipseContents(
+RoundSuperellipseContents::RoundSuperellipseContents(
     Color color,
     const Rect& bounds,
     const RoundSuperellipseParam& round_superellipse_params,
@@ -48,9 +47,9 @@ ComplexRoundedSuperellipseContents::ComplexRoundedSuperellipseContents(
   }
 }
 
-bool ComplexRoundedSuperellipseContents::Render(const ContentContext& renderer,
-                                                const Entity& entity,
-                                                RenderPass& pass) const {
+bool RoundSuperellipseContents::Render(const ContentContext& renderer,
+                                       const Entity& entity,
+                                       RenderPass& pass) const {
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   Point center = bounds_.GetCenter();
@@ -58,11 +57,17 @@ bool ComplexRoundedSuperellipseContents::Render(const ContentContext& renderer,
   RoundSuperellipseParam::Quadrant top_right =
       round_superellipse_params_.top_right;
   RoundSuperellipseParam::Quadrant bottom_right =
-      round_superellipse_params_.bottom_right;
+      round_superellipse_params_.all_corners_same
+          ? top_right
+          : round_superellipse_params_.bottom_right;
   RoundSuperellipseParam::Quadrant bottom_left =
-      round_superellipse_params_.bottom_left;
+      round_superellipse_params_.all_corners_same
+          ? top_right
+          : round_superellipse_params_.bottom_left;
   RoundSuperellipseParam::Quadrant top_left =
-      round_superellipse_params_.top_left;
+      round_superellipse_params_.all_corners_same
+          ? top_right
+          : round_superellipse_params_.top_left;
 
   Point top_right_center_relative = top_right.offset - center;
   Point bottom_right_center_relative = bottom_right.offset - center;
@@ -79,6 +84,8 @@ bool ComplexRoundedSuperellipseContents::Render(const ContentContext& renderer,
   frag_info.size = size;
   frag_info.stroked = stroke_ ? 1.0f : 0.0f;
   frag_info.stroke_width = stroke_ ? stroke_->width : 0.0f;
+  frag_info.all_corners_same =
+      round_superellipse_params_.all_corners_same ? 1.0f : 0.0f;
 
   frag_info.superellipse_degrees_top =
       Vector4(bottom_right.top.se_n, top_right.top.se_n, bottom_left.top.se_n,
@@ -147,7 +154,7 @@ bool ComplexRoundedSuperellipseContents::Render(const ContentContext& renderer,
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
-        return renderer.GetComplexRSEPipeline(options);
+        return renderer.GetRoundSuperellipsePipeline(options);
       };
 
   return ColorSourceContents::DrawGeometry<VS>(
@@ -160,12 +167,12 @@ bool ComplexRoundedSuperellipseContents::Render(const ContentContext& renderer,
       });
 }
 
-std::optional<Rect> ComplexRoundedSuperellipseContents::GetCoverage(
+std::optional<Rect> RoundSuperellipseContents::GetCoverage(
     const Entity& entity) const {
   return GetGeometry()->GetCoverage(entity.GetTransform());
 }
 
-const Geometry* ComplexRoundedSuperellipseContents::GetGeometry() const {
+const Geometry* RoundSuperellipseContents::GetGeometry() const {
   return geometry_.get();
 }
 

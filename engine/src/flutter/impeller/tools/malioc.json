@@ -649,10 +649,10 @@
       }
     }
   },
-  "flutter/impeller/entity/complex_rse.frag.vkspv": {
+  "flutter/impeller/entity/round_superellipse.frag.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/complex_rse.frag.vkspv",
+      "filename": "flutter/impeller/entity/round_superellipse.frag.vkspv",
       "has_side_effects": false,
       "has_uniform_computation": true,
       "modifies_coverage": false,
@@ -2859,10 +2859,10 @@
       }
     }
   },
-  "flutter/impeller/entity/gles/complex_rse.frag.gles": {
+  "flutter/impeller/entity/gles/round_superellipse.frag.gles": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/gles/complex_rse.frag.gles",
+      "filename": "flutter/impeller/entity/gles/round_superellipse.frag.gles",
       "has_side_effects": false,
       "has_uniform_computation": true,
       "modifies_coverage": false,
@@ -2933,7 +2933,7 @@
     },
     "Mali-T880": {
       "core": "Mali-T880",
-      "filename": "flutter/impeller/entity/gles/complex_rse.frag.gles",
+      "filename": "flutter/impeller/entity/gles/round_superellipse.frag.gles",
       "has_uniform_computation": false,
       "type": "Fragment",
       "variants": {
