@@ -141,7 +141,7 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
       /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
       /*stroke=*/std::nullopt);
 
-  ASSERT_NE(maybe_params, std::nullopt);
+  ASSERT_TRUE(maybe_params.has_value());
   auto params = maybe_params.value();
 
   EXPECT_EQ(params.type,
@@ -189,7 +189,7 @@ TEST(UberSDFParametersTest, MakeRectangularRoundedSuperellipse) {
       /*color=*/Color::Red(), /*round_superellipse=*/round_superellipse,
       /*stroke=*/std::nullopt);
 
-  ASSERT_NE(maybe_params, std::nullopt);
+  ASSERT_TRUE(maybe_params.has_value());
   auto params = maybe_params.value();
 
   EXPECT_EQ(params.type,
