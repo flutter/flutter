@@ -87,14 +87,15 @@ abstract class OptionDescriptor<T> {
 
   ArgResults? _resolveTargetResults(ArgResults? results, ArgResults? globalResults) {
     return switch (scope) {
-      OptionScope.local => results,
-      OptionScope.global => globalResults,
-      OptionScope.any =>
-        (results != null && results.options.contains(name) && results.wasParsed(name))
-            ? results
-            : (globalResults ?? results),
+      .local => results,
+      .global => globalResults,
+      .any when results?.options.contains(name) == true && results!.wasParsed(name) => results,
+      .any => globalResults ?? results,
     };
   }
+
+  bool _computeEffectiveHide({required bool verboseHelp, bool? hideOverride}) =>
+      hideOverride ?? (hide || (verboseOnly && !verboseHelp));
 
   void _throwConflictError(String name, OptionDescriptor<Object?>? existing) {
     final existingInfo = existing != null
@@ -142,7 +143,10 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
       _throwConflictError(name, existing);
     }
 
-    final bool effectiveHide = hideOverride ?? (hide || (verboseOnly && !verboseHelp));
+    final bool effectiveHide = _computeEffectiveHide(
+      verboseHelp: verboseHelp,
+      hideOverride: hideOverride,
+    );
 
     parser.addOption(
       name,
@@ -205,7 +209,10 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
       }
       _throwConflictError(name, existing);
     }
-    final bool effectiveHide = hideOverride ?? (hide || (verboseOnly && !verboseHelp));
+    final bool effectiveHide = _computeEffectiveHide(
+      verboseHelp: verboseHelp,
+      hideOverride: hideOverride,
+    );
     parser.addFlag(
       name,
       abbr: abbr,
@@ -258,7 +265,10 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
       }
       _throwConflictError(name, existing);
     }
-    final bool effectiveHide = hideOverride ?? (hide || (verboseOnly && !verboseHelp));
+    final bool effectiveHide = _computeEffectiveHide(
+      verboseHelp: verboseHelp,
+      hideOverride: hideOverride,
+    );
     parser.addFlag(
       name,
       abbr: abbr,
@@ -317,7 +327,10 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       }
       _throwConflictError(name, existing);
     }
-    final bool effectiveHide = hideOverride ?? (hide || (verboseOnly && !verboseHelp));
+    final bool effectiveHide = _computeEffectiveHide(
+      verboseHelp: verboseHelp,
+      hideOverride: hideOverride,
+    );
     parser.addMultiOption(
       name,
       abbr: abbr,

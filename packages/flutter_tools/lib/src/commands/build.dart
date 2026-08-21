@@ -174,8 +174,7 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand({required this.logger, required bool verboseHelp})
-    : super(verboseHelp: verboseHelp) {
+  BuildSubCommand({required this.logger, required super.verboseHelp}) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
