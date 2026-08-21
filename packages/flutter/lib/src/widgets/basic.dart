@@ -7615,27 +7615,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// the semantics subtree. Otherwise, the subtree remains untouched.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.IgnorePointer.ignoringSemantics}
-/// The usages of [ignoringSemantics] are deprecated and not recommended. This
-/// property was introduced to workaround the semantics behavior of the
-/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
-///
-/// Before that version, entire semantics subtree is dropped if [ignoring] is
-/// true. Developers can only use [ignoringSemantics] to preserver the semantics
-/// subtrees.
-///
-/// After that version, with [ignoring] set to true, it only prevents semantics
-/// user actions in the semantics subtree but leaves the other
-/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
-/// longer needed.
-///
-/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
-/// the subtree will be invisible to assistive technologies.
-///
-/// If [ignoringSemantics] is false, the semantics subtree is collected as
-/// usual.
-/// {@endtemplate}
-///
 /// See also:
 ///
 ///  * [AbsorbPointer], which also prevents its children from receiving pointer
@@ -7643,16 +7622,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///  * [SliverIgnorePointer], the sliver version of this widget.
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
-  const IgnorePointer({
-    super.key,
-    this.ignoring = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    super.child,
-  });
+  const IgnorePointer({super.key, this.ignoring = true, super.child});
 
   /// Whether this widget is ignored during hit testing.
   ///
@@ -7664,37 +7634,20 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Defaults to true.
   final bool ignoring;
 
-  /// Whether the semantics of this widget is ignored when compiling the
-  /// semantics subtree.
-  ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderIgnorePointer createRenderObject(BuildContext context) {
-    return RenderIgnorePointer(ignoring: ignoring, ignoringSemantics: ignoringSemantics);
+    return RenderIgnorePointer(ignoring: ignoring);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
-    renderObject
-      ..ignoring = ignoring
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.ignoring = ignoring;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 
@@ -7705,9 +7658,6 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// during layout and paints its child as usual. It just prevents its children
 /// from being the target of located events, because it returns true from
 /// [RenderBox.hitTest].
-///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools).
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
@@ -7729,43 +7679,13 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// the semantics subtree. Otherwise, the subtree remains untouched.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.AbsorbPointer.ignoringSemantics}
-/// The usages of [ignoringSemantics] are deprecated and not recommended. This
-/// property was introduced to workaround the semantics behavior of the
-/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
-///
-/// Before that version, entire semantics subtree is dropped if [absorbing] is
-/// true. Developers can only use [ignoringSemantics] to preserver the semantics
-/// subtrees.
-///
-/// After that version, with [absorbing] set to true, it only prevents semantics
-/// user actions in the semantics subtree but leaves the other
-/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
-/// longer needed.
-///
-/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
-/// the subtree will be invisible to assistive technologies.
-///
-/// If [ignoringSemantics] is false, the semantics subtree is collected as
-/// usual.
-/// {@endtemplate}
-///
 /// See also:
 ///
 ///  * [IgnorePointer], which also prevents its children from receiving pointer
 ///    events but is itself invisible to hit testing.
 class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that absorbs pointers during hit testing.
-  const AbsorbPointer({
-    super.key,
-    this.absorbing = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    super.child,
-  });
+  const AbsorbPointer({super.key, this.absorbing = true, super.child});
 
   /// Whether this widget absorbs pointers during hit testing.
   ///
@@ -7778,37 +7698,20 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Defaults to true.
   final bool absorbing;
 
-  /// Whether the semantics of this render object is ignored when compiling the
-  /// semantics tree.
-  ///
-  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderAbsorbPointer createRenderObject(BuildContext context) {
-    return RenderAbsorbPointer(absorbing: absorbing, ignoringSemantics: ignoringSemantics);
+    return RenderAbsorbPointer(absorbing: absorbing);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderAbsorbPointer renderObject) {
-    renderObject
-      ..absorbing = absorbing
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.absorbing = absorbing;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('absorbing', absorbing));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 
