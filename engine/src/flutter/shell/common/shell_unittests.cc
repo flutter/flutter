@@ -4490,6 +4490,53 @@ TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
+TEST_F(ShellTest, PointerPacketsAreDispatchedSynchronouslyWhenOnUIThread) {
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  EXPECT_EQ(task_runners.GetPlatformTaskRunner(),
+            task_runners.GetUITaskRunner());
+  auto shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [](Shell& shell) {
+            return std::make_unique<::testing::NiceMock<TestPlatformView>>(
+                shell, shell.GetTaskRunners());
+          },
+  });
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("testDispatchEvents");
+
+  RunEngine(shell.get(), std::move(configuration));
+  fml::CountDownLatch latch(1);
+  bool did_invoke_callback = false;
+  AddFfiNativeCallback(
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { did_invoke_callback = true; }));
+
+  bool callback_was_invoked_before_dispatch_returned = false;
+  task_runners.GetPlatformTaskRunner()->PostTask([&] {
+    auto packet = std::make_unique<PointerDataPacket>(1);
+    packet->SetPointerData(0, PointerData{
+                                  .change = PointerData::Change::kHover,
+                                  .physical_x = 23,
+                              });
+    shell->GetPlatformView()->DispatchPointerDataPacket(std::move(packet));
+    callback_was_invoked_before_dispatch_returned = did_invoke_callback;
+    latch.CountDown();
+  });
+
+  latch.Wait();
+  EXPECT_TRUE(callback_was_invoked_before_dispatch_returned);
+
+  DestroyShell(std::move(shell), task_runners);
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
 TEST_F(ShellTest, DiesIfSoftwareRenderingAndImpellerAreEnabledDeathTest) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Fuchsia";
