@@ -15,12 +15,10 @@ import com.flutter.gradle.FlutterPluginUtils.getLegacyAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.isBuiltAsApp
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
 import com.android.build.api.dsl.BuildType as DslBuildType
-import com.android.build.gradle.internal.dsl.BuildType as InternalDslBuildType
 
 /**
  * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
