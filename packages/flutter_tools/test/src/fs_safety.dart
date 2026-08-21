@@ -37,26 +37,34 @@ bool _isDangerousDirectory(String dirPath) {
   return false;
 }
 
-String _canonicalizeWithSymlinks(String entityPath) {
-  String current = path.canonicalize(entityPath);
-  var suffix = '';
-  while (current != '/' && current != '.' && current.isNotEmpty) {
-    try {
-      final String resolved = io.Directory(current).resolveSymbolicLinksSync();
-      return path.canonicalize(path.join(resolved, suffix));
-    } on Object catch (_) {}
-    final String parent = path.dirname(current);
-    if (parent == current) {
-      break;
+/// Canonicalizes [p] and normalizes standard root symlink aliases on macOS.
+///
+/// On macOS (Darwin), system root directories `/var`, `/tmp`, and `/etc` are
+/// symlinks to `/private/var`, `/private/tmp`, and `/private/etc` respectively
+/// (with Darwin per-user `$TMPDIR` located under `/var/folders/...`).
+///
+/// Normalizing these prefixes at the string level ensures consistent prefix
+/// matching against the resolved temporary directory without performing costly
+/// filesystem syscalls (`resolveSymbolicLinksSync`) or failing when validating
+/// paths to files/directories that do not exist yet.
+String _canonicalize(String p) {
+  final String canonical = path.canonicalize(p);
+  if (io.Platform.isMacOS) {
+    if (canonical.startsWith('/var/') || canonical == '/var') {
+      return '/private$canonical';
     }
-    suffix = suffix.isEmpty ? path.basename(current) : path.join(path.basename(current), suffix);
-    current = parent;
+    if (canonical.startsWith('/tmp/') || canonical == '/tmp') {
+      return '/private$canonical';
+    }
+    if (canonical.startsWith('/etc/') || canonical == '/etc') {
+      return '/private$canonical';
+    }
   }
-  return path.canonicalize(entityPath);
+  return canonical;
 }
 
 bool _isAllowedPath(String entityPath) {
-  final String canonicalEntity = _canonicalizeWithSymlinks(entityPath);
+  final String canonicalEntity = _canonicalize(entityPath);
 
   // Allow system temp
   String canonicalTemp;
@@ -64,7 +72,7 @@ bool _isAllowedPath(String entityPath) {
   if (currentOverrides is FSGuardIOOverrides) {
     canonicalTemp = currentOverrides._canonicalSystemTemp;
   } else {
-    canonicalTemp = path.canonicalize(io.Directory.systemTemp.path);
+    canonicalTemp = _canonicalize(io.Directory.systemTemp.path);
   }
 
   if (path.isWithin(canonicalTemp, canonicalEntity) || canonicalEntity == canonicalTemp) {
@@ -596,9 +604,9 @@ final class FSGuardIOOverrides extends io.IOOverrides {
         ? _parent.getSystemTempDirectory()
         : super.getSystemTempDirectory();
     try {
-      return path.canonicalize(rawTemp.resolveSymbolicLinksSync());
+      return _canonicalize(rawTemp.resolveSymbolicLinksSync());
     } on Object catch (_) {
-      return path.canonicalize(rawTemp.path);
+      return _canonicalize(rawTemp.path);
     }
   }();
 
