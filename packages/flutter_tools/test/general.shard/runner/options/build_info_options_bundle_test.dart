@@ -29,24 +29,25 @@ void main() {
     final runner = CommandRunner<void>('test', 'test');
     runner.addCommand(command);
 
-    // Verify all keys are present in the argParser
-    expect(command.argParser.options.containsKey('track-widget-creation'), isTrue);
-    expect(command.argParser.options.containsKey('analyze-size'), isTrue);
-    expect(command.argParser.options.containsKey('code-size-directory'), isTrue);
-    expect(command.argParser.options.containsKey('obfuscate'), isTrue);
-    expect(command.argParser.options.containsKey('split-debug-info'), isTrue);
-    expect(command.argParser.options.containsKey('android-gradle-daemon'), isTrue);
-    expect(command.argParser.options.containsKey('android-project-arg'), isTrue);
-    expect(command.argParser.options.containsKey('android-project-cache-dir'), isTrue);
     expect(
-      command.argParser.options.containsKey('android-skip-build-dependency-validation'),
-      isTrue,
+      command.argParser.options.keys,
+      containsAll(<String>[
+        'track-widget-creation',
+        'analyze-size',
+        'code-size-directory',
+        'obfuscate',
+        'split-debug-info',
+        'android-gradle-daemon',
+        'android-project-arg',
+        'android-project-cache-dir',
+        'android-skip-build-dependency-validation',
+        'performance-measurement-file',
+        'flavor',
+        'codesign',
+        'frontend-server-starter-path',
+        'initialize-from-dill',
+        'assume-initialize-from-dill-up-to-date',
+      ]),
     );
-    expect(command.argParser.options.containsKey('performance-measurement-file'), isTrue);
-    expect(command.argParser.options.containsKey('flavor'), isTrue);
-    expect(command.argParser.options.containsKey('codesign'), isTrue);
-    expect(command.argParser.options.containsKey('frontend-server-starter-path'), isTrue);
-    expect(command.argParser.options.containsKey('initialize-from-dill'), isTrue);
-    expect(command.argParser.options.containsKey('assume-initialize-from-dill-up-to-date'), isTrue);
   });
 }
