@@ -1299,6 +1299,7 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
+  bool forceSwiftPM = false,
   PubspecCache? pubspecCache,
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
@@ -1314,7 +1315,10 @@ Future<void> refreshPluginsList(
 
   var swiftPackageManagerEnabledIos = false;
   var swiftPackageManagerEnabledMacos = false;
-  if (!forceCocoaPodsOnly) {
+  if (forceSwiftPM) {
+    swiftPackageManagerEnabledIos = true;
+    swiftPackageManagerEnabledMacos = true;
+  } else if (!forceCocoaPodsOnly) {
     if (iosPlatform) {
       swiftPackageManagerEnabledIos = project.ios.usesSwiftPackageManager;
     }
