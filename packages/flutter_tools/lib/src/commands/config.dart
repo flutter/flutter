@@ -28,8 +28,6 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   final bool _verboseHelp;
 
   var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
-  var _extensionFeatureFlags = const <FeatureFlag>[];
-  var _extensionConfigOptions = const <ConfigOption>[];
 
   @override
   void populateBaseArgParser(ArgParser parser) {
@@ -111,44 +109,46 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   @override
   Future<void> initializeDynamicOptions() async {
     if (await _activeExtensionConfig case final activeConfig?) {
-      final List<ExtensionSettingsGroup> groups = await activeConfig.fetchExtensionSettings();
-      _extensionSettingsGroups = groups;
-      _extensionFeatureFlags = <FeatureFlag>[for (final g in groups) ...g.featureFlags];
-      _extensionConfigOptions = <ConfigOption>[for (final g in groups) ...g.configOptions];
+      _extensionSettingsGroups = await activeConfig.fetchExtensionSettings();
     }
   }
 
   @override
   String? get extensionArgParserCacheKey {
-    if (_extensionFeatureFlags.isEmpty && _extensionConfigOptions.isEmpty) {
+    if (_extensionSettingsGroups.isEmpty) {
       return null;
     }
     final names = <String>[
-      for (final f in _extensionFeatureFlags) f.name,
-      for (final o in _extensionConfigOptions) o.name,
+      for (final ExtensionSettingsGroup(:featureFlags, :configOptions)
+          in _extensionSettingsGroups) ...[
+        for (final FeatureFlag(:name) in featureFlags) name,
+        for (final ConfigOption(:name) in configOptions) name,
+      ],
     ]..sort();
-    return names.join(',');
+    return names.isEmpty ? null : names.join(',');
   }
 
   @override
   ArgParser buildDynamicArgParser(ArgParser baseParser) {
     final ArgParser newParser = ExtensionArgParserMixin.cloneParser(baseParser);
-    for (final FeatureFlag flag in _extensionFeatureFlags) {
-      if (!newParser.options.containsKey(flag.name)) {
-        newParser.addFlag(flag.name, help: flag.help, defaultsTo: flag.enabledByDefault);
-      } else {
-        globals.printTrace(
-          'Extension feature flag "${flag.name}" conflicts with an existing option and was skipped.',
-        );
+    for (final ExtensionSettingsGroup(:featureFlags, :configOptions) in _extensionSettingsGroups) {
+      for (final FeatureFlag(:name, :help, :enabledByDefault) in featureFlags) {
+        if (!newParser.options.containsKey(name)) {
+          newParser.addFlag(name, help: help, defaultsTo: enabledByDefault);
+        } else {
+          globals.printTrace(
+            'Extension feature flag "$name" conflicts with an existing option and was skipped.',
+          );
+        }
       }
-    }
-    for (final ConfigOption option in _extensionConfigOptions) {
-      if (!newParser.options.containsKey(option.name)) {
-        newParser.addOption(option.name, help: option.help, defaultsTo: option.value);
-      } else {
-        globals.printTrace(
-          'Extension config option "${option.name}" conflicts with an existing option and was skipped.',
-        );
+      for (final ConfigOption(:name, :help, :value) in configOptions) {
+        if (!newParser.options.containsKey(name)) {
+          newParser.addOption(name, help: help, defaultsTo: value);
+        } else {
+          globals.printTrace(
+            'Extension config option "$name" conflicts with an existing option and was skipped.',
+          );
+        }
       }
     }
     return newParser;
@@ -212,11 +212,13 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         }
       }
       final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
-      final List<FeatureFlag> flags = _extensionFeatureFlags.isNotEmpty
-          ? _extensionFeatureFlags
-          : await activeConfig?.fetchFeatureFlags() ?? const <FeatureFlag>[];
-      for (final flag in flags) {
-        globals.config.removeValue(flag.name);
+      final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
+          ? _extensionSettingsGroups
+          : await activeConfig?.fetchExtensionSettings() ?? const <ExtensionSettingsGroup>[];
+      for (final ExtensionSettingsGroup(:featureFlags) in groups) {
+        for (final FeatureFlag(:name) in featureFlags) {
+          globals.config.removeValue(name);
+        }
       }
       globals.printStatus(requireReloadTipText);
       return FlutterCommandResult.success();
@@ -280,17 +282,18 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       }
     }
 
-    for (final FeatureFlag flag in _extensionFeatureFlags) {
-      if (argResults!.wasParsed(flag.name)) {
-        final bool keyValue = boolArg(flag.name);
-        globals.config.setValue(flag.name, keyValue);
-        globals.printStatus('Setting "${flag.name}" value to "$keyValue".');
+    for (final ExtensionSettingsGroup(:featureFlags, :configOptions) in _extensionSettingsGroups) {
+      for (final FeatureFlag(:name) in featureFlags) {
+        if (argResults!.wasParsed(name)) {
+          final bool keyValue = boolArg(name);
+          globals.config.setValue(name, keyValue);
+          globals.printStatus('Setting "$name" value to "$keyValue".');
+        }
       }
-    }
-
-    for (final ConfigOption option in _extensionConfigOptions) {
-      if (argResults!.wasParsed(option.name)) {
-        _updateConfig(option.name, stringArg(option.name));
+      for (final ConfigOption(:name) in configOptions) {
+        if (argResults!.wasParsed(name)) {
+          _updateConfig(name, stringArg(name));
+        }
       }
     }
 
@@ -373,18 +376,19 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         : (await activeConfig?.fetchExtensionSettings()) ?? const <ExtensionSettingsGroup>[];
     if (groups.any((ExtensionSettingsGroup g) => g.isNotEmpty)) {
       buffer.writeln('\nExtension Settings:');
-      for (final group in groups) {
-        if (group.isEmpty) {
+      for (final ExtensionSettingsGroup(:title, :featureFlags, :configOptions, :isEmpty)
+          in groups) {
+        if (isEmpty) {
           continue;
         }
-        buffer.writeln('  ${group.title}:');
-        for (final FeatureFlag flag in group.featureFlags) {
-          final Object val = globals.config.getValue(flag.name) ?? flag.enabledByDefault;
-          buffer.writeln('    ${flag.name}: $val');
+        buffer.writeln('  $title:');
+        for (final FeatureFlag(:name, :enabledByDefault) in featureFlags) {
+          final Object val = globals.config.getValue(name) ?? enabledByDefault;
+          buffer.writeln('    $name: $val');
         }
-        for (final ConfigOption option in group.configOptions) {
-          final Object val = globals.config.getValue(option.name) ?? option.value ?? '(Not set)';
-          buffer.writeln('    ${option.name}: $val');
+        for (final ConfigOption(:name, :value) in configOptions) {
+          final Object val = globals.config.getValue(name) ?? value ?? '(Not set)';
+          buffer.writeln('    $name: $val');
         }
       }
     }
