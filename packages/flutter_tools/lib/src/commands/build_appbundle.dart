@@ -122,7 +122,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       exitWithNoSdkMessage();
     }
     final androidBuildInfo = AndroidBuildInfo(
-      await getBuildInfo(),
+      await getBuildInfo(forcedTargetPlatform: TargetPlatform.android),
       targetArchs: stringsArg('target-platform').map<CpuArch>(getCpuArchForName),
     );
     // Do all setup verification that doesn't involve loading units. Checks that
