@@ -694,7 +694,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
   // File extensions that may legitimately be requested from the project and
   // Flutter SDK roots for source-map resolution.
-  static const Set<String> _sourceMapExtensions = <String>{'.dart', '.map'};
+  static const _sourceMapExtensions = <String>{'.dart', '.map'};
 
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
@@ -711,37 +711,34 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     }
 
     final String extension = fileSystem.path.extension(path);
-
-    // If this is a dart file, it must be on the local file system and is
-    // likely coming from a source map request. The tool doesn't currently
-    // consider the case of Dart files as assets.
     if (_sourceMapExtensions.contains(extension)) {
+      // If this is a dart file, it must be on the local file system and is
+      // likely coming from a source map request. The tool doesn't currently
+      // consider the case of Dart files as assets.
       final File dartFile = fileSystem.file(fileSystem.currentDirectory.uri.resolve(path));
       if (dartFile.existsSync()) {
         return dartFile;
       }
-    }
 
-    final List<String> segments = path.split('/');
-    if (segments.first.isEmpty) {
-      segments.removeAt(0);
-    }
+      final List<String> segments = path.split('/');
+      if (segments.first.isEmpty) {
+        segments.removeAt(0);
+      }
 
-    // The file might have been a package file which is signaled by a
-    // `/packages/<package>/<path>` request.
-    if (segments.first == 'packages' && _sourceMapExtensions.contains(extension)) {
-      final Uri? filePath = _packages.resolve(
-        Uri(scheme: 'package', pathSegments: segments.skip(1)),
-      );
-      if (filePath != null) {
-        final File packageFile = fileSystem.file(filePath);
-        if (packageFile.existsSync()) {
-          return packageFile;
+      // The file might have been a package file which is signaled by a
+      // `/packages/<package>/<path>` request.
+      if (segments.first == 'packages') {
+        final Uri? filePath = _packages.resolve(
+          Uri(scheme: 'package', pathSegments: segments.skip(1)),
+        );
+        if (filePath != null) {
+          final File packageFile = fileSystem.file(filePath);
+          if (packageFile.existsSync()) {
+            return packageFile;
+          }
         }
       }
-    }
 
-    if (_sourceMapExtensions.contains(extension)) {
       // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
       final Directory dartSdkParent = fileSystem
           .directory(
