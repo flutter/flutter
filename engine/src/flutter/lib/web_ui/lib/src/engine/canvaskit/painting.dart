@@ -5,17 +5,8 @@
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../color_filter.dart';
-import '../shader_data.dart';
-import '../vector_math.dart';
-import 'canvaskit_api.dart';
-import 'color_filter.dart';
-import 'image_filter.dart';
-import 'mask_filter.dart';
-import 'native_memory.dart';
-import 'shader.dart';
 
 /// The implementation of [ui.Paint] used by the CanvasKit backend.
 ///
@@ -40,34 +31,54 @@ class CkPaint implements ui.Paint {
     skPaint.setColorInt(_colorValue);
     skPaint.setStrokeMiter(strokeMiterLimit);
 
-    final ManagedSkColorFilter? effectiveColorFilter = _effectiveColorFilter;
-    if (effectiveColorFilter != null) {
-      skPaint.setColorFilter(effectiveColorFilter.skiaObject);
+    final EngineColorFilter? colorFilter = _engineColorFilter;
+    SkColorFilter? composedSkColorFilter;
+    if (invertColors) {
+      final SkColorFilter invertSkColorFilter =
+          (EngineColorFilter.invert.backendFilter as CkColorFilter).skiaObject;
+      if (colorFilter != null) {
+        composedSkColorFilter = canvasKit.ColorFilter.MakeCompose(
+          invertSkColorFilter,
+          (colorFilter.backendFilter as CkColorFilter).skiaObject,
+        );
+        skPaint.setColorFilter(composedSkColorFilter);
+      } else {
+        skPaint.setColorFilter(invertSkColorFilter);
+      }
+    } else if (colorFilter != null) {
+      skPaint.setColorFilter((colorFilter.backendFilter as CkColorFilter).skiaObject);
     }
 
-    final CkShader? shader = _shader;
+    final shader = _shader?.getBackendShader(filterQuality) as CkShader?;
     if (shader != null) {
-      skPaint.setShader(shader.getSkShader(filterQuality));
+      skPaint.setShader(shader.skShader);
       if (shader.isGradient) {
         skPaint.setDither(true);
       }
     }
 
-    final ui.MaskFilter? localMaskFilter = maskFilter;
+    final localMaskFilter = maskFilter as EngineMaskFilter?;
     if (localMaskFilter != null) {
       // CanvasKit returns `null` if the sigma is `0` or infinite.
       if (localMaskFilter.webOnlySigma.isFinite && localMaskFilter.webOnlySigma > 0) {
-        skPaint.setMaskFilter(
-          createBlurSkMaskFilter(localMaskFilter.webOnlyBlurStyle, localMaskFilter.webOnlySigma),
-        );
+        final backendFilter = localMaskFilter.backendFilter as CkMaskFilter;
+        skPaint.setMaskFilter(backendFilter.skiaObject);
       }
     }
 
-    final CkManagedSkImageFilterConvertible? localImageFilter = _imageFilter;
+    final EngineImageFilter? localImageFilter = _imageFilter;
     if (localImageFilter != null) {
-      localImageFilter.withSkImageFilter((skImageFilter) {
+      final backendFilter =
+          localImageFilter.getBackendFilter(defaultBlurTileMode: defaultBlurTileMode)
+              as CkImageFilter;
+      final SkImageFilter? skImageFilter = backendFilter.nativeFilter;
+      if (skImageFilter != null) {
         skPaint.setImageFilter(skImageFilter);
-      }, defaultBlurTileMode: defaultBlurTileMode);
+      }
+    }
+
+    if (composedSkColorFilter != null) {
+      composedSkColorFilter.delete();
     }
 
     return skPaint;
@@ -105,30 +116,10 @@ class CkPaint implements ui.Paint {
   bool get invertColors => _invertColors;
   @override
   set invertColors(bool value) {
-    if (value == _invertColors) {
-      return;
-    }
-    if (!value) {
-      _effectiveColorFilter = _originalColorFilter;
-      _originalColorFilter = null;
-    } else {
-      _originalColorFilter = _effectiveColorFilter;
-      if (_effectiveColorFilter == null) {
-        _effectiveColorFilter = _invertColorFilter;
-      } else {
-        _effectiveColorFilter = ManagedSkColorFilter(
-          CkComposeColorFilter(_invertColorFilter, _effectiveColorFilter!),
-        );
-      }
-    }
     _invertColors = value;
   }
 
   bool _invertColors = false;
-  // The original color filter before we inverted colors. If we set
-  // `invertColors` back to `false`, then restore this filter rather than
-  // invert the color filter again.
-  ManagedSkColorFilter? _originalColorFilter;
 
   @override
   ui.Shader? get shader => _shader;
@@ -137,10 +128,10 @@ class CkPaint implements ui.Paint {
     if (_shader == value) {
       return;
     }
-    _shader = value as CkShader?;
+    _shader = value as EngineShader?;
   }
 
-  CkShader? _shader;
+  EngineShader? _shader;
 
   @override
   ui.MaskFilter? maskFilter;
@@ -153,37 +144,11 @@ class CkPaint implements ui.Paint {
 
   @override
   set colorFilter(ui.ColorFilter? value) {
-    if (_engineColorFilter == value) {
-      return;
-    }
     _engineColorFilter = value as EngineColorFilter?;
-    _originalColorFilter = null;
-    if (value == null) {
-      _effectiveColorFilter = null;
-    } else {
-      final CkColorFilter ckColorFilter = createCkColorFilter(value)!;
-      _effectiveColorFilter = ManagedSkColorFilter(ckColorFilter);
-    }
-
-    if (invertColors) {
-      _originalColorFilter = _effectiveColorFilter;
-      if (_effectiveColorFilter == null) {
-        _effectiveColorFilter = _invertColorFilter;
-      } else {
-        _effectiveColorFilter = ManagedSkColorFilter(
-          CkComposeColorFilter(_invertColorFilter, _effectiveColorFilter!),
-        );
-      }
-    }
   }
 
   /// The original color filter objects passed by the framework.
   EngineColorFilter? _engineColorFilter;
-
-  /// The effective color filter.
-  ///
-  /// This is a combination of the `colorFilter` and `invertColors` properties.
-  ManagedSkColorFilter? _effectiveColorFilter;
 
   @override
   double strokeMiterLimit = 4.0;
@@ -197,13 +162,13 @@ class CkPaint implements ui.Paint {
     }
 
     if (value is ui.ColorFilter) {
-      _imageFilter = createCkColorFilter(value as EngineColorFilter);
+      _imageFilter = EngineColorFilterImageFilter(colorFilter: value as EngineColorFilter);
     } else {
-      _imageFilter = value as CkManagedSkImageFilterConvertible?;
+      _imageFilter = value as EngineImageFilter?;
     }
   }
 
-  CkManagedSkImageFilterConvertible? _imageFilter;
+  EngineImageFilter? _imageFilter;
 
   // Must be kept in sync with the default in paint.cc.
   static const double _kStrokeMiterLimitDefault = 4.0;
@@ -285,17 +250,6 @@ class CkPaint implements ui.Paint {
   }
 }
 
-final Float32List _invertColorMatrix = Float32List.fromList(const <double>[
-  -1.0, 0, 0, 1.0, 0, // row
-  0, -1.0, 0, 1.0, 0, // row
-  0, 0, -1.0, 1.0, 0, // row
-  1.0, 1.0, 1.0, 1.0, 0,
-]);
-
-final ManagedSkColorFilter _invertColorFilter = ManagedSkColorFilter(
-  CkMatrixColorFilter(_invertColorMatrix),
-);
-
 class CkFragmentProgram implements ui.FragmentProgram {
   CkFragmentProgram(this.name, this.effect, this.uniforms, this.floatCount, this.textureCount);
 
@@ -323,7 +277,7 @@ class CkFragmentProgram implements ui.FragmentProgram {
 
   @override
   ui.FragmentShader fragmentShader() {
-    return CkFragmentShader(name, effect, this);
+    return EngineFragmentShader(CkFragmentShader(name, effect, this));
   }
 
   UniformData _getUniformFloatInfo(String name) {
@@ -336,7 +290,7 @@ class CkFragmentProgram implements ui.FragmentProgram {
   }
 }
 
-class CkFragmentShader implements ui.FragmentShader, CkShader {
+class CkFragmentShader extends BackendFragmentShader implements CkShader {
   CkFragmentShader(this.name, this.effect, this._program)
     : floats = mallocFloat32List(_program.floatCount + _program.textureCount * 2),
       samplers = List<SkShader?>.filled(_program.textureCount, null),
@@ -356,7 +310,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   bool get isGradient => false;
 
   @override
-  SkShader getSkShader(ui.FilterQuality contextualQuality) {
+  SkShader get skShader {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
     ref?.dispose();
 
@@ -382,21 +336,11 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   }
 
   @override
-  void setImageSampler(
-    int index,
-    ui.Image image, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.none,
-  }) {
+  void setImageSampler(int index, BackendImageShader shader, double width, double height) {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
-    final sampler = ui.ImageShader(
-      image,
-      ui.TileMode.clamp,
-      ui.TileMode.clamp,
-      toMatrix64(Matrix4.identity().storage),
-    );
-    samplers[index] = (sampler as CkShader).getSkShader(filterQuality);
-    setFloat(lastFloatIndex + 2 * index, (sampler as CkImageShader).imageWidth.toDouble());
-    setFloat(lastFloatIndex + 2 * index + 1, sampler.imageHeight.toDouble());
+    samplers[index] = (shader as CkImageShader).skShader;
+    setFloat(lastFloatIndex + 2 * index, width);
+    setFloat(lastFloatIndex + 2 * index + 1, height);
   }
 
   @override
@@ -413,7 +357,6 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
   bool _debugDisposed = false;
 
-  @override
   bool get debugDisposed => _debugDisposed;
 
   @override
