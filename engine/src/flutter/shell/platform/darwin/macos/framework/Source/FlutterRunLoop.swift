@@ -38,6 +38,7 @@ import Foundation
       "To guarantee the execution order of tasks follows the expiration order, delay must not be negative."
     )
     let task = FlutterRunLoop.Task(block: block, targetDate: .now + delay)
+    // When delay is 0, the timer will be rearmed in the perform block.
     lockScope.addTask(task, andRearm: delay > 0)
     if delay == 0 {
       runLoop.perform(inModes: [.common, Self.flutterRunLoopMode]) { [self] in
@@ -76,7 +77,7 @@ private final class LockScope: @unchecked Sendable {
     self.timer = Timer(
       fire: .distantFuture,
       interval: .greatestFiniteMagnitude,
-      repeats: false
+      repeats: true,
     ) { [lock, unsafeTaskQueue] timer in
       MainActor.assumeIsolated {
         for task in LockScope.popExpiredTasks(
@@ -105,12 +106,10 @@ private final class LockScope: @unchecked Sendable {
     andRearmTimer timer: Timer
   ) -> some Sequence<FlutterRunLoop.Task> {
     lock.withLock {
-      guard
-        let (tasks, newFireDate) = unsafeTaskQueue.popTasks(
-          expiringBy: .now)
-      else {
-        return ContiguousArray<FlutterRunLoop.Task>()
-      }
+      let (tasks, newFireDate) = unsafeTaskQueue.popTasks(expiringBy: .now)
+      // Always set the new fireDate even if it didn't change, to prevent the
+      // repeating timer from automatically setting the fire date to .distantFuture
+      // (since the firing interval is set to .greatestFiniteMagnitude).
       timer.fireDate = newFireDate
       return tasks
     }
@@ -132,33 +131,36 @@ extension FlutterRunLoop {
     let targetDate: Date
   }
 
-  // A simple priority queue that supports adding tasks and poping tasks.
+  // A simple priority queue that supports adding tasks and popping tasks.
   final class UnsafeTaskQueue {
-    // The task queue, sorted by the target date of tasks in ascending order (oldest first).
+    // The task queue, sorted by the target date of tasks in descending order (first to expire last).
     private var tasks: ContiguousArray<Task> = []
 
     func add(task: Task) -> Date {
-      tasks.append(task)
-      tasks.sort(using: KeyPathComparator(\.targetDate))
-      return tasks[0].targetDate
+      let insertionIndex =
+        tasks.lastIndex {
+          task.targetDate < $0.targetDate
+        }.map { $0 + 1 } ?? 0
+      tasks.insert(task, at: insertionIndex)
+      return tasks[tasks.count - 1].targetDate
     }
 
-    // Returns a non-emtpy list of expired tasks, sorted by the expiration dates
-    // in ascending order, and the new earliest deadline, or nil if no tasks have expired.
+    // Returns a non-empty list of expired tasks, sorted by their expiration dates
+    // in ascending order (first to expire first), and the new earliest deadline,
+    // or nil if no tasks have expired.
     func popTasks(
       expiringBy date: Date
-    ) -> (ContiguousArray<Task>, Date)? {
-      let firstExpiredIndex = tasks.lastIndex { $0.targetDate < date }.map { $0 + 1 } ?? 0
-      let numbersOfExpiredTasks = tasks.count - firstExpiredIndex
+    ) -> (some Sequence<Task>, Date) {
+      let firstExpiredIndex = tasks.lastIndex { date < $0.targetDate }.map { $0 + 1 } ?? 0
 
-      guard firstExpiredIndex >= tasks.count else {
-        return nil
+      // If no tasks have expired, firstExpiredIndex == tasks.coount
+      guard firstExpiredIndex < tasks.count else {
+        return (ContiguousArray<Task>(), tasks.last?.targetDate ?? .distantFuture)
       }
 
-      let expiredTasks = ContiguousArray<Task>(tasks[firstExpiredIndex...])
-      tasks.removeLast(numbersOfExpiredTasks)
-
-      return (expiredTasks, tasks.first?.targetDate ?? .distantFuture)
+      let expiredTasks = ContiguousArray<Task>(tasks[firstExpiredIndex...].reversed())
+      tasks.removeSubrange(firstExpiredIndex...)
+      return (expiredTasks, tasks.last?.targetDate ?? .distantFuture)
     }
   }
 }
@@ -173,7 +175,7 @@ private final class SendableCFRunLoop: @unchecked Sendable {
 
   // Calls CFRunLoopPerformBlock on the run loop and then wakes up the run loop.
   func perform(inModes modes: [RunLoop.Mode], block: @escaping @Sendable () -> Void) {
-    let cfModes = modes.map { $0.cfRunLoopMode } as NSArray
+    let cfModes = modes.map { $0.cfRunLoopMode.rawValue } as CFArray
     CFRunLoopPerformBlock(runLoop, cfModes, block)
     CFRunLoopWakeUp(runLoop)
   }

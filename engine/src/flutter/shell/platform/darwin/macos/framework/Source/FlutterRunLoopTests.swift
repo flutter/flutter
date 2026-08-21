@@ -19,7 +19,7 @@ struct FlutterRunLoopTests {
   }
 
   @Test(arguments: [0.0, 0.1])
-  func `perform(afterDelay:) executes the given block`(delay: TimeInterval) async throws {
+  func `perform(afterDelay:) executes in .common mode`(delay: TimeInterval) async throws {
     await withCheckedContinuation { continuation in
       runLoop.perform(afterDelay: delay) {
         continuation.resume()
@@ -38,21 +38,18 @@ struct FlutterRunLoopTests {
   }
 
   @Test(arguments: [0.0, 0.1])
-  func `perform schedules in both common and flutter modes`(delay: TimeInterval) async throws {
-    // Verify scheduled tasks executes in .common mode (serviced by the main run loop automatically).
-    await withCheckedContinuation { continuation in
-      runLoop.perform(afterDelay: delay) {
-        continuation.resume()
-      }
-    }
-
+  @MainActor
+  func `perform schedules in flutter mode`(delay: TimeInterval) async throws {
     // Verify scheduled tasks executes in FlutterRunLoopMode (serviced by pollFlutterMessagesOnce()).
     var executedInFlutterMode = false
     runLoop.perform(afterDelay: delay) {
       executedInFlutterMode = true
     }
     #expect(!executedInFlutterMode)
-    await MainActor.run(body: runLoop.pollFlutterMessagesOnce)
+
+    while !executedInFlutterMode {
+      runLoop.pollFlutterMessagesOnce()
+    }
     #expect(executedInFlutterMode)
   }
 
@@ -96,12 +93,12 @@ struct UnsafeTaskQueueTests {
     _ = queue.add(task: task3)
 
     // task2 (1s), task3 (3s), task1 (5s)
-    let (expired, _) = try #require(queue.popTasks(expiringBy: .distantFuture))
+    let (expired, _) = queue.popTasks(expiringBy: .distantFuture)
     #expect(expired.map(\.targetDate) == [task2.targetDate, task3.targetDate, task1.targetDate])
   }
 
   @Test
-  func `UnsafeTaskQueue add and popTasks return the earliest fire date`() throws {
+  func `UnsafeTaskQueue add and popTasks return the earliest fire date`() {
     let queue = FlutterRunLoop.UnsafeTaskQueue()
 
     // Adding Tasks
@@ -110,18 +107,18 @@ struct UnsafeTaskQueueTests {
     #expect(queue.add(task: Task(expiresAt: 3)) == Date(1))  // Queue: [1s, 3s, 5s] -> Earliest: 1s
 
     // Poping tasks
-    let (_, newFireDate1) = try #require(queue.popTasks(expiringBy: Date(2)))
+    let (_, newFireDate1) = queue.popTasks(expiringBy: Date(2))
     #expect(newFireDate1 == Date(3))
 
-    let (_, newFireDate2) = try #require(queue.popTasks(expiringBy: Date(4)))
+    let (_, newFireDate2) = queue.popTasks(expiringBy: Date(4))
     #expect(newFireDate2 == Date(5))
 
-    let (_, newFireDate3) = try #require(queue.popTasks(expiringBy: Date(6)))
+    let (_, newFireDate3) = queue.popTasks(expiringBy: Date(6))
     #expect(newFireDate3 == .distantFuture)
   }
 
   @Test
-  func `UnsafeTaskQueue popTasks only pops expired tasks and leaves unexpired tasks`() throws {
+  func `UnsafeTaskQueue popTasks only pops expired tasks and leaves unexpired tasks`() {
     let queue = FlutterRunLoop.UnsafeTaskQueue()
 
     let expiredTask = Task(expiresAt: 1)
@@ -130,10 +127,11 @@ struct UnsafeTaskQueueTests {
     _ = queue.add(task: expiredTask)
     _ = queue.add(task: unexpiredTask)
 
-    let (expired, newFireDate) = try #require(queue.popTasks(expiringBy: Date(3)))
+    let (expired, newFireDate) = queue.popTasks(expiringBy: Date(3))
+    let expiredArray = Array(expired)
 
-    #expect(expired.count == 1)
-    #expect(expired.first?.targetDate == expiredTask.targetDate)
+    #expect(expiredArray.count == 1)
+    #expect(expiredArray.first?.targetDate == expiredTask.targetDate)
     #expect(newFireDate == unexpiredTask.targetDate)
   }
 
@@ -200,7 +198,7 @@ struct UnsafeTaskQueueTests {
       _ = queue.add(task: Task(block: { executionOrder.append(id) }, targetDate: task.targetDate))
     }
 
-    let (expired, _) = try #require(queue.popTasks(expiringBy: .distantFuture))
+    let (expired, _) = queue.popTasks(expiringBy: .distantFuture)
     for task in expired {
       task.block()
     }
