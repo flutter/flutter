@@ -80,8 +80,7 @@ void main() {
       mockClipboard.handleMethodCall,
     );
     debugResetSemanticsIdCounter();
-    // Fill the clipboard so that the Paste option is available in the text
-    // selection menu.
+    // Fill the clipboard for tests that invoke the paste action.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
     controller = TextEditingController();
     focusNode = FocusNode(debugLabel: 'EditableText Node');
@@ -2706,7 +2705,7 @@ void main() {
     }),
   );
 
-  testWidgets('Paste is shown only when there is something to paste', (WidgetTester tester) async {
+  testWidgets('Paste is shown without checking clipboard contents', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -2747,9 +2746,9 @@ void main() {
     expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
     await tester.pumpAndSettle();
 
-    // Paste is not shown.
-    await tester.pumpAndSettle();
-    expect(find.text('Paste'), findsNothing);
+    // Paste remains available because the clipboard is only read after the
+    // user requests a paste.
+    expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
   });
 
   testWidgets('pasteText reports error to FlutterError when Clipboard.getData throws', (
@@ -17919,17 +17918,24 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  group('hasStrings', () {
-    late int calls;
+  group('clipboard access', () {
+    late int getDataCalls;
+    late int hasStringsCalls;
     setUp(() {
-      calls = 0;
+      getDataCalls = 0;
+      hasStringsCalls = 0;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) {
-          if (methodCall.method == 'Clipboard.hasStrings') {
-            calls += 1;
+          switch (methodCall.method) {
+            case 'Clipboard.getData':
+              getDataCalls += 1;
+              return Future<Object?>.value(<String, dynamic>{'text': 'Clipboard data'});
+            case 'Clipboard.hasStrings':
+              hasStringsCalls += 1;
+              return Future<Object?>.value(<String, bool>{'value': true});
           }
-          return Future<void>.value();
+          return Future<Object?>.value();
         },
       );
     });
@@ -17940,9 +17946,13 @@ void main() {
       );
     });
 
-    testWidgets('web avoids the paste permissions prompt by not calling hasStrings', (
+    testWidgets('does not inspect the clipboard until paste is requested', (
       WidgetTester tester,
     ) async {
+      controller.value = const TextEditingValue(
+        text: 'Text',
+        selection: TextSelection.collapsed(offset: 4),
+      );
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -17963,15 +17973,45 @@ void main() {
         ),
       );
 
-      expect(calls, equals(kIsWeb ? 0 : 1));
+      expect(getDataCalls, 0);
+      expect(hasStringsCalls, 0);
 
       // Long-press to bring up the context menu.
       final Finder textFinder = find.byType(EditableText);
       await tester.longPress(textFinder);
-      tester.state<EditableTextState>(textFinder).showToolbar();
+      final EditableTextState state = tester.state<EditableTextState>(textFinder);
+      state.showToolbar();
       await tester.pumpAndSettle();
 
-      expect(calls, equals(kIsWeb ? 0 : 2));
+      expect(getDataCalls, 0);
+      expect(hasStringsCalls, 0);
+
+      final ByteData? inactiveMessage = const StringCodec().encodeMessage(
+        AppLifecycleState.inactive.toString(),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/lifecycle',
+        inactiveMessage,
+        (_) {},
+      );
+      final ByteData? resumedMessage = const StringCodec().encodeMessage(
+        AppLifecycleState.resumed.toString(),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/lifecycle',
+        resumedMessage,
+        (_) {},
+      );
+
+      expect(getDataCalls, 0);
+      expect(hasStringsCalls, 0);
+
+      controller.selection = TextSelection.collapsed(offset: controller.text.length);
+      await state.pasteText(SelectionChangedCause.toolbar);
+
+      expect(getDataCalls, 1);
+      expect(hasStringsCalls, 0);
+      expect(controller.text, 'TextClipboard data');
     });
   });
 
