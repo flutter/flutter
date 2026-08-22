@@ -555,7 +555,8 @@ void main() {
 
     final ui.TextStyle ts2 = s2.getTextStyle();
 
-    expect(ts2.toString(), matches(RegExp(r'background: Paint\(Color\(.*\).*\)')));
+    final expectedPaint = Paint()..color = const Color(0xFF00FF00);
+    expect(ts2.toString(), contains('background: $expectedPaint'));
   });
 
   test('TextStyle background and backgroundColor combos', () {
