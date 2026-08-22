@@ -394,15 +394,33 @@ void main() {
           initializeFlutterRoot: false,
         );
       });
+
+      group('toolContext', () {
+        test('is preserved when provided to constructor', () {
+          final fakeToolContext = FakeToolContext();
+          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
+          expect(runner.toolContext, same(fakeToolContext));
+        });
+
+        test('command attached to runner inherits runner toolContext', () {
+          final fakeToolContext = FakeToolContext();
+          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
+          final command = FakeFlutterCommand();
+          runner.addCommand(command);
+          expect(command.toolContext, same(fakeToolContext));
+        });
+      });
     });
   });
 }
 
 class FakeFlutterCommand extends FlutterCommand {
+  bool ran = false;
   late OutputPreferences preferences;
 
   @override
   Future<FlutterCommandResult> runCommand() {
+    ran = true;
     preferences = globals.outputPreferences;
     return Future<FlutterCommandResult>.value(const FlutterCommandResult(ExitStatus.success));
   }

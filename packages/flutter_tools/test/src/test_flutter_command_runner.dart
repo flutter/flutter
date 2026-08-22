@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -26,7 +27,8 @@ CommandRunner<void> createTestCommandRunner([
   Analytics? analytics,
   ToolContext? toolContext,
 ]) {
-  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: toolContext);
+  final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
+  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: effectiveToolContext);
   if (command != null) {
     runner.addCommand(command);
   }
@@ -52,18 +54,27 @@ Future<String> createProject(
 class TestFlutterCommandRunner extends FlutterCommandRunner {
   TestFlutterCommandRunner({Analytics? analytics, ToolContext? toolContext})
     : super(
-        analytics: analytics ?? const NoOpAnalytics(),
+        analytics: analytics ?? _defaultAnalytics(),
         toolContext: toolContext ?? DelegatingToolContext(),
       );
+
+  static Analytics _defaultAnalytics() {
+    try {
+      return context.get<Analytics>() ?? const NoOpAnalytics();
+    } on UnsupportedError {
+      return const NoOpAnalytics();
+    }
+  }
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Logger topLevelLogger = toolContext.logger;
-    final contextOverrides = <Type, dynamic>{
+    final contextOverrides = <Type, Object?>{
       if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
+      ProcessInfo: toolContext.processInfo,
     };
     return context.run<void>(
-      overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
+      overrides: contextOverrides.map<Type, Generator>((Type type, Object? value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
@@ -73,9 +84,8 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
           userMessages: UserMessages(),
         );
         // For compatibility with tests that set this to a relative path.
-        Cache.flutterRoot = toolContext.fs.path.normalize(
-          toolContext.fs.path.absolute(Cache.flutterRoot!),
-        );
+        final FileSystem fs = toolContext.fs;
+        Cache.flutterRoot = fs.path.normalize(fs.path.absolute(Cache.flutterRoot!));
         return super.runCommand(topLevelResults);
       },
     );
