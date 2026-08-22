@@ -240,6 +240,7 @@ android_java_sources = [
   "io/flutter/embedding/android/FlutterTextureView.java",
   "io/flutter/embedding/android/FlutterView.java",
   "io/flutter/embedding/android/FlutterViewDelegate.java",
+  "io/flutter/embedding/android/IntentUtils.java",
   "io/flutter/embedding/android/KeyChannelResponder.java",
   "io/flutter/embedding/android/KeyData.java",
   "io/flutter/embedding/android/KeyEmbedderResponder.java",

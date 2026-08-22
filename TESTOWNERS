@@ -12,6 +12,9 @@
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @reidbaker @flutter/engine
 /dev/devicelab/bin/tasks/android_defines_test.dart @jesswrd @flutter/android
+/dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart @camsim99 @flutter/android
+/dev/devicelab/bin/tasks/android_engine_flags_release_test.dart @camsim99 @flutter/android
+/dev/devicelab/bin/tasks/android_intent_security_test.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart @jesswrd @flutter/android
 /dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart @jesswrd @flutter/android
 /dev/devicelab/bin/tasks/android_lifecycles_test.dart @reidbaker @flutter/engine
@@ -116,8 +119,6 @@
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/wide_gamut_macos.dart @gaaclarke @flutter/engine
-/dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart @camsim99 @flutter/android
-/dev/devicelab/bin/tasks/android_engine_flags_release_test.dart @camsim99 @flutter/android
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @bkonyi @flutter/tool

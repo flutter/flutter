@@ -1054,7 +1054,13 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    Intent intent = getIntent();
+    if (intent != null
+        && IntentUtils.isIntentSelfSent(this)
+        && intent.hasExtra(EXTRA_CACHED_ENGINE_ID)) {
+      return intent.getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    }
+    return null;
   }
 
   /**
@@ -1065,7 +1071,13 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineGroupId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    Intent intent = getIntent();
+    if (intent != null
+        && intent.hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID)
+        && IntentUtils.isIntentSelfSent(this)) {
+      return intent.getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    }
+    return null;
   }
 
   /**
@@ -1110,8 +1122,11 @@ public class FlutterActivity extends Activity
    */
   @NonNull
   public String getDartEntrypointFunctionName() {
-    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT)) {
-      return getIntent().getStringExtra(EXTRA_DART_ENTRYPOINT);
+    Intent intent = getIntent();
+    if (intent != null
+        && intent.hasExtra(EXTRA_DART_ENTRYPOINT)
+        && IntentUtils.isIntentSelfSent(this)) {
+      return intent.getStringExtra(EXTRA_DART_ENTRYPOINT);
     }
 
     try {
@@ -1133,7 +1148,13 @@ public class FlutterActivity extends Activity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    Intent intent = getIntent();
+    if (intent != null
+        && intent.hasExtra(EXTRA_DART_ENTRYPOINT_ARGS)
+        && IntentUtils.isIntentSelfSent(this)) {
+      return (List<String>) intent.getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    }
+    return null;
   }
 
   /**
@@ -1187,8 +1208,11 @@ public class FlutterActivity extends Activity
    * initial route is derived from the {@code Intent} through the Intent.getData() instead.
    */
   public String getInitialRoute() {
-    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
-      return getIntent().getStringExtra(EXTRA_INITIAL_ROUTE);
+    Intent intent = getIntent();
+    if (intent != null
+        && intent.hasExtra(EXTRA_INITIAL_ROUTE)
+        && IntentUtils.isIntentSelfSent(this)) {
+      return intent.getStringExtra(EXTRA_INITIAL_ROUTE);
     }
 
     try {
