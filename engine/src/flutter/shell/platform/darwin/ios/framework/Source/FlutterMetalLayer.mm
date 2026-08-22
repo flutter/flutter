@@ -80,6 +80,8 @@ extern CFTimeInterval display_link_target;
   __weak FlutterMetalLayer* _layer;
   NSUInteger _drawableId;
   BOOL _presented;
+  BOOL _preparedForPresent;
+  BOOL _gpuScheduled;
 }
 
 - (instancetype)initWithTexture:(FlutterTexture*)texture
@@ -121,8 +123,14 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)present {
-  [_layer presentTexture:self->_texture];
-  self->_presented = YES;
+  BOOL presentNow = NO;
+  @synchronized(self) {
+    _presented = YES;
+    presentNow = !_preparedForPresent || _gpuScheduled;
+  }
+  if (presentNow) {
+    [_layer presentTexture:_texture];
+  }
 }
 
 - (void)dealloc {
@@ -146,7 +154,20 @@ extern CFTimeInterval display_link_target;
 
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
   FlutterTexture* texture = _texture;
+  @synchronized(self) {
+    _preparedForPresent = YES;
+  }
   texture.waitingForCompletion = YES;
+  [commandBuffer addScheduledHandler:^(id<MTLCommandBuffer> buffer) {
+    BOOL presentNow = NO;
+    @synchronized(self) {
+      self->_gpuScheduled = YES;
+      presentNow = self->_presented;
+    }
+    if (presentNow) {
+      [self->_layer presentTexture:texture];
+    }
+  }];
   [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
     texture.waitingForCompletion = NO;
   }];
@@ -406,14 +427,11 @@ extern CFTimeInterval display_link_target;
     return;
   }
 
-  // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
-  // Might also be placebo
-  [self setNeedsDisplay];
-
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
   self.contents = texture.surface;
   [CATransaction commit];
+  [CATransaction flush];
   _displayLink.paused = NO;
   _displayLinkPauseCountdown = 0;
   if (!_didSetContentsDuringThisDisplayLinkPeriod) {
@@ -425,24 +443,27 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)presentTexture:(FlutterTexture*)texture {
+  BOOL validTexture = NO;
   @synchronized(self) {
-    if (texture.texture.width != _drawableSize.width ||
-        texture.texture.height != _drawableSize.height) {
-      return;
+    validTexture = texture.texture.width == _drawableSize.width &&
+                   texture.texture.height == _drawableSize.height;
+    if (validTexture) {
+      if (_front != nil) {
+        [_availableTextures addObject:_front];
+      }
+      _front = texture;
+      texture.presentedTime = CACurrentMediaTime();
     }
-    if (_front != nil) {
-      [_availableTextures addObject:_front];
-    }
-    _front = texture;
-    texture.presentedTime = CACurrentMediaTime();
-    if ([NSThread isMainThread]) {
+  }
+  if (!validTexture) {
+    return;
+  }
+  if ([NSThread isMainThread]) {
+    [self presentOnMainThread:texture];
+  } else {
+    dispatch_async(dispatch_get_main_queue(), ^{
       [self presentOnMainThread:texture];
-    } else {
-      // Core animation layers can only be updated on main thread.
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [self presentOnMainThread:texture];
-      });
-    }
+    });
   }
 }
 
