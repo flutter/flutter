@@ -49,7 +49,7 @@
   // update.
   auto notifyBlock = ^{
     NSSize scaledSize = [self convertSizeFromBacking:frameSize];
-    [self.sizingDelegate viewDidUpdateContents:self withSize:scaledSize];
+    [self.contentDelegate viewDidUpdateContents:self withSize:scaledSize];
     block();
   };
   [_resizeSynchronizer performCommitForSize:frameSize afterDelay:delay notify:notifyBlock];
