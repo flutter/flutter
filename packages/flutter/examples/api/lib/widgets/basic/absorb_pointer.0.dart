@@ -15,6 +15,10 @@ class AbsorbPointerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       color: const Color(0xFFFFFFFF),
+      // WidgetsApp does not install a [DefaultTextStyle], so without this the
+      // labels below fall back to a style with no color and are invisible
+      // against the white background.
+      textStyle: const TextStyle(color: Color(0xFF000000), fontSize: 14.0),
       builder: (BuildContext context, Widget? child) {
         return const AbsorbPointerExample();
       },
