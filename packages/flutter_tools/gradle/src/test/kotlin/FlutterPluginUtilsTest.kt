@@ -639,6 +639,27 @@ class FlutterPluginUtilsTest {
         assertEquals("Baklava", result.toString())
     }
 
+    // Regression test for https://github.com/flutter/flutter/issues/191081: a plugin that also
+    // sets compileSdkExtension (required by AARs with a minCompileSdkExtension AAR metadata
+    // constraint, e.g. androidx.health.connect:connect-client) must not affect the reported
+    // compile SDK. compileSdk and compileSdkExtension are distinct typed AGP properties, so the
+    // extension level plays no part in this apiLevel/previewCodename result or in any downstream
+    // isHigherThan comparison.
+    @Test
+    fun `getCompileSdkFromProject ignores compileSdkExtension`() {
+        val project = mockk<Project>()
+        val androidExtension = mockk<ApplicationExtension>()
+        every { project.extensions.findByName("android") } returns androidExtension
+        every { androidExtension.compileSdk } returns 36
+        every { androidExtension.compileSdkPreview } returns null
+        every { androidExtension.compileSdkExtension } returns 19
+        val result = FlutterPluginUtils.getCompileSdkFromProject(project)
+        assertEquals(CompileSdkVersion(apiLevel = 36, previewCodename = null), result)
+        assertEquals("36", result.toString())
+        assertFalse(result.isHigherThan(CompileSdkVersion(apiLevel = 37, previewCodename = null)))
+        assertFalse(result.isHigherThan(CompileSdkVersion(apiLevel = 36, previewCodename = null)))
+    }
+
     @Test
     fun `detectLowCompileSdkVersionOrNdkVersion registers ValidateCompileSdkVersionTask`() {
         val project = mockk<Project>()
