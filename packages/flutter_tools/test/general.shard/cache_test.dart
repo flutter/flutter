@@ -161,6 +161,35 @@ void main() {
       expect(logger.warningText, contains('No known version for the artifact name "fake"'));
     });
 
+    testWithoutContext('MaterialFonts continues on missing version file', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_cache_test_artifact.',
+      );
+      final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_cache_test_download.',
+      );
+      final Cache cache = FakeSecondaryCache()
+        ..version =
+            null // version is missing.
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir;
+
+      final materialFonts = MaterialFonts(cache);
+      await materialFonts.update(
+        FakeArtifactUpdater(),
+        logger,
+        fileSystem,
+        FakeOperatingSystemUtils(),
+      );
+
+      expect(
+        logger.warningText,
+        contains('No known version for the artifact name "material_fonts"'),
+      );
+    });
+
     testWithoutContext(
       'Gradle wrapper should not be up to date, if some cached artifact is not available',
       () {
