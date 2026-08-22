@@ -278,6 +278,10 @@ FLUTTER_DARWIN_EXPORT
  * When set to `YES` (the default), touches are dropped in either case, preventing them from
  * reaching Flutter while a native view controller is covering the screen.
  *
+ * Whether a touch is dropped is decided when it begins, and holds for the rest of that touch. A
+ * touch that is already in progress when a view controller is presented keeps being delivered to
+ * Flutter until it ends, so that Flutter always sees the end of a touch it saw the start of.
+ *
  * This check does not consider whether the presented content actually covers the touched point:
  * touches are dropped everywhere on screen while anything is presented. Some apps intentionally
  * present a `UIViewController` that does not cover the entire screen and rely on Flutter

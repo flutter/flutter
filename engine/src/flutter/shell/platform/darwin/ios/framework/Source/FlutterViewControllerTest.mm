@@ -3375,8 +3375,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterViewControllerDispatchTouchesSpy* vc =
       [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
   UITouch* touch = [[UITouch alloc] init];
-  touch.phase = UITouchPhaseMoved;
   UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  touch.phase = UITouchPhaseMoved;
   [vc touchesMoved:[NSSet setWithObject:touch] withEvent:event];
   XCTAssertFalse(vc.touchesDispatched,
                  @"touchesMoved must not dispatch to Flutter when a native VC is presented");
@@ -3386,8 +3388,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterViewControllerDispatchTouchesSpy* vc =
       [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
   UITouch* touch = [[UITouch alloc] init];
-  touch.phase = UITouchPhaseEnded;
   UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  touch.phase = UITouchPhaseEnded;
   [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
   XCTAssertFalse(vc.touchesDispatched,
                  @"touchesEnded must not dispatch to Flutter when a native VC is presented");
@@ -3397,8 +3401,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterViewControllerDispatchTouchesSpy* vc =
       [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
   UITouch* touch = [[UITouch alloc] init];
-  touch.phase = UITouchPhaseCancelled;
   UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  touch.phase = UITouchPhaseCancelled;
   [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
   XCTAssertFalse(vc.touchesDispatched,
                  @"touchesCancelled must not dispatch to Flutter when a native VC is presented");
@@ -3519,8 +3525,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testTouchesMovedNotDispatchedWhenFlutterVCIsBeingDismissed {
   FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
   UITouch* touch = [[UITouch alloc] init];
-  touch.phase = UITouchPhaseMoved;
   UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  touch.phase = UITouchPhaseMoved;
   [vc touchesMoved:[NSSet setWithObject:touch] withEvent:event];
   XCTAssertFalse(vc.touchesDispatched,
                  @"touchesMoved must not dispatch to Flutter while FlutterViewController is being "
@@ -3530,8 +3538,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testTouchesEndedNotDispatchedWhenFlutterVCIsBeingDismissed {
   FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
   UITouch* touch = [[UITouch alloc] init];
-  touch.phase = UITouchPhaseEnded;
   UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  touch.phase = UITouchPhaseEnded;
   [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
   XCTAssertFalse(vc.touchesDispatched,
                  @"touchesEnded must not dispatch to Flutter while FlutterViewController is being "
@@ -3541,12 +3551,93 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testTouchesCancelledNotDispatchedWhenFlutterVCIsBeingDismissed {
   FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
   UITouch* touch = [[UITouch alloc] init];
-  touch.phase = UITouchPhaseCancelled;
   UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  touch.phase = UITouchPhaseCancelled;
   [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
   XCTAssertFalse(vc.touchesDispatched,
                  @"touchesCancelled must not dispatch to Flutter while FlutterViewController is "
                  @"being dismissed");
+}
+
+// Regression tests for the presentation state changing in the middle of a touch sequence. Whether a
+// sequence is ignored is decided at touchesBegan: and must hold for the rest of the sequence, in
+// both directions, so that every dispatched down is balanced by an up or a cancel and no move or up
+// ever reaches the framework for a pointer it never saw go down.
+
+- (void)testTouchesEndedDispatchedWhenVCPresentedAfterTouchBegan {
+  FlutterEnginePointerDataRecorder* engine = [[FlutterEnginePointerDataRecorder alloc] init];
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerWithEngine:engine];
+  UITouch* touch = [[UITouch alloc] init];
+  UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesBegan must dispatch to Flutter when nothing is presented");
+
+  // A native view controller is presented while the finger is still down.
+  vc.stubbedPresentedViewController = [[UIViewController alloc] init];
+  vc.touchesDispatched = NO;
+  touch.phase = UITouchPhaseEnded;
+  [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
+
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesEnded must dispatch to Flutter for a sequence that began before the "
+                @"presentation, otherwise the pointer stays down in the framework forever");
+  const std::vector<flutter::PointerData>& dispatched = [engine dispatchedPointerData];
+  XCTAssertEqual(dispatched.size(), 3UL,
+                 @"the sequence must dispatch a down followed by an up and a remove");
+  XCTAssertEqual(static_cast<int>(dispatched[1].change),
+                 static_cast<int>(flutter::PointerData::Change::kUp),
+                 @"the down dispatched before the presentation must be balanced by an up");
+  XCTAssertEqual(dispatched[1].device, reinterpret_cast<int64_t>(touch),
+                 @"the up must describe the touch that went down");
+}
+
+- (void)testTouchesMovedNotDispatchedAfterDismissalWhenSequenceBeganWhilePresented {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
+  UITouch* touch = [[UITouch alloc] init];
+  UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesBegan must not dispatch to Flutter when a native VC is presented");
+
+  // The presented view controller is dismissed while the finger is still down.
+  vc.stubbedPresentedViewController = nil;
+  touch.phase = UITouchPhaseMoved;
+  [vc touchesMoved:[NSSet setWithObject:touch] withEvent:event];
+
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesMoved must not dispatch to Flutter for a sequence whose touchesBegan was "
+                 @"ignored, otherwise the framework receives a move for a pointer that never went "
+                 @"down");
+}
+
+- (void)testTouchesDispatchedForNewSequenceAfterIgnoredSequenceEnds {
+  FlutterEnginePointerDataRecorder* engine = [[FlutterEnginePointerDataRecorder alloc] init];
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerWithEngine:engine];
+  vc.stubbedPresentedViewController = [[UIViewController alloc] init];
+  UITouch* touch = [[UITouch alloc] init];
+  UIEvent* event = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  touch.phase = UITouchPhaseEnded;
+  [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched, @"the whole ignored sequence must stay undispatched");
+
+  // The presented view controller is dismissed, then UIKit recycles the same UITouch object for an
+  // unrelated sequence.
+  vc.stubbedPresentedViewController = nil;
+  touch.phase = UITouchPhaseBegan;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+
+  XCTAssertTrue(
+      vc.touchesDispatched,
+      @"a sequence that begins after the dismissal must dispatch, even when it reuses the "
+      @"UITouch object of an ignored sequence");
 }
 
 @end

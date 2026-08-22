@@ -93,6 +93,11 @@ typedef struct MouseState {
 @property(nonatomic, assign) BOOL flutterPrefersStatusBarHidden;
 
 @property(nonatomic, strong) NSMutableSet<NSNumber*>* ongoingTouches;
+// Touches whose sequence began while a view controller was presented or being dismissed, and which
+// are therefore not dispatched to Flutter. Tracked by identity for the lifetime of the sequence so
+// that whether a sequence is ignored is decided once, at touchesBegan:, rather than re-evaluated on
+// every event. See `shouldIgnoreTouchesWhenPresented`.
+@property(nonatomic, strong) NSMutableSet<UITouch*>* ignoredTouches;
 // This scroll view is a workaround to accommodate iOS 13 and higher.  There isn't a way to get
 // touches on the status bar to trigger scrolling to the top of a scroll view.  We place a
 // UIScrollView with height zero and a content offset so we can get those events. See also:
@@ -364,6 +369,7 @@ typedef struct MouseState {
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
   _shouldIgnoreTouchesWhenPresented = YES;
+  _ignoredTouches = [[NSMutableSet alloc] init];
 
   _accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
   _displayLinkManager = FlutterDisplayLinkManager.shared;
@@ -907,6 +913,10 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (void)flushOngoingTouches {
+  // Backstop for sequences whose terminal event never arrives: without this, an ignored UITouch
+  // would stay in the set and suppress a future touch that UIKit recycles onto the same object.
+  [self.ignoredTouches removeAllObjects];
+
   if (self.engine && self.ongoingTouches.count > 0) {
     auto packet = std::make_unique<flutter::PointerDataPacket>(self.ongoingTouches.count);
     size_t pointer_index = 0;
@@ -1281,36 +1291,51 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self.engine dispatchPointerDataPacket:std::move(packet)];
 }
 
+// Returns the subset of `touches` whose sequences are being dispatched to Flutter, i.e. those that
+// did not begin while a view controller was presented or being dismissed.
+- (NSSet*)activeTouches:(NSSet*)touches {
+  if (self.ignoredTouches.count == 0) {
+    return touches;
+  }
+  NSMutableSet* activeTouches = [touches mutableCopy];
+  [activeTouches minusSet:self.ignoredTouches];
+  return activeTouches;
+}
+
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
   if (self.shouldIgnoreTouchesWhenPresented &&
       (self.presentedViewController != nil || self.isBeingDismissed)) {
+    // Ignore the whole sequence, not just this event. Dispatching the rest of it would send moves
+    // and ups for a pointer the framework never saw go down.
+    [self.ignoredTouches unionSet:touches];
     return;
   }
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.shouldIgnoreTouchesWhenPresented &&
-      (self.presentedViewController != nil || self.isBeingDismissed)) {
-    return;
+  NSSet* activeTouches = [self activeTouches:touches];
+  if (activeTouches.count > 0) {
+    [self dispatchTouches:activeTouches pointerDataChangeOverride:nullptr event:event];
   }
-  [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.shouldIgnoreTouchesWhenPresented &&
-      (self.presentedViewController != nil || self.isBeingDismissed)) {
-    return;
+  NSSet* activeTouches = [self activeTouches:touches];
+  // A sequence that began before the presentation must be allowed to end, otherwise its pointer
+  // stays down in the framework forever.
+  [self.ignoredTouches minusSet:touches];
+  if (activeTouches.count > 0) {
+    [self dispatchTouches:activeTouches pointerDataChangeOverride:nullptr event:event];
   }
-  [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (self.shouldIgnoreTouchesWhenPresented &&
-      (self.presentedViewController != nil || self.isBeingDismissed)) {
-    return;
+  NSSet* activeTouches = [self activeTouches:touches];
+  [self.ignoredTouches minusSet:touches];
+  if (activeTouches.count > 0) {
+    [self dispatchTouches:activeTouches pointerDataChangeOverride:nullptr event:event];
   }
-  [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
 - (void)forceTouchesCancelled:(NSSet*)touches {
