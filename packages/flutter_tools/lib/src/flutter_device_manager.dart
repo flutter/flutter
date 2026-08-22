@@ -61,6 +61,7 @@ class FlutterDeviceManager extends DeviceManager {
            fileSystem: fileSystem,
            platform: platform,
            userMessages: userMessages,
+           artifacts: artifacts,
          ),
          IOSDevices(
            platform: platform,
@@ -84,6 +85,7 @@ class FlutterDeviceManager extends DeviceManager {
            platform: platform,
            fileSystem: fileSystem,
            operatingSystemUtils: operatingSystemUtils,
+           artifacts: artifacts,
          ),
          MacOSDesignedForIPadDevices(
            processManager: processManager,
@@ -92,6 +94,7 @@ class FlutterDeviceManager extends DeviceManager {
            platform: platform,
            fileSystem: fileSystem,
            operatingSystemUtils: operatingSystemUtils,
+           artifacts: artifacts,
          ),
          LinuxDevices(
            platform: platform,
@@ -100,6 +103,7 @@ class FlutterDeviceManager extends DeviceManager {
            logger: logger,
            fileSystem: fileSystem,
            operatingSystemUtils: operatingSystemUtils,
+           artifacts: artifacts,
          ),
          WindowsDevices(
            processManager: processManager,
@@ -107,6 +111,7 @@ class FlutterDeviceManager extends DeviceManager {
            logger: logger,
            fileSystem: fileSystem,
            windowsWorkflow: windowsWorkflow,
+           artifacts: artifacts,
          ),
          WebDevices(
            featureFlags: featureFlags,

@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -24,6 +25,7 @@ class LinuxDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
+    required super.artifacts,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _logger = logger,
        super('linux', platformType: PlatformType.linux, ephemeral: false);
@@ -87,12 +89,14 @@ class LinuxDevices extends PollingDeviceDiscovery {
     required FileSystem fileSystem,
     required ProcessManager processManager,
     required Logger logger,
+    required Artifacts artifacts,
   }) : _platform = platform,
        _linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags),
        _fileSystem = fileSystem,
        _logger = logger,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
+       _artifacts = artifacts,
        super('linux devices');
 
   final Platform _platform;
@@ -101,6 +105,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _platform.isLinux;
@@ -122,6 +127,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
         processManager: _processManager,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        artifacts: _artifacts,
       ),
     ];
   }

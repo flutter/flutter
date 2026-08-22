@@ -7,7 +7,9 @@
 #include <cstdlib>
 #include <utility>
 
+#include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/posix_wrappers.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
@@ -989,6 +991,8 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   }
 
   flags->load_vmservice_library = true;
+  flags->is_system_isolate = true;
+  flags->is_service_isolate = true;
 
 #if (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
   // TODO(68663): The service isolate in debug mode is always launched without
@@ -1018,7 +1022,67 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     return nullptr;
   }
 
+  if (!Dart_IsPrecompiledRuntime()) {
+    std::string kernel_path = settings.vmservice_kernel_path;
+    if (kernel_path.empty()) {
+      kernel_path = "vmservice_snapshot.dill";
+    }
+    std::unique_ptr<fml::Mapping> kernel;
+    if (fml::IsFile(kernel_path)) {
+      kernel = fml::FileMapping::CreateReadOnly(kernel_path);
+    }
+    if (!kernel && !settings.assets_path.empty()) {
+      std::string assets_kernel_path =
+          fml::paths::JoinPaths({settings.assets_path, kernel_path});
+      if (fml::IsFile(assets_kernel_path)) {
+        kernel = fml::FileMapping::CreateReadOnly(assets_kernel_path);
+      }
+    }
+    if (!kernel) {
+      auto directory = fml::paths::GetExecutableDirectoryPath();
+      if (directory.first) {
+        std::string path_relative_to_executable =
+            fml::paths::JoinPaths({directory.second, kernel_path});
+        if (fml::IsFile(path_relative_to_executable)) {
+          kernel =
+              fml::FileMapping::CreateReadOnly(path_relative_to_executable);
+        } else {
+          std::string path_relative_to_parent =
+              fml::paths::JoinPaths({directory.second, "..", kernel_path});
+          if (fml::IsFile(path_relative_to_parent)) {
+            kernel = fml::FileMapping::CreateReadOnly(path_relative_to_parent);
+          }
+        }
+      }
+    }
+#if defined(OS_FUCHSIA)
+    if (!kernel) {
+      std::string fuchsia_path =
+          fml::paths::JoinPaths({"/pkg/data/assets", kernel_path});
+      if (fml::IsFile(fuchsia_path)) {
+        kernel = fml::FileMapping::CreateReadOnly(fuchsia_path);
+      }
+    }
+#endif
+    if (!kernel) {
+      *error = fml::strdup("Could not load VM service kernel.");
+      if (!service_isolate->Shutdown()) {
+        FML_DLOG(ERROR) << "Could not shutdown VM service isolate.";
+      }
+      return nullptr;
+    }
+    auto config = IsolateConfiguration::CreateForKernel(std::move(kernel));
+    if (!config->PrepareIsolate(*service_isolate)) {
+      *error = fml::strdup("Could not prepare custom VM service isolate.");
+      if (!service_isolate->Shutdown()) {
+        FML_DLOG(ERROR) << "Could not shutdown VM service isolate.";
+      }
+      return nullptr;
+    }
+  }
+
   tonic::DartState::Scope scope(service_isolate);
+
   if (!DartServiceIsolate::Startup(
           settings.vm_service_host,            // server IP address
           settings.vm_service_port,            // server VM service port
@@ -1031,7 +1095,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           error                                   // error (out)
           )) {
     // Error is populated by call to startup.
-    FML_DLOG(ERROR) << *error;
+    FML_LOG(ERROR) << "DartServiceIsolate::Startup failed: " << *error;
     return nullptr;
   }
 

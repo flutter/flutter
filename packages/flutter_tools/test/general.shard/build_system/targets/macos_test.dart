@@ -435,6 +435,15 @@ void main() {
             ),
           )
           .createSync(recursive: true);
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.vmserviceKernelDill,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
       final inputKernel = '${environment.buildDir.path}/app.dill';
@@ -461,6 +470,12 @@ void main() {
       );
       expect(
         fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+        exists,
+      );
+      expect(
+        fileSystem.file(
+          'App.framework/Versions/A/Resources/flutter_assets/vmservice_snapshot.dill',
+        ),
         exists,
       );
     },
@@ -580,6 +595,12 @@ void main() {
       );
       expect(
         fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+        isNot(exists),
+      );
+      expect(
+        fileSystem.file(
+          'App.framework/Versions/A/Resources/flutter_assets/vmservice_snapshot.dill',
+        ),
         isNot(exists),
       );
     },

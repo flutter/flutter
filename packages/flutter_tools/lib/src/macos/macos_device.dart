@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -24,6 +25,7 @@ class MacOSDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
+    required super.artifacts,
   }) : _processManager = processManager,
        _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
@@ -108,12 +110,14 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
+    required Artifacts artifacts,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
        _processManager = processManager,
        _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
+       _artifacts = artifacts,
        super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
@@ -122,6 +126,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -143,6 +148,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
         logger: _logger,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        artifacts: _artifacts,
       ),
     ];
   }

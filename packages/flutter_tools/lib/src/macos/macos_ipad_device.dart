@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -27,6 +28,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
+    required super.artifacts,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
@@ -125,12 +127,14 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
+    required Artifacts artifacts,
   }) : _logger = logger,
        _platform = platform,
        _iosWorkflow = iosWorkflow,
        _processManager = processManager,
        _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
+       _artifacts = artifacts,
        super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
@@ -139,6 +143,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -168,6 +173,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
         logger: _logger,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        artifacts: _artifacts,
       ),
     ];
   }

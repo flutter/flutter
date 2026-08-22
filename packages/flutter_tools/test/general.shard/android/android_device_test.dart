@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_console.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -25,6 +26,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeArtifacts;
 
 void main() {
   testWithoutContext('AndroidDevice stores the requested id', () {
@@ -575,6 +577,7 @@ AndroidDevice setUpAndroidDevice({
   FileSystem? fileSystem,
   ProcessManager? processManager,
   Platform? platform,
+  Artifacts? artifacts,
   AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
 }) {
   androidSdk ??= FakeAndroidSdk();
@@ -587,6 +590,7 @@ AndroidDevice setUpAndroidDevice({
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     processManager: processManager ?? FakeProcessManager.any(),
     androidConsoleSocketFactory: androidConsoleSocketFactory,
+    artifacts: artifacts ?? FakeArtifacts(),
   );
 }
 

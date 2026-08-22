@@ -71,6 +71,16 @@ abstract class AndroidAssetBundle extends Target {
       environment.fileSystem
           .file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
+
+      final String vmserviceDill = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceKernelDill,
+        mode: BuildMode.debug,
+      );
+      final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
+      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+      if (vmserviceDillFile.existsSync()) {
+        vmserviceDillFile.copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
+      }
     }
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
@@ -113,6 +123,7 @@ class DebugAndroidApplication extends AndroidAssetBundle {
     ...super.inputs,
     const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmserviceKernelDill, mode: BuildMode.debug),
   ];
 
   @override
@@ -121,6 +132,7 @@ class DebugAndroidApplication extends AndroidAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/vm_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/vmservice_snapshot.dill'),
   ];
 }
 
@@ -344,6 +356,22 @@ class AndroidAotBundle extends Target {
 
     final inputs = <File>[];
     final outputs = <File>[];
+
+    if (buildMode == BuildMode.profile) {
+      final String vmserviceSharedLib = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceSharedLibrary,
+        platform: targetPlatform,
+        mode: buildMode,
+      );
+      final File vmserviceFile = environment.fileSystem.file(vmserviceSharedLib);
+      if (vmserviceFile.existsSync()) {
+        final File destinationVmservice = outputDirectory.childFile('libvmservice_snapshot.so');
+        vmserviceFile.copySync(destinationVmservice.path);
+        inputs.add(vmserviceFile);
+        outputs.add(destinationVmservice);
+      }
+    }
+
     final File manifestFile = buildDir.childFile('manifest.json');
     if (manifestFile.existsSync()) {
       final File destinationFile = outputDirectory.childFile('manifest.json');
