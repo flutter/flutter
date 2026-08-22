@@ -7,7 +7,7 @@ package io.flutter.plugin.platform;
 import static android.os.Looper.getMainLooper;
 import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.*;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowOf;
 
 import android.annotation.TargetApi;
 import android.content.Context;
