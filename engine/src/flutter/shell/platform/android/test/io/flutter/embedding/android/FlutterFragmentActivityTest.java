@@ -4,12 +4,14 @@
 
 package io.flutter.embedding.android;
 
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_DART_ENTRYPOINT_ARGS;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterFragment.ARG_CACHED_ENGINE_ID;
 import static io.flutter.embedding.android.FlutterFragment.ARG_DESTROY_ENGINE_WITH_FRAGMENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -37,6 +39,9 @@ import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
@@ -65,6 +70,31 @@ public class FlutterFragmentActivityTest {
   public void tearDown() {
     GeneratedPluginRegistrant.clearRegisteredEngines();
     FlutterInjector.reset();
+  }
+
+  @Test
+  public void itReturnsNullWhenDartEntrypointArgsIsNotAList() {
+    // Previously an unchecked (List<String>) cast, so a non-List Serializable from any caller
+    // crashed the Activity with ClassCastException before it drew a frame.
+    Intent intent =
+        new Intent(ctx, FlutterFragmentActivity.class)
+            .putExtra(EXTRA_DART_ENTRYPOINT_ARGS, new HashMap<String, String>());
+    FlutterFragmentActivity activity =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent).get();
+
+    assertNull(activity.getDartEntrypointArgs());
+  }
+
+  @Test
+  public void itIgnoresDartEntrypointArgsFromBrowserOriginatedIntent() {
+    Intent intent =
+        new Intent(ctx, FlutterFragmentActivity.class)
+            .addCategory(Intent.CATEGORY_BROWSABLE)
+            .putExtra(EXTRA_DART_ENTRYPOINT_ARGS, new ArrayList<String>(Arrays.asList("foo")));
+    FlutterFragmentActivity activity =
+        Robolectric.buildActivity(FlutterFragmentActivity.class, intent).get();
+
+    assertNull(activity.getDartEntrypointArgs());
   }
 
   @Test

@@ -46,6 +46,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -842,7 +843,38 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    if (isRemotelyOriginatedIntent()) {
+      return null;
+    }
+    // This Activity can be exported, so it deserializes an object graph supplied by an arbitrary
+    // sender. An unchecked cast of the result crashes the app before it draws a frame whenever the
+    // value is not a List, so the type is checked instead.
+    try {
+      final Serializable extra =
+          Build.VERSION.SDK_INT >= API_LEVELS.API_33
+              ? getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS, Serializable.class)
+              : getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+      return extra instanceof List ? (List<String>) extra : null;
+    } catch (Exception e) {
+      Log.w(TAG, "Ignoring malformed " + EXTRA_DART_ENTRYPOINT_ARGS + " extra.", e);
+      return null;
+    }
+  }
+
+  /**
+   * Whether the {@code Intent} that launched this {@code Activity} came from a web context.
+   *
+   * <p>Android's {@code intent://} URL scheme lets a web page construct an {@code Intent} carrying
+   * arbitrary string extras and deliver it to any exported {@code Activity} that declares {@link
+   * Intent#CATEGORY_BROWSABLE}. Browsers add {@code CATEGORY_BROWSABLE} to such {@code Intent}s.
+   *
+   * <p>Extras that configure how the application executes must not be honoured from that source.
+   * Configuration supplied by the app itself is unaffected, because an app launching its own {@code
+   * Activity} does not set this category.
+   */
+  private boolean isRemotelyOriginatedIntent() {
+    final Intent intent = getIntent();
+    return intent != null && intent.hasCategory(Intent.CATEGORY_BROWSABLE);
   }
 
   /**
