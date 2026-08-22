@@ -143,6 +143,10 @@ typedef _GetSheetDragged = bool Function();
 /// When `showDragHandle` is set to `true`, then a drag handle will be placed at
 /// the top of the sheet. This flag will default to false.
 ///
+/// The `hasPlatformViews` parameter should be set to `true` if the underlying
+/// route contains platform views. See [CupertinoSheetTransition.hasPlatformViews]
+/// for details.
+///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
 /// a non-sheet route that covers the sheet without first popping the sheet. If
@@ -188,6 +192,7 @@ Future<T?> showCupertinoSheet<T>({
   RouteSettings? settings,
   double? topGap,
   bool showDragHandle = false,
+  bool hasPlatformViews = false,
 }) {
   assert(topGap == null || (topGap >= 0.0 && topGap <= 0.9), 'topGap must be between 0.0 and 0.9');
   assert(pageBuilder != null || builder != null || scrollableBuilder != null);
@@ -205,6 +210,7 @@ Future<T?> showCupertinoSheet<T>({
       settings: settings,
       enableDrag: enableDrag,
       topGap: topGap,
+      hasPlatformViews: hasPlatformViews,
     );
 
     return Navigator.of(context, rootNavigator: true).push<T>(route);
@@ -267,6 +273,7 @@ class CupertinoSheetTransition extends StatefulWidget {
     required this.secondaryRouteAnimation,
     required this.child,
     required this.linearTransition,
+    this.hasPlatformViews = false,
     this.topGap = _kTopGapRatio,
   });
 
@@ -298,6 +305,34 @@ class CupertinoSheetTransition extends StatefulWidget {
   /// {@endtemplate}
   final double topGap;
 
+  /// {@template flutter.cupertino.CupertinoSheetTransition.hasPlatformViews}
+  /// Whether the underlying route contains platform views.
+  ///
+  /// Defaults to false, which uses an [ImageFilterLayer] for high-quality scaling.
+  /// However, since image filters cannot be applied to platform views, they may
+  /// appear "detached" or remain at their original size while the background
+  /// page scales.
+  ///
+  /// When set to true, the transition uses a [TransformLayer] instead. This
+  /// ensures platform views scale in sync with the rest of the route.
+  /// {@endtemplate}
+  final bool hasPlatformViews;
+
+  static Widget _delegateTransitionWithPlatformViews(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child,
+  ) => delegateTransition(
+    context,
+    animation,
+    secondaryAnimation,
+    allowSnapshotting,
+    child,
+    hasPlatformViews: true,
+  );
+
   /// The primary delegated transition. Will slide a non [CupertinoSheetRoute] page down.
   ///
   /// Provided to the previous route to coordinate transitions between routes.
@@ -309,10 +344,15 @@ class CupertinoSheetTransition extends StatefulWidget {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     bool allowSnapshotting,
-    Widget? child,
-  ) {
+    Widget? child, {
+    bool hasPlatformViews = false,
+  }) {
     if (CupertinoSheetRoute.hasParentSheet(context)) {
-      return _delegatedCoverSheetSecondaryTransition(secondaryAnimation, child);
+      return _delegatedCoverSheetSecondaryTransition(
+        secondaryAnimation,
+        child,
+        hasPlatformViews: hasPlatformViews,
+      );
     }
     final bool linear = Navigator.of(context).userGestureInProgress;
 
@@ -371,7 +411,7 @@ class CupertinoSheetTransition extends StatefulWidget {
           position: slideAnimation,
           child: ScaleTransition(
             scale: scaleAnimation,
-            filterQuality: FilterQuality.medium,
+            filterQuality: hasPlatformViews ? null : FilterQuality.medium,
             alignment: Alignment.topCenter,
             child: AnimatedBuilder(
               animation: radiusAnimation,
@@ -393,8 +433,9 @@ class CupertinoSheetTransition extends StatefulWidget {
 
   static Widget _delegatedCoverSheetSecondaryTransition(
     Animation<double> secondaryAnimation,
-    Widget? child,
-  ) {
+    Widget? child, {
+    bool hasPlatformViews = false,
+  }) {
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
     final curvedAnimation = CurvedAnimation(
@@ -412,7 +453,7 @@ class CupertinoSheetTransition extends StatefulWidget {
       transformHitTests: false,
       child: ScaleTransition(
         scale: scaleAnimation,
-        filterQuality: FilterQuality.medium,
+        filterQuality: hasPlatformViews ? null : FilterQuality.medium,
         alignment: Alignment.topCenter,
         child: ClipRSuperellipse(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
@@ -531,7 +572,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       transformHitTests: false,
       child: ScaleTransition(
         scale: _secondaryScaleAnimation,
-        filterQuality: FilterQuality.medium,
+        filterQuality: widget.hasPlatformViews ? null : FilterQuality.medium,
         alignment: Alignment.topCenter,
         child: child,
       ),
@@ -643,6 +684,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     this.scrollableBuilder,
     this.enableDrag = true,
     this.showDragHandle = false,
+    this.hasPlatformViews = false,
     double? topGap,
   }) : assert(
          topGap == null || (topGap >= 0.0 && topGap <= 0.9),
@@ -681,6 +723,9 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   final bool enableDrag;
+
+  @override
+  final bool hasPlatformViews;
 
   // The gap between the top of the screen and the top of the sheet.
   final double? _topGap;
@@ -820,7 +865,9 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     if (_hasCustomTopGap) {
       return null;
     }
-    return CupertinoSheetTransition.delegateTransition;
+    return hasPlatformViews
+        ? CupertinoSheetTransition._delegateTransitionWithPlatformViews
+        : CupertinoSheetTransition.delegateTransition;
   }
 
   /// Determines whether the content can be dragged.
@@ -833,6 +880,9 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   ///
   /// {@macro flutter.cupertino.CupertinoSheetTransition.topGap}
   double get topGap;
+
+  /// {@macro flutter.cupertino.CupertinoSheetTransition.hasPlatformViews}
+  bool get hasPlatformViews;
 
   /// Whether a custom top gap has been set.
   bool get _hasCustomTopGap;
@@ -868,6 +918,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Widget child,
     bool enableDrag,
     double topGap,
+    bool hasPlatformViews,
   ) {
     final bool linearTransition = route.popGestureInProgress;
     return CupertinoSheetTransition(
@@ -875,6 +926,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
       topGap: topGap,
+      hasPlatformViews: hasPlatformViews,
       child: _CupertinoDragGestureDetector<T>(
         enabledCallback: () => enableDrag,
         onStartPopGesture: () => _startPopGesture<T>(route, topGap),
@@ -911,6 +963,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       child,
       enableDrag,
       topGap,
+      hasPlatformViews,
     );
   }
 }
