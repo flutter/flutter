@@ -299,6 +299,8 @@ public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
 
   private void configureCollectionItem(
       AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+    // Cells in a table are positioned by CellRoleConfigurator, which runs after this method and
+    // overwrites whatever is set here.
     if (node.accessibilityBridge.shouldSetCollectionItemInfo(node)) {
       AccessibilityBridge.SemanticsNode parent = node.parent;
       List<AccessibilityBridge.SemanticsNode> scrollChildren = parent.childrenInTraversalOrder;
@@ -307,7 +309,7 @@ public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
               || parent.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT));
       int nodeIndex = scrollChildren.indexOf(node);
       if (verticalScroll) {
-        if (Build.VERSION.SDK_INT < 33) {
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
           result.setCollectionItemInfo(
               AccessibilityNodeInfo.CollectionItemInfo.obtain(
                   nodeIndex, // row index
@@ -327,7 +329,7 @@ public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
                   ));
         }
       } else {
-        if (Build.VERSION.SDK_INT < 33) {
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
           result.setCollectionItemInfo(
               AccessibilityNodeInfo.CollectionItemInfo.obtain(
                   0, // row index

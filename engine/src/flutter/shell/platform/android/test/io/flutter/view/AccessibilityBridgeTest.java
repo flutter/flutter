@@ -2695,6 +2695,322 @@ public class AccessibilityBridgeTest {
     assertEquals("android.widget.RadioGroup", nodeInfo.getClassName().toString());
   }
 
+  // Setup method for testing CollectionInfo for Table.
+  public void itAddsTableLayoutAndCollectionInfo() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode table = new TestSemanticsNode();
+    table.id = 0;
+    table.role = AccessibilityBridge.Role.TABLE.value;
+
+    TestSemanticsNode row1 = new TestSemanticsNode();
+    row1.id = 1;
+    row1.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode cell1_1 = new TestSemanticsNode();
+    cell1_1.id = 3;
+    cell1_1.role = AccessibilityBridge.Role.CELL.value;
+    TestSemanticsNode cell1_2 = new TestSemanticsNode();
+    cell1_2.id = 4;
+    cell1_2.role = AccessibilityBridge.Role.CELL.value;
+    row1.children.add(cell1_1);
+    row1.children.add(cell1_2);
+
+    TestSemanticsNode row2 = new TestSemanticsNode();
+    row2.id = 2;
+    row2.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode cell2_1 = new TestSemanticsNode();
+    cell2_1.id = 5;
+    cell2_1.role = AccessibilityBridge.Role.CELL.value;
+    TestSemanticsNode cell2_2 = new TestSemanticsNode();
+    cell2_2.id = 6;
+    cell2_2.role = AccessibilityBridge.Role.CELL.value;
+    row2.children.add(cell2_1);
+    row2.children.add(cell2_2);
+
+    table.children.add(row1);
+    table.children.add(row2);
+
+    TestSemanticsUpdate testSemanticsUpdate = table.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNotNull(nodeInfo);
+    assertEquals("android.widget.TableLayout", nodeInfo.getClassName().toString());
+    AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
+    assertNotNull(collectionInfo);
+    assertEquals(2, collectionInfo.getRowCount());
+    assertEquals(2, collectionInfo.getColumnCount());
+    assertFalse(collectionInfo.isHierarchical());
+
+    AccessibilityNodeInfo cell11Info = accessibilityBridge.createAccessibilityNodeInfo(3);
+    assertNotNull(cell11Info.getCollectionItemInfo());
+    assertEquals(0, cell11Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(1, cell11Info.getCollectionItemInfo().getRowSpan());
+    assertEquals(0, cell11Info.getCollectionItemInfo().getColumnIndex());
+    assertEquals(1, cell11Info.getCollectionItemInfo().getColumnSpan());
+    assertFalse(cell11Info.getCollectionItemInfo().isHeading());
+
+    AccessibilityNodeInfo cell12Info = accessibilityBridge.createAccessibilityNodeInfo(4);
+    assertNotNull(cell12Info.getCollectionItemInfo());
+    assertEquals(0, cell12Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(1, cell12Info.getCollectionItemInfo().getRowSpan());
+    assertEquals(1, cell12Info.getCollectionItemInfo().getColumnIndex());
+    assertEquals(1, cell12Info.getCollectionItemInfo().getColumnSpan());
+    assertFalse(cell12Info.getCollectionItemInfo().isHeading());
+
+    AccessibilityNodeInfo cell21Info = accessibilityBridge.createAccessibilityNodeInfo(5);
+    assertNotNull(cell21Info.getCollectionItemInfo());
+    assertEquals(1, cell21Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(1, cell21Info.getCollectionItemInfo().getRowSpan());
+    assertEquals(0, cell21Info.getCollectionItemInfo().getColumnIndex());
+    assertEquals(1, cell21Info.getCollectionItemInfo().getColumnSpan());
+    assertFalse(cell21Info.getCollectionItemInfo().isHeading());
+
+    AccessibilityNodeInfo cell22Info = accessibilityBridge.createAccessibilityNodeInfo(6);
+    assertNotNull(cell22Info.getCollectionItemInfo());
+    assertEquals(1, cell22Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(1, cell22Info.getCollectionItemInfo().getRowSpan());
+    assertEquals(1, cell22Info.getCollectionItemInfo().getColumnIndex());
+    assertEquals(1, cell22Info.getCollectionItemInfo().getColumnSpan());
+    assertFalse(cell22Info.getCollectionItemInfo().isHeading());
+  }
+
+  @Config(sdk = API_LEVELS.API_32)
+  @TargetApi(API_LEVELS.API_32)
+  @Test
+  public void itAddsTableLayoutAndCollectionInfoAPI32() {
+    itAddsTableLayoutAndCollectionInfo();
+  }
+
+  @Config(sdk = API_LEVELS.API_33)
+  @TargetApi(API_LEVELS.API_33)
+  @Test
+  public void itAddsTableLayoutAndCollectionInfoAPI33() {
+    itAddsTableLayoutAndCollectionInfo();
+  }
+
+  @Test
+  public void itAddsTableLayoutAndCollectionInfo_raggedRows() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode table = new TestSemanticsNode();
+    table.id = 0;
+    table.role = AccessibilityBridge.Role.TABLE.value;
+
+    TestSemanticsNode row1 = new TestSemanticsNode();
+    row1.id = 1;
+    row1.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode cell1_1 = new TestSemanticsNode();
+    cell1_1.id = 3;
+    cell1_1.role = AccessibilityBridge.Role.CELL.value;
+    row1.children.add(cell1_1);
+
+    TestSemanticsNode row2 = new TestSemanticsNode();
+    row2.id = 2;
+    row2.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode cell2_1 = new TestSemanticsNode();
+    cell2_1.id = 4;
+    cell2_1.role = AccessibilityBridge.Role.CELL.value;
+    TestSemanticsNode cell2_2 = new TestSemanticsNode();
+    cell2_2.id = 5;
+    cell2_2.role = AccessibilityBridge.Role.CELL.value;
+    TestSemanticsNode cell2_3 = new TestSemanticsNode();
+    cell2_3.id = 6;
+    cell2_3.role = AccessibilityBridge.Role.CELL.value;
+    row2.children.add(cell2_1);
+    row2.children.add(cell2_2);
+    row2.children.add(cell2_3);
+
+    table.children.add(row1);
+    table.children.add(row2);
+
+    TestSemanticsUpdate testSemanticsUpdate = table.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNotNull(nodeInfo);
+    assertEquals("android.widget.TableLayout", nodeInfo.getClassName().toString());
+    AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
+    assertNotNull(collectionInfo);
+    assertEquals(2, collectionInfo.getRowCount());
+    assertEquals(3, collectionInfo.getColumnCount());
+    assertFalse(collectionInfo.isHierarchical());
+
+    AccessibilityNodeInfo cell23Info = accessibilityBridge.createAccessibilityNodeInfo(6);
+    assertNotNull(cell23Info.getCollectionItemInfo());
+    assertEquals(1, cell23Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(2, cell23Info.getCollectionItemInfo().getColumnIndex());
+  }
+
+  @Test
+  public void itAddsTableLayoutAndCollectionInfo_withHeaderRow() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode table = new TestSemanticsNode();
+    table.id = 0;
+    table.role = AccessibilityBridge.Role.TABLE.value;
+
+    TestSemanticsNode headerRow = new TestSemanticsNode();
+    headerRow.id = 1;
+    headerRow.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode colHeader1 = new TestSemanticsNode();
+    colHeader1.id = 4;
+    colHeader1.role = AccessibilityBridge.Role.COLUMN_HEADER.value;
+    TestSemanticsNode colHeader2 = new TestSemanticsNode();
+    colHeader2.id = 5;
+    colHeader2.role = AccessibilityBridge.Role.COLUMN_HEADER.value;
+    headerRow.children.add(colHeader1);
+    headerRow.children.add(colHeader2);
+
+    TestSemanticsNode dataRow1 = new TestSemanticsNode();
+    dataRow1.id = 2;
+    dataRow1.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode cell1_1 = new TestSemanticsNode();
+    cell1_1.id = 6;
+    cell1_1.role = AccessibilityBridge.Role.CELL.value;
+    TestSemanticsNode cell1_2 = new TestSemanticsNode();
+    cell1_2.id = 7;
+    cell1_2.role = AccessibilityBridge.Role.CELL.value;
+    dataRow1.children.add(cell1_1);
+    dataRow1.children.add(cell1_2);
+
+    TestSemanticsNode dataRow2 = new TestSemanticsNode();
+    dataRow2.id = 3;
+    dataRow2.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode cell2_1 = new TestSemanticsNode();
+    cell2_1.id = 8;
+    cell2_1.role = AccessibilityBridge.Role.CELL.value;
+    TestSemanticsNode cell2_2 = new TestSemanticsNode();
+    cell2_2.id = 9;
+    cell2_2.role = AccessibilityBridge.Role.CELL.value;
+    dataRow2.children.add(cell2_1);
+    dataRow2.children.add(cell2_2);
+
+    table.children.add(headerRow);
+    table.children.add(dataRow1);
+    table.children.add(dataRow2);
+
+    TestSemanticsUpdate testSemanticsUpdate = table.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNotNull(nodeInfo);
+    assertEquals("android.widget.TableLayout", nodeInfo.getClassName().toString());
+    AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
+    assertNotNull(collectionInfo);
+    assertEquals(3, collectionInfo.getRowCount());
+    assertEquals(2, collectionInfo.getColumnCount());
+    assertFalse(collectionInfo.isHierarchical());
+
+    AccessibilityNodeInfo colHeader1Info = accessibilityBridge.createAccessibilityNodeInfo(4);
+    assertNotNull(colHeader1Info.getCollectionItemInfo());
+    assertEquals(0, colHeader1Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(0, colHeader1Info.getCollectionItemInfo().getColumnIndex());
+    assertTrue(colHeader1Info.getCollectionItemInfo().isHeading());
+
+    AccessibilityNodeInfo colHeader2Info = accessibilityBridge.createAccessibilityNodeInfo(5);
+    assertNotNull(colHeader2Info.getCollectionItemInfo());
+    assertEquals(0, colHeader2Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(1, colHeader2Info.getCollectionItemInfo().getColumnIndex());
+    assertTrue(colHeader2Info.getCollectionItemInfo().isHeading());
+
+    AccessibilityNodeInfo dataCell11Info = accessibilityBridge.createAccessibilityNodeInfo(6);
+    assertNotNull(dataCell11Info.getCollectionItemInfo());
+    assertEquals(1, dataCell11Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(0, dataCell11Info.getCollectionItemInfo().getColumnIndex());
+    assertFalse(dataCell11Info.getCollectionItemInfo().isHeading());
+
+    AccessibilityNodeInfo dataCell22Info = accessibilityBridge.createAccessibilityNodeInfo(9);
+    assertNotNull(dataCell22Info.getCollectionItemInfo());
+    assertEquals(2, dataCell22Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(1, dataCell22Info.getCollectionItemInfo().getColumnIndex());
+    assertFalse(dataCell22Info.getCollectionItemInfo().isHeading());
+  }
+
+  @Test
+  public void itAddsTableLayoutAndCollectionInfo_ignoresNonRowChildren() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode table = new TestSemanticsNode();
+    table.id = 0;
+    table.role = AccessibilityBridge.Role.TABLE.value;
+
+    TestSemanticsNode nonRowChild = new TestSemanticsNode();
+    nonRowChild.id = 1;
+    nonRowChild.role = AccessibilityBridge.Role.NONE.value;
+
+    TestSemanticsNode row = new TestSemanticsNode();
+    row.id = 2;
+    row.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode cell = new TestSemanticsNode();
+    cell.id = 3;
+    cell.role = AccessibilityBridge.Role.CELL.value;
+    row.children.add(cell);
+
+    table.children.add(nonRowChild);
+    table.children.add(row);
+
+    TestSemanticsUpdate testSemanticsUpdate = table.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNotNull(nodeInfo);
+    assertEquals("android.widget.TableLayout", nodeInfo.getClassName().toString());
+    AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
+    assertNotNull(collectionInfo);
+    assertEquals(1, collectionInfo.getRowCount());
+    assertEquals(1, collectionInfo.getColumnCount());
+    assertFalse(collectionInfo.isHierarchical());
+
+    AccessibilityNodeInfo cellInfo = accessibilityBridge.createAccessibilityNodeInfo(3);
+    assertNotNull(cellInfo.getCollectionItemInfo());
+    assertEquals(0, cellInfo.getCollectionItemInfo().getRowIndex());
+    assertEquals(0, cellInfo.getCollectionItemInfo().getColumnIndex());
+  }
+
+  @Test
+  public void itDoesNotAddCollectionInfoToAnEmptyTable() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode table = new TestSemanticsNode();
+    table.id = 0;
+    table.role = AccessibilityBridge.Role.TABLE.value;
+
+    TestSemanticsUpdate testSemanticsUpdate = table.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNotNull(nodeInfo);
+    assertEquals("android.widget.TableLayout", nodeInfo.getClassName().toString());
+    // TalkBack needs counts greater than zero to describe a collection, so an empty table gets
+    // none at all.
+    assertNull(nodeInfo.getCollectionInfo());
+  }
+
+  @Test
+  public void itDoesNotAddCollectionItemInfoToACellOutsideOfATable() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+
+    TestSemanticsNode row = new TestSemanticsNode();
+    row.id = 1;
+    row.role = AccessibilityBridge.Role.ROW.value;
+    TestSemanticsNode cell = new TestSemanticsNode();
+    cell.id = 2;
+    cell.role = AccessibilityBridge.Role.CELL.value;
+    row.children.add(cell);
+    root.children.add(row);
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo cellInfo = accessibilityBridge.createAccessibilityNodeInfo(2);
+    assertNotNull(cellInfo);
+    assertNull(cellInfo.getCollectionItemInfo());
+  }
+
   @Test
   public void itAddsRangeInfoToProgressBar() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
