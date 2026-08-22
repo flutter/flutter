@@ -777,21 +777,30 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   String _createListenerDart(List<Finalizer> finalizers, int ourTestCount, String testPath) {
-    // Prepare a temporary directory to store the Dart file that will talk to us.
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-      'flutter_test_listener.',
-    );
-    finalizers.add(() async {
-      globals.printTrace('test $ourTestCount: deleting temporary directory');
-      tempDir.deleteSync(recursive: true);
-    });
+    // Prepare a directory to store the Dart file that will talk to us.
+    final Directory directory;
+    if (flutterProject != null) {
+      directory = flutterProject!.buildDirectory.childDirectory('test');
+    } else if (projectRootDirectory != null) {
+      directory = globals.fs
+          .directory(projectRootDirectory)
+          .childDirectory(getBuildDirectory())
+          .childDirectory('test');
+    } else {
+      directory = globals.fs.systemTempDirectory.createTempSync('flutter_test_listener.');
+      finalizers.add(() async {
+        globals.printTrace('test $ourTestCount: deleting temporary directory');
+        directory.deleteSync(recursive: true);
+      });
+    }
+
+    directory.createSync(recursive: true);
 
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = globals.fs.file('${tempDir.path}/listener.dart');
-    listenerFile.createSync();
-    listenerFile.writeAsStringSync(
-      _generateTestMain(testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath))),
-    );
+    final File listenerFile = directory.childFile('listener_$ourTestCount.dart')
+      ..writeAsStringSync(
+        _generateTestMain(testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath))),
+      );
     return listenerFile.path;
   }
 
@@ -800,9 +809,11 @@ class FlutterPlatform extends PlatformPlugin {
     final File file = globals.fs.file(testUrl);
     final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
 
+    final String? appName = flutterProject?.manifest.appName;
+    final Package? package = appName != null ? packageConfig[appName] : null;
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
-      packageConfig[flutterProject!.manifest.appName],
+      package,
       Cache.flutterRoot!,
     );
     return generateTestBootstrap(

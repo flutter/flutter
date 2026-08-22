@@ -479,6 +479,212 @@ void main() {
       },
     );
   });
+
+  group('listener.dart generation', () {
+    late SuitePlatform fakeSuitePlatform;
+    late MemoryFileSystem fileSystem;
+    late Artifacts artifacts;
+    late FakeProcessManager processManager;
+    late BufferLogger logger;
+    setUp(() {
+      fakeSuitePlatform = SuitePlatform(Runtime.vm);
+      fileSystem = MemoryFileSystem.test();
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+      artifacts = Artifacts.test(fileSystem: fileSystem);
+      processManager = FakeProcessManager.empty();
+      logger = BufferLogger.test();
+    });
+
+    testUsingContext(
+      'creates listener file in project build directory for integration tests with stable path across runs',
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+
+        final device1 = _WorkingDevice();
+        final platform1 = FlutterPlatform(
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          flutterTesterBinPath: 'flutter_tester',
+          enableVmService: false,
+          flutterProject: flutterProject,
+          integrationTestDevice: device1,
+          host: InternetAddress.anyIPv4,
+          updateGoldens: false,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: logger,
+        );
+
+        final StreamChannel<Object?> channel1 = platform1.loadChannel(
+          'test1.dart',
+          fakeSuitePlatform,
+        );
+        unawaited(channel1.stream.drain<void>());
+        await pumpEventQueue();
+
+        final String expectedPath = fileSystem.path.join(
+          projectDir.path,
+          'build',
+          'test',
+          'listener_0.dart',
+        );
+        expect(device1.lastMainPath, equals(expectedPath));
+        expect(fileSystem.file(device1.lastMainPath).existsSync(), isTrue);
+
+        final device2 = _WorkingDevice();
+        final platform2 = FlutterPlatform(
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          flutterTesterBinPath: 'flutter_tester',
+          enableVmService: false,
+          flutterProject: flutterProject,
+          integrationTestDevice: device2,
+          host: InternetAddress.anyIPv4,
+          updateGoldens: false,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: logger,
+        );
+
+        final StreamChannel<Object?> channel2 = platform2.loadChannel(
+          'test1.dart',
+          fakeSuitePlatform,
+        );
+        unawaited(channel2.stream.drain<void>());
+        await pumpEventQueue();
+
+        expect(device2.lastMainPath, equals(expectedPath));
+        expect(device2.lastMainPath, equals(device1.lastMainPath));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Logger? logger,
+            }) async => _FakeFlutterVmService(),
+        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
+        Artifacts: () => artifacts,
+      },
+    );
+
+    testUsingContext(
+      'creates listener file in projectRootDirectory build directory if flutterProject is null',
+      () async {
+        final Directory projectRootDir = fileSystem.directory('/project_root')
+          ..createSync(recursive: true);
+
+        final device = _WorkingDevice();
+        final platform = FlutterPlatform(
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          flutterTesterBinPath: 'flutter_tester',
+          enableVmService: false,
+          projectRootDirectory: projectRootDir.uri,
+          integrationTestDevice: device,
+          host: InternetAddress.anyIPv4,
+          updateGoldens: false,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: logger,
+        );
+
+        final StreamChannel<Object?> channel = platform.loadChannel(
+          'test1.dart',
+          fakeSuitePlatform,
+        );
+        unawaited(channel.stream.drain<void>());
+        await pumpEventQueue();
+
+        final String expectedPath = fileSystem.path.join(
+          projectRootDir.path,
+          'build',
+          'test',
+          'listener_0.dart',
+        );
+        expect(device.lastMainPath, equals(expectedPath));
+        expect(fileSystem.file(device.lastMainPath).existsSync(), isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Logger? logger,
+            }) async => _FakeFlutterVmService(),
+        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
+        Artifacts: () => artifacts,
+      },
+    );
+
+    testUsingContext(
+      'falls back to systemTempDirectory if neither flutterProject nor projectRootDirectory is provided',
+      () async {
+        final device = _WorkingDevice();
+        final platform = FlutterPlatform(
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          flutterTesterBinPath: 'flutter_tester',
+          enableVmService: false,
+          integrationTestDevice: device,
+          host: InternetAddress.anyIPv4,
+          updateGoldens: false,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: logger,
+        );
+
+        final StreamChannel<Object?> channel = platform.loadChannel(
+          'test1.dart',
+          fakeSuitePlatform,
+        );
+        unawaited(channel.stream.drain<void>());
+        await pumpEventQueue();
+
+        expect(device.lastMainPath, startsWith(fileSystem.systemTempDirectory.path));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Logger? logger,
+            }) async => _FakeFlutterVmService(),
+        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
+        Artifacts: () => artifacts,
+      },
+    );
+  });
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
@@ -564,6 +770,8 @@ class _UnstartableDevice extends Fake implements Device {
 }
 
 class _WorkingDevice extends Fake implements Device {
+  String? lastMainPath;
+
   @override
   Future<void> dispose() async {}
 
@@ -586,11 +794,21 @@ class _WorkingDevice extends Fake implements Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
+    lastMainPath = mainPath;
     return LaunchResult.succeeded(vmServiceUri: Uri.parse('http://127.0.0.1:12345/vmService'));
   }
 }
 
 class _FakeFlutterProject extends Fake implements FlutterProject {
+  _FakeFlutterProject([Directory? directory])
+    : directory = directory ?? MemoryFileSystem.test().directory('/project');
+
+  @override
+  final Directory directory;
+
+  @override
+  Directory get buildDirectory => directory.childDirectory('build');
+
   @override
   FlutterManifest get manifest => FlutterManifest.empty(logger: BufferLogger.test());
 }
