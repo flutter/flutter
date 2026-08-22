@@ -327,8 +327,12 @@ class BuildInfo {
   bool get isJitRelease => mode == BuildMode.jitRelease;
 
   bool get usesAot => isAotBuildMode(mode);
+
+  /// Whether this build can run on an Android emulator.
   bool get supportsEmulator => isEmulatorBuildMode(mode);
-  bool get supportsSimulator => isEmulatorBuildMode(mode);
+
+  /// Whether this build can run on an iOS Simulator.
+  bool get supportsSimulator => !isJitRelease;
   String get modeName => mode.cliName;
 
   /// the flavor name in the output apk files is lower-cased (see Flutter Gradle Plugin),
@@ -647,7 +651,7 @@ bool isAotBuildMode(BuildMode mode) {
   return mode == BuildMode.profile || mode == BuildMode.release;
 }
 
-// Returns true if the given build mode can be used on emulators / simulators.
+/// Returns whether [mode] can be used on an Android emulator.
 bool isEmulatorBuildMode(BuildMode mode) {
   return mode == BuildMode.debug;
 }

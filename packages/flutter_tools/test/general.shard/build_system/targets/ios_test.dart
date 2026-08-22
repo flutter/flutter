@@ -768,33 +768,65 @@ void main() {
   );
 
   testUsingContext(
-    'AotAssemblyRelease throws exception if asked to build for simulator',
+    'AotAssemblyRelease builds for x64 simulator',
     () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        defines: <String, String>{
-          kTargetPlatform: 'ios',
-          kSdkRoot: 'path/to/iPhoneSimulator.sdk',
-          kBuildMode: 'release',
-          kIosArchs: 'x86_64',
-        },
-        processManager: processManager,
-        artifacts: artifacts,
-        logger: logger,
-        fileSystem: fileSystem,
-      );
-
-      expect(
-        const AotAssemblyRelease().build(environment),
-        throwsA(
-          isException.having(
-            (Exception exception) => exception.toString(),
-            'description',
-            contains('release/profile builds are only supported for physical devices.'),
-          ),
+      environment.defines.addAll(<String, String>{
+        kBuildMode: BuildMode.release.cliName,
+        kIosArchs: 'x86_64',
+        kSdkRoot: 'path/to/iPhoneSimulator.sdk',
+      });
+      final String build = environment.buildDir.path;
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(
+              Artifact.genSnapshotX64,
+              platform: TargetPlatform.ios,
+              mode: BuildMode.release,
+            ),
+            '--deterministic',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=$build/x86_64/App.framework/App',
+            '--macho-object=$build/x86_64/app.o',
+            '--macho-min-os-version=15.0',
+            '--macho-platform-simulated',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
+            '$build/app.dill',
+          ],
         ),
-      );
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'dsymutil',
+            '-o',
+            '$build/x86_64/App.framework.dSYM',
+            '$build/x86_64/App.framework/App',
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'strip',
+            '-x',
+            '$build/x86_64/App.framework/App',
+            '-o',
+            '$build/x86_64/App.framework/App',
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'lipo',
+            '$build/x86_64/App.framework/App',
+            '-create',
+            '-output',
+            '$build/App.framework/App',
+          ],
+        ),
+      ]);
+
+      await const AotAssemblyRelease().build(environment);
+
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{

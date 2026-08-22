@@ -94,6 +94,18 @@ void main() {
     });
   });
 
+  testWithoutContext('BuildInfo reports Android emulator and iOS Simulator support', () {
+    expect(BuildInfo.debug.supportsEmulator, true);
+    expect(BuildInfo.profile.supportsEmulator, false);
+    expect(BuildInfo.release.supportsEmulator, false);
+    expect(BuildInfo.jitRelease.supportsEmulator, false);
+
+    expect(BuildInfo.debug.supportsSimulator, true);
+    expect(BuildInfo.profile.supportsSimulator, true);
+    expect(BuildInfo.release.supportsSimulator, true);
+    expect(BuildInfo.jitRelease.supportsSimulator, false);
+  });
+
   testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
     expect(CpuArch.armv7.dartName, 'armv7');
     expect(CpuArch.arm64.dartName, 'arm64');

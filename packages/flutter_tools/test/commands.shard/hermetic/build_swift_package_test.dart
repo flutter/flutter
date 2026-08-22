@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/swift_packages.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -1294,42 +1293,21 @@ let package = Package(
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
-        final Target iphoneDebugTarget = appAndNativeAssetsDependencies.determineTarget(
+        final Target debugTarget = appAndNativeAssetsDependencies.determineTarget(
           targetPlatform,
-          XcodeSdk.IPhoneOS,
           BuildInfo.debug,
         );
-        final Target iphoneProfileTarget = appAndNativeAssetsDependencies.determineTarget(
+        final Target profileTarget = appAndNativeAssetsDependencies.determineTarget(
           targetPlatform,
-          XcodeSdk.IPhoneOS,
           BuildInfo.profile,
         );
-        final Target iphoneReleaseTarget = appAndNativeAssetsDependencies.determineTarget(
+        final Target releaseTarget = appAndNativeAssetsDependencies.determineTarget(
           targetPlatform,
-          XcodeSdk.IPhoneOS,
           BuildInfo.release,
         );
-        final Target simulatorDebugTarget = appAndNativeAssetsDependencies.determineTarget(
-          targetPlatform,
-          XcodeSdk.IPhoneSimulator,
-          BuildInfo.debug,
-        );
-        final Target simulatorProfileTarget = appAndNativeAssetsDependencies.determineTarget(
-          targetPlatform,
-          XcodeSdk.IPhoneSimulator,
-          BuildInfo.profile,
-        );
-        final Target simulatorReleaseTarget = appAndNativeAssetsDependencies.determineTarget(
-          targetPlatform,
-          XcodeSdk.IPhoneSimulator,
-          BuildInfo.release,
-        );
-        expect(iphoneDebugTarget.name, 'debug_ios_bundle_flutter_assets');
-        expect(iphoneProfileTarget.name, 'profile_ios_bundle_flutter_assets');
-        expect(iphoneReleaseTarget.name, 'release_ios_bundle_flutter_assets');
-        expect(simulatorDebugTarget.name, 'debug_ios_bundle_flutter_assets');
-        expect(simulatorProfileTarget.name, 'debug_ios_bundle_flutter_assets');
-        expect(simulatorReleaseTarget.name, 'debug_ios_bundle_flutter_assets');
+        expect(debugTarget.name, 'debug_ios_bundle_flutter_assets');
+        expect(profileTarget.name, 'profile_ios_bundle_flutter_assets');
+        expect(releaseTarget.name, 'release_ios_bundle_flutter_assets');
       });
     });
 
@@ -2719,17 +2697,14 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         );
         final Target macosDebugTarget = appAndNativeAssetsDependencies.determineTarget(
           targetPlatform,
-          XcodeSdk.MacOSX,
           BuildInfo.debug,
         );
         final Target macosProfileTarget = appAndNativeAssetsDependencies.determineTarget(
           targetPlatform,
-          XcodeSdk.MacOSX,
           BuildInfo.profile,
         );
         final Target macosReleaseTarget = appAndNativeAssetsDependencies.determineTarget(
           targetPlatform,
-          XcodeSdk.MacOSX,
           BuildInfo.release,
         );
 

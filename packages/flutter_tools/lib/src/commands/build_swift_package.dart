@@ -1288,7 +1288,7 @@ class AppFrameworkAndNativeAssetsDependencies {
           : _utils.flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
-    final Target target = determineTarget(platform, sdk, buildInfo);
+    final Target target = determineTarget(platform, buildInfo);
 
     final BuildResult result = await _utils.buildSystem.build(target, environment);
     if (!result.success) {
@@ -1395,13 +1395,12 @@ class AppFrameworkAndNativeAssetsDependencies {
     return warnings;
   }
 
-  /// Determine the [Target] to build based on the [platform], [sdk], and [buildInfo].
+  /// Determine the [Target] to build based on the [platform] and [buildInfo].
   @visibleForTesting
-  Target determineTarget(FlutterDarwinPlatform platform, XcodeSdk sdk, BuildInfo buildInfo) {
+  Target determineTarget(FlutterDarwinPlatform platform, BuildInfo buildInfo) {
     switch (platform) {
       case FlutterDarwinPlatform.ios:
-        // Always build debug for simulator.
-        if (buildInfo.isDebug || sdk.sdkType == EnvironmentType.simulator) {
+        if (buildInfo.isDebug) {
           return const DebugIosApplicationBundle();
         } else if (buildInfo.isProfile) {
           return const ProfileIosApplicationBundle();
