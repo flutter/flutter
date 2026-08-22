@@ -78,6 +78,35 @@ import java.util.regex.Pattern;
  * IDs".
  */
 public class AccessibilityBridge extends AccessibilityNodeProvider {
+
+  /**
+   * Represents a pending text change from the IME. This bridges the synchronous IME input with the
+   * asynchronous framework semantics update, allowing us to attach the correct change type to the
+   * accessibility event when the framework eventually processes the text change.
+   */
+  private static class ImeTextChange {
+    final String text;
+    final int type;
+
+    ImeTextChange(String text, int type) {
+      this.text = text;
+      this.type = type;
+    }
+  }
+
+  private final Queue<ImeTextChange> imeTextChanges = new ArrayDeque<>();
+
+  public void addImeTextChange(String text, int type) {
+    // Cap the queue at 20 items to prevent memory leaks in the edge case where Dart text
+    // formatters aggressively alter the text, preventing queue items from ever matching
+    // the semantics update and being naturally dequeued. 20 is large enough to safely
+    // hold multiple rapid keystrokes that are batched into a single frame.
+    if (imeTextChanges.size() > 20) {
+      imeTextChanges.poll();
+    }
+    imeTextChanges.add(new ImeTextChange(text, type));
+  }
+
   private static final String TAG = "AccessibilityBridge";
 
   // Constants from higher API levels.
@@ -1735,6 +1764,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           && (lastInputFocusedSemanticsNode == null
               || lastInputFocusedSemanticsNode.id != inputFocusedSemanticsNode.id)) {
         lastInputFocusedSemanticsNode = inputFocusedSemanticsNode;
+        // Focus just shifted to a new text field. Clear the queue to prevent stale
+        // IME events from the previous text field from bleeding into the new one.
+        imeTextChanges.clear();
         sendAccessibilityEvent(
             obtainAccessibilityEvent(object.id, AccessibilityEvent.TYPE_VIEW_FOCUSED));
       } else if (inputFocusedSemanticsNode == null) {
@@ -1742,6 +1774,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         // null, then we just set the last one to null too, so that it sends the event again
         // when something regains focus.
         lastInputFocusedSemanticsNode = null;
+        // Focus was lost completely. Clear the queue because there is no longer a valid
+        // text field to receive the pending IME events.
+        imeTextChanges.clear();
       }
 
       if (inputFocusedSemanticsNode != null
@@ -1781,6 +1816,30 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     e.setBeforeText(oldValue);
     e.getText().add(newValue);
 
+    // Determine the type of change that occurred by analyzing the IME change history.
+    Integer changeType = null;
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
+      int elementsToPoll = 0;
+      int index = 0;
+      for (ImeTextChange change : imeTextChanges) {
+        index++;
+        if (change.text.equals(newValue)) {
+          elementsToPoll = index;
+        }
+      }
+
+      for (int j = 0; j < elementsToPoll; j++) {
+        ImeTextChange change = imeTextChanges.poll();
+        if (change.text.equals(newValue)) {
+          changeType = change.type;
+        }
+      }
+
+      if (changeType != null) {
+        e.setTextChangeTypes(changeType);
+      }
+    }
+
     int i;
     for (i = 0; i < oldValue.length() && i < newValue.length(); ++i) {
       if (oldValue.charAt(i) != newValue.charAt(i)) {
@@ -1788,7 +1847,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
     }
     if (i >= oldValue.length() && i >= newValue.length()) {
-      return null; // Text did not change
+      if (changeType != null) {
+        return e;
+      } else {
+        return null; // Text did not change
+      }
     }
     int firstDifference = i;
     e.setFromIndex(firstDifference);
