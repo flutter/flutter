@@ -760,6 +760,148 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
+    // On iOS WebKit, a native caret or selection drag transiently blurs the
+    // hidden input with `relatedTarget == null` and refocuses it a frame later.
+    // The connection close is deferred so that refocus cancels it; otherwise the
+    // keyboard dismisses mid-drag.
+    // Regression test for https://github.com/flutter/flutter/issues/189744
+    //
+    // The tests below that dispatch a real `blur()` are skipped on desktop
+    // Safari. `debugEmulateIosSafari` flips `isIosSafari` inside [handleBlur],
+    // but it cannot change which strategy was constructed: on desktop Safari
+    // that is [SafariDesktopTextEditingStrategy], which deliberately does not
+    // subscribe to `blur` (see [DefaultTextEditingStrategy.addEventHandlers]),
+    // so a dispatched blur never reaches [handleBlur]. On actual iOS the
+    // strategy is [IOSTextEditingStrategy], which does subscribe. Tests that
+    // call [handleBlur] directly are unaffected and still run everywhere.
+    test('keeps the text connection open on iOS when the input refocuses after a '
+        'null-relatedTarget blur', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+
+      final DomHTMLElement input = textEditing.strategy.domElement!;
+      debugEmulateIosSafari = true;
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      try {
+        // The blur schedules a deferred close; the immediate refocus, as WebKit
+        // does mid-drag, must skip it.
+        input.blur();
+        input.focusWithoutScroll();
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        expect(connectionClosedMessages(spy), isEmpty);
+        expect(textEditing.isEditing, isTrue);
+      } finally {
+        debugEmulateIosSafari = false;
+        textEditing.strategy.debugDocumentHasFocusOverride = null;
+      }
+
+      spy.tearDown();
+      // See the note above: dispatches a real blur, so it cannot run on desktop
+      // Safari, where it would pass vacuously.
+    }, skip: isSafari);
+
+    // The Done button and tapping away also blur with `relatedTarget == null`,
+    // but do not refocus, so the deferred close must still fire.
+    test('closes the text connection on iOS when the input is not refocused '
+        'after a null-relatedTarget blur', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+
+      final DomHTMLElement input = textEditing.strategy.domElement!;
+      debugEmulateIosSafari = true;
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      try {
+        input.blur();
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        expect(connectionClosedMessages(spy), hasLength(1));
+      } finally {
+        debugEmulateIosSafari = false;
+        textEditing.strategy.debugDocumentHasFocusOverride = null;
+      }
+
+      spy.tearDown();
+      // See the note above: dispatches a real blur, so it cannot run on desktop
+      // Safari.
+    }, skip: isSafari);
+
+    // The deferral is iOS-only: elsewhere a null-relatedTarget blur closes
+    // immediately.
+    test('closes the text connection immediately off iOS on a null-relatedTarget '
+        'blur', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      try {
+        textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+        expect(connectionClosedMessages(spy), hasLength(1));
+      } finally {
+        textEditing.strategy.debugDocumentHasFocusOverride = null;
+      }
+
+      spy.tearDown();
+    });
+
+    // If the page is backgrounded (a tab switch) after the deferred close is
+    // scheduled, the connection must stay open, matching the issue 155265 policy.
+    test('keeps the text connection open on iOS when the page hides before the '
+        'deferred close fires', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+      expect(textEditing.isEditing, isTrue);
+
+      final DomHTMLElement input = textEditing.strategy.domElement!;
+      debugEmulateIosSafari = true;
+      textEditing.strategy.debugDocumentHasFocusOverride = true;
+      try {
+        // Blur without refocusing schedules the deferred close, then the page
+        // is hidden before it fires.
+        input.blur();
+        textEditing.strategy.debugDocumentVisibilityStateOverride = 'hidden';
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        expect(connectionClosedMessages(spy), isEmpty);
+        expect(textEditing.isEditing, isTrue);
+      } finally {
+        debugEmulateIosSafari = false;
+        textEditing.strategy.debugDocumentHasFocusOverride = null;
+        textEditing.strategy.debugDocumentVisibilityStateOverride = null;
+        // Restore focus so this "left blurred" scenario does not leak into the
+        // next test.
+        input.focusWithoutScroll();
+      }
+
+      spy.tearDown();
+      // See the note above: dispatches a real blur, so it cannot run on desktop
+      // Safari, where it would pass vacuously.
+    }, skip: isSafari);
+
     test(
       'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
       () async {
