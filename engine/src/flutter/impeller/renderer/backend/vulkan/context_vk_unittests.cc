@@ -226,6 +226,41 @@ TEST(CapabilitiesVKTest, ReportsBlockCompressedTextureSupport) {
       CompressedTextureFamily::kBC));
 }
 
+// Vertex formats are gated on the device's per-format buffer features, since
+// not every format Impeller can describe is mandatory in Vulkan.
+TEST(CapabilitiesVKTest, ReportsVertexFormatSupport) {
+  const std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalDeviceFormatPropertiesCallback(
+              [](VkPhysicalDevice physicalDevice, VkFormat format,
+                 VkFormatProperties* pFormatProperties) {
+                if (format == VK_FORMAT_R8G8B8A8_UNORM) {
+                  pFormatProperties->optimalTilingFeatures =
+                      static_cast<VkFormatFeatureFlags>(
+                          vk::FormatFeatureFlagBits::eColorAttachment);
+                  pFormatProperties->bufferFeatures =
+                      static_cast<VkFormatFeatureFlags>(
+                          vk::FormatFeatureFlagBits::eVertexBuffer);
+                } else if (format == VK_FORMAT_D24_UNORM_S8_UINT) {
+                  pFormatProperties->optimalTilingFeatures =
+                      static_cast<VkFormatFeatureFlags>(
+                          vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+                }
+              })
+          .Build();
+  ASSERT_NE(context, nullptr);
+  const CapabilitiesVK* capabilities_vk =
+      reinterpret_cast<const CapabilitiesVK*>(context->GetCapabilities().get());
+
+  EXPECT_TRUE(
+      capabilities_vk->SupportsVertexFormat(VertexAttributeFormat::kUNorm8x4));
+  // The device does not advertise the byte-swizzled format.
+  EXPECT_FALSE(capabilities_vk->SupportsVertexFormat(
+      VertexAttributeFormat::kUNorm8x4BGRA));
+  EXPECT_FALSE(
+      capabilities_vk->SupportsVertexFormat(VertexAttributeFormat::kInvalid));
+}
+
 // Impeller's 2D renderer relies on hardware support for a combined
 // depth-stencil format (widely supported). So fail initialization if a suitable
 // one couldn't be found. That way we have an opportunity to fallback to

@@ -125,6 +125,17 @@ class IMockGLESImpl {
                                      const void* indices,
                                      GLsizei instancecount) {}
   virtual void VertexAttribDivisor(GLuint index, GLuint divisor) {}
+  virtual void VertexAttribPointer(GLuint index,
+                                   GLint size,
+                                   GLenum type,
+                                   GLboolean normalized,
+                                   GLsizei stride,
+                                   const void* pointer) {}
+  virtual void VertexAttribIPointer(GLuint index,
+                                    GLint size,
+                                    GLenum type,
+                                    GLsizei stride,
+                                    const void* pointer) {}
   virtual void BindBufferRange(GLenum target,
                                GLuint index,
                                GLuint buffer,
@@ -346,6 +357,23 @@ class MockGLESImpl : public IMockGLESImpl {
   MOCK_METHOD(GLuint,
               GetUniformBlockIndex,
               (GLuint program, const GLchar* uniformBlockName),
+              (override));
+  MOCK_METHOD(void,
+              VertexAttribPointer,
+              (GLuint index,
+               GLint size,
+               GLenum type,
+               GLboolean normalized,
+               GLsizei stride,
+               const void* pointer),
+              (override));
+  MOCK_METHOD(void,
+              VertexAttribIPointer,
+              (GLuint index,
+               GLint size,
+               GLenum type,
+               GLsizei stride,
+               const void* pointer),
               (override));
 };
 

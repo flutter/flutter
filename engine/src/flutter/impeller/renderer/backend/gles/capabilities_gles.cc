@@ -61,6 +61,24 @@ static const constexpr char* kAppleTextureMaxLevelExt =
 static const constexpr char* kTextureFilterAnisotropicExt =
     "GL_EXT_texture_filter_anisotropic";
 
+// https://registry.khronos.org/OpenGL/extensions/OES/OES_vertex_half_float.txt
+static const constexpr char* kVertexHalfFloatOesExt =
+    "GL_OES_vertex_half_float";
+// https://registry.khronos.org/OpenGL/extensions/ARB/ARB_half_float_vertex.txt
+static const constexpr char* kHalfFloatVertexArbExt =
+    "GL_ARB_half_float_vertex";
+
+// https://registry.khronos.org/OpenGL/extensions/ARB/ARB_vertex_type_2_10_10_10_rev.txt
+static const constexpr char* kVertexType2101010RevArbExt =
+    "GL_ARB_vertex_type_2_10_10_10_rev";
+
+// Both are desktop GL extensions. There is no OpenGL ES equivalent.
+// https://registry.khronos.org/OpenGL/extensions/ARB/ARB_vertex_array_bgra.txt
+static const constexpr char* kVertexArrayBgraArbExt =
+    "GL_ARB_vertex_array_bgra";
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_vertex_array_bgra.txt
+static const constexpr char* kVertexArrayBgraExt = "GL_EXT_vertex_array_bgra";
+
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
     GLint value = 0;
@@ -218,6 +236,44 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
                             gl.TexSubImage3D.IsAvailable() &&
                             gl.CompressedTexSubImage3D.IsAvailable();
 
+  const bool supports_gl3 = desc->GetGlVersion().IsAtLeast(Version{3, 0, 0});
+
+  // Half-float vertex attributes are core on GL/GLES 3.0. Below that they come
+  // from GL_OES_vertex_half_float on ES and GL_ARB_half_float_vertex on
+  // desktop GL, which describe the same layout under a different enum value.
+  if (supports_gl3 ||
+      (!desc->IsES() && desc->HasExtension(kHalfFloatVertexArbExt))) {
+    vertex_format_support_.half_float_type = GL_HALF_FLOAT;
+  } else if (desc->IsES() && desc->HasExtension(kVertexHalfFloatOesExt)) {
+    vertex_format_support_.half_float_type = GL_HALF_FLOAT_OES;
+  }
+
+  // Integer vertex inputs are bound with glVertexAttribIPointer, which is core
+  // on GL/GLES 3.0 and has no fallback below it (GLSL ES 1.00 has no integer
+  // vertex inputs at all). Gate on the resolved proc rather than the version so
+  // a context that reports 3.0 but does not provide the entry point is treated
+  // as unsupported.
+  vertex_format_support_.integer = gl.VertexAttribIPointer.IsAvailable();
+
+  // The 2/10/10/10 packed vertex type is core on OpenGL ES 3.0 and desktop GL
+  // 3.3. The OpenGL ES 2.0 GL_OES_vertex_type_10_10_10_2 extension is
+  // deliberately not accepted here: it places the 2-bit component at the
+  // opposite end of the word, so its data is not interchangeable with
+  // GL_UNSIGNED_INT_2_10_10_10_REV.
+  vertex_format_support_.packed_2_10_10_10 =
+      (desc->IsES() && supports_gl3) ||
+      (!desc->IsES() && desc->GetGlVersion().IsAtLeast(Version{3, 3, 0})) ||
+      desc->HasExtension(kVertexType2101010RevArbExt);
+
+  // Blue/green/red/alpha byte ordering is expressed by passing GL_BGRA as the
+  // attribute size, which is core on desktop GL 3.2 and otherwise comes from
+  // an extension. OpenGL ES has no equivalent at any version, so callers there
+  // have to reorder the bytes or swizzle in the shader.
+  vertex_format_support_.bgra =
+      !desc->IsES() && (desc->GetGlVersion().IsAtLeast(Version{3, 2, 0}) ||
+                        desc->HasExtension(kVertexArrayBgraArbExt) ||
+                        desc->HasExtension(kVertexArrayBgraExt));
+
   // Anisotropic filtering is not part of any core GL or GLES version; it is
   // always gated on GL_EXT_texture_filter_anisotropic. The query and the
   // texture parameter are applied with core ES 2.0 entry points (GetFloatv
@@ -251,6 +307,16 @@ bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
 
 bool CapabilitiesGLES::SupportsTextureArray() const {
   return supports_texture_array_;
+}
+
+const VertexFormatSupportGLES& CapabilitiesGLES::GetVertexFormatSupport()
+    const {
+  return vertex_format_support_;
+}
+
+bool CapabilitiesGLES::SupportsVertexFormat(
+    VertexAttributeFormat format) const {
+  return ToVertexAttribGLES(format, vertex_format_support_).has_value();
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
