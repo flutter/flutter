@@ -206,6 +206,7 @@ void main() {
       strutStyle: const StrutStyle(fontSize: 16),
       textWidthBasis: TextWidthBasis.longestLine,
       textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
+      hyphens: Hyphens.hidden,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -231,6 +232,7 @@ void main() {
           contains('applyHeightToFirstAscent: false'),
           contains('applyHeightToLastDescent: true'),
         ),
+        contains('hyphens: hidden'),
       ]),
     );
   });
@@ -288,7 +290,9 @@ void main() {
     expect(paragraph.devicePixelRatio, 4.0);
   });
 
-  testWidgets('RichText defaults to 1.0 devicePixelRatio when no View or MediaQuery is present', (WidgetTester tester) async {
+  testWidgets('RichText defaults to 1.0 devicePixelRatio when no View or MediaQuery is present', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       RawView(
         view: tester.view,
