@@ -309,6 +309,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
 @immutable
+@pragma('track-creation-locations')
 abstract class Widget extends DiagnosticableTree {
   /// Initializes [key] for subclasses.
   const Widget({this.key});
@@ -1178,7 +1179,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
             'This error happens if you call setState() on a State object for a widget that '
             'no longer appears in the widget tree (e.g., whose parent widget no longer '
             'includes the widget in its build). This error can occur when code calls '
-            'setState() from a timer or an animation callback.',
+            'setState() from a timer, from an animation callback, or after an '
+            'asynchronous operation (such as an awaited network request or other '
+            'Future) completes after the widget has been removed from the tree.',
           ),
           ErrorHint(
             'The preferred solution is '
@@ -1485,6 +1488,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// this method because they need to do some expensive work (e.g., network
   /// fetches) when their dependencies change, and that work would be too
   /// expensive to do for every build.
+  ///
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.didChangeDependencies`.
   @protected
   @mustCallSuper
   void didChangeDependencies() {}
@@ -1509,7 +1515,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   }
 
   // If @protected State methods are added or removed, the analysis rule should be
-  // updated accordingly (dev/bots/custom_rules/protect_public_state_subtypes.dart)
+  // updated accordingly (dev/flutter_analyzer_plugin/lib/src/rules/protect_public_state_subtypes.dart)
 }
 
 /// A widget that has a child widget provided to it, instead of building a new

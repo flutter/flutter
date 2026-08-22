@@ -308,48 +308,36 @@ void main() {
       expect(ephemeralDevice, ephemeralOne);
     }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
-    testUsingContext(
-      'returns null when multiple non ephemeral devices are found',
-      () async {
-        final devices = <Device>[ephemeralOne, ephemeralTwo, nonEphemeralOne, nonEphemeralTwo];
+    testUsingContext('returns null when multiple non ephemeral devices are found', () async {
+      final devices = <Device>[ephemeralOne, ephemeralTwo, nonEphemeralOne, nonEphemeralTwo];
 
-        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
-        final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-        expect(ephemeralDevice, isNull);
-      },
-      overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()},
-    );
+      expect(ephemeralDevice, isNull);
+    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
-    testUsingContext(
-      'return null when hasSpecifiedDeviceId is true',
-      () async {
-        final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
+    testUsingContext('return null when hasSpecifiedDeviceId is true', () async {
+      final devices = <Device>[ephemeralOne, nonEphemeralOne, nonEphemeralTwo];
 
-        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
-        deviceManager.specifiedDeviceId = 'device';
+      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+      deviceManager.specifiedDeviceId = 'device';
 
-        final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-        expect(ephemeralDevice, isNull);
-      },
-      overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()},
-    );
+      expect(ephemeralDevice, isNull);
+    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
-    testUsingContext(
-      'returns null when no ephemeral devices are found',
-      () async {
-        final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
+    testUsingContext('returns null when no ephemeral devices are found', () async {
+      final devices = <Device>[nonEphemeralOne, nonEphemeralTwo];
 
-        final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
+      final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
-        final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
+      final Device? ephemeralDevice = deviceManager.getSingleEphemeralDevice(devices);
 
-        expect(ephemeralDevice, isNull);
-      },
-      overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()},
-    );
+      expect(ephemeralDevice, isNull);
+    }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
     testWithoutContext('Unsupported devices listed in all devices', () async {
       final devices = <Device>[unsupported, unsupportedForProject];
@@ -678,6 +666,7 @@ void main() {
         BuildInfo.debug,
         startPaused: true,
         disableServiceAuthCodes: true,
+        disableServiceOriginCheck: true,
         enableDds: false,
         dartEntrypointArgs: <String>['a', 'b'],
         dartFlags: 'c',
@@ -692,6 +681,7 @@ void main() {
       final DebuggingOptions deserialized = DebuggingOptions.fromJson(decoded, BuildInfo.debug);
       expect(deserialized.startPaused, original.startPaused);
       expect(deserialized.disableServiceAuthCodes, original.disableServiceAuthCodes);
+      expect(deserialized.disableServiceOriginCheck, original.disableServiceOriginCheck);
       expect(deserialized.enableDds, original.enableDds);
       expect(deserialized.dartEntrypointArgs, original.dartEntrypointArgs);
       expect(deserialized.dartFlags, original.dartFlags);
@@ -711,6 +701,7 @@ void main() {
           BuildInfo.debug,
           startPaused: true,
           disableServiceAuthCodes: true,
+          disableServiceOriginCheck: true,
           disablePortPublication: true,
           dartFlags: '--foo',
           useTestFonts: true,
@@ -743,6 +734,7 @@ void main() {
             '--enable-dart-profiling',
             '--profile-startup',
             '--disable-service-auth-codes',
+            '--disable-service-origin-check',
             '--disable-vm-service-publication',
             '--start-paused',
             '--dart-flags="--foo"',
@@ -961,6 +953,201 @@ void main() {
         launchArguments.join(' '),
         <String>['--enable-checked-mode', '--verify-entry-points'].join(' '),
       );
+    });
+  });
+
+  group('Get Android launch arguments from DebuggingOptions', () {
+    testWithoutContext(
+      'Get launch arguments for manifest injection with debugging enabled - top level flags',
+      () {
+        final original = DebuggingOptions.enabled(
+          BuildInfo.debug,
+        profileStartup: true,
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'bar',
+        traceSystrace: true,
+        traceToFile: 'path',
+        endlessTraceBuffer: true,
+        profileMicrotasks: true,
+        purgePersistentCache: true,
+        enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
+        enableVulkanValidation: true,
+        enableHcpp: true,
+      );
+
+      final Set<String> launchArguments = original.getAndroidLaunchArguments();
+
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--enable-dart-profiling',
+          '--profile-startup',
+          '--enable-software-rendering',
+          '--skia-deterministic-rendering',
+          '--trace-skia',
+          '--trace-allowlist=foo',
+          '--trace-skia-allowlist=bar',
+          '--trace-systrace',
+          '--trace-to-file=path',
+          '--endless-trace-buffer',
+          '--profile-microtasks',
+          '--purge-persistent-cache',
+          '--enable-impeller=true',
+          '--enable-flutter-gpu',
+          '--enable-vulkan-validation',
+          '--enable-hcpp-and-surface-control',
+        ]),
+      );
+    });
+
+    testWithoutContext(
+      'Get launch arguments for manifest injection with debugging enabled - debug-mode specific flags',
+      () {
+        final original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        disableServiceOriginCheck: true,
+        dartFlags: 'baz',
+        useTestFonts: true,
+        verboseSystemLogs: true,
+        testFlag: true,
+      );
+
+      final Set<String> launchArguments = original.getAndroidLaunchArguments();
+
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--start-paused',
+          '--disable-service-auth-codes',
+          '--disable-service-origin-check',
+          '--dart-flags=baz',
+          '--use-test-fonts',
+          '--verbose-logging',
+          '--test-flag',
+        ]),
+      );
+    });
+
+    testWithoutContext('Get launch arguments for manifest injection - debugging disabled', () {
+      final original = DebuggingOptions.disabled(
+        BuildInfo.release,
+      );
+
+      final Set<String> launchArguments = original.getAndroidLaunchArguments();
+
+      expect(launchArguments.contains('--enable-checked-mode'), isFalse);
+      expect(launchArguments.contains('--verify-entry-points'), isFalse);
+      expect(launchArguments.contains('--start-paused'), isFalse);
+      expect(launchArguments.contains('--disable-service-auth-codes'), isFalse);
+      expect(launchArguments.contains('--disable-service-origin-check'), isFalse);
+      expect(launchArguments.contains('--dart-flags='), isFalse);
+      expect(launchArguments.contains('--use-test-fonts'), isFalse);
+      expect(launchArguments.contains('--verbose-logging'), isFalse);
+      expect(launchArguments.contains('--test-flag'), isFalse);
+    });
+
+    testWithoutContext('Get Intent launch arguments when debugging enabled - top level flags', () {
+      final original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        profileStartup: true,
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'bar',
+        traceSystrace: true,
+        traceToFile: 'path',
+        endlessTraceBuffer: true,
+        profileMicrotasks: true,
+        purgePersistentCache: true,
+        enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
+        enableVulkanValidation: true,
+        enableHcpp: true,
+      );
+
+      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--ez', 'enable-dart-profiling', 'true',
+          '--ez', 'profile-startup', 'true',
+          '--ez', 'enable-software-rendering', 'true',
+          '--ez', 'skia-deterministic-rendering', 'true',
+          '--ez', 'trace-skia', 'true',
+          '--es', 'trace-allowlist', 'foo',
+          '--es', 'trace-skia-allowlist', 'bar',
+          '--ez', 'trace-systrace', 'true',
+          '--es', 'trace-to-file', 'path',
+          '--ez', 'endless-trace-buffer', 'true',
+          '--ez', 'profile-microtasks', 'true',
+          '--ez', 'purge-persistent-cache', 'true',
+          '--ez', 'enable-impeller', 'true',
+          '--ez', 'enable-flutter-gpu', 'true',
+          '--ez', 'enable-vulkan-validation', 'true',
+          '--ez', 'enable-hcpp-and-surface-control', 'true',
+        ]),
+      );
+    });
+
+    testWithoutContext(
+      'Get Intent launch arguments when debugging enabled - debug-mode specific flags',
+      () {
+        final original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        disableServiceOriginCheck: true,
+        dartFlags: 'baz',
+        useTestFonts: true,
+        verboseSystemLogs: true,
+        testFlag: true,
+      );
+
+      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--ez', 'enable-checked-mode', 'true',
+          '--ez', 'verify-entry-points', 'true',
+          '--ez', 'start-paused', 'true',
+          '--ez', 'disable-service-auth-codes', 'true',
+          '--ez', 'disable-service-origin-check', 'true',
+          '--es', 'dart-flags', 'baz',
+          '--ez', 'use-test-fonts', 'true',
+            '--ez',
+            'verbose-logging',
+            'true',
+        ]),
+      );
+    });
+
+    testWithoutContext('Get Intent launch arguments - debugging disabled', () {
+      final original = DebuggingOptions.disabled(
+        BuildInfo.release,
+      );
+
+      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+
+      expect(launchArguments.contains('enable-checked-mode'), isFalse);
+      expect(launchArguments.contains('verify-entry-points'), isFalse);
+      expect(launchArguments.contains('start-paused'), isFalse);
+      expect(launchArguments.contains('disable-service-auth-codes'), isFalse);
+      expect(launchArguments.contains('disable-service-origin-check'), isFalse);
+      expect(launchArguments.contains('dart-flags'), isFalse);
+      expect(launchArguments.contains('use-test-fonts'), isFalse);
+      expect(launchArguments.contains('verbose-logging'), isFalse);
+      expect(launchArguments.contains('test-flag'), isFalse);
     });
   });
 

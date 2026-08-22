@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart' show HostPlatform, OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart' show Version;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -71,6 +73,22 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   }
 }
 
+class FakeXcodeProjectInterpreterWithVersion extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterWithVersion({required this.version});
+
+  @override
+  final Version version;
+
+  @override
+  Future<Map<String, String>> getBuildSettings(
+    XcodeBasedProject xcodeProject, {
+    XcodeProjectBuildContext? buildContext,
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    return <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
+  }
+}
+
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{'FLUTTER_ROOT': '/', 'HOME': '/'},
@@ -114,13 +132,15 @@ void main() {
   }
 
   // Sets up the minimal mock project files necessary for macOS builds to succeed.
-  void createMinimalMockProjectFiles() {
+  void createMinimalMockProjectFiles({bool createWorkspace = true}) {
     fileSystem
         .directory(fileSystem.path.join('macos', 'Runner.xcodeproj'))
         .createSync(recursive: true);
-    fileSystem
-        .directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
-        .createSync(recursive: true);
+    if (createWorkspace) {
+      fileSystem
+          .directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
+          .createSync(recursive: true);
+    }
     createCoreMockProjectFiles();
   }
 
@@ -129,6 +149,7 @@ void main() {
   FakeCommand setUpFakeXcodeBuildHandler(
     String configuration, {
     bool verbose = false,
+    bool hasWorkspace = true,
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
@@ -143,8 +164,10 @@ void main() {
         '/usr/bin/env',
         'xcrun',
         'xcodebuild',
-        '-workspace',
-        flutterProject.macos.xcodeWorkspace!.path,
+        if (hasWorkspace) ...<String>[
+          '-workspace',
+          flutterProject.macos.xcodeWorkspace!.path,
+        ] else ...<String>['-project', flutterProject.macos.xcodeProject.path],
         '-configuration',
         configuration,
         '-scheme',
@@ -285,6 +308,51 @@ STDERR STUFF
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       Analytics: () => fakeAnalytics,
+    },
+  );
+
+  testUsingContext(
+    'macOS build invokes xcodebuild with -project when there is no .xcworkspace',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      createMinimalMockProjectFiles(createWorkspace: false);
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler('Debug', hasWorkspace: false),
+      ]);
+
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
 
@@ -1431,7 +1499,8 @@ STDERR STUFF
       await expectLater(
         createTestCommandRunner(command).run(<String>['build', 'macos', '--release', '--no-pub']),
         throwsToolExit(
-          message: 'No Valid Target Arch: '
+          message:
+              'No Valid Target Arch: '
               'You have enabled the macOSArm64Only feature flag but '
               "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
               'Consider removing arm64 from EXCLUDED_ARCHS.',
@@ -1508,13 +1577,15 @@ STDERR STUFF
   );
 
   testUsingContext(
-    'macOS deployment target too low shows guided message',
+    'Prints warning when building a release app for macOS that contains an x86_64 slice and Xcode version is 27 or greater',
     () async {
+      createMinimalMockProjectFiles();
+
       final command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
-        logger: logger,
+        logger: testLogger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
         platform: FakePlatform(),
@@ -1522,157 +1593,212 @@ STDERR STUFF
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
-        processManager: fakeProcessManager,
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
       );
-      createMinimalMockProjectFiles();
 
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
-        fileSystem.currentDirectory,
-      );
-      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            '/usr/bin/env',
-            'xcrun',
-            'xcodebuild',
-            '-workspace',
-            flutterProject.macos.xcodeWorkspace!.path,
-            '-configuration',
-            'Debug',
-            '-scheme',
-            'Runner',
-            '-derivedDataPath',
-            flutterBuildDir.absolute.path,
-            '-destination',
-            'platform=macOS,arch=x86_64',
-            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
-            '-quiet',
-            'COMPILER_INDEX_STORE_ENABLE=NO',
-          ],
-          exitCode: 1,
-          stdout:
-              "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is 12.0 to 27.0.x. (in target 'Runner' from project 'Runner')",
-        ),
-      );
-
-      await expectLater(
-        createTestCommandRunner(
-          command,
-        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
-        throwsToolExit(),
-      );
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(
-        testLogger.errorText,
-        contains('The macOS deployment target is too low. Xcode requires at least 12.0.'),
-      );
-      expect(
-        testLogger.errorText,
-        contains('Select the "Runner" TARGET, and in the "General" tab:'),
-      );
-      expect(testLogger.errorText, contains('Update "Minimum Deployments" to at least 12.0.'));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => fakeProcessManager,
-      Platform: () => macosPlatform,
-      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
-    },
-  );
-
-  testUsingContext(
-    'macOS deployment target too low shows fallback message if version cannot be parsed',
-    () async {
-      final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: fakeProcessManager,
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
-      createMinimalMockProjectFiles();
-
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(
-        fileSystem.currentDirectory,
-      );
-      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
-            '/usr/bin/env',
-            'xcrun',
-            'xcodebuild',
-            '-workspace',
-            flutterProject.macos.xcodeWorkspace!.path,
-            '-configuration',
-            'Debug',
-            '-scheme',
-            'Runner',
-            '-derivedDataPath',
-            flutterBuildDir.absolute.path,
-            '-destination',
-            'platform=macOS,arch=x86_64',
-            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
-            '-quiet',
-            'COMPILER_INDEX_STORE_ENABLE=NO',
-          ],
-          exitCode: 1,
-          stdout:
-              "Compiling... \nerror: The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is invalid to 27.0.x. (in target 'Runner' from project 'Runner')",
-        ),
-      );
-
-      await expectLater(
-        createTestCommandRunner(
-          command,
-        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
-        throwsToolExit(),
-      );
-
-      expect(
-        testLogger.errorText,
+        testLogger.warningText,
         contains(
-          'The macOS deployment target is too low. Xcode requires at least the minimum supported version.',
+          'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
+          'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
+          'This will become the default behavior in a future Flutter release.',
         ),
       );
-      expect(
-        testLogger.errorText,
-        contains('Select the "Runner" TARGET, and in the "General" tab:'),
-      );
-      expect(
-        testLogger.errorText,
-        contains('Update "Minimum Deployments" to at least the minimum supported version.'),
-      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => fakeProcessManager,
       Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+      Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithVersion(version: Version(27, 0, 0)),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
+
+  group('Analytics for impeller plist setting', () {
+    const plistContents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>FLTEnableImpeller</key>
+  <false/>
+</dict>
+</plist>
+''';
+
+    testUsingContext(
+      'Sends an analytics event when Impeller is enabled',
+      () async {
+        final command = BuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        createMinimalMockProjectFiles();
+
+        await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(Event.flutterBuildInfo(label: 'plist-impeller-enabled', buildType: 'macos')),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () =>
+            FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+        Platform: () => macosPlatform,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Pub: ThrowingPub.new,
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
+      'Sends an analytics event when Impeller is disabled',
+      () async {
+        final command = BuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        createMinimalMockProjectFiles();
+
+        fileSystem.file(fileSystem.path.join('usr', 'bin', 'plutil')).createSync(recursive: true);
+
+        final File infoPlist = fileSystem.file(
+          fileSystem.path.join('macos', 'Runner', 'Info.plist'),
+        )..createSync(recursive: true);
+
+        infoPlist.writeAsStringSync(plistContents);
+
+        await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(Event.flutterBuildInfo(label: 'plist-impeller-disabled', buildType: 'macos')),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () =>
+            FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+        Platform: () => macosPlatform,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Pub: ThrowingPub.new,
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        Analytics: () => fakeAnalytics,
+        PlistParser: () => FakePlistParser(<String, Object>{'FLTEnableImpeller': false}),
+      },
+    );
+
+    testUsingContext(
+      'Reads built app bundle Contents/Info.plist when present',
+      () async {
+        final command = BuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
+        );
+        createMinimalMockProjectFiles();
+
+        await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(Event.flutterBuildInfo(label: 'plist-impeller-disabled', buildType: 'macos')),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          setUpFakeXcodeBuildHandler(
+            'Release',
+            onRun: (_) {
+              fileSystem
+                  .file(
+                    fileSystem.path.join(
+                      'build',
+                      'macos',
+                      'Build',
+                      'Products',
+                      'Release',
+                      'Runner.app',
+                      'Contents',
+                      'Info.plist',
+                    ),
+                  )
+                  .createSync(recursive: true);
+            },
+          ),
+        ]),
+        Platform: () => macosPlatform,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Pub: ThrowingPub.new,
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        Analytics: () => fakeAnalytics,
+        PlistParser: () => FakePlistParser(<String, Object>{'FLTEnableImpeller': false}),
+      },
+    );
+  });
 }

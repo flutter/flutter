@@ -388,8 +388,9 @@ void main() {
                 // Tests run on host system, so the have the full path on the system.
                 projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()
               else
-                // Apps are a bundle with the dylibs on their dlopen path.
-                'bar.framework/bar',
+                // Apps are a bundle, and the dylibs are opened by the install
+                // name of the framework they are bundled in.
+                '@rpath/bar.framework/bar',
             ]),
           );
           expect(
@@ -400,8 +401,9 @@ void main() {
                 // Tests run on host system, so the have the full path on the system.
                 projectUri.resolve('build/native_assets/macos/libbuz.dylib').toFilePath()
               else
-                // Apps are a bundle with the dylibs on their dlopen path.
-                'buz.framework/buz',
+                // Apps are a bundle, and the dylibs are opened by the install
+                // name of the framework they are bundled in.
+                '@rpath/buz.framework/buz',
             ]),
           );
           // Multi arch.

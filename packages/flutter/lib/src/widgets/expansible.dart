@@ -203,6 +203,8 @@ class ExpansibleController extends ChangeNotifier {
 
 /// A [StatefulWidget] that expands and collapses.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=TfoJ55nx1S4}
+///
 /// An [Expansible] consists of a header, which is always shown, and a
 /// body, which is hidden in its collapsed state and shown in its expanded
 /// state.
@@ -230,7 +232,7 @@ class ExpansibleController extends ChangeNotifier {
 /// This example demonstrates how to use the [Expansible] widget and how an
 /// [ExpansibleController] can be used to programmatically expand or collapse it.
 ///
-/// ** See code in examples/api/lib/material/expansible/expansible.0.dart **
+/// ** See code in examples/api/lib/widgets/expansible/expansible.0.dart **
 /// {@end-tool}
 ///
 /// See also:
