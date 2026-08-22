@@ -7,6 +7,8 @@
 
 #include <optional>
 
+#include "impeller/core/texture.h"
+#include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
@@ -32,6 +34,31 @@ struct UberSDFParameters {
     kRoundedSuperellipseSymmetric,
   };
 
+  /// The gradient properties applied to the shape.
+  struct GradientParameters {
+    enum class Type {
+      kLinear,
+      kRadial,
+    };
+
+    /// The type of gradient.
+    Type type;
+
+    /// Gradient start point (for linear gradients) or center (for radial
+    /// gradients).
+    Point start;
+
+    /// Gradient end point (for linear gradients) or `(radius, 0)` (for radial
+    /// gradients).
+    Point end;
+
+    /// Tile mode for the gradient.
+    Entity::TileMode tile_mode = Entity::TileMode::kClamp;
+
+    /// Texture for gradient ramp.
+    std::shared_ptr<Texture> texture;
+  };
+
   /// Creates UberSDFParameters for a rectangle.
   static UberSDFParameters MakeRect(Color color,
                                     const Rect& rect,
@@ -55,7 +82,9 @@ struct UberSDFParameters {
       const RoundingRadii& radii,
       std::optional<StrokeParameters> stroke);
 
-  /// Creates UberSDFParameters for an asymmetric round superellipse.
+  /// Creates UberSDFParameters for a rounded superellipse with rounding extents
+  /// (radii) that are identical for all four corners, and with equal horizontal
+  /// and vertical rounding extents.
   static UberSDFParameters MakeRoundedSuperellipse(
       Color color,
       const Rect& bounds,
@@ -67,6 +96,9 @@ struct UberSDFParameters {
 
   /// The color used for filling or stroking the shape.
   Color color;
+
+  /// Gradient properties. Populated when using a gradient color source.
+  std::optional<GradientParameters> gradient;
 
   /// The center point of the shape in local coordinates.
   Point center;
@@ -82,15 +114,8 @@ struct UberSDFParameters {
   /// The degree (n) of the superellipse curve for the top and right octants.
   Point superellipse_degree;
 
-  /// The semi-axis length of the superellipse curve for the top and right
-  /// octants.
-  Point superellipse_semi_axis;
-
   /// The angular span of the circular cap for the top and right octants.
   Point angle_span;
-
-  /// The geometric offset 'c' used to connect the two octants of each quadrant.
-  float octant_offset_c;
 
   /// The circular cap center for the top octant of each
   /// quadrant.
@@ -100,12 +125,9 @@ struct UberSDFParameters {
   /// quadrant.
   Point circle_center_right;
 
-  /// The scaling factors used to transform normalized superellipses to their
-  /// true size.
-  Point superellipse_scale;
-
-  /// Rounding radii for standard rounded rects and corner radii for circular
-  /// caps of superellipses for top and right octants.
+  /// Rounding radii for rounded rects (bottom-right, top-right, bottom-left,
+  /// top-left), or the circular cap radii for rounded superellipses in
+  /// radii.xy (top octant in x, right octant in y).
   Vector4 radii;
 };
 

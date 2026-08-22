@@ -78,13 +78,24 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
     const Rect& bounds,
     const RoundSuperellipseParam& round_superellipse_params,
     std::optional<StrokeParameters> stroke) {
+  // UberSDF mirrors the top-right quadrant across all four quadrants,
+  // requiring all corners to be identical.
   FML_DCHECK(round_superellipse_params.all_corners_same);
+
   Point center = bounds.GetCenter();
+  Point size = Point(bounds.GetSize() * 0.5f);
 
   RoundSuperellipseParam::Quadrant top_right =
       round_superellipse_params.top_right;
 
-  Point size = Point(bounds.GetSize() * 0.5f);
+  // UberSDF requires equal horizontal and vertical rounding extents (rx == ry),
+  // which ensures no normalization scaling is applied (signed_scale is
+  // unscaled) and the superellipse semi-axes (se_a) directly match the shape's
+  // half-width (size.x) and half-height (size.y).
+  FML_DCHECK(ScalarNearlyEqual(top_right.signed_scale.Abs().x, 1.0f));
+  FML_DCHECK(ScalarNearlyEqual(top_right.signed_scale.Abs().y, 1.0f));
+  FML_DCHECK(ScalarNearlyEqual(top_right.top.se_a, size.x));
+  FML_DCHECK(ScalarNearlyEqual(top_right.right.se_a, size.y));
 
   return UberSDFParameters{
       .type = Type::kRoundedSuperellipseSymmetric,
@@ -93,13 +104,10 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
       .size = size,
       .stroke = stroke,
       .superellipse_degree = Point(top_right.top.se_n, top_right.right.se_n),
-      .superellipse_semi_axis = Point(top_right.top.se_a, top_right.right.se_a),
       .angle_span = Point(top_right.top.circle_max_angle.radians,
                           top_right.right.circle_max_angle.radians),
-      .octant_offset_c = top_right.top.se_a - top_right.right.se_a,
       .circle_center_top = top_right.top.circle_center,
       .circle_center_right = top_right.right.circle_center,
-      .superellipse_scale = top_right.signed_scale.Abs(),
       .radii = Vector4(top_right.top.circle_radius,
                        top_right.right.circle_radius, 0.0f, 0.0f)};
 }
