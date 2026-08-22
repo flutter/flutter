@@ -710,6 +710,8 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
+    validateUseApplicationBinaryForAndroidEngineConfigOptions();
+
     // When running with a prebuilt application, no command validation is
     // necessary.
     if (!runningWithPrebuiltApplication) {
