@@ -364,4 +364,184 @@ FlutterError
     );
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
+
+  testWidgets('ScrollPhysics updates position when shouldUpdate returns true', (
+    WidgetTester tester,
+  ) async {
+    var physicsValue = 0;
+
+    Widget buildScrollable() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          physics: ReactiveScrollPhysics(value: physicsValue),
+          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+          itemCount: 10,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildScrollable());
+
+    ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition firstPosition = scrollable.position;
+    expect((firstPosition.physics as ReactiveScrollPhysics).value, 0);
+
+    // When the physics is updated with an identical runtimeType and shouldUpdate
+    // returns false, the ScrollPosition is not recreated.
+    await tester.pumpWidget(buildScrollable());
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    expect(scrollable.position, same(firstPosition));
+    expect((scrollable.position.physics as ReactiveScrollPhysics).value, 0);
+
+    // When the physics is updated with an identical runtimeType but shouldUpdate
+    // returns true, the ScrollPosition is recreated with the updated physics.
+    physicsValue = 1;
+    await tester.pumpWidget(buildScrollable());
+
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition secondPosition = scrollable.position;
+    expect(secondPosition, isNot(same(firstPosition)));
+    expect((secondPosition.physics as ReactiveScrollPhysics).value, 1);
+  });
+
+  testWidgets('BouncingScrollPhysics updates position when decelerationRate changes', (
+    WidgetTester tester,
+  ) async {
+    ScrollDecelerationRate decelerationRate = ScrollDecelerationRate.normal;
+
+    Widget buildScrollable() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          physics: BouncingScrollPhysics(decelerationRate: decelerationRate),
+          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+          itemCount: 10,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildScrollable());
+
+    ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition firstPosition = scrollable.position;
+    expect(
+      (firstPosition.physics as BouncingScrollPhysics).decelerationRate,
+      ScrollDecelerationRate.normal,
+    );
+
+    // Identical configuration should not recreate ScrollPosition.
+    await tester.pumpWidget(buildScrollable());
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    expect(scrollable.position, same(firstPosition));
+    expect(
+      (scrollable.position.physics as BouncingScrollPhysics).decelerationRate,
+      ScrollDecelerationRate.normal,
+    );
+
+    // Different decelerationRate should recreate ScrollPosition.
+    decelerationRate = ScrollDecelerationRate.fast;
+    await tester.pumpWidget(buildScrollable());
+
+    scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+    final ScrollPosition secondPosition = scrollable.position;
+    expect(secondPosition, isNot(same(firstPosition)));
+    expect(
+      (secondPosition.physics as BouncingScrollPhysics).decelerationRate,
+      ScrollDecelerationRate.fast,
+    );
+  });
+
+  testWidgets(
+    'ScrollPhysics.shouldUpdate handles parent change to physics with covariant parameter without TypeError',
+    (WidgetTester tester) async {
+      ScrollPhysics parentPhysics = const ClampingScrollPhysics();
+
+      Widget buildScrollable() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView.builder(
+            physics: _TestWrapperPhysics(parent: parentPhysics),
+            itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            itemCount: 10,
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildScrollable());
+
+      final ScrollableState scrollable1 = tester.state<ScrollableState>(find.byType(Scrollable));
+      final ScrollPosition firstPosition = scrollable1.position;
+
+      parentPhysics = const _CovariantParentPhysics();
+
+      await tester.pumpWidget(buildScrollable());
+
+      final ScrollableState scrollable2 = tester.state<ScrollableState>(find.byType(Scrollable));
+      final ScrollPosition secondPosition = scrollable2.position;
+
+      expect(secondPosition, isNot(same(firstPosition)));
+    },
+  );
+
+  test('ScrollPhysics.shouldUpdate returns false immediately for identical instances', () {
+    const ScrollPhysics physics = BouncingScrollPhysics();
+
+    expect(physics.shouldUpdate(physics), isFalse);
+  });
+
+  test('ScrollPhysics.shouldUpdate evaluates non-identical instances correctly', () {
+    const ScrollPhysics physicsB1 = BouncingScrollPhysics(parent: ClampingScrollPhysics());
+    const ScrollPhysics physicsB2 = BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+
+    expect(identical(physicsB1, physicsB2), isFalse);
+    expect(physicsB1.shouldUpdate(physicsB2), isTrue);
+
+    const ScrollPhysics physicsC1 = BouncingScrollPhysics();
+    const ScrollPhysics physicsC2 = BouncingScrollPhysics(parent: ClampingScrollPhysics());
+
+    expect(identical(physicsC1, physicsC2), isFalse);
+    expect(physicsC1.shouldUpdate(physicsC2), isTrue);
+  });
+}
+
+class ReactiveScrollPhysics extends ScrollPhysics {
+  const ReactiveScrollPhysics({required this.value, super.parent});
+  final int value;
+
+  @override
+  ReactiveScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return ReactiveScrollPhysics(value: value, parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldUpdate(covariant ReactiveScrollPhysics old) {
+    if (value != old.value) {
+      return true;
+    }
+    return super.shouldUpdate(old);
+  }
+}
+
+class _TestWrapperPhysics extends ScrollPhysics {
+  const _TestWrapperPhysics({super.parent});
+
+  @override
+  _TestWrapperPhysics applyTo(ScrollPhysics? ancestor) {
+    return _TestWrapperPhysics(parent: buildParent(ancestor));
+  }
+}
+
+class _CovariantParentPhysics extends ScrollPhysics {
+  const _CovariantParentPhysics({super.parent});
+
+  @override
+  _CovariantParentPhysics applyTo(ScrollPhysics? ancestor) {
+    return _CovariantParentPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldUpdate(covariant _CovariantParentPhysics old) {
+    return super.shouldUpdate(old);
+  }
 }
