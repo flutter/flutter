@@ -39,6 +39,7 @@ import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /** Android implementation of the text input plugin. */
 public class TextInputPlugin implements ListenableEditingState.EditingStateWatcher {
@@ -62,6 +63,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
 
   // Initialize the "last seen" text editing values to a non-null value.
   private TextEditState mLastKnownFrameworkTextEditingState;
+
+  private final List<TextInputChannel.TextEditState> mSentStates = new ArrayList<>();
 
   // When true following calls to createInputConnection will return the cached lastInputConnection
   // if the input
@@ -456,6 +459,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     notifyViewExited();
     this.configuration = configuration;
     inputTarget = new InputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
+    mSentStates.clear();
 
     mEditable.removeEditingStateListener(this);
     mEditable =
@@ -472,6 +476,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   }
 
   private void setPlatformViewTextInputClient(int platformViewId, boolean usesVirtualDisplay) {
+    mSentStates.clear();
     if (usesVirtualDisplay) {
       // We need to make sure that the Flutter view is focused so that no imm operations get short
       // circuited.
@@ -507,6 +512,17 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   // latest TextEditState from the framework.
   @VisibleForTesting
   void setTextInputEditingState(View view, TextInputChannel.TextEditState state) {
+    int indexOfState = mSentStates.indexOf(state);
+    if (indexOfState != -1) {
+      boolean isLatest = (indexOfState == mSentStates.size() - 1);
+      mSentStates.subList(0, indexOfState + 1).clear();
+      if (!isLatest) {
+        return;
+      }
+    } else {
+      mSentStates.clear();
+    }
+
     if (!mRestartInputPending
         && mLastKnownFrameworkTextEditingState != null
         && mLastKnownFrameworkTextEditingState.hasComposing()) {
@@ -594,6 +610,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       return;
     }
     mEditable.removeEditingStateListener(this);
+    mSentStates.clear();
     notifyViewExited();
     configuration = null;
     updateAutofillConfigurationIfNeeded(null);
@@ -695,6 +712,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       mLastKnownFrameworkTextEditingState =
           new TextEditState(
               mEditable.toString(), selectionStart, selectionEnd, composingStart, composingEnd);
+      mSentStates.add(mLastKnownFrameworkTextEditingState);
     } else {
       // Don't accumulate deltas if they are not sent to the framework.
       mEditable.clearBatchDeltas();
