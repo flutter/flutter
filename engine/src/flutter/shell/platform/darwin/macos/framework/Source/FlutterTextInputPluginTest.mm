@@ -158,6 +158,65 @@ static const FlutterViewIdentifier kViewId = 1;
   return true;
 }
 
+- (bool)testPasteActionInsertsPasteboardString {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
+
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                             arguments:@{
+                                                               @"text" : @"AC",
+                                                               @"selectionBase" : @(1),
+                                                               @"selectionExtent" : @(1),
+                                                               @"composingBase" : @(-1),
+                                                               @"composingExtent" : @(-1),
+                                                             }]
+                    result:^(id){
+                    }];
+
+  // The test shares the general pasteboard with the host system; stash its
+  // contents around the paste.
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  NSString* originalString = [pasteboard stringForType:NSPasteboardTypeString];
+  [pasteboard clearContents];
+  [pasteboard setString:@"B" forType:NSPasteboardTypeString];
+
+  [plugin paste:nil];
+
+  [pasteboard clearContents];
+  if (originalString != nil) {
+    [pasteboard setString:originalString forType:NSPasteboardTypeString];
+  }
+
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "ABC");
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 2);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 2);
+  return true;
+}
+
 - (bool)testSetMarkedTextWithSelectionChange {
   id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
@@ -2089,6 +2148,10 @@ FlutterEngine* CreateTestEngine() {
 
 TEST(FlutterTextInputPluginTest, TestEmptyCompositionRange) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testEmptyCompositionRange]);
+}
+
+TEST(FlutterTextInputPluginTest, TestPasteActionInsertsPasteboardString) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testPasteActionInsertsPasteboardString]);
 }
 
 TEST(FlutterTextInputPluginTest, TestSetMarkedTextWithSelectionChange) {

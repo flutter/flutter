@@ -708,6 +708,75 @@ static char markerKey;
   [_currentViewController flagsChanged:event];
 }
 
+#pragma mark -
+#pragma mark NSTextView editing actions
+
+// The editing actions inherited from NSTextView edit the NSTextView's own
+// storage, which is kept only as an accessibility backing, so they never
+// reach the Flutter editing model. They are invoked directly on the first
+// responder by tools that paste programmatically (and by the Edit menu), so
+// reroute them through the model.
+// See https://github.com/flutter/flutter/issues/184571
+
+- (void)paste:(id)sender {
+  if (_activeModel == nullptr) {
+    return;
+  }
+  NSString* string = [[NSPasteboard generalPasteboard] stringForType:NSPasteboardTypeString];
+  if (string.length == 0) {
+    return;
+  }
+  [self insertText:string replacementRange:NSMakeRange(NSNotFound, 0)];
+}
+
+- (void)copy:(id)sender {
+  NSString* selection = [self selectedTextForClipboard];
+  if (selection.length == 0) {
+    return;
+  }
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  [pasteboard clearContents];
+  [pasteboard setString:selection forType:NSPasteboardTypeString];
+}
+
+- (void)cut:(id)sender {
+  NSString* selection = [self selectedTextForClipboard];
+  if (selection.length == 0) {
+    return;
+  }
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  [pasteboard clearContents];
+  [pasteboard setString:selection forType:NSPasteboardTypeString];
+  [self insertText:@"" replacementRange:NSMakeRange(NSNotFound, 0)];
+}
+
+- (void)selectAll:(id)sender {
+  if (_activeModel == nullptr) {
+    return;
+  }
+  if (_activeModel->SetSelection(_activeModel->text_range())) {
+    [self updateEditState];
+  }
+}
+
+/**
+ * The text under the model's selection, or nil if there is none.
+ */
+- (NSString*)selectedTextForClipboard {
+  if (_activeModel == nullptr) {
+    return nil;
+  }
+  flutter::TextRange selection = _activeModel->selection();
+  if (selection.length() == 0) {
+    return nil;
+  }
+  NSString* text = @(_activeModel->GetText().c_str());
+  if (NSMaxRange(NSMakeRange(selection.start(), selection.length())) > text.length) {
+    return nil;
+  }
+  return [text substringWithRange:NSMakeRange(selection.start(), selection.length())];
+}
+
 - (void)mouseDown:(NSEvent*)event {
   [_currentViewController mouseDown:event];
 }
