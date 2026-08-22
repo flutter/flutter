@@ -80,8 +80,6 @@ extern CFTimeInterval display_link_target;
   __weak FlutterMetalLayer* _layer;
   NSUInteger _drawableId;
   BOOL _presented;
-  BOOL _preparedForPresent;
-  BOOL _gpuScheduled;
 }
 
 - (instancetype)initWithTexture:(FlutterTexture*)texture
@@ -123,14 +121,8 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)present {
-  BOOL presentNow = NO;
-  @synchronized(self) {
-    _presented = YES;
-    presentNow = !_preparedForPresent || _gpuScheduled;
-  }
-  if (presentNow) {
-    [_layer presentTexture:_texture];
-  }
+  [_layer presentTexture:self->_texture];
+  self->_presented = YES;
 }
 
 - (void)dealloc {
@@ -154,20 +146,7 @@ extern CFTimeInterval display_link_target;
 
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
   FlutterTexture* texture = _texture;
-  @synchronized(self) {
-    _preparedForPresent = YES;
-  }
   texture.waitingForCompletion = YES;
-  [commandBuffer addScheduledHandler:^(id<MTLCommandBuffer> buffer) {
-    BOOL presentNow = NO;
-    @synchronized(self) {
-      self->_gpuScheduled = YES;
-      presentNow = self->_presented;
-    }
-    if (presentNow) {
-      [self->_layer presentTexture:texture];
-    }
-  }];
   [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
     texture.waitingForCompletion = NO;
   }];
