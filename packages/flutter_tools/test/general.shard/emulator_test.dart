@@ -332,6 +332,51 @@ iOS Simulator       • iOS Simulator • Apple        • android
       },
     );
 
+    testWithoutContext(
+      'create emulator prefers arm64-v8a over x86_64 when both are available',
+      () async {
+        final emulatorManager = EmulatorManager(
+          java: FakeJava(),
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'test\ntest2\npixel\npixel-xl\n',
+            ),
+            const FakeCommand(
+              command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+              stderr:
+                  'Error: Package path (-k) not specified. Valid system image paths are:\n'
+                  'system-images;android-27;google_apis_playstore;x86\n'
+                  'system-images;android-27;google_apis_playstore;x86_64\n'
+                  'system-images;android-27;google_apis_playstore;arm64-v8a\n'
+                  'null\n',
+              exitCode: 1,
+            ),
+            const FakeCommand(
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                '-n',
+                'test',
+                '-k',
+                'system-images;android-27;google_apis_playstore;arm64-v8a',
+                '-d',
+                'pixel',
+              ],
+            ),
+          ]),
+          androidSdk: sdk,
+          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        );
+        final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+        expect(result.success, true);
+      },
+    );
+
     testWithoutContext('create emulator with an existing name errors', () async {
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
