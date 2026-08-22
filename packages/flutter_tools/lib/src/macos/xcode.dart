@@ -267,6 +267,22 @@ class Xcode {
     return runResult.stdout.trim();
   }
 
+  /// Returns the SDK version for the given [sdkName].
+  ///
+  /// Examples of [sdkName] include 'iphoneos', 'iphonesimulator', and 'macosx'.
+  Future<String> sdkVersion(String sdkName) async {
+    final RunResult runResult = await _processUtils.run(<String>[
+      ...xcrunCommand(),
+      '--sdk',
+      sdkName,
+      '--show-sdk-version',
+    ]);
+    if (runResult.exitCode != 0) {
+      throwToolExit('Could not find SDK version: ${runResult.stderr}');
+    }
+    return runResult.stdout.trim();
+  }
+
   String? getSimulatorPath() {
     final String? selectPath = xcodeSelectPath;
     if (selectPath == null) {
