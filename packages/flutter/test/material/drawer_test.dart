@@ -209,6 +209,155 @@ void main() {
     await checkScrim(const Color(0xFF323232));
   });
 
+  testWidgets('Drawer scrim uses ColorScheme.scrim', (WidgetTester tester) async {
+    const Color scrim = Colors.red;
+    final Color expectedScrim = scrim.withValues(alpha: Colors.black54.a);
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    Widget getScrim() {
+      return tester
+          .widget<Semantics>(
+            find.descendant(
+              of: find.byType(DrawerController),
+              matching: find.byWidgetPredicate((Widget widget) {
+                return widget is Semantics && widget.properties.label == 'Dismiss';
+              }),
+            ),
+          )
+          .child!;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+        ),
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Drawer(child: SizedBox.expand()),
+        ),
+      ),
+    );
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect((getScrim() as ColoredBox).color, isSameColorAs(expectedScrim));
+  });
+
+  testWidgets('DrawerTheme.scrimColor takes precedence over ColorScheme.scrim', (
+    WidgetTester tester,
+  ) async {
+    const Color scrim = Colors.red;
+    const Color themeScrimColor = Colors.blue;
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    Widget getScrim() {
+      return tester
+          .widget<Semantics>(
+            find.descendant(
+              of: find.byType(DrawerController),
+              matching: find.byWidgetPredicate((Widget widget) {
+                return widget is Semantics && widget.properties.label == 'Dismiss';
+              }),
+            ),
+          )
+          .child!;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+          drawerTheme: const DrawerThemeData(scrimColor: themeScrimColor),
+        ),
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Drawer(child: SizedBox.expand()),
+        ),
+      ),
+    );
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect((getScrim() as ColoredBox).color, isSameColorAs(themeScrimColor));
+  });
+
+  testWidgets('Scaffold.drawerScrimColor takes precedence over ColorScheme.scrim', (
+    WidgetTester tester,
+  ) async {
+    const Color scrim = Colors.red;
+    const Color drawerScrimColor = Colors.green;
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    Widget getScrim() {
+      return tester
+          .widget<Semantics>(
+            find.descendant(
+              of: find.byType(DrawerController),
+              matching: find.byWidgetPredicate((Widget widget) {
+                return widget is Semantics && widget.properties.label == 'Dismiss';
+              }),
+            ),
+          )
+          .child!;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+          drawerTheme: const DrawerThemeData(scrimColor: Colors.blue),
+        ),
+        home: Scaffold(
+          key: scaffoldKey,
+          drawerScrimColor: drawerScrimColor,
+          drawer: const Drawer(child: SizedBox.expand()),
+        ),
+      ),
+    );
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect((getScrim() as ColoredBox).color, isSameColorAs(drawerScrimColor));
+  });
+
+  testWidgets('Drawer ColorScheme.scrim alpha is normalized to Colors.black54 opacity', (
+    WidgetTester tester,
+  ) async {
+    final Color scrim = Colors.red.withValues(alpha: 0.2);
+    final Color expectedScrim = scrim.withValues(alpha: Colors.black54.a);
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    Widget getScrim() {
+      return tester
+          .widget<Semantics>(
+            find.descendant(
+              of: find.byType(DrawerController),
+              matching: find.byWidgetPredicate((Widget widget) {
+                return widget is Semantics && widget.properties.label == 'Dismiss';
+              }),
+            ),
+          )
+          .child!;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, scrim: scrim),
+        ),
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Drawer(child: SizedBox.expand()),
+        ),
+      ),
+    );
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect((getScrim() as ColoredBox).color, isSameColorAs(expectedScrim));
+  });
+
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
