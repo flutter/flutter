@@ -218,6 +218,28 @@ void main() {
       expect(descriptor.wasProvided(results), isTrue);
       expect(descriptor.getValue(results), <String>['a=1', 'b=2']);
     });
+
+    test('supports abbreviation and aliases', () {
+      const descriptor = MultiOptionDescriptor(
+        name: 'project-arg',
+        abbr: 'P',
+        aliases: <String>['project-args'],
+        help: 'Project args',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      expect(parser.options['project-arg']!.abbr, 'P');
+      expect(parser.options['project-arg']!.aliases, contains('project-args'));
+
+      final ArgResults abbrResults = parser.parse(<String>['-P', 'key=val', '-P', 'key2=val2']);
+      expect(descriptor.wasProvided(abbrResults), isTrue);
+      expect(descriptor.getValue(abbrResults), <String>['key=val', 'key2=val2']);
+
+      final ArgResults aliasResults = parser.parse(<String>['--project-args=foo=bar']);
+      expect(descriptor.wasProvided(aliasResults), isTrue);
+      expect(descriptor.getValue(aliasResults), <String>['foo=bar']);
+    });
   });
 
   group('OptionDescriptor conflicts and identity', () {

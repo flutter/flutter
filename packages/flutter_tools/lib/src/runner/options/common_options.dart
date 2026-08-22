@@ -197,6 +197,7 @@ abstract final class BuildInfoOptions {
 
   static const androidProjectArg = MultiOptionDescriptor(
     name: FlutterOptions.kAndroidProjectArgs,
+    abbr: 'P',
     aliases: <String>['android-project-args'],
     help:
         'Additional arguments specified as key=value that are passed directly to the gradle project '
