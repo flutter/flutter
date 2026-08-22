@@ -11734,7 +11734,7 @@ void main() {
       //   12 - help/error/counter text (font size 12dps)
       //
       // When the label is not floating, it's vertically centered in the space
-      // above the subtext:
+      // above the supportingText:
       //
       //   20 - top padding
       //   16 - label (font size 16dps)
@@ -11793,14 +11793,14 @@ void main() {
       //   12 - help/error/counter text (font size 12dps)
       //
       // When the label is not floating, it's vertically centered in the space
-      // above the subtext:
+      // above the supportingText:
       //
       //   16 - top padding
       //   16 - label (font size 16dps)
       //   16 - bottom padding (empty input text still appears here)
       //    8 - below the border padding
       //   12 - help/error/counter text (font size 12dps)
-      // The layout of the error/helper/counter subtext doesn't change for dense layout.
+      // The layout of the error/helper/counter supportingText doesn't change for dense layout.
       await tester.pumpWidget(
         buildInputDecoratorM2(
           // isEmpty: false (default)
@@ -15769,5 +15769,192 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
+  });
+
+  testWidgets('supportingTextPadding defined in InputDecoration is used for supporting text', (
+    WidgetTester tester,
+  ) async {
+    const customPaddingStart = 32.0;
+    const customPaddingEnd = 24.0;
+    const customPaddingTop = 16.0;
+    const customPaddingBottom = 12.0;
+    const inputWidth = 300.0;
+    const errorText = 'error';
+    const helperText = 'helper';
+    const counterText = 'counter';
+
+    Future<void> buildDecorator({
+      required TextDirection direction,
+      EdgeInsetsGeometry? supportingTextPadding,
+      String? errorText,
+      String? helperText,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Scaffold(
+            body: Directionality(
+              textDirection: direction,
+              child: SizedBox(
+                width: inputWidth,
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    filled: true,
+                    errorText: errorText,
+                    helperText: helperText,
+                    counterText: counterText,
+                    supportingTextPadding: supportingTextPadding,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    final Finder errorFinder = find.text(errorText);
+    final Finder helperFinder = find.text(helperText);
+    final Finder counterFinder = find.text(counterText);
+
+    const inputGap = 4.0; // _kInputExtraPadding in Material 3 filled field.
+
+    // Calculate default vertical bounds first to ensure new vertical padding shifts correctly.
+    await buildDecorator(direction: TextDirection.ltr, errorText: errorText);
+    final double defaultErrorDy = tester.getTopLeft(errorFinder).dy;
+    final double defaultTotalHeight = tester.getSize(find.byType(InputDecorator)).height;
+
+    // LTR with custom supportingTextPadding (error).
+    await buildDecorator(
+      direction: TextDirection.ltr,
+      errorText: errorText,
+      supportingTextPadding: const EdgeInsetsDirectional.only(
+        start: customPaddingStart,
+        end: customPaddingEnd,
+        top: customPaddingTop,
+        bottom: customPaddingBottom,
+      ),
+    );
+    expect(tester.getTopLeft(errorFinder).dx, customPaddingStart + inputGap);
+    expect(tester.getTopRight(counterFinder).dx, inputWidth - customPaddingEnd - inputGap);
+
+    // Verify vertical padding shift.
+    final double customErrorDy = tester.getTopLeft(errorFinder).dy;
+    final double customTotalHeight = tester.getSize(find.byType(InputDecorator)).height;
+    expect(customErrorDy > defaultErrorDy, true);
+    expect(customTotalHeight > defaultTotalHeight, true);
+
+    // RTL with custom supportingTextPadding (error).
+    await buildDecorator(
+      direction: TextDirection.rtl,
+      errorText: errorText,
+      supportingTextPadding: const EdgeInsetsDirectional.only(
+        start: customPaddingStart,
+        end: customPaddingEnd,
+      ),
+    );
+    // In RTL, "start" is from the right, so errorText is placed on the right.
+    expect(tester.getTopRight(errorFinder).dx, inputWidth - customPaddingStart - inputGap);
+    // In RTL, "end" is from the left, so counterText is placed on the left.
+    expect(tester.getTopLeft(counterFinder).dx, customPaddingEnd + inputGap);
+
+    // LTR with custom supportingTextPadding (helper).
+    await buildDecorator(
+      direction: TextDirection.ltr,
+      helperText: helperText,
+      supportingTextPadding: const EdgeInsetsDirectional.only(
+        start: customPaddingStart,
+        end: customPaddingEnd,
+      ),
+    );
+    expect(tester.getTopLeft(helperFinder).dx, customPaddingStart + inputGap);
+    expect(tester.getTopRight(counterFinder).dx, inputWidth - customPaddingEnd - inputGap);
+
+    // RTL with custom supportingTextPadding (helper).
+    await buildDecorator(
+      direction: TextDirection.rtl,
+      helperText: helperText,
+      supportingTextPadding: const EdgeInsetsDirectional.only(
+        start: customPaddingStart,
+        end: customPaddingEnd,
+      ),
+    );
+    expect(tester.getTopRight(helperFinder).dx, inputWidth - customPaddingStart - inputGap);
+    expect(tester.getTopLeft(counterFinder).dx, customPaddingEnd + inputGap);
+  });
+
+  testWidgets('supportingTextPadding defined in InputDecorationTheme is used for supporting text', (
+    WidgetTester tester,
+  ) async {
+    const themePaddingStart = 40.0;
+    const themePaddingEnd = 20.0;
+    const inputWidth = 300.0;
+    const errorText = 'error';
+    const helperText = 'helper';
+    const counterText = 'counter';
+
+    Future<void> buildDecorator({
+      required TextDirection direction,
+      String? errorText,
+      String? helperText,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            useMaterial3: true,
+            inputDecorationTheme: const InputDecorationThemeData(
+              supportingTextPadding: EdgeInsetsDirectional.only(
+                start: themePaddingStart,
+                end: themePaddingEnd,
+              ),
+            ),
+          ),
+          home: Scaffold(
+            body: Directionality(
+              textDirection: direction,
+              child: SizedBox(
+                width: inputWidth,
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    filled: true,
+                    errorText: errorText,
+                    helperText: helperText,
+                    counterText: counterText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    final Finder errorFinder = find.text(errorText);
+    final Finder helperFinder = find.text(helperText);
+    final Finder counterFinder = find.text(counterText);
+    const inputGap = 4.0;
+
+    // LTR with theme supportingTextPadding (error).
+    await buildDecorator(direction: TextDirection.ltr, errorText: errorText);
+    expect(tester.getTopLeft(errorFinder).dx, themePaddingStart + inputGap);
+    expect(tester.getTopRight(counterFinder).dx, inputWidth - themePaddingEnd - inputGap);
+
+    // RTL with theme supportingTextPadding (error).
+    await buildDecorator(direction: TextDirection.rtl, errorText: errorText);
+    // In RTL, "start" is from the right, "end" is from the left.
+    expect(tester.getTopRight(errorFinder).dx, inputWidth - themePaddingStart - inputGap);
+    expect(tester.getTopLeft(counterFinder).dx, themePaddingEnd + inputGap);
+
+    // LTR with theme supportingTextPadding (helper).
+    await buildDecorator(direction: TextDirection.ltr, helperText: helperText);
+    expect(tester.getTopLeft(helperFinder).dx, themePaddingStart + inputGap);
+    expect(tester.getTopRight(counterFinder).dx, inputWidth - themePaddingEnd - inputGap);
+
+    // RTL with theme supportingTextPadding (helper).
+    await buildDecorator(direction: TextDirection.rtl, helperText: helperText);
+    expect(tester.getTopRight(helperFinder).dx, inputWidth - themePaddingStart - inputGap);
+    expect(tester.getTopLeft(counterFinder).dx, themePaddingEnd + inputGap);
   });
 }
