@@ -126,6 +126,29 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer
   /// used.
   ///
+  /// ## Interaction with selectable fields
+  ///
+  /// When a [TextSpan] with a [recognizer] is placed inside a selectable text
+  /// field (such as [SelectableText] or an editable [TextField]), the
+  /// [recognizer] participates in the standard gesture arena alongside the
+  /// field's built-in gesture handlers (e.g. tap-to-place-cursor,
+  /// double-tap-to-select-word, long-press-to-select). Depending on which
+  /// recognizer wins the arena, the built-in gestures for the spanned text may
+  /// be suppressed.
+  ///
+  /// For example, if a [TapGestureRecognizer] is attached to a span inside a
+  /// selectable field, tapping on that span may trigger the recognizer's
+  /// callback instead of moving the cursor or starting a selection. Similarly,
+  /// a [LongPressGestureRecognizer] on a span may prevent the long-press
+  /// text-selection behavior over that span.
+  ///
+  /// This trade-off is intentional and can be acceptable when the spanned text
+  /// is not meant to be interacted with through the normal selection mechanics
+  /// (for example, a greyed-out inline suggestion that should not be
+  /// selectable). In other cases, developers should be aware that adding a
+  /// [recognizer] to a span inside a selectable field may degrade the standard
+  /// selection and editing user experience for that portion of text.
+  ///
   /// {@tool snippet}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
