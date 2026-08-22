@@ -42,46 +42,14 @@ typedef HeroPlaceholderBuilder = Widget Function(BuildContext context, Size hero
 /// A function that lets [Hero]es self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
 /// show the destination route's instance of the Hero).
-typedef HeroFlightShuttleBuilder = Widget Function(HeroFlightDetails details);
-
-/// The information available to a [HeroFlightShuttleBuilder].
-class HeroFlightDetails {
-  /// Creates the details for a hero flight shuttle.
-  const HeroFlightDetails({
-    required this.context,
-    required this.animation,
-    required this.direction,
-    required this.fromHeroContext,
-    required this.toHeroContext,
-    required this.fromHeroChild,
-    required this.toHeroChild,
-  });
-
-  /// The build context of the flight overlay.
-  final BuildContext context;
-
-  /// The animation that drives the hero flight.
-  final Animation<double> animation;
-
-  /// The direction of the hero flight.
-  final HeroFlightDirection direction;
-
-  /// The build context of the source [Hero].
-  final BuildContext fromHeroContext;
-
-  /// The build context of the destination [Hero].
-  final BuildContext toHeroContext;
-
-  /// The child of the source [Hero].
-  ///
-  /// Unlike [toHeroChild], this child remains mounted in the source route during
-  /// a push flight and is not prepared for state-preserving reparenting.
-  final Widget fromHeroChild;
-
-  /// The destination Hero child, prepared to preserve its [State] while it is
-  /// reparented between the destination route and the flight overlay.
-  final Widget toHeroChild;
-}
+typedef HeroFlightShuttleBuilder =
+    Widget Function(
+      BuildContext flightContext,
+      Animation<double> animation,
+      HeroFlightDirection flightDirection,
+      BuildContext fromHeroContext,
+      BuildContext toHeroContext,
+    );
 
 typedef _OnFlightEnded = void Function(_HeroFlight flight);
 
@@ -256,10 +224,6 @@ class Hero extends StatefulWidget {
   /// If none is provided, the destination route's Hero child is shown in-flight
   /// by default.
   ///
-  /// The [HeroFlightDetails.toHeroChild] passed to this builder preserves
-  /// its [State] when moved into the shuttle. Custom shuttles can wrap that
-  /// child without resetting its state.
-  ///
   /// ## Limitations
   ///
   /// If a widget built by [flightShuttleBuilder] takes part in a [Navigator]
@@ -308,6 +272,23 @@ class Hero extends StatefulWidget {
   ///
   /// If this property is null, [Hero.curve].flipped is used.
   final Curve? reverseCurve;
+
+  /// Returns the child of the [Hero] associated with [context],
+  /// prepared for use in a [HeroFlightShuttleBuilder].
+  ///
+  /// The returned widget preserves the existing element subtree and [State] of
+  /// the Hero's child when it is moved into the flight overlay.
+  ///
+  /// The [context] must be one of the `fromHeroContext` or `toHeroContext` values
+  /// passed to a [HeroFlightShuttleBuilder].
+  static Widget flightShuttleChildOf(BuildContext context) {
+    assert(context.widget is Hero, 'Hero.flightShuttleChildOf must be called with a Hero context.');
+
+    final element = context as StatefulElement;
+    final state = element.state as _HeroState;
+
+    return KeyedSubtree(key: state._key, child: state.widget.child);
+  }
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
   // should be considered for animation when `navigator` transitions from one
@@ -605,15 +586,11 @@ class _HeroFlight {
   // The OverlayEntry WidgetBuilder callback for the hero's overlay.
   Widget _buildOverlay(BuildContext context) {
     shuttle ??= manifest.shuttleBuilder(
-      HeroFlightDetails(
-        context: context,
-        animation: manifest.animation,
-        direction: manifest.type,
-        fromHeroContext: manifest.fromHero.context,
-        toHeroContext: manifest.toHero.context,
-        fromHeroChild: manifest.fromHero.widget.child,
-        toHeroChild: KeyedSubtree(key: manifest.toHero._key, child: manifest.toHero.widget.child),
-      ),
+      context,
+      manifest.animation,
+      manifest.type,
+      manifest.fromHero.context,
+      manifest.toHero.context,
     );
     assert(shuttle != null);
 
@@ -1095,34 +1072,35 @@ class HeroController extends NavigatorObserver {
     _flights.remove(flight.manifest.tag)?.dispose();
   }
 
-  Widget _defaultHeroFlightShuttleBuilder(HeroFlightDetails details) {
-    final MediaQueryData? toMediaQueryData = MediaQuery.maybeOf(details.toHeroContext);
-    final MediaQueryData? fromMediaQueryData = MediaQuery.maybeOf(details.fromHeroContext);
+  Widget _defaultHeroFlightShuttleBuilder(
+    BuildContext flightContext,
+    Animation<double> animation,
+    HeroFlightDirection flightDirection,
+    BuildContext fromHeroContext,
+    BuildContext toHeroContext,
+  ) {
+    final Widget toHeroChild = Hero.flightShuttleChildOf(toHeroContext);
+
+    final MediaQueryData? toMediaQueryData = MediaQuery.maybeOf(toHeroContext);
+    final MediaQueryData? fromMediaQueryData = MediaQuery.maybeOf(fromHeroContext);
 
     if (toMediaQueryData == null || fromMediaQueryData == null) {
-      return details.toHeroChild;
+      return toHeroChild;
     }
 
     final EdgeInsets fromHeroPadding = fromMediaQueryData.padding;
     final EdgeInsets toHeroPadding = toMediaQueryData.padding;
 
     return AnimatedBuilder(
-      animation: details.animation,
-      child: details.toHeroChild,
+      animation: animation,
       builder: (BuildContext context, Widget? child) {
         return MediaQuery(
           data: toMediaQueryData.copyWith(
-            padding: (details.direction == HeroFlightDirection.push)
-                ? EdgeInsetsTween(
-                    begin: fromHeroPadding,
-                    end: toHeroPadding,
-                  ).evaluate(details.animation)
-                : EdgeInsetsTween(
-                    begin: toHeroPadding,
-                    end: fromHeroPadding,
-                  ).evaluate(details.animation),
+            padding: (flightDirection == HeroFlightDirection.push)
+                ? EdgeInsetsTween(begin: fromHeroPadding, end: toHeroPadding).evaluate(animation)
+                : EdgeInsetsTween(begin: toHeroPadding, end: fromHeroPadding).evaluate(animation),
           ),
-          child: child!,
+          child: toHeroChild,
         );
       },
     );
