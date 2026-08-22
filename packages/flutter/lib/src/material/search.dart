@@ -64,7 +64,7 @@ import 'theme.dart';
 /// used to exit the search page.
 ///
 /// ## Handling emojis and other complex characters
-/// {@macro flutter.widgets.EditableText.onChanged}
+/// {@macro flutter.widgets.editableText.onChangedComplexCharacters}
 ///
 /// See also:
 ///
@@ -112,7 +112,7 @@ Future<T?> showSearch<T>({
 /// for another [showSearch] call.
 ///
 /// ## Handling emojis and other complex characters
-/// {@macro flutter.widgets.EditableText.onChanged}
+/// {@macro flutter.widgets.editableText.onChangedComplexCharacters}
 abstract class SearchDelegate<T> {
   /// Constructor to be called by subclasses which may specify
   /// [searchFieldLabel], either [searchFieldStyle] or [searchFieldDecorationTheme],
