@@ -85,6 +85,50 @@ struct FlutterRunLoopTests {
       }
     }
   }
+
+  @Test
+  func `earlier task scheduled after later task executes first`() async throws {
+    var executionOrder: [Int] = []
+
+    await withCheckedContinuation { continuation in
+      runLoop.perform(afterDelay: 0.15) {
+        executionOrder.append(1)
+        continuation.resume()
+      }
+
+      runLoop.perform(afterDelay: 0.05) {
+        executionOrder.append(2)
+      }
+    }
+
+    #expect(executionOrder == [2, 1])
+  }
+
+  @Test
+  func `concurrent perform calls from multiple threads do not race under tsan`() async throws {
+    let threads = 4
+    let tasksPerThread = 50
+    let totalTasks = threads * tasksPerThread
+
+    var executedCount = 0
+
+    await withCheckedContinuation { continuation in
+      for _ in 0..<threads {
+        Thread.detachNewThread {
+          for _ in 0..<tasksPerThread {
+            self.runLoop.perform {
+              executedCount += 1
+              if executedCount == totalTasks {
+                continuation.resume()
+              }
+            }
+          }
+        }
+      }
+    }
+
+    #expect(executedCount == totalTasks)
+  }
 }
 
 @Suite
@@ -144,6 +188,23 @@ struct UnsafeTaskQueueTests {
     #expect(expiredArray.count == 1)
     #expect(expiredArray.first?.targetDate == expiredTask.targetDate)
     #expect(newFireDate == unexpiredTask.targetDate)
+  }
+
+  @Test
+  func `UnsafeTaskQueue popTasks when empty or no tasks have expired`() {
+    let queue = FlutterRunLoop.UnsafeTaskQueue()
+
+    let (emptyTasks, emptyFireDate) = queue.popTasks(expiringBy: Date(10))
+    #expect(Array(emptyTasks).isEmpty)
+    #expect(emptyFireDate == .distantFuture)
+
+    _ = queue.add(task: Task(expiresAt: 20))
+    _ = queue.add(task: Task(expiresAt: 30))
+
+    // No tasks have expired.
+    let (unexpiredTasks, unexpiredFireDate) = queue.popTasks(expiringBy: Date(10))
+    #expect(Array(unexpiredTasks).isEmpty)
+    #expect(unexpiredFireDate == Date(20))
   }
 
   @Test(arguments: [
