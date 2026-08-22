@@ -2590,6 +2590,28 @@ double computeScaleSlop(PointerDeviceKind kind) {
   }
 }
 
+/// Methods for comparing the magnitude of an [Offset], such as a pointer
+/// delta or velocity, against a threshold, such as a touch slop or a minimum
+/// fling velocity.
+extension OffsetDistanceComparison on Offset {
+  /// Whether this offset's [distance] is greater than [threshold].
+  ///
+  /// This is equivalent to `distance > threshold` for a non-negative
+  /// [threshold], but is cheaper to evaluate because it compares squared
+  /// magnitudes, avoiding the square root implied by [distance].
+  bool distanceExceeds(double threshold) {
+    assert(threshold >= 0.0);
+    return distanceSquared > threshold * threshold;
+  }
+
+  /// Whether this offset's [distance] is at most [threshold].
+  ///
+  /// This is equivalent to `distance <= threshold` for a non-negative
+  /// [threshold], but is cheaper to evaluate because it compares squared
+  /// magnitudes, avoiding the square root implied by [distance].
+  bool distanceIsWithin(double threshold) => !distanceExceeds(threshold);
+}
+
 class _TransformedPointerCancelEvent extends _TransformedPointerEvent
     with _CopyPointerCancelEvent
     implements PointerCancelEvent {
