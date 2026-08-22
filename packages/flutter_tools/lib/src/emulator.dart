@@ -224,15 +224,24 @@ class EmulatorManager {
         ? availableApiVersions.reduce(math.max)
         : -1; // Don't match below
 
-    // We're out of preferences, we just have to return the first one with the high
-    // API version.
-    for (final id in availableIDs) {
-      if (id.contains(';android-$apiVersion;')) {
-        return id;
+    final List<String> idsForApiVersion = availableIDs
+        .where((String id) => id.contains(';android-$apiVersion;'))
+        .toList();
+
+    // Prefer 64-bit/modern ABIs over plain x86: current emulator tooling
+    // treats 32-bit x86 images as unsupported, so picking one leaves the
+    // freshly created AVD unusable (flutter/flutter#191512).
+    for (final String abi in _preferredAbis) {
+      for (final id in idsForApiVersion) {
+        if (id.endsWith(';$abi')) {
+          return id;
+        }
       }
     }
-    return null;
+    return idsForApiVersion.isEmpty ? null : idsForApiVersion.first;
   }
+
+  static const _preferredAbis = <String>['arm64-v8a', 'x86_64', 'x86'];
 
   /// Whether we're capable of listing any emulators given the current environment configuration.
   bool get canListAnything {
