@@ -499,6 +499,16 @@ class ScrollPhysics {
   /// Whether a viewport is allowed to change the scroll position as the result of user input.
   bool get allowUserScrolling => true;
 
+  /// Whether a viewport may scroll to reveal more content when a selection
+  /// gesture extends past the visible area, i.e. the viewport's edge.
+  ///
+  /// Paged scrollables that want to prevent selection gestures from revealing an
+  /// adjacent page should override this to false in their [ScrollPhysics],
+  /// similar to [PageScrollPhysics] used by [PageView].
+  ///
+  /// Defaults to true.
+  bool get allowSelectionEdgeScrolling => parent?.allowSelectionEdgeScrolling ?? true;
+
   @override
   String toString() {
     if (parent == null) {

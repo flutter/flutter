@@ -24,6 +24,66 @@ Offset globalize(Offset point, RenderBox box) {
   return box.localToGlobal(point);
 }
 
+// Drag-selects past the edge of a ListView nested in a PageView along [axis],
+// and checks the ListView edge scrolls while the PageView stays on its page.
+Future<void> selectPastNestedListEdge(WidgetTester tester, Axis axis) async {
+  final pageController = PageController();
+  addTearDown(pageController.dispose);
+  final listController = ScrollController();
+  addTearDown(listController.dispose);
+  await tester.pumpWidget(
+    TestWidgetsApp(
+      home: SelectableRegion(
+        selectionControls: testTextSelectionHandleControls,
+        child: PageView(
+          scrollDirection: axis,
+          controller: pageController,
+          children: <Widget>[
+            ListView.builder(
+              scrollDirection: axis,
+              controller: listController,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return Center(child: Text('Item $index'));
+              },
+            ),
+            const Center(child: Text('Second page')),
+          ],
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  expect(pageController.page, 0.0);
+  expect(listController.offset, 0.0);
+
+  final RenderParagraph item0 = tester.renderObject<RenderParagraph>(
+    find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+  );
+  final Rect box = tester.getRect(find.byType(PageView));
+  final target = axis == Axis.vertical
+      ? Offset(box.center.dx, box.bottom + 40.0)
+      : Offset(box.right + 40.0, box.center.dy);
+
+  final TestGesture gesture = await tester.startGesture(
+    textOffsetToPosition(item0, 2),
+    kind: PointerDeviceKind.mouse,
+  );
+  addTearDown(gesture.removePointer);
+  await tester.pump();
+  await gesture.moveTo(target);
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1));
+
+  // The inner ListView edge scrolled, but the PageView did not flip pages.
+  expect(listController.offset, greaterThan(0.0));
+  expect(pageController.page, 0.0);
+  expect(tester.takeException(), isNull);
+
+  await gesture.up();
+  await tester.pumpAndSettle();
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final mockClipboard = MockClipboard();
@@ -1497,6 +1557,119 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.offset, 0.0);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'paged scrollable does not flip pages during selection, but text still gets selected',
+    (WidgetTester tester) async {
+      // Dragging a selection past a PageView's edge must not flip to the next
+      // page and snap back. The selection itself must still work.
+      final controller = PageController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: testTextSelectionHandleControls,
+            child: PageView.builder(
+              controller: controller,
+              itemCount: 5,
+              itemBuilder: (BuildContext context, int index) {
+                return Center(child: Text('Page $index'));
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(controller.page, 0.0);
+
+      final RenderParagraph page0 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Page 0'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.text('Page 0')),
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      expect(controller.page, 0.0);
+
+      // Hold the drag past the right edge; without the fix this keeps flipping
+      // pages toward page 1.
+      await gesture.moveTo(tester.getBottomRight(find.byType(PageView)) + const Offset(40.0, 0.0));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // The page did not flip, but the page's text was still selected.
+      expect(controller.page, 0.0);
+      expect(page0.selections, isNotEmpty);
+      expect(tester.takeException(), isNull);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(controller.page, 0.0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('mouse selection drag still edge auto-scrolls a non page-snapping scrollable', (
+    WidgetTester tester,
+  ) async {
+    // Counterpart to the PageView test above: only paged scrollables are
+    // affected. A plain ListView still edge scrolls while drag-selecting.
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: testTextSelectionHandleControls,
+          child: ListView.builder(
+            controller: controller,
+            scrollDirection: Axis.horizontal,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Center(child: Text('Item $index'));
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+
+    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(paragraph0, 2),
+      kind: ui.PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    expect(controller.offset, 0.0);
+
+    // Drag past the right edge to kick off auto-scroll.
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(40.0, 0.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset, greaterThan(0.0));
+    expect(tester.takeException(), isNull);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('vertical ListView inside a PageView still edge scrolls during selection', (
+    WidgetTester tester,
+  ) async {
+    await selectPastNestedListEdge(tester, Axis.vertical);
+  });
+
+  testWidgets('horizontal ListView inside a PageView still edge scrolls during selection', (
+    WidgetTester tester,
+  ) async {
+    await selectPastNestedListEdge(tester, Axis.horizontal);
   });
 
   group('Complex cases', () {

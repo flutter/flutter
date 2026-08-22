@@ -1299,6 +1299,12 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       return result;
     }
     if (_selectionStartsInScrollable) {
+      // Paged scrollables (like PageView) disallow this; edge scrolling there
+      // flips to an adjacent page instead of revealing more content.
+      if (!(state.resolvedPhysics?.allowSelectionEdgeScrolling ?? true)) {
+        _autoScroller.stopAutoScroll();
+        return result;
+      }
       _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
