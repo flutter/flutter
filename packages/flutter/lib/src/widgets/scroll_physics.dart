@@ -508,16 +508,21 @@ class ScrollPhysics {
   ///
   /// If this method returns true, the [Scrollable] will update its
   /// [ScrollPosition] with the new [ScrollPhysics]. If this method returns
-  /// false, the update might be optimized away.
+  /// false, the physics update on the existing [ScrollPosition] is skipped,
+  /// though the position may still be recreated if other properties on
+  /// [Scrollable] force a reset.
   ///
   /// Subclasses that contain configuration parameters should override this
   /// method to return true when those parameters change, and should call
   /// `super.shouldUpdate(old)` to also update when the [parent] changes.
   ///
-  /// The base class implementation returns true if the [runtimeType] or
-  /// [parent] changes.
+  /// The base class implementation returns false if [this] and [old] are
+  /// [identical], and returns true if the [runtimeType] or [parent] changes.
   @mustCallSuper
   bool shouldUpdate(covariant ScrollPhysics old) {
+    if (identical(this, old)) {
+      return false;
+    }
     if (old.runtimeType != runtimeType) {
       return true;
     }

@@ -483,6 +483,26 @@ FlutterError
       expect(secondPosition, isNot(same(firstPosition)));
     },
   );
+
+  test('ScrollPhysics.shouldUpdate returns false immediately for identical instances', () {
+    const ScrollPhysics physics = BouncingScrollPhysics();
+
+    expect(physics.shouldUpdate(physics), isFalse);
+  });
+
+  test('ScrollPhysics.shouldUpdate evaluates non-identical instances correctly', () {
+    const ScrollPhysics physicsB1 = BouncingScrollPhysics(parent: ClampingScrollPhysics());
+    const ScrollPhysics physicsB2 = BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+
+    expect(identical(physicsB1, physicsB2), isFalse);
+    expect(physicsB1.shouldUpdate(physicsB2), isTrue);
+
+    const ScrollPhysics physicsC1 = BouncingScrollPhysics();
+    const ScrollPhysics physicsC2 = BouncingScrollPhysics(parent: ClampingScrollPhysics());
+
+    expect(identical(physicsC1, physicsC2), isFalse);
+    expect(physicsC1.shouldUpdate(physicsC2), isTrue);
+  });
 }
 
 class ReactiveScrollPhysics extends ScrollPhysics {

@@ -684,19 +684,18 @@ class ScrollableState extends State<Scrollable>
         widget.scrollBehavior!.shouldNotify(oldWidget.scrollBehavior!)) {
       return true;
     }
-    ScrollPhysics? newPhysics = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
-    ScrollPhysics? oldPhysics =
+
+    final ScrollPhysics? newPhysics =
+        widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
+    final ScrollPhysics? oldPhysics =
         oldWidget.physics ?? oldWidget.scrollBehavior?.getScrollPhysics(context);
-    do {
-      if (newPhysics?.runtimeType != oldPhysics?.runtimeType) {
-        return true;
-      }
-      if (newPhysics != null && oldPhysics != null && newPhysics.shouldUpdate(oldPhysics)) {
-        return true;
-      }
-      newPhysics = newPhysics?.parent;
-      oldPhysics = oldPhysics?.parent;
-    } while (newPhysics != null || oldPhysics != null);
+
+    if (newPhysics?.runtimeType != oldPhysics?.runtimeType) {
+      return true;
+    }
+    if (newPhysics != null && oldPhysics != null && newPhysics.shouldUpdate(oldPhysics)) {
+      return true;
+    }
 
     return widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
   }
