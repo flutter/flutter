@@ -273,6 +273,23 @@ class Hero extends StatefulWidget {
   /// If this property is null, [Hero.curve].flipped is used.
   final Curve? reverseCurve;
 
+  /// Returns the child of the [Hero] associated with [context],
+  /// prepared for use in a [HeroFlightShuttleBuilder].
+  ///
+  /// The returned widget preserves the existing element subtree and [State] of
+  /// the Hero's child when it is moved into the flight overlay.
+  ///
+  /// The [context] must be one of the `fromHeroContext` or `toHeroContext` values
+  /// passed to a [HeroFlightShuttleBuilder].
+  static Widget flightShuttleChildOf(BuildContext context) {
+    assert(context.widget is Hero, 'Hero.flightShuttleChildOf must be called with a Hero context.');
+
+    final element = context as StatefulElement;
+    final state = element.state as _HeroState;
+
+    return KeyedSubtree(key: state._key, child: state.widget.child);
+  }
+
   // Returns a map of all of the heroes in `context` indexed by hero tag that
   // should be considered for animation when `navigator` transitions from one
   // PageRoute to another.
@@ -1062,13 +1079,13 @@ class HeroController extends NavigatorObserver {
     BuildContext fromHeroContext,
     BuildContext toHeroContext,
   ) {
-    final toHero = toHeroContext.widget as Hero;
+    final Widget toHeroChild = Hero.flightShuttleChildOf(toHeroContext);
 
     final MediaQueryData? toMediaQueryData = MediaQuery.maybeOf(toHeroContext);
     final MediaQueryData? fromMediaQueryData = MediaQuery.maybeOf(fromHeroContext);
 
     if (toMediaQueryData == null || fromMediaQueryData == null) {
-      return toHero.child;
+      return toHeroChild;
     }
 
     final EdgeInsets fromHeroPadding = fromMediaQueryData.padding;
@@ -1083,7 +1100,7 @@ class HeroController extends NavigatorObserver {
                 ? EdgeInsetsTween(begin: fromHeroPadding, end: toHeroPadding).evaluate(animation)
                 : EdgeInsetsTween(begin: toHeroPadding, end: fromHeroPadding).evaluate(animation),
           ),
-          child: toHero.child,
+          child: toHeroChild,
         );
       },
     );
