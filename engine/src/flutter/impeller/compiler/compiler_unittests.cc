@@ -249,6 +249,12 @@ TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
                                    SourceLanguage::kHLSL, "FragmentShader"));
 }
 
+TEST_P(CompilerTest, CanCompileHLSLWithSampledTexture) {
+  ASSERT_TRUE(CanCompileAndReflect("sampled_texture.hlsl",
+                                   SourceType::kFragmentShader,
+                                   SourceLanguage::kHLSL, "FragmentShader"));
+}
+
 TEST_P(CompilerTest, CanCompileComputeShader) {
   ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader,
                                    SourceLanguage::kGLSL, "main"));
