@@ -135,7 +135,7 @@ abstract final class BuildInfoOptions {
   static const trackWidgetCreation = FlagOptionDescriptor(
     name: 'track-widget-creation',
     defaultsTo: true,
-    hide: true,
+    verboseOnly: true,
     help:
         'Track widget creation locations. This enables features such as the widget inspector. '
         'This parameter is only functional in debug mode (i.e. when compiling JIT, not AOT).',
@@ -239,6 +239,7 @@ abstract final class BuildInfoOptions {
 
   static const frontendServerStarterPath = StringOptionDescriptor(
     name: FlutterOptions.kFrontendServerStarterPath,
+    verboseOnly: true,
     help:
         'When this value is provided, the frontend server will be started '
         'in JIT mode from the specified file, instead of from the AOT '
@@ -253,7 +254,7 @@ abstract final class BuildInfoOptions {
     help:
         'Initializes the resident compiler with a specific kernel file instead of '
         'the default cached location.',
-    hide: true,
+    verboseOnly: true,
   );
 
   static const extraFrontEndOptions = MultiOptionDescriptor(
@@ -263,7 +264,7 @@ abstract final class BuildInfoOptions {
         'A comma-separated list of additional command line arguments that will be passed directly to the Dart front end. '
         'For example, "--${FlutterOptions.kExtraFrontEndOptions}=--enable-experiment=nonfunction-type-aliases".',
     valueHelp: '--foo,--bar',
-    hide: true,
+    verboseOnly: true,
   );
 
   static const extraGenSnapshotOptions = MultiOptionDescriptor(
@@ -273,7 +274,7 @@ abstract final class BuildInfoOptions {
         'A comma-separated list of additional command line arguments that will be passed directly to the Dart native compiler. '
         '(Requires the "--release", "--profile", or "--jit-release" flag.)',
     valueHelp: '--foo,--bar',
-    hide: true,
+    verboseOnly: true,
   );
 
   static const assumeInitializeFromDillUpToDate = FlagOptionDescriptor(
@@ -281,7 +282,7 @@ abstract final class BuildInfoOptions {
     help:
         'If set, assumes that the file passed in initialize-from-dill is up '
         'to date and skip the check and potential invalidation of files.',
-    hide: true,
+    verboseOnly: true,
   );
 }
 
