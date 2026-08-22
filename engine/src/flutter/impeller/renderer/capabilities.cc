@@ -63,6 +63,9 @@ class StandardCapabilities final : public Capabilities {
   bool SupportsTriangleFan() const override { return supports_triangle_fan_; }
 
   // |Capabilities|
+  bool SupportsIndirectDraw() const override { return supports_indirect_draw_; }
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override {
     return default_color_format_;
   }
@@ -151,6 +154,7 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_decal_sampler_address_mode,
                        bool supports_device_transient_textures,
                        bool supports_triangle_fan,
+                       bool supports_indirect_draw,
                        bool supports_extended_range_formats,
                        PixelFormat default_color_format,
                        PixelFormat default_stencil_format,
@@ -175,6 +179,7 @@ class StandardCapabilities final : public Capabilities {
             supports_decal_sampler_address_mode),
         supports_device_transient_textures_(supports_device_transient_textures),
         supports_triangle_fan_(supports_triangle_fan),
+        supports_indirect_draw_(supports_indirect_draw),
         supports_extended_range_formats_(supports_extended_range_formats),
         needs_partitioned_host_buffer_(needs_partitioned_host_buffer),
         default_color_format_(default_color_format),
@@ -203,6 +208,7 @@ class StandardCapabilities final : public Capabilities {
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_device_transient_textures_ = false;
   bool supports_triangle_fan_ = false;
+  bool supports_indirect_draw_ = false;
   bool supports_extended_range_formats_ = false;
   bool needs_partitioned_host_buffer_ = false;
   PixelFormat default_color_format_ = PixelFormat::kUnknown;
@@ -301,6 +307,11 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetDefaultGlyphAtlasFormat(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsIndirectDraw(bool value) {
+  supports_indirect_draw_ = value;
+  return *this;
+}
+
 CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsTriangleFan(bool value) {
   supports_triangle_fan_ = value;
   return *this;
@@ -369,6 +380,7 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_decal_sampler_address_mode_,                                //
       supports_device_transient_textures_,                                 //
       supports_triangle_fan_,                                              //
+      supports_indirect_draw_,                                             //
       supports_extended_range_formats_,                                    //
       default_color_format_.value_or(PixelFormat::kUnknown),               //
       default_stencil_format_.value_or(PixelFormat::kUnknown),             //

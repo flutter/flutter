@@ -343,6 +343,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// them in sync.
   static const int _kMaxVertexBufferSlots = 16;
 
+  /// Byte sizes of the two indirect argument layouts. Match
+  /// `impeller::DrawIndirectArgs` and `impeller::DrawIndexedIndirectArgs`.
+  static const int _kDrawIndirectArgsSize = 16;
+  static const int _kDrawIndexedIndirectArgsSize = 20;
+
   /// Bitmask of slots that have been bound via [bindVertexBuffer] since the
   /// most recent [clearBindings] (or since this RenderPass was created).
   /// Bit `i` is set when slot `i` has been bound.
@@ -702,6 +707,87 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     }
   }
 
+  /// Appends a non-indexed draw whose parameters the GPU reads out of
+  /// [indirectArgs] instead of taking them from Dart.
+  ///
+  /// The view must hold at least 16 bytes and start at a 4 byte aligned
+  /// offset. Those bytes are four little-endian `uint32`s, in order,
+  /// `vertexCount`, `instanceCount`, `firstVertex`, `firstInstance`. That
+  /// layout is the same on every backend, so a compute shader that writes it
+  /// is portable as-is.
+  ///
+  /// The arguments are read by the GPU at draw time and are never validated,
+  /// the same as the contents of an index buffer. Writing them from a shader
+  /// is the point of this entry point; it is what makes GPU culling and
+  /// GPU-side LOD selection expressible without a round trip to the CPU.
+  ///
+  /// `firstInstance` must be 0 unless the device is known to support a
+  /// non-zero base instance. OpenGL ES 3.1 requires zero without
+  /// `GL_EXT_base_instance`.
+  ///
+  /// Throws a [StateError] when [GpuContext.doesSupportIndirectDraw] is false.
+  void drawIndirect(BufferView indirectArgs) {
+    _validateIndirectArgs(indirectArgs, _kDrawIndirectArgsSize);
+    _validateVertexBindings();
+    if (!_drawIndirect(
+      indirectArgs.buffer,
+      indirectArgs.offsetInBytes,
+      indirectArgs.lengthInBytes,
+    )) {
+      throw Exception("Failed to append drawIndirect");
+    }
+  }
+
+  /// Appends an indexed draw whose parameters the GPU reads out of
+  /// [indirectArgs] instead of taking them from Dart.
+  ///
+  /// Indices are read from the index buffer previously bound with
+  /// [bindIndexBuffer].
+  ///
+  /// The view must hold at least 20 bytes and start at a 4 byte aligned
+  /// offset. Those bytes are five little-endian 32-bit words, in order,
+  /// `indexCount`, `instanceCount`, `firstIndex`, `baseVertex` (signed), and
+  /// `firstInstance`. See [drawIndirect] for the rest of the contract.
+  ///
+  /// Throws a [StateError] when [GpuContext.doesSupportIndirectDraw] is false.
+  void drawIndexedIndirect(BufferView indirectArgs) {
+    _validateIndirectArgs(indirectArgs, _kDrawIndexedIndirectArgsSize);
+    _validateVertexBindings();
+    if (!_drawIndexedIndirect(
+      indirectArgs.buffer,
+      indirectArgs.offsetInBytes,
+      indirectArgs.lengthInBytes,
+    )) {
+      throw Exception("Failed to append drawIndexedIndirect");
+    }
+  }
+
+  /// Rejects argument views the backend cannot use before the draw is
+  /// recorded, so the failure names the problem instead of surfacing as a
+  /// generic append failure.
+  void _validateIndirectArgs(BufferView indirectArgs, int requiredSize) {
+    if (!gpuContext.doesSupportIndirectDraw) {
+      throw StateError(
+        'This device does not support indirect draws. Check '
+        'GpuContext.doesSupportIndirectDraw before calling.',
+      );
+    }
+    if (indirectArgs.offsetInBytes % 4 != 0) {
+      throw ArgumentError.value(
+        indirectArgs.offsetInBytes,
+        'indirectArgs.offsetInBytes',
+        'must be a multiple of 4',
+      );
+    }
+    if (indirectArgs.lengthInBytes < requiredSize) {
+      throw ArgumentError.value(
+        indirectArgs.lengthInBytes,
+        'indirectArgs.lengthInBytes',
+        'must be at least $requiredSize',
+      );
+    }
+  }
+
   /// Throws a [StateError] when the bound vertex buffer slots are sparse,
   /// naming the slots in `[0, highestBound]` that were left unbound.
   void _validateVertexBindings() {
@@ -949,4 +1035,22 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_RenderPass_DrawIndexed',
   )
   external bool _drawIndexed(int indexCount, int instanceCount);
+
+  @Native<Bool Function(Pointer<Void>, Pointer<Void>, Int, Int)>(
+    symbol: 'InternalFlutterGpu_RenderPass_DrawIndirect',
+  )
+  external bool _drawIndirect(
+    DeviceBuffer indirectBuffer,
+    int offsetInBytes,
+    int lengthInBytes,
+  );
+
+  @Native<Bool Function(Pointer<Void>, Pointer<Void>, Int, Int)>(
+    symbol: 'InternalFlutterGpu_RenderPass_DrawIndexedIndirect',
+  )
+  external bool _drawIndexedIndirect(
+    DeviceBuffer indirectBuffer,
+    int offsetInBytes,
+    int lengthInBytes,
+  );
 }

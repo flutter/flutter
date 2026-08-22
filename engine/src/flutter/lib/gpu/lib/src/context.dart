@@ -78,6 +78,16 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getSupportsManuallyMippedTextures();
   }
 
+  /// Whether a draw can read its vertex, index, and instance counts out of a
+  /// [DeviceBuffer] the GPU wrote, via [RenderPass.drawIndirect] and
+  /// [RenderPass.drawIndexedIndirect].
+  ///
+  /// True on Metal and Vulkan. On OpenGL ES it needs ES 3.1, so it is false on
+  /// older drivers. Check this before building a GPU culling or LOD pass.
+  bool get doesSupportIndirectDraw {
+    return _getSupportsIndirectDraw();
+  }
+
   /// The maximum anisotropy clamp supported by device samplers (see
   /// [SamplerOptions.maxAnisotropy]).
   ///
@@ -318,6 +328,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures',
   )
   external bool _getSupportsManuallyMippedTextures();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetSupportsIndirectDraw',
+  )
+  external bool _getSupportsIndirectDraw();
 
   @Native<Int Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_Context_GetMaxSamplerAnisotropy',
