@@ -31,6 +31,28 @@ std::string Utf8FromPath(const std::filesystem::path& path) {
   return reinterpret_cast<const char*>(path.u8string().c_str());
 }
 
+std::string EscapeDepfilePath(const std::string& path) {
+  std::stringstream stream;
+  size_t backslashes = 0u;
+  for (char character : path) {
+    switch (character) {
+      case '\\':
+        backslashes++;
+        stream << character;
+        break;
+      case ' ':
+        stream << std::string(backslashes + 1u, '\\') << character;
+        backslashes = 0u;
+        break;
+      default:
+        stream << character;
+        backslashes = 0u;
+        break;
+    }
+  }
+  return stream.str();
+}
+
 std::string InferShaderNameFromPath(const std::filesystem::path& path) {
   return Utf8FromPath(path.stem());
 }
