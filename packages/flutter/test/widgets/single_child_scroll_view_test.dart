@@ -1096,4 +1096,64 @@ void main() {
     );
     expect(tester.getSize(find.byType(SingleChildScrollView)), Size.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/145078
+  testWidgets('overscroll survives a relayout of the content', (WidgetTester tester) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    late StateSetter rebuildRow;
+    var revealed = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          child: SizedBox(
+            width: 300.0,
+            height: 300.0,
+            child: SingleChildScrollView(
+              controller: controller,
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: <Widget>[
+                  StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      rebuildRow = setState;
+                      // Stands in for a row revealing an action on hover: the rebuild has to lay
+                      // the row out again, a repaint alone does not reach performLayout.
+                      return Row(
+                        children: <Widget>[
+                          const Expanded(child: SizedBox(height: 32.0)),
+                          if (revealed) const SizedBox(width: 16.0, height: 32.0),
+                        ],
+                      );
+                    },
+                  ),
+                  for (var i = 1; i < 30; i++) const SizedBox(height: 32.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Drag past the leading edge and hold it there.
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await tester.pump();
+    final double overscrolled = controller.position.pixels;
+    expect(overscrolled, lessThan(-20.0));
+
+    // The row rebuilds mid-gesture, as it would when hover reveals an action.
+    rebuildRow(() => revealed = true);
+    await tester.pump();
+
+    expect(controller.position.pixels, overscrolled);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, 0.0);
+  });
 }
