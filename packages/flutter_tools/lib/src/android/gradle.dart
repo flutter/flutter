@@ -610,15 +610,6 @@ To fix this, you can either:
       }
       if (componentNames.isNotEmpty) {
         options.add('-Pdeferred-component-names=${componentNames.join(',')}');
-        // Multi-apk applications cannot use shrinking. This is only relevant when using
-        // android dynamic feature modules.
-        _logger.printStatus(
-          'Shrinking has been disabled for this build due to deferred components. Shrinking is '
-          'not available for multi-apk applications. This limitation is expected to be removed '
-          'when Gradle plugin 4.2+ is available in Flutter.',
-          color: TerminalColor.yellow,
-        );
-        options.add('-Pshrink=false');
       }
     }
     options.addAll(androidBuildInfo.buildInfo.toGradleConfig());
