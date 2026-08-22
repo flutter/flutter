@@ -277,10 +277,14 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// reasonable selection range within the new [text].
   ///
   /// Setting this notifies all the listeners of this [TextEditingController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
-  /// this value should only be set between frames, e.g. in response to user
-  /// actions, not during the build, layout, or paint phases. This property can
-  /// be set from a listener added to this [TextEditingController].
+  /// that they need to update (it calls [notifyListeners]), so it should only
+  /// be set between frames, e.g. in response to user actions, and not during
+  /// the build, layout, or paint phases: the framework does not allow widgets
+  /// to be marked as needing to build during those phases, and throws an
+  /// exception when a listener attempts it.
+  ///
+  /// This property can be set from a listener added to this
+  /// [TextEditingController].
   ///
   /// Setting this does not run [TextInputFormatter]s. Apply them manually if
   /// needed.
