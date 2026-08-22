@@ -35,24 +35,24 @@ import java.util.Properties
  * A collection of static utility functions used by the Flutter Gradle Plugin.
  */
 object FlutterPluginUtils {
-    // Gradle properties. These must correspond to the values used in
-    // flutter/packages/flutter_tools/lib/src/android/gradle.dart, and therefore it is not
-    // recommended to use these const values in tests.
-    internal const val PROP_SHOULD_SHRINK_RESOURCES = "shrink"
-    internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
-    internal const val PROP_ENABLE_HCPP = "enable-hcpp"
-    internal const val PROP_EXPLICIT_ENABLE_HCPP = "explicit-enable-hcpp"
-    internal const val PROP_LOCAL_ENGINE_REPO = "local-engine-repo"
-    internal const val PROP_IS_VERBOSE = "verbose"
-    internal const val PROP_TARGET = "target"
-    internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
-    internal const val PROP_TARGET_PLATFORM = "target-platform"
-    internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
-    internal const val PROP_SDK_MANAGER_PATH = "flutter.sdkManagerPath"
-    internal const val PROP_ANDROID_SDK_ROOT = "flutter.androidSdkRoot"
-    internal const val PROP_INSTALLED_NDK_VERSIONS = "flutter.installedNdkVersions"
-    internal const val TASK_PRINT_NDK_VERSION = "printNdkVersion"
-    internal const val NDK_VERSION_OUTPUT_PREFIX = "NdkVersion: "
+    // Gradle properties. These correspond to the values used in
+    // flutter/packages/flutter_tools/lib/src/android/gradle.dart, generated from
+    // packages/flutter_tools/lib/src/android/gradle_constants.dart via Pigeon.
+    internal const val PROP_SHOULD_SHRINK_RESOURCES = propShouldShrinkResources
+    internal const val PROP_SPLIT_PER_ABI = propSplitPerAbi
+    internal const val PROP_ENABLE_HCPP = propEnableHcpp
+    internal const val PROP_EXPLICIT_ENABLE_HCPP = propExplicitEnableHcpp
+    internal const val PROP_LOCAL_ENGINE_REPO = propLocalEngineRepo
+    internal const val PROP_IS_VERBOSE = propIsVerbose
+    internal const val PROP_TARGET = propTarget
+    internal const val PROP_LOCAL_ENGINE_BUILD_MODE = propLocalEngineBuildMode
+    internal const val PROP_TARGET_PLATFORM = propTargetPlatform
+    internal const val PROP_DISABLE_ABI_FILTERING = propDisableAbiFiltering
+    internal const val PROP_SDK_MANAGER_PATH = propSdkManagerPath
+    internal const val PROP_ANDROID_SDK_ROOT = propAndroidSdkRoot
+    internal const val PROP_INSTALLED_NDK_VERSIONS = propInstalledNdkVersions
+    internal const val TASK_PRINT_NDK_VERSION = taskPrintNdkVersion
+    internal const val NDK_VERSION_OUTPUT_PREFIX = ndkVersionOutputPrefix
 
     private data class ToolNdkProvisioningProperties(
         val androidSdkRoot: String,
