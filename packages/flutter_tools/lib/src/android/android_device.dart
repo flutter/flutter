@@ -821,6 +821,9 @@ class AndroidDevice extends Device {
   bool get supportsScreenshot => true;
 
   @override
+  bool get supportsScreenRecording => true;
+
+  @override
   Future<void> takeScreenshot(File outputFile) async {
     const remotePath = '/data/local/tmp/flutter_screenshot.png';
     await runAdbCheckedAsync(<String>['shell', 'screencap', '-p', remotePath]);
@@ -829,6 +832,45 @@ class AndroidDevice extends Device {
       throwOnError: true,
     );
     await runAdbCheckedAsync(<String>['shell', 'rm', remotePath]);
+  }
+
+  @override
+  Future<void> startScreenRecording(
+    File outputFile, {
+    Duration? duration,
+  }) async {
+    // adb screenrecord caps at 180 seconds.
+    const maxAdbSeconds = 180;
+    final effectiveDuration = duration != null
+        ? Duration(seconds: duration.inSeconds.clamp(1, maxAdbSeconds))
+        : const Duration(seconds: maxAdbSeconds);
+    const remotePath = '/data/local/tmp/flutter_recording.mp4';
+    final args = <String>[
+      'shell', 'screenrecord',
+      '--time-limit', '${effectiveDuration.inSeconds}',
+      remotePath,
+    ];
+    final Process process = await _processManager.start(
+      adbCommandForDevice(args),
+    );
+    int exitCode = -1;
+    try {
+      exitCode = await process.exitCode;
+    } finally {
+      try {
+        await _processUtils.run(
+          adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
+          throwOnError: true,
+        );
+      } on Exception catch (error) {
+        if (exitCode != 0) {
+          throwToolExit('screenrecord failed with exit code $exitCode.');
+        }
+        rethrow;
+      } finally {
+        await runAdbCheckedAsync(<String>['shell', 'rm', remotePath]);
+      }
+    }
   }
 
   @override
