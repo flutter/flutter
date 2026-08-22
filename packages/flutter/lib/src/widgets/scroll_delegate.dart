@@ -476,8 +476,10 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Typically, children in a scrolling container are wrapped in repaint
   /// boundaries so that they do not need to be repainted as the list scrolls.
   /// If the children are easy to repaint (e.g., solid color blocks or a short
-  /// snippet of text), it might be more efficient to not add a repaint boundary
-  /// and instead always repaint the children during scrolling.
+  /// snippet of text), or if the scroll view is shrink-wrapped or non-scrollable
+  /// (e.g., [ScrollView.shrinkWrap] is true or uses non-scrolling physics),
+  /// it is more efficient to set [addRepaintBoundaries] to false to avoid allocating
+  /// an unnecessary [RepaintBoundary] layer for each child item.
   ///
   /// Defaults to true.
   /// {@endtemplate}
@@ -792,7 +794,10 @@ class SliverChildListDelegate extends SliverChildDelegate {
 
   @override
   bool shouldRebuild(covariant SliverChildListDelegate oldDelegate) {
-    return children != oldDelegate.children;
+    return children != oldDelegate.children ||
+        addRepaintBoundaries != oldDelegate.addRepaintBoundaries ||
+        addAutomaticKeepAlives != oldDelegate.addAutomaticKeepAlives ||
+        addSemanticIndexes != oldDelegate.addSemanticIndexes;
   }
 }
 

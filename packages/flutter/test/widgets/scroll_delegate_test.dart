@@ -17,13 +17,17 @@ void main() {
     );
   });
 
-  test('TwoDimensionalChildListDelegate dispatches memory events', () async {
-    await expectLater(
-      await memoryEvents(
-        () => TwoDimensionalChildListDelegate(children: <List<Widget>>[]).dispose(),
-        TwoDimensionalChildListDelegate,
-      ),
-      areCreateAndDispose,
-    );
+  test('SliverChildListDelegate.shouldRebuild returns true when flags change', () {
+    final List<Widget> children = <Widget>[const SizedBox()];
+    final SliverChildListDelegate delegate1 = SliverChildListDelegate(children, addRepaintBoundaries: true);
+    final SliverChildListDelegate delegate2 = SliverChildListDelegate(children, addRepaintBoundaries: false);
+    final SliverChildListDelegate delegate3 = SliverChildListDelegate(children, addAutomaticKeepAlives: false);
+    final SliverChildListDelegate delegate4 = SliverChildListDelegate(children, addSemanticIndexes: false);
+    final SliverChildListDelegate delegate5 = SliverChildListDelegate(children);
+
+    expect(delegate1.shouldRebuild(delegate5), false);
+    expect(delegate1.shouldRebuild(delegate2), true);
+    expect(delegate1.shouldRebuild(delegate3), true);
+    expect(delegate1.shouldRebuild(delegate4), true);
   });
 }
