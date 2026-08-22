@@ -820,7 +820,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
     if (_needsRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
-        globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
+        globals.fs.directory(globals.fs.path.join(getBuildDirectory(), 'unit_test_assets')),
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
@@ -833,7 +833,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
 
       final File cachedFlavorFile = globals.fs.file(
-        globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+        globals.fs.path.join(getBuildDirectory(), 'test_cache', 'flavor.txt'),
       );
       if (cachedFlavorFile.existsSync()) {
         await cachedFlavorFile.delete();
@@ -851,7 +851,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
     final File manifest = globals.fs.file(
-      globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
+      globals.fs.path.join(getBuildDirectory(), 'unit_test_assets', 'AssetManifest.bin'),
     );
     if (!manifest.existsSync()) {
       return true;
@@ -872,7 +872,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final File cachedFlavorFile = globals.fs.file(
-      globals.fs.path.join('build', 'test_cache', 'flavor.txt'),
+      globals.fs.path.join(getBuildDirectory(), 'test_cache', 'flavor.txt'),
     );
     final String? cachedFlavor = cachedFlavorFile.existsSync()
         ? cachedFlavorFile.readAsStringSync()

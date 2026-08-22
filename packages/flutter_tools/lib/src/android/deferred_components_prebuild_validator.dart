@@ -201,10 +201,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
 
   /// Deletes all files inside of the validator's output directory.
   void clearOutputDir() {
-    final Directory dir = projectDir
-        .childDirectory('build')
-        .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory);
-    ErrorHandlingFileSystem.deleteIfExists(dir, recursive: true);
+    ErrorHandlingFileSystem.deleteIfExists(outputDir, recursive: true);
   }
 }
 

@@ -499,7 +499,12 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
-        globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
+        globals.fs.path.join(
+          globals.fs.currentDirectory.path,
+          getBuildDirectory(),
+          'ios',
+          'framework',
+        );
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');

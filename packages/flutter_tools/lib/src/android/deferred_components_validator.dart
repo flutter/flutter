@@ -8,6 +8,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../build_info.dart';
 
 /// A class to configure and run deferred component setup verification checks
 /// and tasks.
@@ -26,7 +27,7 @@ abstract class DeferredComponentsValidator {
     this.exitOnFail = true,
     String? title,
   }) : outputDir = projectDir
-           .childDirectory('build')
+           .childDirectory(getBuildDirectory())
            .childDirectory(kDeferredComponentsTempDirectory),
        inputs = <File>[],
        outputs = <File>[],

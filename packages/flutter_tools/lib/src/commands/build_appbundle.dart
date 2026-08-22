@@ -154,8 +154,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       // Delete intermediates libs dir for components to resolve mismatching
       // abis supported by base and dynamic feature modules.
       for (final DeferredComponent component in deferredComponents) {
-        final Directory deferredLibsIntermediate = project.directory
-            .childDirectory('build')
+        final Directory deferredLibsIntermediate = project.buildDirectory
             .childDirectory(component.name)
             .childDirectory('intermediates')
             .childDirectory('flutter')

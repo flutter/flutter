@@ -207,8 +207,7 @@ Future<Depfile> copyAssets(
       assetBundle.deferredComponentsEntries.entries.map<Future<void>>((
         MapEntry<String, Map<String, AssetBundleEntry>> componentEntries,
       ) async {
-        final Directory componentOutputDir = environment.projectDir
-            .childDirectory('build')
+        final Directory componentOutputDir = environment.rootBuildDir
             .childDirectory(componentEntries.key)
             .childDirectory('intermediates')
             .childDirectory('flutter');

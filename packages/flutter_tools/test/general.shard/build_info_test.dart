@@ -5,9 +5,11 @@
 import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -469,5 +471,30 @@ void main() {
     expect(CpuArch.x86.name, 'x86');
     expect(CpuArch.x64.name, 'x64');
     expect(CpuArch.riscv64.name, 'riscv64');
+  });
+
+  group('getBuildDirectory', () {
+    testWithoutContext('defaults to "build" when config is not set or in testWithoutContext', () {
+      expect(getBuildDirectory(), 'build');
+    });
+
+    testWithoutContext('uses passed in config', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', 'custom_build_out');
+      expect(getBuildDirectory(config, fileSystem), 'custom_build_out');
+    });
+
+    testWithoutContext('throws exception when configured build-dir is absolute', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', '/absolute/path/to/build');
+      expect(() => getBuildDirectory(config, fileSystem), throwsException);
+    });
+
+    testUsingContext('uses zone injected config', () {
+      globals.config.setValue('build-dir', 'injected_build_dir');
+      expect(getBuildDirectory(), 'injected_build_dir');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
   });
 }

@@ -11,6 +11,7 @@ import 'package:package_config/package_config_types.dart';
 
 import 'artifacts.dart';
 import 'base/config.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
@@ -926,12 +927,28 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  final Config localConfig = config ?? globals.config;
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  var localConfig = config;
+  if (localConfig == null) {
+    try {
+      localConfig = context.get<Config>();
+    } on UnsupportedError {
+      localConfig = null;
+    }
+  }
+  var localFilesystem = fileSystem;
+  if (localFilesystem == null) {
+    try {
+      localFilesystem = context.get<FileSystem>();
+    } on UnsupportedError {
+      localFilesystem = null;
+    }
+  }
 
-  final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
-  if (localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception('build-dir config setting in ${globals.config.configPath} must be relative');
+  final String buildDir = localConfig?.getValue('build-dir') as String? ?? 'build';
+  if (localFilesystem != null && localFilesystem.path.isAbsolute(buildDir)) {
+    throw Exception(
+      'build-dir config setting in ${localConfig?.configPath ?? 'config'} must be relative',
+    );
   }
   return buildDir;
 }

@@ -20,6 +20,7 @@ import 'base/project_migrator.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
+import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
 import 'convert.dart';
@@ -127,7 +128,7 @@ class FlutterProject {
   final Directory directory;
 
   /// The location of the build folder.
-  Directory get buildDirectory => directory.childDirectory('build');
+  Directory get buildDirectory => directory.childDirectory(getBuildDirectory());
 
   /// The manifest of this project.
   FlutterManifest get manifest => _manifest;

@@ -427,7 +427,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
       environment,
       _components!,
       generatedLoadingUnits,
-      environment.projectDir.childDirectory('build'),
+      environment.rootBuildDir,
       abis,
       dependency.buildMode,
     );
