@@ -3040,7 +3040,18 @@ class SemanticsNode with DiagnosticableTreeMixin {
           // ancestors. In that case, we drop the child eagerly here.
           // TODO(ianh): Find a way to assert that the same node didn't
           // actually appear in the tree in two places.
-          child.parent?._dropChild(child);
+          //
+          // The old parent is not necessarily rebuilt during this pass, so if
+          // its child list is left alone it keeps referring to a node it no
+          // longer owns. That list belongs to whoever passed it to
+          // [updateWith] and may be const, so replace it rather than mutate
+          // it in place.
+          final SemanticsNode oldParent = child.parent!;
+          final List<SemanticsNode>? oldParentChildren = oldParent._children;
+          if (oldParentChildren != null && oldParentChildren.contains(child)) {
+            oldParent._children = List<SemanticsNode>.of(oldParentChildren)..remove(child);
+          }
+          oldParent._dropChild(child);
         }
         assert(!child.attached);
         _adoptChild(child);
@@ -3295,7 +3306,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     if (_children != null) {
       for (final SemanticsNode child in _children!) {
-        child.attach(owner);
+        // The list of children may be stale and may contain nodes that have
+        // been assigned to a different parent.
+        if (child.parent == this) {
+          child.attach(owner);
+        }
       }
     }
   }
