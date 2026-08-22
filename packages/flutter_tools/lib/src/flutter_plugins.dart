@@ -1269,8 +1269,26 @@ void _createPlatformPluginSymlinks(
     final name = pluginInfo[_kFlutterPluginsNameKey]! as String;
     final path = pluginInfo[_kFlutterPluginsPathKey]! as String;
     final Link link = symlinkDirectory.childLink(name);
-    if (link.existsSync()) {
-      continue;
+    // Link.existsSync() follows the link to evaluate whether its destination
+    // target exists, returning false for broken/dangling symlinks. Using
+    // typeSync(followLinks: false) inspects the link entry directly on disk so
+    // that broken symlinks or conflicting entities can be cleaned up before
+    // creating the symlink, preventing FileSystemException collisions (such as
+    // ERROR_ALREADY_EXISTS on Windows or EEXIST on POSIX).
+    final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
+    if (entityType == FileSystemEntityType.link) {
+      try {
+        final String target = link.targetSync();
+        if (link.fileSystem.path.canonicalize(target) == link.fileSystem.path.canonicalize(path) &&
+            link.existsSync()) {
+          continue;
+        }
+      } on FileSystemException {
+        // Fall through to delete and recreate if resolving target throws.
+      }
+      ErrorHandlingFileSystem.deleteIfExists(link);
+    } else if (entityType != FileSystemEntityType.notFound) {
+      ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
     }
     try {
       link.createSync(path);
