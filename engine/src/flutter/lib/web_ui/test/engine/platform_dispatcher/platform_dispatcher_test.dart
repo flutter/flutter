@@ -552,14 +552,24 @@ void testMain() {
       });
     });
 
-    test('adds the accesibility placeholder', () {
-      expect(dispatcher.accessibilityPlaceholder.isConnected, isTrue);
-      expect(domDocument.body!.children.first, dispatcher.accessibilityPlaceholder);
-    });
+    test('adds the accessibility placeholder', () {
+      final DomElement placeholder = domDocument.querySelector('flt-semantics-placeholder')!;
+      expect(placeholder.isConnected, isTrue);
 
-    test('removes the accesibility placeholder', () {
-      dispatcher.dispose();
-      expect(dispatcher.accessibilityPlaceholder.isConnected, isFalse);
+      // Where it goes depends on the form factor. The mobile placeholder fills
+      // its view, so it has to live inside that view or it would swallow taps
+      // meant for the HTML around an embedded app. The desktop one is 1x1 and
+      // parked offscreen, and has to stay in the page so it remains the first
+      // tab stop. See https://github.com/flutter/flutter/issues/152838
+      if (isMobile) {
+        final DomElement rootElement =
+            EnginePlatformDispatcher.instance.implicitView!.dom.rootElement;
+        expect(placeholder.parent, rootElement);
+        expect(rootElement.children.first, placeholder);
+      } else {
+        expect(placeholder.parent, domDocument.body);
+        expect(domDocument.body!.children.first, placeholder);
+      }
     });
 
     test('accessibility placeholder label can be updated', () {
