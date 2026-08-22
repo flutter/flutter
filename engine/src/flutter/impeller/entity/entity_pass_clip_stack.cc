@@ -81,17 +81,13 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordRestore(
   result.clip_did_change = true;
 
   if (subpass_state.clip_coverage.back().coverage.has_value()) {
-    FML_DCHECK(next_replay_index_ <=
-               subpass_state.rendered_clip_entities.size());
-    // https://github.com/flutter/flutter/issues/162172
-    // This code is slightly wrong and should be popping more than one clip
-    // entry.
-    if (!subpass_state.rendered_clip_entities.empty()) {
+    while (!subpass_state.rendered_clip_entities.empty() &&
+           subpass_state.rendered_clip_entities.back().clip_height >
+               restore_height) {
       subpass_state.rendered_clip_entities.pop_back();
-
-      if (next_replay_index_ > subpass_state.rendered_clip_entities.size()) {
-        next_replay_index_ = subpass_state.rendered_clip_entities.size();
-      }
+    }
+    if (next_replay_index_ > subpass_state.rendered_clip_entities.size()) {
+      next_replay_index_ = subpass_state.rendered_clip_entities.size();
     }
   }
   return result;
@@ -190,10 +186,11 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordClip(
       << "Not all clips have been replayed before appending new clip.";
 
   subpass_state.rendered_clip_entities.push_back(ReplayResult{
-      .clip_contents = clip_contents,   //
-      .transform = transform,           //
-      .clip_coverage = coverage_value,  //
-      .clip_depth = clip_depth          //
+      .clip_contents = clip_contents,           //
+      .transform = transform,                   //
+      .clip_coverage = coverage_value,          //
+      .clip_depth = clip_depth,                 //
+      .clip_height = previous_clip_height + 1,  //
   });
   next_replay_index_++;
 

@@ -118,7 +118,7 @@ class LazyRenderingConfig {
 
 class Canvas {
  public:
-  static constexpr uint32_t kMaxDepth = 1 << 24;
+  static constexpr uint32_t kMaxDepth = 262143;
 
   Canvas(ContentContext& renderer,
          const RenderTarget& render_target,
@@ -282,6 +282,15 @@ class Canvas {
   ///
   /// Visible for testing.
   static bool IsCompatibleWithSDFRendering(const Paint& paint);
+
+  /// Visible for testing.
+  inline static thread_local std::optional<bool> g_override_should_use_onscreen;
+
+  /// Visible for testing.
+  static void SetOverrideShouldUseOnscreenForTesting(
+      std::optional<bool> override_value) {
+    g_override_should_use_onscreen = override_value;
+  }
 
  private:
   class BlurShape {
