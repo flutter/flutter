@@ -593,16 +593,19 @@ public class PlatformPluginTest {
     when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
     when(mockActivity.getWindow()).thenReturn(fakeWindow);
     PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+    assertFalse(platformPlugin.mPlatformMessageHandler.isEdgeToEdgeEnabled());
 
     try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
       // First, enter edge-to-edge mode.
       platformPlugin.mPlatformMessageHandler.showSystemUiMode(
           PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+      assertTrue(platformPlugin.mPlatformMessageHandler.isEdgeToEdgeEnabled());
       windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
 
       // Then switch to immersive.
       platformPlugin.mPlatformMessageHandler.showSystemUiMode(
           PlatformChannel.SystemUiMode.IMMERSIVE);
+      assertFalse(platformPlugin.mPlatformMessageHandler.isEdgeToEdgeEnabled());
 
       // Should restore decor fits system windows when leaving edge-to-edge.
       windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, true));

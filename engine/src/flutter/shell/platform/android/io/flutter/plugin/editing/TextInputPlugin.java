@@ -32,6 +32,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import io.flutter.Log;
 import io.flutter.embedding.android.KeyboardManager;
+import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel.TextEditState;
@@ -39,6 +40,7 @@ import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.BooleanSupplier;
 
 /** Android implementation of the text input plugin. */
 public class TextInputPlugin implements ListenableEditingState.EditingStateWatcher {
@@ -76,6 +78,40 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       @NonNull ScribeChannel scribeChannel,
       @NonNull PlatformViewsController platformViewsController,
       @NonNull PlatformViewsController2 platformViewsController2) {
+    this(
+        view,
+        textInputChannel,
+        scribeChannel,
+        platformViewsController,
+        platformViewsController2,
+        () -> false);
+  }
+
+  @SuppressLint("NewApi")
+  public TextInputPlugin(
+      @NonNull View view,
+      @NonNull TextInputChannel textInputChannel,
+      @NonNull ScribeChannel scribeChannel,
+      @NonNull PlatformViewsController platformViewsController,
+      @NonNull PlatformViewsController2 platformViewsController2,
+      @NonNull PlatformChannel platformChannel) {
+    this(
+        view,
+        textInputChannel,
+        scribeChannel,
+        platformViewsController,
+        platformViewsController2,
+        platformChannel::isEdgeToEdgeEnabled);
+  }
+
+  @SuppressLint("NewApi")
+  TextInputPlugin(
+      @NonNull View view,
+      @NonNull TextInputChannel textInputChannel,
+      @NonNull ScribeChannel scribeChannel,
+      @NonNull PlatformViewsController platformViewsController,
+      @NonNull PlatformViewsController2 platformViewsController2,
+      @NonNull BooleanSupplier isEdgeToEdgeEnabled) {
     mView = view;
     // Create a default object.
     mEditable = new ListenableEditingState(null, mView);
@@ -90,7 +126,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     // the Flutter view to grow and shrink to accommodate Android
     // controlled keyboard animations.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
-      imeSyncCallback = new ImeSyncDeferringInsetsCallback(view);
+      imeSyncCallback = new ImeSyncDeferringInsetsCallback(view, isEdgeToEdgeEnabled);
       imeSyncCallback.install();
 
       // When the IME is hidden, we need to restart the input method manager to accomodate

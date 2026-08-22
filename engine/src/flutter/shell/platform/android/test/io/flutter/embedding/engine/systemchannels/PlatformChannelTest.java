@@ -5,6 +5,8 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -25,6 +27,23 @@ import org.mockito.ArgumentCaptor;
 
 @RunWith(AndroidJUnit4.class)
 public class PlatformChannelTest {
+  @Test
+  public void isEdgeToEdgeEnabled_delegatesToPlatformMessageHandler() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    DartExecutor dartExecutor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class));
+    PlatformChannel platformChannel = new PlatformChannel(dartExecutor);
+    PlatformChannel.PlatformMessageHandler mockMessageHandler =
+        mock(PlatformChannel.PlatformMessageHandler.class);
+    when(mockMessageHandler.isEdgeToEdgeEnabled()).thenReturn(true);
+    platformChannel.setPlatformMessageHandler(mockMessageHandler);
+
+    assertTrue(platformChannel.isEdgeToEdgeEnabled());
+    verify(mockMessageHandler).isEdgeToEdgeEnabled();
+
+    platformChannel.setPlatformMessageHandler(null);
+    assertFalse(platformChannel.isEdgeToEdgeEnabled());
+  }
+
   @Test
   public void platformChannel_hasStringsMessage() {
     MethodChannel rawChannel = mock(MethodChannel.class);

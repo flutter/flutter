@@ -1194,7 +1194,8 @@ public class FlutterView extends FrameLayout
             this.flutterEngine
                 .getPlatformViewsController(), // TODO(gmackall): this can be changed to take a pvc
             // delegator.
-            this.flutterEngine.getPlatformViewsController2());
+            this.flutterEngine.getPlatformViewsController2(),
+            this.flutterEngine.getPlatformChannel());
 
     try {
       textServicesManager =
