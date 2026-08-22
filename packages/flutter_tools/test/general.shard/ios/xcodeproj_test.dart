@@ -875,6 +875,84 @@ Information about project "Runner":
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('getInfo filters local Swift package schemes from project schemes', () async {
+    const workingDirectory = '/';
+    final Directory buildDirectory = fileSystem.directory('build/ios');
+    final FakeXcodeBasedProject xcodeProject = FakeXcodeBasedProject(workingDirectory, fileSystem);
+
+    // A local Swift package added directly to the Xcode project (not fetched
+    // as a remote dependency, so it never appears under the SwiftPM
+    // `checkouts` directory) but which ships its own scheme.
+    xcodeProject.hostAppRoot
+        .childDirectory('LocalPackages')
+        .childDirectory('LocalDependency')
+        .childDirectory('.swiftpm')
+        .childDirectory('xcode')
+        .childDirectory('xcshareddata')
+        .childDirectory('xcschemes')
+        .childFile('LocalDependency.xcscheme')
+        .createSync(recursive: true);
+
+    xcodeProject.xcodeProjectInfoFile
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+/* Begin XCLocalSwiftPackageReference section */
+		1A2B3C4D /* XCLocalSwiftPackageReference "LocalPackages/LocalDependency" */ = {
+			isa = XCLocalSwiftPackageReference;
+			customName = MyLocalDependency;
+			relativePath = LocalPackages/LocalDependency;
+		};
+/* End XCLocalSwiftPackageReference section */
+''');
+
+    fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      kResolvePackagesCommand,
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/build/ios/SourcePackages',
+          '-skipPackagePluginValidation',
+          '-skipPackageSignatureValidation',
+          '-list',
+        ],
+        stdout: '''
+Information about project "Runner":
+    Targets:
+        Runner
+
+    Build Configurations:
+        Debug
+        Release
+
+    Schemes:
+        Runner
+        LocalDependency
+
+''',
+      ),
+    ]);
+
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: fakeProcessManager,
+      analytics: const NoOpAnalytics(),
+    );
+
+    final XcodeProjectInfo? info = await xcodeProjectInterpreter.getInfo(
+      xcodeProject,
+      buildDirectory: buildDirectory,
+    );
+
+    expect(info!.schemes, <String>['Runner']);
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('expected scheme for non-flavored build is Runner', () {
     expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.debug), 'Runner');
     expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.profile), 'Runner');
