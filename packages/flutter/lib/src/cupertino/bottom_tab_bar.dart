@@ -75,7 +75,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         width: 0.0, // 0.0 means one physical pixel
       ),
     ),
-  }) : assert(items.length >= 2, "Tabs need at least 2 items to conform to Apple's HIG"),
+  }) : assert(items.length > 0, 'CupertinoTabBar requires at least one tab.'),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(height >= 0.0);
 

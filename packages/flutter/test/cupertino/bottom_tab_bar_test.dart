@@ -25,27 +25,30 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
 }
 
 Future<void> main() async {
-  testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
-    await expectLater(
-      () => pumpWidgetWithBoilerplate(
-        tester,
-        CupertinoTabBar(
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              label: 'Tab 1',
-            ),
-          ],
-        ),
-      ),
+  test('CupertinoTabBar requires at least one item', () {
+    expect(
+      () => CupertinoTabBar(items: const <BottomNavigationBarItem>[]),
       throwsA(
         isAssertionError.having(
           (AssertionError error) => error.toString(),
           '.toString()',
-          contains('items.length'),
+          contains('CupertinoTabBar requires at least one tab.'),
         ),
       ),
     );
+  });
+
+  testWidgets('CupertinoTabBar supports one item', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(
+      tester,
+      CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(CupertinoIcons.add), label: 'Tab 1'),
+        ],
+      ),
+    );
+
+    expect(find.byType(CupertinoTabBar), findsOneWidget);
   });
 
   testWidgets('Active and inactive colors', (WidgetTester tester) async {
