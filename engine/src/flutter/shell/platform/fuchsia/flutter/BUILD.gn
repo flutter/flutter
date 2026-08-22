@@ -664,6 +664,7 @@ if (enable_unittests) {
     deps = [
       "//flutter/runtime:runtime_fixtures",
       "//flutter/runtime:runtime_unittests",
+      "//flutter/shell/vmservice:vmservice_snapshot_dill",
     ]
     gen_cml_file = true
     binary = "runtime_unittests"
@@ -675,6 +676,10 @@ if (enable_unittests) {
       {
         path = "$root_gen_dir/flutter/runtime/assets/kernel_blob.bin"
         dest = "data/assets/kernel_blob.bin"
+      },
+      {
+        path = "$root_out_dir/vmservice_snapshot.dill"
+        dest = "data/assets/vmservice_snapshot.dill"
       },
     ]
   }

@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -33,6 +34,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
     required FileSystem fileSystem,
     required Platform platform,
     required UserMessages userMessages,
+    required Artifacts artifacts,
   }) : _androidWorkflow = androidWorkflow,
        _androidSdk = androidSdk,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
@@ -41,6 +43,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
        _fileSystem = fileSystem,
        _platform = platform,
        _userMessages = userMessages,
+       _artifacts = artifacts,
        super('Android devices');
 
   final AndroidWorkflow _androidWorkflow;
@@ -51,6 +54,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   final FileSystem _fileSystem;
   final Platform _platform;
   final UserMessages _userMessages;
+  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _androidWorkflow.appliesToHostPlatform;
@@ -207,6 +211,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
                 logger: _logger,
                 platform: _platform,
                 processManager: _processManager,
+                artifacts: _artifacts,
               ),
             );
         }

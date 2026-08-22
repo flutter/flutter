@@ -594,6 +594,43 @@ int main(int argc, char* argv[]) {
     settings.icu_data_path = "icudtl.dat";
   }
 
+  if (settings.vmservice_kernel_path.empty()) {
+    if (fml::IsFile("vmservice_snapshot.dill")) {
+      settings.vmservice_kernel_path = "vmservice_snapshot.dill";
+    } else {
+      auto directory = fml::paths::GetExecutableDirectoryPath();
+      if (directory.first) {
+        std::string path_relative_to_executable = fml::paths::JoinPaths(
+            {directory.second, "vmservice_snapshot.dill"});
+        if (fml::IsFile(path_relative_to_executable)) {
+          settings.vmservice_kernel_path = path_relative_to_executable;
+        } else {
+          std::string path_relative_to_parent = fml::paths::JoinPaths(
+              {directory.second, "..", "vmservice_snapshot.dill"});
+          if (fml::IsFile(path_relative_to_parent)) {
+            settings.vmservice_kernel_path = path_relative_to_parent;
+          }
+        }
+      }
+    }
+  }
+
+  if (settings.vmservice_snapshot_library_path.empty()) {
+#if FML_OS_LINUX
+    const char* default_vmservice_lib = "libvmservice_snapshot.so";
+#elif FML_OS_MACOSX
+    const char* default_vmservice_lib = "libvmservice_snapshot.dylib";
+#elif FML_OS_WIN
+    const char* default_vmservice_lib = "libvmservice_snapshot.dll";
+#else
+    const char* default_vmservice_lib = nullptr;
+#endif
+    if (default_vmservice_lib != nullptr) {
+      settings.vmservice_snapshot_library_path.emplace_back(
+          default_vmservice_lib);
+    }
+  }
+
   // The tools that read logs get confused if there is a log tag specified.
   settings.log_tag = "";
 

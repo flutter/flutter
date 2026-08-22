@@ -8,6 +8,7 @@
 #include <cstring>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/posix_wrappers.h"
 #include "flutter/runtime/embedder_resources.h"
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -149,21 +150,21 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
     });
   }
 
-  Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
-  Dart_Handle library = Dart_LookupLibrary(uri);
-  SHUTDOWN_ON_ERROR(library);
-  Dart_Handle result = Dart_SetRootLibrary(library);
-  SHUTDOWN_ON_ERROR(result);
-  result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
-  SHUTDOWN_ON_ERROR(result);
+  Dart_Handle library = Dart_RootLibrary();
 
-  library = Dart_RootLibrary();
-  SHUTDOWN_ON_ERROR(library);
+  Dart_Handle result =
+      Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
+  SHUTDOWN_ON_ERROR(result);
 
   // Set the HTTP server's ip.
+  std::string host = server_ip;
+  if (host.empty()) {
+    host = "127.0.0.1";
+  }
   result = Dart_SetField(library, Dart_NewStringFromCString("_ip"),
-                         Dart_NewStringFromCString(server_ip.c_str()));
+                         Dart_NewStringFromCString(host.c_str()));
   SHUTDOWN_ON_ERROR(result);
+
   // If we have a port specified, start the server immediately.
   bool auto_start = server_port >= 0;
   if (server_port < 0) {
@@ -191,14 +192,32 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
       Dart_NewBoolean(enable_service_port_fallback));
   SHUTDOWN_ON_ERROR(result);
 
+  Dart_Handle dart_io_str = Dart_NewStringFromCString("dart:io");
+  Dart_Handle io_lib = Dart_LookupLibrary(dart_io_str);
+  if (!Dart_IsError(io_lib)) {
+    Dart_Handle function_name =
+        Dart_NewStringFromCString("_getWatchSignalInternal");
+    Dart_Handle signal_watch = Dart_Invoke(io_lib, function_name, 0, nullptr);
+    if (!Dart_IsError(signal_watch)) {
+      result = Dart_SetField(library, Dart_NewStringFromCString("_signalWatch"),
+                             signal_watch);
+      SHUTDOWN_ON_ERROR(result);
+    }
+  }
+
   // Make runnable.
   Dart_ExitScope();
   Dart_ExitIsolate();
   *error = Dart_IsolateMakeRunnable(isolate);
   if (*error) {
-    Dart_EnterIsolate(isolate);
-    Dart_ShutdownIsolate();
-    return false;
+    if (strcmp(*error, "Isolate is already runnable") == 0) {
+      free(*error);
+      *error = nullptr;
+    } else {
+      Dart_EnterIsolate(isolate);
+      Dart_ShutdownIsolate();
+      return false;
+    }
   }
   Dart_EnterIsolate(isolate);
   Dart_EnterScope();

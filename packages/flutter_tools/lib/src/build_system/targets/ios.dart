@@ -681,6 +681,16 @@ abstract class IosAssetBundle extends Target {
       environment.fileSystem
           .file(isolateSnapshotData)
           .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+
+      final String vmserviceDill = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceKernelDill,
+        mode: BuildMode.debug,
+      );
+      final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
+      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+      if (vmserviceDillFile.existsSync()) {
+        vmserviceDillFile.copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
+      }
     } else {
       environment.buildDir
           .childDirectory('App.framework')
@@ -756,6 +766,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   List<Source> get inputs => <Source>[
     const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmserviceKernelDill, mode: BuildMode.debug),
     const Source.pattern('{BUILD_DIR}/app.dill'),
     ...super.inputs,
   ];
@@ -765,6 +776,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vm_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vmservice_snapshot.dill'),
     ...super.outputs,
   ];
 

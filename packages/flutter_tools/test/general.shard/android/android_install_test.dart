@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -14,6 +15,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeArtifacts;
 
 const kAdbVersionCommand = FakeCommand(
   command: <String>['adb', 'version'],
@@ -46,7 +48,11 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  AndroidDevice setUpAndroidDevice({AndroidSdk? androidSdk, ProcessManager? processManager}) {
+  AndroidDevice setUpAndroidDevice({
+    AndroidSdk? androidSdk,
+    ProcessManager? processManager,
+    Artifacts? artifacts,
+  }) {
     androidSdk ??= FakeAndroidSdk();
     return AndroidDevice(
       '1234',
@@ -56,6 +62,7 @@ void main() {
       androidSdk: androidSdk,
       fileSystem: fileSystem,
       processManager: processManager ?? FakeProcessManager.any(),
+      artifacts: artifacts ?? FakeArtifacts(),
     );
   }
 

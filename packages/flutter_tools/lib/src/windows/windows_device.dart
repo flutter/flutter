@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -24,6 +25,7 @@ class WindowsDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
+    required super.artifacts,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('windows', platformType: PlatformType.windows, ephemeral: false);
 
@@ -81,11 +83,13 @@ class WindowsDevices extends PollingDeviceDiscovery {
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
+    required Artifacts artifacts,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
        _windowsWorkflow = windowsWorkflow,
+       _artifacts = artifacts,
        super('windows devices');
 
   final FileSystem _fileSystem;
@@ -93,6 +97,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   final ProcessManager _processManager;
   final OperatingSystemUtils _operatingSystemUtils;
   final WindowsWorkflow _windowsWorkflow;
+  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _windowsWorkflow.appliesToHostPlatform;
@@ -114,6 +119,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
         logger: _logger,
         processManager: _processManager,
         operatingSystemUtils: _operatingSystemUtils,
+        artifacts: _artifacts,
       ),
     ];
   }
