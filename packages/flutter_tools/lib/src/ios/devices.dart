@@ -1359,8 +1359,9 @@ class IOSDevice extends Device {
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
-      usesIpv6: ipv6,
+      throwOnMissingLocalNetworkPermissionsError: !compatibleWithProtocolDiscovery,
       useDeviceIPAsHost: isWirelesslyConnected,
+      usesIpv6: ipv6,
     );
 
     if (compatibleWithProtocolDiscovery) {
