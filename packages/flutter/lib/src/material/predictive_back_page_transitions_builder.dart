@@ -459,6 +459,7 @@ class _PredictiveBackSharedElementPageTransitionState
         begin: switch (widget.currentBackEvent?.swipeEdge) {
           SwipeEdge.left => Offset(xShift, _getYShiftPosition(screenSize.height)),
           SwipeEdge.right => Offset(-xShift, _getYShiftPosition(screenSize.height)),
+          SwipeEdge.none => Offset(xShift, _getYShiftPosition(screenSize.height)),
           null => Offset(xShift, _getYShiftPosition(screenSize.height)),
         },
         end: Offset.zero,
