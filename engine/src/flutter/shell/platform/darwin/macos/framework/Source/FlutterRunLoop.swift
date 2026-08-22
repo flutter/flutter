@@ -34,7 +34,7 @@ import Foundation
 
   /// Schedules a block to be executed on the main thread after the given delay.
   @objc func perform(afterDelay delay: TimeInterval = 0, block: @MainActor @escaping () -> Void) {
-    let task = FlutterRunLoop.Task(block: block, targetDate: .now + delay)
+    let task = FlutterRunLoop.Task(block: block, targetDate: Date() + delay)
     lockScope.addTaskAndRearmTimer(task: task)
     if delay == 0 {
       // Wake up the runloop immediately for delay == 0 tasks so they are not affected
@@ -91,7 +91,7 @@ private final class LockScope: @unchecked Sendable {
         // The fireDate setter is relatively expensive, avoid calling it for
         // every task added. This setter directly calls CFRunLoopTimerSetNextFireDate
         // which is thread safe.
-        timer.fireDate = newFireDate
+        CFRunLoopTimerSetNextFireDate(timer, newFireDate.timeIntervalSinceReferenceDate)
       }
     }
   }
@@ -106,11 +106,11 @@ private final class LockScope: @unchecked Sendable {
     andRearmTimer timer: Timer
   ) -> some Sequence<FlutterRunLoop.Task> {
     lock.withLock {
-      let (tasks, newFireDate) = unsafeTaskQueue.popTasks(expiringBy: .now)
+      let (tasks, newFireDate) = unsafeTaskQueue.popTasks(expiringBy: Date())
       // Always set the new fireDate even if it didn't change, to prevent the
       // repeating timer from automatically setting the fire date to .distantFuture
       // (since the firing interval is set to .greatestFiniteMagnitude).
-      timer.fireDate = newFireDate
+      CFRunLoopTimerSetNextFireDate(timer, newFireDate.timeIntervalSinceReferenceDate)
       return tasks
     }
   }
