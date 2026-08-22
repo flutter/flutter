@@ -249,4 +249,29 @@ public class FlutterMutatorViewTest {
   @Implements(FrameLayout.class)
   public static class ShadowFrameLayout
       extends io.flutter.plugin.platform.PlatformViewWrapperTest.ShadowViewGroup {}
+
+  @Test
+  public void dispatchKeyEvent_callsFocusSearchFailedListenerForTabWhenNoNextFocus() {
+    final FlutterMutatorView view =
+        new FlutterMutatorView(ctx, 1.0f, mock(AndroidTouchProcessor.class));
+    final boolean[] listenerCalled = {false};
+    view.setFocusSearchFailedListener(
+        (direction) -> {
+          listenerCalled[0] = true;
+        });
+
+    android.view.KeyEvent tabEvent =
+        new android.view.KeyEvent(
+            android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_TAB);
+
+    // Add a view to act as the currently focused view
+    android.view.View child = new android.view.View(ctx);
+    view.addView(child);
+    child.requestFocus();
+
+    // Dispatch the tab event, it should bubble up and try to focus search.
+    view.dispatchKeyEvent(tabEvent);
+
+    assertTrue(listenerCalled[0]);
+  }
 }

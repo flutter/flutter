@@ -35,6 +35,16 @@ public class PlatformViewsChannel {
     channel.invokeMethod("viewFocused", viewId);
   }
 
+  public void invokeFocusNext(int viewId, int direction) {
+    if (channel == null) {
+      return;
+    }
+    Map<String, Object> args = new HashMap<>();
+    args.put("viewId", viewId);
+    args.put("direction", direction);
+    channel.invokeMethod("invokeFocusNext", args);
+  }
+
   private static String detailedExceptionString(Exception exception) {
     return Log.getStackTraceString(exception);
   }
@@ -71,6 +81,9 @@ public class PlatformViewsChannel {
               break;
             case "clearFocus":
               clearFocus(call, result);
+              break;
+            case "requestFocus":
+              requestFocus(call, result);
               break;
             case "synchronizeToNativeViewHierarchy":
               synchronizeToNativeViewHierarchy(call, result);
@@ -248,6 +261,16 @@ public class PlatformViewsChannel {
           }
         }
 
+        private void requestFocus(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+          int viewId = call.arguments();
+          try {
+            handler.requestFocus(viewId);
+            result.success(null);
+          } catch (IllegalStateException exception) {
+            result.error("error", detailedExceptionString(exception), null);
+          }
+        }
+
         private void synchronizeToNativeViewHierarchy(
             @NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           boolean yes = call.arguments();
@@ -361,6 +384,9 @@ public class PlatformViewsChannel {
 
     /** Clears the focus from the platform view with a give id if it is currently focused. */
     void clearFocus(int viewId);
+
+    /** Requests focus for the platform view with a given id. */
+    void requestFocus(int viewId);
 
     /**
      * Whether the render surface of {@code FlutterView} should be converted to a {@code
