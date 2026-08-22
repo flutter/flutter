@@ -5322,10 +5322,9 @@ class Flex extends MultiChildRenderObjectWidget {
     this.spacing = 0.0,
     super.children,
   }) : assert(
-         !identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null,
+         (crossAxisAlignment != CrossAxisAlignment.baseline) || textBaseline != null,
          'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline',
        );
-  // Cannot use == in the assert above instead of identical because of https://github.com/dart-lang/language/issues/1811.
 
   /// The direction to use as the main axis.
   ///
