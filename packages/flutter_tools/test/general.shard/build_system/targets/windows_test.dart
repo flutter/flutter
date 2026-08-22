@@ -247,14 +247,16 @@ flutter:
       );
 
       environment.buildDir.childFile('app.so').createSync(recursive: true);
+      environment.buildDir.childFile('app.pdb').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
+      await const WindowsAotBundle(AotDataProfile(TargetPlatform.windows_x64)).build(environment);
       await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
       // Depfile is created and so is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
       expect(fileSystem.file(r'C:\windows\app.so'), exists);
+      expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
       expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
     },
     overrides: <Type, Generator>{
@@ -276,14 +278,16 @@ flutter:
       );
 
       environment.buildDir.childFile('app.so').createSync(recursive: true);
+      environment.buildDir.childFile('app.pdb').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
+      await const WindowsAotBundle(AotDataRelease(TargetPlatform.windows_x64)).build(environment);
       await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
       // Depfile is created and so is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
       expect(fileSystem.file(r'C:\windows\app.so'), exists);
+      expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
       expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
     },
     overrides: <Type, Generator>{

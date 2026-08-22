@@ -113,6 +113,7 @@ void main() {
 
     setUp(() async {
       fileSystem = MemoryFileSystem.test();
+      fileSystem.file(r'C:\VS\link.exe').createSync(recursive: true);
       artifacts = Artifacts.test();
       processManager = FakeProcessManager.empty();
       snapshotter = AOTSnapshotter(
@@ -121,6 +122,7 @@ void main() {
         xcode: Xcode.test(processManager: processManager),
         artifacts: artifacts,
         processManager: processManager,
+        windowsLinkerPath: r'C:\VS\link.exe',
       );
     });
 
@@ -512,6 +514,154 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('builds PE library and PDB for windows-x64', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+      processManager
+        ..addCommand(
+          FakeCommand(
+            command: <String>[
+              artifacts.getArtifactPath(
+                Artifact.genSnapshot,
+                platform: TargetPlatform.windows_x64,
+                mode: BuildMode.release,
+              ),
+              '--deterministic',
+              '--snapshot_kind=app-aot-pecoff-obj',
+              '--coff=build/foo/app.o',
+              '--strip',
+              'main.dill',
+            ],
+          ),
+        )
+        ..addCommand(
+          FakeCommand(
+            command: <String>[
+              r'C:\VS\link.exe',
+              '/NOLOGO',
+              '/DLL',
+              '/NOENTRY',
+              '/MACHINE:X64',
+              '/DEBUG',
+              '/INCREMENTAL:NO',
+              '/OUT:build/foo/app.so',
+              '/PDB:build/foo/app.pdb',
+              '/EXPORT:_kDartSnapshotData,DATA',
+              '/EXPORT:_kDartSnapshotText,DATA',
+              'build/foo/app.o',
+            ],
+          ),
+        );
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.windows_x64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: outputPath,
+        dartObfuscation: false,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('builds windows-x64 split debug info PDB outside output path', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+      final String splitDebugInfoPath = fileSystem.path.join('build', 'symbols');
+      final String stalePdbPath = fileSystem.path.join(outputPath, 'app.pdb');
+      fileSystem.file(stalePdbPath).createSync(recursive: true);
+
+      processManager
+        ..addCommand(
+          FakeCommand(
+            command: <String>[
+              artifacts.getArtifactPath(
+                Artifact.genSnapshot,
+                platform: TargetPlatform.windows_x64,
+                mode: BuildMode.release,
+              ),
+              '--deterministic',
+              '--snapshot_kind=app-aot-pecoff-obj',
+              '--coff=build/foo/app.o',
+              '--strip',
+              '--obfuscate',
+              'main.dill',
+            ],
+          ),
+        )
+        ..addCommand(
+          FakeCommand(
+            command: <String>[
+              r'C:\VS\link.exe',
+              '/NOLOGO',
+              '/DLL',
+              '/NOENTRY',
+              '/MACHINE:X64',
+              '/DEBUG',
+              '/INCREMENTAL:NO',
+              '/OUT:build/foo/app.so',
+              '/PDB:build/symbols/app.windows-x64.pdb',
+              '/EXPORT:_kDartSnapshotData,DATA',
+              '/EXPORT:_kDartSnapshotText,DATA',
+              'build/foo/app.o',
+            ],
+          ),
+        );
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.windows_x64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: outputPath,
+        splitDebugInfo: splitDebugInfoPath,
+        dartObfuscation: true,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(fileSystem.file(stalePdbPath).existsSync(), false);
+      expect(fileSystem.directory(splitDebugInfoPath).existsSync(), true);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('fails when the Visual Studio linker does not exist', () async {
+      final BufferLogger logger = BufferLogger.test();
+      final snapshotter = AOTSnapshotter(
+        fileSystem: fileSystem,
+        logger: logger,
+        xcode: Xcode.test(processManager: processManager),
+        artifacts: artifacts,
+        processManager: processManager,
+        windowsLinkerPath: r'C:\VS\does-not-exist\link.exe',
+      );
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(
+              Artifact.genSnapshot,
+              platform: TargetPlatform.windows_x64,
+              mode: BuildMode.release,
+            ),
+            '--deterministic',
+            '--snapshot_kind=app-aot-pecoff-obj',
+            '--coff=build/foo/app.o',
+            '--strip',
+            'main.dill',
+          ],
+        ),
+      );
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.windows_x64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: fileSystem.path.join('build', 'foo'),
+        dartObfuscation: false,
+      );
+
+      expect(genSnapshotExitCode, 1);
+      expect(logger.errorText, contains('Unable to find Visual Studio link.exe'));
       expect(processManager, hasNoRemainingExpectations);
     });
 

@@ -13,9 +13,10 @@ import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
+import '../../globals.dart' as globals show os, platform, xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
+import '../../windows/visual_studio.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -357,30 +358,25 @@ class KernelSnapshot extends Target {
   }
 }
 
-/// Supports compiling a dart kernel file to an ELF binary.
-abstract class AotElfBase extends Target {
-  const AotElfBase();
+/// Supports compiling a dart kernel file to a native AOT binary.
+abstract class AotDataBase extends Target {
+  const AotDataBase();
 
   @override
   String get analyticsName => 'android_aot';
 
+  TargetPlatform get targetPlatform;
+
   @override
   Future<void> build(Environment environment) async {
-    final snapshotter = AOTSnapshotter(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-      xcode: globals.xcode!,
-      processManager: environment.processManager,
-      artifacts: environment.artifacts,
-    );
     final String outputPath = environment.buildDir.path;
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
-      throw MissingDefineException(kBuildMode, 'aot_elf');
+      throw MissingDefineException(kBuildMode, 'aot_data');
     }
     final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
     if (targetPlatformEnvironment == null) {
-      throw MissingDefineException(kTargetPlatform, 'aot_elf');
+      throw MissingDefineException(kTargetPlatform, 'aot_data');
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
       environment.defines,
@@ -388,6 +384,25 @@ abstract class AotElfBase extends Target {
     );
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    // TODO(team-windows): Support PE/COFF AOT snapshots for Windows Arm64.
+    // See: https://github.com/flutter/flutter/issues/190897
+    final String? windowsLinkerPath = targetPlatform == TargetPlatform.windows_x64
+        ? VisualStudio(
+            fileSystem: environment.fileSystem,
+            processManager: environment.processManager,
+            platform: globals.platform,
+            logger: environment.logger,
+            osUtils: globals.os,
+          ).linkPath
+        : null;
+    final snapshotter = AOTSnapshotter(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+      xcode: globals.xcode!,
+      processManager: environment.processManager,
+      artifacts: environment.artifacts,
+      windowsLinkerPath: windowsLinkerPath,
+    );
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
@@ -418,12 +433,21 @@ abstract class AotElfBase extends Target {
   }
 }
 
-/// Generate an ELF binary from a dart kernel file in profile mode.
-class AotElfProfile extends AotElfBase {
-  const AotElfProfile(this.targetPlatform);
+List<Source> _aotOutputsForTarget(TargetPlatform targetPlatform) {
+  return <Source>[
+    const Source.pattern('{BUILD_DIR}/app.so'),
+    if (targetPlatform == TargetPlatform.windows_x64) ...const <Source>[
+      Source.pattern('{BUILD_DIR}/app.o'),
+    ],
+  ];
+}
+
+/// Generate a native AOT binary from a dart kernel file in profile mode.
+class AotDataProfile extends AotDataBase {
+  const AotDataProfile(this.targetPlatform);
 
   @override
-  String get name => 'aot_elf_profile';
+  String get name => 'aot_data_profile';
 
   @override
   List<Source> get inputs => <Source>[
@@ -437,20 +461,21 @@ class AotElfProfile extends AotElfBase {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/app.so')];
+  List<Source> get outputs => _aotOutputsForTarget(targetPlatform);
 
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
 
+  @override
   final TargetPlatform targetPlatform;
 }
 
-/// Generate an ELF binary from a dart kernel file in release mode.
-class AotElfRelease extends AotElfBase {
-  const AotElfRelease(this.targetPlatform);
+/// Generate a native AOT binary from a dart kernel file in release mode.
+class AotDataRelease extends AotDataBase {
+  const AotDataRelease(this.targetPlatform);
 
   @override
-  String get name => 'aot_elf_release';
+  String get name => 'aot_data_release';
 
   @override
   List<Source> get inputs => <Source>[
@@ -464,11 +489,12 @@ class AotElfRelease extends AotElfBase {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/app.so')];
+  List<Source> get outputs => _aotOutputsForTarget(targetPlatform);
 
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
 
+  @override
   final TargetPlatform targetPlatform;
 }
 

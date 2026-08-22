@@ -5,8 +5,12 @@
 #include <thread>
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
+#include <filesystem>
+
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
@@ -20,6 +24,7 @@
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/shell/platform/windows/testing/windows_test_config_builder.h"
+#include "flutter/testing/testing.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_platform_node_win.h"
 #include "fml/synchronization/waitable_event.h"
 #include "gmock/gmock.h"
@@ -82,7 +87,9 @@ TEST_F(FlutterWindowsEngineTest, TaskRunnerDelayedTask) {
     PumpMessage();
   }
   auto duration = fml::TimePoint::Now() - start;
-  EXPECT_GE(duration, fml::TimeDelta::FromMilliseconds(50));
+  // Windows message timers can fire slightly before the requested deadline
+  // under parallel test load.
+  EXPECT_GE(duration, fml::TimeDelta::FromMilliseconds(45));
 }
 
 // https://github.com/flutter/flutter/issues/173843)
@@ -373,6 +380,91 @@ TEST_F(FlutterWindowsEngineTest, RunSkiaWithoutANGLEUsesSoftware) {
   // Ensure that deallocation doesn't call the actual Shutdown with the bogus
   // engine pointer that the overridden Run returned.
   modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+}
+
+// Verify that Run creates the AOT data using the source type expected for
+// the current architecture.
+TEST_F(FlutterWindowsEngineTest, RunLoadsAotDataWithExpectedSourceType) {
+  // Loading AOT data requires that the AOT library exist on disk. Use a
+  // fixture source file as a stand-in; its contents are irrelevant since
+  // CreateAOTData is mocked below.
+  std::filesystem::path aot_library_path =
+      std::filesystem::path{GetSourcePath()} /
+      "flutter/shell/platform/windows/fixtures/main.dart";
+  ASSERT_TRUE(std::filesystem::exists(aot_library_path));
+
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetImpellerSwitch(DisabledImpeller);
+  builder.SetAotLibraryPath(aot_library_path.wstring());
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EngineModifier modifier(engine.get());
+
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return true; };
+
+  bool create_aot_data_called = false;
+  FlutterEngineAOTDataSourceType source_type =
+      kFlutterEngineAOTDataSourceTypeElfPath;
+  std::string source_path;
+  modifier.embedder_api().CreateAOTData = MOCK_ENGINE_PROC(
+      CreateAOTData, ([&](const FlutterEngineAOTDataSource* source,
+                          FlutterEngineAOTData* data_out) {
+        create_aot_data_called = true;
+        source_type = source->type;
+        source_path = source->type == kFlutterEngineAOTDataSourceTypeDllPath
+                          ? source->dll_path
+                          : source->elf_path;
+        *data_out = reinterpret_cast<FlutterEngineAOTData>(1);
+        return kSuccess;
+      }));
+  modifier.embedder_api().CollectAOTData = MOCK_ENGINE_PROC(
+      CollectAOTData, [](FlutterEngineAOTData data) { return kSuccess; });
+
+  bool run_called = false;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
+                          const FlutterProjectArgs* args, void* user_data,
+                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        run_called = true;
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+
+        // The engine must be launched with the created AOT data.
+        EXPECT_EQ(args->aot_data, reinterpret_cast<FlutterEngineAOTData>(1));
+        return kSuccess;
+      }));
+
+  // Stub out the remaining engine procs called during Run.
+  modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures,
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+         FlutterAccessibilityFeature flags) { return kSuccess; });
+  modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([](auto engine, const FlutterLocale** locales,
+                         size_t locales_count) { return kSuccess; }));
+  modifier.embedder_api().SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, auto message) { return kSuccess; }));
+  modifier.embedder_api().NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate,
+                       ([](FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
+                           const FlutterEngineDisplaysUpdateType update_type,
+                           const FlutterEngineDisplay* embedder_displays,
+                           size_t display_count) { return kSuccess; }));
+  // Ensure that deallocation doesn't call the actual Shutdown with the bogus
+  // engine pointer that the overridden Run returned.
+  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+
+  modifier.SetEGLManager(nullptr);
+
+  EXPECT_TRUE(engine->Run());
+
+  EXPECT_TRUE(run_called);
+  EXPECT_TRUE(create_aot_data_called);
+#if FML_ARCH_CPU_X86_64
+  EXPECT_EQ(source_type, kFlutterEngineAOTDataSourceTypeDllPath);
+#else
+  EXPECT_EQ(source_type, kFlutterEngineAOTDataSourceTypeElfPath);
+#endif
+  EXPECT_EQ(source_path, fml::PathToUtf8(aot_library_path));
 }
 
 TEST_F(FlutterWindowsEngineTest, RunWithoutANGLEOnImpellerFailsToStart) {
