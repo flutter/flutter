@@ -1883,6 +1883,18 @@ void main() {
     expect(tester.getSize(find.byType(Offstage)), Size.zero);
   });
 
+  testWidgets('RawImage does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: RawImage()),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawImage)), Size.zero);
+  });
+
   testWidgets('IntrinsicHeight does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);
@@ -1893,6 +1905,44 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(IntrinsicHeight)), Size.zero);
+  });
+
+  testWidgets('Builder does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Builder(builder: (_) => const Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Builder)), Size.zero);
+  });
+
+  testWidgets('StatefulBuilder does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: StatefulBuilder(builder: (_, _) => const Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(StatefulBuilder)), Size.zero);
+  });
+
+  testWidgets('ColoredBox does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ColoredBox(color: Color(0xFFAABBCC), child: Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ColoredBox)), Size.zero);
   });
 }
 
