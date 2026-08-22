@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Vali kõik",
   "searchResultsFound": "Leiti otsingutulemusi",
   "noResultsFound": "Tulemusi ei leitud",
-  "radioButtonUnselectedLabel": "Pole valitud"
+  "radioButtonUnselectedLabel": "Pole valitud",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
