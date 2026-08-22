@@ -83,7 +83,7 @@ abstract final class CommonOptions {
     name: FlutterOptions.kDartDefinesOption,
     abbr: 'D',
     splitCommas: false,
-    aliases: <String>['dart-defines'],
+    aliases: <String>[kDartDefines, 'dart-defines'],
     help:
         'Additional key-value pairs that will be available as constants '
         'from the String.fromEnvironment, bool.fromEnvironment, and int.fromEnvironment '
