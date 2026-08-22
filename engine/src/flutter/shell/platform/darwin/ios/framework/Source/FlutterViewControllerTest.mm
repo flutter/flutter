@@ -329,7 +329,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 @property(nonatomic, assign) BOOL awokenFromNib;
 
-- (void)createTouchRateCorrectionVSyncClientIfNeeded;
 - (void)surfaceUpdated:(BOOL)appeared;
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
 - (void)handlePressEvent:(FlutterUIPressProxy*)press
@@ -356,7 +355,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)sceneWillDisconnect:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
-- (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification;
 @end
 
@@ -415,18 +413,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([viewControllerMock view]).andReturn(view);
 
   return view;
-}
-
-- (void)testViewDidLoadWillInvokeCreateTouchRateCorrectionVSyncClient {
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
-  [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
-  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
-  [viewControllerMock loadView];
-  [viewControllerMock viewDidLoad];
-  OCMVerify([viewControllerMock createTouchRateCorrectionVSyncClientIfNeeded]);
 }
 
 - (void)testStartKeyboardAnimationWillInvokeSetupKeyboardSpringAnimationIfNeeded {
@@ -2716,125 +2702,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     [[[(id)linkMock stub] andReturnValue:@(maxFrameRate)] preferredFramesPerSecond];
     XCTAssertEqual(linkMock.preferredFramesPerSecond, maxFrameRate);
   }
-}
-
-- (void)
-    testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
-  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
-  [self addTeardownBlock:^{
-    [mockDisplayLinkManager stopMocking];
-  }];
-  double maxFrameRate = 120;
-  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
-  [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
-  [viewController createTouchRateCorrectionVSyncClientIfNeeded];
-  XCTAssertNotNil(viewController.touchRateCorrectionVSyncClient);
-}
-
-- (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateNewVSyncClientWhenClientAlreadyExists {
-  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
-  [self addTeardownBlock:^{
-    [mockDisplayLinkManager stopMocking];
-  }];
-  double maxFrameRate = 120;
-  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
-
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
-  [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
-  [viewController createTouchRateCorrectionVSyncClientIfNeeded];
-  FlutterVSyncClient* clientBefore = viewController.touchRateCorrectionVSyncClient;
-  XCTAssertNotNil(clientBefore);
-
-  [viewController createTouchRateCorrectionVSyncClientIfNeeded];
-  FlutterVSyncClient* clientAfter = viewController.touchRateCorrectionVSyncClient;
-  XCTAssertNotNil(clientAfter);
-
-  XCTAssertTrue(clientBefore == clientAfter);
-}
-
-- (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWhenRefreshRateIs60HZ {
-  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
-  [self addTeardownBlock:^{
-    [mockDisplayLinkManager stopMocking];
-  }];
-  double maxFrameRate = 60;
-  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
-  [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
-  [viewController createTouchRateCorrectionVSyncClientIfNeeded];
-  XCTAssertNil(viewController.touchRateCorrectionVSyncClient);
-}
-
-- (void)testTriggerTouchRateCorrectionVSyncClientCorrectly {
-  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
-  [self addTeardownBlock:^{
-    [mockDisplayLinkManager stopMocking];
-  }];
-  double maxFrameRate = 120;
-  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
-  [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
-  [viewController loadView];
-  [viewController viewDidLoad];
-
-  FlutterVSyncClient* client = viewController.touchRateCorrectionVSyncClient;
-  CADisplayLink* link = client.displayLink;
-
-  UITouch* fakeTouchBegan = [[UITouch alloc] init];
-  fakeTouchBegan.phase = UITouchPhaseBegan;
-
-  UITouch* fakeTouchMove = [[UITouch alloc] init];
-  fakeTouchMove.phase = UITouchPhaseMoved;
-
-  UITouch* fakeTouchEnd = [[UITouch alloc] init];
-  fakeTouchEnd.phase = UITouchPhaseEnded;
-
-  UITouch* fakeTouchCancelled = [[UITouch alloc] init];
-  fakeTouchCancelled.phase = UITouchPhaseCancelled;
-
-  [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchBegan, nil]];
-  XCTAssertFalse(link.isPaused);
-
-  [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchEnd, nil]];
-  XCTAssertTrue(link.isPaused);
-
-  [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchMove, nil]];
-  XCTAssertFalse(link.isPaused);
-
-  [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchCancelled, nil]];
-  XCTAssertTrue(link.isPaused);
-
-  [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc]
-                                             initWithObjects:fakeTouchBegan, fakeTouchEnd, nil]];
-  XCTAssertFalse(link.isPaused);
-
-  [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchEnd,
-                                                                        fakeTouchCancelled, nil]];
-  XCTAssertTrue(link.isPaused);
-
-  [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc]
-                                             initWithObjects:fakeTouchMove, fakeTouchEnd, nil]];
-  XCTAssertFalse(link.isPaused);
 }
 
 - (void)testFlutterViewControllerStartKeyboardAnimationWillCreateVsyncClientCorrectly {

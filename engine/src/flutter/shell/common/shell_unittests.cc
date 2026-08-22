@@ -2263,70 +2263,6 @@ TEST_F(ShellTest, CanScheduleFrameFromPlatform) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, SecondaryVsyncCallbackShouldBeCalledAfterVsyncCallback) {
-  bool is_on_begin_frame_called = false;
-  bool is_secondary_callback_called = false;
-  bool test_started = false;
-  Settings settings = CreateSettingsForFixture();
-  TaskRunners task_runners = GetTaskRunnersForFixture();
-  fml::AutoResetWaitableEvent latch;
-  AddFfiNativeCallback("NotifyNative",
-                       CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
-  fml::CountDownLatch count_down_latch(2);
-  AddFfiNativeCallback("NativeOnBeginFrame",
-                       CREATE_FFI_LAMBDA([&](int64_t microseconds) {
-                         if (!test_started) {
-                           return;
-                         }
-                         EXPECT_FALSE(is_on_begin_frame_called);
-                         EXPECT_FALSE(is_secondary_callback_called);
-                         is_on_begin_frame_called = true;
-                         count_down_latch.CountDown();
-                       }));
-  std::unique_ptr<Shell> shell = CreateShell({
-      .settings = settings,
-      .task_runners = task_runners,
-  });
-  ASSERT_TRUE(shell->IsSetup());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("onBeginFrameWithNotifyNativeMain");
-  RunEngine(shell.get(), std::move(configuration));
-
-  // Wait for the application to attach the listener.
-  latch.Wait();
-
-  auto vsync_task = [&]() {
-    shell->GetEngine()->ScheduleSecondaryVsyncCallback(0, [&]() {
-      if (!test_started) {
-        return;
-      }
-      EXPECT_TRUE(is_on_begin_frame_called);
-      EXPECT_FALSE(is_secondary_callback_called);
-      is_secondary_callback_called = true;
-      count_down_latch.CountDown();
-    });
-    shell->GetEngine()->ScheduleFrame();
-    test_started = true;
-  };
-
-  // Run the test task after a vsync occurs so that the
-  // ScheduleSecondaryVsyncCallback and ScheduleFrame calls will happen within
-  // the same vsync interval.
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetUITaskRunner(), [&]() {
-        auto vsync_waiter = shell->GetEngine()->GetVsyncWaiter().lock();
-        vsync_waiter->AsyncWaitForVsync(
-            [&](auto frame_timings_recorder) { vsync_task(); });
-      });
-
-  count_down_latch.Wait();
-  EXPECT_TRUE(is_on_begin_frame_called);
-  EXPECT_TRUE(is_secondary_callback_called);
-
-  DestroyShell(std::move(shell), task_runners);
-}
-
 static void LogSkData(const sk_sp<SkData>& data, const char* title) {
   FML_LOG(ERROR) << "---------- " << title;
   std::ostringstream ostr;
@@ -4485,6 +4421,53 @@ TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
   EXPECT_FALSE(did_invoke_callback);
   latch.Wait();
   EXPECT_TRUE(did_invoke_callback);
+
+  DestroyShell(std::move(shell), task_runners);
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, PointerPacketsAreDispatchedSynchronouslyWhenOnUIThread) {
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  EXPECT_EQ(task_runners.GetPlatformTaskRunner(),
+            task_runners.GetUITaskRunner());
+  auto shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [](Shell& shell) {
+            return std::make_unique<::testing::NiceMock<TestPlatformView>>(
+                shell, shell.GetTaskRunners());
+          },
+  });
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("testDispatchEvents");
+
+  RunEngine(shell.get(), std::move(configuration));
+  fml::CountDownLatch latch(1);
+  bool did_invoke_callback = false;
+  AddFfiNativeCallback(
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { did_invoke_callback = true; }));
+
+  bool callback_was_invoked_before_dispatch_returned = false;
+  task_runners.GetPlatformTaskRunner()->PostTask([&] {
+    auto packet = std::make_unique<PointerDataPacket>(1);
+    packet->SetPointerData(0, PointerData{
+                                  .change = PointerData::Change::kHover,
+                                  .physical_x = 23,
+                              });
+    shell->GetPlatformView()->DispatchPointerDataPacket(std::move(packet));
+    callback_was_invoked_before_dispatch_returned = did_invoke_callback;
+    latch.CountDown();
+  });
+
+  latch.Wait();
+  EXPECT_TRUE(callback_was_invoked_before_dispatch_returned);
 
   DestroyShell(std::move(shell), task_runners);
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

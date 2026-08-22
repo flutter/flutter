@@ -35,7 +35,6 @@ fml::MallocMapping MakeMapping(const std::string& str) {
 
 Engine::Engine(
     Delegate& delegate,
-    const PointerDataDispatcherMaker& dispatcher_maker,
     const std::shared_ptr<fml::ConcurrentTaskRunner>& image_decoder_task_runner,
     const TaskRunners& task_runners,
     const Settings& settings,
@@ -55,12 +54,9 @@ Engine::Engine(
                                         io_manager,
                                         gpu_disabled_switch)),
       task_runners_(task_runners),
-      weak_factory_(this) {
-  pointer_data_dispatcher_ = dispatcher_maker(*this);
-}
+      weak_factory_(this) {}
 
 Engine::Engine(Delegate& delegate,
-               const PointerDataDispatcherMaker& dispatcher_maker,
                DartVM& vm,
                fml::RefPtr<const DartSnapshot> isolate_snapshot,
                const TaskRunners& task_runners,
@@ -74,7 +70,6 @@ Engine::Engine(Delegate& delegate,
                const std::shared_future<impeller::RuntimeStageBackend>&
                    runtime_stage_backend)
     : Engine(delegate,
-             dispatcher_maker,
              vm.GetConcurrentWorkerTaskRunner(),
              task_runners,
              settings,
@@ -112,7 +107,6 @@ Engine::Engine(Delegate& delegate,
 
 std::unique_ptr<Engine> Engine::Spawn(
     Delegate& delegate,
-    const PointerDataDispatcherMaker& dispatcher_maker,
     const Settings& settings,
     std::unique_ptr<Animator> animator,
     const std::string& initial_route,
@@ -121,7 +115,6 @@ std::unique_ptr<Engine> Engine::Spawn(
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) const {
   auto result = std::make_unique<Engine>(
       /*delegate=*/delegate,
-      /*dispatcher_maker=*/dispatcher_maker,
       /*image_decoder_task_runner=*/
       runtime_controller_->GetDartVM()->GetConcurrentWorkerTaskRunner(),
       /*task_runners=*/task_runners_,
@@ -473,7 +466,10 @@ void Engine::DispatchPointerDataPacket(
                              /*flow_id_count=*/1,
                              /*flow_ids=*/&trace_flow_id);
   TRACE_FLOW_STEP("flutter", "PointerEvent", trace_flow_id);
-  pointer_data_dispatcher_->DispatchPacket(std::move(packet), trace_flow_id);
+  animator_->EnqueueTraceFlowId(trace_flow_id);
+  if (runtime_controller_) {
+    runtime_controller_->DispatchPointerDataPacket(*packet);
+  }
 }
 
 HitTestResponse Engine::HitTest(int64_t view_id,
@@ -582,19 +578,6 @@ void Engine::SetNeedsReportTimings(bool needs_reporting) {
 
 FontCollection& Engine::GetFontCollection() {
   return *font_collection_;
-}
-
-void Engine::DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
-                              uint64_t trace_flow_id) {
-  animator_->EnqueueTraceFlowId(trace_flow_id);
-  if (runtime_controller_) {
-    runtime_controller_->DispatchPointerDataPacket(*packet);
-  }
-}
-
-void Engine::ScheduleSecondaryVsyncCallback(uintptr_t id,
-                                            const fml::closure& callback) {
-  animator_->ScheduleSecondaryVsyncCallback(id, callback);
 }
 
 void Engine::HandleAssetPlatformMessage(

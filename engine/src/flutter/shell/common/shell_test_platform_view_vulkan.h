@@ -86,9 +86,6 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
   // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
-  // |PlatformView|
-  PointerDataDispatcherMaker GetDispatcherMaker() override;
-
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTestPlatformViewVulkan);
 };
 
