@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -53,24 +52,6 @@ class TextureBox extends RenderBox {
   set textureId(int value) {
     if (value != _textureId) {
       _textureId = value;
-      markNeedsPaint();
-    }
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    RendererBinding.instance.addTextureFrameAvailableCallback(_handleTextureFrameAvailable);
-  }
-
-  @override
-  void detach() {
-    RendererBinding.instance.removeTextureFrameAvailableCallback(_handleTextureFrameAvailable);
-    super.detach();
-  }
-
-  void _handleTextureFrameAvailable(int textureId) {
-    if (!_freeze && textureId == _textureId) {
       markNeedsPaint();
     }
   }

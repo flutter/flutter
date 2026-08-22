@@ -29,6 +29,14 @@ class AnalysisOptionsMigration extends ProjectMigrator {
       return;
     }
 
+    // A pure Dart package (no `flutter` dependency) has no platform scaffold
+    // directories, so `web/`, `android/`, etc. are ordinary source or asset
+    // directories rather than generated platform code. Excluding them here
+    // would silently drop them from analysis.
+    if (!_project.manifest.dependencies.contains('flutter')) {
+      return;
+    }
+
     final String originalContent = _analysisOptionsFile.readAsStringSync();
     final YamlNode root;
     try {
@@ -43,14 +51,14 @@ class AnalysisOptionsMigration extends ProjectMigrator {
       return;
     }
 
-    const excludesToExclude = <String>[
+    final excludesToExclude = <String>[
       'build/**',
-      'android/**',
-      'ios/**',
-      'web/**',
-      'windows/**',
-      'macos/**',
-      'linux/**',
+      if (_project.android.existsSync()) 'android/**',
+      if (_project.ios.existsSync()) 'ios/**',
+      if (_project.web.existsSync()) 'web/**',
+      if (_project.windows.existsSync()) 'windows/**',
+      if (_project.macos.existsSync()) 'macos/**',
+      if (_project.linux.existsSync()) 'linux/**',
     ];
 
     final Set<String> activeExcludes = await _collectExcludes(_analysisOptionsFile);
@@ -79,6 +87,15 @@ class AnalysisOptionsMigration extends ProjectMigrator {
         final exclude = analyzer['exclude'] as Object?;
         if (exclude is! YamlList) {
           editor.update(<String>['analyzer', 'exclude'], missingExcludes);
+        } else if (exclude.style == CollectionStyle.FLOW) {
+          // Workaround for https://github.com/dart-lang/tools/issues/2532.
+          // Appending to a multiline flow-style list with a trailing comma crashes YamlEditor.
+          // Instead, rewrite the entire exclude list as a block list.
+          final newExcludes = <Object?>[
+            ...exclude,
+            ...missingExcludes.where((String item) => !exclude.contains(item)),
+          ];
+          editor.update(<String>['analyzer', 'exclude'], newExcludes);
         } else {
           for (final missingExclude in missingExcludes) {
             if (!exclude.contains(missingExclude)) {
