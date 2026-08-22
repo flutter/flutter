@@ -2009,6 +2009,112 @@ flutter:
           FeatureFlags: () => featureFlags,
         },
       );
+
+      testUsingContext(
+        'createPluginSymlinks repairs broken links '
+        '(regression test for https://github.com/flutter/flutter/issues/190235)',
+        () async {
+          linuxProject.exists = true;
+          windowsProject.exists = true;
+          createFakePlugin(fs);
+          await refreshPluginsList(flutterProject);
+
+          final links = <Link>[
+            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          ];
+          for (final link in links) {
+            // Delete target to make it a broken link
+            final String targetPath = link.targetSync();
+            ErrorHandlingFileSystem.deleteIfExists(fs.directory(targetPath), recursive: true);
+
+            // Verify link exists but target does not
+            expect(fs.typeSync(link.path, followLinks: false), FileSystemEntityType.link);
+            expect(fs.typeSync(link.path), FileSystemEntityType.notFound);
+          }
+
+          createPluginSymlinks(flutterProject);
+
+          for (final link in links) {
+            // Re-create target first so existsSync returns true
+            final String targetPath = link.targetSync();
+            fs.directory(targetPath).createSync(recursive: true);
+            expect(link, exists);
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => featureFlags,
+        },
+      );
+
+      testUsingContext(
+        'createPluginSymlinks repairs links pointing to wrong target',
+        () async {
+          linuxProject.exists = true;
+          windowsProject.exists = true;
+          createFakePlugin(fs);
+          await refreshPluginsList(flutterProject);
+
+          final links = <Link>[
+            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          ];
+          for (final link in links) {
+            final String wrongTarget = fs.systemTempDirectory.childDirectory('wrong_target').path;
+            link.deleteSync();
+            link.createSync(wrongTarget);
+
+            expect(link.targetSync(), wrongTarget);
+          }
+
+          createPluginSymlinks(flutterProject);
+
+          for (final link in links) {
+            expect(link, exists);
+            // Verify it was updated to point back to the correct path.
+            expect(link.targetSync(), isNot(contains('wrong_target')));
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => featureFlags,
+        },
+      );
+
+      testUsingContext(
+        'createPluginSymlinks repairs path occupied by a file',
+        () async {
+          linuxProject.exists = true;
+          windowsProject.exists = true;
+          createFakePlugin(fs);
+          await refreshPluginsList(flutterProject);
+
+          final links = <Link>[
+            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          ];
+          for (final link in links) {
+            link.deleteSync();
+            fs.file(link.path).createSync(recursive: true);
+            expect(fs.typeSync(link.path, followLinks: false), FileSystemEntityType.file);
+          }
+
+          createPluginSymlinks(flutterProject);
+
+          for (final link in links) {
+            expect(link, exists);
+            expect(fs.typeSync(link.path, followLinks: false), FileSystemEntityType.link);
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => featureFlags,
+        },
+      );
     });
 
     group('pubspec', () {
