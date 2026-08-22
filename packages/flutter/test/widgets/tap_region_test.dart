@@ -11,6 +11,35 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'test_page_tester.dart';
 
+/// Helper for the navigation regression tests below: locate the currently
+/// visible [TapRegion] identified by [regionKey] and tap at a point that is
+/// guaranteed to be just outside its bounds in global coordinates.
+///
+/// The tap is placed one pixel past the bottom-right corner of the region's
+/// global rect (`rect.bottomRight + (1, 1)`). Using the rect itself — rather
+/// than an arbitrary offset from the top-left — guarantees the point lies
+/// outside the region regardless of the region's size, while keeping it
+/// close enough to remain inside the test surface for the layouts these
+/// tests use.
+Future<void> _tapOutside(WidgetTester tester, Key regionKey) async {
+  final RenderBox renderBox =
+      tester.renderObject<RenderBox>(find.byKey(regionKey));
+  final Rect rect = renderBox.localToGlobal(Offset.zero) & renderBox.size;
+  final Offset tapPoint = rect.bottomRight + const Offset(1, 1);
+  // Sanity-check: the tap must land within the default flutter_test surface
+  // (800×600). If the region under test is positioned so close to the
+  // bottom-right corner that the "just outside" tap escapes the surface,
+  // flutter_test won't dispatch a real hit — silently no-oping the whole
+  // test. Asserting the surface bound catches that layout mistake loudly.
+  assert(
+    const Rect.fromLTWH(0, 0, 800, 600).contains(tapPoint),
+    'Tap target $tapPoint is outside the default 800x600 test surface; the '
+    'widget under test is positioned too close to the bottom-right edge.',
+  );
+  await tester.tapAt(tapPoint);
+  await tester.pump();
+}
+
 void main() {
   testWidgets('TapRegionSurface detects outside tap down events', (WidgetTester tester) async {
     final tappedOutside = <String>{};
@@ -1053,11 +1082,6 @@ void main() {
       child: const SizedBox.square(dimension: 100),
     );
 
-    Future<void> tapOutside(WidgetTester tester) async {
-      await tester.tapAt(const Offset(200, 200));
-      await tester.pump();
-    }
-
     const fabKey = ValueKey<String>('Fab');
 
     await tester.pumpWidget(
@@ -1089,15 +1113,15 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap outside the first TapRegion to trigger onTapOutside.
-    await tapOutside(tester);
+    await _tapOutside(tester, tapRegion1Key);
     expect(count1, 1);
     expect(count2, 0);
 
     await tester.tap(find.byKey(fabKey));
     await tester.pumpAndSettle();
 
-    // Tap outside the second TapRegion to trigger onTapOutside
-    await tapOutside(tester);
+    // Tap outside the second TapRegion to trigger onTapOutside.
+    await _tapOutside(tester, tapRegion2Key);
     expect(count1, 2); // When the Fab is pressed, the first TapRegion is still active.
     expect(count2, 1);
 
@@ -1105,8 +1129,8 @@ void main() {
     Navigator.of(tester.element(find.byKey(tapRegion2Key))).pop();
     await tester.pumpAndSettle();
 
-    // Tap outside the first TapRegion to trigger onTapOutside
-    await tapOutside(tester);
+    // Tap outside the first TapRegion to trigger onTapOutside.
+    await _tapOutside(tester, tapRegion1Key);
     expect(count1, 3);
     expect(count2, 1);
   });
@@ -1139,11 +1163,6 @@ void main() {
       child: const SizedBox.square(dimension: 100),
     );
 
-    Future<void> tapOutside(WidgetTester tester) async {
-      await tester.tapAt(const Offset(200, 200));
-      await tester.pump();
-    }
-
     await tester.pumpWidget(
       TestWidgetsApp(
         routes: <String, WidgetBuilder>{
@@ -1160,7 +1179,7 @@ void main() {
 
     // At this point, tapRegion2 is on top of tapRegion1.
     // Tap outside tapRegion2.
-    await tapOutside(tester);
+    await _tapOutside(tester, tapRegion2Key);
     expect(count1, 0); // tapRegion1 should not respond.
     expect(count2, 1); // tapRegion2 should respond.
 
@@ -1169,7 +1188,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap outside tapRegion1.
-    await tapOutside(tester);
+    await _tapOutside(tester, tapRegion1Key);
     expect(count1, 1); // tapRegion1 should respond.
     expect(count2, 1); // tapRegion2 should not respond anymore.
   });
