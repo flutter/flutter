@@ -10,6 +10,7 @@ dependencies:
     sdk: flutter
 
 
+  material_ui: ^0.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -18,4 +19,4 @@ dev_dependencies:
   test: any
 
 
-# PUBSPEC CHECKSUM: f9g2jl
+# PUBSPEC CHECKSUM: 4uq3ad
