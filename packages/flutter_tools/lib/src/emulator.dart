@@ -14,6 +14,7 @@ import 'android/java.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/process.dart';
 import 'device.dart';
 import 'ios/ios_emulators.dart';
@@ -29,8 +30,10 @@ class EmulatorManager {
     required ProcessManager processManager,
     required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
   }) : _java = java,
        _androidSdk = androidSdk,
+       _operatingSystemUtils = operatingSystemUtils,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _androidEmulators = AndroidEmulators(
          androidSdk: androidSdk,
@@ -44,6 +47,7 @@ class EmulatorManager {
 
   final Java? _java;
   final AndroidSdk? _androidSdk;
+  final OperatingSystemUtils _operatingSystemUtils;
   final AndroidEmulators _androidEmulators;
   final ProcessUtils _processUtils;
 
@@ -208,7 +212,7 @@ class EmulatorManager {
 
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr
-        .split('\n')
+        .split(RegExp(r'\r?\n'))
         .where((String l) => _androidApiVersion.hasMatch(l))
         .where((String l) => l.contains('system-images'))
         .where((String l) => l.contains('google_apis_playstore'))
@@ -224,14 +228,39 @@ class EmulatorManager {
         ? availableApiVersions.reduce(math.max)
         : -1; // Don't match below
 
-    // We're out of preferences, we just have to return the first one with the high
-    // API version.
-    for (final id in availableIDs) {
-      if (id.contains(';android-$apiVersion;')) {
-        return id;
+    final List<String> idsForApiVersion = availableIDs
+        .where((String id) => id.contains(';android-$apiVersion;'))
+        .toList();
+
+    if (idsForApiVersion.isEmpty) {
+      return null;
+    }
+
+    // Prefer 64-bit/modern ABIs over plain x86: current emulator tooling
+    // treats 32-bit x86 images as unsupported, so picking one leaves the
+    // freshly created AVD unusable (flutter/flutter#191512). Prefer the ABI
+    // that matches the host so the emulator gets hardware acceleration
+    // instead of falling back to slow software translation.
+    for (final String abi in _preferredAbisForHost) {
+      for (final id in idsForApiVersion) {
+        if (id.endsWith(';$abi')) {
+          return id;
+        }
       }
     }
-    return null;
+    return idsForApiVersion.first;
+  }
+
+  List<String> get _preferredAbisForHost {
+    return switch (_operatingSystemUtils.hostPlatform) {
+      HostPlatform.darwin_arm64 ||
+      HostPlatform.linux_arm64 ||
+      HostPlatform.windows_arm64 => const <String>['arm64-v8a', 'x86_64', 'x86'],
+      HostPlatform.darwin_x64 ||
+      HostPlatform.linux_x64 ||
+      HostPlatform.windows_x64 ||
+      HostPlatform.linux_riscv64 => const <String>['x86_64', 'arm64-v8a', 'x86'],
+    };
   }
 
   /// Whether we're capable of listing any emulators given the current environment configuration.
