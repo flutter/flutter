@@ -3012,9 +3012,11 @@ void main() {
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/191112.
     //
-    // A SliverAppBar whose expandedHeight reacts to the scroll direction (a
-    // common "collapse on scroll down" pattern) can shrink or grow while a
-    // fling is in flight. That leaves the outer position transiently outside
+    // A header sliver whose extent reacts to the scroll direction (e.g. a
+    // SliverAppBar's expandedHeight collapsing on scroll down, reproduced
+    // here with a plain SliverPersistentHeader to keep this widgets-layer
+    // test free of material.dart) can shrink or grow while a fling is in
+    // flight. That leaves the outer position transiently outside
     // [minScrollExtent, maxScrollExtent] until the next layout catches up,
     // which used to trip an assertion in `_NestedScrollCoordinator._getMetrics`.
     final scrolledDown = ValueNotifier<bool>(false);
@@ -3022,57 +3024,55 @@ void main() {
     final key = GlobalKey<NestedScrollViewState>();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: NotificationListener<UserScrollNotification>(
-            onNotification: (UserScrollNotification notification) {
-              switch (notification.direction) {
-                case ScrollDirection.forward:
-                  scrolledDown.value = false;
-                case ScrollDirection.reverse:
-                  scrolledDown.value = true;
-                case ScrollDirection.idle:
-                  break;
-              }
-              return false;
-            },
-            child: NestedScrollView(
-              key: key,
-              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                return <Widget>[
-                  SliverOverlapAbsorber(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                    sliver: ValueListenableBuilder<bool>(
-                      valueListenable: scrolledDown,
-                      builder: (BuildContext context, bool down, Widget? child) {
-                        return SliverAppBar(
-                          pinned: true,
-                          expandedHeight: down ? 80.0 : 340.0,
-                          flexibleSpace: const FlexibleSpaceBar(title: Text('Title')),
-                        );
-                      },
-                    ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NotificationListener<UserScrollNotification>(
+          onNotification: (UserScrollNotification notification) {
+            switch (notification.direction) {
+              case ScrollDirection.forward:
+                scrolledDown.value = false;
+              case ScrollDirection.reverse:
+                scrolledDown.value = true;
+              case ScrollDirection.idle:
+                break;
+            }
+            return false;
+          },
+          child: NestedScrollView(
+            key: key,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: ValueListenableBuilder<bool>(
+                    valueListenable: scrolledDown,
+                    builder: (BuildContext context, bool down, Widget? child) {
+                      return SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _ShrinkingHeaderDelegate(down ? 80.0 : 340.0),
+                      );
+                    },
                   ),
-                ];
+                ),
+              ];
+            },
+            body: Builder(
+              builder: (BuildContext context) {
+                return CustomScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  slivers: <Widget>[
+                    SliverOverlapInjector(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    ),
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int i) => TestListTile(title: Text('Item $i')),
+                        childCount: 40,
+                      ),
+                    ),
+                  ],
+                );
               },
-              body: Builder(
-                builder: (BuildContext context) {
-                  return CustomScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    slivers: <Widget>[
-                      SliverOverlapInjector(
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                      ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int i) => ListTile(title: Text('Item $i')),
-                          childCount: 40,
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
             ),
           ),
         ),
@@ -3618,6 +3618,30 @@ class TestHeader extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(TestHeader oldDelegate) => false;
+}
+
+// A pinned header with a fixed minExtent (like a SliverAppBar's toolbar
+// height) and a maxExtent that can change between rebuilds (like a
+// SliverAppBar's expandedHeight reacting to scroll direction), without
+// depending on material.dart. minExtent staying below maxExtent in every
+// state is what gives the header an actual collapse range to traverse.
+class _ShrinkingHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _ShrinkingHeaderDelegate(this.maxExtent);
+
+  @override
+  double get minExtent => 56.0;
+
+  @override
+  final double maxExtent;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return const SizedBox.expand();
+  }
+
+  @override
+  bool shouldRebuild(_ShrinkingHeaderDelegate oldDelegate) =>
+      maxExtent != oldDelegate.maxExtent;
 }
 
 class _TestLayoutExtentIsNegative extends StatelessWidget {
