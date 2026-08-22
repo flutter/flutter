@@ -26,7 +26,7 @@ import Foundation
   @MainActor
   private override init() {
     super.init()
-    // The timer will not be explicitly invalidated, as the `.mainRunLoop` static
+    // The timer will not be invalidated, as the `.mainRunLoop` static
     // variable will never be deallocated once initialized.
     runLoop.add(timer: lockScope.timer, forModes: [.common, Self.flutterRunLoopMode])
   }
@@ -38,16 +38,12 @@ import Foundation
       "To guarantee the execution order of tasks follows the expiration order, delay must not be negative."
     )
     let task = FlutterRunLoop.Task(block: block, targetDate: .now + delay)
-    // When delay is 0, the timer will be rearmed in the perform block.
-    lockScope.addTask(task, andRearm: delay > 0)
+    lockScope.addTaskAndRearmTimer(task: task)
     if delay == 0 {
-      runLoop.perform(inModes: [.common, Self.flutterRunLoopMode]) { [self] in
-        MainActor.assumeIsolated {
-          for task in lockScope.popExpiredTasksAndRearm() {
-            task.block()
-          }
-        }
-      }
+      // Wake up the runloop immediately for immediate tasks so it's not affected
+      // by timer tolerance, as the runloop will check for and fire expired timers
+      // when active.
+      runLoop.wakeUp()
     }
   }
 
@@ -71,10 +67,6 @@ import Foundation
 private final class LockScope: @unchecked Sendable {
   private let lock = NSLock()
   private let unsafeTaskQueue = FlutterRunLoop.UnsafeTaskQueue()
-  // This Timer needs to be rearmed when:
-  // - A new delayed task is scheduled and its fire date is earlier than
-  //   the timer's current fire date.
-  // - Expired tasks are popped
   let timer: Timer
 
   init() {
@@ -95,15 +87,21 @@ private final class LockScope: @unchecked Sendable {
 
   /// Adds the given task to the task queue and updates the Timer's fire date
   /// accordingly.
-  func addTask(_ task: FlutterRunLoop.Task, andRearm shouldRearm: Bool = false) {
+  func addTaskAndRearmTimer(task: FlutterRunLoop.Task) {
     lock.withLock {
       let newFireDate = unsafeTaskQueue.add(task: task)
-      if shouldRearm {
+      if newFireDate < timer.fireDate {
+        // The fireDate setter is relatively expensive, avoid calling it for
+        // every task added.
         timer.fireDate = newFireDate
       }
     }
   }
 
+  /// Pops all expired tasks from the task queue and updates the Timer's fire date.
+  ///
+  /// Returns a sequence of all expired tasks popped from the task queue, sorted by
+  /// their expiration dates in ascending order.
   @inline(__always)
   private static func popExpiredTasks(
     fromQueue unsafeTaskQueue: FlutterRunLoop.UnsafeTaskQueue, withLock lock: NSLock,
@@ -117,14 +115,6 @@ private final class LockScope: @unchecked Sendable {
       timer.fireDate = newFireDate
       return tasks
     }
-  }
-
-  /// Pops all expired tasks from the task queue and updates the Timer's fire date.
-  ///
-  /// Returns a sequence of all expired tasks popped from the task queue, sorted by
-  /// their expiration dates in ascending order.
-  func popExpiredTasksAndRearm() -> some Sequence<FlutterRunLoop.Task> {
-    Self.popExpiredTasks(fromQueue: unsafeTaskQueue, withLock: lock, andRearmTimer: timer)
   }
 }
 
@@ -177,10 +167,8 @@ extension FlutterRunLoop {
 private final class SendableCFRunLoop: @unchecked Sendable {
   private let runLoop: CFRunLoop = CFRunLoopGetCurrent()
 
-  // Calls CFRunLoopPerformBlock on the run loop and then wakes up the run loop.
-  func perform(inModes modes: [RunLoop.Mode], block: @escaping @Sendable () -> Void) {
-    let cfModes = modes.map { $0.cfRunLoopMode.rawValue } as CFArray
-    CFRunLoopPerformBlock(runLoop, cfModes, block)
+  // Calls CFRunLoopWakeUp on the run loop.
+  func wakeUp() {
     CFRunLoopWakeUp(runLoop)
   }
 
@@ -189,7 +177,6 @@ private final class SendableCFRunLoop: @unchecked Sendable {
       CFRunLoopAddTimer(runLoop, timer, mode.cfRunLoopMode)
     }
   }
-
 }
 
 extension RunLoop.Mode {
