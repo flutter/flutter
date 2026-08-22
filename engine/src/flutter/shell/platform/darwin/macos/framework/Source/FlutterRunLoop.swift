@@ -88,9 +88,7 @@ private final class LockScope: @unchecked Sendable {
     lock.withLock {
       let newFireDate = unsafeTaskQueue.add(task: task)
       if newFireDate < timer.fireDate {
-        // The fireDate setter is relatively expensive, avoid calling it for
-        // every task added. This setter directly calls CFRunLoopTimerSetNextFireDate
-        // which is thread safe.
+        // This call is relatively expensive, avoid calling it for every task added.
         CFRunLoopTimerSetNextFireDate(timer, newFireDate.timeIntervalSinceReferenceDate)
       }
     }
