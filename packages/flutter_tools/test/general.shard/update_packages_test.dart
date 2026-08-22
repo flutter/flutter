@@ -14,4 +14,12 @@ void main() {
       reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
     );
   });
+
+  testWithoutContext('kManuallyPinnedDependencies explicitly pins archive', () {
+    expect(kManuallyPinnedDependencies, containsPair('archive', '3.6.1'));
+  });
+
+  testWithoutContext('kExplicitlyExcludedPackages contains macro packages', () {
+    expect(kExplicitlyExcludedPackages, containsAll(<String>['_macros', 'macros']));
+  });
 }

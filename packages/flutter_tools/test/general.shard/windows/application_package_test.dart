@@ -65,6 +65,20 @@ void main() {
       expect(logger.errorText, contains('Cannot find .exe files in the zip archive.'));
     }, overrides: overrides);
 
+    testUsingContext('Bad zipped app, unzip throws exception', () {
+      fileSystem.file('app.zip').createSync();
+      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+        throw const FormatException('Corrupt archive');
+      };
+      final WindowsApp? windowsApp = WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip'));
+
+      expect(windowsApp, isNull);
+      expect(
+        logger.errorText,
+        contains('Invalid prebuilt Windows app. Unable to extract from archive.'),
+      );
+    }, overrides: overrides);
+
     testUsingContext('Bad zipped app, two .exe files', () {
       fileSystem.file('app.zip').createSync();
       os.unzipOverride = (File zipFile, Directory targetDirectory) {
