@@ -162,33 +162,69 @@ static CommandBuffer::Status ToCommitResult(MTLCommandBufferStatus status) {
   return CommandBufferMTL::Status::kError;
 }
 
-bool CommandBufferMTL::OnSubmitCommands(bool block_on_schedule,
-                                        CompletionCallback callback) {
+bool CommandBufferMTL::OnSubmitCommands(CompletionCallback callback) {
+  return SubmitCommandsInternal(/*create_scheduling_receipt=*/false,
+                                std::move(callback))
+      .submitted;
+}
+
+CommandBuffer::SubmitResult CommandBufferMTL::OnSubmitCommandsWithReceipt(
+    CompletionCallback callback) {
+  return SubmitCommandsInternal(/*create_scheduling_receipt=*/true,
+                                std::move(callback));
+}
+
+CommandBuffer::SubmitResult CommandBufferMTL::SubmitCommandsInternal(
+    bool create_scheduling_receipt,
+    CompletionCallback callback) {
   auto context = context_.lock();
   if (!context) {
-    return false;
+    return SubmitResult(false);
   }
 #ifdef IMPELLER_DEBUG
   ContextMTL::Cast(*context).GetGPUTracer()->RecordCmdBuffer(buffer_);
 #endif  // IMPELLER_DEBUG
+
+  // Copied so the block keeps the tracker alive past context teardown.
+  std::shared_ptr<GpuSubmissionTracker> tracker =
+      ContextMTL::Cast(*context).GetMutableSubmissionTracker();
+  uint64_t submission_id = tracker->RecordSubmission();
+
+  std::shared_ptr<CommandBufferSchedulingReceiptState> scheduling_receipt;
+  if (create_scheduling_receipt) {
+    scheduling_receipt =
+        std::make_shared<CommandBufferSchedulingReceiptState>();
+    // The native buffer retains its handlers, but the receipt state retains
+    // neither the buffer nor the context. This keeps the state alive until a
+    // terminal notification without creating a retain cycle.
+    [buffer_ addScheduledHandler:^(id<MTLCommandBuffer> buffer) {
+      scheduling_receipt->MarkScheduled();
+    }];
+  }
+
+  [buffer_ addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
+    tracker->RecordCompletion(submission_id);
+    if (scheduling_receipt) {
+      scheduling_receipt->MarkTerminal();
+    }
+  }];
+
   if (callback) {
+    // The block copies the callback to keep it alive until completion.
+    CompletionCallback callback_for_block = std::move(callback);
     [buffer_
         addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
           [[maybe_unused]] auto result =
               LogMTLCommandBufferErrorIfPresent(buffer);
           FML_DCHECK(result)
               << "Must not have errors during command buffer submission.";
-          callback(ToCommitResult(buffer.status));
+          callback_for_block(ToCommitResult(buffer.status));
         }];
   }
 
   [buffer_ commit];
-  if (block_on_schedule) {
-    [buffer_ waitUntilScheduled];
-  }
-
   buffer_ = nil;
-  return true;
+  return SubmitResult(true, std::move(scheduling_receipt));
 }
 
 void CommandBufferMTL::OnWaitUntilCompleted() {}

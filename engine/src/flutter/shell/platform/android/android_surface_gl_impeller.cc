@@ -4,11 +4,76 @@
 
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 
+#if defined(__ANDROID__)
+#include <sys/system_properties.h>
+#endif
+
+#include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/logging.h"
 #include "flutter/impeller/toolkit/egl/surface.h"
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 
 namespace flutter {
+
+namespace {
+
+// On some older MediaTek devices running Android 10 or below (specifically
+// MT6762/Helio P22 and MT6765/Helio P35 with PowerVR Rogue GE8320 GPUs),
+// keeping the EGL context current on the raster thread while the thread is idle
+// triggers a driver-level race condition/crash inside the system RenderThread's
+// eglMakeCurrent call during activity transitions or platform view rendering.
+// Clearing the current context at the end of every frame resolves the conflict
+// and avoids the driver crashes.
+bool ShouldClearContextBetweenFrames() {
+#if defined(__ANDROID__)
+  char sdk_value[PROP_VALUE_MAX];
+  int sdk_version = 0;
+  if (__system_property_get("ro.build.version.sdk", sdk_value) > 0) {
+    sdk_version = atoi(sdk_value);
+  }
+  if (sdk_version == 0 || sdk_version > 29) {
+    return false;
+  }
+
+  auto is_bad_platform = [](const char* name) -> bool {
+    char value[PROP_VALUE_MAX];
+    if (__system_property_get(name, value) > 0) {
+      std::string_view platform(value);
+      if (platform.starts_with("mt6762") || platform.starts_with("mt6765") ||
+          platform.starts_with("MT6762") || platform.starts_with("MT6765")) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  return is_bad_platform("ro.board.platform") ||
+         is_bad_platform("ro.vendor.mediatek.platform");
+#else
+  return false;
+#endif
+}
+
+class AndroidSwitchableGLContextImpeller : public SwitchableGLContext {
+ public:
+  explicit AndroidSwitchableGLContextImpeller(
+      const std::shared_ptr<AndroidContextGLImpeller>& android_context)
+      : android_context_(android_context) {}
+
+  bool SetCurrent() override { return true; }
+
+  bool RemoveCurrent() override {
+    if (auto context = android_context_.lock()) {
+      return context->OnscreenContextClearCurrent();
+    }
+    return false;
+  }
+
+ private:
+  std::weak_ptr<AndroidContextGLImpeller> android_context_;
+};
+
+}  // namespace
 
 AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
     const std::shared_ptr<AndroidContextGLImpeller>& android_context)
@@ -111,7 +176,18 @@ AndroidSurfaceGLImpeller::GetImpellerContext() {
 // |GPUSurfaceGLDelegate|
 std::unique_ptr<GLContextResult>
 AndroidSurfaceGLImpeller::GLContextMakeCurrent() {
-  return std::make_unique<GLContextDefaultResult>(OnGLContextMakeCurrent());
+  bool success = OnGLContextMakeCurrent();
+  if (!success) {
+    return std::make_unique<GLContextDefaultResult>(false);
+  }
+  if (!should_clear_context_between_frames_.has_value()) {
+    should_clear_context_between_frames_ = ShouldClearContextBetweenFrames();
+  }
+  if (should_clear_context_between_frames_.value()) {
+    return std::make_unique<GLContextSwitch>(
+        std::make_unique<AndroidSwitchableGLContextImpeller>(android_context_));
+  }
+  return std::make_unique<GLContextDefaultResult>(true);
 }
 
 bool AndroidSurfaceGLImpeller::OnGLContextMakeCurrent() {

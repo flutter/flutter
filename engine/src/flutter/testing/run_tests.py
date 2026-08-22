@@ -569,7 +569,7 @@ def run_cc_tests(
     extra_env = metal_validation_env()
     extra_env.update(vulkan_validation_env(build_dir))
     mac_impeller_unittests_flags = repeat_flags + [
-        '--gtest_filter=-*OpenGLES',  # These are covered in the golden tests.
+        '--gtest_filter=-*OpenGLES:*OpenGLESSDF',  # These are covered in the golden tests.
         '--',
         '--enable_vulkan_validation',
     ]
@@ -748,10 +748,12 @@ def ensure_ios_tests_are_built(ios_out_dir: str) -> None:
   message = []
   message.append('gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator')
   message.append(f'ninja -C {ios_out_dir} ios_test_flutter')
-  joined_message = '\n'.join(message)
+  joined_message = '\n  '.join(message)
   final_message = (
-      f"{ios_out_dir} or {ios_test_lib} doesn't exist. "
-      f'Please run the following commands: \n{joined_message}'
+      f"{ios_out_dir} or {ios_test_lib} doesn't exist.\n\n"
+      f'Please run the following commands:\n\n'
+      f'  {joined_message}\n\n'
+      f'Alternatively, use --ios-variant to specify a different build configuration.'
   )
   assert os.path.exists(tmp_out_dir) and os.path.exists(ios_test_lib), final_message
 
@@ -842,7 +844,9 @@ def run_android_tests(
 
 
 def run_objc_tests(
-    ios_variant: str = 'ios_debug_sim_unopt', test_filter: typing.Optional[str] = None
+    ios_variant: str = 'ios_debug_sim_unopt',
+    test_filter: typing.Optional[str] = None,
+    ios_runtime: typing.Optional[str] = None,
 ) -> None:
   """Runs Objective-C XCTest unit tests for the iOS embedding"""
   assert_expected_xcode_version()
@@ -856,12 +860,15 @@ def run_objc_tests(
   delete_simulator(new_simulator_name)
 
   create_simulator = [
-      'xcrun '
-      'simctl '
-      'create '
-      f'{new_simulator_name} com.apple.CoreSimulator.SimDeviceType.iPhone-11'
+      'xcrun',
+      'simctl',
+      'create',
+      new_simulator_name,
+      'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
   ]
-  run_cmd(create_simulator, shell=True)
+  if ios_runtime is not None:
+    create_simulator.append(ios_runtime)
+  simulator_id = subprocess.check_output(create_simulator, text=True).strip()
 
   try:
     ios_unit_test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosUnitTests')
@@ -878,7 +885,7 @@ def run_objc_tests(
           '-sdk iphonesimulator '
           '-scheme IosUnitTests '
           '-resultBundlePath ' + result_bundle_path + ' '
-          '-destination name=' + new_simulator_name + ' '
+          f'-destination id={simulator_id} '
           'test '
           'FLUTTER_ENGINE=' + ios_variant
       ]
@@ -1311,6 +1318,14 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       help='The engine build variant to run objective-c tests for'
   )
   parser.add_argument(
+      '--ios-runtime',
+      dest='ios_runtime',
+      action='store',
+      default=None,
+      help='The iOS simulator runtime to run tests on '
+      '(example: "com.apple.CoreSimulator.SimRuntime.iOS-26-5")'
+  )
+  parser.add_argument(
       '--verbose-dart-snapshot',
       dest='verbose_dart_snapshot',
       action='store_true',
@@ -1395,7 +1410,10 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
 
   build_dir = os.path.join(OUT_DIR, args.variant)
   if args.type not in ('java', 'android'):
-    assert os.path.exists(build_dir), f'Build variant directory {build_dir} does not exist!'
+    assert os.path.exists(build_dir), (
+        f'Build directory {build_dir} does not exist!\n\n'
+        'You can use --variant to specify a different build configuration if needed.'
+    )
 
   if args.sanitizer_suppressions:
     assert is_linux() or is_mac(
@@ -1473,7 +1491,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
 
   if 'objc' in types:
     assert is_mac(), 'iOS embedding tests can only be run on macOS.'
-    run_objc_tests(args.ios_variant, args.objc_filter)
+    run_objc_tests(args.ios_variant, args.objc_filter, args.ios_runtime)
 
   # https://github.com/flutter/flutter/issues/36300
   if 'benchmarks' in types and not is_windows():

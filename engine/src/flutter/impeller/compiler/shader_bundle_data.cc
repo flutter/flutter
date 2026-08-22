@@ -189,6 +189,8 @@ ShaderBundleData::CreateFlatbuffer() const {
       field_desc->element_size_in_bytes = field.element_size_in_bytes;
       field_desc->total_size_in_bytes = field.total_size_in_bytes;
       field_desc->array_elements = field.array_elements.value_or(0);
+      field_desc->vec_size = field.vec_size;
+      field_desc->columns = field.columns;
       desc->fields.push_back(std::move(field_desc));
     }
 

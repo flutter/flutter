@@ -12,7 +12,7 @@ float TriangleWave(float x) {
 /// OES_EGL_image_external states that only CLAMP_TO_EDGE is valid, so we
 /// emulate all other tile modes here by remapping the texture coordinates.
 vec4 IPSampleWithTileModeOES(sampler2D tex,
-                             vec2 coords,
+                             highp vec2 coords,
                              float x_tile_mode,
                              float y_tile_mode) {
   if (x_tile_mode == kTileModeDecal && (coords.x < 0 || coords.x >= 1) ||

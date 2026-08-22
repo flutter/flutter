@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:dds/dap.dart' hide PidTracker;
+import 'package:dap_adapters/dap_adapters.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/file_system.dart';
@@ -44,6 +44,27 @@ abstract class FlutterBaseDebugAdapter
   /// We never enable DDS in the DAP process for Flutter, so this value is not
   /// the same as what is passed to the base class, which is always provided 'false'.
   final bool enableFlutterDds;
+
+  /// Whether the adapter is currently waiting for the debugger to initialize.
+  bool waitingForDebugger = false;
+
+  /// A completer that completes with an error if debugger initialization fails
+  /// (for example, if the session terminates early).
+  ///
+  /// A dummy error handler is attached to the future to prevent unhandled
+  /// asynchronous exceptions if it completes before any listeners are active.
+  final Completer<void> debuggerInitializationFailedCompleter = Completer<void>()
+    ..future.then<void>((_) {}, onError: (Object _) {});
+
+  @override
+  void handleSessionTerminate([String exitSuffix = '']) {
+    if (waitingForDebugger && !debuggerInitializationFailedCompleter.isCompleted) {
+      debuggerInitializationFailedCompleter.completeError(
+        DebugAdapterException('Session terminated before debugger initialized: $exitSuffix'),
+      );
+    }
+    super.handleSessionTerminate(exitSuffix);
+  }
 
   @override
   final FlutterLaunchRequestArguments Function(Map<String, Object?> obj) parseLaunchArgs =
@@ -167,7 +188,8 @@ abstract class FlutterBaseDebugAdapter
     this.process = process;
 
     process.stdout.transformWithCallSite(ByteToLineTransformer()).listen(handleStdout);
-    process.stderr.transformWithCallSite(utf8.decoder).listen(handleStderr);
+    // Use permissive decoder for debugger stderr which may contain invalid UTF-8
+    process.stderr.transformWithCallSite(utf8AllowMalformed.decoder).listen(handleStderr);
     unawaited(process.exitCode.then(handleExitCode));
   }
 

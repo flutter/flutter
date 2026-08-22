@@ -4,14 +4,8 @@
 
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../lazy_path.dart';
-import '../util.dart';
-import '../vector_math.dart';
-import 'layer.dart';
-import 'layer_painting.dart';
-import 'layer_tree.dart';
 
 // Warn about performance overlay on Web only once per page load.
 bool _webPerfOverlayWarned = false;
@@ -66,9 +60,13 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     bool isComplexHint = false,
     bool willChangeHint = false,
   }) {
+    final layerPicture = picture as LayerPicture;
+    if (layerPicture.isDisposed) {
+      return;
+    }
     // Add a clone of the picture to the layer tree so that the original picture
     // can be disposed.
-    final LayerPicture clonedPicture = (picture as LayerPicture).clone();
+    final LayerPicture clonedPicture = layerPicture.clone();
     currentLayer.add(PictureLayer(clonedPicture, offset, isComplexHint, willChangeHint));
   }
 
@@ -130,7 +128,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.EngineLayer? oldLayer,
   }) {
-    return pushLayer<ClipPathEngineLayer>(ClipPathEngineLayer(path as LazyPath, clipBehavior));
+    return pushLayer<ClipPathEngineLayer>(ClipPathEngineLayer(path as EnginePath, clipBehavior));
   }
 
   @override
@@ -176,9 +174,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilterEngineLayer? oldLayer,
     ui.Offset offset = ui.Offset.zero,
   }) {
-    return pushLayer<ImageFilterEngineLayer>(
-      ImageFilterEngineLayer(filter as LayerImageFilter, offset),
-    );
+    return pushLayer<ImageFilterEngineLayer>(ImageFilterEngineLayer(filter, offset));
   }
 
   @override

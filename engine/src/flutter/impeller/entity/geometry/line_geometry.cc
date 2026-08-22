@@ -167,7 +167,8 @@ std::optional<Rect> LineGeometry::GetCoverage(const Matrix& transform) const {
   return Rect::MakePointBounds(std::begin(corners), std::end(corners));
 }
 
-bool LineGeometry::CoversArea(const Matrix& transform, const Rect& rect) const {
+bool LineGeometry::CoversArea(const Matrix& transform,
+                              const IRect& rect) const {
   if (!transform.IsTranslationScaleOnly() || !IsAxisAlignedRect()) {
     return false;
   }

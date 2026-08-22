@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -25,6 +27,8 @@ import 'cache.dart';
 import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
+import 'experimental/diagnostics.dart';
+import 'experimental/extension_manager.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'http_host_validator.dart';
@@ -42,13 +46,36 @@ import 'windows/visual_studio_validator.dart';
 import 'windows/windows_version_validator.dart';
 import 'windows/windows_workflow.dart';
 
+const _kIntelMacWarning = ValidationMessage.hint(
+  'Flutter is deprecating support for Intel-based Macs. '
+  'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+);
+
 abstract class DoctorValidatorsProvider {
+  /// Create a [DoctorValidatorsProvider] with explicit options.
+  factory DoctorValidatorsProvider.create({
+    Platform? platform,
+    required FeatureFlags featureFlags,
+    ExtensionManager? extensionManager,
+  }) {
+    return _DefaultDoctorValidatorsProvider(
+      platform: platform ?? globals.platform,
+      featureFlags: featureFlags,
+      extensionManager: extensionManager,
+    );
+  }
+
   // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
   // [FeatureFlags].
-  factory DoctorValidatorsProvider.test({Platform? platform, required FeatureFlags featureFlags}) {
+  factory DoctorValidatorsProvider.test({
+    Platform? platform,
+    required FeatureFlags featureFlags,
+    ExtensionManager? extensionManager,
+  }) {
     return _DefaultDoctorValidatorsProvider(
       featureFlags: featureFlags,
       platform: platform ?? FakePlatform(),
+      extensionManager: extensionManager,
     );
   }
 
@@ -65,12 +92,17 @@ abstract class DoctorValidatorsProvider {
 }
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
-  _DefaultDoctorValidatorsProvider({required this.platform, required this.featureFlags});
+  _DefaultDoctorValidatorsProvider({
+    required this.platform,
+    required this.featureFlags,
+    this.extensionManager,
+  });
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
   final Platform platform;
   final FeatureFlags featureFlags;
+  final ExtensionManager? extensionManager;
 
   late final linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags);
 
@@ -86,7 +118,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       return _validators!;
     }
     final proxyValidator = ProxyValidator(platform: platform);
-    _validators = <DoctorValidator>[
+    return _validators = <DoctorValidator>[
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
@@ -136,6 +168,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           processManager: globals.processManager,
           userMessages: globals.userMessages,
         ),
+      if (extensionManager case final ExtensionManager manager)
+        for (final DiagnosticsExtension extension in manager.diagnosticsExtensions)
+          ExtensionDoctorValidator(extension: extension, logger: globals.logger),
       if (windowsWorkflow!.appliesToHostPlatform) visualStudioValidator!,
       if (proxyValidator.shouldShow) proxyValidator,
       if (globals.deviceManager?.canListAnything ?? false)
@@ -146,7 +181,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
       ),
     ];
-    return _validators!;
   }
 
   @override
@@ -179,40 +213,52 @@ class Doctor {
 
   /// Return a list of [ValidatorTask] objects and starts validation on all
   /// objects in [validators].
-  List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[
-    for (final DoctorValidator validator in validators)
-      ValidatorTask(
-        validator,
-        // We use an asyncGuard() here to be absolutely certain that
-        // DoctorValidators do not result in an uncaught exception. Since the
-        // Future returned by the asyncGuard() is not awaited, we pass an
-        // onError callback to it and translate errors into ValidationResults.
-        asyncGuard<ValidationResult>(
-          () {
-            final timeoutCompleter = Completer<ValidationResult>();
-            final timer = Timer(doctorDuration, () {
-              timeoutCompleter.completeError(
-                Exception(
-                  '${validator.title} exceeded maximum allowed duration of $doctorDuration',
-                ),
-              );
-            });
-            final Future<ValidationResult> validatorFuture = validator.validate();
-            return Future.any<ValidationResult>(<Future<ValidationResult>>[
-              validatorFuture,
-              // This future can only complete with an error
-              timeoutCompleter.future,
-            ]).then((ValidationResult result) async {
-              timer.cancel();
-              return result;
-            });
-          },
-          onError: (Object exception, StackTrace stackTrace) {
-            return ValidationResult.crash(exception, stackTrace);
-          },
+  Future<List<ValidatorTask>> startValidatorTasks({ExtensionManager? extensionManager}) async {
+    if (extensionManager != null) {
+      await extensionManager.ensureInitialized();
+    }
+    final List<DoctorValidator> validatorList = extensionManager != null
+        ? DoctorValidatorsProvider.create(
+            platform: globals.platform,
+            featureFlags: featureFlags,
+            extensionManager: extensionManager,
+          ).validators
+        : validators;
+    return <ValidatorTask>[
+      for (final DoctorValidator validator in validatorList)
+        ValidatorTask(
+          validator,
+          // We use an asyncGuard() here to be absolutely certain that
+          // DoctorValidators do not result in an uncaught exception. Since the
+          // Future returned by the asyncGuard() is not awaited, we pass an
+          // onError callback to it and translate errors into ValidationResults.
+          asyncGuard<ValidationResult>(
+            () {
+              final timeoutCompleter = Completer<ValidationResult>();
+              final timer = Timer(doctorDuration, () {
+                timeoutCompleter.completeError(
+                  Exception(
+                    '${validator.title} exceeded maximum allowed duration of $doctorDuration',
+                  ),
+                );
+              });
+              final Future<ValidationResult> validatorFuture = validator.validate();
+              return Future.any<ValidationResult>(<Future<ValidationResult>>[
+                validatorFuture,
+                // This future can only complete with an error
+                timeoutCompleter.future,
+              ]).then((ValidationResult result) async {
+                timer.cancel();
+                return result;
+              });
+            },
+            onError: (Object exception, StackTrace stackTrace) {
+              return ValidationResult.crash(exception, stackTrace);
+            },
+          ),
         ),
-      ),
-  ];
+    ];
+  }
 
   List<Workflow> get workflows {
     return DoctorValidatorsProvider._instance.workflows;
@@ -309,6 +355,7 @@ class Doctor {
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
+    ExtensionManager? extensionManager,
   }) async {
     final bool showColor = globals.terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {
@@ -325,7 +372,8 @@ class Doctor {
     // were sent for each doctor validator and its result
     final int analyticsTimestamp = _clock.now().millisecondsSinceEpoch;
 
-    for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
+    for (final ValidatorTask validatorTask
+        in startedValidatorTasks ?? await startValidatorTasks(extensionManager: extensionManager)) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner(
         timeout: validator.slowWarningDuration,
@@ -514,7 +562,9 @@ class FlutterValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[
+      if (_operatingSystemUtils.hostPlatform == .darwin_x64) _kIntelMacWarning,
+    ];
     String? versionChannel;
     String? frameworkVersion;
 
@@ -593,7 +643,7 @@ class FlutterValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(buffer.toString()));
     }
 
-    ValidationType valid;
+    final ValidationType valid;
     if (messages.every((ValidationMessage message) => message.isInformation)) {
       valid = ValidationType.success;
     } else {
@@ -624,11 +674,11 @@ class FlutterValidator extends DoctorValidator {
 
   String get flutterUnknownChannel =>
       'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
-      "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/setup.";
+      r"If that doesn't fix the issue, try deleting the 'bin/cache/flutter.version.json' file in your Flutter SDK directory and then reinstall Flutter by following instructions at https://flutter.dev/setup.";
 
   String get flutterUnknownVersion =>
       'Cannot resolve current version, possibly due to local changes.\n'
-      'Reinstall Flutter by following instructions at https://flutter.dev/setup.';
+      r"If that doesn't fix the issue, try deleting the 'bin/cache/flutter.version.json' file in your Flutter SDK directory and then reinstall Flutter by following instructions at https://flutter.dev/setup.";
 
   String flutterRevision(String revision, String age, String date) =>
       'Framework revision $revision ($age), $date';
@@ -825,12 +875,12 @@ class DoctorText {
   late final Future<String> piiStrippedText = _runDiagnosis(false);
 
   // Start the validator tasks only once.
-  late final List<ValidatorTask> _validatorTasks = _doctor.startValidatorTasks();
+  late final Future<List<ValidatorTask>> _validatorTasks = _doctor.startValidatorTasks();
 
   Future<String> _runDiagnosis(bool showPii) async {
     try {
       await _doctor.diagnose(
-        startedValidatorTasks: _validatorTasks,
+        startedValidatorTasks: await _validatorTasks,
         showPii: showPii,
         sendEvent: _sendDoctorEvent,
         verbose: _logger.isVerbose,

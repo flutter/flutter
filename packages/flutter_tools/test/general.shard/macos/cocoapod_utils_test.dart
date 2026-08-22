@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -253,6 +254,37 @@ void main() {
             Logger: () => logger,
           },
         );
+
+        testUsingContext(
+          'sets swift_package_manager_enabled when forceSwiftPM is true',
+          () async {
+            final flutterProject = FakeFlutterProject();
+            setUpProject(flutterProject, fs, pluginNames: <String>['plugin_one', 'plugin_two']);
+
+            await processPodsIfNeeded(
+              flutterProject.ios,
+              fs.currentDirectory.childDirectory('build').path,
+              BuildMode.debug,
+              forceSwiftPM: true,
+            );
+
+            expect(flutterProject.flutterPluginsDependenciesFile, exists);
+            final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+                .readAsStringSync();
+            final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+
+            expect(jsonContent['swift_package_manager_enabled'], <String, dynamic>{
+              'ios': true,
+              'macos': true,
+            });
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fs,
+            ProcessManager: FakeProcessManager.empty,
+            Pub: ThrowingPub.new,
+            CocoaPods: () => cocoaPods,
+          },
+        );
       });
     });
 
@@ -502,8 +534,11 @@ class FakeMacOSProject extends Fake implements MacOSProject {
       hostAppRoot.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
 
   @override
-  Directory get flutterSwiftPackagesDirectory =>
-      hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childDirectory('Packages');
+  Directory get ephemeralDirectory =>
+      hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral');
+
+  @override
+  Directory get flutterSwiftPackagesDirectory => ephemeralDirectory.childDirectory('Packages');
 
   @override
   Directory get relativeSwiftPackagesDirectory =>
@@ -551,8 +586,11 @@ class FakeIosProject extends Fake implements IosProject {
       hostAppRoot.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
 
   @override
-  Directory get flutterSwiftPackagesDirectory =>
-      hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childDirectory('Packages');
+  Directory get ephemeralDirectory =>
+      hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral');
+
+  @override
+  Directory get flutterSwiftPackagesDirectory => ephemeralDirectory.childDirectory('Packages');
 
   @override
   Directory get relativeSwiftPackagesDirectory =>

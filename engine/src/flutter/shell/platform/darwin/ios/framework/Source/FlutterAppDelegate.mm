@@ -8,7 +8,7 @@
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
@@ -149,14 +149,12 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
     return YES;
   }
 
-  // Relaying to the system here will case an infinite loop, so we don't do it here.
-  return [self handleOpenURL:url options:options relayToSystemIfUnhandled:NO];
+  return [self handleOpenURL:url options:options];
 }
 
 // Helper function for opening an URL, either with a custom scheme or a http/https scheme.
 - (BOOL)handleOpenURL:(NSURL*)url
-                     options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
-    relayToSystemIfUnhandled:(BOOL)throwBack {
+              options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
   UIApplication* flutterApplication = FlutterSharedApplication.application;
   if (flutterApplication == nil) {
     return NO;
@@ -168,13 +166,8 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   FlutterViewController* flutterViewController = [self rootFlutterViewController];
   if (flutterViewController) {
     [flutterViewController.engine sendDeepLinkToFramework:url
-                                        completionHandler:^(BOOL success) {
-                                          if (!success && throwBack) {
-                                            // throw it back to iOS
-                                            [flutterApplication openURL:url
-                                                                options:@{}
-                                                      completionHandler:nil];
-                                          }
+                                        completionHandler:^(BOOL success){
+                                            // no-op.
                                         }];
   } else {
     [FlutterLogger logError:@"Attempting to open an URL without a Flutter RootViewController."];
@@ -224,7 +217,7 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
     return YES;
   }
 
-  return [self handleOpenURL:userActivity.webpageURL options:@{} relayToSystemIfUnhandled:YES];
+  return [self handleOpenURL:userActivity.webpageURL options:@{}];
 }
 
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController

@@ -50,7 +50,6 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
-    final analysisCompleter = Completer<void>();
     final errors = <AnalysisError>[];
 
     final server = AnalysisServer(
@@ -68,20 +67,6 @@ class AnalyzeOnce extends AnalyzeBase {
     Stopwatch? timer;
     Status? progress;
     try {
-      StreamSubscription<bool>? subscription;
-
-      void handleAnalysisStatus(bool isAnalyzing) {
-        if (!isAnalyzing) {
-          analysisCompleter.complete();
-          subscription?.cancel();
-          subscription = null;
-        }
-      }
-
-      subscription = server.onAnalyzing.listen(
-        (bool isAnalyzing) => handleAnalysisStatus(isAnalyzing),
-      );
-
       void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
         errors.addAll(fileErrors.errors);
       }
@@ -89,17 +74,18 @@ class AnalyzeOnce extends AnalyzeBase {
       server.onErrors.listen(handleAnalysisErrors);
 
       await server.start();
-      // Completing the future in the callback can't fail.
+
+      // Capture if the server exits unexpectedly.
+      final exitErrorCompleter = Completer<void>();
       unawaited(
         server.onExit.then<void>((int? exitCode) {
-          if (!analysisCompleter.isCompleted) {
-            analysisCompleter.completeError(
-              // Include the last 20 lines of server output in exception message
-              Exception(
-                'analysis server exited with code $exitCode and output:\n${server.getLogs(20)}',
-              ),
-            );
-          }
+          exitErrorCompleter.completeError(
+            // Include the last 20 lines of server output in exception message
+            _AnalysisServerExitException(
+              'analysis server exited with code $exitCode and output:\n${server.getLogs(20)}',
+              exitCode,
+            ),
+          );
         }),
       );
 
@@ -112,7 +98,13 @@ class AnalyzeOnce extends AnalyzeBase {
           ? logger.startProgress('Analyzing $message...')
           : null;
 
-      await analysisCompleter.future;
+      // Wait for analysis to complete, or the server to exit and produce
+      // an error.
+      try {
+        await Future.any([server.waitForAnalysis(), exitErrorCompleter.future]);
+      } on _AnalysisServerExitException catch (error) {
+        throwToolExit(error.message, exitCode: error.exitCode);
+      }
     } finally {
       await server.dispose();
       progress?.cancel();
@@ -172,4 +164,10 @@ class AnalyzeOnce extends AnalyzeBase {
     }
     return false;
   }
+}
+
+class _AnalysisServerExitException implements Exception {
+  _AnalysisServerExitException(this.message, this.exitCode);
+  final String message;
+  final int? exitCode;
 }

@@ -4,28 +4,29 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi' as ffi;
 import 'dart:io' as io;
 import 'dart:typed_data' show ByteData, Float64List, Int32List, Uint8List;
 import 'dart:ui' as ui;
 
 // Signals a waiting latch in the native test.
-@pragma('vm:external-name', 'Signal')
+@ffi.Native<ffi.Void Function()>(symbol: 'Signal')
 external void signal();
 
 // Signals a waiting latch in the native test, passing a boolean value.
-@pragma('vm:external-name', 'SignalBoolValue')
+@ffi.Native<ffi.Void Function(ffi.Bool)>(symbol: 'SignalBoolValue')
 external void signalBoolValue(bool value);
 
 // Signals a waiting latch in the native test, passing a string value.
-@pragma('vm:external-name', 'SignalStringValue')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'SignalStringValue')
 external void signalStringValue(String value);
 
 // Signals a waiting latch in the native test, which returns a value to the fixture.
-@pragma('vm:external-name', 'SignalBoolReturn')
+@ffi.Native<ffi.Bool Function()>(symbol: 'SignalBoolReturn')
 external bool signalBoolReturn();
 
 // Notify the native test that the first frame has been scheduled.
-@pragma('vm:external-name', 'NotifyFirstFrameScheduled')
+@ffi.Native<ffi.Void Function()>(symbol: 'NotifyFirstFrameScheduled')
 external void notifyFirstFrameScheduled();
 
 void main() {}
@@ -399,7 +400,7 @@ void mergedUIThread() {
   signal();
 }
 
-@pragma('vm:external-name', 'NotifyEngineId')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'NotifyEngineId')
 external void notifyEngineId(int? handle);
 
 @pragma('vm:entry-point')
@@ -421,11 +422,10 @@ Future<void> sendSemanticsTreeInfo() async {
 
   final Iterable<ui.FlutterView> views = ui.PlatformDispatcher.instance.views;
   final ui.FlutterView view1 = views.firstWhere(
-    (final ui.FlutterView view) => view != ui.PlatformDispatcher.instance.implicitView,
+    (ui.FlutterView view) => view != ui.PlatformDispatcher.instance.implicitView,
   );
   final ui.FlutterView view2 = views.firstWhere(
-    (final ui.FlutterView view) =>
-        view != view1 && view != ui.PlatformDispatcher.instance.implicitView,
+    (ui.FlutterView view) => view != view1 && view != ui.PlatformDispatcher.instance.implicitView,
   );
 
   ui.SemanticsUpdate createSemanticsUpdate(int nodeId) {

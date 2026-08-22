@@ -229,7 +229,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
       // Get the project info to make sure it compiles with xcodebuild
       await _xcodeProjectInterpreter.getInfo(
-        _xcodeProject.hostAppRoot.path,
+        _xcodeProject,
         buildDirectory: _fileSystem.directory(
           _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
         ),
@@ -272,9 +272,6 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     final XcodeProjectInfo? projectInfo = await _xcodeProject.projectInfo();
     if (projectInfo == null) {
       throw Exception('Unable to get Xcode project info.');
-    }
-    if (_xcodeProject.xcodeWorkspace == null) {
-      throw Exception('Xcode workspace not found.');
     }
     final String? scheme = projectInfo.schemeFor(_buildInfo);
     if (scheme == null) {

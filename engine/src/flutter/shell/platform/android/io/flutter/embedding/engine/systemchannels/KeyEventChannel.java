@@ -110,10 +110,6 @@ public class KeyEventChannel {
      */
     @Nullable public final Character complexCharacter;
 
-    public FlutterKeyEvent(@NonNull KeyEvent androidKeyEvent) {
-      this(androidKeyEvent, null);
-    }
-
     public FlutterKeyEvent(
         @NonNull KeyEvent androidKeyEvent, @Nullable Character complexCharacter) {
       this.event = androidKeyEvent;

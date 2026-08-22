@@ -79,7 +79,7 @@ class TaskQueue<T> {
 }
 
 class _TaskQueueItem<T> {
-  _TaskQueueItem(this._closure, this._completer, {this.onComplete});
+  _TaskQueueItem(this._closure, this._completer);
 
   final TaskQueueClosure<T> _closure;
   final Completer<T> _completer;

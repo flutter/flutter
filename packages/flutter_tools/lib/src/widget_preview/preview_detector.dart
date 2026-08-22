@@ -154,9 +154,10 @@ class PreviewDetector {
         onPackageConfigChangeDetected?.call(event.path);
         return;
       }
-      // Ignore any files under .dart_tool or ephemeral directories created by
+      // Ignore any files under .dart_tool, .widget_preview, or ephemeral directories created by
       // the tool (e.g., build/, plugin directories, etc.).
       if (eventPath.doesContainDartTool ||
+          eventPath.doesContainWidgetPreview ||
           project.ephemeralDirectories.any((dir) => eventPath.contains(dir.path))) {
         return;
       }

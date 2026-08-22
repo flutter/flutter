@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
 import 'package:file/file.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -102,6 +103,7 @@ class CocoaPods {
     required Logger logger,
     required Platform platform,
     required Analytics analytics,
+    Abi? currentAbi,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
@@ -113,6 +115,7 @@ class CocoaPods {
          logger: logger,
          platform: platform,
          processManager: processManager,
+         currentAbi: currentAbi,
        );
 
   final FileSystem _fileSystem;

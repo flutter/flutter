@@ -41,6 +41,7 @@ tasks.withType<JavaCompile> {
 tasks.test {
     useJUnitPlatform()
 }
+
 // https://stackoverflow.com/questions/55456176/unresolved-reference-compilekotlin-in-build-gradle-kts
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
@@ -68,6 +69,5 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:8.11.1")
-    testImplementation("org.mockito:mockito-core:5.8.0")
     testImplementation("io.mockk:mockk:1.13.16")
 }

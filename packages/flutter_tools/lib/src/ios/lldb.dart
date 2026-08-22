@@ -7,23 +7,31 @@ library;
 
 import 'dart:async';
 
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import 'device_support.dart';
+import 'xcodeproj.dart';
 
 /// LLDB is the default debugger in Xcode on macOS. Once the application has
 /// launched on a physical iOS device, you can attach to it using LLDB.
 ///
 /// See `xcrun devicectl device process launch --help` for more information.
 class LLDB {
-  LLDB({required Logger logger, required ProcessUtils processUtils})
-    : _logger = logger,
-      _processUtils = processUtils;
+  LLDB({
+    required Logger logger,
+    required ProcessUtils processUtils,
+    required XcodeProjectInterpreter xcodeProjectInterpreter,
+  }) : _logger = logger,
+       _processUtils = processUtils,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
   _LLDBProcess? _lldbProcess;
 
@@ -32,6 +40,8 @@ class LLDB {
 
   /// Whether or not the LLDB process has attached and resumed the application process.
   var _isAttached = false;
+
+  var _warnedAboutMissingSymbols = false;
 
   /// The process id of the application running on the iOS device.
   int? get appProcessId => _lldbProcess?.appProcessId;
@@ -58,8 +68,27 @@ class LLDB {
   /// Example: Breakpoint 1: no locations (pending).
   static final _breakpointPattern = RegExp(r'Breakpoint (\d+)*:');
 
+  /// Pattern of lldb log when a stop hook is added.
+  ///
+  /// Example: Stop hook #1 added.
+  static final _stopHookAddedPattern = RegExp(r'Stop hook #\d+ added');
+
+  /// Pattern of lldb log when a stop hook is processed.
+  ///
+  /// Example: "- Hook 1 (thread backtrace all)"
+  static final _stopHookProcessedPattern = RegExp(r'- Hook \d+');
+
   /// A list of log patterns to ignore.
-  static final _ignorePatterns = <Pattern>[RegExp(r'\d+ location added to breakpoint \d+')];
+  static final _ignorePatterns = <Pattern>[
+    RegExp(r'\d+ location added to breakpoint \d+'),
+    _stopHookProcessedPattern,
+  ];
+
+  /// Pattern of lldb log when libobjc.A.dylib is being read from process memory. This indicates
+  /// that Device Support symbols were not found on the host machine.
+  static final missingSymbolsPattern = RegExp(
+    'warning: libobjc.A.dylib is being read from process memory.',
+  );
 
   /// Breakpoint script required for JIT on iOS.
   ///
@@ -95,19 +124,24 @@ return False
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
     required BuildMode mode,
+    required IOSDeviceSupport deviceSupport,
   }) async {
     Timer? timer;
     try {
       timer = Timer(const Duration(minutes: 1), () {
-        _logger.printError(
-          'LLDB is taking longer than expected to start debugging the app. '
-          "LLDB debugging can be disabled for the project by adding the following in the project's pubspec.yaml:\n"
-          'flutter:\n'
-          '  config:\n'
-          '    enable-lldb-debugging: false\n'
-          'Or disable LLDB debugging globally with the following command:\n'
-          '  "flutter config --no-enable-lldb-debugging"',
-        );
+        final String? warning = deviceSupport.missingSymbolsWarning();
+        if (warning != null) {
+          _logger.printWarning(
+            'LLDB is taking longer than expected to start debugging the app. $warning',
+          );
+          _warnedAboutMissingSymbols = true;
+        } else {
+          _logger.printError(
+            'LLDB is taking longer than expected to start debugging the app. Try again using '
+            '--verbose and file a bug including the verbose logs '
+            'at https://github.com/flutter/flutter/issues/new?template=01_activation.yml',
+          );
+        }
       });
 
       final bool start = await _startLLDB(
@@ -118,10 +152,14 @@ return False
         return false;
       }
       await _selectDevice(deviceId);
+      await _addSymbolSearchPaths(deviceSupport);
+
       if (mode == BuildMode.debug) {
         await _setBreakpoint();
       }
       await _attachToAppProcess(appProcessId);
+      await _setupStopHooks();
+      await _printDeviceSupportStatus();
       await _resumeProcess(mode);
       _isAttached = true;
     } on _LLDBError catch (e) {
@@ -151,7 +189,10 @@ return False
     }
     try {
       _lldbProcess = _LLDBProcess(
-        process: await _processUtils.start(<String>['lldb']),
+        process: await _processUtils.start(<String>[
+          ..._xcodeProjectInterpreter.xcrunCommand(),
+          'lldb',
+        ]),
         appProcessId: appProcessId,
         logger: _logger,
       );
@@ -204,14 +245,39 @@ return False
   bool exit() {
     final bool success = (_lldbProcess == null) || _lldbProcess!.kill();
     _lldbProcess = null;
+    if (_logCompleter != null) {
+      _logCompleter!.completeError(_LLDBError('LLDB process exited'));
+    }
     _logCompleter = null;
     _isAttached = false;
+    _warnedAboutMissingSymbols = false;
     return success;
   }
 
   /// Selects a device for LLDB to interact with.
   Future<void> _selectDevice(String deviceId) async {
     await _lldbProcess?.stdinWriteln('device select $deviceId');
+  }
+
+  /// Adds the symbol search paths to the LLDB process.
+  Future<void> _addSymbolSearchPaths(IOSDeviceSupport deviceSupport) async {
+    final Directory? symbolDirectory = deviceSupport.existingDeviceSupportSymbols;
+    if (symbolDirectory == null) {
+      return;
+    }
+    await _lldbProcess?.stdinWriteln(
+      'platform select remote-ios --sysroot "${symbolDirectory.path}"',
+    );
+  }
+
+  /// Prints logs of available Device Support
+  Future<void> _printDeviceSupportStatus() async {
+    final Future<String> futureLog = _startWaitingForLog(
+      RegExp(r'\s*Platform:'),
+    ).then((value) => value, onError: _handleAsyncError);
+
+    await _lldbProcess?.stdinWriteln('platform status');
+    await futureLog;
   }
 
   /// Attaches LLDB to the [appProcessId] running on the device.
@@ -268,6 +334,18 @@ return False
     await futureLog;
   }
 
+  /// Adds a stop hook to print the backtrace of all threads and then detach the debugger from the
+  /// process once it stops, such as when it crashes.
+  ///
+  /// Without this, the debugger would remain attached to the process and the app will hang on crash.
+  Future<void> _setupStopHooks() async {
+    final Future<String> futureLog = _startWaitingForLog(
+      _stopHookAddedPattern,
+    ).then((value) => value, onError: _handleAsyncError);
+    await _lldbProcess?.stdinWriteln('target stop-hook add -o "thread backtrace all" -o "detach"');
+    await futureLog;
+  }
+
   /// Creates a completer and returns its future. Methods that utilize this should
   /// start waiting for the log before writing to stdin to avoid race conditions.
   ///
@@ -308,6 +386,13 @@ return False
   }
 
   bool _ignoreLog(String log) {
+    // We only want to warn about missing symbols once.
+    if (log.contains(missingSymbolsPattern)) {
+      if (_warnedAboutMissingSymbols) {
+        return true;
+      }
+      _warnedAboutMissingSymbols = true;
+    }
     return _ignorePatterns.any((Pattern pattern) => log.contains(pattern));
   }
 }
@@ -343,7 +428,7 @@ class _LLDBLogPatternCompleter {
   }
 }
 
-/// A container class for associating a [Process] that is is running LLDB with
+/// A container class for associating a [Process] that is running LLDB with
 /// the iOS device process of an application.
 class _LLDBProcess {
   _LLDBProcess({required Process process, required this.appProcessId, required Logger logger})

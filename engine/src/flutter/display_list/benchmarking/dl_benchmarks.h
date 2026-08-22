@@ -20,7 +20,10 @@ enum BenchmarkAttributes {
   kStrokedStyle = 1 << 0,
   kFilledStyle = 1 << 1,
   kHairlineStroke = 1 << 2,
-  kAntiAliasing = 1 << 3
+  kWideStroke10 = 1 << 3,
+  kAntiAliasing = 1 << 4,
+  kShadow5 = 1 << 5,
+  kShadow10 = 1 << 6,
 };
 
 enum class RRectType {
@@ -35,8 +38,6 @@ enum class PathVerb {
   kConic,
   kCubic,
 };
-
-DlPaint GetPaintForRun(unsigned attributes);
 
 using BackendType = DlSurfaceProvider::BackendType;
 
@@ -110,7 +111,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawLine
 #define DRAW_LINE_BENCHMARKS(BACKEND, ATTRIBUTES)                       \
   BENCHMARK_CAPTURE(BM_DrawLine, BACKEND,                               \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES)                                         \
       ->RangeMultiplier(2)                                              \
       ->Range(16, 2048)                                                 \
@@ -120,7 +121,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawRect
 #define DRAW_RECT_BENCHMARKS(BACKEND, ATTRIBUTES)                       \
   BENCHMARK_CAPTURE(BM_DrawRect, BACKEND,                               \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES)                                         \
       ->RangeMultiplier(2)                                              \
       ->Range(16, 2048)                                                 \
@@ -130,7 +131,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawOval
 #define DRAW_OVAL_BENCHMARKS(BACKEND, ATTRIBUTES)                       \
   BENCHMARK_CAPTURE(BM_DrawOval, BACKEND,                               \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES)                                         \
       ->RangeMultiplier(2)                                              \
       ->Range(16, 2048)                                                 \
@@ -140,7 +141,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawCircle
 #define DRAW_CIRCLE_BENCHMARKS(BACKEND, ATTRIBUTES)                     \
   BENCHMARK_CAPTURE(BM_DrawCircle, BACKEND,                             \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES)                                         \
       ->RangeMultiplier(2)                                              \
       ->Range(16, 2048)                                                 \
@@ -150,7 +151,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawArc
 #define DRAW_ARC_BENCHMARKS(BACKEND, ATTRIBUTES)                        \
   BENCHMARK_CAPTURE(BM_DrawArc, BACKEND,                                \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES)                                         \
       ->RangeMultiplier(2)                                              \
       ->Range(128, 2048)                                                \
@@ -161,7 +162,7 @@ void BM_SaveLayer(benchmark::State& state,
 #define DRAW_PATH_BENCHMARKS(BACKEND, ATTRIBUTES)                       \
   BENCHMARK_CAPTURE(BM_DrawPath,                                        \
                     Lines/BACKEND,                                      \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     PathVerb::kLine)                                    \
       ->RangeMultiplier(2)                                              \
@@ -172,7 +173,7 @@ void BM_SaveLayer(benchmark::State& state,
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawPath,                                        \
                     Quads/BACKEND,                                      \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     PathVerb::kQuad)                                    \
       ->RangeMultiplier(2)                                              \
@@ -183,7 +184,7 @@ void BM_SaveLayer(benchmark::State& state,
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawPath,                                        \
                     Conics/BACKEND,                                     \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     PathVerb::kConic)                                   \
       ->RangeMultiplier(2)                                              \
@@ -194,7 +195,7 @@ void BM_SaveLayer(benchmark::State& state,
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawPath,                                        \
                     Cubics/BACKEND,                                     \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     PathVerb::kCubic)                                   \
       ->RangeMultiplier(2)                                              \
@@ -206,7 +207,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawPoints
 #define DRAW_POINTS_BENCHMARKS(BACKEND, ATTRIBUTES)                     \
   BENCHMARK_CAPTURE(BM_DrawPoints, Points/BACKEND,                      \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlPointMode::kPoints)                               \
       ->RangeMultiplier(2)                                              \
@@ -215,7 +216,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawPoints, Lines/BACKEND,                       \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlPointMode::kLines)                                \
       ->RangeMultiplier(2)                                              \
@@ -224,7 +225,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawPoints, Polygon/BACKEND,                     \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlPointMode::kPolygon)                              \
       ->RangeMultiplier(2)                                              \
@@ -236,7 +237,7 @@ void BM_SaveLayer(benchmark::State& state,
 #define DRAW_VERTICES_BENCHMARKS(BACKEND, ATTRIBUTES)                   \
   BENCHMARK_CAPTURE(BM_DrawVertices,                                    \
                     TriangleStrip/BACKEND,                              \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlVertexMode::kTriangleStrip)                       \
       ->RangeMultiplier(2)                                              \
@@ -247,7 +248,7 @@ void BM_SaveLayer(benchmark::State& state,
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawVertices,                                    \
                     TriangleFan/BACKEND,                                \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlVertexMode::kTriangleFan)                         \
       ->RangeMultiplier(2)                                              \
@@ -258,7 +259,7 @@ void BM_SaveLayer(benchmark::State& state,
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawVertices,                                    \
                     Triangles/BACKEND,                                  \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlVertexMode::kTriangles)                           \
       ->RangeMultiplier(2)                                              \
@@ -270,7 +271,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawRRect
 #define DRAW_RRECT_BENCHMARKS(BACKEND, ATTRIBUTES)                      \
   BENCHMARK_CAPTURE(BM_DrawRRect, Symmetric/BACKEND,                    \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     RRectType::kSimple)                                 \
       ->RangeMultiplier(2)                                              \
@@ -279,7 +280,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawRRect, NinePatch/BACKEND,                    \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     RRectType::kNinePatch)                              \
       ->RangeMultiplier(2)                                              \
@@ -288,7 +289,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawRRect, Complex/BACKEND,                      \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     RRectType::kComplex)                                \
       ->RangeMultiplier(2)                                              \
@@ -299,7 +300,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawDRRect
 #define DRAW_DRRECT_BENCHMARKS(BACKEND, ATTRIBUTES)                     \
   BENCHMARK_CAPTURE(BM_DrawDRRect, Symmetric/BACKEND,                   \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     RRectType::kSimple)                                 \
       ->RangeMultiplier(2)                                              \
@@ -308,7 +309,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawDRRect, NinePatch/BACKEND,                   \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     RRectType::kNinePatch)                              \
       ->RangeMultiplier(2)                                              \
@@ -317,7 +318,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawDRRect, Complex/BACKEND,                     \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     RRectType::kComplex)                                \
       ->RangeMultiplier(2)                                              \
@@ -328,7 +329,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawImage
 #define DRAW_IMAGE_BENCHMARKS(BACKEND, ATTRIBUTES)                      \
   BENCHMARK_CAPTURE(BM_DrawImage, Texture/BACKEND,                      \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlImageSampling::kNearestNeighbor, false)           \
       ->RangeMultiplier(2)                                              \
@@ -337,7 +338,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawImage, Upload/BACKEND,                       \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlImageSampling::kNearestNeighbor, true)            \
       ->RangeMultiplier(2)                                              \
@@ -349,7 +350,7 @@ void BM_SaveLayer(benchmark::State& state,
 #define DRAW_IMAGE_RECT_BENCHMARKS(BACKEND, ATTRIBUTES)                 \
   BENCHMARK_CAPTURE(                                                    \
       BM_DrawImageRect, Texture/Strict/BACKEND,                         \
-      BackendType::k##BACKEND##Backend,                                 \
+      BackendType::k##BACKEND,                                          \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
       DlSrcRectConstraint::kStrict, false)                              \
@@ -360,7 +361,7 @@ void BM_SaveLayer(benchmark::State& state,
                                                                         \
   BENCHMARK_CAPTURE(                                                    \
       BM_DrawImageRect, Texture/Fast/BACKEND,                           \
-      BackendType::k##BACKEND##Backend,                                 \
+      BackendType::k##BACKEND,                                          \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
       DlSrcRectConstraint::kFast, false)                                \
@@ -371,7 +372,7 @@ void BM_SaveLayer(benchmark::State& state,
                                                                         \
   BENCHMARK_CAPTURE(                                                    \
       BM_DrawImageRect, Upload/Strict/BACKEND,                          \
-      BackendType::k##BACKEND##Backend,                                 \
+      BackendType::k##BACKEND,                                          \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
       DlSrcRectConstraint::kStrict, true)                               \
@@ -382,7 +383,7 @@ void BM_SaveLayer(benchmark::State& state,
                                                                         \
   BENCHMARK_CAPTURE(                                                    \
       BM_DrawImageRect, Upload/Fast/BACKEND,                            \
-      BackendType::k##BACKEND##Backend,                                 \
+      BackendType::k##BACKEND,                                          \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
       DlSrcRectConstraint::kFast, true)                                 \
@@ -394,7 +395,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawImageNine
 #define DRAW_IMAGE_NINE_BENCHMARKS(BACKEND, ATTRIBUTES)                 \
   BENCHMARK_CAPTURE(BM_DrawImageNine, Texture/Nearest/BACKEND,          \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlFilterMode::kNearest, false)                      \
       ->RangeMultiplier(2)                                              \
@@ -403,7 +404,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawImageNine, Upload/Nearest/BACKEND,           \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlFilterMode::kNearest, true)                       \
       ->RangeMultiplier(2)                                              \
@@ -412,7 +413,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawImageNine, Texture/Linear/BACKEND,           \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlFilterMode::kLinear, false)                       \
       ->RangeMultiplier(2)                                              \
@@ -421,7 +422,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawImageNine, Upload/Linear/BACKEND,            \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     DlFilterMode::kLinear, true)                        \
       ->RangeMultiplier(2)                                              \
@@ -432,7 +433,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawTextBlob
 #define DRAW_TEXT_BLOB_BENCHMARKS(BACKEND, ATTRIBUTES)                  \
   BENCHMARK_CAPTURE(BM_DrawTextBlob, BACKEND,                           \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES)                                         \
       ->RangeMultiplier(2)                                              \
       ->Range(1, 256)                                                   \
@@ -443,7 +444,7 @@ void BM_SaveLayer(benchmark::State& state,
 // DrawShadow
 #define DRAW_SHADOW_BENCHMARKS(BACKEND, ATTRIBUTES)                     \
   BENCHMARK_CAPTURE(BM_DrawShadow, Lines/Transparent/BACKEND,           \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     true,                                               \
                     PathVerb::kLine)                                    \
@@ -453,7 +454,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawShadow, Quads/Transparent/BACKEND,           \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     true,                                               \
                     PathVerb::kQuad)                                    \
@@ -463,7 +464,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawShadow, Conics/Transparent/BACKEND,          \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     true,                                               \
                     PathVerb::kConic)                                   \
@@ -473,7 +474,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawShadow, Cubics/Transparent/BACKEND,          \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     true,                                               \
                     PathVerb::kCubic)                                   \
@@ -483,7 +484,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawShadow, Lines/Opaque/BACKEND,                \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     false,                                              \
                     PathVerb::kLine)                                    \
@@ -493,7 +494,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawShadow, Quads/Opaque/BACKEND,                \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     false,                                              \
                     PathVerb::kQuad)                                    \
@@ -503,7 +504,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawShadow, Conics/Opaque/BACKEND,               \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     false,                                              \
                     PathVerb::kConic)                                   \
@@ -513,7 +514,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_DrawShadow, Cubics/Opaque/BACKEND,               \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     false,                                              \
                     PathVerb::kCubic)                                   \
@@ -525,7 +526,7 @@ void BM_SaveLayer(benchmark::State& state,
 // SaveLayer
 #define SAVE_LAYER_BENCHMARKS(BACKEND, ATTRIBUTES)                      \
   BENCHMARK_CAPTURE(BM_SaveLayer, Depth 1/BACKEND,                      \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     1)                                                  \
       ->RangeMultiplier(2)                                              \
@@ -534,7 +535,7 @@ void BM_SaveLayer(benchmark::State& state,
       ->Unit(benchmark::kMillisecond);                                  \
                                                                         \
   BENCHMARK_CAPTURE(BM_SaveLayer, Depth 8/BACKEND,                      \
-                    BackendType::k##BACKEND##Backend,                   \
+                    BackendType::k##BACKEND,                            \
                     ATTRIBUTES,                                         \
                     8)                                                  \
       ->RangeMultiplier(2)                                              \
