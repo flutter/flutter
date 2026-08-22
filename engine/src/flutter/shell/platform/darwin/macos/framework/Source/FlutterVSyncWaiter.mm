@@ -46,6 +46,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   void (^_block)(CFTimeInterval, CFTimeInterval, uintptr_t);
   CFTimeInterval _lastTargetTimestamp;
   BOOL _warmUpFrame;
+  FlutterRunLoop* _mainRunLoop;
 }
 
 - (instancetype)initWithDisplayLink:(FlutterDisplayLink*)displayLink
@@ -55,6 +56,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   FML_DCHECK([NSThread isMainThread]);
   if (self = [super init]) {
     _block = block;
+    _mainRunLoop = [FlutterRunLoop mainRunLoop];
 
     _displayLink = displayLink;
     _displayLink.delegate = self;
@@ -83,7 +85,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
 
     TRACE_VSYNC("DisplayLinkCallback-Original", _pendingBaton.value_or(0));
 
-    [FlutterRunLoop.mainRunLoop
+    [_mainRunLoop
         performAfterDelay:remaining
                     block:^{
                       if (!_pendingBaton.has_value()) {
@@ -144,12 +146,12 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
       delay = std::max(start - now - kTimerLatencyCompensation, 0.0);
     }
 
-    [FlutterRunLoop.mainRunLoop performAfterDelay:delay
-                                            block:^{
-                                              CFTimeInterval targetTime = start + tick_interval;
-                                              TRACE_VSYNC("SynthesizedInitialVSync", baton);
-                                              _block(start, targetTime, baton);
-                                            }];
+    [_mainRunLoop performAfterDelay:delay
+                              block:^{
+                                CFTimeInterval targetTime = start + tick_interval;
+                                TRACE_VSYNC("SynthesizedInitialVSync", baton);
+                                _block(start, targetTime, baton);
+                              }];
     _displayLink.paused = NO;
   } else {
     _pendingBaton = baton;

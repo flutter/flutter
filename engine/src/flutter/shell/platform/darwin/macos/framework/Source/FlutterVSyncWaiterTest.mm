@@ -36,10 +36,7 @@
 
 @end
 
-class FlutterVSyncWaiterTest : public testing::Test {
- public:
-  void SetUp() override { [FlutterRunLoop ensureMainLoopInitialized]; }
-};
+using FlutterVSyncWaiterTest = testing::Test;
 
 TEST_F(FlutterVSyncWaiterTest, RequestsInitialVSync) {
   TestDisplayLink* displayLink = [[TestDisplayLink alloc] init];
