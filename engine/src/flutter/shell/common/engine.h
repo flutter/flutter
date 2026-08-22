@@ -903,9 +903,6 @@ class Engine final : public RuntimeDelegate {
   fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
   GetImageGeneratorRegistry();
 
-  void ScheduleSecondaryVsyncCallback(uintptr_t id,
-                                      const fml::closure& callback);
-
   //----------------------------------------------------------------------------
   /// @brief      Get the last Entrypoint that was used in the RunConfiguration
   ///             when |Engine::Run| was called.
