@@ -275,12 +275,36 @@ name: my_app
     'Does not crash if the application exits during DDS startup',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/178151
-      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
       webDevFS.exception = DartDevelopmentServiceException.failedToStart();
 
       await expectLater(residentWebRunner.run(), throwsToolExit());
+      expect(logger.errorText, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'Does not crash if DDS fails to upgrade WebSocket during startup',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      const errorMessage =
+          'WebSocketChannelException: WebSocketException: Connection to '
+          "'http://127.0.0.1:62932/9fVOXxsamo0=/ws#' was not upgraded to websocket";
+      webDevFS.exception = DartDevelopmentServiceException.connectionIssue(errorMessage);
+
+      await expectLater(residentWebRunner.run(), throwsToolExit());
+      expect(logger.errorText, contains(errorMessage));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -2625,7 +2649,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   ResidentCompiler? generator;
 
   @override
-  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
+  Future<Uri>? get vmServiceUri => testUri != null ? Future<Uri>.value(testUri!) : null;
 
   @override
   DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
@@ -2657,15 +2681,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
-    bool enableDevTools = false,
   }) async {}
 
   @override

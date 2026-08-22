@@ -952,7 +952,70 @@ void main() {
         expect(command.usage, isNot(contains(option)));
       }
 
+      // Deprecated options are always hidden.
       expectHidden('pwa-strategy');
+
+      // Verbose-only options are hidden in standard help output.
+      expectHidden('dump-info');
+      expectHidden('minify-js');
+      expectHidden('minify-wasm');
+      expectHidden('enable-wasm-deferred-loading');
+      expectHidden('no-frequency-based-minification');
+      expectHidden('enable-experiment');
+
+      // Standard options are visible.
+      expectVisible('web-resources-cdn');
+      expectVisible('optimization-level');
+      expectVisible('source-maps');
+      expectVisible('csp');
+      expectVisible('dart2js-optimization');
+      expectVisible('wasm');
+      expectVisible('strip-wasm');
+      expectVisible('base-href');
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'flutter build web option visibility with verboseHelp',
+    () async {
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem, verboseHelp: true);
+      createTestCommandRunner(buildCommand);
+      final command = buildCommand.subcommands.values.single as BuildWebCommand;
+
+      void expectVisible(String option) {
+        expect(command.argParser.options.keys, contains(option));
+        expect(
+          command.argParser.options[option]!.hide,
+          isFalse,
+          reason: 'Expecting `$option` to be visible with verboseHelp: true',
+        );
+        expect(command.usage, contains(option));
+      }
+
+      void expectHidden(String option) {
+        expect(command.argParser.options.keys, contains(option));
+        expect(command.argParser.options[option]!.hide, isTrue);
+        expect(command.usage, isNot(contains(option)));
+      }
+
+      // Deprecated options remain hidden.
+      expectHidden('pwa-strategy');
+
+      // Verbose-only options become visible when verboseHelp is true.
+      expectVisible('dump-info');
+      expectVisible('minify-js');
+      expectVisible('minify-wasm');
+      expectVisible('enable-wasm-deferred-loading');
+      expectVisible('no-frequency-based-minification');
+      expectVisible('enable-experiment');
+
+      // Standard options remain visible.
       expectVisible('web-resources-cdn');
       expectVisible('optimization-level');
       expectVisible('source-maps');
