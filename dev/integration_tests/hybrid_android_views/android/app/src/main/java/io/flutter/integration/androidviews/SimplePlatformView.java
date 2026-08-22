@@ -36,6 +36,8 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
             }
         };
         view.setBackgroundColor(0xff0000ff);
+        view.setFocusable(true);
+        view.setFocusableInTouchMode(true);
 
         touchPipe = new TouchPipe(this.methodChannel, view);
     }

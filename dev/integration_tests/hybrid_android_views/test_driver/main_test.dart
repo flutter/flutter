@@ -162,4 +162,39 @@ Future<void> main() async {
       );
     }, timeout: Timeout.none);
   });
+
+  test('PlatformView does not steal focus from TextField when unfocused', () async {
+    final SerializableFinder keyboardTile = find.byValueKey('KeyboardUnfocusListTile');
+    await driver.tap(keyboardTile);
+
+    // Disable emulation to test real native keyboard behavior.
+    await driver.setTextEntryEmulation(enabled: false);
+
+    await driver.waitFor(find.byValueKey('PlatformViewContainer'));
+    await driver.waitUntilNoTransientCallbacks();
+
+    // Tap text field to focus it and open IME.
+    await driver.tap(find.byValueKey('textfield'));
+    await driver.waitUntilNoTransientCallbacks();
+
+    // Tap platform view (causes native focus shift).
+    await driver.tap(find.byValueKey('PlatformViewContainer'));
+    await driver.waitUntilNoTransientCallbacks();
+
+    // Tap text field again to re-focus it.
+    await driver.tap(find.byValueKey('textfield'));
+    await driver.waitUntilNoTransientCallbacks();
+
+    expect(await driver.requestData('commitText'), 'true');
+    await driver.waitUntilNoTransientCallbacks();
+
+    // Also verify the text field value was updated!
+    final SerializableFinder textValue = find.byValueKey('text_value');
+    expect(await driver.getText(textValue), 'updated');
+
+    // Clean up
+    await driver.setTextEntryEmulation(enabled: true);
+    await driver.waitFor(find.pageBack());
+    await driver.tap(find.pageBack());
+  }, timeout: Timeout.none);
 }

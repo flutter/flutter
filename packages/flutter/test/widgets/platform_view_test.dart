@@ -4167,6 +4167,65 @@ void main() {
       expect(lastPlatformViewTextClient['platformViewId'], viewId);
     });
 
+    testWidgets(
+      'PlatformViewLink does not steal focus from text field when platform view unfocuses',
+      (WidgetTester tester) async {
+        late FakePlatformViewController controller;
+        late int viewId;
+
+        final platformViewLink = PlatformViewLink(
+          viewType: 'test',
+          onCreatePlatformView: (PlatformViewCreationParams params) {
+            viewId = params.id;
+            params.onPlatformViewCreated(params.id);
+            controller = FakePlatformViewController(params.id);
+            return controller;
+          },
+          surfaceFactory: (BuildContext context, PlatformViewController controller) {
+            return PlatformViewSurface(
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+              controller: controller,
+              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            );
+          },
+        );
+        await tester.pumpWidget(SizedBox(width: 300, height: 300, child: platformViewLink));
+
+        final Focus platformViewFocusWidget = tester.widget(
+          find.descendant(of: find.byType(PlatformViewLink), matching: find.byType(Focus)),
+        );
+
+        final FocusNode? focusNode = platformViewFocusWidget.focusNode;
+        expect(focusNode, isNotNull);
+        expect(focusNode!.hasFocus, false);
+
+        late Map<String, dynamic> lastPlatformViewTextClient;
+        var callCount = 0;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall call,
+        ) {
+          if (call.method == 'TextInput.setPlatformViewClient') {
+            lastPlatformViewTextClient = call.arguments as Map<String, dynamic>;
+            callCount++;
+          }
+          return null;
+        });
+
+        platformViewFocusWidget.focusNode!.requestFocus();
+        await tester.pump();
+
+        expect(focusNode.hasFocus, true);
+        expect(callCount, 1);
+        expect(lastPlatformViewTextClient['platformViewId'], viewId);
+
+        platformViewFocusWidget.focusNode!.unfocus();
+        await tester.pump();
+
+        expect(focusNode.hasFocus, false);
+        expect(callCount, 1);
+      },
+    );
+
     testWidgets('PlatformViewLink focus change reports error when channel fails', (
       WidgetTester tester,
     ) async {
