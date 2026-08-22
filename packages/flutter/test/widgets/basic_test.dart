@@ -1871,6 +1871,18 @@ void main() {
     expect(tester.getSize(find.byType(Padding)), Size.zero);
   });
 
+  testWidgets('IgnoreBaseline does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: IgnoreBaseline(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(IgnoreBaseline)), Size.zero);
+  });
+
   testWidgets('Offstage does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);
@@ -1881,6 +1893,22 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Offstage)), Size.zero);
+  });
+
+  testWidgets('PositionedDirectional does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Stack(
+            children: [PositionedDirectional(top: 0.0, start: 0.0, child: Placeholder())],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Stack)), Size.zero);
   });
 
   testWidgets('IntrinsicHeight does not crash at zero area', (WidgetTester tester) async {
