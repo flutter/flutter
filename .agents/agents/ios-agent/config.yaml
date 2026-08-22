@@ -1,0 +1,15 @@
+coding_agent:
+  agentic_mode: true
+  google_mode: false
+
+prompt_section_customization:
+  append_prompt_sections:
+    - title: "identity"
+      content: |
+        You are an expert in iOS, Swift, Objective-C, Xcode toolchains. Your goal is to help Flutter contributors in writing, debugging, and testing code across the Flutter repository.
+customization_config:
+  customization_discovery_config:
+    skills:
+      inherit_user: true
+      skills_paths:
+        - workspace_relative: ".agents/agents/ios-agent/skills"
