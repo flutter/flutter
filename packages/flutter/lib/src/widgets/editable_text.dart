@@ -3540,13 +3540,27 @@ class EditableTextState extends State<EditableText>
 
     if (_hasInputConnection) {
       final obscureTextChanged = oldWidget.obscureText != widget.obscureText;
-      if (obscureTextChanged || oldWidget.keyboardType != widget.keyboardType) {
+      final keyboardTypeChanged = oldWidget.keyboardType != widget.keyboardType;
+      final textInputActionChanged = oldWidget.textInputAction != widget.textInputAction;
+
+      if (obscureTextChanged || keyboardTypeChanged || textInputActionChanged) {
         if (obscureTextChanged) {
           // When obscureText is toggled, we should reset its state to prevent the last character from being visible between state changes.
           _obscureShowCharTicksPending = 0;
           _obscureLatestCharIndex = null;
         }
-        _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+
+        if (textInputActionChanged) {
+          if (!_value.composing.isValid) {
+            _pendingTextInputActionRestart = false;
+            _scheduleRestartConnection();
+          } else {
+            _pendingTextInputActionRestart = true;
+            _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+          }
+        } else {
+          _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+        }
       }
     }
 
@@ -4163,6 +4177,7 @@ class EditableTextState extends State<EditableText>
   }
 
   void _closeInputConnectionIfNeeded() {
+    _pendingTextInputActionRestart = false;
     if (_hasInputConnection) {
       _textInputConnection!.close();
       _textInputConnection = null;
@@ -4182,6 +4197,7 @@ class EditableTextState extends State<EditableText>
   }
 
   bool _restartConnectionScheduled = false;
+  bool _pendingTextInputActionRestart = false;
   void _scheduleRestartConnection() {
     if (_restartConnectionScheduled) {
       return;
@@ -4200,6 +4216,7 @@ class EditableTextState extends State<EditableText>
     if (!_hasInputConnection || !_shouldCreateInputConnection) {
       return;
     }
+    _pendingTextInputActionRestart = false;
     _textInputConnection!.close();
     _textInputConnection = null;
     _lastKnownRemoteTextEditingValue = null;
@@ -4733,6 +4750,9 @@ class EditableTextState extends State<EditableText>
     final TextEditingValue oldValue = _value;
     final textChanged = oldValue.text != value.text;
     final bool textCommitted = !oldValue.composing.isCollapsed && value.composing.isCollapsed;
+    if (textCommitted && _pendingTextInputActionRestart) {
+      _scheduleRestartConnection();
+    }
     final selectionChanged = oldValue.selection != value.selection;
 
     if (textChanged || textCommitted) {
