@@ -432,6 +432,107 @@ void main() {
     expect(transformOfArrow.transform.getRotation(), equals(Matrix3.rotationZ(math.pi)));
   });
 
+  testWidgets('DataTable custom sortIconBuilder test', (WidgetTester tester) async {
+    Widget buildTable({
+      DataTableSortIconBuilder? sortIconBuilder,
+      DataTableThemeData? themeData,
+      int? sortColumnIndex = 0,
+      bool sortAscending = true,
+    }) {
+      final Widget table = DataTable(
+        sortColumnIndex: sortColumnIndex,
+        sortAscending: sortAscending,
+        sortIconBuilder: sortIconBuilder,
+        columns: <DataColumn>[
+          DataColumn(label: const Text('Name'), onSort: (int columnIndex, bool ascending) {}),
+          DataColumn(label: const Text('Calories'), onSort: (int columnIndex, bool ascending) {}),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            cells: <DataCell>[DataCell(Text(dessert.name)), DataCell(Text('${dessert.calories}'))],
+          );
+        }).toList(),
+      );
+
+      return MaterialApp(
+        home: Material(
+          child: themeData != null ? DataTableTheme(data: themeData, child: table) : table,
+        ),
+      );
+    }
+
+    // Default (null sortIconBuilder): uses standard Icon(Icons.arrow_upward).
+    await tester.pumpWidget(buildTable());
+    final Finder defaultIconFinder = find.descendant(
+      of: find.byType(DataTable),
+      matching: find.byIcon(Icons.arrow_upward),
+    );
+    expect(defaultIconFinder, findsNWidgets(2));
+
+    // Custom sortIconBuilder on DataTable.
+    await tester.pumpWidget(
+      buildTable(
+        sortIconBuilder: (BuildContext context, bool visible, bool ascending) {
+          return Text(visible ? (ascending ? 'ASC' : 'DESC') : 'INACTIVE');
+        },
+      ),
+    );
+    expect(find.text('ASC'), findsOneWidget);
+    expect(find.text('INACTIVE'), findsOneWidget);
+
+    // Verify sortAscending = false passes ascending = false.
+    await tester.pumpWidget(
+      buildTable(
+        sortAscending: false,
+        sortIconBuilder: (BuildContext context, bool visible, bool ascending) {
+          return Text(visible ? (ascending ? 'ASC' : 'DESC') : 'INACTIVE');
+        },
+      ),
+    );
+    expect(find.text('DESC'), findsOneWidget);
+    expect(find.text('INACTIVE'), findsOneWidget);
+
+    // Verify sorted column index change passes updated visible flags.
+    await tester.pumpWidget(
+      buildTable(
+        sortColumnIndex: 1,
+        sortIconBuilder: (BuildContext context, bool visible, bool ascending) {
+          return Text(visible ? 'SORTED_COL1' : 'UNSORTED_COL0');
+        },
+      ),
+    );
+    expect(find.text('SORTED_COL1'), findsOneWidget);
+    expect(find.text('UNSORTED_COL0'), findsOneWidget);
+
+    // Verify DataTableThemeData.sortIconBuilder theme resolution.
+    await tester.pumpWidget(
+      buildTable(
+        themeData: DataTableThemeData(
+          sortIconBuilder: (BuildContext context, bool visible, bool ascending) {
+            return const Text('THEME_BUILDER');
+          },
+        ),
+      ),
+    );
+    expect(find.text('THEME_BUILDER'), findsNWidgets(2));
+
+    // Verify DataTable.sortIconBuilder overrides DataTableThemeData.sortIconBuilder.
+    await tester.pumpWidget(
+      buildTable(
+        sortIconBuilder: (BuildContext context, bool visible, bool ascending) {
+          return const Text('WIDGET_BUILDER');
+        },
+        themeData: DataTableThemeData(
+          sortIconBuilder: (BuildContext context, bool visible, bool ascending) {
+            return const Text('THEME_BUILDER');
+          },
+        ),
+      ),
+    );
+    expect(find.text('WIDGET_BUILDER'), findsNWidgets(2));
+    expect(find.text('THEME_BUILDER'), findsNothing);
+  });
+
   testWidgets('DataTable sort indicator orientation does not change on state update', (
     WidgetTester tester,
   ) async {
