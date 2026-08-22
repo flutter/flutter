@@ -680,6 +680,46 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
+  testWidgets('Discrete slider has no floating-point rounding errors', (WidgetTester tester) async {
+    final values = <double>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                width: 180.0,
+                child: Slider(
+                  max: 35.0,
+                  divisions: 35,
+                  value: 0.0,
+                  onChanged: (double newValue) {
+                    values.add(newValue);
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset topLeft = tester.getTopLeft(find.byType(Slider));
+    final Offset bottomRight = tester.getBottomRight(find.byType(Slider));
+    final double width = bottomRight.dx - topLeft.dx;
+    final double activeTrackWidth = width - 48.0;
+    final Offset start = topLeft + Offset(24.0, (bottomRight.dy - topLeft.dy) / 2);
+    final TestGesture gesture = await tester.startGesture(start);
+    await gesture.moveTo(start + Offset(activeTrackWidth * 29.0 / 35.0, 0.0));
+    await gesture.up();
+
+    expect(values.isNotEmpty, isTrue);
+    for (final val in values) {
+      expect(val, equals(val.roundToDouble()));
+    }
+  });
+
   testWidgets('Slider can be given zero values', (WidgetTester tester) async {
     final log = <double>[];
     await tester.pumpWidget(
