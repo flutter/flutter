@@ -284,9 +284,9 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
 }
 
 TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
-  RenderCallback callback = [&](RenderTarget& render_target) {
+  RenderCallback callback = [&](RenderTarget& render_target, bool is_onscreen) {
     ContentContext& context = GetContentContext();
-    Canvas canvas(context, render_target, true, false);
+    Canvas canvas(context, render_target, is_onscreen, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
         flutter::DlPoint(0, 0),
@@ -340,9 +340,9 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
   auto color_source = flutter::DlColorSource::MakeRuntimeEffect(
       runtime_effect, {}, uniform_data);
 
-  RenderCallback callback = [&](RenderTarget& render_target) {
+  RenderCallback callback = [&](RenderTarget& render_target, bool is_onscreen) {
     ContentContext& context = GetContentContext();
-    Canvas canvas(context, render_target, true, false);
+    Canvas canvas(context, render_target, is_onscreen, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
         flutter::DlPoint(100, 100),
@@ -409,9 +409,9 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
         flutter::DlTileMode::kClamp);
   }
 
-  RenderCallback callback = [&](RenderTarget& render_target) {
+  RenderCallback callback = [&](RenderTarget& render_target, bool is_onscreen) {
     ContentContext& context = GetContentContext();
-    Canvas canvas(context, render_target, true, false);
+    Canvas canvas(context, render_target, is_onscreen, false);
     // Somehow there's a scaling factor between PlaygroundPoint and Canvas.
     Matrix ctm = Matrix::MakeScale(Vector2(1, 1) * 0.5);
     Matrix i_ctm = ctm.Invert();
