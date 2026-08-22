@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_COMMON_ACCESSIBILITY_BRIDGE_H_
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include "flutter/fml/mapping.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -179,7 +180,9 @@ class AccessibilityBridge
     FlutterTextDirection text_direction;
     FlutterRect rect;
     FlutterTransformation transform;
+    FlutterTransformation hit_test_transform;
     std::vector<int32_t> children_in_traversal_order;
+    std::vector<int32_t> children_in_hit_test_order;
     std::vector<int32_t> custom_accessibility_actions;
     int32_t heading_level;
     std::string identifier;
@@ -201,6 +204,7 @@ class AccessibilityBridge
   std::unordered_map<int32_t, SemanticsNode> pending_semantics_node_updates_;
   std::unordered_map<int32_t, SemanticsCustomAction>
       pending_semantics_custom_action_updates_;
+  std::unordered_map<int32_t, AccessibilityNodeId> hit_test_parent_ids_;
   AccessibilityNodeId last_focused_id_ = ui::AXNode::kInvalidAXID;
 
   void InitAXTree(const ui::AXTreeUpdate& initial_state);
@@ -211,7 +215,9 @@ class AccessibilityBridge
 
   void GetSubTreeList(const SemanticsNode& target,
                       std::vector<SemanticsNode>& result);
+  void UpdateHitTestParentIds();
   void ConvertFlutterUpdate(const SemanticsNode& node,
+                            const std::unordered_set<int32_t>& update_node_ids,
                             ui::AXTreeUpdate& tree_update);
   void SetRoleFromFlutterUpdate(ui::AXNodeData& node_data,
                                 const SemanticsNode& node);

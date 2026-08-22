@@ -328,7 +328,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   engine.semanticsEnabled = YES;
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
@@ -349,7 +349,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   root.custom_accessibility_actions_count = 0;
   root.identifier = "";
 
-  FlutterSemanticsNode2 child1;
+  FlutterSemanticsNode2 child1{};
   child1.id = 1;
   child1.flags2 = &child_flags;
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
@@ -424,7 +424,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   engine.semanticsEnabled = YES;
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
-  FlutterSemanticsNode2 root;
+  FlutterSemanticsNode2 root{};
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
@@ -444,7 +444,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
 
-  FlutterSemanticsNode2 child1;
+  FlutterSemanticsNode2 child1{};
   child1.id = 1;
   child1.flags2 = &child_flags;
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
