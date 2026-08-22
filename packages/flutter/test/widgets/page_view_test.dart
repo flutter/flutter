@@ -1874,4 +1874,59 @@ void main() {
       expect(controller.page, 1.0);
     },
   );
+
+  testWidgets('PageView fling snaps to a page when accessible navigation is enabled', (
+    WidgetTester tester,
+  ) async {
+    // Accessible navigation must not alter the ballistic simulation that
+    // snaps a PageView to whole pages after a fling.
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(accessibleNavigation: true),
+          child: PageView(
+            controller: controller,
+            children: const <Widget>[Text('Page 1'), Text('Page 2'), Text('Page 3')],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
+    await tester.pumpAndSettle();
+
+    expect(controller.page, 1.0);
+  });
+
+  testWidgets('PageView drag without velocity snaps back when accessible navigation is enabled', (
+    WidgetTester tester,
+  ) async {
+    // Accessible navigation must not alter the ballistic simulation that
+    // returns a PageView to the current page after a drag that ends without
+    // enough velocity to turn the page.
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(accessibleNavigation: true),
+          child: PageView(
+            controller: controller,
+            children: const <Widget>[Text('Page 1'), Text('Page 2'), Text('Page 3')],
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(PageView), const Offset(-100.0, 0.0));
+    await tester.pumpAndSettle();
+
+    expect(controller.page, 0.0);
+  });
 }

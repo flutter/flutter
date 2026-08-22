@@ -870,6 +870,360 @@ void main() {
       semantics.dispose();
     },
   );
+
+  group('semantic scroll actions do not overscroll at the boundaries', () {
+    // Regression test for https://github.com/flutter/flutter/issues/11665
+
+    // Bouncing ListView under a MediaQuery, tracking the extreme offsets seen.
+    Future<(ScrollController, int Function(), List<double>)> pumpList(
+      WidgetTester tester, {
+      required SemanticsTester semantics,
+      required bool accessibleNavigation,
+    }) async {
+      final controller = ScrollController();
+      final extremes = <double>[0.0, 0.0]; // [minObserved, maxObserved]
+      controller.addListener(() {
+        extremes[0] = controller.offset < extremes[0] ? controller.offset : extremes[0];
+        extremes[1] = controller.offset > extremes[1] ? controller.offset : extremes[1];
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(accessibleNavigation: accessibleNavigation),
+            child: ListView(
+              controller: controller,
+              physics: const BouncingScrollPhysics(),
+              children: List<Widget>.generate(
+                80,
+                (int i) => SizedBox(height: 40.0, child: Text('$i')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Inside the bounds the node exposes both directions plus scrollToOffset.
+      int scrollableId() => semantics
+          .nodesWith(
+            actions: <SemanticsAction>[
+              SemanticsAction.scrollUp,
+              SemanticsAction.scrollDown,
+              SemanticsAction.scrollToOffset,
+            ],
+          )
+          .single
+          .id;
+
+      return (controller, scrollableId, extremes);
+    }
+
+    testWidgets('scroll up near the max extent clamps instead of overscrolling', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final (ScrollController controller, int Function() scrollableId, List<double> extremes) =
+          await pumpList(tester, semantics: semantics, accessibleNavigation: true);
+
+      final double maxExtent = controller.position.maxScrollExtent;
+      // Less room left than one semantic scroll step (size * scrollFactor).
+      controller.jumpTo(maxExtent - 10.0);
+      await tester.pump();
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        scrollableId(),
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      // Never went past the edge, and settled on it.
+      expect(extremes[1], lessThanOrEqualTo(maxExtent));
+      expect(controller.offset, moreOrLessEquals(maxExtent));
+
+      controller.dispose();
+      semantics.dispose();
+    });
+
+    testWidgets('scroll down near the min extent clamps instead of overscrolling', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final (ScrollController controller, int Function() scrollableId, List<double> extremes) =
+          await pumpList(tester, semantics: semantics, accessibleNavigation: true);
+
+      final double minExtent = controller.position.minScrollExtent;
+      controller.jumpTo(minExtent + 10.0);
+      await tester.pump();
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        scrollableId(),
+        SemanticsAction.scrollDown,
+      );
+      await tester.pumpAndSettle();
+
+      // Never went past the edge, and settled on it.
+      expect(extremes[0], greaterThanOrEqualTo(minExtent));
+      expect(controller.offset, moreOrLessEquals(minExtent));
+
+      controller.dispose();
+      semantics.dispose();
+    });
+
+    testWidgets('mid-list semantic scroll still scrolls and stays in bounds', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final (ScrollController controller, int Function() scrollableId, List<double> extremes) =
+          await pumpList(tester, semantics: semantics, accessibleNavigation: true);
+
+      final double maxExtent = controller.position.maxScrollExtent;
+      controller.jumpTo(maxExtent / 2.0);
+      await tester.pump();
+      final double before = controller.offset;
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        scrollableId(),
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      // Still scrolled towards the end, and stayed in range.
+      expect(controller.offset, greaterThan(before));
+      expect(extremes[1], lessThanOrEqualTo(maxExtent));
+      expect(controller.offset, lessThanOrEqualTo(maxExtent));
+
+      controller.dispose();
+      semantics.dispose();
+    });
+
+    testWidgets('does not make a NeverScrollable view scrollable', (WidgetTester tester) async {
+      final semantics = SemanticsTester(tester);
+      final controller = ScrollController();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: ListView(
+              controller: controller,
+              physics: const NeverScrollableScrollPhysics(),
+              children: List<Widget>.generate(
+                80,
+                (int i) => SizedBox(height: 40.0, child: Text('$i')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Accessible navigation must not alter the effective physics, otherwise
+      // a non-scrollable view would gain implicit scrolling (onScrollToOffset).
+      expect(controller.position.physics, isA<NeverScrollableScrollPhysics>());
+      expect(
+        semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollToOffset]),
+        isEmpty,
+      );
+
+      controller.dispose();
+      semantics.dispose();
+    });
+
+    testWidgets('semantic scrolls land exactly on the scroll extents of a short list', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final extremes = <double>[0.0, 0.0]; // [minObserved, maxObserved]
+      controller.addListener(() {
+        extremes[0] = controller.offset < extremes[0] ? controller.offset : extremes[0];
+        extremes[1] = controller.offset > extremes[1] ? controller.offset : extremes[1];
+      });
+
+      // The content is only 200 pixels taller than the 600 pixel viewport, so
+      // a single semantic scroll (80% of the viewport) crosses the full scroll
+      // extent in either direction.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: ListView(
+              controller: controller,
+              physics: const BouncingScrollPhysics(),
+              children: List<Widget>.generate(
+                20,
+                (int i) => SizedBox(height: 40.0, child: Text('$i')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final double minExtent = controller.position.minScrollExtent;
+      final double maxExtent = controller.position.maxScrollExtent;
+      expect(controller.offset, minExtent);
+
+      // At the top only the forward action is exposed.
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.offset, maxExtent);
+
+      // Landing exactly on the max extent leaves only the backward action.
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[
+                SemanticsAction.scrollDown,
+                SemanticsAction.scrollToOffset,
+              ],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollDown,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.offset, minExtent);
+      // The position never left the scrollable range.
+      expect(extremes[0], minExtent);
+      expect(extremes[1], maxExtent);
+
+      semantics.dispose();
+    });
+  });
+
+  testWidgets(
+    'BouncingScrollPhysics allows overscroll drag on short list when accessibleNavigation is true',
+    (WidgetTester tester) async {
+      // A drag past the leading edge of a short bouncing list must still
+      // produce negative overscroll (which gestures like pull-to-refresh
+      // depend on) when a screen reader is active.
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      var minOffset = 0.0;
+      controller.addListener(() {
+        minOffset = controller.offset < minOffset ? controller.offset : minOffset;
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: ListView(
+              controller: controller,
+              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+              children: const <Widget>[SizedBox(height: 50.0, child: Text('Short List Item'))],
+            ),
+          ),
+        ),
+      );
+
+      // Drag down past the top edge.
+      await tester.drag(find.text('Short List Item'), const Offset(0.0, 100.0));
+      await tester.pump();
+
+      expect(minOffset, lessThan(0.0));
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('scroll feed keeps child actions and boundary nodes with accessibleNavigation', (
+    WidgetTester tester,
+  ) async {
+    // The children of a bouncing scroll view and their semantics actions must
+    // be unaffected by a screen reader being active.
+    final semantics = SemanticsTester(tester);
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(accessibleNavigation: true),
+          child: ListView.builder(
+            controller: controller,
+            physics: const BouncingScrollPhysics(),
+            itemCount: 3,
+            itemBuilder: (BuildContext context, int index) {
+              final int itemNumber = index + 1;
+              return SizedBox(
+                height: 400.0,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Semantics(
+                      label: 'Video content',
+                      onTapHint: 'Toggle mute',
+                      onLongPressHint: 'Pause video',
+                      child: const SizedBox(height: 100.0, width: double.infinity),
+                    ),
+                    const Text('Sponsored'),
+                    Semantics(
+                      button: true,
+                      enabled: true,
+                      label: 'More info',
+                      child: const SizedBox(height: 30.0, width: 100.0),
+                    ),
+                    Semantics(
+                      button: true,
+                      enabled: true,
+                      label: 'Show menu',
+                      child: const SizedBox(height: 30.0, width: 100.0),
+                    ),
+                    Text(
+                      'Test sponsor $itemNumber\nTest headline $itemNumber\nTest caption $itemNumber',
+                    ),
+                    Semantics(
+                      button: true,
+                      enabled: true,
+                      label: 'Test button',
+                      child: const SizedBox(height: 30.0, width: 100.0),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // All 3 sponsor items are present, including the boundary item that is
+    // built but not visible yet.
+    expect(
+      find.text('Test sponsor 1\nTest headline 1\nTest caption 1', skipOffstage: false),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Test sponsor 2\nTest headline 2\nTest caption 2', skipOffstage: false),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Test sponsor 3\nTest headline 3\nTest caption 3', skipOffstage: false),
+      findsOneWidget,
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('More info').first),
+      matchesSemantics(isButton: true, hasEnabledState: true, isEnabled: true, label: 'More info'),
+    );
+
+    semantics.dispose();
+  });
 }
 
 Future<void> flingUp(WidgetTester tester, {int repetitions = 1}) =>

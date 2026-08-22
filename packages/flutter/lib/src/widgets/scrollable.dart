@@ -749,6 +749,9 @@ class ScrollableState extends State<Scrollable>
 
   final GlobalKey _scrollSemanticsKey = GlobalKey();
 
+  late final _ScrollableSemanticsGestureDelegate _semanticsGestureDelegate =
+      _ScrollableSemanticsGestureDelegate(state: this);
+
   @override
   @protected
   void setSemanticsActions(Set<SemanticsAction> actions) {
@@ -1031,6 +1034,7 @@ class ScrollableState extends State<Scrollable>
           gestures: _gestureRecognizers,
           behavior: widget.hitTestBehavior,
           excludeFromSemantics: widget.excludeFromSemantics,
+          semantics: _semanticsGestureDelegate,
           child: Semantics(
             explicitChildNodes: !widget.excludeFromSemantics,
             child: IgnorePointer(
@@ -1759,6 +1763,113 @@ class _RenderScrollSemantics extends RenderProxyBox {
   void clearSemantics() {
     super.clearSemantics();
     _innerNode = null;
+  }
+}
+
+// The [SemanticsGestureDelegate] for the [RawGestureDetector] of a
+// [Scrollable].
+//
+// Assistive technologies scroll a [Scrollable] by dispatching semantic scroll
+// actions, which [RenderSemanticsGestureHandler] turns into a synthesized drag
+// whose length is a fixed fraction of the viewport, regardless of how much
+// scrollable content is left. Near the edge of the content such a drag
+// overshoots the scrollable's bounds, which physics like
+// [BouncingScrollPhysics] turn into an overscroll followed by a bounce back,
+// instead of a scroll that stops at the boundary.
+//
+// This delegate replays the same drag sequence that the default delegate of
+// [RawGestureDetector] would, except that the drag delta is clamped so that
+// the scroll offset never leaves the range from
+// [ScrollMetrics.minScrollExtent] to [ScrollMetrics.maxScrollExtent]: a
+// semantic scroll lands exactly on the boundary instead of overscrolling past
+// it. Only the synthesized drags of semantic scroll actions are dispatched
+// through this delegate; drags from real pointer gestures are unaffected.
+class _ScrollableSemanticsGestureDelegate extends SemanticsGestureDelegate {
+  _ScrollableSemanticsGestureDelegate({required this.state});
+
+  final ScrollableState state;
+
+  @override
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+    // Mirrors the default delegate: a drag handler is only exposed while the
+    // corresponding gesture recognizer is registered (see [setCanDrag]), so
+    // that exactly the same semantic scroll actions are available as with the
+    // default delegate. A pan recognizer (used by [TwoDimensionalScrollable]
+    // for diagonal scrolling) handles both axes.
+    final Map<Type, GestureRecognizerFactory> recognizers = state._gestureRecognizers;
+    final bool canPan = recognizers.containsKey(PanGestureRecognizer);
+    final bool canDragHorizontally =
+        canPan || recognizers.containsKey(HorizontalDragGestureRecognizer);
+    final bool canDragVertically = canPan || recognizers.containsKey(VerticalDragGestureRecognizer);
+    renderObject.onHorizontalDragUpdate = canDragHorizontally
+        ? (DragUpdateDetails details) =>
+              _performSemanticDrag(renderObject, details, Axis.horizontal)
+        : null;
+    renderObject.onVerticalDragUpdate = canDragVertically
+        ? (DragUpdateDetails details) => _performSemanticDrag(renderObject, details, Axis.vertical)
+        : null;
+  }
+
+  // Clamps the synthesized drag so that it cannot move the scroll position out
+  // of its bounds, and then replays the drag sequence that the default
+  // delegate produces for a semantic scroll: down, start, a single update, and
+  // an end without velocity.
+  void _performSemanticDrag(
+    RenderSemanticsGestureHandler renderObject,
+    DragUpdateDetails details,
+    Axis dragAxis,
+  ) {
+    var effectiveDetails = details;
+    // Only the delta along this scrollable's own axis can be clamped against
+    // its scroll position. For [TwoDimensionalScrollable], the drag handlers
+    // forward deltas along the other axis to the scrollable of that axis.
+    if (dragAxis == state.widget.axis) {
+      final ScrollPosition position = state.position;
+      final double primaryDelta = switch (dragAxis) {
+        Axis.horizontal => details.delta.dx,
+        Axis.vertical => details.delta.dy,
+      };
+      // A drag and the scroll it causes point in opposite directions, unless
+      // the axis direction is reversed.
+      final bool reversed = axisDirectionIsReversed(state.axisDirection);
+      final double pixelDelta = reversed ? primaryDelta : -primaryDelta;
+      final double targetPixels = clampDouble(
+        position.pixels + pixelDelta,
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+      final double clampedPixelDelta = targetPixels - position.pixels;
+      if (clampedPixelDelta == 0.0) {
+        // The position is already at the boundary the drag points to.
+        return;
+      }
+      if (clampedPixelDelta != pixelDelta) {
+        final double clampedPrimaryDelta = reversed ? clampedPixelDelta : -clampedPixelDelta;
+        effectiveDetails = DragUpdateDetails(
+          delta: switch (dragAxis) {
+            Axis.horizontal => Offset(clampedPrimaryDelta, 0.0),
+            Axis.vertical => Offset(0.0, clampedPrimaryDelta),
+          },
+          primaryDelta: clampedPrimaryDelta,
+          globalPosition: details.globalPosition,
+          localPosition: details.localPosition,
+        );
+      }
+    }
+    final Offset localCenter = renderObject.size.center(Offset.zero);
+    final Offset globalCenter = renderObject.localToGlobal(localCenter);
+    final Offset localEnd = localCenter + effectiveDetails.delta;
+    final Offset globalEnd = renderObject.localToGlobal(localEnd);
+    state._handleDragDown(
+      DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+    );
+    state._handleDragStart(
+      DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+    );
+    state._handleDragUpdate(effectiveDetails);
+    state._handleDragEnd(
+      DragEndDetails(primaryVelocity: 0.0, localPosition: localEnd, globalPosition: globalEnd),
+    );
   }
 }
 
