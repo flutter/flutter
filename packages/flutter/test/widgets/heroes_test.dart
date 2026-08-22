@@ -1822,28 +1822,45 @@ Future<void> main() async {
 
     expect(destinationTracker.states, hasLength(1));
     final State<_LifecycleTrackingWidget> destinationState = destinationTracker.states.single;
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
 
     // Start the push flight. The destination child moves into the overlay.
     await tester.pump();
     expect(destinationTracker.states, hasLength(1));
     expect(destinationTracker.disposals, 0);
     expect(destinationState.mounted, isTrue);
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
 
     // Finish the push flight. The same State moves back into the destination route.
     await tester.pumpAndSettle();
     expect(destinationTracker.states, hasLength(1));
     expect(destinationTracker.disposals, 0);
     expect(destinationState.mounted, isTrue);
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
 
     // Start the pop flight. The home Hero is now the destination Hero.
     navigatorKey.currentState!.pop();
     await tester.pump();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
     expect(homeTracker.states, hasLength(1));
     expect(homeTracker.disposals, 0);
     expect(homeState.mounted, isTrue);
 
     // Finish the pop flight and verify that the original home State is restored.
     await tester.pumpAndSettle();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 1);
+    expect(destinationState.mounted, isFalse);
     expect(homeTracker.states, hasLength(1));
     expect(homeTracker.disposals, 0);
     expect(homeState.mounted, isTrue);
