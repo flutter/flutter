@@ -4005,6 +4005,56 @@ void main() {
       expect(targetFocus.hasFocus, isTrue);
     },
   );
+
+  testWidgets('removes the listener from a caller-provided focusNode on dispose', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = _SpyFocusNode();
+    addTearDown(focusNode.dispose);
+    final textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          focusNode: focusNode,
+          textEditingController: textEditingController,
+          optionsBuilder: (TextEditingValue textEditingValue) => const <String>[],
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                return TestTextField(
+                  focusNode: fieldFocusNode,
+                  controller: fieldTextEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                return const SizedBox.shrink();
+              },
+        ),
+      ),
+    );
+    expect(focusNode.hasListeners, isTrue);
+
+    // Unmounting the RawAutocomplete removes everything it added to the
+    // caller-owned focusNode, so that it cannot fire on a disposed State.
+    await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
+    expect(focusNode.hasListeners, isFalse);
+  });
+}
+
+class _SpyFocusNode extends FocusNode {
+  @override
+  bool get hasListeners => super.hasListeners;
 }
 
 /// A simple tappable widget used as a replacement for [InkWell] in tests.
