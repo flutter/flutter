@@ -19,6 +19,7 @@ class TestRoute<T> extends PageRoute<T> {
     this.transitionsBuilder,
     super.fullscreenDialog,
     super.allowSnapshotting,
+    super.directionalTraversalEdgeBehavior,
   }) : assert(child != null || builder != null, 'Either child or builder must be provided.');
 
   final Widget? child;
