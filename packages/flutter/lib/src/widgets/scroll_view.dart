@@ -1524,6 +1524,7 @@ class ListView extends BoxScrollView {
     super.physics,
     super.shrinkWrap,
     super.padding,
+    this.itemExtentBuilder,
     required NullableIndexedWidgetBuilder itemBuilder,
     @Deprecated(
       'Use findItemIndexCallback instead. '
@@ -1558,7 +1559,6 @@ class ListView extends BoxScrollView {
          'Use findItemIndexCallback as findChildIndexCallback is deprecated.',
        ),
        itemExtent = null,
-       itemExtentBuilder = null,
        prototypeItem = null,
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
