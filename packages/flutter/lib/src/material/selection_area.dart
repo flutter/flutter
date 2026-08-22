@@ -7,6 +7,8 @@
 /// @docImport 'selectable_text.dart';
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
@@ -54,6 +56,8 @@ class SelectionArea extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     required this.child,
   });
 
@@ -93,6 +97,12 @@ class SelectionArea extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// {@macro flutter.widgets.selectionHeightStyle}
+  final ui.BoxHeightStyle? selectionHeightStyle;
+
+  /// {@macro flutter.widgets.selectionWidthStyle}
+  final ui.BoxWidthStyle? selectionWidthStyle;
 
   /// The child widget this selection area applies to.
   ///
@@ -139,6 +149,8 @@ class SelectionAreaState extends State<SelectionArea> {
       magnifierConfiguration:
           widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
+      selectionHeightStyle: widget.selectionHeightStyle,
+      selectionWidthStyle: widget.selectionWidthStyle,
       child: widget.child,
     );
   }
