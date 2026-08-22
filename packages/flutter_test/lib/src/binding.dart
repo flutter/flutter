@@ -1727,12 +1727,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Zone? _parentZone;
+  Zone? _testZone;
 
   VoidCallback _createTestCompletionHandler(String testDescription, Completer<void> completer) {
     return () {
       // This can get called twice, in the case of a Future without listeners failing, and then
       // our main future completing.
       assert(Zone.current == _parentZone);
+      _testZone = null;
       if (_pendingExceptionDetails != null) {
         debugPrint =
             debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
@@ -1948,6 +1950,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     );
     _parentZone = Zone.current;
     final Zone testZone = _parentZone!.fork(specification: errorHandlingZoneSpecification);
+    _testZone = testZone;
     testZone
         .runBinary<Future<void>, Future<void> Function(), VoidCallback>(
           _runTestBody,
@@ -2812,6 +2815,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void handleBeginFrame(Duration? rawTimeStamp) {
+    if (_testZone != null) {
+      _testZone!.runUnary<void, Duration?>(_handleBeginFrame, rawTimeStamp);
+    } else {
+      _handleBeginFrame(rawTimeStamp);
+    }
+  }
+
+  void _handleBeginFrame(Duration? rawTimeStamp) {
     if (_drawFrame != _HandleDrawFrame.reset) {
       throw StateError('handleBeginFrame() called before previous handleDrawFrame()');
     }
@@ -2830,6 +2841,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void handleDrawFrame() {
+    if (_testZone != null) {
+      _testZone!.run<void>(_handleDrawFrame);
+    } else {
+      _handleDrawFrame();
+    }
+  }
+
+  void _handleDrawFrame() {
     if (_drawFrame == _HandleDrawFrame.reset) {
       throw StateError('handleDrawFrame() called without paired handleBeginFrame()');
     }
@@ -2947,6 +2966,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// forwarded to [deviceEventDispatcher].
   @override
   void handlePointerEvent(PointerEvent event) {
+    if (_testZone != null) {
+      _testZone!.runUnary<void, PointerEvent>(_handlePointerEvent, event);
+    } else {
+      _handlePointerEvent(event);
+    }
+  }
+
+  void _handlePointerEvent(PointerEvent event) {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
         RenderView? target;
