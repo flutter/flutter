@@ -103,9 +103,10 @@ class LoggingThumbShape extends SliderComponentShape {
 
 // A value indicator shape to log labelPainter text.
 class LoggingValueIndicatorShape extends SliderComponentShape {
-  LoggingValueIndicatorShape(this.logLabel);
+  LoggingValueIndicatorShape(this.logLabel, [this.logPainter]);
 
   final List<InlineSpan> logLabel;
+  final List<TextPainter>? logPainter;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -128,6 +129,7 @@ class LoggingValueIndicatorShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     logLabel.add(labelPainter.text!);
+    logPainter?.add(labelPainter);
   }
 }
 
@@ -5678,6 +5680,43 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Slider)), Size.zero);
+  });
+
+  testWidgets('Slider label respects horizontal buffer and avoids screen overflow', (
+    WidgetTester tester,
+  ) async {
+    final logPainters = <TextPainter>[];
+    final shape = LoggingValueIndicatorShape(<InlineSpan>[], logPainters);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SliderTheme(
+            data: SliderThemeData(
+              showValueIndicator: ShowValueIndicator.always,
+              valueIndicatorShape: shape,
+            ),
+            child: Slider(
+              value: 0.5,
+              divisions: 10,
+              label:
+                  'A very long label string that exceeds standard screen widths to test clipping behavior',
+              onChanged: (double value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Slider)));
+    await tester.pumpAndSettle();
+
+    final double screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+
+    expect(logPainters, isNotEmpty);
+    expect(logPainters.last.width, lessThanOrEqualTo(screenWidth - 64.0));
+
+    await gesture.up();
   });
 }
 
