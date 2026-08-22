@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart' show CupertinoPageScaffold, showCupertinoSheet;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -776,6 +777,77 @@ void main() {
       await tester.pumpAndSettle();
     },
     variant: TargetPlatformVariant.all(),
+  );
+
+  for (final builder in <PageTransitionsBuilder>[
+    const PredictiveBackPageTransitionsBuilder(),
+    const PredictiveBackFullscreenPageTransitionsBuilder(),
+  ]) {
+    testWidgets(
+      'route covered by a CupertinoSheet does not switch to the predictive back '
+      'transition while the sheet is dragged (${builder.runtimeType})',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              pageTransitionsTheme: PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  for (final TargetPlatform platform in TargetPlatform.values)
+                    platform: builder,
+                },
+              ),
+            ),
+            home: Builder(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: Center(
+                    child: TextButton(
+                      onPressed: () {
+                        showCupertinoSheet<void>(
+                          context: context,
+                          scrollableBuilder: _sheetContent,
+                        );
+                      },
+                      child: const Text('open sheet'),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('open sheet'));
+        await tester.pumpAndSettle();
+
+        expect(_findPredictiveBackPageTransition(builder), findsNothing);
+        expect(_findFallbackPageTransition(builder), findsOneWidget);
+
+        final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+        // A small drag first to win the gesture arena, then a larger one.
+        await gesture.moveBy(const Offset(0, 30));
+        await gesture.moveBy(const Offset(0, 100));
+        await tester.pump();
+
+        expect(_findPredictiveBackPageTransition(builder), findsNothing);
+        expect(_findFallbackPageTransition(builder), findsOneWidget);
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+      },
+    );
+  }
+}
+
+Widget _sheetContent(BuildContext context, ScrollController controller) {
+  return CupertinoPageScaffold(
+    child: ListView.builder(
+      controller: controller,
+      itemCount: 30,
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(height: 56.0, child: Text('item $index'));
+      },
+    ),
   );
 }
 
