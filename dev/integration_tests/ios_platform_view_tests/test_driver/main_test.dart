@@ -18,7 +18,7 @@ void main() {
       await driver.close();
     });
 
-    test('Merge thread to create and remove platform views should not crash', () async {
+    test('Adding and removing platform views should not crash', () async {
       // Start pushing in a page with platform view, merge threads.
       final SerializableFinder platformViewButton = find.byValueKey('platform_view_button');
       await driver.waitFor(platformViewButton);
@@ -42,7 +42,7 @@ void main() {
       expect(driverHealth.status, HealthStatus.ok);
     }, timeout: Timeout.none);
 
-    test('Merge thread to create and remove platform views should not crash', () async {
+    test('Adding and removing platform views and animating afterwards should not crash', () async {
       // Start pushing in a page with platform view, merge threads.
       final SerializableFinder platformViewButton = find.byValueKey('platform_view_button');
       await driver.waitFor(platformViewButton);

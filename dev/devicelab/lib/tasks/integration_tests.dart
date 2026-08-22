@@ -8,17 +8,19 @@ import '../framework/talkback.dart' hide adbPath;
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-TaskFunction createChannelsIntegrationTest() {
+TaskFunction createChannelsIntegrationTest({String? deviceIdOverride}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/channels',
     'integration_test/main_test.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createPlatformInteractionTest() {
+TaskFunction createPlatformInteractionTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/platform_interaction',
     'lib/main.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -89,11 +91,12 @@ TaskFunction createAndroidSemanticsIntegrationTest() {
   ).call;
 }
 
-TaskFunction createIOSPlatformViewTests() {
+TaskFunction createIOSPlatformViewTests({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
     'lib/main.dart',
     extraOptions: <String>['--dart-define=ENABLE_DRIVER_EXTENSION=true'],
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
