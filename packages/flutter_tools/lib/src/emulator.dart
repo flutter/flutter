@@ -208,7 +208,7 @@ class EmulatorManager {
 
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr
-        .split('\n')
+        .split(RegExp(r'\r?\n'))
         .where((String l) => _androidApiVersion.hasMatch(l))
         .where((String l) => l.contains('system-images'))
         .where((String l) => l.contains('google_apis_playstore'))
