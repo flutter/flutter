@@ -105,8 +105,10 @@ class Scrollbar extends StatelessWidget {
   /// {@macro flutter.widgets.Scrollbar.thumbVisibility}
   ///
   /// If this property is null, then [ScrollbarThemeData.thumbVisibility] of
-  /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
-  /// is false.
+  /// [ThemeData.scrollbarTheme] is used. If that is also null, the platform
+  /// preference reported by [MediaQueryData.persistentScrollbars] is used,
+  /// which is false unless the platform asks for persistently visible
+  /// scrollbars.
   ///
   /// If the thumb visibility is related to the scrollbar's material state,
   /// use the global [ScrollbarThemeData.thumbVisibility] or override the
@@ -153,7 +155,7 @@ class Scrollbar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
       return CupertinoScrollbar(
-        thumbVisibility: thumbVisibility ?? false,
+        thumbVisibility: thumbVisibility,
         thickness: thickness ?? CupertinoScrollbar.defaultThickness,
         thicknessWhileDragging: thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
         radius: radius ?? CupertinoScrollbar.defaultRadius,
@@ -209,9 +211,13 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   // On Android, scrollbars should match native appearance.
   late bool _useAndroidScrollbar;
 
+  // Resolution order: the widget property, then the theme, then
+  // RawScrollbarState's platform preference (MediaQueryData.persistentScrollbars).
   @override
   bool get showScrollbar =>
-      widget.thumbVisibility ?? _scrollbarTheme.thumbVisibility?.resolve(_states) ?? false;
+      widget.thumbVisibility ??
+      _scrollbarTheme.thumbVisibility?.resolve(_states) ??
+      super.showScrollbar;
 
   @override
   bool get enableGestures =>

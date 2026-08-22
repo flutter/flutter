@@ -51,6 +51,10 @@ class ScrollbarThemeData with Diagnosticable {
 
   /// Overrides the default value of [Scrollbar.thumbVisibility] in all
   /// descendant [Scrollbar] widgets.
+  ///
+  /// This is consulted only when [Scrollbar.thumbVisibility] is null, and it
+  /// takes precedence over the platform preference reported by
+  /// [MediaQueryData.persistentScrollbars].
   final WidgetStateProperty<bool?>? thumbVisibility;
 
   /// Overrides the default value of [Scrollbar.thickness] in all
