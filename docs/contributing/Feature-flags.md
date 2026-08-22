@@ -405,9 +405,25 @@ to evolve over time.
 
 # Limitations
 
-The Flutter engine and embedders cannot use Flutter's feature flags directly.
+The Flutter engine and embedders cannot query Flutter's feature flags directly at runtime.
 
-If an embedder needs feature flags, you can instead use the project's platform-specific configuration.
+However, the flutter tool runs upstream of the platform builds, so it can query a
+feature flag and pipe the value into the build, where it is baked into the
+platform-specific configuration that the engine or embedder reads. For example, the
+`enable-hcpp` flag is passed to Gradle as `-Penable-hcpp`, and the Flutter Gradle
+Plugin injects the corresponding `io.flutter.embedding.android.EnableHcpp` manifest
+metadata into the merged manifest, unless the merged manifest already sets it. The
+resulting precedence is `--[no-]enable-hcpp` > `AndroidManifest.xml` > the feature
+flag.
+
+Note that this technique only works where the injected configuration cannot conflict
+with configuration the developer owns. For example, the `EnableHcpp` injection is
+limited to application projects: injecting into an add-to-app module (aar) manifest
+would merge into the host app's manifest, where a conflicting explicit value in the
+host manifest fails the host build in the Android manifest merger rather than taking
+priority.
+
+If an embedder needs feature flags and no such piping exists, you can instead use the project's platform-specific configuration.
 
 On Android, use `AndroidManifest.xml`:
 

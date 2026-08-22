@@ -1198,8 +1198,10 @@ object FlutterPluginUtils {
 
     /**
      * Adds tasks that inject the `io.flutter.embedding.android.EnableHcpp` meta-data into the
-     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true` (i.e.
-     * when the `--enable-hcpp` flag was passed).
+     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true`. The
+     * tool does that when the `enable-hcpp` feature flag is on, or when `--enable-hcpp` was
+     * passed explicitly (these are not the same thing: an explicit flag sets the property
+     * regardless of the feature flag).
      *
      * The meta-data is only added when not already present in the merged manifest, so an
      * explicit value in the developer's manifest always takes priority over the tool's default.
