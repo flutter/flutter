@@ -114,7 +114,7 @@ private final class LockScope: @unchecked Sendable {
   }
 }
 
-// The data structure is made internal for testing.
+// The data structure is exposed internally for testing.
 extension FlutterRunLoop {
   struct Task {
     let block: @MainActor () -> Void
