@@ -406,10 +406,15 @@ extern CFTimeInterval display_link_target;
     return;
   }
 
+  // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
+  // Might also be placebo
+  [self setNeedsDisplay];
+
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
   self.contents = texture.surface;
   [CATransaction commit];
+  // Submit the committed layer update to Core Animation before returning.
   [CATransaction flush];
   _displayLink.paused = NO;
   _displayLinkPauseCountdown = 0;
@@ -422,27 +427,24 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)presentTexture:(FlutterTexture*)texture {
-  BOOL validTexture = NO;
   @synchronized(self) {
-    validTexture = texture.texture.width == _drawableSize.width &&
-                   texture.texture.height == _drawableSize.height;
-    if (validTexture) {
-      if (_front != nil) {
-        [_availableTextures addObject:_front];
-      }
-      _front = texture;
-      texture.presentedTime = CACurrentMediaTime();
+    if (texture.texture.width != _drawableSize.width ||
+        texture.texture.height != _drawableSize.height) {
+      return;
     }
-  }
-  if (!validTexture) {
-    return;
-  }
-  if ([NSThread isMainThread]) {
-    [self presentOnMainThread:texture];
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    if (_front != nil) {
+      [_availableTextures addObject:_front];
+    }
+    _front = texture;
+    texture.presentedTime = CACurrentMediaTime();
+    if ([NSThread isMainThread]) {
       [self presentOnMainThread:texture];
-    });
+    } else {
+      // Core animation layers can only be updated on main thread.
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [self presentOnMainThread:texture];
+      });
+    }
   }
 }
 
