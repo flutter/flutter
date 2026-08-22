@@ -709,6 +709,55 @@ void main() {
   );
 
   testWithoutContext(
+    'xcodebuild -list getInfo throws a tool exit explaining how to resolve multiple projects',
+    () async {
+      const workingDirectory = '/ios';
+      final Directory buildDirectory = fileSystem.directory('build/ios');
+      fileSystem.directory('$workingDirectory/Runner.xcodeproj').createSync(recursive: true);
+      fileSystem.directory('$workingDirectory/Widget.xcodeproj').createSync(recursive: true);
+
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        kResolvePackagesCommand,
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
+            '-list',
+          ],
+          exitCode: 78,
+          stderr: 'xcodebuild failed',
+        ),
+      ]);
+
+      final xcodeProjectInterpreter = XcodeProjectInterpreter(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: fakeProcessManager,
+        analytics: const NoOpAnalytics(),
+      );
+
+      await expectLater(
+        () => xcodeProjectInterpreter.getInfo(
+          FakeXcodeBasedProject(workingDirectory, fileSystem),
+          buildDirectory: buildDirectory,
+        ),
+        throwsToolExit(
+          message: 'Found multiple Xcode projects in ios/: Runner.xcodeproj, Widget.xcodeproj.',
+        ),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext(
     'xcodebuild -list getInfo throws a tool exit when project is corrupted',
     () async {
       const workingDirectory = '/';
