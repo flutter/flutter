@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import android.content.pm.ActivityInfo;
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -450,8 +451,7 @@ public class PlatformChannel {
     void vibrateHapticFeedback(@NonNull HapticFeedbackType feedbackType);
 
     /** The Flutter application would like to display in the given {@code androidOrientation}. */
-    // TODO(mattcarroll): add @ScreenOrientation annotation
-    void setPreferredOrientations(int androidOrientation);
+    void setPreferredOrientations(@ActivityInfo.ScreenOrientation int androidOrientation);
 
     /**
      * The Flutter application would like to be displayed in Android's app switcher with the visual
@@ -701,11 +701,10 @@ public class PlatformChannel {
    * screen.
    */
   public static class AppSwitcherDescription {
-    // TODO(mattcarroll): add color annotation
-    public final int color;
+    @ColorInt public final int color;
     @NonNull public final String label;
 
-    public AppSwitcherDescription(int color, @NonNull String label) {
+    public AppSwitcherDescription(@ColorInt int color, @NonNull String label) {
       this.color = color;
       this.label = label;
     }
@@ -713,24 +712,21 @@ public class PlatformChannel {
 
   /** The color and brightness of system chrome, e.g., status bar and system navigation bar. */
   public static class SystemChromeStyle {
-    // TODO(mattcarroll): add color annotation
-    @Nullable public final Integer statusBarColor;
+    @Nullable @ColorInt public final Integer statusBarColor;
     @Nullable public final Brightness statusBarIconBrightness;
     @Nullable public final Boolean systemStatusBarContrastEnforced;
-    // TODO(mattcarroll): add color annotation
-    @Nullable public final Integer systemNavigationBarColor;
+    @Nullable @ColorInt public final Integer systemNavigationBarColor;
     @Nullable public final Brightness systemNavigationBarIconBrightness;
-    // TODO(mattcarroll): add color annotation
-    @Nullable public final Integer systemNavigationBarDividerColor;
+    @Nullable @ColorInt public final Integer systemNavigationBarDividerColor;
     @Nullable public final Boolean systemNavigationBarContrastEnforced;
 
     public SystemChromeStyle(
-        @Nullable Integer statusBarColor,
+        @Nullable @ColorInt Integer statusBarColor,
         @Nullable Brightness statusBarIconBrightness,
         @Nullable Boolean systemStatusBarContrastEnforced,
-        @Nullable Integer systemNavigationBarColor,
+        @Nullable @ColorInt Integer systemNavigationBarColor,
         @Nullable Brightness systemNavigationBarIconBrightness,
-        @Nullable Integer systemNavigationBarDividerColor,
+        @Nullable @ColorInt Integer systemNavigationBarDividerColor,
         @Nullable Boolean systemNavigationBarContrastEnforced) {
       this.statusBarColor = statusBarColor;
       this.statusBarIconBrightness = statusBarIconBrightness;
