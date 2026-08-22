@@ -642,4 +642,9 @@ enum TextureType {
 
   /// A texture sourced from an external source.
   textureExternalOES,
+
+  /// A 2-dimensional texture with multiple same-size layers, sampled in
+  /// shaders as `sampler2DArray`. The layer count is set with the
+  /// `layerCount` argument to `GpuContext.createTexture`.
+  texture2DArray,
 }
