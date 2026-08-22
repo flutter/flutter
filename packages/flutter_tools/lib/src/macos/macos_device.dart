@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:process/process.dart';
 
+import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -20,18 +23,18 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
-    required super.processManager,
-    required super.logger,
     required super.fileSystem,
+    required super.logger,
     required super.operatingSystemUtils,
-  }) : _processManager = processManager,
-       _logger = logger,
+    required super.processManager,
+  }) : _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
+       _processManager = processManager,
        super('macos', platformType: PlatformType.macos, ephemeral: false);
 
-  final ProcessManager _processManager;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
+  final ProcessManager _processManager;
 
   @override
   Future<bool> isSupported() async => true;
@@ -77,9 +80,11 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  String? executablePathForDevice(covariant MacOSApp package, BuildInfo buildInfo) {
-    return package.executable(buildInfo);
-  }
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) =>
+      switch (package) {
+        final MacOSApp macosApp => macosApp.executable(buildInfo),
+        _ => null,
+      };
 
   @override
   void onAttached(covariant MacOSApp package, BuildInfo buildInfo, Process process) {
@@ -92,36 +97,38 @@ class MacOSDevice extends DesktopDevice {
       _logger.printError('Failed to foreground app; application bundle not found');
       return;
     }
-    _processManager.run(<String>['open', applicationBundle]).then((ProcessResult result) {
-      if (result.exitCode != 0) {
-        _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
-      }
-    });
+    unawaited(
+      _processManager.run(<String>['open', applicationBundle]).then((ProcessResult result) {
+        if (result.exitCode != 0) {
+          _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
+        }
+      }),
+    );
   }
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    required Platform platform,
-    required MacOSWorkflow macOSWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
     required FileSystem fileSystem,
+    required Logger logger,
+    required MacOSWorkflow macOSWorkflow,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _platform = platform,
+    required Platform platform,
+    required ProcessManager processManager,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
        _macOSWorkflow = macOSWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
+       _platform = platform,
+       _processManager = processManager,
        super('macOS devices');
 
+  final FileSystem _fileSystem;
+  final Logger _logger;
   final MacOSWorkflow _macOSWorkflow;
+  final OperatingSystemUtils _operatingSystemUtils;
   final Platform _platform;
   final ProcessManager _processManager;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -139,10 +146,10 @@ class MacOSDevices extends PollingDeviceDiscovery {
     }
     return <Device>[
       MacOSDevice(
-        processManager: _processManager,
-        logger: _logger,
         fileSystem: _fileSystem,
+        logger: _logger,
         operatingSystemUtils: _operatingSystemUtils,
+        processManager: _processManager,
       ),
     ];
   }
