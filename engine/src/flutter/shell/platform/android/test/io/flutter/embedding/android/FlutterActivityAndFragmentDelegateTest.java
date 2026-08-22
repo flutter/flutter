@@ -303,14 +303,21 @@ public class FlutterActivityAndFragmentDelegateTest {
     verify(cachedEngine.getLifecycleChannel(), times(1)).appIsResumed();
   }
 
-  @Test(expected = IllegalStateException.class)
-  public void itThrowsExceptionIfCachedEngineDoesNotExist() {
+  @Test
+  public void itFallsBackToNewEngineIfCachedEngineDoesNotExist() {
     // ---- Test setup ----
     // Adjust fake host to request cached engine that does not exist.
-    when(mockHost.getCachedEngineId()).thenReturn("my_flutter_engine");
+    when(mockHost.getCachedEngineId()).thenReturn("non_existent_engine_id");
+    when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(null);
+
+    FlutterEngineGroup mockEngineGroup = mock(FlutterEngineGroup.class);
+    when(mockEngineGroup.createAndRunEngine(any(FlutterEngineGroup.Options.class)))
+        .thenReturn(mockFlutterEngine);
 
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    FlutterActivityAndFragmentDelegate delegate =
+        new FlutterActivityAndFragmentDelegate(mockHost, mockEngineGroup);
+
     try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
       scenario.onActivity(
           activity -> {
@@ -319,10 +326,10 @@ public class FlutterActivityAndFragmentDelegateTest {
             // --- Execute the behavior under test ---
             // The FlutterEngine existence is verified in onAttach()
             delegate.onAttach(ctx);
+
+            assertEquals(mockFlutterEngine, delegate.getFlutterEngine());
+            assertFalse(delegate.isFlutterEngineFromHost());
           });
-    } catch (IllegalStateException e) {
-      // Expect IllegalStateException.
-      throw e;
     }
   }
 
