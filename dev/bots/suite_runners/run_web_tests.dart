@@ -24,6 +24,7 @@ import 'package:path/path.dart' as path;
 import '../browser.dart';
 import '../run_command.dart';
 import '../service_worker_test.dart';
+import '../tool_subsharding.dart';
 import '../utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -634,6 +635,13 @@ class WebTestsSuite {
     // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
     // https://github.com/flutter/flutter/issues/146003
     if (!dryRun) {
+      // Parse the test results and report the individual test cases to LUCI
+      // ResultDB (no-op off LUCI) so web test shards populate the "Test Results"
+      // tab.
+      if (metricFile.existsSync()) {
+        final test = TestFileReporterResults.fromFile(metricFile);
+        await reportTestResultsToResultDb(test, workingDirectory: workingDirectory);
+      }
       metricFile.deleteSync();
     }
   }
