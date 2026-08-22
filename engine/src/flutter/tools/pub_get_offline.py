@@ -42,7 +42,6 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'tools', 'const_finder'),
     os.path.join(ENGINE_DIR, 'tools', 'engine_tool'),
     os.path.join(ENGINE_DIR, 'tools', 'gen_web_locale_keymap'),
-    os.path.join(ENGINE_DIR, 'tools', 'githooks'),
     os.path.join(ENGINE_DIR, 'tools', 'golden_tests_harvester'),
     os.path.join(ENGINE_DIR, 'tools', 'header_guard_check'),
     os.path.join(ENGINE_DIR, 'tools', 'mcp'),
