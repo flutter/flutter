@@ -59,7 +59,47 @@ void doTests() {
         isTrue,
         reason: 'Should install flutter viewport meta tag.',
       );
-      expect(warnings, hasLength(1), reason: 'Should print a warning to the user.');
+      expect(
+        warnings,
+        isEmpty,
+        reason:
+            'Should not warn about a width=device-width viewport, which is '
+            'compatible with Flutter and is what apps are expected to ship in '
+            'index.html. See https://github.com/flutter/flutter/issues/129324',
+      );
+
+      printWarning = oldPrintWarning;
+    });
+
+    test('Warns about (and replaces) an incompatible viewport meta', () {
+      final warnings = <String>[];
+      final void Function(String) oldPrintWarning = printWarning;
+      printWarning = (String message) {
+        warnings.add(message);
+      };
+
+      for (final DomElement meta in domDocument.head!.querySelectorAll('meta[name="viewport"]')) {
+        meta.remove();
+      }
+      domDocument.head!.append(
+        createDomHTMLMetaElement()
+          ..name = 'viewport'
+          // A fixed-width (non device-width) viewport is not compatible with
+          // Flutter and gets replaced, so the user should be warned.
+          ..content = 'width=1024',
+      );
+
+      // ignore: unused_local_variable
+      final strategy = FullPageEmbeddingStrategy();
+
+      final DomElement? flutterMeta = domDocument.querySelector('meta[name="viewport"]');
+      expect(flutterMeta, isNotNull);
+      expect(flutterMeta!.hasAttribute('flt-viewport'), isTrue);
+      expect(
+        warnings,
+        hasLength(1),
+        reason: 'Should warn that an incompatible viewport is replaced.',
+      );
       expect(warnings.single, contains(RegExp(r'Found an existing.*meta.*viewport')));
 
       printWarning = oldPrintWarning;

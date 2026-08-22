@@ -75,7 +75,15 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
         // Filter out the meta tag that the engine placed on the page. This is
         // to avoid UI flicker during hot restart. Hot restart will clean up the
         // old meta tag synchronously with the first post-restart frame.
-        if (!viewportMeta.hasAttribute('flt-viewport')) {
+        //
+        // Also don't warn about an app-provided `width=device-width` viewport.
+        // That configuration is compatible with Flutter, and shipping it in the
+        // initial HTML is in fact required on iOS so the correct viewport (and
+        // devicePixelRatio) applies from the first layout rather than the 980px
+        // desktop fallback. See https://github.com/flutter/flutter/issues/129324
+        final String? content = viewportMeta.getAttribute('content');
+        final bool isCompatible = content != null && content.contains('width=device-width');
+        if (!viewportMeta.hasAttribute('flt-viewport') && !isCompatible) {
           printWarning(
             'Found an existing <meta name="viewport"> tag. Flutter Web uses its own viewport '
             'configuration for better compatibility with Flutter. This tag will be replaced.',
