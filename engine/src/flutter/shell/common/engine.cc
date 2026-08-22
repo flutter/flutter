@@ -580,11 +580,6 @@ FontCollection& Engine::GetFontCollection() {
   return *font_collection_;
 }
 
-void Engine::ScheduleSecondaryVsyncCallback(uintptr_t id,
-                                            const fml::closure& callback) {
-  animator_->ScheduleSecondaryVsyncCallback(id, callback);
-}
-
 void Engine::HandleAssetPlatformMessage(
     std::unique_ptr<PlatformMessage> message) {
   fml::RefPtr<PlatformMessageResponse> response = message->response();

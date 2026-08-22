@@ -54,8 +54,28 @@ void Animator::EnqueueTraceFlowId(uint64_t trace_flow_id) {
           return;
         }
         self->trace_flow_ids_.push_back(trace_flow_id);
-        self->ScheduleMaybeClearTraceFlowIds();
       });
+}
+
+void Animator::MaybeCleanTraceFlowIds() {
+  if (!frame_scheduled_ && !trace_flow_ids_.empty()) {
+    size_t flow_id_count = trace_flow_ids_.size();
+    std::unique_ptr<uint64_t[]> flow_ids =
+        std::make_unique<uint64_t[]>(flow_id_count);
+    for (size_t i = 0; i < flow_id_count; ++i) {
+      flow_ids.get()[i] = trace_flow_ids_.at(i);
+    }
+
+    TRACE_EVENT0_WITH_FLOW_IDS(
+        "flutter", "Animator::ScheduleMaybeClearTraceFlowIds - callback",
+        flow_id_count, flow_ids.get());
+
+    while (!trace_flow_ids_.empty()) {
+      auto flow_id = trace_flow_ids_.front();
+      TRACE_FLOW_END("flutter", "PointerEvent", flow_id);
+      trace_flow_ids_.pop_front();
+    }
+  }
 }
 
 void Animator::BeginFrame(
@@ -279,38 +299,6 @@ void Animator::OnAllViewsRendered() {
   if (!layer_trees_tasks_.empty()) {
     EndFrame();
   }
-}
-
-void Animator::ScheduleSecondaryVsyncCallback(uintptr_t id,
-                                              const fml::closure& callback) {
-  waiter_->ScheduleSecondaryCallback(id, callback);
-}
-
-void Animator::ScheduleMaybeClearTraceFlowIds() {
-  waiter_->ScheduleSecondaryCallback(
-      reinterpret_cast<uintptr_t>(this), [self = weak_factory_.GetWeakPtr()] {
-        if (!self) {
-          return;
-        }
-        if (!self->frame_scheduled_ && !self->trace_flow_ids_.empty()) {
-          size_t flow_id_count = self->trace_flow_ids_.size();
-          std::unique_ptr<uint64_t[]> flow_ids =
-              std::make_unique<uint64_t[]>(flow_id_count);
-          for (size_t i = 0; i < flow_id_count; ++i) {
-            flow_ids.get()[i] = self->trace_flow_ids_.at(i);
-          }
-
-          TRACE_EVENT0_WITH_FLOW_IDS(
-              "flutter", "Animator::ScheduleMaybeClearTraceFlowIds - callback",
-              flow_id_count, flow_ids.get());
-
-          while (!self->trace_flow_ids_.empty()) {
-            auto flow_id = self->trace_flow_ids_.front();
-            TRACE_FLOW_END("flutter", "PointerEvent", flow_id);
-            self->trace_flow_ids_.pop_front();
-          }
-        }
-      });
 }
 
 }  // namespace flutter
