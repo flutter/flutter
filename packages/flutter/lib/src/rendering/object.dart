@@ -3951,9 +3951,11 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// By default, the method will annotate `node` with `config` and add the
   /// `children` to it.
   ///
-  /// Subclasses can override this method to add additional [SemanticsNode]s
-  /// to the tree. If new [SemanticsNode]s are instantiated in this method
-  /// they must be disposed in [clearSemantics].
+  /// Deprecated. Override [assembleSemanticsNodes] instead.
+  @Deprecated(
+    'Override assembleSemanticsNodes instead. '
+    'This feature was deprecated after v3.25.0-0.0.pre.',
+  )
   void assembleSemanticsNode(
     SemanticsNode node,
     SemanticsConfiguration config,
@@ -3961,6 +3963,29 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ) {
     // TODO(a14n): remove the following cast by updating type of parameter in either updateWith or assembleSemanticsNode
     node.updateWith(config: config, childrenInInversePaintOrder: children as List<SemanticsNode>);
+  }
+
+  /// Assemble the [SemanticsNode]s for this [RenderObject].
+  ///
+  /// If [describeSemanticsConfiguration] sets
+  /// [SemanticsConfiguration.isSemanticBoundary] to true, this method is called
+  /// with the `node` created for this [RenderObject], the `config` to be
+  /// applied to that node and the `children` [SemanticsNode]s that descendants
+  /// of this [RenderObject] have generated.
+  ///
+  /// By default, the method will delegate to [assembleSemanticsNode] and return
+  /// a list containing only `node`.
+  ///
+  /// Subclasses can override this method to emit multiple [SemanticsNode]s
+  /// or interleave them. If new [SemanticsNode]s are instantiated in this method
+  /// they must be disposed in [clearSemantics].
+  Iterable<SemanticsNode> assembleSemanticsNodes(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    assembleSemanticsNode(node, config, children);
+    return <SemanticsNode>[node];
   }
 
   // EVENTS
@@ -6280,7 +6305,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         // Create an inner node to hold the configuration and children, and the cachedSemanticsNode will
         // hold the inner node and the sibling nodes so that all of them can be merged together.
         final innerNode = SemanticsNode(showOnScreen: renderObject.showOnScreen);
-        renderObject.assembleSemanticsNode(innerNode, configProvider.effective, children);
+        final Iterable<SemanticsNode> assembledInner = renderObject.assembleSemanticsNodes(
+          innerNode,
+          configProvider.effective,
+          children,
+        );
 
         final config = SemanticsConfiguration()
           ..isSemanticBoundary = true
@@ -6289,16 +6318,26 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         node.updateWith(
           config: config,
           childrenInInversePaintOrder: <SemanticsNode>[
-            innerNode,
+            ...assembledInner,
             ..._producedSiblingNodesAndOwners.keys,
           ],
         );
+        semanticsNodes.clear();
+        semanticsNodes.add(node);
       } else {
-        renderObject.assembleSemanticsNode(node, configProvider.effective, children);
+        final Iterable<SemanticsNode> assembled = renderObject.assembleSemanticsNodes(
+          node,
+          configProvider.effective,
+          children,
+        );
+        semanticsNodes.clear();
+        semanticsNodes.addAll(assembled);
       }
     } else {
       assert(!configProvider.effective.isMergingSemanticsOfDescendants);
       node.updateWith(config: configProvider.effective, childrenInInversePaintOrder: children);
+      semanticsNodes.clear();
+      semanticsNodes.add(node);
     }
   }
 
@@ -6316,10 +6355,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     _mergeSiblingGroup(usedSemanticsIds);
     _buildSemanticsSubtree(usedSemanticsIds: usedSemanticsIds);
 
-    // At this point, the cachedSemanticsNode should be latest semantics node
-    // representing this render object and _producedSiblingNodesAndOwners contains the latest
-    // sibling nodes.
-    semanticsNodes.add(node);
+    // At this point, semanticsNodes contains the latest semantics nodes
+    // representing this render object, and _producedSiblingNodesAndOwners contains the latest
+    // sibling nodes from delegates.
     if (!_needsMergingSiblingNodesIntoSelf) {
       semanticsNodes.addAll(_producedSiblingNodesAndOwners.keys);
     }

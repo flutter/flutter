@@ -13,7 +13,6 @@ library;
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -1705,37 +1704,63 @@ class _RenderDecoration extends RenderBox
     return false;
   }
 
-  ChildSemanticsConfigurationsResult _childSemanticsConfigurationDelegate(
-    List<SemanticsConfiguration> childConfigs,
-  ) {
-    final builder = ChildSemanticsConfigurationsResultBuilder();
-
-    final mergeGroups = <SemanticsTag, List<SemanticsConfiguration>>{};
-    final tags = <SemanticsTag>{
-      _InputDecoratorState._kPrefixSemanticsTag,
-      _InputDecoratorState._kPrefixIconSemanticsTag,
-      _InputDecoratorState._kSuffixSemanticsTag,
-      _InputDecoratorState._kSuffixIconSemanticsTag,
-    };
-
-    for (final childConfig in childConfigs) {
-      final SemanticsTag? tag = tags.firstWhereOrNull(
-        (SemanticsTag tag) => childConfig.tagsChildrenWith(tag),
-      );
-      if (tag != null) {
-        mergeGroups.putIfAbsent(tag, () => <SemanticsConfiguration>[]).add(childConfig);
-      } else {
-        builder.markAsMergeUp(childConfig);
-      }
-    }
-
-    mergeGroups.values.forEach(builder.markAsSiblingMergeGroup);
-    return builder.build();
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    config.isSemanticBoundary = true;
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    config.childConfigurationsDelegate = _childSemanticsConfigurationDelegate;
+  Iterable<SemanticsNode> assembleSemanticsNodes(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    SemanticsNode? findNodeTagged(SemanticsTag tag) {
+      for (final n in children) {
+        if (n.isTagged(tag)) {
+          return n;
+        }
+      }
+      return null;
+    }
+
+    SemanticsNode? prefixNode = findNodeTagged(_InputDecoratorState._kPrefixSemanticsTag);
+    final SemanticsNode? prefixIconNode = findNodeTagged(
+      _InputDecoratorState._kPrefixIconSemanticsTag,
+    );
+    if (prefixNode != null && prefixIconNode != null) {
+      prefixNode.mergeWith(prefixIconNode);
+    } else {
+      prefixNode ??= prefixIconNode;
+    }
+
+    SemanticsNode? suffixNode = findNodeTagged(_InputDecoratorState._kSuffixSemanticsTag);
+    final SemanticsNode? suffixIconNode = findNodeTagged(
+      _InputDecoratorState._kSuffixIconSemanticsTag,
+    );
+    if (suffixNode != null && suffixIconNode != null) {
+      suffixNode.mergeWith(suffixIconNode);
+    } else {
+      suffixNode ??= suffixIconNode;
+    }
+
+    final extractedSiblings = <SemanticsNode?>{
+      prefixNode,
+      prefixIconNode,
+      suffixNode,
+      suffixIconNode,
+    };
+    final List<SemanticsNode> fieldChildren = children
+        .where((SemanticsNode n) => !extractedSiblings.contains(n))
+        .toList();
+
+    node.updateWith(config: config, childrenInInversePaintOrder: fieldChildren);
+
+    return <SemanticsNode>[
+      if (prefixNode != null) prefixNode,
+      node,
+      if (suffixNode != null) suffixNode,
+    ];
   }
 }
 
@@ -1829,6 +1854,7 @@ class _AffixText extends StatelessWidget {
           curve: _kTransitionCurve,
           opacity: labelIsFloating ? 1.0 : 0.0,
           child: Semantics(
+            container: true,
             sortKey: semanticsSortKey,
             tagForChildren: semanticsTag,
             child: child ?? (text == null ? null : Text(text!, style: style)),
@@ -2491,6 +2517,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                       ).merge(iconButtonTheme.style),
                     ),
                     child: Semantics(
+                      container: true,
                       tagForChildren: _kPrefixIconSemanticsTag,
                       child: decoration.prefixIcon,
                     ),
@@ -2531,6 +2558,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                       ).merge(iconButtonTheme.style),
                     ),
                     child: Semantics(
+                      container: true,
                       tagForChildren: _kSuffixIconSemanticsTag,
                       child: decoration.suffixIcon,
                     ),
