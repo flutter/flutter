@@ -51,8 +51,19 @@ CapabilitiesVK::CapabilitiesVK(bool enable_validations,
       }
     }
   } else {
+    // In embedder mode, use the extensions provided by the embedder but still
+    // enumerate available layers so that validation layers can be detected and
+    // enabled when requested.
     for (const auto& ext : embedder_instance_extensions_) {
       exts_[kInstanceLayer].insert(ext);
+    }
+    auto layers = vk::enumerateInstanceLayerProperties();
+    if (layers.result == vk::Result::eSuccess) {
+      for (const auto& layer : layers.value) {
+        // Register the layer name so HasLayer() works. Don't enumerate
+        // per-layer extensions - the embedder controls the instance.
+        exts_[std::string(layer.layerName)];
+      }
     }
   }
 
@@ -99,13 +110,21 @@ std::optional<std::vector<std::string>>
 CapabilitiesVK::GetEnabledInstanceExtensions() const {
   std::vector<std::string> required;
 
-  if (!HasExtension("VK_KHR_surface")) {
-    // Swapchain support is required and this is a dependency of
-    // VK_KHR_swapchain.
-    VALIDATION_LOG << "Could not find the surface extension.";
-    return std::nullopt;
+  // An embedder that does not provide the surface extension presents
+  // rendered images itself (for example through a platform compositor), so
+  // neither VK_KHR_surface nor any WSI extension is required.
+  const bool embedder_controls_presentation =
+      use_embedder_extensions_ && !HasExtension("VK_KHR_surface");
+
+  if (!embedder_controls_presentation) {
+    if (!HasExtension("VK_KHR_surface")) {
+      // Swapchain support is required and this is a dependency of
+      // VK_KHR_swapchain.
+      VALIDATION_LOG << "Could not find the surface extension.";
+      return std::nullopt;
+    }
+    required.push_back("VK_KHR_surface");
   }
-  required.push_back("VK_KHR_surface");
 
   auto has_wsi = false;
   if (HasExtension("VK_MVK_macos_surface")) {
@@ -148,7 +167,7 @@ CapabilitiesVK::GetEnabledInstanceExtensions() const {
     has_wsi = true;
   }
 
-  if (!has_wsi) {
+  if (!has_wsi && !embedder_controls_presentation) {
     // Don't really care which WSI extension there is as long there is at least
     // one.
     VALIDATION_LOG << "Could not find a WSI extension.";
@@ -284,6 +303,11 @@ CapabilitiesVK::GetEnabledDeviceExtensions(
   auto for_each_common_extension = [&](RequiredCommonDeviceExtensionVK ext) {
     auto name = GetExtensionName(ext);
     if (exts.find(name) == exts.end()) {
+      if (use_embedder_extensions_) {
+        // The embedder controls presentation and may legitimately omit
+        // swapchain support (see GetEnabledInstanceExtensions).
+        return true;
+      }
       VALIDATION_LOG << "Device does not support required extension: " << name;
       return false;
     }
