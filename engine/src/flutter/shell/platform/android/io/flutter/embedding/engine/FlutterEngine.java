@@ -149,6 +149,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
           platformViewsController.onPreEngineRestart();
           platformViewsController2.onPreEngineRestart();
           restorationChannel.clearData();
+          platformChannel.clearData();
         }
 
         @Override
