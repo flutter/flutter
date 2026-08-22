@@ -41,6 +41,10 @@ class UserMessages {
   String androidSdkInstallHelp(Platform platform) =>
       'Try re-installing or updating your Android SDK,\n'
       'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
+  String get androidMissingAvdManager =>
+      'avdmanager is missing from the Android SDK command-line tools.\n'
+      'Please ensure that command-line tools are installed or updated in Android Studio,\n'
+      'or manually download them and install them in the SDK cmdline-tools directory.';
   // Also occurs in AndroidLicenseValidator
   String androidStatusInfo(String version) => 'Android SDK version $version';
 
