@@ -53,8 +53,9 @@ bool Context::MakeCurrent(const Surface& surface) const {
                                                 ) == EGL_TRUE;
   if (!result) {
     IMPELLER_LOG_EGL_ERROR;
+  } else {
+    DispatchLifecyleEvent(LifecycleEvent::kDidMakeCurrent);
   }
-  DispatchLifecyleEvent(LifecycleEvent::kDidMakeCurrent);
   return result;
 }
 

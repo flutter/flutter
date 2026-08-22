@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/android_context_gl_impeller.h"
+
+#include <atomic>
+#include <thread>
+
+#include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/impeller/toolkit/egl/context.h"
+#include "flutter/impeller/toolkit/egl/surface.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -134,6 +141,55 @@ TEST_F(AndroidContextGLImpellerTest, FallbackForEmulator) {
   auto context = std::make_unique<AndroidContextGLImpeller>(std::move(display),
                                                             true, nullptr);
   ASSERT_TRUE(context);
+}
+
+TEST_F(AndroidContextGLImpellerTest,
+       FailedMakeCurrentDoesNotDispatchDidMakeCurrent) {
+  impeller::egl::Display display;
+  ASSERT_TRUE(display.IsValid());
+
+  std::atomic<int> did_make_current_count{0};
+  auto config = display.ChooseConfig(ConfigDescriptor());
+  ASSERT_NE(config, nullptr);
+  auto context = display.CreateContext(*config, nullptr);
+  ASSERT_NE(context, nullptr);
+  auto surface = display.CreatePixelBufferSurface(*config, 1u, 1u);
+  ASSERT_NE(surface, nullptr);
+
+  ASSERT_TRUE(
+      context
+          ->AddLifecycleListener([&did_make_current_count](auto event) {
+            if (event ==
+                impeller::egl::Context::LifecycleEvent::kDidMakeCurrent) {
+              did_make_current_count++;
+            }
+          })
+          .has_value());
+
+  fml::AutoResetWaitableEvent context_is_current;
+  fml::AutoResetWaitableEvent allow_context_clear;
+  bool worker_made_current = false;
+  bool worker_cleared_current = false;
+  std::thread worker([&] {
+    // Holding the context current here makes the main-thread bind below fail
+    // with EGL_BAD_ACCESS.
+    worker_made_current = context->MakeCurrent(*surface);
+    context_is_current.Signal();
+    allow_context_clear.Wait();
+    if (worker_made_current) {
+      worker_cleared_current = context->ClearCurrent();
+    }
+  });
+
+  context_is_current.Wait();
+  const bool main_made_current = context->MakeCurrent(*surface);
+  allow_context_clear.Signal();
+  worker.join();
+
+  EXPECT_TRUE(worker_made_current);
+  EXPECT_FALSE(main_made_current);
+  EXPECT_TRUE(worker_cleared_current);
+  EXPECT_EQ(did_make_current_count.load(), 1);
 }
 
 }  // namespace testing
