@@ -1760,6 +1760,51 @@ void main() {
     );
     expect(tester.getSize(find.byType(NavigationBar)), Size.zero);
   });
+
+  testWidgets('NavigationDestination label defaults to TextAlign.center when none given', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildWidget(
+        NavigationBar(
+          destinations: const <Widget>[
+            NavigationDestination(icon: Icon(Icons.home), label: 'HOME'),
+            NavigationDestination(icon: Icon(Icons.settings), label: 'SETTINGS'),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+      ),
+    );
+
+    final Text text = tester.widget<Text>(find.text('HOME'));
+    expect(text.textAlign, TextAlign.center);
+  });
+
+  testWidgets('NavigationDestination label respects the given textAlign parameter', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildWidget(
+        NavigationBar(
+          destinations: const <Widget>[
+            NavigationDestination(icon: Icon(Icons.home), label: 'HOME', textAlign: TextAlign.left),
+            NavigationDestination(
+              icon: Icon(Icons.settings),
+              label: 'SETTINGS',
+              textAlign: TextAlign.right,
+            ),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+      ),
+    );
+
+    final Text homeText = tester.widget<Text>(find.text('HOME'));
+    expect(homeText.textAlign, TextAlign.left);
+
+    final Text settingsText = tester.widget<Text>(find.text('SETTINGS'));
+    expect(settingsText.textAlign, TextAlign.right);
+  });
 }
 
 Widget _buildWidget(Widget child, {bool? useMaterial3}) {
