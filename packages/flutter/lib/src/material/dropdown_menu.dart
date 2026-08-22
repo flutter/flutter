@@ -733,6 +733,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final FocusNode _internalFocusNode = FocusNode();
   WidgetStatesController? _highlightedItemStatesController;
 
+  FocusNode? _focusNode;
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode(debugLabel: '${widget.runtimeType}'));
+
   FocusNode? _localTrailingIconButtonFocusNode;
   FocusNode get _trailingIconButtonFocusNode =>
       widget.trailingIconFocusNode ?? (_localTrailingIconButtonFocusNode ??= FocusNode());
@@ -762,6 +765,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
     _internalFocusNode.dispose();
+    _focusNode?.dispose();
+    _focusNode = null;
     _localTrailingIconButtonFocusNode?.dispose();
     _localTrailingIconButtonFocusNode = null;
     _highlightedItemStatesController?.dispose();
@@ -774,6 +779,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (oldWidget.controller != widget.controller) {
       _localTextEditingController?.dispose();
       _localTextEditingController = null;
+    }
+    if (oldWidget.focusNode != widget.focusNode) {
+      _focusNode?.dispose();
+      _focusNode = null;
     }
     if (oldWidget.enableFilter != widget.enableFilter) {
       if (!widget.enableFilter) {
@@ -1282,7 +1291,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               key: _anchorKey,
               enabled: widget.enabled,
               mouseCursor: effectiveMouseCursor,
-              focusNode: widget.focusNode,
+              focusNode: _effectiveFocusNode,
               canRequestFocus: canRequestFocus(),
               enableInteractiveSelection: !isButton,
               readOnly: isButton,
