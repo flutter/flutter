@@ -71,6 +71,10 @@ import Foundation
 private final class LockScope: @unchecked Sendable {
   private let lock = NSLock()
   private let unsafeTaskQueue = FlutterRunLoop.UnsafeTaskQueue()
+  // This Timer needs to be rearmed when:
+  // - A new delayed task is scheduled and its fire date is earlier than
+  //   the timer's current fire date.
+  // - Expired tasks are popped
   let timer: Timer
 
   init() {
