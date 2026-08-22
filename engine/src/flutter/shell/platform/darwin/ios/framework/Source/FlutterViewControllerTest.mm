@@ -313,6 +313,36 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     NSMutableArray<id<FlutterKeyPrimaryResponder>>* primaryResponders;
 @end
 
+@interface ViewportMetricsCaptureEngine : FlutterEnginePartialMock {
+  flutter::ViewportMetrics _lastViewportMetrics;
+}
+@property(nonatomic, readonly) const flutter::ViewportMetrics& lastViewportMetrics;
+@property(nonatomic, assign) NSUInteger updateViewportMetricsCallCount;
+@end
+
+@implementation ViewportMetricsCaptureEngine
+
+- (instancetype)init {
+  self = [super init];
+  if (self) {
+    // These tests attach the controller's view to a UIWindow, which exercises engine methods that
+    // require a shell.
+    [self createShell:@"" libraryURI:@"" initialRoute:nil];
+  }
+  return self;
+}
+
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics {
+  _lastViewportMetrics = viewportMetrics;
+  self.updateViewportMetricsCallCount += 1;
+}
+
+- (const flutter::ViewportMetrics&)lastViewportMetrics {
+  return _lastViewportMetrics;
+}
+
+@end
+
 @interface FlutterEmbedderKeyResponder (Tests)
 @property(nonatomic, copy, readonly) FlutterSendKeyEvent sendEvent;
 @end
@@ -328,6 +358,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 @property(nonatomic, assign) BOOL awokenFromNib;
+@property(nonatomic, strong) UIView* displayCornerRadiusProbe API_AVAILABLE(ios(26.0));
 
 - (void)createTouchRateCorrectionVSyncClientIfNeeded;
 - (void)surfaceUpdated:(BOOL)appeared;
@@ -359,6 +390,74 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification;
 @end
+
+API_AVAILABLE(ios(26.0))
+@interface TestDisplayCornerRadiusProbe : UIView
+@property(nonatomic, assign) CGFloat topLeftRadius;
+@property(nonatomic, assign) CGFloat topRightRadius;
+@property(nonatomic, assign) CGFloat bottomRightRadius;
+@property(nonatomic, assign) CGFloat bottomLeftRadius;
+@end
+
+@implementation TestDisplayCornerRadiusProbe
+
+- (CGFloat)effectiveRadiusForCorner:(UIRectCorner)corner {
+  switch (corner) {
+    case UIRectCornerTopLeft:
+      return self.topLeftRadius;
+    case UIRectCornerTopRight:
+      return self.topRightRadius;
+    case UIRectCornerBottomRight:
+      return self.bottomRightRadius;
+    case UIRectCornerBottomLeft:
+      return self.bottomLeftRadius;
+    default:
+      return 0.0;
+  }
+}
+
+@end
+
+API_AVAILABLE(ios(26.0))
+@interface TestLayoutTrackingDisplayCornerRadiusProbe : TestDisplayCornerRadiusProbe
+@property(nonatomic, assign) NSUInteger layoutIfNeededCallCount;
+@property(nonatomic, assign) NSUInteger setFrameCallCount;
+@end
+
+@implementation TestLayoutTrackingDisplayCornerRadiusProbe
+
+- (void)layoutIfNeeded {
+  self.layoutIfNeededCallCount += 1;
+  [super layoutIfNeeded];
+}
+
+- (void)setFrame:(CGRect)frame {
+  self.setFrameCallCount += 1;
+  [super setFrame:frame];
+}
+
+@end
+
+static UIWindowScene* WindowSceneForTest() {
+  UIWindowScene* windowScene = nil;
+  for (UIScene* scene in UIApplication.sharedApplication.connectedScenes) {
+    if ([scene isKindOfClass:UIWindowScene.class]) {
+      windowScene = (UIWindowScene*)scene;
+      if (scene.activationState == UISceneActivationStateForegroundActive) {
+        break;
+      }
+    }
+  }
+  return windowScene;
+}
+
+static UIWindow* CreateWindowForTest(CGRect frame) {
+  UIWindowScene* windowScene = WindowSceneForTest();
+  UIWindow* window = windowScene ? [[UIWindow alloc] initWithWindowScene:windowScene]
+                                 : [[UIWindow alloc] initWithFrame:frame];
+  window.frame = frame;
+  return window;
+}
 
 @interface FlutterViewControllerTest : XCTestCase
 @property(nonatomic, strong) id mockEngine;
@@ -1320,6 +1419,213 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMExpect([mockEngine updateViewportMetrics:viewportMetrics]).ignoringNonObjectArgs();
   [viewController updateViewportMetricsIfNeeded];
   OCMVerifyAll(mockEngine);
+}
+
+- (void)testUpdatePropertiesSetsDisplayCornerRadiiInPhysicalPixelsOnIOS26 {
+  if (@available(iOS 26.0, *)) {
+    ViewportMetricsCaptureEngine* engine = [[ViewportMetricsCaptureEngine alloc] init];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    engine.viewController = nil;
+
+    UIWindowScene* windowScene = WindowSceneForTest();
+    CGRect frame = windowScene ? windowScene.screen.bounds : UIScreen.mainScreen.bounds;
+    UIWindow* window = CreateWindowForTest(frame);
+    UIView* view = [[UIView alloc] initWithFrame:frame];
+    viewController.view = view;
+    [window addSubview:view];
+    [viewController viewIsAppearing:NO];
+    engine.viewController = viewController;
+
+    UIScreen* screen = OCMClassMock([UIScreen class]);
+    OCMStub([screen scale]).andReturn(3.0);
+    FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+    OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(screen);
+
+    TestLayoutTrackingDisplayCornerRadiusProbe* probe =
+        [[TestLayoutTrackingDisplayCornerRadiusProbe alloc] initWithFrame:frame];
+    probe.topLeftRadius = 1.0;
+    probe.topRightRadius = 2.0;
+    probe.bottomRightRadius = 3.0;
+    probe.bottomLeftRadius = 4.0;
+    [viewController.displayCornerRadiusProbe removeFromSuperview];
+    [window insertSubview:probe atIndex:0];
+    viewController.displayCornerRadiusProbe = probe;
+    probe.layoutIfNeededCallCount = 0;
+    probe.setFrameCallCount = 0;
+
+    [viewController setNeedsUpdateProperties];
+    [viewController updatePropertiesIfNeeded];
+
+    const flutter::ViewportMetrics& viewportMetrics = engine.lastViewportMetrics;
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_top_left, 3.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_top_right, 6.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_bottom_right, 9.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_bottom_left, 12.0);
+    XCTAssertEqual(probe.layoutIfNeededCallCount, 0u);
+    XCTAssertEqual(probe.setFrameCallCount, 0u);
+  }
+}
+
+- (void)testCreatesNonRenderingDisplayCornerRadiusProbeOnIOS26 {
+  if (@available(iOS 26.0, *)) {
+    ViewportMetricsCaptureEngine* engine = [[ViewportMetricsCaptureEngine alloc] init];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    engine.viewController = nil;
+
+    UIWindowScene* windowScene = WindowSceneForTest();
+    CGRect frame = windowScene ? windowScene.screen.bounds : UIScreen.mainScreen.bounds;
+    UIWindow* window = CreateWindowForTest(frame);
+    viewController.view = [[UIView alloc] initWithFrame:frame];
+    [window addSubview:viewController.view];
+    [viewController viewIsAppearing:NO];
+
+    UIView* probe = viewController.displayCornerRadiusProbe;
+    XCTAssertEqual(probe.superview, window);
+    XCTAssertEqual(window.subviews.firstObject, probe);
+    XCTAssertTrue(CGRectEqualToRect(probe.frame, window.bounds));
+    XCTAssertEqual(probe.autoresizingMask,
+                   UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+    XCTAssertEqualObjects(probe.backgroundColor, UIColor.clearColor);
+    XCTAssertFalse(probe.opaque);
+    XCTAssertFalse(probe.userInteractionEnabled);
+    XCTAssertFalse(probe.isAccessibilityElement);
+    XCTAssertTrue(probe.accessibilityElementsHidden);
+    XCTAssertNotNil(probe.cornerConfiguration);
+    XCTAssertGreaterThan([probe effectiveRadiusForCorner:UIRectCornerTopLeft], 0.0);
+    XCTAssertGreaterThan([probe effectiveRadiusForCorner:UIRectCornerTopRight], 0.0);
+    XCTAssertGreaterThan([probe effectiveRadiusForCorner:UIRectCornerBottomRight], 0.0);
+    XCTAssertGreaterThan([probe effectiveRadiusForCorner:UIRectCornerBottomLeft], 0.0);
+
+    CGRect resizedBounds = CGRectMake(0, 0, frame.size.height, frame.size.width);
+    window.bounds = resizedBounds;
+    [window layoutIfNeeded];
+    XCTAssertTrue(CGRectEqualToRect(probe.frame, resizedBounds));
+  }
+}
+
+- (void)testViewDidDisappearRemovesProbeAndUnsetsDisplayCornerRadiiOnIOS26 {
+  if (@available(iOS 26.0, *)) {
+    ViewportMetricsCaptureEngine* engine = [[ViewportMetricsCaptureEngine alloc] init];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    engine.viewController = nil;
+    CGRect frame = CGRectMake(0, 0, 390, 844);
+    UIWindow* window = CreateWindowForTest(frame);
+    viewController.view = [[UIView alloc] initWithFrame:frame];
+    [window addSubview:viewController.view];
+    [viewController viewIsAppearing:NO];
+    UIView* probe = viewController.displayCornerRadiusProbe;
+
+    TestDisplayCornerRadiusProbe* populatedProbe =
+        [[TestDisplayCornerRadiusProbe alloc] initWithFrame:window.bounds];
+    populatedProbe.topLeftRadius = 1.0;
+    populatedProbe.topRightRadius = 2.0;
+    populatedProbe.bottomRightRadius = 3.0;
+    populatedProbe.bottomLeftRadius = 4.0;
+    [probe removeFromSuperview];
+    [window insertSubview:populatedProbe atIndex:0];
+    viewController.displayCornerRadiusProbe = populatedProbe;
+    engine.viewController = viewController;
+    [viewController setNeedsUpdateProperties];
+    [viewController updatePropertiesIfNeeded];
+    XCTAssertGreaterThan(engine.lastViewportMetrics.physical_display_corner_radius_top_left, 0.0);
+    NSUInteger updateCountBeforeDisappearance = engine.updateViewportMetricsCallCount;
+    viewController.keyboardInsetManager = [[FakeFlutterKeyboardInsetManager alloc]
+        initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)viewController];
+
+    [viewController viewDidDisappear:NO];
+    XCTAssertNil(viewController.displayCornerRadiusProbe);
+    XCTAssertNil(populatedProbe.superview);
+
+    const flutter::ViewportMetrics& viewportMetrics = engine.lastViewportMetrics;
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_top_left, -1.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_top_right, -1.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_bottom_right, -1.0);
+    XCTAssertEqual(viewportMetrics.physical_display_corner_radius_bottom_left, -1.0);
+    XCTAssertEqual(engine.updateViewportMetricsCallCount, updateCountBeforeDisappearance + 1);
+
+    [viewController setNeedsUpdateProperties];
+    [viewController updatePropertiesIfNeeded];
+    XCTAssertNil(viewController.displayCornerRadiusProbe);
+    XCTAssertEqual(engine.lastViewportMetrics.physical_display_corner_radius_top_left, -1.0);
+  }
+}
+
+- (void)testRecreatesDisplayCornerRadiusProbeAfterMovingWindowsOnIOS26 {
+  if (@available(iOS 26.0, *)) {
+    ViewportMetricsCaptureEngine* engine = [[ViewportMetricsCaptureEngine alloc] init];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    engine.viewController = nil;
+
+    CGRect frame = CGRectMake(0, 0, 390, 844);
+    UIWindow* firstWindow = CreateWindowForTest(frame);
+    viewController.view = [[UIView alloc] initWithFrame:frame];
+    [firstWindow addSubview:viewController.view];
+    [viewController viewIsAppearing:NO];
+    UIView* firstProbe = viewController.displayCornerRadiusProbe;
+
+    UIWindow* secondWindow = CreateWindowForTest(frame);
+    [secondWindow addSubview:viewController.view];
+    XCTAssertEqual(firstProbe.superview, firstWindow);
+    FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+    OCMStub([viewControllerMock stateIsActive]).andReturn(NO);
+
+    [viewControllerMock viewDidLayoutSubviews];
+    XCTAssertEqual(viewController.displayCornerRadiusProbe, firstProbe);
+    XCTAssertEqual(firstProbe.superview, firstWindow);
+    XCTAssertEqual(secondWindow.subviews.count, 1u);
+    [viewControllerMock updatePropertiesIfNeeded];
+    UIView* secondProbe = viewController.displayCornerRadiusProbe;
+
+    XCTAssertNil(firstProbe.superview);
+    XCTAssertNotEqual(secondProbe, firstProbe);
+    XCTAssertEqual(secondProbe.superview, secondWindow);
+    XCTAssertEqual(secondWindow.subviews.firstObject, secondProbe);
+  }
+}
+
+- (void)testViewDidLayoutSubviewsDoesNotMutateDisplayCornerRadiusProbeOnIOS26 {
+  if (@available(iOS 26.0, *)) {
+    ViewportMetricsCaptureEngine* engine = [[ViewportMetricsCaptureEngine alloc] init];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    engine.viewController = nil;
+
+    CGRect frame = CGRectMake(0, 0, 390, 844);
+    UIWindow* window = CreateWindowForTest(frame);
+    viewController.view = [[UIView alloc] initWithFrame:frame];
+    [window addSubview:viewController.view];
+    [viewController viewIsAppearing:NO];
+    engine.viewController = viewController;
+    FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+    OCMStub([viewControllerMock stateIsActive]).andReturn(NO);
+
+    TestLayoutTrackingDisplayCornerRadiusProbe* originalProbe =
+        [[TestLayoutTrackingDisplayCornerRadiusProbe alloc] initWithFrame:window.bounds];
+    [viewController.displayCornerRadiusProbe removeFromSuperview];
+    [window insertSubview:originalProbe atIndex:0];
+    viewController.displayCornerRadiusProbe = originalProbe;
+    UIView* originalSuperview = originalProbe.superview;
+    NSUInteger originalSubviewIndex = [originalSuperview.subviews indexOfObject:originalProbe];
+    originalProbe.layoutIfNeededCallCount = 0;
+    originalProbe.setFrameCallCount = 0;
+
+    [viewControllerMock viewDidLayoutSubviews];
+
+    XCTAssertEqual(viewController.displayCornerRadiusProbe, originalProbe);
+    XCTAssertEqual(originalProbe.superview, originalSuperview);
+    XCTAssertEqual([originalSuperview.subviews indexOfObject:originalProbe], originalSubviewIndex);
+    XCTAssertEqual(originalProbe.layoutIfNeededCallCount, 0u);
+    XCTAssertEqual(originalProbe.setFrameCallCount, 0u);
+  }
 }
 
 - (void)testUpdatedViewportMetricsDoesResizeFlutterViewWhenAutoResizable {
