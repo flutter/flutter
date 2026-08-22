@@ -947,6 +947,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       FlutterRunLoop* mainRunLoop;
     };
     bool removed = false;
+    // Stack allocation is safe here because this method blocks the current thread
+    // until `removed` becomes true.
     RemoveViewContext context = {
         .removed = &removed,
         .mainRunLoop = _mainRunLoop,

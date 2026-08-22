@@ -6,8 +6,9 @@ import Foundation
 
 /// Scheduling tasks on the main thread run loop, potentially with a delay.
 ///
-/// This class guarantees the order of execution between tasks. In other words,
-/// tasks with earlier fire dates always run before tasks with later fire dates.
+/// If no tasks with negative delays are posted, this class guarantees the order
+/// of execution between tasks. In other words, tasks with earlier fire dates
+/// always run before tasks with later fire dates.
 ///
 /// The main difference between using `FlutterRunLoop` to schedule tasks compared
 /// to `DispatchQueue.async` or `RunLoop.perform(_:)` is that `FlutterRunLoop`
@@ -33,14 +34,10 @@ import Foundation
 
   /// Schedules a block to be executed on the main thread after the given delay.
   @objc func perform(afterDelay delay: TimeInterval = 0, block: @MainActor @escaping () -> Void) {
-    assert(
-      delay >= 0,
-      "To guarantee the execution order of tasks follows the expiration order, delay must not be negative."
-    )
     let task = FlutterRunLoop.Task(block: block, targetDate: .now + delay)
     lockScope.addTaskAndRearmTimer(task: task)
     if delay == 0 {
-      // Wake up the runloop immediately for immediate tasks so it's not affected
+      // Wake up the runloop immediately for delay == 0 tasks so they are not affected
       // by timer tolerance, as the runloop will check for and fire expired timers
       // when active.
       runLoop.wakeUp()
@@ -92,7 +89,8 @@ private final class LockScope: @unchecked Sendable {
       let newFireDate = unsafeTaskQueue.add(task: task)
       if newFireDate < timer.fireDate {
         // The fireDate setter is relatively expensive, avoid calling it for
-        // every task added.
+        // every task added. This setter directly calls CFRunLoopTimerSetNextFireDate
+        // which is thread safe.
         timer.fireDate = newFireDate
       }
     }
@@ -127,34 +125,36 @@ extension FlutterRunLoop {
 
   // A simple priority queue that supports adding tasks and popping tasks.
   final class UnsafeTaskQueue {
-    // The task queue, sorted by the target date of tasks in descending order (first to expire last).
+    // The task queue, sorted by the target date of tasks in ascending order (first to expire first).
+    // This is for optimizing adding tasks over popping tasks, since new tasks usually have later
+    // expiration dates than most tasks already in the queue.
     private var tasks: ContiguousArray<Task> = []
 
     func add(task: Task) -> Date {
       let insertionIndex =
         tasks.lastIndex {
-          task.targetDate < $0.targetDate
+          $0.targetDate <= task.targetDate
         }.map { $0 + 1 } ?? 0
       tasks.insert(task, at: insertionIndex)
-      return tasks[tasks.count - 1].targetDate
+      return tasks[0].targetDate
     }
 
-    // Returns a non-empty list of expired tasks, sorted by their expiration dates
+    // Returns a list of expired tasks, sorted by their expiration dates
     // in ascending order (first to expire first), and the new earliest deadline,
-    // or nil if no tasks have expired.
+    // or .distantFuture if no tasks remain in the queue.
     func popTasks(
       expiringBy date: Date
     ) -> (some Sequence<Task>, Date) {
-      let firstExpiredIndex = tasks.lastIndex { date < $0.targetDate }.map { $0 + 1 } ?? 0
+      let firstUnexpiredIndex = tasks.firstIndex { date < $0.targetDate } ?? tasks.count
 
-      // If no tasks have expired, firstExpiredIndex == tasks.coount
-      guard firstExpiredIndex < tasks.count else {
-        return (ContiguousArray<Task>(), tasks.last?.targetDate ?? .distantFuture)
+      // If no tasks have expired.
+      guard firstUnexpiredIndex > 0 else {
+        return (ContiguousArray<Task>(), tasks.first?.targetDate ?? .distantFuture)
       }
 
-      let expiredTasks = ContiguousArray<Task>(tasks[firstExpiredIndex...].reversed())
-      tasks.removeSubrange(firstExpiredIndex...)
-      return (expiredTasks, tasks.last?.targetDate ?? .distantFuture)
+      let expiredTasks = ContiguousArray<Task>(tasks[..<firstUnexpiredIndex])
+      tasks.removeSubrange(..<firstUnexpiredIndex)
+      return (expiredTasks, tasks.first?.targetDate ?? .distantFuture)
     }
   }
 }

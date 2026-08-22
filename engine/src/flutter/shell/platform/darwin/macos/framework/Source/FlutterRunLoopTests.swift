@@ -74,6 +74,17 @@ struct FlutterRunLoopTests {
     // Stop task1.
     task1CanFinish.signal()
   }
+
+  @Test
+  func `nested perform calls execute successfully without deadlock`() async throws {
+    await withCheckedContinuation { continuation in
+      runLoop.perform {
+        self.runLoop.perform {
+          continuation.resume()
+        }
+      }
+    }
+  }
 }
 
 @Suite
