@@ -24,6 +24,14 @@ plugins {
     id "org.jetbrains.kotlin.android" version "{{kotlinVersion}}" apply false
 }
 
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
 include ':app'
 
 rootProject.name = 'android_generated'
