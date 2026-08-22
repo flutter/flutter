@@ -267,6 +267,23 @@ FLUTTER_DARWIN_EXPORT
  */
 @property(nonatomic, getter=isAutoResizable) BOOL autoResizable;
 
+/**
+ * Controls whether this `FlutterViewController` ignores touches while a `UIViewController` is
+ * presented on top of it (via `presentedViewController`) or while it is being dismissed.
+ *
+ * When set to `YES` (the default), touches are dropped in either case, preventing them from
+ * reaching Flutter while a native view controller is covering the screen.
+ *
+ * This check does not consider whether the presented content actually covers the touched point:
+ * touches are dropped everywhere on screen while anything is presented. Some apps intentionally
+ * present a `UIViewController` that does not cover the entire screen and rely on Flutter
+ * continuing to receive touches while it is presented. Set this property to `NO` to restore
+ * that behavior.
+ *
+ * Default is `YES`.
+ */
+@property(nonatomic) BOOL shouldIgnoreTouchesWhenPresented;
+
 @end
 
 NS_ASSUME_NONNULL_END
