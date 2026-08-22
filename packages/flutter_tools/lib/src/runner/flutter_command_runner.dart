@@ -565,6 +565,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         .toList();
   }
 
+  /// Directory names that are excluded when discovering packages.
+  static const Set<String> _ignoredRepoDirectoryNames = <String>{'.dart_tool', 'build'};
+
   static List<String> _gatherProjectPaths(FileSystem fs, String rootPath) {
     if (fs.isFileSync(fs.path.join(rootPath, '.dartignore'))) {
       return <String>[];
@@ -577,7 +580,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final List<String> projectPaths = directory.listSync(followLinks: false).expand((
       FileSystemEntity entity,
     ) {
-      if (entity is Directory && fs.path.basename(entity.path) != '.dart_tool') {
+      if (entity is Directory &&
+          !_ignoredRepoDirectoryNames.contains(fs.path.basename(entity.path))) {
         return _gatherProjectPaths(fs, entity.path);
       }
       return <String>[];
