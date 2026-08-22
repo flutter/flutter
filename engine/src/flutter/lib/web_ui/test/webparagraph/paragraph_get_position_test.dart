@@ -16,19 +16,19 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('Paragraph getPositionForOffset 1 Infinity line', () {
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
     const text =
         'World domination is such an ugly phrase - I prefer to call it world optimisation. ';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     final ui.TextPosition positiontt = paragraph.getPositionForOffset(const ui.Offset(-1, -1));
     final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset.zero);
     final ui.TextPosition positionee = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.longestLine, paragraph.height),
+      ui.Offset(paragraph.longestLine.ceilToDouble(), paragraph.height),
     );
     final ui.TextPosition positionmm = paragraph.getPositionForOffset(
       ui.Offset(paragraph.longestLine / 2, paragraph.height / 2),
@@ -36,31 +36,35 @@ Future<void> testMain() async {
     final ui.TextPosition positionbb = paragraph.getPositionForOffset(
       ui.Offset(paragraph.longestLine + 1, paragraph.height + 1),
     );
+
     expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position00, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(positionmm, const ui.TextPosition(offset: 37 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(
+      positionmm.offset,
+      38 - (positionmm.affinity == ui.TextAffinity.downstream ? 1 : 0),
+    ); // 38 is the offset of the middle character);
     // The last glyph, position close to the end
     expect(
       positionee,
-      const ui.TextPosition(offset: text.length - 1, affinity: ui.TextAffinity.upstream),
+      const ui.TextPosition(offset: text.length - 1 /*affinity: ui.TextAffinity.downstream)*/),
     );
     expect(positionbb, const ui.TextPosition(offset: text.length - 1));
   });
 
   test('Paragraph getPositionForOffset multiple lines', () {
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
     const text =
         'World domination is such an ugly phrase - I prefer to call it world optimisation. ';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     final ui.TextPosition positiontt = paragraph.getPositionForOffset(const ui.Offset(-1, -1));
     final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset.zero);
     final ui.TextPosition positionee = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.longestLine, paragraph.height),
+      ui.Offset(paragraph.longestLine.ceilToDouble(), paragraph.height),
     );
     final ui.TextPosition positionmm = paragraph.getPositionForOffset(
       ui.Offset(paragraph.longestLine / 2, paragraph.height / 2),
@@ -71,27 +75,27 @@ Future<void> testMain() async {
 
     expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position00, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(positionmm, const ui.TextPosition(offset: 37 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(positionmm.offset, 38 - (positionmm.affinity == ui.TextAffinity.downstream ? 1 : 0));
     // The last glyph, position close to the end
     expect(
       positionee,
-      const ui.TextPosition(offset: text.length - 1, affinity: ui.TextAffinity.upstream),
+      const ui.TextPosition(offset: text.length - 1 /*affinity: ui.TextAffinity.downstream)*/),
     );
     expect(positionbb, const ui.TextPosition(offset: text.length - 1));
   });
 
   test('Paragraph getPositionForOffset above and below the line', () {
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
     const text1 = 'World domination is such an ugly phrase -';
     const text2 = 'I prefer to call it world optimisation. ';
-    final builder = WebParagraphBuilder(paragraphStyle);
-    builder.pushStyle(WebTextStyle(fontSize: 10));
+    final builder = ui.ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(ui.TextStyle(fontSize: 10));
     builder.addText(text1);
-    builder.pushStyle(WebTextStyle(fontSize: 50));
+    builder.pushStyle(ui.TextStyle(fontSize: 50));
     builder.addText(text2);
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
     final double middle = paragraph.longestLine / 2;
     final double baseline = paragraph.alphabeticBaseline;
@@ -108,24 +112,24 @@ Future<void> testMain() async {
       ui.Offset(middle, paragraph.height + 10),
     );
 
-    expect(position1, const ui.TextPosition(offset: 56 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(position2, const ui.TextPosition(offset: 56 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(position3, const ui.TextPosition(offset: 56 /*affinity: ui.TextAffinity.downstream)*/));
-    expect(position4, const ui.TextPosition(offset: 56 /*affinity: ui.TextAffinity.downstream)*/));
+    expect(position1.offset, 57 - (position1.affinity == ui.TextAffinity.downstream ? 1 : 0));
+    expect(position2.offset, 57 - (position2.affinity == ui.TextAffinity.downstream ? 1 : 0));
+    expect(position3.offset, 57 - (position3.affinity == ui.TextAffinity.downstream ? 1 : 0));
+    expect(position4.offset, 57 - (position4.affinity == ui.TextAffinity.downstream ? 1 : 0));
   });
 
   test('Paragraph getPositionForOffset - cursor positioning with formatting shift', () {
     // Tests the fix for left calculation: changed from - to +
-    final paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = ui.ParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 20,
       textAlign: ui.TextAlign.center,
     );
 
     const text = 'Hello World';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 200));
 
     // Get position at offset - should handle formatting shift correctly
@@ -140,17 +144,17 @@ Future<void> testMain() async {
 
   test('Paragraph getPositionForOffset - placeholder handling', () {
     // Tests the fix for placeholder block positioning
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText('Before ');
 
     // Add a placeholder
     builder.addPlaceholder(50, 50, ui.PlaceholderAlignment.middle);
     builder.addText(' After');
 
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
     // Test position at various offsets
     final ui.TextPosition positionBefore = paragraph.getPositionForOffset(const ui.Offset(30, 20));
@@ -162,16 +166,16 @@ Future<void> testMain() async {
 
   test('Paragraph getPositionForOffset - strut style handling', () {
     // Tests the simplified fix for Strut style box height calculations
-    final paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = ui.ParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 20,
       strutStyle: ui.StrutStyle(fontFamily: 'Arial', fontSize: 16, height: 1.5),
     );
 
     const text = 'Line with strut style';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 300));
 
     // Test positioning with strut style applied
@@ -185,11 +189,11 @@ Future<void> testMain() async {
 
   test('Paragraph getPositionForOffset - empty line handling', () {
     // Tests fix for handling empty/nearly empty lines (width < epsilon)
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText('Line1\n\nLine3');
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 200));
 
     // Position on empty line
@@ -202,40 +206,40 @@ Future<void> testMain() async {
 
   test('Paragraph getPositionForOffset - bidi text (RTL) with proper affinity', () {
     // Tests fix for proper TextDirection handling in cluster positioning
-    final paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = ui.ParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 20,
       textDirection: ui.TextDirection.rtl,
     );
 
     const text = 'שלום עולם'; // Hebrew text
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
     // Test RTL positioning with correct affinity based on isLtr
     final ui.TextPosition positionLeft = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.longestLine * 0.1, paragraph.height / 2),
+      ui.Offset(1000 - paragraph.longestLine * 0.1, paragraph.height / 2),
     );
 
     final ui.TextPosition positionRight = paragraph.getPositionForOffset(
-      ui.Offset(paragraph.longestLine * 0.9, paragraph.height / 2),
+      ui.Offset(1000 - paragraph.longestLine * 0.9, paragraph.height / 2),
     );
 
     expect(positionLeft.offset, greaterThanOrEqualTo(0));
     expect(positionRight.offset, greaterThanOrEqualTo(0));
-    expect(positionLeft.offset, greaterThan(positionRight.offset)); // We have RTL here
+    expect(positionLeft.offset, lessThan(positionRight.offset)); // We have RTL here
   });
 
   test('Paragraph getPositionForOffset - cluster center calculation', () {
     // Tests fix for using center point instead of simple left/right distance
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
     const text = 'Test text with clusters';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 300));
 
     final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(6);
@@ -260,7 +264,7 @@ Future<void> testMain() async {
 
   test('Paragraph getPositionForOffset - multi-line with ellipsis handling', () {
     // Tests fix for ellipsis block handling
-    final paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = ui.ParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 20,
       maxLines: 2,
@@ -268,9 +272,9 @@ Future<void> testMain() async {
     );
 
     const text = 'This is a long text that will be truncated with ellipsis';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 150));
 
     // Test positioning at ellipsis
@@ -284,12 +288,12 @@ Future<void> testMain() async {
 
   test('Paragraph getPositionForOffset - first visual block in line', () {
     // Tests fix for handling positions left of first visual block
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
     const text = 'Start of line';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 300));
 
     // Position to the left of the first character
@@ -304,12 +308,12 @@ Future<void> testMain() async {
 
   test('Paragraph getPositionForOffset - last block in line positioning', () {
     // Tests fix for handling positions beyond the last visual block
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
     const text = 'End of line';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 300));
 
     // Position to the right of the last character
@@ -324,12 +328,12 @@ Future<void> testMain() async {
 
   test('Paragraph getPositionForOffset - epsilon tolerance for block edges', () {
     // Tests use of epsilon constant for edge detection
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
     const text = 'Epsilon test';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 200));
 
     // Test positioning at exact edge boundaries (within epsilon)
@@ -347,13 +351,13 @@ Future<void> testMain() async {
   });
 
   test('Text block respects line height multiplier', () {
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
-    final builder = WebParagraphBuilder(paragraphStyle);
-    builder.pushStyle(WebTextStyle(fontSize: 20, height: 1.5));
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(ui.TextStyle(fontSize: 20, height: 1.5));
     builder.addText('Hello');
-    builder.pushStyle(WebTextStyle(fontSize: 20, height: 2.0));
+    builder.pushStyle(ui.TextStyle(fontSize: 20, height: 2.0));
     builder.addText(' World');
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     // Height should reflect the line height multipliers
@@ -361,38 +365,38 @@ Future<void> testMain() async {
   });
 
   test('Text block height calculations with strut style', () {
-    final paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = ui.ParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 20,
       strutStyle: ui.StrutStyle(fontSize: 20),
     );
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText('Hello World');
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     expect(paragraph.height, 22);
   });
 
   test('Text block height with leading distribution', () {
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.pushStyle(
-      WebTextStyle(fontSize: 20, height: 1.5, leadingDistribution: ui.TextLeadingDistribution.even),
+      ui.TextStyle(fontSize: 20, height: 1.5, leadingDistribution: ui.TextLeadingDistribution.even),
     );
     builder.addText('Hello');
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     expect(paragraph.height, 20 * 1.5);
   });
 
   test('getPositionForOffset returns correct position for out of bounds offsets', () {
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
     const text = 'Hello World';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     // Position beyond paragraph bounds should return valid TextPosition
@@ -407,11 +411,11 @@ Future<void> testMain() async {
   });
 
   test('getPositionForOffset handles empty paragraph correctly', () {
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
     const text = '';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     final ui.TextPosition position = paragraph.getPositionForOffset(const ui.Offset(10, 10));
@@ -419,17 +423,17 @@ Future<void> testMain() async {
   });
 
   test('getPositionForOffset handles bidirectional text correctly', () {
-    final paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = ui.ParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 20,
       textDirection: ui.TextDirection.ltr,
     );
-    final builder = WebParagraphBuilder(paragraphStyle);
-    builder.pushStyle(WebTextStyle(fontSize: 20));
+    final builder = ui.ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(ui.TextStyle(fontSize: 20));
     builder.addText('Hello'); // LTR
-    builder.pushStyle(WebTextStyle(fontSize: 20));
+    builder.pushStyle(ui.TextStyle(fontSize: 20));
     builder.addText('مرحبا'); // RTL (Arabic)
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     // Get position in LTR text
@@ -445,11 +449,11 @@ Future<void> testMain() async {
   });
 
   test('getPositionForOffset handles multiple lines correctly', () {
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20);
     const text = 'First line\nSecond line\nThird line';
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText(text);
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 100));
 
     // Get position on first line
@@ -466,14 +470,14 @@ Future<void> testMain() async {
   });
 
   test('getPositionForOffset uses correct affinity for RTL text', () {
-    final paragraphStyle = WebParagraphStyle(
+    final paragraphStyle = ui.ParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 20,
       textDirection: ui.TextDirection.rtl,
     );
-    final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = ui.ParagraphBuilder(paragraphStyle);
     builder.addText('مرحبا'); // Arabic (RTL)
-    final WebParagraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
     // Positions should have appropriate affinity

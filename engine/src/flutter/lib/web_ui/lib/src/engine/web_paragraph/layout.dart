@@ -201,18 +201,25 @@ class TextLayout {
     // but it only makes sense if we have one line
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
     paragraph.ideographicBaseline = lines.first.height;
+    // We only know now which line is the last and we need this information for later
+    lines.last.lastLine = true;
   }
 
   double addLine(
     ClusterRange contentRange,
     ClusterRange whitespaceRange,
-    bool hardLineBreak,
+    ClusterRange hardlineRange,
     double top,
+    // Special case: text ends with \n which creates an empty line at the end
+    bool specialCase,
   ) {
     assert(contentRange.end == whitespaceRange.start);
+    assert(whitespaceRange.end == hardlineRange.start);
     if (WebParagraphDebug.logging) {
       final String allLineText = paragraph.getText(contentRange.start, whitespaceRange.end);
-      WebParagraphDebug.log('LINE "$allLineText" clusters:$contentRange+$whitespaceRange');
+      WebParagraphDebug.log(
+        'LINE "$allLineText" clusters:$contentRange+$whitespaceRange+$hardlineRange',
+      );
     }
     // Prepare ellipsis block in case we need to get metrics for it
     EllipsisBlock? ellipsisBlock;
@@ -229,6 +236,7 @@ class TextLayout {
         _ellipsisBidiLevel!,
         ClusterRange(start: 0, end: ellipsisSpan.size),
         ui.TextRange(start: 0, end: ellipsisSpan.text.length),
+        ui.TextRange(start: 0, end: ellipsisSpan.text.length),
         0.0,
         0.0,
       );
@@ -237,18 +245,22 @@ class TextLayout {
     // Arrange line vertically, calculate metrics and bounds
     final ui.TextRange contentTextRange = _mapping.toTextRange(contentRange);
     final ui.TextRange whitespaceTextRange = _mapping.toTextRange(whitespaceRange);
-    final allTextRange = ui.TextRange(start: contentTextRange.start, end: whitespaceTextRange.end);
-    assert(contentTextRange.end == whitespaceTextRange.start);
-
+    final ui.TextRange hardlineTextRange = _mapping.toTextRange(hardlineRange);
+    final allTextRange = ui.TextRange(
+      start: contentTextRange.start,
+      end: specialCase ? hardlineRange.end : whitespaceTextRange.end,
+    );
     // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(
       contentRange,
       whitespaceRange,
-      hardLineBreak,
+      hardlineRange,
       lines.length,
       contentTextRange,
       whitespaceTextRange,
+      hardlineTextRange,
       allTextRange,
+      hardlineTextRange.isNotEmpty || specialCase,
     );
 
     // Get logical bidi levels belonging to the line.
@@ -258,7 +270,7 @@ class TextLayout {
       final BidiRun bidiRun = bidiRuns[i];
       final bool isOverlapping = bidiRun.clusterRange.overlapsWith(
         contentRange.start,
-        whitespaceRange.end,
+        hardlineRange.end,
       );
 
       final bool isFirstOverlap = isOverlapping && overlapStart == -1;
@@ -297,21 +309,24 @@ class TextLayout {
       // Let's keep it as is.
       final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
       final ClusterRange whitespacesIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
+      final ClusterRange hardlineRangeIntersection = bidiRun.clusterRange.intersect(hardlineRange);
 
       assert(() {
-        final ClusterRange whitespaceIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
-        // One of the intersections must be non-empty, or we have a special case when there is \n at the end of the paragraph
-        // and this is the line AFTER that last \n.
-        return (textIntersection.isNotEmpty || whitespaceIntersection.isNotEmpty) ||
-            ((contentRange.start == allClusters.length - 1) &&
-                (whitespaceRange.start == allClusters.length - 1));
+        // One of the intersections must be non-empty
+        return textIntersection.isNotEmpty ||
+            whitespacesIntersection.isNotEmpty ||
+            hardlineRangeIntersection.isNotEmpty;
       }());
 
-      // We cannot ignore whitespaces because they are expected to be counted in some query apis (getBoxesForRange)
-      final ClusterRange fullIntersection = textIntersection.merge(whitespacesIntersection);
+      // We cannot ignore whitespaces or newlines because they are expected to be counted in some query apis (getBoxesForRange)
+      final ClusterRange fullIntersection = textIntersection
+          .merge(whitespacesIntersection)
+          .merge(hardlineRangeIntersection);
+      final ClusterRange physicalIntersection = textIntersection.merge(whitespacesIntersection);
 
       // This is the part of the line that intersects with the `bidiRun` being processed now.
       final ui.TextRange bidiLineTextRange = _mapping.toTextRange(fullIntersection);
+      final ui.TextRange bidiLinePhysicalTextRange = _mapping.toTextRange(physicalIntersection);
       final ui.TextRange bidiWhitespacesTextRange =
           whitespacesIntersection.start < whitespacesIntersection.end
           ? _mapping.toTextRange(whitespacesIntersection)
@@ -333,6 +348,9 @@ class TextLayout {
 
         // This is the intersection of the bidi region + line + span.
         final ui.TextRange bidiLineSpanTextRange = bidiLineTextRange.intersect(span);
+        final ui.TextRange bidiLineSpanPhysicalTextRange = bidiLinePhysicalTextRange.intersect(
+          span,
+        );
         final ClusterRange bidiLineSpanRange = _mapping.toClusterRange(
           bidiLineSpanTextRange.start,
           bidiLineSpanTextRange.end,
@@ -362,6 +380,7 @@ class TextLayout {
               bidiRun.bidiLevel,
               bidiLineSpanRange,
               bidiLineSpanTextRange,
+              bidiLineSpanPhysicalTextRange,
               blockShiftFromLineStart,
               blockShiftFromSpanStart,
             ),
@@ -520,8 +539,13 @@ class TextLayout {
           '[${line.advance.left}:${line.advance.right} x ${line.advance.top}:${line.advance.bottom}] ',
         );
       }
-      // We take whitespaces in account
-      if (!line.allLineTextRange.overlapsWith(start, end)) {
+      // We take whitespaces and newlines into account
+      final lineTextRange = ui.TextRange(
+        start: line.allLineTextRange.start,
+        // The only way the last line has hard line break is if the text ends with \n and we have a special case for it
+        end: line.lastLine ? line.whitespacesRange.end : line.hardLineBreakRange.end,
+      );
+      if (!lineTextRange.overlapsWith(start, end)) {
         continue;
       }
 
@@ -608,7 +632,7 @@ class TextLayout {
 
       if (boxWidthStyle == ui.BoxWidthStyle.max && lineIndex < lines.length - 1) {
         // Add whitespaces box left/right for all the lines except the last one
-        if ((result.first.left - 0).abs() > epsilon) {
+        if (result.first.left > epsilon) {
           result.insert(
             0,
             ui.TextBox.fromLTRBD(
@@ -620,13 +644,13 @@ class TextLayout {
             ),
           );
         }
-        if ((result.last.right - paragraph.maxLineWidthWithTrailingSpaces).abs() > epsilon) {
+        if (paragraph.maxLineWidthWithTrailingSpaces - result.last.right > epsilon) {
           result.add(
             ui.TextBox.fromLTRBD(
               result.last.right,
-              result.first.top,
+              result.last.top,
               paragraph.maxLineWidthWithTrailingSpaces,
-              result.first.bottom,
+              result.last.bottom,
               paragraph.paragraphStyle.textDirection,
             ),
           );
@@ -700,7 +724,7 @@ class TextLayout {
       if ((line.fullWidth - line.trailingSpacesWidth) < epsilon &&
           line.trailingSpacesWidth < epsilon) {
         // Accordingly to SkParagraph this is a special Flutter case
-        return ui.TextPosition(offset: line.textRange.end);
+        return ui.TextPosition(offset: line.hardLineBreakRange.end);
       }
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
@@ -717,8 +741,8 @@ class TextLayout {
         }
 
         // Calculate left and right edges of the block
-        final double left = block.advance.left + lineShift - epsilon;
-        final double right = block.advance.right + lineShift + epsilon;
+        final double left = block.advance.left + lineShift;
+        final double right = block.advance.right + lineShift;
 
         if (right < offset.dx) {
           // We are not there yet; we need a block containing the offset (or the closest to it)
@@ -771,13 +795,11 @@ class TextLayout {
         assert(false);
       }
       // We found the line but not the block because the offset is to the right of all blocks in this line.
-      // We deal with it the same way as if we didn't find the line (taking the last block of the last line)
-      final LineBlock lastVisualBlockInLine = lines.last.visualBlocks.last;
-      return lastVisualBlockInLine.isLtr
-          ? ui.TextPosition(
-              offset: lastVisualBlockInLine.textRange.end,
-              affinity: ui.TextAffinity.upstream,
-            )
+      final LineBlock? lastVisualBlockInLine = line.visualBlocks.lastOrNull;
+      return lastVisualBlockInLine == null
+          ? ui.TextPosition(offset: line.allLineTextRange.start, affinity: ui.TextAffinity.upstream)
+          : lastVisualBlockInLine.isLtr
+          ? ui.TextPosition(offset: line.textRange.end, affinity: ui.TextAffinity.upstream)
           : ui.TextPosition(offset: lastVisualBlockInLine.textRange.start);
     }
 
@@ -796,9 +818,9 @@ class TextLayout {
     }
 
     // The cluster is on this line
+    final TextLine line = lines[lineNumber];
     // We cannot assume clusters go sequentially because of bidi reshuffling
     // but we don't care about the order because we only look for a cluster that contains the offset
-    final TextLine line = lines[lineNumber];
     for (final LineBlock visualBlock in line.visualBlocks) {
       for (
         int start = visualBlock.clusterRange.start;
@@ -807,8 +829,18 @@ class TextLayout {
       ) {
         final WebCluster cluster = allClusters[start];
         if (cluster.start <= codeUnitOffset && codeUnitOffset < cluster.end) {
+          final bool isNewline = codeUnitFlags.hasFlag(cluster.end, CodeUnitFlag.hardLineBreak);
+          final ui.Rect rect = isNewline
+              ? ui.Rect.fromLTWH(
+                  cluster.advance.left,
+                  cluster.advance.top,
+                  0.0,
+                  cluster.advance.height,
+                )
+              : cluster.advance;
+
           return ui.GlyphInfo(
-            cluster.advance.translate(
+            rect.translate(
               line.advance.left + line.formattingShift + visualBlock.spanShiftFromLineStart,
               line.advance.top + line.fontBoundingBoxAscent,
             ),
@@ -817,6 +849,27 @@ class TextLayout {
           );
         }
       }
+    }
+    // The codepoint could be on a hard line break which is not in the visual blocks
+    if (codeUnitOffset >= line.hardLineBreakRange.start &&
+        codeUnitOffset < line.hardLineBreakRange.end) {
+      final WebCluster cluster = allClusters[line.hardLineBreakRange.start];
+      // Pretend that the hard line break is placed at the end of the last visual block
+      final LineBlock? lastVisualBlock = line.visualBlocks.lastOrNull;
+      final bool isLtr = lastVisualBlock?.isLtr ?? true;
+      final double x = lastVisualBlock != null
+          ? (isLtr ? lastVisualBlock.advance.right : lastVisualBlock.advance.left)
+          : 0.0;
+      final double top = lastVisualBlock?.advance.top ?? -line.fontBoundingBoxAscent;
+      final double bottom = lastVisualBlock?.advance.bottom ?? line.fontBoundingBoxDescent;
+      return ui.GlyphInfo(
+        ui.Rect.fromLTRB(x, top, x, bottom).translate(
+          line.advance.left + line.formattingShift,
+          line.advance.top + line.fontBoundingBoxAscent,
+        ),
+        ui.TextRange(start: cluster.start, end: cluster.end),
+        isLtr ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+      );
     }
     // No cluster found that contains the offset
     return null;
@@ -845,8 +898,9 @@ class TextLayout {
 
   ui.TextRange getLineBoundary(int codepointPosition) {
     for (final TextLine line in lines) {
+      // This is the condition that SkParagraph is using
       if (line.allLineTextRange.start <= codepointPosition &&
-          line.allLineTextRange.end > codepointPosition) {
+          line.allLineTextRange.end >= codepointPosition) {
         return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
       }
     }
@@ -877,7 +931,7 @@ extension EnhancedTextRange on ui.TextRange {
   /// Whether this range overlaps with the given range from [start] to [end].
   bool overlapsWith(int start, int end) {
     // `end` is exclusive.
-    return !isBefore(start) && !isAfter(end - 1);
+    return start < end && isNotEmpty && !isBefore(start) && !isAfter(end - 1);
   }
 }
 
@@ -981,7 +1035,9 @@ abstract class WebCluster {
 }
 
 class TextCluster extends WebCluster {
-  TextCluster(this.span, this._cluster) : startInSpan = _cluster.start, endInSpan = _cluster.end;
+  TextCluster(this.span, this._cluster) : startInSpan = _cluster.start, endInSpan = _cluster.end {
+    _advance = span.getClusterSelection(this);
+  }
 
   @override
   final TextSpan span;
@@ -995,7 +1051,10 @@ class TextCluster extends WebCluster {
   final int endInSpan;
 
   @override
-  late final ui.Rect advance = span.getClusterSelection(this);
+  ui.Rect get advance => _advance;
+
+  set advance(ui.Rect value) => _advance = value;
+  ui.Rect _advance = ui.Rect.zero;
 
   final DomTextCluster _cluster;
 
@@ -1103,9 +1162,11 @@ abstract class LineBlock {
       _multipliedFontBoundingBoxAscent + _multipliedFontBoundingBoxDescent;
 
   late final double _multipliedFontBoundingBoxAscent;
+
   double get multipliedFontBoundingBoxAscent => _multipliedFontBoundingBoxAscent;
 
   late final double _multipliedFontBoundingBoxDescent;
+
   double get multipliedFontBoundingBoxDescent => _multipliedFontBoundingBoxDescent;
 
   final ParagraphSpan span;
@@ -1143,11 +1204,14 @@ class TextBlock extends LineBlock {
     super._bidiLevel,
     super.clusterRange,
     super.textRange,
+    this.physicalTextRange,
     super.shiftFromLineStart,
     double shiftFromSpanStart,
   ) : spanShiftFromLineStart = shiftFromLineStart - shiftFromSpanStart,
       clusterRangeWithoutWhitespaces = clusterRange,
       whitespacesWidth = 0.0;
+
+  final ui.TextRange physicalTextRange;
 
   @override
   TextSpan get span => super.span as TextSpan;
@@ -1158,12 +1222,14 @@ class TextBlock extends LineBlock {
   late final ui.Rect paintBounds = span.getBlockBounds(this);
 
   double get paintBoundsAscent => -paintBounds.top;
+
   double get paintBoundsDescent => paintBounds.bottom;
 
   @override
   double spanShiftFromLineStart;
 
   int get visualClusterStart => isLtr ? clusterRange.start : clusterRange.end - 1;
+
   int get visualClusterEnd => isLtr ? clusterRange.end : clusterRange.start - 1;
 
   /// Returns a list of pairs of clusters and their directions in the visual order.
@@ -1270,6 +1336,7 @@ class EllipsisBlock extends TextBlock {
     super._bidiLevel,
     super.clusterRange,
     super.textRange,
+    super.physicalTextRange,
     super.shiftFromLineStart,
     super.shiftFromSpanStart,
   );
@@ -1279,16 +1346,18 @@ class TextLine {
   TextLine(
     this.textClusterRange,
     this.whitespacesClusterRange,
-    this.hardLineBreak,
+    this.hardLineBreakClusterRange,
     this.lineNumber,
     this.textRange,
     this.whitespacesRange,
+    this.hardLineBreakRange,
     this.allLineTextRange,
+    this.hasHardLineBreak,
   );
 
   ui.LineMetrics getMetrics() {
     return ui.LineMetrics(
-      hardBreak: hardLineBreak,
+      hardBreak: hasHardLineBreak,
       ascent: fontBoundingBoxAscent,
       descent: fontBoundingBoxDescent,
       // It was not implemented in SkParagraph either; kept it as is
@@ -1309,11 +1378,14 @@ class TextLine {
 
   final ClusterRange textClusterRange;
   final ClusterRange whitespacesClusterRange;
+  final ClusterRange hardLineBreakClusterRange;
   final ui.TextRange textRange;
   final ui.TextRange whitespacesRange;
+  final ui.TextRange hardLineBreakRange;
   final ui.TextRange allLineTextRange;
-  final bool hardLineBreak;
+  final bool hasHardLineBreak;
   final int lineNumber;
+  bool lastLine = false;
 
   ui.Rect advance = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;
