@@ -10,6 +10,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
+import 'address_bar_controller.dart';
 import 'browser_detection.dart';
 import 'display.dart';
 import 'dom.dart';
@@ -68,6 +69,7 @@ class EngineFlutterView implements ui.FlutterView {
     // The embeddingStrategy will take care of cleaning up the rootElement on
     // hot restart.
     embeddingStrategy.attachViewRoot(dom.rootElement);
+    addressBarController = AddressBarController(this);
     pointerBinding = PointerBinding(this);
     _resizeSubscription = onResize.listen(_handleBrowserResize);
     _globalHtmlAttributes.applyAttributes(
@@ -109,6 +111,7 @@ class EngineFlutterView implements ui.FlutterView {
     isDisposed = true;
     _resizeSubscription.cancel();
     dimensionsProvider.close();
+    addressBarController.dispose();
     pointerBinding.dispose();
     dom.rootElement.remove();
     // TODO(harryterkelsen): What should we do about this in multi-view?
@@ -153,6 +156,8 @@ class EngineFlutterView implements ui.FlutterView {
   late final DomManager dom = DomManager(devicePixelRatio: devicePixelRatio);
 
   late final PointerBinding pointerBinding;
+
+  late final AddressBarController addressBarController;
 
   @override
   ViewConstraints get physicalConstraints {
@@ -260,6 +265,10 @@ class EngineFlutterView implements ui.FlutterView {
   ViewPadding get viewInsets => _viewInsets;
   ViewPadding _viewInsets = ui.ViewPadding.zero as ViewPadding;
 
+  ui.Size? _lastNotifiedPhysicalSize;
+  ViewPadding? _lastNotifiedViewInsets;
+  double? _lastNotifiedDevicePixelRatio;
+
   @override
   ViewPadding get viewPadding => _viewConfiguration.viewPadding;
 
@@ -322,7 +331,25 @@ class EngineFlutterView implements ui.FlutterView {
       // When physical size changes this value has to be recalculated.
       _computeOnScreenKeyboardInsets(false);
     }
-    platformDispatcher.invokeOnMetricsChanged();
+    // The browser can fire resize events while none of the metrics the
+    // framework observes changed (e.g. while the address bar animates);
+    // notify only when something changed since the last notification
+    // (`handleFrameworkResize` refreshes `_physicalSize` in between).
+    final ViewPadding? lastInsets = _lastNotifiedViewInsets;
+    final sizeChanged = _physicalSize != _lastNotifiedPhysicalSize;
+    final bool insetsChanged =
+        lastInsets == null ||
+        _viewInsets.bottom != lastInsets.bottom ||
+        _viewInsets.top != lastInsets.top ||
+        _viewInsets.left != lastInsets.left ||
+        _viewInsets.right != lastInsets.right;
+    final dprChanged = devicePixelRatio != _lastNotifiedDevicePixelRatio;
+    if (sizeChanged || insetsChanged || dprChanged) {
+      _lastNotifiedPhysicalSize = _physicalSize;
+      _lastNotifiedViewInsets = _viewInsets;
+      _lastNotifiedDevicePixelRatio = devicePixelRatio;
+      platformDispatcher.invokeOnMetricsChanged();
+    }
   }
 
   /// Uses the previous physical size and current innerHeight/innerWidth
