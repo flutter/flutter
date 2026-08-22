@@ -292,7 +292,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '067bfdbde9b10c1beb5d6b02d67ae9db8b96f736',
 
   'engine/src/flutter/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'd578f2e8b7bd5938e21cfb6bf15c079e0aa5b738',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '8cc91d9b6ab9991802fd208ee03a69714fd0251c',
 
    'engine/src/flutter/third_party/gtest-parallel':
    Var('chromium_git') + '/external/github.com/google/gtest-parallel' + '@' + '38191e2733d7cbaeaef6a3f1a942ddeb38a2ad14',
