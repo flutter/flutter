@@ -216,14 +216,11 @@ AccessibilityBridge::CreateRemoveReparentedNodesUpdate() {
 
   for (const auto& node_update : pending_semantics_node_updates_) {
     for (int32_t child_id : node_update.second.children_in_traversal_order) {
-      // Skip nodes that don't exist or have a parent in the current tree.
+      // Skip nodes that don't exist or aren't attached to a parent in the current tree.
       ui::AXNode* child = tree_->GetFromId(child_id);
-      if (!child) {
+      if (!child || !child->parent()) {
         continue;
       }
-
-      // Flutter's root node should never be reparented.
-      assert(child->parent());
 
       // Skip nodes whose parents are unchanged.
       if (child->parent()->id() == node_update.second.id) {
