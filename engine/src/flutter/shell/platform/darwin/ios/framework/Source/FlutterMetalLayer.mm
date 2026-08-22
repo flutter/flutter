@@ -414,7 +414,6 @@ extern CFTimeInterval display_link_target;
   [CATransaction setDisableActions:YES];
   self.contents = texture.surface;
   [CATransaction commit];
-  // Submit the committed layer update to Core Animation before returning.
   [CATransaction flush];
   _displayLink.paused = NO;
   _displayLinkPauseCountdown = 0;
