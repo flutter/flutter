@@ -61,6 +61,12 @@ class BufferBindingsGLES {
                        Range texture_range,
                        Range buffer_range);
 
+  /// Upload a push constant block. `data` points at the block's bytes, which
+  /// the caller owns.
+  bool BindPushConstants(const ProcTableGLES& gl,
+                         const ShaderMetadata* metadata,
+                         const uint8_t* data);
+
   bool UnbindVertexAttributes(const ProcTableGLES& gl);
 
  private:
@@ -125,6 +131,12 @@ class BufferBindingsGLES {
                            const BufferView& buffer,
                            const ShaderMetadata* metadata,
                            const DeviceBufferGLES& device_buffer_gles);
+
+  /// Upload each member of `metadata` with the matching glUniform call,
+  /// reading from `buffer_ptr` at the member's reflected offset.
+  bool BindUniformMembers(const ProcTableGLES& gl,
+                          const ShaderMetadata* metadata,
+                          const uint8_t* buffer_ptr);
 
   std::optional<size_t> BindTextures(
       const ProcTableGLES& gl,

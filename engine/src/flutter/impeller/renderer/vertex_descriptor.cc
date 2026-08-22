@@ -43,6 +43,17 @@ void VertexDescriptor::RegisterDescriptorSetLayouts(
   }
 }
 
+void VertexDescriptor::RegisterPushConstantRange(ShaderStage stage,
+                                                 size_t size_in_bytes) {
+  if (size_in_bytes == 0u) {
+    return;
+  }
+  push_constant_ranges_.emplace_back(PushConstantRange{
+      .shader_stage = stage,
+      .size = static_cast<uint32_t>(size_in_bytes),
+  });
+}
+
 // |Comparable<VertexDescriptor>|
 size_t VertexDescriptor::GetHash() const {
   auto seed = fml::HashCombine();
@@ -52,12 +63,16 @@ size_t VertexDescriptor::GetHash() const {
   for (const auto& layout : layouts_) {
     fml::HashCombineSeed(seed, layout.GetHash());
   }
+  for (const auto& range : push_constant_ranges_) {
+    fml::HashCombineSeed(seed, range.GetHash());
+  }
   return seed;
 }
 
 // |Comparable<VertexDescriptor>|
 bool VertexDescriptor::IsEqual(const VertexDescriptor& other) const {
-  return inputs_ == other.inputs_ && layouts_ == other.layouts_;
+  return inputs_ == other.inputs_ && layouts_ == other.layouts_ &&
+         push_constant_ranges_ == other.push_constant_ranges_;
 }
 
 const std::vector<ShaderStageIOSlot>& VertexDescriptor::GetStageInputs() const {
@@ -72,6 +87,11 @@ const std::vector<ShaderStageBufferLayout>& VertexDescriptor::GetStageLayouts()
 const std::vector<DescriptorSetLayout>&
 VertexDescriptor::GetDescriptorSetLayouts() const {
   return desc_set_layouts_;
+}
+
+const std::vector<PushConstantRange>& VertexDescriptor::GetPushConstantRanges()
+    const {
+  return push_constant_ranges_;
 }
 
 bool VertexDescriptor::UsesInputAttachments() const {
