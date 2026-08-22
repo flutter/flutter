@@ -17,6 +17,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:ui'
     show
@@ -808,11 +809,75 @@ mixin WidgetsBinding
           return _forceRebuild();
         },
       );
+
+      registerServiceExtension(
+        name: WidgetsServiceExtensions.viewMetricsOverride.name,
+        callback: _handleViewMetricsOverrideServiceExtension,
+      );
+
       AccessibilityInspector.instance.initServiceExtensions(registerServiceExtension);
+
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
     }());
+  }
+
+  /// Implements the `ext.flutter.viewMetricsOverride` service extension.
+  ///
+  /// Recognized parameters:
+  ///
+  ///  * `viewId`: the [FlutterView.viewId] to act on. Required unless
+  ///    `clearAll` is `true`.
+  ///  * `overrides`: a JSON object in the format accepted by
+  ///    [ViewMetricsOverride.fromJson]. When present, it replaces the current
+  ///    override for `viewId`. An empty object removes the override.
+  ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
+  ///
+  /// With neither `overrides` nor `clearAll`, the call is a read.
+  ///
+  /// The result always reports the override now in effect for `viewId` under
+  /// the `overrides` key, plus the full set of overridden view ids under
+  /// `overriddenViewIds`, so tooling can resynchronize after any call.
+  ///
+  /// The response is sent as soon as the override is installed. Affected views
+  /// are marked dirty synchronously by [debugSetViewMetricsOverride], so the
+  /// change is visible in the next frame. This deliberately does not rebuild
+  /// the whole widget tree: only the views whose metrics actually changed need
+  /// to rebuild.
+  Future<Map<String, Object?>> _handleViewMetricsOverrideServiceExtension(
+    Map<String, String> parameters,
+  ) async {
+    if (parameters['clearAll'] == 'true') {
+      debugClearViewMetricsOverrides();
+      return <String, Object?>{'overrides': <String, Object?>{}, 'overriddenViewIds': <int>[]};
+    }
+
+    final String? rawViewId = parameters['viewId'];
+    if (rawViewId == null) {
+      throw Exception('The viewId parameter is required unless clearAll is true.');
+    }
+    final int? viewId = int.tryParse(rawViewId);
+    if (viewId == null) {
+      throw Exception('The viewId parameter must be an integer, got "$rawViewId".');
+    }
+
+    final String? rawOverrides = parameters['overrides'];
+    if (rawOverrides != null) {
+      final Object? decoded = json.decode(rawOverrides);
+      if (decoded is! Map<String, Object?>) {
+        throw Exception('The overrides parameter must be a JSON object.');
+      }
+      // ViewMetricsOverride.fromJson throws FormatException on a malformed
+      // payload, which the service extension machinery reports back to the
+      // caller as an error rather than silently applying a partial override.
+      debugSetViewMetricsOverride(viewId, ViewMetricsOverride.fromJson(decoded));
+    }
+
+    return <String, Object?>{
+      'overrides': debugViewMetricsOverrides[viewId]?.toJson() ?? <String, Object?>{},
+      'overriddenViewIds': debugViewMetricsOverrides.keys.toList(),
+    };
   }
 
   Map<String, List<Map<String, String>>> _formatEvaluationResult(List<Violation> violations) {

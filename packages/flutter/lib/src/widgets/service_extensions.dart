@@ -123,6 +123,17 @@ enum WidgetsServiceExtensions {
   /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   accessibilityEvaluations,
+
+  /// Name of service extension that, when called, gets, sets, or clears the
+  /// view metric overrides of an individual view.
+  ///
+  /// See also:
+  ///
+  /// * [ViewMetricsOverride], the value this service extension exposes.
+  /// * [debugViewMetricsOverrides], the map this service extension writes to.
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
+  ///   registered.
+  viewMetricsOverride,
 }
 
 /// Service extension constants for the Widget Inspector.

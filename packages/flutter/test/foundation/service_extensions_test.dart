@@ -212,11 +212,15 @@ void main() {
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions) or accessibility inspector (see accessibility_inspector_test.dart).
     // Any test counted here must be tested in this file!
-    const serviceExtensionCount = 31;
+    const serviceExtensionCount = 32;
 
     // The tests are in the widgets/accessibility_evaluations_service_extension_test.dart
     // They can't be moved here because they need to run in a WidgetTester environment.
     testedExtensions.add(WidgetsServiceExtensions.accessibilityEvaluations.name);
+
+    // The tests are in the widgets/view_metrics_override_test.dart
+    // They can't be moved here because they need to run in a WidgetTester environment.
+    testedExtensions.add(WidgetsServiceExtensions.viewMetricsOverride.name);
 
     expect(
       binding.extensions.length,

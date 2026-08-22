@@ -16,6 +16,7 @@ library;
 
 import 'box.dart';
 import 'object.dart';
+import 'view_metrics_override.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
 
@@ -344,7 +345,8 @@ bool debugAssertAllRenderVarsUnset(String reason, {bool debugCheckIntrinsicSizes
         debugOnProfilePaint != null ||
         debugDisableClipLayers ||
         debugDisablePhysicalShapeLayers ||
-        debugDisableOpacityLayers) {
+        debugDisableOpacityLayers ||
+        debugViewMetricsOverrides.isNotEmpty) {
       throw FlutterError(reason);
     }
     return true;

@@ -10,7 +10,7 @@
 library;
 
 import 'dart:async';
-import 'dart:ui' as ui show PictureRecorder, Rect, SceneBuilder, SemanticsUpdate;
+import 'dart:ui' as ui show FlutterView, PictureRecorder, Rect, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -18,11 +18,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'box.dart';
 import 'debug.dart';
 import 'mouse_tracker.dart';
 import 'object.dart';
 import 'service_extensions.dart';
 import 'view.dart';
+import 'view_metrics_override.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
@@ -59,6 +61,10 @@ mixin RendererBinding
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
     addPersistentFrameCallback(_handlePersistentFrameCallback);
+    assert(() {
+      debugViewMetricsOverridesNotifier.addListener(_debugHandleViewMetricsOverridesChanged);
+      return true;
+    }());
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
@@ -368,7 +374,72 @@ mixin RendererBinding
   /// using `flutter run`.
   @protected
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    return ViewConfiguration.fromView(renderView.flutterView);
+    final ui.FlutterView view = renderView.flutterView;
+    ViewConfiguration? configuration;
+    assert(() {
+      final ViewMetricsOverride? override = debugViewMetricsOverrides[view.viewId];
+      if (override != null && override.affectsViewConfiguration) {
+        final double devicePixelRatio = override.devicePixelRatio ?? view.devicePixelRatio;
+        final physicalConstraints = override.physicalSize != null
+            ? BoxConstraints.tight(override.physicalSize!)
+            : BoxConstraints.fromViewConstraints(view.physicalConstraints);
+        configuration = ViewConfiguration(
+          logicalConstraints: physicalConstraints / devicePixelRatio,
+          physicalConstraints: physicalConstraints,
+          devicePixelRatio: devicePixelRatio,
+        );
+      }
+      return true;
+    }());
+    return configuration ?? ViewConfiguration.fromView(view);
+  }
+
+  @override
+  double? devicePixelRatioForView(int viewId) {
+    double? devicePixelRatio = super.devicePixelRatioForView(viewId);
+    assert(() {
+      if (devicePixelRatio != null) {
+        // Pointer data arrives in physical pixels and is converted to logical
+        // pixels with this ratio. The view lays out at the overridden ratio, so
+        // pointers have to use it too, otherwise a tap would land a factor of
+        // (real ratio / overridden ratio) away from the widget it was aimed at.
+        devicePixelRatio = debugViewMetricsOverrides[viewId]?.devicePixelRatio ?? devicePixelRatio;
+      }
+      return true;
+    }());
+    return devicePixelRatio;
+  }
+
+  /// Applies any [debugViewMetricsOverrides] change to the [ViewConfiguration]
+  /// of every [RenderView], and schedules a frame if one actually changed.
+  ///
+  /// Overrides that do not affect layout, such as [ViewMetricsOverride.boldText],
+  /// leave every configuration untouched and schedule nothing here; the views
+  /// that report them rebuild through [MediaQuery] instead.
+  ///
+  /// This deliberately does not call [handleMetricsChanged]. That method is the
+  /// platform's "the window changed" notification, and [WidgetsBinding]
+  /// forwards it to every [WidgetsBindingObserver] as
+  /// [WidgetsBindingObserver.didChangeMetrics]. Reusing it here would tell
+  /// applications that the real window changed whenever tooling toggled an
+  /// unrelated setting.
+  ///
+  /// Has no effect in release mode.
+  void _debugHandleViewMetricsOverridesChanged() {
+    assert(() {
+      var forceFrame = false;
+      for (final RenderView renderView in renderViews) {
+        final ViewConfiguration configuration = createViewConfigurationFor(renderView);
+        if (!renderView.hasConfiguration || renderView.configuration != configuration) {
+          renderView.configuration = configuration;
+          forceFrame = forceFrame || renderView.child != null;
+        }
+      }
+      if (forceFrame) {
+        scheduleForcedFrame();
+      }
+      return true;
+    }());
   }
 
   /// Create a [SceneBuilder].
