@@ -41,7 +41,7 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
 
     // Align target time to the C++ steady_clock used by fml::TimePoint.
     fml::TimePoint target_time = start_time + fml::TimeDelta::FromSecondsF(duration);
-    FireCallback(start_time, target_time, true);
+    FireCallback(start_time, target_time);
   };
   FlutterFMLTaskRunner* uiTaskRunner =
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()];
@@ -69,7 +69,7 @@ void VsyncWaiterIOS::AwaitVSync() {
 
   if (client_.displayLink.paused) {
     [client_ await];
-    FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now(), false);
+    FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now());
   } else {
     waiting_for_vsync_ = true;
   }
