@@ -786,6 +786,32 @@ void main() {
     );
 
     testUsingContext(
+      'getBuildInfo defaults when no build options are registered on command',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+        await createTestCommandRunner(flutterCommand).run(<String>['dummy']);
+
+        final BuildInfo debugBuildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(debugBuildInfo.trackWidgetCreation, isFalse);
+        expect(debugBuildInfo.treeShakeIcons, isFalse);
+        expect(debugBuildInfo.androidGradleDaemon, isTrue);
+        expect(debugBuildInfo.androidSkipBuildDependencyValidation, isTrue);
+
+        final BuildInfo releaseBuildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.release,
+        );
+        expect(releaseBuildInfo.trackWidgetCreation, isFalse);
+        expect(releaseBuildInfo.treeShakeIcons, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'getBuildInfo default flag values with options registered',
       () async {
         final command = DummyAllBuildOptionsFlutterCommand();

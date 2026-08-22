@@ -78,6 +78,12 @@ abstract class OptionDescriptor<T> {
     return target != null && target.options.contains(name) && target.wasParsed(name);
   }
 
+  /// Checks if this option is registered in [results].
+  bool isRegistered(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    return target != null && target.options.contains(name);
+  }
+
   /// Checks if this option was explicitly parsed (alias for [wasProvided]).
   bool wasParsed(ArgResults? results, {ArgResults? globalResults}) =>
       wasProvided(results, globalResults: globalResults);

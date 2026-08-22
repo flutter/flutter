@@ -80,6 +80,25 @@ void main() {
       expect(descriptor.wasProvided(results), isTrue);
       expect(descriptor.getValue(results), isFalse);
     });
+
+    test('isRegistered reports true when added to parser and false when not', () {
+      const descriptor = FlagOptionDescriptor(
+        name: 'registered-flag',
+        defaultsTo: true,
+        help: 'Registered flag help',
+      );
+      const unaddedDescriptor = FlagOptionDescriptor(
+        name: 'unadded-flag',
+        defaultsTo: true,
+        help: 'Unadded flag help',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.isRegistered(results), isTrue);
+      expect(unaddedDescriptor.isRegistered(results), isFalse);
+    });
   });
 
   group('NullableFlagOptionDescriptor', () {
