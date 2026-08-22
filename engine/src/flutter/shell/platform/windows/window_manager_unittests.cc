@@ -846,6 +846,57 @@ TEST_F(WindowManagerTest, PopupWindowDoesNotStealFocus) {
   EXPECT_NE(focused_after, popup_window_handle);
 }
 
+TEST_F(WindowManagerTest, PopupWindowHandlesNullPositionCallback) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  // Simulates the positioner failing (e.g. its anchor was torn down).
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    return nullptr;
+  };
+
+  PopupWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  const int64_t popup_view_id =
+      InternalFlutterWindows_WindowManager_CreatePopupWindow(engine_id(),
+                                                             &creation_request);
+  HWND popup_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), popup_view_id);
+  ASSERT_NE(popup_window_handle, nullptr);
+
+  FlutterWindowsView* view =
+      engine()->GetViewFromTopLevelWindow(popup_window_handle);
+  ASSERT_NE(view, nullptr);
+
+  RECT initial_rect;
+  GetWindowRect(popup_window_handle, &initial_rect);
+
+  // Triggers UpdatePosition via the null positioner; must not crash.
+  view->OnFrameGenerated(150, 100);
+  engine()->task_runner()->ProcessTasks();
+
+  RECT rect_after_null_callback;
+  GetWindowRect(popup_window_handle, &rect_after_null_callback);
+  EXPECT_EQ(initial_rect.left, rect_after_null_callback.left);
+  EXPECT_EQ(initial_rect.top, rect_after_null_callback.top);
+}
+
 // TODO(team-windows): Fix flakes. See:
 // https://github.com/flutter/flutter/issues/177172
 TEST_F(WindowManagerTest, DISABLED_PopupWindowUpdatesPositionOnViewSizeChange) {
