@@ -14,7 +14,8 @@ const Color borderColor = Color(0xFF3F51B5); // Colors.indigo
 /// The color of the opaque child placed inside every [Container] below.
 const Color fillColor = Color(0xFFFFC107); // Colors.amber
 
-/// The page background, which shows through the gaps in the first pitfall.
+/// The page background, which shows through the corner gaps when a child
+/// is clipped to the outer radius.
 const Color backgroundColor = Color(0xFFFFFFFF);
 
 /// The width and height of every sample [Container] below.
