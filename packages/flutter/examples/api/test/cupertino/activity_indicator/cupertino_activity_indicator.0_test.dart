@@ -23,8 +23,12 @@ void main() {
       tester.widget<CupertinoActivityIndicator>(firstIndicator).radius,
       10.0,
     );
+    expect(
+      tester.widget<CupertinoActivityIndicator>(firstIndicator).tickCount,
+      8,
+    );
 
-    // Cupertino activity indicator with custom radius and color.
+    // Cupertino activity indicator with custom radius, color, and tick count.
     final Finder secondIndicator = find
         .byType(CupertinoActivityIndicator)
         .at(1);
@@ -40,6 +44,10 @@ void main() {
       tester.widget<CupertinoActivityIndicator>(secondIndicator).color,
       CupertinoColors.activeBlue,
     );
+    expect(
+      tester.widget<CupertinoActivityIndicator>(secondIndicator).tickCount,
+      12,
+    );
 
     // Cupertino activity indicator with custom radius and disabled animation.
     final Finder thirdIndicator = find.byType(CupertinoActivityIndicator).at(2);
@@ -50,6 +58,10 @@ void main() {
     expect(
       tester.widget<CupertinoActivityIndicator>(thirdIndicator).radius,
       20.0,
+    );
+    expect(
+      tester.widget<CupertinoActivityIndicator>(thirdIndicator).tickCount,
+      16,
     );
   });
 }

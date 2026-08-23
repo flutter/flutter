@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
 const double _kDefaultIndicatorRadius = 10.0;
+const int _kDefaultIndicatorTickCount = 8;
 
 // Extracted from iOS 13.2 Beta.
 const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
@@ -38,7 +39,9 @@ class CupertinoActivityIndicator extends StatefulWidget {
     this.color,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
+    this.tickCount = _kDefaultIndicatorTickCount,
   }) : assert(radius > 0.0),
+       assert(tickCount > 0),
        progress = 1.0;
 
   /// Creates a non-animated iOS-style activity indicator that displays
@@ -52,9 +55,11 @@ class CupertinoActivityIndicator extends StatefulWidget {
     this.color,
     this.radius = _kDefaultIndicatorRadius,
     this.progress = 1.0,
+    this.tickCount = _kDefaultIndicatorTickCount,
   }) : assert(radius > 0.0),
        assert(progress >= 0.0),
        assert(progress <= 1.0),
+       assert(tickCount > 0),
        animating = false;
 
   /// Color of the activity indicator.
@@ -71,6 +76,11 @@ class CupertinoActivityIndicator extends StatefulWidget {
   ///
   /// Defaults to 10 pixels. Must be positive.
   final double radius;
+
+  /// The number of ticks drawn around the indicator.
+  ///
+  /// Defaults to 8. Must be positive.
+  final int tickCount;
 
   /// Determines the percentage of spinner ticks that will be shown. Typical usage would
   /// display all ticks, however, this allows for more fine-grained control such as
@@ -126,6 +136,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
           activeColor: widget.color ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context),
           radius: widget.radius,
           progress: widget.progress,
+          tickCount: widget.tickCount,
         ),
       ),
     );
@@ -134,12 +145,11 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
 
 const double _kTwoPI = math.pi * 2.0;
 
-/// Alpha values extracted from the native component (for both dark and light mode) to
-/// draw the spinning ticks.
-const List<int> _kAlphaValues = <int>[47, 47, 47, 47, 72, 97, 122, 147];
+/// The minimum alpha value used to draw the spinning ticks.
+const int _kMinTickAlpha = 47;
 
-/// The alpha value that is used to draw the partially revealed ticks.
-const int _partiallyRevealedAlpha = 147;
+/// The maximum alpha value used to draw the spinning and partially revealed ticks.
+const int _kMaxTickAlpha = 147;
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
@@ -147,6 +157,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     required this.activeColor,
     required this.radius,
     required this.progress,
+    required this.tickCount,
   }) : tickFundamentalShape = RRect.fromLTRBXY(
          -radius / _kDefaultIndicatorRadius,
          -radius / 3.0,
@@ -161,15 +172,25 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   final Color activeColor;
   final double radius;
   final double progress;
+  final int tickCount;
 
   // Use a RRect instead of RSuperellipse since this shape is really small
   // and should make little visual difference.
   final RRect tickFundamentalShape;
 
+  int _alphaValueForTick(int tick) {
+    final int fadingTickCount = tickCount - tickCount ~/ 2;
+    final int fadingTick = tick - tickCount ~/ 2;
+    if (fadingTick < 0) {
+      return _kMinTickAlpha;
+    }
+    return _kMinTickAlpha +
+        ((_kMaxTickAlpha - _kMinTickAlpha) * (fadingTick + 1) / fadingTickCount).round();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
-    final int tickCount = _kAlphaValues.length;
 
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);
@@ -178,9 +199,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
     for (var i = 0; i < tickCount * progress; ++i) {
       final int t = (i - activeTick) % tickCount;
-      paint.color = activeColor.withAlpha(
-        progress < 1 ? _partiallyRevealedAlpha : _kAlphaValues[t],
-      );
+      paint.color = activeColor.withAlpha(progress < 1 ? _kMaxTickAlpha : _alphaValueForTick(t));
       canvas.drawRRect(tickFundamentalShape, paint);
       canvas.rotate(_kTwoPI / tickCount);
     }
@@ -192,7 +211,8 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   bool shouldRepaint(_CupertinoActivityIndicatorPainter oldPainter) {
     return oldPainter.position != position ||
         oldPainter.activeColor != activeColor ||
-        oldPainter.progress != progress;
+        oldPainter.progress != progress ||
+        oldPainter.tickCount != tickCount;
   }
 }
 

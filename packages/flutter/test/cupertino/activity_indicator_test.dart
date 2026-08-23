@@ -156,6 +156,47 @@ void main() {
     );
   });
 
+  test('tickCount defaults to 8', () {
+    expect(const CupertinoActivityIndicator().tickCount, 8);
+    expect(const CupertinoActivityIndicator.partiallyRevealed().tickCount, 8);
+  });
+
+  for (final tickCount in <int>[8, 12, 16]) {
+    testWidgets('Can specify $tickCount ticks', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Center(child: CupertinoActivityIndicator(animating: false, tickCount: tickCount)),
+      );
+
+      expect(
+        find.byType(CupertinoActivityIndicator),
+        paintsExactlyCountTimes(#drawRRect, tickCount),
+      );
+      expect(
+        tester
+            .widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator))
+            .tickCount,
+        tickCount,
+      );
+    });
+  }
+
+  testWidgets('Partially revealed activity indicator honors tickCount', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Center(
+        child: CupertinoActivityIndicator.partiallyRevealed(progress: 0.5, tickCount: 16),
+      ),
+    );
+
+    expect(find.byType(CupertinoActivityIndicator), paintsExactlyCountTimes(#drawRRect, 8));
+  });
+
+  test('tickCount must be positive', () {
+    expect(() => CupertinoActivityIndicator(tickCount: 0), throwsAssertionError);
+    expect(() => CupertinoActivityIndicator.partiallyRevealed(tickCount: 0), throwsAssertionError);
+  });
+
   group('CupertinoLinearActivityIndicator', () {
     testWidgets('draws the linear activity indicator', (WidgetTester tester) async {
       await tester.pumpWidget(const Center(child: CupertinoLinearActivityIndicator(progress: 0.2)));
