@@ -53,18 +53,23 @@ class SkwasmCanvas implements LayerCanvas {
     // that operation will not adopt the tile mode from the backdrop filter
     // and instead needs it supplied to the saveLayer call itself as a
     // separate argument.
-    final nativeFilter = SkwasmImageFilter.fromUiFilter(imageFilter);
+    final EngineImageFilter engineFilter;
+    if (imageFilter is ui.ColorFilter) {
+      engineFilter = EngineColorFilterImageFilter(colorFilter: imageFilter as EngineColorFilter);
+    } else {
+      engineFilter = imageFilter as EngineImageFilter;
+    }
+    final backendFilter =
+        engineFilter.getBackendFilter(defaultBlurTileMode: ui.TileMode.mirror) as SkwasmImageFilter;
+    final ImageFilterHandle nativeFilterHandle = backendFilter.nativeFilter;
+
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(/*ui.TileMode.decal*/);
     if (bounds != null) {
       withStackScope((StackScope s) {
-        nativeFilter.withRawImageFilter((nativeFilterHandle) {
-          canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nativeFilterHandle);
-        }, defaultBlurTileMode: ui.TileMode.mirror);
+        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nativeFilterHandle);
       });
     } else {
-      nativeFilter.withRawImageFilter((nativeFilterHandle) {
-        canvasSaveLayer(_handle, nullptr, paintHandle, nativeFilterHandle);
-      }, defaultBlurTileMode: ui.TileMode.mirror);
+      canvasSaveLayer(_handle, nullptr, paintHandle, nativeFilterHandle);
     }
     paintDispose(paintHandle);
   }
@@ -323,8 +328,12 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
+    final skwasmVertices = (vertices as EngineVertices).delegate as SkwasmVertices?;
+    if (skwasmVertices == null) {
+      return;
+    }
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawVertices(_handle, (vertices as SkwasmVertices).handle, blendMode.index, paintHandle);
+    canvasDrawVertices(_handle, skwasmVertices.handle, blendMode.index, paintHandle);
     paintDispose(paintHandle);
   }
 
