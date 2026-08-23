@@ -17,6 +17,22 @@ const Color fillColor = Color(0xFFFFC107); // Colors.amber
 /// The page background, which shows through the gaps in the first pitfall.
 const Color backgroundColor = Color(0xFFFFFFFF);
 
+/// The width and height of every sample [Container] below.
+const double sampleSize = 140.0;
+
+/// The corner radius of every sample's [BoxDecoration.borderRadius].
+const double outerRadius = 56.0;
+
+/// The border width in the first pair of samples.
+const double thickBorderWidth = 20.0;
+
+/// The child's corner radius that matches the inside of a
+/// [thickBorderWidth]-wide border around [outerRadius].
+const double innerRadius = outerRadius - thickBorderWidth;
+
+/// The border width in the second pair of samples.
+const double thinBorderWidth = 8.0;
+
 class ContainerDecorationExampleApp extends StatelessWidget {
   const ContainerDecorationExampleApp({super.key});
 
@@ -56,40 +72,46 @@ class ContainerDecorationExample extends StatelessWidget {
               runSpacing: 16.0,
               children: <Widget>[
                 _Sample(
-                  label: 'Pitfall',
+                  label: 'Clipped to the outer radius',
                   child: Container(
                     key: const Key('gap-pitfall'),
-                    width: 140.0,
-                    height: 140.0,
+                    width: sampleSize,
+                    height: sampleSize,
                     decoration: BoxDecoration(
-                      border: Border.all(color: borderColor, width: 20.0),
-                      borderRadius: BorderRadius.circular(56.0),
+                      border: Border.all(
+                        color: borderColor,
+                        width: thickBorderWidth,
+                      ),
+                      borderRadius: BorderRadius.circular(outerRadius),
                     ),
-                    // The child is inset by the 20-pixel border (see
-                    // Decoration.padding), so a 56-pixel corner radius no
-                    // longer matches the border's inner edge, whose radius is
-                    // 56.0 - 20.0 = 36.0 pixels: the corners pull away from
-                    // the border, leaving background-colored gaps.
+                    // The child is inset by the border (see
+                    // Decoration.padding), so outerRadius no longer matches
+                    // the border's inner edge, whose radius is innerRadius
+                    // (outerRadius minus the border width): the corners pull
+                    // away from the border, leaving background-colored gaps.
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(56.0),
+                      borderRadius: BorderRadius.circular(outerRadius),
                       child: const ColoredBox(color: fillColor),
                     ),
                   ),
                 ),
                 _Sample(
-                  label: 'Recommended',
+                  label: 'Clipped to the inner radius',
                   child: Container(
                     key: const Key('gap-recommended'),
-                    width: 140.0,
-                    height: 140.0,
+                    width: sampleSize,
+                    height: sampleSize,
                     decoration: BoxDecoration(
-                      border: Border.all(color: borderColor, width: 20.0),
-                      borderRadius: BorderRadius.circular(56.0),
+                      border: Border.all(
+                        color: borderColor,
+                        width: thickBorderWidth,
+                      ),
+                      borderRadius: BorderRadius.circular(outerRadius),
                     ),
-                    // Reducing the clip radius by the border width aligns the
+                    // Reducing the clip radius to innerRadius aligns the
                     // child's corners with the inside of the border.
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(36.0),
+                      borderRadius: BorderRadius.circular(innerRadius),
                       child: const ColoredBox(color: fillColor),
                     ),
                   ),
@@ -115,15 +137,18 @@ class ContainerDecorationExample extends StatelessWidget {
               runSpacing: 16.0,
               children: <Widget>[
                 _Sample(
-                  label: 'Pitfall',
+                  label: 'Border in the decoration',
                   child: Container(
                     key: const Key('covered-pitfall'),
-                    width: 140.0,
-                    height: 140.0,
+                    width: sampleSize,
+                    height: sampleSize,
                     clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      border: Border.all(color: borderColor, width: 8.0),
-                      borderRadius: BorderRadius.circular(56.0),
+                      border: Border.all(
+                        color: borderColor,
+                        width: thinBorderWidth,
+                      ),
+                      borderRadius: BorderRadius.circular(outerRadius),
                     ),
                     // The child's sharp corners cover the border ring near
                     // the corners; the clip only trims what sticks out past
@@ -132,22 +157,25 @@ class ContainerDecorationExample extends StatelessWidget {
                   ),
                 ),
                 _Sample(
-                  label: 'Recommended',
+                  label: 'Border in the foregroundDecoration',
                   child: Container(
                     key: const Key('covered-recommended'),
-                    width: 140.0,
-                    height: 140.0,
+                    width: sampleSize,
+                    height: sampleSize,
                     clipBehavior: Clip.antiAlias,
                     // Without a border, the decoration no longer insets the
                     // child, but it still defines the rounded clip path.
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(56.0),
+                      borderRadius: BorderRadius.circular(outerRadius),
                     ),
                     // An identical border in the foreground decoration paints
                     // on top of the child, so it stays fully visible.
                     foregroundDecoration: BoxDecoration(
-                      border: Border.all(color: borderColor, width: 8.0),
-                      borderRadius: BorderRadius.circular(56.0),
+                      border: Border.all(
+                        color: borderColor,
+                        width: thinBorderWidth,
+                      ),
+                      borderRadius: BorderRadius.circular(outerRadius),
                     ),
                     child: const ColoredBox(color: fillColor),
                   ),
