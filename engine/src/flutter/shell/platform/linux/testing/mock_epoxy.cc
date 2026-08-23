@@ -478,17 +478,38 @@ static void _glFramebufferRenderbuffer(GLenum target,
                                        GLenum renderbuffertarget,
                                        GLuint renderbuffer) {
   framebuffer_renderbuffers[attachment] = renderbuffer;
+  if (mock) {
+    mock->glFramebufferRenderbuffer(target, attachment, renderbuffertarget,
+                                    renderbuffer);
+  }
 }
 
 static void _glFramebufferTexture2D(GLenum target,
                                     GLenum attachment,
                                     GLenum textarget,
                                     GLuint texture,
-                                    GLint level) {}
+                                    GLint level) {
+  if (mock) {
+    mock->glFramebufferTexture2D(target, attachment, textarget, texture, level);
+  }
+}
+
+static void _glFramebufferTexture2DMultisampleEXT(GLenum target,
+                                                  GLenum attachment,
+                                                  GLenum textarget,
+                                                  GLuint texture,
+                                                  GLint level,
+                                                  GLsizei samples) {
+  if (mock) {
+    mock->glFramebufferTexture2DMultisampleEXT(target, attachment, textarget,
+                                               texture, level, samples);
+  }
+}
 
 static void _glGenTextures(GLsizei n, GLuint* textures) {
+  static GLuint next_id = 1;
   for (GLsizei i = 0; i < n; i++) {
-    textures[i] = 0;
+    textures[i] = next_id++;
   }
   if (mock) {
     mock->glGenTextures(n, textures);
@@ -496,8 +517,9 @@ static void _glGenTextures(GLsizei n, GLuint* textures) {
 }
 
 static void _glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
+  static GLuint next_id = 1;
   for (GLsizei i = 0; i < n; i++) {
-    framebuffers[i] = 0;
+    framebuffers[i] = next_id++;
   }
   if (mock) {
     mock->glGenFramebuffers(n, framebuffers);
@@ -505,8 +527,9 @@ static void _glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
 }
 
 static void _glGenRenderbuffers(GLsizei n, GLuint* renderbuffers) {
+  static GLuint next_id = 1;
   for (GLsizei i = 0; i < n; i++) {
-    renderbuffers[i] = 0;
+    renderbuffers[i] = next_id++;
   }
   if (mock) {
     mock->glGenRenderbuffers(n, renderbuffers);
@@ -530,6 +553,9 @@ static void _glGetFramebufferAttachmentParameteriv(GLenum target,
 static void _glGetIntegerv(GLenum pname, GLint* data) {
   if (pname == GL_TEXTURE_BINDING_2D) {
     *data = bound_texture_2d;
+  }
+  if (mock) {
+    mock->glGetIntegerv(pname, data);
   }
 }
 
@@ -582,9 +608,14 @@ static void _glTexImage2D(GLenum target,
                           GLenum format,
                           GLenum type,
                           const void* pixels) {
+  if (mock) {
+    mock->glTexImage2D(target, level, internalformat, width, height, border,
+                       format, type, pixels);
+  }
   if (pixels != nullptr) {
-    FML_CHECK(internalformat == GL_RGBA || internalformat == GL_RGBA8);
-    FML_CHECK(format == GL_RGBA);
+    FML_CHECK(internalformat == GL_RGBA || internalformat == GL_RGBA8 ||
+              internalformat == GL_BGRA_EXT);
+    FML_CHECK(format == GL_RGBA || format == GL_BGRA_EXT);
     FML_CHECK(type == GL_UNSIGNED_BYTE);
 
     // Simple mock read to detect out-of-bounds reads in tests.
@@ -603,7 +634,33 @@ void _glLinkProgram(GLuint program) {}
 void _glRenderbufferStorage(GLenum target,
                             GLenum internalformat,
                             GLsizei width,
-                            GLsizei height) {}
+                            GLsizei height) {
+  if (mock) {
+    mock->glRenderbufferStorage(target, internalformat, width, height);
+  }
+}
+
+void _glRenderbufferStorageMultisample(GLenum target,
+                                       GLsizei samples,
+                                       GLenum internalformat,
+                                       GLsizei width,
+                                       GLsizei height) {
+  if (mock) {
+    mock->glRenderbufferStorageMultisample(target, samples, internalformat,
+                                           width, height);
+  }
+}
+
+void _glRenderbufferStorageMultisampleEXT(GLenum target,
+                                          GLsizei samples,
+                                          GLenum internalformat,
+                                          GLsizei width,
+                                          GLsizei height) {
+  if (mock) {
+    mock->glRenderbufferStorageMultisampleEXT(target, samples, internalformat,
+                                              width, height);
+  }
+}
 
 void _glShaderSource(GLuint shader,
                      GLsizei count,
@@ -711,17 +768,34 @@ void (*epoxy_glFramebufferTexture2D)(GLenum target,
                                      GLenum textarget,
                                      GLuint texture,
                                      GLint level);
+void (*epoxy_glFramebufferTexture2DMultisampleEXT)(GLenum target,
+                                                   GLenum attachment,
+                                                   GLenum textarget,
+                                                   GLuint texture,
+                                                   GLint level,
+                                                   GLsizei samples);
 void (*epoxy_glGetFramebufferAttachmentParameteriv)(GLenum target,
                                                     GLenum attachment,
                                                     GLenum pname,
                                                     GLint* params);
 void (*epoxy_glGenFramebuffers)(GLsizei n, GLuint* framebuffers);
+void (*epoxy_glGenRenderbuffers)(GLsizei n, GLuint* renderbuffers);
 void (*epoxy_glGenTextures)(GLsizei n, GLuint* textures);
 void (*epoxy_glLinkProgram)(GLuint program);
 void (*epoxy_glRenderbufferStorage)(GLenum target,
                                     GLenum internalformat,
                                     GLsizei width,
                                     GLsizei height);
+void (*epoxy_glRenderbufferStorageMultisample)(GLenum target,
+                                               GLsizei samples,
+                                               GLenum internalformat,
+                                               GLsizei width,
+                                               GLsizei height);
+void (*epoxy_glRenderbufferStorageMultisampleEXT)(GLenum target,
+                                                  GLsizei samples,
+                                                  GLenum internalformat,
+                                                  GLsizei width,
+                                                  GLsizei height);
 void (*epoxy_glShaderSource)(GLuint shader,
                              GLsizei count,
                              const GLchar* const* string,
@@ -776,6 +850,8 @@ static void library_init() {
   epoxy_glEnable = _glEnable;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
   epoxy_glFramebufferTexture2D = _glFramebufferTexture2D;
+  epoxy_glFramebufferTexture2DMultisampleEXT =
+      _glFramebufferTexture2DMultisampleEXT;
   epoxy_glGenFramebuffers = _glGenFramebuffers;
   epoxy_glGenRenderbuffers = _glGenRenderbuffers;
   epoxy_glGenTextures = _glGenTextures;
@@ -790,6 +866,9 @@ static void library_init() {
   epoxy_glIsEnabled = _glIsEnabled;
   epoxy_glLinkProgram = _glLinkProgram;
   epoxy_glRenderbufferStorage = _glRenderbufferStorage;
+  epoxy_glRenderbufferStorageMultisample = _glRenderbufferStorageMultisample;
+  epoxy_glRenderbufferStorageMultisampleEXT =
+      _glRenderbufferStorageMultisampleEXT;
   epoxy_glShaderSource = _glShaderSource;
   epoxy_glTexParameterf = _glTexParameterf;
   epoxy_glTexParameteri = _glTexParameteri;
