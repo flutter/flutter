@@ -26,8 +26,9 @@ class WaylandTest : public ::testing::Test {
   // The Wayland library the code being tested runs against.
   ::testing::NiceMock<MockWayland> wayland;
 
-  // Gets the log levels received since the start of the test.
-  GLogLevelFlags GetReceivedLogLevels();
+  // Checks if a log of the given level has been received since the start of
+  // the test.
+  bool HasReceivedLogLevel(GLogLevelFlags level);
 
  private:
   // The log levels that were fatal before this test started.

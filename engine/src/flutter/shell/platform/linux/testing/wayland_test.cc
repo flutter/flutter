@@ -48,8 +48,8 @@ WaylandTest::~WaylandTest() {
   fl_ensure_gtk_init(nullptr);
 }
 
-GLogLevelFlags WaylandTest::GetReceivedLogLevels() {
-  return fl_get_received_gtk_log_levels();
+bool WaylandTest::HasReceivedLogLevel(GLogLevelFlags level) {
+  return fl_has_received_gtk_log_level(level);
 }
 
 }  // namespace testing

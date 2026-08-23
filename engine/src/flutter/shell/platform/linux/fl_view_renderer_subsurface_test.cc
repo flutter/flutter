@@ -43,9 +43,8 @@ TEST_F(FlViewRendererSubsurfaceTest, PresentBeforeRealize) {
   const FlutterLayer* layers[1] = {&layer};
   fl_view_renderer_present_layers(FL_VIEW_RENDERER(renderer), layers, 1);
 
-  EXPECT_EQ(flutter::testing::fl_get_received_gtk_log_levels() &
-                (G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL),
-            static_cast<GLogLevelFlags>(0x0));
+  EXPECT_FALSE(flutter::testing::fl_has_received_gtk_log_level(
+      static_cast<GLogLevelFlags>(G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL)));
 }
 
 // The subsurface renderer can only be used on Wayland. The tests don't run on
@@ -63,9 +62,8 @@ TEST_F(FlViewRendererSubsurfaceTest, RealizeWithoutWayland) {
 
   flutter::testing::fl_reset_received_gtk_log_levels();
   gtk_widget_show_all(window);
-  EXPECT_NE(
-      flutter::testing::fl_get_received_gtk_log_levels() & G_LOG_LEVEL_WARNING,
-      static_cast<GLogLevelFlags>(0x0));
+  EXPECT_TRUE(
+      flutter::testing::fl_has_received_gtk_log_level(G_LOG_LEVEL_WARNING));
 
   // Unrealizing a widget that has no subsurface must not fail.
   gtk_widget_destroy(window);

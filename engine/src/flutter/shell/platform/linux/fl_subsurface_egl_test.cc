@@ -68,8 +68,7 @@ TEST_F(FlSubsurfaceEGLTest, Create) {
 
   g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
   EXPECT_NE(egl, nullptr);
-  EXPECT_EQ(GetReceivedLogLevels() & G_LOG_LEVEL_WARNING,
-            static_cast<GLogLevelFlags>(0x0));
+  EXPECT_FALSE(HasReceivedLogLevel(G_LOG_LEVEL_WARNING));
 }
 
 // If the EGL setup fails an object is still returned, so the caller doesn't
@@ -79,8 +78,7 @@ TEST_F(FlSubsurfaceEGLTest, CreateFailure) {
 
   g_autoptr(FlSubsurfaceEGL) egl = CreateEGL();
   EXPECT_NE(egl, nullptr);
-  EXPECT_NE(GetReceivedLogLevels() & G_LOG_LEVEL_WARNING,
-            static_cast<GLogLevelFlags>(0x0));
+  EXPECT_TRUE(HasReceivedLogLevel(G_LOG_LEVEL_WARNING));
 }
 
 // A subsurface reference is held, so the Wayland surface being drawn to can't

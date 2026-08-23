@@ -54,5 +54,9 @@ GLogLevelFlags fl_get_received_gtk_log_levels() {
   return fl_received_log_levels;
 }
 
+bool fl_has_received_gtk_log_level(GLogLevelFlags level) {
+  return (fl_received_log_levels & level) != 0;
+}
+
 }  // namespace testing
 }  // namespace flutter

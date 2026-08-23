@@ -25,8 +25,7 @@ TEST_F(FlWaylandDisplayTest, Open) {
   g_autoptr(FlWaylandDisplay) display =
       fl_wayland_display_open(fl_mock_wayland_get_display());
   EXPECT_NE(display, nullptr);
-  EXPECT_EQ(GetReceivedLogLevels() & G_LOG_LEVEL_WARNING,
-            static_cast<GLogLevelFlags>(0x0));
+  EXPECT_FALSE(HasReceivedLogLevel(G_LOG_LEVEL_WARNING));
 }
 
 // The display can't be used if the compositor doesn't support subsurfaces.
@@ -36,8 +35,7 @@ TEST_F(FlWaylandDisplayTest, OpenMissingSubcompositor) {
   FlWaylandDisplay* display =
       fl_wayland_display_open(fl_mock_wayland_get_display());
   EXPECT_EQ(display, nullptr);
-  EXPECT_NE(GetReceivedLogLevels() & G_LOG_LEVEL_WARNING,
-            static_cast<GLogLevelFlags>(0x0));
+  EXPECT_TRUE(HasReceivedLogLevel(G_LOG_LEVEL_WARNING));
 }
 
 TEST_F(FlWaylandDisplayTest, OpenMissingCompositor) {
@@ -46,8 +44,7 @@ TEST_F(FlWaylandDisplayTest, OpenMissingCompositor) {
   FlWaylandDisplay* display =
       fl_wayland_display_open(fl_mock_wayland_get_display());
   EXPECT_EQ(display, nullptr);
-  EXPECT_NE(GetReceivedLogLevels() & G_LOG_LEVEL_WARNING,
-            static_cast<GLogLevelFlags>(0x0));
+  EXPECT_TRUE(HasReceivedLogLevel(G_LOG_LEVEL_WARNING));
 }
 
 // Asking for the Wayland display of a display that isn't Wayland is a
@@ -62,8 +59,7 @@ TEST_F(FlWaylandDisplayTest, GetForNonWaylandDisplay) {
   EXPECT_CALL(wayland, CreateObject(::testing::_)).Times(0);
 
   EXPECT_EQ(fl_wayland_display_get_for_display(gdk_display), nullptr);
-  EXPECT_NE(GetReceivedLogLevels() & G_LOG_LEVEL_CRITICAL,
-            static_cast<GLogLevelFlags>(0x0));
+  EXPECT_TRUE(HasReceivedLogLevel(G_LOG_LEVEL_CRITICAL));
 }
 
 // Subsurfaces are made from the globals bound when the display was opened, so
