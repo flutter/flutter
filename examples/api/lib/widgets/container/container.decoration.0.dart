@@ -97,7 +97,7 @@ class ContainerDecorationExample extends StatelessWidget {
                   ),
                 ),
                 _Sample(
-                  label: 'Clipped to the inner radius',
+                  label: 'Clipped to the outer radius minus the border width',
                   child: Container(
                     key: const Key('gap-recommended'),
                     width: sampleSize,
