@@ -97,7 +97,9 @@ def zip_framework(dst, args):
       # TODO(cbracken): Remove the zip file from the path when outer zip is removed.
       'FlutterMacOS.framework.zip/Versions/A/FlutterMacOS',
   ]
-  if os.path.exists(os.path.join(framework_dst, 'Versions', 'A', 'Frameworks', 'libvmservice_snapshot.dylib')):
+  if os.path.exists(
+      os.path.join(framework_dst, 'Versions', 'A', 'Frameworks', 'libvmservice_snapshot.dylib')
+  ):
     without_entitlements.append(
         'FlutterMacOS.framework.zip/Versions/A/Frameworks/libvmservice_snapshot.dylib'
     )

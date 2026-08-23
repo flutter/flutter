@@ -390,9 +390,8 @@ action("_generate_symlinks") {
         [ "FlutterMacOS.framework.zip/Versions/A/FlutterMacOS" ]
   }
   if (flutter_runtime_mode == "profile") {
-    metadata.macos_framework_without_entitlement += [
-      "FlutterMacOS.framework.zip/Versions/A/Frameworks/libvmservice_snapshot.dylib",
-    ]
+    metadata.macos_framework_without_entitlement +=
+        [ "FlutterMacOS.framework.zip/Versions/A/Frameworks/libvmservice_snapshot.dylib" ]
   }
 }
 
