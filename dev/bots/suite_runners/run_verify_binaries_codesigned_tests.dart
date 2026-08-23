@@ -98,7 +98,7 @@ List<String> binariesWithEntitlements(String flutterRoot) {
 List<String> binariesWithoutEntitlements(String flutterRoot) {
   final List<String> binaries = <String>[
     'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-    'artifacts/engine/darwin-x64-profile/libvmservice_snapshot.dylib',
+    'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/Frameworks/libvmservice_snapshot.dylib',
     'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/font-subset',

@@ -337,6 +337,17 @@ copy("copy_license") {
   outputs = [ "$root_out_dir/LICENSE" ]
 }
 
+if (flutter_runtime_mode == "profile") {
+  copy("copy_vmservice_snapshot_dylib") {
+    visibility = [ ":*" ]
+    sources = [ "$root_out_dir/libvmservice_snapshot.dylib" ]
+    outputs = [
+      "$_flutter_framework_dir/Versions/A/Frameworks/libvmservice_snapshot.dylib",
+    ]
+    deps = [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+  }
+}
+
 action("_generate_symlinks") {
   visibility = [ ":*" ]
   script = "//build/config/mac/package_framework.py"
@@ -354,6 +365,11 @@ action("_generate_symlinks") {
     "Resources",
     "Headers",
     "Modules",
+  ]
+  if (flutter_runtime_mode == "profile") {
+    args += [ "Frameworks" ]
+  }
+  args += [
     "--stamp",
     "$_flutter_framework_name.stamp",
   ]
@@ -366,9 +382,17 @@ action("_generate_symlinks") {
     ":copy_framework_privacy_manifest",
     ":copy_license",
   ]
+  if (flutter_runtime_mode == "profile") {
+    deps += [ ":copy_vmservice_snapshot_dylib" ]
+  }
   metadata = {
     macos_framework_without_entitlement =
         [ "FlutterMacOS.framework.zip/Versions/A/FlutterMacOS" ]
+  }
+  if (flutter_runtime_mode == "profile") {
+    metadata.macos_framework_without_entitlement += [
+      "FlutterMacOS.framework.zip/Versions/A/Frameworks/libvmservice_snapshot.dylib",
+    ]
   }
 }
 
@@ -407,9 +431,6 @@ zip_bundle("zip_macos_flutter_framework") {
     ":_generate_symlinks",
     ":macos_framework_without_entitlement_config",
   ]
-  if (flutter_runtime_mode == "profile") {
-    deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
-  }
   prefix = "$full_platform_name-$flutter_runtime_mode/"
   if (flutter_runtime_mode == "debug") {
     prefix = "$full_platform_name/"
@@ -422,14 +443,6 @@ zip_bundle("zip_macos_flutter_framework") {
       destination = "FlutterMacOS.framework"
     },
   ]
-  if (flutter_runtime_mode == "profile") {
-    files += [
-      {
-        source = "$root_out_dir/libvmservice_snapshot.dylib"
-        destination = "libvmservice_snapshot.dylib"
-      },
-    ]
-  }
 }
 
 generated_file("macos_framework_without_entitlement_config") {

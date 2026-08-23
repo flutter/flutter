@@ -497,8 +497,18 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshotArm64:
       case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
-      case Artifact.vmserviceSharedLibrary:
       case Artifact.vmserviceKernelDill:
+        return _fileSystem.path.join(engineDir, artifact.getFileName(_platform, mode, platform));
+      case Artifact.vmserviceSharedLibrary:
+        if (platform == TargetPlatform.darwin) {
+          return _fileSystem.path.join(
+            _getMacOSFrameworkPath(engineDir, _fileSystem, _platform),
+            'Versions',
+            'A',
+            'Frameworks',
+            artifact.getFileName(_platform, mode, platform),
+          );
+        }
         return _fileSystem.path.join(engineDir, artifact.getFileName(_platform, mode, platform));
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
@@ -778,7 +788,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
       case Artifact.linuxHeaders:
-      case Artifact.vmserviceSharedLibrary:
       case Artifact.vmserviceKernelDill:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
@@ -788,6 +797,30 @@ class CachedArtifacts implements Artifacts {
           platformDirName = '$platformDirName-${mode!.cliName}';
         }
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
+        return _fileSystem.path.join(
+          engineArtifactsPath,
+          platformDirName,
+          artifact.getFileName(_platform, mode, platform),
+        );
+      case Artifact.vmserviceSharedLibrary:
+        String platformDirName = _enginePlatformDirectoryName(platform);
+        if (mode == BuildMode.profile || mode == BuildMode.release) {
+          platformDirName = '$platformDirName-${mode!.cliName}';
+        }
+        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
+        if (platform == TargetPlatform.darwin) {
+          return _fileSystem.path.join(
+            _getMacOSFrameworkPath(
+              _fileSystem.path.join(engineArtifactsPath, platformDirName),
+              _fileSystem,
+              _platform,
+            ),
+            'Versions',
+            'A',
+            'Frameworks',
+            artifact.getFileName(_platform, mode, platform),
+          );
+        }
         return _fileSystem.path.join(
           engineArtifactsPath,
           platformDirName,
@@ -1127,8 +1160,18 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.icuData:
       case Artifact.flutterXcframework:
       case Artifact.flutterMacOSXcframework:
-      case Artifact.vmserviceSharedLibrary:
       case Artifact.vmserviceKernelDill:
+        return _fileSystem.path.join(localEngineInfo.targetOutPath, artifactFileName);
+      case Artifact.vmserviceSharedLibrary:
+        if (platform == TargetPlatform.darwin) {
+          return _fileSystem.path.join(
+            _getMacOSFrameworkPath(localEngineInfo.targetOutPath, _fileSystem, _platform),
+            'Versions',
+            'A',
+            'Frameworks',
+            artifactFileName,
+          );
+        }
         return _fileSystem.path.join(localEngineInfo.targetOutPath, artifactFileName);
       case Artifact.platformKernelDill:
         if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
