@@ -36,8 +36,7 @@ VsyncWaiter::VsyncWaiter(AwaitVsyncCallback await_vsync_callback,
             // Note: It is VERY important to set |pause_secondary_tasks| to
             // false, else Animator will almost immediately crash on Fuchsia.
             // FML_LOG(INFO) << "CRASH:: VsyncWaiter about to FireCallback";
-            weak_this->FireCallback(frame_start, frame_end,
-                                    /*pause_secondary_tasks*/ false);
+            weak_this->FireCallback(frame_start, frame_end);
           }
         },
         frame_start);
