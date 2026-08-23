@@ -34,6 +34,8 @@ void main() {
   late FakeCommand copyFrameworkCommand;
   late FakeCommand releaseCopyFrameworkCommand;
   late FakeCommand copyFrameworkDsymCommand;
+  late FakeCommand chmodDebugFrameworkCommand;
+  late FakeCommand chmodReleaseFrameworkCommand;
   late FakeCommand lipoInfoNonFatCommand;
   late FakeCommand lipoInfoFatCommand;
   late FakeCommand lipoVerifyX86_64Command;
@@ -84,6 +86,15 @@ void main() {
       ],
     );
 
+    chmodDebugFrameworkCommand = FakeCommand(
+      command: <String>[
+        'chmod',
+        '-R',
+        'u+w',
+        environment.outputDir.childDirectory('Artifact.flutterMacOSFramework.debug').path,
+      ],
+    );
+
     releaseCopyFrameworkCommand = FakeCommand(
       command: <String>[
         'rsync',
@@ -94,6 +105,15 @@ void main() {
         '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
         'Artifact.flutterMacOSFramework.release',
         environment.outputDir.path,
+      ],
+    );
+
+    chmodReleaseFrameworkCommand = FakeCommand(
+      command: <String>[
+        'chmod',
+        '-R',
+        'u+w',
+        environment.outputDir.childDirectory('Artifact.flutterMacOSFramework.release').path,
       ],
     );
 
@@ -155,6 +175,7 @@ void main() {
       binary.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         copyFrameworkCommand,
+        chmodDebugFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
       ]);
@@ -204,6 +225,7 @@ void main() {
             nestedEntitlements.writeAsStringSync('somefile.bin');
           },
         ),
+        chmodDebugFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
       ]);
@@ -226,6 +248,7 @@ void main() {
     'thinning fails when framework missing',
     () async {
       processManager.addCommand(copyFrameworkCommand);
+      processManager.addCommand(chmodDebugFrameworkCommand);
       await expectLater(
         const DebugUnpackMacOS().build(environment),
         throwsA(
@@ -250,11 +273,9 @@ void main() {
       binary.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         copyFrameworkCommand,
+        chmodDebugFrameworkCommand,
         lipoInfoFatCommand,
-        FakeCommand(
-          command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64'],
-          exitCode: 1,
-        ),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64'], exitCode: 1),
       ]);
 
       await expectLater(
@@ -264,7 +285,7 @@ void main() {
             (Exception exception) => exception.toString(),
             'description',
             contains(
-              'does not contain architectures "arm64 x86_64".\n\nlipo -info:\nArchitectures in the fat file:',
+              'does not contain architecture "arm64" (expected "arm64 x86_64").\n\nlipo -info:\nArchitectures in the fat file:',
             ),
           ),
         ),
@@ -280,6 +301,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
+        chmodDebugFrameworkCommand,
       lipoInfoNonFatCommand,
       lipoVerifyX86_64Command,
     ]);
@@ -296,6 +318,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
+        chmodDebugFrameworkCommand,
       lipoInfoFatCommand,
       lipoVerifyX86_64Command,
       lipoExtractX86_64Command,
@@ -312,6 +335,7 @@ void main() {
       binary.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         releaseCopyFrameworkCommand,
+        chmodReleaseFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
       ]);
@@ -333,6 +357,7 @@ void main() {
       frameworkDsym.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         releaseCopyFrameworkCommand,
+        chmodReleaseFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
         copyFrameworkDsymCommand,
@@ -368,6 +393,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         releaseCopyFrameworkCommand,
+        chmodReleaseFrameworkCommand,
         lipoInfoFatCommand,
         lipoVerifyX86_64Command,
         lipoExtractX86_64Command,
@@ -821,7 +847,7 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
-            '--macho-min-os-version=10.15',
+            '--macho-min-os-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
@@ -834,7 +860,7 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
-            '--macho-min-os-version=10.15',
+            '--macho-min-os-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,

@@ -37,6 +37,12 @@ static vk::UniqueSampler CreateSampler(
   sampler_info.borderColor = vk::BorderColor::eFloatTransparentBlack;
   sampler_info.maxLod = VK_LOD_CLAMP_NONE;
 
+  // The descriptor's max anisotropy has already been clamped to the device
+  // limit by SamplerLibraryVK, and it remains 1 (disabled) when the
+  // samplerAnisotropy feature is unavailable.
+  sampler_info.anisotropyEnable = desc.max_anisotropy > 1;
+  sampler_info.maxAnisotropy = static_cast<float>(desc.max_anisotropy);
+
   // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSamplerCreateInfo.html#_description
   switch (desc.mip_filter) {
     case MipFilter::kBase:

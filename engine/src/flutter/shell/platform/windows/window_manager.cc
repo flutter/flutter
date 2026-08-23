@@ -33,7 +33,7 @@ FlutterViewId WindowManager::CreateRegularWindow(
     const RegularWindowCreationRequest* request) {
   auto window = HostWindow::CreateRegularWindow(
       this, engine_, request->preferred_size, request->preferred_constraints,
-      request->title);
+      request->title, request->sized_to_content, request->resizable);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return -1;
@@ -47,7 +47,8 @@ FlutterViewId WindowManager::CreateDialogWindow(
     const DialogWindowCreationRequest* request) {
   auto window = HostWindow::CreateDialogWindow(
       this, engine_, request->preferred_size, request->preferred_constraints,
-      request->title, request->parent_or_null);
+      request->title, request->parent_or_null, request->sized_to_content,
+      request->resizable);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return -1;
@@ -86,19 +87,23 @@ FlutterViewId WindowManager::CreatePopupWindow(
 }
 
 void WindowManager::OnEngineShutdown() {
-  // Don't send any more messages to isolate.
-  on_message_ = nullptr;
   std::vector<HWND> active_handles;
   active_handles.reserve(active_windows_.size());
   for (auto& [hwnd, window] : active_windows_) {
     active_handles.push_back(hwnd);
   }
+  // Destroy the windows before clearing |on_message_| so the WM_DESTROY
+  // round-trip reaches the isolate. Otherwise per-view Dart controllers
+  // never observe destruction and may issue follow-up FFI calls (e.g.
+  // updatePosition) with stale handles after the engine is torn down.
   for (auto hwnd : active_handles) {
     // This will destroy the window, which will in turn remove the
     // HostWindow from map when handling WM_NCDESTROY inside
     // HandleMessage.
     InternalFlutterWindows_WindowManager_OnDestroyWindow(hwnd);
   }
+  // Don't send any more messages to isolate.
+  on_message_ = nullptr;
 }
 
 std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,

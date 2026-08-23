@@ -365,19 +365,25 @@ static void SetViewportMetrics(JNIEnv* env,
   // javaDisplayFeaturesState cannot be null
   jsize rectSize = env->GetArrayLength(javaDisplayFeaturesBounds);
   std::vector<int> boundsIntVector(rectSize);
-  env->GetIntArrayRegion(javaDisplayFeaturesBounds, 0, rectSize,
-                         &boundsIntVector[0]);
+  if (rectSize > 0) {
+    env->GetIntArrayRegion(javaDisplayFeaturesBounds, 0, rectSize,
+                           &boundsIntVector[0]);
+  }
   std::vector<double> displayFeaturesBounds(boundsIntVector.begin(),
                                             boundsIntVector.end());
   jsize typeSize = env->GetArrayLength(javaDisplayFeaturesType);
   std::vector<int> displayFeaturesType(typeSize);
-  env->GetIntArrayRegion(javaDisplayFeaturesType, 0, typeSize,
-                         &displayFeaturesType[0]);
+  if (typeSize > 0) {
+    env->GetIntArrayRegion(javaDisplayFeaturesType, 0, typeSize,
+                           &displayFeaturesType[0]);
+  }
 
   jsize stateSize = env->GetArrayLength(javaDisplayFeaturesState);
   std::vector<int> displayFeaturesState(stateSize);
-  env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
-                         &displayFeaturesState[0]);
+  if (stateSize > 0) {
+    env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
+                           &displayFeaturesState[0]);
+  }
 
   const flutter::ViewportMetrics metrics{
       static_cast<double>(devicePixelRatio),  // p_device_pixel_ratio
@@ -674,6 +680,25 @@ static void DeferredComponentInstallFailure(JNIEnv* env,
                          static_cast<bool>(jTransient));
 }
 
+void* FindFirstLoadableLibrary(
+    const std::vector<std::string>& search_paths,
+    const std::function<void*(const std::string&)>& open_library) {
+  // Search paths are provided in descending priority order (see the contract
+  // on FlutterJNI.loadDartDeferredLibrary): try them from first to last and
+  // stop at the first one that loads. This matters for security as well as
+  // correctness -- callers place the most trusted candidates (e.g.
+  // OS-installed signed APKs) ahead of less trusted fallbacks (e.g. standalone
+  // unbundled .so files in app-writable storage), so the trusted candidate
+  // must win when more than one is loadable.
+  for (const std::string& path : search_paths) {
+    void* handle = open_library(path);
+    if (handle != nullptr) {
+      return handle;
+    }
+  }
+  return nullptr;
+}
+
 static void LoadDartDeferredLibrary(JNIEnv* env,
                                     jobject obj,
                                     jlong shell_holder,
@@ -684,14 +709,11 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
   std::vector<std::string> search_paths =
       fml::jni::StringArrayToVector(env, jSearchPaths);
 
-  // Use dlopen here to directly check if handle is nullptr before creating a
-  // NativeLibrary.
-  void* handle = nullptr;
-  while (handle == nullptr && !search_paths.empty()) {
-    std::string path = search_paths.back();
-    handle = ::dlopen(path.c_str(), RTLD_NOW);
-    search_paths.pop_back();
-  }
+  // Use dlopen here (via FindFirstLoadableLibrary) to directly check if handle
+  // is nullptr before creating a NativeLibrary.
+  void* handle = FindFirstLoadableLibrary(
+      search_paths,
+      [](const std::string& path) { return ::dlopen(path.c_str(), RTLD_NOW); });
   if (handle == nullptr) {
     LoadLoadingUnitFailure(loading_unit_id,
                            "No lib .so found for provided search paths.", true);
@@ -1078,7 +1100,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
 
   g_mutators_stack_push_cliprect_method = env->GetMethodID(
-      g_mutators_stack_class->obj(), "pushClipRect", "(IIII)V");
+      g_mutators_stack_class->obj(), "pushClipRect", "(FFFF)V");
   if (g_mutators_stack_push_cliprect_method == nullptr) {
     FML_LOG(ERROR)
         << "Could not locate FlutterMutatorsStack.pushClipRect method";
@@ -1086,7 +1108,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
 
   g_mutators_stack_push_cliprrect_method = env->GetMethodID(
-      g_mutators_stack_class->obj(), "pushClipRRect", "(IIII[F)V");
+      g_mutators_stack_class->obj(), "pushClipRRect", "(FFFF[F)V");
   if (g_mutators_stack_push_cliprrect_method == nullptr) {
     FML_LOG(ERROR)
         << "Could not locate FlutterMutatorsStack.pushClipRRect method";
@@ -1765,10 +1787,10 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
         const DlRect& rect = (*iter)->GetRect();
         env->CallVoidMethod(mutatorsStack,
                             g_mutators_stack_push_cliprect_method,
-                            static_cast<int>(rect.GetLeft()),   //
-                            static_cast<int>(rect.GetTop()),    //
-                            static_cast<int>(rect.GetRight()),  //
-                            static_cast<int>(rect.GetBottom()));
+                            rect.GetLeft(),   //
+                            rect.GetTop(),    //
+                            rect.GetRight(),  //
+                            rect.GetBottom());
         break;
       }
       case MutatorType::kClipRRect: {
@@ -1786,10 +1808,10 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
         env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
         env->CallVoidMethod(mutatorsStack,
                             g_mutators_stack_push_cliprrect_method,
-                            static_cast<int>(rect.GetLeft()),    //
-                            static_cast<int>(rect.GetTop()),     //
-                            static_cast<int>(rect.GetRight()),   //
-                            static_cast<int>(rect.GetBottom()),  //
+                            rect.GetLeft(),    //
+                            rect.GetTop(),     //
+                            rect.GetRight(),   //
+                            rect.GetBottom(),  //
                             radiisArray.obj());
         break;
       }
@@ -1808,10 +1830,10 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
         env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
         env->CallVoidMethod(mutatorsStack,
                             g_mutators_stack_push_cliprrect_method,
-                            static_cast<int>(rect.GetLeft()),    //
-                            static_cast<int>(rect.GetTop()),     //
-                            static_cast<int>(rect.GetRight()),   //
-                            static_cast<int>(rect.GetBottom()),  //
+                            rect.GetLeft(),    //
+                            rect.GetTop(),     //
+                            rect.GetRight(),   //
+                            rect.GetBottom(),  //
                             radiisArray.obj());
         break;
       }
@@ -2250,10 +2272,10 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         const DlRect& rect = (*iter)->GetRect();
         env->CallVoidMethod(mutatorsStack,
                             g_mutators_stack_push_cliprect_method,
-                            static_cast<int>(rect.GetLeft()),   //
-                            static_cast<int>(rect.GetTop()),    //
-                            static_cast<int>(rect.GetRight()),  //
-                            static_cast<int>(rect.GetBottom()));
+                            rect.GetLeft(),   //
+                            rect.GetTop(),    //
+                            rect.GetRight(),  //
+                            rect.GetBottom());
         break;
       }
       case MutatorType::kClipRRect: {
@@ -2271,10 +2293,10 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
         env->CallVoidMethod(mutatorsStack,
                             g_mutators_stack_push_cliprrect_method,
-                            static_cast<int>(rect.GetLeft()),    //
-                            static_cast<int>(rect.GetTop()),     //
-                            static_cast<int>(rect.GetRight()),   //
-                            static_cast<int>(rect.GetBottom()),  //
+                            rect.GetLeft(),    //
+                            rect.GetTop(),     //
+                            rect.GetRight(),   //
+                            rect.GetBottom(),  //
                             radiisArray.obj());
         break;
       }
@@ -2293,10 +2315,10 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
         env->CallVoidMethod(mutatorsStack,
                             g_mutators_stack_push_cliprrect_method,
-                            static_cast<int>(rect.GetLeft()),    //
-                            static_cast<int>(rect.GetTop()),     //
-                            static_cast<int>(rect.GetRight()),   //
-                            static_cast<int>(rect.GetBottom()),  //
+                            rect.GetLeft(),    //
+                            rect.GetTop(),     //
+                            rect.GetRight(),   //
+                            rect.GetBottom(),  //
                             radiisArray.obj());
         break;
       }

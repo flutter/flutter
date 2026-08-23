@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:ffi' show Abi;
 import 'dart:math' show max;
 
 import 'package:crypto/crypto.dart';
@@ -181,6 +182,7 @@ class Cache {
     Platform? platform,
     Stdio? stdio,
     required ProcessManager processManager,
+    Abi? currentAbi,
   }) {
     if (rootOverride?.fileSystem != null &&
         fileSystem != null &&
@@ -206,6 +208,7 @@ class Cache {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: currentAbi,
       ),
     );
   }
@@ -214,6 +217,7 @@ class Cache {
   final Platform _platform;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
+  OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
   final Stdio? _stdio;

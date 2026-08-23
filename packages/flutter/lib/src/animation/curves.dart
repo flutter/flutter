@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
 library;
 
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 export 'dart:ui' show Offset;
@@ -401,6 +401,15 @@ class Cubic extends Curve {
 
   @override
   double transformInternal(double t) {
+    if (t.isNaN) {
+      throw ArgumentError.value(t, 't', 'must not be NaN');
+    }
+    if (t <= 0.0) {
+      return 0.0;
+    }
+    if (t >= 1.0) {
+      return 1.0;
+    }
     var start = 0.0;
     var end = 1.0;
     while (true) {

@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
+
+const _kWhite = Color(0xFFFFFFFF);
+const _kBlack = Color(0xFF000000);
 
 class TestInherited extends InheritedWidget {
   const TestInherited({super.key, required super.child, this.shouldNotify = true});
@@ -55,32 +58,82 @@ class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
   const ChangeNotifierInherited({super.key, required super.child, super.notifier});
 }
 
-class ThemedCard extends SingleChildRenderObjectWidget {
-  const ThemedCard({super.key}) : super(child: const SizedBox.expand());
+@immutable
+class TestWidgetData {
+  const TestWidgetData({
+    this.color,
+    this.elevation,
+    this.shadowColor,
+    this.shape,
+    this.clipBehavior,
+  });
+
+  final Color? color;
+  final double? elevation;
+  final Color? shadowColor;
+  final ShapeBorder? shape;
+  final Clip? clipBehavior;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TestWidgetData &&
+        other.color == color &&
+        other.elevation == elevation &&
+        other.shadowColor == shadowColor &&
+        other.shape == shape &&
+        other.clipBehavior == clipBehavior;
+  }
+
+  @override
+  int get hashCode => Object.hash(color, elevation, shadowColor, shape, clipBehavior);
+}
+
+class TestDataWidget extends InheritedWidget {
+  const TestDataWidget({super.key, required super.child, required this.data});
+
+  final TestWidgetData data;
+
+  static TestWidgetData of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<TestDataWidget>()?.data ??
+        const TestWidgetData();
+  }
+
+  @override
+  bool updateShouldNotify(TestDataWidget oldWidget) => data != oldWidget.data;
+}
+
+class ThemedWidget extends SingleChildRenderObjectWidget {
+  const ThemedWidget({super.key}) : super(child: const SizedBox.expand());
 
   @override
   RenderPhysicalShape createRenderObject(BuildContext context) {
-    final CardThemeData cardTheme = CardTheme.of(context);
+    final TestWidgetData data = TestDataWidget.of(context);
 
     return RenderPhysicalShape(
-      clipper: ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder()),
-      clipBehavior: cardTheme.clipBehavior ?? Clip.antiAlias,
-      color: cardTheme.color ?? Colors.white,
-      elevation: cardTheme.elevation ?? 0.0,
-      shadowColor: cardTheme.shadowColor ?? Colors.black,
+      clipper: ShapeBorderClipper(shape: data.shape ?? const RoundedRectangleBorder()),
+      clipBehavior: data.clipBehavior ?? Clip.antiAlias,
+      color: data.color ?? _kWhite,
+      elevation: data.elevation ?? 0.0,
+      shadowColor: data.shadowColor ?? _kBlack,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
-    final CardThemeData cardTheme = CardTheme.of(context);
+    final TestWidgetData data = TestDataWidget.of(context);
 
     renderObject
-      ..clipper = ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder())
-      ..clipBehavior = cardTheme.clipBehavior ?? Clip.antiAlias
-      ..color = cardTheme.color ?? Colors.white
-      ..elevation = cardTheme.elevation ?? 0.0
-      ..shadowColor = cardTheme.shadowColor ?? Colors.black;
+      ..clipper = ShapeBorderClipper(shape: data.shape ?? const RoundedRectangleBorder())
+      ..clipBehavior = data.clipBehavior ?? Clip.antiAlias
+      ..color = data.color ?? _kWhite
+      ..elevation = data.elevation ?? 0.0
+      ..shadowColor = data.shadowColor ?? _kBlack;
   }
 }
 
@@ -523,30 +576,30 @@ void main() {
   });
 
   testWidgets('InheritedWidgets can trigger RenderObject updates', (WidgetTester tester) async {
-    var cardThemeData = const CardThemeData(color: Colors.white);
+    var data = const TestWidgetData(color: _kWhite);
     late StateSetter setState;
 
-    // Verifies that the "themed card" is rendered
+    // Verifies that the "themed widget" is rendered
     // with the appropriate inherited theme data.
-    void expectCardToMatchTheme() {
-      final RenderPhysicalShape renderShape = tester.renderObject(find.byType(ThemedCard));
+    void expectWidgetToMatchTheme() {
+      final RenderPhysicalShape renderShape = tester.renderObject(find.byType(ThemedWidget));
 
-      if (cardThemeData.color != null) {
-        expect(renderShape.color, cardThemeData.color);
+      if (data.color != null) {
+        expect(renderShape.color, data.color);
       }
-      if (cardThemeData.elevation != null) {
-        expect(renderShape.elevation, cardThemeData.elevation);
+      if (data.elevation != null) {
+        expect(renderShape.elevation, data.elevation);
       }
-      if (cardThemeData.shadowColor != null) {
-        expect(renderShape.shadowColor, cardThemeData.shadowColor);
+      if (data.shadowColor != null) {
+        expect(renderShape.shadowColor, data.shadowColor);
       }
-      if (cardThemeData.shape != null) {
+      if (data.shape != null) {
         final CustomClipper<Path>? clipper = renderShape.clipper;
         expect(clipper, isA<ShapeBorderClipper>());
-        expect((clipper! as ShapeBorderClipper).shape, cardThemeData.shape);
+        expect((clipper! as ShapeBorderClipper).shape, data.shape);
       }
-      if (cardThemeData.clipBehavior != null) {
-        expect(renderShape.clipBehavior, cardThemeData.clipBehavior);
+      if (data.clipBehavior != null) {
+        expect(renderShape.clipBehavior, data.clipBehavior);
       }
     }
 
@@ -554,38 +607,35 @@ void main() {
       StatefulBuilder(
         builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
-          return Theme(
-            data: ThemeData(cardTheme: cardThemeData),
-            child: const ThemedCard(),
-          );
+          return TestDataWidget(data: data, child: const ThemedWidget());
         },
       ),
     );
-    expectCardToMatchTheme();
+    expectWidgetToMatchTheme();
 
     setState(() {
-      cardThemeData = const CardThemeData(
+      data = const TestWidgetData(
         shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
       );
     });
     await tester.pump();
-    expectCardToMatchTheme();
+    expectWidgetToMatchTheme();
 
     setState(() {
-      cardThemeData = const CardThemeData(clipBehavior: Clip.hardEdge);
+      data = const TestWidgetData(clipBehavior: Clip.hardEdge);
     });
     await tester.pump();
-    expectCardToMatchTheme();
+    expectWidgetToMatchTheme();
 
     setState(() {
-      cardThemeData = const CardThemeData(
+      data = const TestWidgetData(
         elevation: 5.0,
-        shadowColor: Colors.blueGrey,
+        shadowColor: Color(0xFF0000FF),
         shape: ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         clipBehavior: Clip.antiAliasWithSaveLayer,
       );
     });
     await tester.pump();
-    expectCardToMatchTheme();
+    expectWidgetToMatchTheme();
   });
 }

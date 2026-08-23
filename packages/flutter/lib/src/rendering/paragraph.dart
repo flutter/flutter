@@ -41,8 +41,10 @@ typedef _TextBoundaryAtPosition = _TextBoundaryRecord Function(TextPosition posi
 
 /// Signature for a function that determines the [_TextBoundaryRecord] at the given
 /// [TextPosition], for the given [String].
-typedef _TextBoundaryAtPositionInText =
-    _TextBoundaryRecord Function(TextPosition position, String text);
+typedef _TextBoundaryAtPositionInText = _TextBoundaryRecord Function(
+  TextPosition position,
+  String text,
+);
 
 const String _kEllipsis = '\u2026';
 
@@ -353,6 +355,7 @@ class RenderParagraph extends RenderBox
     List<RenderBox>? children,
     Color? selectionColor,
     SelectionRegistrar? registrar,
+    double devicePixelRatio = 1.0,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -361,6 +364,7 @@ class RenderParagraph extends RenderBox
        ),
        _softWrap = softWrap,
        _overflow = overflow,
+       _devicePixelRatio = devicePixelRatio,
        _selectionColor = selectionColor,
        _textPainter = TextPainter(
          text: text,
@@ -663,6 +667,25 @@ class RenderParagraph extends RenderBox
     _textPainter.textScaler = value;
     _overflowShader = null;
     markNeedsLayout();
+  }
+
+  /// The number of device pixels for each logical pixel.
+  ///
+  /// This is used by some renderers (like WebParagraph on the web) to
+  /// regenerate the text bitmap when the scale changes.
+  double get devicePixelRatio => _devicePixelRatio;
+  double _devicePixelRatio;
+
+  set devicePixelRatio(double value) {
+    if (_devicePixelRatio == value) {
+      return;
+    }
+    _devicePixelRatio = value;
+    if (kIsWeb) {
+      // The `WebParagraph` implementation renders the paragraph as an image. After a
+      // `devicePixelRatio` change, the image needs to be regenerated or it would look blurry.
+      markNeedsPaint();
+    }
   }
 
   /// An optional maximum number of lines for the text to span, wrapping if
@@ -1475,6 +1498,7 @@ class RenderParagraph extends RenderBox
     );
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(DoubleProperty('devicePixelRatio', devicePixelRatio, defaultValue: 1.0));
   }
 }
 

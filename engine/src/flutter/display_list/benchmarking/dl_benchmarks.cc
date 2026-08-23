@@ -118,6 +118,16 @@ DlPaint GetPaintForRun(unsigned attributes) {
     paint.setStrokeWidth(1.0f);
   }
 
+  if (attributes & kShadow5) {
+    static auto blur5filter =
+        DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5.0f);
+    paint.setMaskFilter(blur5filter);
+  } else if (attributes & kShadow10) {
+    static auto blur10filter =
+        DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f);
+    paint.setMaskFilter(blur10filter);
+  }
+
   paint.setAntiAlias(attributes & kAntiAliasing);
   return paint;
 }
@@ -149,6 +159,7 @@ constexpr size_t kRRectsToDraw = 5000;
 constexpr size_t kRSEsToDraw = 5000;
 constexpr size_t kDRRectsToDraw = 2000;
 constexpr size_t kArcSweepSetsToDraw = 1000;
+constexpr size_t kPathsToDraw = 2000;
 constexpr size_t kImagesToDraw = 500;
 constexpr size_t kFixedCanvasSize = 1024;
 
@@ -930,6 +941,98 @@ void BM_DrawPath(benchmark::State& state,
                           "DrawPath-" + label);
 }
 
+void BM_DrawPathPrimitives(benchmark::State& state,
+                           BackendType backend_type,
+                           unsigned attributes,
+                           PathVerb type) {
+  auto surface_provider = DlSurfaceProvider::Create(backend_type);
+  DisplayListBuilder builder;
+  DlPaint paint = GetPaintForRun(attributes);
+
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawPathFlags);
+
+  size_t length = state.range(0);
+  surface_provider->InitializeSurface(length * 2, length * 2);
+  auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
+
+  DlPathBuilder path_builder;
+  DlPoint center = DlPoint(length / 2.0f, length / 2.0f);
+  float radius = length / 2.0f;
+
+  switch (type) {
+    case PathVerb::kLine:
+      GetLinesPath(path_builder, 10, center, radius);
+      break;
+    case PathVerb::kQuad:
+      GetQuadsPath(path_builder, 10, center, radius);
+      break;
+    case PathVerb::kConic:
+      GetConicsPath(path_builder, 10, center, radius);
+      break;
+    case PathVerb::kCubic:
+      GetCubicsPath(path_builder, 10, center, radius);
+      break;
+  }
+  DlPath path = path_builder.TakePath();
+
+  const DlPoint delta(0.5f, 0.5f);
+  RectAnimator animator(DlRect::MakeWH(length, length), delta, surface);
+
+  state.counters["DrawCallCount"] = kPathsToDraw;
+  for (size_t i = 0; i < kPathsToDraw; i++) {
+    builder.Save();
+    builder.Translate(animator.GetPoint().x, animator.GetPoint().y);
+    builder.DrawPath(path, paint);
+    builder.Restore();
+    animator.Animate();
+  }
+
+  auto display_list = builder.Build();
+
+  // Prime any path conversions
+  surface->RenderDisplayList(display_list);
+  surface->FlushSubmitCpuSync();
+
+  // We only want to time the actual rasterization.
+  size_t items_processed = 0;
+  for ([[maybe_unused]] auto _ : state) {
+    surface->RenderDisplayList(display_list);
+    items_processed += kPathsToDraw;
+    surface->FlushSubmitCpuSync();
+  }
+  state.SetItemsProcessed(items_processed);
+
+  std::string label = VerbToString(type);
+  SaveSnapshotIfNecessary(surface_provider, surface, state,
+                          "DrawPathPrimitives-" + label);
+}
+
+void BM_DrawPathLine(benchmark::State& state,
+                     BackendType backend_type,
+                     unsigned attributes) {
+  BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kLine);
+}
+
+void BM_DrawPathQuad(benchmark::State& state,
+                     BackendType backend_type,
+                     unsigned attributes) {
+  BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kQuad);
+}
+
+void BM_DrawPathConic(benchmark::State& state,
+                      BackendType backend_type,
+                      unsigned attributes) {
+  BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kConic);
+}
+
+void BM_DrawPathCubic(benchmark::State& state,
+                      BackendType backend_type,
+                      unsigned attributes) {
+  BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kCubic);
+}
+
 // Returns a set of vertices that describe a circle that has a
 // radius of `radius` and outer vertex count of approximately
 // `vertex_count`. The final number of vertices will differ as we
@@ -1627,51 +1730,55 @@ constexpr int kAAHairlinePrimitive =
     kAntiAliasing | kStrokedStyle | kHairlineStroke;
 constexpr int kAAStroke10Primitive =
     kAntiAliasing | kStrokedStyle | kWideStroke10;
+constexpr int kFilledShadow5Primitive =
+    kFilledStyle | kShadow5;
+constexpr int kFilledShadow10Primitive =
+    kFilledStyle | kShadow10;
 
-#define BENCHMARK_PRIMITIVE_SYNC_OVERHEAD(BACKEND)                           \
-  BENCHMARK_CAPTURE(BM_SyncOverhead, BACKEND, BackendType::k##BACKEND)       \
+#define BENCHMARK_OVERHEAD(FUNC, BACKEND)                                    \
+  BENCHMARK_CAPTURE(BM_##FUNC, BACKEND, BackendType::k##BACKEND)             \
       ->RangeMultiplier(4)                                                   \
       ->Range(16, 1024)                                                      \
       ->UseRealTime()                                                        \
       ->Unit(benchmark::kNanosecond);
 
-#define BENCHMARK_PRIMITIVE_EMPTY_DISPLAY_LIST_OVERHEAD(BACKEND)             \
-  BENCHMARK_CAPTURE(BM_EmptyDisplayList, BACKEND, BackendType::k##BACKEND)   \
-      ->RangeMultiplier(4)                                                   \
-      ->Range(16, 1024)                                                      \
-      ->UseRealTime()                                                        \
-      ->Unit(benchmark::kNanosecond);
-
-#define BENCHMARK_PRIMITIVE_SINGLE_OP_DISPLAY_LIST_OVERHEAD(BACKEND)         \
-  BENCHMARK_CAPTURE(BM_SingleOpDisplayList, BACKEND,                         \
-                    BackendType::k##BACKEND)                                 \
-      ->RangeMultiplier(4)                                                   \
-      ->Range(16, 1024)                                                      \
-      ->UseRealTime()                                                        \
-      ->Unit(benchmark::kNanosecond);
-
-#define DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, ATTRIBUTES)                 \
+#define DRAW_BENCHMARK_PRIMITIVES_LIMITS(BACKEND, TYPE, ATTRIBUTES,          \
+                                         MIN, MAX, MULT)                     \
   BENCHMARK_CAPTURE(BM_Draw##TYPE, ATTRIBUTES/BACKEND,                       \
                     BackendType::k##BACKEND,                                 \
                     k##ATTRIBUTES##Primitive)                                \
-      ->RangeMultiplier(4)                                                   \
-      ->Range(16, 1024)                                                      \
+      ->RangeMultiplier(MULT)                                                \
+      ->Range(MIN, MAX)                                                      \
       ->UseRealTime()                                                        \
       ->Unit(benchmark::kMillisecond);
 
+#define DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, ATTRIBUTES)                  \
+  DRAW_BENCHMARK_PRIMITIVES_LIMITS(BACKEND, TYPE, ATTRIBUTES, 16, 1024, 4)
+
+#define DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, ATTRIBUTES)           \
+  DRAW_BENCHMARK_PRIMITIVES_LIMITS(BACKEND, TYPE, ATTRIBUTES, 64, 256, 4)
+
 #define DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                              \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, AAHairline)                       \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, AAStroke10)
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, Line, AAHairline)                        \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, Line, AAStroke10)                        \
 
 #define DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, TYPE)                        \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAFilled)                         \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAHairline)                       \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAStroke10)                       \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAFilled)                          \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAHairline)                        \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAStroke10)                        \
+  DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, FilledShadow5)              \
+  DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, FilledShadow10)             \
+
+#define DRAW_BENCHMARK_PRIMITIVES_PATH(BACKEND)                              \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathLine)                          \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathQuad)                          \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathConic)                         \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathCubic)
 
 #define DRAW_BENCHMARK_PRIMITIVE_SUITE(BACKEND)                              \
-  BENCHMARK_PRIMITIVE_SYNC_OVERHEAD(BACKEND)                                 \
-  BENCHMARK_PRIMITIVE_EMPTY_DISPLAY_LIST_OVERHEAD(BACKEND)                   \
-  BENCHMARK_PRIMITIVE_SINGLE_OP_DISPLAY_LIST_OVERHEAD(BACKEND)               \
+  BENCHMARK_OVERHEAD(SyncOverhead, BACKEND)                                  \
+  BENCHMARK_OVERHEAD(EmptyDisplayList, BACKEND)                              \
+  BENCHMARK_OVERHEAD(SingleOpDisplayList, BACKEND)                           \
   DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                                    \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Rect)                              \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Oval)                              \
@@ -1679,7 +1786,8 @@ constexpr int kAAStroke10Primitive =
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, SimpleRRect)                       \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRRect)                      \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, SimpleRSE)                         \
-  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRSE)
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRSE)                        \
+  DRAW_BENCHMARK_PRIMITIVES_PATH(BACKEND)
 
 // clang-format on
 

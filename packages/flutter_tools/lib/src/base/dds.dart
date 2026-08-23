@@ -118,7 +118,9 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
     }
   }
 
-  void shutdown() => _ddsInstance?.shutdown();
+  Future<void> shutdown() async {
+    await _ddsInstance?.shutdown();
+  }
 }
 
 /// Contains common functionality that can be used with any implementation of
@@ -175,7 +177,15 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     }
     assert(devToolsUri != null);
     logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUri');
-    unawaited(startChrome(<String>[devToolsUri!.toString()]));
+    Future<void> launchChrome() async {
+      try {
+        await startChrome(<String>[devToolsUri!.toString()]);
+      } on Exception catch (error) {
+        logger.printError('Failed to launch DevTools in browser: $error');
+      }
+    }
+
+    unawaited(launchChrome());
     return true;
   }
 

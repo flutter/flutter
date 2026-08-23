@@ -16,8 +16,12 @@
 
 namespace impeller {
 
-PipelineLibraryGLES::PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor)
-    : reactor_(std::move(reactor)) {}
+PipelineLibraryGLES::PipelineLibraryGLES(
+    std::shared_ptr<ReactorGLES> reactor,
+    std::shared_ptr<fml::BasicTaskRunner> io_task_runner)
+    : reactor_(std::move(reactor)),
+      compile_queue_(
+          PipelineCompileQueueGLES::Create(std::move(io_task_runner))) {}
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
   GLint log_length = 0;
@@ -296,17 +300,34 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
   pipelines_[descriptor] = pipeline_future;
 
-  const auto result = reactor_->AddOperation([promise,                       //
-                                              weak_this = weak_from_this(),  //
-                                              descriptor,                    //
-                                              vert_function,                 //
-                                              frag_function,                 //
-                                              threadsafe                     //
-  ](const ReactorGLES& reactor) {
-    promise->set_value(CreatePipeline(weak_this, descriptor, vert_function,
-                                      frag_function, threadsafe));
-  });
-  FML_CHECK(result);
+  std::weak_ptr<PipelineLibrary> weak_this = weak_from_this();
+  std::shared_ptr<ReactorGLES> reactor = reactor_;
+  auto generation_task = [promise, weak_this, descriptor, vert_function,
+                          frag_function, threadsafe, reactor]() {
+    auto thiz = weak_this.lock();
+    if (!thiz) {
+      promise->set_value(nullptr);
+      return;
+    }
+    const bool result = reactor->AddOperation([promise,        //
+                                               weak_this,      //
+                                               descriptor,     //
+                                               vert_function,  //
+                                               frag_function,  //
+                                               threadsafe      //
+    ](const ReactorGLES& reactor) {
+      promise->set_value(CreatePipeline(weak_this, descriptor, vert_function,
+                                        frag_function, threadsafe));
+    });
+    FML_CHECK(result);
+  };
+
+  if (async && compile_queue_) {
+    compile_queue_->PostJobForDescriptor(descriptor,
+                                         std::move(generation_task));
+  } else {
+    generation_task();
+  }
 
   return pipeline_future;
 }
@@ -371,6 +392,10 @@ void PipelineLibraryGLES::SetProgramForKey(
     std::shared_ptr<UniqueHandleGLES> program) {
   Lock lock(programs_mutex_);
   programs_[key] = std::move(program);
+}
+
+PipelineCompileQueue* PipelineLibraryGLES::GetPipelineCompileQueue() const {
+  return compile_queue_.get();
 }
 
 }  // namespace impeller

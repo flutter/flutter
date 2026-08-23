@@ -9,29 +9,29 @@ import UIKit
 /// UIPressProxy subclass for use to create fake UIPress events in tests.
 @available(iOS 13.4, *)
 @objc
-public class FakeUIPressProxy: UIPressProxy {
+class FakeUIPressProxy: UIPressProxy {
   private let dataPhase: UIPress.Phase
   private let dataKey: UIKey  // Store the copied key
   private let dataType: UIEvent.EventType
   private let dataTimestamp: TimeInterval
 
-  @objc override public var phase: UIPress.Phase {
+  @objc override var phase: UIPress.Phase {
     return dataPhase
   }
 
-  @objc override public var key: UIKey? {
+  @objc override var key: UIKey? {
     return dataKey
   }
 
-  @objc override public var type: UIEvent.EventType {
+  @objc override var type: UIEvent.EventType {
     return dataType
   }
 
-  @objc override public var timestamp: TimeInterval {
+  @objc override var timestamp: TimeInterval {
     return dataTimestamp
   }
 
-  @objc public init(
+  @objc init(
     phase: UIPress.Phase,
     key: UIKey,
     type: UIEvent.EventType,

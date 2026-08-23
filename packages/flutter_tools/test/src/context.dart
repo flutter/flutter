@@ -404,18 +404,16 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<void> prefetchSwiftPackages(
+  Future<void> prefetchSwiftPackagesForProject(
     XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
-    bool quiet = true,
-    bool waitForCompletion = true,
   }) async {}
 
   @override
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async {
     return <String>['xcrun', 'xcodebuild'];
   }

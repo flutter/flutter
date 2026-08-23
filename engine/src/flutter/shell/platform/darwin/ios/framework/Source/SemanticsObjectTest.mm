@@ -282,6 +282,17 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual([object accessibilityTraits], UIAccessibilityTraitStaticText);
 }
 
+- (void)testPlainSemanticsObjectWithHeadingLevelHasHeaderTrait {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  flutter::SemanticsNode node;
+  node.headingLevel = 2;
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  XCTAssertTrue(([object accessibilityTraits] & UIAccessibilityTraitHeader) > 0);
+}
+
 - (void)testNodeWithImplicitScrollIsAnAccessibilityElementWhenItisHidden {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());

@@ -72,7 +72,7 @@ template("android_toolchain") {
     assert(invoker.is_clang)
     host_dir = ""
     if (host_os == "linux") {
-      host_dir = "linux-x64"
+      host_dir = "linux-${host_cpu}"
     } else if (host_os == "mac") {
       host_dir = "mac-${host_cpu}"
     } else {

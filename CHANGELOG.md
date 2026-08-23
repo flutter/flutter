@@ -30,6 +30,66 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.47 Changes
+
+### [3.47.1](https://github.com/flutter/flutter/releases/tag/3.47.1)
+- [flutter/190871](https://github.com/flutter/flutter/issues/190871) Flutter GPU could not be enabled in release builds on Linux and Windows, since those embedders had no project-level opt-in and release builds ignore engine switches from the environment.
+- [flutter/188446](https://github.com/flutter/flutter/issues/188446) When building multi-target applications in parallel on iOS and macOS, a race condition in SwiftPM integration causes `FileSystemException`.
+- [flutter/189550](https://github.com/flutter/flutter/issues/189550) When running `flutter pub get` in a Dart workspace, platform tooling regeneration and analysis options migration are skipped for packages that do not depend on Flutter.
+- [flutter/190234](https://github.com/flutter/flutter/issues/190234) Avoid crashing with `PathNotFoundException` when cleaning up native assets if files are removed concurrently.
+- [flutter/189128](https://github.com/flutter/flutter/issues/189128) Invalidate `WebEntrypointTarget` and regenerate `web_plugin_registrant.dart` when web plugins are added or removed.
+- [flutter/186445](https://github.com/flutter/flutter/issues/186445) Fix hot restart for WASM web builds.
+- [flutter/190284](https://github.com/flutter/flutter/issues/190284) Fix hot reload failing to reload edits in nested Pub workspace member packages located under root `lib/`.
+- [flutter/191056](https://github.com/flutter/flutter/issues/191056) Recursively resolve includes in `AnalysisOptionsMigration` to prevent redundant rewrites of `analysis_options.yaml`.
+- [flutter/189156](https://github.com/flutter/flutter/issues/189156) Validate plugin class and package identifiers to prevent arbitrary code injection into `GeneratedPluginRegistrant`.
+- [flutter/190721](https://github.com/flutter/flutter/issues/190721) Fix deadlock in debug adapters when the target process exits early during startup before VM service connection.
+- [flutter/189972](https://github.com/flutter/flutter/issues/189972) Fix ADB device list parsing for long wireless mDNS serials separated from state by a single space.
+- [flutter/190233](https://github.com/flutter/flutter/issues/190233) Fix `impellerc` crash on Windows when paths contain Unicode characters, and improve shader compiler error diagnostics.
+
+### [3.47.0](https://github.com/flutter/flutter/releases/tag/3.47.0)
+
+Learn about what's new in this release in [the blog post](https://flutter.dev/blog/whats-new-in-flutter-3-47), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.47.0) for a detailed list of all the new changes.
+
+
+## Flutter 3.44 Changes
+
+### [3.44.7](https://github.com/flutter/flutter/releases/tag/3.44.7)
+- [flutter/188161](https://github.com/flutter/flutter/issues/188161) Fixes a resource leak that sometimes caused crashes when using external textures on some GPUs (such as Arm Mali).
+
+### [3.44.6](https://github.com/flutter/flutter/releases/tag/3.44.6)
+- [flutter/187980](https://github.com/flutter/flutter/issues/187980) On Linux, building asset bundles with native assets enabled without a native app build directory crashes due to missing `CMakeCache.txt`.
+- [flutter/188805](https://github.com/flutter/flutter/issues/188805) Fixes a crash when running Android instrumented tests.
+
+### [3.44.5](https://github.com/flutter/flutter/releases/tag/3.44.5)
+- [flutter/188718](https://github.com/flutter/flutter/issues/188718) When building Flutter Android apps and add-to-app modules using AGP < 9 with KGP, the tool incorrectly logs Built-in Kotlin migration warnings.
+- [flutter/186810](https://github.com/flutter/flutter/issues/186810) [flutter/187388](https://github.com/flutter/flutter/issues/187388) [flutter/187553](https://github.com/flutter/flutter/issues/187553) When building Android app bundles using flavors, or with an old app template combined with a plugin coming alphabetically before app, fixes problems with failing to include libapp.so in the produced app bundle.
+- [flutter/188035](https://github.com/flutter/flutter/issues/188035) When rendering text with shadows, the shadows would appear elsewhere on the screen, separate from the text.
+- [flutter/187237](https://github.com/flutter/flutter/issues/187237) Fixes a crash that can happen during app shutdown or rotation on some Android devices using Impeller/Vulkan with HCPP.
+
+### [3.44.4](https://github.com/flutter/flutter/releases/tag/3.44.4)
+- [flutter/188192](https://github.com/flutter/flutter/issues/188192) Fix bounds checking in Flutter Linux's FlAccessibleTextField.
+
+### [3.44.3](https://github.com/flutter/flutter/releases/tag/3.44.3)
+- [flutter/186738](https://github.com/flutter/flutter/issues/186738) Demote flavor/platform asset skipping messages from warning to trace level to reduce build log noise.
+- [flutter/186899](https://github.com/flutter/flutter/issues/186899) On Android, destroying a texture before the GLES fence that it holds was used may cause a crash.
+- [flutter/186953](https://github.com/flutter/flutter/issues/186953) When building concurrently with SwiftPM on macOS/iOS, concurrent directory/file/symlink creation may cause a crash.
+- [flutter/183179](https://github.com/flutter/flutter/issues/183179) Fixes an issue that can cause crashes when rendering animated PNG images.
+
+### [3.44.2](https://github.com/flutter/flutter/releases/tag/3.44.2)
+- [flutter/187322](https://github.com/flutter/flutter/issues/187322) When DTD connection is lost or fails at startup during widget-preview on all platforms, the tool crashes with unhandled exceptions instead of exiting gracefully.
+- [flutter/186723](https://github.com/flutter/flutter/issues/186723) When Android apps switch from any `SystemUiMode` to edge-to-edge, the system bars unexpectedly remain invisible.
+- [flutter/186054](https://github.com/flutter/flutter/issues/186054) When building an iOS or macOS app with Swift Package Manager enabled, remote package dependencies may fail to download.
+- [flutter/185775](https://github.com/flutter/flutter/issues/185775) When building for non-iOS or macOS apps, Swift Package Manager warnings may appear.
+
+### [3.44.1](https://github.com/flutter/flutter/releases/tag/3.44.1)
+- [flutter/186962](https://github.com/flutter/flutter/issues/186962) When the analysis server exits unexpectedly, the `flutter` tool can crash instead of outputting a descriptive error message.
+- [flutter/186963](https://github.com/flutter/flutter/issues/186963) When failing to connect to a Chrome instance on Windows, the `flutter` tool can crash instead of outputting a descriptive error message.
+
+### [3.44.0](https://github.com/flutter/flutter/releases/tag/3.44.0)
+
+Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-44-b0cc1ad3c527), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.44.0) for a detailed list of all the new changes.
+
+
 ## Flutter 3.41 Changes
 
 ### [3.41.9](https://github.com/flutter/flutter/releases/tag/3.41.9)

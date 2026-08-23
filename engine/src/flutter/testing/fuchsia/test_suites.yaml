@@ -42,8 +42,9 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/embedder_proctable_unittests#meta/embedder_proctable_unittests.cm
   package: embedder_proctable_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/embedder_tests#meta/embedder_tests.cm
+  disabled: vulkan and argument initialization errors on fuchsia emulator
   package: embedder_tests-0.far
-  variant: debug_x64
+  variant: disabled
 - test_command: test run fuchsia-pkg://fuchsia.com/flow_tests#meta/flow_tests.cm
   package: flow_tests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/flutter-embedder-test#meta/flutter-embedder-test.cm

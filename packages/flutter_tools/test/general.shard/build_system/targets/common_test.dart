@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -49,7 +50,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        kTargetPlatform: TargetPlatform.android_arm.getName(),
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -62,7 +63,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+        kTargetPlatform: TargetPlatform.ios.getName(),
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -101,7 +102,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.profile, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--aot',
           '--tfa',
           '--target-os',
@@ -113,6 +114,7 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         exitCode: 1,
@@ -143,7 +145,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.profile, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--aot',
           '--tfa',
           '--target-os',
@@ -155,9 +157,13 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -188,7 +194,7 @@ void main() {
             '--target=flutter',
             '--no-print-incremental-dependencies',
             ...buildModeOptions(BuildMode.profile, <String>[]),
-            '--track-widget-creation',
+            '--track-creation-locations',
             '--aot',
             '--tfa',
             '--target-os',
@@ -200,9 +206,13 @@ void main() {
             '--depfile',
             '$build/kernel_snapshot_program.d',
             '--verbosity=error',
+            '--recorded-uses=$build/recorded_uses.json',
             'file:///lib/main.dart',
           ],
           stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+          onRun: (_) {
+            fileSystem.file('$build/recorded_uses.json').createSync();
+          },
         ),
       ]);
 
@@ -233,7 +243,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.profile, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--aot',
           '--tfa',
           '--target-os',
@@ -245,9 +255,13 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -279,7 +293,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.profile, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--aot',
           '--tfa',
           '--target-os',
@@ -293,9 +307,13 @@ void main() {
           '--verbosity=error',
           'foo',
           'bar',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -393,7 +411,7 @@ void main() {
 
       await const KernelSnapshot().build(
         androidEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.darwin)
+          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kTrackWidgetCreation] = 'false',
       );
@@ -487,7 +505,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.ios)
+          ..defines[kTargetPlatform] = TargetPlatform.ios.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
           ..defines[kXcodeConfiguration] = 'Debug-chocolate'
@@ -497,6 +515,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
+      Config: () => Config.test(directory: fileSystem.currentDirectory),
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
@@ -544,7 +563,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.darwin)
+          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
           ..defines[kXcodeConfiguration] = 'Debug-chocolate'
@@ -554,6 +573,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
+      Config: () => Config.test(directory: fileSystem.currentDirectory),
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
@@ -600,7 +620,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.darwin)
+          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kDartDefines] = base64Encode(utf8.encode('FLUTTER_APP_FLAVOR=vanilla'))
           ..defines[kFlavor] = 'strawberry'
@@ -624,13 +644,14 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        kTargetPlatform: TargetPlatform.android_arm.getName(),
       },
       processManager: processManager,
       artifacts: artifacts,
       fileSystem: fileSystem,
       logger: logger,
     );
+    testEnvironment.buildDir.createSync(recursive: true);
     final String build = testEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -647,7 +668,7 @@ void main() {
           '--target=flutter',
           '--no-print-incremental-dependencies',
           ...buildModeOptions(BuildMode.debug, <String>[]),
-          '--track-widget-creation',
+          '--track-creation-locations',
           '--no-link-platform',
           '--packages',
           '/.dart_tool/package_config.json',
@@ -684,7 +705,6 @@ void main() {
           '--deterministic',
           kElfAot,
           '--elf=$build/app.so',
-          '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '$build/app.dill',
         ],
@@ -714,7 +734,6 @@ void main() {
           '--trace-precompiler-to=code_size_1/trace.android-arm.json',
           kElfAot,
           '--elf=$build/app.so',
-          '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '$build/app.dill',
         ],
@@ -810,7 +829,7 @@ void main() {
             kMachoDylibAot,
             '--macho=$build/arm64/App.framework/App',
             '--macho-object=$build/arm64/app.o',
-            '--macho-min-os-version=13.0',
+            '--macho-min-os-version=15.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '$build/app.dill',
@@ -876,7 +895,6 @@ void main() {
           'baz=2',
           kElfAot,
           '--elf=$build/app.so',
-          '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '$build/app.dill',
         ],

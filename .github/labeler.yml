@@ -50,7 +50,7 @@
 'd: api docs':
   - changed-files:
     - any-glob-to-any-file:
-      - examples/api/**/*
+      - packages/flutter/examples/api/**/*
 
 'd: docs/':
   - changed-files:
@@ -61,6 +61,7 @@
   - changed-files:
     - any-glob-to-any-file:
       - examples/**/*
+      - packages/flutter/examples/**/*
 
 'e: embedder':
   - changed-files:
@@ -104,7 +105,7 @@ engine:
       - '**/gestures/*'
       - '**/*gestures*'
 
-'f: material design':
+'p: material_ui':
   - changed-files:
     - any-glob-to-any-file:
       - '**/material/*'
@@ -138,7 +139,6 @@ framework:
       - packages/flutter_localizations/**/*
       - packages/flutter_test/**/*
       - packages/integration_test/**/*
-      - examples/api/**/*
       - docs/about/**/*
       - docs/contributing/**/*
       - docs/libraries/**/*
@@ -304,7 +304,11 @@ team-tool:
 team-web:
   - changed-files:
     - any-glob-to-any-file:
+      - dev/**/*web*
+      - dev/**/*web*/**/*
       - docs/platforms/web/**/*
+      - engine/src/flutter/lib/web_ui/**/*
+      - engine/src/flutter/web_sdk/**/*
 
 tool:
   - changed-files:

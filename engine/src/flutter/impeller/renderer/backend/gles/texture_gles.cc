@@ -40,6 +40,23 @@ static bool IsDepthStencilFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return false;
   }
   FML_UNREACHABLE();
@@ -133,17 +150,20 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
       type_(GetTextureTypeFromDescriptor(
           GetTextureDescriptor(),
           reactor_->GetProcTable().GetCapabilities())),
-      handle_(external_handle.has_value()
-                  ? external_handle.value()
-                  : (threadsafe ? reactor_->CreateHandle(ToHandleType(type_))
-                                : reactor_->CreateUntrackedHandle(
-                                      ToHandleType(type_)))),
+      handle_(
+          external_handle.has_value()
+              ? UniqueHandleGLES(reactor_, external_handle.value())
+              : (threadsafe
+                     ? UniqueHandleGLES(reactor_, ToHandleType(type_))
+                     : UniqueHandleGLES::MakeUntracked(reactor_,
+                                                       ToHandleType(type_)))),
       is_wrapped_(fbo.has_value() || external_handle.has_value()),
       wrapped_fbo_(fbo) {
   // Ensure the texture descriptor itself is valid.
   if (!GetTextureDescriptor().IsValid()) {
     return;
   }
+
   // Ensure the texture doesn't exceed device capabilities.
   const auto tex_size = GetTextureDescriptor().size;
   const auto max_size =
@@ -157,16 +177,8 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
   is_valid_ = true;
 }
 
-// |Texture|
-TextureGLES::~TextureGLES() {
-  reactor_->CollectHandle(handle_);
-  if (!cached_fbo_.IsDead()) {
-    reactor_->CollectHandle(cached_fbo_);
-  }
-}
-
 void TextureGLES::Leak() {
-  handle_ = HandleGLES::DeadHandle();
+  handle_.Release();
 }
 
 // |Texture|
@@ -177,7 +189,7 @@ bool TextureGLES::IsValid() const {
 // |Texture|
 void TextureGLES::SetLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
-  reactor_->SetDebugLabel(handle_, label);
+  reactor_->SetDebugLabel(handle_.Get(), label);
 #endif  // IMPELLER_DEBUG
 }
 
@@ -185,7 +197,8 @@ void TextureGLES::SetLabel(std::string_view label) {
 void TextureGLES::SetLabel(std::string_view label, std::string_view trailing) {
 #ifdef IMPELLER_DEBUG
   if (reactor_->CanSetDebugLabels()) {
-    reactor_->SetDebugLabel(handle_, std::format("{} {}", label, trailing));
+    reactor_->SetDebugLabel(handle_.Get(),
+                            std::format("{} {}", label, trailing));
   }
 #endif  // IMPELLER_DEBUG
 }
@@ -249,10 +262,29 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
       texture_type = GL_TEXTURE_CUBE_MAP;
       texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice;
       break;
+    case TextureType::kTexture2DArray:
+      texture_type = GL_TEXTURE_2D_ARRAY;
+      texture_target = GL_TEXTURE_2D_ARRAY;
+      break;
     case TextureType::kTextureExternalOES:
       texture_type = GL_TEXTURE_EXTERNAL_OES;
       texture_target = GL_TEXTURE_EXTERNAL_OES;
       break;
+  }
+
+  // Array textures allocate all layers up front (glTexImage3D); a per-layer
+  // upload then fills one layer with glTexSubImage3D, so make sure the storage
+  // exists before uploading.
+  const bool is_array = tex_descriptor.type == TextureType::kTexture2DArray;
+  if (is_array) {
+    // Bail out synchronously on contexts without array support (e.g. ES 2.0).
+    // The glTexImage3D/glTexSubImage3D procs are null there, so queuing the
+    // upload would dereference a null proc on the reactor thread.
+    if (!reactor_->GetProcTable().GetCapabilities()->SupportsTextureArray()) {
+      VALIDATION_LOG << "2D array textures are not supported on this context.";
+      return false;
+    }
+    InitializeContentsIfNecessary();
   }
 
   std::optional<PixelFormatGLES> gles_format =
@@ -265,41 +297,86 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
     return false;
   }
 
-  ReactorGLES::Operation texture_upload = [handle = handle_,              //
-                                           mapping,                       //
-                                           format = gles_format.value(),  //
-                                           size = tex_descriptor.size,    //
-                                           texture_type,                  //
-                                           texture_target                 //
+  ReactorGLES::Operation texture_upload =
+      [handle = handle_.Get(),                                   //
+       mapping,                                                  //
+       format = gles_format.value(),                             //
+       size = tex_descriptor.size,                               //
+       image_size = tex_descriptor.GetByteSizeOfBaseMipLevel(),  //
+       texture_type,                                             //
+       texture_target,                                           //
+       is_array,                                                 //
+       slice                                                     //
   ](const auto& reactor) {
-    auto gl_handle = reactor.GetGLHandle(handle);
-    if (!gl_handle.has_value()) {
-      VALIDATION_LOG
-          << "Texture was collected before it could be uploaded to the GPU.";
-      return;
-    }
-    const auto& gl = reactor.GetProcTable();
-    gl.BindTexture(texture_type, gl_handle.value());
-    const GLvoid* tex_data = nullptr;
-    if (mapping) {
-      tex_data = mapping->GetMapping();
-    }
+        auto gl_handle = reactor.GetGLHandle(handle);
+        if (!gl_handle.has_value()) {
+          VALIDATION_LOG << "Texture was collected before it could be uploaded "
+                            "to the GPU.";
+          return;
+        }
+        const auto& gl = reactor.GetProcTable();
+        gl.BindTexture(texture_type, gl_handle.value());
+        const GLvoid* tex_data = nullptr;
+        if (mapping) {
+          tex_data = mapping->GetMapping();
+        }
 
-    {
-      TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
-                   std::to_string(mapping->GetSize()).c_str());
-      gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      gl.TexImage2D(texture_target,          // target
-                    0u,                      // LOD level
-                    format.internal_format,  // internal format
-                    size.width,              // width
-                    size.height,             // height
-                    0u,                      // border
-                    format.external_format,  // format
-                    format.type,             // type
-                    tex_data);               // data
-    }
-  };
+        {
+          TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
+                       std::to_string(mapping->GetSize()).c_str());
+          gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+          if (is_array) {
+            // Storage for every layer is allocated by the initializer; fill the
+            // requested layer (slice) of the already-allocated base mip level.
+            if (format.is_compressed) {
+              gl.CompressedTexSubImage3D(
+                  /*target=*/texture_target,              //
+                  /*level=*/0u,                           //
+                  /*xoffset=*/0u,                         //
+                  /*yoffset=*/0u,                         //
+                  /*zoffset=*/static_cast<GLint>(slice),  //
+                  /*width=*/size.width,                   //
+                  /*height=*/size.height,                 //
+                  /*depth=*/1,                            //
+                  /*format=*/format.internal_format,      //
+                  /*image_size=*/image_size,              //
+                  /*data=*/tex_data);                     //
+            } else {
+              gl.TexSubImage3D(
+                  /*target=*/texture_target,              //
+                  /*level=*/0u,                           //
+                  /*xoffset=*/0u,                         //
+                  /*yoffset=*/0u,                         //
+                  /*zoffset=*/static_cast<GLint>(slice),  //
+                  /*width=*/size.width,                   //
+                  /*height=*/size.height,                 //
+                  /*depth=*/1,                            //
+                  /*format=*/format.external_format,      //
+                  /*type=*/format.type,                   //
+                  /*data=*/tex_data);                     //
+            }
+          } else if (format.is_compressed) {
+            gl.CompressedTexImage2D(texture_target,          // target
+                                    0u,                      // LOD level
+                                    format.internal_format,  // internal format
+                                    size.width,              // width
+                                    size.height,             // height
+                                    0u,                      // border
+                                    image_size,              // image size
+                                    tex_data);               // data
+          } else {
+            gl.TexImage2D(texture_target,          // target
+                          0u,                      // LOD level
+                          format.internal_format,  // internal format
+                          size.width,              // width
+                          size.height,             // height
+                          0u,                      // border
+                          format.external_format,  // format
+                          format.type,             // type
+                          tex_data);               // data
+          }
+        }
+      };
 
   const bool added = reactor_->AddOperation(texture_upload);
   if (added) {
@@ -338,6 +415,23 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return std::nullopt;
   }
   FML_UNREACHABLE();
@@ -371,7 +465,7 @@ void TextureGLES::InitializeContentsIfNecessary() {
   }
 
   const auto& gl = reactor_->GetProcTable();
-  std::optional<GLuint> handle = reactor_->GetGLHandle(handle_);
+  std::optional<GLuint> handle = reactor_->GetGLHandle(handle_.Get());
   if (!handle.has_value()) {
     VALIDATION_LOG << "Could not initialize the contents of texture.";
     return;
@@ -411,6 +505,31 @@ void TextureGLES::InitializeContentsIfNecessary() {
           );
           MarkSliceMipLevelInitialized(face, 0);
         }
+      } else if (desc.type == TextureType::kTexture2DArray) {
+        if (!gl.GetCapabilities()->SupportsTextureArray()) {
+          VALIDATION_LOG << "2D array textures are not supported on this "
+                            "context.";
+          return;
+        }
+        // Array textures allocate the whole base mip level (all layers) in one
+        // glTexImage3D call; individual layers are then filled with
+        // glTexSubImage3D. Non-zero mip levels are allocated lazily.
+        gl.BindTexture(GL_TEXTURE_2D_ARRAY, handle.value());
+        gl.TexImage3D(
+            /*target=*/GL_TEXTURE_2D_ARRAY,                    //
+            /*level=*/0u,                                      //
+            /*internal_format=*/gles_format->internal_format,  //
+            /*width=*/size.width,                              //
+            /*height=*/size.height,                            //
+            /*depth=*/desc.array_layer_count,                  //
+            /*border=*/0u,                                     //
+            /*format=*/gles_format->external_format,           //
+            /*type=*/gles_format->type,                        //
+            /*data=*/nullptr                                   //
+        );
+        // glTexImage3D allocated every layer of the base level at once, so a
+        // single entry covers the whole level.
+        MarkSliceMipLevelInitialized(0, 0);
       } else {
         // 2D / multisampled. External-OES textures are always wrapped, so
         // they returned at the is_wrapped_ check above. Only the base mip
@@ -484,7 +603,7 @@ std::optional<GLuint> TextureGLES::GetGLHandle() const {
   if (!IsValid()) {
     return std::nullopt;
   }
-  return reactor_->GetGLHandle(handle_);
+  return reactor_->GetGLHandle(handle_.Get());
 }
 
 bool TextureGLES::Bind() {
@@ -494,13 +613,12 @@ bool TextureGLES::Bind() {
   }
   const auto& gl = reactor_->GetProcTable();
 
-  if (fence_.has_value()) {
-    std::optional<GLsync> fence = reactor_->GetGLFence(fence_.value());
+  if (fence_.IsValid()) {
+    std::optional<GLsync> fence = reactor_->GetGLFence(fence_.Get());
     if (fence.has_value()) {
       gl.WaitSync(fence.value(), 0, GL_TIMEOUT_IGNORED);
     }
-    reactor_->CollectHandle(fence_.value());
-    fence_ = std::nullopt;
+    fence_.Reset();
   }
 
   switch (type_) {
@@ -568,6 +686,8 @@ bool TextureGLES::GenerateMipmap() {
       return false;
     case TextureType::kTextureCube:
       break;
+    case TextureType::kTexture2DArray:
+      break;
     case TextureType::kTextureExternalOES:
       break;
   }
@@ -602,34 +722,123 @@ static GLenum ToAttachmentType(TextureGLES::AttachmentType point) {
   }
 }
 
-bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
-                                             AttachmentType attachment_type) {
-  if (!IsValid()) {
-    return false;
+bool TextureGLES::EnsureSliceMipLevelStorage(size_t slice, size_t mip_level) {
+  if (IsSliceMipLevelInitialized(slice, mip_level)) {
+    return true;
   }
-  InitializeContentsIfNecessary();
+  // Renderbuffers and multisampled textures only have their single level
+  // allocated at init; only sampled 2D and cube textures allocate per-level.
+  if (type_ != Type::kTexture) {
+    return true;
+  }
   auto handle = GetGLHandle();
   if (!handle.has_value()) {
     return false;
   }
   const auto& gl = reactor_->GetProcTable();
+  const auto& desc = GetTextureDescriptor();
+  std::optional<PixelFormatGLES> gles_format = ToPixelFormatGLES(
+      desc.format,
+      gl.GetDescription()->HasExtension("GL_EXT_texture_format_BGRA8888"));
+  if (!gles_format.has_value()) {
+    return false;
+  }
+  ISize size = GetSize();
+  const GLsizei mip_width =
+      static_cast<GLsizei>(std::max<int64_t>(1, size.width >> mip_level));
+  const GLsizei mip_height =
+      static_cast<GLsizei>(std::max<int64_t>(1, size.height >> mip_level));
+
+  if (desc.type == TextureType::kTexture2DArray) {
+    // glTexImage3D allocates this mip level for every layer at once, so a
+    // single entry (slice 0) tracks the whole level regardless of which layer
+    // was requested. Guard on that entry so a request for a non-zero layer
+    // does not re-allocate and orphan already-uploaded layers.
+    if (IsSliceMipLevelInitialized(0, mip_level)) {
+      return true;
+    }
+    gl.BindTexture(GL_TEXTURE_2D_ARRAY, handle.value());
+    gl.TexImage3D(
+        /*target=*/GL_TEXTURE_2D_ARRAY,                    //
+        /*level=*/static_cast<GLint>(mip_level),           //
+        /*internal_format=*/gles_format->internal_format,  //
+        /*width=*/mip_width,                               //
+        /*height=*/mip_height,                             //
+        /*depth=*/desc.array_layer_count,                  //
+        /*border=*/0u,                                     //
+        /*format=*/gles_format->external_format,           //
+        /*type=*/gles_format->type,                        //
+        /*data=*/nullptr                                   //
+    );
+    MarkSliceMipLevelInitialized(0, mip_level);
+    return true;
+  }
+
+  bool is_cube = desc.type == TextureType::kTextureCube;
+  GLenum image_target =
+      is_cube ? GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice : GL_TEXTURE_2D;
+  gl.BindTexture(is_cube ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, handle.value());
+  gl.TexImage2D(
+      /*target=*/image_target,                           //
+      /*level=*/static_cast<GLint>(mip_level),           //
+      /*internal_format=*/gles_format->internal_format,  //
+      /*width=*/mip_width,                               //
+      /*height=*/mip_height,                             //
+      /*border=*/0u,                                     //
+      /*format=*/gles_format->external_format,           //
+      /*type=*/gles_format->type,                        //
+      /*data=*/nullptr                                   //
+  );
+  MarkSliceMipLevelInitialized(slice, mip_level);
+  return true;
+}
+
+bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
+                                             AttachmentType attachment_type,
+                                             uint32_t mip_level,
+                                             uint32_t slice) {
+  if (!IsValid()) {
+    return false;
+  }
+  InitializeContentsIfNecessary();
+  const auto& gl = reactor_->GetProcTable();
+  if (mip_level > 0 &&
+      !gl.GetCapabilities()->SupportsFramebufferRenderMipmap()) {
+    VALIDATION_LOG << "Rendering into a non-zero mip level is not supported on "
+                      "the GLES backend.";
+    return false;
+  }
+  if (!EnsureSliceMipLevelStorage(slice, mip_level)) {
+    return false;
+  }
+  auto handle = GetGLHandle();
+  if (!handle.has_value()) {
+    return false;
+  }
+  const GLint level = static_cast<GLint>(mip_level);
 
   switch (ComputeTypeForBinding(target)) {
-    case Type::kTexture:
+    case Type::kTexture: {
+      // Cube maps attach a specific face; 2D textures attach the 2D target.
+      GLenum textarget =
+          GetTextureDescriptor().type == TextureType::kTextureCube
+              ? GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice
+              : GL_TEXTURE_2D;
       gl.FramebufferTexture2D(target,                             // target
                               ToAttachmentType(attachment_type),  // attachment
-                              GL_TEXTURE_2D,                      // textarget
+                              textarget,                          // textarget
                               handle.value(),                     // texture
-                              0                                   // level
+                              level                               // level
       );
       break;
+    }
     case Type::kTextureMultisampled:
       gl.FramebufferTexture2DMultisampleEXT(
           target,                             // target
           ToAttachmentType(attachment_type),  // attachment
           GL_TEXTURE_2D,                      // textarget
           handle.value(),                     // texture
-          0,                                  // level
+          level,                              // level
           4                                   // samples
       );
       break;
@@ -647,17 +856,6 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
   return true;
 }
 
-// |Texture|
-Scalar TextureGLES::GetYCoordScale() const {
-  switch (GetCoordinateSystem()) {
-    case TextureCoordinateSystem::kUploadFromHost:
-      return 1.0;
-    case TextureCoordinateSystem::kRenderToTexture:
-      return -1.0;
-  }
-  FML_UNREACHABLE();
-}
-
 bool TextureGLES::IsWrapped() const {
   return is_wrapped_;
 }
@@ -667,21 +865,31 @@ std::optional<GLuint> TextureGLES::GetFBO() const {
 }
 
 void TextureGLES::SetFence(HandleGLES fence) {
-  FML_DCHECK(!fence_.has_value());
-  fence_ = fence;
+  FML_DCHECK(!fence_.IsValid());
+  fence_ = UniqueHandleGLES(reactor_, fence);
 }
 
 // Visible for testing.
 std::optional<HandleGLES> TextureGLES::GetSyncFence() const {
-  return fence_;
+  return fence_.IsValid() ? std::optional(fence_.Get()) : std::nullopt;
 }
 
 void TextureGLES::SetCachedFBO(HandleGLES fbo) {
-  cached_fbo_ = fbo;
+  cached_fbo_ = UniqueHandleGLES(reactor_, fbo);
 }
 
 const HandleGLES& TextureGLES::GetCachedFBO() const {
-  return cached_fbo_;
+  return cached_fbo_.Get();
+}
+
+void TextureGLES::SetCachedFBOSubresource(uint32_t mip_level, uint32_t slice) {
+  cached_fbo_mip_level_ = mip_level;
+  cached_fbo_slice_ = slice;
+}
+
+bool TextureGLES::CachedFBOMatchesSubresource(uint32_t mip_level,
+                                              uint32_t slice) const {
+  return cached_fbo_mip_level_ == mip_level && cached_fbo_slice_ == slice;
 }
 
 }  // namespace impeller

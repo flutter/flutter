@@ -7,10 +7,13 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:fake_async/fake_async.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/ios/device_support.dart';
 import 'package:flutter_tools/src/ios/lldb.dart';
 import 'package:test/fake.dart';
 
@@ -49,6 +52,7 @@ void main() {
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.debug,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
@@ -64,11 +68,15 @@ void main() {
 
     final breakPointCompleter = Completer<List<int>>();
     final processAttachCompleter = Completer<List<int>>();
+    final setupStopHooksCompleter = Completer<List<int>>();
+    final platformStatusCompleter = Completer<List<int>>();
     final processResumedCompleted = Completer<List<int>>();
 
     final stdoutStream = Stream<List<int>>.fromFutures([
       breakPointCompleter.future,
       processAttachCompleter.future,
+      setupStopHooksCompleter.future,
+      platformStatusCompleter.future,
       processResumedCompleted.future,
     ]);
 
@@ -96,12 +104,16 @@ void main() {
     const breakPointMatcher = r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
     const processAttachMatcher = 'device process attach --pid $appProcessId';
     const processResumedMatcher = 'process continue';
+    const setupStopHooksMatcher = 'target stop-hook add -o "thread backtrace all" -o "detach"';
+    const platformStatusMatcher = 'platform status';
     final expectedInputs = [
       'device select $deviceId',
       breakPointMatcher,
       'breakpoint command add --script-type python $breakpointId',
       'script lldb.debugger.SetAsync(False)',
       processAttachMatcher,
+      setupStopHooksMatcher,
+      platformStatusMatcher,
       processResumedMatcher,
     ];
 
@@ -129,6 +141,12 @@ Target 0: (Runner) stopped.
 '''),
         );
       }
+      if (line == setupStopHooksMatcher) {
+        setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
+      }
+      if (line == platformStatusMatcher) {
+        platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
+      }
       if (line == processResumedMatcher) {
         processResumedCompleted.complete(utf8.encode('1 location added to breakpoint 1\n'));
       }
@@ -139,6 +157,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.debug,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isTrue);
     expect(lldb.isRunning, isTrue);
@@ -153,10 +172,14 @@ Target 0: (Runner) stopped.
     const appProcessId = 5678;
 
     final processAttachCompleter = Completer<List<int>>();
+    final setupStopHooksCompleter = Completer<List<int>>();
+    final platformStatusCompleter = Completer<List<int>>();
     final processResumedCompleted = Completer<List<int>>();
 
     final stdoutStream = Stream<List<int>>.fromFutures([
       processAttachCompleter.future,
+      setupStopHooksCompleter.future,
+      platformStatusCompleter.future,
       processResumedCompleted.future,
     ]);
 
@@ -183,7 +206,15 @@ Target 0: (Runner) stopped.
 
     const processAttachMatcher = 'device process attach --pid $appProcessId';
     const processResumedMatcher = 'process continue';
-    final expectedInputs = ['device select $deviceId', processAttachMatcher, processResumedMatcher];
+    const setupStopHooksMatcher = 'target stop-hook add -o "thread backtrace all" -o "detach"';
+    const platformStatusMatcher = 'platform status';
+    final expectedInputs = [
+      'device select $deviceId',
+      processAttachMatcher,
+      setupStopHooksMatcher,
+      platformStatusMatcher,
+      processResumedMatcher,
+    ];
 
     stdinController.stream.transform<String>(utf8.decoder).transform(const LineSplitter()).listen((
       String line,
@@ -204,6 +235,12 @@ Target 0: (Runner) stopped.
 '''),
         );
       }
+      if (line == setupStopHooksMatcher) {
+        setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
+      }
+      if (line == platformStatusMatcher) {
+        platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
+      }
       if (line == processResumedMatcher) {
         processResumedCompleted.complete(utf8.encode('Process 568 resuming\n'));
       }
@@ -214,6 +251,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.profile,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isTrue);
     expect(lldb.isRunning, isTrue);
@@ -273,6 +311,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.debug,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
@@ -313,14 +352,19 @@ Target 0: (Runner) stopped.
       processUtils: processUtils,
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     );
-    final expectedInputs = ['device select $deviceId'];
+    final expectedInputs = [
+      'device select $deviceId',
+      r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
+    ];
     const errorText = "error: 'device' is not a valid command.\n";
 
     stdinController.stream.transform<String>(utf8.decoder).transform(const LineSplitter()).listen((
       String line,
     ) {
       expectedInputs.remove(line);
-      errorCompleter.complete(utf8.encode(errorText));
+      if (expectedInputs.isEmpty) {
+        errorCompleter.complete(utf8.encode(errorText));
+      }
     });
 
     final bool success = await lldb.attachAndStart(
@@ -328,6 +372,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
       mode: BuildMode.debug,
+      deviceSupport: createDeviceSupport(),
     );
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
@@ -378,6 +423,7 @@ Target 0: (Runner) stopped.
         appProcessId: appProcessId,
         lldbLogForwarder: FakeLLDBLogForwarder(),
         mode: BuildMode.debug,
+        deviceSupport: createDeviceSupport(),
       );
       time.elapse(const Duration(minutes: 2));
       time.flushMicrotasks();
@@ -385,7 +431,7 @@ Target 0: (Runner) stopped.
     });
 
     expect(
-      logger.errorText,
+      logger.warningText,
       contains('LLDB is taking longer than expected to start debugging the app'),
     );
   });
@@ -397,12 +443,16 @@ Target 0: (Runner) stopped.
 
     final breakPointCompleter = Completer<List<int>>();
     final processAttachCompleter = Completer<List<int>>();
+    final setupStopHooksCompleter = Completer<List<int>>();
+    final platformStatusCompleter = Completer<List<int>>();
     final processResumedCompleted = Completer<List<int>>();
     final logAfterAttachCompleter = Completer<List<int>>();
 
     final stdoutStream = Stream<List<int>>.fromFutures([
       breakPointCompleter.future,
       processAttachCompleter.future,
+      setupStopHooksCompleter.future,
+      platformStatusCompleter.future,
       processResumedCompleted.future,
       logAfterAttachCompleter.future,
     ]);
@@ -431,12 +481,16 @@ Target 0: (Runner) stopped.
     const breakPointMatcher = r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
     const processAttachMatcher = 'device process attach --pid $appProcessId';
     const processResumedMatcher = 'process continue';
+    const setupStopHooksMatcher = 'target stop-hook add -o "thread backtrace all" -o "detach"';
+    const platformStatusMatcher = 'platform status';
     final expectedInputs = [
       'device select $deviceId',
       breakPointMatcher,
       'breakpoint command add --script-type python $breakpointId',
       'script lldb.debugger.SetAsync(False)',
       processAttachMatcher,
+      setupStopHooksMatcher,
+      platformStatusMatcher,
       processResumedMatcher,
     ];
 
@@ -464,6 +518,12 @@ Target 0: (Runner) stopped.
 '''),
         );
       }
+      if (line == setupStopHooksMatcher) {
+        setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
+      }
+      if (line == platformStatusMatcher) {
+        platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
+      }
       if (line == processResumedMatcher) {
         processResumedCompleted.complete(utf8.encode('1 location added to breakpoint 1\n'));
       }
@@ -478,6 +538,7 @@ Target 0: (Runner) stopped.
       appProcessId: appProcessId,
       lldbLogForwarder: lldbLogForwarder,
       mode: BuildMode.debug,
+      deviceSupport: createDeviceSupport(),
     );
 
     logAfterAttachCompleter.complete(utf8.encode('$ignoreLog\n$expectedForwardedLog\n'));
@@ -534,6 +595,7 @@ Target 0: (Runner) stopped.
         appProcessId: appProcessId,
         lldbLogForwarder: FakeLLDBLogForwarder(),
         mode: BuildMode.debug,
+        deviceSupport: createDeviceSupport(),
       ),
     );
 
@@ -561,6 +623,227 @@ Target 0: (Runner) stopped.
     expect(exitStatus, isTrue);
     expect(lldb.isRunning, isFalse);
     expect(lldb.appProcessId, isNull);
+  });
+
+  group('addSymbolSearchPaths', () {
+    testWithoutContext(
+      'sends platform select remote-ios sysroot for arch symbol directory',
+      () async {
+        final fileSystem = MemoryFileSystem.test();
+        final Directory homeDir = fileSystem.directory('/Users/username');
+        final Directory archSymbols =
+            homeDir
+                .childDirectory('Library')
+                .childDirectory('Developer')
+                .childDirectory('Xcode')
+                .childDirectory('iOS DeviceSupport')
+                .childDirectory('iPhone15,2 17.0')
+                .childDirectory('arm64e')
+                .childDirectory('Symbols')
+              ..createSync(recursive: true);
+
+        const deviceId = '123';
+        const appProcessId = 5678;
+
+        final platformSelectCompleter = Completer<List<int>>();
+        final processAttachCompleter = Completer<List<int>>();
+        final setupStopHooksCompleter = Completer<List<int>>();
+        final platformStatusCompleter = Completer<List<int>>();
+        final processResumedCompleted = Completer<List<int>>();
+
+        final stdoutStream = Stream<List<int>>.fromFutures([
+          platformSelectCompleter.future,
+          processAttachCompleter.future,
+          setupStopHooksCompleter.future,
+          platformStatusCompleter.future,
+          processResumedCompleted.future,
+        ]);
+
+        final stdinController = StreamController<List<int>>();
+
+        final processCompleter = Completer<void>();
+        final lldbCommand = FakeLLDBCommand(
+          command: const <String>['xcrun', 'lldb'],
+          completer: processCompleter,
+          stdin: io.IOSink(stdinController.sink),
+          stdout: stdoutStream,
+          stderr: const Stream.empty(),
+        );
+
+        final logger = BufferLogger.test();
+
+        final processManager = FakeLLDBProcessManager([lldbCommand]);
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final lldb = LLDB(
+          logger: logger,
+          processUtils: processUtils,
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        );
+
+        final platformSelectMatcher = 'platform select remote-ios --sysroot "${archSymbols.path}"';
+        const processAttachMatcher = 'device process attach --pid $appProcessId';
+        const setupStopHooksMatcher = 'target stop-hook add -o "thread backtrace all" -o "detach"';
+        const processResumedMatcher = 'process continue';
+        const platformStatusMatcher = 'platform status';
+        final expectedInputs = [
+          'device select $deviceId',
+          platformSelectMatcher,
+          processAttachMatcher,
+          setupStopHooksMatcher,
+          platformStatusMatcher,
+          processResumedMatcher,
+        ];
+
+        stdinController.stream
+            .transform<String>(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen((String line) {
+              expectedInputs.remove(line);
+              if (line == platformSelectMatcher) {
+                platformSelectCompleter.complete(utf8.encode('\n'));
+              }
+              if (line == processAttachMatcher) {
+                processAttachCompleter.complete(
+                  utf8.encode('Process 568 stopped\nTarget 0: (Runner) stopped.\n'),
+                );
+              }
+              if (line == setupStopHooksMatcher) {
+                setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
+              }
+              if (line == platformStatusMatcher) {
+                platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
+              }
+              if (line == processResumedMatcher) {
+                processResumedCompleted.complete(utf8.encode('Process 568 resuming\n'));
+              }
+            });
+
+        final bool success = await lldb.attachAndStart(
+          deviceId: deviceId,
+          appProcessId: appProcessId,
+          lldbLogForwarder: FakeLLDBLogForwarder(),
+          mode: BuildMode.profile,
+          deviceSupport: createDeviceSupport(
+            modelCode: 'iPhone15,2',
+            operatingSystemVersion: '17.0',
+            cpuArchitectureString: 'arm64e',
+            homeDirectory: homeDir,
+          ),
+        );
+
+        expect(success, isTrue);
+        expect(expectedInputs, isEmpty);
+      },
+    );
+
+    testWithoutContext(
+      'sends platform select remote-ios sysroot for non-arch symbol directory',
+      () async {
+        final fileSystem = MemoryFileSystem.test();
+        final Directory homeDir = fileSystem.directory('/Users/username');
+        final Directory symbols =
+            homeDir
+                .childDirectory('Library')
+                .childDirectory('Developer')
+                .childDirectory('Xcode')
+                .childDirectory('iOS DeviceSupport')
+                .childDirectory('iPhone15,2 17.0')
+                .childDirectory('Symbols')
+              ..createSync(recursive: true);
+
+        const deviceId = '123';
+        const appProcessId = 5678;
+
+        final platformSelectCompleter = Completer<List<int>>();
+        final processAttachCompleter = Completer<List<int>>();
+        final setupStopHooksCompleter = Completer<List<int>>();
+        final platformStatusCompleter = Completer<List<int>>();
+        final processResumedCompleted = Completer<List<int>>();
+
+        final stdoutStream = Stream<List<int>>.fromFutures([
+          platformSelectCompleter.future,
+          processAttachCompleter.future,
+          setupStopHooksCompleter.future,
+          platformStatusCompleter.future,
+          processResumedCompleted.future,
+        ]);
+
+        final stdinController = StreamController<List<int>>();
+
+        final processCompleter = Completer<void>();
+        final lldbCommand = FakeLLDBCommand(
+          command: const <String>['xcrun', 'lldb'],
+          completer: processCompleter,
+          stdin: io.IOSink(stdinController.sink),
+          stdout: stdoutStream,
+          stderr: const Stream.empty(),
+        );
+
+        final logger = BufferLogger.test();
+
+        final processManager = FakeLLDBProcessManager([lldbCommand]);
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final lldb = LLDB(
+          logger: logger,
+          processUtils: processUtils,
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        );
+
+        final platformSelectMatcher = 'platform select remote-ios --sysroot "${symbols.path}"';
+        const processAttachMatcher = 'device process attach --pid $appProcessId';
+        const setupStopHooksMatcher = 'target stop-hook add -o "thread backtrace all" -o "detach"';
+        const processResumedMatcher = 'process continue';
+        const platformStatusMatcher = 'platform status';
+        final expectedInputs = [
+          'device select $deviceId',
+          platformSelectMatcher,
+          processAttachMatcher,
+          setupStopHooksMatcher,
+          platformStatusMatcher,
+          processResumedMatcher,
+        ];
+
+        stdinController.stream
+            .transform<String>(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen((String line) {
+              expectedInputs.remove(line);
+              if (line == platformSelectMatcher) {
+                platformSelectCompleter.complete(utf8.encode('\n'));
+              }
+              if (line == processAttachMatcher) {
+                processAttachCompleter.complete(
+                  utf8.encode('Process 568 stopped\nTarget 0: (Runner) stopped.\n'),
+                );
+              }
+              if (line == setupStopHooksMatcher) {
+                setupStopHooksCompleter.complete(utf8.encode('Stop hook #1 added.\n'));
+              }
+              if (line == platformStatusMatcher) {
+                platformStatusCompleter.complete(utf8.encode('  Platform: remote-ios\n'));
+              }
+              if (line == processResumedMatcher) {
+                processResumedCompleted.complete(utf8.encode('Process 568 resuming\n'));
+              }
+            });
+
+        final bool success = await lldb.attachAndStart(
+          deviceId: deviceId,
+          appProcessId: appProcessId,
+          lldbLogForwarder: FakeLLDBLogForwarder(),
+          mode: BuildMode.profile,
+          deviceSupport: createDeviceSupport(
+            modelCode: 'iPhone15,2',
+            operatingSystemVersion: '17.0',
+            cpuArchitectureString: 'arm64e',
+            homeDirectory: homeDir,
+          ),
+        );
+
+        expect(success, isTrue);
+        expect(expectedInputs, isEmpty);
+      },
+    );
   });
 
   group('LLDBLogForwarder', () {
@@ -794,4 +1077,28 @@ class FakeLLDBLogForwarder extends Fake implements LLDBLogForwarder {
       expectedLogCompleter.complete();
     }
   }
+}
+
+IOSDeviceSupport createDeviceSupport({
+  Logger? logger,
+  ProcessUtils? processUtils,
+  Directory? homeDirectory,
+  String? modelCode,
+  String? operatingSystemVersion,
+  String? cpuArchitectureString,
+  String deviceId = '123',
+}) {
+  final Logger testLogger = logger ?? BufferLogger.test();
+  return IOSDeviceSupport(
+    logger: testLogger,
+    processUtils:
+        processUtils ??
+        ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
+    xcode: null,
+    homeDirectory: homeDirectory,
+    modelCode: modelCode,
+    operatingSystemVersion: operatingSystemVersion,
+    cpuArchitectureString: cpuArchitectureString,
+    deviceId: deviceId,
+  );
 }

@@ -16,6 +16,7 @@ import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/project_migrator.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
@@ -27,6 +28,7 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'migrations/analysis_options_migration.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
@@ -249,10 +251,7 @@ class FlutterProject {
 
   /// The location of the generated scaffolding project for hosting widget
   /// previews from this project.
-  // TODO(bkonyi): don't create this project in $TMP.
-  // See https://github.com/flutter/flutter/issues/179036
-  late final Directory widgetPreviewScaffold = directory.fileSystem.systemTempDirectory
-      .createTempSync('widget_preview_scaffold');
+  late final Directory widgetPreviewScaffold = directory.childDirectory('.widget_preview');
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory.absolute
@@ -422,7 +421,25 @@ class FlutterProject {
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) async {
-    if (!directory.existsSync() || isPlugin) {
+    if (!directory.existsSync()) {
+      return;
+    }
+
+    final migration = ProjectMigration(<ProjectMigrator>[
+      AnalysisOptionsMigration(this, globals.logger, packageConfig: packageConfig),
+    ]);
+    await migration.run();
+
+    // When no platforms are enabled, nothing reads the plugin list or the
+    // injected per-platform files.
+    final bool anyPlatformEnabled =
+        androidPlatform ||
+        iosPlatform ||
+        linuxPlatform ||
+        macOSPlatform ||
+        windowsPlatform ||
+        webPlatform;
+    if (isPlugin || !anyPlatformEnabled) {
       return;
     }
     await refreshPluginsList(
@@ -1082,13 +1099,29 @@ See the link below for more information:
     );
   }
 
-  bool computeHcppEnabled() {
-    return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', false);
+  /// Returns the `io.flutter.embedding.android.EnableHcpp` manifest value.
+  ///
+  /// If there is no manifest file, or the key is not present, returns
+  /// [ifAbsent]. Callers should pass the value the build injects into the
+  /// manifest when the key is not explicitly set, so that the result reflects
+  /// what is actually packaged.
+  ///
+  /// This reads the app's primary source manifest, so it is an estimate of the
+  /// packaged value: it does not account for contributions from build
+  /// type/flavor overlay manifests or library manifests merged in at build
+  /// time. Intended for analytics, not for correctness-sensitive decisions.
+  bool computeHcppEnabled({bool ifAbsent = false}) {
+    return _computeManifestMetadataBoolValueOrNull('io.flutter.embedding.android.EnableHcpp') ??
+        ifAbsent;
   }
 
   bool _computeManifestMetadataBoolValue(String metadataKey, bool defaultValue) {
+    return _computeManifestMetadataBoolValueOrNull(metadataKey) ?? defaultValue;
+  }
+
+  bool? _computeManifestMetadataBoolValueOrNull(String metadataKey) {
     if (!appManifestFile.existsSync()) {
-      return defaultValue;
+      return null;
     }
     final XmlDocument document;
     try {
@@ -1119,7 +1152,7 @@ See the link below for more information:
         }
       }
     }
-    return defaultValue;
+    return null;
   }
 }
 
