@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'button_tester.dart';
 import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _transparent = Color(0x00000000);
 const Color _green = Color(0xFF00FF00);
@@ -2925,6 +2924,65 @@ void main() {
     await tester.pumpAndSettle();
     expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('showGeneralDialog applies custom barrierBuilder', (WidgetTester tester) async {
+    const expectedPadding = 12.0;
+    const barrierKey = ValueKey<String>('custom-barrier-padding');
+    RouteBarrierDetails? capturedDetails;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return TestButton(
+              onPressed: () {
+                showGeneralDialog<void>(
+                  context: context,
+                  barrierDismissible: true,
+                  barrierLabel: 'barrier_label',
+                  transitionDuration: Duration.zero,
+                  barrierColor: _green,
+                  barrierBuilder:
+                      (BuildContext context, RouteBarrierDetails details, Widget barrier) {
+                        capturedDetails = details;
+                        return Padding(
+                          key: barrierKey,
+                          padding: const EdgeInsets.all(expectedPadding),
+                          child: barrier,
+                        );
+                      },
+                  pageBuilder:
+                      (
+                        BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                      ) => const SizedBox(),
+                );
+              },
+              child: const Text('Show Dialog'),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(TestButton));
+    await tester.pumpAndSettle();
+
+    final Padding paddingWidget = tester.widget<Padding>(find.byKey(barrierKey));
+    expect(paddingWidget.padding, const EdgeInsets.all(expectedPadding));
+
+    final ModalBarrier barrierWidget = tester.widget<ModalBarrier>(
+      find.descendant(of: find.byKey(barrierKey), matching: find.byType(ModalBarrier)),
+    );
+    expect(barrierWidget.color, _green);
+
+    expect(capturedDetails, isNotNull);
+    expect(capturedDetails!.barrierColor, _green);
+    expect(capturedDetails!.barrierDismissible, true);
+    expect(capturedDetails!.barrierLabel, 'barrier_label');
   });
 }
 

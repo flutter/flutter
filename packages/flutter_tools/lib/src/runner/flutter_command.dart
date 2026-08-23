@@ -29,9 +29,16 @@ import '../project.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
 import 'flutter_command_runner.dart';
+
+import 'options/option_bundle.dart';
+import 'options/option_descriptor.dart';
 import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
+export 'options/common_options.dart';
+export 'options/option_bundle.dart';
+export 'options/option_descriptor.dart';
+export 'options/safe_arg_results.dart';
 
 abstract class DotEnvRegex {
   // Dot env multi-line block value regex
@@ -162,7 +169,13 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
+  FlutterCommand({this.verboseHelp = false});
+
+  /// Whether this command was invoked with verbose help enabled.
+  final bool verboseHelp;
+
   /// The currently executing command (or sub-command).
+
   ///
   /// Will be `null` until the top-most command has begun execution.
   static FlutterCommand? get current => context.get<FlutterCommand>();
@@ -230,7 +243,17 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether this command uses the 'target' option.
   var _usesTargetOption = false;
 
+  /// Enables the target option flag behavior on this command.
+  void enableUsesTargetOption() {
+    _usesTargetOption = true;
+  }
+
   var _usesPubOption = false;
+
+  /// Enables the pub option flag behavior on this command.
+  void enableUsesPubOption() {
+    _usesPubOption = true;
+  }
 
   var _usesPortOption = false;
 
@@ -267,6 +290,20 @@ abstract class FlutterCommand extends Command<void> {
   /// at the [FlutterCommand] level to enable any classes that extend it to
   /// easily reference it or overwrite as necessary.
   Analytics get analytics => globals.analytics;
+
+  final Map<String, OptionDescriptor<Object?>> _optionRegistry =
+      <String, OptionDescriptor<Object?>>{};
+
+  /// Option descriptor registry for type-safe lookups.
+  Map<String, OptionDescriptor<Object?>> get optionRegistry => _optionRegistry;
+
+  /// Registers an [OptionBundle] with this command.
+  void registerOptionBundle(OptionBundle bundle) {
+    bundle.register(this, argParser, _optionRegistry);
+  }
+
+  /// Registers multiple [OptionBundle] instances with this command.
+  void registerOptionBundles(List<OptionBundle> bundles) => bundles.forEach(registerOptionBundle);
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
@@ -1319,9 +1356,39 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'enable-hcpp',
       hide: !verboseHelp,
-      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
+      help:
+          'Enable the use of the HCPP platform view rendering mode on the Impeller rendering '
+          'backend. An explicit value takes priority over the EnableHcpp metadata in '
+          'AndroidManifest.xml: build commands write it into the manifest of the artifact they '
+          'produce, and "run", "test", and "drive" additionally apply it at launch. Without the '
+          'flag, the manifest decides.',
     );
   }
+
+  /// The explicit `--[no-]enable-hcpp` value, or null when the flag was not
+  /// passed (or the command does not define it).
+  ///
+  /// This takes priority over the `io.flutter.embedding.android.EnableHcpp`
+  /// manifest entry: it is passed to Gradle, which writes it into the merged
+  /// manifest over any value already there. Commands that launch the app
+  /// (run/test/drive) additionally forward it to the device.
+  bool? get explicitEnableHcpp {
+    final ArgResults? results = argResults;
+    if (results == null ||
+        !results.options.contains('enable-hcpp') ||
+        !results.wasParsed('enable-hcpp')) {
+      return null;
+    }
+    return boolArg('enable-hcpp');
+  }
+
+  /// The HCPP value for an Android artifact when the developer did not pass
+  /// `--[no-]enable-hcpp`: currently always false.
+  ///
+  /// This is only a default. Gradle injects it when the merged manifest does
+  /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
+  /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
+  bool get enableHcpp => explicitEnableHcpp ?? false;
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
@@ -1524,6 +1591,8 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+      androidEnableHcpp: enableHcpp,
+      explicitAndroidEnableHcpp: explicitEnableHcpp,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,
@@ -1736,7 +1805,16 @@ abstract class FlutterCommand extends Command<void> {
           );
         }
 
-        final String configRaw = globals.fs.file(path).readAsStringSync();
+        String configRaw;
+        try {
+          configRaw = decodeUtf8OrUtf16(globals.fs.file(path).readAsBytesSync());
+        } on Exception catch (err) {
+          throwToolExit(
+            'Unable to decode the file at path "$path". '
+            'Ensure that the file is encoded in UTF-8 or UTF-16.\n'
+            'Error details: $err',
+          );
+        }
 
         // Determine whether the file content is JSON or .env format.
         String configJsonRaw;
@@ -1940,6 +2018,20 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
+
+    if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
+        (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
+      if (getBuildMode().isRelease) {
+        final bool enableImpeller = boolArg(FlutterOptions.kEnableImpeller);
+        final flagName = enableImpeller
+            ? '--${FlutterOptions.kEnableImpeller}'
+            : '--no-${FlutterOptions.kEnableImpeller}';
+        globals.logger.printWarning(
+          'The "$flagName" flag is ignored in release builds. '
+          'The rendering backend is determined at build time.',
+        );
+      }
+    }
 
     if (globals.os.hostPlatform == .darwin_x64 &&
         globals.persistentToolState!.shouldShowIntelMacWarning) {

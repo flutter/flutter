@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #import <XCTest/XCTest.h>
-#import "GoldenTestManager.h"
 
 @interface AppExtensionTests : XCTestCase
 @property(nonatomic, strong) XCUIApplication* hostApplication;

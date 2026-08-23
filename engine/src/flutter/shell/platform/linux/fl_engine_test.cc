@@ -1008,6 +1008,58 @@ TEST_F(FlEngineTest, DisableImpeller) {
   EXPECT_TRUE(called);
 }
 
+TEST_F(FlEngineTest, EnableFlutterGpuDefault) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&called](size_t version, const FlutterRendererConfig* config,
+                 const FlutterProjectArgs* args, void* user_data,
+                 FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        called = true;
+        bool has_flutter_gpu_switch = false;
+        for (int i = 0; i < args->command_line_argc; i++) {
+          if (strcmp(args->command_line_argv[i], "--enable-flutter-gpu") == 0) {
+            has_flutter_gpu_switch = true;
+          }
+        }
+        EXPECT_FALSE(has_flutter_gpu_switch);
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  StartEngine();
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlEngineTest, EnableFlutterGpu) {
+  fl_dart_project_set_enable_flutter_gpu(project, TRUE);
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&called](size_t version, const FlutterRendererConfig* config,
+                 const FlutterProjectArgs* args, void* user_data,
+                 FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        called = true;
+        bool has_flutter_gpu_switch = false;
+        for (int i = 0; i < args->command_line_argc; i++) {
+          if (strcmp(args->command_line_argv[i], "--enable-flutter-gpu") == 0) {
+            has_flutter_gpu_switch = true;
+          }
+        }
+        EXPECT_TRUE(has_flutter_gpu_switch);
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(called);
+}
+
 TEST_F(FlEngineTest, ChildObjects) {
   // Check objects exist before engine started.
   EXPECT_NE(fl_engine_get_binary_messenger(engine), nullptr);

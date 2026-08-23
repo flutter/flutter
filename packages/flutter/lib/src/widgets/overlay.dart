@@ -1791,6 +1791,8 @@ enum OverlayChildLocation {
 
 /// A widget that renders its overlay child on an [Overlay].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=S0Ylpa44OAQ}
+///
 /// The overlay child is initially hidden until [OverlayPortalController.show]
 /// is called on the associated [controller]. The [OverlayPortal] uses
 /// [overlayChildBuilder] to build its overlay child and renders it on the
@@ -1906,6 +1908,13 @@ class OverlayPortal extends StatefulWidget {
   /// the overlay child to, for example, always follow [OverlayPortal.child] and
   /// at the same time resize itself base on how close it is to the edges of
   /// the [Overlay].
+  ///
+  /// {@tool dartpad}
+  /// This example uses [OverlayPortal.overlayChildLayoutBuilder] to build a
+  /// tooltip that becomes visible when the user taps on the [child] widget.
+  ///
+  /// ** See code in examples/api/lib/widgets/overlay/overlay_portal.1.dart **
+  /// {@end-tool}
   ///
   /// The `overlayChildBuilder` callback is called during layout. To ensure the
   /// paint transform of [OverlayPortal.child] in relation to the target
