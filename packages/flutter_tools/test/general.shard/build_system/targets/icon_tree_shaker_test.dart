@@ -89,7 +89,7 @@ void main() {
       artifacts: artifacts,
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
     );
   }
 
@@ -1027,6 +1027,181 @@ void main() {
 
     expect(processManager, hasNoRemainingExpectations);
   });
+
+  testWithoutContext(
+    'Does not warn about missing CupertinoIcons font when building Material-only app',
+    () async {
+      final Environment environment = createEnvironment(<String, String>{
+        kIconTreeShakerFlag: 'true',
+        kBuildMode: 'release',
+      });
+      final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+      const materialManifestJson = '''
+[
+  {
+    "family": "MaterialIcons",
+    "fonts": [
+      {
+        "asset": "fonts/MaterialIcons-Regular.otf"
+      }
+    ]
+  }
+]
+''';
+      fontManifestContent = DevFSStringContent(materialManifestJson);
+
+      final iconTreeShaker = IconTreeShaker(
+        environment,
+        fontManifestContent,
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        targetPlatform: TargetPlatform.android,
+      );
+
+      writeRecordedUsesFile(appDill.path, content: materialAndCupertinoRecordedUsesResult);
+
+      final stdinSink = CompleterIOSink();
+      fontSubsetArgs = <String>[fontSubsetPath, outputPath, inputPath];
+      resetFontSubsetInvocation(stdinSink: stdinSink);
+
+      final File inputFont = fileSystem.file(inputPath)
+        ..writeAsBytesSync(List<int>.filled(2500, 0));
+      fileSystem.file(outputPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(1200, 0));
+
+      expect(
+        await iconTreeShaker.subsetFont(
+          input: inputFont,
+          outputPath: outputPath,
+          relativePath: relativePath,
+        ),
+        true,
+      );
+
+      expect(logger.statusText, isNot(contains('Expected to find fonts for')));
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext(
+    'Does not warn about missing MaterialIcons font when building Cupertino-only app',
+    () async {
+      final Environment environment = createEnvironment(<String, String>{
+        kIconTreeShakerFlag: 'true',
+        kBuildMode: 'release',
+      });
+      final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+      const cupertinoFontPath = 'packages/cupertino_icons/assets/CupertinoIcons.ttf';
+      const cupertinoManifestJson =
+          '''
+[
+  {
+    "family": "packages/cupertino_icons/CupertinoIcons",
+    "fonts": [
+      {
+        "asset": "$cupertinoFontPath"
+      }
+    ]
+  }
+]
+''';
+      fontManifestContent = DevFSStringContent(cupertinoManifestJson);
+
+      final iconTreeShaker = IconTreeShaker(
+        environment,
+        fontManifestContent,
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        targetPlatform: TargetPlatform.android,
+      );
+
+      writeRecordedUsesFile(appDill.path, content: materialAndCupertinoRecordedUsesResult);
+
+      final stdinSink = CompleterIOSink();
+      fontSubsetArgs = <String>[fontSubsetPath, outputPath, inputPath];
+      resetFontSubsetInvocation(stdinSink: stdinSink);
+
+      final File inputFont = fileSystem.file(inputPath)
+        ..writeAsBytesSync(List<int>.filled(2500, 0));
+      fileSystem.file(outputPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(1200, 0));
+
+      expect(
+        await iconTreeShaker.subsetFont(
+          input: inputFont,
+          outputPath: outputPath,
+          relativePath: cupertinoFontPath,
+        ),
+        true,
+      );
+
+      expect(logger.statusText, isNot(contains('Expected to find fonts for')));
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext('Warns about missing custom font when not in font manifest', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    const materialManifestJson = '''
+[
+  {
+    "family": "MaterialIcons",
+    "fonts": [
+      {
+        "asset": "fonts/MaterialIcons-Regular.otf"
+      }
+    ]
+  }
+]
+''';
+    fontManifestContent = DevFSStringContent(materialManifestJson);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    writeRecordedUsesFile(appDill.path, content: customFontRecordedUsesResult);
+
+    final stdinSink = CompleterIOSink();
+    fontSubsetArgs = <String>[fontSubsetPath, outputPath, inputPath];
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+
+    final File inputFont = fileSystem.file(inputPath)..writeAsBytesSync(List<int>.filled(2500, 0));
+    fileSystem.file(outputPath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(1200, 0));
+
+    expect(
+      await iconTreeShaker.subsetFont(
+        input: inputFont,
+        outputPath: outputPath,
+        relativePath: relativePath,
+      ),
+      true,
+    );
+
+    expect(logger.statusText, contains('Expected to find fonts for {CustomIcons}'));
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
 
 const Library iconDataLibrary = Library('package:flutter/src/widgets/icon_data.dart');
@@ -1200,3 +1375,70 @@ const invalidFontManifestJson = '''
 ''';
 
 const emptyFontManifestJson = '[]';
+
+// Generated from:
+// const IconData(0xe84e, fontFamily: 'MaterialIcons')
+// const IconData(0xf4a5, fontFamily: 'CupertinoIcons', fontPackage: 'cupertino_icons')
+final String materialAndCupertinoRecordedUsesResult = json.encode(
+  Recordings(
+    calls: <DefinitionWithStaticCalls, List<CallReference>>{},
+    instances: <DefinitionWithInstances, List<InstanceReference>>{
+      iconDataClass: <InstanceReference>[
+        const InstanceConstantReference(
+          instanceConstant: InstanceConstant(
+            definition: iconDataClass,
+            fields: <String, Constant>{
+              'codePoint': IntConstant(59470),
+              'fontFamily': StringConstant('MaterialIcons'),
+            },
+          ),
+          loadingUnit: rootLoadingUnit,
+        ),
+        const InstanceConstantReference(
+          instanceConstant: InstanceConstant(
+            definition: iconDataClass,
+            fields: <String, Constant>{
+              'codePoint': IntConstant(62629),
+              'fontFamily': StringConstant('CupertinoIcons'),
+              'fontPackage': StringConstant('cupertino_icons'),
+            },
+          ),
+          loadingUnit: rootLoadingUnit,
+        ),
+      ],
+    },
+  ).toJson(),
+);
+
+// Generated from:
+// const IconData(0xe84e, fontFamily: 'MaterialIcons')
+// const IconData(0xe001, fontFamily: 'CustomIcons')
+final String customFontRecordedUsesResult = json.encode(
+  Recordings(
+    calls: <DefinitionWithStaticCalls, List<CallReference>>{},
+    instances: <DefinitionWithInstances, List<InstanceReference>>{
+      iconDataClass: <InstanceReference>[
+        const InstanceConstantReference(
+          instanceConstant: InstanceConstant(
+            definition: iconDataClass,
+            fields: <String, Constant>{
+              'codePoint': IntConstant(59470),
+              'fontFamily': StringConstant('MaterialIcons'),
+            },
+          ),
+          loadingUnit: rootLoadingUnit,
+        ),
+        const InstanceConstantReference(
+          instanceConstant: InstanceConstant(
+            definition: iconDataClass,
+            fields: <String, Constant>{
+              'codePoint': IntConstant(57345),
+              'fontFamily': StringConstant('CustomIcons'),
+            },
+          ),
+          loadingUnit: rootLoadingUnit,
+        ),
+      ],
+    },
+  ).toJson(),
+);
