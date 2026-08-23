@@ -19,13 +19,9 @@
 namespace flutter_runner {
 
 VsyncWaiter::VsyncWaiter(AwaitVsyncCallback await_vsync_callback,
-                         AwaitVsyncForSecondaryCallbackCallback
-                             await_vsync_for_secondary_callback_callback,
                          flutter::TaskRunners task_runners)
     : flutter::VsyncWaiter(task_runners),
       await_vsync_callback_(await_vsync_callback),
-      await_vsync_for_secondary_callback_callback_(
-          await_vsync_for_secondary_callback_callback),
       weak_factory_ui_(nullptr),
       weak_factory_(this) {
   fire_callback_callback_ = [this](fml::TimePoint frame_start,
@@ -33,9 +29,6 @@ VsyncWaiter::VsyncWaiter(AwaitVsyncCallback await_vsync_callback,
     task_runners_.GetUITaskRunner()->PostTaskForTime(
         [frame_start, frame_end, weak_this = weak_ui_]() {
           if (weak_this) {
-            // Note: It is VERY important to set |pause_secondary_tasks| to
-            // false, else Animator will almost immediately crash on Fuchsia.
-            // FML_LOG(INFO) << "CRASH:: VsyncWaiter about to FireCallback";
             weak_this->FireCallback(frame_start, frame_end);
           }
         },
@@ -67,10 +60,6 @@ VsyncWaiter::~VsyncWaiter() {
 
 void VsyncWaiter::AwaitVSync() {
   await_vsync_callback_(fire_callback_callback_);
-}
-
-void VsyncWaiter::AwaitVSyncForSecondaryCallback() {
-  await_vsync_for_secondary_callback_callback_(fire_callback_callback_);
 }
 
 }  // namespace flutter_runner
