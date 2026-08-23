@@ -69,7 +69,10 @@ void VsyncWaiterIOS::AwaitVSync() {
 
   if (client_.displayLink.paused) {
     [client_ await];
-    FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now());
+    const fml::TimePoint frame_start_time = fml::TimePoint::Now();
+    const fml::TimePoint frame_target_time =
+        frame_start_time + fml::TimeDelta::FromSecondsF(SnapDuration(0.0, max_refresh_rate_));
+    FireCallback(frame_start_time, frame_target_time);
   } else {
     waiting_for_vsync_ = true;
   }
