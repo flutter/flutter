@@ -33,6 +33,10 @@ enum LicensesAccepted { none, some, all, unknown }
 final licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
 final licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
 final licenseAccepted = RegExp(r'All SDK package licenses accepted.');
+final licensesNoLongerNeeded = RegExp(
+  r'--licenses option is no longer needed',
+  caseSensitive: false,
+);
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({required AndroidSdk? androidSdk, required FeatureFlags featureFlags})
@@ -446,6 +450,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   Future<LicensesAccepted> get licensesAccepted async {
     LicensesAccepted? status;
+    var sawNewCliLicensesMessage = false;
 
     void handleLine(String line) {
       if (licenseCounts.hasMatch(line)) {
@@ -462,6 +467,8 @@ class AndroidLicenseValidator extends DoctorValidator {
         status = LicensesAccepted.none;
       } else if (licenseAccepted.hasMatch(line)) {
         status ??= LicensesAccepted.all;
+      } else if (licensesNoLongerNeeded.hasMatch(line)) {
+        sawNewCliLicensesMessage = true;
       }
     }
 
@@ -488,11 +495,31 @@ class AndroidLicenseValidator extends DoctorValidator {
           .listen(handleLine)
           .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
-      return status ?? LicensesAccepted.unknown;
+      if (status != null) {
+        return status!;
+      }
+      if (sawNewCliLicensesMessage) {
+        return _licensesAcceptedFromDisk();
+      }
+      return LicensesAccepted.unknown;
     } on IOException catch (e) {
       _logger.printTrace('Failed to run Android sdk manager: $e');
       return LicensesAccepted.unknown;
     }
+  }
+
+  /// Fallback license check for Android cmdline-tools versions where
+  /// `sdkmanager --licenses` no longer prints a parseable status
+  /// (see https://github.com/flutter/flutter/issues/191487).
+  LicensesAccepted _licensesAcceptedFromDisk() {
+    if (_androidSdk == null || !_androidSdk.licensesAvailable) {
+      return LicensesAccepted.none;
+    }
+    final Directory licensesDir = _androidSdk.directory.childDirectory('licenses');
+    final bool hasAcceptedLicense = licensesDir.listSync().whereType<File>().any(
+      (File file) => file.lengthSync() > 0,
+    );
+    return hasAcceptedLicense ? LicensesAccepted.all : LicensesAccepted.none;
   }
 
   /// Run the Android SDK manager tool in order to accept SDK licenses.
