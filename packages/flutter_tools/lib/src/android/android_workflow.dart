@@ -516,10 +516,14 @@ class AndroidLicenseValidator extends DoctorValidator {
       return LicensesAccepted.none;
     }
     final Directory licensesDir = _androidSdk.directory.childDirectory('licenses');
-    final bool hasAcceptedLicense = licensesDir.listSync().whereType<File>().any(
-      (File file) => file.lengthSync() > 0,
-    );
-    return hasAcceptedLicense ? LicensesAccepted.all : LicensesAccepted.none;
+    try {
+      final bool hasAcceptedLicense = licensesDir.listSync().whereType<File>().any(
+        (File file) => file.lengthSync() > 0,
+      );
+      return hasAcceptedLicense ? LicensesAccepted.all : LicensesAccepted.none;
+    } on FileSystemException {
+      return LicensesAccepted.unknown;
+    }
   }
 
   /// Run the Android SDK manager tool in order to accept SDK licenses.

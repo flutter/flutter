@@ -377,6 +377,42 @@ Warning: The --licenses option is no longer needed.
     },
   );
 
+  testWithoutContext(
+    'licensesAccepted returns unknown when the licenses directory cannot be listed (new Android CLI)',
+    () async {
+      sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+      // `licensesAvailable` reports true, but the licenses directory does
+      // not actually exist on disk (e.g. a race where it was deleted
+      // between the check and use), so `listSync()` throws a
+      // FileSystemException rather than returning results.
+      sdk.licensesAvailable = true;
+      sdk.directory = fileSystem.directory('/sdk')..createSync(recursive: true);
+
+      const output = '''
+WARNING: The SDK Manager CLI tool (sdkmanager) is deprecated. Android CLI will be used instead.
+The 'android' binary can also be found in the cmdline-tools directory, and 'android sdk' is the replacement for 'sdkmanager'.
+To learn more about the Android CLI and how to use it, see the documentation (https://d.android.com/tools/agents/android-cli)
+Warning: The --licenses option is no longer needed.
+''';
+      processManager.addCommand(
+        const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stdout: output),
+      );
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+      );
+      final LicensesAccepted result = await licenseValidator.licensesAccepted;
+
+      expect(result, LicensesAccepted.unknown);
+    },
+  );
+
   testWithoutContext('runLicenseManager succeeds for version >= 26', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.sdkManagerVersion = '26.0.0';
