@@ -835,7 +835,7 @@ abstract class Device {
   Future<void> startScreenRecording(
     File outputFile, {
     Duration? duration,
-  }) => Future<void>.error('unimplemented');
+  }) async => throw UnimplementedError();
 
   @nonVirtual
   @override

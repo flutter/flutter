@@ -10,9 +10,10 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -26,6 +27,8 @@ const String _kSkiaType = 'skia';
 /// invocation), and [CaptureScreenshotCommand].
 mixin ScreenshotMixin on FlutterCommand {
   FileSystem get fs;
+  Logger get logger;
+  FileSystemUtils get fsUtils;
 
   void addScreenshotOptions() {
     argParser.addOption(
@@ -106,7 +109,7 @@ mixin ScreenshotMixin on FlutterCommand {
   }
 
   Future<void> _runDeviceScreenshot(File? outputFile) async {
-    outputFile ??= globals.fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'png');
+    outputFile ??= fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'png');
 
     try {
       await screenshotDevice!.takeScreenshot(outputFile);
@@ -132,17 +135,17 @@ mixin ScreenshotMixin on FlutterCommand {
     final Uri vmServiceUrl = Uri.parse(stringArg(_kVmServiceUrl)!);
     final FlutterVmService vmService = await connectToVmService(
       vmServiceUrl,
-      logger: globals.logger,
+      logger: logger,
     );
     final vm_service.Response? skp = await vmService.screenshotSkp();
     if (skp == null) {
-      globals.printError(
+      logger.printError(
         'The Skia picture request failed, probably because the device was '
         'disconnected',
       );
       return false;
     }
-    outputFile ??= globals.fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
+    outputFile ??= fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(skp.json?['skp'] as String));
     await sink.close();
@@ -152,14 +155,13 @@ mixin ScreenshotMixin on FlutterCommand {
   }
 
   void _showOutputFileInfo(File outputFile) {
-    final int sizeKB = (outputFile.lengthSync()) ~/ 1024;
-    globals.printStatus(
-      'Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).',
+    logger.printStatus(
+      'Screenshot written to ${fs.path.relative(outputFile.path)} (${getSizeAsPlatformMB(outputFile.lengthSync())}).',
     );
   }
 
   static void checkOutput(File outputFile, FileSystem fs) {
-    if (!fs.file(outputFile.path).existsSync()) {
+    if (!outputFile.existsSync()) {
       throwToolExit(
         'File was not created, ensure path is valid\n'
         'Path provided: "${outputFile.path}"',
@@ -169,6 +171,8 @@ mixin ScreenshotMixin on FlutterCommand {
 
   @visibleForTesting
   static void ensureOutputIsNotJsonRpcError(File outputFile) {
+    // Valid screenshot data (PNG/SKP) is always larger than 1 KB; only check
+    // small files for JSON-RPC error payloads masquerading as output.
     if (outputFile.lengthSync() >= 1000) {
       return;
     }
@@ -185,12 +189,18 @@ mixin ScreenshotMixin on FlutterCommand {
 ///
 /// Shares screenshot logic with [CaptureScreenshotCommand] via [ScreenshotMixin].
 class ScreenshotCommand extends FlutterCommand with ScreenshotMixin {
-  ScreenshotCommand({required this.fs}) {
+  ScreenshotCommand({required this.fs, required this.logger, required this.fsUtils}) {
     addScreenshotOptions();
   }
 
   @override
   final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final FileSystemUtils fsUtils;
 
   @override
   String get name => 'screenshot';
@@ -218,9 +228,9 @@ class ScreenshotCommand extends FlutterCommand with ScreenshotMixin {
 }
 
 class CaptureCommand extends FlutterCommand {
-  CaptureCommand({required FileSystem fs}) {
-    addSubcommand(CaptureScreenshotCommand(fs: fs));
-    addSubcommand(CaptureRecordingCommand(fs: fs));
+  CaptureCommand({required FileSystem fs, required Logger logger, required FileSystemUtils fsUtils}) {
+    addSubcommand(CaptureScreenshotCommand(fs: fs, logger: logger, fsUtils: fsUtils));
+    addSubcommand(CaptureRecordingCommand(fs: fs, logger: logger, fsUtils: fsUtils));
   }
 
   @override
@@ -237,12 +247,18 @@ class CaptureCommand extends FlutterCommand {
 }
 
 class CaptureScreenshotCommand extends FlutterCommand with ScreenshotMixin {
-  CaptureScreenshotCommand({required this.fs}) {
+  CaptureScreenshotCommand({required this.fs, required this.logger, required this.fsUtils}) {
     addScreenshotOptions();
   }
 
   @override
   final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final FileSystemUtils fsUtils;
 
   @override
   String get name => 'screenshot';
@@ -267,7 +283,11 @@ class CaptureScreenshotCommand extends FlutterCommand with ScreenshotMixin {
 }
 
 class CaptureRecordingCommand extends FlutterCommand {
-  CaptureRecordingCommand({required this.fs}) {
+  CaptureRecordingCommand({
+    required this.fs,
+    required this.logger,
+    required this.fsUtils,
+  }) {
     argParser.addOption(
       _kOut,
       abbr: 'o',
@@ -286,6 +306,8 @@ class CaptureRecordingCommand extends FlutterCommand {
   }
 
   final FileSystem fs;
+  final Logger logger;
+  final FileSystemUtils fsUtils;
 
   @override
   String get name => 'recording';
@@ -317,7 +339,7 @@ class CaptureRecordingCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final File outputFile = argResults?.wasParsed(_kOut) == true
         ? fs.file(stringArg(_kOut))
-        : globals.fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'mp4');
+        : fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'mp4');
 
     Duration? duration;
     final String? durationStr = stringArg('duration');
@@ -330,11 +352,11 @@ class CaptureRecordingCommand extends FlutterCommand {
     }
 
     if (duration != null) {
-      globals.printStatus(
+      logger.printStatus(
         'Recording ${_device!.displayName} for ${duration.inSeconds} seconds...',
       );
     } else {
-      globals.printStatus(
+      logger.printStatus(
         'Recording ${_device!.displayName}... Press Ctrl-C to stop.',
       );
     }
@@ -345,10 +367,6 @@ class CaptureRecordingCommand extends FlutterCommand {
     }
     try {
       await _device!.startScreenRecording(outputFile, duration: duration);
-    } on ToolExit {
-      rethrow;
-    } on Exception catch (error) {
-      throwToolExit('Error recording screen: $error');
     } finally {
       await sigintSubscription?.cancel();
     }
@@ -360,9 +378,8 @@ class CaptureRecordingCommand extends FlutterCommand {
       );
     }
 
-    final int sizeKB = outputFile.lengthSync() ~/ 1024;
-    globals.printStatus(
-      'Recording written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).',
+    logger.printStatus(
+      'Recording written to ${fs.path.relative(outputFile.path)} (${getSizeAsPlatformMB(outputFile.lengthSync())}).',
     );
     return FlutterCommandResult.success();
   }

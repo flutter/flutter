@@ -1381,9 +1381,9 @@ class IOSDevice extends Device {
   }
 
   bool get _supportsDevicectl {
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode?.currentVersion;
     return isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27 &&
-        globals.xcode!.isDevicectlInstalled;
+        _xcode!.isDevicectlInstalled;
   }
 
   @override
@@ -1427,7 +1427,7 @@ class IOSDevice extends Device {
       );
       if (duration != null) {
         await Future.any(<Future<void>>[
-          process.exitCode.then((_) {}),
+          process.exitCode,
           Future<void>.delayed(duration).then((_) => ProcessSignal.sigint.kill(process)),
         ]);
       }
@@ -1439,15 +1439,19 @@ class IOSDevice extends Device {
   }
 
   Never _handleDevicectlError(Exception error, String operation) {
-    final errorMessage = error.toString();
-    if (errorMessage.contains('CoreDeviceError error 4000') ||
-        errorMessage.contains('CoreDeviceError error 4016') ||
-        errorMessage.contains('RemotePairingError error 2') ||
-        errorMessage.contains('Connection was invalidated')) {
-      throwToolExit(
-        'Failed to establish a connection to the device. '
-        'Please make sure the device is available and try again.',
-      );
+    // devicectl surfaces errors as ProcessException with stderr containing
+    // these error codes; no typed exception hierarchy exists upstream.
+    if (error is ProcessException) {
+      final String message = error.message;
+      if (message.contains('CoreDeviceError error 4000') ||
+          message.contains('CoreDeviceError error 4016') ||
+          message.contains('RemotePairingError error 2') ||
+          message.contains('Connection was invalidated')) {
+        throwToolExit(
+          'Failed to establish a connection to the device. '
+          'Please make sure the device is available and try again.',
+        );
+      }
     }
     throwToolExit('Failed to $operation with devicectl: $error');
   }

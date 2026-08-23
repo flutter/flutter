@@ -232,7 +232,11 @@ List<FlutterCommand> generateCommands({
     processInfo: ProcessInfo(toolDependencies.toolContext.fs),
     fileSystem: toolDependencies.toolContext.fs,
   ),
-  CaptureCommand(fs: toolDependencies.toolContext.fs),
+  CaptureCommand(
+    fs: toolDependencies.toolContext.fs,
+    logger: toolDependencies.toolContext.logger,
+    fsUtils: toolDependencies.toolContext.fileSystemUtils,
+  ),
   BuildCommand(
     fileSystem: toolDependencies.toolContext.fs,
     buildSystem: toolDependencies.buildSystem,
@@ -300,7 +304,11 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
   ),
   RunCommand(verboseHelp: verboseHelp),
-  ScreenshotCommand(fs: toolDependencies.toolContext.fs),
+  ScreenshotCommand(
+    fs: toolDependencies.toolContext.fs,
+    logger: toolDependencies.toolContext.logger,
+    fsUtils: toolDependencies.toolContext.fileSystemUtils,
+  ),
   ShellCompletionCommand(),
   TestCommand(
     verboseHelp: verboseHelp,

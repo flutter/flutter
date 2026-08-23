@@ -741,12 +741,12 @@ class IOSSimulator extends Device {
     // Wait for simctl to confirm the first frame is captured.
     await Future.any(<Future<void>>[
       recordingStarted.future,
-      process.exitCode.then((_) {}),
+      process.exitCode,
     ]);
 
     if (duration != null) {
       await Future.any(<Future<void>>[
-        process.exitCode.then((_) {}),
+        process.exitCode,
         Future<void>.delayed(duration).then((_) => ProcessSignal.sigint.kill(process)),
       ]);
     }
