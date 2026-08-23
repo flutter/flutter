@@ -341,9 +341,7 @@ if (flutter_runtime_mode == "profile") {
   copy("copy_vmservice_snapshot_dylib") {
     visibility = [ ":*" ]
     sources = [ "$root_out_dir/libvmservice_snapshot.dylib" ]
-    outputs = [
-      "$_flutter_framework_dir/Versions/A/Frameworks/libvmservice_snapshot.dylib",
-    ]
+    outputs = [ "$_flutter_framework_dir/Versions/A/Frameworks/libvmservice_snapshot.dylib" ]
     deps = [ "//flutter/shell/vmservice:vmservice_snapshot" ]
   }
 }
@@ -390,8 +388,7 @@ action("_generate_symlinks") {
         [ "FlutterMacOS.framework.zip/Versions/A/FlutterMacOS" ]
   }
   if (flutter_runtime_mode == "profile") {
-    metadata.macos_framework_without_entitlement +=
-        [ "FlutterMacOS.framework.zip/Versions/A/Frameworks/libvmservice_snapshot.dylib" ]
+    metadata.macos_framework_without_entitlement += [ "FlutterMacOS.framework.zip/Versions/A/Frameworks/libvmservice_snapshot.dylib" ]
   }
 }
 
