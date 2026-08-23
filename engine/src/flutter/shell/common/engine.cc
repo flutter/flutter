@@ -470,6 +470,7 @@ void Engine::DispatchPointerDataPacket(
   if (runtime_controller_) {
     runtime_controller_->DispatchPointerDataPacket(*packet);
   }
+  animator_->MaybeCleanTraceFlowIds();
 }
 
 HitTestResponse Engine::HitTest(int64_t view_id,
