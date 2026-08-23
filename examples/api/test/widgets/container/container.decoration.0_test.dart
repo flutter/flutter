@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-    'Pitfall tiles show the border artifacts and recommended tiles fix them',
+    'Each tile renders the corner geometry that its label describes',
     (WidgetTester tester) async {
       // Make the surface tall enough to show both sections at once, so that
       // every probed pixel is within the captured image.

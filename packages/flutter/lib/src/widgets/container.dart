@@ -346,8 +346,8 @@ class Container extends StatelessWidget {
   ///
   /// {@tool dartpad}
   /// This example shows the resulting gaps, and the related [clipBehavior]
-  /// pitfall of an opaque child covering the border, each rendered side by
-  /// side with a recommended way to avoid it.
+  /// case of an opaque child covering the border, each rendered side by
+  /// side with a way to avoid it.
   ///
   /// ** See code in examples/api/lib/widgets/container/container.decoration.0.dart **
   /// {@end-tool}
@@ -400,8 +400,8 @@ class Container extends StatelessWidget {
   ///
   /// {@tool dartpad}
   /// This example shows a border covered by an opaque child, and the related
-  /// [decoration] pitfall of corner gaps around a self-clipping child, each
-  /// rendered side by side with a recommended way to avoid it.
+  /// [decoration] case of corner gaps around a self-clipping child, each
+  /// rendered side by side with a way to avoid it.
   ///
   /// ** See code in examples/api/lib/widgets/container/container.decoration.0.dart **
   /// {@end-tool}
