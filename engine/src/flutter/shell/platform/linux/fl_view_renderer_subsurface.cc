@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/linux/fl_subsurface.h"
 #include "flutter/shell/platform/linux/fl_subsurface_egl.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
+#include "flutter/shell/platform/linux/fl_wayland_display.h"
 
 // Maximum time to wait for a frame to be ready before giving up and rendering.
 static constexpr gint64 kRenderTimeoutMicroseconds = 100000;  // 100ms
@@ -146,22 +147,25 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
     return;
   }
 
-  // Create a subsurface on the toplevel's surface.
-  self->subsurface = fl_subsurface_new(widget);
-  if (self->subsurface == nullptr) {
+  FlWaylandDisplay* wayland_display =
+      fl_wayland_display_get_for_display(gdk_display);
+  if (wayland_display == nullptr) {
     return;
   }
+
+  // Create a subsurface on the toplevel's surface.
+  GdkWindow* toplevel_window =
+      gtk_widget_get_window(gtk_widget_get_toplevel(widget));
+  self->subsurface = fl_wayland_display_create_subsurface(
+      wayland_display, gdk_wayland_window_get_wl_surface(toplevel_window));
+  update_subsurface_position(self);
 
   GtkAllocation allocation;
   gtk_widget_get_allocation(widget, &allocation);
   gint scale_factor = gtk_widget_get_scale_factor(widget);
-  self->egl =
-      fl_subsurface_egl_new(fl_engine_get_opengl_manager(self->engine),
-                            fl_subsurface_get_surface(self->subsurface),
-                            allocation.width, allocation.height, scale_factor);
-  if (self->egl == nullptr) {
-    return;
-  }
+  self->egl = fl_subsurface_egl_new(fl_engine_get_opengl_manager(self->engine),
+                                    self->subsurface, allocation.width,
+                                    allocation.height, scale_factor);
 
   // The subsurface's EGL context shares resources with the engine, so the
   // engine's frame texture is accessed directly without using EGLImage.

@@ -18,6 +18,10 @@ struct _FlSubsurfaceEGL {
   // owned by the engine and must not be terminated here.
   FlOpenGLManager* opengl_manager;
 
+  // Subsurface frames are presented to. A reference is held so its Wayland
+  // surface outlives the EGL surface created from it.
+  FlSubsurface* subsurface;
+
   // Native Wayland window backing the EGL surface.
   struct wl_egl_window* egl_window;
 
@@ -49,18 +53,19 @@ static EGLDisplay get_display(FlSubsurfaceEGL* self) {
   return fl_opengl_manager_get_display(self->opengl_manager);
 }
 
-// Sets up the EGL context and window surface for the subsurface.
-static gboolean setup(FlSubsurfaceEGL* self,
-                      struct wl_surface* surface,
-                      size_t width,
-                      size_t height,
-                      gint scale) {
+// Sets up the EGL context and window surface for the subsurface. If this
+// fails a warning is printed and the object is left without a usable context;
+// subsequent operations will fail with the usual EGL/OpenGL errors.
+static void setup(FlSubsurfaceEGL* self,
+                  size_t width,
+                  size_t height,
+                  gint scale) {
   // Share the engine's EGL display and render context so the engine's frame
   // texture can be accessed directly, without using EGLImage.
   EGLDisplay egl_display = get_display(self);
   if (egl_display == EGL_NO_DISPLAY) {
     g_warning("Failed to get EGL display for subsurface");
-    return FALSE;
+    return;
   }
 
   static const EGLint config_attributes[] = {EGL_SURFACE_TYPE,
@@ -82,7 +87,7 @@ static gboolean setup(FlSubsurfaceEGL* self,
                        &num_config) ||
       num_config == 0) {
     g_warning("Failed to choose EGL config for subsurface");
-    return FALSE;
+    return;
   }
 
   eglBindAPI(EGL_OPENGL_ES_API);
@@ -95,14 +100,15 @@ static gboolean setup(FlSubsurfaceEGL* self,
                                        context_attributes);
   if (self->egl_context == EGL_NO_CONTEXT) {
     g_warning("Failed to create EGL context for subsurface");
-    return FALSE;
+    return;
   }
 
+  struct wl_surface* surface = fl_subsurface_get_surface(self->subsurface);
   self->egl_window =
       wl_egl_window_create(surface, width * scale, height * scale);
   if (self->egl_window == nullptr) {
     g_warning("Failed to create wl_egl_window for subsurface");
-    return FALSE;
+    return;
   }
 
   self->egl_surface = eglCreateWindowSurface(
@@ -110,7 +116,7 @@ static gboolean setup(FlSubsurfaceEGL* self,
       reinterpret_cast<EGLNativeWindowType>(self->egl_window), nullptr);
   if (self->egl_surface == EGL_NO_SURFACE) {
     g_warning("Failed to create EGL window surface for subsurface");
-    return FALSE;
+    return;
   }
 
   wl_surface_set_buffer_scale(surface, scale);
@@ -132,7 +138,6 @@ static gboolean setup(FlSubsurfaceEGL* self,
     self->shader = fl_compositor_opengl_shader_new(self->opengl_manager);
     fl_opengl_manager_clear_current(self->opengl_manager);
   }
-  return TRUE;
 }
 
 static void fl_subsurface_egl_dispose(GObject* object) {
@@ -167,6 +172,7 @@ static void fl_subsurface_egl_dispose(GObject* object) {
     self->egl_window = nullptr;
   }
   g_clear_object(&self->shader);
+  g_clear_object(&self->subsurface);
   g_clear_object(&self->opengl_manager);
 
   G_OBJECT_CLASS(fl_subsurface_egl_parent_class)->dispose(object);
@@ -182,18 +188,16 @@ static void fl_subsurface_egl_init(FlSubsurfaceEGL* self) {
 }
 
 FlSubsurfaceEGL* fl_subsurface_egl_new(FlOpenGLManager* opengl_manager,
-                                       struct wl_surface* surface,
+                                       FlSubsurface* subsurface,
                                        size_t width,
                                        size_t height,
                                        gint scale) {
   FlSubsurfaceEGL* self =
       FL_SUBSURFACE_EGL(g_object_new(fl_subsurface_egl_get_type(), nullptr));
   self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
+  self->subsurface = FL_SUBSURFACE(g_object_ref(subsurface));
 
-  if (!setup(self, surface, width, height, scale)) {
-    g_object_unref(self);
-    return nullptr;
-  }
+  setup(self, width, height, scale);
 
   return self;
 }
@@ -220,11 +224,12 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
   eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
 
-  EGLint surface_width, surface_height;
+  EGLint surface_width = 0, surface_height = 0;
   eglQuerySurface(egl_display, self->egl_surface, EGL_WIDTH, &surface_width);
   eglQuerySurface(egl_display, self->egl_surface, EGL_HEIGHT, &surface_height);
-  if (static_cast<size_t>(surface_width) != width ||
-      static_cast<size_t>(surface_height) != height) {
+  if (self->egl_window != nullptr &&
+      (static_cast<size_t>(surface_width) != width ||
+       static_cast<size_t>(surface_height) != height)) {
     wl_egl_window_resize(self->egl_window, width, height, 0, 0);
   }
 

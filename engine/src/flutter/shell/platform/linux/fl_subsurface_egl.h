@@ -9,8 +9,7 @@
 #include <gtk/gtk.h>
 
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
-
-struct wl_surface;
+#include "flutter/shell/platform/linux/fl_subsurface.h"
 
 G_BEGIN_DECLS
 
@@ -33,18 +32,21 @@ G_DECLARE_FINAL_TYPE(FlSubsurfaceEGL,
  * fl_subsurface_egl_new:
  * @opengl_manager: the #FlOpenGLManager providing the engine's EGL display and
  * share context.
- * @surface: the Wayland surface to present onto.
+ * @subsurface: the #FlSubsurface to present onto.
  * @width: the surface width in logical pixels.
  * @height: the surface height in logical pixels.
  * @scale: the surface buffer scale.
  *
  * Creates the EGL context and window surface for presenting frames onto
- * @surface.
+ * @subsurface. A reference is kept on @subsurface, so its Wayland surface is
+ * guaranteed to outlive the EGL surface created here. If this fails a warning
+ * is printed and the returned object will fail to present frames, generating
+ * the usual EGL/OpenGL errors.
  *
- * Returns: a new #FlSubsurfaceEGL, or %NULL if it could not be created.
+ * Returns: a new #FlSubsurfaceEGL.
  */
 FlSubsurfaceEGL* fl_subsurface_egl_new(FlOpenGLManager* opengl_manager,
-                                       struct wl_surface* surface,
+                                       FlSubsurface* subsurface,
                                        size_t width,
                                        size_t height,
                                        gint scale);

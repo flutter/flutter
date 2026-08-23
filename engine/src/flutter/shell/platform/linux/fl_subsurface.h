@@ -7,6 +7,8 @@
 
 #include <gtk/gtk.h>
 
+struct wl_compositor;
+struct wl_subcompositor;
 struct wl_surface;
 
 G_BEGIN_DECLS
@@ -16,21 +18,24 @@ G_DECLARE_FINAL_TYPE(FlSubsurface, fl_subsurface, FL, SUBSURFACE, GObject)
 /**
  * FlSubsurface:
  *
- * #FlSubsurface manages a Wayland subsurface attached to the surface of the
- * toplevel window containing a widget. It is used to render Flutter content
- * directly to a Wayland surface, independently of the GTK widget hierarchy.
+ * #FlSubsurface manages a Wayland subsurface attached to another Wayland
+ * surface. It is used to render Flutter content directly to a Wayland surface,
+ * independently of the GTK widget hierarchy.
  */
 
 /**
  * fl_subsurface_new:
- * @widget: the #GtkWidget the subsurface is created for.
+ * @compositor: the Wayland compositor to create the surface with.
+ * @subcompositor: the Wayland subcompositor to create the subsurface with.
+ * @parent_surface: the Wayland surface to attach the subsurface to.
  *
- * Creates a new Wayland subsurface on the surface of the toplevel window
- * containing @widget. @widget must be realized and on a Wayland display.
+ * Creates a new Wayland subsurface on @parent_surface.
  *
- * Returns: a new #FlSubsurface, or %NULL if it could not be created.
+ * Returns: a new #FlSubsurface.
  */
-FlSubsurface* fl_subsurface_new(GtkWidget* widget);
+FlSubsurface* fl_subsurface_new(struct wl_compositor* compositor,
+                                struct wl_subcompositor* subcompositor,
+                                struct wl_surface* parent_surface);
 
 /**
  * fl_subsurface_get_surface:
