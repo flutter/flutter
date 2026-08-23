@@ -93,8 +93,6 @@ class PlatformView : public flutter::PlatformView {
       OnRequestAnnounceCallback on_request_announce_callback,
       OnShaderWarmupCallback on_shader_warmup_callback,
       AwaitVsyncCallback await_vsync_callback,
-      AwaitVsyncForSecondaryCallbackCallback
-          await_vsync_for_secondary_callback_callback,
       std::shared_ptr<sys::ServiceDirectory> dart_application_svc);
 
   ~PlatformView() override;
@@ -223,8 +221,6 @@ class PlatformView : public flutter::PlatformView {
   OnDestroyViewCallback on_destroy_view_callback_;
   OnShaderWarmupCallback on_shader_warmup_callback_;
   AwaitVsyncCallback await_vsync_callback_;
-  AwaitVsyncForSecondaryCallbackCallback
-      await_vsync_for_secondary_callback_callback_;
 
   // Proxies for input tests.
   fuchsia::ui::test::input::TouchInputListenerPtr touch_input_listener_;
