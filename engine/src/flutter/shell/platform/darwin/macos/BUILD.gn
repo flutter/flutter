@@ -363,11 +363,6 @@ action("_generate_symlinks") {
     "Resources",
     "Headers",
     "Modules",
-  ]
-  if (flutter_runtime_mode == "profile") {
-    args += [ "Frameworks" ]
-  }
-  args += [
     "--stamp",
     "$_flutter_framework_name.stamp",
   ]

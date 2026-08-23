@@ -69,9 +69,6 @@ def main():
     os.makedirs(vmservice_framework_dir, exist_ok=True)
     sky_utils.lipo([arm64_vmservice, x64_vmservice],
                    os.path.join(vmservice_framework_dir, 'libvmservice_snapshot.dylib'))
-    frameworks_symlink = os.path.join(fat_framework, 'Frameworks')
-    if not os.path.exists(frameworks_symlink):
-      os.symlink(os.path.join('Versions', 'Current', 'Frameworks'), frameworks_symlink)
 
   # Create XCFramework from the arm64 and x64 fat framework.
   xcframeworks = [fat_framework]
