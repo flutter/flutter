@@ -8,10 +8,8 @@
 #include <gtk/gtk.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/linux/fl_compositor.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
-#include "flutter/shell/platform/linux/fl_task_runner.h"
 
 G_BEGIN_DECLS
 
@@ -19,28 +17,41 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
                      fl_compositor_opengl,
                      FL,
                      COMPOSITOR_OPENGL,
-                     FlCompositor)
+                     GObject)
 
 /**
  * FlCompositorOpenGL:
  *
- * #FlCompositorOpenGL is class that implements compositing using OpenGL.
+ * #FlCompositorOpenGL is a class that implements compositing using OpenGL.
+ *
+ * Layers are composited into the OpenGL framebuffer bound to the current
+ * OpenGL context. The caller is responsible for binding the target framebuffer
+ * and for reading the composited frame back if required.
  */
 
 /**
  * fl_compositor_opengl_new:
- * @task_runner: an #FlTaskRunnner.
  * @opengl_manager: an #FlOpenGLManager
- * @shareable: %TRUE if the can use a framebuffer that is shared between
- * contexts.
  *
  * Creates a new OpenGL compositor.
  *
  * Returns: a new #FlCompositorOpenGL.
  */
-FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
-                                             FlOpenGLManager* opengl_manager,
-                                             gboolean shareable);
+FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager);
+
+/**
+ * fl_compositor_opengl_composite_layers:
+ * @compositor: an #FlCompositorOpenGL.
+ * @layers: layers to be composited.
+ * @layers_count: number of layers.
+ *
+ * Composite @layers into the OpenGL framebuffer bound to the current OpenGL
+ * context. The caller is responsible for binding the target framebuffer before
+ * calling this function.
+ */
+void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* compositor,
+                                           const FlutterLayer** layers,
+                                           size_t layers_count);
 
 G_END_DECLS
 

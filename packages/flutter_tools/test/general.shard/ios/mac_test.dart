@@ -91,85 +91,6 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
     });
-
-    group('screenshot', () {
-      late FakeProcessManager fakeProcessManager;
-      late File outputFile;
-
-      setUp(() {
-        fakeProcessManager = FakeProcessManager.empty();
-        outputFile = MemoryFileSystem.test().file('image.png');
-      });
-
-      testWithoutContext('error if idevicescreenshot is not installed', () async {
-        // Let `idevicescreenshot` fail with exit code 1.
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>['HostArtifact.idevicescreenshot', outputFile.path, '--udid', '1234'],
-            environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
-            exitCode: 1,
-          ),
-        );
-
-        final iMobileDevice = IMobileDevice(
-          artifacts: artifacts,
-          cache: cache,
-          processManager: fakeProcessManager,
-          logger: logger,
-        );
-
-        expect(
-          () async =>
-              iMobileDevice.takeScreenshot(outputFile, '1234', DeviceConnectionInterface.attached),
-          throwsA(anything),
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
-      testWithoutContext('idevicescreenshot captures and returns USB screenshot', () async {
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>['HostArtifact.idevicescreenshot', outputFile.path, '--udid', '1234'],
-            environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
-          ),
-        );
-
-        final iMobileDevice = IMobileDevice(
-          artifacts: artifacts,
-          cache: cache,
-          processManager: fakeProcessManager,
-          logger: logger,
-        );
-
-        await iMobileDevice.takeScreenshot(outputFile, '1234', DeviceConnectionInterface.attached);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
-      testWithoutContext('idevicescreenshot captures and returns network screenshot', () async {
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'HostArtifact.idevicescreenshot',
-              outputFile.path,
-              '--udid',
-              '1234',
-              '--network',
-            ],
-            environment: const <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'},
-          ),
-        );
-
-        final iMobileDevice = IMobileDevice(
-          artifacts: artifacts,
-          cache: cache,
-          processManager: fakeProcessManager,
-          logger: logger,
-        );
-
-        await iMobileDevice.takeScreenshot(outputFile, '1234', DeviceConnectionInterface.wireless);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-    });
   });
 
   group('Diagnose Xcode build failure', () {
@@ -688,6 +609,47 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       },
     );
 
+    testWithoutContext('parses missing module map error', () async {
+      const buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(
+          issues: <XCResultIssue>[
+            XCResultIssue.test(
+              message:
+                  "module map file '.../test_app/build/ios/Release-iphoneos/url_launcher_ios/url_launcher_ios.framework/Modules/module.modulemap' not found",
+              subType: 'Error',
+            ),
+          ],
+        ),
+      );
+      final fs = MemoryFileSystem.test();
+      final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
+      project.ios.podfile.createSync(recursive: true);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: FlutterDarwinPlatform.ios,
+        project: project,
+      );
+      expect(
+        logger.errorText,
+        contains(
+          'A precompiled file has been changed since last built. Please run "flutter clean --include-xcode-workspace" to '
+          'clear the cache.',
+        ),
+      );
+    });
+
     testWithoutContext('parses file has been modified error', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
@@ -732,7 +694,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(
         logger.errorText,
         contains(
-          'A precompiled file has been changed since last built. Please run "flutter clean" to '
+          'A precompiled file has been changed since last built. Please run "flutter clean --include-xcode-workspace" to '
           'clear the cache.',
         ),
       );
@@ -923,6 +885,81 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         expect(
           logger.errorText,
           isNot(contains("To fix this error, increase your app's minimum platform version")),
+        );
+      },
+    );
+
+    testWithoutContext('iOS deployment target too low shows message', () async {
+      final buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(
+          issues: <XCResultIssue>[
+            XCResultIssue.test(
+              message:
+                  "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 13.0, but the range of supported deployment target versions is 15.0 to 27.0.x.",
+              subType: 'Error',
+            ),
+          ],
+        ),
+      );
+      final fs = MemoryFileSystem.test();
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: FlutterDarwinPlatform.ios,
+        project: FakeFlutterProject(fileSystem: fs),
+      );
+      expect(
+        logger.errorText,
+        contains('The iOS deployment target is too low. Xcode requires at least 15.0.'),
+      );
+    });
+
+    testWithoutContext(
+      'iOS deployment target too low shows fallback message if version cannot be parsed',
+      () async {
+        final buildResult = XcodeBuildResult(
+          success: false,
+          stdout: '',
+          xcodeBuildExecution: XcodeBuildExecution(
+            buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+            appDirectory: '/blah/blah',
+            environmentType: EnvironmentType.physical,
+            buildSettings: buildSettings,
+          ),
+          xcResult: XCResult.test(
+            issues: <XCResultIssue>[
+              XCResultIssue.test(
+                message:
+                    "The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 10.11, but the range of supported deployment target versions is invalid to 27.0.x.",
+                subType: 'Error',
+              ),
+            ],
+          ),
+        );
+        final fs = MemoryFileSystem.test();
+        await diagnoseXcodeBuildFailure(
+          buildResult,
+          logger: logger,
+          analytics: fakeAnalytics,
+          fileSystem: fs,
+          platform: FlutterDarwinPlatform.ios,
+          project: FakeFlutterProject(fileSystem: fs),
+        );
+        expect(
+          logger.errorText,
+          contains(
+            'The iOS deployment target is too low. Xcode requires at least the minimum supported version.',
+          ),
         );
       },
     );
@@ -1337,7 +1374,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async {
     return <String>['xcrun', 'xcodebuild'];
   }

@@ -29,9 +29,16 @@ import '../project.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
 import 'flutter_command_runner.dart';
+
+import 'options/option_bundle.dart';
+import 'options/option_descriptor.dart';
 import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
+export 'options/common_options.dart';
+export 'options/option_bundle.dart';
+export 'options/option_descriptor.dart';
+export 'options/safe_arg_results.dart';
 
 abstract class DotEnvRegex {
   // Dot env multi-line block value regex
@@ -162,7 +169,13 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
+  FlutterCommand({this.verboseHelp = false});
+
+  /// Whether this command was invoked with verbose help enabled.
+  final bool verboseHelp;
+
   /// The currently executing command (or sub-command).
+
   ///
   /// Will be `null` until the top-most command has begun execution.
   static FlutterCommand? get current => context.get<FlutterCommand>();
@@ -230,7 +243,17 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether this command uses the 'target' option.
   var _usesTargetOption = false;
 
+  /// Enables the target option flag behavior on this command.
+  void enableUsesTargetOption() {
+    _usesTargetOption = true;
+  }
+
   var _usesPubOption = false;
+
+  /// Enables the pub option flag behavior on this command.
+  void enableUsesPubOption() {
+    _usesPubOption = true;
+  }
 
   var _usesPortOption = false;
 
@@ -242,7 +265,9 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
-  bool get outputMachineFormat => boolArg('machine');
+  bool get outputMachineFormat =>
+      argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
+      boolArg(FlutterGlobalOptions.kMachineFlag);
 
   bool get shouldUpdateCache => true;
 
@@ -265,6 +290,20 @@ abstract class FlutterCommand extends Command<void> {
   /// at the [FlutterCommand] level to enable any classes that extend it to
   /// easily reference it or overwrite as necessary.
   Analytics get analytics => globals.analytics;
+
+  final Map<String, OptionDescriptor<Object?>> _optionRegistry =
+      <String, OptionDescriptor<Object?>>{};
+
+  /// Option descriptor registry for type-safe lookups.
+  Map<String, OptionDescriptor<Object?>> get optionRegistry => _optionRegistry;
+
+  /// Registers an [OptionBundle] with this command.
+  void registerOptionBundle(OptionBundle bundle) {
+    bundle.register(this, argParser, _optionRegistry);
+  }
+
+  /// Registers multiple [OptionBundle] instances with this command.
+  void registerOptionBundles(List<OptionBundle> bundles) => bundles.forEach(registerOptionBundle);
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
@@ -369,14 +408,6 @@ abstract class FlutterCommand extends Command<void> {
       'web-enable-expression-evaluation',
       defaultsTo: true,
       help: 'Enables expression evaluation in the debugger.',
-      hide: !verboseHelp,
-    );
-    argParser.addFlag(
-      FlutterOptions.kWebExperimentalHotReload,
-      help:
-          '(deprecated; will be removed in a future release) '
-          'Enables new module format that supports hot reload.',
-      defaultsTo: true,
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -1325,9 +1356,39 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'enable-hcpp',
       hide: !verboseHelp,
-      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
+      help:
+          'Enable the use of the HCPP platform view rendering mode on the Impeller rendering '
+          'backend. An explicit value takes priority over the EnableHcpp metadata in '
+          'AndroidManifest.xml: build commands write it into the manifest of the artifact they '
+          'produce, and "run", "test", and "drive" additionally apply it at launch. Without the '
+          'flag, the manifest decides.',
     );
   }
+
+  /// The explicit `--[no-]enable-hcpp` value, or null when the flag was not
+  /// passed (or the command does not define it).
+  ///
+  /// This takes priority over the `io.flutter.embedding.android.EnableHcpp`
+  /// manifest entry: it is passed to Gradle, which writes it into the merged
+  /// manifest over any value already there. Commands that launch the app
+  /// (run/test/drive) additionally forward it to the device.
+  bool? get explicitEnableHcpp {
+    final ArgResults? results = argResults;
+    if (results == null ||
+        !results.options.contains('enable-hcpp') ||
+        !results.wasParsed('enable-hcpp')) {
+      return null;
+    }
+    return boolArg('enable-hcpp');
+  }
+
+  /// The HCPP value for an Android artifact when the developer did not pass
+  /// `--[no-]enable-hcpp`: currently always false.
+  ///
+  /// This is only a default. Gradle injects it when the merged manifest does
+  /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
+  /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
+  bool get enableHcpp => explicitEnableHcpp ?? false;
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
@@ -1375,6 +1436,10 @@ abstract class FlutterCommand extends Command<void> {
         ? stringArg('build-number')
         : null;
 
+    final String? buildName = argParser.options.containsKey('build-name')
+        ? stringArg('build-name')
+        : null;
+
     final File packageConfigFile = globals.fs.file(packageConfigPath());
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -1402,13 +1467,6 @@ abstract class FlutterCommand extends Command<void> {
         extraGenSnapshotOptions.add(flag);
       }
     }
-
-    // TODO(natebiggs): Delete this when new DDC module system is the default.
-    final bool webEnableHotReload =
-        forcedWebEnableHotReload ??
-        (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-            boolArg(FlutterOptions.kWebExperimentalHotReload));
-
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
         boolArg(FlutterOptions.kAnalyzeSize)) {
@@ -1493,17 +1551,18 @@ abstract class FlutterCommand extends Command<void> {
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
 
-    if (globals.platform.environment[kAppFlavor] != null) {
-      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
-    }
-    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
-      throwToolExit(
-        '$kAppFlavor is used by the framework and cannot be '
-        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
-      );
-    }
+    _ensureReservedDartDefineIsUnset(kAppFlavor, dartDefines);
     if (flavor != null) {
       dartDefines.add('$kAppFlavor=$flavor');
+    }
+    for (final (String define, String? value) in <(String, String?)>[
+      (kAppBuildName, buildName ?? project.manifest.buildName),
+      (kAppBuildNumber, buildNumber ?? project.manifest.buildNumber),
+    ]) {
+      _ensureReservedDartDefineIsUnset(define, dartDefines);
+      if (value != null) {
+        dartDefines.add('$define=$value');
+      }
     }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
     _addFeatureFlagsToDartDefines(dartDefines);
@@ -1521,7 +1580,7 @@ abstract class FlutterCommand extends Command<void> {
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
-      buildName: argParser.options.containsKey('build-name') ? stringArg('build-name') : null,
+      buildName: buildName,
       treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
@@ -1532,6 +1591,8 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+      androidEnableHcpp: enableHcpp,
+      explicitAndroidEnableHcpp: explicitEnableHcpp,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       androidGradleProjectCacheDir: androidGradleProjectCacheDir,
@@ -1542,8 +1603,23 @@ abstract class FlutterCommand extends Command<void> {
           argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
-      webEnableHotReload: webEnableHotReload,
+      webEnableHotReload: true,
     );
+  }
+
+  /// Throws a [ToolExit] if [define], a dart-define key reserved by the
+  /// framework, has been set either in the environment or through
+  /// `--${FlutterOptions.kDartDefinesOption}` / `--${FlutterOptions.kDartDefineFromFileOption}`.
+  void _ensureReservedDartDefineIsUnset(String define, List<String> dartDefines) {
+    if (globals.platform.environment[define] != null) {
+      throwToolExit('$define is used by the framework and cannot be set in the environment.');
+    }
+    if (dartDefines.any((String d) => d == define || d.startsWith('$define='))) {
+      throwToolExit(
+        '$define is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+      );
+    }
   }
 
   // This adds the Dart defines used to access various Flutter version information at runtime.
@@ -1729,7 +1805,16 @@ abstract class FlutterCommand extends Command<void> {
           );
         }
 
-        final String configRaw = globals.fs.file(path).readAsStringSync();
+        String configRaw;
+        try {
+          configRaw = decodeUtf8OrUtf16(globals.fs.file(path).readAsBytesSync());
+        } on Exception catch (err) {
+          throwToolExit(
+            'Unable to decode the file at path "$path". '
+            'Ensure that the file is encoded in UTF-8 or UTF-16.\n'
+            'Error details: $err',
+          );
+        }
 
         // Determine whether the file content is JSON or .env format.
         String configJsonRaw;
@@ -1934,6 +2019,29 @@ abstract class FlutterCommand extends Command<void> {
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
 
+    if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
+        (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
+      if (getBuildMode().isRelease) {
+        final bool enableImpeller = boolArg(FlutterOptions.kEnableImpeller);
+        final flagName = enableImpeller
+            ? '--${FlutterOptions.kEnableImpeller}'
+            : '--no-${FlutterOptions.kEnableImpeller}';
+        globals.logger.printWarning(
+          'The "$flagName" flag is ignored in release builds. '
+          'The rendering backend is determined at build time.',
+        );
+      }
+    }
+
+    if (globals.os.hostPlatform == .darwin_x64 &&
+        globals.persistentToolState!.shouldShowIntelMacWarning) {
+      globals.logger.printWarning(
+        'Flutter is deprecating support for Intel-based Macs. '
+        'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+      );
+      globals.persistentToolState!.shouldShowIntelMacWarning = false;
+    }
+
     if (refreshWirelessDevices) {
       // Loading wireless devices takes longer so start it early.
       _targetDevices.startExtendedWirelessDeviceDiscovery(
@@ -2043,10 +2151,17 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
+  ///
+  /// If [canPrompt] is true, the tool will interactively prompt the user to
+  /// select a device when multiple devices are found and a terminal is
+  /// attached. If [canPrompt] is false, the interactive prompt is bypassed.
+  /// If not specified, [canPrompt] defaults to `!outputMachineFormat`.
   Future<List<Device>?> findAllTargetDevices({
+    bool? canPrompt,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     return _targetDevices.findAllTargetDevices(
+      canPrompt: canPrompt ?? !outputMachineFormat,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );

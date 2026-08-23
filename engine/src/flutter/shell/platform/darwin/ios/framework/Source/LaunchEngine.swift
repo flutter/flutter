@@ -29,7 +29,7 @@ import Foundation
 /// `FlutterImplicitEngineDelegate` and implementing `didInitializeImplicitFlutterEngine` instead of
 /// relying on `FlutterAppDelegate`'s automatic registration.
 @objc(FlutterLaunchEngine)
-public final class LaunchEngine: NSObject {
+final class LaunchEngine: NSObject {
 
   /// The lifecycle state of the contained engine.
   private enum State {
@@ -49,7 +49,7 @@ public final class LaunchEngine: NSObject {
   ///
   /// In cases where `takeEngine` has not yet been called, this will lazily allocate and return an
   /// engine.
-  @objc public func acquireEngine() -> FlutterEngine? {
+  @objc func acquireEngine() -> FlutterEngine? {
     switch state {
     case .uninitialized:
       let newEngine = FlutterEngine(
@@ -73,7 +73,7 @@ public final class LaunchEngine: NSObject {
   /// Take ownership of the launch engine.
   ///
   /// After this is called `acquireEngine` and `takeEngine` will always return nil.
-  @objc public func takeEngine() -> FlutterEngine? {
+  @objc func takeEngine() -> FlutterEngine? {
     let result: FlutterEngine?
     switch state {
     case .created(let engine):

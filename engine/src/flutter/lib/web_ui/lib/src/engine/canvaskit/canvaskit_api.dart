@@ -296,15 +296,6 @@ extension type SkAffinity(JSObject _) implements JSObject {
   external double get value;
 }
 
-final List<SkAffinity> _skAffinitys = <SkAffinity>[
-  canvasKit.Affinity.Upstream,
-  canvasKit.Affinity.Downstream,
-];
-
-SkAffinity toSkAffinity(ui.TextAffinity affinity) {
-  return _skAffinitys[affinity.index];
-}
-
 extension type SkTextDirectionEnum(JSObject _) implements JSObject {
   external SkTextDirection get RTL;
   external SkTextDirection get LTR;
@@ -1052,7 +1043,7 @@ extension type SkColorFilter(JSObject _) implements JSObject {
 }
 
 extension type SkImageFilterNamespace(JSObject _) implements JSObject {
-  external SkImageFilter MakeBlur(
+  external SkImageFilter? MakeBlur(
     double sigmaX,
     double sigmaY,
     SkTileMode tileMode,
@@ -1071,20 +1062,20 @@ extension type SkImageFilterNamespace(JSObject _) implements JSObject {
     void input, // we don't use this yet
   ) => _MakeMatrixTransform(matrix.toJS, filterOptions, input);
 
-  external SkImageFilter MakeColorFilter(
+  external SkImageFilter? MakeColorFilter(
     SkColorFilter colorFilter,
     void input, // we don't use this yet
   );
 
-  external SkImageFilter MakeCompose(SkImageFilter outer, SkImageFilter inner);
+  external SkImageFilter? MakeCompose(SkImageFilter? outer, SkImageFilter? inner);
 
-  external SkImageFilter MakeDilate(
+  external SkImageFilter? MakeDilate(
     double radiusX,
     double radiusY,
     void input, // we don't use this yet
   );
 
-  external SkImageFilter MakeErode(
+  external SkImageFilter? MakeErode(
     double radiusX,
     double radiusY,
     void input, // we don't use this yet
@@ -1097,8 +1088,8 @@ extension type SkImageFilter(JSObject _) implements JSObject {
   external bool isDeleted();
 
   @JS('getOutputBounds')
-  external JSInt32Array _getOutputBounds(JSFloat32Array bounds);
-  Int32List getOutputBounds(Float32List bounds) => _getOutputBounds(bounds.toJS).toDart;
+  external JSInt32Array? _getOutputBounds(JSFloat32Array bounds);
+  Int32List? getOutputBounds(Float32List bounds) => _getOutputBounds(bounds.toJS)?.toDart;
 }
 
 extension type SkPathNamespace(JSObject _) implements JSObject {
@@ -1515,16 +1506,6 @@ Float32List toSkRRect(ui.RRect rrect) {
   return skRRect;
 }
 
-// TODO(hterkelsen): Use a shared malloc'ed array for performance.
-Float32List toOuterSkRect(ui.RRect rrect) {
-  final skRect = Float32List(4);
-  skRect[0] = rrect.left;
-  skRect[1] = rrect.top;
-  skRect[2] = rrect.right;
-  skRect[3] = rrect.bottom;
-  return skRect;
-}
-
 /// Encodes a list of offsets to CanvasKit-compatible point array.
 ///
 /// Uses `CanvasKit.Malloc` to allocate storage for the points in the WASM
@@ -1637,6 +1618,7 @@ extension type SkCanvas(JSObject _) implements JSObject {
     SkPaint paint,
     SkBlendMode blendMode,
     JSUint32Array? colors,
+    CkFilterOptions sampling,
   );
   void drawAtlas(
     SkImage image,
@@ -1645,7 +1627,8 @@ extension type SkCanvas(JSObject _) implements JSObject {
     SkPaint paint,
     SkBlendMode blendMode,
     Uint32List? colors,
-  ) => _drawAtlas(image, rects.toJS, rstTransforms.toJS, paint, blendMode, colors?.toJS);
+    CkFilterOptions sampling,
+  ) => _drawAtlas(image, rects.toJS, rstTransforms.toJS, paint, blendMode, colors?.toJS, sampling);
 
   external void drawCircle(double x, double y, double radius, SkPaint paint);
   external void drawColorInt(double color, SkBlendMode blendMode);

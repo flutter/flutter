@@ -88,7 +88,10 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about Impeller, add `team-engine`.
 - If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`. And:
   - if it's specific to a single platform, also add that platform's `fyi-*` label.
-- If it's about Cupertino or Material Design, add `team-design`.
+- If it's about Cupertino or Material Design, add `team-design` and `package`.
+  - Material Design issues should have the `p: material_ui` label.
+  - Cupertino issues should have the `p: cupertino_ui` label.
+  - Note: The `framework` label should no longer be applied to these issues.
 - If it's about text fields or other user-facing text field, text input, or text selection issues, add `team-text-input`. And:
   - if it's specific to a single platform, also add that platform's `fyi-*` label.
   - if it's specific to text fields or text input, also add `a: text input`.
@@ -102,12 +105,15 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about a first-party package:
   - Apply `team-framework` if it's about:
     - `animations`
-    - `cupertino_icons`
     - `flutter_lints`
     - `go_router`, `go_router_builder`
-    - `google_fonts`
     - `two_dimensional_scrollables`
     - `vector_math`
+  - Apply `team-design` if it's about:
+    - `cupertino_ui`
+    - `cupertino_icons`
+    - `google_fonts`
+    - `material_ui`
   - Apply `team-engine` if it's about:
     - `flutter_svg`
     - `vector_graphics`
@@ -249,7 +255,8 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-design%2Cfyi-design+-label%3Atriaged-design+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+-label%3A%22waiting+for+response%22+)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-design+label%3AP0+sort%3Aupdated-asc)
-- [Design Languages PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22f%3A+material+design%22%2C%22f%3A+cupertino%22+sort%3Aupdated-asc+draft%3Afalse)
+- [Legacy Design Languages PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22f%3A+material+design%22%2C%22f%3A+cupertino%22%2C%22p%3A+cupertino_ui%22%2C%22p%3A+material_ui%22+sort%3Aupdated-asc+draft%3Afalse)
+- [Design Language PRs](https://github.com/flutter/packages/pulls?q=sort%3Aupdated-desc+is%3Apr+is%3Aopen+label%3A%22p%3A+material_ui%22%2C%22p%3A+cupertino_ui%22%2C%22triage-design%22+draft%3Afalse+)
 
 ### Ecosystem team (`team-ecosystem`)
 
@@ -283,8 +290,8 @@ In addition, consider these issues that fall under another team's triage, but ar
 ### Framework team (`team-framework`)
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%20label%3AP0%20sort%3Aupdated-desc)
-- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+-label%3A%22a%3A+text+input%22+draft%3Afalse+sort%3Aupdated-desc+)
-- [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3A%22triage-framework%22+draft%3Afalse)
+- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+-label%3A%22a%3A+text+input%22+draft%3Afalse+sort%3Aupdated-desc+-label%3A%22p%3A+material_ui%22+-label%3A%22p%3A+cupertino_ui%22)
+- [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3Atriage-framework+draft%3Afalse+-label%3A%22p%3A+material_ui%22+-label%3A%22p%3A+cupertino_ui%22+-label%3A%22p%3A+google_fonts%22+-label%3A%22p%3A+cupertino_icons%22)
 - [Framework-owned Core Package PR list](https://github.com/flutter/core-packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3A%22triage-framework%22+draft%3Afalse)
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20response%22%20sort%3Aupdated-desc)
 
@@ -305,15 +312,15 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - Pre-work: Add missing CI/CD labels (after verifying a PR is safe to run on CI).
 - [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios%2Cteam-ios+sort%3Acreated-asc+-is%3Adraft)
-- [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-macos++sort%3Aupdated-asc)
-- [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+sort%3Aupdated-asc+)
+- [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-macos+-is%3Adraft+sort%3Aupdated-asc)
+- [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+-is%3Adraft+sort%3Aupdated-asc)
 
 ### Linux platforms team (`team-linux`)
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-linux%2Cfyi-linux+-label%3Atriaged-linux+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-linux+label%3AP0+sort%3Aupdated-asc)
-- [Linux PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-linux+sort%3Aupdated-asc)
-- [Linux PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux+sort%3Aupdated-asc)
+- [Linux PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-linux+-is%3Adraft+sort%3Aupdated-asc)
+- [Linux PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux+-is%3Adraft+sort%3Aupdated-asc)
 
 ### Text Input team (`team-text-input`)
 
@@ -337,8 +344,8 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-windows%2Cfyi-windows+-label%3Atriaged-windows+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-windows+label%3AP0+sort%3Aupdated-asc)
-- [Windows PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-windows+sort%3Aupdated-asc)
-- [Windows PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-windows+sort%3Aupdated-asc)
+- [Windows PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-windows+-is%3Adraft+sort%3Aupdated-asc)
+- [Windows PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-windows+-is%3Adraft+sort%3Aupdated-asc)
 
 ## Adding a new team
 

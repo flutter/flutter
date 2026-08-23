@@ -89,6 +89,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             '(Not recommended! This can open your device to remote code execution attacks!)',
       )
       ..addFlag(
+        'disable-service-origin-check',
+        negatable: false,
+        hide: !verboseHelp,
+        help:
+            'Allow connections to the VM service from any origin. '
+            '(Not recommended. This can open your device to remote code execution attacks.)',
+      )
+      ..addFlag(
         'start-paused',
         defaultsTo: startPausedDefault,
         help: 'Start in a paused mode and wait for a debugger to connect.',
@@ -257,6 +265,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableDartProfiling => boolArg('enable-dart-profiling');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
+  bool get disableServiceOriginCheck => boolArg('disable-service-origin-check');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
   bool get runningWithPrebuiltApplication => prebuiltApplicationBinaryPath != null;
   String? get prebuiltApplicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
@@ -267,7 +276,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
-  bool get enableHcpp => boolArg('enable-hcpp');
   bool get testFlag => boolArg('test-flag');
 
   @override
@@ -346,6 +354,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        disableServiceOriginCheck: boolArg('disable-service-origin-check'),
         cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
@@ -480,7 +489,14 @@ class RunCommand extends RunCommandBase {
             'a test using "flutter run" for debugging purposes. This flag is '
             'only available when running in debug mode.',
       )
-      ..addFlag('build', defaultsTo: true, help: 'If necessary, build the app before running.')
+      ..addFlag(
+        'build',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help:
+            '(deprecated) If necessary, build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
+            'flag with an existing application artifact.',
+      )
       ..addOption('project-root', hide: !verboseHelp, help: 'Specify the project root directory.')
       ..addFlag(
         'hot',
@@ -731,36 +747,30 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
-    if (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false) {
-      final bool webEnableHotReload = boolArg(FlutterOptions.kWebExperimentalHotReload);
-      if (webEnableHotReload) {
-        globals.printWarning(
-          'Hot reload on the web is now enabled by default. '
-          'The "--${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
-          'and will be removed in an upcoming release.',
-        );
-      } else {
-        globals.printWarning(
-          'Hot reload on the web is now enabled by default. '
-          'The "--no-${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
-          'and will be removed in an upcoming release. '
-          'If your web development workflow depends on disabling hot reload, '
-          'please open an issue explaining why at '
-          'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
-        );
-      }
-    }
-
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
     );
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
       globals.printWarning(
-        '--flavor is only supported for Android, macOS, iOS, and Windows devices. '
+        '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
         'Flavor-related features may not function properly and could '
         'behave differently in a future release.',
       );
+    }
+
+    if (argResults!.wasParsed('build')) {
+      if (boolArg('build')) {
+        globals.printWarning(
+          'The "--build" flag is deprecated and will be removed in a future release. '
+          'Building is the default behavior, so this flag can be safely removed.',
+        );
+      } else {
+        globals.printWarning(
+          'The "--no-build" flag is deprecated and will be removed in a future release. '
+          'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
+        );
+      }
     }
   }
 

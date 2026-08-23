@@ -185,7 +185,13 @@ class BuildSwiftPackage extends BuildSubCommand {
     await super.validateCommand();
     _validateTargetPlatform();
     _validateFeatureFlags();
-    _validateXcodeVersion();
+    final Xcode? xcode = _xcode;
+    if (xcode == null || !xcode.isInstalled) {
+      throwToolExit(
+        'Flutter requires Xcode when using Swift Package Manager. Please ensure '
+        'Xcode is installed.',
+      );
+    }
   }
 
   /// Validates the Flutter project supports the [_targetPlatform].
@@ -219,19 +225,6 @@ class BuildSwiftPackage extends BuildSubCommand {
         'Swift Package Manager is disabled. Ensure it is enabled in your global config ("flutter '
         'config --enable-swift-package-manager") and is not disabled in your Flutter '
         "project's pubspec.yaml.",
-      );
-    }
-  }
-
-  /// Validates the Xcode version is equal to or greater than 15.
-  ///
-  /// Throws a [ToolExit] if the Xcoder version is less than 15.
-  void _validateXcodeVersion() {
-    final Version? xcodeVersion = _xcode?.currentVersion;
-    if (xcodeVersion == null || xcodeVersion.major < 15) {
-      throwToolExit(
-        'Flutter requires Xcode 15 or greater when using Swift Package Manager. Please ensure '
-        'Xcode is installed and meets the version requirements.',
       );
     }
   }
@@ -406,7 +399,6 @@ class BuildSwiftPackage extends BuildSubCommand {
       xcframeworkOutput: xcframeworkOutput,
       codesignIdentity: codesignIdentity,
       codesignIdentityFile: codesignIdentityFile,
-      pluginSwiftDependencies: pluginSwiftDependencies,
     );
   }
 
@@ -649,6 +641,28 @@ class FlutterFrameworkDependency {
         throwToolExit(
           'Failed to copy $frameworkArtifactPath (exit ${result.exitCode}:\n'
           '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
+      final String copiedPath = xcframeworkOutput
+          .childDirectory('${_targetPlatform.binaryName}.xcframework')
+          .path;
+      try {
+        final ProcessResult chmodResult = await _utils.processManager.run(<String>[
+          'chmod',
+          '-R',
+          'u+w',
+          copiedPath,
+        ]);
+        if (chmodResult.exitCode != 0) {
+          _utils.logger.printWarning(
+            'Failed to make the XCFramework writable. This may cause the build to '
+            'fail when using lipo.\nError: $copiedPath: ${chmodResult.stderr}',
+          );
+        }
+      } on ProcessException catch (e) {
+        _utils.logger.printWarning(
+          'Failed to make the XCFramework writable. This may cause the build to '
+          'fail when using lipo.\nError: $copiedPath: $e',
         );
       }
       if (codesignIdentity != null) {
@@ -1413,14 +1427,14 @@ class AppFrameworkAndNativeAssetsDependencies {
           kIosArchs: defaultIOSArchsForEnvironment(
             sdk.sdkType,
             _utils.artifacts,
-          ).map((DarwinArch e) => e.name).join(' '),
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
           kSdkRoot: await _utils.xcode.sdkLocation(sdk.sdkType),
         };
       case FlutterDarwinPlatform.macos:
         return <String, String>{
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             _utils.artifacts,
-          ).map((DarwinArch e) => e.name).join(' '),
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
         };
     }
   }
@@ -1495,7 +1509,6 @@ class CocoaPodPluginDependencies {
     required bool buildStatic,
     required String? codesignIdentity,
     required File codesignIdentityFile,
-    required FlutterPluginSwiftDependencies pluginSwiftDependencies,
   }) async {
     final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
     if (!_xcodeProject.podfile.existsSync()) {
@@ -1526,6 +1539,22 @@ class CocoaPodPluginDependencies {
         ErrorHandlingFileSystem.deleteIfExists(cocoapodXCFrameworkOutput, recursive: true);
       }
 
+      if (_utils.project.isModule) {
+        // Flutter modules generate a FlutterPluginRegistrant framework, but "flutter build
+        // swift-package" uses a Swift package for the FlutterPluginRegistrant instead. Since
+        // SwiftPM compatible pods are skipped, overwrite the FlutterPluginRegistrant.podspec to
+        // have no dependencies to avoid build failures due to missing dependencies (that are now
+        // SwiftPM). FlutterPluginRegistrant will be skipped in [_findFrameworks] anyway.
+        //
+        // TODO(vashworth): Find a way to prevent CocoaPods from building FlutterPluginRegistrant
+        // during this command when using a module in the first place.
+        await writeIOSPluginRegistrant(
+          _utils.project,
+          [],
+          templateRenderer: _utils.templateRenderer,
+        );
+      }
+
       await processPods(_xcodeProject, buildInfo);
       // Pods directory may not exist until after `processPods` is called.
       final Directory podsDirectory = _xcodeProject.hostAppRoot.childDirectory('Pods');
@@ -1545,7 +1574,6 @@ class CocoaPodPluginDependencies {
           buildStatic: buildStatic,
           outputBuildDirectory: outputBuildDirectory,
           podsDirectory: podsDirectory,
-          pluginSwiftDependencies: pluginSwiftDependencies,
         );
         sdkSpecificFrameworks.forEach((String name, List<Directory> frameworks) {
           frameworksPerPod.putIfAbsent(name, () => <Directory>[]).addAll(frameworks);
@@ -1582,7 +1610,18 @@ class CocoaPodPluginDependencies {
   @visibleForTesting
   /// Wrap [processPodsIfNeeded] in a method to be overwritten in tests.
   Future<void> processPods(XcodeBasedProject xcodeProject, BuildInfo buildInfo) async {
-    await processPodsIfNeeded(xcodeProject, _targetPlatform.buildDirectory(), buildInfo.mode);
+    await processPodsIfNeeded(
+      xcodeProject,
+      _targetPlatform.buildDirectory(),
+      buildInfo.mode,
+      // Normal module builds (like when running "flutter build ios" with a module), do not support
+      // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods
+      // separately, we need to force SwiftPM to be enabled so that CocoaPods will skip processing
+      // plugins that support SwiftPM. Forcing SwiftPM to be enabled here causes
+      // `swift_package_manager_enabled` to be set to true in .flutter-plugins-dependencies, which
+      // podhelper.rb then uses to skip processing SwiftPM-compatible pods.
+      forceSwiftPM: true,
+    );
   }
 
   /// Builds CocoaPod plugins into frameworks for the given [xcodeBuildConfiguration], [platform],
@@ -1597,7 +1636,6 @@ class CocoaPodPluginDependencies {
     required bool buildStatic,
     required Directory outputBuildDirectory,
     required Directory podsDirectory,
-    required FlutterPluginSwiftDependencies pluginSwiftDependencies,
   }) async {
     final String configuration = _configurationForSdkType(sdk, xcodeBuildConfiguration);
     final ProcessResult buildPluginsResult = await _utils.processManager.run(<String>[
@@ -1626,7 +1664,7 @@ class CocoaPodPluginDependencies {
           '$configuration-${sdk.platformName}',
         );
     }
-    return _findFrameworks(configurationBuildDir, pluginSwiftDependencies);
+    return _findFrameworks(configurationBuildDir);
   }
 
   /// Iterates through the build files and find .frameworks
@@ -1637,10 +1675,7 @@ class CocoaPodPluginDependencies {
   ///   > plugin_a
   ///     > plugin_a.framework
   /// ```
-  Future<Map<String, List<Directory>>> _findFrameworks(
-    Directory configurationBuildDir,
-    FlutterPluginSwiftDependencies pluginSwiftDependencies,
-  ) async {
+  Future<Map<String, List<Directory>>> _findFrameworks(Directory configurationBuildDir) async {
     final frameworks = <String, List<Directory>>{};
 
     final Iterable<Directory> products = configurationBuildDir
@@ -1654,18 +1689,10 @@ class CocoaPodPluginDependencies {
           continue;
         }
         final String binaryName = _utils.fileSystem.path.basenameWithoutExtension(podFrameworkName);
-        if (_utils.project.isModule &&
-            (binaryName == 'FlutterPluginRegistrant' ||
-                pluginSwiftDependencies.copiedPlugins.any((record) => record.name == binaryName))) {
-          // Flutter modules don't support SwiftPM and force all plugins to be built as CocoaPods.
-          // Since SwiftPM supported plugins are used as Swift packages in this command, they should
-          // be skipped and not included as CocoaPod framework dependencies.
-          // In addition, modules generate a FlutterPluginRegistrant framework. Since the
-          // FlutterPluginRegistrant is also being used as a Swift Package in this command, it should
-          // also be skipped.
-          // TODO(vashworth): Find a way to prevent CocoaPods from building SwiftPM plugins and
-          // FlutterPluginRegistrant when using a module in the first place.
-          // See https://github.com/flutter/flutter/issues/184590.
+        if (_utils.project.isModule && (binaryName == 'FlutterPluginRegistrant')) {
+          // Flutter modules generate a FlutterPluginRegistrant framework. Since the
+          // FlutterPluginRegistrant is being used as a Swift Package in this command, it should
+          // be skipped.
           continue;
         }
         frameworks.putIfAbsent(binaryName, () => <Directory>[]).add(podProduct);

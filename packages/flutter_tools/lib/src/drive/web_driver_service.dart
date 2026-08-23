@@ -23,6 +23,7 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
+import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
@@ -72,12 +73,13 @@ class WebDriverService extends DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       target: mainPath,
       buildInfo: buildInfo,
-      platform: globals.platform,
+      platform: _platform,
     );
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
@@ -98,6 +100,7 @@ class WebDriverService extends DriverService {
             ),
       platformArgs: platformArgs,
       stayResident: true,
+      webDefines: webDefines,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
       analytics: globals.analytics,
@@ -202,6 +205,7 @@ class WebDriverService extends DriverService {
         desired: getDesiredCapabilities(
           browser,
           headless,
+          platform: _platform,
           webBrowserFlags: webBrowserFlags,
           chromeBinary: chromeBinary,
           mobileEmulation: mobileEmulation,
@@ -321,6 +325,7 @@ enum Browser implements CliEnum {
 Map<String, dynamic> getDesiredCapabilities(
   Browser browser,
   bool? headless, {
+  Platform platform = const LocalPlatform(),
   List<String> webBrowserFlags = const <String>[],
   String? chromeBinary,
   Map<String, dynamic>? mobileEmulation,
@@ -337,6 +342,12 @@ Map<String, dynamic> getDesiredCapabilities(
       'args': <String>[
         '--bwsi',
         '--disable-background-timer-throttling',
+        '--disable-renderer-backgrounding',
+        '--disable-background-networking',
+        '--disable-sync',
+        '--disable-client-side-phishing-detection',
+        '--disable-notifications',
+        ...kGcmDisabledFlags,
         '--disable-default-apps',
         '--disable-extensions',
         '--disable-popup-blocking',
@@ -344,7 +355,18 @@ Map<String, dynamic> getDesiredCapabilities(
         '--no-default-browser-check',
         '--no-sandbox',
         '--no-first-run',
-        if (headless!) '--headless',
+        '--password-store=basic',
+        if (platform.isMacOS) '--use-mock-keychain',
+        '--disable-search-engine-choice-screen',
+        if (headless!) ...<String>[
+          '--headless',
+          if (platform.isLinux) ...<String>[
+            '--use-gl=angle',
+            '--use-angle=swiftshader',
+            '--enable-unsafe-swiftshader',
+            '--disable-gpu-sandbox',
+          ],
+        ],
         ...webBrowserFlags,
       ],
       'perfLoggingPrefs': <String, String>{
