@@ -15,7 +15,7 @@ vars = {
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
-  'skia_revision': 'f6900c5b8439132de9ad98b56ea67a65430a7dbc',
+  'skia_revision': '886302c7c68ed1d35f793b9c99cfdb57ba80e30a',
 
   # Do not download the Emscripten SDK by default.
   # This prevents us from downloading the Emscripten toolchain for builds
@@ -199,7 +199,7 @@ vars = {
   # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
-  'fuchsia_test_scripts_version': 'KaOq3EE4qJ9fnaaaKznmHAZs9wyn-LdK_h52KEQv2KgC',
+  'fuchsia_test_scripts_version': '0iCv10IlKfiilEBOU6W-UM1oPJ8_wGduU0i6cYYDo28C',
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
@@ -292,7 +292,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '067bfdbde9b10c1beb5d6b02d67ae9db8b96f736',
 
   'engine/src/flutter/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'd578f2e8b7bd5938e21cfb6bf15c079e0aa5b738',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '8cc91d9b6ab9991802fd208ee03a69714fd0251c',
 
    'engine/src/flutter/third_party/gtest-parallel':
    Var('chromium_git') + '/external/github.com/google/gtest-parallel' + '@' + '38191e2733d7cbaeaef6a3f1a942ddeb38a2ad14',
@@ -830,7 +830,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'GCQlmt6h-esJsNubSmgdOPOVSJoeftcg9q5Bmq8H51AC'
+        'version': '8Xu4ujBJniC0nQGx3MAlb2ANTQhaU6CrIcmBlf-yz0gC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
