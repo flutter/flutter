@@ -263,6 +263,7 @@ void main() {
           buildRunner: buildRunner,
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
+          recordedUsesFile: null,
         );
         await installCodeAssets(
           dartHookResult: dartHookResult,
@@ -276,8 +277,12 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for ios_arm64, ios_x64.',
-            'Building native assets for ios_arm64, ios_x64 done.',
+            'Running build hooks for ios_arm64, ios_x64.',
+            'Running build hooks for ios_arm64, ios_x64 done.',
+            if (buildMode == BuildMode.release) ...<String>[
+              'Running link hooks for ios_arm64, ios_x64.',
+              'Running link hooks for ios_arm64, ios_x64 done.',
+            ],
           ]),
         );
         expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);

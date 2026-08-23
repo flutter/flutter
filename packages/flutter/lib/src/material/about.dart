@@ -684,7 +684,7 @@ class _LicensePageState extends State<LicensePage> {
     );
   }
 
-  Widget _packagesView(final BuildContext _, final bool isLateral) {
+  Widget _packagesView(BuildContext _, bool isLateral) {
     final Widget about = _AboutProgram(
       name: widget.applicationName ?? _defaultApplicationName(context),
       icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
@@ -835,12 +835,19 @@ class _PackagesViewState extends State<_PackagesView> {
   }
 
   Widget _packagesList(
-    final BuildContext context,
-    final int? selectedId,
-    final _LicenseData data,
-    final bool drawSelection,
+    BuildContext context,
+    int? selectedId,
+    _LicenseData data,
+    bool drawSelection,
   ) {
+    final EdgeInsets safeAreaPadding = MediaQuery.paddingOf(context);
+    final padding = EdgeInsets.only(
+      left: safeAreaPadding.left,
+      right: safeAreaPadding.right,
+      bottom: safeAreaPadding.bottom,
+    );
     return ListView.builder(
+      padding: padding,
       itemCount: data.packages.length + 1,
       itemBuilder: (BuildContext context, int index) {
         if (index == 0) {
@@ -964,7 +971,7 @@ class _DetailArguments {
   final List<LicenseEntry> licenseEntries;
 
   @override
-  bool operator ==(final Object other) {
+  bool operator ==(Object other) {
     if (other is _DetailArguments) {
       return other.packageName == packageName;
     }
@@ -1068,7 +1075,12 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
     final double pad = _getGutterSize(context);
-    final padding = EdgeInsets.only(left: pad, right: pad, bottom: pad);
+    final EdgeInsets safeAreaPadding = MediaQuery.paddingOf(context);
+    final padding = EdgeInsets.only(
+      left: pad + safeAreaPadding.left,
+      right: pad + safeAreaPadding.right,
+      bottom: pad + safeAreaPadding.bottom,
+    );
     final listWidgets = <Widget>[
       ..._licenses,
       if (!_loaded)

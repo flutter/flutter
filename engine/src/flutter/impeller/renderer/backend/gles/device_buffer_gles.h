@@ -10,6 +10,7 @@
 
 #include "impeller/base/allocation.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/base/thread.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 
@@ -21,7 +22,7 @@ class DeviceBufferGLES final
  public:
   DeviceBufferGLES(DeviceBufferDescriptor desc,
                    std::shared_ptr<ReactorGLES> reactor,
-                   std::shared_ptr<Allocation> backing_store);
+                   std::unique_ptr<Allocation> backing_store);
 
   // |DeviceBuffer|
   ~DeviceBufferGLES() override;
@@ -48,8 +49,13 @@ class DeviceBufferGLES final
   std::optional<std::string> label_;
   // Mutable for lazy evaluation.
   mutable std::optional<HandleGLES> handle_;
-  mutable std::shared_ptr<Allocation> backing_store_;
-  mutable std::optional<Range> dirty_range_ = std::nullopt;
+  mutable std::unique_ptr<Allocation> backing_store_;
+  // Guards dirty_range_. Flush() merges ranges from writer threads (e.g. the
+  // UI thread for flutter_gpu host-visible buffers) while
+  // BindAndUploadDataIfNecessary() consumes the range on a reactor thread.
+  mutable Mutex dirty_range_mutex_;
+  mutable std::optional<Range> dirty_range_
+      IPLR_GUARDED_BY(dirty_range_mutex_) = std::nullopt;
   mutable bool initialized_ = false;
 
   // |DeviceBuffer|

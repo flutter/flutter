@@ -1,0 +1,27 @@
+name: data_asset_app
+description: A new Flutter project.
+version: 0.0.1
+
+publish_to: none
+
+environment:
+  sdk: '>=3.5.0-0 <4.0.0'
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hooks: ^2.1.0
+  data_assets: ^0.20.0
+  data_asset_package:
+    path: ../data_asset_package
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: qa7aie

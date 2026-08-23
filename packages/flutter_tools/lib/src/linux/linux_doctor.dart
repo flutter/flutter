@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:process/process.dart';
 
 import '../base/io.dart';
@@ -338,7 +339,7 @@ class LinuxDoctorValidator extends DoctorValidator {
 
   /// Returns the installed version of [binary], or null if it's not installed.
   ///
-  /// Requires tha [binary] take a '--version' flag, and print a version of the
+  /// Requires that [binary] take a '--version' flag, and print a version of the
   /// form x.y.z somewhere on the first line of output.
   Future<_VersionInfo?> _getBinaryVersion(String binary) async {
     ProcessResult? result;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestTransition extends AnimatedWidget {
@@ -27,8 +27,7 @@ class TestTransition extends AnimatedWidget {
 }
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({required this.child, required RouteSettings settings, this.barrierColor})
-    : super(settings: settings);
+  TestRoute({required this.child, required RouteSettings super.settings, this.barrierColor});
 
   final Widget child;
 
@@ -60,6 +59,8 @@ void main() {
 
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
     final GlobalKey insideKey = GlobalKey();
+    final heroController = HeroController();
+    addTearDown(heroController.dispose);
 
     String state({bool skipOffstage = true}) {
       var result = '';
@@ -88,7 +89,11 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
+        initialRoute: '/',
+        builder: (BuildContext context, Widget? child) {
+          return HeroControllerScope(controller: heroController, child: child!);
+        },
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
             case '/':
@@ -205,8 +210,14 @@ void main() {
   testWidgets('Check onstage/offstage handling of barriers around transitions', (
     WidgetTester tester,
   ) async {
+    final heroController = HeroController();
+    addTearDown(heroController.dispose);
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
+        initialRoute: '/',
+        builder: (BuildContext context, Widget? child) {
+          return HeroControllerScope(controller: heroController, child: child!);
+        },
         onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
           '/' => TestRoute<void>(settings: settings, child: const Text('A')),
           '/1' => TestRoute<void>(

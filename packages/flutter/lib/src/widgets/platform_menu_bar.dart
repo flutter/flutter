@@ -318,7 +318,21 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     // Currently there's only ever one window, but the channel's format allows
     // more than one window's menu hierarchy to be defined.
     final windowMenu = <String, Object?>{'0': representation};
-    channel.invokeMethod<void>(_kMenuSetMethod, windowMenu);
+    channel
+        .invokeMethod<void>(_kMenuSetMethod, windowMenu)
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'widget library',
+                context: ErrorDescription('while setting the platform menu'),
+              ),
+            );
+          },
+        );
   }
 
   /// Defines the channel that the [DefaultPlatformMenuDelegate] uses to
@@ -424,7 +438,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
 ///
 /// **This example will only work on macOS.**
 ///
-/// ** See code in examples/api/lib/material/platform_menu_bar/platform_menu_bar.0.dart **
+/// ** See code in examples/api/lib/widgets/platform_menu_bar/platform_menu_bar.0.dart **
 /// {@end-tool}
 ///
 /// The menus could just as effectively be managed without using the widget tree

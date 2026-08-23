@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
@@ -78,7 +78,7 @@ void main() {
     TextStyle style = const TextStyle(fontSize: 10.0),
     bool enableInteractiveSelection = true,
   }) {
-    return MaterialApp(
+    return TestWidgetsApp(
       home: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
@@ -94,9 +94,9 @@ void main() {
             textScaleFactor: 1,
             // Avoid the cursor from taking up width.
             cursorWidth: 0,
-            cursorColor: Colors.blue,
-            backgroundCursorColor: Colors.grey,
-            selectionControls: materialTextSelectionControls,
+            cursorColor: const Color(0xFF2196F3),
+            backgroundCursorColor: const Color(0xFF9E9E9E),
+            selectionControls: emptyTextSelectionControls,
             keyboardType: TextInputType.text,
             maxLines: obscured ? 1 : null,
             readOnly: readOnly,

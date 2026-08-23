@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/spell_check.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/editable_text_utils.dart';
+import 'editable_text_utils.dart';
 
 void main() {
   testWidgets('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {

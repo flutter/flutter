@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "GLES3/gl3.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
@@ -36,7 +37,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace flutter::testing {
@@ -191,10 +192,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
         latch.CountDown();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -313,10 +312,8 @@ TEST_F(EmbedderTest, RasterCacheDisabledWithPlatformViews) {
         setup.CountDown();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&setup](Dart_NativeArguments args) { setup.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&setup]() { setup.CountDown(); }));
 
   UniqueEngine engine = builder.LaunchEngine();
 
@@ -400,10 +397,8 @@ TEST_F(EmbedderTest, RasterCacheEnabled) {
         setup.CountDown();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&setup](Dart_NativeArguments args) { setup.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&setup]() { setup.CountDown(); }));
 
   UniqueEngine engine = builder.LaunchEngine();
 
@@ -530,10 +525,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
         latch.CountDown();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -652,10 +645,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
         latch.CountDown();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -860,10 +851,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
         return surface->makeImageSnapshot();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -1020,10 +1009,8 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
 
   builder.SetPlatformTaskRunner(&task_runner_description);
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   platform_task_runner->PostTask([&]() {
     std::scoped_lock lock(engine_mutex);
@@ -1112,10 +1099,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
         latch.CountDown();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -1237,10 +1222,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
         return surface->makeImageSnapshot();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -1461,10 +1444,8 @@ TEST_F(EmbedderTest,
         return surface->makeImageSnapshot();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -2461,11 +2442,10 @@ TEST_F(EmbedderTest,
   constexpr size_t frames_expected = 10;
   fml::CountDownLatch frame_latch(frames_expected);
   std::atomic_size_t frames_seen = 0;
-  context.AddNativeCallback("SignalNativeTest",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              frames_seen++;
-                              frame_latch.CountDown();
-                            }));
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                 frames_seen++;
+                                 frame_latch.CountDown();
+                               }));
   frame_latch.Wait();
 
   ASSERT_GE(frames_seen, frames_expected);
@@ -2502,11 +2482,10 @@ TEST_F(EmbedderTest,
   constexpr size_t frames_expected = 10;
   fml::CountDownLatch frame_latch(frames_expected);
   std::atomic_size_t frames_seen = 0;
-  context.AddNativeCallback("SignalNativeTest",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              frames_seen++;
-                              frame_latch.CountDown();
-                            }));
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                 frames_seen++;
+                                 frame_latch.CountDown();
+                               }));
   frame_latch.Wait();
 
   ASSERT_GE(frames_seen, frames_expected);
@@ -2862,9 +2841,8 @@ TEST_F(EmbedderTest, EmptySceneIsAcceptable) {
   builder.SetCompositor();
   builder.SetDartEntrypoint("empty_scene");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -2890,9 +2868,8 @@ TEST_F(EmbedderTest, SceneWithNoRootContainerIsAcceptable) {
       EmbedderTestBackingStoreProducer::RenderTargetType::kOpenGLFramebuffer);
   builder.SetDartEntrypoint("scene_with_no_container");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -3123,12 +3100,11 @@ TEST_F(EmbedderTest, ObjectsCanBePostedViaPorts) {
   // for inspection.
   FlutterEngineDartPort port = 0;
   fml::AutoResetWaitableEvent event;
-  context.AddNativeCallback("SignalNativeCount",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              port = tonic::DartConverter<int64_t>::FromDart(
-                                  Dart_GetNativeArgument(args, 0));
-                              event.Signal();
-                            }));
+  context.AddFfiNativeCallback("SignalNativeCount",
+                               CREATE_FFI_LAMBDA([&](int64_t count) {
+                                 port = count;
+                                 event.Signal();
+                               }));
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
   event.Wait();
@@ -3137,13 +3113,13 @@ TEST_F(EmbedderTest, ObjectsCanBePostedViaPorts) {
   using Trampoline = std::function<void(Dart_Handle message)>;
   Trampoline trampoline;
 
-  context.AddNativeCallback("SendObjectToNativeCode",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              FML_CHECK(trampoline);
-                              auto trampoline_copy = trampoline;
-                              trampoline = nullptr;
-                              trampoline_copy(Dart_GetNativeArgument(args, 0));
-                            }));
+  context.AddFfiNativeCallback("SendObjectToNativeCode",
+                               CREATE_FFI_LAMBDA([&](Dart_Handle object) {
+                                 FML_CHECK(trampoline);
+                                 auto trampoline_copy = trampoline;
+                                 trampoline = nullptr;
+                                 trampoline_copy(object);
+                               }));
 
   // Check null.
   {
@@ -3421,10 +3397,8 @@ TEST_F(EmbedderTest, CompositorRenderTargetsAreRecycled) {
 
   fml::CountDownLatch latch(2);
 
-  context.AddNativeCallback("SignalNativeTest",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              latch.CountDown();
-                            }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.CountDown(); }));
 
   context.GetCompositor().SetNextPresentCallback(
       [&](FlutterViewId view_id, const FlutterLayer** layers,
@@ -3467,10 +3441,8 @@ TEST_F(EmbedderTest, CompositorRenderTargetsAreInStableOrder) {
 
   fml::CountDownLatch latch(2);
 
-  context.AddNativeCallback("SignalNativeTest",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              latch.CountDown();
-                            }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.CountDown(); }));
 
   size_t frame_count = 0;
   std::vector<void*> first_frame_backing_store_user_data;
@@ -3549,10 +3521,9 @@ TEST_F(EmbedderTest, FrameInfoContainsValidWidthAndHeight) {
 
   static fml::CountDownLatch frame_latch(10);
 
-  context.AddNativeCallback("SignalNativeTest",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              /* Nothing to do. */
-                            }));
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                 /* Nothing to do. */
+                               }));
 
   context.SetGLGetFBOCallback([](FlutterFrameInfo frame_info) {
     // width and height are rotated by 90 deg
@@ -3674,10 +3645,9 @@ TEST_F(EmbedderTest, PresentInfoContainsValidFBOId) {
 
   static fml::CountDownLatch frame_latch(10);
 
-  context.AddNativeCallback("SignalNativeTest",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              /* Nothing to do. */
-                            }));
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                 /* Nothing to do. */
+                               }));
 
   const uint32_t window_fbo_id = context.GetWindowFBOId();
   context.SetGLPresentCallback(
@@ -3984,10 +3954,9 @@ TEST_F(EmbedderTest, PopulateExistingDamageReceivesInvalidID) {
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
-  context.AddNativeCallback("SignalNativeTest",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              /* Nothing to do. */
-                            }));
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                 /* Nothing to do. */
+                               }));
 
   const uint32_t window_fbo_id = context.GetWindowFBOId();
   context.SetGLPopulateExistingDamageCallback(
@@ -4016,9 +3985,8 @@ TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithDisplayId) {
   builder.SetCompositor();
   builder.SetDartEntrypoint("empty_scene");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -4058,9 +4026,8 @@ TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithoutDisplayId) {
   builder.SetCompositor();
   builder.SetDartEntrypoint("empty_scene");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -4100,9 +4067,8 @@ TEST_F(EmbedderTest, SetValidMultiDisplayConfiguration) {
   builder.SetCompositor();
   builder.SetDartEntrypoint("empty_scene");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -4149,9 +4115,8 @@ TEST_F(EmbedderTest, MultipleDisplaysWithSingleDisplayTrueIsInvalid) {
   builder.SetCompositor();
   builder.SetDartEntrypoint("empty_scene");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -4195,9 +4160,8 @@ TEST_F(EmbedderTest, MultipleDisplaysWithSameDisplayIdIsInvalid) {
   builder.SetCompositor();
   builder.SetDartEntrypoint("empty_scene");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -4248,10 +4212,8 @@ TEST_F(EmbedderTest, CompositorRenderTargetsNotRecycledWhenAvoidsCacheSet) {
   const unsigned num_backing_stores = num_frames * num_engine_layers;
   fml::CountDownLatch latch(1 + num_frames);  // 1 for native test signal.
 
-  context.AddNativeCallback("SignalNativeTest",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              latch.CountDown();
-                            }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.CountDown(); }));
 
   context.GetCompositor().SetPresentCallback(
       [&](FlutterViewId view_id, const FlutterLayer** layers,
@@ -4297,23 +4259,24 @@ TEST_F(EmbedderTest, SnapshotRenderTargetScalesDownToDriverMax) {
   });
 
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SnapshotsCallback", CREATE_NATIVE_ENTRY(([&](Dart_NativeArguments args) {
-        auto get_arg = [&args](int index) {
-          Dart_Handle dart_image = Dart_GetNativeArgument(args, index);
+  context.AddFfiNativeCallback(
+      "SnapshotsCallback",
+      CREATE_FFI_LAMBDA(([&](Dart_Handle big_handle, Dart_Handle small_handle) {
+        auto get_arg = [](Dart_Handle dart_image) {
           Dart_Handle internal_image =
               Dart_GetField(dart_image, tonic::ToDart("_image"));
           return tonic::DartConverter<flutter::CanvasImage*>::FromDart(
               internal_image);
         };
 
-        CanvasImage* big_image = get_arg(0);
+        CanvasImage* big_image = get_arg(big_handle);
         ASSERT_EQ(big_image->width(), max_size);
         ASSERT_EQ(big_image->height(), max_size / 2);
 
-        CanvasImage* small_image = get_arg(1);
-        ASSERT_TRUE(ImageMatchesFixture("snapshot_large_scene.png",
-                                        small_image->image()->skia_image()));
+        CanvasImage* small_image = get_arg(small_handle);
+        ASSERT_TRUE(ImageMatchesFixture(
+            "snapshot_large_scene.png",
+            small_image->image()->asSkiaImage()->skia_image()));
 
         latch.Signal();
       })));
@@ -4335,12 +4298,11 @@ TEST_F(EmbedderTest, ObjectsPostedViaPortsServicedOnSecondaryTaskHeap) {
   // for inspection.
   FlutterEngineDartPort port = 0;
   fml::AutoResetWaitableEvent event;
-  context.AddNativeCallback("SignalNativeCount",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              port = tonic::DartConverter<int64_t>::FromDart(
-                                  Dart_GetNativeArgument(args, 0));
-                              event.Signal();
-                            }));
+  context.AddFfiNativeCallback("SignalNativeCount",
+                               CREATE_FFI_LAMBDA([&](int64_t count) {
+                                 port = count;
+                                 event.Signal();
+                               }));
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
   event.Wait();
@@ -4349,13 +4311,13 @@ TEST_F(EmbedderTest, ObjectsPostedViaPortsServicedOnSecondaryTaskHeap) {
   using Trampoline = std::function<void(Dart_Handle message)>;
   Trampoline trampoline;
 
-  context.AddNativeCallback("SendObjectToNativeCode",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              FML_CHECK(trampoline);
-                              auto trampoline_copy = trampoline;
-                              trampoline = nullptr;
-                              trampoline_copy(Dart_GetNativeArgument(args, 0));
-                            }));
+  context.AddFfiNativeCallback("SendObjectToNativeCode",
+                               CREATE_FFI_LAMBDA([&](Dart_Handle object) {
+                                 FML_CHECK(trampoline);
+                                 auto trampoline_copy = trampoline;
+                                 trampoline = nullptr;
+                                 trampoline_copy(object);
+                               }));
 
   // Send a boolean value and assert that it's received by the right heap.
   {
@@ -4418,10 +4380,8 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLTexture) {
         return true;
       };
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -4481,10 +4441,8 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLFramebuffer) {
         return true;
       };
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -4540,10 +4498,8 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreOpenGLSurface) {
         return true;
       };
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -4618,6 +4574,31 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   EXPECT_TRUE(resolve_called);
 
   glFinish();
+}
+
+TEST_F(EmbedderTest, ExternalTextureGLNullContextDoesNotCrash) {
+  EmbedderExternalTextureGL::ExternalTextureCallback callback(
+      [](int64_t, size_t, size_t) {
+        auto res = std::make_unique<FlutterOpenGLTexture>();
+        res->target = GL_TEXTURE_2D;
+        res->name = 1;
+        res->format = GL_RGBA8;
+        res->user_data = nullptr;
+        res->destruction_callback = [](void*) {};
+        res->width = res->height = 100;
+        return res;
+      });
+  EmbedderExternalTextureGL texture(1, callback);
+
+  DisplayListBuilder builder;
+  Texture::PaintContext ctx{
+      .canvas = &builder,
+      .gr_context = nullptr,
+      .aiks_context = nullptr,
+  };
+  // Should not crash even when last_image_ is null and contexts are null.
+  texture.Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
+                DlImageSampling::kLinear);
 }
 
 TEST_F(
@@ -5020,12 +5001,11 @@ TEST_F(EmbedderTest, ImpellerOpenGLImageSnapshot) {
 
   bool result = false;
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback("NotifyBoolValue",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              result = tonic::DartConverter<bool>::FromDart(
-                                  Dart_GetNativeArgument(args, 0));
-                              latch.Signal();
-                            }));
+  context.AddFfiNativeCallback("NotifyBoolValue",
+                               CREATE_FFI_LAMBDA([&](bool value) {
+                                 result = value;
+                                 latch.Signal();
+                               }));
 
   EmbedderConfigBuilder builder(context);
   builder.AddCommandLineArgument("--enable-impeller");
@@ -5138,10 +5118,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLSurface) {
         latch.CountDown();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -5343,10 +5321,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneToOpenGLSurfaces) {
         return surface->makeImageSnapshot();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 

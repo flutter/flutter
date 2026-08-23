@@ -8,8 +8,6 @@
         binary: "bin/app",
         forward_stdout_to: "log",
         forward_stderr_to: "log",
-        // Needed for JIT builds.
-        job_policy_ambient_mark_vmo_exec: "true",
     },
     capabilities: [
         {
@@ -21,6 +19,13 @@
         {
             runner: "dart_jit_product_runner",
             from: "self",
+        },
+    ],
+    use: [
+        {
+            protocol: [
+                "fuchsia.kernel.VmexResource",
+            ],
         },
     ],
 }

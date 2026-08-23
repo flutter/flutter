@@ -168,10 +168,8 @@ static BOOL _preparedOnce = NO;
   visualEffectView.frame = _frame;
 
   visualEffectView.layer.cornerRadius = _cornerRadius;
-  if (@available(iOS 13.0, *)) {
-    visualEffectView.layer.cornerCurve =
-        _isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
-  }
+  visualEffectView.layer.cornerCurve =
+      _isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
   visualEffectView.clipsToBounds = YES;
 
   self.backdropFilterView = visualEffectView;
@@ -517,8 +515,9 @@ static BOOL _preparedOnce = NO;
 
 @interface FlutterTouchInterceptingView ()
 @property(nonatomic, weak, readonly) UIView* embeddedView;
+@property(nonatomic, weak, readonly) UIViewController<FlutterViewResponder>* flutterViewController;
+@property(nonatomic, weak, readonly) FlutterPlatformViewsController* platformViewsController;
 @property(nonatomic, readonly) FlutterDelayingGestureRecognizer* delayingRecognizer;
-@property(nonatomic, readonly) FlutterPlatformViewGestureRecognizersBlockingPolicy blockingPolicy;
 @end
 
 @implementation FlutterTouchInterceptingView
@@ -530,6 +529,8 @@ static BOOL _preparedOnce = NO;
   if (self) {
     self.multipleTouchEnabled = YES;
     _embeddedView = embeddedView;
+    _platformViewsController = platformViewsController;
+    _flutterViewController = platformViewsController.flutterViewController;
     embeddedView.autoresizingMask =
         (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
 
@@ -545,7 +546,12 @@ static BOOL _preparedOnce = NO;
                                             forwardingRecognizer:forwardingRecognizer];
     _blockingPolicy = blockingPolicy;
 
-    [self addGestureRecognizer:_delayingRecognizer];
+    // For hit test, don't block gestures using delaying recognizer. However, we still
+    // forward touches so Flutter can process it in its gesture arena (e.g. dismiss a
+    // drop-down menu when tapping outside of the menu but inside the platform view).
+    if (blockingPolicy != FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture) {
+      [self addGestureRecognizer:_delayingRecognizer];
+    }
     [self addGestureRecognizer:forwardingRecognizer];
   }
   return self;
@@ -614,8 +620,30 @@ static BOOL _preparedOnce = NO;
   }
 }
 
+- (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
+  // In release mode, FlutterTouchInterceptingView's init is called before flutterViewController
+  // is set on platformViewsController.
+  if (self.flutterViewController == nil) {
+    _flutterViewController = self.platformViewsController.flutterViewController;
+  }
+  CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
+  // Consult the framework on if the touch should be handled by the platform view.
+  // If NO, the touch is handled by a Flutter widget and should be blocked (by returning self).
+  // If YES, the touch should continue to the standard hit-testing (through super), allowing the
+  // touch to be delivered to the underlying native platform view or one of its subviews.
+  if (![self.flutterViewController
+          platformViewShouldAcceptTouchAtTouchBeganLocation:pointInFlutterView]) {
+    return self;
+  }
+
+  return [super hitTest:point withEvent:event];
+}
+
 - (void)blockGesture {
   switch (_blockingPolicy) {
+    case FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture:
+      // No-op. Handled by hit test.
+      break;
     case FlutterPlatformViewGestureRecognizersBlockingPolicyEager:
       // We block all other gesture recognizers immediately in this policy.
       self.delayingRecognizer.state = UIGestureRecognizerStateEnded;
@@ -628,7 +656,10 @@ static BOOL _preparedOnce = NO;
       // from the web view plugin level. Right now we only observe this issue for
       // FlutterPlatformViewGestureRecognizersBlockingPolicyEager, but we should try it if a similar
       // issue arises for the other policy.
-      if (@available(iOS 26.0, *)) {
+      if (@available(iOS 26.4, *)) {
+        // Skip workaround as this non-tappable web view bug has been fixed on iOS 26.4.
+        // See: https://github.com/WebKit/WebKit/pull/57358.
+      } else if (@available(iOS 26.0, *)) {
         // This performs a nested DFS, with the outer one searching for any web view, and the inner
         // one searching for a TouchEventsGestureRecognizer inside the web view. Once found, disable
         // and immediately reenable it to reset its state.
@@ -775,6 +806,13 @@ static BOOL _preparedOnce = NO;
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
   FML_DCHECK(_currentTouchPointersCount >= 0);
   if (_currentTouchPointersCount == 0) {
+    // TODO(hellohuanlin): the following comment is likely incorrect and very misleading.
+    // The actual reason is a race condition when platform view is created before
+    // flutterViewController is set in platformViewsController in debug mode. We should clean up the
+    // code, either fix the race condition, or make flutterViewController a computed property rather
+    // than a stored property.
+    // See: https://github.com/flutter/flutter/issues/184354.
+    //
     // At the start of each gesture sequence, we reset the `_flutterViewController`,
     // so that all the touch events in the same sequence are forwarded to the same
     // `_flutterViewController`.

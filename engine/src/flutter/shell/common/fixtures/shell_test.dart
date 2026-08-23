@@ -6,6 +6,7 @@
 
 import 'dart:async';
 import 'dart:convert' show json, utf8;
+import 'dart:ffi';
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -23,11 +24,11 @@ void mainNotifyNative() {
   notifyNative();
 }
 
-@pragma('vm:external-name', 'NativeReportTimingsCallback')
+@Native<Void Function(Handle)>(symbol: 'NativeReportTimingsCallback')
 external void nativeReportTimingsCallback(List<int> timings);
-@pragma('vm:external-name', 'NativeOnBeginFrame')
+@Native<Void Function(Int64)>(symbol: 'NativeOnBeginFrame')
 external void nativeOnBeginFrame(int microseconds);
-@pragma('vm:external-name', 'NativeOnPointerDataPacket')
+@Native<Void Function(Handle)>(symbol: 'NativeOnPointerDataPacket')
 external void nativeOnPointerDataPacket(List<int> sequences);
 
 @pragma('vm:entry-point')
@@ -50,9 +51,9 @@ void onErrorB() {
   throw Exception('I should be coming from B');
 }
 
-@pragma('vm:external-name', 'NotifyErrorA')
+@Native<Void Function(Handle)>(symbol: 'NotifyErrorA')
 external void notifyErrorA(String message);
-@pragma('vm:external-name', 'NotifyErrorB')
+@Native<Void Function(Handle)>(symbol: 'NotifyErrorB')
 external void notifyErrorB(String message);
 
 @pragma('vm:entry-point')
@@ -120,7 +121,7 @@ void reportMetrics() {
   };
 }
 
-@pragma('vm:external-name', 'ReportMetrics')
+@Native<Void Function(Double, Double, Double)>(symbol: 'ReportMetrics')
 external void _reportMetrics(double devicePixelRatio, double width, double height);
 
 @pragma('vm:entry-point')
@@ -133,11 +134,11 @@ void fixturesAreFunctionalMain() {
   sayHiFromFixturesAreFunctionalMain();
 }
 
-@pragma('vm:external-name', 'SayHiFromFixturesAreFunctionalMain')
+@Native<Void Function()>(symbol: 'SayHiFromFixturesAreFunctionalMain')
 external void sayHiFromFixturesAreFunctionalMain();
 
 @pragma('vm:entry-point')
-@pragma('vm:external-name', 'NotifyNative')
+@Native<Void Function()>(symbol: 'NotifyNative')
 external void notifyNative();
 
 @pragma('vm:entry-point')
@@ -184,7 +185,7 @@ void testSkiaResourceCacheSendsResponse() {
   );
 }
 
-@pragma('vm:external-name', 'NotifyWidthHeight')
+@Native<Void Function(Int, Int)>(symbol: 'NotifyWidthHeight')
 external void notifyWidthHeight(int width, int height);
 
 @pragma('vm:entry-point')
@@ -215,7 +216,7 @@ void performanceModeImpactsNotifyIdle() {
   PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);
 }
 
-@pragma('vm:external-name', 'NotifyMessage')
+@Native<Void Function(Handle)>(symbol: 'NotifyMessage')
 external void notifyMessage(String string);
 
 @pragma('vm:entry-point')
@@ -229,10 +230,10 @@ void canRegisterImageDecoders() {
   );
 }
 
-@pragma('vm:external-name', 'NotifyLocalTime')
+@Native<Void Function(Handle)>(symbol: 'NotifyLocalTime')
 external void notifyLocalTime(String string);
 
-@pragma('vm:external-name', 'WaitFixture')
+@Native<Bool Function()>(symbol: 'WaitFixture')
 external bool waitFixture();
 
 // Return local date-time as a string, to an hour resolution.  So, "2020-07-23
@@ -258,10 +259,10 @@ void timezonesChange() {
   } while (waitFixture());
 }
 
-@pragma('vm:external-name', 'NotifyCanAccessResource')
+@Native<Void Function(Bool)>(symbol: 'NotifyCanAccessResource')
 external void notifyCanAccessResource(bool success);
 
-@pragma('vm:external-name', 'NotifySetAssetBundlePath')
+@Native<Void Function()>(symbol: 'NotifySetAssetBundlePath')
 external void notifySetAssetBundlePath();
 
 @pragma('vm:entry-point')
@@ -276,10 +277,10 @@ Future<void> canAccessResourceFromAssetDir() async {
   );
 }
 
-@pragma('vm:external-name', 'NotifyNativeWhenEngineRun')
+@Native<Void Function(Bool)>(symbol: 'NotifyNativeWhenEngineRun')
 external void notifyNativeWhenEngineRun(bool success);
 
-@pragma('vm:external-name', 'NotifyNativeWhenEngineSpawn')
+@Native<Void Function(Bool)>(symbol: 'NotifyNativeWhenEngineSpawn')
 external void notifyNativeWhenEngineSpawn(bool success);
 
 @pragma('vm:entry-point')
@@ -307,7 +308,7 @@ void frameCallback(Object? image, int durationMilliseconds, String decodeError) 
   }
 }
 
-@pragma('vm:external-name', 'NativeOnBeforeToImageSync')
+@Native<Void Function()>(symbol: 'NativeOnBeforeToImageSync')
 external void onBeforeToImageSync();
 
 @pragma('vm:entry-point')
@@ -373,7 +374,7 @@ Future<void> runCallback(IsolateParam param) async {
 }
 
 @pragma('vm:entry-point')
-@pragma('vm:external-name', 'NotifyNativeBool')
+@Native<Void Function(Bool)>(symbol: 'NotifyNativeBool')
 external void notifyNativeBool(bool value);
 
 @pragma('vm:entry-point')
@@ -419,7 +420,7 @@ Future<void> testThatAssetLoadingHappensOnWorkerThread() async {
   notifyNative();
 }
 
-@pragma('vm:external-name', 'NativeReportViewIdsCallback')
+@Native<Void Function(Bool, Handle)>(symbol: 'NativeReportViewIdsCallback')
 external void nativeReportViewIdsCallback(bool hasImplicitView, List<int> viewIds);
 
 List<int> getCurrentViewIds() {
@@ -468,7 +469,7 @@ List<int> getCurrentViewWidths() {
   return result;
 }
 
-@pragma('vm:external-name', 'NativeReportViewWidthsCallback')
+@Native<Void Function(Handle)>(symbol: 'NativeReportViewWidthsCallback')
 external void nativeReportViewWidthsCallback(List<int> viewWidthPacket);
 
 // This entrypoint reports the list of views and their widths using
@@ -513,7 +514,7 @@ void renderViewsInFrameAndOutOfFrame() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
-@pragma('vm:external-name', 'CaptureRootLayer')
+@Native<Void Function(Handle)>(symbol: 'CaptureRootLayer')
 external void _captureRootLayer(SceneBuilder sceneBuilder);
 
 @pragma('vm:entry-point')
@@ -634,10 +635,24 @@ void testSendViewFocusEvent() {
   notifyNative();
 }
 
-@pragma('vm:external-name', 'ReportEngineId')
+@Native<Void Function(Handle)>(symbol: 'ReportEngineId')
 external void _reportEngineId(int? identifier);
 
 @pragma('vm:entry-point')
 void providesEngineId() {
   _reportEngineId(PlatformDispatcher.instance.engineId);
+}
+
+@pragma('vm:entry-point')
+void hitTestInsidePlatformViewMain() {
+  PlatformDispatcher.instance.onHitTest = (HitTestRequest request) {
+    return const HitTestResponse(hasPlatformView: true);
+  };
+}
+
+@pragma('vm:entry-point')
+void hitTestOutsidePlatformViewMain() {
+  PlatformDispatcher.instance.onHitTest = (HitTestRequest request) {
+    return HitTestResponse.empty;
+  };
 }

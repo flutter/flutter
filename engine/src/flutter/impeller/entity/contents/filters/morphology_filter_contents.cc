@@ -85,8 +85,6 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-    frame_info.texture_sampler_y_coord_scale =
-        input_snapshot->texture->GetYCoordScale();
 
     auto transform = entity.GetTransform() * effect_transform.Basis();
     auto transformed_radius =
@@ -140,7 +138,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
 
   fml::StatusOr<RenderTarget> render_target =
       renderer.MakeSubpass("Directional Morphology Filter",  //
-                           ISize(coverage.GetSize()),        //
+                           ISize::Ceil(coverage.GetSize()),  //
                            command_buffer,                   //
                            callback,                         //
                            /*msaa_enabled=*/false,           //

@@ -15,6 +15,8 @@ namespace impeller {
 class ContextGLES;
 }  // namespace impeller
 
+#include "impeller/base/flags.h"
+
 namespace flutter {
 namespace testing {
 FML_TEST_CLASS(EmbedderSurfaceGLImpellerTest, GLES3ContextHasGLES3Shaders);
@@ -30,7 +32,9 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
   EmbedderSurfaceGLImpeller(
       EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table,
       bool fbo_reset_after_present,
-      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner,
+      impeller::Flags impeller_flags = {});
 
   ~EmbedderSurfaceGLImpeller() override;
 
@@ -81,6 +85,9 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
 
   // |EmbedderSurface|
   sk_sp<GrDirectContext> CreateResourceContext() const override;
+
+  // |EmbedderSurface|
+  void ReleaseResourceContext() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceGLImpeller);
 };

@@ -38,8 +38,9 @@ interface class FlutterTestRunner {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
+    List<String> tags = const <String>[],
+    List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool enableVmService = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -82,8 +83,9 @@ interface class FlutterTestRunner {
       for (final String name in names) ...<String>['--name', name],
       for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
       if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
-      if (tags != null) ...<String>['--tags', tags],
-      if (excludeTags != null) ...<String>['--exclude-tags', excludeTags],
+      for (final String tag in tags) ...<String>['--tags', tag],
+      for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
+      for (final String preset in presets) ...<String>['--preset', preset],
       if (failFast) '--fail-fast',
       if (runSkipped) '--run-skipped',
       if (totalShards != null) '--total-shards=$totalShards',
@@ -92,6 +94,9 @@ interface class FlutterTestRunner {
     ];
 
     if (web) {
+      // Unsupported for general Flutter developers.
+      // This is only used by the Flutter Framework tests.
+      // See: https://github.com/flutter/flutter/pull/65984.
       final String tempBuildDir = globals.fs.systemTempDirectory
           .createTempSync('flutter_test.')
           .absolute
@@ -213,7 +218,7 @@ interface class FlutterTestRunner {
     if (packageConfigFile.existsSync()) {
       projectPackageConfig = PackageConfig.parseBytes(
         packageConfigFile.readAsBytesSync(),
-        Uri.file(flutterProject.directory.path),
+        packageConfigFile.absolute.uri,
       );
     } else {
       // We can't use this directly, but need to manually check
@@ -237,7 +242,7 @@ interface class FlutterTestRunner {
         .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(
       flutterToolsPackageConfigFile.readAsBytesSync(),
-      flutterToolsPackageConfigFile.uri,
+      flutterToolsPackageConfigFile.absolute.uri,
     );
 
     final mergedPackages = <Package>[...projectPackageConfig.packages];
@@ -277,10 +282,7 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
     String pathToImport(String path) {
       assert(path.endsWith('.dart'));
       return path
-          .replaceAll('.', '_')
-          .replaceAll(':', '_')
-          .replaceAll('/', '_')
-          .replaceAll(r'\', '_')
+          .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')
           .replaceRange(path.length - '.dart'.length, null, '');
     }
 
@@ -499,10 +501,7 @@ String pathToImport(String path) {
   assert(path.endsWith('.dart'));
   return path
       .replaceRange(path.length - '.dart'.length, null, '')
-      .replaceAll('.', '_')
-      .replaceAll(':', '_')
-      .replaceAll('/', '_')
-      .replaceAll(r'\', '_');
+      .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
 }
 
 class SpawnPlugin extends PlatformPlugin {
@@ -592,8 +591,9 @@ class SpawnPlugin extends PlatformPlugin {
     required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
+    List<String> tags = const <String>[],
+    List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool machine = false,
     bool updateGoldens = false,
     required int? concurrency,
@@ -632,7 +632,7 @@ class SpawnPlugin extends PlatformPlugin {
     );
     final PackageConfig isolateSpawningTesterPackageConfig = PackageConfig.parseBytes(
       isolateSpawningTesterPackageConfigFile.readAsBytesSync(),
-      isolateSpawningTesterPackageConfigFile.uri,
+      isolateSpawningTesterPackageConfigFile.absolute.uri,
     );
 
     final File childTestIsolateSpawnerSourceFile = isolateSpawningTesterDirectory.childFile(
@@ -659,8 +659,9 @@ class SpawnPlugin extends PlatformPlugin {
       for (final String name in names) ...<String>['--name', name],
       for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
       if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
-      if (tags != null) ...<String>['--tags', tags],
-      if (excludeTags != null) ...<String>['--exclude-tags', excludeTags],
+      for (final String tag in tags) ...<String>['--tags', tag],
+      for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
+      for (final String preset in presets) ...<String>['--preset', preset],
       if (failFast) '--fail-fast',
       if (runSkipped) '--run-skipped',
       if (totalShards != null) '--total-shards=$totalShards',
@@ -743,7 +744,8 @@ class SpawnPlugin extends PlatformPlugin {
     globals.logger.printTrace('Started flutter_tester process at pid ${process.pid}');
 
     for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform<String>(utf8.decoder).listen(globals.stdio.stdoutWrite);
+      // Use permissive decoder for test output which may contain invalid UTF-8
+      stream.transform<String>(utf8AllowMalformed.decoder).listen(globals.stdio.stdoutWrite);
     }
 
     return process.exitCode.then((int exitCode) {

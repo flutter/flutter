@@ -90,7 +90,11 @@ class SliverResizingHeader extends StatelessWidget {
     return _SliverResizingHeader(
       minExtentPrototype: _excludeFocus(minExtentPrototype),
       maxExtentPrototype: _excludeFocus(maxExtentPrototype),
-      child: child ?? const SizedBox.shrink(),
+      child: Semantics(
+        container: true,
+        explicitChildNodes: true,
+        child: child ?? const SizedBox.shrink(),
+      ),
     );
   }
 }
@@ -255,5 +259,14 @@ class _RenderSliverResizingHeader extends RenderSliver
       );
     }
     return false;
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    if (geometry != null && geometry!.layoutExtent < childExtent) {
+      config.addTagForChildren(RenderViewport.excludeFromScrolling);
+    }
   }
 }

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(InfiniteScrollApp());
+  runApp(const InfiniteScrollApp());
 }
 
 class InfiniteScrollApp extends StatelessWidget {
@@ -15,7 +15,10 @@ class InfiniteScrollApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Infinite Scrolling Flutter',
-      home: InfiniteScrollList(),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Infinite Scrolling ListView (Static Data)')),
+        body: const InfiniteScrollList(),
+      ),
     );
   }
 }
@@ -31,11 +34,11 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
   final List<String> items = [];
   final int itemsPerPage = 20;
   final List<String> staticData = [
-    "Hello Flutter",
-    "Hello Flutter",
-    "Hello Flutter",
-    "Hello Flutter",
-    "Hello Flutter",
+    'Hello Flutter',
+    'Hello Flutter',
+    'Hello Flutter',
+    'Hello Flutter',
+    'Hello Flutter',
   ];
 
   @override
@@ -46,7 +49,7 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
 
   void _loadMoreData() {
     setState(() {
-      final newItems = List.generate(itemsPerPage, (i) {
+      final List<String> newItems = List.generate(itemsPerPage, (int i) {
         return staticData[i % staticData.length];
       });
       items.addAll(newItems);
@@ -55,27 +58,19 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text("Infinite Scrolling ListView (Static Data)"),
-        ),
-        body: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (scrollInfo.metrics.pixels >=
-                scrollInfo.metrics.maxScrollExtent - 50) {
-              _loadMoreData();
-              return true;
-            }
-            return false;
-          },
-          child: ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              return ListTile(title: Text(items[index]));
-            },
-          ),
-        ),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 50) {
+          _loadMoreData();
+          return true;
+        }
+        return false;
+      },
+      child: ListView.builder(
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          return ListTile(title: Text(items[index]));
+        },
       ),
     );
   }

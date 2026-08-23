@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -90,6 +89,21 @@ final fakeVM = vm_service.VM(
 
 final fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
 
+/// Returns a [FakeVmServiceRequest] for the 'getVM' method with the provided
+/// [isolates].
+FakeVmServiceRequest getVm([List<vm_service.Isolate>? isolates]) {
+  // TODO(dantup): Remove this if vm_service is updated to convert nulls back
+  //  to empty lists.
+  //  See https://github.com/flutter/flutter/pull/185274#discussion_r3116379311
+  isolates ??= [];
+  return FakeVmServiceRequest(
+    method: 'getVM',
+    jsonResponse: vm_service.VM.parse(<String, Object>{
+      'isolates': isolates.map((isolate) => isolate.toJson()).toList(),
+    })!.toJson(),
+  );
+}
+
 final listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
@@ -110,6 +124,11 @@ const evict = FakeVmServiceRequest(
 const evictShader = FakeVmServiceRequest(
   method: 'ext.ui.window.reinitializeShader',
   args: <String, Object>{'assetKey': 'foo.frag', 'isolateId': '1'},
+);
+
+const reinitializeShaderLibrary = FakeVmServiceRequest(
+  method: 'ext.ui.gpu.reinitializeShaderLibrary',
+  args: <String, Object>{'assetKey': 'foo.shaderbundle', 'isolateId': '1'},
 );
 
 final Uri testUri = Uri.parse('foo://bar');
@@ -133,7 +152,7 @@ class FakeDartDevelopmentService extends Fake
   Future<void> handleHotRestart(FlutterDevice? device) async {}
 
   @override
-  void shutdown() {}
+  Future<void> shutdown() async {}
 }
 
 class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {
@@ -153,19 +172,15 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 }
 
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(super.device, {Stream<Uri>? vmServiceUris})
-    : _vmServiceUris = vmServiceUris,
-      super(
+  TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
+    : super(
         generator: FakeResidentCompiler(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         developmentShaderCompiler: const FakeShaderCompiler(),
-      );
-
-  final Stream<Uri>? _vmServiceUris;
-
-  @override
-  Stream<Uri> get vmServiceUris => _vmServiceUris!;
+      ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 }
 
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
@@ -186,8 +201,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
   Exception? reportError;
   Exception? runColdError;
+  Exception? connectError;
   int runHotCode = 0;
   int runColdCode = 0;
+
+  @override
+  Duration logFlushDelay = Duration.zero;
 
   @override
   ResidentCompiler? generator;
@@ -199,7 +218,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform targetPlatform = TargetPlatform.android;
 
   @override
-  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
+  Future<Uri>? get vmServiceUri => testUri != null ? Future<Uri>.value(testUri!) : null;
 
   @override
   FlutterVmService? get vmService => vmServiceHost?.call()?.vmService;
@@ -238,15 +257,17 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
-  }) async {}
+  }) async {
+    if (connectError != null) {
+      throw connectError!;
+    }
+  }
 
   @override
   Future<UpdateFSReport> updateDevFS({
@@ -280,24 +301,25 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     super.device,
     BuildInfo buildInfo,
     ResidentCompiler residentCompiler,
-    this.fakeDevFS,
-  ) : super(
+    this.fakeDevFS, {
+    Future<Uri>? vmServiceUri,
+  }) : super(
         targetPlatform: .unsupported,
         buildInfo: buildInfo,
         generator: residentCompiler,
         developmentShaderCompiler: const FakeShaderCompiler(),
-      );
+      ) {
+    this.vmServiceUri = vmServiceUri ?? Future<Uri>.value(testUri);
+  }
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
   }) async {}
 
   final DevFS fakeDevFS;
@@ -512,4 +534,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

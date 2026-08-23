@@ -29,7 +29,25 @@ class SemanticsProgressBar extends SemanticRole {
       setAttribute('aria-valuemax', semanticsObject.maxValue!);
     }
     if (semanticsObject.value?.isNotEmpty ?? false) {
-      setAttribute('aria-valuenow', semanticsObject.value!);
+      final String value = semanticsObject.value!;
+      final double? doubleValue = double.tryParse(value);
+
+      if (doubleValue != null) {
+        setAttribute('aria-valuenow', value);
+      } else if (value.endsWith('%')) {
+        final double? percentage = double.tryParse(value.substring(0, value.length - 1));
+        if (percentage != null) {
+          final double? min = double.tryParse(semanticsObject.minValue ?? '');
+          final double? max = double.tryParse(semanticsObject.maxValue ?? '');
+          if (min != null && max != null) {
+            final double calculatedValue = min + (percentage / 100.0) * (max - min);
+            setAttribute('aria-valuenow', calculatedValue.toString());
+          }
+        }
+        setAttribute('aria-valuetext', value);
+      } else {
+        setAttribute('aria-valuetext', value);
+      }
     }
   }
 

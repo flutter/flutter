@@ -5,15 +5,21 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:hooks/hooks.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin;
+import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin, platform;
 import '../transition_test_utils.dart';
 
-Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
+Future<Directory> createTestProject(
+  String packageName,
+  Directory tempDirectory, {
+  bool withProcessGlobalState = false,
+}) async {
   final ProcessResult result = processManager.runSync(<String>[
     flutterBin,
     'create',
@@ -46,6 +52,10 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await addUserDefine(packageName, packageDirectory);
 
   await addDynamicallyLinkedNativeLibrary(packageName, packageDirectory);
+
+  if (withProcessGlobalState) {
+    await addProcessGlobalState(packageName, packageDirectory);
+  }
 
   final ProcessResult result2 = await processManager.run(<String>[
     flutterBin,
@@ -273,6 +283,92 @@ extension on BuildInput {
   await builderFile.writeAsString(builderSource);
 }
 
+/// Adds a pair of native functions that share state through a heap allocation
+/// the native library holds on to.
+///
+/// `storeState` allocates and remembers a value, `loadState` reads it back
+/// through the remembered pointer. Reading it back only works while both calls
+/// land in the same copy of the library, which makes the pair a probe for
+/// whether the code asset was mapped into the process more than once.
+///
+/// `loadState` gets its own binding so that it resolves the asset again on
+/// first use, rather than reusing whatever `storeState` resolved.
+Future<void> addProcessGlobalState(String packageName, Directory packageDirectory) async {
+  final Directory srcDirectory = packageDirectory.childDirectory('src');
+
+  await srcDirectory.childFile('$packageName.h').writeAsString('''
+
+FFI_PLUGIN_EXPORT void store_state(intptr_t value);
+
+FFI_PLUGIN_EXPORT intptr_t load_state(void);
+''', mode: FileMode.append);
+
+  await srcDirectory.childFile('$packageName.c').writeAsString('''
+
+typedef struct {
+  intptr_t value;
+} state_t;
+
+static state_t* state = NULL;
+
+FFI_PLUGIN_EXPORT void store_state(intptr_t value) {
+  state = malloc(sizeof(state_t));
+  state->value = value;
+}
+
+// Reads through `state` without checking it, on purpose. A second copy of this
+// library in the same process gets its own `state`, which no one has stored
+// anything in, and reading through it takes the process down the same way a
+// real code asset does.
+FFI_PLUGIN_EXPORT intptr_t load_state(void) {
+  return state->value;
+}
+''', mode: FileMode.append);
+
+  final Directory libDirectory = packageDirectory.childDirectory('lib');
+
+  await libDirectory.childFile('${packageName}_bindings_generated.dart').writeAsString('''
+
+@ffi.Native<ffi.Void Function(ffi.IntPtr)>()
+external void store_state(int value);
+
+@ffi.Native<ffi.IntPtr Function()>()
+external int load_state();
+''', mode: FileMode.append);
+
+  await libDirectory.childFile('$packageName.dart').writeAsString('''
+
+/// Remembers [value] in an allocation held by the native library.
+void storeState(int value) => bindings.store_state(value);
+
+/// Reads back what [storeState] remembered.
+int loadState() => bindings.load_state();
+''', mode: FileMode.append);
+}
+
+/// The framework binary a macOS app bundle resolves its code asset to.
+File bundledFrameworkBinaryMacOS(Directory appDirectory, String buildMode) {
+  return appDirectory
+      .childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/')
+      .childDirectory('$exampleAppName.app')
+      .childDirectory('Contents/Frameworks')
+      .childDirectory('$packageName.framework')
+      .childDirectory('Versions')
+      .childDirectory('A')
+      .childFile(packageName);
+}
+
+/// Replaces [file] with a byte for byte copy of itself.
+///
+/// The copy occupies a different inode, which is the identity dyld falls back
+/// on for an image it cannot match by install name. Rebuilding a bundle that a
+/// debug instance is still running does the same thing to it.
+void replaceWithCopy(File file) {
+  final File copy = file.parent.childFile('${file.basename}.copy');
+  file.copySync(copy.path);
+  copy.renameSync(file.path);
+}
+
 Future<void> pinDependencies(File pubspecFile) async {
   expect(pubspecFile, exists);
   final String oldPubspec = await pubspecFile.readAsString();
@@ -290,4 +386,280 @@ Future<void> inTempDir(Future<void> Function(Directory tempDirectory) fun) async
   } finally {
     tryToDelete(tempDirectory);
   }
+}
+
+final String hostOs = platform.operatingSystem;
+
+const packageName = 'package_with_native_assets';
+
+const exampleAppName = '${packageName}_example';
+
+/// For `flutter build` we can't easily test whether running the app works.
+/// Check that we have the dylibs in the app.
+void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
+  final Directory frameworksFolder = appDirectory.childDirectory(
+    'build/$os/framework/${buildMode.upperCaseFirst()}',
+  );
+  expect(frameworksFolder, exists);
+  final Directory xcFrameworkDirectory = frameworksFolder.childDirectory(
+    '$packageName.xcframework',
+  );
+  if (os == 'macos') {
+    final File dylib = xcFrameworkDirectory
+        .childDirectory('macos-arm64_x86_64')
+        .childDirectory('$packageName.framework')
+        .childFile(packageName);
+    expect(dylib, exists);
+    _expectBinaryContainsArchitectures(dylib, ['x86_64', 'arm64']);
+  } else {
+    assert(os == 'ios');
+    final File deviceDylib = xcFrameworkDirectory
+        .childDirectory('ios-arm64')
+        .childDirectory('$packageName.framework')
+        .childFile(packageName);
+    expect(deviceDylib, exists);
+    _expectBinaryContainsArchitectures(deviceDylib, ['arm64']);
+
+    final File simulatorDylib = xcFrameworkDirectory
+        .childDirectory('ios-arm64_x86_64-simulator')
+        .childDirectory('$packageName.framework')
+        .childFile(packageName);
+    expect(simulatorDylib, exists);
+    _expectBinaryContainsArchitectures(simulatorDylib, ['x86_64', 'arm64']);
+  }
+
+  _expectXCFrameworkCodesigned(xcFrameworkDirectory);
+}
+
+extension StringUpperCaseFirst on String {
+  String upperCaseFirst() {
+    return replaceFirst(this[0], this[0].toUpperCase());
+  }
+}
+
+/// Runs 'lipo -info' on a binary and asserts that it contains the expected architectures.
+void _expectBinaryContainsArchitectures(File binary, List<String> expectedArchs) {
+  expect(binary, exists);
+  final ProcessResult lipoResult = processManager.runSync(<String>['lipo', '-info', binary.path]);
+  expect(
+    lipoResult.exitCode,
+    0,
+    reason: 'lipo -info failed for ${binary.path}:\n${lipoResult.stderr}',
+  );
+  final lipoOutput = lipoResult.stdout.toString();
+  for (final arch in expectedArchs) {
+    expect(
+      lipoOutput,
+      contains(arch),
+      reason:
+          'Binary ${binary.path} does not contain expected architecture $arch.\nLipo output: $lipoOutput',
+    );
+  }
+}
+
+void _expectXCFrameworkCodesigned(Directory xcFramework) {
+  expect(xcFramework, exists);
+  final ProcessResult result = processManager.runSync(<String>[
+    'codesign',
+    '-dv',
+    xcFramework.path,
+  ]);
+  if (!result.stderr.toString().contains('Signature=adhoc')) {
+    throw Exception('XCFramework ${xcFramework.path} is not codesigned:\n${result.stderr}');
+  }
+}
+
+/// Check that the native assets are built with the C Compiler that Flutter uses.
+///
+/// This inspects the build configuration to see if the C compiler was configured.
+void expectCCompilerIsConfigured(Directory appDirectory) {
+  final Directory nativeAssetsBuilderDir = appDirectory.childDirectory(
+    '.dart_tool/hooks_runner/$packageName/',
+  );
+  for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
+    // We only want to look at build/link hook invocation directories. The
+    // `/shared/*` directory allows the individual hooks to store data that is
+    // reusable across different build/link configurations.
+    if (subDir.path.endsWith('shared')) {
+      continue;
+    }
+
+    final File inputFile = subDir.childFile('input.json');
+    expect(inputFile, exists);
+    final inputContents = json.decode(inputFile.readAsStringSync()) as Map<String, Object?>;
+    final input = BuildInput(inputContents);
+    final BuildConfig config = input.config;
+    if (!config.buildCodeAssets) {
+      continue;
+    }
+    expect(config.code.cCompiler?.compiler, isNot(isNull));
+  }
+}
+
+/// For `flutter build` we can't easily test whether running the app works.
+/// Check that we have the dylibs in the app.
+void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
+  final Directory productsDirectory = appDirectory.childDirectory(
+    'build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/',
+  );
+  final Directory appBundle = productsDirectory.childDirectory('$exampleAppName.app');
+  expect(appBundle, exists);
+  final Directory frameworksFolder = appBundle.childDirectory('Contents/Frameworks');
+  expect(frameworksFolder, exists);
+
+  // MyFramework.framework/
+  //   MyFramework  -> Versions/Current/MyFramework
+  //   Resources    -> Versions/Current/Resources
+  //   Versions/
+  //     A/
+  //       MyFramework
+  //       Resources/
+  //         Info.plist
+  //     Current  -> A
+  const String frameworkName = packageName;
+  final Directory frameworkDir = frameworksFolder.childDirectory('$frameworkName.framework');
+  final Directory versionsDir = frameworkDir.childDirectory('Versions');
+  final Directory versionADir = versionsDir.childDirectory('A');
+  final Directory resourcesDir = versionADir.childDirectory('Resources');
+  expect(resourcesDir, exists);
+  final File dylibFile = versionADir.childFile(frameworkName);
+  expect(dylibFile, exists);
+  final stripped = buildMode != 'debug';
+  expectDylibIsStripped(dylibFile, stripped: stripped);
+  if (stripped) {
+    final Directory dsymDir = productsDirectory.childDirectory('$frameworkName.framework.dsym');
+    expect(dsymDir, exists);
+  }
+  final Link currentLink = versionsDir.childLink('Current');
+  expect(currentLink, exists);
+  expect(currentLink.resolveSymbolicLinksSync(), versionADir.path);
+  final Link resourcesLink = frameworkDir.childLink('Resources');
+  expect(resourcesLink, exists);
+  expect(resourcesLink.resolveSymbolicLinksSync(), resourcesDir.path);
+  final Link dylibLink = frameworkDir.childLink(frameworkName);
+  expect(dylibLink, exists);
+  expect(dylibLink.resolveSymbolicLinksSync(), dylibFile.path);
+  final String infoPlist = resourcesDir.childFile('Info.plist').readAsStringSync();
+  expect(infoPlist, '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>package_with_native_assets</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.flutter.flutter.native-assets.package-with-native-assets</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>package_with_native_assets</string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>''');
+}
+
+/// Check whether a dylib is stripped with `otool`.
+///
+/// ```text
+///       cmd LC_DYSYMTAB
+///   cmdsize 80
+/// ilocalsym 0
+/// nlocalsym 0              0 or 1 means stripped
+/// iextdefsym 0
+/// nextdefsym 2
+/// iundefsym 2
+/// nundefsym 1
+/// ```
+///
+/// ```text
+///       cmd LC_DYSYMTAB
+///   cmdsize 80
+/// ilocalsym 0
+/// nlocalsym 8              >0 means unstripped, note: unstripped can be 0!
+/// iextdefsym 8
+/// nextdefsym 2
+/// ```
+void expectDylibIsStripped(File dylib, {required bool stripped}) {
+  final ProcessResult result = processManager.runSync(<String>['otool', '-l', dylib.path]);
+  expect(result.exitCode, 0);
+  final stdout = result.stdout.toString();
+
+  // Find LC_DYSYMTAB section and check nlocalsym.
+  final List<String> lines = stdout.split('\n');
+  int? nlocalsym;
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].contains('LC_DYSYMTAB')) {
+      const kMaxDsymtabSearchLines = 20;
+      for (int j = i + 1; j < i + kMaxDsymtabSearchLines && j < lines.length; j++) {
+        if (lines[j].contains('nlocalsym')) {
+          final RegExpMatch? match = RegExp(r'nlocalsym\s+(\d+)').firstMatch(lines[j]);
+          if (match != null) {
+            nlocalsym = int.parse(match.group(1)!);
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  if (nlocalsym == null) {
+    throw Exception('nlocalsym not found in LC_DYSYMTAB section of ${dylib.path}\n$stdout');
+  }
+
+  if (stripped) {
+    expect(
+      nlocalsym,
+      lessThanOrEqualTo(1),
+      reason: 'Expected stripped binary to have nlocalsym 0 in ${dylib.path}',
+    );
+  } else {
+    // Unstripped can be 0 if compiled with a modern XCode, so nothing to check
+    // here.
+  }
+}
+
+/// Checks that dylibs are bundled.
+///
+/// Sample path: build/linux/x64/release/bundle/lib/libmy_package.so
+void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
+  // Linux does not support cross compilation, so always only check current architecture.
+  final String architecture = Architecture.current.name;
+  final Directory appBundle = appDirectory
+      .childDirectory('build')
+      .childDirectory(hostOs)
+      .childDirectory(architecture)
+      .childDirectory(buildMode)
+      .childDirectory('bundle');
+  expect(appBundle, exists);
+  final Directory dylibsFolder = appBundle.childDirectory('lib');
+  expect(dylibsFolder, exists);
+  final File dylib = dylibsFolder.childFile(OS.linux.dylibFileName(packageName));
+  expect(dylib, exists);
+}
+
+/// Checks that dylibs are bundled.
+///
+/// Sample path: build\windows\x64\runner\Debug\my_package_example.exe
+void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
+  // Linux does not support cross compilation, so always only check current architecture.
+  final String architecture = Architecture.current.name;
+  final Directory appBundle = appDirectory
+      .childDirectory('build')
+      .childDirectory(hostOs)
+      .childDirectory(architecture)
+      .childDirectory('runner')
+      .childDirectory(buildMode.upperCaseFirst());
+  expect(appBundle, exists);
+  final File dylib = appBundle.childFile(OS.windows.dylibFileName(packageName));
+  expect(dylib, exists);
 }

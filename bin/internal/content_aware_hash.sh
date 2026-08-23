@@ -65,4 +65,14 @@ if [[ "$CURRENT_BRANCH" != "main" && \
   fi
 fi
 
-git -C "$FLUTTER_ROOT" ls-tree "$BASEREF" -- "${TRACKEDFILES[@]}" | git hash-object --stdin
+# Workaround for Xcode's git multi-pack-index incompatibility.
+# https://github.com/flutter/flutter/issues/184376
+GIT_OPTS=()
+if [[ "$(git --version)" == *"Apple Git"* ]]; then
+  GIT_OPTS=(-c core.multiPackIndex=false)
+fi
+if ! HASH=$(set -o pipefail; git "${GIT_OPTS[@]}" -C "$FLUTTER_ROOT" ls-tree "$BASEREF" -- "${TRACKEDFILES[@]}" | git hash-object --stdin); then
+  >&2 echo "${0}: git error when generating Flutter content-aware hash"
+  exit 1
+fi
+echo "$HASH"

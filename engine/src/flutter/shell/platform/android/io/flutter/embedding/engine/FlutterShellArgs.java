@@ -57,6 +57,12 @@ public class FlutterShellArgs {
   public static final String ARG_KEY_TOGGLE_IMPELLER = "enable-impeller";
   public static final String ARG_ENABLE_IMPELLER = "--enable-impeller=true";
   public static final String ARG_DISABLE_IMPELLER = "--enable-impeller=false";
+  /** Intent extra key that opts the engine into the Flutter GPU API. */
+  public static final String ARG_KEY_ENABLE_FLUTTER_GPU = "enable-flutter-gpu";
+
+  /** Engine shell argument emitted when {@link #ARG_KEY_ENABLE_FLUTTER_GPU} is set. */
+  public static final String ARG_ENABLE_FLUTTER_GPU = "--enable-flutter-gpu";
+
   public static final String ARG_KEY_ENABLE_VULKAN_VALIDATION = "enable-vulkan-validation";
   public static final String ARG_ENABLE_VULKAN_VALIDATION = "--enable-vulkan-validation";
   public static final String ARG_KEY_ENABLE_HCPP_AND_SURFACE_CONTROL =
@@ -79,6 +85,8 @@ public class FlutterShellArgs {
   public static final String ARG_VM_SERVICE_PORT = "--vm-service-port=";
   public static final String ARG_KEY_DART_FLAGS = "dart-flags";
   public static final String ARG_DART_FLAGS = "--dart-flags";
+  private static final String ARG_KEY_TEST_FLAG = "test-flag";
+  private static final String ARG_TEST_FLAG = "--test-flag";
 
   @NonNull
   public static FlutterShellArgs fromIntent(@NonNull Intent intent) {
@@ -141,6 +149,9 @@ public class FlutterShellArgs {
         args.add(ARG_DISABLE_IMPELLER);
       }
     }
+    if (intent.getBooleanExtra(ARG_KEY_ENABLE_FLUTTER_GPU, false)) {
+      args.add(ARG_ENABLE_FLUTTER_GPU);
+    }
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_VULKAN_VALIDATION, false)) {
       args.add(ARG_ENABLE_VULKAN_VALIDATION);
     }
@@ -163,6 +174,9 @@ public class FlutterShellArgs {
     }
     if (intent.getBooleanExtra(ARG_KEY_VERBOSE_LOGGING, false)) {
       args.add(ARG_VERBOSE_LOGGING);
+    }
+    if (intent.getBooleanExtra(ARG_KEY_TEST_FLAG, false)) {
+      args.add(ARG_TEST_FLAG);
     }
 
     // NOTE: all flags provided with this argument are subject to filtering

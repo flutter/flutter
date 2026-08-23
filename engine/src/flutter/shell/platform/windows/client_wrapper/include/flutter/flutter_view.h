@@ -28,6 +28,7 @@ class FlutterView {
   HWND GetNativeWindow() { return FlutterDesktopViewGetHWND(view_); }
 
   // Returns the DXGI adapter used for rendering or nullptr in case of error.
+  // DEPRECATED: Use |GetGraphicsAdapter| on |FlutterEngine| instead.
   IDXGIAdapter* GetGraphicsAdapter() {
     return FlutterDesktopViewGetGraphicsAdapter(view_);
   }

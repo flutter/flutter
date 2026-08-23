@@ -67,6 +67,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -81,6 +82,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -95,6 +97,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -109,6 +112,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'profile',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -123,6 +127,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -130,6 +135,142 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics default false when not in the manifest and no explicit flag is passed',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        await runBuildApkCommand(projectPath);
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'apk',
+              commandHasTerminal: false,
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildApkBuildMode: 'release',
+              buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from an explicit --no-enable-hcpp flag',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        await runBuildApkCommand(projectPath, arguments: <String>['--no-enable-hcpp']);
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'apk',
+              commandHasTerminal: false,
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildApkBuildMode: 'release',
+              buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from an explicit --enable-hcpp flag when not in the manifest',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        // The manifest does not set EnableHcpp, so the build injects the flag value and the
+        // packaged app has HCPP on. Analytics has to report what was packaged, not what the
+        // source manifest happened to say.
+        await runBuildApkCommand(projectPath, arguments: <String>['--enable-hcpp']);
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'apk',
+              commandHasTerminal: false,
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildApkBuildMode: 'release',
+              buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: true,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from an explicit --enable-hcpp over a manifest value',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+        final File manifestFile = globals.fs.file(
+          globals.fs.path.join(projectPath, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
+        );
+        manifestFile.writeAsStringSync(
+          manifestFile.readAsStringSync().replaceFirst(
+            '</application>',
+            '    <meta-data android:name="io.flutter.embedding.android.EnableHcpp" '
+                'android:value="false" />\n'
+                '    </application>',
+          ),
+        );
+
+        // The flag is passed at invocation time, so it wins over the checked in manifest value
+        // and gradle writes true into the merged manifest. Analytics reports what is packaged.
+        await runBuildApkCommand(projectPath, arguments: <String>['--enable-hcpp']);
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'apk',
+              commandHasTerminal: false,
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildApkBuildMode: 'release',
+              buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: true,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -152,6 +293,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -169,6 +311,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -186,6 +329,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -203,6 +347,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'profile',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -220,6 +365,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -512,6 +658,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -522,6 +670,7 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
             exitCode: 1,
@@ -559,6 +708,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -570,6 +721,7 @@ void main() {
               '-Psplit-debug-info=${tempDir.path}',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
             exitCode: 1,
@@ -610,6 +762,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -621,6 +775,7 @@ void main() {
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
             exitCode: 1,
@@ -661,6 +816,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -671,6 +828,7 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
             exitCode: 1,
@@ -714,6 +872,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -724,6 +884,7 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
           ),
@@ -732,16 +893,7 @@ void main() {
         // The command throws a [ToolExit] because it expects an APK in the file system.
         await expectLater(() => runBuildApkCommand(projectPath), throwsToolExit());
 
-        expect(
-          testLogger.statusText,
-          allOf(
-            containsIgnoringWhitespace("Your app isn't using AndroidX"),
-            containsIgnoringWhitespace(
-              'To avoid potential build failures, you can quickly migrate your app by '
-              'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
-            ),
-          ),
-        );
+        expect(testLogger.statusText, isNot(contains("Your app isn't using AndroidX")));
 
         expect(
           analytics.sentEvents,
@@ -781,6 +933,8 @@ void main() {
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
               '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
                 'FLUTTER_VERSION': '0.0.0', //
                 'FLUTTER_CHANNEL': 'master',
                 'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
@@ -791,6 +945,7 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              '-Penable-hcpp=false',
               'assembleRelease',
             ],
           ),
@@ -822,6 +977,59 @@ void main() {
             ),
           ),
         );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        AndroidSdk: () => mockAndroidSdk,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        Java: () => null,
+        ProcessManager: () => processManager,
+        Analytics: () => analytics,
+        AndroidStudio: () => FakeAndroidStudio(),
+      },
+    );
+
+    testUsingContext(
+      'passes enable-hcpp and explicit-enable-hcpp to gradle for --enable-hcpp',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app', '--platform=android'],
+        );
+        processManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              gradlew,
+              '-q',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+              '-Pbase-application-name=android.app.Application',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_BUILD_NAME': '1.0.0',
+                'FLUTTER_BUILD_NUMBER': '1',
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
+              '-Pdart-obfuscation=false',
+              '-Ptrack-widget-creation=true',
+              '-Ptree-shake-icons=true',
+              '-Penable-hcpp=true',
+              '-Pexplicit-enable-hcpp=true',
+              'assembleRelease',
+            ],
+          ),
+        );
+
+        // The command throws a [ToolExit] because it expects an APK in the file system.
+        await expectLater(
+          () => runBuildApkCommand(projectPath, arguments: <String>['--enable-hcpp']),
+          throwsToolExit(),
+        );
+
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{

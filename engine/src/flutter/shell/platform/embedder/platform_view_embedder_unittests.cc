@@ -52,6 +52,10 @@ class MockDelegate : public PlatformView::Delegate {
               OnPlatformViewDispatchPointerDataPacket,
               (std::unique_ptr<PointerDataPacket> packet),
               (override));
+  MOCK_METHOD(HitTestResponse,
+              OnPlatformViewHitTest,
+              (int64_t view_id, const flutter::PointData offset),
+              (override));
   MOCK_METHOD(void,
               OnPlatformViewDispatchSemanticsAction,
               (int64_t view_id,
@@ -98,6 +102,10 @@ class MockDelegate : public PlatformView::Delegate {
               (override));
   MOCK_METHOD(const Settings&,
               OnPlatformViewGetSettings,
+              (),
+              (const, override));
+  MOCK_METHOD(std::shared_ptr<fml::BasicTaskRunner>,
+              OnPlatformViewGetShutdownSafeIOTaskRunner,
               (),
               (const, override));
 };

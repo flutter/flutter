@@ -7,18 +7,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import 'canvaskit_api.dart';
-import 'path.dart';
-
-/// An error related to the CanvasKit rendering backend.
-class CanvasKitError extends Error {
-  CanvasKitError(this.message);
-
-  /// Describes this error.
-  final String message;
-
-  @override
-  String toString() => 'CanvasKitError: $message';
-}
 
 /// Creates a new color array.
 Float32List makeFreshSkColor(ui.Color color) {
@@ -74,7 +62,7 @@ const double ckShadowLightRadius = 800;
 
 void drawSkShadow(
   SkCanvas skCanvas,
-  CkPath path,
+  SkPath path,
   ui.Color color,
   double elevation,
   bool transparentOccluder,
@@ -95,9 +83,8 @@ void drawSkShadow(
 
   final SkTonalColors tonalColors = canvasKit.computeTonalColors(inTonalColors);
 
-  final SkPath skPath = path.snapshotSkPath();
   skCanvas.drawShadow(
-    skPath,
+    path,
     Float32List(3)..[2] = devicePixelRatio * elevation,
     Float32List(3)
       ..[0] = 0
@@ -108,5 +95,4 @@ void drawSkShadow(
     tonalColors.spot,
     flags.toDouble(),
   );
-  skPath.delete();
 }

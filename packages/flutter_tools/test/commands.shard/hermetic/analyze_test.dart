@@ -2,25 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
-import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
+import 'analysis_server_mock.dart';
 
 const _kFlutterRoot = '/data/flutter';
 const SIGABRT = -6;
@@ -86,11 +84,11 @@ void main() {
             // artifact paths are from Artifacts.test() and stable
             command: <String>[
               'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
               '--suppress-analytics',
             ],
             exitCode: SIGABRT,
@@ -115,39 +113,76 @@ void main() {
     );
 
     testUsingContext(
+      'Analysis server premature exit with 255 throws ToolExit',
+      () async {
+        const stderr = 'Fatal error in analyzer';
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: stderr,
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze']),
+          throwsA(
+            isA<ToolExit>()
+                .having(
+                  (ToolExit e) => e.message,
+                  'message',
+                  contains('analysis server exited with code 255 and output:\n[stderr] $stderr'),
+                )
+                .having((ToolExit e) => e.exitCode, 'exitCode', equals(255)),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       '--flutter-repo analyzes everything in the flutterRoot',
       () async {
-        final streamController = StreamController<List<int>>();
-        final sink = IOSink(streamController.sink);
+        final process = MockLspServerProcess();
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             // artifact paths are from Artifacts.test() and stable
             command: const <String>[
               'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
               '--suppress-analytics',
             ],
-            stdin: sink,
-            stdout: '{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}',
+            process: process,
           ),
         ]);
+
         await runner.run(<String>['analyze', '--flutter-repo']);
-        final setAnalysisRootsCommand =
-            jsonDecode(
-                  await streamController.stream
-                      .transform(utf8.decoder)
-                      .transform(const LineSplitter())
-                      .elementAt(1),
-                )
-                as Map<String, Object?>;
-        expect(setAnalysisRootsCommand['method'], 'analysis.setAnalysisRoots');
-        final params = setAnalysisRootsCommand['params']! as Map<String, Object?>;
-        expect(params['included'], <String?>[Cache.flutterRoot]);
-        expect(params['excluded'], isEmpty);
+
+        final Map<String, Object?> request = await process.initializeRequest;
+        final params = request['params']! as Map<String, Object?>;
+        expect(
+          params['workspaceFolders'] as List?,
+          contains(
+            equals(<String, dynamic>{
+              'name': '/home/user/flutter',
+              'uri': 'file:///home/user/flutter/',
+            }),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -181,27 +216,6 @@ void main() {
     // Ensure no exceptions
     inRepo(null, fileSystem);
     inRepo(<String>[], fileSystem);
-  });
-
-  testWithoutContext('AnalysisError from json write correct', () {
-    final json = <String, dynamic>{
-      'severity': 'INFO',
-      'type': 'TODO',
-      'location': <String, dynamic>{
-        'file': '/Users/.../lib/test.dart',
-        'offset': 362,
-        'length': 72,
-        'startLine': 15,
-        'startColumn': 4,
-      },
-      'message': 'Prefer final for variable declarations if they are not reassigned.',
-      'code': 'var foo = 123;',
-      'hasFix': false,
-    };
-    expect(
-      WrittenError.fromJson(json).toString(),
-      '[info] Prefer final for variable declarations if they are not reassigned (/Users/.../lib/test.dart:15:4)',
-    );
   });
 }
 

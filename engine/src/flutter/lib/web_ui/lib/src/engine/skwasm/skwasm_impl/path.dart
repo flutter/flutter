@@ -14,17 +14,79 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, DisposablePath {
-  factory SkwasmPath() {
-    return SkwasmPath.fromHandle(pathCreate());
+ui.Rect _getPathBounds(Pointer<RawPath> handle) {
+  return withStackScope((StackScope s) {
+    final Pointer<Float> rectBuffer = s.allocFloatArray(4);
+    pathGetBounds(handle, rectBuffer);
+    return s.convertRectFromNative(rectBuffer);
+  });
+}
+
+class SkwasmPath implements BackendPath {
+  SkwasmPath.fromHandle(this.handle);
+
+  final Pointer<RawPath> handle;
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    assert(!_isDisposed, 'SkwasmPath has already been disposed.');
+    if (!_isDisposed) {
+      pathDispose(handle);
+      _isDisposed = true;
+    }
   }
 
-  factory SkwasmPath.from(SkwasmPath source) {
-    return SkwasmPath.fromHandle(pathCopy(source.handle));
+  bool contains(ui.Offset point) => pathContains(handle, point.dx, point.dy);
+  ui.PathFillType get fillType => ui.PathFillType.values[pathGetFillType(handle)];
+
+  @override
+  ui.Rect getBounds() => _getPathBounds(handle);
+
+  @override
+  SkwasmPathMetricIterator computeMetrics({bool forceClosed = false}) {
+    return SkwasmPathMetricIterator(this, forceClosed);
   }
 
-  SkwasmPath.fromHandle(PathHandle handle)
-    : super(handle, (PathHandle h) => pathDispose(h), 'Path');
+  @override
+  String toSvgString() {
+    final SkStringHandle skString = pathGetSvgString(handle);
+    final Pointer<Int8> buffer = skStringGetData(skString);
+    final int length = skStringGetLength(skString);
+    final String svgString = utf8.decode(buffer.toUint8List(length));
+    skStringFree(skString);
+    return svgString;
+  }
+}
+
+class SkwasmPathBuilder implements BackendPathBuilder {
+  factory SkwasmPathBuilder() {
+    return SkwasmPathBuilder.fromHandle(pathCreate());
+  }
+
+  factory SkwasmPathBuilder.from(SkwasmPath source) {
+    return SkwasmPathBuilder.fromHandle(pathCopy(source.handle));
+  }
+
+  SkwasmPathBuilder.fromHandle(this.handle);
+
+  final Pointer<RawPath> handle;
+  bool _isDisposed = false;
+
+  @override
+  SkwasmPath build() {
+    assert(!_isDisposed, 'SkwasmPathBuilder has been disposed.');
+    return SkwasmPath.fromHandle(pathCopy(handle));
+  }
+
+  @override
+  void dispose() {
+    assert(!_isDisposed, 'SkwasmPathBuilder has already been disposed.');
+    if (!_isDisposed) {
+      pathDispose(handle);
+      _isDisposed = true;
+    }
+  }
 
   @override
   ui.PathFillType get fillType => ui.PathFillType.values[pathGetFillType(handle)];
@@ -172,20 +234,20 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, Disp
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
-    addPath((path as LazyPath).builtPath, offset);
+    addPath((path as EnginePath).backendPath, offset);
   }
 
   @override
-  void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
+  void addPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, false, matrix4: matrix4);
   }
 
   @override
-  void extendWithPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
+  void extendWithPath(BackendPath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, true, matrix4: matrix4);
   }
 
-  void _addPath(ui.Path path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
+  void _addPath(BackendPath path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
     assert(path is SkwasmPath);
     withStackScope((StackScope s) {
       final Pointer<Float> convertedMatrix = s.convertMatrix4toSkMatrix(
@@ -207,53 +269,51 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, Disp
   bool contains(ui.Offset point) => pathContains(handle, point.dx, point.dy);
 
   @override
-  ui.Path shift(ui.Offset offset) =>
-      transform(Matrix4.translationValues(offset.dx, offset.dy, 0.0).toFloat64());
+  void shiftInPlace(ui.Offset offset) {
+    transformInPlace(Matrix4.translationValues(offset.dx, offset.dy, 0.0).toFloat64());
+  }
 
   @override
-  ui.Path transform(Float64List matrix4) {
+  void transformInPlace(Float64List matrix4) {
     return withStackScope((StackScope s) {
-      final PathHandle newPathHandle = pathCopy(handle);
-      pathTransform(newPathHandle, s.convertMatrix4toSkMatrix(matrix4));
-      return SkwasmPath.fromHandle(newPathHandle);
+      pathTransform(handle, s.convertMatrix4toSkMatrix(matrix4));
     });
   }
 
   @override
-  ui.Rect getBounds() {
-    return withStackScope((StackScope s) {
-      final Pointer<Float> rectBuffer = s.allocFloatArray(4);
-      pathGetBounds(handle, rectBuffer);
-      return s.convertRectFromNative(rectBuffer);
-    });
-  }
+  ui.Rect getBounds() => _getPathBounds(handle);
 
-  static SkwasmPath combine(ui.PathOperation operation, SkwasmPath path1, SkwasmPath path2) =>
-      SkwasmPath.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
+  static SkwasmPathBuilder combine(
+    ui.PathOperation operation,
+    SkwasmPath path1,
+    SkwasmPath path2,
+  ) => SkwasmPathBuilder.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
+}
+
+class SkwasmPathConstructors implements BackendPathConstructors {
+  @override
+  SkwasmPathBuilder createNew() => SkwasmPathBuilder();
 
   @override
-  SkwasmPathMetrics computeMetrics({bool forceClosed = false}) {
-    return SkwasmPathMetrics(path: this, forceClosed: forceClosed);
-  }
+  BackendPathBuilder fromPath(BackendPath path) => SkwasmPathBuilder.from(path as SkwasmPath);
 
   @override
-  String toSvgString() {
-    final SkStringHandle skString = pathGetSvgString(handle);
-    final Pointer<Int8> buffer = skStringGetData(skString);
-    final int length = skStringGetLength(skString);
-    final characters = List<int>.generate(length, (int i) => buffer[i]);
-    final String svgString = utf8.decode(characters);
-    skStringFree(skString);
-    return svgString;
+  SkwasmPathBuilder combinePaths(ui.PathOperation operation, BackendPath path1, BackendPath path2) {
+    return SkwasmPathBuilder.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
   }
 }
 
-class SkwasmPathConstructors implements DisposablePathConstructors {
-  @override
-  SkwasmPath createNew() => SkwasmPath();
-
-  @override
-  SkwasmPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
-    return SkwasmPath.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+/// Explicitly masks the signed Int8 values to positive unsigned bytes (& 0xFF)
+/// to guarantee correct decoding by the UTF-8 decoder.
+extension on Pointer<Int8> {
+  Uint8List toUint8List(int length) {
+    final list = Uint8List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i] & 0xFF;
+    }
+    return list;
   }
 }

@@ -66,6 +66,7 @@ void main() {
           ),
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
+          recordedUsesFile: null,
         ),
         throwsToolExit(
           message: 'Enable data assets using `flutter config --enable-dart-data-assets`',
@@ -103,6 +104,7 @@ void main() {
             projectUri: projectUri,
             buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
             buildDataAssets: true,
+            recordedUsesFile: null,
             fileSystem: fileSystem,
             buildRunner: FakeFlutterNativeAssetsBuildRunner(
               packagesWithNativeAssetsResult: <String>['bar'],

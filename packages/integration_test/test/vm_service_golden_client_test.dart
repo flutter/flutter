@@ -114,6 +114,30 @@ void main() {
       expect(response.result, '{}');
     });
 
+    test('"id" must match a pending request (failed previously)', () async {
+      // This is based on an implementation detail of knowing how IDs are generated.
+      const nextId = 1;
+
+      expect(
+        goldenFileComparator.compare(Uint8List(0), Uri(path: 'some-file')),
+        throwsA(contains('We did a bad')),
+      );
+
+      dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'id': '$nextId', 'error': 'We did a bad'},
+      );
+      expect(response.errorDetail, isNull);
+
+      response = await goldenFileComparator.handleEvent(<String, String>{
+        'id': '$nextId',
+        'result': 'true',
+      });
+      expect(
+        response.errorDetail,
+        stringContainsInOrder(<String>['No pending request with method ID', '1']),
+      );
+    });
+
     test('requests that do not contain "error" return an empty response', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
       const nextId = 1;

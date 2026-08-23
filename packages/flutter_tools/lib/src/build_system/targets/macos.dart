@@ -210,10 +210,10 @@ class DebugMacOSFramework extends Target {
       environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'),
     );
 
-    final Iterable<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
+    final Iterable<CpuArch> cpuArchs = getCpuArchsFromEnv(environment.defines);
 
-    final Iterable<String> darwinArchArguments = darwinArchs.expand(
-      (DarwinArch arch) => <String>['-arch', arch.name],
+    final Iterable<String> darwinArchArguments = cpuArchs.expand(
+      (CpuArch arch) => <String>['-arch', arch.darwinArchName],
     );
 
     outputFile.createSync(recursive: true);
@@ -286,8 +286,8 @@ class CompileMacOSFramework extends Target {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
-    final List<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
+    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    final List<CpuArch> cpuArchs = getCpuArchsFromEnv(environment.defines);
     if (targetPlatform != TargetPlatform.darwin) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
@@ -301,14 +301,14 @@ class CompileMacOSFramework extends Target {
     );
 
     final pending = <Future<int>>[];
-    for (final darwinArch in darwinArchs) {
+    for (final cpuArch in cpuArchs) {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('snapshot.${darwinArch.name}.json');
+            .childFile('snapshot.${cpuArch.darwinArchName}.json');
         final File precompilerTraceFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('trace.${darwinArch.name}.json');
+            .childFile('trace.${cpuArch.darwinArchName}.json');
         extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
@@ -320,9 +320,9 @@ class CompileMacOSFramework extends Target {
         snapshotter.build(
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
-          outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
+          outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
           platform: TargetPlatform.darwin,
-          darwinArch: darwinArch,
+          cpuArch: cpuArch,
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
@@ -339,7 +339,7 @@ class CompileMacOSFramework extends Target {
     // Combine the app lib into a fat framework.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework/App',
       inputDir: buildOutputPath,
     );
@@ -347,7 +347,7 @@ class CompileMacOSFramework extends Target {
     // And combine the dSYM for each architecture too, if it was created.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
       inputDir: buildOutputPath,
       // Don't fail if the dSYM wasn't created (i.e. during a debug build).
@@ -382,12 +382,12 @@ abstract class MacOSBundleFlutterAssets extends Target {
   const MacOSBundleFlutterAssets();
 
   @override
-  List<Target> get dependencies => const <Target>[DartBuildForNative()];
+  List<Target> get dependencies => const <Target>[LinkHooks()];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
-    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
+    Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...IconTreeShaker.inputs,
   ];
 
@@ -446,7 +446,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
-    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,

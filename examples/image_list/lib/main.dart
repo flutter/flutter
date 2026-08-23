@@ -5,8 +5,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// An example that sets up local http server for serving single
 /// image, creates single flutter widget with five copies of requested
@@ -112,7 +113,7 @@ Future<void> main() async {
       // Let other isolates and microtasks to run.
       await Future<void>.delayed(Duration.zero);
     }
-    request.response.close();
+    await request.response.close();
   });
 
   runApp(MyApp(port));
@@ -154,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     });
   }
 
-  Widget createImage(final int index, final Completer<bool> completer) {
+  Widget createImage(int index, Completer<bool> completer) {
     return Image.network(
       'https://localhost:${widget.port}/${_counter * images + index}',
       frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {

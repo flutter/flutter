@@ -19,7 +19,9 @@ class RenderContext {
   virtual ~RenderContext() = default;
   virtual void RenderPicture(
       const sk_sp<flutter::DisplayList> display_list) = 0;
-  virtual void RenderImage(flutter::DlImage* image, ImageByteFormat format) = 0;
+  virtual bool RasterizeImage(flutter::DlImage* image,
+                              ImageByteFormat format,
+                              void* out_pixels) = 0;
   virtual void Resize(int width, int height) = 0;
   virtual void SetResourceCacheLimit(int bytes) = 0;
 };

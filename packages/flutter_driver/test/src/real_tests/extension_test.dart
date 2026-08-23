@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210721"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TextInputAction;
 import 'package:flutter/rendering.dart';
@@ -34,6 +27,21 @@ Future<void> silenceDriverLogger(AsyncCallback callback) async {
 }
 
 void main() {
+  setUpAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async {
+        return null;
+      },
+    );
+  });
+
+  tearDownAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
+  });
   group('waitUntilNoTransientCallbacks', () {
     late FlutterDriverExtension driverExtension;
     Map<String, dynamic>? result;
@@ -58,6 +66,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -75,6 +84,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -126,6 +136,7 @@ void main() {
         driverExtension
             .call(const WaitForCondition(NoTransientCallbacks()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -146,6 +157,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -166,6 +178,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -183,6 +196,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -204,6 +218,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(combinedCondition).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -227,6 +242,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(combinedCondition).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -255,6 +271,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(combinedCondition).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -275,6 +292,7 @@ void main() {
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -298,11 +316,16 @@ void main() {
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
         });
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel', null);
+        });
+        // ignore: unawaited_futures
         channel.invokeMethod<String>('sayHello', 'hello');
 
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -343,13 +366,19 @@ void main() {
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
         });
-
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel1', null);
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel2', null);
+        });
+        // ignore: unawaited_futures
         channel1.invokeMethod<String>('sayHello', 'hello');
+        // ignore: unawaited_futures
         channel2.invokeMethod<String>('sayHello', 'hello');
 
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -394,13 +423,19 @@ void main() {
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
         });
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel1', null);
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel2', null);
+        });
 
+        // ignore: unawaited_futures
         channel1.invokeMethod<String>('sayHello', 'hello');
 
         // Calls the waiting API before the second channel message is sent.
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -410,6 +445,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 5));
         expect(result, isNull);
 
+        // ignore: unawaited_futures
         channel2.invokeMethod<String>('sayHello', 'hello');
 
         // Result of channel 1 is received, but channel 2 is still pending, so still waiting.
@@ -433,7 +469,7 @@ void main() {
         ) {
           return Future<ByteData>.delayed(
             const Duration(milliseconds: 20),
-            () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
+            () => jsonMessage.encodeMessage(const <dynamic>['hello world'])!,
           );
         });
 
@@ -444,15 +480,22 @@ void main() {
         ) {
           return Future<ByteData>.delayed(
             const Duration(milliseconds: 10),
-            () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
+            () => jsonMessage.encodeMessage(const <dynamic>['hello world'])!,
           );
         });
 
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel1', null);
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel2', null);
+        });
+
+        // ignore: unawaited_futures
         channel1.invokeMethod<String>('sayHello', 'hello');
 
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -462,6 +505,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 5));
         expect(result, isNull);
 
+        // ignore: unawaited_futures
         channel2.invokeMethod<String>('sayHello', 'hello');
 
         // Result of channel 2 is received, but channel 1 is still pending, so still waiting.
@@ -470,7 +514,7 @@ void main() {
 
         // Now we receive the result.
         await tester.pump(const Duration(milliseconds: 5));
-        expect(result, <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
+        expect(result, const <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
       },
     );
   });
@@ -561,6 +605,16 @@ void main() {
   });
 
   testWidgets('getText', (WidgetTester tester) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.processText,
+      (_) async => null,
+    );
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.processText,
+        null,
+      );
+    });
     await silenceDriverLogger(() async {
       final driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
@@ -576,6 +630,16 @@ void main() {
         return GetTextResult.fromJson(result['response'] as Map<String, dynamic>).text;
       }
 
+      final controller3 = TextEditingController(text: 'Hello3');
+      final controller4 = TextEditingController(text: 'Hello4');
+      final controller5 = TextEditingController(text: 'Hello5');
+      final focusNode3 = FocusNode();
+      addTearDown(() {
+        controller3.dispose();
+        controller4.dispose();
+        controller5.dispose();
+        focusNode3.dispose();
+      });
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -594,8 +658,8 @@ void main() {
                   height: 25.0,
                   child: EditableText(
                     key: const ValueKey<String>('text3'),
-                    controller: TextEditingController(text: 'Hello3'),
-                    focusNode: FocusNode(),
+                    controller: controller3,
+                    focusNode: focusNode3,
                     style: const TextStyle(),
                     cursorColor: Colors.red,
                     backgroundCursorColor: Colors.black,
@@ -603,16 +667,13 @@ void main() {
                 ),
                 SizedBox(
                   height: 25.0,
-                  child: TextField(
-                    key: const ValueKey<String>('text4'),
-                    controller: TextEditingController(text: 'Hello4'),
-                  ),
+                  child: TextField(key: const ValueKey<String>('text4'), controller: controller4),
                 ),
                 SizedBox(
                   height: 25.0,
                   child: TextFormField(
                     key: const ValueKey<String>('text5'),
-                    controller: TextEditingController(text: 'Hello5'),
+                    controller: controller5,
                   ),
                 ),
                 SizedBox(
@@ -955,6 +1016,16 @@ void main() {
     );
 
     testWidgets('enableTextEntryEmulation false', (WidgetTester tester) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.processText,
+        (_) async => null,
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.processText,
+          null,
+        );
+      });
       driverExtension = FlutterDriverExtension((String? arg) async => '', true, false);
 
       await tester.pumpWidget(testWidget);
@@ -964,6 +1035,16 @@ void main() {
     });
 
     testWidgets('enableTextEntryEmulation true', (WidgetTester tester) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.processText,
+        (_) async => null,
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.processText,
+          null,
+        );
+      });
       driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
       await tester.pumpWidget(testWidget);
@@ -1236,6 +1317,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -1253,6 +1335,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -1273,6 +1356,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -1312,9 +1396,20 @@ void main() {
     );
 
     testWidgets('press done trigger onSubmitted and change value', (WidgetTester tester) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.processText,
+        (_) async => null,
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.processText,
+          null,
+        );
+      });
       driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
       final controller = TextEditingController(text: 'foo');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(testWidget(controller));
 
       expect(controller.value.text, 'foo');

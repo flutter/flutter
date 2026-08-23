@@ -17,6 +17,29 @@ void main(List<String> arguments) {
   ).run();
 }
 
+enum XcodeBuildCommand {
+  build('build', true),
+  prepare('prepare', true),
+  thin('thin'),
+  embed('embed', true),
+  embedAndThin('embed_and_thin', true),
+  buildAddToApp('build-add-to-app'),
+  testVmServiceBonjourService('test_vm_service_bonjour_service');
+
+  const XcodeBuildCommand(this.command, [this.requiresGeneratedXcconfigImport = false]);
+  final String command;
+  final bool requiresGeneratedXcconfigImport;
+
+  static XcodeBuildCommand? tryParse(String command) {
+    for (final XcodeBuildCommand value in values) {
+      if (value.command == command) {
+        return value;
+      }
+    }
+    return null;
+  }
+}
+
 /// Container for script arguments and environment variables.
 ///
 /// All interactions with the platform are broken into individual methods that
@@ -43,42 +66,71 @@ class Context {
       exit(-1);
     }
 
-    final String subCommand = validateCommand(arguments[0]);
+    final XcodeBuildCommand subCommand = validateCommand(arguments[0]);
     final String? platformName = arguments.length < 2 ? null : arguments[1];
     final TargetPlatform platform = parsePlatform(platformName);
+    if (subCommand.requiresGeneratedXcconfigImport) {
+      validateGeneratedBuildSettings(platform);
+    }
     switch (subCommand) {
-      case 'build':
-        buildApp(platform);
-      case 'prepare':
+      case XcodeBuildCommand.build:
+        buildApp(platform, 'build');
+      case XcodeBuildCommand.prepare:
         unpackFor(platform, 'prepare');
-      case 'thin':
+      case XcodeBuildCommand.buildAddToApp:
+        buildForNativeApp(platform);
+      case XcodeBuildCommand.thin:
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
-      case 'embed':
-      case 'embed_and_thin':
+      case XcodeBuildCommand.embed:
+      case XcodeBuildCommand.embedAndThin:
         // Thinning is handled during the bundle asset assemble build target, so just embed.
         embedFlutterFrameworks(platform);
-      case 'test_vm_service_bonjour_service':
+      case XcodeBuildCommand.testVmServiceBonjourService:
         // Exposed for integration testing only.
         addVmServiceBonjourService();
     }
   }
 
+  /// If any of these are missing from the environment, the Xcode project's
+  /// build configurations are not correctly including the generated xcconfig,
+  /// and the build would otherwise continue in a broken state (no app version,
+  /// dropped dart-defines, wrong target, etc).
+  static const List<String> requiredGeneratedBuildSettings = <String>[
+    'FLUTTER_ROOT',
+    'FLUTTER_BUILD_DIR',
+    'FLUTTER_BUILD_NAME',
+    'FLUTTER_BUILD_NUMBER',
+  ];
+
+  void validateGeneratedBuildSettings(TargetPlatform platform) {
+    final bool hasMissingSettings = requiredGeneratedBuildSettings.any(
+      (String setting) => environment[setting] == null,
+    );
+    if (!hasMissingSettings) {
+      return;
+    }
+    final includeDirective = platform == TargetPlatform.macos
+        ? '#include "ephemeral/Flutter-Generated.xcconfig"'
+        : '#include "Generated.xcconfig"';
+    echoXcodeError(
+      'Missing Flutter build settings. Run "flutter build ${platform.name} --config-only" '
+      'to regenerate the Flutter xcconfig files, and verify the build configuration for '
+      'the current scheme includes $includeDirective.',
+    );
+    exitApp(-1);
+  }
+
   /// Validates the command argument matches one of the possible commands.
   /// Returns null if not.
-  String validateCommand(String command) {
-    switch (command) {
-      case 'build':
-      case 'prepare':
-      case 'thin':
-      case 'embed':
-      case 'embed_and_thin':
-      case 'test_vm_service_bonjour_service':
-        return command;
-      default:
-        echoXcodeError(incompatibleErrorMessage);
-        exit(-1);
+  XcodeBuildCommand validateCommand(String command) {
+    final XcodeBuildCommand? parsedCommand = XcodeBuildCommand.tryParse(command);
+    if (parsedCommand == null) {
+      echoXcodeError(incompatibleErrorMessage);
+      exit(-1);
     }
+
+    return parsedCommand;
   }
 
   /// Converts the [platformName] argument to a [TargetPlatform]. If there is
@@ -222,6 +274,10 @@ class Context {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
     // they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+
+    // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+    // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterToolHelper.swift.tmpl
+
     final String? buildMode = (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])
         ?.toLowerCase();
 
@@ -269,6 +325,14 @@ class Context {
     ]);
   }
 
+  /// Call `flutter assemble` from a build script in a native app (add-to-app).
+  /// After building the App.framework, embed it and the Flutter framework into the app.
+  /// This does a combination of the `build` and `embed_and_thin` commands in a single build script.
+  void buildForNativeApp(TargetPlatform platform) {
+    buildApp(platform, 'build-add-to-app');
+    embedFlutterFrameworks(platform);
+  }
+
   /// Embeds the App.framework, Flutter/FlutterMacOS.framework, and any native
   /// asset frameworks into the app.
   ///
@@ -296,6 +360,8 @@ class Context {
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type-specific build.
     switch (platform) {
+      // NOTE: If you modify the rsync logic here, you should likely also update the equivalent implementation in
+      // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
       case TargetPlatform.ios:
         runRsync('${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework', '$xcodeFrameworksDir/');
       case TargetPlatform.macos:
@@ -385,6 +451,8 @@ class Context {
   }
 
   void _codesignFramework(String expandedCodeSignIdentity, String frameworkPath) {
+    // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+    // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
     runSync('codesign', <String>[
       '--force',
       '--verbose',
@@ -517,7 +585,7 @@ class Context {
 
   /// Calls `flutter assemble [buildMode]_[platform]_bundle_flutter_assets`
   /// (e.g. `debug_ios_bundle_flutter_assets`, `debug_macos_bundle_flutter_assets`)
-  void buildApp(TargetPlatform platform) {
+  void buildApp(TargetPlatform platform, String command) {
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
@@ -525,7 +593,7 @@ class Context {
     final String buildMode = parseFlutterBuildMode();
 
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
-      command: 'build',
+      command: command,
       buildMode: buildMode,
       sourceRoot: sourceRoot,
       platform: platform,

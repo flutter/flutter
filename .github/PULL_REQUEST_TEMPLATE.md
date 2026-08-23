@@ -25,6 +25,8 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].
 
+If this change needs to override an active code freeze, provide a comment explaining why. The code freeze workflow can be overridden by code reviewers. See pinned issues for any active code freezes with guidance.
+
 **Note**: The Flutter team is currently trialing the use of [Gemini Code Assist for GitHub](https://developers.google.com/gemini-code-assist/docs/review-github-code). Comments from the `gemini-code-assist` bot should not be taken as authoritative feedback from the Flutter team. If you find its comments useful you can update your code accordingly, but if you are unsure or disagree with the feedback, please feel free to wait for a Flutter team member's review for guidance on which automated comments should be addressed.
 
 <!-- Links -->

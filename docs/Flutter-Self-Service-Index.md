@@ -315,4 +315,4 @@ Flutter provides multiple functionality through self-service services. Most of t
 </table>
 
 
-Googlers can access the internal version using [go/flutter-self-service](http://go/flutter-self-service)
+Googlers can access the internal version using [go/flutter-self-service](https://goto.google.com/flutter-self-service)

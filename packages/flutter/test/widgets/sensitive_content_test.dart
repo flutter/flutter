@@ -19,6 +19,17 @@ void main() {
       null,
     );
   });
+
+  testWidgets('SensitiveContent widget can be tested without mocking method channels', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
+    );
+
+    expect(find.byType(SensitiveContent), findsOneWidget);
+  });
+
   testWidgets(
     'while SensitiveContent widget is being registered, SizedBox.shrink is built initially, then child widget is built upon completion',
     (WidgetTester tester) async {
@@ -123,4 +134,17 @@ void main() {
       expect(setContentSensitivityCall, 2);
     },
   );
+
+  testWidgets('SensitiveContent does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SensitiveContent)), Size.zero);
+  });
 }

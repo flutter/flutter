@@ -16,6 +16,11 @@ namespace testing {
 
 extern const ProcTableGLES::Resolver kMockResolverGLES;
 
+/// A resolver that behaves like |kMockResolverGLES| but hides the hardware
+/// instancing entry points, so the OpenGL ES backend exercises its
+/// instanced-draw emulation fallback.
+extern const ProcTableGLES::Resolver kMockResolverGLESWithoutInstancing;
+
 class IMockGLESImpl {
  public:
   virtual ~IMockGLESImpl() = default;
@@ -92,6 +97,10 @@ class IMockGLESImpl {
   virtual void DeleteQueriesEXT(GLsizei size, const GLuint* queries) {}
   virtual void GenBuffers(GLsizei n, GLuint* buffers) {}
   virtual void DeleteBuffers(GLsizei n, const GLuint* buffers) {}
+  virtual void BufferSubData(GLenum target,
+                             GLintptr offset,
+                             GLsizeiptr size,
+                             const void* data) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
   virtual void DiscardFramebufferEXT(GLenum target,
                                      GLsizei numAttachments,
@@ -100,6 +109,41 @@ class IMockGLESImpl {
                                      GLsizei numAttachments,
                                      const GLenum* attachments) {};
   virtual void GetIntegerv(GLenum name, GLint* attachments) {};
+  virtual void Viewport(GLint x, GLint y, GLsizei width, GLsizei height) {}
+  virtual void DrawArrays(GLenum mode, GLint first, GLsizei count) {}
+  virtual void DrawElements(GLenum mode,
+                            GLsizei count,
+                            GLenum type,
+                            const void* indices) {}
+  virtual void DrawArraysInstanced(GLenum mode,
+                                   GLint first,
+                                   GLsizei count,
+                                   GLsizei instancecount) {}
+  virtual void DrawElementsInstanced(GLenum mode,
+                                     GLsizei count,
+                                     GLenum type,
+                                     const void* indices,
+                                     GLsizei instancecount) {}
+  virtual void VertexAttribDivisor(GLuint index, GLuint divisor) {}
+  virtual void BindBufferRange(GLenum target,
+                               GLuint index,
+                               GLuint buffer,
+                               GLintptr offset,
+                               GLsizeiptr size) {}
+  virtual void GetProgramiv(GLuint program, GLenum pname, GLint* params) {}
+  virtual void GetActiveUniformBlockiv(GLuint program,
+                                       GLuint uniformBlockIndex,
+                                       GLenum pname,
+                                       GLint* params) {}
+  virtual void GetActiveUniformBlockName(GLuint program,
+                                         GLuint uniformBlockIndex,
+                                         GLsizei bufSize,
+                                         GLsizei* length,
+                                         GLchar* uniformBlockName) {}
+  virtual GLuint GetUniformBlockIndex(GLuint program,
+                                      const GLchar* uniformBlockName) {
+    return 0;
+  }
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -227,6 +271,11 @@ class MockGLESImpl : public IMockGLESImpl {
               DeleteBuffers,
               (GLsizei n, const GLuint* buffers),
               (override));
+  MOCK_METHOD(
+      void,
+      BufferSubData,
+      (GLenum target, GLintptr offset, GLsizeiptr size, const void* data),
+      (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
   MOCK_METHOD(void,
               DiscardFramebufferEXT,
@@ -241,6 +290,63 @@ class MockGLESImpl : public IMockGLESImpl {
                const GLenum* attachments),
               (override));
   MOCK_METHOD(void, GetIntegerv, (GLenum name, GLint* value), (override));
+  MOCK_METHOD(void,
+              Viewport,
+              (GLint x, GLint y, GLsizei width, GLsizei height),
+              (override));
+  MOCK_METHOD(void,
+              DrawArrays,
+              (GLenum mode, GLint first, GLsizei count),
+              (override));
+  MOCK_METHOD(void,
+              DrawElements,
+              (GLenum mode, GLsizei count, GLenum type, const void* indices),
+              (override));
+  MOCK_METHOD(void,
+              DrawArraysInstanced,
+              (GLenum mode, GLint first, GLsizei count, GLsizei instancecount),
+              (override));
+  MOCK_METHOD(void,
+              DrawElementsInstanced,
+              (GLenum mode,
+               GLsizei count,
+               GLenum type,
+               const void* indices,
+               GLsizei instancecount),
+              (override));
+  MOCK_METHOD(void,
+              VertexAttribDivisor,
+              (GLuint index, GLuint divisor),
+              (override));
+  MOCK_METHOD(void,
+              BindBufferRange,
+              (GLenum target,
+               GLuint index,
+               GLuint buffer,
+               GLintptr offset,
+               GLsizeiptr size),
+              (override));
+  MOCK_METHOD(void,
+              GetProgramiv,
+              (GLuint program, GLenum pname, GLint* params),
+              (override));
+  MOCK_METHOD(
+      void,
+      GetActiveUniformBlockiv,
+      (GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params),
+      (override));
+  MOCK_METHOD(void,
+              GetActiveUniformBlockName,
+              (GLuint program,
+               GLuint uniformBlockIndex,
+               GLsizei bufSize,
+               GLsizei* length,
+               GLchar* uniformBlockName),
+              (override));
+  MOCK_METHOD(GLuint,
+              GetUniformBlockIndex,
+              (GLuint program, const GLchar* uniformBlockName),
+              (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.

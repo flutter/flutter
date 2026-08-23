@@ -29,15 +29,12 @@ constexpr auto kDartRunnerEnvironment = "dart_runner_env";
 
 constexpr auto kDartAotRunner = "dart_aot_runner";
 constexpr auto kDartAotRunnerRef = ChildRef{kDartAotRunner};
-constexpr auto kDartAotRunnerUrl =
-    "fuchsia-pkg://fuchsia.com/oot_dart_aot_runner#meta/"
-    "dart_aot_runner.cm";
+constexpr auto kDartAotRunnerUrl = "dart_aot_runner#meta/dart_aot_runner.cm";
 
 constexpr auto kDartAotEchoServer = "dart_aot_echo_server";
 constexpr auto kDartAotEchoServerRef = ChildRef{kDartAotEchoServer};
 constexpr auto kDartAotEchoServerUrl =
-    "fuchsia-pkg://fuchsia.com/dart_aot_echo_server#meta/"
-    "dart_aot_echo_server.cm";
+    "dart_aot_echo_server#meta/dart_aot_echo_server.cm";
 
 class RealmBuilderTest : public ::loop_fixture::RealLoop,
                          public ::testing::Test {
@@ -79,12 +76,13 @@ TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
 
   // Route base capabilities to the Dart AOT runner
   realm_builder.AddRoute(
-      Route{.capabilities = {Protocol{"fuchsia.logger.LogSink"},
-                             Protocol{"fuchsia.tracing.provider.Registry"},
-                             Protocol{"fuchsia.posix.socket.Provider"},
+      Route{.capabilities = {Protocol{"fuchsia.inspect.InspectSink"},
                              Protocol{"fuchsia.intl.PropertyProvider"},
+                             Protocol{"fuchsia.kernel.VmexResource"},
+                             Protocol{"fuchsia.logger.LogSink"},
+                             Protocol{"fuchsia.posix.socket.Provider"},
+                             Protocol{"fuchsia.tracing.provider.Registry"},
                              Protocol{"fuchsia.vulkan.loader.Loader"},
-                             Protocol{"fuchsia.inspect.InspectSink"},
                              Directory{"config-data"}},
             .source = ParentRef(),
             .targets = {kDartAotRunnerRef, kDartAotEchoServerRef}});

@@ -77,9 +77,17 @@ void main() {
             ),
             globals.fs.path.join('usr', 'local', 'bin', 'adb'),
             globals.fs.path.join('Android', 'platform-tools', 'adb.exe'),
+            globals.fs.path.join('flutter', 'pubspec.lock'),
+            globals.fs.path.join('flutter', 'version'),
           ];
           for (final filePath in filePaths) {
-            globals.fs.file(filePath).createSync(recursive: true);
+            final File file = globals.fs.file(filePath);
+            file.createSync(recursive: true);
+            if (filePath.endsWith('pubspec.yaml')) {
+              file.writeAsStringSync('dependencies: {}\n');
+            } else if (filePath.endsWith('pubspec.lock')) {
+              file.writeAsStringSync('packages: {}\n');
+            }
           }
           final templatePaths = <String>[
             globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app'),
@@ -157,7 +165,7 @@ void main() {
             globals.fs
                 .directory(templatePath)
                 .childFile('pubspec.yaml.tmpl')
-                .writeAsStringSync('name: my_app');
+                .writeAsStringSync('name: my_app\ndependencies: {}\n');
           }
           // Set up enough of the packages to satisfy the templating code.
           final File packagesFile = globals.fs.file(

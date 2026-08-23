@@ -14,13 +14,16 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import 'application_package.dart';
+import 'device_support.dart';
 import 'lldb.dart';
 import 'xcode_debug.dart';
+import 'xcodeproj.dart';
 
 /// Provides methods for launching and debugging apps on physical iOS CoreDevices.
 ///
@@ -38,12 +41,19 @@ class IOSCoreDeviceLauncher {
     required XcodeDebug xcodeDebug,
     required FileSystem fileSystem,
     required ProcessUtils processUtils,
+    required XcodeProjectInterpreter xcodeProjectInterpreter,
     @visibleForTesting LLDB? lldb,
   }) : _coreDeviceControl = coreDeviceControl,
        _logger = logger,
        _xcodeDebug = xcodeDebug,
        _fileSystem = fileSystem,
-       _lldb = lldb ?? LLDB(logger: logger, processUtils: processUtils);
+       _lldb =
+           lldb ??
+           LLDB(
+             logger: logger,
+             processUtils: processUtils,
+             xcodeProjectInterpreter: xcodeProjectInterpreter,
+           );
 
   final IOSCoreDeviceControl _coreDeviceControl;
   final Logger _logger;
@@ -92,10 +102,12 @@ class IOSCoreDeviceLauncher {
   /// Requires Xcode 16+.
   Future<bool> launchAppWithLLDBDebugger({
     required String deviceId,
+    required IOSDeviceSupport deviceSupport,
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
     required ShutdownHooks shutdownHooks,
+    required BuildMode mode,
   }) async {
     // Install app to device
     final (bool installStatus, IOSCoreDeviceInstallResult? installResult) = await _coreDeviceControl
@@ -140,11 +152,22 @@ class IOSCoreDeviceLauncher {
       return false;
     }
 
+    // Kill LLDB and devicectl if the CLI shuts down so they do not hang in the background.
+    shutdownHooks.addShutdownHook(() async {
+      try {
+        await stopApp(deviceId: deviceId, processId: processId);
+      } on Exception {
+        // ignore any failures
+      }
+    });
+
     // Start LLDB and attach to the device process.
     final bool attachStatus = await _lldb.attachAndStart(
       deviceId: deviceId,
       appProcessId: processId,
       lldbLogForwarder: lldbLogForwarder,
+      mode: mode,
+      deviceSupport: deviceSupport,
     );
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
@@ -153,6 +176,33 @@ class IOSCoreDeviceLauncher {
       return false;
     }
     return attachStatus;
+  }
+
+  /// Install and launch the app on the device with `devicectl` ([_coreDeviceControl])
+  /// and stream logs, but do not attach an LLDB debugger.
+  Future<bool> launchAppAndStreamLogsWithoutDebugger({
+    required String deviceId,
+    required String bundlePath,
+    required String bundleId,
+    required List<String> launchArguments,
+    required ShutdownHooks shutdownHooks,
+  }) async {
+    final (bool installStatus, _) = await _coreDeviceControl.installApp(
+      deviceId: deviceId,
+      bundlePath: bundlePath,
+    );
+    if (!installStatus) {
+      return false;
+    }
+
+    // Since we are not attaching a debugger, startStopped should be false.
+    return _coreDeviceControl.launchAppAndStreamLogs(
+      coreDeviceLogForwarder: coreDeviceLogForwarder,
+      deviceId: deviceId,
+      bundleId: bundleId,
+      launchArguments: launchArguments,
+      shutdownHooks: shutdownHooks,
+    );
   }
 
   /// Install and launch the app on the device through Xcode using Mac Automation ([_xcodeDebug]).
@@ -333,7 +383,7 @@ class IOSCoreDeviceControl {
     //   * Don't ignore flutter logs:
     //     2025-09-16 12:50:07.953318-0500 Runner[1279:149305] flutter: ...
     RegExp(
-      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:))(?!(\[UIKit App Config\] `UIScene` lifecycle)).*',
+      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:))(?!(\[UIKit App Config\] `UIScene` lifecycle))(?!.*UIScene life\s?cycle).*',
     ),
     // Ignore iOS execution mode and potential error. This is not meaningful to the developer.
     // Example:
@@ -831,7 +881,7 @@ class IOSCoreDeviceControl {
       // Signal script child jobs to exit and exit the shell.
       // See https://linux.die.net/Bash-Beginners-Guide/sect_12_01.html#sect_12_01_01_02.
       shutdownHooks.addShutdownHook(() => launchProcess.kill());
-      return launchCompleter.future;
+      return await launchCompleter.future;
     } on ProcessException catch (err) {
       _logger.printTrace('Error executing devicectl: $err');
       return false;
@@ -952,6 +1002,60 @@ class IOSCoreDeviceControl {
         if (processObject is Map<String, Object?>)
           IOSCoreDeviceRunningProcess.fromJson(processObject),
     ];
+  }
+
+  /// Captures a screenshot from the device and saves it to the destination.
+  ///
+  /// Returns true if successfully able to take screenshot.
+  Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
+    if (!_xcode.isDevicectlInstalled) {
+      _logger.printError('devicectl is not installed.');
+      return false;
+    }
+
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final File output = tempDirectory.childFile('screenshot_results.json');
+    output.createSync();
+
+    final command = <String>[
+      ..._xcode.xcrunCommand(),
+      'devicectl',
+      'device',
+      'capture',
+      'screenshot',
+      '--device',
+      deviceId,
+      '--destination',
+      destination,
+      '--json-output',
+      output.path,
+    ];
+
+    try {
+      await _processUtils.run(command, throwOnError: true);
+      final String stringOutput = output.readAsStringSync();
+
+      try {
+        final Object? decoded = json.decode(stringOutput);
+        if (decoded is Map<String, Object?>) {
+          final Object? decodeResult = decoded['info'];
+          if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
+            return true;
+          }
+        }
+        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+        return false;
+      } on FormatException {
+        _logger.printError('devicectl returned non-JSON response: $stringOutput');
+        return false;
+      }
+    } finally {
+      try {
+        tempDirectory.deleteSync(recursive: true);
+      } on FileSystemException {
+        // Ignore.
+      }
+    }
   }
 }
 

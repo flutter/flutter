@@ -138,8 +138,6 @@ class AnalyzeContinuously extends AnalyzeBase {
   }
 
   void _handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-    fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
-
     analyzedPaths.add(fileErrors.file);
     analysisErrors[fileErrors.file] = fileErrors.errors;
   }

@@ -10,7 +10,7 @@ namespace fml {
 namespace paths {
 
 std::pair<bool, std::string> GetExecutablePath() {
-  const int path_size = 255;
+  const int path_size = PATH_MAX;
   char path[path_size] = {0};
   auto read_size = ::readlink("/proc/self/exe", path, path_size);
   if (read_size == -1) {

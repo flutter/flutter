@@ -41,6 +41,7 @@ Stream<String> runAndGetStdout(
 
   // Close the stream controller after the command is complete. Otherwise,
   // the yield* will never finish.
+  // ignore: unawaited_futures
   command.whenComplete(output.close);
 
   yield* output.stream;

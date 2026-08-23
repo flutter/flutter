@@ -101,14 +101,18 @@ void _updateGeneratedEnvironmentVariablesScript({
   required List<String> xcodeBuildSettings,
   bool useMacOSConfig = false,
 }) {
-  final localsBuffer = StringBuffer();
+  final exportFileBuffer = StringBuffer();
+  final envBuffer = StringBuffer();
 
-  localsBuffer.writeln('#!/bin/sh');
-  localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
+  exportFileBuffer.writeln('#!/bin/sh');
+  exportFileBuffer.writeln(
+    '# This is a generated file; do not edit or check into version control.',
+  );
   for (final line in xcodeBuildSettings) {
     if (!line.contains('[')) {
       // Exported conditional Xcode build settings do not work.
-      localsBuffer.writeln('export "$line"');
+      exportFileBuffer.writeln('export "$line"');
+      envBuffer.writeln(line);
     }
   }
 
@@ -116,8 +120,14 @@ void _updateGeneratedEnvironmentVariablesScript({
       ? project.macos.generatedEnvironmentVariableExportScript
       : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
-  generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
+  generatedModuleBuildPhaseScript.writeAsStringSync(exportFileBuffer.toString());
   globals.os.chmod(generatedModuleBuildPhaseScript, '755');
+
+  final File envFile = useMacOSConfig
+      ? project.macos.generatedNativeIntegrationEnvironmentFile
+      : project.ios.generatedNativeIntegrationEnvironmentFile;
+  envFile.createSync(recursive: true);
+  envFile.writeAsStringSync(envBuffer.toString());
 }
 
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.

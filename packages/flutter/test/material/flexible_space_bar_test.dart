@@ -1697,7 +1697,7 @@ class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
         slivers: <Widget>[
           SliverAppBar(
             leading: const SizedBox(),
-            expandedHeight: MediaQuery.of(context).size.width / 1.7,
+            expandedHeight: MediaQuery.widthOf(context) / 1.7,
             collapsedHeight: 0,
             toolbarHeight: 0,
             titleSpacing: 0,

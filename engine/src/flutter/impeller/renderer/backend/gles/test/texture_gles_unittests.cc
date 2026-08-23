@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
+
 #include "flutter/impeller/playground/playground_test.h"
 #include "flutter/impeller/renderer/backend/gles/context_gles.h"
 #include "flutter/impeller/renderer/backend/gles/texture_gles.h"
@@ -67,6 +69,38 @@ TEST_P(TextureGLESTest, CanSetSyncFence) {
   ASSERT_FALSE(sync_fence.has_value());
 }
 
+TEST_P(TextureGLESTest, TextureDtorDeletesFence) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  if (!context_gles.GetReactor()
+           ->GetProcTable()
+           .GetDescription()
+           ->GetGlVersion()
+           .IsAtLeast(Version{3, 0, 0})) {
+    GTEST_SKIP() << "GL Version too low to test sync fence.";
+  }
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.size = {100, 100};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(!!texture);
+
+  HandleGLES fence =
+      context_gles.GetReactor()->CreateHandle(HandleType::kFence);
+  bool fence_collected = false;
+  context_gles.GetReactor()->RegisterCleanupCallback(
+      fence, [&]() { fence_collected = true; });
+  TextureGLES::Cast(*texture).SetFence(fence);
+
+  texture.reset();
+  ASSERT_TRUE(context_gles.GetReactor()->AddOperation(
+      [](const ReactorGLES& reactor) {}));
+  ASSERT_TRUE(context_gles.GetReactor()->React());
+  EXPECT_TRUE(fence_collected);
+}
+
 TEST_P(TextureGLESTest, Binds2DTexture) {
   TextureDescriptor desc;
   desc.storage_mode = StorageMode::kDevicePrivate;
@@ -114,6 +148,60 @@ TEST_P(TextureGLESTest, Leak) {
   ScopedValidationDisable disable_validation;
   handle = TextureGLES::Cast(*texture).GetGLHandle();
   EXPECT_FALSE(handle.has_value());
+}
+
+TEST_P(TextureGLESTest, CanCreateAndUpload2DArrayTexture) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  if (!context_gles.GetReactor()
+           ->GetProcTable()
+           .GetCapabilities()
+           ->SupportsTextureArray()) {
+    GTEST_SKIP() << "2D array textures are not supported on this context.";
+  }
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kHostVisible;
+  desc.size = {2, 2};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.type = TextureType::kTexture2DArray;
+  desc.array_layer_count = 3;
+  desc.mip_count = 1;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+  EXPECT_EQ(static_cast<int>(texture->GetTextureDescriptor().array_layer_count),
+            3);
+  EXPECT_TRUE(texture->IsSliceValid(2));
+  EXPECT_FALSE(texture->IsSliceValid(3));
+
+  // Every layer can be uploaded.
+  std::vector<uint8_t> layer(2u * 2u * 4u, 0xFF);
+  for (size_t slice = 0; slice < static_cast<size_t>(desc.array_layer_count);
+       ++slice) {
+    EXPECT_TRUE(texture->SetContents(layer.data(), layer.size(), slice));
+  }
+  EXPECT_TRUE(context_gles.GetReactor()->React());
+}
+
+TEST_P(TextureGLESTest, CreatingAndBindingEmptyTexturesDoesNotCrash) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  const ProcTableGLES& gl = context_gles.GetReactor()->GetProcTable();
+  GLuint texture_name;
+  gl.GenTextures(1, &texture_name);
+
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.storage_mode = StorageMode::kDevicePrivate;
+  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_descriptor.size = ISize(0, 0);
+  texture_descriptor.mip_count = 1u;
+
+  impeller::HandleGLES texture_handle = context_gles.GetReactor()->CreateHandle(
+      impeller::HandleType::kTexture, texture_name);
+  auto texture = TextureGLES::WrapTexture(context_gles.GetReactor(),
+                                          texture_descriptor, texture_handle);
+  // The texture descriptor is invalid because its size is empty, so WrapTexture
+  // will return null.
+  ASSERT_EQ(texture, nullptr);
 }
 
 }  // namespace impeller::testing

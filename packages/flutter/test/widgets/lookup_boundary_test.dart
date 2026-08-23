@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const kBlue = Color(0xFF0000FF);
+  const kRed = Color(0xFFFF0000);
+
   group('LookupBoundary.dependOnInheritedWidgetOfExactType', () {
     testWidgets('respects boundary', (WidgetTester tester) async {
       InheritedWidget? containerThroughBoundary;
@@ -504,7 +507,7 @@ void main() {
           child: LookupBoundary(
             child: Container(
               padding: const EdgeInsets.all(10),
-              color: Colors.blue,
+              color: kBlue,
               child: Container(
                 key: innerContainerKey,
                 child: Builder(
@@ -561,7 +564,7 @@ void main() {
                 context,
               );
               containerStoppedAtBoundaryUnfulfilled =
-                  LookupBoundary.findAncestorWidgetOfExactType<Material>(context);
+                  LookupBoundary.findAncestorWidgetOfExactType<Wrap>(context);
             },
           ),
         ),
@@ -1117,7 +1120,7 @@ void main() {
       await tester.pumpWidget(
         Container(
           padding: const EdgeInsets.all(10),
-          color: Colors.blue,
+          color: kBlue,
           child: LookupBoundary(
             child: Builder(
               builder: (BuildContext context) {
@@ -1138,11 +1141,11 @@ void main() {
       await tester.pumpWidget(
         Container(
           padding: const EdgeInsets.all(10),
-          color: Colors.blue,
+          color: kBlue,
           child: LookupBoundary(
             child: Container(
               padding: const EdgeInsets.all(10),
-              color: Colors.red,
+              color: kRed,
               child: Builder(
                 builder: (BuildContext context) {
                   isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(
@@ -1163,7 +1166,7 @@ void main() {
       await tester.pumpWidget(
         Container(
           padding: const EdgeInsets.all(10),
-          color: Colors.blue,
+          color: kBlue,
           child: Builder(
             builder: (BuildContext context) {
               isHidden = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Container>(context);

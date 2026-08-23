@@ -37,10 +37,16 @@ abstract class ProjectMigrator {
   /// Calls [migrateLine] per line, then [migrateFileContents]
   /// including the line migrations.
   void processFileLines(File file) {
-    final List<String> lines = file.readAsLinesSync();
+    final String basename = file.basename;
+    List<String> lines;
+    try {
+      lines = file.readAsLinesSync();
+    } on FileSystemException catch (e) {
+      logger.printError('Failed to read $basename during migration: $e');
+      return;
+    }
 
     final newProjectContents = StringBuffer();
-    final String basename = file.basename;
 
     for (final line in lines) {
       final String? newProjectLine = migrateLine(line);
@@ -71,7 +77,11 @@ abstract class ProjectMigrator {
 
     if (migrationRequired) {
       logger.printStatus('Upgrading $basename');
-      file.writeAsStringSync(projectContentsWithMigratedContents);
+      try {
+        file.writeAsStringSync(projectContentsWithMigratedContents);
+      } on FileSystemException catch (e) {
+        logger.printError('Failed to process/migrate $basename during migration: $e');
+      }
     }
   }
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,8 +12,8 @@ void main() {
     expect(testPainter, isNot(throwsException));
   });
 
-  testWidgets('Toggleable exists in widget layer', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: TestToggleable()));
+  testWidgets('Toggleable can be toggled by tap', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestWidgetsApp(home: TestToggleable()));
     final TestToggleableState state = tester.state<TestToggleableState>(
       find.byType(TestToggleable),
     );
@@ -29,6 +29,63 @@ void main() {
     await tester.pumpAndSettle();
     expect(state.value, isFalse);
   });
+
+  testWidgets('reactionController defaults to a 100ms duration', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestWidgetsApp(home: TestToggleable()));
+    final TestToggleableState state = tester.state<TestToggleableState>(
+      find.byType(TestToggleable),
+    );
+
+    expect(state.reactionController.duration, const Duration(milliseconds: 100));
+  });
+
+  testWidgets('reactionAnimationDuration override is used by the reactionController', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: TestToggleable(reactionAnimationDuration: Duration(milliseconds: 250)),
+      ),
+    );
+    final TestToggleableState state = tester.state<TestToggleableState>(
+      find.byType(TestToggleable),
+    );
+
+    expect(state.reactionController.duration, const Duration(milliseconds: 250));
+  });
+
+  testWidgets('reactionAnimationDuration is only read when the state initializes', (
+    WidgetTester tester,
+  ) async {
+    const toggleableKey = Key('toggleable');
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: TestToggleable(
+          key: toggleableKey,
+          reactionAnimationDuration: Duration(milliseconds: 250),
+        ),
+      ),
+    );
+    final TestToggleableState state = tester.state<TestToggleableState>(
+      find.byType(TestToggleable),
+    );
+
+    // Pump again with a different reactionAnimationDuration but without
+    // re-initializing state.
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: TestToggleable(
+          key: toggleableKey,
+          reactionAnimationDuration: Duration(milliseconds: 400),
+        ),
+      ),
+    );
+
+    // State is conserved across rebuilds, and the reaction controller keeps the
+    // duration that was read at initialization.
+    expect(tester.state(find.byKey(toggleableKey)), same(state));
+    expect(state.reactionController.duration, const Duration(milliseconds: 250));
+  });
 }
 
 class TestPainter extends ToggleablePainter {
@@ -37,7 +94,9 @@ class TestPainter extends ToggleablePainter {
 }
 
 class TestToggleable extends StatefulWidget {
-  const TestToggleable({super.key});
+  const TestToggleable({super.key, this.reactionAnimationDuration});
+
+  final Duration? reactionAnimationDuration;
 
   @override
   State<StatefulWidget> createState() => TestToggleableState();
@@ -45,6 +104,9 @@ class TestToggleable extends StatefulWidget {
 
 class TestToggleableState extends State<TestToggleable>
     with TickerProviderStateMixin, ToggleableStateMixin {
+  @override
+  Duration? get reactionAnimationDuration => widget.reactionAnimationDuration;
+
   @override
   Widget build(BuildContext context) {
     return buildToggleableWithChild(child: const Text('child'));

@@ -146,7 +146,7 @@ class FuchsiaRemoteConnection {
           await connection._pollVms();
           await Future<void>.delayed(_kVmPollInterval);
         }
-        connection._dartVmEventController.close();
+        await connection._dartVmEventController.close();
       }
 
       connection._dartVmEventController.onListen = listen;
@@ -699,7 +699,11 @@ class _SshPortForwarder implements PortForwarder {
         '\nstderr: ${result.stderr}',
       );
     }
-    _localSocket.close();
+    try {
+      await _localSocket.close();
+    } catch (e) {
+      _log.warning('Failed to close local socket: $e');
+    }
   }
 
   /// Attempts to find an available port.

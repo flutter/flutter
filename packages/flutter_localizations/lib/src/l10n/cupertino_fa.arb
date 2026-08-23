@@ -16,7 +16,7 @@
   "timerPickerSecondLabelOne": "ثانیه",
   "timerPickerSecondLabelOther": "ثانیه",
   "cutButtonLabel": "برش",
-  "copyButtonLabel": "کپی",
+  "copyButtonLabel": "کپی کردن",
   "pasteButtonLabel": "جای‌گذاری",
   "selectAllButtonLabel": "انتخاب همه",
   "tabSemanticsLabel": "برگه $tabIndex از $tabCount",

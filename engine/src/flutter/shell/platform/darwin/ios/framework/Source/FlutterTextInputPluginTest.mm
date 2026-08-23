@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 
 #import <OCMock/OCMock.h>
@@ -103,6 +103,9 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   void OnPlatformViewDispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) override {}
   void OnPlatformViewDispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet) override {
   }
+  HitTestResponse OnPlatformViewHitTest(int64_t view_id, const flutter::PointData offset) override {
+    return {.has_platform_view = false};
+  }
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
                                              int32_t node_id,
                                              SemanticsAction action,
@@ -122,6 +125,9 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                                     bool transient) override {}
   void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
                                  flutter::AssetResolver::AssetResolverType type) override {}
+  std::shared_ptr<fml::BasicTaskRunner> OnPlatformViewGetShutdownSafeIOTaskRunner() const override {
+    return nullptr;
+  }
 
   flutter::Settings settings_;
 };
@@ -885,12 +891,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   thread_task_runner->PostTask([&] {
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_platform_view_delegate,
-        /*rendering_api=*/mock_platform_view_delegate.settings_.enable_impeller
-            ? flutter::IOSRenderingAPI::kMetal
-            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/nil,
         /*task_runners=*/runners,
-        /*worker_task_runner=*/nil,
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
     platform_view->SetOwnerViewController(mockFlutterViewController);
@@ -965,6 +967,33 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqual(inputView.spellCheckingType, UITextSpellCheckingTypeNo);
 }
 
+- (void)testEnableInlinePredictionFromConfiguration API_AVAILABLE(ios(17.0)) {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  NSMutableDictionary* config = self.mutableTemplateCopy;
+
+  // Template does not include enableInlinePrediction -> disabled.
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  [config setValue:@NO forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  [config setValue:@YES forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeYes);
+
+  // Explicit nil / missing key -> disabled.
+  [config removeObjectForKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  // Key present with NSNull (e.g. framework sent null) -> disabled.
+  [config setValue:[NSNull null] forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+}
+
 - (void)testReplaceTestLocalAdjustSelectionAndMarkedTextRange {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [inputView setMarkedText:@"test text" selectedRange:NSMakeRange(0, 5)];
@@ -1010,6 +1039,31 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   } else {
     XCTAssertTrue(respondsToInsertionPointColor);
   }
+}
+
+- (void)testSetAttributedMarkedTextSelectedRange API_AVAILABLE(ios(17.0)) {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  NSAttributedString* attributedText =
+      [[NSAttributedString alloc] initWithString:@"inline prediction"
+                                      attributes:@{
+                                        NSForegroundColorAttributeName : [UIColor grayColor],
+                                      }];
+  [inputView setAttributedMarkedText:attributedText selectedRange:NSMakeRange(0, 7)];
+
+  XCTAssertEqualObjects(inputView.text, @"inline prediction");
+  NSRange selectedRange = ((FlutterTextRange*)inputView.selectedTextRange).range;
+  XCTAssertEqual(selectedRange.location, 0ul);
+  XCTAssertEqual(selectedRange.length, 7ul);
+  FlutterTextRange* markedRange = (FlutterTextRange*)inputView.markedTextRange;
+  XCTAssertNotNil(markedRange);
+  XCTAssertEqual(markedRange.range.location, 0ul);
+  // Marked range length must match the attributed string length (17 for "inline prediction").
+  XCTAssertEqual(markedRange.range.length, 17ul);
+
+  // Nil attributed string should behave like empty string.
+  [inputView setAttributedMarkedText:nil selectedRange:NSMakeRange(0, 0)];
+  XCTAssertEqualObjects(inputView.text, @"");
+  XCTAssertNil(inputView.markedTextRange);
 }
 
 #pragma mark - TextEditingDelta tests

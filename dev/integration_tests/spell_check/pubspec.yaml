@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.10.0-0
+  sdk: ^3.11.0-0
 
 resolution: workspace
 
@@ -31,10 +31,6 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: 1.0.8
 
 
 dev_dependencies:
@@ -89,4 +85,4 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 
-# PUBSPEC CHECKSUM: ovmend
+# PUBSPEC CHECKSUM: vrimb3

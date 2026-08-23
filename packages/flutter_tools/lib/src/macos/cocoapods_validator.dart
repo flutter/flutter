@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+
 import '../base/user_messages.dart';
 import '../doctor_validator.dart';
 import 'cocoapods.dart';
@@ -34,16 +36,16 @@ class CocoaPodsValidator extends DoctorValidator {
           ),
         );
       case CocoaPodsStatus.notInstalled:
-        status = ValidationType.missing;
+        status = ValidationType.partial;
         messages.add(
-          ValidationMessage.error(
+          ValidationMessage.hint(
             _userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions),
           ),
         );
       case CocoaPodsStatus.brokenInstall:
-        status = ValidationType.missing;
+        status = ValidationType.partial;
         messages.add(
-          ValidationMessage.error(
+          ValidationMessage.hint(
             _userMessages.cocoaPodsBrokenInstall(
               brokenCocoaPodsConsequence,
               cocoaPodsInstallInstructions,

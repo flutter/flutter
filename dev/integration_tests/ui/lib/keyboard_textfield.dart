@@ -67,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
               key: const ValueKey<String>(keys.kListView),
               controller: _controller,
               children: <Widget>[
-                Container(height: MediaQuery.of(context).size.height),
+                Container(height: MediaQuery.heightOf(context)),
                 const TextField(key: ValueKey<String>(keys.kDefaultTextField)),
               ],
             ),

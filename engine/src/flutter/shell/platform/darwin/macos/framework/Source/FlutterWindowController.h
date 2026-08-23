@@ -18,6 +18,8 @@
 
 - (void)closeAllWindows;
 
+- (void)fixMoveRunLoopModeIfNeeded;
+
 @end
 
 struct FlutterWindowRect {
@@ -46,6 +48,18 @@ struct FlutterWindowSize {
     return {
         size.width,
         size.height,
+    };
+  }
+};
+
+struct FlutterWindowOffset {
+  double x;
+  double y;
+
+  static FlutterWindowOffset fromNSPoint(const NSPoint& point) {
+    return {
+        point.x,
+        point.y,
     };
   }
 };
@@ -89,6 +103,11 @@ int64_t InternalFlutter_WindowController_CreateDialogWindow(
 
 FLUTTER_DARWIN_EXPORT
 int64_t InternalFlutter_WindowController_CreateTooltipWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request);
+
+FLUTTER_DARWIN_EXPORT
+int64_t InternalFlutter_WindowController_CreatePopupWindow(
     int64_t engine_id,
     const FlutterWindowCreationRequest* request);
 
@@ -143,6 +162,9 @@ bool InternalFlutter_Window_IsActivated(void* window);
 
 FLUTTER_DARWIN_EXPORT
 void InternalFlutter_Window_UpdatePosition(void* window);
+
+FLUTTER_DARWIN_EXPORT
+FlutterWindowOffset InternalFlutter_Window_GetOffsetInParent(void* window);
 
 // NOLINTEND(google-objc-function-naming)
 }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/image_filter.h"
+#include "impeller/display_list/dl_image_impeller.h"
 
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
@@ -12,10 +13,12 @@
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
+#include "impeller/renderer/context.h"
 
 namespace impeller {
 
-std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
+std::shared_ptr<FilterContents> WrapInput(const ContentContext& renderer,
+                                          const flutter::DlImageFilter* filter,
                                           const FilterInput::Ref& input) {
   FML_DCHECK(filter);
 
@@ -72,7 +75,7 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
       auto matrix = matrix_filter->matrix();
       return FilterContents::MakeLocalMatrixFilter(
           FilterInput::Make(
-              WrapInput(matrix_filter->image_filter().get(), input)),
+              WrapInput(renderer, matrix_filter->image_filter().get(), input)),
           matrix);
     }
     case flutter::DlImageFilterType::kColorFilter: {
@@ -95,16 +98,16 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
       auto outer_dl_filter = compose->outer();
       auto inner_dl_filter = compose->inner();
       if (!outer_dl_filter) {
-        return WrapInput(inner_dl_filter.get(), input);
+        return WrapInput(renderer, inner_dl_filter.get(), input);
       }
       if (!inner_dl_filter) {
-        return WrapInput(outer_dl_filter.get(), input);
+        return WrapInput(renderer, outer_dl_filter.get(), input);
       }
       FML_DCHECK(outer_dl_filter && inner_dl_filter);
 
       return WrapInput(
-          outer_dl_filter.get(),
-          FilterInput::Make(WrapInput(inner_dl_filter.get(), input)));
+          renderer, outer_dl_filter.get(),
+          FilterInput::Make(WrapInput(renderer, inner_dl_filter.get(), input)));
     }
     case flutter::DlImageFilterType::kRuntimeEffect: {
       const flutter::DlRuntimeEffectImageFilter* runtime_filter =
@@ -114,13 +117,15 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
           runtime_filter->runtime_effect()->runtime_stage();
 
       std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
-      size_t index = 0;
+      bool is_first = true;
       for (const std::shared_ptr<flutter::DlColorSource>& sampler :
            runtime_filter->samplers()) {
-        if (index == 0 && sampler == nullptr) {
-          // Insert placeholder for filter.
+        if (is_first) {
+          is_first = false;
+          // The first sampler is always the image filter input.
           texture_inputs.push_back(
-              {.sampler_descriptor = skia_conversions::ToSamplerDescriptor({}),
+              {.sampler_descriptor = skia_conversions::ToSamplerDescriptor(
+                   runtime_filter->input_sampling()),
                .texture = nullptr});
           continue;
         }
@@ -131,12 +136,13 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
         if (!image) {
           return nullptr;
         }
-        FML_DCHECK(image->image()->impeller_texture());
-        index++;
+        std::shared_ptr<impeller::Texture> texture =
+            image->image()->asImpellerImage()->GetCachedTexture(renderer);
+        FML_DCHECK(texture);
         texture_inputs.push_back({
             .sampler_descriptor =
                 skia_conversions::ToSamplerDescriptor(image->sampling()),
-            .texture = image->image()->impeller_texture(),
+            .texture = std::move(texture),
         });
       }
       return FilterContents::MakeRuntimeEffect(input, std::move(runtime_stage),

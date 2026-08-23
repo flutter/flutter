@@ -579,7 +579,13 @@ void main() {
                         ListTile(title: Text('Item a-$i')),
                   ),
                 ),
-                const Divider(thickness: 5),
+                const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: ColoredBox(
+                    color: Color(0xFF000000),
+                    child: SizedBox(height: 5, width: double.infinity),
+                  ),
+                ),
                 Expanded(
                   child: ListView.builder(
                     key: const Key('listView-b'),
@@ -1504,6 +1510,7 @@ void main() {
               const SnackBar(content: SizedBox(height: 40, width: 300), duration: duration),
             )
             .closed
+            // ignore: unawaited_futures
             .then((SnackBarClosedReason result) => reason = result);
         await tester.pumpFrames(tester.widget(find.byType(MaterialApp)), halfDuration);
 

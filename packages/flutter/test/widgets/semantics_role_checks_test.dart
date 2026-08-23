@@ -4,8 +4,12 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'checkbox_tester.dart';
+import 'radio_group_tester.dart';
+import 'radio_tester.dart';
 
 void main() {
   group('tab', () {
@@ -266,19 +270,20 @@ void main() {
     testWidgets('success case, radio group can have checkbox children', (
       WidgetTester tester,
     ) async {
+      final node0 = FocusNode();
+      addTearDown(node0.dispose);
+      final node1 = FocusNode();
+      addTearDown(node1.dispose);
       await tester.pumpWidget(
-        Material(
-          child: Material(
-            child: RadioGroup<int>(
-              groupValue: 0,
-              onChanged: (int? value) {},
-              child: Column(
-                children: <Widget>[
-                  Checkbox(value: false, onChanged: (bool? value) {}),
-                  const Radio<int>(value: 0),
-                  const Radio<int>(value: 1),
-                ],
-              ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: TestRadioGroup<int>(
+            child: Column(
+              children: <Widget>[
+                TestCheckbox(value: false, onChanged: (bool? value) {}),
+                const TestRadio<int>(value: 0),
+                const TestRadio<int>(value: 1),
+              ],
             ),
           ),
         ),
@@ -287,23 +292,22 @@ void main() {
     });
 
     testWidgets('success case, radio group can nest', (WidgetTester tester) async {
+      final stringNode = FocusNode();
+      addTearDown(stringNode.dispose);
+      final node0 = FocusNode();
+      addTearDown(node0.dispose);
+      final node1 = FocusNode();
+      addTearDown(node1.dispose);
       await tester.pumpWidget(
-        Material(
-          child: Material(
-            child: RadioGroup<int>(
-              groupValue: 0,
-              onChanged: (int? value) {},
-              child: Column(
-                children: <Widget>[
-                  RadioGroup<String>(
-                    groupValue: 'string',
-                    onChanged: (String? value) {},
-                    child: const Radio<String>(value: 'string'),
-                  ),
-                  const Radio<int>(value: 0),
-                  const Radio<int>(value: 1),
-                ],
-              ),
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: TestRadioGroup<int>(
+            child: Column(
+              children: <Widget>[
+                TestRadioGroup<String>(child: TestRadio<String>(value: 'string')),
+                TestRadio<int>(value: 0),
+                TestRadio<int>(value: 1),
+              ],
             ),
           ),
         ),
@@ -1068,6 +1072,215 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Semantics(label: 'Header 1', role: SemanticsRole.region, child: const SizedBox()),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('progressBar', () {
+    testWidgets('failure case, missing value, min, and max', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.progressBar, child: const SizedBox()),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'A progress bar must have a value, a minValue, a maxValue.');
+    });
+
+    testWidgets('failure case, has min and max but not value', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.progressBar,
+            minValue: '0',
+            maxValue: '10',
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'A progress bar must have a value, a minValue, a maxValue.');
+    });
+
+    testWidgets('failure case, has value but not min and max', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.progressBar, value: '5', child: const SizedBox()),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'A progress bar must have a value, a minValue, a maxValue.');
+    });
+
+    testWidgets('failure case, valid min and max but invalid value', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.progressBar,
+            value: 'invalid',
+            minValue: '0',
+            maxValue: '10',
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(
+        error.message,
+        'Progress bar value, minValue, and maxValue must be valid numbers. '
+        'value: "invalid", minValue: "0", maxValue: "10"',
+      );
+    });
+
+    testWidgets('failure case, min and max are percentages, invalid value', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.progressBar,
+            value: 'invalid',
+            minValue: '0%',
+            maxValue: '100%',
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(
+        error.message,
+        'Progress bar value, minValue, and maxValue must be valid numbers. '
+        'value: "invalid", minValue: "0%", maxValue: "100%"',
+      );
+    });
+
+    testWidgets('failure case, invalid numbers', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.progressBar,
+            value: 'invalid',
+            minValue: 'invalid',
+            maxValue: 'invalid',
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(
+        error.message,
+        'Progress bar value, minValue, and maxValue must be valid numbers. '
+        'value: "invalid", minValue: "invalid", maxValue: "invalid"',
+      );
+    });
+
+    testWidgets('failure case, min >= max', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.progressBar,
+            value: '5',
+            minValue: '10',
+            maxValue: '0',
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'Progress bar minValue (10) must be less than maxValue (0)');
+    });
+
+    testWidgets('failure case, value out of range (number)', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.progressBar,
+            value: '20',
+            minValue: '0',
+            maxValue: '10',
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(
+        error.message,
+        'Progress bar value (20) must be between minValue (0) and maxValue (10)',
+      );
+    });
+
+    testWidgets('failure case, value out of range (percentage)', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.progressBar,
+            value: '150%',
+            minValue: '0',
+            maxValue: '10',
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'Progress bar percentage value (150%) must be between 0% and 100%');
+    });
+
+    testWidgets('success case, value is a valid number', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.progressBar,
+            value: '5',
+            minValue: '0',
+            maxValue: '10',
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('success case, value is a valid percentage', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.progressBar,
+            value: '50%',
+            minValue: '0',
+            maxValue: '10',
+            child: const SizedBox(),
+          ),
         ),
       );
       expect(tester.takeException(), isNull);

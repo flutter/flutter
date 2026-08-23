@@ -12,8 +12,6 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 void main() {
   testWidgets('RawRadio control test', (WidgetTester tester) async {
     final node = FocusNode();
@@ -168,6 +166,32 @@ void main() {
       // Radio semantics should not have hint.
       expect(semantics.hint, anyOf(isNull, isEmpty));
     });
+  });
+
+  testWidgets('RawRadio does not crash at zero area', (WidgetTester tester) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: RawRadio<int>(
+              value: 1,
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+              toggleable: false,
+              focusNode: focusNode,
+              autofocus: false,
+              groupRegistry: TestRegistry<int>(),
+              enabled: true,
+              builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
+                  const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawRadio<int>)), Size.zero);
   });
 }
 

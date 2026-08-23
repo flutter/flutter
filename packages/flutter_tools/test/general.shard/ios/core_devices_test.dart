@@ -14,11 +14,11 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
-import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
+import 'package:flutter_tools/src/ios/device_support.dart';
 import 'package:flutter_tools/src/ios/lldb.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -40,6 +40,13 @@ class LocalFileSystemFake extends Fake implements LocalFileSystem {
 
   @override
   File file(dynamic path) => memoryFileSystem.file(path);
+
+  @override
+  Link link(dynamic path) => memoryFileSystem.link(path);
+
+  @override
+  FileSystemEntityType typeSync(String path, {bool followLinks = true}) =>
+      memoryFileSystem.typeSync(path, followLinks: followLinks);
 
   @override
   Context get path => memoryFileSystem.path;
@@ -83,6 +90,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -109,6 +117,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -137,6 +146,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -161,6 +171,7 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
         );
 
         final bool result = await launcher.launchAppWithoutDebugger(
@@ -208,19 +219,142 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isTrue);
         expect(fakeLLDB.attemptedToAttach, isTrue);
+      });
+
+      testWithoutContext('registers shutdown hook to stop app', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'installedApplications': [
+                <String, Object?>{'installationURL': '/asdf'},
+              ],
+            },
+          }),
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 123},
+            },
+          }),
+          runningProcesses: [
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 123,
+              'executable': '/asdf',
+            }),
+          ],
+        );
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        fakeLLDB.setIsRunning(true, 123);
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          lldb: fakeLLDB,
+        );
+        final shutdownHooks = FakeShutdownHooks();
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(
+            operatingSystemVersion: '17.0',
+            modelCode: 'iPhone15,2',
+            cpuArchitectureString: 'arm64e',
+          ),
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+          shutdownHooks: shutdownHooks,
+          mode: BuildMode.debug,
+        );
+
+        expect(result, isTrue);
+        expect(shutdownHooks.registeredHooks, hasLength(1));
+        await shutdownHooks.registeredHooks.first();
+        expect(fakeCoreDeviceControl.terminateProcessCalled, isTrue);
+        expect(fakeCoreDeviceControl.processTerminated, 123);
+        expect(fakeLLDB.exitCalled, isTrue);
+      });
+
+      testWithoutContext('shutdown hook catches Exception thrown by stopApp', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'installedApplications': [
+                <String, Object?>{'installationURL': '/asdf'},
+              ],
+            },
+          }),
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 123},
+            },
+          }),
+          runningProcesses: [
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 123,
+              'executable': '/asdf',
+            }),
+          ],
+        );
+        fakeCoreDeviceControl.terminateException = Exception('failed to terminate');
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        fakeLLDB.setIsRunning(true, 123);
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
+          lldb: fakeLLDB,
+        );
+        final shutdownHooks = FakeShutdownHooks();
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(
+            operatingSystemVersion: '17.0',
+            modelCode: 'iPhone15,2',
+            cpuArchitectureString: 'arm64e',
+          ),
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+          shutdownHooks: shutdownHooks,
+          mode: BuildMode.debug,
+        );
+
+        expect(result, isTrue);
+        expect(shutdownHooks.registeredHooks, hasLength(1));
+        await expectLater(shutdownHooks.registeredHooks.first(), completes);
       });
 
       testWithoutContext('ignores app extension processes', () async {
@@ -266,15 +400,18 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isTrue);
@@ -317,15 +454,18 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -361,15 +501,18 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -411,15 +554,18 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -455,15 +601,18 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -501,15 +650,18 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -549,15 +701,18 @@ void main() {
           xcodeDebug: FakeXcodeDebug(),
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
         final bool result = await launcher.launchAppWithLLDBDebugger(
           deviceId: 'device-id',
+          deviceSupport: createDeviceSupport(),
           bundlePath: 'bundle-path',
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -584,6 +739,7 @@ void main() {
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -617,6 +773,7 @@ void main() {
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -650,6 +807,7 @@ void main() {
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -683,6 +841,7 @@ void main() {
           xcodeDebug: fakeXcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: FakeLLDB(),
         );
         final bool result = await launcher.launchAppWithXcodeDebugger(
@@ -715,6 +874,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -744,6 +904,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -772,6 +933,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -799,6 +961,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           fileSystem: MemoryFileSystem.test(),
           processUtils: processUtils,
+          xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           lldb: fakeLLDB,
         );
 
@@ -855,7 +1018,7 @@ void main() {
     });
   });
 
-  group('Xcode prior to Core Device Control/Xcode 15', () {
+  group('Xcode when devicectl is not installed', () {
     late BufferLogger logger;
     late FakeProcessManager fakeProcessManager;
     late Xcode xcode;
@@ -864,14 +1027,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      final xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-        processManager: fakeProcessManager,
-        version: Version(14, 0, 0),
-      );
-      xcode = Xcode.test(
-        processManager: fakeProcessManager,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
-      );
+      xcode = FakeXcodeNotInstalled();
       deviceControl = IOSCoreDeviceControl(
         logger: logger,
         processManager: fakeProcessManager,
@@ -913,6 +1069,16 @@ void main() {
         final bool status = await deviceControl.isAppInstalled(
           deviceId: 'device-id',
           bundleId: 'com.example.flutterApp',
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.errorText, contains('devicectl is not installed.'));
+        expect(status, isFalse);
+      });
+
+      testWithoutContext('fails to take screenshot', () async {
+        final bool status = await deviceControl.takeScreenshot(
+          deviceId: 'device-id',
+          destination: '/path/to/screenshot.png',
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl is not installed.'));
@@ -3852,6 +4018,116 @@ invalid JSON
         expect(logger.traceText, contains('Error reading output file'));
       });
     });
+
+    group('take screenshot', () {
+      const deviceId = 'device-id';
+      const destination = '/path/to/screenshot.png';
+
+      testWithoutContext('Successful screenshot', () async {
+        const deviceControlOutput =
+            '''
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "capture",
+      "screenshot",
+      "--device",
+      "$deviceId",
+      "--destination",
+      "$destination"
+    ],
+    "outcome" : "success"
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('screenshot_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'capture',
+              'screenshot',
+              '--device',
+              deviceId,
+              '--destination',
+              destination,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool success = await deviceControl.takeScreenshot(
+          deviceId: deviceId,
+          destination: destination,
+        );
+        expect(success, isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
+      });
+
+      testWithoutContext('failed screenshot', () async {
+        const deviceControlOutput =
+            '''
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "capture",
+      "screenshot",
+      "--device",
+      "$deviceId",
+      "--destination",
+      "$destination"
+    ],
+    "outcome" : "failure"
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('screenshot_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'capture',
+              'screenshot',
+              '--device',
+              deviceId,
+              '--destination',
+              destination,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool success = await deviceControl.takeScreenshot(
+          deviceId: deviceId,
+          destination: destination,
+        );
+        expect(success, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
+        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
+      });
+    });
   });
 }
 
@@ -3863,6 +4139,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     this.launchResult,
     this.terminateSuccess = true,
     this.runningProcesses = const <IOSCoreDeviceRunningProcess>[],
+    this.takeScreenshotSuccess = true,
   });
 
   bool installSuccess;
@@ -3870,9 +4147,16 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   bool launchSuccess;
   IOSCoreDeviceInstallResult? installResult;
   bool terminateSuccess;
+  Exception? terminateException;
   int? processTerminated;
   List<IOSCoreDeviceRunningProcess> runningProcesses;
   bool get terminateProcessCalled => processTerminated != null;
+  bool takeScreenshotSuccess;
+
+  @override
+  Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
+    return takeScreenshotSuccess;
+  }
 
   @override
   Future<List<IOSCoreDevice>> getCoreDevices({
@@ -3921,6 +4205,9 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   @override
   Future<bool> terminateProcess({required String deviceId, required int processId}) async {
     processTerminated = processId;
+    if (terminateException != null) {
+      throw terminateException!;
+    }
     return terminateSuccess;
   }
 
@@ -4020,6 +4307,8 @@ class FakeLLDB extends Fake implements LLDB {
     required String deviceId,
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
+    required BuildMode mode,
+    required IOSDeviceSupport deviceSupport,
   }) async {
     attemptedToAttach = true;
     attachedProcessId = appProcessId;
@@ -4136,4 +4425,33 @@ class FakeShutdownHooks extends Fake implements ShutdownHooks {
   Future<void> runShutdownHooks(Logger logger) async {
     _isShuttingDown = true;
   }
+}
+
+IOSDeviceSupport createDeviceSupport({
+  Logger? logger,
+  ProcessUtils? processUtils,
+  Directory? homeDirectory,
+  String? modelCode,
+  String? operatingSystemVersion,
+  String? cpuArchitectureString,
+  String deviceId = 'device-id',
+}) {
+  final Logger testLogger = logger ?? BufferLogger.test();
+  return IOSDeviceSupport(
+    logger: testLogger,
+    processUtils:
+        processUtils ??
+        ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
+    xcode: null,
+    homeDirectory: homeDirectory,
+    modelCode: modelCode,
+    operatingSystemVersion: operatingSystemVersion,
+    cpuArchitectureString: cpuArchitectureString,
+    deviceId: deviceId,
+  );
+}
+
+class FakeXcodeNotInstalled extends Fake implements Xcode {
+  @override
+  bool get isDevicectlInstalled => false;
 }

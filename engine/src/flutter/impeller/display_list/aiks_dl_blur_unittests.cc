@@ -531,8 +531,8 @@ TEST_P(AiksTest, ClearBlendWithBlur) {
 TEST_P(AiksTest, BlurHasNoEdge) {
   Scalar sigma = 47.6;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 50);
       ImGui::End();
     }
@@ -565,6 +565,12 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
 }
 
 TEST_P(AiksTest, MaskBlurOnZeroDimensionIsSkippedWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with wide gamut support.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   // Making sure this test is run on a wide gamut enabled backend
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
@@ -822,8 +828,8 @@ TEST_P(AiksTest, GaussianBlurStyleSolid) {
 TEST_P(AiksTest, MaskBlurTexture) {
   Scalar sigma = 30;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 500);
       ImGui::End();
     }
@@ -851,8 +857,8 @@ TEST_P(AiksTest, MaskBlurTexture) {
 TEST_P(AiksTest, MaskBlurDoesntStretchContents) {
   Scalar sigma = 70;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 500);
       ImGui::End();
     }
@@ -953,8 +959,8 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
   Scalar freq = 0.1;
   Scalar amp = 50.0;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 200);
       ImGui::SliderFloat("Frequency", &freq, 0.01, 2.0);
       ImGui::SliderFloat("Amplitude", &amp, 1, 100);
@@ -1112,8 +1118,7 @@ TEST_P(AiksTest, GaussianBlurScaledAndClipped) {
   Vector2 center = Vector2(1024, 768) / 2;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
-  auto rect =
-      Rect::MakeLTRB(center.x, center.y, center.x, center.y).Expand(clip_size);
+  auto rect = Rect::MakeEllipseBounds(center, clip_size);
   builder.ClipRect(DlRect::MakeLTRB(rect.GetLeft(), rect.GetTop(),
                                     rect.GetRight(), rect.GetBottom()));
   builder.Translate(center.x, center.y);
@@ -1143,8 +1148,8 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
     static float scale = 0.6;
     static int selected_tile_mode = 3;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Rotation (degrees)", &rotation, -180, 180);
       ImGui::SliderFloat("Scale", &scale, 0, 2.0);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
@@ -1223,8 +1228,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClipped) {
   Vector2 center = Vector2(1024, 768) / 2;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
-  auto clip_bounds =
-      Rect::MakeLTRB(center.x, center.y, center.x, center.y).Expand(clip_size);
+  auto clip_bounds = Rect::MakeEllipseBounds(center, clip_size);
   builder.ClipRect(DlRect::MakeLTRB(clip_bounds.GetLeft(), clip_bounds.GetTop(),
                                     clip_bounds.GetRight(),
                                     clip_bounds.GetBottom()));
@@ -1255,8 +1259,8 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
     static float scale = 0.6;
     static int selected_tile_mode = 3;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Rotation (degrees)", &rotation, -180, 180);
       ImGui::SliderFloat("Scale", &scale, 0, 2.0);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
@@ -1278,7 +1282,7 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
     builder.Rotate(rotation);
 
     DlRoundRect rrect =
-        DlRoundRect::MakeRectXY(DlRect::MakeXYWH(-100, -100, 200, 200), 10, 10);
+        DlRoundRect::MakeRectXY(DlRect::MakeCircleBounds({0, 0}, 100), 10, 10);
     builder.DrawRoundRect(rrect, paint);
     return builder.Build();
   };

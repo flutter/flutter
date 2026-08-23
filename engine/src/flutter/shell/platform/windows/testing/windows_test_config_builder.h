@@ -67,6 +67,8 @@ class WindowsConfigBuilder {
 
   void SetGpuPreference(FlutterDesktopGpuPreference gpu_preference);
 
+  void SetAccessibilityMode(FlutterDesktopAccessibilityMode accessibility_mode);
+
   // Returns a configured and initialized engine.
   EnginePtr InitializeEngine() const;
 
@@ -95,6 +97,9 @@ class WindowsConfigBuilder {
 
   FlutterDesktopGpuPreference gpu_preference_ =
       FlutterDesktopGpuPreference::NoPreference;
+
+  FlutterDesktopAccessibilityMode accessibility_mode_ =
+      FlutterDesktopAccessibilityMode::DefaultAccessibilityMode;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowsConfigBuilder);
 };

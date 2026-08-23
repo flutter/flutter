@@ -1354,6 +1354,29 @@ class WidgetsLocalizationEsEc extends WidgetsLocalizationEs {
   String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
+/// The translations for Spanish Castilian, as used in Spain (`es_ES`).
+class WidgetsLocalizationEsEs extends WidgetsLocalizationEs {
+  /// Create an instance of the translation bundle for Spanish Castilian, as used in Spain.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationEsEs();
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
+  String get lookUpButtonLabel => 'Consultar';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
+}
+
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
 class WidgetsLocalizationEsGt extends WidgetsLocalizationEs {
   /// Create an instance of the translation bundle for Spanish Castilian, as used in Guatemala.
@@ -1750,7 +1773,7 @@ class WidgetsLocalizationFa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFa() : super(TextDirection.rtl);
 
   @override
-  String get copyButtonLabel => 'کپی';
+  String get copyButtonLabel => 'کپی کردن';
 
   @override
   String get cutButtonLabel => 'برش';
@@ -5539,7 +5562,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `de` - German (plus one country variation)
 ///  * `el` - Modern Greek
 ///  * `en` - English (plus 8 country variations)
-///  * `es` - Spanish Castilian (plus 20 country variations)
+///  * `es` - Spanish Castilian (plus 21 country variations)
 ///  * `et` - Estonian
 ///  * `eu` - Basque
 ///  * `fa` - Persian
@@ -5688,6 +5711,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
           return const WidgetsLocalizationEsDo();
         case 'EC':
           return const WidgetsLocalizationEsEc();
+        case 'ES':
+          return const WidgetsLocalizationEsEs();
         case 'GT':
           return const WidgetsLocalizationEsGt();
         case 'HN':

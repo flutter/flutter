@@ -181,6 +181,7 @@ class Ticker {
   ///
   /// By convention, this method is used by the object that receives the ticks
   /// (as opposed to the [TickerProvider] which created the ticker).
+  @awaitNotRequired
   TickerFuture start() {
     assert(() {
       if (isActive) {
@@ -413,7 +414,15 @@ class Ticker {
 /// the `canceled` argument set to false (the default).
 ///
 /// If the [Ticker] is disposed without being stopped, or if it is stopped with
-/// `canceled` set to true, then this Future will never complete.
+/// `canceled` set to true, then this Future will never complete. For this
+/// reason, [TickerFuture]s should generally not be awaited, as they risk
+/// hanging indefinitely if the [Ticker] is canceled or muted before the
+/// animation completes.
+///
+/// Methods returning a [TickerFuture] are typically marked with
+/// `@awaitNotRequired` (or similar annotations) to signal that ignoring the
+/// Future is the intended pattern. Callers who need to react to completion
+/// should use [whenComplete] to handle both success and cancellation safely.
 ///
 /// This class works like a normal [Future], but has an additional property,
 /// [orCancel], which returns a derivative [Future] that completes with an error

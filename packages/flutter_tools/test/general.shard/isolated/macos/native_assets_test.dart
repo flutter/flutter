@@ -346,6 +346,7 @@ void main() {
               appBuildDirectory: fileSystem.directory(projectUri),
             ),
             buildDataAssets: true,
+            recordedUsesFile: null,
           );
           final Uri nativeAssetsFileUri = flutterTester
               ? projectUri.resolve(
@@ -368,8 +369,12 @@ void main() {
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for $expectedArchsBeingBuilt.',
-              'Building native assets for $expectedArchsBeingBuilt done.',
+              'Running build hooks for $expectedArchsBeingBuilt.',
+              'Running build hooks for $expectedArchsBeingBuilt done.',
+              if (buildMode == BuildMode.release) ...<String>[
+                'Running link hooks for $expectedArchsBeingBuilt.',
+                'Running link hooks for $expectedArchsBeingBuilt done.',
+              ],
             ]),
           );
           final String nativeAssetsFileContent = await fileSystem
@@ -383,8 +388,9 @@ void main() {
                 // Tests run on host system, so the have the full path on the system.
                 projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()
               else
-                // Apps are a bundle with the dylibs on their dlopen path.
-                'bar.framework/bar',
+                // Apps are a bundle, and the dylibs are opened by the install
+                // name of the framework they are bundled in.
+                '@rpath/bar.framework/bar',
             ]),
           );
           expect(
@@ -395,8 +401,9 @@ void main() {
                 // Tests run on host system, so the have the full path on the system.
                 projectUri.resolve('build/native_assets/macos/libbuz.dylib').toFilePath()
               else
-                // Apps are a bundle with the dylibs on their dlopen path.
-                'buz.framework/buz',
+                // Apps are a bundle, and the dylibs are opened by the install
+                // name of the framework they are bundled in.
+                '@rpath/buz.framework/buz',
             ]),
           );
           // Multi arch.

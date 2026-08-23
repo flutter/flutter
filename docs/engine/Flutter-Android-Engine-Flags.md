@@ -66,7 +66,8 @@ command line flag corresponds to the metadata key
 `io.flutter.embedding.android.ImpellerLazyShaderInitialization`.
 
 For flags that take values, set the numeric, string, or boolean value (without
-the leading `--flag=` prefix).
+the leading `--flag=` prefix). For those that do not take values, specify a
+boolean value to indicate if the flag should be used or not.
 
 ### Examples
 
@@ -93,15 +94,10 @@ Set the `--enable-flutter-gpu` flag:
 />
 ```
 
-For flags that take boolean values, if you omit a value entirely, it
-will be assumed to be true. For example, this is the same as the
-example above:
-
-```xml
-<meta-data
-    android:name="io.flutter.embedding.android.EnableFlutterGPU"
-/>
-```
+For flags that take boolean values, you must explicitly set
+`android:value="true"` to enable the flag. Omitting the value or
+providing a non-boolean value (e.g., a typo like `"Fasle"`) will
+default to `false` (disabled).
 
 ## Release-mode restrictions
 

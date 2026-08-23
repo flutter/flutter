@@ -11,7 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 const List<String> _kTestImages = <String>[
   '16x1.png',
@@ -287,12 +286,15 @@ class BitmapTestCodec extends TestCodec {
 
     await imageElement.decode();
 
-    final DomImageBitmap bitmap = await createImageBitmap(imageElement, (
-      x: 0,
-      y: 0,
-      width: imageElement.naturalWidth.toInt(),
-      height: imageElement.naturalHeight.toInt(),
-    ));
+    final DomImageBitmap bitmap = await createImageBitmap(
+      imageElement,
+      bounds: (
+        x: 0,
+        y: 0,
+        width: imageElement.naturalWidth.toInt(),
+        height: imageElement.naturalHeight.toInt(),
+      ),
+    );
 
     final ui.Image image = await codecFactory(bitmap);
     return BitmapSingleFrameCodec(bitmap, image);
@@ -316,7 +318,7 @@ class BitmapSingleFrameCodec implements ui.Codec {
 
   @override
   Future<ui.FrameInfo> getNextFrame() async {
-    return SingleFrameInfo(image);
+    return AnimatedImageFrameInfo(Duration.zero, image);
   }
 
   @override
@@ -395,6 +397,11 @@ Future<void> testMain() async {
           expect(image.width, isNonZero);
           expect(image.height, isNonZero);
 
+          if (testCodec.description.contains('300 x 300')) {
+            expect(image.width, 300);
+            expect(image.height, 300);
+          }
+
           final ByteData? byteData = await image.toByteData();
           expect(
             byteData,
@@ -422,11 +429,14 @@ Future<void> testMain() async {
 
     group('Codecs (default browserSupportsImageDecoder)', () {
       createTestCodecs().forEach(runCodecTest);
-    }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
+    });
 
-    if (browserSupportsImageDecoder) {
+    if (browserSupportsImageDecoder && !browserSupportsCanvaskitChromium) {
       // For the sake of completeness, test codec fallback logic on browsers that support
       // `ImageDecoder`.
+      //
+      // We skip this on Canvaskit Chromium because there is no fallback; the
+      // `ImageDecoder`-based codec is always used.
       group('Codecs (browserSupportsImageDecoder=false)', () {
         setUpAll(() {
           browserSupportsImageDecoder = false;
@@ -436,7 +446,7 @@ Future<void> testMain() async {
         });
 
         createTestCodecs().forEach(runCodecTest);
-      }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
+      });
     }
   });
 
@@ -451,6 +461,20 @@ Future<void> testMain() async {
       gotError = true;
     }
     expect(gotError, isTrue, reason: 'Should have got CORS error');
+  });
+
+  test('does not upscale when allowUpscaling is false', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/1x1.png');
+    final Uint8List bytes = (await response.payload.asByteBuffer()).asUint8List();
+    final ui.Codec codec = await renderer.instantiateImageCodec(
+      bytes,
+      targetWidth: 100,
+      targetHeight: 100,
+      allowUpscaling: false,
+    );
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    expect(frame.image.width, 1);
+    expect(frame.image.height, 1);
   });
 
   test('isAvif', () {

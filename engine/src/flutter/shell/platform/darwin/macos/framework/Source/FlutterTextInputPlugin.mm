@@ -221,6 +221,13 @@ static char markerKey;
   __weak FlutterViewController* _currentViewController;
 
   /**
+   * The originally requested view controller. This may be attached to a window
+   * that is a descendant of _currentViewController window in case the window
+   * can not become a key window (i.e. popup window).
+   */
+  __weak FlutterViewController* _originalViewController;
+
+  /**
    * Used to obtain view controller on client creation
    */
   __weak id<FlutterTextInputPluginDelegate> _delegate;
@@ -432,6 +439,19 @@ static char markerKey;
         viewId = [(NSNumber*)requestViewId longLongValue];
       }
       _currentViewController = [_delegate viewControllerForIdentifier:viewId];
+      _originalViewController = _currentViewController;
+      while (!_currentViewController.view.window.canBecomeKeyWindow) {
+        NSWindow* parentWindow = [_currentViewController.view.window parentWindow];
+        if (parentWindow == nil) {
+          break;
+        }
+        NSViewController* controller = parentWindow.contentViewController;
+        if ([controller isKindOfClass:[FlutterViewController class]]) {
+          _currentViewController = (FlutterViewController*)controller;
+        } else {
+          break;
+        }
+      }
       FML_DCHECK(_currentViewController != nil);
     }
   } else if ([method isEqualToString:kShowMethod]) {
@@ -463,6 +483,7 @@ static char markerKey;
     _inputType = nil;
     _activeModel = nullptr;
     _currentViewController = nil;
+    _originalViewController = nil;
   } else if ([method isEqualToString:kSetEditingStateMethod]) {
     FML_DCHECK(_currentViewController != nil);
     NSDictionary* state = call.arguments;
@@ -993,7 +1014,7 @@ static char markerKey;
     farthest.y = MAX(farthest.y, y);
   }
 
-  const NSView* fromView = _currentViewController.flutterView;
+  const NSView* fromView = _originalViewController.flutterView;
   const CGRect rectInWindow = [fromView
       convertRect:CGRectMake(origin.x, origin.y, farthest.x - origin.x, farthest.y - origin.y)
            toView:nil];
@@ -1004,7 +1025,7 @@ static char markerKey;
 - (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(NSRangePointer)actualRange {
   // This only determines position of caret instead of any arbitrary range, but it's enough
   // to properly position accent selection popup
-  return !_currentViewController.viewLoaded || CGRectEqualToRect(_caretRect, CGRectNull)
+  return !_originalViewController.viewLoaded || CGRectEqualToRect(_caretRect, CGRectNull)
              ? CGRectZero
              : [self screenRectFromFrameworkTransform:_caretRect];
 }

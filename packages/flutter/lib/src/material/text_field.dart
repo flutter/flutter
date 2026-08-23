@@ -322,6 +322,7 @@ class TextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     this.enableIMEPersonalizedLearning = true,
+    this.enableInlinePrediction,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
@@ -870,6 +871,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableInlinePrediction}
+  final bool? enableInlinePrediction;
+
   /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
   final ContentInsertionConfiguration? contentInsertionConfiguration;
 
@@ -1122,6 +1126,13 @@ class TextField extends StatefulWidget {
         'enableIMEPersonalizedLearning',
         enableIMEPersonalizedLearning,
         defaultValue: true,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool?>(
+        'enableInlinePrediction',
+        enableInlinePrediction,
+        defaultValue: null,
       ),
     );
     properties.add(
@@ -1751,6 +1762,7 @@ class _TextFieldState extends State<TextField>
           scribbleEnabled: widget.scribbleEnabled,
           stylusHandwritingEnabled: widget.stylusHandwritingEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+          enableInlinePrediction: widget.enableInlinePrediction,
           contentInsertionConfiguration: widget.contentInsertionConfiguration,
           contextMenuBuilder: widget.contextMenuBuilder,
           spellCheckConfiguration: spellCheckConfiguration,

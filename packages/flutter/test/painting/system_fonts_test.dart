@@ -220,6 +220,37 @@ void main() {
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/151873
+  testWidgets('System fonts update during non-idle scheduler phase does not assert', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: Text('Hello')));
+
+    // Simulate a fontsChange system message arriving during a non-idle
+    // scheduler phase (e.g. midFrameMicrotasks on web when fonts load
+    // asynchronously). Previously this caused an assertion failure in
+    // _scheduleSystemFontsUpdate because it assumed the scheduler was idle.
+    tester.binding.scheduleFrameCallback((Duration timeStamp) {
+      // We're now inside transientCallbacks phase (not idle).
+      // Trigger a fonts change notification from here.
+      const data = <String, dynamic>{'type': 'fontsChange'};
+      tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/system',
+        SystemChannels.system.codec.encodeMessage(data),
+        (ByteData? data) {},
+      );
+    });
+
+    // Pump to execute the frame callback. This should not throw.
+    await tester.pump();
+
+    // Pump again to let the scheduled frame callback run.
+    await tester.pump();
+
+    // Verify the text widget still renders correctly after the fonts update.
+    expect(find.text('Hello'), findsOneWidget);
+  });
+
   testWidgets('TimePicker relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

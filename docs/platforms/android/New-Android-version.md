@@ -58,7 +58,7 @@ First, find the new Android API release notes online and follow the instructions
 Flutter now includes a script to download, package, and upload the Android SDK to CIPD. These CIPD packages are then used as dependencies by the Flutter engine and recipes (go/flutter-luci-recipes) so that there is a stable archived version of the Android SDK to depend on. The script is located in the flutter/flutter repo under `engine/src/flutter/tools/android_sdk/create_cipd_packages.sh`.
 
 > Before uploading to CIPD, please double-check that the Android SDK configurations in the text file are correct.
-> Be cautious when uploading new packages to CIPD because it is difficult to undo. If you need to remove an uploaded CIPD tag, follow the documentation [here](http://go/flutter-luci-playbook#remove-duplicated-cipd-tags).
+> Be cautious when uploading new packages to CIPD because it is difficult to undo. If you need to remove an uploaded CIPD tag, follow the documentation [here](https://goto.google.com/flutter-luci-playbook#remove-duplicated-cipd-tags).
 
 Please do not manually upload a new Android API version to CIPD. Instead, follow these steps:
 

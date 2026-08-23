@@ -20,9 +20,16 @@ import 'project.dart';
 /// the [project] package.
 List<Dependency> computeTransitiveDependencies(
   FlutterProject project,
-  PackageConfig packageConfig,
-) {
-  final PackageGraph packageGraph = PackageGraph.load(project);
+  PackageConfig packageConfig, {
+  PackageGraph? packageGraph,
+}) {
+  // Use the provided graph only if it contains the current project — in a
+  // workspace the shared graph covers all packages. Outside a workspace (or
+  // in tests), fall back to loading the project-specific graph.
+  final PackageGraph resolvedGraph =
+      (packageGraph != null && packageGraph.dependencies.containsKey(project.manifest.appName))
+      ? packageGraph
+      : PackageGraph.load(project);
 
   final String rootName = project.manifest.appName;
 
@@ -36,16 +43,16 @@ List<Dependency> computeTransitiveDependencies(
     isExclusiveDevDependency: true,
   );
 
-  final List<String>? dependencies = packageGraph.dependencies[project.manifest.appName];
+  final List<String>? dependencies = resolvedGraph.dependencies[project.manifest.appName];
   if (dependencies == null) {
     throwToolExit('''
-Failed to parse ${packageGraph.file.path}: dependencies for `${project.manifest.appName}` missing.
+Failed to parse ${resolvedGraph.file.path}: dependencies for `${project.manifest.appName}` missing.
 Try running `flutter pub get`''');
   }
-  final List<String>? devDependencies = packageGraph.devDependencies[project.manifest.appName];
+  final List<String>? devDependencies = resolvedGraph.devDependencies[project.manifest.appName];
   if (devDependencies == null) {
     throwToolExit('''
-Failed to parse ${packageGraph.file.path}: devDependencies for `${project.manifest.appName}` missing.
+Failed to parse ${resolvedGraph.file.path}: devDependencies for `${project.manifest.appName}` missing.
 Try running `flutter pub get`''');
   }
   final packageNamesToVisit = <String>[...dependencies, ...devDependencies];
@@ -55,11 +62,11 @@ Try running `flutter pub get`''');
       continue;
     }
 
-    final List<String>? dependencies = packageGraph.dependencies[current];
+    final List<String>? dependencies = resolvedGraph.dependencies[current];
 
     if (dependencies == null) {
       throwToolExit('''
-Failed to parse ${packageGraph.file.path}: dependencies for `$current` missing.
+Failed to parse ${resolvedGraph.file.path}: dependencies for `$current` missing.
 Try running `flutter pub get`''');
     }
     packageNamesToVisit.addAll(dependencies);
@@ -89,7 +96,7 @@ Try running `flutter pub get`''');
       currentDependency.rootUri,
       isExclusiveDevDependency: false,
     );
-    packageNamesToVisit.addAll(packageGraph.dependencies[current]!);
+    packageNamesToVisit.addAll(resolvedGraph.dependencies[current]!);
   }
   return result.values.toList();
 }

@@ -145,7 +145,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
       // the SystemNavigator. If this wasn't the root route, then
       // Navigator.maybePop could be used instead.
       // See https://github.com/flutter/flutter/issues/11490
-      SystemNavigator.pop();
+      await SystemNavigator.pop();
     }
   }
 

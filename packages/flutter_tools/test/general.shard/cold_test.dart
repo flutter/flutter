@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/tracing.dart';
@@ -39,6 +38,7 @@ void main() {
           'Connection closed before full header was received, '
           'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws',
         ),
+        vmServiceUri: Future<Uri>.value(Uri.parse('http://127.0.0.1:63394/5ZmLv8A59xY=/ws')),
       ),
     ];
 
@@ -166,7 +166,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   @override
-  Stream<Uri> get vmServiceUris => const Stream<Uri>.empty();
+  Future<Uri>? get vmServiceUri => null;
 
   @override
   final Device device;
@@ -238,6 +238,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String? appName = 'Fake App',
     int? ddsPort,
     FlutterDevice? device,
     bool? ipv6,
@@ -257,26 +258,28 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
+    Future<Uri>? vmServiceUri,
   }) : super(
          targetPlatform: .unsupported,
          device,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
-       );
+       ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
   }) async {
     throw exception;
   }
@@ -336,4 +339,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

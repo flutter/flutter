@@ -306,6 +306,32 @@ void main() {
       expect(destination.childDirectory('nested'), isNot(exists));
       expect(destination.childDirectory('nested').childFile('b.txt'), isNot(exists));
     });
+
+    testWithoutContext('Skip deeply nested directories if shouldCopyDirectory returns false', () {
+      final fileSystem = MemoryFileSystem.test();
+      final Directory origin = fileSystem.directory('/origin');
+      origin.createSync();
+      origin.childFile('a.txt').writeAsStringSync('irrelevant');
+      final Directory nested = origin.childDirectory('nested')..createSync();
+      nested.childFile('b.txt').writeAsStringSync('irrelevant');
+      final Directory deep = nested.childDirectory('deep')..createSync();
+      deep.childFile('c.txt').writeAsStringSync('irrelevant');
+
+      final Directory destination = fileSystem.directory('/destination');
+      copyDirectory(
+        origin,
+        destination,
+        shouldCopyDirectory: (Directory directory) {
+          return !directory.path.endsWith('deep');
+        },
+      );
+
+      expect(destination, exists);
+      expect(destination.childFile('a.txt'), exists);
+      expect(destination.childDirectory('nested'), exists);
+      expect(destination.childDirectory('nested').childFile('b.txt'), exists);
+      expect(destination.childDirectory('nested').childDirectory('deep'), isNot(exists));
+    });
   });
 
   group('escapePath', () {

@@ -21,13 +21,6 @@ UINT MockWindow::GetDpi() {
   return GetCurrentDPI();
 }
 
-LRESULT MockWindow::Win32DefWindowProc(HWND hWnd,
-                                       UINT Msg,
-                                       WPARAM wParam,
-                                       LPARAM lParam) {
-  return kWmResultDefault;
-}
-
 void MockWindow::SetDirectManipulationOwner(
     std::unique_ptr<DirectManipulationOwner> owner) {
   direct_manipulation_owner_ = std::move(owner);

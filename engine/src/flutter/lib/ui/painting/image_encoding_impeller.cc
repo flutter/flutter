@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/image_encoding_impeller.h"
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "fml/status.h"
 #include "impeller/core/device_buffer.h"
@@ -139,7 +140,13 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
     std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
     const std::shared_ptr<impeller::Context>& impeller_context) {
-  auto texture = dl_image->impeller_texture();
+  auto impeller_image = dl_image->asImpellerImage();
+  if (!impeller_image) {
+    encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
+                            "Image is not an Impeller image."));
+    return;
+  }
+  auto texture = impeller_image->GetImpellerTexture(impeller_context);
 
   if (impeller_context == nullptr) {
     encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
@@ -153,7 +160,9 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
     return;
   }
 
-  auto dimensions = dl_image->GetSize();
+  // Use the size of the texture allocated by the Impeller back end (which may
+  // differ from the original image size).
+  auto dimensions = DlISize(texture->GetSize());
   auto color_type = ToSkColorType(texture->GetTextureDescriptor().format);
 
   if (dimensions.IsEmpty()) {

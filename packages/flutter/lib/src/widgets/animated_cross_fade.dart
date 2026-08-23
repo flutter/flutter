@@ -135,6 +135,7 @@ class AnimatedCrossFade extends StatefulWidget {
     this.reverseDuration,
     this.layoutBuilder = defaultLayoutBuilder,
     this.excludeBottomFocus = true,
+    this.clipBehavior = Clip.hardEdge,
     this.onEnd,
   });
 
@@ -211,6 +212,19 @@ class AnimatedCrossFade extends StatefulWidget {
   /// animating between different [TextField]s so the keyboard remains open during the
   /// cross-fade animation.
   final bool excludeBottomFocus;
+
+  /// Controls whether the content is clipped during the cross-fade transition.
+  ///
+  /// During the size transition between [firstChild] and [secondChild],
+  /// the content is clipped by default to prevent it from overflowing the
+  /// bounding box of the animating widget.
+  ///
+  /// Set this to [Clip.none] to disable clipping entirely. This can be
+  /// useful for widgets with shadows or visual effects that extend beyond
+  /// their bounds.
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
 
   /// Called every time an animation completes.
   ///
@@ -390,11 +404,13 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       ),
     );
     return ClipRect(
+      clipBehavior: widget.clipBehavior,
       child: AnimatedSize(
         alignment: widget.alignment,
         duration: widget.duration,
         reverseDuration: widget.reverseDuration,
         curve: widget.sizeCurve,
+        clipBehavior: widget.clipBehavior,
         child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),
       ),
     );
@@ -413,6 +429,9 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         widget.alignment,
         defaultValue: Alignment.topCenter,
       ),
+    );
+    description.add(
+      EnumProperty<Clip>('clipBehavior', widget.clipBehavior, defaultValue: Clip.hardEdge),
     );
   }
 }

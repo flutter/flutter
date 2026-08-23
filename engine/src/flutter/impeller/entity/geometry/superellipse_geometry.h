@@ -31,7 +31,7 @@ class SuperellipseGeometry final : public Geometry {
   ~SuperellipseGeometry() override;
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
   // |Geometry|
   bool IsAxisAlignedRect() const override;

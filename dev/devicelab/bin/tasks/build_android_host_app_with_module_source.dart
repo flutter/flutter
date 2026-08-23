@@ -33,7 +33,7 @@ TaskFunction combine(List<TaskFunction> tasks) {
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
 class ModuleTest {
-  ModuleTest({this.gradleVersion = '7.6.3'});
+  ModuleTest({this.gradleVersion = '8.7'});
 
   static const String buildTarget = 'module-gradle';
   final String gradleVersion;
@@ -390,5 +390,5 @@ class ModuleTest {
 }
 
 Future<void> main() async {
-  await task(combine(<TaskFunction>[ModuleTest(gradleVersion: '8.7').call]));
+  await task(combine(<TaskFunction>[ModuleTest(gradleVersion: '8.14').call]));
 }

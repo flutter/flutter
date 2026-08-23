@@ -559,8 +559,8 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
               child: FadeTransition(
                 opacity: _drawerCurve,
                 child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.heightOf(context),
+                  width: MediaQuery.widthOf(context),
                   color: Theme.of(context).bottomSheetTheme.modalBackgroundColor,
                 ),
               ),

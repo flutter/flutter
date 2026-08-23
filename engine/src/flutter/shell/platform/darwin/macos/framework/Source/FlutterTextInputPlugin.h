@@ -50,6 +50,9 @@
 /**
  * Returns the view controller text input plugin is currently attached to,
  * nil if not attached to any view controller.
+ *
+ * In case of popup windows, this will be the view controller of the closest
+ * window in hierarchy above that can receive keyboard input.
  */
 @property(nonatomic, readonly, weak) FlutterViewController* currentViewController;
 

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/user_messages.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -25,16 +25,16 @@ void main() {
       expect(message.message, contains('CocoaPods version 1000.0.0'));
     });
 
-    testWithoutContext('Emits missing status when CocoaPods is not installed', () async {
+    testWithoutContext('Emits partial status when CocoaPods is not installed', () async {
       final workflow = CocoaPodsValidator(
         FakeCocoaPods(CocoaPodsStatus.notInstalled),
         UserMessages(),
       );
       final ValidationResult result = await workflow.validate();
-      expect(result.type, ValidationType.missing);
+      expect(result.type, ValidationType.partial);
       expect(result.messages.length, 1);
       final ValidationMessage message = result.messages.first;
-      expect(message.type, ValidationMessageType.error);
+      expect(message.type, ValidationMessageType.hint);
       expect(message.message, contains('CocoaPods not installed'));
       expect(message.message, contains('getting-started.html#installation'));
     });

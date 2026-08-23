@@ -69,6 +69,12 @@ flutter:
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       expect(
@@ -108,7 +114,7 @@ flutter:
               '-I=/flutter/packages/flutter_tools/gradle/aar_init_script.gradle',
               ...List<RegExp>.filled(4, RegExp(r'-P[a-zA-Z-]+=.*')),
               '-q',
-              ...List<RegExp>.filled(6, RegExp(r'-P[a-zA-Z-]+=.*')),
+              ...List<RegExp>.filled(7, RegExp(r'-P[a-zA-Z-]+=.*')),
               'assembleAar$buildMode',
             ],
             onRun: (_) => fs.directory('/build/host/outputs/repo').createSync(recursive: true),
@@ -130,6 +136,12 @@ flutter:
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       await createTestCommandRunner(command).run(const <String>['build', 'aar', '--no-pub']);

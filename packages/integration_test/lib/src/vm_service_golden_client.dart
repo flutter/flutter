@@ -180,10 +180,9 @@ final class VmServiceProxyGoldenFileComparator extends GoldenFileComparator {
     }, stream: _kEventName);
 
     _pendingRequests[nextId] = completer;
-    completer.future.whenComplete(() {
+    return completer.future.whenComplete(() {
       _pendingRequests.remove(nextId);
     });
-    return completer.future;
   }
 
   @override

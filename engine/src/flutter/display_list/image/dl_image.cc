@@ -8,14 +8,6 @@
 
 namespace flutter {
 
-sk_sp<DlImage> DlImage::Make(const SkImage* image) {
-  return Make(sk_ref_sp(image));
-}
-
-sk_sp<DlImage> DlImage::Make(sk_sp<SkImage> image) {
-  return sk_make_sp<DlImageSkia>(std::move(image));
-}
-
 DlImage::DlImage() = default;
 
 DlImage::~DlImage() = default;
@@ -34,6 +26,23 @@ DlIRect DlImage::GetBounds() const {
 
 std::optional<std::string> DlImage::get_error() const {
   return std::nullopt;
+}
+
+bool DlImage::Equals(const DlImage* other) const {
+  if (!other) {
+    return false;
+  }
+  if (this == other) {
+    return true;
+  }
+
+  auto skia_this = asSkiaImage();
+  auto skia_other = other->asSkiaImage();
+  if (!skia_this || !skia_other) {
+    // Impeller images have pointer equality (handled by this == other)
+    return false;
+  }
+  return skia_this->skia_image() == skia_other->skia_image();
 }
 
 }  // namespace flutter

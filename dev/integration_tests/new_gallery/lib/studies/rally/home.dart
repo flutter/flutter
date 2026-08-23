@@ -221,7 +221,7 @@ class _RallyTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FocusTraversalOrder(
-      order: const NumericFocusOrder(0),
+      order: const .numeric(0),
       child: TabBar(
         // Setting isScrollable to true prevents the tabs from being
         // wrapped in [Expanded] widgets, which allows for more
@@ -311,7 +311,7 @@ class _RallyTabState extends State<_RallyTab> with SingleTickerProviderStateMixi
     // units and dividing it into the screen width. Each unexpanded tab is 1
     // unit, and there is always 1 expanded tab which is 1 unit + any extra
     // space determined by the multiplier.
-    final double width = MediaQuery.of(context).size.width;
+    final double width = MediaQuery.widthOf(context);
     const expandedTitleWidthMultiplier = 2;
     final double unitWidth = width / (tabCount + expandedTitleWidthMultiplier);
 

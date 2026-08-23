@@ -20,7 +20,7 @@ void customEntrypoint() {
   sayHiFromCustomEntrypoint();
 }
 
-@pragma('vm:external-name', 'SayHiFromCustomEntrypoint')
+@ffi.Native<ffi.Void Function()>(symbol: 'SayHiFromCustomEntrypoint')
 external void sayHiFromCustomEntrypoint();
 
 @pragma('vm:entry-point')
@@ -30,11 +30,11 @@ void customEntrypoint1() {
   sayHiFromCustomEntrypoint3();
 }
 
-@pragma('vm:external-name', 'SayHiFromCustomEntrypoint1')
+@ffi.Native<ffi.Void Function()>(symbol: 'SayHiFromCustomEntrypoint1')
 external void sayHiFromCustomEntrypoint1();
-@pragma('vm:external-name', 'SayHiFromCustomEntrypoint2')
+@ffi.Native<ffi.Void Function()>(symbol: 'SayHiFromCustomEntrypoint2')
 external void sayHiFromCustomEntrypoint2();
-@pragma('vm:external-name', 'SayHiFromCustomEntrypoint3')
+@ffi.Native<ffi.Void Function()>(symbol: 'SayHiFromCustomEntrypoint3')
 external void sayHiFromCustomEntrypoint3();
 
 @pragma('vm:entry-point')
@@ -52,9 +52,9 @@ void implicitViewNotNull() {
   notifyBoolValue(PlatformDispatcher.instance.implicitView != null);
 }
 
-@pragma('vm:external-name', 'NotifyStringValue')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'NotifyStringValue')
 external void notifyStringValue(String value);
-@pragma('vm:external-name', 'NotifyBoolValue')
+@ffi.Native<ffi.Void Function(ffi.Bool)>(symbol: 'NotifyBoolValue')
 external void notifyBoolValue(bool value);
 
 @pragma('vm:entry-point')
@@ -104,17 +104,17 @@ Float64List kTestTransform = () {
   return values;
 }();
 
-@pragma('vm:external-name', 'SignalNativeTest')
+@ffi.Native<ffi.Void Function()>(symbol: 'SignalNativeTest')
 external void signalNativeTest();
-@pragma('vm:external-name', 'SignalNativeCount')
+@ffi.Native<ffi.Void Function(ffi.Int64)>(symbol: 'SignalNativeCount')
 external void signalNativeCount(int count);
-@pragma('vm:external-name', 'SignalNativeMessage')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'SignalNativeMessage')
 external void signalNativeMessage(String message);
-@pragma('vm:external-name', 'NotifySemanticsEnabled')
+@ffi.Native<ffi.Void Function(ffi.Bool)>(symbol: 'NotifySemanticsEnabled')
 external void notifySemanticsEnabled(bool enabled);
-@pragma('vm:external-name', 'NotifyAccessibilityFeatures')
+@ffi.Native<ffi.Void Function(ffi.Bool)>(symbol: 'NotifyAccessibilityFeatures')
 external void notifyAccessibilityFeatures(bool reduceMotion);
-@pragma('vm:external-name', 'NotifySemanticsAction')
+@ffi.Native<ffi.Void Function(ffi.Int64, ffi.Int64, ffi.Handle)>(symbol: 'NotifySemanticsAction')
 external void notifySemanticsAction(int nodeId, int action, List<int> data);
 
 @ffi.Native<ffi.Void Function()>(symbol: 'FFISignalNativeTest')
@@ -689,7 +689,7 @@ void can_composite_platform_views_with_platform_layer_on_bottom() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
-@pragma('vm:external-name', 'SignalBeginFrame')
+@ffi.Native<ffi.Void Function()>(symbol: 'SignalBeginFrame')
 // ignore: unreachable_from_main
 external void signalBeginFrame();
 
@@ -772,7 +772,17 @@ Picture createGradientBox(Size size) {
   return baseRecorder.endRecording();
 }
 
-@pragma('vm:external-name', 'EchoKeyEvent')
+@ffi.Native<
+  ffi.Void Function(
+    ffi.Uint64,
+    ffi.Uint64,
+    ffi.Uint64,
+    ffi.Uint64,
+    ffi.Uint64,
+    ffi.Bool,
+    ffi.Uint64,
+  )
+>(symbol: 'EchoKeyEvent')
 external void _echoKeyEvent(
   int change,
   int timestamp,
@@ -1234,7 +1244,7 @@ void scene_builder_with_complex_clips() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
-@pragma('vm:external-name', 'SendObjectToNativeCode')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'SendObjectToNativeCode')
 external void sendObjectToNativeCode(dynamic object);
 
 @pragma('vm:entry-point')
@@ -1312,7 +1322,7 @@ void render_targets_are_in_stable_order() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
-@pragma('vm:external-name', 'NativeArgumentsCallback')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'NativeArgumentsCallback')
 external void nativeArgumentsCallback(List<String> args);
 
 @pragma('vm:entry-point')
@@ -1327,7 +1337,7 @@ void dart_entrypoint_args(List<String> args) {
   nativeArgumentsCallback(args);
 }
 
-@pragma('vm:external-name', 'SnapshotsCallback')
+@ffi.Native<ffi.Void Function(ffi.Handle, ffi.Handle)>(symbol: 'SnapshotsCallback')
 external void snapshotsCallback(Image bigImage, Image smallImage);
 
 @pragma('vm:entry-point')
@@ -1446,6 +1456,20 @@ void pointer_data_packet() {
 
     for (final PointerData pointerData in packet.data) {
       signalNativeMessage(pointerData.toString());
+    }
+  };
+
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+void pointer_data_packet_stylus_buttons() {
+  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket packet) {
+    signalNativeCount(packet.data.length);
+
+    for (final PointerData pointerData in packet.data) {
+      signalNativeMessage('buttons: ${pointerData.buttons}');
     }
   };
 
@@ -1601,16 +1625,26 @@ void render_impeller_text_test() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     final builder = SceneBuilder();
     builder.pushOffset(0.0, 0.0);
-    final paint = Paint();
-    paint.color = const Color.fromARGB(255, 0, 0, 255);
+    const darkColor = Color.fromARGB(255, 25, 25, 25);
+    const lightColor = Color.fromARGB(255, 230, 230, 230);
     final baseRecorder = PictureRecorder();
     final canvas = Canvas(baseRecorder);
 
-    final paragraphBuilder = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+    final paragraphBuilder1 = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+      ..pushStyle(TextStyle(color: darkColor, background: Paint()..color = lightColor))
       ..addText('Flutter is the best!');
-    final Paragraph paragraph = paragraphBuilder.build()
+    final Paragraph paragraph1 = paragraphBuilder1.build()
       ..layout(const ParagraphConstraints(width: 400));
-    canvas.drawParagraph(paragraph, const Offset(20, 20));
+    canvas.drawParagraph(paragraph1, const Offset(20, 20));
+
+    canvas.translate(0, 40);
+
+    final paragraphBuilder2 = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+      ..pushStyle(TextStyle(color: lightColor, background: Paint()..color = darkColor))
+      ..addText('Flutter is the best!');
+    final Paragraph paragraph2 = paragraphBuilder2.build()
+      ..layout(const ParagraphConstraints(width: 400));
+    canvas.drawParagraph(paragraph2, const Offset(20, 20));
 
     builder.addPicture(Offset.zero, baseRecorder.endRecording());
     builder.pop();
@@ -1634,6 +1668,41 @@ Future<void> render_impeller_image_snapshot_test() async {
 
   final bool result = (pixel & 0xFF) == color.alpha && ((pixel >> 8) & 0xFF) == color.blue;
   notifyBoolValue(result);
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+void render_impeller_platform_view() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final builder = SceneBuilder();
+
+    // Background
+    builder.addPicture(
+      Offset.zero,
+      createColoredBox(const Color.fromARGB(255, 128, 128, 128), const Size(800.0, 600.0)),
+    );
+
+    // The top bar and the platform view are pushed to the side.
+    builder.pushOffset(100.0, 0.0);
+
+    // Platform view offset from the top
+    builder.pushOffset(0.0, 150.0);
+    builder.addPlatformView(1, width: 700.0, height: 450.0);
+    builder.pop();
+
+    // Top bar
+    builder.addPicture(
+      Offset.zero,
+      createColoredBox(const Color.fromARGB(255, 255, 0, 0), const Size(800.0, 150.0)),
+    );
+
+    builder.pop();
+
+    signalNativeTest(); // Signal 2
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  signalNativeTest(); // Signal 1
+  PlatformDispatcher.instance.scheduleFrame();
 }
 
 @pragma('vm:entry-point')

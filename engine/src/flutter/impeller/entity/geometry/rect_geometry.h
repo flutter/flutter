@@ -16,14 +16,8 @@ class FillRectGeometry final : public Geometry {
 
   ~FillRectGeometry() override;
 
-  const Rect& GetRect() const;
-
-  void SetAntialiasPadding(Scalar padding);
-
-  Scalar GetAntialiasPadding() const;
-
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
   // |Geometry|
   bool IsAxisAlignedRect() const override;
@@ -38,7 +32,6 @@ class FillRectGeometry final : public Geometry {
 
  private:
   Rect rect_;
-  Scalar padding_pixels_ = 0.0f;
 };
 
 class StrokeRectGeometry final : public Geometry {

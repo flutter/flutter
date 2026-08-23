@@ -157,7 +157,7 @@ void main() {
         : (KeyEventSimulator.getKeyData(LogicalKeyboardKey.keyA, platform: 'android')
             ..['metaState'] =
                 RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift);
-    tester.binding.keyEventManager.handleRawKeyMessage(rawMessage);
+    await tester.binding.keyEventManager.handleRawKeyMessage(rawMessage);
     expect(events, hasLength(2));
     expect(events[0].physicalKey, PhysicalKeyboardKey.shiftLeft);
     expect(events[0].logicalKey, LogicalKeyboardKey.shiftLeft);
@@ -452,7 +452,7 @@ void main() {
         synthesized: false,
       ),
     );
-    tester.binding.keyEventManager.handleRawKeyMessage(<String, dynamic>{
+    await tester.binding.keyEventManager.handleRawKeyMessage(<String, dynamic>{
       'type': 'keydown',
       'keymap': 'windows',
       'keyCode': 0x04,
@@ -476,7 +476,7 @@ void main() {
         synthesized: false,
       ),
     );
-    tester.binding.keyEventManager.handleRawKeyMessage(<String, dynamic>{
+    await tester.binding.keyEventManager.handleRawKeyMessage(<String, dynamic>{
       'type': 'keydown',
       'keymap': 'windows',
       'keyCode': 0x04,

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -452,6 +453,87 @@ void main() {
         assertiveness: Assertiveness.assertive,
       ),
     ]);
+  });
+
+  testWidgets('Form reports error when SemanticsService.sendAnnouncement fails during validation', (
+    WidgetTester tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    try {
+      final formKey = GlobalKey<FormState>();
+      const validString = 'Valid string';
+      String? validator(String? s) => s == validString ? null : 'error';
+      final errors = <FlutterErrorDetails>[];
+      final void Function(FlutterErrorDetails)? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        final String contextStr = details.context?.toString() ?? '';
+        if (contextStr.contains('while sending semantics announcement')) {
+          errors.add(details);
+          return;
+        }
+        originalOnError?.call(details);
+      };
+      addTearDown(() {
+        FlutterError.onError = originalOnError;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          SystemChannels.accessibility.name,
+          null,
+        );
+      });
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+        SystemChannels.accessibility.name,
+        (ByteData? message) async {
+          const codec = StandardMessageCodec();
+          final Object? decoded = codec.decodeMessage(message);
+          if (decoded is Map && decoded['type'] == 'announce') {
+            final data = ByteData(1);
+            data.setUint8(0, 255); // Invalid type byte
+            return data;
+          }
+          return null; // Success for other events
+        },
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(supportsAnnounce: true),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Form(
+                key: formKey,
+                child: ListView(
+                  children: <Widget>[
+                    FormField<String>(
+                      initialValue: '',
+                      validator: validator,
+                      autovalidateMode: AutovalidateMode.disabled,
+                      builder: (FormFieldState<String> state) {
+                        return Container();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      formKey.currentState!.validate();
+      await tester.pump();
+
+      expect(errors, isNotEmpty);
+      final bool hasAnnouncementError = errors.any(
+        (e) =>
+            e.exception.toString().contains('FormatException') &&
+            e.context.toString().contains('while sending semantics announcement'),
+      );
+      expect(hasAnnouncementError, isTrue);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   testWidgets('Multiple TextFormFields communicate', (WidgetTester tester) async {

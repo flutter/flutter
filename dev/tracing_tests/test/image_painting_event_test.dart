@@ -47,6 +47,7 @@ void main() {
     final completer = Completer<Event>();
     vmService.onExtensionEvent
         .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+        // ignore: unawaited_futures
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
@@ -84,6 +85,7 @@ void main() {
     final completer = Completer<Event>();
     vmService.onExtensionEvent
         .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+        // ignore: unawaited_futures
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);

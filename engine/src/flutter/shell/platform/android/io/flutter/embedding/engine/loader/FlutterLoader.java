@@ -34,6 +34,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -48,6 +50,16 @@ public class FlutterLoader {
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
   private static final String VMSERVICE_SNAPSHOT_LIBRARY = "libvmservice_snapshot.so";
+
+  // The manifest metadata key for engine flags specified via the command line
+  // that are injected into the application merged manifest to be loaded here in the
+  // Flutter Android embedding.
+  //
+  // The key is set in the custom Gradle task found in
+  // packages/flutter_tools/gradle/src/main/kotlin/tasks/GenerateEngineFlagsManifestTask.kt.
+  // The command line flags set there are later loaded by ensureInitializationComplete.
+  private static final String ANDROID_ENGINE_SHELL_ARGS_KEY =
+      "io.flutter.app.androidEngineShellArgs";
 
   private static FlutterLoader instance;
 
@@ -396,9 +408,60 @@ public class FlutterLoader {
           }
 
           // Check if a boolean value is specified and if so, use it to determine if the
-          // flags should be added. If not, assume the flag is meant to be added.
-          if (applicationMetaData.getBoolean(metadataKey, true)) {
+          // flags should be added. If the value is missing or unparseable, default to
+          // false (disabled) to ensure flags are only enabled when explicitly requested.
+          if (applicationMetaData.getBoolean(metadataKey, false)) {
             shellArgs.add(arg);
+          }
+        }
+
+        // Add engine flags specified by the command line that have been injected into
+        // the manifest. These settings will take precedent over any flag configurations
+        // specified by appplication manifest metadata.
+        if (isRelease) {
+          String androidEngineShellArgsValue =
+              applicationMetaData.getString(ANDROID_ENGINE_SHELL_ARGS_KEY);
+          if (androidEngineShellArgsValue != null && !androidEngineShellArgsValue.isEmpty()) {
+            try {
+              JSONArray shellArgsJson = new JSONArray(androidEngineShellArgsValue);
+              for (int i = 0; i < shellArgsJson.length(); i++) {
+                String arg = shellArgsJson.getString(i);
+
+                FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
+                if (flag == null) {
+                  // TODO(camsim99): Reject unknown flags specified on the command line:
+                  // https://github.com/flutter/flutter/issues/182557.
+                  shellArgs.add(arg);
+                  continue;
+                } else if (flag.equals(FlutterEngineFlags.TEST_FLAG)) {
+                  Log.w(
+                      TAG,
+                      "For testing purposes only: test flag specified on the command line was loaded by the FlutterLoader.");
+                  continue;
+                } else if (!flag.allowedInRelease) {
+                  Log.e(
+                      TAG,
+                      "Flag " + arg + " is not allowed in release builds and will be ignored.");
+                  continue;
+                } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
+                    || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
+                  // Perform security check for path containing application's compiled Dart
+                  // code and potentially user-provided compiled native code.
+                  String aotSharedLibraryPath = arg.substring(flag.engineArgument.length());
+                  maybeAddAotSharedLibraryNameArg(
+                      applicationContext, aotSharedLibraryPath, shellArgs);
+                  continue;
+                }
+                shellArgs.add(arg);
+              }
+            } catch (JSONException j) {
+              Log.e(
+                  TAG,
+                  "Exception parsing shell arguments "
+                      + androidEngineShellArgsValue
+                      + " from manifest: "
+                      + j);
+            }
           }
         }
       }
@@ -458,13 +521,13 @@ public class FlutterLoader {
                 + flutterApplicationInfo.isolateSnapshotData);
       } else {
         // Add default AOT shared library name arg. Note that if a different library
-        // is set in the manifest, that value will take precendence and the default
+        // is set in the manifest, that value will take precedence and the default
         // libraries will be used as fallbacks in the order that they are added.
         shellArgs.add(
             FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument
                 + flutterApplicationInfo.aotSharedLibraryName);
 
-        // Some devices cannot load the an AOT shared library based on the library name
+        // Some devices cannot load the AOT shared library based on the library name
         // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
@@ -497,8 +560,7 @@ public class FlutterLoader {
         activityManager.getMemoryInfo(memInfo);
         int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
         shellArgs.add(
-            FlutterEngineFlags.OLD_GEN_HEAP_SIZE.engineArgument
-                + String.valueOf(oldGenHeapSizeMegaBytes));
+            FlutterEngineFlags.OLD_GEN_HEAP_SIZE.engineArgument + oldGenHeapSizeMegaBytes);
       }
 
       DisplayMetrics displayMetrics = applicationContext.getResources().getDisplayMetrics();

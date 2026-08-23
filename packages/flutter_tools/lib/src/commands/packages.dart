@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:args/args.dart';
 import 'package:package_config/package_config.dart';
+import 'package:pool/pool.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
@@ -342,31 +345,36 @@ class PackagesGetCommand extends FlutterCommand {
         logger: globals.logger,
       );
       final PackageGraph graph = PackageGraph.load(rootProject);
-      // Iterate all root packages in the pub workspace to do Flutter specific
-      // generation.
-      for (final String workspaceRootName in graph.roots) {
+
+      // Build a cache of all pubspec.yaml contents once, keyed by package root
+      // URI. This avoids re-reading the same files for every workspace package
+      // during post-processing.
+      final PubspecCache pubspecCache = await buildPubspecCache(packageConfig);
+      // Process workspace root packages concurrently, capped to 64 to
+      // saturate I/O without exhausting file descriptors or system resources.
+      await Pool(64).forEach<String, void>(graph.roots, (String workspaceRootName) async {
         final Package? rootPackage = packageConfig[workspaceRootName];
         assert(rootPackage != null);
         final Uri rootUri = rootPackage!.root;
 
         final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(rootUri));
 
-        final environment = Environment(
-          artifacts: globals.artifacts!,
-          logger: globals.logger,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.flutterVersion.engineRevision,
-          fileSystem: globals.fs,
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-          outputDir: globals.fs.directory(getBuildDirectory()),
-          processManager: globals.processManager,
-          platform: globals.platform,
-          analytics: analytics,
-          projectDir: project.directory,
-          packageConfigPath: packageConfigPath(),
-          generateDartPluginRegistry: true,
-        );
         if (project.manifest.generateLocalizations) {
+          final environment = Environment(
+            artifacts: globals.artifacts!,
+            logger: globals.logger,
+            cacheDir: globals.cache.getRoot(),
+            engineVersion: globals.flutterVersion.engineRevision,
+            fileSystem: globals.fs,
+            flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+            outputDir: globals.fs.directory(getBuildDirectory()),
+            processManager: globals.processManager,
+            platform: globals.platform,
+            analytics: analytics,
+            projectDir: project.directory,
+            packageConfigPath: packageConfigPath(),
+            generateDartPluginRegistry: true,
+          );
           // If localizations were enabled, but we are not using synthetic packages.
           final BuildResult result = await globals.buildSystem.build(
             const GenerateLocalizationsTarget(),
@@ -389,22 +397,61 @@ class PackagesGetCommand extends FlutterCommand {
         //
         // It won't be if they do `flutter build --no-pub`, though.
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
-
-        // We need to regenerate the platform specific tooling for both the project
-        // itself and example(if present).
-        await project.regeneratePlatformSpecificTooling(
-          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
-        );
-        if (example && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
-          final FlutterProject exampleProject = project.example;
-          await exampleProject.regeneratePlatformSpecificTooling(
+        // We need to regenerate the platform specific tooling for both the
+        // project itself and example (if present).
+        //
+        // Workspace packages that do not depend on Flutter (such as a pub
+        // workspace root that is a plain Dart package) are skipped, so that a
+        // stray ios/ or android/ directory in one of them is not populated
+        // with Flutter project files.
+        // See https://github.com/flutter/flutter/issues/189550.
+        if (_dependsOnFlutter(graph, workspaceRootName)) {
+          await project.regeneratePlatformSpecificTooling(
             releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+            pubspecCache: pubspecCache,
+            packageGraph: graph,
+            packageConfig: packageConfig,
           );
         }
-      }
+        if (example && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
+          final FlutterProject exampleProject = project.example;
+          // Skip if the example is already a workspace root — it will be
+          // (or has already been) processed in the main loop, avoiding
+          // double post-processing.
+          if (!graph.roots.contains(exampleProject.manifest.appName)) {
+            await exampleProject.regeneratePlatformSpecificTooling(
+              releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+              pubspecCache: pubspecCache,
+              packageGraph: graph,
+              packageConfig: packageConfig,
+            );
+          }
+        }
+      }).drain<void>();
     }
 
     return FlutterCommandResult.success();
+  }
+
+  /// Whether [packageName] depends on the `flutter` package, directly or
+  /// transitively, according to the resolved package [graph].
+  static bool _dependsOnFlutter(PackageGraph graph, String packageName) {
+    final visited = <String>{};
+    final toVisit = Queue<String>.of(<String>[packageName]);
+    while (toVisit.isNotEmpty) {
+      final String current = toVisit.removeFirst();
+      if (!visited.add(current)) {
+        continue;
+      }
+      if (current == 'flutter') {
+        return true;
+      }
+      final List<String>? dependencies = graph.dependencies[current];
+      if (dependencies != null) {
+        toVisit.addAll(dependencies);
+      }
+    }
+    return false;
   }
 
   late final Future<List<Plugin>> _pluginsFound = (() async {

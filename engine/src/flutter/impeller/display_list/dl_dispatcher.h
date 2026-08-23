@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
 #define FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
 
+#include <map>
 #include <memory>
 
 #include "flutter/display_list/dl_op_receiver.h"
@@ -18,7 +19,11 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/rect.h"
 
+#include "flutter/display_list/image/dl_image.h"
+
 namespace impeller {
+
+#include "impeller/core/texture.h"
 
 using DlScalar = flutter::DlScalar;
 using DlPoint = flutter::DlPoint;
@@ -59,6 +64,10 @@ using DlPath = flutter::DlPath;
 /// operations for other specific classes.
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
+  explicit DlDispatcherBase() {}
+
+  virtual ~DlDispatcherBase() = default;
+
   // |flutter::DlOpReceiver|
   void setAntiAlias(bool aa) override;
 
@@ -280,6 +289,10 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   virtual Canvas& GetCanvas() = 0;
 
+  virtual const ContentContext& GetContentContext() const = 0;
+
+  std::shared_ptr<Texture> GetTexture(const sk_sp<flutter::DlImage>& image);
+
  protected:
   Paint paint_;
   Matrix initial_matrix_;
@@ -337,6 +350,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
   const ContentContext& renderer_;
 
   Canvas& GetCanvas() override;
+  const ContentContext& GetContentContext() const override;
 };
 
 /// Performs a first pass over the display list to collect information

@@ -59,6 +59,13 @@ Future<void> main(List<String> rawArguments) async {
         'successful creation of the archive. Will publish under this '
         'directory: $baseUrl$releaseFolder',
   );
+  argParser.addOption(
+    'target_arch',
+    allowed: TargetArch.values.map<String>((TargetArch arch) => arch.name),
+    help:
+        'The target architecture of the package to create. '
+        'Defaults to the architecture of the host machine running the script.',
+  );
   argParser.addFlag('force', abbr: 'f', help: 'Overwrite a previously uploaded package.');
   argParser.addFlag(
     'dry_run',
@@ -117,6 +124,10 @@ Future<void> main(List<String> rawArguments) async {
 
   final publish = parsedArguments['publish'] as bool;
   final dryRun = parsedArguments['dry_run'] as bool;
+  final targetArchName = parsedArguments['target_arch'] as String?;
+  final TargetArch? targetArch = targetArchName == null
+      ? null
+      : TargetArch.values.byName(targetArchName);
   final Branch branch = Branch.values.byName(parsedArguments['branch'] as String);
   final creator = ArchiveCreator(
     tempDir,
@@ -125,6 +136,7 @@ Future<void> main(List<String> rawArguments) async {
     branch,
     fs: fs,
     strict: publish && !dryRun,
+    targetArch: targetArch,
   );
   var exitCode = 0;
   late String message;
@@ -140,9 +152,10 @@ Future<void> main(List<String> rawArguments) async {
       dryRun,
       fs: fs,
     );
-    await publisher.generateLocalMetadata();
     if (parsedArguments['publish'] as bool) {
       await publisher.publishArchive(parsedArguments['force'] as bool);
+    } else {
+      await publisher.generateLocalMetadata();
     }
   } on PreparePackageException catch (e) {
     exitCode = e.exitCode;

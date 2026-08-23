@@ -80,6 +80,7 @@ static NSString* const kAutofillEditingValue = @"editingValue";
 static NSString* const kAutofillHints = @"hints";
 
 static NSString* const kAutocorrectionType = @"autocorrect";
+static NSString* const kEnableInlinePrediction = @"enableInlinePrediction";
 
 #pragma mark - Static Functions
 
@@ -863,6 +864,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     _smartQuotesType = UITextSmartQuotesTypeYes;
     _smartDashesType = UITextSmartDashesTypeYes;
     _selectionRects = [[NSArray alloc] init];
+    if (@available(iOS 17.0, *)) {
+      _inlinePredictionType = UITextInlinePredictionTypeNo;
+    }
 
     if (@available(iOS 14.0, *)) {
       UIScribbleInteraction* interaction = [[UIScribbleInteraction alloc] initWithDelegate:self];
@@ -1100,6 +1104,16 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   // The input field needs to be visible for the system autofill
   // to find it.
   self.isVisibleToAutofill = autofill || _secureTextEntry;
+
+  if (@available(iOS 17.0, *)) {
+    // iOS 17+ inline prediction. Only enabled when explicitly set to true;
+    // all other values (nil, NSNull, false) disable it.
+    id enableInlinePrediction = configuration[kEnableInlinePrediction];
+    BOOL enabled = enableInlinePrediction != nil && enableInlinePrediction != [NSNull null] &&
+                   [enableInlinePrediction boolValue];
+    self.inlinePredictionType =
+        enabled ? UITextInlinePredictionTypeYes : UITextInlinePredictionTypeNo;
+  }
 }
 
 - (UITextContentType)textContentType {
@@ -1593,6 +1607,14 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   } else {
     [self updateEditingState];
   }
+}
+
+// iOS 17+ inline predictive text uses setAttributedMarkedText:selectedRange:.
+// Forward to the existing setMarkedText implementation by extracting the plain string.
+- (void)setAttributedMarkedText:(NSAttributedString*)attributedString
+                  selectedRange:(NSRange)selectedRange API_AVAILABLE(ios(17.0)) {
+  NSString* markedText = attributedString ? [attributedString string] : @"";
+  [self setMarkedText:markedText selectedRange:selectedRange];
 }
 
 - (void)unmarkText {

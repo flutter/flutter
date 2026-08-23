@@ -28,7 +28,7 @@ abstract final class LiveText {
   /// If any [TextInputConnection] is currently active, calling this method will tell the text field
   /// to start Live Text input. If the current device doesn't support Live Text input,
   /// nothing will happen.
-  static void startLiveTextInput() {
-    SystemChannels.textInput.invokeMethod('TextInput.startLiveTextInput');
+  static Future<void> startLiveTextInput() async {
+    await SystemChannels.textInput.invokeMethod<void>('TextInput.startLiveTextInput');
   }
 }

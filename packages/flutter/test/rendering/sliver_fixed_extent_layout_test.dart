@@ -348,6 +348,63 @@ void main() {
     expect(sliver.calculateLeadingGarbage(firstIndex: 1), 1);
     expect(sliver.calculateTrailingGarbage(lastIndex: 1), 1);
   });
+
+  test('RenderSliverFixedExtentBoxAdaptor assertion test', () {
+    final childManager = TestChildManagerSimple();
+    final sliver = NonMultipleFixedExtentList(
+      childManager: childManager,
+      itemExtent: 100.0,
+      totalExtent: 250.0, // Not a multiple of 100.0
+    );
+    final child = RenderSizedBox(const Size(400.0, 100.0));
+    childManager.setup(sliver, child);
+
+    final root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[sliver],
+    );
+
+    late FlutterError error;
+    layout(
+      root,
+      onErrors: () {
+        final FlutterErrorDetails? details = TestRenderingFlutterBinding.instance
+            .takeFlutterErrorDetails();
+        error = details!.exception as FlutterError;
+      },
+    );
+
+    expect(
+      error.message,
+      contains('returned a value that is not an even multiple of its itemExtent'),
+    );
+  });
+
+  test('RenderSliverFixedExtentBoxAdaptor rounding tolerance test', () {
+    final childManager = TestChildManagerSimple();
+    final sliver = NonMultipleFixedExtentList(
+      childManager: childManager,
+      itemExtent: 100.0,
+      totalExtent: 200.0000000000001,
+    );
+    final child = RenderSizedBox(const Size(400.0, 100.0));
+    childManager.setup(sliver, child);
+
+    final root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[sliver],
+    );
+
+    layout(
+      root,
+      onErrors: () {
+        fail('Should not have errors');
+      },
+    );
+    expect(TestRenderingFlutterBinding.instance.takeFlutterErrorDetails(), isNull);
+  });
 }
 
 int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
@@ -435,4 +492,63 @@ class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAd
 
   @override
   double get itemExtent => _itemExtent;
+}
+
+class NonMultipleFixedExtentList extends RenderSliverFixedExtentList {
+  NonMultipleFixedExtentList({
+    required super.childManager,
+    required super.itemExtent,
+    required this.totalExtent,
+  }) : super();
+
+  final double totalExtent;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    geometry = geometry!.copyWith(scrollExtent: totalExtent, maxPaintExtent: totalExtent);
+  }
+}
+
+class TestChildManagerSimple extends RenderSliverBoxChildManager {
+  TestChildManagerSimple();
+
+  late RenderSliverMultiBoxAdaptor? _renderObject;
+  RenderBox? child;
+
+  void setup(RenderSliverMultiBoxAdaptor renderObject, RenderBox child) {
+    _renderObject = renderObject;
+    this.child = child;
+  }
+
+  @override
+  void createChild(int index, {required RenderBox? after}) {
+    if (index == 0 && child != null) {
+      _renderObject!.insert(child!, after: after);
+    }
+  }
+
+  @override
+  void removeChild(RenderBox child) {}
+
+  @override
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
+  }) => 0.0;
+
+  @override
+  int get childCount => 1;
+
+  @override
+  void didAdoptChild(RenderBox child) {
+    final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+    childParentData.index = 0;
+  }
+
+  @override
+  void setDidUnderflow(bool value) {}
 }

@@ -30,6 +30,9 @@ class MockDelegate : public PlatformView::Delegate {
   void OnPlatformViewDispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) override {}
   void OnPlatformViewDispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet) override {
   }
+  HitTestResponse OnPlatformViewHitTest(int64_t view_id, const flutter::PointData offset) override {
+    return {.has_platform_view = false};
+  }
   void OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) override {}
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
                                              int32_t node_id,
@@ -50,6 +53,9 @@ class MockDelegate : public PlatformView::Delegate {
                                     bool transient) override {}
   void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
                                  flutter::AssetResolver::AssetResolverType type) override {}
+  std::shared_ptr<fml::BasicTaskRunner> OnPlatformViewGetShutdownSafeIOTaskRunner() const override {
+    return nullptr;
+  }
 
   flutter::Settings settings_;
 };
@@ -82,10 +88,8 @@ class MockDelegate : public PlatformView::Delegate {
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   fml::AutoResetWaitableEvent latch;
   thread_task_runner->PostTask([&] {
@@ -122,10 +126,8 @@ class MockDelegate : public PlatformView::Delegate {
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   fml::AutoResetWaitableEvent latch;
   thread_task_runner->PostTask([&] {

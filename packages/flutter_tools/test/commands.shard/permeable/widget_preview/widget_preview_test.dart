@@ -14,9 +14,11 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
+import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -25,7 +27,9 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
+import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -43,7 +47,10 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   DtdLauncher get dtdLauncher => throw UnimplementedError();
 
   @override
-  Uri? get dtdUri => Uri();
+  Uri? get dtdUri => Uri.parse('ws://localhost:1234');
+
+  @override
+  bool get lspServiceAvailable => false;
 
   @override
   final String widgetPreviewService = WidgetPreviewDtdServices.kWidgetPreviewServiceRoot;
@@ -53,7 +60,52 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
       WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot;
 
   @override
-  Future<void> launchAndConnect() async {}
+  Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {}
+
+  FlutterWidgetPreviews? nextUpdate;
+  bool shouldThrow = false;
+
+  @override
+  Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
+    if (shouldThrow) {
+      throw RpcException(123, 'Fake RPC Exception');
+    }
+    return nextUpdate ??
+        const FlutterWidgetPreviews(
+          namespaces: <String, String>{},
+          previews: <FlutterWidgetPreviewDetails>[],
+          scriptUris: <Uri>[],
+        );
+  }
+}
+
+class FakeTerminal extends Fake implements Terminal {}
+
+class FakeAnalysisServer extends Fake implements AnalysisServer {
+  @override
+  String get sdkPath => 'fake/sdk';
+
+  @override
+  List<String> get directories => <String>[];
+
+  @override
+  Future<void> start() async {}
+
+  @override
+  Future<void> connectToDtd({required Uri dtdUri}) async {}
+
+  @override
+  Future<bool?> dispose() async => true;
+
+  @override
+  Stream<bool> get onAnalyzing => const Stream<bool>.empty();
+
+  bool waitForAnalysisCalled = false;
+
+  @override
+  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
+    waitForAnalysisCalled = true;
+  }
 }
 
 class FakeGoogleChromeDevice extends Fake implements GoogleChromeDevice {
@@ -111,8 +163,10 @@ void main() {
   late FakeGoogleChromeDevice fakeGoogleChromeDevice;
   late FakeMicrosoftEdgeDevice fakeMicrosoftEdgeDevice;
   late FakeCustomBrowserDevice fakeCustomBrowserDevice;
+  late FakeWidgetPreviewScaffoldDtdServices fakeDtdServices;
 
   setUp(() async {
+    Cache.disableLocking();
     originalCwd = globals.fs.currentDirectory;
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
@@ -127,6 +181,7 @@ void main() {
     fakeGoogleChromeDevice = FakeGoogleChromeDevice();
     fakeMicrosoftEdgeDevice = FakeMicrosoftEdgeDevice();
     fakeCustomBrowserDevice = FakeCustomBrowserDevice();
+    fakeDtdServices = FakeWidgetPreviewScaffoldDtdServices();
 
     // Create a fake device manager which only contains a single Chrome device.
     fakeDeviceManager = FakeDeviceManager()
@@ -157,7 +212,10 @@ void main() {
     return fs.directory(await createProject(tempDir, arguments: <String>['--pub']));
   }
 
-  Future<void> runWidgetPreviewCommand(List<String> arguments) async {
+  Future<void> runWidgetPreviewCommand(
+    List<String> arguments, {
+    Future<AnalysisServer> Function()? analysisServerFactoryOverride,
+  }) async {
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
         verboseHelp: false,
@@ -175,7 +233,10 @@ void main() {
         ),
         artifacts: Artifacts.test(),
         processManager: loggingProcessManager,
-        dtdServicesOverride: FakeWidgetPreviewScaffoldDtdServices(),
+        terminal: FakeTerminal(),
+        dtdServicesOverride: fakeDtdServices,
+        analysisServerFactoryOverride:
+            analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),
       ),
     );
     await runner.run(<String>['widget-preview', ...arguments]);
@@ -204,23 +265,20 @@ void main() {
   Future<void> startWidgetPreview({
     required Directory? rootProject,
     List<String>? arguments,
+    bool legacyDetection = false,
+    Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) async {
     // This might get changed during the test, so keep track of the original directory.
     final Directory current = fs.currentDirectory;
     await runWidgetPreviewCommand(<String>[
       'start',
+      if (legacyDetection) '--legacy-preview-detection',
       ...?arguments,
       '--no-launch-previewer',
       '--verbose',
       ?rootProject?.path,
-    ]);
-    // Don't perform analysis on Windows since `dart pub add` will use '\' for
-    // path dependencies and cause analysis to fail.
-    // TODO(bkonyi): enable analysis on Windows once https://github.com/dart-lang/pub/issues/4520
-    // is resolved.
-    if (!platform.isWindows) {
-      await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
-    }
+    ], analysisServerFactoryOverride: analysisServerFactoryOverride);
+    await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
     fs.currentDirectory = current;
   }
 
@@ -237,6 +295,38 @@ void main() {
 
   group('flutter widget-preview', () {
     group('start exits if', () {
+      testUsingContext(
+        'DTD fails to retrieve widget previews',
+        () async {
+          final Directory rootProject = await createRootProject();
+          fakeDtdServices.shouldThrow = true;
+          try {
+            await startWidgetPreview(rootProject: rootProject);
+            fail('Successfully executed despite DTD failure.');
+          } on ToolExit catch (e) {
+            expect(
+              e.message,
+              contains('Failed to retrieve widget previews from the Dart Tooling Daemon (DTD)'),
+            );
+          }
+          expectNoPreviewLaunchTimingEvents();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => loggingProcessManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+
       testUsingContext('given an invalid directory', () async {
         try {
           await runWidgetPreviewCommand(<String>['start', 'foo']);
@@ -348,6 +438,87 @@ void main() {
     );
 
     testUsingContext(
+      'start copies host web directory to scaffold if it exists and removes stale files',
+      () async {
+        final Directory rootProject = await createRootProject();
+        final Directory hostWebDir = rootProject.childDirectory('web')..createSync();
+        hostWebDir.childFile('index.html').writeAsStringSync('<html>custom index</html>');
+        final File staleFile = hostWebDir.childFile('stale.js')
+          ..writeAsStringSync('console.log("stale");');
+
+        await startWidgetPreview(rootProject: rootProject);
+
+        final Directory scaffoldWebDir = WidgetPreviewStartCommand.widgetPreviewScaffold
+            .childDirectory('web');
+        expect(scaffoldWebDir.existsSync(), true);
+        expect(
+          scaffoldWebDir.childFile('index.html').readAsStringSync(),
+          '<html>custom index</html>',
+        );
+        expect(scaffoldWebDir.childFile('stale.js').readAsStringSync(), 'console.log("stale");');
+        expectSinglePreviewLaunchTimingEvent();
+
+        // Now remove stale.js from host, and add a new file.
+        staleFile.deleteSync();
+        hostWebDir.childFile('new.js').writeAsStringSync('console.log("new");');
+
+        // Run again
+        await startWidgetPreview(rootProject: rootProject);
+
+        expect(scaffoldWebDir.childFile('stale.js').existsSync(), false);
+        expect(scaffoldWebDir.childFile('new.js').readAsStringSync(), 'console.log("new");');
+        expect(
+          scaffoldWebDir.childFile('index.html').readAsStringSync(),
+          '<html>custom index</html>',
+        );
+        expectNPreviewLaunchTimingEvents(2);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
+      'start waits for analysis to complete',
+      () async {
+        final Directory rootProject = await createRootProject();
+        final fakeAnalysisServer = FakeAnalysisServer();
+
+        await startWidgetPreview(
+          rootProject: rootProject,
+          analysisServerFactoryOverride: () async => fakeAnalysisServer,
+        );
+
+        expect(fakeAnalysisServer.waitForAnalysisCalled, isTrue);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
       'start creates .dart_tool/widget_preview_scaffold in the CWD',
       () async {
         final Directory rootProject = await createRootProject();
@@ -389,105 +560,286 @@ import 'package:flutter_project/foo.dart' as _i3;
 import 'package:flutter/src/widget_previews/widget_previews.dart' as _i4;
 
 List<_i1.WidgetPreview> previews() => [
-      _i2.buildWidgetPreview(
-        packageName: 'flutter_project',
-        scriptUri: 'STRIPPED',
-        line: 4,
-        column: 1,
-        previewFunction: () => _i3.preview(),
-        transformedPreview: const _i4.Preview(name: 'preview').transform(),
-      )
-    ];
+  _i2.buildWidgetPreview(
+    packageName: 'flutter_project',
+    scriptUri: 'STRIPPED',
+    line: 4,
+    column: 1,
+    previewFunction: () => _i3.preview(),
+    transformedPreview: const _i4.Preview(name: 'preview').transform(),
+  ),
+];
 ''';
 
-    testUsingContext(
-      'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-      () async {
-        final Directory rootProject = await createRootProject();
-        rootProject
-            .childDirectory('lib')
-            .childFile('foo.dart')
-            .writeAsStringSync(samplePreviewFile);
+    group('LSP-based preview detection', () {
+      testUsingContext(
+        'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
+        () async {
+          final Directory rootProject = await createRootProject();
+          rootProject
+              .childDirectory('lib')
+              .childFile('foo.dart')
+              .writeAsStringSync(samplePreviewFile);
 
-        await startWidgetPreview(rootProject: rootProject);
+          fakeDtdServices.nextUpdate = FlutterWidgetPreviews(
+            namespaces: <String, String>{
+              'widget_preview.dart': '_i1',
+              'utils.dart': '_i2',
+              'package:flutter_project/foo.dart': '_i3',
+              'package:flutter/src/widget_previews/widget_previews.dart': '_i4',
+            },
+            previews: <FlutterWidgetPreviewDetails>[
+              FlutterWidgetPreviewDetails(
+                functionName: 'preview',
+                hasError: false,
+                dependencyHasErrors: false,
+                isBuilder: false,
+                isMultiPreview: false,
+                packageName: 'flutter_project',
+                position: const Position(character: 1, line: 4),
+                previewAnnotation: "const _i4.Preview(name: 'preview')",
+                scriptUri: Uri.file('/user/flutter_project/lib/foo.dart'),
+                libraryUri: Uri.parse('package:flutter_project/foo.dart'),
+              ),
+            ],
+            scriptUris: <Uri>[rootProject.childDirectory('lib').childFile('foo.dart').uri],
+          );
 
-        final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-        );
+          await startWidgetPreview(rootProject: rootProject);
 
-        expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
-        expectSinglePreviewLaunchTimingEvent();
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
+            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+          );
 
-    testUsingContext(
-      'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-      () async {
-        final Directory rootProject = await createRootProject();
-        rootProject
-            .childDirectory('lib')
-            .childFile('foo.dart')
-            .writeAsStringSync(samplePreviewFile);
+          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
+          expectSinglePreviewLaunchTimingEvent();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
 
-        // Try to execute using the CWD.
-        fs.currentDirectory = rootProject;
-        await startWidgetPreview(rootProject: null);
+      testUsingContext(
+        'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
+        () async {
+          final Directory rootProject = await createRootProject();
+          rootProject
+              .childDirectory('lib')
+              .childFile('foo.dart')
+              .writeAsStringSync(samplePreviewFile);
 
-        final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-        );
+          fakeDtdServices.nextUpdate = FlutterWidgetPreviews(
+            namespaces: <String, String>{
+              'widget_preview.dart': '_i1',
+              'utils.dart': '_i2',
+              'package:flutter_project/foo.dart': '_i3',
+              'package:flutter/src/widget_previews/widget_previews.dart': '_i4',
+            },
+            previews: <FlutterWidgetPreviewDetails>[
+              FlutterWidgetPreviewDetails(
+                functionName: 'preview',
+                hasError: false,
+                dependencyHasErrors: false,
+                isBuilder: false,
+                isMultiPreview: false,
+                packageName: 'flutter_project',
+                position: const Position(character: 1, line: 4),
+                previewAnnotation: "const _i4.Preview(name: 'preview')",
+                scriptUri: Uri.file('/user/flutter_project/lib/foo.dart'),
+                libraryUri: Uri.parse('package:flutter_project/foo.dart'),
+              ),
+            ],
+            scriptUris: <Uri>[rootProject.childDirectory('lib').childFile('foo.dart').uri],
+          );
 
-        expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
-        expectSinglePreviewLaunchTimingEvent();
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        FileSystem: () => fs,
-        ProcessManager: () => loggingProcessManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+          // Try to execute using the CWD.
+          fs.currentDirectory = rootProject;
+          await startWidgetPreview(rootProject: null);
 
-    testUsingContext(
-      'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-      () async {
-        final Directory rootProject = await createRootProject();
-        await startWidgetPreview(rootProject: rootProject);
-        expectSinglePreviewLaunchTimingEvent();
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        DeviceManager: () => fakeDeviceManager,
-        Pub: () => Pub.test(
-          fileSystem: fs,
-          logger: logger,
-          processManager: loggingProcessManager,
-          botDetector: botDetector,
-          platform: platform,
-          stdio: mockStdio,
-        ),
-      },
-    );
+          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
+            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+          );
+
+          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
+          expectSinglePreviewLaunchTimingEvent();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => loggingProcessManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+
+      testUsingContext(
+        'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
+        () async {
+          final Directory rootProject = await createRootProject();
+          rootProject
+              .childDirectory('lib')
+              .childFile('foo.dart')
+              .writeAsStringSync(samplePreviewFile);
+
+          fakeDtdServices.nextUpdate = FlutterWidgetPreviews(
+            namespaces: <String, String>{
+              'widget_preview.dart': '_i1',
+              'utils.dart': '_i2',
+              'package:flutter_project/foo.dart': '_i3',
+              'package:flutter/src/widget_previews/widget_previews.dart': '_i4',
+            },
+            previews: <FlutterWidgetPreviewDetails>[
+              FlutterWidgetPreviewDetails(
+                functionName: 'preview',
+                hasError: false,
+                dependencyHasErrors: false,
+                isBuilder: false,
+                isMultiPreview: false,
+                packageName: 'flutter_project',
+                position: const Position(character: 1, line: 4),
+                previewAnnotation: "const _i4.Preview(name: 'preview')",
+                scriptUri: Uri.file('/user/flutter_project/lib/foo.dart'),
+                libraryUri: Uri.parse('package:flutter_project/foo.dart'),
+              ),
+            ],
+            scriptUris: <Uri>[rootProject.childDirectory('lib').childFile('foo.dart').uri],
+          );
+
+          await startWidgetPreview(rootProject: rootProject);
+          expectSinglePreviewLaunchTimingEvent();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+    });
+
+    group('Legacy preview detection', () {
+      testUsingContext(
+        'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
+        () async {
+          final Directory rootProject = await createRootProject();
+          rootProject
+              .childDirectory('lib')
+              .childFile('foo.dart')
+              .writeAsStringSync(samplePreviewFile);
+
+          await startWidgetPreview(rootProject: rootProject, legacyDetection: true);
+
+          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
+            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+          );
+
+          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
+          expectSinglePreviewLaunchTimingEvent();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+
+      testUsingContext(
+        'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
+        () async {
+          final Directory rootProject = await createRootProject();
+          rootProject
+              .childDirectory('lib')
+              .childFile('foo.dart')
+              .writeAsStringSync(samplePreviewFile);
+
+          // Try to execute using the CWD.
+          fs.currentDirectory = rootProject;
+          await startWidgetPreview(rootProject: null, legacyDetection: true);
+
+          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
+            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+          );
+
+          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
+          expectSinglePreviewLaunchTimingEvent();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => loggingProcessManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+
+      testUsingContext(
+        'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
+        () async {
+          final Directory rootProject = await createRootProject();
+          rootProject
+              .childDirectory('lib')
+              .childFile('foo.dart')
+              .writeAsStringSync(samplePreviewFile);
+
+          await startWidgetPreview(rootProject: rootProject, legacyDetection: true);
+
+          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
+            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+          );
+
+          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
+          expectSinglePreviewLaunchTimingEvent();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+    });
 
     testUsingContext(
       'invokes pub in online and offline modes',

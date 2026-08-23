@@ -404,6 +404,50 @@ void main() {
     );
     await driverService.stop();
   });
+
+  testWithoutContext(
+    'Listens to device log reader even if connection to VM service fails',
+    () async {
+      final processManager = FakeProcessManager.empty();
+      final logReader = FakeDeviceLogReader();
+      final DriverService driverService = FlutterDriverService(
+        applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
+        dartSdkPath: 'dart',
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        logFlushDelay: Duration.zero,
+        vmServiceConnector:
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+              Device? device,
+              required Logger logger,
+            }) async {
+              throw Exception('Failed to connect to VM service');
+            },
+      );
+      final device = FakeDevice(LaunchResult.failed(), logReader: logReader);
+
+      try {
+        await driverService.reuseApplication(
+          Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+          device,
+          DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        fail('Expected reuseApplication to fail');
+      } on Exception catch (e) {
+        expect(e.toString(), contains('Failed to connect to VM service'));
+      }
+      expect(logReader.isListened, true);
+    },
+  );
 }
 
 FlutterDriverService setUpDriverService({
@@ -460,11 +504,16 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   }) async => applicationPackage;
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage {
+  @override
+  String get name => 'fakeAppPackage';
+}
 
 class FakeDevice extends Fake implements Device {
-  FakeDevice(this.result, {this.supportsFlutterExit = true});
+  FakeDevice(this.result, {this.supportsFlutterExit = true, DeviceLogReader? logReader})
+    : _logReader = logReader ?? NoOpDeviceLogReader('test');
 
+  final DeviceLogReader _logReader;
   LaunchResult result;
   bool didStopApp = false;
   bool didUninstallApp = false;
@@ -475,6 +524,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   String get name => 'test';
+
+  @override
+  String get displayName => name;
 
   @override
   final bool supportsFlutterExit;
@@ -489,7 +541,7 @@ class FakeDevice extends Fake implements Device {
   Future<DeviceLogReader> getLogReader({
     ApplicationPackage? app,
     bool includePastLogs = false,
-  }) async => NoOpDeviceLogReader('test');
+  }) async => _logReader;
 
   @override
   Future<LaunchResult> startApp(
@@ -539,6 +591,7 @@ class FakeDartDevelopmentService extends Fake
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String? appName = 'Fake App',
     FlutterDevice? device,
     int? ddsPort,
     bool? ipv6,
@@ -555,4 +608,26 @@ class FakeDartDevelopmentService extends Fake
   Future<void> shutdown() async {
     disposed = true;
   }
+}
+
+class FakeDeviceLogReader implements DeviceLogReader {
+  final StreamController<String> _logLinesController = StreamController<String>.broadcast();
+  bool isListened = false;
+
+  @override
+  String get name => 'fake_log_reader';
+
+  @override
+  Stream<String> get logLines {
+    isListened = true;
+    return _logLinesController.stream;
+  }
+
+  @override
+  void dispose() {
+    _logLinesController.close();
+  }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
 }

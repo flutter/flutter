@@ -404,7 +404,11 @@ class RawTooltip extends StatefulWidget {
   ///
   /// If [AnimationStyle.reverseCurve] is provided, it will be used to override
   /// the hide tooltip animation curve. If it is null, the same curve will be
-  /// used as for the show tooltip animation.
+  /// used as for the show tooltip animation. The reverse curve only takes
+  /// effect when the tooltip starts hiding from the fully shown state; a
+  /// tooltip dismissed while it is still animating in continues to use the
+  /// show curve, to avoid a visual discontinuity. See
+  /// [CurvedAnimation.reverseCurve].
   ///
   /// To disable the tooltip show/hide animation, use
   /// [AnimationStyle.noAnimation].
@@ -528,6 +532,13 @@ class RawTooltip extends StatefulWidget {
         defaultValue: null,
       ),
     );
+    properties.add(
+      DiagnosticsProperty<AnimationStyle>(
+        'animationStyle',
+        animationStyle,
+        defaultValue: _kDefaultAnimationStyle,
+      ),
+    );
   }
 }
 
@@ -540,10 +551,16 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
 
   Timer? _timer;
   AnimationController? _backingController;
+  Duration get _showDuration => widget.animationStyle.duration ?? _kDefaultAnimationStyle.duration!;
+  Duration get _hideDuration =>
+      widget.animationStyle.reverseDuration ?? _kDefaultAnimationStyle.reverseDuration!;
+  Curve get _showCurve => widget.animationStyle.curve ?? _kDefaultAnimationStyle.curve!;
+  Curve? get _hideCurve => widget.animationStyle.reverseCurve;
+
   AnimationController get _controller {
     return _backingController ??= AnimationController(
-      duration: widget.animationStyle.duration,
-      reverseDuration: widget.animationStyle.reverseDuration,
+      duration: _showDuration,
+      reverseDuration: _hideDuration,
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
   }
@@ -552,7 +569,8 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   CurvedAnimation get _overlayAnimation {
     return _backingOverlayAnimation ??= CurvedAnimation(
       parent: _controller,
-      curve: widget.animationStyle.curve ?? _kDefaultAnimationStyle.curve!,
+      curve: _showCurve,
+      reverseCurve: _hideCurve,
     );
   }
 
@@ -796,6 +814,20 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // if some other control is clicked on. Pointer events are dispatched to
     // global routes **after** other routes.
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
+  }
+
+  @protected
+  @override
+  void didUpdateWidget(RawTooltip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animationStyle != oldWidget.animationStyle) {
+      _backingController
+        ?..duration = _showDuration
+        ..reverseDuration = _hideDuration;
+      _backingOverlayAnimation
+        ?..curve = _showCurve
+        ..reverseCurve = _hideCurve;
+    }
   }
 
   Widget _buildTooltipOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {

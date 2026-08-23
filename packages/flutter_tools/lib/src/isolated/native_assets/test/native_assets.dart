@@ -44,6 +44,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     buildInfo.packageConfig,
     globals.fs,
     globals.logger,
+    globals.platform,
     runPackageName,
     includeDevDependencies: true,
     pubspecPath,
@@ -82,6 +83,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
       appBuildDirectory: null,
     ),
     buildDataAssets: true,
+    recordedUsesFile: null,
   );
 
   // Then "install" the code assets so they can be used at runtime.

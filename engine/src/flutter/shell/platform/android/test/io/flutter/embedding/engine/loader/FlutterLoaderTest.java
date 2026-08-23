@@ -18,6 +18,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,6 +49,9 @@ import org.mockito.Mockito;
 @RunWith(AndroidJUnit4.class)
 public class FlutterLoaderTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
+
+  // Default value for flags to test if they are successfully loaded.
+  private static final boolean defaultFlagTestValue = true;
 
   @Test
   public void itReportsUninitializedAfterCreating() {
@@ -757,7 +761,7 @@ public class FlutterLoaderTest {
   public void itSetsEnableSoftwareRenderingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.EnableSoftwareRendering",
-        null,
+        defaultFlagTestValue,
         "--enable-software-rendering");
   }
 
@@ -784,7 +788,7 @@ public class FlutterLoaderTest {
   public void itSetsSkiaDeterministicRenderingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.SkiaDeterministicRendering",
-        null,
+        defaultFlagTestValue,
         "--skia-deterministic-rendering");
   }
 
@@ -853,7 +857,9 @@ public class FlutterLoaderTest {
   public void itSetsEnableImpellerFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableImpeller", true, "--enable-impeller=true");
+        "io.flutter.embedding.android.EnableImpeller",
+        defaultFlagTestValue,
+        "--enable-impeller=true");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
@@ -914,7 +920,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsUseTestFontsFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.UseTestFonts", null, "--use-test-fonts");
+        "io.flutter.embedding.android.UseTestFonts", defaultFlagTestValue, "--use-test-fonts");
   }
 
   @Test
@@ -929,7 +935,9 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsEnableVulkanValidationFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableVulkanValidation", null, "--enable-vulkan-validation");
+        "io.flutter.embedding.android.EnableVulkanValidation",
+        defaultFlagTestValue,
+        "--enable-vulkan-validation");
   }
 
   @Test
@@ -944,64 +952,76 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsTraceStartupFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.TraceStartup", null, "--trace-startup");
+        "io.flutter.embedding.android.TraceStartup", defaultFlagTestValue, "--trace-startup");
   }
 
   @Test
   public void itSetsStartPausedFromMetadata() {
-    testFlagFromMetadataPresent("io.flutter.embedding.android.StartPaused", null, "--start-paused");
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.StartPaused", defaultFlagTestValue, "--start-paused");
   }
 
   @Test
   public void itSetsDisableServiceAuthCodesFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.DisableServiceAuthCodes",
-        null,
+        defaultFlagTestValue,
         "--disable-service-auth-codes");
   }
 
   @Test
   public void itSetsEndlessTraceBufferFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EndlessTraceBuffer", null, "--endless-trace-buffer");
+        "io.flutter.embedding.android.EndlessTraceBuffer",
+        defaultFlagTestValue,
+        "--endless-trace-buffer");
   }
 
   @Test
   public void itSetsEnableDartProfilingFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableDartProfiling", null, "--enable-dart-profiling");
+        "io.flutter.embedding.android.EnableDartProfiling",
+        defaultFlagTestValue,
+        "--enable-dart-profiling");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableDartProfiling", null, "--enable-dart-profiling");
+        "io.flutter.embedding.android.EnableDartProfiling",
+        defaultFlagTestValue,
+        "--enable-dart-profiling");
   }
 
   @Test
   public void itSetsProfileStartupFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ProfileStartup", null, "--profile-startup");
+        "io.flutter.embedding.android.ProfileStartup", defaultFlagTestValue, "--profile-startup");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ProfileStartup", null, "--profile-startup");
+        "io.flutter.embedding.android.ProfileStartup", defaultFlagTestValue, "--profile-startup");
   }
 
   @Test
   public void itSetsMergedPlatformUiThread() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.MergedPlatformUIThread", null, "--merged-platform-ui-thread");
+        "io.flutter.embedding.android.MergedPlatformUIThread",
+        defaultFlagTestValue,
+        "--merged-platform-ui-thread");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.MergedPlatformUIThread", null, "--merged-platform-ui-thread");
+        "io.flutter.embedding.android.MergedPlatformUIThread",
+        defaultFlagTestValue,
+        "--merged-platform-ui-thread");
   }
 
   @Test
   public void itSetsTraceSkiaFromMetadata() {
-    testFlagFromMetadataPresent("io.flutter.embedding.android.TraceSkia", null, "--trace-skia");
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.TraceSkia", defaultFlagTestValue, "--trace-skia");
   }
 
   @Test
@@ -1016,7 +1036,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsTraceSystraceFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.TraceSystrace", null, "--trace-systrace");
+        "io.flutter.embedding.android.TraceSystrace", defaultFlagTestValue, "--trace-systrace");
   }
 
   @Test
@@ -1031,27 +1051,31 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsProfileMicrotasksFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ProfileMicrotasks", null, "--profile-microtasks");
+        "io.flutter.embedding.android.ProfileMicrotasks",
+        defaultFlagTestValue,
+        "--profile-microtasks");
   }
 
   @Test
   public void itSetsDumpSkpOnShaderCompilationFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.DumpSkpOnShaderCompilation",
-        null,
+        defaultFlagTestValue,
         "--dump-skp-on-shader-compilation");
   }
 
   @Test
   public void itSetsPurgePersistentCacheFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.PurgePersistentCache", null, "--purge-persistent-cache");
+        "io.flutter.embedding.android.PurgePersistentCache",
+        defaultFlagTestValue,
+        "--purge-persistent-cache");
   }
 
   @Test
   public void itSetsVerboseLoggingFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.VerboseLogging", null, "--verbose-logging");
+        "io.flutter.embedding.android.VerboseLogging", defaultFlagTestValue, "--verbose-logging");
   }
 
   @Test
@@ -1067,11 +1091,15 @@ public class FlutterLoaderTest {
   public void itSetsEnableFlutterGPUFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableFlutterGPU", true, "--enable-flutter-gpu");
+        "io.flutter.embedding.android.EnableFlutterGPU",
+        defaultFlagTestValue,
+        "--enable-flutter-gpu");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableFlutterGPU", true, "--enable-flutter-gpu");
+        "io.flutter.embedding.android.EnableFlutterGPU",
+        defaultFlagTestValue,
+        "--enable-flutter-gpu");
   }
 
   @Test
@@ -1079,48 +1107,55 @@ public class FlutterLoaderTest {
     // Test debug mode.
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
-        true,
+        defaultFlagTestValue,
         "--impeller-lazy-shader-mode");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
         "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
-        true,
+        defaultFlagTestValue,
         "--impeller-lazy-shader-mode");
-  }
-
-  @Test
-  public void itSetsImpellerAntiAliasLinesFromMetadata() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ImpellerAntialiasLines", true, "--impeller-antialias-lines");
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ImpellerAntialiasLines", true, "--impeller-antialias-lines");
   }
 
   @Test
   public void itSetsEnableOpenGLGPUTracingFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableOpenGLGPUTracing", true, "--enable-opengl-gpu-tracing");
+        "io.flutter.embedding.android.EnableOpenGLGPUTracing",
+        defaultFlagTestValue,
+        "--enable-opengl-gpu-tracing");
   }
 
   @Test
   public void itSetsEnableVulkanGPUTracingFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableVulkanGPUTracing", true, "--enable-vulkan-gpu-tracing");
+        "io.flutter.embedding.android.EnableVulkanGPUTracing",
+        defaultFlagTestValue,
+        "--enable-vulkan-gpu-tracing");
+  }
+
+  @Test
+  public void itDoesNotSetBooleanFlagWithMalformedOrMissingValue() {
+    // A key present with a non-boolean string value should NOT enable the flag.
+    testFlagFromMetadataNotPresent(
+        "io.flutter.embedding.android.EnableVulkanValidation",
+        "Fasle",
+        "--enable-vulkan-validation");
+
+    // A key present with a null value should NOT enable the flag.
+    testFlagFromMetadataNotPresent(
+        "io.flutter.embedding.android.EnableVulkanValidation", null, "--enable-vulkan-validation");
   }
 
   @Test
   public void itDoesNotSetTestFlagFromMetadata() {
-    testFlagFromMetadataNotPresent("io.flutter.embedding.android.TestFlag", null, "--test-flag");
+    testFlagFromMetadataNotPresent(
+        "io.flutter.embedding.android.TestFlag", defaultFlagTestValue, "--test-flag");
   }
 
   @Test
   public void itDoesNotSetFlagDisallowedinReleaseMode() {
     testFlagFromMetadataNotPresentInReleaseMode(
-        "io.flutter.embedding.android.TraceSkia", null, "--test-flag");
+        "io.flutter.embedding.android.TraceSkia", defaultFlagTestValue, "--test-flag");
   }
 
   @Test
@@ -1316,6 +1351,157 @@ public class FlutterLoaderTest {
             + expectedArg
             + "' was found in the arguments passed to FlutterJNI.init",
         arguments.contains(expectedArg));
+  }
+
+  @Test
+  public void itSetsSingleCommandLineFlagFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-impeller=true\"]", new String[] {"--enable-impeller=true"}, true, true);
+  }
+
+  @Test
+  public void itSetsMultipleCommandLineFlagsFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-impeller=true\",\"--enable-dart-profiling\"]",
+        new String[] {"--enable-impeller=true", "--enable-dart-profiling"},
+        true,
+        true);
+  }
+
+  @Test
+  public void
+      itSetsMultipleCommandLineFlagsWithSpecialCharactersFromManifestMetadataInReleaseMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--flutter-assets-dir=\\\"path/<to>/'a'& file\\\"\",\"--enable-impeller=true\"]",
+        new String[] {"--flutter-assets-dir=\"path/<to>/'a'& file\"", "--enable-impeller=true"},
+        true,
+        true);
+  }
+
+  @Test
+  public void itIgnoresCommandLineFlagsFromManifestMetadataInDebugMode() {
+    testMultipleFlagsFromManifestMetadata(
+        "[\"--enable-impeller=true\"]", new String[] {"--enable-impeller=true"}, false, false);
+  }
+
+  @Test
+  public void itDoesNotReadAndroidEngineShellArgsFromManifestInDebugMode() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = spy(new Bundle());
+
+    metadata.putString(
+        "io.flutter.app.androidEngineShellArgs",
+        "[\"--enable-impeller=true\",\"--enable-dart-profiling\"]");
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null, false);
+    shadowOf(getMainLooper()).idle();
+
+    verify(metadata, never()).getString("io.flutter.app.androidEngineShellArgs");
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertFalse(arguments.contains("--enable-impeller=true"));
+    assertFalse(arguments.contains("--enable-dart-profiling"));
+  }
+
+  @Test
+  public void itSetsCommandLineFlagsFromManifestMetadataInReleaseModeAndTakesPrecedence() {
+    String expectedImpellerArgFromMetadata = "--enable-impeller=false";
+    String expectedImpellerArgFromShellArgs = "--enable-impeller=true";
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    // Place metadata key and value into the metadata bundle used to mock the manifest.
+    metadata.putBoolean("io.flutter.embedding.android.EnableImpeller", false);
+
+    // Mock metadata put into the manifest by the Flutter tool when command line flag specified.
+    metadata.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"" + expectedImpellerArgFromShellArgs + "\"]");
+
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null, true);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // Verify that the command line argument takes precedence over the manifest metadata.
+    assertTrue(
+        arguments.indexOf(expectedImpellerArgFromMetadata)
+            < arguments.indexOf(expectedImpellerArgFromShellArgs));
+  }
+
+  private void testMultipleFlagsFromManifestMetadata(
+      String jsonFlags, String[] expectedArgs, boolean shouldBeSet, boolean isReleaseMode) {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    metadata.putString("io.flutter.app.androidEngineShellArgs", jsonFlags);
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null, isReleaseMode);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    for (String expectedArg : expectedArgs) {
+      if (shouldBeSet) {
+        assertTrue(
+            "Expected argument '"
+                + expectedArg
+                + "' was not found in the arguments passed to FlutterJNI.init",
+            arguments.contains(expectedArg));
+      } else {
+        assertFalse(
+            "Unexpected argument '"
+                + expectedArg
+                + "' was found in the arguments passed to FlutterJNI.init",
+            arguments.contains(expectedArg));
+      }
+    }
   }
 
   private void testFlagFromMetadataPresentInReleaseMode(

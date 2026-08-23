@@ -12,5 +12,6 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterHourFormat.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterTracing.h"
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_INTERNALFLUTTERSWIFTCOMMON_BRIDGING_HEADER_H_

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class AdaptedListItem extends StatelessWidget {
   const AdaptedListItem({super.key, required this.name});
@@ -62,7 +62,7 @@ class AdaptiveContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context).size.width < _kGridViewBreakpoint) {
+    if (MediaQuery.widthOf(context) < _kGridViewBreakpoint) {
       return ListView(
         itemExtent: _kListItemExtent,
         children: names.map<Widget>((String name) => AdaptedListItem(name: name)).toList(),

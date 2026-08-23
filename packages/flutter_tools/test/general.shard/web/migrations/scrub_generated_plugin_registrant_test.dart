@@ -68,6 +68,12 @@ void main() {
             terminal: FakeTerminal(),
             plistParser: FakePlistParser(),
             processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -103,6 +109,12 @@ void main() {
             terminal: FakeTerminal(),
             plistParser: FakePlistParser(),
             processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -137,6 +149,12 @@ void main() {
             terminal: FakeTerminal(),
             plistParser: FakePlistParser(),
             processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -173,6 +191,12 @@ void main() {
             terminal: FakeTerminal(),
             plistParser: FakePlistParser(),
             processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -208,6 +232,12 @@ void main() {
             terminal: FakeTerminal(),
             plistParser: FakePlistParser(),
             processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 

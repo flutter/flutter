@@ -26,7 +26,7 @@ struct RenderableText {
 
   /// The properties needed for rendering stroked text and/or the color
   /// needed to cache a TextFrame where HasColor() == true.
-  const std::optional<GlyphProperties> properties;
+  const GlyphProperties properties;
 };
 
 //------------------------------------------------------------------------------

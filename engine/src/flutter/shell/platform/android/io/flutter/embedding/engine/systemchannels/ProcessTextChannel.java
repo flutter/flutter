@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
@@ -27,7 +28,7 @@ import java.util.Map;
  * all activities that can be performed for the {@code Intent.ACTION_PROCESS_TEXT} intent.
  *
  * <p>When a text processing action has to be executed, the framework will send to the embedding the
- * message {@code ProcessText.processTextAction} with the {@code int id} of the choosen text action
+ * message {@code ProcessText.processTextAction} with the {@code int id} of the chosen text action
  * and the {@code String} of text to process as arguments. In response, the {@link
  * io.flutter.plugin.text.ProcessTextPlugin} will make a call to the Android application activity to
  * start the activity exposing the text action. The {@link io.flutter.plugin.text.ProcessTextPlugin}
@@ -87,7 +88,14 @@ public class ProcessTextChannel {
   public ProcessTextChannel(
       @NonNull DartExecutor dartExecutor, @NonNull PackageManager packageManager) {
     this.packageManager = packageManager;
-    channel = new MethodChannel(dartExecutor, CHANNEL_NAME, StandardMethodCodec.INSTANCE);
+    BinaryMessenger.TaskQueue taskQueue =
+        dartExecutor.getBinaryMessenger().makeBackgroundTaskQueue();
+    channel =
+        new MethodChannel(
+            dartExecutor.getBinaryMessenger(),
+            CHANNEL_NAME,
+            StandardMethodCodec.INSTANCE,
+            taskQueue);
     channel.setMethodCallHandler(parsingMethodHandler);
   }
 

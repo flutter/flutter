@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/navigator_utils.dart';
+import 'navigator_utils.dart';
 
 // Matches _kTopGapRatio in cupertino/sheet.dart.
 const double _kTopGapRatio = 0.08;

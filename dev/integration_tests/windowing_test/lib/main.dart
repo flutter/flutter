@@ -11,11 +11,26 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
-late final RegularWindowController controller;
-final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(
-  null,
+late final WindowController controller;
+final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(null);
+
+/// A generic "secondary" window used by the `isDestroyed` end-to-end tests.
+///
+/// Constructing a controller creates the native window immediately, so these
+/// tests exercise the [BaseWindowController.isDestroyed] lifecycle at the
+/// controller level without mounting the window's widget. The reference is kept
+/// even after the window is destroyed so that its `isDestroyed` flag can still
+/// be queried.
+BaseWindowController? secondaryController;
+
+/// Positioner used when creating child secondary windows (tooltip, popup,
+/// satellite).
+const WindowPositioner _kSecondaryPositioner = WindowPositioner(
+  parentAnchor: WindowPositionerAnchor.right,
+  childAnchor: WindowPositionerAnchor.left,
 );
 
 void main() {
@@ -28,18 +43,15 @@ void main() {
           return '';
         }
 
-        final jsonMap = jsonDecode(message);
+        final jsonMap = jsonDecode(message) as Map<String, Object?>;
         if (!jsonMap.containsKey('type')) {
           throw ArgumentError('Message must contain a "type" field.');
         }
 
         /// This helper method registers a listener on the controller,
         /// calls [act] to perform some action on the controller, waits for
-        /// the [predicate] to be satisified, and finally cleans up the listener.
-        Future<void> awaitNotification(
-          VoidCallback act,
-          bool Function() predicate,
-        ) async {
+        /// the [predicate] to be satisfied, and finally cleans up the listener.
+        Future<void> awaitNotification(VoidCallback act, bool Function() predicate) async {
           final StreamController<bool> streamController = StreamController();
           void notificationHandler() {
             streamController.add(true);
@@ -54,12 +66,12 @@ void main() {
             // the animation is in progress and next request for state change
             // will be ignored. Easiest way to handle this is to just wait.
             if (defaultTargetPlatform == TargetPlatform.macOS) {
-              await Future.delayed(Duration(seconds: 1));
+              await Future<void>.delayed(const Duration(seconds: 1));
             }
 
             // Add a timeout to avoid hanging indefinitely
-            await for (final _ in streamController.stream.timeout(
-              Duration(seconds: 10),
+            await for (final bool _ in streamController.stream.timeout(
+              const Duration(seconds: 10),
             )) {
               if (predicate()) {
                 break;
@@ -79,22 +91,22 @@ void main() {
             'height': controller.contentSize.height,
           });
         } else if (jsonMap['type'] == 'set_size') {
-          final Size size = Size(
-            jsonMap['width'].toDouble(),
-            jsonMap['height'].toDouble(),
+          final size = Size(
+            (jsonMap['width']! as num).toDouble(),
+            (jsonMap['height']! as num).toDouble(),
           );
           await awaitNotification(() {
             controller.setSize(size);
           }, () => controller.contentSize == size);
         } else if (jsonMap['type'] == 'set_constraints') {
-          final BoxConstraints constraints = BoxConstraints(
-            minWidth: jsonMap['min_width'].toDouble(),
-            minHeight: jsonMap['min_height'].toDouble(),
-            maxWidth: jsonMap['max_width'].toDouble(),
-            maxHeight: jsonMap['max_height'].toDouble(),
+          final constraints = BoxConstraints(
+            minWidth: (jsonMap['min_width']! as num).toDouble(),
+            minHeight: (jsonMap['min_height']! as num).toDouble(),
+            maxWidth: (jsonMap['max_width']! as num).toDouble(),
+            maxHeight: (jsonMap['max_height']! as num).toDouble(),
           );
           // We assume that this will cause a resize, which the current tests do.
-          final initialSize = controller.contentSize;
+          final Size initialSize = controller.contentSize;
           await awaitNotification(() {
             controller.setConstraints(constraints);
           }, () => controller.contentSize != initialSize);
@@ -129,7 +141,7 @@ void main() {
         } else if (jsonMap['type'] == 'get_minimized') {
           return jsonEncode({'isMinimized': controller.isMinimized});
         } else if (jsonMap['type'] == 'set_title') {
-          final String title = jsonMap['title'];
+          final title = jsonMap['title']! as String;
           await awaitNotification(() {
             controller.setTitle(title);
           }, () => controller.title == title);
@@ -146,7 +158,7 @@ void main() {
             return jsonEncode({'result': false});
           }
           dialogController.value = DialogWindowController(
-            preferredSize: const Size(200, 200),
+            size: const Size(200, 200),
             parent: controller,
             delegate: MyDialogWindowControllerDelegate(
               onDestroyed: () {
@@ -158,6 +170,55 @@ void main() {
         } else if (jsonMap['type'] == 'close_dialog') {
           dialogController.value?.destroy();
           return jsonEncode({'result': true});
+        } else if (jsonMap['type'] == 'create_window') {
+          // Destroy any lingering live secondary window so tests are isolated.
+          if (secondaryController?.isDestroyed == false) {
+            secondaryController!.destroy();
+          }
+          final windowType = jsonMap['window_type']! as String;
+
+          try {
+            switch (windowType) {
+              case 'regular':
+                secondaryController = WindowController(
+                  size: const Size(200, 200),
+                  title: 'Secondary',
+                );
+              case 'dialog':
+                secondaryController = DialogWindowController(
+                  size: const Size(200, 200),
+                  parent: controller,
+                );
+              case 'tooltip':
+                secondaryController = TooltipWindowController(
+                  parent: controller,
+                  anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
+                  positioner: _kSecondaryPositioner,
+                );
+              case 'popup':
+                secondaryController = PopupWindowController(
+                  parent: controller,
+                  anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
+                  positioner: _kSecondaryPositioner,
+                );
+              case 'satellite':
+                secondaryController = SatelliteWindowController(
+                  parent: controller,
+                  initialPositioner: _kSecondaryPositioner,
+                  size: const Size(200, 200),
+                );
+              default:
+                throw ArgumentError('Unknown window_type: $windowType');
+            }
+          } on UnsupportedError {
+            return jsonEncode({'result': 'unsupported'});
+          }
+          return jsonEncode({'result': true});
+        } else if (jsonMap['type'] == 'is_window_destroyed') {
+          return jsonEncode({'isDestroyed': secondaryController?.isDestroyed});
+        } else if (jsonMap['type'] == 'destroy_window') {
+          secondaryController?.destroy();
+          return jsonEncode({'result': true});
         } else {
           throw ArgumentError('Unknown message type: ${jsonMap['type']}');
         }
@@ -167,13 +228,13 @@ void main() {
       }
     },
   );
-  controller = RegularWindowController(
-    preferredSize: Size(640, 480),
+  controller = WindowController(
+    size: const Size(640, 480),
     title: 'Integration Test',
-    delegate: RegularWindowControllerDelegate(),
+    delegate: WindowControllerDelegate(),
   );
 
-  runWidget(RegularWindow(controller: controller, child: MyApp()));
+  runWidget(Window(controller: controller, child: const MyApp()));
   windowCreated.complete();
 }
 
@@ -184,9 +245,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -218,33 +277,28 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: dialogController,
-      builder:
-          (
-            BuildContext context,
-            DialogWindowController? dialogController,
-            Widget? child,
-          ) {
-            return ViewAnchor(
-              view: dialogController != null
-                  ? DialogWindow(
-                      controller: dialogController,
-                      child: MyDialogPage(controller: dialogController),
-                    )
-                  : null,
-              child: Scaffold(
-                appBar: AppBar(
-                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                  title: Text(widget.title),
-                ),
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[const Text('This is the main window.')],
-                  ),
-                ),
+      builder: (BuildContext context, DialogWindowController? dialogController, Widget? child) {
+        return ViewAnchor(
+          view: dialogController != null
+              ? DialogWindow(
+                  controller: dialogController,
+                  child: MyDialogPage(controller: dialogController),
+                )
+              : null,
+          child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              title: Text(widget.title),
+            ),
+            body: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[Text('This is the main window.')],
               ),
-            );
-          },
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -260,7 +314,7 @@ class MyDialogPage extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text('Dialog'),
+          title: const Text('Dialog'),
         ),
         body: Center(
           child: Column(
@@ -272,7 +326,7 @@ class MyDialogPage extends StatelessWidget {
                 onPressed: () {
                   controller.destroy();
                 },
-                child: Text('Close Dialog'),
+                child: const Text('Close Dialog'),
               ),
             ],
           ),
