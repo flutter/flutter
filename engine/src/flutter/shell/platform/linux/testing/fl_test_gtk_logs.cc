@@ -35,6 +35,9 @@ GLogWriterOutput log_writer(GLogLevelFlags log_level,
 
 void fl_ensure_gtk_init(GLogWriterFunc writer) {
   if (!gtk_initialized) {
+    // Tests must not connect to a Wayland compositor; libwayland is replaced
+    // with a mock (see mock_wayland.h) and GDK would be talking to that.
+    gdk_set_allowed_backends("x11");
     gtk_init(0, nullptr);
     g_log_set_writer_func(log_writer, nullptr, nullptr);
     gtk_initialized = true;
