@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io' hide Platform;
+import 'dart:io' as io show Platform;
 
 import 'package:collection/collection.dart';
 import 'package:file/file.dart' as fs;
@@ -129,12 +130,15 @@ void main() {
       Map<String, String>? environment,
       List<String> otherArgs = const <String>[],
     ]) async {
-      final String dart = path.absolute(
-        path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      final String scriptPath = path.join(
+        Directory.current.path.endsWith(path.join('dev', 'bots'))
+            ? Directory.current.path
+            : path.join(Directory.current.path, 'dev', 'bots'),
+        'test.dart',
       );
       final ProcessResult scriptProcess = processManager.runSync(<String>[
-        dart,
-        'test.dart',
+        io.Platform.resolvedExecutable,
+        scriptPath,
         ...otherArgs,
       ], environment: environment);
       return scriptProcess;
@@ -174,9 +178,25 @@ void main() {
     });
 
     test('--dry-run prints every test that would run', () async {
-      final ProcessResult result = await runScript(<String, String>{}, <String>['--dry-run']);
+      final ProcessResult result = await runScript(
+        <String, String>{'SHARD': kTestHarnessShardName},
+        <String>['--dry-run'],
+      );
       expectExitCode(result, 0);
       expect(result.stdout, contains('|> bin/flutter'));
+    }, testOn: 'posix');
+
+    test('--dry-run on fuchsia_precache shard runs precache with --all-platforms', () async {
+      final ProcessResult result = await runScript(
+        <String, String>{'SHARD': 'fuchsia_precache'},
+        <String>['--dry-run'],
+      );
+      expectExitCode(result, 0);
+      expect(result.stdout, contains('|> flutter'));
+      expect(result.stdout, contains('--all-platforms'));
+      expect(result.stdout, contains('--flutter_runner'));
+      expect(result.stdout, contains('--fuchsia'));
+      expect(result.stdout, contains('--force'));
     }, testOn: 'posix');
   });
 
