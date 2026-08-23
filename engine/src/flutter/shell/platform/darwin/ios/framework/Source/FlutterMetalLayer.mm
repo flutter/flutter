@@ -18,12 +18,9 @@ FLUTTER_ASSERT_ARC
 @class FlutterTexture;
 @class FlutterDrawable;
 
-extern CFTimeInterval display_link_target;
-
 @interface FlutterMetalLayer () {
   id<MTLDevice> _preferredDevice;
   CGSize _drawableSize;
-  FlutterDisplayLinkManager* _displayLinkManager;
 
   NSUInteger _nextDrawableId;
 
@@ -31,9 +28,6 @@ extern CFTimeInterval display_link_target;
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
   FlutterTexture* _front;
-
-  // Whether layer displayLink is forced to max rate.
-  BOOL _displayLinkForcedMaxRate;
 }
 
 - (void)presentTexture:(FlutterTexture*)texture;
@@ -149,7 +143,6 @@ extern CFTimeInterval display_link_target;
     self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
-    _displayLinkManager = FlutterDisplayLinkManager.shared;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
