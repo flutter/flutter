@@ -1615,6 +1615,61 @@ void main() {
     },
   );
 
+  testUsingContext(
+    'flutter create --platforms appends platforms to .metadata without dropping existing ones',
+    () async {
+      // The revisions written to .metadata must look like git hashes; a
+      // purely numeric revision would be parsed back as a number by YAML and
+      // rejected by the migrate config validation.
+      fakeFlutterVersion = FakeFlutterVersion(
+        frameworkRevision: 'abcdef1234567890abcdef1234567890abcdef12',
+        branch: frameworkChannel,
+      );
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+        'flutter_create_append_platforms_',
+      );
+      final Directory projectDir = tempDir.childDirectory('myapp');
+
+      try {
+        // Create a project that only supports the android platform.
+        final command = CreateCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+
+        // Append the ios platform to the existing project.
+        final appendCommand = CreateCommand();
+        final CommandRunner<void> appendRunner = createTestCommandRunner(appendCommand);
+        await appendRunner.run(<String>['create', '--no-pub', '--platforms=ios', projectDir.path]);
+
+        // Parse the migration section of the .metadata file with loadYaml,
+        // the same parser the tool uses when reading the file back.
+        final File metadataFile = projectDir.childFile('.metadata');
+        expect(metadataFile, exists);
+
+        final yamlMap = loadYaml(metadataFile.readAsStringSync()) as YamlMap;
+        final migration = yamlMap['migration'] as YamlMap;
+        final platforms = migration['platforms'] as YamlList;
+
+        // Each entry in the platforms list is a map that tracks the platform
+        // name along with the revisions it was created at; extract the names.
+        final actualPlatforms = <String>[
+          for (final YamlMap platform in platforms.whereType<YamlMap>())
+            platform['platform'] as String,
+        ];
+
+        // The root platform is always tracked, and neither the previously
+        // added android platform nor the newly added ios platform may be lost.
+        expect(actualPlatforms, unorderedEquals(<String>['root', 'android', 'ios']));
+      } finally {
+        tryToDelete(tempDir);
+      }
+    },
+    overrides: {
+      FlutterVersion: () => fakeFlutterVersion,
+      Platform: _kNoColorTerminalPlatform,
+    },
+  );
+
   testUsingContext('Correct info.plist key-value pairs for project.', () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
