@@ -328,6 +328,49 @@ void main() {
     );
   });
 
+  testWithoutContext('flutter test supports the short preset option', () async {
+    final ProcessResult result = await _runFlutterTest(
+      'preset',
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>['-P', 'passing'],
+    );
+    expect(result, const ProcessResultMatcher());
+  });
+
+  testWithoutContext('flutter test supports the long preset option', () async {
+    final ProcessResult result = await _runFlutterTest(
+      'preset',
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>['--preset=passing'],
+    );
+    expect(result, const ProcessResultMatcher());
+  });
+
+  testWithoutContext('flutter test reports an undefined preset', () async {
+    final ProcessResult result = await _runFlutterTest(
+      'preset',
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>['--preset=missing'],
+    );
+    expect(
+      result,
+      const ProcessResultMatcher(exitCode: 64, stderrPattern: 'Undefined preset "missing".'),
+    );
+  });
+
+  testWithoutContext('flutter test combines a preset with other test options', () async {
+    final ProcessResult result = await _runFlutterTest(
+      'preset',
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>['--preset=filtered', '--plain-name=combined selection'],
+    );
+    expect(result, const ProcessResultMatcher());
+  });
+
   testWithoutContext('flutter test should run a test with an exact name in URI format', () async {
     final ProcessResult result = await _runFlutterTest(
       'uri_format',

@@ -16117,6 +16117,36 @@ void main() {
       expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
     });
 
+    testWidgets('Spell check disabled for numeric password input type', (
+      WidgetTester tester,
+    ) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: const TextInputType.numberWithOptions(password: true),
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
     testWidgets('Spell check disabled for password autofill hints', (WidgetTester tester) async {
       final fakeSpellCheckService = FakeSpellCheckService();
       controller.text = 'A';

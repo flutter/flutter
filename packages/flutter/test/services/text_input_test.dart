@@ -577,6 +577,7 @@ void main() {
         'name': 'TextInputType.text',
         'signed': null,
         'decimal': null,
+        'password': null,
       });
       expect(json['readOnly'], true);
       expect(json['obscureText'], true);
@@ -611,11 +612,25 @@ void main() {
         'name': 'TextInputType.number',
         'signed': false,
         'decimal': true,
+        'password': false,
       });
       expect(json['readOnly'], false);
       expect(json['obscureText'], true);
       expect(json['autocorrect'], false);
       expect(json['actionLabel'], 'xyzzy');
+    });
+
+    test('numeric password serializes to JSON', () {
+      const configuration = TextInputConfiguration(
+        inputType: TextInputType.numberWithOptions(password: true),
+      );
+      final Map<String, dynamic> json = configuration.toJson();
+      expect(json['inputType'], <String, dynamic>{
+        'name': 'TextInputType.number',
+        'signed': false,
+        'decimal': false,
+        'password': true,
+      });
     });
 
     test('basic structure', () async {
@@ -626,87 +641,110 @@ void main() {
       const signed2 = TextInputType.numberWithOptions(signed: true);
       const decimal = TextInputType.numberWithOptions(decimal: true);
       const signedDecimal = TextInputType.numberWithOptions(signed: true, decimal: true);
+      const password = TextInputType.numberWithOptions(password: true);
+      const password2 = TextInputType.numberWithOptions(password: true);
+      const signedDecimalPassword = TextInputType.numberWithOptions(
+        signed: true,
+        decimal: true,
+        password: true,
+      );
 
       expect(
         text.toString(),
-        'TextInputType(name: TextInputType.text, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.text, signed: null, decimal: null, password: null)',
       );
       expect(
         number.toString(),
-        'TextInputType(name: TextInputType.number, signed: false, decimal: false)',
+        'TextInputType(name: TextInputType.number, signed: false, decimal: false, password: false)',
       );
       expect(
         signed.toString(),
-        'TextInputType(name: TextInputType.number, signed: true, decimal: false)',
+        'TextInputType(name: TextInputType.number, signed: true, decimal: false, password: false)',
       );
       expect(
         decimal.toString(),
-        'TextInputType(name: TextInputType.number, signed: false, decimal: true)',
+        'TextInputType(name: TextInputType.number, signed: false, decimal: true, password: false)',
       );
       expect(
         signedDecimal.toString(),
-        'TextInputType(name: TextInputType.number, signed: true, decimal: true)',
+        'TextInputType(name: TextInputType.number, signed: true, decimal: true, password: false)',
+      );
+      expect(
+        password.toString(),
+        'TextInputType(name: TextInputType.number, signed: false, decimal: false, password: true)',
+      );
+      expect(
+        signedDecimalPassword.toString(),
+        'TextInputType(name: TextInputType.number, signed: true, decimal: true, password: true)',
       );
       expect(
         TextInputType.multiline.toString(),
-        'TextInputType(name: TextInputType.multiline, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.multiline, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.phone.toString(),
-        'TextInputType(name: TextInputType.phone, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.phone, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.datetime.toString(),
-        'TextInputType(name: TextInputType.datetime, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.datetime, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.emailAddress.toString(),
-        'TextInputType(name: TextInputType.emailAddress, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.emailAddress, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.url.toString(),
-        'TextInputType(name: TextInputType.url, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.url, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.visiblePassword.toString(),
-        'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.visiblePassword, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.name.toString(),
-        'TextInputType(name: TextInputType.name, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.name, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.streetAddress.toString(),
-        'TextInputType(name: TextInputType.address, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.address, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.none.toString(),
-        'TextInputType(name: TextInputType.none, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.none, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.webSearch.toString(),
-        'TextInputType(name: TextInputType.webSearch, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.webSearch, signed: null, decimal: null, password: null)',
       );
       expect(
         TextInputType.twitter.toString(),
-        'TextInputType(name: TextInputType.twitter, signed: null, decimal: null)',
+        'TextInputType(name: TextInputType.twitter, signed: null, decimal: null, password: null)',
       );
 
       expect(text == number, false);
       expect(number == number2, true);
       expect(number == signed, false);
+      expect(number == password, false);
       expect(signed == signed2, true);
       expect(signed == decimal, false);
       expect(signed == signedDecimal, false);
       expect(decimal == signedDecimal, false);
+      expect(password == password2, true);
+      expect(password == signedDecimalPassword, false);
+      expect(signedDecimal == signedDecimalPassword, false);
 
       expect(text.hashCode == number.hashCode, false);
       expect(number.hashCode == number2.hashCode, true);
       expect(number.hashCode == signed.hashCode, false);
+      expect(number.hashCode == password.hashCode, false);
       expect(signed.hashCode == signed2.hashCode, true);
       expect(signed.hashCode == decimal.hashCode, false);
       expect(signed.hashCode == signedDecimal.hashCode, false);
       expect(decimal.hashCode == signedDecimal.hashCode, false);
+      expect(password.hashCode == password2.hashCode, true);
+      expect(password.hashCode == signedDecimalPassword.hashCode, false);
+      expect(signedDecimal.hashCode == signedDecimalPassword.hashCode, false);
 
       expect(TextInputType.text.index, 0);
       expect(TextInputType.multiline.index, 1);
