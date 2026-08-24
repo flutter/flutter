@@ -679,15 +679,19 @@ public class FlutterAssembleToolHelper {
           ]
           for subDir in subFrameworksDirs {
             if fileManager.fileExists(atPath: subDir),
-              let items = try? fileManager.contentsOfDirectory(atPath: subDir)
+              let items = try? fileManager.contentsOfDirectory(
+                at: URL(fileURLWithPath: subDir),
+                includingPropertiesForKeys: nil,
+                options: []
+              )
             {
               for item in items {
-                if item.hasSuffix(".dylib") || item.hasSuffix(".so") {
+                if item.pathExtension == "dylib" || item.pathExtension == "so" {
                   try processManager.run(
                     executableURL: URL(fileURLWithPath: "/usr/bin/codesign"),
                     arguments: [
                       "--force", "--verbose", "--sign", codesignIdentity, "--",
-                      "\(subDir)/\(item)",
+                      item.path,
                     ],
                     env: nil,
                     failOnError: true
