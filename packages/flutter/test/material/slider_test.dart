@@ -5749,7 +5749,7 @@ void main() {
     testWidgets('Calculator receives correct increment type (line vs page)', (
       WidgetTester tester,
     ) async {
-      final receivedTypes = <SliderScrollIncrementType>[];
+      final receivedTypes = <ScrollIncrementType>[];
       var value = 0.5;
 
       await tester.pumpWidget(
@@ -5778,7 +5778,7 @@ void main() {
 
       expect(
         receivedTypes.last,
-        SliderScrollIncrementType.line,
+        ScrollIncrementType.line,
         reason: 'Calculator should receive line type when ScrollIncrementType.line is used',
       );
 
@@ -5790,7 +5790,7 @@ void main() {
 
       expect(
         receivedTypes.last,
-        SliderScrollIncrementType.page,
+        ScrollIncrementType.page,
         reason: 'Calculator should receive page type when ScrollIncrementType.page is used',
       );
     });

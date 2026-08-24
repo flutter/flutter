@@ -49,7 +49,7 @@ class SliderScrollIncrementDetails {
   const SliderScrollIncrementDetails({required this.type, required this.semanticActionUnit});
 
   /// The type of scroll increment (line or page) of the [ScrollIntent].
-  final SliderScrollIncrementType type;
+  final ScrollIncrementType type;
 
   /// The amount by which the slider value changes during a semantic adjustment.
   ///
@@ -61,15 +61,6 @@ class SliderScrollIncrementDetails {
   /// For discrete sliders, this is calculated as `1.0 / divisions`.
   /// For continuous sliders, it defaults to a platform-dependent value: 0.1 for iOS or macOS, and 0.05 otherwise.
   final double semanticActionUnit;
-}
-
-/// Types of scroll increments.
-enum SliderScrollIncrementType {
-  /// Small increment (e.g., mouse wheel scroll).
-  line,
-
-  /// Large increment (e.g., Page Up/Down).
-  page,
 }
 
 enum _SliderType { material, adaptive }
@@ -614,7 +605,7 @@ class Slider extends StatefulWidget {
   /// Calculates the increment amount for scroll inputs.
   ///
   /// If null, a default calculator is used that handles both
-  /// [SliderScrollIncrementType.line] and [SliderScrollIncrementType.page].
+  /// [ScrollIncrementType.line] and [ScrollIncrementType.page].
   ///
   /// The calculator receives a [SliderScrollIncrementDetails] object containing:
   /// - [SliderScrollIncrementDetails.type]: Whether this is a line or page scroll
@@ -642,7 +633,7 @@ class Slider extends StatefulWidget {
   /// ```dart
   /// Slider(
   ///   scrollIncrementCalculator: (details) {
-  ///     if (details.type == SliderScrollIncrementType.page) {
+  ///     if (details.type == ScrollIncrementType.page) {
   ///       return details.semanticActionUnit * 10;
   ///     }
   ///     return details.semanticActionUnit;
@@ -858,13 +849,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         widget.scrollIncrementCalculator ?? _defaultScrollIncrementCalculator;
 
     return calculator(
-      SliderScrollIncrementDetails(
-        type: switch (scrollIncrementType) {
-          ScrollIncrementType.line => SliderScrollIncrementType.line,
-          ScrollIncrementType.page => SliderScrollIncrementType.page,
-        },
-        semanticActionUnit: _semanticActionUnit,
-      ),
+      SliderScrollIncrementDetails(type: scrollIncrementType, semanticActionUnit: _semanticActionUnit),
     );
   }
 
@@ -872,8 +857,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   // noticeably larger than line scrolls on the slider track.
   static double _defaultScrollIncrementCalculator(SliderScrollIncrementDetails details) {
     return switch (details.type) {
-      SliderScrollIncrementType.line => details.semanticActionUnit,
-      SliderScrollIncrementType.page => details.semanticActionUnit * 5,
+      ScrollIncrementType.line => details.semanticActionUnit,
+      ScrollIncrementType.page => details.semanticActionUnit * 5,
     };
   }
 
