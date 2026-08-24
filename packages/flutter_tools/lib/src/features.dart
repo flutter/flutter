@@ -231,14 +231,14 @@ const recordUse = Feature(
 
 /// Warning printed when Swift Package Manager is disabled in configuration.
 const kSwiftPackageManagerDisabledWarning =
-    'Disabling Swift Package Manager will not be allowed in a future version of Flutter.';
+    'Enabling Swift Package Manager will be required in a future version of Flutter.';
 
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
-  warningOnDisable: kSwiftPackageManagerDisabledWarning,
+  warningMessageOnDisable: kSwiftPackageManagerDisabledWarning,
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
@@ -348,7 +348,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
-    this.warningOnDisable,
+    this.warningMessageOnDisable,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
     this.stable = const FeatureChannelSetting(),
@@ -361,7 +361,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
-    this.warningOnDisable,
+    this.warningMessageOnDisable,
   }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
        stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
@@ -406,7 +406,7 @@ class Feature {
   /// A warning to print when this feature is explicitly disabled.
   ///
   /// If not provided, defaults to `null` meaning there is no warning.
-  final String? warningOnDisable;
+  final String? warningMessageOnDisable;
 
   /// A help message for the `flutter config` command, or null if unsupported.
   String? generateHelpMessage() {
