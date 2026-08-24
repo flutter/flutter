@@ -8654,7 +8654,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 44,
+          "uniform_registers_used": 60,
           "work_registers_used": 32
         }
       }
@@ -8693,13 +8693,13 @@
               "arithmetic"
             ],
             "total_cycles": [
-              121.0,
+              121.33333587646484,
               7.0,
               26.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 5,
+          "uniform_registers_used": 9,
           "work_registers_used": 4
         }
       }
