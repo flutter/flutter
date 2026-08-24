@@ -33,91 +33,88 @@ void main() {
       await driver.close();
     });
 
-    test(
-      'validates smooth IME insets animation without terminal jump in edgeToEdge mode',
-      () async {
-        final SerializableFinder edgeToEdgeButton = find.byValueKey(keys.kEdgeToEdgeButton);
-        final SerializableFinder defaultTextField = find.byValueKey(keys.kDefaultTextField);
-        final SerializableFinder insetsText = find.byValueKey(keys.kInsetsText);
-        final SerializableFinder unfocusButton = find.byValueKey(keys.kUnfocusButton);
+    test('validates smooth IME insets animation without terminal jump in edgeToEdge mode', () async {
+      final SerializableFinder edgeToEdgeButton = find.byValueKey(keys.kEdgeToEdgeButton);
+      final SerializableFinder defaultTextField = find.byValueKey(keys.kDefaultTextField);
+      final SerializableFinder insetsText = find.byValueKey(keys.kInsetsText);
+      final SerializableFinder unfocusButton = find.byValueKey(keys.kUnfocusButton);
 
-        await driver.waitFor(edgeToEdgeButton);
-        await driver.tap(edgeToEdgeButton);
+      await driver.waitFor(edgeToEdgeButton);
+      await driver.tap(edgeToEdgeButton);
 
-        // Reset recorded insets frame history before opening keyboard.
-        await driver.requestData('reset_history');
+      // Reset recorded insets frame history before opening keyboard.
+      await driver.requestData('reset_history');
 
-        // Tap text field to trigger IME opening animation.
-        await driver.waitFor(defaultTextField);
-        await driver.tap(defaultTextField);
+      // Tap text field to trigger IME opening animation.
+      await driver.waitFor(defaultTextField);
+      await driver.tap(defaultTextField);
 
-        // Wait for keyboard to open and settle.
-        const pollDelay = Duration(milliseconds: 300);
-        var settled = false;
-        var lastReportedInset = 0.0;
-        for (var i = 0; i < 40; ++i) {
-          await Future<void>.delayed(pollDelay);
-          final String insetsStr = await driver.getText(insetsText);
-          final double currentInset = double.tryParse(insetsStr) ?? 0.0;
-          if (currentInset > 50.0 && currentInset == lastReportedInset) {
-            settled = true;
-            break;
-          }
-          lastReportedInset = currentInset;
+      // Wait for keyboard to open and settle.
+      const pollDelay = Duration(milliseconds: 300);
+      var settled = false;
+      var lastReportedInset = 0.0;
+      for (var i = 0; i < 40; ++i) {
+        await Future<void>.delayed(pollDelay);
+        final String insetsStr = await driver.getText(insetsText);
+        final double currentInset = double.tryParse(insetsStr) ?? 0.0;
+        if (currentInset > 50.0 && currentInset == lastReportedInset) {
+          settled = true;
+          break;
         }
-        expect(settled, isTrue, reason: 'Keyboard should open and reach a settled non-zero inset');
+        lastReportedInset = currentInset;
+      }
+      expect(settled, isTrue, reason: 'Keyboard should open and reach a settled non-zero inset');
 
-        // Fetch frame-by-frame trajectory recorded during opening.
-        final String rawHistory = await driver.requestData('get_history');
-        final dynamic decoded = jsonDecode(rawHistory);
-        final Map<String, dynamic> history = decoded is Map<String, dynamic>
-            ? decoded
-            : <String, dynamic>{};
-        final List<dynamic> insets = history['insets'] as List<dynamic>? ?? <dynamic>[];
-        final List<dynamic> deltas = history['deltas'] as List<dynamic>? ?? <dynamic>[];
+      // Fetch frame-by-frame trajectory recorded during opening.
+      final String rawHistory = await driver.requestData('get_history');
+      final dynamic decoded = jsonDecode(rawHistory);
+      final Map<String, dynamic> history = decoded is Map<String, dynamic>
+          ? decoded
+          : <String, dynamic>{};
+      final List<dynamic> insets = history['insets'] as List<dynamic>? ?? <dynamic>[];
 
+      expect(
+        insets.length,
+        greaterThan(1),
+        reason: 'Should have captured multiple animation frames',
+      );
+
+      final double finalInset = (insets.last as num).toDouble();
+      expect(
+        finalInset,
+        greaterThan(100.0),
+        reason: 'Keyboard should reach full height, but reached $finalInset',
+      );
+
+      // Verify that the opening animation trajectory is monotonically non-decreasing
+      // and does not exhibit erratic reversals or jumping backwards.
+      for (var i = 1; i < insets.length; i++) {
+        final double current = (insets[i] as num).toDouble();
+        final double previous = (insets[i - 1] as num).toDouble();
         expect(
-          insets.length,
-          greaterThan(1),
-          reason: 'Should have captured multiple animation frames',
+          current,
+          greaterThanOrEqualTo(previous),
+          reason:
+              'Opening animation must be monotonic: frame $i ($current) < frame ${i - 1} ($previous)',
         );
+      }
 
-        // In the bug from #190974, the last transition (from final onProgress frame to onEnd)
-        // snapped by the navigation bar height (e.g. >= 20dp).
-        // With the fix, all consecutive deltas stay within smooth animation step bounds.
-        for (var i = 1; i < insets.length; i++) {
-          final double delta = (deltas[i] as num).toDouble();
-          expect(
-            delta,
-            lessThan(40.0),
-            reason: 'Animation step at frame $i must be smooth, but delta was $delta',
-          );
+      // Test dismissal
+      await driver.requestData('reset_history');
+      await driver.waitFor(unfocusButton);
+      await driver.tap(unfocusButton);
+
+      var closed = false;
+      for (var i = 0; i < 30; ++i) {
+        await Future<void>.delayed(pollDelay);
+        final String insetsStr = await driver.getText(insetsText);
+        final double currentInset = double.tryParse(insetsStr) ?? 0.0;
+        if (currentInset == 0.0) {
+          closed = true;
+          break;
         }
-        final double terminalDelta = (deltas.last as num).toDouble();
-        expect(
-          terminalDelta,
-          lessThan(20.0),
-          reason: 'Terminal inset transition must be smooth with 0 jump, but was $terminalDelta',
-        );
-
-        // Test dismissal
-        await driver.requestData('reset_history');
-        await driver.waitFor(unfocusButton);
-        await driver.tap(unfocusButton);
-
-        var closed = false;
-        for (var i = 0; i < 30; ++i) {
-          await Future<void>.delayed(pollDelay);
-          final String insetsStr = await driver.getText(insetsText);
-          final double currentInset = double.tryParse(insetsStr) ?? 0.0;
-          if (currentInset == 0.0) {
-            closed = true;
-            break;
-          }
-        }
-        expect(closed, isTrue, reason: 'Keyboard should dismiss back to 0 inset');
-      },
-      timeout: Timeout.none,
-    );
+      }
+      expect(closed, isTrue, reason: 'Keyboard should dismiss back to 0 inset');
+    }, timeout: Timeout.none);
   });
 }

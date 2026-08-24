@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Test suite validating visual layout continuity and absence of terminal
@@ -23,12 +23,10 @@ void main() {
     WidgetTester tester,
   ) async {
     // Exact reproduction UI from issue #190974:
-    // A Scaffold with bottom padding driven by MediaQuery.viewInsetsOf(context).bottom.
+    // A view with bottom padding driven by MediaQuery.viewInsetsOf(context).bottom.
     // In edgeToEdge mode on API 34, viewPadding.bottom is 24dp (gesture bar).
     Widget buildTestApp(double bottomInset) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData.light().copyWith(scaffoldBackgroundColor: const Color(0xFFECEFF1)),
+      return TestWidgetsApp(
         home: MediaQuery(
           data: MediaQueryData(
             size: const Size(400, 800),
@@ -36,9 +34,9 @@ void main() {
             viewPadding: const EdgeInsets.only(bottom: 24),
             viewInsets: EdgeInsets.only(bottom: bottomInset),
           ),
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            body: Builder(
+          child: ColoredBox(
+            color: const Color(0xFFECEFF1),
+            child: Builder(
               builder: (BuildContext context) {
                 final double insetsBottom = MediaQuery.viewInsetsOf(context).bottom;
                 final double paddingBottom = MediaQuery.viewPaddingOf(context).bottom;
@@ -50,21 +48,29 @@ void main() {
                       Text(
                         'IME Insets: ${insetsBottom.toStringAsFixed(1)} dp | Padding: ${paddingBottom.toStringAsFixed(1)} dp',
                         key: const ValueKey<String>('metrics_label'),
+                        textDirection: TextDirection.ltr,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const Spacer(),
                       // Distinct indicator strip at the bottom of the content area
-                      Container(
-                        key: const ValueKey<String>('indicator_bar'),
-                        height: 8,
-                        color: Colors.red,
+                      const ColoredBox(
+                        key: ValueKey<String>('indicator_bar'),
+                        color: Color(0xFFFF0000),
+                        child: SizedBox(height: 8, width: double.infinity),
                       ),
-                      Container(
-                        key: const ValueKey<String>('input_box'),
-                        height: 56,
-                        color: Colors.blueGrey.shade100,
-                        alignment: Alignment.center,
-                        child: const Text('Input Field (pinned above keyboard)'),
+                      const ColoredBox(
+                        key: ValueKey<String>('input_box'),
+                        color: Color(0xFFCFD8DC),
+                        child: SizedBox(
+                          height: 56,
+                          width: double.infinity,
+                          child: Center(
+                            child: Text(
+                              'Input Field (pinned above keyboard)',
+                              textDirection: TextDirection.ltr,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
