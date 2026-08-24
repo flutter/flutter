@@ -18,12 +18,13 @@ FLUTTER_ASSERT_ARC
 @class FlutterTexture;
 @class FlutterDrawable;
 
-extern CFTimeInterval display_link_target;
-
 @interface FlutterMetalLayer () {
   id<MTLDevice> _preferredDevice;
+  id<MTLDevice> _device;
+  MTLPixelFormat _pixelFormat;
+  CGColorSpaceRef _colorspace;
   CGSize _drawableSize;
-  FlutterDisplayLinkManager* _displayLinkManager;
+  CAMetalLayer* _presentationSignalLayer;
 
   NSUInteger _nextDrawableId;
 
@@ -31,26 +32,11 @@ extern CFTimeInterval display_link_target;
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
   FlutterTexture* _front;
-
-  // There must be a CADisplayLink scheduled *on main thread* otherwise
-  // core animation only updates layers 60 times a second.
-  CADisplayLink* _displayLink;
-  NSUInteger _displayLinkPauseCountdown;
-
-  // Used to track whether the content was set during this display link.
-  // When unlocking phone the layer (main thread) display link and raster thread
-  // display link get out of sync for several seconds. Even worse, layer display
-  // link does not seem to reflect actual vsync. Forcing the layer link
-  // to max rate (instead range) temporarily seems to fix the issue.
-  BOOL _didSetContentsDuringThisDisplayLinkPeriod;
-
-  // Whether layer displayLink is forced to max rate.
-  BOOL _displayLinkForcedMaxRate;
 }
 
-- (void)onDisplayLink:(CADisplayLink*)link;
 - (void)presentTexture:(FlutterTexture*)texture;
 - (void)returnTexture:(FlutterTexture*)texture;
+- (id<CAMetalDrawable>)acquirePresentationDrawable;
 
 @end
 
@@ -147,29 +133,38 @@ extern CFTimeInterval display_link_target;
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
   FlutterTexture* texture = _texture;
   texture.waitingForCompletion = YES;
+  id<CAMetalDrawable> presentationDrawable = [_layer acquirePresentationDrawable];
+  id<MTLTexture> presentationTexture = presentationDrawable.texture;
+
+  // A resize can leave an old Flutter texture in flight. do not copy
+  // it into a drawable created for the new layer configuration.
+  const BOOL canCopy = presentationTexture != nil &&
+                       presentationTexture.width == texture.texture.width &&
+                       presentationTexture.height == texture.texture.height &&
+                       presentationTexture.pixelFormat == texture.texture.pixelFormat;
+
+  if (canCopy) {
+    // CAMetalLayer can only present its own drawables, so bridge the IOSurface-backed
+    // Flutter result into this drawable. Keeping the copy and presentation on Flutter
+    // render command buffer preserves GPU ordering without making the CPU wait.
+    id<MTLBlitCommandEncoder> blit = [commandBuffer blitCommandEncoder];
+    MTLOrigin origin = MTLOriginMake(0, 0, 0);
+    MTLSize size = MTLSizeMake(texture.texture.width, texture.texture.height, 1);
+    [blit copyFromTexture:texture.texture
+              sourceSlice:0
+              sourceLevel:0
+             sourceOrigin:origin
+               sourceSize:size
+                toTexture:presentationTexture
+         destinationSlice:0
+         destinationLevel:0
+        destinationOrigin:origin];
+    [blit endEncoding];
+    [commandBuffer presentDrawable:presentationDrawable];
+  }
   [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
     texture.waitingForCompletion = NO;
   }];
-}
-
-@end
-
-@interface FlutterMetalLayerDisplayLinkProxy : NSObject {
-  __weak FlutterMetalLayer* _layer;
-}
-
-@end
-
-@implementation FlutterMetalLayerDisplayLinkProxy
-- (instancetype)initWithLayer:(FlutterMetalLayer*)layer {
-  if (self = [super init]) {
-    _layer = layer;
-  }
-  return self;
-}
-
-- (void)onDisplayLink:(CADisplayLink*)link {
-  [_layer onDisplayLink:link];
 }
 
 @end
@@ -182,13 +177,20 @@ extern CFTimeInterval display_link_target;
     self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
-    _displayLinkManager = FlutterDisplayLinkManager.shared;
 
-    FlutterMetalLayerDisplayLinkProxy* proxy =
-        [[FlutterMetalLayerDisplayLinkProxy alloc] initWithLayer:self];
-    _displayLink = [CADisplayLink displayLinkWithTarget:proxy selector:@selector(onDisplayLink:)];
-    [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:NO];
-    [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+    // Use CAMetalLayer presentation path to prevent completed Flutter frames published
+    // through CALayer.contents from being deferred to a later Core Animation presentation
+    // opportunity, while retaining the IOSurface-backed rendering required by the
+    // platform-view composition path. This child layer only owns final presentation.
+    _presentationSignalLayer = [CAMetalLayer layer];
+    _presentationSignalLayer.device = _preferredDevice;
+    _presentationSignalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+    _presentationSignalLayer.frame = self.bounds;
+    _presentationSignalLayer.framebufferOnly = NO;
+    _presentationSignalLayer.opaque = YES;
+    _presentationSignalLayer.presentsWithTransaction = NO;
+    [self addSublayer:_presentationSignalLayer];
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
                                                  name:UIApplicationDidEnterBackgroundNotification
@@ -198,36 +200,7 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)dealloc {
-  [_displayLink invalidate];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)setMaxRefreshRate:(double)refreshRate forceMax:(BOOL)forceMax {
-  // This is copied from vsync_waiter_ios.mm. The vsync waiter has display link scheduled on UI
-  // thread which does not trigger actual core animation frame. As a workaround FlutterMetalLayer
-  // has it's own displaylink scheduled on main thread, which is used to trigger core animation
-  // frame allowing for 120hz updates.
-  if (!_displayLinkManager.maxRefreshRateEnabledOnIPhone) {
-    return;
-  }
-  double maxFrameRate = fmax(refreshRate, 60);
-  double minFrameRate = fmax(maxFrameRate / 2, 60);
-  _displayLink.preferredFrameRateRange =
-      CAFrameRateRangeMake(forceMax ? maxFrameRate : minFrameRate, maxFrameRate, maxFrameRate);
-}
-
-- (void)onDisplayLink:(CADisplayLink*)link {
-  _didSetContentsDuringThisDisplayLinkPeriod = NO;
-  // Do not pause immediately, this seems to prevent 120hz while touching.
-  if (_displayLinkPauseCountdown == 3) {
-    _displayLink.paused = YES;
-    if (_displayLinkForcedMaxRate) {
-      [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:NO];
-      _displayLinkForcedMaxRate = NO;
-    }
-  } else {
-    ++_displayLinkPauseCountdown;
-  }
 }
 
 - (BOOL)isKindOfClass:(Class)aClass {
@@ -241,12 +214,41 @@ extern CFTimeInterval display_link_target;
   return [super isKindOfClass:aClass];
 }
 
+- (void)setDevice:(id<MTLDevice>)device {
+  _device = device;
+  _presentationSignalLayer.device = device;
+}
+
+- (id<MTLDevice>)device {
+  return _device;
+}
+
+- (void)setPixelFormat:(MTLPixelFormat)pixelFormat {
+  _pixelFormat = pixelFormat;
+  _presentationSignalLayer.pixelFormat = pixelFormat;
+}
+
+- (MTLPixelFormat)pixelFormat {
+  return _pixelFormat;
+}
+
+- (void)setColorspace:(CGColorSpaceRef)colorspace {
+  _colorspace = colorspace;
+  _presentationSignalLayer.colorspace = colorspace;
+}
+
+- (CGColorSpaceRef)colorspace {
+  return _colorspace;
+}
+
 - (void)setDrawableSize:(CGSize)drawableSize {
   @synchronized(self) {
     [_availableTextures removeAllObjects];
     _front = nil;
     _totalTextures = 0;
     _drawableSize = drawableSize;
+    _presentationSignalLayer.frame = self.bounds;
+    _presentationSignalLayer.drawableSize = drawableSize;
   }
 }
 
@@ -255,7 +257,6 @@ extern CFTimeInterval display_link_target;
     [_availableTextures removeAllObjects];
     _totalTextures = _front != nil ? 1 : 0;
   }
-  _displayLink.paused = YES;
 }
 
 - (CGSize)drawableSize {
@@ -397,31 +398,8 @@ extern CFTimeInterval display_link_target;
   return drawable;
 }
 
-- (void)presentOnMainThread:(FlutterTexture*)texture {
-  if (texture.texture.width != _drawableSize.width ||
-      texture.texture.height != _drawableSize.height) {
-    // This texture was created with an old size, but the view has since been
-    // resized. Do not present this stale frame to avoid distortion. The texture
-    // will be correctly recycled on the next frame.
-    return;
-  }
-
-  // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
-  // Might also be placebo
-  [self setNeedsDisplay];
-
-  [CATransaction begin];
-  [CATransaction setDisableActions:YES];
-  self.contents = texture.surface;
-  [CATransaction commit];
-  _displayLink.paused = NO;
-  _displayLinkPauseCountdown = 0;
-  if (!_didSetContentsDuringThisDisplayLinkPeriod) {
-    _didSetContentsDuringThisDisplayLinkPeriod = YES;
-  } else if (!_displayLinkForcedMaxRate) {
-    _displayLinkForcedMaxRate = YES;
-    [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:YES];
-  }
+- (id<CAMetalDrawable>)acquirePresentationDrawable {
+  return [_presentationSignalLayer nextDrawable];
 }
 
 - (void)presentTexture:(FlutterTexture*)texture {
@@ -435,14 +413,6 @@ extern CFTimeInterval display_link_target;
     }
     _front = texture;
     texture.presentedTime = CACurrentMediaTime();
-    if ([NSThread isMainThread]) {
-      [self presentOnMainThread:texture];
-    } else {
-      // Core animation layers can only be updated on main thread.
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [self presentOnMainThread:texture];
-      });
-    }
   }
 }
 
@@ -459,14 +429,14 @@ extern CFTimeInterval display_link_target;
 }
 
 + (BOOL)enabled {
-  static BOOL enabled = NO;
+  static BOOL enabled = YES;
   static BOOL didCheckInfoPlist = NO;
   if (!didCheckInfoPlist) {
     didCheckInfoPlist = YES;
     NSNumber* use_flutter_metal_layer =
         [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTUseFlutterMetalLayer"];
-    if (use_flutter_metal_layer != nil) {
-      enabled = [use_flutter_metal_layer boolValue];
+    if (use_flutter_metal_layer != nil && ![use_flutter_metal_layer boolValue]) {
+      enabled = NO;
     }
   }
   return enabled;
