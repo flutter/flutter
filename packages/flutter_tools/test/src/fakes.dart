@@ -516,7 +516,11 @@ class FakeFlutterVersion implements FlutterVersion {
   FileSystem get fs => throw UnimplementedError('FakeFlutterVersion.fs is not implemented');
 
   @override
-  Future<void> checkFlutterVersionFreshness() async {
+  Future<void> checkFlutterVersionFreshness({
+    Cache? cache,
+    Logger? logger,
+    Platform? platform,
+  }) async {
     _didCheckFlutterVersionFreshness = true;
   }
 

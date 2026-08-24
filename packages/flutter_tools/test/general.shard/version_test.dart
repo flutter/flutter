@@ -116,13 +116,7 @@ void main() {
         stdout: channel,
       ),
       FakeCommand(
-        command: const <String>[
-          'git',
-          'rev-parse',
-          '--abbrev-ref',
-          '--symbolic',
-          '@{upstream}',
-        ],
+        command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
         stdout: 'origin/$channel',
       ),
       FakeCommand(
@@ -622,157 +616,149 @@ void main() {
         },
       );
 
-      testUsingContext(
-        'does not ping server when version stamp is up-to-date',
-        () async {
-          const flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
-          final stamp = VersionCheckStamp(
-            lastTimeVersionWasChecked: _stampUpToDate,
-            lastKnownRemoteVersion: getChannelUpToDateVersion(),
-          );
-          cache.versionStamp = json.encode(stamp);
+      testWithoutContext('does not ping server when version stamp is up-to-date', () async {
+        const flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
+        final stamp = VersionCheckStamp(
+          lastTimeVersionWasChecked: _stampUpToDate,
+          lastKnownRemoteVersion: getChannelUpToDateVersion(),
+        );
+        cache.versionStamp = json.encode(stamp);
 
-          processManager.addCommands(
-            mockLocalGitVersionCheckCommands(
-              channel: channel,
-              flutterUpstreamUrl: flutterUpstreamUrl,
-              localCommitDate: getChannelUpToDateVersion(),
-            ),
-          );
+        processManager.addCommands(
+          mockLocalGitVersionCheckCommands(
+            channel: channel,
+            flutterUpstreamUrl: flutterUpstreamUrl,
+            localCommitDate: getChannelUpToDateVersion(),
+          ),
+        );
 
-          final flutterVersion = FlutterVersion(
-            clock: _testClock,
-            fs: fs,
-            flutterRoot: flutterRoot,
-            git: git,
-          );
-          await flutterVersion.checkFlutterVersionFreshness();
+        final flutterVersion = FlutterVersion(
+          clock: _testClock,
+          fs: fs,
+          flutterRoot: flutterRoot,
+          git: git,
+          platform: FakePlatform(),
+          logger: testLogger,
+        );
+        await flutterVersion.checkFlutterVersionFreshness(
+          cache: cache,
+          logger: testLogger,
+          platform: FakePlatform(),
+        );
 
-          expect(testLogger.statusText, isEmpty);
-          expect(cache.setVersionStamp, false);
-          expect(processManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => processManager,
-          Cache: () => cache,
-          Logger: () => testLogger,
-        },
-      );
+        expect(testLogger.statusText, isEmpty);
+        expect(cache.setVersionStamp, false);
+        expect(processManager, hasNoRemainingExpectations);
+      });
 
-      testUsingContext(
-        'pings server when version stamp is missing',
-        () async {
-          const flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
-          cache.versionStamp = null;
+      testWithoutContext('pings server when version stamp is missing', () async {
+        const flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
+        cache.versionStamp = null;
 
-          processManager.addCommands(<FakeCommand>[
-            ...mockLocalGitVersionCheckCommands(
-              channel: channel,
-              flutterUpstreamUrl: flutterUpstreamUrl,
-              localCommitDate: getChannelUpToDateVersion(),
-            ),
-            ...mockServerPingGitCommands(remoteCommitDate: getChannelUpToDateVersion()),
-          ]);
+        processManager.addCommands(<FakeCommand>[
+          ...mockLocalGitVersionCheckCommands(
+            channel: channel,
+            flutterUpstreamUrl: flutterUpstreamUrl,
+            localCommitDate: getChannelUpToDateVersion(),
+          ),
+          ...mockServerPingGitCommands(remoteCommitDate: getChannelUpToDateVersion()),
+        ]);
 
-          final flutterVersion = FlutterVersion(
-            clock: _testClock,
-            fs: fs,
-            flutterRoot: flutterRoot,
-            git: git,
-          );
-          await flutterVersion.checkFlutterVersionFreshness();
+        final flutterVersion = FlutterVersion(
+          clock: _testClock,
+          fs: fs,
+          flutterRoot: flutterRoot,
+          git: git,
+          platform: FakePlatform(),
+          logger: testLogger,
+        );
+        await flutterVersion.checkFlutterVersionFreshness(
+          cache: cache,
+          logger: testLogger,
+          platform: FakePlatform(),
+        );
 
-          expect(testLogger.statusText, isEmpty);
-          expect(cache.setVersionStamp, true);
-          final VersionCheckStamp savedStamp = await VersionCheckStamp.load(cache, testLogger);
-          expect(savedStamp.lastTimeVersionWasChecked, _testClock.now());
-          expect(savedStamp.lastKnownRemoteVersion, getChannelUpToDateVersion());
-          expect(processManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => processManager,
-          Cache: () => cache,
-          Logger: () => testLogger,
-        },
-      );
+        expect(testLogger.statusText, isEmpty);
+        expect(cache.setVersionStamp, true);
+        final VersionCheckStamp savedStamp = await VersionCheckStamp.load(cache, testLogger);
+        expect(savedStamp.lastTimeVersionWasChecked, _testClock.now());
+        expect(savedStamp.lastKnownRemoteVersion, getChannelUpToDateVersion());
+        expect(processManager, hasNoRemainingExpectations);
+      });
 
-      testUsingContext(
-        'pings server when version stamp is out-of-date',
-        () async {
-          const flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
-          final stamp = VersionCheckStamp(
-            lastTimeVersionWasChecked: _stampOutOfDate,
-            lastKnownRemoteVersion: getChannelOutOfDateVersion(),
-          );
-          cache.versionStamp = json.encode(stamp);
+      testWithoutContext('pings server when version stamp is out-of-date', () async {
+        const flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
+        final stamp = VersionCheckStamp(
+          lastTimeVersionWasChecked: _stampOutOfDate,
+          lastKnownRemoteVersion: getChannelOutOfDateVersion(),
+        );
+        cache.versionStamp = json.encode(stamp);
 
-          processManager.addCommands(<FakeCommand>[
-            ...mockLocalGitVersionCheckCommands(
-              channel: channel,
-              flutterUpstreamUrl: flutterUpstreamUrl,
-              localCommitDate: getChannelUpToDateVersion(),
-            ),
-            ...mockServerPingGitCommands(remoteCommitDate: getChannelUpToDateVersion()),
-          ]);
+        processManager.addCommands(<FakeCommand>[
+          ...mockLocalGitVersionCheckCommands(
+            channel: channel,
+            flutterUpstreamUrl: flutterUpstreamUrl,
+            localCommitDate: getChannelUpToDateVersion(),
+          ),
+          ...mockServerPingGitCommands(remoteCommitDate: getChannelUpToDateVersion()),
+        ]);
 
-          final flutterVersion = FlutterVersion(
-            clock: _testClock,
-            fs: fs,
-            flutterRoot: flutterRoot,
-            git: git,
-          );
-          await flutterVersion.checkFlutterVersionFreshness();
+        final flutterVersion = FlutterVersion(
+          clock: _testClock,
+          fs: fs,
+          flutterRoot: flutterRoot,
+          git: git,
+          platform: FakePlatform(),
+          logger: testLogger,
+        );
+        await flutterVersion.checkFlutterVersionFreshness(
+          cache: cache,
+          logger: testLogger,
+          platform: FakePlatform(),
+        );
 
-          expect(testLogger.statusText, isEmpty);
-          expect(cache.setVersionStamp, true);
-          final VersionCheckStamp savedStamp = await VersionCheckStamp.load(cache, testLogger);
-          expect(savedStamp.lastTimeVersionWasChecked, _testClock.now());
-          expect(savedStamp.lastKnownRemoteVersion, getChannelUpToDateVersion());
-          expect(processManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => processManager,
-          Cache: () => cache,
-          Logger: () => testLogger,
-        },
-      );
+        expect(testLogger.statusText, isEmpty);
+        expect(cache.setVersionStamp, true);
+        final VersionCheckStamp savedStamp = await VersionCheckStamp.load(cache, testLogger);
+        expect(savedStamp.lastTimeVersionWasChecked, _testClock.now());
+        expect(savedStamp.lastKnownRemoteVersion, getChannelUpToDateVersion());
+        expect(processManager, hasNoRemainingExpectations);
+      });
 
-      testUsingContext(
-        'records check timestamp when pinging server fails',
-        () async {
-          const flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
-          cache.versionStamp = null;
+      testWithoutContext('records check timestamp when pinging server fails', () async {
+        const flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
+        cache.versionStamp = null;
 
-          processManager.addCommands(<FakeCommand>[
-            ...mockLocalGitVersionCheckCommands(
-              channel: channel,
-              flutterUpstreamUrl: flutterUpstreamUrl,
-              localCommitDate: getChannelUpToDateVersion(),
-            ),
-            const FakeCommand(command: <String>['git', 'fetch', '--tags'], exitCode: 1),
-          ]);
+        processManager.addCommands(<FakeCommand>[
+          ...mockLocalGitVersionCheckCommands(
+            channel: channel,
+            flutterUpstreamUrl: flutterUpstreamUrl,
+            localCommitDate: getChannelUpToDateVersion(),
+          ),
+          const FakeCommand(command: <String>['git', 'fetch', '--tags'], exitCode: 1),
+        ]);
 
-          final flutterVersion = FlutterVersion(
-            clock: _testClock,
-            fs: fs,
-            flutterRoot: flutterRoot,
-            git: git,
-          );
-          await flutterVersion.checkFlutterVersionFreshness();
+        final flutterVersion = FlutterVersion(
+          clock: _testClock,
+          fs: fs,
+          flutterRoot: flutterRoot,
+          git: git,
+          platform: FakePlatform(),
+          logger: testLogger,
+        );
+        await flutterVersion.checkFlutterVersionFreshness(
+          cache: cache,
+          logger: testLogger,
+          platform: FakePlatform(),
+        );
 
-          expect(testLogger.statusText, isEmpty);
-          expect(cache.setVersionStamp, true);
-          final VersionCheckStamp savedStamp = await VersionCheckStamp.load(cache, testLogger);
-          expect(savedStamp.lastTimeVersionWasChecked, _testClock.now());
-          expect(savedStamp.lastKnownRemoteVersion, isNull);
-          expect(processManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          ProcessManager: () => processManager,
-          Cache: () => cache,
-          Logger: () => testLogger,
-        },
-      );
+        expect(testLogger.statusText, isEmpty);
+        expect(cache.setVersionStamp, true);
+        final VersionCheckStamp savedStamp = await VersionCheckStamp.load(cache, testLogger);
+        expect(savedStamp.lastTimeVersionWasChecked, _testClock.now());
+        expect(savedStamp.lastKnownRemoteVersion, isNull);
+        expect(processManager, hasNoRemainingExpectations);
+      });
 
       group('$VersionFreshnessValidator for $channel', () {
         testWithoutContext(
