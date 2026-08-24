@@ -502,6 +502,9 @@ FlutterError
 
     expect(identical(physicsC1, physicsC2), isFalse);
     expect(physicsC1.shouldUpdate(physicsC2), isTrue);
+
+    expect(identical(physicsB1, physicsC2), isTrue);
+    expect(physicsB1.shouldUpdate(physicsC2), isFalse);
   });
 }
 
