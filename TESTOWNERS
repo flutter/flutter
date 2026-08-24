@@ -129,7 +129,7 @@
 /dev/devicelab/bin/tasks/windows_chrome_dev_mode.dart @yjbanov @flutter/web
 
 ## Mac Android DeviceLab tests
-/dev/devicelab/bin/tasks/android_semantics_integration_test.dart @Piinks @flutter/framework
+/dev/devicelab/bin/tasks/android_semantics_integration_test.dart @justinmc @flutter/framework
 /dev/devicelab/bin/tasks/backdrop_filter_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/channels_integration_test.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/color_filter_and_fade_perf__timeline_summary.dart @jtmcdole @flutter/engine
@@ -156,7 +156,6 @@
 /dev/devicelab/bin/tasks/integration_ui_driver.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_frame_number.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_keyboard_resize.dart @bkonyi @flutter/tool
-/dev/devicelab/bin/tasks/integration_ui_screenshot.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_textfield.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/native_assets_android.dart @dcharkes @flutter/android
@@ -210,7 +209,6 @@
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart LongCatIsLooong @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_frame_number.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_keyboard_resize.dart @LongCatIsLooong @flutter/engine
-/dev/devicelab/bin/tasks/integration_ui_ios_screenshot.dart @LongCatIsLooong @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @LongCatIsLooong @flutter/tool
 /dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @hellohuanlin @flutter/tool
 /dev/devicelab/bin/tasks/ios_defines_test.dart @vashworth @flutter/tool
@@ -257,6 +255,8 @@
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_macos_impeller__timeline_summary.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_macos__timeline_summary.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/new_gallery_macos_impeller__transition_perf.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/new_gallery_windows_impeller__transition_perf.dart @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/new_gallery_windows_skia__transition_perf.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/dart_plugin_registry_test.dart @stuartmorgan-g @flutter/plugin
@@ -288,7 +288,6 @@
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_macos_target__benchmark.dart @cbracken @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_win_target__benchmark.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/integration_ui_test_test_macos.dart @cbracken @flutter/desktop
-/dev/devicelab/bin/tasks/ios_debug_workflow.dart @vashworth @flutter/ios
 /dev/devicelab/bin/tasks/linux_desktop_impeller.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/linux_feature_flags_test.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/mac_desktop_impeller.dart @jonahwilliams @flutter/engine
@@ -319,7 +318,7 @@
 /dev/devicelab/bin/tasks/run_release_test_linux.dart @loic-sharma @flutter/tool
 /dev/devicelab/bin/tasks/run_release_test_macos.dart @cbracken @flutter/tool
 /dev/devicelab/bin/tasks/run_release_test_windows.dart @loic-sharma @flutter/tool
-/dev/devicelab/bin/tasks/technical_debt__cost.dart @Piinks @flutter/framework
+/dev/devicelab/bin/tasks/technical_debt__cost.dart @justinmc @flutter/framework
 /dev/devicelab/bin/tasks/texture_impeller_linux.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/texture_impeller_windows.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
@@ -332,14 +331,18 @@
 /dev/devicelab/bin/tasks/windowing_test_windows.dart @mattkae @flutter/desktop
 /dev/devicelab/bin/tasks/windows_desktop_impeller.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_engine_integration_golden_test.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/windows_gradient_consistent_perf__e2e_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/windows_gradient_dynamic_perf__e2e_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/windows_gradient_static_perf__e2e_summary.dart @b-luk @flutter/engine
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/windows_text_shadow_perf__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
 ## Host only framework tests
 # Linux docs_deploy_stable
 # Linux docs_generate_release
 # Linux docs_publish
-/dev/bots/docs.sh @Piinks @flutter/framework
+/dev/bots/docs.sh @justinmc @flutter/framework
 # Linux snippets
 /dev/snippets @dkwingsmt @flutter/framework
 # Linux packages_autoroller
@@ -362,7 +365,7 @@
 # TODO(keyonghan): add files/paths for below framework host only testss.
 # https://github.com/flutter/flutter/issues/82068
 #
-# analyze @Piinks @flutter/framework
+# analyze @justinmc @flutter/framework
 # android_engine_opengles_tests @reidbaker @flutter/android
 # android_engine_vulkan_tests @reidbaker @flutter/android
 # android_hardware_smoke_opengles_tests @andywolff @flutter/engine
@@ -374,12 +377,12 @@
 # build_tests @bkonyi @flutter/tool
 # ci_yaml flutter roller @keyonghan @flutter/infra
 # coverage @christopherfujino @flutter/infra
-# customer_testing @Piinks @flutter/framework
-# docs @Piinks @flutter/framework
-# snippets @Piinks @flutter/framework
+# customer_testing @justinmc @flutter/framework
+# docs @justinmc @flutter/framework
+# snippets @justinmc @flutter/framework
 # flutter_packaging @christopherfujino @flutter/infra
 # flutter_plugins @stuartmorgan-g @flutter/plugin
-# framework_tests @Piinks @flutter/framework
+# framework_tests @justinmc @flutter/framework
 # fuchsia_precache @bkonyi @flutter/tool
 # realm_checker @eyebrowsoffire @flutter/tool
 # skp_generator @Hixie

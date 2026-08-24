@@ -488,7 +488,7 @@ class FlutterProject {
     }
 
     final migration = ProjectMigration(<ProjectMigrator>[
-      AnalysisOptionsMigration(this, globals.logger),
+      AnalysisOptionsMigration(this, globals.logger, packageConfig: packageConfig),
     ]);
     await migration.run();
 

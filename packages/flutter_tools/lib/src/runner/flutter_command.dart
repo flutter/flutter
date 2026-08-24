@@ -29,9 +29,16 @@ import '../project.dart';
 import '../reporting/unified_analytics.dart';
 import '../version.dart';
 import 'flutter_command_runner.dart';
+
+import 'options/option_bundle.dart';
+import 'options/option_descriptor.dart';
 import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
+export 'options/common_options.dart';
+export 'options/option_bundle.dart';
+export 'options/option_descriptor.dart';
+export 'options/safe_arg_results.dart';
 
 abstract class DotEnvRegex {
   // Dot env multi-line block value regex
@@ -162,7 +169,13 @@ abstract final class FlutterCommandCategory {
 }
 
 abstract class FlutterCommand extends Command<void> {
+  FlutterCommand({this.verboseHelp = false});
+
+  /// Whether this command was invoked with verbose help enabled.
+  final bool verboseHelp;
+
   /// The currently executing command (or sub-command).
+
   ///
   /// Will be `null` until the top-most command has begun execution.
   static FlutterCommand? get current => context.get<FlutterCommand>();
@@ -230,7 +243,17 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether this command uses the 'target' option.
   var _usesTargetOption = false;
 
+  /// Enables the target option flag behavior on this command.
+  void enableUsesTargetOption() {
+    _usesTargetOption = true;
+  }
+
   var _usesPubOption = false;
+
+  /// Enables the pub option flag behavior on this command.
+  void enableUsesPubOption() {
+    _usesPubOption = true;
+  }
 
   var _usesPortOption = false;
 
@@ -267,6 +290,20 @@ abstract class FlutterCommand extends Command<void> {
   /// at the [FlutterCommand] level to enable any classes that extend it to
   /// easily reference it or overwrite as necessary.
   Analytics get analytics => globals.analytics;
+
+  final Map<String, OptionDescriptor<Object?>> _optionRegistry =
+      <String, OptionDescriptor<Object?>>{};
+
+  /// Option descriptor registry for type-safe lookups.
+  Map<String, OptionDescriptor<Object?>> get optionRegistry => _optionRegistry;
+
+  /// Registers an [OptionBundle] with this command.
+  void registerOptionBundle(OptionBundle bundle) {
+    bundle.register(this, argParser, _optionRegistry);
+  }
+
+  /// Registers multiple [OptionBundle] instances with this command.
+  void registerOptionBundles(List<OptionBundle> bundles) => bundles.forEach(registerOptionBundle);
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
@@ -1768,7 +1805,16 @@ abstract class FlutterCommand extends Command<void> {
           );
         }
 
-        final String configRaw = globals.fs.file(path).readAsStringSync();
+        String configRaw;
+        try {
+          configRaw = decodeUtf8OrUtf16(globals.fs.file(path).readAsBytesSync());
+        } on Exception catch (err) {
+          throwToolExit(
+            'Unable to decode the file at path "$path". '
+            'Ensure that the file is encoded in UTF-8 or UTF-16.\n'
+            'Error details: $err',
+          );
+        }
 
         // Determine whether the file content is JSON or .env format.
         String configJsonRaw;
@@ -1972,6 +2018,20 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     globals.preRunValidator.validate();
+
+    if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
+        (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
+      if (getBuildMode().isRelease) {
+        final bool enableImpeller = boolArg(FlutterOptions.kEnableImpeller);
+        final flagName = enableImpeller
+            ? '--${FlutterOptions.kEnableImpeller}'
+            : '--no-${FlutterOptions.kEnableImpeller}';
+        globals.logger.printWarning(
+          'The "$flagName" flag is ignored in release builds. '
+          'The rendering backend is determined at build time.',
+        );
+      }
+    }
 
     if (globals.os.hostPlatform == .darwin_x64 &&
         globals.persistentToolState!.shouldShowIntelMacWarning) {
