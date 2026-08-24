@@ -77,6 +77,7 @@ abstract class FlutterVersion {
     required String flutterRoot,
     Platform? platform,
     Logger? logger,
+    Cache? cache,
     @protected bool fetchTags = false,
   }) {
     final File versionFile = getVersionFile(fs, flutterRoot);
@@ -87,6 +88,8 @@ abstract class FlutterVersion {
         git: git,
         flutterRoot: flutterRoot,
         logger: logger,
+        platform: platform,
+        cache: cache,
       );
       if (version != null) {
         final String gitPath = fs.path.join(flutterRoot, '.git');
@@ -129,6 +132,7 @@ abstract class FlutterVersion {
       git: git,
       platform: platform,
       logger: logger,
+      cache: cache,
       fetchTags: fetchTags,
     );
   }
@@ -138,8 +142,14 @@ abstract class FlutterVersion {
     required Git git,
     required this.flutterRoot,
     required this.fs,
+    Platform? platform,
+    Logger? logger,
+    Cache? cache,
   }) : _clock = clock,
-       _git = git;
+       _git = git,
+       _platform = platform,
+       _logger = logger,
+       _cache = cache;
 
   factory FlutterVersion.fromRevision({
     SystemClock clock = const SystemClock(),
@@ -149,6 +159,7 @@ abstract class FlutterVersion {
     required Git git,
     Platform? platform,
     Logger? logger,
+    Cache? cache,
     bool fetchTags = false,
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
@@ -168,12 +179,19 @@ abstract class FlutterVersion {
       gitTagVersion: gitTagVersion,
       fs: fs,
       git: git,
+      platform: platform,
+      logger: logger,
+      cache: cache,
     );
     if (fetchTags) {
       result.ensureVersionFile();
     }
     return result;
   }
+
+  final Platform? _platform;
+  final Logger? _logger;
+  final Cache? _cache;
 
   /// Ensure the latest git tags are fetched and recalculate [FlutterVersion].
   ///
@@ -336,14 +354,10 @@ abstract class FlutterVersion {
   ///
   /// This function must run while [Cache.lock] is acquired because it reads and
   /// writes shared cache files.
-  Future<void> checkFlutterVersionFreshness({
-    Cache? cache,
-    Logger? logger,
-    Platform? platform,
-  }) async {
-    final Cache effectiveCache = cache ?? globals.cache;
-    final Logger effectiveLogger = logger ?? globals.logger;
-    final Platform effectivePlatform = platform ?? globals.platform;
+  Future<void> checkFlutterVersionFreshness() async {
+    final Cache effectiveCache = _cache ?? globals.cache;
+    final Logger effectiveLogger = _logger ?? globals.logger;
+    final Platform effectivePlatform = _platform ?? globals.platform;
 
     // Don't perform update checks if we're not on an official channel.
     if (!kOfficialChannels.contains(channel)) {
@@ -549,6 +563,9 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required super.flutterRoot,
     required super.fs,
     required super.git,
+    super.platform,
+    super.logger,
+    super.cache,
   }) : super._();
 
   static _FlutterVersionFromFile? tryParseFromFile(
@@ -557,6 +574,8 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required Git git,
     SystemClock clock = const SystemClock(),
     Logger? logger,
+    Platform? platform,
+    Cache? cache,
   }) {
     try {
       final String jsonContents = jsonFile.readAsStringSync();
@@ -576,9 +595,12 @@ class _FlutterVersionFromFile extends FlutterVersion {
         engineBuildDate: manifest['engineBuildDate'] as String?,
         dartSdkVersion: manifest['dartSdkVersion']! as String,
         devToolsVersion: manifest['devToolsVersion']! as String,
-        gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String),
+        gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String, logger: logger),
         flutterRoot: flutterRoot,
         fs: jsonFile.fileSystem,
+        platform: platform,
+        logger: logger,
+        cache: cache,
       );
       // ignore: avoid_catches_without_on_clauses
     } catch (err) {
@@ -651,6 +673,9 @@ class _FlutterVersionGit extends FlutterVersion {
     required this.gitTagVersion,
     required super.fs,
     required super.git,
+    super.platform,
+    super.logger,
+    super.cache,
   }) : super._();
 
   late final FlutterEngineStampFromFile? _engineStamp = FlutterEngineStampFromFile.tryParseFromFile(

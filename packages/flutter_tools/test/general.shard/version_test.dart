@@ -639,12 +639,9 @@ void main() {
           git: git,
           platform: FakePlatform(),
           logger: testLogger,
-        );
-        await flutterVersion.checkFlutterVersionFreshness(
           cache: cache,
-          logger: testLogger,
-          platform: FakePlatform(),
         );
+        await flutterVersion.checkFlutterVersionFreshness();
 
         expect(testLogger.statusText, isEmpty);
         expect(cache.setVersionStamp, false);
@@ -671,12 +668,9 @@ void main() {
           git: git,
           platform: FakePlatform(),
           logger: testLogger,
-        );
-        await flutterVersion.checkFlutterVersionFreshness(
           cache: cache,
-          logger: testLogger,
-          platform: FakePlatform(),
         );
+        await flutterVersion.checkFlutterVersionFreshness();
 
         expect(testLogger.statusText, isEmpty);
         expect(cache.setVersionStamp, true);
@@ -710,12 +704,9 @@ void main() {
           git: git,
           platform: FakePlatform(),
           logger: testLogger,
-        );
-        await flutterVersion.checkFlutterVersionFreshness(
           cache: cache,
-          logger: testLogger,
-          platform: FakePlatform(),
         );
+        await flutterVersion.checkFlutterVersionFreshness();
 
         expect(testLogger.statusText, isEmpty);
         expect(cache.setVersionStamp, true);
@@ -745,12 +736,9 @@ void main() {
           git: git,
           platform: FakePlatform(),
           logger: testLogger,
-        );
-        await flutterVersion.checkFlutterVersionFreshness(
           cache: cache,
-          logger: testLogger,
-          platform: FakePlatform(),
         );
+        await flutterVersion.checkFlutterVersionFreshness();
 
         expect(testLogger.statusText, isEmpty);
         expect(cache.setVersionStamp, true);
