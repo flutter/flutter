@@ -301,7 +301,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
-        chmodDebugFrameworkCommand,
+      chmodDebugFrameworkCommand,
       lipoInfoNonFatCommand,
       lipoVerifyX86_64Command,
     ]);
@@ -318,7 +318,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
-        chmodDebugFrameworkCommand,
+      chmodDebugFrameworkCommand,
       lipoInfoFatCommand,
       lipoVerifyX86_64Command,
       lipoExtractX86_64Command,
@@ -840,6 +840,10 @@ void main() {
           .createSync(recursive: true);
 
       processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'macosx', '--show-sdk-version'],
+          stdout: '12.0',
+        ),
         FakeCommand(
           command: <String>[
             'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
@@ -848,6 +852,7 @@ void main() {
             '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
             '--macho-min-os-version=12.0',
+            '--macho-sdk-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
@@ -861,6 +866,7 @@ void main() {
             '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
             '--macho-min-os-version=12.0',
+            '--macho-sdk-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
