@@ -309,8 +309,7 @@ public class ImeSyncDeferringInsetsCallbackTest {
    * Tests interrupted animations (e.g. keyboard closing gesture triggered while opening is
    * in-flight).
    *
-   * <p>Rationale / Added for: Fixes a critical flaw identified in adversarial review. If
-   * startImeBottom was read from lastWindowInsets (which stored the prior target of 100px),
+   * <p>If startImeBottom was read from lastWindowInsets (which stored the prior target of 100px),
    * interrupting an opening animation at 50px would calculate 100 + (0 - 100) * fraction, snapping
    * instantly from 50px up to 100px on frame 0 of the closing animation. This test verifies that
    * tracking currentImeBottom enables smooth interpolation from the in-flight inset (50px) down to
@@ -397,9 +396,8 @@ public class ImeSyncDeferringInsetsCallbackTest {
    * Tests aborted animation lifecycles (onPrepare immediately followed by onEnd without
    * onApplyWindowInsets).
    *
-   * <p>Rationale / Added for: Fixes a state-machine leak identified in adversarial review. If
-   * onPrepare sets needsSave = true and the animation is aborted before onApplyWindowInsets fires,
-   * onEnd must reset needsSave = false so subsequent animations are not stalled by dropped
+   * <p>If onPrepare sets needsSave = true and the animation is aborted before onApplyWindowInsets
+   * fires, onEnd must reset needsSave = false so subsequent animations are not stalled by dropped
    * onProgress frames.
    */
   @Test
@@ -448,8 +446,7 @@ public class ImeSyncDeferringInsetsCallbackTest {
   /**
    * Tests concurrent animation of IME and other system bars (status bars / navigation bars).
    *
-   * <p>Rationale / Added for: Fixes a bug identified in adversarial review where
-   * WindowInsets.Builder used a stale lastWindowInsets snapshot, freezing non-IME system bar
+   * <p>If WindowInsets.Builder used a stale lastWindowInsets snapshot, freezing non-IME system bar
    * animations during IME transitions. This test verifies that non-IME insets from the current
    * frame's insets object are preserved.
    */
@@ -495,11 +492,10 @@ public class ImeSyncDeferringInsetsCallbackTest {
   /**
    * Tests arrival of non-animated window insets while !animating.
    *
-   * <p>Rationale / Added for: Fixes a critical desynchronization defect identified in adversarial
-   * review. When window insets arrive without an animation (e.g. initial layout, orientation
-   * change, split screen, or hardware keyboard toggle), onApplyWindowInsets must update
-   * currentImeBottom and lastWindowInsets. If not updated, currentImeBottom remains 0, causing any
-   * subsequent animated dismissal to start from 0 and immediately collapse on frame 1.
+   * <p>When window insets arrive without an animation (e.g. initial layout, orientation change,
+   * split screen, or hardware keyboard toggle), onApplyWindowInsets must update currentImeBottom
+   * and lastWindowInsets. If not updated, currentImeBottom remains 0, causing any subsequent
+   * animated dismissal to start from 0 and immediately collapse on frame 1.
    */
   @Test
   public void
@@ -563,8 +559,7 @@ public class ImeSyncDeferringInsetsCallbackTest {
   /**
    * Tests non-IME animation preparation (e.g. status bar / caption bar animations).
    *
-   * <p>Rationale / Added for: Fixes a state pollution defect identified in adversarial review.
-   * onPrepare for non-IME animations must not set needsSave = true, ensuring that running IME
+   * <p>onPrepare for non-IME animations must not set needsSave = true, ensuring that running IME
    * animations are not stalled or interrupted.
    */
   @Test
@@ -715,11 +710,10 @@ public class ImeSyncDeferringInsetsCallbackTest {
   /**
    * Tests that onEnd transitions to IDLE before invoking view.dispatchApplyWindowInsets.
    *
-   * <p>Rationale / Added for: Fixes a critical defect identified in adversarial review. In a real
-   * Android View hierarchy, view.dispatchApplyWindowInsets immediately forwards to the view's
-   * OnApplyWindowInsetsListener (the callback's insets listener). If state is still ANIMATING,
-   * onApplyWindowInsets returns CONSUMED and drops the final insets. Transitioning to IDLE before
-   * dispatching ensures the settled insets are delivered to view.onApplyWindowInsets.
+   * <p>In a real Android View hierarchy, view.dispatchApplyWindowInsets immediately forwards to the
+   * view's OnApplyWindowInsetsListener (the callback's insets listener). If state is still
+   * ANIMATING, onApplyWindowInsets returns CONSUMED and drops the final insets. Transitioning to
+   * IDLE before dispatching ensures the settled insets are delivered to view.onApplyWindowInsets.
    */
   @Test
   public void stateMachine_onEnd_transitionsToIdleBeforeDispatchingSoViewReceivesSettledInsets() {
@@ -766,10 +760,9 @@ public class ImeSyncDeferringInsetsCallbackTest {
   /**
    * Tests backgrounding and resuming the app with a cancelled hide animation (issue #191156).
    *
-   * <p>Rationale / Added for: Verifies that when an app resumes from the background after the
-   * keyboard is dismissed, and Android cancels an internal hide animation
-   * (PHASE_CLIENT_ANIMATION_CANCEL), stale keyboard insets from the previous open state are not
-   * restored.
+   * <p>Verifies that when an app resumes from the background after the keyboard is dismissed, and
+   * Android cancels an internal hide animation (PHASE_CLIENT_ANIMATION_CANCEL), stale keyboard
+   * insets from the previous open state are not restored.
    */
   @Test
   public void backgroundResume_cancelledHideAnimation_doesNotRestoreStaleKeyboardInsets() {
