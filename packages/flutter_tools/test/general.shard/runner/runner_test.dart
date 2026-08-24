@@ -646,6 +646,57 @@ void main() {
     );
 
     testUsingContext(
+      'do not print welcome when --machine is provided',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final fakeFlutterVersion = FakeFlutterVersion();
+        final Analytics analytics = Analytics.fake(
+          tool: DashTool.flutterTool,
+          homeDirectory: fs.currentDirectory,
+          dartVersion: fakeFlutterVersion.dartSdkVersion,
+          fs: fs,
+          flutterChannel: fakeFlutterVersion.channel,
+          flutterVersion: fakeFlutterVersion.getVersionString(),
+        );
+
+        final stdio = FakeStdio();
+        await runner.run(
+          <String>['--version', '--machine'],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+          overrides: <Type, Generator>{
+            Analytics: () => analytics,
+            FileSystem: () => fs,
+            Logger: () {
+              final loggerFactory = LoggerFactory(
+                outputPreferences: globals.outputPreferences,
+                terminal: globals.terminal,
+                stdio: stdio,
+              );
+              return loggerFactory.createLogger(
+                daemon: false,
+                machine: true,
+                verbose: false,
+                prefixedErrors: false,
+                widgetPreviews: false,
+                windows: globals.platform.isWindows,
+              );
+            },
+          },
+        );
+
+        expect(stdio.writtenToStdout.join(), isNot(contains(analytics.getConsentMessage)));
+        expect(analytics.shouldShowMessage, isTrue);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+        BotDetector: () => const FakeBotDetector(false),
+      },
+    );
+
+    testUsingContext(
       'do not print download messages when --machine is provided',
       () async {
         // Regression test for https://github.com/flutter/flutter/issues/154119.
