@@ -27,7 +27,7 @@ abstract class DeferredComponentsValidator {
     this.exitOnFail = true,
     String? title,
   }) : outputDir = projectDir
-           .childDirectory(getBuildDirectory())
+           .childDirectory(getBuildDirectory(null, projectDir.fileSystem))
            .childDirectory(kDeferredComponentsTempDirectory),
        inputs = <File>[],
        outputs = <File>[],

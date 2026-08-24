@@ -501,7 +501,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         stringArg('output') ??
         globals.fs.path.join(
           globals.fs.currentDirectory.path,
-          getBuildDirectory(),
+          getBuildDirectory(globals.config, globals.fs),
           'ios',
           'framework',
         );

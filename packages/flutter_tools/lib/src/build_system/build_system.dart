@@ -369,7 +369,8 @@ class Environment {
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
 
-    final Directory rootBuildDir = buildDir ?? projectDir.childDirectory(getBuildDirectory());
+    final Directory rootBuildDir =
+        buildDir ?? projectDir.childDirectory(getBuildDirectory(null, projectDir.fileSystem));
     final Directory buildDirectory = rootBuildDir.childDirectory(buildPrefix);
     return Environment._(
       outputDir: outputDir,
