@@ -4,28 +4,6 @@
 
 import("//build/config/win/visual_studio_version.gni")
 
-# Deterministic PDB builds
-config("compiler") {
-  if (is_win) {
-    cflags = [
-      "/Z7",                      # Store CodeView debug info in .obj files
-    ]
-
-    if (is_clang) {
-      cflags += [
-        "-gcodeview-ghash",         # Emit .debug$H type content hashes (Clang-cl)
-        "-fdebug-compilation-dir=.",# Normalize build machine source paths
-      ]
-    }
-
-    ldflags = [
-      "/DEBUG:GHASH",             # Emit PDB with deterministic globally hashed type records
-      "/Brepro",                  # Deterministic PE timestamp and PDB Age
-      "/pdbaltpath:%_PDB%",       # Strip absolute build machine paths from PE CodeView record
-    ]
-  }
-}
-
 # Compiler setup for the Windows SDK. Applied to all targets.
 config("sdk") {
   # The include path is the stuff returned by the script.
