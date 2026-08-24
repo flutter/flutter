@@ -100,7 +100,6 @@ class LLDB {
   static final _ignorePatterns = <Pattern>[
     RegExp(r'\d+ location added to breakpoint \d+'),
     _stopHookProcessedPattern,
-    _targetStoppedPattern,
   ];
 
   /// Pattern of lldb log when libobjc.A.dylib is being read from process memory. This indicates
