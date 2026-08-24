@@ -407,7 +407,7 @@ to evolve over time.
 
 The Flutter engine and embedders cannot query Flutter's feature flags directly at runtime.
 
-However, the flutter tool runs upstream of the platform builds, so it can query a
+However, the Flutter tool runs upstream of the platform builds, so it can query a
 feature flag and pipe the value into the build, where it is baked into the
 platform-specific configuration that the engine or embedder reads. For example, the
 `enable-hcpp` flag is passed to Gradle as `-Penable-hcpp`, and the Flutter Gradle
