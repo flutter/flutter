@@ -565,6 +565,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
         .toList();
   }
 
+  /// Directory names to skip when scanning repository packages to avoid
+  /// traversing build caches and generated artifacts.
   static const _ignoredDirectoryNames = <String>{'.dart_tool', 'build'};
 
   static List<String> _gatherProjectPaths(FileSystem fs, String rootPath) {
