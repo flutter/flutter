@@ -829,7 +829,9 @@ end
         final BuildResult result = await buildSystem.build(target, environment);
         if (!result.success) {
           for (final ExceptionMeasurement measurement in result.exceptions.values) {
-            globals.printError(measurement.exception.toString());
+            if (measurement.fatal || globals.logger.isVerbose) {
+              globals.printError(measurement.exception.toString());
+            }
           }
           throwToolExit('The App.xcframework build failed.');
         }

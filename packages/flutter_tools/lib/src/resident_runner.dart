@@ -237,9 +237,7 @@ class FlutterDevice {
       service =
           await Future.any<dynamic>(<Future<dynamic>>[
                 connectToVmService(
-                  debuggingOptions.enableDds
-                      ? (device!.dds.uri ?? vmServiceUri)
-                      : vmServiceUri,
+                  debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
                   reloadSources: reloadSources,
                   restart: restart,
                   compileExpression: compileExpression,
@@ -1108,10 +1106,12 @@ abstract class ResidentRunner extends ResidentHandlers {
     );
     if (!_lastBuild!.success) {
       for (final ExceptionMeasurement exceptionMeasurement in _lastBuild!.exceptions.values) {
-        globals.printError(
-          exceptionMeasurement.exception.toString(),
-          stackTrace: globals.logger.isVerbose ? exceptionMeasurement.stackTrace : null,
-        );
+        if (exceptionMeasurement.fatal || globals.logger.isVerbose) {
+          globals.printError(
+            exceptionMeasurement.exception.toString(),
+            stackTrace: globals.logger.isVerbose ? exceptionMeasurement.stackTrace : null,
+          );
+        }
       }
     }
     globals.printTrace('complete');

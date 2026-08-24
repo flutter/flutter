@@ -386,6 +386,70 @@ void main() {
   );
 
   testUsingContext(
+    'flutter assemble does not log error message for non-fatal build failure',
+    () async {
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+          buildSystem: TestBuildSystem.all(
+            BuildResult(
+              success: false,
+              exceptions: <String, ExceptionMeasurement>{
+                'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
+              },
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
+        throwsToolExit(),
+      );
+      expect(testLogger.errorText, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'flutter assemble logs error message and stack trace for non-fatal build failure with --verbose',
+    () async {
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+          buildSystem: TestBuildSystem.all(
+            BuildResult(
+              success: false,
+              exceptions: <String, ExceptionMeasurement>{
+                'hello': ExceptionMeasurement('hello', 'bar', stackTrace),
+              },
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        commandRunner.run(<String>[
+          'assemble',
+          '-v',
+          '-o Output',
+          'debug_macos_bundle_flutter_assets',
+        ]),
+        throwsToolExit(),
+      );
+      expect(testLogger.errorText, contains('Target hello failed: bar'));
+      expect(testLogger.errorText, contains('#0      main'));
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
     'flutter assemble outputs JSON performance data to provided file',
     () async {
       final CommandRunner<void> commandRunner = createTestCommandRunner(

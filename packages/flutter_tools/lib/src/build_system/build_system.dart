@@ -24,6 +24,7 @@ import 'exceptions.dart';
 import 'file_store.dart';
 import 'source.dart';
 
+export 'exceptions.dart';
 export 'source.dart';
 
 /// A reasonable amount of files to open at the same time.
@@ -1008,7 +1009,7 @@ class _BuildInstance {
         node.target.name,
         exception,
         stackTrace,
-        fatal: true,
+        fatal: exception is! CompilerException,
       );
     } finally {
       resource.release();

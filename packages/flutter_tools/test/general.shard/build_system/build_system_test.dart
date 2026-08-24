@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/convert.dart';
 
 import '../../src/common.dart';
@@ -911,6 +910,51 @@ void main() {
 
     expect(result.success, false);
     expect(result.exceptions.keys, containsAll(<String>['B', 'C']));
+  });
+
+  testWithoutContext('BuildSystem.build sets fatal: false for CompilerException', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    final target = TestTarget((Environment environment) async {
+      throw const CompilerException('syntax error');
+    })..name = 'compiler_target';
+
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    final BuildResult result = await buildSystem.build(target, environment);
+
+    expect(result.success, false);
+    expect(result.exceptions['compiler_target']?.fatal, false);
+    expect(
+      result.exceptions['compiler_target']?.exception.toString(),
+      'compilation failed: syntax error',
+    );
+  });
+
+  testWithoutContext('BuildSystem.build sets fatal: true for non-CompilerException', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    final target = TestTarget((Environment environment) async {
+      throw Exception('unexpected error');
+    })..name = 'other_target';
+
+    final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    final BuildResult result = await buildSystem.build(target, environment);
+
+    expect(result.success, false);
+    expect(result.exceptions['other_target']?.fatal, true);
+    expect(result.exceptions['other_target']?.exception.toString(), 'Exception: unexpected error');
   });
 
   testWithoutContext(
