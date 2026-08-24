@@ -271,12 +271,16 @@ List<Plugin> sortByDependencies(Iterable<Plugin> plugins) {
     final String current = available.removeAt(0);
     if (placed.add(current)) {
       sortedPlugins.add(pluginMap[current]!);
+      final newlyAvailable = <String>[];
       for (final String dependent in dependents[current]!) {
         inDegree[dependent] = inDegree[dependent]! - 1;
-        if (inDegree[dependent] == 0) {
-          available.add(dependent);
-          available.sort();
+        if (inDegree[dependent] == 0 && !placed.contains(dependent)) {
+          newlyAvailable.add(dependent);
         }
+      }
+      if (newlyAvailable.isNotEmpty) {
+        available.addAll(newlyAvailable);
+        available.sort();
       }
     }
   }
