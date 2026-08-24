@@ -24,7 +24,6 @@ import 'mouse_tracker.dart';
 import 'object.dart';
 import 'service_extensions.dart';
 import 'view.dart';
-import 'view_metrics_override.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
@@ -377,7 +376,7 @@ mixin RendererBinding
     final ui.FlutterView view = renderView.flutterView;
     ViewConfiguration? configuration;
     assert(() {
-      final ViewMetricsOverride? override = debugViewMetricsOverrides[view.viewId];
+      final DebugViewMetricsOverride? override = debugViewMetricsOverrides[view.viewId];
       if (override != null && override.affectsViewConfiguration) {
         final double devicePixelRatio = override.devicePixelRatio ?? view.devicePixelRatio;
         final physicalConstraints = override.physicalSize != null
@@ -427,16 +426,8 @@ mixin RendererBinding
   /// Has no effect in release mode.
   void _debugHandleViewMetricsOverridesChanged() {
     assert(() {
-      var forceFrame = false;
       for (final RenderView renderView in renderViews) {
-        final ViewConfiguration configuration = createViewConfigurationFor(renderView);
-        if (!renderView.hasConfiguration || renderView.configuration != configuration) {
-          renderView.configuration = configuration;
-          forceFrame = forceFrame || renderView.child != null;
-        }
-      }
-      if (forceFrame) {
-        scheduleForcedFrame();
+        renderView.configuration = createViewConfigurationFor(renderView);
       }
       return true;
     }());

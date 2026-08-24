@@ -871,7 +871,7 @@ mixin WidgetsBinding
       // ViewMetricsOverride.fromJson throws FormatException on a malformed
       // payload, which the service extension machinery reports back to the
       // caller as an error rather than silently applying a partial override.
-      debugSetViewMetricsOverride(viewId, ViewMetricsOverride.fromJson(decoded));
+      debugSetViewMetricsOverride(viewId, DebugViewMetricsOverride.fromJson(decoded));
     }
 
     return <String, Object?>{

@@ -2526,7 +2526,7 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
       // Developer tooling can override the metrics of an individual view. Unlike
       // debugBrightnessOverride above, this applies even when there is a parent
       // MediaQuery, because the override explicitly names the view it targets.
-      final ViewMetricsOverride? override = debugViewMetricsOverrides[widget.view.viewId];
+      final DebugViewMetricsOverride? override = debugViewMetricsOverrides[widget.view.viewId];
       if (override != null) {
         effectiveData = _applyViewMetricsOverride(widget.view, effectiveData, override);
       }
@@ -2538,7 +2538,7 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   static MediaQueryData _applyViewMetricsOverride(
     ui.FlutterView view,
     MediaQueryData data,
-    ViewMetricsOverride override,
+    DebugViewMetricsOverride override,
   ) {
     // devicePixelRatio and physicalSize are also applied to the RenderView's
     // ViewConfiguration by RendererBinding.createViewConfigurationFor, so that

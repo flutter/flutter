@@ -134,7 +134,7 @@ void main() {
     // silently disappear.
     debugSetViewMetricsOverride(
       tester.view.viewId,
-      ViewMetricsOverride(devicePixelRatio: tester.view.devicePixelRatio * 2),
+      DebugViewMetricsOverride(devicePixelRatio: tester.view.devicePixelRatio * 2),
     );
     await tester.pumpAndSettle();
 
