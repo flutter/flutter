@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
+
+#include <cmath>
+
 #include "display_list/dl_color.h"
 #include "flow/view_slicer.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -11,6 +14,26 @@
 #include "fml/synchronization/count_down_latch.h"
 
 namespace flutter {
+
+namespace {
+
+// Converts a size in logical pixels to the whole number of physical pixels the
+// platform view should be laid out at.
+//
+// Android view geometry is integral, so this conversion is lossy no matter
+// what, but it must *round* rather than truncate. `size_points * dpr` is
+// computed in double precision from a float `size_points`, so a platform view
+// that exactly covers the screen lands a hair under the physical size (e.g.
+// 1079.99996 for a 1080px wide screen at a device pixel ratio of 2.625).
+// Truncating that drops a pixel off the right and bottom edges, and the Flutter
+// content behind the platform view shows through as a thin line.
+//
+// See https://github.com/flutter/flutter/issues/189834.
+int32_t ToPhysicalPixels(DlScalar size_points, double device_pixel_ratio) {
+  return static_cast<int32_t>(std::round(size_points * device_pixel_ratio));
+}
+
+}  // namespace
 
 AndroidExternalViewEmbedder2::AndroidExternalViewEmbedder2(
     const AndroidContext& android_context,
@@ -178,7 +201,10 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
         }
 
         for (int64_t view_id : composition_order) {
-          DlRect view_rect = GetViewRect(view_id, view_params);
+          // Round, rather than truncate, the bounds onto the pixel grid. See
+          // `ToPhysicalPixels` for why.
+          const DlIRect view_rect =
+              DlIRect::Round(GetViewRect(view_id, view_params));
           const EmbeddedViewParams& params = view_params.at(view_id);
           jni_facade->onDisplayPlatformView2(
               view_id,                //
@@ -186,8 +212,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
               view_rect.GetY(),       //
               view_rect.GetWidth(),   //
               view_rect.GetHeight(),  //
-              params.sizePoints().width * device_pixel_ratio,
-              params.sizePoints().height * device_pixel_ratio,
+              ToPhysicalPixels(params.sizePoints().width, device_pixel_ratio),
+              ToPhysicalPixels(params.sizePoints().height, device_pixel_ratio),
               params.mutatorsStack()  //
           );
           // Remove from views visible last frame, so we can hide the rest.
@@ -239,11 +265,9 @@ void AndroidExternalViewEmbedder2::PrepareFlutterView(
     double device_pixel_ratio) {
   Reset();
 
-  // The surface size changed. Therefore, destroy existing surfaces as
-  // the existing surfaces in the pool can't be recycled.
+  // The singular overlay surface is persistent, so it is resized in place by
+  // |SurfacePool::GetLayer| rather than destroyed and recreated here.
   if (frame_size_ != frame_size) {
-    DestroySurfaces();
-
     // This should not block to prevent deadlocks with
     // setViewportMetrics.
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(

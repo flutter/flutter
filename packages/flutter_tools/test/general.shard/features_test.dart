@@ -447,6 +447,29 @@ void main() {
       expect(checkFlags.isMacOSArm64OnlyEnabled, isTrue);
     });
   });
+
+  group('Tool Extensions', () {
+    test('is available only on master', () {
+      expect(
+        toolExtensionsFeature,
+        allOf(<Matcher>[
+          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: false, enabledByDefault: false),
+          _onChannelIs('beta', available: false, enabledByDefault: false),
+        ]),
+      );
+    });
+
+    test('can be configured', () {
+      expect(toolExtensionsFeature.configSetting, 'enable-tool-extensions');
+      expect(toolExtensionsFeature.environmentOverride, 'FLUTTER_TOOL_EXTENSIONS');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: toolExtensionsFeature);
+      expect(checkFlags.isToolExtensionsEnabled, isTrue);
+    });
+  });
 }
 
 final class _FakeFeaturesConfig implements FlutterFeaturesConfig {
