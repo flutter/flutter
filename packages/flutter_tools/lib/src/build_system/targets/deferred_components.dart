@@ -81,7 +81,8 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
     validator!
       ..checkAppAndroidManifestComponentLoadingUnitMapping(
-        FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[],
+        FlutterProject.fromDirectory(environment.projectDir).manifest.deferredComponents ??
+            <DeferredComponent>[],
         generatedLoadingUnits,
       )
       ..checkAgainstLoadingUnitsCache(generatedLoadingUnits)
