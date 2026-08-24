@@ -762,4 +762,65 @@ public class ImeSyncDeferringInsetsCallbackTest {
     assertEquals(
         FINAL_IME_BOTTOM_INSET, captor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
   }
+
+  /**
+   * Tests backgrounding and resuming the app with a cancelled hide animation (issue #191156).
+   *
+   * <p>Rationale / Added for: Verifies that when an app resumes from the background after the
+   * keyboard is dismissed, and Android cancels an internal hide animation
+   * (PHASE_CLIENT_ANIMATION_CANCEL), stale keyboard insets from the previous open state are not
+   * restored.
+   */
+  @Test
+  public void backgroundResume_cancelledHideAnimation_doesNotRestoreStaleKeyboardInsets() {
+    View view = mock(View.class);
+    ImeSyncDeferringInsetsCallback callback = new ImeSyncDeferringInsetsCallback(view);
+
+    WindowInsetsAnimation openAnimation = mock(WindowInsetsAnimation.class);
+    when(openAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+    // 1. Keyboard opens to full height (e.g. 100px).
+    callback.getAnimationCallback().onPrepare(openAnimation);
+    WindowInsets openInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, FINAL_IME_BOTTOM_INSET))
+            .build();
+    callback.getInsetsListener().onApplyWindowInsets(view, openInsets);
+    when(openAnimation.getInterpolatedFraction()).thenReturn(1.0f);
+    callback
+        .getAnimationCallback()
+        .onProgress(openInsets, Collections.singletonList(openAnimation));
+    callback.getAnimationCallback().onEnd(openAnimation);
+
+    // Verify keyboard settled at 100px.
+    ArgumentCaptor<WindowInsets> openCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view).dispatchApplyWindowInsets(openCaptor.capture());
+    assertEquals(
+        FINAL_IME_BOTTOM_INSET, openCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+
+    // 2. App is backgrounded and resumes: OS delivers non-animated insets with ime = 0.
+    WindowInsets resumeZeroInsets =
+        new WindowInsets.Builder()
+            .setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 0))
+            .build();
+    callback.getInsetsListener().onApplyWindowInsets(view, resumeZeroInsets);
+
+    ArgumentCaptor<WindowInsets> resumeCaptor = ArgumentCaptor.forClass(WindowInsets.class);
+    verify(view, org.mockito.Mockito.atLeastOnce()).onApplyWindowInsets(resumeCaptor.capture());
+    assertEquals(0, resumeCaptor.getValue().getInsets(WindowInsets.Type.ime()).bottom);
+
+    // 3. Android InsetsController initiates hide(ime()) animation, which gets cancelled
+    // (onPrepare called, followed immediately by onEnd without onApplyWindowInsets or onProgress).
+    WindowInsetsAnimation cancelledHideAnimation = mock(WindowInsetsAnimation.class);
+    when(cancelledHideAnimation.getTypeMask()).thenReturn(WindowInsets.Type.ime());
+
+    callback.getAnimationCallback().onPrepare(cancelledHideAnimation);
+    callback.getAnimationCallback().onEnd(cancelledHideAnimation);
+
+    // 4. Assert that view.dispatchApplyWindowInsets was NOT called again with the stale 100px
+    // insets.
+    // The only dispatchApplyWindowInsets call should have been the initial open from step 1.
+    verify(view, org.mockito.Mockito.times(1))
+        .dispatchApplyWindowInsets(org.mockito.ArgumentMatchers.any(WindowInsets.class));
+  }
 }
