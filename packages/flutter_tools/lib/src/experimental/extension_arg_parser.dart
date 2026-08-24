@@ -11,6 +11,7 @@ library experimental.extension_arg_parser;
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// A mixin on `FlutterCommand` that supports lazy, dynamic rebuilding of `argParser`
@@ -36,7 +37,12 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   /// and flags rather than adding options in the constructor, allowing the
   /// base parser to be cloned and dynamically rebuilt when extension options change.
   @protected
-  ArgParser createBaseArgParser() => ArgParser(allowTrailingOptions: false);
+  ArgParser createBaseArgParser() => ArgParser(
+    allowTrailingOptions: false,
+    usageLineLength: globals.outputPreferences.wrapText
+        ? globals.outputPreferences.wrapColumn
+        : null,
+  );
 
   /// Returns a cache key representing the current set of dynamic extension options
   /// (for example, a comma-separated list of template names).
