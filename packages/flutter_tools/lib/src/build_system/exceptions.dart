@@ -105,10 +105,8 @@ class CompilerException implements Exception {
   final String? message;
 
   @override
-  String toString() {
-    if (message == null || message!.isEmpty) {
-      return 'compilation failed';
-    }
-    return 'compilation failed: $message';
-  }
+  String toString() => switch (message) {
+    null || '' => 'compilation failed',
+    final String msg => 'compilation failed: $msg',
+  };
 }

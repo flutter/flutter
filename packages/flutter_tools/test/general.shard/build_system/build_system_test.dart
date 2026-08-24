@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/convert.dart';
 
 import '../../src/common.dart';
@@ -928,8 +929,8 @@ void main() {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final BuildResult result = await buildSystem.build(target, environment);
 
-    expect(result.success, false);
-    expect(result.exceptions['compiler_target']?.fatal, false);
+    expect(result.success, isFalse);
+    expect(result.exceptions['compiler_target']?.fatal, isFalse);
     expect(
       result.exceptions['compiler_target']?.exception.toString(),
       'compilation failed: syntax error',
@@ -952,8 +953,8 @@ void main() {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     final BuildResult result = await buildSystem.build(target, environment);
 
-    expect(result.success, false);
-    expect(result.exceptions['other_target']?.fatal, true);
+    expect(result.success, isFalse);
+    expect(result.exceptions['other_target']?.fatal, isTrue);
     expect(result.exceptions['other_target']?.exception.toString(), 'Exception: unexpected error');
   });
 

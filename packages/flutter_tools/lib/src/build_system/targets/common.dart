@@ -18,6 +18,7 @@ import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
+import '../exceptions.dart';
 import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'dart_plugin_registrant.dart';
