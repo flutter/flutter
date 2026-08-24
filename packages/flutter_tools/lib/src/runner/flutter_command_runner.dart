@@ -60,6 +60,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
     bool verboseHelp = false,
   }) : _analytics = analytics,
        _toolContext = toolContext,
+       _verboseHelp = verboseHelp,
+       _argParser = ArgParser(
+         allowTrailingOptions: false,
+         usageLineLength: toolContext?.outputPreferences.wrapText ?? false
+             ? toolContext?.outputPreferences.wrapColumn
+             : null,
+       ),
        super(
          'flutter',
          'Manage your Flutter app development.\n'
@@ -72,6 +79,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
              '  flutter run [options]\n'
              '    Run your Flutter application on an attached device or in an emulator.',
        ) {
+    _populateOptions(verboseHelp: verboseHelp);
+  }
+
+  final bool _verboseHelp;
+
+  @override
+  ArgParser get argParser => _argParser;
+  ArgParser _argParser;
+
+  void _populateOptions({required bool verboseHelp}) {
     argParser.addFlag(
       FlutterGlobalOptions.kVerboseFlag,
       abbr: 'v',
@@ -239,14 +256,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
     );
   }
 
-  @override
-  ArgParser get argParser => _argParser;
-  late final _argParser = ArgParser(
-    allowTrailingOptions: false,
-    usageLineLength: _toolContext?.outputPreferences.wrapText ?? false
-        ? _toolContext?.outputPreferences.wrapColumn
-        : null,
-  );
+  void _updateArgParser({required int? wrapColumn}) {
+    _argParser = ArgParser(allowTrailingOptions: false, usageLineLength: wrapColumn);
+
+    argParser.addFlag('help', abbr: 'h', negatable: false, help: 'Print this usage information.');
+
+    _populateOptions(verboseHelp: _verboseHelp);
+
+    for (final MapEntry<String, Command<void>> entry in commands.entries) {
+      argParser.addCommand(entry.key, entry.value.argParser);
+    }
+  }
 
   @override
   String get usageFooter {
@@ -487,6 +507,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       wrapText: useWrapping,
       showColor: topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?,
       wrapColumn: wrapColumn,
+    );
+
+    _updateArgParser(
+      wrapColumn: useWrapping ? (wrapColumn ?? toolContext.stdio.terminalColumns) : null,
     );
 
     if (((topLevelResults[FlutterGlobalOptions.kShowTestDeviceFlag] as bool?) ?? false) ||

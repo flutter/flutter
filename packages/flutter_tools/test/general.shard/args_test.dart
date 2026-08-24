@@ -209,6 +209,24 @@ void main() {
     await runner.run(<String>['dummy']);
     expect(command.stringsArg('key'), <String>[]);
   });
+
+  testUsingContext('wrap-column option updates argParser usageLineLength', () async {
+    final command = DummyFlutterCommand(
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
+    runner.addCommand(command);
+
+    await runner.run(<String>['--wrap', '--wrap-column=50', 'dummy']);
+
+    expect(runner.argParser.usageLineLength, 50);
+  });
 }
 
 void verifyCommandRunner(CommandRunner<Object?> runner) {
