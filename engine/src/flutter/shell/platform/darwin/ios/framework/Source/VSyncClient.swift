@@ -13,6 +13,7 @@ class VSyncClient: NSObject {
   private let taskRunner: TaskRunner
   private let isVariableRefreshRateEnabled: Bool
   private let callback: (CFTimeInterval, CFTimeInterval) -> Void
+  private var updateLinkClient: AnyObject?
 
   /// The display link used to coordinate vsync callbacks.
   @objc
@@ -110,7 +111,31 @@ class VSyncClient: NSObject {
   /// `onDisplayLink(_:)` on the next vsync event.
   @objc
   func await() {
+    if #available(iOS 18.0, *), allowPauseAfterVsync, awaitUIUpdate() {
+      return
+    }
     displayLink?.isPaused = false
+  }
+
+  /// Uses the active scene's UI update cycle when available. Returns `false` when no active scene
+  /// exists so the caller can fall back to `CADisplayLink`.
+  @available(iOS 18.0, *)
+  private func awaitUIUpdate() -> Bool {
+    if updateLinkClient == nil {
+      guard let scene = UIApplication.shared.connectedScenes.first(where: {
+        $0.activationState == .foregroundActive
+      }) as? UIWindowScene else {
+        return false
+      }
+
+      updateLinkClient = UIUpdateLinkClient(scene: scene) {
+        [weak self] timestamp, targetTimestamp in
+        self?.onVsync(timestamp: timestamp, targetTimestamp: targetTimestamp)
+      }
+    }
+
+    (updateLinkClient as? UIUpdateLinkClient)?.await()
+    return true
   }
 
   /// Pauses the display link to stop receiving vsync callbacks.
@@ -175,6 +200,15 @@ class VSyncClient: NSObject {
       targetTimestamp = timestamp + (1.0 / refreshRate)
     }
 
+    if allowPauseAfterVsync {
+      link.isPaused = true
+    }
+
+    onVsync(timestamp: timestamp, targetTimestamp: targetTimestamp)
+  }
+
+  /// Records timing information and delivers a vsync callback to the engine.
+  private func onVsync(timestamp: CFTimeInterval, targetTimestamp: CFTimeInterval) {
     Tracing.tracePlatformVsync(
       withStartTime: timestamp,
       targetTime: targetTimestamp
@@ -195,10 +229,49 @@ class VSyncClient: NSObject {
       }
     }
 
-    if allowPauseAfterVsync {
-      link.isPaused = true
-    }
     callback(timestamp, targetTimestamp)
+  }
+}
+
+/// Delivers Flutter's vsync callback from the active iOS UI update cycle. This avoids waiting an
+/// extra display interval when resuming a paused `CADisplayLink`, while preserving Flutter's
+/// demand-driven behavior by requesting only one UI update for each awaited frame.
+@available(iOS 18.0, *)
+private final class UIUpdateLinkClient: NSObject {
+  /// The engine callback that receives the current UI update's frame timing.
+  private let callback: (CFTimeInterval, CFTimeInterval) -> Void
+
+  /// Whether Flutter is waiting for the next UI update to begin a frame.
+  private var isAwaiting = false
+
+  private lazy var updateLink: UIUpdateLink = {
+    let link = UIUpdateLink(windowScene: scene)
+    link.addAction(to: .beforeCADisplayLinkDispatch) { [weak self] _, info in
+      self?.onUIUpdate(info)
+    }
+    link.isEnabled = true
+    return link
+  }()
+  private let scene: UIWindowScene
+
+  init(scene: UIWindowScene, callback: @escaping (CFTimeInterval, CFTimeInterval) -> Void) {
+    self.scene = scene
+    self.callback = callback
+    super.init()
+  }
+
+  /// Requests one UI update for the frame Flutter is currently awaiting.
+  func await() {
+    isAwaiting = true
+    updateLink.requiresContinuousUpdates = true
+  }
+
+  /// Completes the pending request with the timing supplied by the current iOS UI update.
+  private func onUIUpdate(_ info: UIUpdateInfo) {
+    guard isAwaiting else { return }
+    isAwaiting = false
+    updateLink.requiresContinuousUpdates = false
+    callback(info.modelTime, info.estimatedPresentationTime)
   }
 }
 
