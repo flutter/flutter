@@ -358,6 +358,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification;
+- (void)dispatchTouches:(NSSet*)touches
+    pointerDataChangeOverride:(flutter::PointerData::Change*)overridden_change
+                        event:(UIEvent*)event;
 @end
 
 @interface FlutterViewControllerTest : XCTestCase
@@ -371,6 +374,50 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @property(nonatomic, readwrite) UITouchPhase phase;
 
+@end
+
+// Captures the pointer data the view controller dispatches, so touch tests can assert on the
+// contents of the packet rather than only on the fact that dispatch happened.
+@interface FlutterEnginePointerDataRecorder : FlutterEnginePartialMock
+- (const std::vector<flutter::PointerData>&)dispatchedPointerData;
+@end
+
+@implementation FlutterEnginePointerDataRecorder {
+  std::vector<flutter::PointerData> _dispatchedPointerData;
+}
+
+- (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {
+  for (size_t i = 0; i < packet->GetLength(); i++) {
+    _dispatchedPointerData.push_back(packet->GetPointerData(i));
+  }
+}
+
+- (const std::vector<flutter::PointerData>&)dispatchedPointerData {
+  return _dispatchedPointerData;
+}
+@end
+
+// Records whether dispatchTouches:pointerDataChangeOverride:event: was invoked, while still
+// calling super so the real dispatch pipeline (touch -> PointerDataPacket -> engine) is exercised.
+@interface FlutterViewControllerDispatchTouchesSpy : FlutterViewController
+@property(nonatomic) BOOL touchesDispatched;
+@property(nonatomic, strong) UIViewController* stubbedPresentedViewController;
+@property(nonatomic) BOOL stubbedIsBeingDismissed;
+@end
+
+@implementation FlutterViewControllerDispatchTouchesSpy
+- (UIViewController*)presentedViewController {
+  return self.stubbedPresentedViewController;
+}
+- (BOOL)isBeingDismissed {
+  return self.stubbedIsBeingDismissed;
+}
+- (void)dispatchTouches:(NSSet*)touches
+    pointerDataChangeOverride:(flutter::PointerData::Change*)overridden_change
+                        event:(UIEvent*)event {
+  [super dispatchTouches:touches pointerDataChangeOverride:overridden_change event:event];
+  self.touchesDispatched = YES;
+}
 @end
 
 @implementation FlutterViewControllerTest
@@ -3100,6 +3147,207 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertNotNil(flutterViewController.engine);
   XCTAssertNotEqual(flutterViewController.engine, self.mockEngine);
   [appDelegate setMockLaunchEngine:nil];
+}
+
+// Regression tests for https://github.com/flutter/flutter/issues/14720
+
+- (FlutterViewControllerDispatchTouchesSpy*)spyViewControllerWithPresentedViewController:
+    (UIViewController*)presentedVC {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [[FlutterViewControllerDispatchTouchesSpy alloc] initWithEngine:self.mockEngine
+                                                              nibName:nil
+                                                               bundle:nil];
+  vc.stubbedPresentedViewController = presentedVC;
+  return vc;
+}
+
+- (void)testTouchesBeganNotDispatchedWhenNativeVCPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseBegan;
+  UIEvent* event = nil;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesBegan must not dispatch to Flutter when a native VC is presented");
+}
+
+- (void)testTouchesMovedNotDispatchedWhenNativeVCPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseMoved;
+  UIEvent* event = nil;
+  [vc touchesMoved:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesMoved must not dispatch to Flutter when a native VC is presented");
+}
+
+- (void)testTouchesEndedNotDispatchedWhenNativeVCPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseEnded;
+  UIEvent* event = nil;
+  [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesEnded must not dispatch to Flutter when a native VC is presented");
+}
+
+- (void)testTouchesCancelledNotDispatchedWhenNativeVCPresented {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [self spyViewControllerWithPresentedViewController:[[UIViewController alloc] init]];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseCancelled;
+  UIEvent* event = nil;
+  [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesCancelled must not dispatch to Flutter when a native VC is presented");
+}
+
+// Positive-path controls for the tests above: verifies the guard only blocks dispatch when
+// something is actually presented / being dismissed, not unconditionally, and that the pointer
+// data that reaches the engine describes the touch that was sent.
+
+- (FlutterViewControllerDispatchTouchesSpy*)spyViewControllerWithEngine:(FlutterEngine*)engine {
+  return [[FlutterViewControllerDispatchTouchesSpy alloc] initWithEngine:engine
+                                                                 nibName:nil
+                                                                  bundle:nil];
+}
+
+- (void)testTouchesBeganDispatchedWhenNothingPresented {
+  FlutterEnginePointerDataRecorder* engine = [[FlutterEnginePointerDataRecorder alloc] init];
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerWithEngine:engine];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseBegan;
+  UIEvent* event = nil;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesBegan must dispatch to Flutter when nothing is presented");
+  const std::vector<flutter::PointerData>& dispatched = [engine dispatchedPointerData];
+  XCTAssertEqual(dispatched.size(), 1UL, @"touchesBegan must dispatch exactly one pointer data");
+  XCTAssertEqual(dispatched[0].device, reinterpret_cast<int64_t>(touch),
+                 @"the dispatched pointer data must describe the touch that was sent");
+  XCTAssertEqual(static_cast<int>(dispatched[0].change),
+                 static_cast<int>(flutter::PointerData::Change::kDown),
+                 @"UITouchPhaseBegan must dispatch a kDown change");
+}
+
+- (void)testTouchesMovedDispatchedWhenNothingPresented {
+  FlutterEnginePointerDataRecorder* engine = [[FlutterEnginePointerDataRecorder alloc] init];
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerWithEngine:engine];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseMoved;
+  UIEvent* event = nil;
+  [vc touchesMoved:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesMoved must dispatch to Flutter when nothing is presented");
+  const std::vector<flutter::PointerData>& dispatched = [engine dispatchedPointerData];
+  XCTAssertEqual(dispatched.size(), 1UL, @"touchesMoved must dispatch exactly one pointer data");
+  XCTAssertEqual(dispatched[0].device, reinterpret_cast<int64_t>(touch),
+                 @"the dispatched pointer data must describe the touch that was sent");
+  XCTAssertEqual(static_cast<int>(dispatched[0].change),
+                 static_cast<int>(flutter::PointerData::Change::kMove),
+                 @"UITouchPhaseMoved must dispatch a kMove change");
+}
+
+- (void)testTouchesEndedDispatchedWhenNothingPresented {
+  FlutterEnginePointerDataRecorder* engine = [[FlutterEnginePointerDataRecorder alloc] init];
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerWithEngine:engine];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseEnded;
+  UIEvent* event = nil;
+  [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesEnded must dispatch to Flutter when nothing is presented");
+  const std::vector<flutter::PointerData>& dispatched = [engine dispatchedPointerData];
+  XCTAssertEqual(dispatched.size(), 2UL,
+                 @"touchesEnded must dispatch the pointer data followed by a remove");
+  XCTAssertEqual(dispatched[0].device, reinterpret_cast<int64_t>(touch),
+                 @"the dispatched pointer data must describe the touch that was sent");
+  XCTAssertEqual(static_cast<int>(dispatched[0].change),
+                 static_cast<int>(flutter::PointerData::Change::kUp),
+                 @"UITouchPhaseEnded must dispatch a kUp change");
+  XCTAssertEqual(static_cast<int>(dispatched[1].change),
+                 static_cast<int>(flutter::PointerData::Change::kRemove),
+                 @"UITouchPhaseEnded must be followed by a kRemove change");
+}
+
+- (void)testTouchesCancelledDispatchedWhenNothingPresented {
+  FlutterEnginePointerDataRecorder* engine = [[FlutterEnginePointerDataRecorder alloc] init];
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerWithEngine:engine];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseCancelled;
+  UIEvent* event = nil;
+  [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertTrue(vc.touchesDispatched,
+                @"touchesCancelled must dispatch to Flutter when nothing is presented");
+  const std::vector<flutter::PointerData>& dispatched = [engine dispatchedPointerData];
+  XCTAssertEqual(dispatched.size(), 2UL,
+                 @"touchesCancelled must dispatch the pointer data followed by a remove");
+  XCTAssertEqual(dispatched[0].device, reinterpret_cast<int64_t>(touch),
+                 @"the dispatched pointer data must describe the touch that was sent");
+  XCTAssertEqual(static_cast<int>(dispatched[0].change),
+                 static_cast<int>(flutter::PointerData::Change::kCancel),
+                 @"UITouchPhaseCancelled must dispatch a kCancel change");
+  XCTAssertEqual(static_cast<int>(dispatched[1].change),
+                 static_cast<int>(flutter::PointerData::Change::kRemove),
+                 @"UITouchPhaseCancelled must be followed by a kRemove change");
+}
+
+// Regression tests for the isBeingDismissed guard.
+
+- (FlutterViewControllerDispatchTouchesSpy*)spyViewControllerBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc =
+      [[FlutterViewControllerDispatchTouchesSpy alloc] initWithEngine:self.mockEngine
+                                                              nibName:nil
+                                                               bundle:nil];
+  vc.stubbedIsBeingDismissed = YES;
+  return vc;
+}
+
+- (void)testTouchesBeganNotDispatchedWhenFlutterVCIsBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseBegan;
+  UIEvent* event = nil;
+  [vc touchesBegan:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesBegan must not dispatch to Flutter while FlutterViewController is being "
+                 @"dismissed");
+}
+
+- (void)testTouchesMovedNotDispatchedWhenFlutterVCIsBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseMoved;
+  UIEvent* event = nil;
+  [vc touchesMoved:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesMoved must not dispatch to Flutter while FlutterViewController is being "
+                 @"dismissed");
+}
+
+- (void)testTouchesEndedNotDispatchedWhenFlutterVCIsBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseEnded;
+  UIEvent* event = nil;
+  [vc touchesEnded:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesEnded must not dispatch to Flutter while FlutterViewController is being "
+                 @"dismissed");
+}
+
+- (void)testTouchesCancelledNotDispatchedWhenFlutterVCIsBeingDismissed {
+  FlutterViewControllerDispatchTouchesSpy* vc = [self spyViewControllerBeingDismissed];
+  UITouch* touch = [[UITouch alloc] init];
+  touch.phase = UITouchPhaseCancelled;
+  UIEvent* event = nil;
+  [vc touchesCancelled:[NSSet setWithObject:touch] withEvent:event];
+  XCTAssertFalse(vc.touchesDispatched,
+                 @"touchesCancelled must not dispatch to Flutter while FlutterViewController is "
+                 @"being dismissed");
 }
 
 @end
