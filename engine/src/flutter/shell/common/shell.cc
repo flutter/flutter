@@ -1231,14 +1231,21 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetUITaskRunner()->PostTask(
-      fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
-                         flow_id = next_pointer_flow_id_]() mutable {
+  const uint64_t flow_id = next_pointer_flow_id_++;
+  auto dispatch_packet = fml::MakeCopyable(
+      [engine = weak_engine_, packet = std::move(packet), flow_id]() mutable {
         if (engine) {
           engine->DispatchPointerDataPacket(std::move(packet), flow_id);
         }
-      }));
-  next_pointer_flow_id_++;
+      });
+
+  // Avoid re-enqueuing input onto the same UI thread and potentially missing
+  // the next VSync, while preserving asynchronous dispatch across threads.
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread()) {
+    dispatch_packet();
+  } else {
+    task_runners_.GetUITaskRunner()->PostTask(std::move(dispatch_packet));
+  }
 }
 
 HitTestResponse Shell::OnPlatformViewHitTest(int64_t view_id,
