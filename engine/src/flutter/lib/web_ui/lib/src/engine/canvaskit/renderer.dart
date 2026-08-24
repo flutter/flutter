@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -92,47 +91,78 @@ class CanvasKitRenderer extends Renderer {
       CkCanvas(recorder, cullRect);
 
   @override
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) => CkGradientLinear(from, to, colors, colorStops, tileMode, matrix4);
+  ) {
+    return CkGradient.linear(endPoints, colors, colorStops, tileMode, matrix4);
+  }
 
   @override
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
     double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) => CkGradientRadial(center, radius, colors, colorStops, tileMode, matrix4);
+  ) {
+    return CkGradient.radial(centerX, centerY, radius, colors, colorStops, tileMode, matrix4);
+  }
 
   @override
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]) => CkGradientConical(focal, focalRadius, center, radius, colors, colorStops, tileMode, matrix);
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) {
+    return CkGradient.conical(
+      startX,
+      startY,
+      startRadius,
+      endX,
+      endY,
+      endRadius,
+      colors,
+      colorStops,
+      tileMode,
+      matrix4,
+    );
+  }
 
   @override
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
     Float32List? matrix4,
-  ]) => CkGradientSweep(center, colors, colorStops, tileMode, startAngle, endAngle, matrix4);
+  ) {
+    return CkGradient.sweep(
+      centerX,
+      centerY,
+      colors,
+      colorStops,
+      tileMode,
+      startAngle,
+      endAngle,
+      matrix4,
+    );
+  }
 
   @override
   ui.PictureRecorder createPictureRecorder() => CkPictureRecorder();
@@ -284,13 +314,15 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  ui.ImageShader createImageShader(
-    ui.Image image,
+  BackendImageShader createImageShader(
+    EngineImage image,
     ui.TileMode tmx,
     ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
-  ) => CkImageShader(image, tmx, tmy, matrix4, filterQuality);
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
+  ) {
+    return CkImageShader(image.backendImage as CkImageDelegate, tmx, tmy, matrix4, filterQuality);
+  }
 
   @override
   CkPathConstructors pathConstructors = CkPathConstructors();
