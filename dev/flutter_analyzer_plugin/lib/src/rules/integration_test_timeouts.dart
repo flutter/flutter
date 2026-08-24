@@ -30,7 +30,10 @@ class IntegrationTestTimeouts extends AnalysisRule {
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final String filePath = context.definingUnit.file.path;
-    if (!filePath.contains('test_driver') && !filePath.contains('test.dart')) {
+    if (!filePath.contains('test_driver') ||
+        (!filePath.endsWith('_test.dart') &&
+            !filePath.endsWith('util.dart') &&
+            !filePath.endsWith('test.dart'))) {
       return;
     }
     final visitor = _Visitor(this);

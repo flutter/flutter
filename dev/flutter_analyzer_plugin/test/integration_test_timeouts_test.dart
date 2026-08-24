@@ -16,6 +16,9 @@ class IntegrationTestTimeoutsTest extends AnalysisRuleTest {
   }
 
   @override
+  String get testPackageLibPath => '$testPackageRootPath/test_driver';
+
+  @override
   String get analysisRule => IntegrationTestTimeouts.code.name;
 
   static const String source = '''

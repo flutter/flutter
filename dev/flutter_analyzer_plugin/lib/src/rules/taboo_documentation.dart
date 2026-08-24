@@ -32,6 +32,11 @@ class TabooDocumentation extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path;
+    if (filePath.endsWith('taboo_documentation.dart') ||
+        filePath.endsWith('taboo_documentation_test.dart')) {
+      return;
+    }
     final visitor = _Visitor(this, context);
     registry.addComment(this, visitor);
   }

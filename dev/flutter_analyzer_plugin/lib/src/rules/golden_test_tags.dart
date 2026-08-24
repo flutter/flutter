@@ -34,6 +34,11 @@ class GoldenTestTags extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path;
+    // Only golden tests in packages/flutter (or test runner) are subject to reduced testing tags.
+    if (!filePath.contains('packages/flutter/test') && !filePath.contains('/home/test')) {
+      return;
+    }
     final visitor = _Visitor(this, context);
     registry.addMethodInvocation(this, visitor);
   }

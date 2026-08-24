@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:analyzer/src/lint/registry.dart';
-import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
+import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_stopwatches.dart';
 import 'package:test_reflective_loader/test_reflective_loader.dart';
@@ -15,7 +15,7 @@ import 'package_mixins/external_stopwatches_mixin.dart';
 class NoStopwatchesTest extends AnalysisRuleTest with ExternalStopwatchesPackage {
   @override
   void setUp() {
-    Registry.ruleRegistry.registerWarningRule(NoStopwatches());
+    Registry.ruleRegistry.registerLintRule(NoStopwatches());
     super.setUp();
 
     writeTestPackageConfig(PackageConfigFileBuilder()..addExternalStopwatchesPackage(this));

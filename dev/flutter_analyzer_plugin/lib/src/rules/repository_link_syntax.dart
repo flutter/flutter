@@ -52,6 +52,10 @@ class RepositoryLinkSyntax extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path;
+    if (filePath.endsWith('repository_link_syntax_test.dart')) {
+      return;
+    }
     final visitor = _Visitor(this);
     registry
       ..addAdjacentStrings(this, visitor)

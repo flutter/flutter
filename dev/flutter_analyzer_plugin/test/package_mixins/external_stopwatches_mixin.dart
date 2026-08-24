@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
+import 'package:analyzer_testing/package_config_file_builder.dart';
 
 extension ExternalStopwatchesExtension on PackageConfigFileBuilder {
   PackageConfigFileBuilder addExternalStopwatchesPackage(AnalysisRuleTest test) {
     add(
       name: ExternalStopwatchesPackage._externalStopwatchesPackageName,
-      rootFolder: test.getFolder(
-        ExternalStopwatchesPackage._externalStopwatchesPackageRoot,
-      ),
+      rootFolder: test.getFolder(ExternalStopwatchesPackage._externalStopwatchesPackageRoot),
     );
     return this;
   }
