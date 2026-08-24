@@ -4173,6 +4173,23 @@ void main() {
     },
   );
 
+  testUsingContext('analysis_options.yaml only excludes platforms that were generated', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms', 'android,ios'],
+      <String>['analysis_options.yaml'],
+    );
+
+    final String analysisOptions = projectDir.childFile('analysis_options.yaml').readAsStringSync();
+    expect(analysisOptions, contains('- build/**'));
+    expect(analysisOptions, contains('- android/**'));
+    expect(analysisOptions, contains('- ios/**'));
+    expect(analysisOptions, isNot(contains('- web/**')));
+    expect(analysisOptions, isNot(contains('- windows/**')));
+    expect(analysisOptions, isNot(contains('- macos/**')));
+    expect(analysisOptions, isNot(contains('- linux/**')));
+  });
+
   testUsingContext('should escape ":" in project description', () async {
     await _createProject(
       projectDir,
