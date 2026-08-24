@@ -14,19 +14,19 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/error/error.dart';
 
-class ProtectPublicStateSubtypes extends AnalysisRule {
+import '../flutter_analysis_rule.dart';
+
+class ProtectPublicStateSubtypes extends FlutterAnalysisRule {
   ProtectPublicStateSubtypes()
     : super(
         name: code.name,
-        description:
-            'Public State subtypes should add @protected when overriding methods '
-            'to avoid exposing internal logic to developers.',
+        description: 'Enforces that public subclasses of State are marked @protected.',
       );
 
   static const LintCode code = LintCode(
     'protect_public_state_subtypes',
-    'Public State subtypes should add @protected when overriding methods '
-        'to avoid exposing internal logic to developers.',
+    'Public State subtypes must be marked @protected.',
+    correctionMessage: 'Add @protected annotation to the State subclass.',
     severity: DiagnosticSeverity.ERROR,
   );
 
@@ -34,16 +34,7 @@ class ProtectPublicStateSubtypes extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
-    // Material and Cupertino packages are marked as read-only and exempted from this lint.
-    if (!filePath.startsWith('/home/test') &&
-        (filePath.contains('/material/') ||
-            filePath.contains('/cupertino/') ||
-            filePath.contains('src/material') ||
-            filePath.contains('src/cupertino'))) {
-      return;
-    }
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry.addClassDeclaration(this, visitor);
   }

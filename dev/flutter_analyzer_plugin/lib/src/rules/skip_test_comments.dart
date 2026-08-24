@@ -10,11 +10,13 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/source/line_info.dart';
 
+import '../flutter_analysis_rule.dart';
+
 final Pattern _skipTestIntentionalPattern = RegExp(r'// .*\[intended\]');
 final Pattern _skipTestTrackingBugPattern = RegExp(r'// .*https?://github.com/.*/issues/\d+');
 
 /// Skipped tests should have a justification comment.
-class SkipTestComments extends AnalysisRule {
+class SkipTestComments extends FlutterAnalysisRule {
   SkipTestComments() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription =
@@ -31,8 +33,8 @@ class SkipTestComments extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path;
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     // Skip test comments rule only applies to test files.
     if (!filePath.startsWith('/home/test') && !filePath.endsWith('_test.dart')) {
       return;

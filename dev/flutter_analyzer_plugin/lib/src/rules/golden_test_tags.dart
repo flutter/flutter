@@ -9,12 +9,14 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 const String _matchesGoldenFile = 'matchesGoldenFile';
 const String _reducedTestSetTag = 'reduced-test-set';
 const String _tagsAnnotation = 'Tags';
 
 /// Files containing golden tests must be tagged using `@Tags(<String>['reduced-test-set'])`.
-class GoldenTestTags extends AnalysisRule {
+class GoldenTestTags extends FlutterAnalysisRule {
   GoldenTestTags() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription =
@@ -33,8 +35,8 @@ class GoldenTestTags extends AnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path;
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     // Only golden tests in packages/flutter (or test runner) are subject to reduced testing tags.
     if (!filePath.contains('packages/flutter/test') && !filePath.contains('/home/test')) {
       return;

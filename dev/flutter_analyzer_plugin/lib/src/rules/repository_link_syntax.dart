@@ -10,6 +10,8 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 // Pattern matching repository URLs from supported hosting domains.
 // Delimiters (whitespace, quotes, backslashes, parentheses, brackets) define the URL boundary.
 final RegExp _repoUrlPattern = RegExp(
@@ -34,7 +36,7 @@ const Set<String> _repoExceptions = <String>{
 const String _bannedBranch = 'master';
 
 /// Repository links must use the "main" branch rather than "master".
-class RepositoryLinkSyntax extends AnalysisRule {
+class RepositoryLinkSyntax extends FlutterAnalysisRule {
   RepositoryLinkSyntax() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription =
@@ -52,8 +54,8 @@ class RepositoryLinkSyntax extends AnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path;
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     if (filePath.endsWith('repository_link_syntax_test.dart')) {
       return;
     }

@@ -10,10 +10,12 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 final RegExp _tabooPattern = RegExp(r'\bsimply\b', caseSensitive: false);
 
 /// Avoid taboo words ('simply') in documentation comments.
-class TabooDocumentation extends AnalysisRule {
+class TabooDocumentation extends FlutterAnalysisRule {
   TabooDocumentation() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription = "Avoid taboo words ('simply') in documentation comments.";
@@ -30,8 +32,8 @@ class TabooDocumentation extends AnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path;
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     if (!filePath.startsWith('/home/test') &&
         (filePath.contains('/test/') ||
             filePath.endsWith('_test.dart') ||

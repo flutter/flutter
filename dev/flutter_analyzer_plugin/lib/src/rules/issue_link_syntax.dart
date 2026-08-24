@@ -10,6 +10,8 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 // Pattern matching GitHub issue URLs starting with the Flutter issue creation prefix.
 // Delimiters (whitespace, quotes, backslashes, parentheses, brackets) define the URL boundary.
 final RegExp _issueUrlPattern = RegExp(
@@ -33,7 +35,7 @@ const Set<String> _validTemplates = <String>{
 };
 
 /// Links to create GitHub issues must specify a valid template or use "/choose".
-class IssueLinkSyntax extends AnalysisRule {
+class IssueLinkSyntax extends FlutterAnalysisRule {
   IssueLinkSyntax() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription =
@@ -52,8 +54,8 @@ class IssueLinkSyntax extends AnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path;
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     if (filePath.endsWith('_test.dart') || filePath.endsWith('issue_link_syntax.dart')) {
       return;
     }

@@ -10,8 +10,10 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 /// A rule that enforces explanation comments for `sync*` and `async*` methods.
-class NoSyncAsyncStar extends AnalysisRule {
+class NoSyncAsyncStar extends FlutterAnalysisRule {
   /// Creates a new [NoSyncAsyncStar] rule.
   NoSyncAsyncStar()
     : super(
@@ -32,7 +34,7 @@ class NoSyncAsyncStar extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     if (!filePath.startsWith('/home/test') &&
         (!filePath.contains('/packages/') && !filePath.contains('/examples/'))) {

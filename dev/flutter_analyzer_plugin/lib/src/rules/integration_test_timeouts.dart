@@ -10,8 +10,10 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
-/// Integration tests in flutter test_driver must have `timeout: Timeout.none`.
-class IntegrationTestTimeouts extends AnalysisRule {
+import '../flutter_analysis_rule.dart';
+
+/// Integration tests must specify `timeout: Timeout.none` to prevent them from getting stuck.
+class IntegrationTestTimeouts extends FlutterAnalysisRule {
   IntegrationTestTimeouts() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription =
@@ -28,7 +30,7 @@ class IntegrationTestTimeouts extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     if (!filePath.startsWith('/home/test') && !filePath.contains('/dev/')) {
       return;

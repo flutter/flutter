@@ -10,8 +10,10 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/source/line_info.dart';
 
+import '../flutter_analysis_rule.dart';
+
 /// A rule that enforces standard Flutter deprecation notice syntax.
-class DeprecationSyntax extends AnalysisRule {
+class DeprecationSyntax extends FlutterAnalysisRule {
   /// Creates a new [DeprecationSyntax] rule.
   DeprecationSyntax() : super(name: code.name, description: 'Verify deprecation syntax');
 
@@ -28,7 +30,7 @@ class DeprecationSyntax extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     if (filePath.contains('analyze-test-input')) {
       return;
