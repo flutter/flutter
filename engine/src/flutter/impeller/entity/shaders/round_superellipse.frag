@@ -16,6 +16,7 @@ uniform FragInfo {
   vec2 size;
   float stroke_width;
   float stroked;
+  float all_corners_same;
   vec4 superellipse_degrees_top;
   vec4 superellipse_degrees_right;
   vec4 superellipse_semi_axes_top;
@@ -164,26 +165,86 @@ float getQuadrantDistance(vec2 p,
   return max(dist_rect_local, corner_dist);
 }
 
-float distanceFromRoundedSuperellipse(vec2 p,
-                                      vec4 quadrant_splits,
-                                      vec2 size,
-                                      vec4 superellipse_degrees_top,
-                                      vec4 superellipse_degrees_right,
-                                      vec4 superellipse_semi_axes_top,
-                                      vec4 superellipse_semi_axes_right,
-                                      vec4 angle_spans_top,
-                                      vec4 angle_spans_right,
-                                      vec4 octant_offsets_c,
-                                      vec4 radii_width,
-                                      vec4 radii_height,
-                                      vec4 circle_centers_top_x,
-                                      vec4 circle_centers_top_y,
-                                      vec4 circle_centers_right_x,
-                                      vec4 circle_centers_right_y,
-                                      vec4 superellipse_scales_x,
-                                      vec4 superellipse_scales_y,
-                                      vec4 quadrant_centers_x,
-                                      vec4 quadrant_centers_y) {
+float distanceFromSimpleRoundedSuperellipse(vec2 p,
+                                            vec2 degree,
+                                            vec2 se_a,
+                                            vec2 radii,
+                                            vec2 angle_span,
+                                            vec2 circle_center_top,
+                                            vec2 circle_center_right,
+                                            float c,
+                                            vec2 scale) {
+  // Do work in the first quadrant to simplify things.
+  p = abs(p);
+  // Map p in to a square.
+  vec2 p_norm = p / scale;
+
+  // Declare all RSE params for a single octant.
+  float se_degree, span, radius, axis_length;
+  vec2 circle_center;
+
+  // 'p' in the coordinate system of the octant.
+  vec2 p_oct;
+
+  // We split the quadrant along the diagonal of the transition (p_norm.y + c ==
+  // p_norm.x). This allows us to grab the correct set of parameters for the
+  // "top" and "right" halves of the corner.
+  if (p_norm.y + c > p_norm.x) {
+    p_oct = p_norm + vec2(0.0, c);
+    se_degree = degree.x;
+    span = angle_span.x;
+    radius = radii.x;
+    circle_center = circle_center_top;
+    axis_length = se_a.x;
+  } else {
+    // For the 'right' octant, we flip the point and shift it according to
+    // the CPU's OctantContains/Flip logic.
+    p_oct = p_norm.yx - vec2(0.0, c);
+    se_degree = degree.y;
+    span = angle_span.y;
+    radius = radii.y;
+    circle_center = circle_center_right;
+    axis_length = se_a.y;
+  }
+
+  // Move the point to the corner circle's coordinate system.
+  vec2 p_rel = p_oct - circle_center;
+
+  // Grab the angle offset of the point.
+  float theta = atan(p_rel.y, p_rel.x);
+
+  // The angular distance between the point and the 45 degree midline.
+  float d_theta = theta - PI_OVER_FOUR;
+  d_theta = mod(d_theta + PI, TWO_PI) - PI;
+
+  // If the point is within the span of the corner circle's arc,
+  // use a circle SDF.
+  if (abs(d_theta) < abs(span)) {
+    return distanceFromCircle(p_rel, radius);
+  }
+  return sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
+}
+
+float distanceFromComplexRoundedSuperellipse(vec2 p,
+                                             vec4 quadrant_splits,
+                                             vec2 size,
+                                             vec4 superellipse_degrees_top,
+                                             vec4 superellipse_degrees_right,
+                                             vec4 superellipse_semi_axes_top,
+                                             vec4 superellipse_semi_axes_right,
+                                             vec4 angle_spans_top,
+                                             vec4 angle_spans_right,
+                                             vec4 octant_offsets_c,
+                                             vec4 radii_width,
+                                             vec4 radii_height,
+                                             vec4 circle_centers_top_x,
+                                             vec4 circle_centers_top_y,
+                                             vec4 circle_centers_right_x,
+                                             vec4 circle_centers_right_y,
+                                             vec4 superellipse_scales_x,
+                                             vec4 superellipse_scales_y,
+                                             vec4 quadrant_centers_x,
+                                             vec4 quadrant_centers_y) {
   vec2 T = vec2(quadrant_splits.x, -size.y);
   vec2 R = vec2(size.x, quadrant_splits.w);
   vec2 B = vec2(quadrant_splits.y, size.y);
@@ -248,20 +309,56 @@ float pixelSize(float sdf) {
   return length(gradient);
 }
 
+// Converts linear coverage alpha to perceptual alpha.
+float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
+  // Gamma corrected alpha used for dark colors.
+  // Fast approximation for `1.0 - pow(1.0 - alpha, 1.0 / 2.2)`.
+  float alpha_dark = 1.0 - sqrt(1.0 - alpha);
+
+  // Gamma corrected alpha used for light colors.
+  // Fast approximation for `pow(alpha, 1.0 / 2.2)`.
+  float alpha_light = sqrt(alpha);
+
+  // Interpolate between the dark and light gamma corrected alphas based on the
+  // foreground luma.
+  float luma = dot(foreground_rgb, vec3(0.2126, 0.7152, 0.0722));
+  return mix(alpha_dark, alpha_light, luma);
+}
+
 void main() {
   vec2 p = v_position - frag_info.center;
 
-  float base_sdf = distanceFromRoundedSuperellipse(
-      p, frag_info.quadrant_splits, frag_info.size,
-      frag_info.superellipse_degrees_top, frag_info.superellipse_degrees_right,
-      frag_info.superellipse_semi_axes_top,
-      frag_info.superellipse_semi_axes_right, frag_info.angle_spans_top,
-      frag_info.angle_spans_right, frag_info.octant_offsets_c,
-      frag_info.radii_width, frag_info.radii_height,
-      frag_info.circle_centers_top_x, frag_info.circle_centers_top_y,
-      frag_info.circle_centers_right_x, frag_info.circle_centers_right_y,
-      frag_info.superellipse_scales_x, frag_info.superellipse_scales_y,
-      frag_info.quadrant_centers_x, frag_info.quadrant_centers_y);
+  float base_sdf;
+  if (frag_info.all_corners_same > 0.5) {
+    base_sdf = distanceFromSimpleRoundedSuperellipse(
+        p,
+        vec2(frag_info.superellipse_degrees_top.x,
+             frag_info.superellipse_degrees_right.x),
+        vec2(frag_info.superellipse_semi_axes_top.x,
+             frag_info.superellipse_semi_axes_right.x),
+        vec2(frag_info.radii_width.x, frag_info.radii_height.x),
+        vec2(frag_info.angle_spans_top.x, frag_info.angle_spans_right.x),
+        vec2(frag_info.circle_centers_top_x.x,
+             frag_info.circle_centers_top_y.x),
+        vec2(frag_info.circle_centers_right_x.x,
+             frag_info.circle_centers_right_y.x),
+        frag_info.octant_offsets_c.x,
+        vec2(frag_info.superellipse_scales_x.x,
+             frag_info.superellipse_scales_y.x));
+  } else {
+    base_sdf = distanceFromComplexRoundedSuperellipse(
+        p, frag_info.quadrant_splits, frag_info.size,
+        frag_info.superellipse_degrees_top,
+        frag_info.superellipse_degrees_right,
+        frag_info.superellipse_semi_axes_top,
+        frag_info.superellipse_semi_axes_right, frag_info.angle_spans_top,
+        frag_info.angle_spans_right, frag_info.octant_offsets_c,
+        frag_info.radii_width, frag_info.radii_height,
+        frag_info.circle_centers_top_x, frag_info.circle_centers_top_y,
+        frag_info.circle_centers_right_x, frag_info.circle_centers_right_y,
+        frag_info.superellipse_scales_x, frag_info.superellipse_scales_y,
+        frag_info.quadrant_centers_x, frag_info.quadrant_centers_y);
+  }
 
   float base_pixel_size = pixelSize(base_sdf);
 
@@ -274,6 +371,10 @@ void main() {
   float pixel_size = sdf_and_pixel_size.y;
 
   float alpha = SDFAlpha(sdf, pixel_size, 1.0);
+  // Clamp alpha in case floating point precision errors cause it to be outside
+  // [0.0, 1.0].
+  alpha = clamp(alpha, 0.0, 1.0);
+  alpha = gammaCorrectedAlpha(alpha, frag_info.color.rgb);
 
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
   frag_color = IPPremultiply(frag_color);
