@@ -332,7 +332,6 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
     };
     enclosingClass = className;
     if (!className.startsWith('_')) {
-      enclosingClass = className;
       var comment = <SourceLine>[];
       if (node.documentationComment != null && node.documentationComment!.tokens.isNotEmpty) {
         comment = _processComment(className, node.documentationComment!);

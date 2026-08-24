@@ -54,7 +54,11 @@ void main() {
       'build with assets $buildMode',
       // [intended] Backslashes in commands, but we will never run these commands on Windows.
       skip: const LocalPlatform().isWindows,
-      overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.empty(),
+        FeatureFlags: () =>
+            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
+      },
       () async {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',

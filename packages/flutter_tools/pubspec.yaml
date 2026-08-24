@@ -69,9 +69,9 @@ dependencies:
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
-  hooks_runner: 1.6.1
+  hooks_runner: 1.6.3
   hooks: 2.2.0
-  code_assets: 1.2.1
+  code_assets: 2.0.0
   data_assets: 0.20.0
   record_use: 1.1.1
 
@@ -140,4 +140,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 98rko8
+# PUBSPEC CHECKSUM: tnrpre
