@@ -10,7 +10,6 @@ dependencies:
     sdk: flutter
   material_ui: ^1.1.0
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -18,8 +17,7 @@ dev_dependencies:
     sdk: flutter
   test: any
 
-
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: kujv36
+# PUBSPEC CHECKSUM: 2rmgtd
