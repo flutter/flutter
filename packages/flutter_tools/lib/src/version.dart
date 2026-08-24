@@ -75,6 +75,8 @@ abstract class FlutterVersion {
     required FileSystem fs,
     required Git git,
     required String flutterRoot,
+    Platform? platform,
+    Logger? logger,
     @protected bool fetchTags = false,
   }) {
     final File versionFile = getVersionFile(fs, flutterRoot);
@@ -84,6 +86,7 @@ abstract class FlutterVersion {
         versionFile,
         git: git,
         flutterRoot: flutterRoot,
+        logger: logger,
       );
       if (version != null) {
         final String gitPath = fs.path.join(flutterRoot, '.git');
@@ -123,8 +126,10 @@ abstract class FlutterVersion {
       frameworkRevision: frameworkRevision,
       fs: fs,
       flutterRoot: flutterRoot,
-      fetchTags: fetchTags,
       git: git,
+      platform: platform,
+      logger: logger,
+      fetchTags: fetchTags,
     );
   }
 
@@ -142,14 +147,17 @@ abstract class FlutterVersion {
     required String frameworkRevision,
     required FileSystem fs,
     required Git git,
+    Platform? platform,
+    Logger? logger,
     bool fetchTags = false,
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      globals.platform,
+      platform ?? globals.platform,
       git: git,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,
       fetchTags: fetchTags,
+      logger: logger,
     );
     final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
     final result = _FlutterVersionGit._(
@@ -323,18 +331,26 @@ abstract class FlutterVersion {
   /// the date is omitted, and left `null`.
   String? get engineBuildDate;
 
-  /// Checks if the currently installed version of Flutter is up-to-date, and
+  /// Checks if the current Flutter installation is up-to-date and
   /// warns the user if it isn't.
   ///
   /// This function must run while [Cache.lock] is acquired because it reads and
   /// writes shared cache files.
-  Future<void> checkFlutterVersionFreshness() async {
+  Future<void> checkFlutterVersionFreshness({
+    Cache? cache,
+    Logger? logger,
+    Platform? platform,
+  }) async {
+    final Cache effectiveCache = cache ?? globals.cache;
+    final Logger effectiveLogger = logger ?? globals.logger;
+    final Platform effectivePlatform = platform ?? globals.platform;
+
     // Don't perform update checks if we're not on an official channel.
     if (!kOfficialChannels.contains(channel)) {
       return;
     }
     // Don't perform the update check if the tracking remote is not standard.
-    if (VersionUpstreamValidator(version: this, platform: globals.platform).run() != null) {
+    if (VersionUpstreamValidator(version: this, platform: effectivePlatform).run() != null) {
       return;
     }
     DateTime localFrameworkCommitDate;
@@ -348,15 +364,18 @@ abstract class FlutterVersion {
     } on FormatException {
       return;
     }
-    final DateTime? latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
+    final DateTime? latestFlutterCommitDate = await _getLatestAvailableFlutterDate(
+      cache: effectiveCache,
+      logger: effectiveLogger,
+    );
 
     return VersionFreshnessValidator(
       version: this,
       clock: _clock,
       localFrameworkCommitDate: localFrameworkCommitDate,
       latestFlutterCommitDate: latestFlutterCommitDate,
-      logger: globals.logger,
-      cache: globals.cache,
+      logger: effectiveLogger,
+      cache: effectiveCache,
       pauseTime: VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage,
     ).run();
   }
@@ -369,12 +388,12 @@ abstract class FlutterVersion {
   ///
   /// Returns `null` if the cached version is out-of-date or missing, and we are
   /// unable to reach the server to get the latest version.
-  Future<DateTime?> _getLatestAvailableFlutterDate() async {
-    globals.cache.checkLockAcquired();
-    final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load(
-      globals.cache,
-      globals.logger,
-    );
+  Future<DateTime?> _getLatestAvailableFlutterDate({
+    required Cache cache,
+    required Logger logger,
+  }) async {
+    cache.checkLockAcquired();
+    final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load(cache, logger);
 
     final DateTime now = _clock.now();
     if (versionCheckStamp.lastTimeVersionWasChecked != null) {
@@ -391,21 +410,22 @@ abstract class FlutterVersion {
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
       final DateTime remoteFrameworkCommitDate = DateTime.parse(
-        await _fetchRemoteFrameworkCommitDate(),
+        await _fetchRemoteFrameworkCommitDate(logger: logger),
       );
       await versionCheckStamp.store(
         newTimeVersionWasChecked: now,
         newKnownRemoteVersion: remoteFrameworkCommitDate,
+        cache: cache,
       );
       return remoteFrameworkCommitDate;
     } on VersionCheckError catch (error) {
       // This happens when any of the git commands fails, which can happen when
       // there's no Internet connectivity. Remote version check is best effort
       // only. We do not prevent the command from running when it fails.
-      globals.printTrace('Failed to check Flutter version in the remote repository: $error');
+      logger.printTrace('Failed to check Flutter version in the remote repository: $error');
       // Still update the timestamp to avoid us hitting the server on every single
       // command if for some reason we cannot connect (eg. we may be offline).
-      await versionCheckStamp.store(newTimeVersionWasChecked: now);
+      await versionCheckStamp.store(newTimeVersionWasChecked: now, cache: cache);
       return null;
     }
   }
@@ -414,22 +434,17 @@ abstract class FlutterVersion {
   ///
   /// Throws [VersionCheckError] if a git command fails, for example, when the
   /// remote git repository is not reachable due to a network issue.
-  Future<String> _fetchRemoteFrameworkCommitDate() async {
+  Future<String> _fetchRemoteFrameworkCommitDate({required Logger logger}) async {
     try {
       // Fetch upstream branch's commit and tags
-      await _run(_git, ['fetch', '--tags']);
-      return _gitCommitDate(
-        git: _git,
-        gitRef: kGitTrackingUpstream,
-        workingDirectory: Cache.flutterRoot,
-      );
+      await _run(_git, ['fetch', '--tags'], workingDirectory: flutterRoot);
+      return _gitCommitDate(git: _git, gitRef: kGitTrackingUpstream, workingDirectory: flutterRoot);
     } on VersionCheckError catch (error) {
-      globals.printError(error.message);
+      logger.printError(error.message);
       rethrow;
     }
   }
 
-  /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
   String getVersionString({bool redactUnknownBranches = false}) {
     if (frameworkVersion != kUnknownFrameworkVersion) {
       return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
@@ -541,6 +556,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required String flutterRoot,
     required Git git,
     SystemClock clock = const SystemClock(),
+    Logger? logger,
   }) {
     try {
       final String jsonContents = jsonFile.readAsStringSync();
@@ -566,11 +582,15 @@ class _FlutterVersionFromFile extends FlutterVersion {
       );
       // ignore: avoid_catches_without_on_clauses
     } catch (err) {
-      globals.printTrace('Failed to parse ${jsonFile.path} with $err');
+      if (logger != null) {
+        logger.printTrace('Failed to parse ${jsonFile.path} with $err');
+      }
       try {
         jsonFile.deleteSync();
       } on FileSystemException {
-        globals.printTrace('Failed to delete ${jsonFile.path}');
+        if (logger != null) {
+          logger.printTrace('Failed to delete ${jsonFile.path}');
+        }
       }
       // Returning null means fallback to git implementation.
       return null;
@@ -969,9 +989,12 @@ class VersionCheckError implements Exception {
 /// standard output as a string.
 ///
 /// If the command fails, throws a [ToolExit] exception.
-Future<String> _run(Git git, List<String> command) async {
+Future<String> _run(Git git, List<String> command, {String? workingDirectory}) async {
   // TODO(matanlurey): Inline this in the single place it's called in this file.
-  final RunResult results = await git.run(command, workingDirectory: Cache.flutterRoot);
+  final RunResult results = await git.run(
+    command,
+    workingDirectory: workingDirectory ?? Cache.flutterRoot,
+  );
 
   if (results.exitCode == 0) {
     return results.stdout.trim();
@@ -1047,6 +1070,7 @@ class GitTagVersion {
     String? workingDirectory,
     bool fetchTags = false,
     String gitRef = 'HEAD',
+    Logger? logger,
   }) {
     if (fetchTags) {
       final String channel = git
@@ -1054,7 +1078,15 @@ class GitTagVersion {
           .stdout
           .trim();
       if (!kDevelopmentChannels.contains(channel) && kOfficialChannels.contains(channel)) {
-        globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
+        if (logger != null) {
+          logger.printTrace('Skipping request to fetchTags - on well known channel $channel.');
+        } else {
+          try {
+            globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
+          } on Exception {
+            // In testWithoutContext, globals is not available.
+          }
+        }
       } else {
         final String flutterGit =
             platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
@@ -1075,14 +1107,14 @@ class GitTagVersion {
     final stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
     for (final tag in tags) {
       if (stableTagPattern.hasMatch(tag.trim())) {
-        return parse(tag);
+        return parse(tag, logger: logger);
       }
     }
     // Next check for a dev tag
     final devTagPattern = RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$');
     for (final tag in tags) {
       if (devTagPattern.hasMatch(tag.trim())) {
-        return parse(tag);
+        return parse(tag, logger: logger);
       }
     }
 
@@ -1091,6 +1123,7 @@ class GitTagVersion {
       git: git,
       workingDirectory: workingDirectory,
       gitRef: gitRef,
+      logger: logger,
     );
   }
 
@@ -1098,6 +1131,7 @@ class GitTagVersion {
     required Git git,
     required String? workingDirectory,
     required String gitRef,
+    Logger? logger,
   }) {
     final String latestTag = git
         .runSync([
@@ -1124,7 +1158,7 @@ class GitTagVersion {
         .stdout
         .trim();
 
-    return parse('$latestTag-$commitCount');
+    return parse('$latestTag-$commitCount', logger: logger);
   }
 
   /// Parse a version string.
@@ -1171,14 +1205,22 @@ class GitTagVersion {
   }
 
   @visibleForTesting
-  static GitTagVersion parse(String version) {
+  static GitTagVersion parse(String version, {Logger? logger}) {
     GitTagVersion gitTagVersion;
 
     gitTagVersion = parseVersion(version);
     if (gitTagVersion != const GitTagVersion.unknown()) {
       return gitTagVersion;
     }
-    globals.printTrace('Could not interpret results of "git describe": $version');
+    if (logger != null) {
+      logger.printTrace('Could not interpret results of "git describe": $version');
+    } else {
+      try {
+        globals.printTrace('Could not interpret results of "git describe": $version');
+      } on Exception {
+        // In testWithoutContext, globals is not available.
+      }
+    }
     return const GitTagVersion.unknown();
   }
 

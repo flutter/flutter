@@ -10,6 +10,8 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
@@ -285,5 +287,9 @@ class FakeFlutterVersion extends Fake implements FlutterVersion {
   void ensureVersionFile() {}
 
   @override
-  Future<void> checkFlutterVersionFreshness() async {}
+  Future<void> checkFlutterVersionFreshness({
+    Cache? cache,
+    Logger? logger,
+    Platform? platform,
+  }) async {}
 }
