@@ -1098,12 +1098,23 @@ config("optimize_speed") {
 
 config("symbols") {
   if (is_win) {
-    if (use_rbe) {
-      cflags = [ "/Z7" ]  # No PDB file
-    } else {
-      cflags = [ "/Zi" ]  # Produce PDB file, no edit and continue.
+    cflags = [ "/Z7" ]  # Store CodeView debug info in .obj files
+    if (is_clang) {
+      cflags += [
+        "-gcodeview-ghash",  # Emit .debug$H type content hashes (Clang-cl)
+        "-ffile-compilation-dir=.",  # Normalize build machine source paths
+      ]
     }
-    ldflags = [ "/DEBUG" ]
+    ldflags = [
+      "/DEBUG",
+      "/Brepro",  # Deterministic PE timestamps
+      "/pdbaltpath:%_PDB%",  # Strips host paths from debug directory
+    ]
+    if (is_clang) {
+      ldflags += [
+        "/DEBUG:GHASH",  # Global-hash PDB deduplication (LLD)
+      ]
+    }
   } else if (is_wasm) {
     if (wasm_use_dwarf) {
       cflags = [ "-g3" ]
@@ -1113,10 +1124,25 @@ config("symbols") {
       ldflags = [ "-gsource-map" ]
     }
   } else {
-    cflags = [ "-g2" ]
+    cflags = [
+      "-g2",
+      "-ffile-compilation-dir=.",
+      "-fno-ident",
+      "-fno-standalone-debug",
+    ]
     asmflags = [ "-g" ]
     if (is_apple) {
       swiftflags = [ "-g" ]
+    } else {
+      # Linux & Android (ELF + LLD)
+      cflags += [
+        "-gdwarf-5",  # Compact DWARF 5 standard
+        "-fdebug-types-section",  # Deduplicates template classes into type
+                                  # units
+        "-Wa,--compress-debug-sections=none",  # Uncompressed DWARF sections for
+                                               # FastCDC chunk alignment
+      ]
+      ldflags = [ "-Wl,--build-id=sha1" ]
     }
   }
 }
