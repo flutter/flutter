@@ -684,6 +684,77 @@ assembleFooTest
     );
 
     testUsingContext(
+      'handler - with multiple flavor dimensions',
+      () async {
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['gradlew', 'app:tasks', '--all', '--console=auto'],
+            stdout: '''
+assembleRelease
+assembleDebug
+assembleProfile
+assembleDevelopment
+assembleProduction
+assembleExternal
+assembleInternal
+assembleDevelopmentExternal
+assembleDevelopmentExternalDebug
+assembleDevelopmentExternalRelease
+assembleDevelopmentExternalProfile
+assembleDevelopmentInternal
+assembleDevelopmentInternalDebug
+assembleDevelopmentInternalRelease
+assembleDevelopmentInternalProfile
+assembleProductionExternal
+assembleProductionExternalDebug
+assembleProductionExternalRelease
+assembleProductionExternalProfile
+assembleProductionInternal
+assembleProductionInternalDebug
+assembleProductionInternalRelease
+assembleProductionInternalProfile
+''',
+          ),
+        );
+
+        await flavorUndefinedHandler.handler(
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          usesAndroidX: true,
+          line: '',
+        );
+
+        expect(
+          testLogger.statusText,
+          contains(
+            'Gradle project does not define a task suitable '
+            'for the requested build.',
+          ),
+        );
+        expect(
+          testLogger.statusText,
+          contains(
+            '\n'
+            '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+            '│ [!]  Gradle project does not define a task suitable for the requested build.                    │\n'
+            '│                                                                                                 │\n'
+            '│ The /android/app/build.gradle file defines product flavors: developmentexternal,                │\n'
+            '│ developmentinternal, productionexternal, productioninternal. You must specify a --flavor option │\n'
+            '│ to select one of them.                                                                          │\n'
+            '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n',
+          ),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        Java: () => FakeJava(),
+        GradleUtils: () => FakeGradleUtils(),
+        Platform: () => fakePlatform('android'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'handler - without flavor',
       () async {
         processManager.addCommand(
