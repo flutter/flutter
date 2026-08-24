@@ -346,7 +346,7 @@ const hcpp = Feature(
   name: 'the HCPP platform view rendering mode',
   extraHelpText:
       'HCPP requires the Impeller rendering backend, and Android API 34 or above. '
-      'Devices that do not support it fall back to the previous platform view rendering mode.',
+      "Devices that do not support it fall back to each platform view's developer-chosen mode.",
   configSetting: 'enable-hcpp',
   environmentOverride: 'FLUTTER_ENABLE_HCPP',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
