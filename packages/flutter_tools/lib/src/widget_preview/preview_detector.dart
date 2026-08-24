@@ -63,6 +63,10 @@ class PreviewDetector {
   final void Function(String path)? onPackageConfigChangeDetected;
   final WatcherBuilder watcherBuilder;
 
+  late final List<String> _resolvedEphemeralDirectoryPaths = project.ephemeralDirectories
+      .map((Directory dir) => _resolveDirectory(dir).path)
+      .toList();
+
   @visibleForTesting
   static const kDirectoryWatcherClosedUnexpectedlyPrefix = 'Directory watcher closed unexpectedly';
   @visibleForTesting
@@ -173,7 +177,7 @@ class PreviewDetector {
       // the tool (e.g., build/, plugin directories, etc.).
       if (eventPath.doesContainDartTool ||
           eventPath.doesContainWidgetPreview ||
-          project.ephemeralDirectories.any((dir) => eventPath.contains(_resolveDirectory(dir).path))) {
+          _resolvedEphemeralDirectoryPaths.any((String path) => eventPath.contains(path))) {
         return;
       }
       // If the pubspec has changed, new dependencies or assets could have been added, requiring
