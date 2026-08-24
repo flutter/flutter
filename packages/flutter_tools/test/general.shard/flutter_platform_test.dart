@@ -667,6 +667,66 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Logger? logger,
+            }) async => _FakeFlutterVmService(),
+        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
+        Artifacts: () => artifacts,
+      },
+    );
+    testUsingContext(
+      'cleans up listener file after test completion',
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+
+        final device = _WorkingDevice();
+        final platform = FlutterPlatform(
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          flutterTesterBinPath: 'flutter_tester',
+          enableVmService: false,
+          flutterProject: flutterProject,
+          integrationTestDevice: device,
+          host: InternetAddress.anyIPv4,
+          updateGoldens: false,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: logger,
+        );
+
+        final StreamChannel<Object?> channel = platform.loadChannel(
+          'test1.dart',
+          fakeSuitePlatform,
+        );
+        unawaited(channel.stream.drain<void>());
+        await pumpEventQueue();
+
+        final String expectedPath = fileSystem.path.join(
+          projectDir.path,
+          'build',
+          'test',
+          'listener_0.dart',
+        );
+        expect(device.lastMainPath, equals(expectedPath));
+
+        await channel.sink.close();
+        await pumpEventQueue();
+
+        expect(fileSystem.file(expectedPath).existsSync(), isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
         Logger: () => logger,
         VMServiceConnector: () =>
             (

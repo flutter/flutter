@@ -801,6 +801,17 @@ class FlutterPlatform extends PlatformPlugin {
       ..writeAsStringSync(
         _generateTestMain(testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath))),
       );
+    if (flutterProject != null || projectRootDirectory != null) {
+      finalizers.add(() async {
+        try {
+          if (listenerFile.existsSync()) {
+            listenerFile.deleteSync();
+          }
+        } on FileSystemException catch (error) {
+          globals.printTrace('test $ourTestCount: failed to delete listener file: $error');
+        }
+      });
+    }
     return listenerFile.path;
   }
 
