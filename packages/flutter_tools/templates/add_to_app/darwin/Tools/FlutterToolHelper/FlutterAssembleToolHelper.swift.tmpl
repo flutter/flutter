@@ -671,6 +671,32 @@ public class FlutterAssembleToolHelper {
 
       if let codesignIdentity = env["EXPANDED_CODE_SIGN_IDENTITY"] {
         if env["CODE_SIGNING_REQUIRED"] != "NO" {
+          let frameworkDir = "\(embeddedFrameworks)/\(frameworkPath.lastPathComponent)"
+          let subFrameworksDirs = [
+            "\(frameworkDir)/Frameworks",
+            "\(frameworkDir)/Versions/A/Frameworks",
+            "\(frameworkDir)/Versions/Current/Frameworks",
+          ]
+          for subDir in subFrameworksDirs {
+            if fileManager.fileExists(atPath: subDir),
+              let items = try? fileManager.contentsOfDirectory(atPath: subDir)
+            {
+              for item in items {
+                if item.hasSuffix(".dylib") || item.hasSuffix(".so") {
+                  try processManager.run(
+                    executableURL: URL(fileURLWithPath: "/usr/bin/codesign"),
+                    arguments: [
+                      "--force", "--verbose", "--sign", codesignIdentity, "--",
+                      "\(subDir)/\(item)",
+                    ],
+                    env: nil,
+                    failOnError: true
+                  )
+                }
+              }
+            }
+          }
+
           try processManager.run(
             executableURL: URL(fileURLWithPath: "/usr/bin/codesign"),
             arguments: [

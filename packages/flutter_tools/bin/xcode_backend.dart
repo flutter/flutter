@@ -154,6 +154,8 @@ class Context {
 
   Directory directoryFromPath(String path) => Directory(path);
 
+  File fileFromPath(String path) => File(path);
+
   /// Run given command ([bin]) in a synchronous subprocess.
   ///
   /// If [allowFail] is true, an exception will not be thrown even if the process returns a
@@ -453,6 +455,46 @@ class Context {
   void _codesignFramework(String expandedCodeSignIdentity, String frameworkPath) {
     // NOTE: If you modify this function, you should likely also update the equivalent implementation in
     // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
+    final File binaryFile = fileFromPath(frameworkPath);
+    Directory frameworkDir = binaryFile.parent;
+    while (!frameworkDir.path.endsWith('.framework') &&
+        frameworkDir.parent.path != frameworkDir.path) {
+      frameworkDir = frameworkDir.parent;
+    }
+    if (frameworkDir.path.endsWith('.framework')) {
+      final frameworksDirs = <Directory>[
+        directoryFromPath('${frameworkDir.path}/Frameworks'),
+        directoryFromPath('${frameworkDir.path}/Versions/A/Frameworks'),
+        directoryFromPath('${frameworkDir.path}/Versions/Current/Frameworks'),
+      ];
+      final seenPaths = <String>{};
+      for (final dir in frameworksDirs) {
+        if (dir.existsSync()) {
+          for (final FileSystemEntity entity in dir.listSync()) {
+            final String canonicalPath = entity.resolveSymbolicLinksSync();
+            if (!seenPaths.add(canonicalPath)) {
+              continue;
+            }
+            if (entity is File && (entity.path.endsWith('.dylib') || entity.path.endsWith('.so'))) {
+              runSync('codesign', <String>[
+                '--force',
+                '--verbose',
+                '--sign',
+                expandedCodeSignIdentity,
+                '--',
+                entity.path,
+              ]);
+            } else if (entity is Directory && entity.path.endsWith('.framework')) {
+              final String? nestedFrameworkName = _parseFrameworkNameFromDirectory(entity);
+              if (nestedFrameworkName != null) {
+                _codesignFramework(expandedCodeSignIdentity, '${entity.path}/$nestedFrameworkName');
+              }
+            }
+          }
+        }
+      }
+    }
+
     runSync('codesign', <String>[
       '--force',
       '--verbose',
