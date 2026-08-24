@@ -408,8 +408,8 @@ bool debugCheckHasDirectionality(
         ),
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
-          'Typically, the Directionality widget is introduced by the MaterialApp '
-          'or WidgetsApp widget at the top of your application widget tree. It '
+          'Typically, the Directionality widget is introduced by the WidgetsApp '
+          'widget at the top of your application widget tree. It '
           'determines the ambient reading direction and is used, for example, to '
           'determine how to lay out text, how to interpret "start" and "end" '
           'values, and to resolve EdgeInsetsDirectional, '
@@ -544,7 +544,7 @@ bool debugCheckHasOverlay(BuildContext context) {
         ErrorHint(
           'To introduce an Overlay widget, you can either directly '
           'include one, or use a widget that contains an Overlay itself, '
-          'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+          'such as a Navigator or WidgetsApp.',
         ),
         ...context.describeMissingAncestor(expectedAncestorType: Overlay),
       ]);
