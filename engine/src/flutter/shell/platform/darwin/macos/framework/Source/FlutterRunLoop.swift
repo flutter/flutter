@@ -4,6 +4,16 @@
 
 import Foundation
 
+extension RunLoop.Mode {
+  fileprivate var cfRunLoopMode: CFRunLoopMode {
+    switch self {
+    case .default: .defaultMode
+    case .common: .commonModes
+    case let mode: CFRunLoopMode(mode.rawValue as CFString)
+    }
+  }
+}
+
 /// Scheduling tasks on the main thread run loop, potentially with a delay.
 ///
 /// If no tasks with negative delays are posted, this class guarantees the order
@@ -145,6 +155,8 @@ private final class LockScope: @unchecked Sendable {
 private final class SendableCFRunLoop: @unchecked Sendable {
   private let runLoop: CFRunLoop = CFRunLoopGetCurrent()
   private let modes: [RunLoop.Mode]
+  // The CoreFoundation array is cached so we don't have to create a new one for
+  // each performAndWakeUpRunLoop call.
   private let cfModes: CFArray
 
   @MainActor
@@ -165,16 +177,6 @@ private final class SendableCFRunLoop: @unchecked Sendable {
   func add(timer: Timer) {
     for mode in modes {
       CFRunLoopAddTimer(runLoop, timer, mode.cfRunLoopMode)
-    }
-  }
-}
-
-extension RunLoop.Mode {
-  fileprivate var cfRunLoopMode: CFRunLoopMode {
-    switch self {
-    case .default: .defaultMode
-    case .common: .commonModes
-    case let mode: CFRunLoopMode(mode.rawValue as CFString)
     }
   }
 }

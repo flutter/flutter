@@ -104,8 +104,10 @@ struct FlutterRunLoopTests {
     #expect(executionOrder == [2, 1])
   }
 
-  @Test
-  func `concurrent perform calls from multiple threads do not race under tsan`() async throws {
+  @Test(arguments: [0.0, 0.01])
+  func `concurrent perform calls from multiple threads do not race under tsan`(delay: TimeInterval)
+    async throws
+  {
     let threads = 4
     let tasksPerThread = 50
     let totalTasks = threads * tasksPerThread
@@ -115,8 +117,8 @@ struct FlutterRunLoopTests {
     await withCheckedContinuation { continuation in
       for _ in 0..<threads {
         Thread.detachNewThread {
-          for _ in 0..<tasksPerThread {
-            self.runLoop.perform {
+          for i in 0..<tasksPerThread {
+            self.runLoop.perform(afterDelay: Double(i) * delay) {
               executedCount += 1
               if executedCount == totalTasks {
                 continuation.resume()
