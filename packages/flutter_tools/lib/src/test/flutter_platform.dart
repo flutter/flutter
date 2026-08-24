@@ -803,6 +803,7 @@ class FlutterPlatform extends PlatformPlugin {
       );
     if (flutterProject != null || projectRootDirectory != null) {
       finalizers.add(() async {
+        globals.printTrace('test $ourTestCount: deleting test listener file');
         try {
           if (listenerFile.existsSync()) {
             listenerFile.deleteSync();
