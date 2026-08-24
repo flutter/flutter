@@ -44,6 +44,18 @@ void fl_reset_received_gtk_log_levels();
  */
 GLogLevelFlags fl_get_received_gtk_log_levels();
 
+/**
+ * Checks if any log of the given level has been seen since the last time the
+ * recorded levels were reset.
+ *
+ * @brief Checks if a log level has been recorded.
+ *
+ * @param[in] level The log level to check for, e.g. `G_LOG_LEVEL_WARNING`.
+ *
+ * @return TRUE if a log of this level has been recorded.
+ */
+bool fl_has_received_gtk_log_level(GLogLevelFlags level);
+
 }  // namespace testing
 }  // namespace flutter
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_TESTING_FL_TEST_GTK_LOGS_H_
