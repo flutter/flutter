@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/fade_in_image/fade_in_image.0.dart'
+import 'package:flutter_api_samples/widgets/fade_in_image/fade_in_image.transition.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,26 +16,27 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('selecting a transition updates the FadeInImage', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('switches the transition in place', (WidgetTester tester) async {
     await tester.pumpWidget(const example.FadeInImageTransitionExampleApp());
+    await tester.pumpAndSettle();
 
     FadeInImage fadeInImage() =>
         tester.widget<FadeInImage>(find.byType(FadeInImage));
+    final State state = tester.state(find.byType(FadeInImage));
 
-    // Defaults to the sequential transition.
     expect(fadeInImage().transition, FadeInImageTransition.sequential);
 
-    // Selecting fadeInOver updates the transition without throwing.
     await tester.tap(find.text('fadeInOver'));
     await tester.pumpAndSettle();
     expect(fadeInImage().transition, FadeInImageTransition.fadeInOver);
+    // The transition is swapped in place rather than the widget being rebuilt
+    // from scratch, so the same state is kept throughout.
+    expect(tester.state(find.byType(FadeInImage)), same(state));
 
-    // Selecting sequential again switches back.
     await tester.tap(find.text('sequential'));
     await tester.pumpAndSettle();
     expect(fadeInImage().transition, FadeInImageTransition.sequential);
+    expect(tester.state(find.byType(FadeInImage)), same(state));
 
     expect(tester.takeException(), isNull);
   });

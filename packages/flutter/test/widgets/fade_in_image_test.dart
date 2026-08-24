@@ -787,6 +787,67 @@ void main() {
       expect(find.byType(Image), findsOneWidget);
     });
 
+    testWidgets('sequential transition handles a zero fadeInDuration', (WidgetTester tester) async {
+      final placeholderProvider = TestImageProvider(placeholderImage);
+      final imageProvider = TestImageProvider(targetImage);
+
+      await tester.pumpWidget(
+        FadeInImage(
+          placeholder: placeholderProvider,
+          image: imageProvider,
+          fadeOutDuration: animationDuration,
+          fadeInDuration: Duration.zero,
+          fadeOutCurve: Curves.linear,
+          excludeFromSemantics: true,
+        ),
+      );
+
+      placeholderProvider.complete();
+      await tester.pump();
+      expect(findFadeInImage(tester).placeholder!.opacity, 1);
+
+      // Without a fade-in the image is shown right away, and is revealed as the
+      // placeholder fades out over fadeOutDuration.
+      imageProvider.complete();
+      await tester.pump();
+      for (var i = 0; i < 5; i += 1) {
+        final FadeInImageParts parts = findFadeInImage(tester);
+        expect(parts.placeholder!.opacity, moreOrLessEquals(1 - i / 5));
+        expect(parts.target.opacity, 1);
+        await tester.pump(const Duration(milliseconds: 10));
+      }
+
+      await tester.pumpAndSettle();
+      expect(findFadeInImage(tester).target.opacity, 1);
+      expect(find.byType(Image), findsOneWidget);
+    });
+
+    testWidgets('handles a zero fadeInDuration and fadeOutDuration', (WidgetTester tester) async {
+      final placeholderProvider = TestImageProvider(placeholderImage);
+      final imageProvider = TestImageProvider(targetImage);
+
+      await tester.pumpWidget(
+        FadeInImage(
+          placeholder: placeholderProvider,
+          image: imageProvider,
+          fadeOutDuration: Duration.zero,
+          fadeInDuration: Duration.zero,
+          excludeFromSemantics: true,
+        ),
+      );
+
+      placeholderProvider.complete();
+      await tester.pump();
+      expect(findFadeInImage(tester).placeholder!.opacity, 1);
+
+      // With no animation at all the image replaces the placeholder outright.
+      imageProvider.complete();
+      await tester.pumpAndSettle();
+      expect(findFadeInImage(tester).target.opacity, 1);
+      expect(find.byType(Image), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('FadeInImage does not crash at zero area', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -973,6 +1034,33 @@ void main() {
         expect(findFadeInImage(tester).target.rawImage.image!.isCloneOf(targetImage), true);
         expect(findFadeInImage(tester).placeholder, isNull);
         expect(findFadeInImage(tester).target.opacity, 1);
+      });
+
+      testWidgets('handles a zero fadeInDuration', (WidgetTester tester) async {
+        final placeholderProvider = TestImageProvider(placeholderImage);
+        final imageProvider = TestImageProvider(targetImage);
+
+        await tester.pumpWidget(
+          FadeInImage(
+            placeholder: placeholderProvider,
+            image: imageProvider,
+            fadeInDuration: Duration.zero,
+            transition: FadeInImageTransition.fadeInOver,
+            excludeFromSemantics: true,
+          ),
+        );
+
+        placeholderProvider.complete();
+        await tester.pump();
+        expect(findFadeInOverImages(tester).placeholder.opacity, 1);
+
+        // Without a fade-in the image appears at once and the placeholder is
+        // removed, rather than a zero-weight sequence item being built.
+        imageProvider.complete();
+        await tester.pumpAndSettle();
+        expect(findFadeInImage(tester).target.opacity, 1);
+        expect(find.byType(Image), findsOneWidget);
+        expect(tester.takeException(), isNull);
       });
 
       testWidgets('asserts when fadeOutDuration is set', (WidgetTester tester) async {

@@ -30,24 +30,15 @@ class FadeInImageTransitionExample extends StatefulWidget {
 
 class _FadeInImageTransitionExampleState
     extends State<FadeInImageTransitionExample> {
-  // A solid, opaque placeholder so the difference between the two transitions
-  // is visible: in sequential mode it fades out before the image appears, while
-  // in fadeInOver mode it stays put until the image has faded in on top.
+  // A solid, opaque placeholder makes the difference between the two
+  // transitions visible: with FadeInImageTransition.sequential it fades out
+  // before the image appears, while with FadeInImageTransition.fadeInOver it
+  // stays put until the image has faded in on top of it.
   static final Uint8List _placeholderBytes = base64Decode(
     'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAEklEQVR42mNIqO3+jw8zjAwFAA9JmcEHBMcCAAAAAElFTkSuQmCC',
   );
 
   FadeInImageTransition _transition = FadeInImageTransition.sequential;
-  int _reloadCount = 0;
-
-  void _selectTransition(FadeInImageTransition transition) {
-    setState(() {
-      _transition = transition;
-      // Change the image's cache key so the fade-in animation plays again each
-      // time a transition is selected.
-      _reloadCount += 1;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +61,9 @@ class _FadeInImageTransitionExampleState
               ],
               selected: <FadeInImageTransition>{_transition},
               onSelectionChanged: (Set<FadeInImageTransition> selection) {
-                _selectTransition(selection.first);
+                setState(() {
+                  _transition = selection.first;
+                });
               },
             ),
             const SizedBox(height: 24),
@@ -78,12 +71,9 @@ class _FadeInImageTransitionExampleState
               width: 250,
               height: 250,
               child: FadeInImage(
-                // Rebuild the widget from scratch on each selection so the fade
-                // animation replays and both transitions can be compared.
-                key: ValueKey<int>(_reloadCount),
                 placeholder: MemoryImage(_placeholderBytes),
-                image: NetworkImage(
-                  'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg?reload=$_reloadCount',
+                image: const NetworkImage(
+                  'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
                 ),
                 fit: BoxFit.cover,
                 transition: _transition,
