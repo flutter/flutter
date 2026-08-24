@@ -8,6 +8,7 @@
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
 #import "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data.h"
+#include "flutter/lib/ui/window/pointer_data_packet.h"
 #import "flutter/lib/ui/window/viewport_metrics.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterHourFormat.h"
@@ -344,6 +345,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)addInternalPlugins;
 - (flutter::PointerData)generatePointerDataForFake;
+- (void)dispatchTouches:(NSSet*)touches
+    pointerDataChangeOverride:(flutter::PointerData::Change*)changeOverride
+                        event:(UIEvent*)event;
 - (void)sharedSetupWithProject:(nullable FlutterDartProject*)project
                   initialRoute:(nullable NSString*)initialRoute;
 - (void)applicationBecameActive:(NSNotification*)notification;
@@ -370,6 +374,27 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @interface UITouch ()
 
 @property(nonatomic, readwrite) UITouchPhase phase;
+
+@end
+
+/// A `FlutterEngine` that saves received `PointerData`s instead of forwarding to the shell.
+@interface PointerDataCapturingEngine : FlutterEngine
+- (const std::vector<flutter::PointerData>&)capturedPointerData;
+@end
+
+@implementation PointerDataCapturingEngine {
+  std::vector<flutter::PointerData> _capturedPointerData;
+}
+
+- (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {
+  for (size_t i = 0; i < packet->GetLength(); i++) {
+    _capturedPointerData.push_back(packet->GetPointerData(i));
+  }
+}
+
+- (const std::vector<flutter::PointerData>&)capturedPointerData {
+  return _capturedPointerData;
+}
 
 @end
 
@@ -2283,6 +2308,109 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [[mockPanGestureRecognizer verify] locationInView:[OCMArg any]];
   [[[self.mockEngine verify] ignoringNonObjectArgs]
       dispatchPointerDataPacket:std::make_unique<flutter::PointerDataPacket>(0)];
+}
+
+// Verify stylus and touch-geometry fields.
+//
+// Ensure `tilt` and `orientation` are correctly renormalized. iOS reports angles relative to the
+// surface plane with 0 representing horizontal. The engine expects them relative to the surface
+// normal with zero representing vertical.
+- (void)testStylusTouchFieldsSurviveConversion {
+  PointerDataCapturingEngine* engine = [[PointerDataCapturingEngine alloc] initWithName:@"foobar"
+                                                                                project:nil];
+  // `-[FlutterEngine setViewController:]` requires PlatformViewIOS, which only exists after
+  // the shell has been created.
+  [engine run];
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:engine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+  XCTAssertNotNil(vc);
+
+  // A stylus held at 30 degrees off the surface, swung 45 degrees clockwise from the +x axis.
+  const CGFloat altitudeAngle = M_PI / 6;  // 30 degrees from the surface plane.
+  const CGFloat azimuthAngle = M_PI / 4;   // 45 degrees clockwise from +x.
+  const CGFloat force = 0.75;
+  const CGFloat maximumPossibleForce = 4.0;
+  const CGFloat majorRadius = 20.0;
+  const CGFloat majorRadiusTolerance = 3.0;
+
+  id fakeTouch = OCMPartialMock([[UITouch alloc] init]);
+  [fakeTouch setPhase:UITouchPhaseBegan];
+  OCMStub([fakeTouch force]).andReturn(force);
+  OCMStub([fakeTouch maximumPossibleForce]).andReturn(maximumPossibleForce);
+  OCMStub([fakeTouch majorRadius]).andReturn(majorRadius);
+  OCMStub([fakeTouch majorRadiusTolerance]).andReturn(majorRadiusTolerance);
+  OCMStub([fakeTouch altitudeAngle]).andReturn(altitudeAngle);
+  OCMStub([fakeTouch azimuthAngleInView:[OCMArg any]]).andReturn(azimuthAngle);
+
+  [vc dispatchTouches:[NSSet setWithObject:fakeTouch] pointerDataChangeOverride:nullptr event:nil];
+
+  const std::vector<flutter::PointerData>& captured = [engine capturedPointerData];
+  XCTAssertEqual(captured.size(), 1u);
+  const flutter::PointerData& data = captured[0];
+
+  const double tolerance = 1e-6;
+
+  // Pressure is a straight copy; `pressure_min` is always 0.
+  XCTAssertEqualWithAccuracy(data.pressure, force, tolerance);
+  XCTAssertEqualWithAccuracy(data.pressure_max, maximumPossibleForce, tolerance);
+  XCTAssertEqualWithAccuracy(data.pressure_min, 0.0, tolerance);
+
+  // Radius is a copy, with the tolerance applied symmetrically to produce min/max.
+  XCTAssertEqualWithAccuracy(data.radius_major, majorRadius, tolerance);
+  XCTAssertEqualWithAccuracy(data.radius_min, majorRadius - majorRadiusTolerance, tolerance);
+  XCTAssertEqualWithAccuracy(data.radius_max, majorRadius + majorRadiusTolerance, tolerance);
+
+  // iOS measures altitude from the surface plane; `PointerData.tilt` measures from the surface
+  // normal. Same range, swapped origin, so the two are complements about pi/2.
+  XCTAssertEqualWithAccuracy(data.tilt, M_PI_2 - altitudeAngle, tolerance);
+
+  // iOS measures azimuth from the +x axis; `PointerData.orientation` measures from the +y axis.
+  // Same sweep direction, phase-shifted by pi/2.
+  XCTAssertEqualWithAccuracy(data.orientation, azimuthAngle - M_PI_2, tolerance);
+}
+
+// Verify max stylus tilt angle.
+//
+// A stylus lying flat on the glass is altitude 0 to iOS, which must map to the maximum tilt of pi/2
+// in the engine. A stylus held perpendicular is altitude pi/2, mapping to engine tilt 0.
+- (void)testStylusTiltEndpoints {
+  PointerDataCapturingEngine* engine = [[PointerDataCapturingEngine alloc] initWithName:@"foobar"
+                                                                                project:nil];
+  [engine run];
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:engine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+
+  id flatTouch = OCMPartialMock([[UITouch alloc] init]);
+  [flatTouch setPhase:UITouchPhaseBegan];
+  OCMStub([flatTouch altitudeAngle]).andReturn(0.0);
+  OCMStub([flatTouch azimuthAngleInView:[OCMArg any]]).andReturn(M_PI_2);
+
+  [vc dispatchTouches:[NSSet setWithObject:flatTouch] pointerDataChangeOverride:nullptr event:nil];
+
+  id perpendicularTouch = OCMPartialMock([[UITouch alloc] init]);
+  [perpendicularTouch setPhase:UITouchPhaseBegan];
+  OCMStub([perpendicularTouch altitudeAngle]).andReturn(M_PI_2);
+  OCMStub([perpendicularTouch azimuthAngleInView:[OCMArg any]]).andReturn(0.0);
+
+  [vc dispatchTouches:[NSSet setWithObject:perpendicularTouch]
+      pointerDataChangeOverride:nullptr
+                          event:nil];
+
+  const double tolerance = 1e-6;
+  const std::vector<flutter::PointerData>& captured = [engine capturedPointerData];
+  XCTAssertEqual(captured.size(), 2u);
+
+  // Flat on the surface: maximum tilt.
+  XCTAssertEqualWithAccuracy(captured[0].tilt, M_PI_2, tolerance);
+  // Azimuth of pi/2 points along +y, which is orientation 0.
+  XCTAssertEqualWithAccuracy(captured[0].orientation, 0.0, tolerance);
+
+  // Perpendicular to the surface: zero tilt.
+  XCTAssertEqualWithAccuracy(captured[1].tilt, 0.0, tolerance);
+  // Azimuth of 0 points along +x, a quarter turn back from +y.
+  XCTAssertEqualWithAccuracy(captured[1].orientation, -M_PI_2, tolerance);
 }
 
 - (void)testFakeEventTimeStamp {

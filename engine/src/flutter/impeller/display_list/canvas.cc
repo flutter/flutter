@@ -67,10 +67,52 @@
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/command_buffer.h"
+#include "third_party/abseil-cpp/absl/hash/hash.h"
 
 namespace impeller {
 
 namespace {
+
+uint32_t PackGlyphId(const Glyph& glyph) {
+  return (static_cast<uint32_t>(glyph.type) << 16) | glyph.index;
+}
+
+TextFrameFingerprint ComputeTextFrameFingerprint(const TextFrame& text_frame) {
+  TextFrameFingerprint fp;
+  const std::vector<TextRun>& runs = text_frame.GetRuns();
+  fp.run_count = runs.size();
+
+  size_t hash = absl::HashOf(text_frame.HasColor(),
+                             text_frame.GetEnableGammaCorrection());
+
+  for (const TextRun& run : runs) {
+    hash = absl::HashOf(hash, run.GetFont().GetHash());
+    const std::vector<TextRun::GlyphPosition>& glyphs = run.GetGlyphPositions();
+    fp.total_glyph_count += glyphs.size();
+
+    for (const TextRun::GlyphPosition& glyph_pos : glyphs) {
+      hash = absl::HashOf(hash, static_cast<uint32_t>(glyph_pos.glyph.type),
+                          glyph_pos.glyph.index, glyph_pos.position.x,
+                          glyph_pos.position.y);
+    }
+  }
+
+  if (!runs.empty()) {
+    const std::vector<TextRun::GlyphPosition>& first_glyphs =
+        runs.front().GetGlyphPositions();
+    if (!first_glyphs.empty()) {
+      fp.first_glyph_id = PackGlyphId(first_glyphs.front().glyph);
+    }
+    const std::vector<TextRun::GlyphPosition>& last_glyphs =
+        runs.back().GetGlyphPositions();
+    if (!last_glyphs.empty()) {
+      fp.last_glyph_id = PackGlyphId(last_glyphs.back().glyph);
+    }
+  }
+
+  fp.full_hash = hash;
+  return fp;
+}
 
 constexpr Scalar kAntialiasPadding = 1.0f;
 
@@ -1274,23 +1316,19 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint)) {
-    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
-        round_superellipse.GetBounds(), round_superellipse.GetRadii());
+    // Try to draw using UberSDF.
+    auto params = UberSDFParameters::MakeRoundedSuperellipse(
+        /*color=*/paint.color, /*round_superellipse=*/round_superellipse,
+        /*stroke=*/paint.GetStroke());
 
-    if (round_superellipse_params.all_corners_same) {
-      auto params = UberSDFParameters::MakeRoundedSuperellipse(
-          /*color=*/paint.color,
-          /*bounds=*/round_superellipse.GetBounds(),
-          /*round_superellipse_params=*/round_superellipse_params,
-          /*stroke=*/paint.GetStroke());
-
-      AddRenderSDFEntityToCurrentPass(paint, params);
+    if (params) {
+      AddRenderSDFEntityToCurrentPass(paint, *params);
       return;
     } else {
+      // Fall back to ComplexRoundSuperellipse.
       auto contents = ComplexRoundedSuperellipseContents::Make(
           /*color=*/paint.color_source ? Color::White() : paint.color,
-          /*bounds=*/round_superellipse.GetBounds(),
-          /*round_superellipse_params=*/round_superellipse_params,
+          /*round_superellipse=*/round_superellipse,
           /*stroke=*/paint.GetStroke());
 
       const Geometry* geom = contents->GetGeometry();
@@ -2179,17 +2217,12 @@ bool Canvas::AttemptBlurredTextOptimization(
           FilterInput::Make(text_contents),
           /*is_solid_color=*/true, GetCurrentTransform());
 
-  std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
-  int64_t identifier = maybe_glyph.has_value()
-                           ? maybe_glyph.value().index
-                           : reinterpret_cast<int64_t>(text_frame.get());
+  TextFrameFingerprint fingerprint = ComputeTextFrameFingerprint(*text_frame);
   TextShadowCache::TextShadowCacheKey cache_key(
       /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
-      /*p_identifier=*/identifier,
-      /*p_is_single_glyph=*/maybe_glyph.has_value(),
-      /*p_font=*/text_frame->GetFont(),
       /*p_sigma=*/paint.mask_blur_descriptor->sigma,
-      /*p_color=*/paint.color);
+      /*p_color=*/paint.color,
+      /*p_fingerprint=*/fingerprint);
 
   std::optional<Entity> result = renderer_.GetTextShadowCache().Lookup(
       renderer_, entity, filter, cache_key);
@@ -2210,7 +2243,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
   Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
-  if (max_scale * text_frame->GetFont().GetMetrics().point_size >
+  if (max_scale * text_frame->GetRuns()[0].GetFont().GetMetrics().point_size >
       kMaxTextScale) {
     fml::StatusOr<flutter::DlPath> path = text_frame->GetPath();
     if (path.ok()) {
