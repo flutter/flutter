@@ -65,11 +65,14 @@ class CanvasKitPainter extends WebParagraphPainter {
       );
     }
 
+    canvas.save();
+    canvas.scale(1 / dpr, 1 / dpr);
     canvas.drawImageRect(
       _singleImageCache!,
       sourceRect,
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
+    canvas.restore();
   }
 }

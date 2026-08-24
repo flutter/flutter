@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -45,29 +46,66 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   return (sourceRect, targetRect);
 }
 
-/// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph
-(ui.Rect sourceRect, ui.Rect targetRect) _calculateParagraph(
+double _calculateShift(double minShift, double targetFrac) {
+  double shift = minShift.floorToDouble() + targetFrac;
+  if (shift < minShift) {
+    shift += 1.0;
+  }
+  return shift;
+}
+
+@visibleForTesting
+(ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) calculateParagraphForTest(
+  WebParagraph paragraph,
+  ui.Offset offset,
+  double devicePixelRatio,
+) => _calculateParagraph(paragraph, offset, devicePixelRatio);
+
+/// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph,
+/// as well as the translation shift on Canvas2D.
+(ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) _calculateParagraph(
   WebParagraph paragraph,
   ui.Offset offset,
   double devicePixelRatio,
 ) {
-  // Define the paragraph rect (using advances, not selected rects)
-  // Source rect must take in account the scaling
-  final sourceRect = ui.Rect.fromLTWH(
-    0,
-    0,
-    ((paragraph.paintBounds.width) * devicePixelRatio).ceilToDouble(),
-    ((paragraph.paintBounds.height) * devicePixelRatio).ceilToDouble(),
-  );
-  // Target rect will be scaled by the canvas transform, so we don't scale it here
-  final targetRect = ui.Rect.fromLTWH(
-    offset.dx + paragraph.paintBounds.left,
-    offset.dy + paragraph.paintBounds.top,
-    sourceRect.width / devicePixelRatio,
-    sourceRect.height / devicePixelRatio,
+  // Convert offset and paintBounds to physical device pixel space
+  final double physicalOffsetX = offset.dx * devicePixelRatio;
+  final double physicalOffsetY = offset.dy * devicePixelRatio;
+  final physicalPaintBounds = ui.Rect.fromLTRB(
+    paragraph.paintBounds.left * devicePixelRatio,
+    paragraph.paintBounds.top * devicePixelRatio,
+    paragraph.paintBounds.right * devicePixelRatio,
+    paragraph.paintBounds.bottom * devicePixelRatio,
   );
 
-  return (sourceRect, targetRect);
+  // Match horizontal subpixel phase in physical device pixels
+  final double targetFracX = physicalOffsetX - physicalOffsetX.floorToDouble();
+  final double minShiftX = -physicalPaintBounds.left;
+  final double shiftPhysicalX = _calculateShift(minShiftX, targetFracX);
+  final double shiftPhysicalY = -physicalPaintBounds.top;
+
+  final double physicalWidth = (shiftPhysicalX + physicalPaintBounds.right).ceilToDouble();
+  final double physicalHeight = physicalPaintBounds.height.ceilToDouble();
+
+  // Source rect in physical device pixels
+  final sourceRect = ui.Rect.fromLTWH(0, 0, physicalWidth, physicalHeight);
+
+  // Target rect in physical device pixels:
+  // targetLeft is guaranteed to be an exact integer in physical device pixels
+  final targetRect = ui.Rect.fromLTWH(
+    physicalOffsetX - shiftPhysicalX,
+    physicalOffsetY + physicalPaintBounds.top,
+    physicalWidth,
+    physicalHeight,
+  );
+
+  // Convert shift to logical units for Canvas2D context translation
+  final canvas2dShift = ui.Offset(
+    shiftPhysicalX / devicePixelRatio,
+    shiftPhysicalY / devicePixelRatio,
+  );
+
+  return (sourceRect, targetRect, canvas2dShift);
 }
 
 /// Paints a [WebParagraph].
@@ -144,7 +182,7 @@ abstract class WebParagraphPainter {
 
     final TextLayout layout = _paragraph.getLayout();
 
-    final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateParagraph(
+    final (ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) = _calculateParagraph(
       _paragraph,
       offset,
       ui.window.devicePixelRatio,
@@ -167,8 +205,8 @@ abstract class WebParagraphPainter {
       generateParagraphImage: () {
         _resizePaintCanvas(ui.window.devicePixelRatio, sourceRect);
 
-        // We only want to paint the actual paint bounds of the paragraph.
-        _paintContext.translate(-_paragraph.paintBounds.left, -_paragraph.paintBounds.top);
+        // We translate Canvas2D context by canvas2dShift in logical units
+        _paintContext.translate(canvas2dShift.dx, canvas2dShift.dy);
 
         // Fill out all the blocks on Canvas2D canvas
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.shadows, layout);
