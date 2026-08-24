@@ -4622,6 +4622,31 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   glFinish();
 }
 
+TEST_F(EmbedderTest, ExternalTextureGLNullContextDoesNotCrash) {
+  EmbedderExternalTextureGL::ExternalTextureCallback callback(
+      [](int64_t, size_t, size_t) {
+        auto res = std::make_unique<FlutterOpenGLTexture>();
+        res->target = GL_TEXTURE_2D;
+        res->name = 1;
+        res->format = GL_RGBA8;
+        res->user_data = nullptr;
+        res->destruction_callback = [](void*) {};
+        res->width = res->height = 100;
+        return res;
+      });
+  EmbedderExternalTextureGL texture(1, callback);
+
+  DisplayListBuilder builder;
+  Texture::PaintContext ctx{
+      .canvas = &builder,
+      .gr_context = nullptr,
+      .aiks_context = nullptr,
+  };
+  // Should not crash even when last_image_ is null and contexts are null.
+  texture.Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
+                DlImageSampling::kLinear);
+}
+
 TEST_F(
     EmbedderTest,
     PresentInfoReceivesFullScreenDamageWhenPopulateExistingDamageIsNotProvided) {
