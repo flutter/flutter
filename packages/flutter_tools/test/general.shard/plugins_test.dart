@@ -813,6 +813,46 @@ dependencies:
       );
 
       testUsingContext(
+        '.flutter-plugins-dependencies forces swift_package_manager_enabled if forceSwiftPM is true',
+        () async {
+          createPlugin(
+            name: 'plugin-a',
+            platforms: const <String, _PluginPlatformInfo>{
+              'ios': _PluginPlatformInfo(
+                pluginClass: 'Foo',
+                dartPluginClass: 'Bar',
+                sharedDarwinSource: true,
+              ),
+            },
+          );
+          iosProject.testExists = true;
+
+          final dateCreated = DateTime(1970);
+          systemClock.currentTime = dateCreated;
+
+          iosProject.usesSwiftPackageManager = false;
+          macosProject.usesSwiftPackageManager = false;
+
+          await refreshPluginsList(flutterProject, forceSwiftPM: true);
+
+          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+
+          final expectedSwiftPackageManagerEnabled = <String, dynamic>{'ios': true, 'macos': true};
+          expect(jsonContent['swift_package_manager_enabled'], expectedSwiftPackageManagerEnabled);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          SystemClock: () => systemClock,
+          FlutterVersion: () => flutterVersion,
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
         '.flutter-plugins-dependencies can have different swift_package_manager_enabled values for iOS and macoS',
         () async {
           createPlugin(
@@ -2226,6 +2266,29 @@ iosPrefix: FLT
       testUsingContext('createPlatformsYamlMap should create empty map', () async {
         final YamlMap map = Plugin.createPlatformsYamlMap(<String>[], 'foo', 'bar');
         expect(map.isEmpty, true);
+      });
+
+      testUsingContext('Platform plugin fromYaml factories perform validation', () async {
+        expect(
+          () => AndroidPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{}), '', globals.fs),
+          throwsToolExit(message: 'Invalid "android" plugin specification for plugin "foo".'),
+        );
+        expect(
+          () => IOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
+          throwsToolExit(message: 'Invalid "ios" plugin specification for plugin "foo".'),
+        );
+        expect(
+          () => MacOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
+          throwsToolExit(message: 'Invalid "macos" plugin specification for plugin "foo".'),
+        );
+        expect(
+          () => WindowsPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
+          throwsToolExit(message: 'Invalid "windows" plugin specification for plugin "foo".'),
+        );
+        expect(
+          () => LinuxPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
+          throwsToolExit(message: 'Invalid "linux" plugin specification for plugin "foo".'),
+        );
       });
     });
 
