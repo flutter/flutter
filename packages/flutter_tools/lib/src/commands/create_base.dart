@@ -551,9 +551,17 @@ mixin CreateBase on FlutterCommand {
       // add the newly requested platforms without dropping the previously
       // added ones, and without overwriting their recorded revisions.
       // See https://github.com/flutter/flutter/issues/191567.
-      final MigrateConfig migrateConfig = metadataFile.existsSync()
-          ? FlutterProjectMetadata(metadataFile, globals.logger).migrateConfig
-          : MigrateConfig();
+      MigrateConfig migrateConfig;
+      if (metadataFile.existsSync()) {
+        try {
+          migrateConfig = FlutterProjectMetadata(metadataFile, globals.logger).migrateConfig;
+        } catch (error) {
+          globals.logger.printTrace('Failed to parse existing .metadata file: $error');
+          migrateConfig = MigrateConfig();
+        }
+      } else {
+        migrateConfig = MigrateConfig();
+      }
       final metadata = FlutterProjectMetadata.explicit(
         file: metadataFile,
         versionRevision: globals.flutterVersion.frameworkRevision,
