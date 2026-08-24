@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -315,6 +315,30 @@ void main() {
     // generated sibling nodes.
     expect(boundaryParentObject.hasRebuildSemantics, isTrue);
     expect(grandBoundaryParentObject.hasRebuildSemantics, isFalse);
+  });
+
+  testWidgets('MergeSemantics + sibling merge group', (tester) async {
+    final focus = FocusNode();
+    addTearDown(focus.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MergeSemantics(
+            child: TextField(
+              focusNode: focus,
+              decoration: const InputDecoration(prefix: SizedBox(width: 12)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final semantics = SemanticsTester(tester);
+    focus.requestFocus();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 }
 
