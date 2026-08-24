@@ -866,6 +866,24 @@ Future<void> testMain() async {
     fakeAssetManager.popAssetScope(assetScope);
   });
 
+  test('fragment shader explicit dispose', () async {
+    final ui.FragmentProgram program = await renderer.createFragmentProgram('voronoi_shader');
+    final ui.FragmentShader shader = program.fragmentShader();
+
+    // Set uniform to ensure native resource is actually created/initialized properly
+    shader.setFloat(0, 10.0);
+
+    // Explicitly dispose
+    shader.dispose();
+
+    // Verify it is marked as disposed
+    expect(shader.debugDisposed, true);
+    expect(() => shader.setFloat(0, 5.0), throwsA(isA<AssertionError>()));
+    final ui.Image dummyImage = _createOvalGradientImage(imageDimension: 16);
+    expect(() => shader.setImageSampler(0, dummyImage), throwsA(isA<AssertionError>()));
+    dummyImage.dispose();
+  });
+
   test('fragment shader', () async {
     final ui.FragmentProgram program = await renderer.createFragmentProgram('voronoi_shader');
     final ui.FragmentShader shader = program.fragmentShader();
