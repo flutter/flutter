@@ -215,6 +215,8 @@ bool Manager::InitializeContexts() {
   EGLContext render_context =
       ::eglCreateContext(display_, config_, EGL_NO_CONTEXT, context_attributes);
   if (render_context == EGL_NO_CONTEXT) {
+    // Clear out lingering error.
+    ::eglGetError();
     context_attributes = gles2_context_attributes;
     render_context = ::eglCreateContext(display_, config_, EGL_NO_CONTEXT,
                                         context_attributes);
