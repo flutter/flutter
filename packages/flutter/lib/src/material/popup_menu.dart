@@ -1596,6 +1596,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   RenderBox? _cachedButtonRenderBox;
   RenderBox? _cachedOverlayRenderBox;
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();

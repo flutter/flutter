@@ -13,6 +13,6 @@ dependencies:
     path: ../flutter_tools_extension
 
 dev_dependencies:
-  test: 1.31.1
+  test: 1.31.2
 
-# PUBSPEC CHECKSUM: i74lku
+# PUBSPEC CHECKSUM: mq6q80

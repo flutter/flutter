@@ -48,10 +48,9 @@ class _Visitor extends SimpleAstVisitor<void> {
   bool? _hasReducedTestSetTagCache;
 
   bool _isReducedTestSetTag(Annotation annotation) {
-    final String? name = switch (annotation.name) {
+    final String name = switch (annotation.name) {
       SimpleIdentifier(:final String name) => name,
       PrefixedIdentifier(:final SimpleIdentifier identifier) => identifier.name,
-      _ => null,
     };
     if (name != _tagsAnnotation) {
       return false;
@@ -60,11 +59,15 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (argumentList == null) {
       return false;
     }
-    for (final Expression argument in argumentList.arguments) {
-      final Expression expr = switch (argument) {
-        NamedExpression(:final Expression expression) => expression,
-        _ => argument,
+    for (final Argument argument in argumentList.arguments) {
+      final Expression? expr = switch (argument) {
+        NamedArgument(:final Expression argumentExpression) => argumentExpression,
+        final Expression expression => expression,
+        _ => null,
       };
+      if (expr == null) {
+        continue;
+      }
       if (expr case StringLiteral(
         :final String? stringValue,
       ) when stringValue == _reducedTestSetTag) {

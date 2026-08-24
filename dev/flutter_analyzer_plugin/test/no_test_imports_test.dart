@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:analyzer/src/lint/registry.dart';
-import 'package:analyzer/utilities/package_config_file_builder.dart';
+import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_test_imports.dart';
 import 'package:test_reflective_loader/test_reflective_loader.dart';

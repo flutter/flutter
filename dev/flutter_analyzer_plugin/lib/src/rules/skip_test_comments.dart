@@ -11,7 +11,7 @@ import 'package:analyzer/error/error.dart';
 import 'package:analyzer/source/line_info.dart';
 
 final Pattern _skipTestIntentionalPattern = RegExp(r'// .*\[intended\]');
-final Pattern _skipTestTrackingBugPattern = RegExp(r'// .*https+?://github.com/.*/issues/\d+');
+final Pattern _skipTestTrackingBugPattern = RegExp(r'// .*https?://github.com/.*/issues/\d+');
 
 /// Skipped tests should have a justification comment.
 class SkipTestComments extends AnalysisRule {
@@ -47,15 +47,15 @@ class _Visitor extends SimpleAstVisitor<void> {
     return name.startsWith('test') || name == 'group' || name == 'expect';
   }
 
-  bool _hasInlineIgnore(AstNode node, Pattern ignoreDirectivePattern) {
+  bool _hasInlineIgnore(int offset, Pattern ignoreDirectivePattern) {
     final RuleContextUnit compilationUnit = context.currentUnit!;
     final LineInfo lineInfo = compilationUnit.unit.lineInfo;
-    final int lineNumber = lineInfo.getLocation(node.offset).lineNumber;
+    final int lineNumber = lineInfo.getLocation(offset).lineNumber;
     final String content = compilationUnit.content;
 
     final int endOffset =
         lineNumber < lineInfo.lineCount ? lineInfo.getOffsetOfLine(lineNumber) : content.length;
-    final String textAfterNode = content.substring(node.offset, endOffset);
+    final String textAfterNode = content.substring(offset, endOffset);
     if (textAfterNode.contains(ignoreDirectivePattern)) {
       return true;
     }
@@ -73,18 +73,18 @@ class _Visitor extends SimpleAstVisitor<void> {
         .contains(ignoreDirectivePattern);
   }
 
-  bool _hasValidJustificationComment(AstNode skipLabel) {
-    return _hasInlineIgnore(skipLabel, _skipTestIntentionalPattern) ||
-        _hasInlineIgnore(skipLabel, _skipTestTrackingBugPattern);
+  bool _hasValidJustificationComment(int offset) {
+    return _hasInlineIgnore(offset, _skipTestIntentionalPattern) ||
+        _hasInlineIgnore(offset, _skipTestTrackingBugPattern);
   }
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
     if (_isTestMethod(node.methodName.name)) {
-      for (final Expression argument in node.argumentList.arguments) {
-        if (argument is NamedExpression &&
-            argument.name.label.name == 'skip' &&
-            !_hasValidJustificationComment(argument.name.label)) {
+      for (final Argument argument in node.argumentList.arguments) {
+        if (argument is NamedArgument &&
+            argument.name.lexeme == 'skip' &&
+            !_hasValidJustificationComment(argument.name.offset)) {
           rule.reportAtNode(argument);
         }
       }

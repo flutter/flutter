@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:analyzer/src/lint/registry.dart';
-import 'package:analyzer/utilities/package_config_file_builder.dart';
+import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/golden_test_tags.dart';
 import 'package:test_reflective_loader/test_reflective_loader.dart';
@@ -28,7 +28,7 @@ void expect(Object? actual, Object? matcher) {}
 ''');
     writeTestPackageConfig(
       PackageConfigFileBuilder()
-        ..add(name: _flutterTestPackageName, rootPath: convertPath(_flutterTestPackageRoot)),
+        ..add(name: _flutterTestPackageName, rootFolder: getFolder(_flutterTestPackageRoot)),
     );
   }
 

@@ -326,17 +326,21 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
 
   @override
   T? visitClassDeclaration(ClassDeclaration node) {
-    enclosingClass = node.name.lexeme;
-    if (!node.name.lexeme.startsWith('_')) {
-      enclosingClass = node.name.lexeme;
+    final String className = switch (node.namePart) {
+      NameWithTypeParameters(:final Token typeName) => typeName.lexeme,
+      PrimaryConstructorDeclaration(:final Token typeName) => typeName.lexeme,
+    };
+    enclosingClass = className;
+    if (!className.startsWith('_')) {
+      enclosingClass = className;
       var comment = <SourceLine>[];
       if (node.documentationComment != null && node.documentationComment!.tokens.isNotEmpty) {
-        comment = _processComment(node.name.lexeme, node.documentationComment!);
+        comment = _processComment(className, node.documentationComment!);
       }
       elements.add(
         SourceElement(
           SourceElementType.classType,
-          node.name.lexeme,
+          className,
           node.beginToken.charOffset,
           file: file,
           comment: comment,

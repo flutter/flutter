@@ -3,6 +3,8 @@ include: ../analysis_options.yaml
 plugins:
   flutter_analyzer_plugin:
     path: ../../dev/flutter_analyzer_plugin
+  dependency_overrides:
+    analysis_server_plugin: ^0.3.20
 
 analyzer:
   exclude:

@@ -197,6 +197,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         rootDirectory.childDirectory('packages').childDirectory('flutter'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_localizations'),
+        rootDirectory.childDirectory('dev').childDirectory('flutter_analyzer_plugin'),
         hooksUserDefineIntegrationTestDirectory,
       ]) {
         _updatePubspec(package, deps);
@@ -379,7 +380,7 @@ class UpdatePackagesCommand extends FlutterCommand {
             workspaceMembers.contains(packageName) ||
             (subpackagesDir.existsSync() &&
                 subpackagesDir.childDirectory(packageName).childFile(_pubspecName).existsSync());
-        if (isPathDependency || (value == null && isWorkspaceMember)) {
+        if (isPathDependency || isWorkspaceMember) {
           toRemove.add(packageName);
         }
       }

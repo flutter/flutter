@@ -886,6 +886,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     super.dispose();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     // If message is empty then no need to create a tooltip overlay to show

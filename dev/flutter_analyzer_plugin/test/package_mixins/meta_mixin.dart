@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/utilities/package_config_file_builder.dart';
+import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 
 extension MetaPackageConfigExtension on PackageConfigFileBuilder {
   PackageConfigFileBuilder addMetaPackage(AnalysisRuleTest test) {
     add(
       name: MetaPackage._metaPackageName,
-      rootPath: test.convertPath(MetaPackage._metaPackageRoot),
+      rootFolder: test.getFolder(MetaPackage._metaPackageRoot),
     );
     return this;
   }

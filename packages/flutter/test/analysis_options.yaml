@@ -5,6 +5,8 @@ plugins:
     path: ../../../dev/flutter_analyzer_plugin
     diagnostics:
       no_stopwatches: true
+  dependency_overrides:
+    analysis_server_plugin: ^0.3.20
 
 linter:
   rules:
