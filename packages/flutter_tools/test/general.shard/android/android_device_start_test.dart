@@ -681,6 +681,7 @@ void main() {
           logger: logger,
           platform: FakePlatform(),
           androidSdk: androidSdk,
+          artifacts: FakeArtifacts(),
         );
         final File apkFile = fileSystem.file('app-release.apk')..createSync();
         final apk = AndroidApk(
@@ -764,7 +765,10 @@ void main() {
 
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
-        expect(fakeAndroidBuilder.lastAndroidBuildInfo?.releaseManifestEngineShellArgs, contains('--route=/custom/route'));
+        expect(
+          fakeAndroidBuilder.lastAndroidBuildInfo?.releaseManifestEngineShellArgs,
+          contains('--route=/custom/route'),
+        );
       },
       overrides: <Type, Generator>{
         AndroidBuilder: () => fakeAndroidBuilder,
