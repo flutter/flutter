@@ -214,14 +214,15 @@ extension FlutterRunLoop {
         tasks = []
         return (expired, .distantFuture)
       }
+      let newFireDate = tasks[firstUnexpiredIndex].targetDate
       // No tasks have expired.
       guard firstUnexpiredIndex > 0 else {
-        return (ContiguousArray<Task>(), tasks.first?.targetDate ?? .distantFuture)
+        return (ContiguousArray<Task>(), newFireDate)
       }
 
       let expiredTasks = ContiguousArray<Task>(tasks[..<firstUnexpiredIndex])
       tasks.removeSubrange(..<firstUnexpiredIndex)
-      return (expiredTasks, tasks.first?.targetDate ?? .distantFuture)
+      return (expiredTasks, newFireDate)
     }
   }
 }
