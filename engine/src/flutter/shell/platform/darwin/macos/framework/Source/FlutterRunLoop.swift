@@ -17,30 +17,36 @@ import Foundation
 /// (`pollFlutterMessagesOnce()`).
 @objc final class FlutterRunLoop: NSObject, Sendable {
   private static let flutterRunLoopMode = RunLoop.Mode("FlutterRunLoopMode")
-  private static let flutterCFRunLoopMode = flutterRunLoopMode.cfRunLoopMode
 
   @objc @MainActor
   static let mainRunLoop = FlutterRunLoop()
+  // The internal implementation protected by a NSLock.
   private let lockScope = LockScope()
-  private let runLoop = SendableCFRunLoop()
+  private let runLoop: SendableCFRunLoop
+  private let flutterCFRunLoopMode = flutterRunLoopMode.cfRunLoopMode
 
   @MainActor
   private override init() {
+    runLoop = SendableCFRunLoop(modes: [.common, Self.flutterRunLoopMode])
     super.init()
     // The timer will not be invalidated, as the `.mainRunLoop` static
-    // variable will never be deallocated once initialized.
-    runLoop.add(timer: lockScope.timer, forModes: [.common, Self.flutterRunLoopMode])
+    // variable will never be deallocated.
+    runLoop.add(timer: lockScope.timer)
   }
 
   /// Schedules a block to be executed on the main thread after the given delay.
   @objc func perform(afterDelay delay: TimeInterval = 0, block: @MainActor @escaping () -> Void) {
     let task = FlutterRunLoop.Task(block: block, targetDate: Date() + delay)
-    lockScope.addTaskAndRearmTimer(task: task)
-    if delay == 0 {
-      // Wake up the runloop immediately for delay == 0 tasks so they are not affected
-      // by timer tolerance, as the runloop will check for and fire expired timers
-      // when active.
-      runLoop.wakeUp()
+    lockScope.addTask(task: task, shouldRearmTimer: delay > 0)
+    if delay <= 0 {
+      // shouldRearmTimer was set to false. Drain the task queue immediately.
+      runLoop.performAndWakeUpRunLoop { [lockScope] in
+        MainActor.assumeIsolated {
+          for task in lockScope.popExpiredTasksAndRearm() {
+            task.block()
+          }
+        }
+      }
     }
   }
 
@@ -56,11 +62,11 @@ import Foundation
   /// Must be called on the main thread.
   @MainActor
   @objc func pollFlutterMessagesOnce() {
-    CFRunLoopRunInMode(Self.flutterCFRunLoopMode, 0.1, true)
+    CFRunLoopRunInMode(flutterCFRunLoopMode, 0.1, true)
   }
 }
 
-/// A Sendable class that synchronizes non-thead-safe calls using a NSLock.
+/// A Sendable class that synchronizes non-thread-safe calls using a NSLock.
 private final class LockScope: @unchecked Sendable {
   private let lock = NSLock()
   private let unsafeTaskQueue = FlutterRunLoop.UnsafeTaskQueue()
@@ -82,22 +88,26 @@ private final class LockScope: @unchecked Sendable {
     }
   }
 
-  /// Adds the given task to the task queue and updates the Timer's fire date
-  /// accordingly.
-  func addTaskAndRearmTimer(task: FlutterRunLoop.Task) {
+  /// Adds the given task to the task queue and updates the timer's fire date if
+  /// necessary.
+  ///
+  /// Rearming the timer is a relatively expensive operation. As an optimization,
+  /// the timer is only rearmed if shouldRearmTimer is set to true (the default),
+  /// and the task's fire date is earlier than the timer's current fire date.
+  /// Tasks already expired when it is scheduled (i.e., non-delayed tasks) should
+  /// set shouldRearmTimer to false and drain the task queue asap after this call
+  /// (instead of relying on the timer).
+  func addTask(task: FlutterRunLoop.Task, shouldRearmTimer: Bool = true) {
     lock.withLock {
-      let newFireDate = unsafeTaskQueue.add(task: task)
-      if newFireDate < timer.fireDate {
-        // This call is relatively expensive, avoid calling it for every task added.
-        CFRunLoopTimerSetNextFireDate(timer, newFireDate.timeIntervalSinceReferenceDate)
+      _ = unsafeTaskQueue.add(task: task)
+      // Ignore the earliest fire date reported by the task queue, to avoid setting
+      // timer.fireDate to that of a non-delayed task.
+      if shouldRearmTimer && task.targetDate < timer.fireDate {
+        CFRunLoopTimerSetNextFireDate(timer, task.targetDate.timeIntervalSinceReferenceDate)
       }
     }
   }
 
-  /// Pops all expired tasks from the task queue and updates the Timer's fire date.
-  ///
-  /// Returns a sequence of all expired tasks popped from the task queue, sorted by
-  /// their expiration dates in ascending order.
   @inline(__always)
   private static func popExpiredTasks(
     fromQueue unsafeTaskQueue: FlutterRunLoop.UnsafeTaskQueue, withLock lock: NSLock,
@@ -108,8 +118,63 @@ private final class LockScope: @unchecked Sendable {
       // Always set the new fireDate even if it didn't change, to prevent the
       // repeating timer from automatically setting the fire date to .distantFuture
       // (since the firing interval is set to .greatestFiniteMagnitude).
-      CFRunLoopTimerSetNextFireDate(timer, newFireDate.timeIntervalSinceReferenceDate)
+      if newFireDate < .distantFuture {
+        CFRunLoopTimerSetNextFireDate(timer, newFireDate.timeIntervalSinceReferenceDate)
+      }
       return tasks
+    }
+  }
+
+  /// Pops all expired tasks from the task queue and updates the Timer's fire date.
+  ///
+  /// Returns a sequence of all expired tasks popped from the task queue, sorted by
+  /// their expiration dates in ascending order.
+  func popExpiredTasksAndRearm() -> some Sequence<FlutterRunLoop.Task> {
+    Self.popExpiredTasks(fromQueue: unsafeTaskQueue, withLock: lock, andRearmTimer: timer)
+  }
+
+}
+
+// A Sendable CFRunLoop wrapper class.
+//
+// The CFRunLoop type is not Sendable. However according to Apple's Threading
+// Programming Guide, Unlike NSRunLoop, CFRunLoop APIs are "generally" thread-safe, but
+// "If you are performing operations that alter the configuration of the run loop,
+// however, it is still good practice to do so from the thread that owns the run loop
+// whenever possible."
+private final class SendableCFRunLoop: @unchecked Sendable {
+  private let runLoop: CFRunLoop = CFRunLoopGetCurrent()
+  private let modes: [RunLoop.Mode]
+  private let cfModes: CFArray
+
+  @MainActor
+  init(modes: [RunLoop.Mode]) {
+    self.modes = modes
+    self.cfModes = modes.map { $0.cfRunLoopMode.rawValue } as CFArray
+  }
+
+  // Calls CFRunLoopPerformBlock on the run loop and immediately wakes up the run loop.
+  //
+  // The given block will be associated with SendableCFRunLoop.modes.
+  func performAndWakeUpRunLoop(block: @escaping @Sendable () -> Void) {
+    CFRunLoopPerformBlock(runLoop, cfModes, block)
+    CFRunLoopWakeUp(runLoop)
+  }
+
+  // The timer will be associated with SendableCFRunLoop.modes.
+  func add(timer: Timer) {
+    for mode in modes {
+      CFRunLoopAddTimer(runLoop, timer, mode.cfRunLoopMode)
+    }
+  }
+}
+
+extension RunLoop.Mode {
+  fileprivate var cfRunLoopMode: CFRunLoopMode {
+    switch self {
+    case .default: .defaultMode
+    case .common: .commonModes
+    case let mode: CFRunLoopMode(mode.rawValue as CFString)
     }
   }
 }
@@ -143,9 +208,13 @@ extension FlutterRunLoop {
     func popTasks(
       expiringBy date: Date
     ) -> (some Sequence<Task>, Date) {
-      let firstUnexpiredIndex = tasks.firstIndex { date < $0.targetDate } ?? tasks.count
-
-      // If no tasks have expired.
+      guard let firstUnexpiredIndex = tasks.firstIndex(where: { date < $0.targetDate }) else {
+        // Fast path for popping the entire task queue.
+        let expired = tasks
+        tasks = []
+        return (expired, .distantFuture)
+      }
+      // No tasks have expired.
       guard firstUnexpiredIndex > 0 else {
         return (ContiguousArray<Task>(), tasks.first?.targetDate ?? .distantFuture)
       }
@@ -153,36 +222,6 @@ extension FlutterRunLoop {
       let expiredTasks = ContiguousArray<Task>(tasks[..<firstUnexpiredIndex])
       tasks.removeSubrange(..<firstUnexpiredIndex)
       return (expiredTasks, tasks.first?.targetDate ?? .distantFuture)
-    }
-  }
-}
-
-// According to Apple's Threading Programming Guide, Unlike NSRunLoop,
-// CFRunLoop APIs are "generally" thread-safe, but
-// "If you are performing operations that alter the configuration of the run loop,
-// however, it is still good practice to do so from the thread that owns the run loop
-// whenever possible."
-private final class SendableCFRunLoop: @unchecked Sendable {
-  private let runLoop: CFRunLoop = CFRunLoopGetCurrent()
-
-  // Calls CFRunLoopWakeUp on the run loop.
-  func wakeUp() {
-    CFRunLoopWakeUp(runLoop)
-  }
-
-  func add(timer: Timer, forModes modes: [RunLoop.Mode]) {
-    for mode in modes {
-      CFRunLoopAddTimer(runLoop, timer, mode.cfRunLoopMode)
-    }
-  }
-}
-
-extension RunLoop.Mode {
-  fileprivate var cfRunLoopMode: CFRunLoopMode {
-    switch self {
-    case .default: .defaultMode
-    case .common: .commonModes
-    case let mode: CFRunLoopMode(mode.rawValue as CFString)
     }
   }
 }
