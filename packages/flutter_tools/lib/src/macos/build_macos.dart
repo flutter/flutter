@@ -86,6 +86,10 @@ Future<void> buildMacOS({
   SizeAnalyzer? sizeAnalyzer,
   bool usingCISystem = false,
 }) async {
+  if (globals.xcodeProjectInterpreter?.isInstalled != true) {
+    throwToolExit(globals.userMessages.xcodeMissing);
+  }
+
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
     throwToolExit(
@@ -151,11 +155,14 @@ Future<void> buildMacOS({
     projectFilename: xcodeProjectName,
     buildDirectory: flutterBuildDir,
   );
-  final String? scheme = projectInfo?.schemeFor(buildInfo);
-  if (scheme == null) {
-    projectInfo!.reportFlavorNotFoundAndExit();
+  if (projectInfo == null) {
+    throwToolExit('Unable to get Xcode project information.');
   }
-  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
+  final String? scheme = projectInfo.schemeFor(buildInfo);
+  if (scheme == null) {
+    projectInfo.reportFlavorNotFoundAndExit();
+  }
+  final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
