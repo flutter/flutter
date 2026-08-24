@@ -155,6 +155,7 @@
 /dev/devicelab/bin/tasks/integration_test_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_driver.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_frame_number.dart @jtmcdole @flutter/engine
+/dev/devicelab/bin/tasks/integration_ui_keyboard_inset_jump.dart @boetger @flutter/android
 /dev/devicelab/bin/tasks/integration_ui_keyboard_resize.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_textfield.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks.dart @jtmcdole @flutter/engine
