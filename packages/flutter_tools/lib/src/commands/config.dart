@@ -30,7 +30,8 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
 
   @override
-  void populateBaseArgParser(ArgParser parser) {
+  ArgParser createBaseArgParser() {
+    final ArgParser parser = super.createBaseArgParser();
     parser.addFlag('list', help: 'List all settings and their current values.', negatable: false);
     parser.addFlag(
       'analytics',
@@ -73,7 +74,12 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       help: 'The relative path to override a projects build directory.',
       valueHelp: 'out/',
     );
-    addMachineOutputFlag(verboseHelp: _verboseHelp);
+    parser.addFlag(
+      FlutterGlobalOptions.kMachineFlag,
+      negatable: false,
+      help: 'Outputs in a machine readable structured JSON format.',
+      hide: !_verboseHelp,
+    );
     for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
@@ -91,6 +97,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       help: 'Remove all configured features and restore them to the default values.',
       negatable: false,
     );
+    return parser;
   }
 
   final ExtensionManager? _extensionManager;
@@ -129,12 +136,11 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   }
 
   @override
-  ArgParser buildDynamicArgParser(ArgParser baseParser) {
-    final ArgParser newParser = ExtensionArgParserMixin.cloneParser(baseParser);
+  ArgParser buildDynamicArgParser(ArgParser dynamicParser) {
     for (final ExtensionSettingsGroup(:featureFlags, :configOptions) in _extensionSettingsGroups) {
       for (final FeatureFlag(:name, :help, :enabledByDefault) in featureFlags) {
-        if (!newParser.options.containsKey(name)) {
-          newParser.addFlag(name, help: help, defaultsTo: enabledByDefault);
+        if (!dynamicParser.options.containsKey(name)) {
+          dynamicParser.addFlag(name, help: help, defaultsTo: enabledByDefault);
         } else {
           globals.printTrace(
             'Extension feature flag "$name" conflicts with an existing option and was skipped.',
@@ -142,8 +148,8 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         }
       }
       for (final ConfigOption(:name, :help, :value) in configOptions) {
-        if (!newParser.options.containsKey(name)) {
-          newParser.addOption(name, help: help, defaultsTo: value);
+        if (!dynamicParser.options.containsKey(name)) {
+          dynamicParser.addOption(name, help: help, defaultsTo: value);
         } else {
           globals.printTrace(
             'Extension config option "$name" conflicts with an existing option and was skipped.',
@@ -151,7 +157,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         }
       }
     }
-    return newParser;
+    return dynamicParser;
   }
 
   @override

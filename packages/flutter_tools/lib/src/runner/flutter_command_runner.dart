@@ -352,12 +352,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
   }
 
+  /// Traverses [args] to identify the target command being invoked and triggers
+  /// dynamic option initialization (via [ExtensionArgParserMixin.initializeDynamicOptions])
+  /// before argument parsing begins.
   Future<void> _initializeDynamicOptions(Iterable<String> args) async {
     if (!featureFlags.isToolExtensionsEnabled) {
       return;
     }
     if (_findTargetCommand(args) case var command?) {
       if (command.name == 'help') {
+        // If the top-level 'help' command was matched (e.g. `flutter help config` or `flutter help --verbose config`),
+        // identify the target command whose help documentation is requested rather than the help command itself.
         command = switch (command.parent) {
           final Command<void> parent => parent,
           _ =>
@@ -374,6 +379,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   /// Helper to find the target command from the list of arguments, traversing subcommands and skipping options.
+  ///
+  /// Skips global and command-level options (e.g., `--verbose`, `-v`, `--device-id <id>`, `--device-id=id`)
+  /// so that non-option arguments are matched against registered command and subcommand names.
   Command<void>? _findTargetCommand(Iterable<String> args) {
     Map<String, Command<void>> commandsMap = commands;
     Command<void>? lastFoundCommand;
@@ -382,15 +390,18 @@ class FlutterCommandRunner extends CommandRunner<void> {
     var i = 0;
     while (i < argsList.length) {
       final String arg = argsList[i];
+      // Options and flags start with '-'.
       if (arg.startsWith('-')) {
         var name = arg;
         while (name.startsWith('-')) {
           name = name.substring(1);
         }
+        // Option with inline value (e.g., '--device-id=foo' or '-d=foo'): consumes 1 argument token.
         if (name.contains('=')) {
           i++;
           continue;
         }
+        // Look up option in the current command or runner parser to check if it expects a separate value token.
         Option? option;
         for (final Option opt in currentParser.options.values) {
           if (opt.name == name || opt.abbr == name) {
@@ -398,8 +409,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
             break;
           }
         }
+        // Non-flag options (single/multi options) consume the subsequent argument as their value (e.g., '-d' 'linux').
         if (option != null && !option.isFlag) {
-          i += 2; // Skip option and its value
+          i += 2;
         } else {
           i++;
         }

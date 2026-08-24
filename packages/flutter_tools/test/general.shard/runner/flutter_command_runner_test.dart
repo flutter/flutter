@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -9,6 +10,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/experimental/extension_arg_parser.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -394,6 +397,98 @@ void main() {
           initializeFlutterRoot: false,
         );
       });
+
+      group('dynamic options initialization', () {
+        testUsingContext(
+          'initializes dynamic options when command is invoked directly',
+          () async {
+            final dynamicCommand = _FakeDynamicFlutterCommand();
+            final runner = createTestCommandRunner(dynamicCommand) as FlutterCommandRunner;
+
+            await runner.run(<String>['dynamic-cmd']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isTrue);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+            FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+          },
+        );
+
+        testUsingContext(
+          'initializes dynamic options when global flags precede command',
+          () async {
+            final dynamicCommand = _FakeDynamicFlutterCommand();
+            final runner = createTestCommandRunner(dynamicCommand) as FlutterCommandRunner;
+
+            await runner.run(<String>['--verbose', 'dynamic-cmd']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isTrue);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+            FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+          },
+        );
+
+        testUsingContext(
+          'initializes dynamic options when options with separate values precede command',
+          () async {
+            final dynamicCommand = _FakeDynamicFlutterCommand();
+            final runner = createTestCommandRunner(dynamicCommand) as FlutterCommandRunner;
+
+            await runner.run(<String>['-d', 'dummy-device', 'dynamic-cmd']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isTrue);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+            FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+          },
+        );
+
+        testUsingContext(
+          'initializes dynamic options when help command precedes dynamic command',
+          () async {
+            final dynamicCommand = _FakeDynamicFlutterCommand();
+            final runner = createTestCommandRunner(dynamicCommand) as FlutterCommandRunner;
+
+            await runner.run(<String>['help', '--verbose', 'dynamic-cmd']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isTrue);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+            FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+          },
+        );
+
+        testUsingContext(
+          'does not initialize dynamic options when tool extensions feature flag is disabled',
+          () async {
+            final dynamicCommand = _FakeDynamicFlutterCommand();
+            final runner = createTestCommandRunner(dynamicCommand) as FlutterCommandRunner;
+
+            await runner.run(<String>['dynamic-cmd']);
+
+            expect(dynamicCommand.didInitializeDynamicOptions, isFalse);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+            FeatureFlags: () => TestFeatureFlags(),
+          },
+        );
+      });
     });
   });
 }
@@ -446,4 +541,35 @@ final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
 
   @override
   String get description => 'does nothing, this time with --machine';
+}
+
+final class _FakeDynamicFlutterCommand extends FlutterCommand with ExtensionArgParserMixin {
+  _FakeDynamicFlutterCommand();
+
+  @override
+  String get name => 'dynamic-cmd';
+
+  @override
+  String get description => 'A fake command with dynamic extension options';
+
+  bool didInitializeDynamicOptions = false;
+
+  @override
+  Future<void> initializeDynamicOptions() async {
+    didInitializeDynamicOptions = true;
+  }
+
+  @override
+  String? get extensionArgParserCacheKey => 'dummy-cache-key';
+
+  @override
+  ArgParser buildDynamicArgParser(ArgParser dynamicParser) {
+    dynamicParser.addFlag('dynamic-flag', help: 'A dynamically added flag');
+    return dynamicParser;
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
 }
