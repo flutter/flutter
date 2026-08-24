@@ -187,8 +187,8 @@ std::string SimplifyPath(std::string path) {
 
 std::string AbsolutePath(const std::string& path) {
   std::error_code ec;
-  std::filesystem::path p(
-      std::u8string_view(reinterpret_cast<const char8_t*>(path.data()), path.size()));
+  std::filesystem::path p(std::u8string_view(
+      reinterpret_cast<const char8_t*>(path.data()), path.size()));
   std::filesystem::path abs_path = std::filesystem::absolute(p, ec);
   if (ec) {
     tonic::Log("Failed to resolve absolute path for '%s': %s", path.c_str(),
@@ -197,7 +197,8 @@ std::string AbsolutePath(const std::string& path) {
   }
   abs_path = abs_path.lexically_normal();
   std::u8string u8_str = abs_path.u8string();
-  return std::string(reinterpret_cast<const char*>(u8_str.data()), u8_str.size());
+  return std::string(reinterpret_cast<const char*>(u8_str.data()),
+                     u8_str.size());
 }
 
 std::string GetDirectoryName(const std::string& path) {
@@ -235,7 +236,7 @@ std::string GetAbsoluteFilePath(const std::string& path) {
   } else if (ret >= MAX_PATH) {
     std::vector<wchar_t> dyn_buffer(ret);
     DWORD dyn_ret = GetFinalPathNameByHandleW(file, dyn_buffer.data(), ret,
-                                             FILE_NAME_NORMALIZED);
+                                              FILE_NAME_NORMALIZED);
     if (dyn_ret > 0 && dyn_ret < ret) {
       wide_result.assign(dyn_buffer.data(), dyn_ret);
     }

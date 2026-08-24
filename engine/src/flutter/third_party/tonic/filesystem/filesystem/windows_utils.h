@@ -18,8 +18,7 @@ inline std::wstring Utf8PathToWide(std::string_view utf8_path) {
   if (utf8_path.empty()) {
     return std::wstring();
   }
-  const char8_t* u8_data =
-      reinterpret_cast<const char8_t*>(utf8_path.data());
+  const char8_t* u8_data = reinterpret_cast<const char8_t*>(utf8_path.data());
   std::u8string_view u8_view(u8_data, utf8_path.size());
   return std::filesystem::path(u8_view).wstring();
 }

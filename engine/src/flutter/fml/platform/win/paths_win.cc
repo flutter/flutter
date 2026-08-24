@@ -70,8 +70,8 @@ std::pair<bool, std::string> GetExecutablePath() {
 
 std::string AbsolutePath(const std::string& path) {
   std::error_code ec;
-  std::filesystem::path p(
-      std::u8string_view(reinterpret_cast<const char8_t*>(path.data()), path.size()));
+  std::filesystem::path p(std::u8string_view(
+      reinterpret_cast<const char8_t*>(path.data()), path.size()));
   std::filesystem::path abs_path = std::filesystem::absolute(p, ec);
   if (ec) {
     FML_DLOG(ERROR) << "Failed to resolve absolute path for '" << path
@@ -80,7 +80,8 @@ std::string AbsolutePath(const std::string& path) {
   }
   abs_path = abs_path.lexically_normal();
   std::u8string u8_str = abs_path.u8string();
-  return std::string(reinterpret_cast<const char*>(u8_str.data()), u8_str.size());
+  return std::string(reinterpret_cast<const char*>(u8_str.data()),
+                     u8_str.size());
 }
 
 std::string GetDirectoryName(const std::string& path) {
