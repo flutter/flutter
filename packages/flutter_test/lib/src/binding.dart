@@ -1734,7 +1734,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // This can get called twice, in the case of a Future without listeners failing, and then
       // our main future completing.
       assert(Zone.current == _parentZone);
-      _testZone = null;
       if (_pendingExceptionDetails != null) {
         debugPrint =
             debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
@@ -2164,6 +2163,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     FlutterError.demangleStackTrace = _oldStackTraceDemangler;
     _pendingExceptionDetails = null;
     _parentZone = null;
+    _testZone = null;
     buildOwner!.focusManager.dispose();
 
     if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(

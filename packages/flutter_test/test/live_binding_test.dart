@@ -120,6 +120,50 @@ void main() {
     expect(gestureZone, equals(bodyZone));
   });
 
+  testWidgets(
+    'Teardown callbacks and frame callbacks in teardown run in current test zone (test 1 of 2)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113885
+      final Zone bodyZone = Zone.current;
+      addTearDown(() async {
+        Zone? teardownBuildZone;
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Builder(
+              builder: (BuildContext context) {
+                teardownBuildZone = Zone.current;
+                return const Text('Teardown 1');
+              },
+            ),
+          ),
+        );
+        expect(teardownBuildZone, equals(bodyZone));
+      });
+    },
+  );
+
+  testWidgets(
+    'Teardown callbacks and frame callbacks in teardown run in current test zone (test 2 of 2)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/113885
+      final Zone bodyZone = Zone.current;
+      addTearDown(() async {
+        Zone? teardownBuildZone;
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Builder(
+              builder: (BuildContext context) {
+                teardownBuildZone = Zone.current;
+                return const Text('Teardown 2');
+              },
+            ),
+          ),
+        );
+        expect(teardownBuildZone, equals(bodyZone));
+      });
+    },
+  );
+
   testWidgets('Input PointerAddedEvent', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidgetsApp(home: Text('Test')));
     await tester.pump();
