@@ -1004,11 +1004,12 @@ void main() {
   "format-version": [1, 0, 0],
   "native-assets": {
     "ios_arm64": {
-      "package:project/asset1": ["absolute", "Foo.framework/Foo"],
-      "package:project/asset2": ["absolute", "Bar.framework/Bar"]
+      "package:project/asset1": ["absolute", "@rpath/Foo.framework/Foo"],
+      "package:project/asset2": ["absolute", "@rpath/Bar.framework/Bar"],
+      "package:project/asset3": ["system", "/usr/lib/libsqlite3.dylib"]
     },
     "ios_x64": {
-      "package:project/asset1": ["absolute", "Foo.framework/Foo"]
+      "package:project/asset1": ["absolute", "@rpath/Foo.framework/Foo"]
     }
   }
 }
@@ -1018,9 +1019,13 @@ void main() {
         output,
         FlutterDarwinPlatform.ios,
       );
+      // Bundled assets are recorded under their install name and come back as
+      // the location within the bundle. An asset that is not bundled has no
+      // install name to strip.
       expect(assets, <String, String>{
         'package:project/asset1': 'Foo.framework/Foo',
         'package:project/asset2': 'Bar.framework/Bar',
+        'package:project/asset3': '/usr/lib/libsqlite3.dylib',
       });
     });
 
@@ -1037,11 +1042,11 @@ void main() {
   "format-version": [1, 0, 0],
   "native-assets": {
     "macos_x64": {
-      "package:project/asset1": ["absolute", "Foo.framework/Foo"],
-      "package:project/asset2": ["absolute", "Bar.framework/Bar"]
+      "package:project/asset1": ["absolute", "@rpath/Foo.framework/Foo"],
+      "package:project/asset2": ["absolute", "@rpath/Bar.framework/Bar"]
     },
     "macos_arm64": {
-      "package:project/asset1": ["absolute", "Foo.framework/Foo"]
+      "package:project/asset1": ["absolute", "@rpath/Foo.framework/Foo"]
     }
   }
 }
