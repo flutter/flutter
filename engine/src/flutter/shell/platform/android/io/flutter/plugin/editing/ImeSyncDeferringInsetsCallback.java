@@ -125,10 +125,12 @@ class ImeSyncDeferringInsetsCallback {
     public void onEnd(WindowInsetsAnimation animation) {
       try (TraceSection e = TraceSection.scoped("ImeSyncDeferringInsetsCallback#onEnd")) {
         stateMachine.onEnd(view, animation);
-        WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
-        if (insets != null && imeVisibilityListener != null) {
-          boolean imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
-          imeVisibilityListener.onImeVisibilityChanged(imeVisible);
+        if (view != null) {
+          WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
+          if (insets != null && imeVisibilityListener != null) {
+            boolean imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+            imeVisibilityListener.onImeVisibilityChanged(imeVisible);
+          }
         }
       }
     }

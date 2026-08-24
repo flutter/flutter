@@ -26,8 +26,9 @@ void main() {
     // A view with bottom padding driven by MediaQuery.viewInsetsOf(context).bottom.
     // In edgeToEdge mode on API 34, viewPadding.bottom is 24dp (gesture bar).
     Widget buildTestApp(double bottomInset) {
-      return TestWidgetsApp(
-        home: MediaQuery(
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
           data: MediaQueryData(
             size: const Size(400, 800),
             padding: const EdgeInsets.only(bottom: 24),
