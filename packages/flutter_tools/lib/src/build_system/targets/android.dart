@@ -429,7 +429,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
       environment,
       _components!,
       generatedLoadingUnits,
-      environment.rootBuildDir,
+      FlutterProject.fromDirectory(environment.projectDir).buildDirectory,
       abis,
       dependency.buildMode,
     );

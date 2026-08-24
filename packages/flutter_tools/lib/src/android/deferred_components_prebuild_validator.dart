@@ -282,8 +282,8 @@ class _DeferredComponentAndroidFiles {
     }
     final context = <String, Object>{
       'androidIdentifier':
-          FlutterProject.current().manifest.androidPackage ??
-          'com.example.${FlutterProject.current().manifest.appName}',
+          FlutterProject.fromDirectory(projectDir).manifest.androidPackage ??
+          'com.example.${FlutterProject.fromDirectory(projectDir).manifest.appName}',
       'componentName': name,
     };
 

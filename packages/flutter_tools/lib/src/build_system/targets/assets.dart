@@ -13,6 +13,7 @@ import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -207,7 +208,8 @@ Future<Depfile> copyAssets(
       assetBundle.deferredComponentsEntries.entries.map<Future<void>>((
         MapEntry<String, Map<String, AssetBundleEntry>> componentEntries,
       ) async {
-        final Directory componentOutputDir = environment.rootBuildDir
+        final Directory componentOutputDir = FlutterProject.fromDirectory(environment.projectDir)
+            .buildDirectory
             .childDirectory(componentEntries.key)
             .childDirectory('intermediates')
             .childDirectory('flutter');

@@ -111,8 +111,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
       buildBundleEnableHcpp:
-          explicitEnableHcpp ??
-          FlutterProject.current().android.computeHcppEnabled(ifAbsent: enableHcpp),
+          explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   }
 
@@ -127,8 +126,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.
-    final List<DeferredComponent>? deferredComponents =
-        FlutterProject.current().manifest.deferredComponents;
+    final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;
     if (deferredComponents != null && boolArg('deferred-components')) {
       // Record to analytics that DeferredComponents is being used.
       globals.analytics.send(
