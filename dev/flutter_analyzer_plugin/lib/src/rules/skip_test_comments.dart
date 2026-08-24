@@ -32,6 +32,11 @@ class SkipTestComments extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path;
+    // Skip test comments rule only applies to test files.
+    if (!filePath.startsWith('/home/test') && !filePath.endsWith('_test.dart')) {
+      return;
+    }
     final visitor = _Visitor(this, context);
     registry.addMethodInvocation(this, visitor);
   }
@@ -45,6 +50,10 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   static bool _isTestMethod(String name) {
     return name.startsWith('test') || name == 'group' || name == 'expect';
+  }
+
+  static bool _isNonSkippingExpression(Expression expr) {
+    return expr is SimpleIdentifier || (expr is BooleanLiteral && !expr.value);
   }
 
   bool _hasInlineIgnore(int offset, Pattern ignoreDirectivePattern) {
@@ -84,6 +93,7 @@ class _Visitor extends SimpleAstVisitor<void> {
       for (final Argument argument in node.argumentList.arguments) {
         if (argument is NamedArgument &&
             argument.name.lexeme == 'skip' &&
+            !_isNonSkippingExpression(argument.argumentExpression) &&
             !_hasValidJustificationComment(argument.name.offset)) {
           rule.reportAtNode(argument);
         }

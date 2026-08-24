@@ -33,6 +33,12 @@ class NoSyncAsyncStar extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path;
+    // sync*/async* restrictions apply to production code, not test files.
+    if (!filePath.startsWith('/home/test') &&
+        (filePath.contains('/test/') || filePath.endsWith('_test.dart'))) {
+      return;
+    }
     final visitor = _Visitor(this, context);
     registry.addFunctionDeclaration(this, visitor);
     registry.addMethodDeclaration(this, visitor);

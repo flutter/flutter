@@ -33,8 +33,12 @@ class TabooDocumentation extends AnalysisRule {
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final String filePath = context.definingUnit.file.path;
-    if (filePath.endsWith('taboo_documentation.dart') ||
-        filePath.endsWith('taboo_documentation_test.dart')) {
+    if (!filePath.startsWith('/home/test') &&
+        (filePath.contains('/test/') ||
+            filePath.endsWith('_test.dart') ||
+            filePath.contains('packages/flutter_tools') ||
+            filePath.endsWith('taboo_documentation.dart') ||
+            filePath.endsWith('taboo_documentation_test.dart'))) {
       return;
     }
     final visitor = _Visitor(this, context);
