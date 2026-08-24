@@ -14,6 +14,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -42,6 +43,7 @@ class IOSCoreDeviceLauncher {
     required FileSystem fileSystem,
     required ProcessUtils processUtils,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required Version? deviceVersion,
     @visibleForTesting LLDB? lldb,
   }) : _coreDeviceControl = coreDeviceControl,
        _logger = logger,
@@ -53,6 +55,7 @@ class IOSCoreDeviceLauncher {
              logger: logger,
              processUtils: processUtils,
              xcodeProjectInterpreter: xcodeProjectInterpreter,
+             deviceVersion: deviceVersion,
            );
 
   final IOSCoreDeviceControl _coreDeviceControl;
@@ -865,7 +868,7 @@ class IOSCoreDeviceControl {
       unawaited(
         launchProcess.exitCode
             .then((int status) async {
-              _logger.printTrace('lldb exited with code $status');
+              _logger.printTrace('devicectl exited with code $status');
               await stdoutSubscription.cancel();
               await stderrSubscription.cancel();
             })

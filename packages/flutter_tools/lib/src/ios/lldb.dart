@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import 'device_support.dart';
 import 'xcodeproj.dart';
@@ -25,13 +26,16 @@ class LLDB {
     required Logger logger,
     required ProcessUtils processUtils,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required Version? deviceVersion,
   }) : _logger = logger,
        _processUtils = processUtils,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter;
+       _xcodeProjectInterpreter = xcodeProjectInterpreter,
+       _deviceVersion = deviceVersion;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
+  final Version? _deviceVersion;
 
   _LLDBProcess? _lldbProcess;
 
@@ -78,6 +82,20 @@ class LLDB {
   /// Example: "- Hook 1 (thread backtrace all)"
   static final _stopHookProcessedPattern = RegExp(r'- Hook \d+');
 
+  /// Pattern of lldb log when the application has started.
+  ///
+  /// Example: Target 0: (Flutter Gallery) stopped.
+  static final _targetStoppedPattern = RegExp(r'Target .* stopped.');
+
+  /// LLDB command to continue execution of all threads in the current process.
+  static const _processContinueCommand = 'process continue';
+
+  /// LLDB command to show backtraces of all thread call stacks.
+  static const _threadBacktraceAllCommand = 'thread backtrace all';
+
+  /// LLDB command to detach from the current target process.
+  static const _detachCommand = 'detach';
+
   /// A list of log patterns to ignore.
   static final _ignorePatterns = <Pattern>[
     RegExp(r'\d+ location added to breakpoint \d+'),
@@ -110,8 +128,6 @@ if not error.Success():
     print(f'Failed to write into {base}[+{page_len}]', error)
     return
 
-# If the returned value is False, that tells LLDB not to stop at the breakpoint
-return False
 ''';
 
   /// Starts an LLDB process and inputs commands to start debugging the [appProcessId].
@@ -144,9 +160,20 @@ return False
         }
       });
 
+      // iOS 27+ devices sometimes fail to stop at the JIT breakpoint (only used in debug mode)
+      // when `auto-continue` is enabled. This causes the app to crash. To workaround this, we
+      // manually listen for stops and continue the process if the stop is due to the breakpoint.
+      var manualContinue = false;
+      if (mode == BuildMode.debug &&
+          _deviceVersion != null &&
+          _deviceVersion >= Version(27, 0, 0)) {
+        manualContinue = true;
+      }
+
       final bool start = await _startLLDB(
         appProcessId: appProcessId,
         lldbLogForwarder: lldbLogForwarder,
+        manualContinue: manualContinue,
       );
       if (!start) {
         return false;
@@ -155,10 +182,15 @@ return False
       await _addSymbolSearchPaths(deviceSupport);
 
       if (mode == BuildMode.debug) {
-        await _setBreakpoint();
+        await _setBreakpoint(manualContinue);
       }
       await _attachToAppProcess(appProcessId);
-      await _setupStopHooks();
+
+      // Stop hooks should only be used when manualContinue is false. Otherwise, it would run on
+      // every breakpoint stop instead of just crashes.
+      if (!manualContinue) {
+        await _setupStopHooks();
+      }
       await _printDeviceSupportStatus();
       await _resumeProcess(mode);
       _isAttached = true;
@@ -180,6 +212,7 @@ return False
   Future<bool> _startLLDB({
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
+    required bool manualContinue,
   }) async {
     if (_lldbProcess != null) {
       _logger.printTrace(
@@ -196,18 +229,63 @@ return False
         appProcessId: appProcessId,
         logger: _logger,
       );
+
+      void printLine(String line) {
+        if (_isAttached && !_ignoreLog(line)) {
+          // Only forwards logs after LLDB is attached. All logs before then are part of the
+          // attach process.
+
+          lldbLogForwarder.addLog(line);
+        } else {
+          _logger.printTrace('[lldb]: $line');
+          _logCompleter?.checkForMatch(line);
+        }
+      }
+
+      var processIsStoppedAfterAttaching = false;
+      final List<String> stopLogs = [];
       final StreamSubscription<String> stdoutSubscription = _lldbProcess!.stdout
           .transform(utf8LineDecoder)
-          .listen((String line) {
-            if (_isAttached && !_ignoreLog(line)) {
-              // Only forwards logs after LLDB is attached. All logs before then are part of the
-              // attach process.
-
-              lldbLogForwarder.addLog(line);
-            } else {
-              _logger.printTrace('[lldb]: $line');
-              _logCompleter?.checkForMatch(line);
+          .listen((String line) async {
+            // If not manually handling stops or if not attached yet, print the line directly.
+            if (!manualContinue || !_isAttached) {
+              printLine(line);
+              return;
             }
+
+            // When manually continuing, listen for process stops and then handle the stop by
+            // either continuing the process or detaching.
+            //
+            // When the process stops, collect logs until the target has stopped. Once the target
+            // has stopped, check if it stopped due to a breakpoint. If it has, continue and
+            // process and discard the logs after the process resumes. If the stop is not caused by
+            // a breakpoint, print the collected logs, get the stack trace, and detach.
+            if (line.contains(_lldbProcessStopped)) {
+              processIsStoppedAfterAttaching = true;
+            }
+            if (processIsStoppedAfterAttaching) {
+              stopLogs.add(line);
+            }
+            if (line.contains(_targetStoppedPattern)) {
+              if (stopLogs.any((log) => log.contains('stop reason = breakpoint'))) {
+                await _lldbProcess?.stdinWriteln(_processContinueCommand);
+              } else {
+                stopLogs.forEach(printLine);
+                await _lldbProcess?.stdinWriteln(_threadBacktraceAllCommand);
+                await _lldbProcess?.stdinWriteln(_detachCommand);
+                processIsStoppedAfterAttaching = false;
+              }
+              return;
+            }
+            if (processIsStoppedAfterAttaching) {
+              if (line.contains(_lldbProcessResuming)) {
+                processIsStoppedAfterAttaching = false;
+                stopLogs.clear();
+              }
+              return;
+            }
+
+            printLine(line);
           });
 
       final StreamSubscription<String> stderrSubscription = _lldbProcess!.stderr
@@ -294,14 +372,17 @@ return False
 
   /// Sets a breakpoint, waits for it print the breakpoint id, and adds a python
   /// script command to be executed whenever the breakpoint is hit.
-  Future<void> _setBreakpoint() async {
+  Future<void> _setBreakpoint(bool manualContinue) async {
     final Future<String> futureLog = _startWaitingForLog(
       _breakpointPattern,
     ).then((value) => value, onError: _handleAsyncError);
 
-    await _lldbProcess?.stdinWriteln(
-      r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
-    );
+    final breakpointSetCommand = manualContinue
+        ? r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'"
+        : r"breakpoint set --auto-continue true --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
+
+    await _lldbProcess?.stdinWriteln(breakpointSetCommand);
+
     final String log = await futureLog;
     final Match? match = _breakpointPattern.firstMatch(log);
     final String? breakpointId = match?.group(1);
@@ -330,7 +411,7 @@ return False
       mode == BuildMode.debug ? _lldbBreakpointAdded : _lldbProcessResuming,
     ).then((value) => value, onError: _handleAsyncError);
 
-    await _lldbProcess?.stdinWriteln('process continue');
+    await _lldbProcess?.stdinWriteln(_processContinueCommand);
     await futureLog;
   }
 
@@ -342,7 +423,9 @@ return False
     final Future<String> futureLog = _startWaitingForLog(
       _stopHookAddedPattern,
     ).then((value) => value, onError: _handleAsyncError);
-    await _lldbProcess?.stdinWriteln('target stop-hook add -o "thread backtrace all" -o "detach"');
+    await _lldbProcess?.stdinWriteln(
+      'target stop-hook add -o "$_threadBacktraceAllCommand" -o "$_detachCommand"',
+    );
     await futureLog;
   }
 
