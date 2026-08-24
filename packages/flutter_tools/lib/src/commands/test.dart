@@ -8,6 +8,7 @@ import 'package:package_config/package_config_types.dart';
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../devfs.dart';
@@ -818,7 +819,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needsRebuild(assetBundle.entries, flavor)) {
+    if (await _needsRebuild(assetBundle.entries, flavor)) {
       await writeBundle(
         globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
         assetBundle.entries,
@@ -845,11 +846,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
-  bool _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) {
-    // TODO(andrewkolos): This logic might fail in the future if we change the
-    //  schema of the contents of the asset manifest file and the user does not
-    //  perform a `flutter clean` after upgrading.
-    //  See https://github.com/flutter/flutter/issues/128563.
+  Future<bool> _needsRebuild(Map<String, AssetBundleEntry> entries, String? flavor) async {
     final File manifest = globals.fs.file(
       globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'),
     );
@@ -868,6 +865,22 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     for (final entry in files) {
       if (entry.isModifiedAfter(lastModified)) {
         return true;
+      }
+    }
+
+    for (final MapEntry<String, AssetBundleEntry> entry in entries.entries) {
+      if (entry.value.content is! DevFSFileContent) {
+        final File file = globals.fs.file(
+          globals.fs.path.join('build', 'unit_test_assets', entry.key),
+        );
+        if (!file.existsSync()) {
+          return true;
+        }
+        final List<int> entryBytes = await entry.value.contentsAsBytes();
+        final List<int> fileBytes = await file.readAsBytes();
+        if (!listEquals(entryBytes, fileBytes)) {
+          return true;
+        }
       }
     }
 
