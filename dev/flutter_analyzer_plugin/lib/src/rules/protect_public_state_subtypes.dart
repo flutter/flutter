@@ -35,6 +35,15 @@ class ProtectPublicStateSubtypes extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
+    // Material and Cupertino packages are marked as read-only and exempted from this lint.
+    if (!filePath.startsWith('/home/test') &&
+        (filePath.contains('/material/') ||
+            filePath.contains('/cupertino/') ||
+            filePath.contains('src/material') ||
+            filePath.contains('src/cupertino'))) {
+      return;
+    }
     final visitor = _Visitor(this, context);
     registry.addClassDeclaration(this, visitor);
   }

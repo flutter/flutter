@@ -470,7 +470,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         );
   }
 
-  @protected
   @override
   Widget build(BuildContext context) {
     // If no message is provided, there is no need to create a tooltip overlay

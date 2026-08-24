@@ -2874,14 +2874,12 @@ class ScaffoldState extends State<Scaffold>
     super.didChangeDependencies();
   }
 
-  @protected
   @override
   void deactivate() {
     WidgetsBinding.instance.removeObserver(this);
     super.deactivate();
   }
 
-  @protected
   @override
   void activate() {
     super.activate();

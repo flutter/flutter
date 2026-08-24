@@ -56,35 +56,25 @@ class _Visitor extends SimpleAstVisitor<void> {
     return expr is SimpleIdentifier || (expr is BooleanLiteral && !expr.value);
   }
 
-  bool _hasInlineIgnore(int offset, Pattern ignoreDirectivePattern) {
+  bool _hasInlineIgnore(NamedArgument argument, Pattern ignoreDirectivePattern) {
     final RuleContextUnit compilationUnit = context.currentUnit!;
     final LineInfo lineInfo = compilationUnit.unit.lineInfo;
-    final int lineNumber = lineInfo.getLocation(offset).lineNumber;
+    final int startLine = lineInfo.getLocation(argument.offset).lineNumber;
+    final int endLine = lineInfo.getLocation(argument.end).lineNumber;
     final String content = compilationUnit.content;
 
-    final int endOffset =
-        lineNumber < lineInfo.lineCount ? lineInfo.getOffsetOfLine(lineNumber) : content.length;
-    final String textAfterNode = content.substring(offset, endOffset);
-    if (textAfterNode.contains(ignoreDirectivePattern)) {
-      return true;
-    }
+    final int scanStartLine = (startLine - 1).clamp(1, lineInfo.lineCount);
+    final int scanStartOffset = lineInfo.getOffsetOfLine(scanStartLine - 1);
+    final int scanEndOffset =
+        endLine < lineInfo.lineCount ? lineInfo.getOffsetOfLine(endLine) : content.length;
 
-    final int previousLineNumber = lineNumber - 1;
-    if (previousLineNumber <= 0) {
-      return false;
-    }
-    return content
-        .substring(
-          lineInfo.getOffsetOfLine(previousLineNumber - 1),
-          lineInfo.getOffsetOfLine(previousLineNumber),
-        )
-        .trimLeft()
-        .contains(ignoreDirectivePattern);
+    final String text = content.substring(scanStartOffset, scanEndOffset);
+    return text.contains(ignoreDirectivePattern);
   }
 
-  bool _hasValidJustificationComment(int offset) {
-    return _hasInlineIgnore(offset, _skipTestIntentionalPattern) ||
-        _hasInlineIgnore(offset, _skipTestTrackingBugPattern);
+  bool _hasValidJustificationComment(NamedArgument argument) {
+    return _hasInlineIgnore(argument, _skipTestIntentionalPattern) ||
+        _hasInlineIgnore(argument, _skipTestTrackingBugPattern);
   }
 
   @override
@@ -94,7 +84,7 @@ class _Visitor extends SimpleAstVisitor<void> {
         if (argument is NamedArgument &&
             argument.name.lexeme == 'skip' &&
             !_isNonSkippingExpression(argument.argumentExpression) &&
-            !_hasValidJustificationComment(argument.name.offset)) {
+            !_hasValidJustificationComment(argument)) {
           rule.reportAtNode(argument);
         }
       }

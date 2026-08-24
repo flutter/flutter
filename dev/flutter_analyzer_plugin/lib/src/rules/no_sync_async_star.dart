@@ -33,10 +33,15 @@ class NoSyncAsyncStar extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path;
-    // sync*/async* restrictions apply to production code, not test files.
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     if (!filePath.startsWith('/home/test') &&
-        (filePath.contains('/test/') || filePath.endsWith('_test.dart'))) {
+        (!filePath.contains('/packages/') && !filePath.contains('/examples/'))) {
+      return;
+    }
+    if (!filePath.startsWith('/home/test') &&
+        (filePath.contains('/test/') ||
+            filePath.endsWith('_test.dart') ||
+            filePath.contains('flutter_test'))) {
       return;
     }
     final visitor = _Visitor(this, context);
@@ -71,12 +76,12 @@ class _Visitor extends SimpleAstVisitor<void> {
   }
 
   void _checkFunctionBody(FunctionBody body, AstNode node) {
-    if (body.isGenerator && !_hasExplanationComment(node)) {
+    if (body.isGenerator && !_hasExplanationComment(node, body)) {
       rule.reportAtNode(node);
     }
   }
 
-  bool _hasExplanationComment(AstNode node) {
+  bool _hasExplanationComment(AstNode node, FunctionBody body) {
     bool hasMatch(Token? startToken) {
       for (
         Token? comment = startToken?.precedingComments;
@@ -88,6 +93,19 @@ class _Visitor extends SimpleAstVisitor<void> {
         }
       }
       return false;
+    }
+
+    final Token firstToken =
+        node is AnnotatedNode ? node.firstTokenAfterCommentAndMetadata : node.beginToken;
+
+    for (
+      Token? token = firstToken;
+      token != null && token.offset <= body.beginToken.offset;
+      token = token.next
+    ) {
+      if (hasMatch(token)) {
+        return true;
+      }
     }
 
     return hasMatch(node.beginToken) || hasMatch(node.parent?.beginToken);

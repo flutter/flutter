@@ -31,6 +31,7 @@ class RepositoryLinkSyntaxTest extends AnalysisRuleTest {
 // Exempt repositories whose default branch is master:
 // https://github.com/clojure/clojure/tree/master/file1
 // https://github.com/dart-lang/test/tree/master/file1
+// https://github.com/flutter/flutter-intellij/tree/master/file1
 // https://github.com/glfw/glfw/tree/master/file1
 // https://github.com/ninja-build/ninja/tree/master/file1
 // https://github.com/torvalds/linux/tree/master/file1

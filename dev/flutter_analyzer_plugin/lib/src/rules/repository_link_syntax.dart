@@ -22,6 +22,7 @@ const Set<String> _repoExceptions = <String>{
   'dart-lang/test', // TODO(guidezpl): remove when https://github.com/dart-lang/test/issues/2209 is closed
   'eseidelGoogle/bezier_perf',
   'flutter/devtools', // TODO(guidezpl): remove when https://github.com/flutter/devtools/issues/7551 is closed
+  'flutter/flutter-intellij',
   'glfw/glfw',
   'GoogleCloudPlatform/artifact-registry-maven-tools',
   'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed

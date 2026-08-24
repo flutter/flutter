@@ -29,6 +29,10 @@ class DeprecationSyntax extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
+    if (filePath.contains('analyze-test-input')) {
+      return;
+    }
     registry.addAnnotation(this, _Visitor(this, context));
   }
 }

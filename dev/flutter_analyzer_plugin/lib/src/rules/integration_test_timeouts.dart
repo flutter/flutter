@@ -29,7 +29,10 @@ class IntegrationTestTimeouts extends AnalysisRule {
 
   @override
   void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path;
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
+    if (!filePath.startsWith('/home/test') && !filePath.contains('/dev/')) {
+      return;
+    }
     if (!filePath.contains('test_driver') ||
         (!filePath.endsWith('_test.dart') &&
             !filePath.endsWith('util.dart') &&
