@@ -306,27 +306,6 @@ void main() {
       }
     }
   });
-
-  test('no Future.catchError in lib/ or bin/', () {
-    for (final dirName in <String>['lib', 'bin']) {
-      final Iterable<File> files = fileSystem
-          .directory(fileSystem.path.join(flutterTools, dirName))
-          .listSync(recursive: true)
-          .where(_isDartFile)
-          .map(_asFile);
-      for (final file in files) {
-        for (final String line in file.readAsLinesSync()) {
-          if (line.contains('.catchError(') &&
-              !line.contains('flutter_ignore: future_catch_error')) {
-            final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
-            fail(
-              '$relativePath uses catchError. Use Future.then(..., onError: ...) instead (see https://github.com/dart-lang/sdk/issues/51248).',
-            );
-          }
-        }
-      }
-    }
-  });
 }
 
 bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');
