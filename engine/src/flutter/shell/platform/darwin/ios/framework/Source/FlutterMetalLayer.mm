@@ -397,34 +397,6 @@ extern CFTimeInterval display_link_target;
   return drawable;
 }
 
-- (void)presentOnMainThread:(FlutterTexture*)texture {
-  if (texture.texture.width != _drawableSize.width ||
-      texture.texture.height != _drawableSize.height) {
-    // This texture was created with an old size, but the view has since been
-    // resized. Do not present this stale frame to avoid distortion. The texture
-    // will be correctly recycled on the next frame.
-    return;
-  }
-
-  // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
-  // Might also be placebo
-  [self setNeedsDisplay];
-
-  [CATransaction begin];
-  [CATransaction setDisableActions:YES];
-  self.contents = texture.surface;
-  [CATransaction commit];
-  [CATransaction flush];
-  _displayLink.paused = NO;
-  _displayLinkPauseCountdown = 0;
-  if (!_didSetContentsDuringThisDisplayLinkPeriod) {
-    _didSetContentsDuringThisDisplayLinkPeriod = YES;
-  } else if (!_displayLinkForcedMaxRate) {
-    _displayLinkForcedMaxRate = YES;
-    [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:YES];
-  }
-}
-
 - (void)presentTexture:(FlutterTexture*)texture {
   @synchronized(self) {
     if (texture.texture.width != _drawableSize.width ||
@@ -436,14 +408,23 @@ extern CFTimeInterval display_link_target;
     }
     _front = texture;
     texture.presentedTime = CACurrentMediaTime();
-    if ([NSThread isMainThread]) {
-      [self presentOnMainThread:texture];
-    } else {
-      // Core animation layers can only be updated on main thread.
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [self presentOnMainThread:texture];
-      });
-    }
+
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    self.contents = texture.surface;
+    [CATransaction commit];
+    [CATransaction flush];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+      _displayLink.paused = NO;
+      _displayLinkPauseCountdown = 0;
+      if (!_didSetContentsDuringThisDisplayLinkPeriod) {
+        _didSetContentsDuringThisDisplayLinkPeriod = YES;
+      } else if (!_displayLinkForcedMaxRate) {
+        _displayLinkForcedMaxRate = YES;
+        [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:YES];
+      }
+    });
   }
 }
 
