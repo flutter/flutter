@@ -91,15 +91,6 @@ TaskFunction createAndroidSemanticsIntegrationTest() {
   ).call;
 }
 
-TaskFunction createIOSPlatformViewTests({String? deviceIdOverride}) {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
-    'lib/main.dart',
-    extraOptions: <String>['--dart-define=ENABLE_DRIVER_EXTENSION=true'],
-    deviceIdOverride: deviceIdOverride,
-  ).call;
-}
-
 TaskFunction createEndToEndKeyboardTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',

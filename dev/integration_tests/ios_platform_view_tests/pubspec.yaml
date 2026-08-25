@@ -10,14 +10,11 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  flutter_driver:
-    sdk: flutter
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  test: any
 
 
 flutter:
