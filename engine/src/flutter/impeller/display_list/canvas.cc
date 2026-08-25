@@ -1885,6 +1885,8 @@ void Canvas::SaveLayer(const Paint& paint,
         WrapInput(renderer_, backdrop_filter,
                   FilterInput::Make(std::move(input_texture)));
     backdrop_filter_contents->SetEffectTransform(
+        transform_stack_.back().transform.Basis());
+    backdrop_filter_contents->SetLocalToPassTransform(
         transform_stack_.back().transform);
     backdrop_filter_contents->SetRenderingMode(
         transform_stack_.back().transform.HasTranslation()
