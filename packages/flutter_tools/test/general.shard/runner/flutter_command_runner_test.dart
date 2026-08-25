@@ -195,7 +195,8 @@ void main() {
       testUsingContext(
         'Fetches tags when --version is used',
         () async {
-          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final runner =
+              createTestCommandRunner(DummyFlutterCommand(), fakeAnalytics) as FlutterCommandRunner;
           final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['--version']);
