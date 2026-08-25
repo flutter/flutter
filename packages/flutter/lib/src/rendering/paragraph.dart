@@ -1532,6 +1532,18 @@ class _SelectableFragment
   LayerLink? _startHandleLayerLink;
   LayerLink? _endHandleLayerLink;
 
+  // The [LeaderLayer]s pushed by [paintHandles] for the handle layer links.
+  //
+  // A [LayerLink] can only be linked to a single [LeaderLayer] per frame, but a
+  // [RenderParagraph] can be painted more than once in the same frame. For
+  // example, a [RenderListWheelViewport] paints the item that overlaps the
+  // magnifier twice: once magnified and once cylindrically. These handles are
+  // used to detect that case: while a leader layer of an earlier paint of the
+  // same frame is still attached, pushing another one would leave the link with
+  // more than one leader.
+  final LayerHandle<LeaderLayer> _startHandleLeaderLayer = LayerHandle<LeaderLayer>();
+  final LayerHandle<LeaderLayer> _endHandleLeaderLayer = LayerHandle<LeaderLayer>();
+
   @override
   SelectionGeometry get value => _selectionGeometry;
   late SelectionGeometry _selectionGeometry;
@@ -3550,10 +3562,16 @@ class _SelectableFragment
     }
     if (_startHandleLayerLink != startHandle) {
       _startHandleLayerLink = startHandle;
+      if (startHandle == null) {
+        _startHandleLeaderLayer.layer = null;
+      }
       paragraph.markNeedsPaint();
     }
     if (_endHandleLayerLink != endHandle) {
       _endHandleLayerLink = endHandle;
+      if (endHandle == null) {
+        _endHandleLeaderLayer.layer = null;
+      }
       paragraph.markNeedsPaint();
     }
   }
@@ -3615,6 +3633,13 @@ class _SelectableFragment
   }
 
   @override
+  void dispose() {
+    _startHandleLeaderLayer.layer = null;
+    _endHandleLeaderLayer.layer = null;
+    super.dispose();
+  }
+
+  @override
   int get contentLength => range.end - range.start;
 
   @override
@@ -3644,26 +3669,34 @@ class _SelectableFragment
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return;
     }
-    if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
-      context.pushLayer(
-        LeaderLayer(
-          link: _startHandleLayerLink!,
-          offset: offset + value.startSelectionPoint!.localPosition,
-        ),
-        (PaintingContext context, Offset offset) {},
-        Offset.zero,
+    if (_startHandleLayerLink != null &&
+        value.startSelectionPoint != null &&
+        !_isLeaderLayerStillInLayerTree(_startHandleLeaderLayer)) {
+      final leaderLayer = LeaderLayer(
+        link: _startHandleLayerLink!,
+        offset: offset + value.startSelectionPoint!.localPosition,
       );
+      _startHandleLeaderLayer.layer = leaderLayer;
+      context.pushLayer(leaderLayer, (PaintingContext context, Offset offset) {}, Offset.zero);
     }
-    if (_endHandleLayerLink != null && value.endSelectionPoint != null) {
-      context.pushLayer(
-        LeaderLayer(
-          link: _endHandleLayerLink!,
-          offset: offset + value.endSelectionPoint!.localPosition,
-        ),
-        (PaintingContext context, Offset offset) {},
-        Offset.zero,
+    if (_endHandleLayerLink != null &&
+        value.endSelectionPoint != null &&
+        !_isLeaderLayerStillInLayerTree(_endHandleLeaderLayer)) {
+      final leaderLayer = LeaderLayer(
+        link: _endHandleLayerLink!,
+        offset: offset + value.endSelectionPoint!.localPosition,
       );
+      _endHandleLeaderLayer.layer = leaderLayer;
+      context.pushLayer(leaderLayer, (PaintingContext context, Offset offset) {}, Offset.zero);
     }
+  }
+
+  // Whether the leader layer pushed by an earlier paint is still part of the
+  // layer tree, which means the paragraph is being painted more than once in
+  // the same frame. The layer tree is torn down and rebuilt before a paint, so
+  // a leader layer that is still attached can only come from the current frame.
+  static bool _isLeaderLayerStillInLayerTree(LayerHandle<LeaderLayer> handle) {
+    return handle.layer?.attached ?? false;
   }
 
   @override
