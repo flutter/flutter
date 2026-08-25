@@ -1843,6 +1843,25 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _cachedController = null;
   }
 
+  /// Handler called when a press on the scrollbar thumb is canceled before it
+  /// turns into a drag, for example when the thumb drag gesture loses the
+  /// gesture arena.
+  ///
+  /// Subclasses that react to [handleThumbPress] must override this to undo
+  /// that reaction, since [handleThumbPressEnd] is not called for a canceled
+  /// gesture.
+  @protected
+  @mustCallSuper
+  void handleThumbPressCancel() {
+    // _thumbHold might be null if the drag started.
+    // _thumbDrag might be null if the drag activity ended and called _disposeThumbDrag.
+    assert(_thumbHold == null || _thumbDrag == null);
+    _thumbHold?.cancel();
+    _thumbDrag?.cancel();
+    assert(_thumbHold == null);
+    assert(_thumbDrag == null);
+  }
+
   /// Handler called when the track is tapped in order to page in the tapped
   /// direction.
   @protected
@@ -2007,13 +2026,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       // any work.
       return;
     }
-    // _thumbHold might be null if the drag started.
-    // _thumbDrag might be null if the drag activity ended and called _disposeThumbDrag.
-    assert(_thumbHold == null || _thumbDrag == null);
-    _thumbHold?.cancel();
-    _thumbDrag?.cancel();
-    assert(_thumbHold == null);
-    assert(_thumbDrag == null);
+    handleThumbPressCancel();
   }
 
   void _initThumbDragGestureRecognizer(DragGestureRecognizer instance) {

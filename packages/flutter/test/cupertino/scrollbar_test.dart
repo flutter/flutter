@@ -1358,4 +1358,60 @@ void main() {
     );
     expect(tester.getSize(find.byType(CupertinoScrollbar)), Size.zero);
   });
+
+  testWidgets('CupertinoScrollbar thumb thickness is restored when the thumb drag is canceled', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/162747
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: PrimaryScrollController(
+          controller: scrollController,
+          child: CupertinoScrollbar(
+            thumbVisibility: true,
+            controller: scrollController,
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: 50,
+              itemBuilder: (BuildContext context, int index) =>
+                  const SizedBox(height: 50.0, child: Text('Item')),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    double thumbThickness() {
+      final CustomPaint customPaint = tester
+          .widgetList<CustomPaint>(
+            find.descendant(
+              of: find.byType(CupertinoScrollbar),
+              matching: find.byType(CustomPaint),
+            ),
+          )
+          .firstWhere((CustomPaint paint) => paint.foregroundPainter is ScrollbarPainter);
+      return (customPaint.foregroundPainter! as ScrollbarPainter).thickness;
+    }
+
+    expect(thumbThickness(), CupertinoScrollbar.defaultThickness);
+
+    // Touch the thumb close to, but not directly on top of, the scrollbar
+    // track. The touch is still within the thumb's padded hit test area, so
+    // the thumb drag gesture recognizer is notified, but the scrollable's own
+    // drag gesture recognizer also joins the gesture arena. Lifting the finger
+    // without moving it makes the thumb drag lose the arena, which cancels the
+    // gesture instead of ending it.
+    final TestGesture gesture = await tester.startGesture(const Offset(780.0, 74.0));
+    await tester.pump();
+    await tester.pump(kScrollbarResizeDuration);
+    expect(thumbThickness(), CupertinoScrollbar.defaultThicknessWhileDragging);
+
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(kScrollbarResizeDuration);
+    expect(thumbThickness(), CupertinoScrollbar.defaultThickness);
+  });
 }
