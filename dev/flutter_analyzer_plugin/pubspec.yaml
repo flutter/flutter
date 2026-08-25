@@ -15,6 +15,7 @@ dependencies:
 
 dev_dependencies:
   analyzer_testing: any
+  test: any
   test_reflective_loader: any
 
 # PUBSPEC CHECKSUM: 3mn13l
