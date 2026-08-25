@@ -29,8 +29,9 @@ enum FadeInImageTransition {
   /// in, so there is no intermediate frame where neither image is fully opaque.
   ///
   /// The placeholder is not faded out in this mode, so
-  /// [FadeInImage.fadeOutDuration] and [FadeInImage.fadeOutCurve] must be null.
-  /// Only [FadeInImage.fadeInDuration] and [FadeInImage.fadeInCurve] are used.
+  /// [FadeInImage.fadeOutDuration] and [FadeInImage.fadeOutCurve] must be
+  /// omitted or null. Only [FadeInImage.fadeInDuration] and
+  /// [FadeInImage.fadeInCurve] are used.
   fadeInOver,
 }
 
@@ -96,7 +97,7 @@ class FadeInImage extends StatefulWidget {
   /// and then the image fades in. Set [transition] to
   /// [FadeInImageTransition.fadeInOver] to instead fade the image in on top of
   /// the placeholder; in that case [fadeOutDuration] and [fadeOutCurve] must be
-  /// null.
+  /// omitted or null.
   ///
   /// The [placeholder] and [image] may be composed in a [ResizeImage] to provide
   /// a custom decode/cache size.
@@ -137,8 +138,9 @@ class FadeInImage extends StatefulWidget {
   }) : assert(
          transition != FadeInImageTransition.fadeInOver ||
              (fadeOutDuration == null && fadeOutCurve == null),
-         'fadeOutDuration and fadeOutCurve have no effect when transition is '
-         'FadeInImageTransition.fadeInOver and must be null.',
+         'fadeOutDuration and fadeOutCurve must be omitted or null when '
+         'transition is FadeInImageTransition.fadeInOver, since the placeholder '
+         'is not faded out in that mode.',
        ),
        fadeOutDuration = fadeOutDuration ?? _defaultFadeOutDuration,
        fadeOutCurve = fadeOutCurve ?? _defaultFadeOutCurve;
@@ -210,8 +212,9 @@ class FadeInImage extends StatefulWidget {
   }) : assert(
          transition != FadeInImageTransition.fadeInOver ||
              (fadeOutDuration == null && fadeOutCurve == null),
-         'fadeOutDuration and fadeOutCurve have no effect when transition is '
-         'FadeInImageTransition.fadeInOver and must be null.',
+         'fadeOutDuration and fadeOutCurve must be omitted or null when '
+         'transition is FadeInImageTransition.fadeInOver, since the placeholder '
+         'is not faded out in that mode.',
        ),
        fadeOutDuration = fadeOutDuration ?? _defaultFadeOutDuration,
        fadeOutCurve = fadeOutCurve ?? _defaultFadeOutCurve,
@@ -300,8 +303,9 @@ class FadeInImage extends StatefulWidget {
   }) : assert(
          transition != FadeInImageTransition.fadeInOver ||
              (fadeOutDuration == null && fadeOutCurve == null),
-         'fadeOutDuration and fadeOutCurve have no effect when transition is '
-         'FadeInImageTransition.fadeInOver and must be null.',
+         'fadeOutDuration and fadeOutCurve must be omitted or null when '
+         'transition is FadeInImageTransition.fadeInOver, since the placeholder '
+         'is not faded out in that mode.',
        ),
        fadeOutDuration = fadeOutDuration ?? _defaultFadeOutDuration,
        fadeOutCurve = fadeOutCurve ?? _defaultFadeOutCurve,
@@ -357,16 +361,18 @@ class FadeInImage extends StatefulWidget {
   ///
   /// Defaults to 300 milliseconds.
   ///
-  /// Must be null when [transition] is [FadeInImageTransition.fadeInOver], since
-  /// the [placeholder] is not faded out in that mode.
+  /// Must be omitted or null when [transition] is
+  /// [FadeInImageTransition.fadeInOver], since the [placeholder] is not faded
+  /// out in that mode.
   final Duration fadeOutDuration;
 
   /// The curve of the fade-out animation for the [placeholder].
   ///
   /// Defaults to [Curves.easeOut].
   ///
-  /// Must be null when [transition] is [FadeInImageTransition.fadeInOver], since
-  /// the [placeholder] is not faded out in that mode.
+  /// Must be omitted or null when [transition] is
+  /// [FadeInImageTransition.fadeInOver], since the [placeholder] is not faded
+  /// out in that mode.
   final Curve fadeOutCurve;
 
   /// The duration of the fade-in animation for the [image].

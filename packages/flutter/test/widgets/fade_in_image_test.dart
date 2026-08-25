@@ -1087,6 +1087,18 @@ void main() {
         );
       });
 
+      testWidgets('memoryNetwork asserts when fadeOutCurve is set', (WidgetTester tester) async {
+        expect(
+          () => FadeInImage.memoryNetwork(
+            placeholder: Uint8List.fromList(kTransparentImage),
+            image: 'test.com',
+            fadeOutCurve: Curves.bounceIn,
+            transition: FadeInImageTransition.fadeInOver,
+          ),
+          throwsAssertionError,
+        );
+      });
+
       testWidgets('memoryNetwork asserts when fadeOutDuration is set', (WidgetTester tester) async {
         expect(
           () => FadeInImage.memoryNetwork(
@@ -1105,6 +1117,18 @@ void main() {
             placeholder: 'placeholder.png',
             image: 'test.com',
             fadeOutDuration: const Duration(seconds: 1),
+            transition: FadeInImageTransition.fadeInOver,
+          ),
+          throwsAssertionError,
+        );
+      });
+
+      testWidgets('assetNetwork asserts when fadeOutCurve is set', (WidgetTester tester) async {
+        expect(
+          () => FadeInImage.assetNetwork(
+            placeholder: 'placeholder.png',
+            image: 'test.com',
+            fadeOutCurve: Curves.bounceIn,
             transition: FadeInImageTransition.fadeInOver,
           ),
           throwsAssertionError,
