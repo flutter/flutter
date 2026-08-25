@@ -351,7 +351,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
-    final Stream<Uri> vmServiceUri = _discoverVmService(device: device);
+    final Future<Uri> vmServiceUri = _discoverVmService(device: device);
+    vmServiceUri.ignore();
 
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -363,7 +364,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       userIdentifier: userIdentifier,
       platform: _platform,
     );
-    flutterDevice.vmServiceUris = vmServiceUri;
+    flutterDevice.vmServiceUri = vmServiceUri;
     final flutterDevices = <FlutterDevice>[flutterDevice];
     final debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
@@ -400,7 +401,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           );
   }
 
-  Stream<Uri> _discoverVmService({required Device device}) {
+  Future<Uri> _discoverVmService({required Device device}) async {
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
@@ -408,14 +409,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
     if (!isWirelessIOSDevice && (debugPort != null || debugUri != null)) {
-      return Stream<Uri>.fromFuture(
-        buildVMServiceUri(
-          device,
-          debugUri?.host ?? hostname,
-          debugPort ?? debugUri!.port,
-          hostVmservicePort,
-          debugUri?.path,
-        ),
+      return buildVMServiceUri(
+        device,
+        debugUri?.host ?? hostname,
+        debugPort ?? debugUri!.port,
+        hostVmservicePort,
+        debugUri?.path,
       );
     }
 
@@ -460,8 +459,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       warningColor: TerminalColor.cyan,
     );
 
-    // Stop the timer once we receive the first uri.
-    return streamWithCallbackOnFirstItem(vmServiceDiscovery.uris, discoveryStatus.stop);
+    try {
+      return await vmServiceDiscovery.firstValidUri();
+    } finally {
+      discoveryStatus.stop();
+    }
   }
 
   bool _isIOSDevice(Device device) {

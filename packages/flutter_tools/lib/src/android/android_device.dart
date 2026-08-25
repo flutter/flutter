@@ -571,6 +571,7 @@ class AndroidDevice extends Device {
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
           ...debuggingOptions.getAndroidLaunchArguments(),
           if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+          if (route != null) '--route=$route',
         ],
       ];
 
