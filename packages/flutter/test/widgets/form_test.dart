@@ -1907,16 +1907,16 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Form(
-            child: _WrappingFormField(semanticsValidationResult: SemanticsValidationResult.invalid),
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Form(
+          child: _WrappingFormField(semanticsValidationResult: SemanticsValidationResult.invalid),
         ),
       ),
     );
 
     expect(find.byKey(_semanticsWrapperKey), findsOneWidget);
+    expect(find.byKey(_focusWrapperKey), findsNothing);
     expect(
       tester.getSemantics(find.text('field')),
       containsSemantics(validationResult: SemanticsValidationResult.invalid),
@@ -1929,17 +1929,17 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Form(
-            autovalidateMode: AutovalidateMode.onUnfocus,
-            child: _WrappingFormField(focusIncludesSemantics: false),
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Form(
+          autovalidateMode: AutovalidateMode.onUnfocus,
+          child: _WrappingFormField(focusIncludesSemantics: false),
         ),
       ),
     );
 
     expect(find.byKey(_focusWrapperKey), findsOneWidget);
+    expect(find.byKey(_semanticsWrapperKey), findsOneWidget);
     final Finder focus = find.descendant(
       of: find.byKey(_focusWrapperKey),
       matching: find.byType(Focus),

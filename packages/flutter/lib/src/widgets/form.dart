@@ -635,6 +635,10 @@ class FormField<T> extends StatefulWidget {
 
 /// The current state of a [FormField]. Passed to the [FormFieldBuilder] method
 /// for use in constructing the form field's widget.
+///
+/// Subclasses whose [FormField.builder] returns a sliver can override
+/// [wrapWithSemantics], [wrapWithFocus], and [focusIncludesSemantics] to
+/// replace the default render-box wrappers with sliver-compatible ones.
 class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   late T? _value = widget.initialValue;
   // Marking it as late, so it can be registered
@@ -831,6 +835,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   /// The [SemanticsValidationResult] published by [wrapWithSemantics] for this
   /// field's current state.
+  ///
+  /// See also:
+  ///
+  ///  * [wrapWithSemantics], which publishes this value on a [Semantics] node.
+  ///  * [hasError], which the default implementation reflects.
   @protected
   SemanticsValidationResult get semanticsValidationResult =>
       hasError ? SemanticsValidationResult.invalid : SemanticsValidationResult.valid;
@@ -840,6 +849,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// Subclasses whose [wrapWithSemantics] uses a sliver-typed semantics node
   /// override this to `false`, since the box-typed semantics node added by
   /// [Focus] would otherwise crash on a sliver child.
+  ///
+  /// See also:
+  ///
+  ///  * [wrapWithFocus], whose [Focus] node this flag configures.
+  ///  * [Focus.includeSemantics], which receives this value.
   @protected
   bool get focusIncludesSemantics => true;
 
@@ -849,6 +863,13 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// Subclasses whose builder returns a sliver override this to wrap with a
   /// sliver-typed semantics node instead, since [Semantics] is a render-box
   /// widget and would crash when given a sliver child.
+  ///
+  /// See also:
+  ///
+  ///  * [semanticsValidationResult], the value the default implementation
+  ///    publishes.
+  ///  * [wrapWithFocus], which wraps the result of this method when
+  ///    [AutovalidateMode.onUnfocus] validation is in effect.
   @protected
   Widget wrapWithSemantics(Widget child) {
     return Semantics(validationResult: semanticsValidationResult, child: child);
@@ -859,6 +880,13 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   ///
   /// Subclasses whose builder returns a sliver override [focusIncludesSemantics]
   /// to disable [Focus]'s own [Semantics] wrapper, which is a render-box widget.
+  ///
+  /// See also:
+  ///
+  ///  * [focusIncludesSemantics], which controls whether the [Focus] node adds
+  ///    its own [Semantics] node.
+  ///  * [wrapWithSemantics], which wraps the result of [FormField.builder]
+  ///    before this method runs.
   @protected
   Widget wrapWithFocus(Widget child) {
     return Focus(
