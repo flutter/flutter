@@ -116,17 +116,13 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
-    testUsingContext(
-      'throws error on absolute path to build-dir',
-      () async {
-        final configCommand = ConfigCommand();
-        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+    testUsingContext('throws error on absolute path to build-dir', () async {
+      final configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-        expect(() => commandRunner.run(<String>['config', '--build-dir=/foo']), throwsToolExit());
-        expect(fakeAnalytics.sentEvents, isEmpty);
-      },
-      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-    );
+      expect(() => commandRunner.run(<String>['config', '--build-dir=/foo']), throwsToolExit());
+      expect(fakeAnalytics.sentEvents, isEmpty);
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
     testUsingContext(
       'allows setting and removing feature flags',
@@ -228,22 +224,18 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'analytics flag enables/disables analytics',
-      () async {
-        final configCommand = ConfigCommand();
-        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+    testUsingContext('analytics flag enables/disables analytics', () async {
+      final configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-        expect(fakeAnalytics.telemetryEnabled, true);
+      expect(fakeAnalytics.telemetryEnabled, true);
 
-        await commandRunner.run(<String>['config', '--no-analytics']);
-        expect(fakeAnalytics.telemetryEnabled, false);
+      await commandRunner.run(<String>['config', '--no-analytics']);
+      expect(fakeAnalytics.telemetryEnabled, false);
 
-        await commandRunner.run(<String>['config', '--analytics']);
-        expect(fakeAnalytics.telemetryEnabled, true);
-      },
-      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
-    );
+      await commandRunner.run(<String>['config', '--analytics']);
+      expect(fakeAnalytics.telemetryEnabled, true);
+    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
     testUsingContext('analytics reported with help usages', () async {
       final configCommand = ConfigCommand();
@@ -252,15 +244,35 @@ void main() {
       await fakeAnalytics.setTelemetry(false);
       expect(
         configCommand.usage,
-        containsIgnoringWhitespace('Analytics reporting is currently disabled'),
+        containsIgnoringWhitespace('Analytics reporting is currently disabled.'),
       );
 
       await fakeAnalytics.setTelemetry(true);
       expect(
         configCommand.usage,
-        containsIgnoringWhitespace('Analytics reporting is currently enabled'),
+        containsIgnoringWhitespace('Analytics reporting is currently enabled.'),
       );
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+
+    testUsingContext(
+      'analytics usage mentions feature branch when on a user branch',
+      () async {
+        fakeFlutterVersion.channel = kUserBranch;
+        final configCommand = ConfigCommand();
+        createTestCommandRunner(configCommand);
+
+        expect(
+          configCommand.usage,
+          containsIgnoringWhitespace(
+            'Analytics reporting is currently disabled when running from a feature branch.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FlutterVersion: () => fakeFlutterVersion,
+        Analytics: () => fakeAnalytics,
+      },
+    );
   });
 }
 

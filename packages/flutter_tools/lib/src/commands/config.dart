@@ -12,6 +12,7 @@ import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import '../version.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({bool verboseHelp = false}) {
@@ -281,6 +282,9 @@ class ConfigCommand extends FlutterCommand {
 
   /// List the status of the analytics reporting.
   String get analyticsUsage {
+    if (globals.flutterVersion.channel == kUserBranch) {
+      return 'Analytics reporting is currently disabled when running from a feature branch.';
+    }
     return 'Analytics reporting is currently ${globals.analytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
   }
 
