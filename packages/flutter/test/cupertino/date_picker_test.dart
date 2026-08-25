@@ -407,6 +407,76 @@ void main() {
       }, throwsAssertionError);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/63196
+    test('date and monthYear modes ignore the time of day of minimumDate & maximumDate', () {
+      for (final mode in <CupertinoDatePickerMode>[
+        CupertinoDatePickerMode.date,
+        CupertinoDatePickerMode.monthYear,
+      ]) {
+        // The whole day of minimumDate/maximumDate is selectable in these modes,
+        // so the time of day must not make the initial date invalid.
+        expect(() {
+          CupertinoDatePicker(
+            mode: mode,
+            onDateTimeChanged: (DateTime d) {},
+            initialDateTime: DateTime(2020, 8, 8),
+            minimumDate: DateTime(2020, 8, 8, 8),
+          );
+        }, returnsNormally);
+
+        expect(() {
+          CupertinoDatePicker(
+            mode: mode,
+            onDateTimeChanged: (DateTime d) {},
+            initialDateTime: DateTime(2020, 8, 8, 12),
+            maximumDate: DateTime(2020, 8, 8, 8),
+          );
+        }, returnsNormally);
+
+        // Bounds that fall on a different day are still validated.
+        expect(() {
+          CupertinoDatePicker(
+            mode: mode,
+            onDateTimeChanged: (DateTime d) {},
+            initialDateTime: DateTime(2020, 8, 8),
+            minimumDate: DateTime(2020, 8, 9),
+          );
+        }, throwsAssertionError);
+
+        expect(() {
+          CupertinoDatePicker(
+            mode: mode,
+            onDateTimeChanged: (DateTime d) {},
+            initialDateTime: DateTime(2020, 8, 8),
+            maximumDate: DateTime(2020, 8, 7, 23, 59),
+          );
+        }, throwsAssertionError);
+      }
+    });
+
+    testWidgets('date mode builds with a minimumDate later in the initial day', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox.square(
+              dimension: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                onDateTimeChanged: (DateTime d) {},
+                initialDateTime: DateTime(2020, 8, 8),
+                minimumDate: DateTime(2020, 8, 8, 8),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('8'), findsOneWidget);
+    });
+
     testWidgets('changing initialDateTime after first build does not do anything', (
       WidgetTester tester,
     ) async {

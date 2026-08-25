@@ -342,13 +342,13 @@ class CupertinoDatePicker extends StatefulWidget {
        assert(
          (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) ||
              minimumDate == null ||
-             !minimumDate.isAfter(initialDateTime ?? DateTime.now()),
+             !_dateOnly(minimumDate).isAfter(_dateOnly(initialDateTime ?? DateTime.now())),
          'initial date ${initialDateTime ?? DateTime.now()} is not greater than or equal to minimumDate $minimumDate',
        ),
        assert(
          (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) ||
              maximumDate == null ||
-             !maximumDate.isBefore(initialDateTime ?? DateTime.now()),
+             !_dateOnly(maximumDate).isBefore(_dateOnly(initialDateTime ?? DateTime.now())),
          'initial date ${initialDateTime ?? DateTime.now()} is not less than or equal to maximumDate $maximumDate',
        ),
        assert(
@@ -538,6 +538,14 @@ class CupertinoDatePicker extends StatefulWidget {
       CupertinoDatePickerMode.monthYear => _CupertinoDatePickerMonthYearState(dateOrder: dateOrder),
     };
   }
+
+  // Strips the time of day from `date`.
+  //
+  // In [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.monthYear]
+  // modes the picker only selects a date, and the entire day of [minimumDate]
+  // and [maximumDate] is selectable, so the time of day of these values must be
+  // ignored when they are validated against [initialDateTime].
+  static DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 
   // Estimate the minimum width that each column needs to layout its content.
   static double _getColumnWidth(
