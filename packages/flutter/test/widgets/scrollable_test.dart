@@ -1797,6 +1797,68 @@ void main() {
     );
     expect(tester.getSize(find.byType(Scrollable)), Size.zero);
   });
+
+  testWidgets(
+    'Scrollable stops accepting drags once the position settles back within its scroll extents',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/115426
+      final controller = ScrollController(initialScrollOffset: 200.0);
+      addTearDown(controller.dispose);
+      var childHeight = 800.0;
+      late StateSetter setChildHeight;
+      final scrollStarts = <ScrollStartNotification>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotificationListener<ScrollStartNotification>(
+            onNotification: (ScrollStartNotification notification) {
+              scrollStarts.add(notification);
+              return false;
+            },
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                setChildHeight = setState;
+                return ListView(
+                  controller: controller,
+                  children: <Widget>[SizedBox(height: childHeight)],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      expect(controller.position.maxScrollExtent, 200.0);
+      expect(controller.position.pixels, 200.0);
+
+      // Scroll back to the top. While that animation is running, the content
+      // shrinks so that it fits inside the viewport. The scroll offset is out
+      // of range until the animation settles it back to zero.
+      controller.animateTo(0.0, duration: const Duration(milliseconds: 300), curve: Curves.linear);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+      setChildHeight(() {
+        childHeight = 500.0;
+      });
+      await tester.pump();
+      expect(controller.position.maxScrollExtent, 0.0);
+      expect(controller.position.pixels, greaterThan(0.0));
+      await tester.pumpAndSettle();
+      expect(controller.position.pixels, 0.0);
+
+      // The content fits inside the viewport, so there is nothing left to
+      // reveal and a drag must be ignored.
+      scrollStarts.clear();
+      await tester.drag(find.byType(ListView), const Offset(0.0, -100.0));
+      await tester.pumpAndSettle();
+      expect(scrollStarts, isEmpty);
+      expect(controller.position.pixels, 0.0);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }),
+  );
 }
 
 // ignore: must_be_immutable

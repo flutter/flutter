@@ -836,8 +836,26 @@ class ScrollableState extends State<Scrollable>
     }
     _lastCanDrag = value;
     _lastAxisDirection = widget.axis;
-    if (_gestureDetectorKey.currentState != null) {
+    _syncGestureRecognizers();
+  }
+
+  // Hands [_gestureRecognizers] to the [RawGestureDetector].
+  //
+  // [setCanDrag] is usually called from [ScrollPosition.applyNewDimensions]
+  // during layout, when the tree cannot be rebuilt and the recognizers have to
+  // be replaced imperatively. It is also called when the scroll activity ends,
+  // which can happen between frames, and rebuilding is then the only way to
+  // update the recognizers.
+  void _syncGestureRecognizers() {
+    if (_gestureDetectorKey.currentState == null) {
+      return;
+    }
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       _gestureDetectorKey.currentState!.replaceGestureRecognizers(_gestureRecognizers);
+    } else {
+      setState(() {
+        // The new recognizers are picked up by the RawGestureDetector in build.
+      });
     }
   }
 
@@ -2415,9 +2433,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
           _handleDragCancel();
           _lastCanDrag = value;
           _lastAxisDirection = widget.axis;
-          if (_gestureDetectorKey.currentState != null) {
-            _gestureDetectorKey.currentState!.replaceGestureRecognizers(_gestureRecognizers);
-          }
+          _syncGestureRecognizers();
         }
         return;
     }
@@ -2533,9 +2549,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
           _handleDragCancel();
           _lastCanDrag = value;
           _lastAxisDirection = widget.axis;
-          if (_gestureDetectorKey.currentState != null) {
-            _gestureDetectorKey.currentState!.replaceGestureRecognizers(_gestureRecognizers);
-          }
+          _syncGestureRecognizers();
         }
         return;
     }
