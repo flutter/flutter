@@ -60,7 +60,7 @@ class AlignmentTween extends Tween<Alignment> {
 /// See also:
 ///
 ///  * [AlignmentTween], which interpolates between two [Alignment] objects.
-class AlignmentGeometryTween extends Tween<AlignmentGeometry?> {
+class AlignmentGeometryTween extends Tween<AlignmentGeometry> {
   /// Creates a fractional offset geometry tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
@@ -69,5 +69,5 @@ class AlignmentGeometryTween extends Tween<AlignmentGeometry?> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  AlignmentGeometry? lerp(double t) => AlignmentGeometry.lerp(begin, end, t);
+  AlignmentGeometry lerp(double t) => AlignmentGeometry.lerp(begin, end, t)!;
 }
