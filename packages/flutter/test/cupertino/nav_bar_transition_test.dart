@@ -1899,4 +1899,48 @@ void main() {
     await tester.pumpAndSettle();
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
   });
+
+  testWidgets(
+    'CupertinoTextField with a focus node in the nav bar can be focused again after a pop',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              middle: CupertinoTextField(focusNode: focusNode),
+            ),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(CupertinoTextField));
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              builder: (BuildContext context) => const CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar(),
+                child: Placeholder(),
+              ),
+            ),
+          );
+      await tester.pumpAndSettle();
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pumpAndSettle();
+
+      // The text field should still be focusable after the nav bar hero
+      // transition duplicated it into the flight shuttle.
+      await tester.tap(find.byType(CupertinoTextField));
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+    },
+  );
 }
