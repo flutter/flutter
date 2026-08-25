@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
@@ -13,6 +14,9 @@ FLUTTER_ASSERT_ARC
 // When calculating refresh rate diffrence, anything within 0.1 fps is ignored.
 const static double kRefreshRateDiffToIgnore = 0.1;
 
+extern bool FlutterDispatchingTouches;
+extern bool FlutterDidPresentSurface;
+
 namespace flutter {
 
 VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
@@ -20,6 +24,15 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
     : VsyncWaiter(task_runners), display_link_manager_(display_link_manager) {
   FML_DCHECK(display_link_manager);
   auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+    if (!waiting_for_vsync_) {
+      if (--idle_countdown_ == 0) {
+        [client_ pause];
+      }
+      return;
+    }
+    waiting_for_vsync_ = false;
+    idle_countdown_ = 10;
+
     // Compute delay using the same CACurrentMediaTime() clock.
     CFTimeInterval delay = CACurrentMediaTime() - startTime;
     if (delay < 0.0) {
@@ -36,6 +49,15 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
     // Align target time to the C++ steady_clock used by fml::TimePoint.
     fml::TimePoint target_time = start_time + fml::TimeDelta::FromSecondsF(duration);
     FireCallback(start_time, target_time, true);
+
+    if (block_until_frame_available_) {
+      block_until_frame_available_ = false;
+      FlutterDidPresentSurface = false;
+      CFTimeInterval startTime = CACurrentMediaTime();
+      while (!FlutterDidPresentSurface && CACurrentMediaTime() - startTime < 0.5) {
+        [FlutterRunLoop.mainRunLoop pollFlutterMessagesOnce];
+      }
+    }
   };
   FlutterFMLTaskRunner* uiTaskRunner =
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()];
@@ -44,6 +66,7 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
       isVariableRefreshRateEnabled:display_link_manager_.maxRefreshRateEnabledOnIPhone
                     maxRefreshRate:display_link_manager_.displayRefreshRate
                           callback:vsyncCallback];
+  client_.allowPauseAfterVsync = false;
   max_refresh_rate_ = display_link_manager_.displayRefreshRate;
 }
 
@@ -59,7 +82,16 @@ void VsyncWaiterIOS::AwaitVSync() {
     max_refresh_rate_ = new_max_refresh_rate;
     [client_ setMaxRefreshRate:max_refresh_rate_];
   }
-  [client_ await];
+
+  if (client_.displayLink.paused) {
+    [client_ await];
+    FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now(), false);
+  } else {
+    waiting_for_vsync_ = true;
+    if (FlutterDispatchingTouches) {
+      block_until_frame_available_ = true;
+    }
+  }
 }
 
 // |VariableRefreshRateReporter|

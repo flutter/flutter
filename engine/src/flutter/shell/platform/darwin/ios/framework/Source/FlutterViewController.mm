@@ -38,6 +38,8 @@
 #import "flutter/shell/platform/embedder/embedder.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
+bool FlutterDispatchingTouches;
+
 FLUTTER_ASSERT_ARC
 
 static constexpr int kMicrosecondsPerSecond = 1000 * 1000;
@@ -1277,7 +1279,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     }
   }
 
+  FlutterDispatchingTouches = true;
   [self.engine dispatchPointerDataPacket:std::move(packet)];
+  FlutterDispatchingTouches = false;
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
@@ -1285,6 +1289,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+  NSLog(@"Touches moved %f", CACurrentMediaTime());
   [self dispatchTouches:touches pointerDataChangeOverride:nullptr event:event];
 }
 
@@ -1347,6 +1352,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches {
+  // This is not needed now that we're running CADisplayLink on main thread.
+#if 0
   if (_touchRateCorrectionVSyncClient == nil) {
     // If the _touchRateCorrectionVSyncClient is not created, means current devices doesn't
     // need to correct the touch rate. So just return.
@@ -1368,6 +1375,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   } else {
     [_touchRateCorrectionVSyncClient pause];
   }
+#endif
 }
 
 - (void)invalidateTouchRateCorrectionVSyncClient {

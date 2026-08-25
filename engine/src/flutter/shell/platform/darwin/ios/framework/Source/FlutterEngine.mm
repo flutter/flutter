@@ -41,7 +41,22 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+#import "flutter/shell/platform/embedder/embedder_task_runner.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
+
+static void PostTask(flutter::EmbedderTaskRunner* task_runner,
+                     uint64_t task_baton,
+                     fml::TimePoint target_time) {
+  [FlutterRunLoop.mainRunLoop
+      performAfterDelay:std::max(0.0, (target_time - fml::TimePoint::Now()).ToSecondsF())
+                  block:^{
+                    task_runner->PostTask(task_baton);
+                  }];
+}
+
+static bool RunsTaskOnCurrentThread() {
+  return [NSThread isMainThread];
+}
 
 FLUTTER_ASSERT_ARC
 
@@ -240,6 +255,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
   NSAssert(labelPrefix, @"labelPrefix is required");
+
+  [FlutterRunLoop ensureMainLoopInitialized];
 
   _restorationEnabled = restorationEnabled;
   _allowHeadlessExecution = allowHeadlessExecution;
@@ -960,7 +977,17 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   // The platform and UI threads are always merged on iOS, so the UI task runner is the platform
   // thread's task runner.
-  fml::RefPtr<fml::TaskRunner> platform_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  fml::RefPtr<fml::TaskRunner> platform_runner = fml::MakeRefCounted<flutter::EmbedderTaskRunner>(
+      flutter::EmbedderTaskRunner::DispatchTable{
+          .post_task_callback =
+              [](flutter::EmbedderTaskRunner* task_runner, uint64_t task_baton,
+                 fml::TimePoint target_time) { PostTask(task_runner, task_baton, target_time); },
+          .runs_task_on_current_thread_callback = []() { return RunsTaskOnCurrentThread(); },
+          .destruction_callback = []() {},
+      },
+
+      0);
+  //  fml::MessageLoop::GetCurrent().GetTaskRunner();
   flutter::TaskRunners task_runners(threadLabel.UTF8String,                       // label
                                     platform_runner,                              // platform
                                     _threadHost->raster_thread->GetTaskRunner(),  // raster
