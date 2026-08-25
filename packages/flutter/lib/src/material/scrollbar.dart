@@ -381,8 +381,12 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   @override
   void handleHover(PointerHoverEvent event) {
     super.handleHover(event);
-    // Check if the position of the pointer falls over the painted scrollbar
-    if (isPointerOverScrollbar(event.position, event.kind, forHover: true)) {
+    // Check if the position of the pointer falls over the painted scrollbar.
+    // The enlarged `forHover` proximity area is deliberately not used here. It
+    // only serves to bring a faded out scrollbar back into view, and it extends
+    // beyond the area that accepts a press. Painting the thumb as hovered there
+    // would advertise an interaction that cannot be started.
+    if (isPointerOverScrollbar(event.position, event.kind)) {
       // Pointer is hovering over the scrollbar
       setState(() {
         _hoverIsActive = true;

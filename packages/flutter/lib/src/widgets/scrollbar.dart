@@ -740,11 +740,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// caused by [PointerDeviceKind.touch] to make sure that the region
   /// isn't too small to be interacted with by the user.
   ///
-  /// The hit test area for hovering with [PointerDeviceKind.mouse] over the
-  /// scrollbar also uses this extra padding. This is to make it easier to
-  /// interact with the scrollbar by presenting it to the mouse for interaction
-  /// based on proximity. When `forHover` is true, the larger hit test area will
-  /// be used.
+  /// The hit test area for hovering with [PointerDeviceKind.mouse] over a
+  /// faded out scrollbar also uses this extra padding. This is to bring the
+  /// scrollbar back into view based on proximity, so that the mouse can then
+  /// move onto it. When `forHover` is true, the larger hit test area will be
+  /// used. Since the enlarged area only reveals the scrollbar, it is never used
+  /// to accept a press; once the scrollbar is visible a mouse must be over the
+  /// track to interact with it.
   bool hitTestInteractive(Offset position, PointerDeviceKind kind, {bool forHover = false}) {
     if (_trackRect == null) {
       // We have not computed the scrollbar position yet.
@@ -814,8 +816,25 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.unknown:
-        return _thumbRect!.contains(position);
+        // The thumb is inset from the edges of the track by crossAxisMargin.
+        // Pointers landing in that inset are still on the scrollbar, so they
+        // should grab the thumb instead of paging the scroll view like a tap
+        // on the track does.
+        return _crossAxisPaddedThumbRect.contains(position);
     }
+  }
+
+  // The thumb rect, expanded on the cross axis to fill the track, which is
+  // wider than the thumb when crossAxisMargin is greater than zero.
+  Rect get _crossAxisPaddedThumbRect {
+    final Rect thumbRect = _thumbRect!;
+    final Rect? trackRect = _trackRect;
+    if (trackRect == null) {
+      return thumbRect;
+    }
+    return _isVertical
+        ? Rect.fromLTRB(trackRect.left, thumbRect.top, trackRect.right, thumbRect.bottom)
+        : Rect.fromLTRB(thumbRect.left, trackRect.top, thumbRect.right, trackRect.bottom);
   }
 
   @override
@@ -2102,17 +2121,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Returns true if the provided [Offset] is located over the track or thumb
   /// of the [RawScrollbar].
   ///
-  /// The hit test area for mouse hovering over the scrollbar is larger than
-  /// regular hit testing. This is to make it easier to interact with the
-  /// scrollbar and present it to the mouse for interaction based on proximity.
-  /// When `forHover` is true, the larger hit test area will be used.
+  /// The hit test area for mouse hovering over a faded out scrollbar is larger
+  /// than regular hit testing. This is to bring the scrollbar back into view
+  /// based on proximity. When `forHover` is true, the larger hit test area will
+  /// be used. The enlarged area does not accept presses, so it should not be
+  /// used to decide whether the scrollbar is to be painted as interactive.
   @protected
   bool isPointerOverScrollbar(Offset position, PointerDeviceKind kind, {bool forHover = false}) {
     if (_scrollbarPainterKey.currentContext == null) {
       return false;
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
-    return scrollbarPainter.hitTestInteractive(localOffset, kind, forHover: true);
+    return scrollbarPainter.hitTestInteractive(localOffset, kind, forHover: forHover);
   }
 
   /// Cancels the fade out animation so the scrollbar will remain visible for

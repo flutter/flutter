@@ -1509,6 +1509,156 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.fuchsia}),
   );
 
+  testWidgets(
+    'Mouse can drag the Scrollbar thumb from the part of the track that hovering highlights',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/163464
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: ScrollConfiguration(
+            behavior: const NoScrollbarBehavior(),
+            child: Scrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: const SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, 0.0);
+      expect(
+        find.byType(Scrollbar),
+        paints..rrect(
+          rrect: RRect.fromRectAndRadius(
+            getStartingThumbRect(isAndroid: false),
+            _kDefaultThumbRadius,
+          ),
+          color: _kDefaultIdleThumbColor,
+        ),
+      );
+
+      // The Material thumb is painted with a 2 pixel margin to the right edge
+      // of the viewport, but the track it lives in reaches that edge. Hovering
+      // there highlights the thumb, so it must be draggable from there too.
+      final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(const Offset(799.0, 45.0));
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(Scrollbar),
+        paints..rrect(
+          rrect: RRect.fromRectAndRadius(
+            getStartingThumbRect(isAndroid: false),
+            _kDefaultThumbRadius,
+          ),
+          // Hover color.
+          color: const Color(0x80000000),
+        ),
+      );
+
+      const scrollAmount = 10.0;
+      await gesture.down(const Offset(799.0, 45.0));
+      await tester.pumpAndSettle();
+      await gesture.moveBy(const Offset(0.0, scrollAmount));
+      await tester.pumpAndSettle();
+
+      expect(scrollController.offset, greaterThan(0.0));
+      expect(
+        find.byType(Scrollbar),
+        paints..rrect(
+          rrect: RRect.fromRectAndRadius(
+            getStartingThumbRect(isAndroid: false).shift(const Offset(0.0, scrollAmount)),
+            _kDefaultThumbRadius,
+          ),
+        ),
+      );
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
+
+  testWidgets(
+    'Mouse proximity reveals the Scrollbar without presenting the thumb as interactive',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/163464
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: ScrollConfiguration(
+            behavior: const NoScrollbarBehavior(),
+            child: Scrollbar(
+              controller: scrollController,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: const SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // Scroll so the scrollbar has metrics, then let it fade out again.
+      await tester.dragFrom(const Offset(400.0, 300.0), const Offset(0.0, -20.0), touchSlopY: 0.0);
+      await tester.pumpAndSettle();
+      final double scrolledOffset = scrollController.offset;
+      expect(scrolledOffset, greaterThan(0.0));
+      await tester.pump(_kScrollbarTimeToFade);
+      await tester.pump(_kScrollbarFadeDuration);
+      expect(find.byType(Scrollbar), isNot(paints..rrect()));
+
+      final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+
+      // The proximity area of a faded out scrollbar reaches far past the track.
+      // Moving into it brings the scrollbar back into view, but the thumb must
+      // not be painted as hovered there, since a press that far from the track
+      // is passed on to the scroll view.
+      await gesture.moveTo(const Offset(775.0, 45.0));
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollbar), paints..rrect(color: _kDefaultIdleThumbColor));
+
+      await gesture.down(const Offset(775.0, 45.0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(0.0, 10.0));
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, scrolledOffset);
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Once the pointer is over the track the thumb is highlighted, and a drag
+      // started from there moves the scroll view.
+      await gesture.moveTo(const Offset(799.0, 45.0));
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollbar), paints..rrect(color: const Color(0x80000000)));
+
+      await gesture.down(const Offset(799.0, 45.0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(0.0, 10.0));
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, greaterThan(scrolledOffset));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.linux}),
+  );
+
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
     var tapCount = 0;
     final scrollController = ScrollController();
