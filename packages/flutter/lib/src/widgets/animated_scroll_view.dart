@@ -835,9 +835,13 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
     if (index == 0) {
       return index;
     }
-    final int itemsAndSeparatorsCount = _itemsCount;
+    // Children animating out from an earlier removeItem call still count
+    // towards [_itemsCount] until their animation finishes (see
+    // [_indexToItemIndex]), so exclude them here too: [index] is defined
+    // against the settled, post-removal item count.
+    final int itemsAndSeparatorsCount = _itemsCount - _outgoingItemsCount;
     final int separatorsCount = itemsAndSeparatorsCount ~/ 2;
-    final int separatedItemsCount = _itemsCount - separatorsCount;
+    final int separatedItemsCount = itemsAndSeparatorsCount - separatorsCount;
 
     final isNewLastIndex = index == separatedItemsCount;
     final int indexAdjustedForSeparators = index * 2;

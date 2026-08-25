@@ -1279,6 +1279,68 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/179029.
+  testWidgets(
+    'AnimatedList.separated can insert a new last item right after removing the previous one',
+    (WidgetTester tester) async {
+      Widget itemBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+      }
+
+      Widget separatorBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 10.0, child: Center(child: Text('separator $index')));
+      }
+
+      Widget removedSeparatorBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 10.0, child: Center(child: Text('removing separator $index')));
+      }
+
+      Widget removedItemBuilder(BuildContext context, Animation<double> animation) {
+        return const SizedBox(height: 100.0, child: Center(child: Text('removing item')));
+      }
+
+      const numItems = 2;
+      final listKey = GlobalKey<AnimatedListState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedList.separated(
+            key: listKey,
+            initialItemCount: numItems,
+            itemBuilder: itemBuilder,
+            separatorBuilder: separatorBuilder,
+            removedSeparatorBuilder: removedSeparatorBuilder,
+          ),
+        ),
+      );
+
+      // Remove the last item, then immediately (before its removal animation
+      // finishes) insert a new item at the same, now-last, index. Before the
+      // fix this triggered an "itemIndex >= 0 && itemIndex <= _itemsCount"
+      // assertion inside _SliverAnimatedMultiBoxAdaptorState.insertItem,
+      // because _computeItemIndex used the raw sliver child count instead of
+      // the settled (post-removal) item count to place the new item.
+      listKey.currentState!.removeItem(numItems - 1, removedItemBuilder);
+      listKey.currentState!.insertItem(numItems - 1);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('removing item'), findsOneWidget);
+
+      await tester.pumpAndSettle();
+
+      // The removal animation finished and the newly inserted item settled
+      // into place, with exactly one separator between the two items.
+      expect(tester.takeException(), isNull);
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsOneWidget);
+      expect(find.text('removing item'), findsNothing);
+      expect(find.textContaining('separator'), findsOneWidget);
+    },
+  );
+
   testWidgets('AnimatedList does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     final controller = ScrollController();
