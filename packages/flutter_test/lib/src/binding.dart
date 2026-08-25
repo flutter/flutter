@@ -2476,6 +2476,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           }
         }
       }
+      // Unmounting the elements that are no longer active can invoke
+      // application callbacks that schedule a build for a subsequent frame,
+      // which is allowed because the build phase of this frame is over. See
+      // also WidgetsBinding.drawFrame.
+      debugBuildingDirtyElements = false;
       buildOwner!.finalizeTree();
     } finally {
       debugBuildingDirtyElements = false;

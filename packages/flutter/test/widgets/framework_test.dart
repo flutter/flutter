@@ -2169,6 +2169,41 @@ The findRenderObject() method was called for the following element:
       expect(element.debugIsDefunct, true);
     },
   );
+
+  testWidgets('a callback invoked from State.dispose can mark other widgets as needing to build', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/160508
+    late StateSetter setState;
+    var showSpy = true;
+    var buildCount = 0;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          buildCount += 1;
+          return showSpy
+              ? StatefulWidgetSpy(onDispose: (_) => setState(() {}), child: const Placeholder())
+              : const Placeholder();
+        },
+      ),
+    );
+    expect(buildCount, 1);
+
+    // The spy is unmounted at the end of this frame, while the widget tree is
+    // locked. Marking the still mounted StatefulBuilder as needing to build is
+    // allowed there: it is simply rebuilt during the next frame.
+    setState(() {
+      showSpy = false;
+    });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(buildCount, 2);
+
+    await tester.pump();
+    expect(buildCount, 3);
+  });
 }
 
 class _TestInheritedElement extends InheritedElement {
