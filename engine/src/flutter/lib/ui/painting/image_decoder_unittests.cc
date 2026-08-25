@@ -8,7 +8,6 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/impeller/core/allocator.h"
 #include "flutter/impeller/core/device_buffer.h"
-#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/size.h"
 #include "flutter/impeller/renderer/context.h"
@@ -46,7 +45,9 @@ namespace impeller {
 
 class TestImpellerContext : public impeller::Context {
  public:
-  TestImpellerContext() : impeller::Context(impeller::Flags{}) {}
+  TestImpellerContext()
+      : impeller::Context(impeller::Flags{}),
+        allocator_(std::make_shared<TestImpellerAllocator>()) {}
 
   BackendType GetBackendType() const override { return BackendType::kMetal; }
 
@@ -59,7 +60,11 @@ class TestImpellerContext : public impeller::Context {
   }
 
   std::shared_ptr<Allocator> GetResourceAllocator() const override {
-    return std::make_shared<TestImpellerAllocator>();
+    return allocator_;
+  }
+
+  std::shared_ptr<TestImpellerTexture> GetLastCreatedTexture() const {
+    return allocator_->last_created_texture();
   }
 
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override {
@@ -122,6 +127,7 @@ class TestImpellerContext : public impeller::Context {
   };
   std::vector<PendingTask> tasks_;
   std::shared_ptr<const Capabilities> capabilities_;
+  std::shared_ptr<TestImpellerAllocator> allocator_;
   bool did_dispose_ = false;
 };
 
@@ -404,10 +410,10 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
 
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
-  EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), true);
-  impeller::AiksContext aiks_context(no_gpu_access_context, nullptr);
-  EXPECT_EQ(result.first->asImpellerImage()
-                ->GetImpellerTexture(aiks_context.GetContentContext())
+  ASSERT_NE(result.first, nullptr);
+  EXPECT_EQ(result.first->GetSize(), DlISize::MakeWH(10, 10));
+  ASSERT_NE(no_gpu_access_context->GetLastCreatedTexture(), nullptr);
+  EXPECT_EQ(no_gpu_access_context->GetLastCreatedTexture()
                 ->GetTextureDescriptor()
                 .storage_mode,
             impeller::StorageMode::kHostVisible);

@@ -13,7 +13,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "impeller/core/texture_descriptor.h"
-#include "impeller/display_list/aiks_context.h"
 #include "impeller/renderer/testing/mocks.h"
 
 namespace flutter {
@@ -75,10 +74,7 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
   fml::AutoResetWaitableEvent latch;
   task_runner->PostTask([&latch, &image]() {
     latch.Wait();
-    auto context = std::make_shared<impeller::testing::MockImpellerContext>();
-    impeller::AiksContext aiks_context(context, nullptr);
-    EXPECT_EQ(image->GetImpellerTexture(aiks_context.GetContentContext()),
-              nullptr);
+    EXPECT_EQ(image->wrapper_->texture(), nullptr);
   });
 
   image = DlDeferredImageGPUImpeller::Make(
@@ -89,10 +85,7 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
   latch.Signal();
 
   PostTaskSync(task_runner, [&]() {
-    auto context = std::make_shared<impeller::testing::MockImpellerContext>();
-    impeller::AiksContext aiks_context(context, nullptr);
-    EXPECT_NE(image->GetImpellerTexture(aiks_context.GetContentContext()),
-              nullptr);
+    EXPECT_NE(image->wrapper_->texture(), nullptr);
     snapshot_delegate.reset();
   });
 }
