@@ -1100,9 +1100,10 @@ class HeroController extends NavigatorObserver {
                 ? EdgeInsetsTween(begin: fromHeroPadding, end: toHeroPadding).evaluate(animation)
                 : EdgeInsetsTween(begin: toHeroPadding, end: fromHeroPadding).evaluate(animation),
           ),
-          child: toHeroChild,
+          child: child!,
         );
       },
+      child: toHeroChild,
     );
   }
 
