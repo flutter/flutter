@@ -1757,6 +1757,15 @@ abstract class FlutterCommand extends Command<void> {
     final dartDefines = <String>[];
 
     defineConfigJsonMap.forEach((String key, Object? value) {
+      if (key.contains('\r') ||
+          key.contains('\n') ||
+          (value is String && (value.contains('\r') || value.contains('\n')))) {
+        throwToolExit(
+          'Multi-line value is not supported for '
+          '--${FlutterOptions.kDartDefinesOption} or '
+          '--${FlutterOptions.kDartDefineFromFileOption}: $key',
+        );
+      }
       dartDefines.add('$key=$value');
     });
 
@@ -1764,7 +1773,16 @@ abstract class FlutterCommand extends Command<void> {
       final Iterable<String> defines = stringsArg(
         FlutterOptions.kDartDefinesOption,
       ).where((string) => string.isNotEmpty);
-      dartDefines.addAll(defines);
+      for (final define in defines) {
+        if (define.contains('\r') || define.contains('\n')) {
+          throwToolExit(
+            'Multi-line value is not supported for '
+            '--${FlutterOptions.kDartDefinesOption} or '
+            '--${FlutterOptions.kDartDefineFromFileOption}: $define',
+          );
+        }
+        dartDefines.add(define);
+      }
     }
 
     return dartDefines;
@@ -1828,6 +1846,13 @@ abstract class FlutterCommand extends Command<void> {
         try {
           // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
           (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, Object? value) {
+            if (key.contains('\r') ||
+                key.contains('\n') ||
+                (value is String && (value.contains('\r') || value.contains('\n')))) {
+              throwToolExit(
+                'The file at path "$path" contains a multi-line value, which is not supported: $key',
+              );
+            }
             dartDefineConfigJsonMap[key] = value;
           });
         } on FormatException catch (err) {

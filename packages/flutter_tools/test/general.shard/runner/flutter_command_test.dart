@@ -1463,6 +1463,63 @@ void main() {
       );
 
       testUsingContext(
+        'throws a ToolExit when the given JSON file contains multiline values',
+        () async {
+          fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          await fileSystem.file('config.json').writeAsString(r'''
+            {
+              "MY_ENV_VALUE": "json \n foo \n"
+            }
+          ''');
+
+          await dummyCommandRunner.run(<String>['dummy', '--dart-define-from-file=config.json']);
+          expect(
+            dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+            throwsToolExit(
+              message:
+                  'The file at path "config.json" contains a multi-line value, which is not supported: MY_ENV_VALUE',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          FileSystemUtils: () => fileSystemUtils,
+          Platform: () => platform,
+          ProcessManager: () => processManager,
+        },
+      );
+
+      testUsingContext(
+        'throws a ToolExit when --dart-define contains a multiline value',
+        () async {
+          fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+
+          await dummyCommandRunner.run(<String>[
+            'dummy',
+            '--dart-define',
+            'MY_ENV_VALUE=hello\nworld',
+          ]);
+          expect(
+            dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+            throwsToolExit(
+              message:
+                  'Multi-line value is not supported for --dart-define or --dart-define-from-file: MY_ENV_VALUE=hello\nworld',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          FileSystemUtils: () => fileSystemUtils,
+          Platform: () => platform,
+          ProcessManager: () => processManager,
+        },
+      );
+
+      testUsingContext(
         'throws a ToolExit when the provided file does not exist',
         () async {
           fileSystem.directory('config').createSync();
