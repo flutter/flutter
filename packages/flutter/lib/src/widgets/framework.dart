@@ -1152,12 +1152,12 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// For this reason, this method should only be called when the [build] method
   /// will, as a result of whatever state change was detected, change its result
   /// meaningfully.
-  /// To minimize the rebuild cost it's better to call [State.setState] on leaves
-  /// children.
+  /// To minimize the rebuild cost, it is recommended to call [State.setState] on
+  /// leaf widgets.
   ///
-  /// It is also possible to trigger a rebuild without directly calling [State.setState]
-  /// one way to do that is using [AnimatedBuilder] with any subtype of [Listenable]
-  /// which can be more performant is some situations.
+  /// It is also possible to trigger a rebuild without directly calling [State.setState].
+  /// One way to do so is by using [AnimatedBuilder] with a [Listenable],
+  /// which can be more performant in some situations.
   ///
   /// See also:
   ///
