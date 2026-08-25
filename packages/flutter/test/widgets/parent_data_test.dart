@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -336,6 +337,12 @@ void main() {
     await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
     checkTree(tester, <TestParentData>[]);
 
+    final List<Object> exceptions = <Object>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -349,20 +356,24 @@ void main() {
       ),
     );
 
-    exception = tester.takeException();
-    expect(exception, isFlutterError);
+    FlutterError.onError = oldHandler;
+
+    // Mounting stops on the first error, and follow-on errors are reported
+    // while the tree unwinds, so match against all captured exceptions.
     expect(
-      exception.toString(),
-      startsWith(
-        'Incorrect use of ParentDataWidget.\n'
-        'The ParentDataWidget Positioned(left: 7.0, top: 6.0) wants to apply ParentData of type '
-        'StackParentData to a RenderObject, which has been set up to accept ParentData of '
-        'incompatible type FlexParentData.\n'
-        'Usually, this means that the Positioned widget has the wrong ancestor RenderObjectWidget. '
-        'Typically, Positioned widgets are placed directly inside Stack widgets.\n'
-        'The offending Positioned is currently placed inside a Row widget.\n'
-        'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
-        '  DecoratedBox ← Positioned ← Row ← DummyWidget ← Directionality ← ', // End of chain omitted, not relevant for test.
+      exceptions.map((Object exception) => exception.toString()),
+      contains(
+        startsWith(
+          'Incorrect use of ParentDataWidget.\n'
+          'The ParentDataWidget Positioned(left: 7.0, top: 6.0) wants to apply ParentData of type '
+          'StackParentData to a RenderObject, which has been set up to accept ParentData of '
+          'incompatible type FlexParentData.\n'
+          'Usually, this means that the Positioned widget has the wrong ancestor RenderObjectWidget. '
+          'Typically, Positioned widgets are placed directly inside Stack widgets.\n'
+          'The offending Positioned is currently placed inside a Row widget.\n'
+          'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
+          '  DecoratedBox ← Positioned ← Row ← DummyWidget ← Directionality ← ', // End of chain omitted, not relevant for test.
+        ),
       ),
     );
 
@@ -423,6 +434,12 @@ void main() {
   });
 
   testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
+    final List<Object> exceptions = <Object>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -437,23 +454,90 @@ void main() {
       ),
     );
 
-    final dynamic exception = tester.takeException();
+    FlutterError.onError = oldHandler;
+
+    // Mounting stops on the first error, and follow-on errors are reported
+    // while the tree unwinds, so match against all captured exceptions.
+    expect(
+      exceptions.map((Object exception) => exception.toString()),
+      contains(
+        startsWith(
+          'Incorrect use of ParentDataWidget.\n'
+          'The ParentDataWidget Expanded(flex: 1) wants to apply ParentData of type '
+          'FlexParentData to a RenderObject, which has been set up to accept ParentData of '
+          'incompatible type StackParentData.\n'
+          'Usually, this means that the Expanded widget has the wrong ancestor RenderObjectWidget. '
+          'Typically, Expanded widgets are placed directly inside Flex widgets.\n'
+          'The offending Expanded is currently placed inside a Stack widget.\n'
+          'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
+          '  LimitedBox ← Container ← Expanded ← Stack ← Row ← Directionality ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Spacer inside an OverflowBar stops the build with a descriptive error', (
+    WidgetTester tester,
+  ) async {
+    final List<Object> exceptions = <Object>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: OverflowBar(children: <Widget>[Text('A'), Spacer(), Text('B')]),
+      ),
+    );
+
+    FlutterError.onError = oldHandler;
+
+    // Mounting the OverflowBar stops on the first error; follow-on errors
+    // reported while the tree unwinds are not part of this assertion.
+    final dynamic exception = exceptions.first;
     expect(exception, isFlutterError);
     expect(
       exception.toString(),
       startsWith(
         'Incorrect use of ParentDataWidget.\n'
-        'The ParentDataWidget Expanded(flex: 1) wants to apply ParentData of type '
-        'FlexParentData to a RenderObject, which has been set up to accept ParentData of '
-        'incompatible type StackParentData.\n'
-        'Usually, this means that the Expanded widget has the wrong ancestor RenderObjectWidget. '
-        'Typically, Expanded widgets are placed directly inside Flex widgets.\n'
-        'The offending Expanded is currently placed inside a Stack widget.\n'
-        'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
-        '  LimitedBox ← Container ← Expanded ← Stack ← Row ← Directionality ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
+        'The ParentDataWidget Expanded(flex: 1) wants to apply ParentData of '
+        'type FlexParentData to a RenderObject, which has been set up to '
+        'accept ParentData of incompatible type _OverflowBarParentData.\n'
+        'Usually, this means that the Expanded widget has the wrong ancestor '
+        'RenderObjectWidget. Typically, Expanded widgets are placed directly '
+        'inside Flex widgets.\n'
+        'The offending Expanded is currently placed inside a OverflowBar widget.\n',
       ),
     );
   });
+
+  testWidgets(
+    'Spacer inside an OverflowBar surfaces an ErrorWidget instead of being ignored silently',
+    (WidgetTester tester) async {
+      final List<Object> exceptions = <Object>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        exceptions.add(details.exception);
+      };
+
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: OverflowBar(children: <Widget>[Text('A'), Spacer(), Text('B')]),
+        ),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(
+        exceptions.map((Object exception) => exception.toString()),
+        contains(startsWith('Incorrect use of ParentDataWidget.')),
+      );
+      expect(find.byType(ErrorWidget), findsOneWidget);
+    },
+  );
 
   testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (
     WidgetTester tester,
