@@ -29,7 +29,7 @@ abstract class FlutterAnalysisRule extends AnalysisRule {
   /// (e.g. Material and Cupertino implementations and tests).
   static bool isReadOnly(String normalizedPath) {
     // In-memory test files in package:analyzer_testing start with /home/test
-    if (normalizedPath.startsWith('/home/test')) {
+    if (normalizedPath.contains('/home/test')) {
       return false;
     }
     return normalizedPath.contains('/material/') ||

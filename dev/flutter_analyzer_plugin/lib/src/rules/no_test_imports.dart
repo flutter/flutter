@@ -39,7 +39,7 @@ class NoTestImports extends FlutterAnalysisRule {
   @override
   void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
-    if (!filePath.startsWith('/home/test') && !filePath.contains('/packages/')) {
+    if (!filePath.contains('/home/test') && !filePath.contains('/packages/')) {
       return;
     }
     final visitor = _Visitor(this, context);

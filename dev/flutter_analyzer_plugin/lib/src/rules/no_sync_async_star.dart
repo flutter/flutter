@@ -36,11 +36,11 @@ class NoSyncAsyncStar extends FlutterAnalysisRule {
   @override
   void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
-    if (!filePath.startsWith('/home/test') &&
+    if (!filePath.contains('/home/test') &&
         (!filePath.contains('/packages/') && !filePath.contains('/examples/'))) {
       return;
     }
-    if (!filePath.startsWith('/home/test') &&
+    if (!filePath.contains('/home/test') &&
         (filePath.contains('/test/') ||
             filePath.endsWith('_test.dart') ||
             filePath.contains('flutter_test'))) {

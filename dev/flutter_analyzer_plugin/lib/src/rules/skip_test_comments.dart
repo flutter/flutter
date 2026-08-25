@@ -36,7 +36,7 @@ class SkipTestComments extends FlutterAnalysisRule {
   void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
     // Skip test comments rule only applies to test files.
-    if (!filePath.startsWith('/home/test') && !filePath.endsWith('_test.dart')) {
+    if (!filePath.contains('/home/test') && !filePath.endsWith('_test.dart')) {
       return;
     }
     final visitor = _Visitor(this, context);
