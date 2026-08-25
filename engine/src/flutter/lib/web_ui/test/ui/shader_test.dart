@@ -54,28 +54,32 @@ void testMain() {
     });
 
     test('Conical gradient', () {
-      final gradient = ui.Gradient.radial(
-        ui.Offset.zero,
-        10,
-        testColors,
-        null,
-        ui.TileMode.clamp,
-        null,
-        const ui.Offset(10, 10),
-        40,
-      ) as EngineGradient;
+      final gradient =
+          ui.Gradient.radial(
+                ui.Offset.zero,
+                10,
+                testColors,
+                null,
+                ui.TileMode.clamp,
+                null,
+                const ui.Offset(10, 10),
+                40,
+              )
+              as EngineGradient;
       expect(gradient.getBackendShader(ui.FilterQuality.none), isA<BackendGradient>());
       expect(gradient.getBackendShader(ui.FilterQuality.none).isGradient, isTrue);
     });
 
     test('Image shader isGradient is false', () async {
       final EngineImage image = await createTestImage();
-      final imageShader = ui.ImageShader(
-        image,
-        ui.TileMode.clamp,
-        ui.TileMode.repeated,
-        Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-      ) as EngineImageShader;
+      final imageShader =
+          ui.ImageShader(
+                image,
+                ui.TileMode.clamp,
+                ui.TileMode.repeated,
+                Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
+              )
+              as EngineImageShader;
       expect(imageShader.getBackendShader(ui.FilterQuality.none), isA<BackendImageShader>());
       expect(imageShader.getBackendShader(ui.FilterQuality.none).isGradient, isFalse);
       imageShader.dispose();
@@ -83,12 +87,14 @@ void testMain() {
 
     test('Image shader filterQuality delegate caching', () async {
       final EngineImage image = await createTestImage();
-      final imageShader = ui.ImageShader(
-        image,
-        ui.TileMode.clamp,
-        ui.TileMode.repeated,
-        Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-      ) as EngineImageShader;
+      final imageShader =
+          ui.ImageShader(
+                image,
+                ui.TileMode.clamp,
+                ui.TileMode.repeated,
+                Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
+              )
+              as EngineImageShader;
       final BackendShader backendShader1 = imageShader.getBackendShader(ui.FilterQuality.none);
       expect(backendShader1, isA<BackendImageShader>());
 

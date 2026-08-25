@@ -3709,7 +3709,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
             'insufficient data to draw conclusion (less than five repaints)',
           > 0.9 => 'this is an outstandingly useful repaint boundary and should definitely be kept',
           > 0.5 => 'this is a useful repaint boundary and should be kept',
-          > 0.3 => 'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere',
+          > 0.3 =>
+            'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere',
           > 0.1 =>
             'this repaint boundary does sometimes show value, though currently not that often',
           _ when debugAsymmetricPaintCount > 0 =>

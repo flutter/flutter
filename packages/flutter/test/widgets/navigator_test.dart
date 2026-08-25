@@ -102,11 +102,12 @@ class OnTapPage extends StatelessWidget {
 class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
   SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings})
     : super(
-        pageBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Animation<double> secondaryAnimation,
-        ) => bodyBuilder(context),
+        pageBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => bodyBuilder(context),
         transitionsBuilder:
             (
               BuildContext context,

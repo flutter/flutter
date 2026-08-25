@@ -279,9 +279,9 @@ void testMain() {
     expect(program.name, 'test');
 
     {
-      final shader = (program.fragmentShader() as EngineFragmentShader).getBackendShader(
-        ui.FilterQuality.none,
-      ) as CkFragmentShader;
+      final shader =
+          (program.fragmentShader() as EngineFragmentShader).getBackendShader(ui.FilterQuality.none)
+              as CkFragmentShader;
 
       shader.setFloat(0, 4);
       expect(reason: 'SkShaders are created lazily', shader.ref, isNull);
@@ -298,9 +298,9 @@ void testMain() {
     }
 
     {
-      final shader = (program.fragmentShader() as EngineFragmentShader).getBackendShader(
-        ui.FilterQuality.none,
-      ) as CkFragmentShader;
+      final shader =
+          (program.fragmentShader() as EngineFragmentShader).getBackendShader(ui.FilterQuality.none)
+              as CkFragmentShader;
       shader.setFloat(0, 5);
 
       final SkShader skShader1 = shader.skShader;
@@ -326,7 +326,8 @@ void testMain() {
       shader.dispose();
       expect(shader.debugDisposed, true);
       expect(
-        reason: 'The last remaining SkShader reference should be disposed of when the FragmentShader itself is disposed of.',
+        reason:
+            'The last remaining SkShader reference should be disposed of when the FragmentShader itself is disposed of.',
         ref2.isDisposed,
         true,
       );
@@ -347,9 +348,9 @@ void testMain() {
     expect(program.uniforms, hasLength(7));
     expect(program.name, 'test');
 
-    final shader = (program.fragmentShader() as EngineFragmentShader).getBackendShader(
-      ui.FilterQuality.none,
-    ) as CkFragmentShader;
+    final shader =
+        (program.fragmentShader() as EngineFragmentShader).getBackendShader(ui.FilterQuality.none)
+            as CkFragmentShader;
 
     final ui.UniformArray<ui.UniformFloatSlot> floatArray = shader.getUniformFloatArray('uFloats');
     expect(floatArray.length, 10);

@@ -65,9 +65,9 @@ class CkPaint implements ui.Paint {
 
     final EngineImageFilter? localImageFilter = _imageFilter;
     if (localImageFilter != null) {
-      final backendFilter = localImageFilter.getBackendFilter(
-        defaultBlurTileMode: defaultBlurTileMode,
-      ) as CkImageFilter;
+      final backendFilter =
+          localImageFilter.getBackendFilter(defaultBlurTileMode: defaultBlurTileMode)
+              as CkImageFilter;
       final SkImageFilter? skImageFilter = backendFilter.nativeFilter;
       if (skImageFilter != null) {
         skPaint.setImageFilter(skImageFilter);

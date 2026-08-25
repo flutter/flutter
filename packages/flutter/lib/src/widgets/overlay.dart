@@ -31,15 +31,13 @@ import 'ticker_provider.dart';
 
 /// The signature of the widget builder callback used in
 /// [OverlayPortal.overlayChildLayoutBuilder].
-typedef OverlayChildLayoutBuilder = Widget Function(
-  BuildContext context,
-  OverlayChildLayoutInfo info,
-);
+typedef OverlayChildLayoutBuilder =
+    Widget Function(BuildContext context, OverlayChildLayoutInfo info);
 
 /// The additional layout information available to the
 /// [OverlayPortal.overlayChildLayoutBuilder] callback.
 extension type OverlayChildLayoutInfo._(
-  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info,
+  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info
 ) {
   /// The size of [OverlayPortal.child] in its own coordinates.
   Size get childSize => _info.$1;

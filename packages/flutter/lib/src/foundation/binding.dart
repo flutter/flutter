@@ -40,9 +40,8 @@ export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter
 // mixin BarBinding on BindingBase { }
 
 /// Signature for service extensions.
-typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(
-  Map<String, String> parameters,
-);
+typedef ServiceExtensionCallback =
+    Future<Map<String, dynamic>> Function(Map<String, String> parameters);
 
 /// Base class for mixins that provide singleton services.
 ///

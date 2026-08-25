@@ -562,16 +562,20 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _targetOpacity = visitor(
-      _targetOpacity,
-      widget.isTargetLoaded ? 1.0 : 0.0,
-      (dynamic value) => Tween<double>(begin: value as double),
-    ) as Tween<double>?;
-    _placeholderOpacity = visitor(
-      _placeholderOpacity,
-      widget.isTargetLoaded ? 0.0 : 1.0,
-      (dynamic value) => Tween<double>(begin: value as double),
-    ) as Tween<double>?;
+    _targetOpacity =
+        visitor(
+              _targetOpacity,
+              widget.isTargetLoaded ? 1.0 : 0.0,
+              (dynamic value) => Tween<double>(begin: value as double),
+            )
+            as Tween<double>?;
+    _placeholderOpacity =
+        visitor(
+              _placeholderOpacity,
+              widget.isTargetLoaded ? 0.0 : 1.0,
+              (dynamic value) => Tween<double>(begin: value as double),
+            )
+            as Tween<double>?;
   }
 
   @override

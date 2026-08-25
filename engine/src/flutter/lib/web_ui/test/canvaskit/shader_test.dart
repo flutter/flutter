@@ -23,12 +23,14 @@ void testMain() {
 
     test('Image shader initialize/dispose cycle', () async {
       final EngineImage image = await createImageFromBytes(kTransparentImage);
-      final imageShader = ui.ImageShader(
-        image,
-        ui.TileMode.clamp,
-        ui.TileMode.repeated,
-        Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-      ) as EngineImageShader;
+      final imageShader =
+          ui.ImageShader(
+                image,
+                ui.TileMode.clamp,
+                ui.TileMode.repeated,
+                Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
+              )
+              as EngineImageShader;
       final ckShader = imageShader.getBackendShader(ui.FilterQuality.none) as CkImageShader;
       expect(ckShader, isA<CkImageShader>());
 

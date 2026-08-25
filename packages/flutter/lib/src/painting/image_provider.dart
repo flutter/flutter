@@ -28,11 +28,8 @@ import 'image_stream.dart';
 typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
 
 /// Signature used for error handling by [ImageProvider._createErrorHandlerAndKey].
-typedef _AsyncKeyErrorHandler<T> = Future<void> Function(
-  T key,
-  Object exception,
-  StackTrace? stack,
-);
+typedef _AsyncKeyErrorHandler<T> =
+    Future<void> Function(T key, Object exception, StackTrace? stack);
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
@@ -187,12 +184,13 @@ class ImageConfiguration {
   'Use ImageDecoderCallback with ImageProvider.loadImage instead. '
   'This feature was deprecated after v3.7.0-1.4.pre.',
 )
-typedef DecoderBufferCallback = Future<ui.Codec> Function(
-  ui.ImmutableBuffer buffer, {
-  int? cacheWidth,
-  int? cacheHeight,
-  bool allowUpscaling,
-});
+typedef DecoderBufferCallback =
+    Future<ui.Codec> Function(
+      ui.ImmutableBuffer buffer, {
+      int? cacheWidth,
+      int? cacheHeight,
+      bool allowUpscaling,
+    });
 
 // Method signature for _loadAsync decode callbacks.
 typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
@@ -205,10 +203,11 @@ typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer bu
 /// See also:
 ///
 ///  * [ResizeImage], which uses this to load images at specific sizes.
-typedef ImageDecoderCallback = Future<ui.Codec> Function(
-  ui.ImmutableBuffer buffer, {
-  ui.TargetImageSizeCallback? getTargetSize,
-});
+typedef ImageDecoderCallback =
+    Future<ui.Codec> Function(
+      ui.ImmutableBuffer buffer, {
+      ui.TargetImageSizeCallback? getTargetSize,
+    });
 
 /// Identifies an image without committing to the precise final asset. This
 /// allows a set of images to be identified and for the precise image to later

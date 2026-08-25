@@ -55,9 +55,9 @@ class SkwasmPaint implements ui.Paint {
       } else {
         engineFilter = filter as EngineImageFilter;
       }
-      final backendFilter = engineFilter.getBackendFilter(
-        defaultBlurTileMode: defaultBlurTileMode,
-      ) as SkwasmImageFilter;
+      final backendFilter =
+          engineFilter.getBackendFilter(defaultBlurTileMode: defaultBlurTileMode)
+              as SkwasmImageFilter;
       final ImageFilterHandle nativeHandle = backendFilter.nativeFilter;
       if (nativeHandle != nullptr) {
         paintSetImageFilter(rawPaint, nativeHandle);

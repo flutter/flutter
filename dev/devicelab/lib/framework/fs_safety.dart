@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
-
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 bool _isDangerousDirectory(String dirPath) {
