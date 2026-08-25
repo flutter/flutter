@@ -19,14 +19,36 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
 
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kHotReloadPreviewer = 'hotReloadPreviewer';
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
   static const kGetDevToolsUri = 'getDevToolsUri';
+  static const kGetWebPreviewUrl = 'getWebPreviewUrl';
+  static const kGetServiceInfo = 'getServiceInfo';
+  static const kRegisterSyntheticPreview = 'registerSyntheticPreview';
+  static const kUnregisterSyntheticPreview = 'unregisterSyntheticPreview';
+  static const kClearSyntheticPreviews = 'clearSyntheticPreviews';
+
+  static const kWidgetPreviewConnectedEvent = 'Connected';
+  static const kLayoutExceptionEvent = 'LayoutException';
+  static const kCompilationSucceededEvent = 'CompilationSucceeded';
+  static const kCompilationFailedEvent = 'CompilationFailed';
+  static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
+  static const kSyntheticPreviewStateChangedEvent =
+      'SyntheticPreviewStateChanged';
+
+  /// Protocol version for agent widget preview services.
+  static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
   static const kNoValueForKey = 200;
+
+  static const kKey = 'key';
+  static const kUri = 'uri';
+  static const kUrl = 'url';
+  static const kValue = 'value';
 
   // END KEEP SYNCED
 
@@ -64,19 +86,37 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   late final bool isWindows;
 
   Future<void> _determineIfWindows() async {
-    isWindows = (BoolResponse.fromDTDResponse(
-      (await _call(kIsWindows))!,
-    )).value!;
+    isWindows = (BoolResponse.fromDTDResponse((await _call(kIsWindows))!))
+        .value!;
   }
 
   /// Trigger a hot restart of the widget preview scaffold.
   Future<void> hotRestartPreviewer() => _call(kHotRestartPreviewer);
 
+  /// Trigger a hot reload of the widget preview scaffold.
+  Future<void> hotReloadPreviewer() => _call(kHotReloadPreviewer);
+
+  /// Retrieves the active web preview URL from the Flutter tool daemon.
+  Future<Uri?> getWebPreviewUrl() async {
+    final response = await _call(kGetWebPreviewUrl);
+    if (response == null) {
+      return null;
+    }
+    final urlString = response.result[kUrl] as String?;
+    return urlString != null ? Uri.parse(urlString) : null;
+  }
+
+  /// Retrieves metadata describing the active widget preview service.
+  Future<Map<String, Object?>?> getServiceInfo() async {
+    final response = await _call(kGetServiceInfo);
+    return response?.result;
+  }
+
   /// Resolves a package:// URI to a file:// URI using the package_config.
   ///
   /// Returns null if [uri] can not be resolved.
   Future<Uri?> resolveUri(Uri uri) async {
-    final response = await _call(kResolveUri, params: {'uri': uri.toString()});
+    final response = await _call(kResolveUri, params: {kUri: uri.toString()});
     if (response == null) {
       return null;
     }
@@ -90,7 +130,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// Returns null if [key] is not in the map.
   Future<Object?> getPreference(String key) async {
     try {
-      final response = await _call(kGetPreference, params: {'key': key});
+      final response = await _call(kGetPreference, params: {kKey: key});
       return switch (response?.type) {
         'StringResponse' => StringResponse.fromDTDResponse(response!).value,
         'BoolResponse' => BoolResponse.fromDTDResponse(response!).value,
@@ -114,7 +154,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
 
   /// Sets [key] to [value] in the persistent preferences map.
   Future<void> setPreference(String key, Object? value) async {
-    await _call(kSetPreference, params: {'key': key, 'value': value});
+    await _call(kSetPreference, params: {kKey: key, kValue: value});
   }
 
   /// Retrieves the DevTools URI for the previewer instance.

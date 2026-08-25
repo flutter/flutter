@@ -108,7 +108,18 @@ class WidgetPreviewDtdServices {
   static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
   static const kSyntheticPreviewStateChangedEvent = 'SyntheticPreviewStateChanged';
 
+  static const kClearedCount = 'clearedCount';
+  static const kCount = 'count';
+  static const kDiagnostic = 'diagnostic';
+  static const kDurationMs = 'durationMs';
+  static const kError = 'error';
+  static const kPreviewId = 'previewId';
+  static const kPreviews = 'previews';
+  static const kRegistered = 'registered';
+  static const kSuccess = 'success';
+
   /// Protocol version for agent widget preview services.
+
   static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
@@ -412,7 +423,7 @@ class WidgetPreviewDtdServices {
   }
 
   Future<Map<String, Object?>> _unregisterSyntheticPreview(Parameters params) async {
-    final String previewId = params['previewId'].asString;
+    final String previewId = params[SyntheticPreviewDetails.kPreviewId].asString;
     final bool success =
         onUnregisterSyntheticPreview == null || await onUnregisterSyntheticPreview!(previewId);
     if (success) {
@@ -423,7 +434,7 @@ class WidgetPreviewDtdServices {
 
   Future<Map<String, Object?>> _clearSyntheticPreviews(Parameters _) async {
     final int count = onClearSyntheticPreviews != null ? await onClearSyntheticPreviews!() : 0;
-    return <String, Object?>{'clearedCount': count};
+    return <String, Object?>{kClearedCount: count};
   }
 
   /// Posts a [kLayoutExceptionEvent] to the widget preview stream.
@@ -436,8 +447,8 @@ class WidgetPreviewDtdServices {
       return;
     }
     await dtd.postEvent(widgetPreviewScaffoldStream, kLayoutExceptionEvent, <String, Object?>{
-      'previewId': previewId,
-      'diagnostic': diagnostic,
+      kPreviewId: previewId,
+      kDiagnostic: diagnostic,
     });
   }
 
@@ -448,8 +459,8 @@ class WidgetPreviewDtdServices {
       return;
     }
     await dtd.postEvent(widgetPreviewScaffoldStream, kPreviewsUpdatedEvent, <String, Object?>{
-      'count': previews.length,
-      'previews': previews,
+      kCount: previews.length,
+      kPreviews: previews,
     });
   }
 
@@ -463,9 +474,9 @@ class WidgetPreviewDtdServices {
       widgetPreviewScaffoldStream,
       success ? kCompilationSucceededEvent : kCompilationFailedEvent,
       <String, Object?>{
-        'success': success,
-        if (durationMs != null) 'durationMs': durationMs,
-        if (error != null) 'error': error,
+        kSuccess: success,
+        if (durationMs != null) kDurationMs: durationMs,
+        if (error != null) kError: error,
       },
     );
   }
@@ -482,7 +493,7 @@ class WidgetPreviewDtdServices {
     await dtd.postEvent(
       widgetPreviewScaffoldStream,
       kSyntheticPreviewStateChangedEvent,
-      <String, Object?>{'previewId': previewId, 'registered': registered},
+      <String, Object?>{kPreviewId: previewId, kRegistered: registered},
     );
   }
 }
