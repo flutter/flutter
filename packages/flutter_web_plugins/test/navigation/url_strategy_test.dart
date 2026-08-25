@@ -131,4 +131,20 @@ void main() {
       expect(strategy.prepareExternalUrl('/bar/'), '/foo/bar/');
     });
   });
+
+  group('usePathUrlStrategy', () {
+    tearDown(() {
+      setUrlStrategy(null);
+    });
+
+    test('can usePathUrlStrategy with the default includeHash', () {
+      expect(() => usePathUrlStrategy(), returnsNormally);
+      expect(urlStrategy, isA<PathUrlStrategy>());
+    });
+
+    test('can usePathUrlStrategy with includeHash: true', () {
+      expect(() => usePathUrlStrategy(includeHash: true), returnsNormally);
+      expect(urlStrategy, isA<PathUrlStrategy>());
+    });
+  });
 }
