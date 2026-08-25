@@ -2438,15 +2438,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  // The window must be attached to the connected scene to have a screen, without which the
-  // viewport metrics stay empty and the surface is never updated.
-  UIWindowScene* windowScene =
-      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
-  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
-  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
-  [window addSubview:flutterViewController.view];
-  flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
-  [flutterViewController viewDidLayoutSubviews];
   NSNotification* sceneNotification =
       [NSNotification notificationWithName:UISceneDidActivateNotification object:nil userInfo:nil];
   NSNotification* applicationNotification =
@@ -2460,7 +2451,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerify([mockVC applicationBecameActive:[OCMArg any]]);
   XCTAssertFalse(
       flutterViewController.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground);
-  OCMVerify([mockVC surfaceUpdated:YES]);
   XCTestExpectation* timeoutApplicationLifeCycle =
       [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
@@ -2481,15 +2471,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  // The window must be attached to the connected scene to have a screen, without which the
-  // viewport metrics stay empty and the surface is never updated.
-  UIWindowScene* windowScene =
-      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
-  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
-  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
-  [window addSubview:flutterViewController.view];
-  flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
-  [flutterViewController viewDidLayoutSubviews];
   NSNotification* sceneNotification =
       [NSNotification notificationWithName:UISceneDidActivateNotification object:nil userInfo:nil];
   NSNotification* applicationNotification =
@@ -2503,7 +2484,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMReject([mockVC applicationBecameActive:[OCMArg any]]);
   XCTAssertFalse(
       flutterViewController.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground);
-  OCMVerify([mockVC surfaceUpdated:YES]);
   XCTestExpectation* timeoutApplicationLifeCycle =
       [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
@@ -2736,6 +2716,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  // The window must be attached to the connected scene to have a screen, without which the
+  // viewport metrics stay empty and the surface is never updated.
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
+  [window addSubview:flutterViewController.view];
+  flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
+  [flutterViewController viewDidLayoutSubviews];
   NSNotification* sceneNotification =
       [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
                                     object:nil
@@ -2749,6 +2738,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMReject([mockVC sceneWillEnterForeground:[OCMArg any]]);
   OCMVerify([mockVC applicationWillEnterForeground:[OCMArg any]]);
+  OCMVerify([mockVC surfaceUpdated:YES]);
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
   [flutterViewController deregisterNotifications];
 }
@@ -2762,6 +2752,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  // The window must be attached to the connected scene to have a screen, without which the
+  // viewport metrics stay empty and the surface is never updated.
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
+  [window addSubview:flutterViewController.view];
+  flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
+  [flutterViewController viewDidLayoutSubviews];
   NSNotification* sceneNotification =
       [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
                                     object:nil
@@ -2775,6 +2774,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMVerify([mockVC sceneWillEnterForeground:[OCMArg any]]);
   OCMReject([mockVC applicationWillEnterForeground:[OCMArg any]]);
+  OCMVerify([mockVC surfaceUpdated:YES]);
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
   [flutterViewController deregisterNotifications];
   [mockBundle stopMocking];
