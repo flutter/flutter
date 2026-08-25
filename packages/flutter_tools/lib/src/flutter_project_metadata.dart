@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'experimental/templates.dart';
 import 'features.dart';
 import 'project.dart';
 import 'template.dart';
@@ -15,7 +17,12 @@ import 'version.dart';
 
 /// The result of parsing `--template=` for `flutter create` and related commands.
 @immutable
-sealed class ParsedFlutterTemplateType implements CliEnum {
+sealed class ParsedFlutterTemplateType {
+  const ParsedFlutterTemplateType();
+
+  String get cliName;
+  String get helpText;
+
   static const _values = <ParsedFlutterTemplateType>[
     ...FlutterTemplateType.values,
     ...RemovedFlutterTemplateType.values,
@@ -23,25 +30,77 @@ sealed class ParsedFlutterTemplateType implements CliEnum {
 
   /// Parses and returns a [ParsedFlutterTemplateType], if any, for [cliName].
   ///
-  /// If no match was found `null` is returned.
-  static ParsedFlutterTemplateType? fromCliName(String cliName) {
+  /// If no match was found in standard templates, it queries the
+  /// [ExtensionTemplateManager] to check if it matches a custom template.
+  /// If no match is found, `null` is returned.
+  static ParsedFlutterTemplateType? fromCliName(
+    String cliName, {
+    required ExtensionTemplateManager? extensionTemplateManager,
+  }) {
     for (final ParsedFlutterTemplateType type in _values) {
       if (cliName == type.cliName) {
         return type;
+      }
+    }
+    final manager = extensionTemplateManager;
+    if (manager != null) {
+      for (final ProjectTemplate template in manager.cachedTemplates) {
+        if (template.name == cliName) {
+          return ExtensionProjectTemplateType(cliName: cliName);
+        }
       }
     }
     return null;
   }
 
   /// Returns template types that are enabled based on the current [featureFlags].
-  static List<ParsedFlutterTemplateType> enabledValues(FeatureFlags featureFlags) {
-    return _values.toList()..retainWhere((ParsedFlutterTemplateType templateType) {
+  ///
+  /// Includes custom templates from [ExtensionTemplateManager] if the manager
+  /// is available and has cached templates.
+  static List<ParsedFlutterTemplateType> enabledValues(
+    FeatureFlags featureFlags, {
+    required ExtensionTemplateManager? extensionTemplateManager,
+  }) {
+    final List<ParsedFlutterTemplateType> values = _values.toList();
+    final manager = extensionTemplateManager;
+    if (manager != null) {
+      for (final ProjectTemplate template in manager.cachedTemplates) {
+        values.add(ExtensionProjectTemplateType(cliName: template.name));
+      }
+    }
+    return values..retainWhere((ParsedFlutterTemplateType templateType) {
       return templateType.isEnabled(featureFlags);
     });
   }
 
   /// Whether the flag is enabled based on a flag being set.
   bool isEnabled(FeatureFlags featureFlags) => true;
+}
+
+/// A [ParsedFlutterTemplateType] representing a template provided dynamically
+/// by a tool extension.
+@immutable
+class ExtensionProjectTemplateType extends ParsedFlutterTemplateType {
+  const ExtensionProjectTemplateType({required this.cliName});
+
+  @override
+  final String cliName;
+
+  @override
+  String get helpText => 'Dynamically loaded template from extension.';
+
+  @override
+  bool isEnabled(FeatureFlags featureFlags) => true;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ExtensionProjectTemplateType &&
+          runtimeType == other.runtimeType &&
+          cliName == other.cliName;
+
+  @override
+  int get hashCode => cliName.hashCode;
 }
 
 /// A [ParsedFlutterTemplateType] that is no longer operable.
@@ -156,9 +215,13 @@ bool _validateMetadataMap(YamlMap map, Map<String, Type> validations, Logger log
 /// A wrapper around the `.metadata` file.
 class FlutterProjectMetadata {
   /// Creates a MigrateConfig by parsing an existing .migrate_config yaml file.
-  FlutterProjectMetadata(this.file, Logger logger)
-    : _logger = logger,
-      migrateConfig = MigrateConfig() {
+  FlutterProjectMetadata(
+    this.file,
+    Logger logger, {
+    required ExtensionTemplateManager? extensionTemplateManager,
+  }) : _logger = logger,
+       _extensionTemplateManager = extensionTemplateManager,
+       migrateConfig = MigrateConfig() {
     if (!file.existsSync()) {
       _logger.printTrace('No .metadata file found at ${file.path}.');
       // Create a default empty metadata.
@@ -188,10 +251,12 @@ class FlutterProjectMetadata {
     if (_validateMetadataMap(yamlRoot, <String, Type>{'project_type': String}, _logger)) {
       final ParsedFlutterTemplateType? templateType = ParsedFlutterTemplateType.fromCliName(
         yamlRoot['project_type'] as String,
+        extensionTemplateManager: _extensionTemplateManager,
       );
       _projectType = switch (templateType) {
         RemovedFlutterTemplateType() || null => null,
         FlutterTemplateType() => templateType,
+        ExtensionProjectTemplateType() => templateType,
       };
     }
     final Object? migrationYaml = yamlRoot['migration'];
@@ -205,10 +270,12 @@ class FlutterProjectMetadata {
     required this.file,
     required String? versionRevision,
     required String? versionChannel,
-    required FlutterTemplateType? projectType,
+    required ParsedFlutterTemplateType? projectType,
     required this.migrateConfig,
     required Logger logger,
+    required ExtensionTemplateManager? extensionTemplateManager,
   }) : _logger = logger,
+       _extensionTemplateManager = extensionTemplateManager,
        _versionChannel = versionChannel,
        _versionRevision = versionRevision,
        _projectType = projectType;
@@ -222,13 +289,14 @@ class FlutterProjectMetadata {
   String? _versionChannel;
   String? get versionChannel => _versionChannel;
 
-  FlutterTemplateType? _projectType;
-  FlutterTemplateType? get projectType => _projectType;
+  ParsedFlutterTemplateType? _projectType;
+  ParsedFlutterTemplateType? get projectType => _projectType;
 
   /// Metadata and configuration for the migrate command.
   MigrateConfig migrateConfig;
 
   final Logger _logger;
+  final ExtensionTemplateManager? _extensionTemplateManager;
 
   final File file;
 

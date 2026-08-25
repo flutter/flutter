@@ -52,6 +52,7 @@ import 'src/context/tool_dependencies.dart';
 import 'src/devtools_launcher.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
+import 'src/experimental/templates.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
@@ -116,11 +117,18 @@ Future<void> main(List<String> args) async {
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
+      final templateManager = ExtensionTemplateManager(
+        extensionManager: manager,
+        fileSystem: toolDependencies.toolContext.fs,
+        logger: toolDependencies.toolContext.logger,
+        featureFlags: featureFlags,
+      );
       return generateCommands(
         toolDependencies: toolDependencies,
         verboseHelp: verboseHelp,
         verbose: verbose,
         extensionManager: manager,
+        extensionTemplateManager: templateManager,
       );
     },
     verbose: verbose,
@@ -200,6 +208,7 @@ List<FlutterCommand> generateCommands({
   required bool verbose,
   required bool verboseHelp,
   ExtensionManager? extensionManager,
+  ExtensionTemplateManager? extensionTemplateManager,
 }) => <FlutterCommand>[
   AnalyzeCommand(
     verboseHelp: verboseHelp,
@@ -265,7 +274,7 @@ List<FlutterCommand> generateCommands({
     fileSystem: toolDependencies.toolContext.fs,
     logger: toolDependencies.toolContext.logger,
   ),
-  CreateCommand(verboseHelp: verboseHelp),
+  CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
