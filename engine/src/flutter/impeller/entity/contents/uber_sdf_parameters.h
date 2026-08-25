@@ -86,9 +86,6 @@ struct UberSDFParameters {
   /// The angular span of the circular cap for the top and right octants.
   Point angle_span;
 
-  /// The geometric offset 'c' used to connect the two octants of each quadrant.
-  float octant_offset_c;
-
   /// The circular cap center for the top octant of each
   /// quadrant.
   Point circle_center_top;
