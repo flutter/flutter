@@ -15,6 +15,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
@@ -33,7 +34,7 @@
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "gtest/gtest.h"
 
-// CREATE_NATIVE_ENTRY and MOCK_ENGINE_PROC are leaky by design
+// CREATE_FFI_LAMBDA and MOCK_ENGINE_PROC are leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 @interface FlutterEngine (Test)
@@ -153,12 +154,12 @@ TEST_F(FlutterEngineTest, HasNonNullExecutableName) {
 
   // Block until notified by the Dart test of the value of Platform.executable.
   BOOL signaled = NO;
-  AddNativeCallback("NotifyStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      const auto dart_string = tonic::DartConverter<std::string>::FromDart(
-                          Dart_GetNativeArgument(args, 0));
-                      EXPECT_EQ(executable_name, dart_string);
-                      signaled = YES;
-                    }));
+  AddFfiNativeCallback("NotifyStringValue", CREATE_FFI_LAMBDA([&](Dart_Handle value) {
+                         const auto dart_string =
+                             tonic::DartConverter<std::string>::FromDart(value);
+                         EXPECT_EQ(executable_name, dart_string);
+                         signaled = YES;
+                       }));
 
   // Launch the test entrypoint.
   EXPECT_TRUE([engine runWithEntrypoint:@"executableNameNotNull"]);
@@ -216,8 +217,7 @@ TEST_F(FlutterEngineTest, MessengerSend) {
 TEST_F(FlutterEngineTest, CanLogToStdout) {
   // Block until completion of print statement.
   BOOL signaled = NO;
-  AddNativeCallback("SignalNativeTest",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signaled = YES; }));
+  AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() { signaled = YES; }));
 
   // Replace stdout stream buffer with our own.
   FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
@@ -242,16 +242,16 @@ TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
 
   // Latch to ensure the entire layer tree has been generated and presented.
   BOOL signaled = NO;
-  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      CALayer* rootLayer = engine.viewController.flutterView.layer;
-                      EXPECT_TRUE(rootLayer.backgroundColor != nil);
-                      if (rootLayer.backgroundColor != nil) {
-                        NSColor* actualBackgroundColor =
-                            [NSColor colorWithCGColor:rootLayer.backgroundColor];
-                        EXPECT_EQ(actualBackgroundColor, [NSColor blackColor]);
-                      }
-                      signaled = YES;
-                    }));
+  AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                         CALayer* rootLayer = engine.viewController.flutterView.layer;
+                         EXPECT_TRUE(rootLayer.backgroundColor != nil);
+                         if (rootLayer.backgroundColor != nil) {
+                           NSColor* actualBackgroundColor =
+                               [NSColor colorWithCGColor:rootLayer.backgroundColor];
+                           EXPECT_EQ(actualBackgroundColor, [NSColor blackColor]);
+                         }
+                         signaled = YES;
+                       }));
 
   // Launch the test entrypoint.
   EXPECT_TRUE([engine runWithEntrypoint:@"backgroundTest"]);
@@ -273,16 +273,16 @@ TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
 
   // Latch to ensure the entire layer tree has been generated and presented.
   BOOL signaled = NO;
-  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      CALayer* rootLayer = engine.viewController.flutterView.layer;
-                      EXPECT_TRUE(rootLayer.backgroundColor != nil);
-                      if (rootLayer.backgroundColor != nil) {
-                        NSColor* actualBackgroundColor =
-                            [NSColor colorWithCGColor:rootLayer.backgroundColor];
-                        EXPECT_EQ(actualBackgroundColor, [NSColor whiteColor]);
-                      }
-                      signaled = YES;
-                    }));
+  AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                         CALayer* rootLayer = engine.viewController.flutterView.layer;
+                         EXPECT_TRUE(rootLayer.backgroundColor != nil);
+                         if (rootLayer.backgroundColor != nil) {
+                           NSColor* actualBackgroundColor =
+                               [NSColor colorWithCGColor:rootLayer.backgroundColor];
+                           EXPECT_EQ(actualBackgroundColor, [NSColor whiteColor]);
+                         }
+                         signaled = YES;
+                       }));
 
   // Launch the test entrypoint.
   EXPECT_TRUE([engine runWithEntrypoint:@"backgroundTest"]);
@@ -512,8 +512,7 @@ TEST_F(FlutterEngineTest, ProducesAccessibilityTreeWhenAddingViews) {
 
 TEST_F(FlutterEngineTest, NativeCallbacks) {
   BOOL latch_called = NO;
-  AddNativeCallback("SignalNativeTest",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch_called = YES; }));
+  AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() { latch_called = YES; }));
 
   FlutterEngine* engine = GetFlutterEngine();
   EXPECT_TRUE([engine runWithEntrypoint:@"nativeCallback"]);
@@ -937,14 +936,13 @@ TEST_F(FlutterEngineTest, CanGetEngineForId) {
 
   BOOL signaled = NO;
   std::optional<int64_t> engineId;
-  AddNativeCallback("NotifyEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      const auto argument = Dart_GetNativeArgument(args, 0);
-                      if (!Dart_IsNull(argument)) {
-                        const auto id = tonic::DartConverter<int64_t>::FromDart(argument);
-                        engineId = id;
-                      }
-                      signaled = YES;
-                    }));
+  AddFfiNativeCallback("NotifyEngineId", CREATE_FFI_LAMBDA([&](Dart_Handle argument) {
+                         if (!Dart_IsNull(argument)) {
+                           const auto id = tonic::DartConverter<int64_t>::FromDart(argument);
+                           engineId = id;
+                         }
+                         signaled = YES;
+                       }));
 
   EXPECT_TRUE([engine runWithEntrypoint:@"testEngineId"]);
   while (!signaled) {

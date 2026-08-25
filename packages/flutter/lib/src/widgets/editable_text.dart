@@ -196,6 +196,14 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// between the framework and the input method. Consider using
 /// [TextInputFormatter]s instead for as-you-type text modification.
 ///
+/// [TextInputFormatter]s, such as those supplied to
+/// [EditableText.inputFormatters], only run when the user changes the text in
+/// the text field, for example using the keyboard or the text selection menu.
+/// They don't run when the text is changed programmatically through this
+/// controller, such as by setting [value] or [text], or by calling [clear].
+/// If a programmatically set value needs to be formatted, apply the
+/// formatting manually before updating the controller.
+///
 /// If both the [text] and [selection] properties need to be changed, set the
 /// controller's [value] instead. Setting [text] will clear the selection
 /// and composing range.
@@ -273,6 +281,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases. This property can
   /// be set from a listener added to this [TextEditingController].
+  ///
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
@@ -281,6 +292,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     );
   }
 
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   @override
   set value(TextEditingValue newValue) {
     assert(
@@ -342,6 +355,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// If the new selection is outside the composing range, the composing range is
   /// cleared.
+  ///
+  /// Setting this does not run [TextInputFormatter]s. Apply them manually if
+  /// needed.
   set selection(TextSelection newSelection) {
     if (text.length < newSelection.end || text.length < newSelection.start) {
       throw FlutterError('invalid text selection: $newSelection');
@@ -361,6 +377,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
+  ///
+  /// Calling this method does not run [TextInputFormatter]s. Apply them
+  /// manually if needed.
   void clear() {
     value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
   }
@@ -375,6 +394,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
+  ///
+  /// Calling this method does not run [TextInputFormatter]s. Apply them
+  /// manually if needed.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
   }
@@ -2023,14 +2045,14 @@ class EditableText extends StatefulWidget {
   /// This example shows how to customize the menu, in this case by keeping the
   /// default buttons for the platform but modifying their appearance.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.0.dart **
+  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.0.dart **
   /// {@end-tool}
   ///
   /// {@tool dartpad}
   /// This example shows how to show a custom button only when an email address
   /// is currently selected.
   ///
-  /// ** See code in examples/api/lib/material/context_menu/editable_text_toolbar_builder.1.dart **
+  /// ** See code in examples/api/lib/widgets/context_menu/editable_text_toolbar_builder.1.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -2052,9 +2074,9 @@ class EditableText extends StatefulWidget {
   /// [TextStyle] used to style text with misspelled words.
   ///
   /// Spell check is disabled for password input, including when [obscureText]
-  /// is true, [keyboardType] is [TextInputType.visiblePassword], or
-  /// [autofillHints] contains [AutofillHints.password] or
-  /// [AutofillHints.newPassword].
+  /// is true, [keyboardType] is [TextInputType.visiblePassword],
+  /// [TextInputType.password] is true, or [autofillHints] contains
+  /// [AutofillHints.password] or [AutofillHints.newPassword].
   ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
@@ -3111,6 +3133,7 @@ class EditableTextState extends State<EditableText>
   }) {
     return obscureText ||
         keyboardType == TextInputType.visiblePassword ||
+        keyboardType.password == true ||
         (autofillHints?.any(
               (String hint) => hint == AutofillHints.password || hint == AutofillHints.newPassword,
             ) ??

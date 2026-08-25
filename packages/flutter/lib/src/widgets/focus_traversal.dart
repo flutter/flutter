@@ -1371,8 +1371,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     final FocusScopeNode nearestScope = currentNode.nearestScope!;
     final FocusNode? focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      final FocusNode firstFocus =
-          findFirstFocusInDirection(currentNode, direction) ?? currentNode;
+      final FocusNode firstFocus = findFirstFocusInDirection(currentNode, direction) ?? currentNode;
       switch (direction) {
         case TraversalDirection.up:
         case TraversalDirection.left:
@@ -1794,6 +1793,12 @@ abstract class FocusOrder with Diagnosticable implements Comparable<FocusOrder> 
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const FocusOrder();
+
+  /// Creates a [LexicalFocusOrder] that describes its order in lexical order.
+  const factory FocusOrder.lexical(String order) = LexicalFocusOrder;
+
+  /// Creates a [NumericFocusOrder] that describes its order numerically.
+  const factory FocusOrder.numeric(double order) = NumericFocusOrder;
 
   /// Compares this object to another [Comparable].
   ///
@@ -2218,8 +2223,8 @@ class FocusTraversalGroup extends StatefulWidget {
           'FocusTraversalGroup.of() was called with a context that does not contain a '
           'Focus or FocusScope widget, or there was no FocusTraversalPolicy in effect.\n'
           'This can happen if there is not a FocusTraversalGroup that defines the policy, '
-          'or if the context comes from a widget that is above the WidgetsApp, MaterialApp, '
-          'or CupertinoApp widget (those widgets introduce an implicit default policy) \n'
+          'or if the context comes from a widget that is above the WidgetsApp '
+          'widget (which introduces an implicit default policy)\n'
           'The context used was:\n'
           '  $context',
         );
