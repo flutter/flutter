@@ -877,6 +877,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           return true;
         }
         final List<int> entryBytes = await assetEntry.contentsAsBytes();
+        if (entryBytes.length != await file.length()) {
+          return true;
+        }
         final List<int> fileBytes = await file.readAsBytes();
         if (!listEquals(entryBytes, fileBytes)) {
           return true;
