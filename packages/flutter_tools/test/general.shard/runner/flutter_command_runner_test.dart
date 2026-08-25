@@ -557,10 +557,8 @@ final class _FakeDynamicFlutterCommand extends FlutterCommand with ExtensionArgP
   @override
   Future<void> initializeDynamicOptions() async {
     didInitializeDynamicOptions = true;
+    rebuildDynamicArgParser();
   }
-
-  @override
-  String? get extensionArgParserCacheKey => 'dummy-cache-key';
 
   @override
   ArgParser buildDynamicArgParser(ArgParser dynamicParser) {

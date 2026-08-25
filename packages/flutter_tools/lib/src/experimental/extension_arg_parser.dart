@@ -22,8 +22,7 @@ import '../runner/flutter_command.dart';
 /// when new extension capabilities (such as project templates) are discovered.
 mixin ExtensionArgParserMixin on FlutterCommand {
   ArgParser? _baseArgParser;
-  ArgParser? _customArgParser;
-  String? _lastDynamicCacheKey;
+  ArgParser? _dynamicArgParser;
   bool _buildingBaseParser = false;
 
   /// Hook called by the command runner before parsing arguments,
@@ -43,14 +42,6 @@ mixin ExtensionArgParserMixin on FlutterCommand {
         ? globals.outputPreferences.wrapColumn
         : null,
   );
-
-  /// Returns a cache key representing the current set of dynamic extension options
-  /// (for example, a comma-separated list of template names).
-  ///
-  /// This key is used to determine if the dynamic parser needs to be rebuilt.
-  /// If this returns null or an empty string, the base parser is returned directly.
-  @protected
-  String? get extensionArgParserCacheKey;
 
   /// Injects dynamic extension options or allowed help entries into [dynamicParser].
   ///
@@ -125,8 +116,22 @@ mixin ExtensionArgParserMixin on FlutterCommand {
     }
   }
 
-  /// Returns either the base parser or a dynamically rebuilt parser if the
-  /// cache key has changed.
+  /// Rebuilds the dynamic argument parser from [baseArgParser].
+  ///
+  /// Subclasses should call this when dynamic options or capabilities are discovered.
+  @protected
+  void rebuildDynamicArgParser() {
+    final ArgParser clonedParser = cloneParser(baseArgParser);
+    _dynamicArgParser = buildDynamicArgParser(clonedParser);
+    // Re-add subcommands to the dynamic parser to ensure they are not lost.
+    for (final MapEntry(:key, :value) in subcommands.entries) {
+      if (!_dynamicArgParser!.commands.containsKey(key)) {
+        _dynamicArgParser!.addCommand(key, value.argParser);
+      }
+    }
+  }
+
+  /// Returns either the base parser or a dynamically rebuilt parser if dynamic options were added.
   @override
   ArgParser get argParser {
     assert(
@@ -134,21 +139,6 @@ mixin ExtensionArgParserMixin on FlutterCommand {
       'argParser was accessed re-entrantly while createBaseArgParser was executing. '
       'Subclasses should add options directly to the ArgParser created in createBaseArgParser.',
     );
-    final String? cacheKey = extensionArgParserCacheKey;
-    if (cacheKey == null || cacheKey.isEmpty) {
-      return baseArgParser;
-    }
-    if (_customArgParser == null || cacheKey != _lastDynamicCacheKey) {
-      _lastDynamicCacheKey = cacheKey;
-      final ArgParser clonedParser = cloneParser(baseArgParser);
-      _customArgParser = buildDynamicArgParser(clonedParser);
-      // Re-add subcommands to the custom parser to ensure they are not lost.
-      for (final MapEntry(:key, :value) in subcommands.entries) {
-        if (!_customArgParser!.commands.containsKey(key)) {
-          _customArgParser!.addCommand(key, value.argParser);
-        }
-      }
-    }
-    return _customArgParser!;
+    return _dynamicArgParser ?? baseArgParser;
   }
 }

@@ -117,22 +117,10 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   Future<void> initializeDynamicOptions() async {
     if (await _activeExtensionConfig case final activeConfig?) {
       _extensionSettingsGroups = await activeConfig.fetchExtensionSettings();
+      if (_extensionSettingsGroups.isNotEmpty) {
+        rebuildDynamicArgParser();
+      }
     }
-  }
-
-  @override
-  String? get extensionArgParserCacheKey {
-    if (_extensionSettingsGroups.isEmpty) {
-      return null;
-    }
-    final names = <String>[
-      for (final ExtensionSettingsGroup(:featureFlags, :configOptions)
-          in _extensionSettingsGroups) ...[
-        for (final FeatureFlag(:name) in featureFlags) name,
-        for (final ConfigOption(:name) in configOptions) name,
-      ],
-    ]..sort();
-    return names.isEmpty ? null : names.join(',');
   }
 
   @override
