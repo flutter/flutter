@@ -2223,8 +2223,8 @@ class FocusTraversalGroup extends StatefulWidget {
           'FocusTraversalGroup.of() was called with a context that does not contain a '
           'Focus or FocusScope widget, or there was no FocusTraversalPolicy in effect.\n'
           'This can happen if there is not a FocusTraversalGroup that defines the policy, '
-          'or if the context comes from a widget that is above the WidgetsApp, MaterialApp, '
-          'or CupertinoApp widget (those widgets introduce an implicit default policy) \n'
+          'or if the context comes from a widget that is above the WidgetsApp '
+          'widget (which introduces an implicit default policy)\n'
           'The context used was:\n'
           '  $context',
         );
