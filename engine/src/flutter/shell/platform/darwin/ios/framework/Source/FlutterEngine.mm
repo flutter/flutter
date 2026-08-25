@@ -243,8 +243,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   // Reading the UIApplication lifecycle state and registering for UIKit notifications below both
   // require the main thread, as does running the engine.
-  FML_DCHECK([[NSThread currentThread] isMainThread])
-      << "FlutterEngine must be created on the main thread.";
+  FML_DCHECK(NSThread.isMainThread) << "FlutterEngine must be created on the main thread.";
 
   _restorationEnabled = restorationEnabled;
   _allowHeadlessExecution = allowHeadlessExecution;
@@ -294,7 +293,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 + (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
-  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
+  NSAssert(NSThread.isMainThread, @"Must be called on the main thread.");
   return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
 }
 
@@ -930,7 +929,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   //
   // Engines spawned from this one inherit these task runners, so this applies to every engine in a
   // FlutterEngineGroup.
-  FML_CHECK([[NSThread currentThread] isMainThread])
+  FML_CHECK(NSThread.isMainThread)
       << "FlutterEngine must be run on the main thread. The engine adopts the calling thread as "
          "its platform and UI thread, both of which must be the main thread. To start an engine "
          "from a background queue, dispatch to the main queue first.";
@@ -1622,8 +1621,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                            libraryURI:(/*nullable*/ NSString*)libraryURI
                          initialRoute:(/*nullable*/ NSString*)initialRoute
                        entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs {
-  FML_CHECK([[NSThread currentThread] isMainThread])
-      << "FlutterEngine must be spawned on the iOS main thread.";
+  FML_CHECK(NSThread.isMainThread) << "FlutterEngine must be spawned on the iOS main thread.";
 
   NSAssert(_shell, @"Spawning from an engine without a shell (possibly not run).");
   FlutterEngine* result = [[FlutterEngine alloc] initWithName:self.labelPrefix
