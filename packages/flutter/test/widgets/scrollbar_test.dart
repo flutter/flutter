@@ -1233,6 +1233,126 @@ void main() {
     );
   });
 
+  testWidgets('Scrollbar thumb can be dragged with a mouse within the crossAxisMargin', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/163464
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              crossAxisMargin: 2.0,
+              controller: scrollController,
+              child: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(790.0, 0.0, 800.0, 600.0))
+        ..rect(rect: const Rect.fromLTRB(792.0, 0.0, 798.0, 90.0), color: const Color(0x66BCBCBC)),
+    );
+
+    // The pointer is within the crossAxisMargin of the track, next to the
+    // painted thumb. This is part of the scrollbar, so it should drag the
+    // thumb instead of paging the scroll view like a tap on the track.
+    const scrollAmount = 10.0;
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.down(const Offset(799.0, 45.0));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, greaterThan(0.0));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(790.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(792.0, 10.0, 798.0, 100.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets(
+    'Horizontal scrollbar thumb can be dragged with a mouse within the crossAxisMargin',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/163464
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: RawScrollbar(
+              thumbVisibility: true,
+              crossAxisMargin: 2.0,
+              controller: scrollController,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: scrollController,
+                child: const SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, 0.0);
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(0.0, 590.0, 800.0, 600.0))
+          ..rect(rect: const Rect.fromLTRB(0.0, 592.0, 160.0, 598.0), color: const Color(0x66BCBCBC)),
+      );
+
+      // The pointer is within the crossAxisMargin of the track, next to the
+      // painted thumb. This is part of the scrollbar, so it should drag the
+      // thumb instead of paging the scroll view like a tap on the track.
+      const scrollAmount = 10.0;
+      final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await gesture.down(const Offset(45.0, 599.0));
+      await tester.pumpAndSettle();
+      await gesture.moveBy(const Offset(scrollAmount, 0.0));
+      await tester.pumpAndSettle();
+
+      expect(scrollController.offset, greaterThan(0.0));
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(0.0, 590.0, 800.0, 600.0))
+          ..rect(
+            rect: const Rect.fromLTRB(10.0, 592.0, 170.0, 598.0),
+            color: const Color(0x66BCBCBC),
+          ),
+      );
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+  );
+
   testWidgets('hit test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99324
     final scrollController = ScrollController();
