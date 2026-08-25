@@ -237,13 +237,18 @@ class SampleChecker {
     final List<File> files = getFiles(searchDirectory, RegExp(r'\.dart$'));
     final searchStrings = <String>{};
     final malformedStrings = <LinkInfo>{};
-    final validExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
+    final legacyValidExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
+    final newValidExampleRe = RegExp(r'{@example /(?<path>[^#}]+)(?:#.+)?}');
     // Looks for some common broken versions of example links. This looks for
-    // something that is at minimum "///*seecode<something>*" to indicate that it
-    // looks like an example link. It should be narrowed if we start getting false
-    // positives.
+    // something that is at minimum "///*seecode<something>*" or
+    // "///{@example<something>}" to indicate that it looks like an example
+    // link. It should be narrowed if we start getting false positives.
     final malformedLinkRe = RegExp(
-      r'^(?<malformed>\s*///\s*\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)',
+      r'^(?<malformed>\s*///\s*'
+      r'(?:'
+      r'(?:\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)|'
+      r'(?:{@example.*})'
+      r'))',
     );
     for (final file in files) {
       final String contents = file.readAsStringSync();
@@ -251,13 +256,16 @@ class SampleChecker {
       var count = 0;
       for (final line in lines) {
         count += 1;
-        final RegExpMatch? validMatch = validExampleRe.firstMatch(line);
-        if (validMatch != null) {
-          searchStrings.add(validMatch.namedGroup('path')!);
+        final RegExpMatch? legacyValidMatch = legacyValidExampleRe.firstMatch(line);
+        final RegExpMatch? newValidMatch = newValidExampleRe.firstMatch(line);
+        if (legacyValidMatch != null) {
+          searchStrings.add(legacyValidMatch.namedGroup('path')!);
+        } else if (newValidMatch != null) {
+          searchStrings.add(newValidMatch.namedGroup('path')!);
         }
         final RegExpMatch? malformedMatch = malformedLinkRe.firstMatch(line);
         // It's only malformed if it doesn't match the valid RegExp.
-        if (malformedMatch != null && validMatch == null) {
+        if (malformedMatch != null && legacyValidMatch == null && newValidMatch == null) {
           malformedStrings.add(LinkInfo(malformedMatch.namedGroup('malformed')!, file, count));
         }
       }
