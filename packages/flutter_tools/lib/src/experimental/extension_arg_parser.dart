@@ -51,8 +51,7 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   ArgParser buildDynamicArgParser(ArgParser dynamicParser);
 
   /// Clones all options from [source] into a new [ArgParser] instance.
-  @protected
-  static ArgParser cloneParser(ArgParser source) {
+  static ArgParser _cloneParser(ArgParser source) {
     final newParser = ArgParser(
       allowTrailingOptions: source.allowTrailingOptions,
       usageLineLength: source.usageLineLength,
@@ -121,7 +120,7 @@ mixin ExtensionArgParserMixin on FlutterCommand {
   /// Subclasses should call this when dynamic options or capabilities are discovered.
   @protected
   void rebuildDynamicArgParser() {
-    final ArgParser clonedParser = cloneParser(baseArgParser);
+    final ArgParser clonedParser = _cloneParser(baseArgParser);
     _dynamicArgParser = buildDynamicArgParser(clonedParser);
     // Re-add subcommands to the dynamic parser to ensure they are not lost.
     for (final MapEntry(:key, :value) in subcommands.entries) {
