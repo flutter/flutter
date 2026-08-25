@@ -4,6 +4,8 @@
 
 import 'package:args/args.dart';
 
+import '../../base/utils.dart';
+
 /// Defines the lookup scope for an [OptionDescriptor].
 enum OptionScope {
   /// Look up only within the subcommand's local `ArgResults`.
@@ -171,13 +173,64 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
     }
     return defaultsTo;
   }
+}
 
-  /// Returns the resolved value or [fallback] if null.
-  String getValueOrDefault(
-    ArgResults? results, {
-    ArgResults? globalResults,
-    String fallback = '',
-  }) => getValue(results, globalResults: globalResults) ?? fallback;
+/// A descriptor for single-value string options that have a non-null default value.
+class DefaultedStringOptionDescriptor extends OptionDescriptor<String> {
+  const DefaultedStringOptionDescriptor({
+    required super.name,
+    required super.help,
+    required String super.defaultsTo,
+    super.abbr,
+    super.valueHelp,
+    this.aliases = const <String>[],
+    super.allowed,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  /// Alternative names for this option.
+  final List<String> aliases;
+
+  @override
+  void addTo(
+    ArgParser parser, {
+    Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
+    bool? hideOverride,
+  }) {
+    if (parser.options.containsKey(name)) {
+      final OptionDescriptor<Object?>? existing = registry?[name];
+      if (existing != null && identical(existing, this)) {
+        return;
+      }
+      _throwConflictError(name, existing);
+    }
+
+    parser.addOption(
+      name,
+      abbr: abbr,
+      aliases: aliases,
+      help: help,
+      valueHelp: valueHelp,
+      defaultsTo: defaultsTo,
+      allowed: allowed,
+      allowedHelp: allowedHelp,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+    );
+    registry?[name] = this;
+  }
+
+  @override
+  String getValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      return (target[name] as String?) ?? defaultsTo!;
+    }
+    return defaultsTo!;
+  }
 }
 
 /// A descriptor for boolean flags with a concrete default value.
@@ -342,5 +395,214 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       return (target[name] as List<dynamic>?)?.cast<String>() ?? const <String>[];
     }
     return defaultsTo ?? const <String>[];
+  }
+}
+
+/// A descriptor for enum-based options that automatically validates allowed values
+/// and parses CLI string arguments directly into typed enum values [T].
+class EnumOptionDescriptor<T extends Enum> extends OptionDescriptor<T?> {
+  const EnumOptionDescriptor({
+    required super.name,
+    required super.help,
+    required this.values,
+    this.nameMapper,
+    this.valueParser,
+    super.abbr,
+    super.valueHelp,
+    super.defaultsTo,
+    this.aliases = const <String>[],
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  /// The list of enum values allowed for this option.
+  final List<T> values;
+
+  /// Optional function to map an enum value to its CLI string representation.
+  /// Defaults to `value.cliName` if [T] is a [CliEnum], otherwise `value.name`.
+  final String Function(T value)? nameMapper;
+
+  /// Optional function to parse a string into an enum value.
+  /// Defaults to matching against [nameMapper], `cliName`, or `value.name`.
+  final T? Function(String name)? valueParser;
+
+  /// Alternative names for this option.
+  final List<String> aliases;
+
+  String _formatName(T value) {
+    if (nameMapper != null) {
+      return nameMapper!(value);
+    }
+    if (value is CliEnum) {
+      return (value as CliEnum).cliName;
+    }
+    return value.name;
+  }
+
+  @override
+  List<String> get allowed => values.map(_formatName).toList();
+
+  @override
+  void addTo(
+    ArgParser parser, {
+    Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
+    bool? hideOverride,
+  }) {
+    if (parser.options.containsKey(name)) {
+      final OptionDescriptor<Object?>? existing = registry?[name];
+      if (existing != null && identical(existing, this)) {
+        return;
+      }
+      _throwConflictError(name, existing);
+    }
+
+    final String? defaultString = defaultsTo != null ? _formatName(defaultsTo!) : null;
+
+    Map<String, String>? effectiveAllowedHelp = allowedHelp;
+    if (effectiveAllowedHelp == null && values.isNotEmpty && values.first is CliEnum) {
+      effectiveAllowedHelp = <String, String>{
+        for (final T val in values) _formatName(val): (val as CliEnum).helpText,
+      };
+    }
+
+    parser.addOption(
+      name,
+      abbr: abbr,
+      aliases: aliases,
+      help: help,
+      valueHelp: valueHelp,
+      defaultsTo: defaultString,
+      allowed: allowed,
+      allowedHelp: effectiveAllowedHelp,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+    );
+    registry?[name] = this;
+  }
+
+  @override
+  T? getValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      final raw = target[name] as String?;
+      if (raw == null) {
+        return defaultsTo;
+      }
+      if (valueParser != null) {
+        return valueParser!(raw) ?? defaultsTo;
+      }
+      for (final T val in values) {
+        if (_formatName(val) == raw || val.name == raw) {
+          return val;
+        }
+      }
+    }
+    return defaultsTo;
+  }
+}
+
+/// A descriptor for enum-based options that have a non-null default value.
+class DefaultedEnumOptionDescriptor<T extends Enum> extends OptionDescriptor<T> {
+  const DefaultedEnumOptionDescriptor({
+    required super.name,
+    required super.help,
+    required this.values,
+    required T super.defaultsTo,
+    this.nameMapper,
+    this.valueParser,
+    super.abbr,
+    super.valueHelp,
+    this.aliases = const <String>[],
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  /// The list of enum values allowed for this option.
+  final List<T> values;
+
+  /// Optional function to map an enum value to its CLI string representation.
+  /// Defaults to `value.cliName` if [T] is a [CliEnum], otherwise `value.name`.
+  final String Function(T value)? nameMapper;
+
+  /// Optional function to parse a string into an enum value.
+  /// Defaults to matching against [nameMapper], `cliName`, or `value.name`.
+  final T? Function(String name)? valueParser;
+
+  /// Alternative names for this option.
+  final List<String> aliases;
+
+  String _formatName(T value) {
+    if (nameMapper != null) {
+      return nameMapper!(value);
+    }
+    if (value is CliEnum) {
+      return (value as CliEnum).cliName;
+    }
+    return value.name;
+  }
+
+  @override
+  List<String> get allowed => values.map(_formatName).toList();
+
+  @override
+  void addTo(
+    ArgParser parser, {
+    Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
+    bool? hideOverride,
+  }) {
+    if (parser.options.containsKey(name)) {
+      final OptionDescriptor<Object?>? existing = registry?[name];
+      if (existing != null && identical(existing, this)) {
+        return;
+      }
+      _throwConflictError(name, existing);
+    }
+
+    final String defaultString = _formatName(defaultsTo!);
+
+    Map<String, String>? effectiveAllowedHelp = allowedHelp;
+    if (effectiveAllowedHelp == null && values.isNotEmpty && values.first is CliEnum) {
+      effectiveAllowedHelp = <String, String>{
+        for (final T val in values) _formatName(val): (val as CliEnum).helpText,
+      };
+    }
+
+    parser.addOption(
+      name,
+      abbr: abbr,
+      aliases: aliases,
+      help: help,
+      valueHelp: valueHelp,
+      defaultsTo: defaultString,
+      allowed: allowed,
+      allowedHelp: effectiveAllowedHelp,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+    );
+    registry?[name] = this;
+  }
+
+  @override
+  T getValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      final raw = target[name] as String?;
+      if (raw == null) {
+        return defaultsTo!;
+      }
+      if (valueParser != null) {
+        return valueParser!(raw) ?? defaultsTo!;
+      }
+      for (final T val in values) {
+        if (_formatName(val) == raw || val.name == raw) {
+          return val;
+        }
+      }
+    }
+    return defaultsTo!;
   }
 }

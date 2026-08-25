@@ -13,7 +13,7 @@ abstract final class CommonOptions {
     help: 'Tree shake icon fonts so that only glyphs used by the application are included.',
   );
 
-  static const target = StringOptionDescriptor(
+  static const target = DefaultedStringOptionDescriptor(
     name: 'target',
     abbr: 't',
     defaultsTo: 'lib/main.dart',
