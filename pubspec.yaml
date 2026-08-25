@@ -87,7 +87,7 @@ workspace:
   - packages/integration_test/integration_test_macos
 
 dependencies:
-  _discoveryapis_commons: 1.0.7
+  _discoveryapis_commons: 1.0.8
   _fe_analyzer_shared: 95.0.0
   adaptive_breakpoints: 0.1.7
   analyzer: 10.1.0
@@ -224,4 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 9g1kde
+# PUBSPEC CHECKSUM: dcr0di
