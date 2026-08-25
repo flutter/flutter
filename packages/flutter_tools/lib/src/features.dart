@@ -88,6 +88,9 @@ abstract class FeatureFlags {
   /// Whether to only build for arm64 when targeting macOS.
   bool get isMacOSArm64OnlyEnabled;
 
+  /// Whether support for tool extensions is enabled.
+  bool get isToolExtensionsEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -115,6 +118,7 @@ abstract class FeatureFlags {
     uiSceneMigration,
     riscv64,
     macOSArm64Only,
+    toolExtensionsFeature,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -229,11 +233,16 @@ const recordUse = Feature(
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
+/// Warning printed when Swift Package Manager is disabled in configuration.
+const kSwiftPackageManagerDisabledWarning =
+    'Enabling Swift Package Manager will be required in a future version of Flutter.';
+
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  warningMessageOnDisable: kSwiftPackageManagerDisabledWarning,
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
@@ -327,6 +336,14 @@ const macOSArm64Only = Feature(
   stable: FeatureChannelSetting(available: true),
 );
 
+/// Enable tool extensions feature.
+const toolExtensionsFeature = Feature(
+  name: 'support for tool extensions',
+  configSetting: 'enable-tool-extensions',
+  environmentOverride: 'FLUTTER_TOOL_EXTENSIONS',
+  master: FeatureChannelSetting(available: true),
+);
+
 /// A [Feature] is a process for conditionally enabling tool features.
 ///
 /// All settings are optional, and if not provided will generally default to
@@ -343,6 +360,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
+    this.warningMessageOnDisable,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
     this.stable = const FeatureChannelSetting(),
@@ -355,6 +373,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
+    this.warningMessageOnDisable,
   }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
        stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
@@ -395,6 +414,11 @@ class Feature {
   ///
   /// If not provided, defaults to `null` meaning there is no additional text.
   final String? extraHelpText;
+
+  /// A warning to print when this feature is explicitly disabled.
+  ///
+  /// If not provided, defaults to `null` meaning there is no warning.
+  final String? warningMessageOnDisable;
 
   /// A help message for the `flutter config` command, or null if unsupported.
   String? generateHelpMessage() {
