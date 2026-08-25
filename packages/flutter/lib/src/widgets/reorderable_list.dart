@@ -941,6 +941,11 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dragEnd(_DragInfo item) {
     setState(() {
+      // The drop position is derived from the geometry of the item occupying
+      // the insert position. That item may not be laid out anymore, e.g. when
+      // the list has been auto scrolled far away from it. In that case the
+      // drop position stays null and the item is dropped where it is instead
+      // of animating to a position that cannot be computed.
       if (_insertIndex! - item.index == 1) {
         // When returning to original position from below, _insertIndex equals
         // item.index + 1 because insertion index is calculated with the dragged
@@ -952,23 +957,33 @@ class SliverReorderableListState extends State<SliverReorderableList>
       } else if (_reverse) {
         if (_insertIndex! >= _items.length) {
           // Drop at the starting position of the last element and offset its own extent
-          _finalDropPosition =
-              _itemOffsetAt(_items.length - 1) - _extentOffset(item.itemExtent, _scrollDirection);
+          final Offset? offset = _itemOffsetAt(_items.length - 1);
+          _finalDropPosition = offset == null
+              ? null
+              : offset - _extentOffset(item.itemExtent, _scrollDirection);
         } else {
           // Drop at the end of the current element occupying the insert position
-          _finalDropPosition =
-              _itemOffsetAt(_insertIndex!) +
-              _extentOffset(_itemExtentAt(_insertIndex!), _scrollDirection);
+          final Offset? offset = _itemOffsetAt(_insertIndex!);
+          final double? extent = _itemExtentAt(_insertIndex!);
+          _finalDropPosition = offset == null || extent == null
+              ? null
+              : offset + _extentOffset(extent, _scrollDirection);
         }
       } else {
         if (_insertIndex! == 0) {
           // Drop at the starting position of the first element and offset its own extent
-          _finalDropPosition = _itemOffsetAt(0) - _extentOffset(item.itemExtent, _scrollDirection);
+          final Offset? offset = _itemOffsetAt(0);
+          _finalDropPosition = offset == null
+              ? null
+              : offset - _extentOffset(item.itemExtent, _scrollDirection);
         } else {
           // Drop at the end of the previous element occupying the insert position
           final int atIndex = _insertIndex! - 1;
-          _finalDropPosition =
-              _itemOffsetAt(atIndex) + _extentOffset(_itemExtentAt(atIndex), _scrollDirection);
+          final Offset? offset = _itemOffsetAt(atIndex);
+          final double? extent = _itemExtentAt(atIndex);
+          _finalDropPosition = offset == null || extent == null
+              ? null
+              : offset + _extentOffset(extent, _scrollDirection);
         }
       }
     });
@@ -1128,12 +1143,15 @@ class SliverReorderableListState extends State<SliverReorderableList>
     );
   }
 
-  Offset _itemOffsetAt(int index) {
-    return _items[index]!.targetGeometry().topLeft;
+  // Returns null when the item at [index] is not currently laid out, e.g. when
+  // it has been scrolled out of the viewport and out of the cache extent.
+  Offset? _itemOffsetAt(int index) {
+    return _items[index]?.targetGeometry().topLeft;
   }
 
-  double _itemExtentAt(int index) {
-    return _sizeExtent(_items[index]!.targetGeometry().size, _scrollDirection);
+  double? _itemExtentAt(int index) {
+    final Size? size = _items[index]?.targetGeometry().size;
+    return size == null ? null : _sizeExtent(size, _scrollDirection);
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
