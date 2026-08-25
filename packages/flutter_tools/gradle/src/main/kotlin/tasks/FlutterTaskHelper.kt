@@ -8,6 +8,7 @@ import com.flutter.gradle.FlutterPluginConstants
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
+import org.gradle.kotlin.dsl.*
 import java.io.File
 
 /**
@@ -19,26 +20,30 @@ object FlutterTaskHelper {
 
     internal fun getOutputDirectory(flutterTask: FlutterTask): File? = flutterTask.intermediateDir
 
-    internal fun getAssetsDirectory(flutterTask: FlutterTask): String = "${flutterTask.outputDirectory}${File.separator}flutter_assets"
+    internal fun getAssetsDirectory(flutterTask: FlutterTask): String =
+        "${flutterTask.outputDirectory}${File.separator}flutter_assets"
 
     internal fun getAssets(
         project: Project,
         flutterTask: FlutterTask
     ): CopySpec =
-        project.copySpec {
-            from("${flutterTask.intermediateDir}")
-            include(FLUTTER_ASSETS_INCLUDE_DIRECTORY) // the working dir and its files
+        project.copySpec { copySpec: CopySpec ->
+            copySpec.from("${flutterTask.intermediateDir}")
+            copySpec.include(FLUTTER_ASSETS_INCLUDE_DIRECTORY)
         }
 
     internal fun getSnapshots(
         project: Project,
         flutterTask: FlutterTask
     ): CopySpec =
-        project.copySpec {
-            from("${flutterTask.intermediateDir}")
+        project.copySpec { copySpec: CopySpec ->
+            copySpec.from("${flutterTask.intermediateDir}")
             if (flutterTask.buildMode == "release" || flutterTask.buildMode == "profile") {
                 flutterTask.targetPlatformValues!!.forEach { targetArch ->
-                    include("${FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]}${File.separator}app.so")
+                    val platformDir = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
+                    if (platformDir != null) {
+                        copySpec.include("${platformDir}${File.separator}app.so")
+                    }
                 }
             }
         }
@@ -54,11 +59,10 @@ object FlutterTaskHelper {
             val depText = dependenciesFile.readText()
             // So we split list of files by non-escaped(by backslash) space,
             val parts = depText.split(": ")
-            val fileString = parts[if (inputs) 1 else 0]
+            val fileString = parts.getOrNull(if (inputs) 1 else 0) ?: ""
             val matcher = Regex("""(\\ |\S)+""").findAll(fileString)
             // then we replace all escaped spaces with regular spaces
-            val depList =
-                matcher.map { it.value.replace("\\ ", " ") }.toList()
+            val depList = matcher.map { it.value.replace("\\ ", " ") }.toList()
             return project.files(depList)
         }
         return project.files()

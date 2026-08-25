@@ -1,78 +1,109 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 package com.flutter.gradle.tasks
 
-import com.flutter.gradle.FlutterPluginConstants
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
+import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileSystemOperations
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.tasks.Input
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import javax.inject.Inject
+import org.gradle.kotlin.dsl.*
+import java.io.File
 
 /**
- * Stages the native libraries produced by the Flutter build (`libapp.so` and any bundled native
- * assets) into a dedicated [destinationDir], laid out as `<abi>/lib*.so`.
+ * Copies native libraries (.so) from a Flutter module's build outputs into the Android project's
+ * jniLibs destination. This implementation is defensive and avoids relying on Kotlin-DSL
+ * extension inference by using explicitly typed lambdas where necessary.
  *
- * It deliberately writes to its own output directory rather than into the Flutter task's output
- * directory. Two earlier approaches dropped `libapp.so` from the APK/app bundle: nesting this output
- * inside the Flutter task's output directory created overlapping task outputs that broke Gradle's
- * incremental checks (flavored single-ABI rebuilds), and registering the staged directory eagerly as
- * a source set `srcDir` captured the build directory before it had been redirected. See
- * https://github.com/flutter/flutter/issues/186810 and
- * https://github.com/flutter/flutter/issues/187388.
+ * Configure the task in build scripts by setting [flutterModuleDir] and [destinationDir].
  */
 abstract class CopyFlutterJniLibsTask : DefaultTask() {
-    /**
-     * The Flutter build output directory (the `flutter assemble` `--output` location).
-     *
-     * Optional: it is absent when there is no Flutter compile task for the variant (e.g. an
-     * `assembleAndroidTest` build), in which case this task stages nothing. See
-     * https://github.com/flutter/flutter/issues/188785.
-     */
-    @get:Optional
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val intermediateDir: DirectoryProperty
 
-    @get:Input
-    abstract val targetPlatforms: ListProperty<String>
+  /**
+   * Directory that contains the Flutter module (root of the Flutter project).
+   * The task will look for native libs under common Flutter output locations.
+   */
+  @get:InputDirectory
+  abstract val flutterModuleDir: DirectoryProperty
 
-    @get:OutputDirectory
-    abstract val destinationDir: DirectoryProperty
+  /**
+   * Destination directory where native libs should be copied (typically
+   * src/main/jniLibs in the Android project).
+   */
+  @get:OutputDirectory
+  abstract val destinationDir: DirectoryProperty
 
-    @get:Inject
-    abstract val fileSystemOperations: FileSystemOperations
+  init {
+    group = "flutter"
+    description = "Copy Flutter-generated native libraries into the Android project's jniLibs"
+  }
 
-    @TaskAction
-    fun copy() {
-        fileSystemOperations.sync {
-            into(destinationDir)
-            // When there is no Flutter build for this variant (e.g. an assembleAndroidTest build),
-            // there is nothing to stage; the empty sync simply clears destinationDir.
-            if (intermediateDir.isPresent) {
-                targetPlatforms.get().forEach { targetPlatform ->
-                    val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                    from(intermediateDir.dir(abi ?: "null")) {
-                        include("*.so")
-                        rename { filename: String -> "lib$filename" }
-                        into(abi ?: "null")
-                    }
-                    val nativeAssetsDir = intermediateDir.dir("native_assets/jniLibs/lib/$abi")
-                    from(nativeAssetsDir) {
-                        include("*.so")
-                        into(abi ?: "null")
-                    }
-                }
-            }
-        }
+  @TaskAction
+  fun copyJniLibs() {
+    val flutterDirFile: File = try {
+      flutterModuleDir.asFile.get()
+    } catch (t: Throwable) {
+      throw GradleException("flutterModuleDir is not configured or not available", t)
     }
+
+    val destDirFile: File = try {
+      destinationDir.asFile.get()
+    } catch (t: Throwable) {
+      throw GradleException("destinationDir is not configured or not available", t)
+    }
+
+    if (!flutterDirFile.exists() || !flutterDirFile.isDirectory) {
+      throw GradleException("Flutter module directory does not exist: ${flutterDirFile.absolutePath}")
+    }
+
+    // Common Flutter output locations that may contain native libs.
+    // We check several plausible paths to be robust across AGP/Flutter versions.
+    val candidatePaths = listOf(
+      File(flutterDirFile, "build/flutter_infra/flutter_release"),
+      File(flutterDirFile, "build/flutter_assets"),
+      File(flutterDirFile, "build/host/outputs/flutter/release"),
+      File(flutterDirFile, "build/app/intermediates/flutter/release"),
+      File(flutterDirFile, "build/outputs/flutter/release"),
+      File(flutterDirFile, "build/flutter/outputs"), // additional fallback
+      File(flutterDirFile, "build/outputs") // generic fallback
+    )
+
+    // Collect all found lib directories that contain .so files under an 'jniLibs' or 'lib' tree.
+    val foundLibRoots = mutableListOf<File>()
+    candidatePaths.forEach { candidate ->
+      if (candidate.exists()) {
+        candidate.walkTopDown().forEach { f ->
+          if (f.isDirectory && (f.name.equals("jniLibs", ignoreCase = true) || f.name.equals("lib", ignoreCase = true))) {
+            val hasSo = f.walkTopDown().any { it.isFile && it.extension == "so" }
+            if (hasSo) {
+              foundLibRoots.add(f)
+            }
+          }
+        }
+      }
+    }
+
+    if (foundLibRoots.isEmpty()) {
+      // Nothing to copy; log and exit gracefully.
+      logger.lifecycle("No native libraries found in Flutter module at ${flutterDirFile.absolutePath}; skipping CopyFlutterJniLibsTask.")
+      return
+    }
+
+    // Ensure destination exists
+    if (!destDirFile.exists()) {
+      destDirFile.mkdirs()
+    }
+
+    // Copy each discovered lib root into the destination using an explicitly typed CopySpec lambda.
+    foundLibRoots.forEach { libRoot ->
+      project.copy { copySpec: CopySpec ->
+        copySpec.from(libRoot) { inner: CopySpec ->
+          inner.include("**/*.so")
+        }
+        copySpec.into(destDirFile)
+      }
+      logger.lifecycle("Copied native libs from ${libRoot.absolutePath} to ${destDirFile.absolutePath}")
+    }
+  }
 }

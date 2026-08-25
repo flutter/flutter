@@ -10,9 +10,10 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.OutputFiles
-import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.kotlin.dsl.*
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
+import org.gradle.api.tasks.Exec
 
 /**
  * Stateless object to contain the logic used in [BaseFlutterTask]. Any required state should be stored
@@ -88,74 +89,96 @@ object BaseFlutterTaskHelper {
      * @return an Action<ExecSpec> of build processes and options to be executed.
      */
     internal fun createExecSpecActionFromTask(baseFlutterTask: BaseFlutterTask): Action<ExecSpec> =
-        Action<ExecSpec> {
-            executable(baseFlutterTask.flutterExecutable!!.absolutePath)
-            workingDir(baseFlutterTask.sourceDir)
+        Action<ExecSpec> { spec: ExecSpec ->
+            // Build args list explicitly to avoid relying on Kotlin-DSL extension functions.
+            val argsList = mutableListOf<String>()
+
+            // executable and working directory
+            spec.executable = baseFlutterTask.flutterExecutable!!.absolutePath
+            baseFlutterTask.sourceDir?.let { spec.workingDir = it }
+
+            // local engine options
             baseFlutterTask.localEngine?.let {
-                args("--local-engine", it)
-                args("--local-engine-src-path", baseFlutterTask.localEngineSrcPath)
-            }
-            baseFlutterTask.localEngineHost?.let {
-                args("--local-engine-host", it)
-            }
-            if (baseFlutterTask.verbose == true) {
-                args("--verbose")
-            } else {
-                args("--quiet")
-            }
-            args("assemble")
-            args("--no-version-check")
-            args("--depfile", "${baseFlutterTask.intermediateDir}/flutter_build.d")
-            args("--output", "${baseFlutterTask.intermediateDir}")
-            baseFlutterTask.performanceMeasurementFile?.let {
-                args("--performance-measurement-file=$it")
-            }
-            args("-dTargetFile=${baseFlutterTask.targetPath}")
-            args("-dTargetPlatform=android")
-            args("-dBuildMode=${baseFlutterTask.buildMode}")
-            baseFlutterTask.trackWidgetCreation?.let {
-                args("-dTrackWidgetCreation=$it")
-            }
-            baseFlutterTask.splitDebugInfo?.let {
-                args("-dSplitDebugInfo=$it")
-            }
-            if (baseFlutterTask.treeShakeIcons == true) {
-                args("-dTreeShakeIcons=true")
-            }
-            if (baseFlutterTask.dartObfuscation == true) {
-                args("-dDartObfuscation=true")
-            }
-            baseFlutterTask.dartDefines?.let {
-                args("--DartDefines=$it")
-            }
-            baseFlutterTask.bundleSkSLPath?.let {
-                args("-dBundleSkSLPath=$it")
-            }
-            baseFlutterTask.codeSizeDirectory?.let {
-                args("-dCodeSizeDirectory=$it")
-            }
-            baseFlutterTask.flavor?.let {
-                args("-dFlavor=$it")
-            }
-            baseFlutterTask.extraGenSnapshotOptions?.let {
-                args("--ExtraGenSnapshotOptions=$it")
-            }
-            baseFlutterTask.frontendServerStarterPath?.let {
-                args("-dFrontendServerStarterPath=$it")
-            }
-            baseFlutterTask.extraFrontEndOptions?.let {
-                args("--ExtraFrontEndOptions=$it")
+                argsList += "--local-engine"
+                argsList += it
+                baseFlutterTask.localEngineSrcPath?.let { src -> argsList += "--local-engine-src-path"; argsList += src }
             }
 
-            args("-dAndroidArchs=${baseFlutterTask.targetPlatformValues!!.joinToString(" ")}")
-            args("-dMinSdkVersion=${baseFlutterTask.minSdkVersion}")
-            args(generateRuleNames(baseFlutterTask))
+            baseFlutterTask.localEngineHost?.let {
+                argsList += "--local-engine-host"
+                argsList += it
+            }
+
+            // verbosity
+            if (baseFlutterTask.verbose == true) {
+                argsList += "--verbose"
+            } else {
+                argsList += "--quiet"
+            }
+
+            // core assemble args
+            argsList += "assemble"
+            argsList += "--no-version-check"
+            argsList += "--depfile"
+            argsList += "${baseFlutterTask.intermediateDir}/flutter_build.d"
+            argsList += "--output"
+            argsList += "${baseFlutterTask.intermediateDir}"
+
+            baseFlutterTask.performanceMeasurementFile?.let {
+                argsList += "--performance-measurement-file=$it"
+            }
+
+            argsList += "-dTargetFile=${baseFlutterTask.targetPath}"
+            argsList += "-dTargetPlatform=android"
+            argsList += "-dBuildMode=${baseFlutterTask.buildMode}"
+
+            baseFlutterTask.trackWidgetCreation?.let {
+                argsList += "-dTrackWidgetCreation=$it"
+            }
+            baseFlutterTask.splitDebugInfo?.let {
+                argsList += "-dSplitDebugInfo=$it"
+            }
+            if (baseFlutterTask.treeShakeIcons == true) {
+                argsList += "-dTreeShakeIcons=true"
+            }
+            if (baseFlutterTask.dartObfuscation == true) {
+                argsList += "-dDartObfuscation=true"
+            }
+            baseFlutterTask.dartDefines?.let {
+                argsList += "--DartDefines=$it"
+            }
+            baseFlutterTask.bundleSkSLPath?.let {
+                argsList += "-dBundleSkSLPath=$it"
+            }
+            baseFlutterTask.codeSizeDirectory?.let {
+                argsList += "-dCodeSizeDirectory=$it"
+            }
+            baseFlutterTask.flavor?.let {
+                argsList += "-dFlavor=$it"
+            }
+            baseFlutterTask.extraGenSnapshotOptions?.let {
+                argsList += "--ExtraGenSnapshotOptions=$it"
+            }
+            baseFlutterTask.frontendServerStarterPath?.let {
+                argsList += "-dFrontendServerStarterPath=$it"
+            }
+            baseFlutterTask.extraFrontEndOptions?.let {
+                argsList += "--ExtraFrontEndOptions=$it"
+            }
+
+            argsList += "-dAndroidArchs=${baseFlutterTask.targetPlatformValues!!.joinToString(" ")}"
+            argsList += "-dMinSdkVersion=${baseFlutterTask.minSdkVersion}"
+            argsList += generateRuleNames(baseFlutterTask)
+
+            // Assign the built args list to the ExecSpec
+            spec.args = argsList
         }
 
     fun buildBundle(baseFlutterTask: BaseFlutterTask) {
         checkPreConditions(baseFlutterTask)
         baseFlutterTask.logging.captureStandardError(LogLevel.ERROR)
-        val execOps = baseFlutterTask.project.serviceOf<ExecOperations>()
+        // Use the ExecOperations service via extensions.getByType to avoid relying on serviceOf helper.
+        val execOps = baseFlutterTask.project.extensions.getByType(ExecOperations::class.java)
         execOps.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
     }
 }
