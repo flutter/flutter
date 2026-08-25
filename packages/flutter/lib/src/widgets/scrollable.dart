@@ -68,6 +68,12 @@ typedef TwoDimensionalViewportBuilder =
 // next potential ancestor Scrollable.
 typedef _EnsureVisibleResults = (List<Future<void>>, ScrollableState);
 
+// The duration and curve used to animate the scroll offset when an assistive
+// technology performs a scroll action on a [Scrollable]. They are chosen to
+// roughly match the animation the native scroll views use for the same action.
+const Duration _kSemanticScrollDuration = Duration(milliseconds: 300);
+const Curve _kSemanticScrollCurve = Curves.easeInOut;
+
 /// A widget that manages scrolling in one dimension and informs the [Viewport]
 /// through which the content is viewed.
 ///
@@ -749,12 +755,35 @@ class ScrollableState extends State<Scrollable>
 
   final GlobalKey _scrollSemanticsKey = GlobalKey();
 
+  late final _semanticsGestureDelegate = _ScrollableSemanticsGestureDelegate(this);
+
   @override
   @protected
   void setSemanticsActions(Set<SemanticsAction> actions) {
     if (_gestureDetectorKey.currentState != null) {
       _gestureDetectorKey.currentState!.replaceSemanticsActions(actions);
     }
+  }
+
+  // Scrolls in response to a scroll action performed by an assistive
+  // technology, e.g. the three finger scroll of VoiceOver on iOS.
+  //
+  // The offset is animated instead of applied at once because the native scroll
+  // views animate accessibility scrolls as well. Without the animation the
+  // content appears to teleport, which makes it hard to keep track of where in
+  // the scrollable the user ended up.
+  void _handleSemanticsScroll(DragUpdateDetails details) {
+    final double delta = details.primaryDelta ?? 0.0;
+    if (delta == 0.0 || !position.hasPixels || !position.hasContentDimensions) {
+      return;
+    }
+    // The delta describes the drag the assistive technology asked for, which
+    // moves the content in the opposite direction of the scroll offset.
+    position.moveTo(
+      position.pixels - delta,
+      duration: _kSemanticScrollDuration,
+      curve: _kSemanticScrollCurve,
+    );
   }
 
   // GESTURE RECOGNITION AND POINTER IGNORING
@@ -1029,6 +1058,7 @@ class ScrollableState extends State<Scrollable>
         child: RawGestureDetector(
           key: _gestureDetectorKey,
           gestures: _gestureRecognizers,
+          semantics: _semanticsGestureDelegate,
           behavior: widget.hitTestBehavior,
           excludeFromSemantics: widget.excludeFromSemantics,
           child: Semantics(
@@ -1641,6 +1671,33 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
       ..axis = axis
       ..position = position
       ..semanticChildCount = semanticChildCount;
+  }
+}
+
+// Turns the scroll actions of an assistive technology into an animated scroll
+// of the [Scrollable]'s position.
+//
+// The default semantics delegate of [RawGestureDetector] synthesizes a complete
+// drag gesture for a scroll action, which moves the scroll offset to its
+// destination within a single frame. [Scrollable] animates the offset instead,
+// see [ScrollableState._handleSemanticsScroll].
+class _ScrollableSemanticsGestureDelegate extends SemanticsGestureDelegate {
+  const _ScrollableSemanticsGestureDelegate(this.state);
+
+  final ScrollableState state;
+
+  @override
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+    // Only expose the scroll actions that the installed drag gesture
+    // recognizers would expose, so that scrollables that cannot be dragged
+    // (e.g. because of NeverScrollableScrollPhysics) stay unscrollable for
+    // assistive technologies as well.
+    final Axis? axis = state._gestureRecognizers.isEmpty ? null : state._lastAxisDirection;
+    renderObject
+      ..onTap = null
+      ..onLongPress = null
+      ..onHorizontalDragUpdate = axis == Axis.horizontal ? state._handleSemanticsScroll : null
+      ..onVerticalDragUpdate = axis == Axis.vertical ? state._handleSemanticsScroll : null;
   }
 }
 

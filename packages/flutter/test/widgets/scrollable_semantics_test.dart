@@ -870,6 +870,75 @@ void main() {
       semantics.dispose();
     },
   );
+
+  testWidgets('scrolling by a semantics action animates the scroll offset', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          children: List<Widget>.generate(80, (int i) => Text('$i')),
+        ),
+      ),
+    );
+
+    expect(controller.offset, 0.0);
+
+    // 80% of the 600px tall viewport.
+    const expectedOffset = 480.0;
+
+    final SemanticsNode scrollable = findNodeWithAction(
+      tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!,
+      SemanticsAction.scrollUp,
+    )!;
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      scrollable.id,
+      SemanticsAction.scrollUp,
+    );
+
+    // The scroll offset is animated instead of jumping to its destination.
+    await tester.pump();
+    expect(controller.offset, 0.0);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(controller.offset, greaterThan(0.0));
+    expect(controller.offset, lessThan(expectedOffset));
+
+    await tester.pumpAndSettle();
+    expect(controller.offset, expectedOffset);
+
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      scrollable.id,
+      SemanticsAction.scrollDown,
+    );
+    await tester.pump();
+    expect(controller.offset, expectedOffset);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(controller.offset, lessThan(expectedOffset));
+    expect(controller.offset, greaterThan(0.0));
+
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+
+    semantics.dispose();
+  });
+}
+
+SemanticsNode? findNodeWithAction(SemanticsNode node, SemanticsAction action) {
+  if (node.getSemanticsData().hasAction(action)) {
+    return node;
+  }
+  SemanticsNode? result;
+  node.visitChildren((SemanticsNode child) {
+    result ??= findNodeWithAction(child, action);
+    return result == null;
+  });
+  return result;
 }
 
 Future<void> flingUp(WidgetTester tester, {int repetitions = 1}) =>
