@@ -677,6 +677,199 @@ void main() {
     });
   }
 
+  testWidgets(
+    'PredictiveBackPageTransitionsBuilder uses the swipe edge of the current gesture after popping a route that the route below cannot transition to',
+    (WidgetTester tester) async {
+      const PageTransitionsBuilder pageTransitionsBuilder = PredictiveBackPageTransitionsBuilder();
+
+      Future<void> sendBackGestureMessage(MethodCall methodCall) async {
+        final ByteData message = const StandardMethodCodec().encodeMethodCall(methodCall);
+        await binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/backgesture',
+          message,
+          (ByteData? _) {},
+        );
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: pageTransitionsBuilder,
+              },
+            ),
+          ),
+          home: Builder(
+            builder: (BuildContext context) => Material(
+              child: TextButton(
+                child: const Text('push b'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    _NoSecondaryAnimationPageRoute<void>(
+                      builder: (BuildContext context) => Material(
+                        child: TextButton(
+                          child: const Text('page b'),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) => const Text('page c'),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('push b'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('page b'));
+      await tester.pumpAndSettle();
+      expect(find.text('page c'), findsOneWidget);
+
+      // Pop page c with a predictive back gesture from the right edge.
+      await sendBackGestureMessage(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[795.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 1, // right
+        }),
+      );
+      await tester.pump();
+      await sendBackGestureMessage(
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'touchOffset': <double>[700.0, 300.0],
+          'progress': 0.35,
+          'swipeEdge': 1, // right
+        }),
+      );
+      await tester.pump();
+      await sendBackGestureMessage(const MethodCall('commitBackGesture'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('page c'), findsNothing);
+      expect(find.text('page b'), findsOneWidget);
+      final double restingPageBDx = tester.getTopLeft(find.text('page b')).dx;
+
+      // Start another predictive back gesture from the right edge, this time on
+      // page b.
+      await sendBackGestureMessage(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[795.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 1, // right
+        }),
+      );
+      await tester.pump();
+      await sendBackGestureMessage(
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'touchOffset': <double>[700.0, 300.0],
+          'progress': 0.35,
+          'swipeEdge': 1, // right
+        }),
+      );
+      await tester.pump();
+
+      // Page b must move to the left, away from the right edge gesture, and not
+      // towards it.
+      expect(tester.getTopLeft(find.text('page b')).dx, lessThan(restingPageBDx));
+
+      await sendBackGestureMessage(const MethodCall('cancelBackGesture'));
+      await tester.pumpAndSettle();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'PredictiveBackPageTransitionsBuilder rebounds toward the same edge after canceling a right-edge gesture',
+    (WidgetTester tester) async {
+      const PageTransitionsBuilder pageTransitionsBuilder = PredictiveBackPageTransitionsBuilder();
+
+      Future<void> sendBackGestureMessage(MethodCall methodCall) async {
+        final ByteData message = const StandardMethodCodec().encodeMethodCall(methodCall);
+        await binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/backgesture',
+          message,
+          (ByteData? _) {},
+        );
+      }
+
+      final routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: pageTransitionsBuilder,
+              },
+            ),
+          ),
+          routes: routes,
+        ),
+      );
+
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+      expect(find.text('page b'), findsOneWidget);
+
+      // Start a predictive back gesture from the right edge.
+      await sendBackGestureMessage(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[795.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 1, // right
+        }),
+      );
+      await tester.pump();
+      await sendBackGestureMessage(
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'touchOffset': <double>[700.0, 300.0],
+          'progress': 0.35,
+          'swipeEdge': 1, // right
+        }),
+      );
+      await tester.pump();
+
+      final double dxDuringGesture = tester.getTopLeft(find.text('page b')).dx;
+
+      // Cancel the gesture. currentBackEvent is cleared to null at this
+      // point, but the position must not jump: the driving animation's value
+      // has not changed yet on this frame, so the tween must still reflect
+      // the right edge of the gesture that was just canceled. A regression
+      // here shows up as the position suddenly jumping toward the opposite
+      // side, which is what the default left-edge tween would produce.
+      await sendBackGestureMessage(const MethodCall('cancelBackGesture'));
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.text('page b')).dx,
+        moreOrLessEquals(dxDuringGesture, epsilon: 0.5),
+      );
+
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(find.text('page b')).dx, 0.0);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+
   testWidgets('PredictiveBackPageTransitionsBuilder uses fallbackColor', (
     WidgetTester tester,
   ) async {
@@ -777,6 +970,15 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+}
+
+/// Mimics routing packages whose routes never run a secondary animation for the
+/// route below them.
+class _NoSecondaryAnimationPageRoute<T> extends MaterialPageRoute<T> {
+  _NoSecondaryAnimationPageRoute({required super.builder});
+
+  @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => false;
 }
 
 String _getTransitionsString(PageTransitionsBuilder pageTransitionsBuilder) {

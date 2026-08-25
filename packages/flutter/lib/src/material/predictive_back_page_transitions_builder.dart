@@ -492,7 +492,18 @@ class _PredictiveBackSharedElementPageTransitionState
     if (widget.animation != oldWidget.animation) {
       _updateCurvedAnimations();
     }
-    if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
+    // The horizontal direction of _positionAnimation is baked into its tween, so
+    // the animations must also be updated when the swipe edge changes. This
+    // state can outlive a gesture, for example when the route below is not
+    // rebuilt after the route above it is popped, so the swipe edge of the
+    // previous gesture must not leak into the next one. Only do this while a
+    // gesture is active (widget.currentBackEvent != null): when a gesture is
+    // canceled, currentBackEvent is cleared to null without changing the swipe
+    // edge of the ongoing rebound, so refreshing here would incorrectly reset
+    // the tween to the default left-edge direction mid-rebound.
+    if ((widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) ||
+        (widget.currentBackEvent != null &&
+            widget.currentBackEvent?.swipeEdge != oldWidget.currentBackEvent?.swipeEdge)) {
       _updateAnimations(MediaQuery.sizeOf(context));
     }
   }
