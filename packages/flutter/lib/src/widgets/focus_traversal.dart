@@ -9,6 +9,8 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'actions.dart';
 import 'basic.dart';
@@ -587,7 +589,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///
   /// Returns true if a node requested focus.
   @protected
-  bool _moveFocus(FocusNode currentNode, {required bool forward}) {
+  bool _moveFocus(FocusNode currentNode, {required bool forward, bool allowScroll = true}) {
     final FocusScopeNode nearestScope = currentNode.nearestScope!;
     invalidateScopeData(nearestScope);
     FocusNode? focusedChild = nearestScope.focusedChild;
@@ -608,6 +610,18 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     focusedChild ??= nearestScope;
     final List<FocusNode> sortedNodes = _sortAllDescendants(nearestScope, focusedChild);
     assert(sortedNodes.contains(focusedChild));
+
+    // A lazily built scrollable such as ListView.builder only builds the
+    // children that are inside of its viewport (plus its cache extent), so the
+    // focus tree may not contain a node for the item that comes after the last
+    // built one yet. Scroll the viewport to build it, and retry the traversal
+    // once the new frame has been laid out, rather than immediately applying
+    // the edge behavior of the scope.
+    if (allowScroll &&
+        focusedChild == (forward ? sortedNodes.last : sortedNodes.first) &&
+        _scrollToRevealMoreDescendants(sortedNodes, focusedChild, forward: forward)) {
+      return true;
+    }
 
     if (forward && focusedChild == sortedNodes.last) {
       switch (nearestScope.traversalEdgeBehavior) {
@@ -683,6 +697,102 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       previousNode = node;
     }
     return false;
+  }
+
+  // Scrolls the scrollable that contains `focusedChild` so that the widgets
+  // that come after (or before, when `forward` is false) `focusedChild` in the
+  // traversal order are built, and retries the traversal on the next frame.
+  //
+  // Lazily built scrollables such as ListView.builder only build the children
+  // that are inside of the viewport plus its cache extent, so when the cache
+  // extent is small the focus tree does not contain a node for the next item,
+  // and the traversal would wrongly apply the edge behavior of the scope
+  // instead of moving to that item.
+  //
+  // Returns true if the viewport was scrolled and the traversal was scheduled
+  // to be retried, in which case the caller must not move the focus itself.
+  bool _scrollToRevealMoreDescendants(
+    List<FocusNode> sortedNodes,
+    FocusNode focusedChild, {
+    required bool forward,
+  }) {
+    final BuildContext? context = focusedChild.context;
+    if (context == null) {
+      return false;
+    }
+    final ScrollableState? scrollable = Scrollable.maybeOf(context);
+    final ScrollPosition? position = scrollable?.position;
+    if (position == null || !position.hasPixels || !position.hasContentDimensions) {
+      return false;
+    }
+    final RenderObject? renderObject = context.findRenderObject();
+    if (renderObject == null || !renderObject.attached) {
+      return false;
+    }
+    final RenderAbstractViewport? viewport = RenderAbstractViewport.maybeOf(renderObject);
+    if (viewport == null) {
+      return false;
+    }
+
+    // The scroll offset that puts `renderObject` at the leading edge of the
+    // viewport is the largest offset at which it is still visible, and the
+    // offset for the trailing edge is the smallest one. Whether the traversal
+    // moves towards larger or smaller scroll offsets depends on the axis
+    // direction and on the reading direction, so it is derived from the node
+    // that was traversed just before `focusedChild` instead.
+    final int index = sortedNodes.indexOf(focusedChild);
+    final FocusNode? previous = forward
+        ? (index > 0 ? sortedNodes[index - 1] : null)
+        : (index < sortedNodes.length - 1 ? sortedNodes[index + 1] : null);
+    final RenderObject? previousRenderObject = previous?.context?.findRenderObject();
+    var towardsLargerOffsets = forward;
+    if (previousRenderObject != null &&
+        previousRenderObject.attached &&
+        RenderAbstractViewport.maybeOf(previousRenderObject) == viewport) {
+      final double previousOffset = viewport.getOffsetToReveal(previousRenderObject, 0.0).offset;
+      final double currentOffset = viewport.getOffsetToReveal(renderObject, 0.0).offset;
+      if ((currentOffset - previousOffset).abs() > precisionErrorTolerance) {
+        towardsLargerOffsets = currentOffset > previousOffset;
+      }
+    }
+
+    // Only scroll when `focusedChild` reaches the edge of the viewport that the
+    // traversal is moving towards. Otherwise the scrollable does show what
+    // comes next in the traversal order, and the missing nodes are not simply
+    // waiting to be built.
+    final double edgeOffset = viewport
+        .getOffsetToReveal(renderObject, towardsLargerOffsets ? 1.0 : 0.0)
+        .offset;
+    if (towardsLargerOffsets
+        ? position.pixels > edgeOffset + precisionErrorTolerance
+        : position.pixels < edgeOffset - precisionErrorTolerance) {
+      return false;
+    }
+
+    final double target = clampDouble(
+      viewport.getOffsetToReveal(renderObject, towardsLargerOffsets ? 0.0 : 1.0).offset,
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if (towardsLargerOffsets
+        ? target <= position.pixels + precisionErrorTolerance
+        : target >= position.pixels - precisionErrorTolerance) {
+      // The viewport is already scrolled as far as it can go in the direction
+      // the traversal is moving towards, so there is nothing left to build.
+      return false;
+    }
+    position.jumpTo(target);
+
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      if (focusedChild.context == null || !focusedChild.hasFocus) {
+        return;
+      }
+      // Retry without allowing another scroll, so that a scrollable that has
+      // no more focusable children still falls back to the edge behavior of
+      // the enclosing scope.
+      _moveFocus(focusedChild, forward: forward, allowScroll: false);
+    }, debugLabel: 'FocusTraversalPolicy.retryTraversalAfterScroll');
+    return true;
   }
 }
 

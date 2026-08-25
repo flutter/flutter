@@ -1183,6 +1183,131 @@ void main() {
 
       expect(calledCallback, isTrue);
     });
+
+    testWidgets(
+      'Tab traversal scrolls a lazy scrollable to reveal items that are not built yet.',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/91743.
+        const itemCount = 20;
+        final nodes = List<FocusNode>.generate(
+          itemCount,
+          (int index) => FocusNode(debugLabel: 'Item $index'),
+        );
+        addTearDown(() {
+          for (final node in nodes) {
+            node.dispose();
+          }
+        });
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Center(
+              child: SizedBox(
+                height: 300,
+                width: 200,
+                child: ListView.builder(
+                  controller: controller,
+                  // Without a cache extent, only the items that are visible in
+                  // the viewport are built, so the focus tree has no node after
+                  // the last visible item.
+                  cacheExtent: 0,
+                  itemExtent: 100,
+                  itemCount: itemCount,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Focus(focusNode: nodes[index], child: const SizedBox.expand());
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        nodes[0].requestFocus();
+        await tester.pump();
+        expect(nodes[0].hasPrimaryFocus, isTrue);
+        expect(controller.offset, equals(0.0));
+
+        // Tab forward through more items than fit in the viewport.
+        for (var index = 1; index <= 8; index += 1) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+          await tester.pumpAndSettle();
+          expect(nodes[index].hasPrimaryFocus, isTrue, reason: 'Item $index is not focused');
+        }
+        expect(controller.offset, greaterThan(0.0));
+
+        // Tab backwards all the way to the first item.
+        for (var index = 7; index >= 0; index -= 1) {
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+          await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+          await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+          await tester.pumpAndSettle();
+          expect(nodes[index].hasPrimaryFocus, isTrue, reason: 'Item $index is not focused');
+        }
+        expect(controller.offset, equals(0.0));
+      },
+      variant: KeySimulatorTransitModeVariant.all(),
+    );
+
+    testWidgets(
+      'Tab traversal does not scroll when the scrollable has no more focusable widgets.',
+      (WidgetTester tester) async {
+        final nodes = List<FocusNode>.generate(
+          3,
+          (int index) => FocusNode(debugLabel: 'Item $index'),
+        );
+        addTearDown(() {
+          for (final node in nodes) {
+            node.dispose();
+          }
+        });
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Center(
+              child: SizedBox(
+                height: 300,
+                width: 200,
+                child: SingleChildScrollView(
+                  controller: controller,
+                  child: Column(
+                    children: <Widget>[
+                      for (final node in nodes)
+                        Focus(focusNode: node, child: const SizedBox(height: 50, width: 200)),
+                      // Scrollable content that contains no focusable widget.
+                      const SizedBox(height: 2000),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        nodes[0].requestFocus();
+        await tester.pump();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+        expect(nodes[1].hasPrimaryFocus, isTrue);
+        expect(controller.offset, equals(0.0));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+        expect(nodes[2].hasPrimaryFocus, isTrue);
+        expect(controller.offset, equals(0.0));
+
+        // The traversal wraps around instead of scrolling the empty space.
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+        expect(nodes[0].hasPrimaryFocus, isTrue);
+        expect(controller.offset, equals(0.0));
+      },
+      variant: KeySimulatorTransitModeVariant.all(),
+    );
   });
 
   group(OrderedTraversalPolicy, () {
