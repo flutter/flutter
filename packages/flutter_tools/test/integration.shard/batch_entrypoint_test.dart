@@ -70,6 +70,27 @@ Future<void> main() async {
     result = await processManager.run(<String>[flutterBatch.path, '--version']);
     expect(result.stderr, isNot(contains('Building flutter tool...')));
   });
+
+  test('shared.bat builds and reuses the AOT flutter tool snapshot', () async {
+    setupToolsEntrypointNewerPubpsec();
+    const environment = <String, String>{'FLUTTER_TOOLS_USE_AOT_SNAPSHOT': '1'};
+
+    ProcessResult result = await processManager.run(<String>[
+      flutterBatch.path,
+      '--version',
+    ], environment: environment);
+    expect(result, const ProcessResultMatcher());
+    expect(result.stderr, contains('Building flutter tool'));
+    expect(aotSnapshot.existsSync(), isTrue);
+    expect(aotStamp.existsSync(), isTrue);
+
+    result = await processManager.run(<String>[
+      flutterBatch.path,
+      '--version',
+    ], environment: environment);
+    expect(result, const ProcessResultMatcher());
+    expect(result.stderr, isNot(contains('Building flutter tool...')));
+  });
 }
 
 Future<String> runDartBatch() async {
@@ -112,6 +133,20 @@ File get dartBatch {
 // The executable batch entrypoint for the Flutter binary.
 File get flutterBatch {
   return flutterRoot.childDirectory('bin').childFile('flutter.bat').absolute;
+}
+
+File get aotSnapshot {
+  return flutterRoot
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .childFile('flutter_tools.aot_snapshot');
+}
+
+File get aotStamp {
+  return flutterRoot
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .childFile('flutter_tools.aot_stamp');
 }
 
 // The Dart SDK's stamp file.

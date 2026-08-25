@@ -56,10 +56,6 @@ SET shared_bin=%FLUTTER_ROOT%\bin\internal\shared.bat
 CALL "%shared_bin%"
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
-SET cache_dir=%FLUTTER_ROOT%\bin\cache
-SET snapshot_path=%cache_dir%\flutter_tools.snapshot
-SET dart_sdk_path=%cache_dir%\dart-sdk
-SET dart=%dart_sdk_path%\bin\dart.exe
 
 SET exit_with_errorlevel=%FLUTTER_ROOT%/bin/internal/exit_with_errorlevel.bat
 
@@ -71,4 +67,4 @@ REM
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
-"%dart%" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & "%exit_with_errorlevel%"
+"%flutter_tool_runtime%" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" %FLUTTER_TOOL_ARGS% "%flutter_tool_snapshot_path%" %* & "%exit_with_errorlevel%"

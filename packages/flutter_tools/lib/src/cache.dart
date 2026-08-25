@@ -45,6 +45,7 @@ const kFlutterRootEnvironmentVariableName =
 const kFlutterEngineEnvironmentVariableName =
     'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
 const kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/cache/
+const kAotSnapshotFileName = 'flutter_tools.aot_snapshot'; // in //flutter/bin/cache/
 const kFlutterToolsScriptFileName =
     'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const kFlutterEnginePackageName = 'sky_engine';
@@ -303,7 +304,10 @@ class Cache {
 
       if (platform.script.scheme == 'file') {
         final String script = platform.script.toFilePath(windows: platform.isWindows);
-        if (fileSystem.path.basename(script) == kSnapshotFileName) {
+        if (<String>{
+          kSnapshotFileName,
+          kAotSnapshotFileName,
+        }.contains(fileSystem.path.basename(script))) {
           return normalize(dirname(dirname(fileSystem.path.dirname(script))));
         }
         if (fileSystem.path.basename(script) == kFlutterToolsScriptFileName) {

@@ -122,7 +122,7 @@ function upgrade_flutter () (
   "$FLUTTER_ROOT/bin/internal/update_engine_version.sh"
 
   local revision="$(git -C "$FLUTTER_ROOT" rev-parse HEAD)"
-  local compilekey="$revision:$FLUTTER_TOOL_ARGS"
+  local compilekey="$revision:$FLUTTER_TOOL_ARGS:$SNAPSHOT_KIND"
 
   # Invalidate cache if:
   #  * SNAPSHOT_PATH is not a file, or
@@ -176,7 +176,11 @@ function upgrade_flutter () (
     fi
 
     # Compile...
-    "$DART" --verbosity=error $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
+    if [[ "$SNAPSHOT_KIND" == "aot" ]]; then
+      "$DART" compile aot-snapshot --verbosity=error --output="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" "$SCRIPT_PATH" > /dev/null
+    else
+      "$DART" --verbosity=error $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
+    fi
     echo "$compilekey" > "$STAMP_PATH"
 
     # Delete any temporary snapshot path.
@@ -203,18 +207,27 @@ function shared::execute() {
   fi
 
   FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
+  SNAPSHOT_KIND="app-jit"
   SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
   STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
+  # FLUTTER_TOOL_ARGS may contain VM options that the AOT runtime does not support.
+  if [[ -z "$FLUTTER_TOOL_ARGS" && ( "$FLUTTER_TOOLS_USE_AOT_SNAPSHOT" == "1" || "$FLUTTER_TOOLS_USE_AOT_SNAPSHOT" == "true" ) ]]; then
+    SNAPSHOT_KIND="aot"
+    SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.aot_snapshot"
+    STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.aot_stamp"
+  fi
   SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"
   DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 
   DART="$DART_SDK_PATH/bin/dart"
+  DART_AOT_RUNTIME="$DART_SDK_PATH/bin/dartaotruntime"
 
   # If running over git-bash, overrides the default UNIX executables with win32
   # executables
   case "$(uname -s)" in
     MINGW* | MSYS* )
       DART="$DART.exe"
+      DART_AOT_RUNTIME="$DART_AOT_RUNTIME.exe"
       ;;
   esac
 
@@ -270,7 +283,11 @@ function shared::execute() {
     flutter*)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
       # considered as separate space-separated args.
-      exec "$DART" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      if [[ "$SNAPSHOT_KIND" == "aot" ]]; then
+        exec "$DART_AOT_RUNTIME" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      else
+        exec "$DART" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      fi
       ;;
     dart*)
       exec "$DART" "$@"
