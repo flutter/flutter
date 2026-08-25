@@ -528,7 +528,9 @@ class RenderWrap extends RenderBox
   double computeMaxIntrinsicWidth(double height) {
     switch (direction) {
       case Axis.horizontal:
-        var width = 0.0;
+        // The maximum intrinsic width is reached when every child is laid out
+        // in a single run, which also includes the spacing between them.
+        double width = math.max(childCount - 1, 0) * spacing;
         RenderBox? child = firstChild;
         while (child != null) {
           width += child.getMaxIntrinsicWidth(double.infinity);
@@ -562,7 +564,9 @@ class RenderWrap extends RenderBox
       case Axis.horizontal:
         return getDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
-        var height = 0.0;
+        // The maximum intrinsic height is reached when every child is laid out
+        // in a single run, which also includes the spacing between them.
+        double height = math.max(childCount - 1, 0) * spacing;
         RenderBox? child = firstChild;
         while (child != null) {
           height += child.getMaxIntrinsicHeight(double.infinity);
