@@ -143,6 +143,12 @@ class GalleryOptions {
     isTestMode,
   );
 
+  static GalleryOptions? maybeOf(BuildContext context) {
+    final _ModelBindingScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_ModelBindingScope>();
+    return scope?.modelBindingState.currentModel;
+  }
+
   static GalleryOptions of(BuildContext context) {
     final _ModelBindingScope scope = context
         .dependOnInheritedWidgetOfExactType<_ModelBindingScope>()!;
