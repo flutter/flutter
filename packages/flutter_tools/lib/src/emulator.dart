@@ -210,12 +210,16 @@ class EmulatorManager {
     final args = <String>[avdManagerPath, 'create', 'avd', '-n', 'temp'];
     final RunResult runResult = await _processUtils.run(args, environment: _java?.environment);
 
-    // Get the list of IDs that match our criteria
+    // Get the list of IDs that match our criteria. 32-bit x86 images are
+    // excluded entirely: current emulator tooling treats them as
+    // unsupported, so picking one would leave the freshly created AVD
+    // unusable (flutter/flutter#191512).
     final List<String> availableIDs = runResult.stderr
         .split(RegExp(r'\r?\n'))
         .where((String l) => _androidApiVersion.hasMatch(l))
         .where((String l) => l.contains('system-images'))
         .where((String l) => l.contains('google_apis_playstore'))
+        .where((String l) => !l.endsWith(';x86'))
         .toList();
 
     final List<int> availableApiVersions = availableIDs
@@ -236,11 +240,8 @@ class EmulatorManager {
       return null;
     }
 
-    // Prefer 64-bit/modern ABIs over plain x86: current emulator tooling
-    // treats 32-bit x86 images as unsupported, so picking one leaves the
-    // freshly created AVD unusable (flutter/flutter#191512). Prefer the ABI
-    // that matches the host so the emulator gets hardware acceleration
-    // instead of falling back to slow software translation.
+    // Prefer the ABI that matches the host so the emulator gets hardware
+    // acceleration instead of falling back to slow software translation.
     for (final String abi in _preferredAbisForHost) {
       for (final id in idsForApiVersion) {
         if (id.endsWith(';$abi')) {
@@ -255,11 +256,11 @@ class EmulatorManager {
     return switch (_operatingSystemUtils.hostPlatform) {
       HostPlatform.darwin_arm64 ||
       HostPlatform.linux_arm64 ||
-      HostPlatform.windows_arm64 => const <String>['arm64-v8a', 'x86_64', 'x86'],
+      HostPlatform.windows_arm64 => const <String>['arm64-v8a', 'x86_64'],
       HostPlatform.darwin_x64 ||
       HostPlatform.linux_x64 ||
       HostPlatform.windows_x64 ||
-      HostPlatform.linux_riscv64 => const <String>['x86_64', 'arm64-v8a', 'x86'],
+      HostPlatform.linux_riscv64 => const <String>['x86_64', 'arm64-v8a'],
     };
   }
 

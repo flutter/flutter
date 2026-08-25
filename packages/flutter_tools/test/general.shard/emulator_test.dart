@@ -40,6 +40,23 @@ const kListEmulatorsCommand = FakeCommand(
   exitCode: 1,
 );
 
+// Like fakeCreateFailureOutput, but with a supported (x86_64) image
+// alongside the unsupported x86 ones, for tests that aren't themselves
+// about ABI selection and just need emulator creation to succeed.
+const fakeCreateFailureOutputWithSupportedAbi =
+    'Error: Package path (-k) not specified. Valid system image paths are:\n'
+    'system-images;android-27;google_apis;x86\n'
+    'system-images;android-P;google_apis;x86\n'
+    'system-images;android-27;google_apis_playstore;x86\n'
+    'system-images;android-27;google_apis_playstore;x86_64\n'
+    'null\n';
+
+const kListEmulatorsCommandWithSupportedAbi = FakeCommand(
+  command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+  stderr: fakeCreateFailureOutputWithSupportedAbi,
+  exitCode: 1,
+);
+
 void main() {
   late FakeProcessManager fakeProcessManager;
   late FakeAndroidSdk sdk;
@@ -193,7 +210,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
             command: <String>['avdmanager', 'list', 'device', '-c'],
             stdout: 'test\ntest2\npixel\npixel-xl\n',
           ),
-          kListEmulatorsCommand,
+          kListEmulatorsCommandWithSupportedAbi,
           const FakeCommand(
             command: <String>[
               'avdmanager',
@@ -202,7 +219,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
               '-n',
               'flutter_emulator',
               '-k',
-              'system-images;android-27;google_apis_playstore;x86',
+              'system-images;android-27;google_apis_playstore;x86_64',
               '-d',
               'pixel',
             ],
@@ -227,7 +244,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
             command: <String>['avdmanager', 'list', 'device', '-c'],
             stdout: 'test\ntest2\npixel\npixel-xl\n',
           ),
-          kListEmulatorsCommand,
+          kListEmulatorsCommandWithSupportedAbi,
           const FakeCommand(
             command: <String>[
               'avdmanager',
@@ -237,7 +254,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
               '-n',
               'test',
               '-k',
-              'system-images;android-27;google_apis_playstore;x86',
+              'system-images;android-27;google_apis_playstore;x86_64',
               '-d',
               'pixel',
             ],
@@ -439,6 +456,31 @@ iOS Simulator       • iOS Simulator • Apple        • android
       },
     );
 
+    testWithoutContext(
+      'create emulator fails with a clear error when only unsupported x86 images are available',
+      () async {
+        final emulatorManager = EmulatorManager(
+          java: FakeJava(),
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'test\ntest2\npixel\npixel-xl\n',
+            ),
+            kListEmulatorsCommand,
+          ]),
+          androidSdk: sdk,
+          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        );
+        final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+        expect(result.success, false);
+        expect(result.error, contains('No suitable Android AVD system images are available'));
+      },
+    );
+
     testWithoutContext('create emulator with an existing name errors', () async {
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
@@ -449,7 +491,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
             command: <String>['avdmanager', 'list', 'device', '-c'],
             stdout: 'test\ntest2\npixel\npixel-xl\n',
           ),
-          kListEmulatorsCommand,
+          kListEmulatorsCommandWithSupportedAbi,
           const FakeCommand(
             command: <String>[
               'avdmanager',
@@ -458,7 +500,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
               '-n',
               'existing-avd-1',
               '-k',
-              'system-images;android-27;google_apis_playstore;x86',
+              'system-images;android-27;google_apis_playstore;x86_64',
               '-d',
               'pixel',
             ],
@@ -496,7 +538,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
               command: <String>['avdmanager', 'list', 'device', '-c'],
               stdout: 'test\ntest2\npixel\npixel-xl\n',
             ),
-            kListEmulatorsCommand,
+            kListEmulatorsCommandWithSupportedAbi,
             const FakeCommand(
               command: <String>[
                 'avdmanager',
@@ -506,7 +548,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
                 '-n',
                 'flutter_emulator_2',
                 '-k',
-                'system-images;android-27;google_apis_playstore;x86',
+                'system-images;android-27;google_apis_playstore;x86_64',
                 '-d',
                 'pixel',
               ],
