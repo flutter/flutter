@@ -7,7 +7,9 @@ package io.flutter.embedding.engine.loader;
 import static android.os.Looper.getMainLooper;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
@@ -57,6 +59,29 @@ public class FlutterLoaderTest {
   public void itReportsUninitializedAfterCreating() {
     FlutterLoader flutterLoader = new FlutterLoader();
     assertFalse(flutterLoader.initialized());
+  }
+
+  @Test
+  public void getManifestEngineShellArgs_parsesJsonList() {
+    Bundle bundle = new Bundle();
+    bundle.putString(
+        "io.flutter.app.androidEngineShellArgs", "[\"--route=/test\", \"--enable-impeller=true\"]");
+    List<String> result = FlutterLoader.getManifestEngineShellArgs(bundle);
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertEquals("--route=/test", result.get(0));
+    assertEquals("--enable-impeller=true", result.get(1));
+  }
+
+  @Test
+  public void getManifestEngineShellArgs_returnsNullWhenEmptyOrMissing() {
+    assertNull(FlutterLoader.getManifestEngineShellArgs(null));
+
+    Bundle bundle = new Bundle();
+    assertNull(FlutterLoader.getManifestEngineShellArgs(bundle));
+
+    bundle.putString("io.flutter.app.androidEngineShellArgs", "");
+    assertNull(FlutterLoader.getManifestEngineShellArgs(bundle));
   }
 
   @Test

@@ -5,6 +5,11 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_OPENGL_MANAGER_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_OPENGL_MANAGER_H_
 
+// Avoid pulling in X11 headers (via <epoxy/egl.h>), which define `None` and
+// `Bool` as macros that collide with googletest in transitively-including test
+// translation units. EGLDisplay/EGLContext are platform-independent handles.
+#define EGL_NO_X11
+#include <epoxy/egl.h>
 #include <glib-object.h>
 
 G_BEGIN_DECLS
@@ -63,6 +68,43 @@ gboolean fl_opengl_manager_make_platform_current(FlOpenGLManager* manager);
  * Returns: %TRUE if the context cleared.
  */
 gboolean fl_opengl_manager_clear_current(FlOpenGLManager* manager);
+
+/**
+ * fl_opengl_manager_get_display:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Gets the EGL display the engine renders to. This can be used to create
+ * additional EGL contexts that share resources with the engine.
+ *
+ * Returns: an %EGLDisplay.
+ */
+EGLDisplay fl_opengl_manager_get_display(FlOpenGLManager* manager);
+
+/**
+ * fl_opengl_manager_get_context:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Gets the EGL context the engine renders with. This can be used as a share
+ * context when creating additional EGL contexts so they can access textures
+ * rendered by the engine directly (without using EGLImage).
+ *
+ * Returns: an %EGLContext.
+ */
+EGLContext fl_opengl_manager_get_context(FlOpenGLManager* manager);
+
+/**
+ * fl_opengl_manager_can_blit:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Checks whether glBlitFramebuffer can be used on the currently current OpenGL
+ * context. glBlitFramebuffer is a GLES3 / OpenGL 3.0 function that may be
+ * missing or broken on some drivers, so callers should fall back to shader
+ * compositing when this returns %FALSE. Requires an OpenGL context to be
+ * current.
+ *
+ * Returns: %TRUE if glBlitFramebuffer is available.
+ */
+gboolean fl_opengl_manager_can_blit(FlOpenGLManager* manager);
 
 G_END_DECLS
 
