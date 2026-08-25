@@ -8,6 +8,7 @@
 library;
 
 import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -2319,4 +2320,84 @@ void main() {
     final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
     expect(listTile.statesController, isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/84201.
+  testWidgets('ListTile tileColor is repainted when an ExpansionTile above it expands', (
+    WidgetTester tester,
+  ) async {
+    const boundaryKey = Key('boundary');
+    const tileKey = Key('tile');
+    const tileColor = Color(0xFFFFFFFF);
+    final controller = ExpansibleController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: boundaryKey,
+        child: MaterialApp(
+          home: Material(
+            color: const Color(0xFF000000),
+            child: ListView(
+              children: <Widget>[
+                ExpansionTile(
+                  controller: controller,
+                  title: const Text('Expansion'),
+                  children: const <Widget>[SizedBox(height: 150.0)],
+                ),
+                const ListTile(key: tileKey, tileColor: tileColor, title: Text('Tile')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Returns the vertical bounds of the tile color as it was actually painted.
+    Future<Rect> paintedTileColorBounds() async {
+      final RenderRepaintBoundary boundary = tester.renderObject<RenderRepaintBoundary>(
+        find.byKey(boundaryKey),
+      );
+      ByteData? data;
+      var width = 0;
+      var height = 0;
+      await tester.runAsync(() async {
+        final ui.Image image = await boundary.toImage();
+        width = image.width;
+        height = image.height;
+        data = await image.toByteData();
+        image.dispose();
+      });
+      double? top;
+      double? bottom;
+      for (var y = 0; y < height; y += 1) {
+        final int offset = (y * width + width ~/ 2) * 4;
+        final int pixel = Color.fromARGB(
+          data!.getUint8(offset + 3),
+          data!.getUint8(offset),
+          data!.getUint8(offset + 1),
+          data!.getUint8(offset + 2),
+        ).toARGB32();
+        if (pixel == tileColor.toARGB32()) {
+          top ??= y.toDouble();
+          bottom = y + 1.0;
+        }
+      }
+      return Rect.fromLTRB(0.0, top!, 0.0, bottom!);
+    }
+
+    Rect tileRect = tester.getRect(find.byKey(tileKey));
+    Rect paintedRect = await paintedTileColorBounds();
+    expect(paintedRect.top, tileRect.top);
+    expect(paintedRect.bottom, tileRect.bottom);
+
+    // Expanding the tile above moves the ListTile down. Its tile color must
+    // move with it.
+    controller.expand();
+    await tester.pumpAndSettle();
+
+    tileRect = tester.getRect(find.byKey(tileKey));
+    paintedRect = await paintedTileColorBounds();
+    expect(paintedRect.top, tileRect.top);
+    expect(paintedRect.bottom, tileRect.bottom);
+  }, skip: isBrowser); // [intended] The test uses RenderRepaintBoundary.toImage.
 }
