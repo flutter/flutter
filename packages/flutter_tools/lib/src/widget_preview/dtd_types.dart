@@ -17,10 +17,6 @@ class FlutterWidgetPreviews {
     required this.scriptUris,
   });
 
-  static const kNamespaces = 'namespaces';
-  static const kPreviews = 'previews';
-  static const kScriptUris = 'scriptUris';
-
   /// A set of library URIs and the prefixes used for types in
   /// "previewAnnotation" sources.
   final Map<String, String> namespaces;
@@ -49,9 +45,9 @@ class FlutterWidgetPreviews {
 
   Map<String, Object?> toJson() {
     final result = <String, Object?>{};
-    result[kNamespaces] = namespaces;
-    result[kPreviews] = previews.map((item) => item.toJson()).toList();
-    result[kScriptUris] = scriptUris.map((uri) => uri.toString()).toList();
+    result['namespaces'] = namespaces;
+    result['previews'] = previews.map((item) => item.toJson()).toList();
+    result['scriptUris'] = scriptUris.map((uri) => uri.toString()).toList();
     return result;
   }
 
@@ -59,15 +55,15 @@ class FlutterWidgetPreviews {
   String toString() => json.encode(toJson());
 
   static FlutterWidgetPreviews fromJson(Map<String, Object?> json) {
-    final Object? namespacesJson = json[kNamespaces];
+    final Object? namespacesJson = json['namespaces'];
     final Map<String, String> namespaces = (namespacesJson! as Map<Object, Object?>).map(
       (key, value) => MapEntry(key as String, value! as String),
     );
-    final Object? previewsJson = json[kPreviews];
+    final Object? previewsJson = json['previews'];
     final List<FlutterWidgetPreviewDetails> previews = (previewsJson! as List<Object?>)
         .map((item) => FlutterWidgetPreviewDetails.fromJson(item! as Map<String, Object?>))
         .toList();
-    final Object? scriptUrisJson = json[kScriptUris];
+    final Object? scriptUrisJson = json['scriptUris'];
     final List<Uri> scriptUris = (scriptUrisJson! as List<Object?>)
         .map((item) => Uri.parse(item! as String))
         .toList();
@@ -94,17 +90,6 @@ class FlutterWidgetPreviewDetails {
     required this.scriptUri,
     required this.libraryUri,
   });
-
-  static const kFunctionName = 'functionName';
-  static const kHasError = 'hasError';
-  static const kDependencyHasErrors = 'dependencyHasErrors';
-  static const kIsBuilder = 'isBuilder';
-  static const kIsMultiPreview = 'isMultiPreview';
-  static const kPackageName = 'packageName';
-  static const kPosition = 'position';
-  static const kPreviewAnnotation = 'previewAnnotation';
-  static const kScriptUri = 'scriptUri';
-  static const kLibraryUri = 'libraryUri';
 
   /// The name of the function returning the preview.
   final String functionName;
@@ -182,16 +167,16 @@ class FlutterWidgetPreviewDetails {
 
   Map<String, Object?> toJson() {
     final result = <String, Object?>{};
-    result[kFunctionName] = functionName;
-    result[kHasError] = hasError;
-    result[kDependencyHasErrors] = dependencyHasErrors;
-    result[kIsBuilder] = isBuilder;
-    result[kIsMultiPreview] = isMultiPreview;
-    result[kPackageName] = packageName;
-    result[kPosition] = position.toJson();
-    result[kPreviewAnnotation] = previewAnnotation;
-    result[kScriptUri] = scriptUri.toString();
-    result[kLibraryUri] = libraryUri.toString();
+    result['functionName'] = functionName;
+    result['hasError'] = hasError;
+    result['dependencyHasErrors'] = dependencyHasErrors;
+    result['isBuilder'] = isBuilder;
+    result['isMultiPreview'] = isMultiPreview;
+    result['packageName'] = packageName;
+    result['position'] = position.toJson();
+    result['previewAnnotation'] = previewAnnotation;
+    result['scriptUri'] = scriptUri.toString();
+    result['libraryUri'] = libraryUri.toString();
     return result;
   }
 
@@ -199,25 +184,25 @@ class FlutterWidgetPreviewDetails {
   String toString() => json.encode(toJson());
 
   static FlutterWidgetPreviewDetails fromJson(Map<String, Object?> json) {
-    final Object? functionNameJson = json[kFunctionName];
+    final Object? functionNameJson = json['functionName'];
     final functionName = functionNameJson! as String;
-    final Object? hasErrorJson = json[kHasError];
+    final Object? hasErrorJson = json['hasError'];
     final hasError = hasErrorJson! as bool;
-    final Object? dependencyHasErrorsJson = json[kDependencyHasErrors];
+    final Object? dependencyHasErrorsJson = json['dependencyHasErrors'];
     final dependencyHasErrors = dependencyHasErrorsJson! as bool;
-    final Object? isBuilderJson = json[kIsBuilder];
+    final Object? isBuilderJson = json['isBuilder'];
     final isBuilder = isBuilderJson! as bool;
-    final Object? isMultiPreviewJson = json[kIsMultiPreview];
+    final Object? isMultiPreviewJson = json['isMultiPreview'];
     final isMultiPreview = isMultiPreviewJson! as bool;
-    final Object? packageNameJson = json[kPackageName];
+    final Object? packageNameJson = json['packageName'];
     final packageName = packageNameJson as String?;
-    final Object? positionJson = json[kPosition];
+    final Object? positionJson = json['position'];
     final Position position = Position.fromJson(positionJson! as Map<String, Object?>);
-    final Object? previewAnnotationJson = json[kPreviewAnnotation];
+    final Object? previewAnnotationJson = json['previewAnnotation'];
     final previewAnnotation = previewAnnotationJson! as String;
-    final Object? scriptUriJson = json[kScriptUri];
+    final Object? scriptUriJson = json['scriptUri'];
     final Uri scriptUri = Uri.parse(scriptUriJson! as String);
-    final Object? libraryUriJson = json[kLibraryUri];
+    final Object? libraryUriJson = json['libraryUri'];
     final Uri libraryUri = Uri.parse(libraryUriJson! as String);
     return FlutterWidgetPreviewDetails(
       functionName: functionName,
@@ -236,9 +221,6 @@ class FlutterWidgetPreviewDetails {
 
 class Position {
   const Position({required this.character, required this.line});
-
-  static const kCharacter = 'character';
-  static const kLine = 'line';
 
   /// Character offset on a line in a document (zero-based).
   ///
@@ -269,8 +251,8 @@ class Position {
 
   Map<String, Object?> toJson() {
     final result = <String, Object?>{};
-    result[kCharacter] = character;
-    result[kLine] = line;
+    result['character'] = character;
+    result['line'] = line;
     return result;
   }
 
@@ -278,9 +260,9 @@ class Position {
   String toString() => json.encode(toJson());
 
   static Position fromJson(Map<String, Object?> json) {
-    final Object? characterJson = json[kCharacter];
+    final Object? characterJson = json['character'];
     final character = characterJson! as int;
-    final Object? lineJson = json[kLine];
+    final Object? lineJson = json['line'];
     final line = lineJson! as int;
     return Position(character: character, line: line);
   }

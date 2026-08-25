@@ -108,18 +108,7 @@ class WidgetPreviewDtdServices {
   static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
   static const kSyntheticPreviewStateChangedEvent = 'SyntheticPreviewStateChanged';
 
-  static const kClearedCount = 'clearedCount';
-  static const kCount = 'count';
-  static const kDiagnostic = 'diagnostic';
-  static const kDurationMs = 'durationMs';
-  static const kError = 'error';
-  static const kPreviewId = 'previewId';
-  static const kPreviews = 'previews';
-  static const kRegistered = 'registered';
-  static const kSuccess = 'success';
-
   /// Protocol version for agent widget preview services.
-
   static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
@@ -143,6 +132,16 @@ class WidgetPreviewDtdServices {
   ];
 
   // END KEEP SYNCED
+
+  static const kClearedCount = 'clearedCount';
+  static const kCount = 'count';
+  static const kDiagnostic = 'diagnostic';
+  static const kDurationMs = 'durationMs';
+  static const kError = 'error';
+  static const kPreviewId = 'previewId';
+  static const kPreviews = 'previews';
+  static const kRegistered = 'registered';
+  static const kSuccess = 'success';
 
   @visibleForTesting
   late final preferences = PersistentPreferences(fs: fs);

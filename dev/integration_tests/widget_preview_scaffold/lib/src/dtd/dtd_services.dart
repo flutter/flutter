@@ -35,8 +35,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kCompilationSucceededEvent = 'CompilationSucceeded';
   static const kCompilationFailedEvent = 'CompilationFailed';
   static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
-  static const kSyntheticPreviewStateChangedEvent =
-      'SyntheticPreviewStateChanged';
+  static const kSyntheticPreviewStateChangedEvent = 'SyntheticPreviewStateChanged';
 
   /// Protocol version for agent widget preview services.
   static const kProtocolVersion = '1.0.0';
@@ -44,11 +43,6 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
   static const kNoValueForKey = 200;
-
-  static const kKey = 'key';
-  static const kUri = 'uri';
-  static const kUrl = 'url';
-  static const kValue = 'value';
 
   // END KEEP SYNCED
 
@@ -59,13 +53,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   Future<void> connect({Uri? dtdUri}) async {
     final Uri dtdWsUri = dtdUri ?? Uri.parse(kWidgetPreviewDtdUri);
     dtd = await DartToolingDaemon.connect(dtdWsUri);
-    unawaited(
-      dtd.postEvent(
-        kWidgetPreviewScaffoldStream,
-        'Connected',
-        const <String, Object?>{},
-      ),
-    );
+    unawaited(dtd.postEvent(kWidgetPreviewScaffoldStream, 'Connected', const <String, Object?>{}));
     await _determineIfWindows();
     await initializeEditorService(this);
   }
@@ -77,17 +65,14 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     await dtd.close();
   }
 
-  Future<DTDResponse?> _call(
-    String methodName, {
-    Map<String, Object?>? params,
-  }) => dtd.safeCall(kWidgetPreviewService, methodName, params: params);
+  Future<DTDResponse?> _call(String methodName, {Map<String, Object?>? params}) =>
+      dtd.safeCall(kWidgetPreviewService, methodName, params: params);
 
   /// Returns `true` if the operating system is Windows.
   late final bool isWindows;
 
   Future<void> _determineIfWindows() async {
-    isWindows = (BoolResponse.fromDTDResponse((await _call(kIsWindows))!))
-        .value!;
+    isWindows = (BoolResponse.fromDTDResponse((await _call(kIsWindows))!)).value!;
   }
 
   /// Trigger a hot restart of the widget preview scaffold.
@@ -102,7 +87,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     if (response == null) {
       return null;
     }
-    final urlString = response.result[kUrl] as String?;
+    final urlString = response.result['url'] as String?;
     return urlString != null ? Uri.parse(urlString) : null;
   }
 
@@ -116,7 +101,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   ///
   /// Returns null if [uri] can not be resolved.
   Future<Uri?> resolveUri(Uri uri) async {
-    final response = await _call(kResolveUri, params: {kUri: uri.toString()});
+    final response = await _call(kResolveUri, params: {'uri': uri.toString()});
     if (response == null) {
       return null;
     }
@@ -130,7 +115,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// Returns null if [key] is not in the map.
   Future<Object?> getPreference(String key) async {
     try {
-      final response = await _call(kGetPreference, params: {kKey: key});
+      final response = await _call(kGetPreference, params: {'key': key});
       return switch (response?.type) {
         'StringResponse' => StringResponse.fromDTDResponse(response!).value,
         'BoolResponse' => BoolResponse.fromDTDResponse(response!).value,
@@ -154,14 +139,12 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
 
   /// Sets [key] to [value] in the persistent preferences map.
   Future<void> setPreference(String key, Object? value) async {
-    await _call(kSetPreference, params: {kKey: key, kValue: value});
+    await _call(kSetPreference, params: {'key': key, 'value': value});
   }
 
   /// Retrieves the DevTools URI for the previewer instance.
   Future<Uri> getDevToolsUri() async {
-    final result = StringResponse.fromDTDResponse(
-      (await _call(kGetDevToolsUri))!,
-    );
+    final result = StringResponse.fromDTDResponse((await _call(kGetDevToolsUri))!);
     return Uri.parse(result.value!);
   }
 
