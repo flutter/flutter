@@ -935,6 +935,29 @@ void main() {
     expect(opacity.paintsChild(sliver), false);
   });
 
+  test('RenderConstrainedBox intrinsics take the additional constraints into account', () {
+    // Regression test for https://github.com/flutter/flutter/issues/177740
+    // The child is only ever as wide as `additionalConstraints` allows, so its
+    // intrinsic height has to be measured at that reduced width.
+    final RenderBox squareChild = RenderAspectRatio(aspectRatio: 1.0);
+    final constrainedBox = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.tightFor(width: 50.0),
+      child: squareChild,
+    );
+    expect(constrainedBox.getMinIntrinsicHeight(200.0), 50.0);
+    expect(constrainedBox.getMaxIntrinsicHeight(200.0), 50.0);
+    // A smaller incoming extent still wins over the additional constraints.
+    expect(constrainedBox.getMaxIntrinsicHeight(20.0), 20.0);
+
+    final RenderBox otherSquareChild = RenderAspectRatio(aspectRatio: 1.0);
+    final heightConstrainedBox = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(maxHeight: 50.0),
+      child: otherSquareChild,
+    );
+    expect(heightConstrainedBox.getMinIntrinsicWidth(200.0), 50.0);
+    expect(heightConstrainedBox.getMaxIntrinsicWidth(200.0), 50.0);
+  });
+
   test('RenderCustomClip extenders respect clipBehavior when asked to describeApproximateClip', () {
     final RenderBox child = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200),
