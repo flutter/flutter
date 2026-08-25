@@ -707,6 +707,9 @@ abstract class Device {
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
 
+  /// The CPU architecture of the device.
+  Future<CpuArch> get cpuArch;
+
   /// Platform name for display only.
   Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
@@ -883,6 +886,7 @@ abstract class Device {
       'id': id,
       'isSupported': await isSupported(),
       'targetPlatform': (await targetPlatform).getName(),
+      'cpuArch': (await cpuArch).name,
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,
       'capabilities': <String, Object>{
@@ -1409,6 +1413,88 @@ class DebuggingOptions {
           headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         ),
       );
+
+  /// Retrieves Android engine shell arguments from the debugging options based on the
+  /// command line flags that are passed to the engine via the manifest.
+  Set<String> getAndroidLaunchArguments() {
+    return <String>{
+      if (enableDartProfiling) ...<String>['--enable-dart-profiling'],
+      if (profileStartup) ...<String>['--profile-startup'],
+      if (enableSoftwareRendering) ...<String>['--enable-software-rendering'],
+      if (skiaDeterministicRendering) ...<String>['--skia-deterministic-rendering'],
+      if (traceSkia) ...<String>['--trace-skia'],
+      if (traceAllowlist != null) ...<String>['--trace-allowlist=${traceAllowlist!}'],
+      if (traceSkiaAllowlist != null) ...<String>['--trace-skia-allowlist=${traceSkiaAllowlist!}'],
+      if (traceSystrace) ...<String>['--trace-systrace'],
+      if (traceToFile != null) ...<String>['--trace-to-file=${traceToFile!}'],
+      if (endlessTraceBuffer) ...<String>['--endless-trace-buffer'],
+      if (profileMicrotasks) ...<String>['--profile-microtasks'],
+      if (purgePersistentCache) ...<String>['--purge-persistent-cache'],
+      if (enableImpeller == ImpellerStatus.enabled) ...<String>['--enable-impeller=true'],
+      if (enableImpeller == ImpellerStatus.disabled) ...<String>['--enable-impeller=false'],
+      if (enableFlutterGpu) ...<String>['--enable-flutter-gpu'],
+      if (enableVulkanValidation) ...<String>['--enable-vulkan-validation'],
+      if (enableHcpp) ...<String>['--enable-hcpp-and-surface-control'],
+      if (testFlag) ...<String>['--test-flag'],
+      if (debuggingEnabled) ...<String>[
+        if (buildInfo.isDebug) ...<String>[
+          ...<String>['--enable-checked-mode'],
+          ...<String>['--verify-entry-points'],
+        ],
+        if (startPaused) ...<String>['--start-paused'],
+        if (disableServiceAuthCodes) ...<String>['--disable-service-auth-codes'],
+        if (disableServiceOriginCheck) ...<String>['--disable-service-origin-check'],
+        if (dartFlags.isNotEmpty) ...<String>['--dart-flags=$dartFlags'],
+        if (useTestFonts) ...<String>['--use-test-fonts'],
+        if (verboseSystemLogs) ...<String>['--verbose-logging'],
+      ],
+    };
+  }
+
+  /// Retrieves Android engine shell arguments from the debugging options based on the
+  /// command line flags that are passed to the engine via the manifest as Intent extras.
+  List<String> getAndroidLaunchArgumentsAsIntentExtras() {
+    return <String>[
+      if (enableDartProfiling) ...<String>['--ez', 'enable-dart-profiling', 'true'],
+      if (profileStartup) ...<String>['--ez', 'profile-startup', 'true'],
+      if (enableSoftwareRendering) ...<String>['--ez', 'enable-software-rendering', 'true'],
+      if (skiaDeterministicRendering) ...<String>['--ez', 'skia-deterministic-rendering', 'true'],
+      if (traceSkia) ...<String>['--ez', 'trace-skia', 'true'],
+      if (traceAllowlist != null) ...<String>['--es', 'trace-allowlist', traceAllowlist!],
+      if (traceSkiaAllowlist != null) ...<String>[
+        '--es',
+        'trace-skia-allowlist',
+        traceSkiaAllowlist!,
+      ],
+      if (traceSystrace) ...<String>['--ez', 'trace-systrace', 'true'],
+      if (traceToFile != null) ...<String>['--es', 'trace-to-file', traceToFile!],
+      if (endlessTraceBuffer) ...<String>['--ez', 'endless-trace-buffer', 'true'],
+      if (profileMicrotasks) ...<String>['--ez', 'profile-microtasks', 'true'],
+      if (purgePersistentCache) ...<String>['--ez', 'purge-persistent-cache', 'true'],
+      if (enableImpeller == ImpellerStatus.enabled) ...<String>['--ez', 'enable-impeller', 'true'],
+      if (enableImpeller == ImpellerStatus.disabled) ...<String>[
+        '--ez',
+        'enable-impeller',
+        'false',
+      ],
+      if (enableFlutterGpu) ...<String>['--ez', 'enable-flutter-gpu', 'true'],
+      if (enableVulkanValidation) ...<String>['--ez', 'enable-vulkan-validation', 'true'],
+      if (enableHcpp) ...<String>['--ez', 'enable-hcpp-and-surface-control', 'true'],
+      if (debuggingEnabled) ...<String>[
+        if (buildInfo.isDebug) ...<String>[
+          ...<String>['--ez', 'enable-checked-mode', 'true'],
+          ...<String>['--ez', 'verify-entry-points', 'true'],
+        ],
+        if (startPaused) ...<String>['--ez', 'start-paused', 'true'],
+        if (disableServiceAuthCodes) ...<String>['--ez', 'disable-service-auth-codes', 'true'],
+        if (disableServiceOriginCheck) ...<String>['--ez', 'disable-service-origin-check', 'true'],
+        if (dartFlags.isNotEmpty) ...<String>['--es', 'dart-flags', dartFlags],
+        if (useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
+        if (verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
+        if (testFlag) ...<String>['--ez', 'test-flag', 'true'],
+      ],
+    ];
+  }
 }
 
 class LaunchResult {

@@ -278,25 +278,13 @@ void main() {
       '--verbose',
       ?rootProject?.path,
     ], analysisServerFactoryOverride: analysisServerFactoryOverride);
-    // Don't perform analysis on Windows since `dart pub add` will use '\' for
-    // path dependencies and cause analysis to fail.
-    // TODO(bkonyi): enable analysis on Windows once https://github.com/dart-lang/pub/issues/4520
-    // is resolved.
-    if (!platform.isWindows) {
-      await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
-    }
+    await analyzeProject(WidgetPreviewStartCommand.widgetPreviewScaffold.path);
     fs.currentDirectory = current;
   }
 
   Future<void> cleanWidgetPreview({required Directory rootProject}) async {
     await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
-    expect(
-      fs
-          .directory(rootProject)
-          .childDirectory('.dart_tool')
-          .childDirectory('widget_preview_scaffold'),
-      isNot(exists),
-    );
+    expect(fs.directory(rootProject).childDirectory('.widget_preview'), isNot(exists));
   }
 
   group('flutter widget-preview', () {
@@ -383,6 +371,62 @@ void main() {
             // ignore: avoid_redundant_argument_values, readability
             isWebEnabled: false,
           ),
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+    });
+
+    group('workspaces', () {
+      testUsingContext(
+        'starts from workspace root when run from member package',
+        () async {
+          final File workspacePubspec = tempDir.childFile('pubspec.yaml');
+          workspacePubspec.writeAsStringSync('''
+name: my_workspace
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+workspace:
+  - my_app
+''');
+
+          final String memberProjectPath = await createProject(
+            tempDir,
+            name: 'my_app',
+            arguments: <String>['--pub'],
+          );
+          final Directory memberProjectDir = fs.directory(memberProjectPath);
+
+          final File memberPubspec = memberProjectDir.childFile('pubspec.yaml');
+          final String memberPubspecContent = memberPubspec.readAsStringSync();
+          memberPubspec.writeAsStringSync('''
+$memberPubspecContent
+resolution: workspace
+''');
+
+          fs.currentDirectory = memberProjectDir;
+
+          await startWidgetPreview(rootProject: null);
+          final Directory workspaceScaffoldDir = tempDir.childDirectory('.widget_preview');
+          final Directory memberScaffoldDir = memberProjectDir.childDirectory('.widget_preview');
+
+          expect(workspaceScaffoldDir, exists);
+          expect(memberScaffoldDir, isNot(exists));
+
+          await cleanWidgetPreview(rootProject: tempDir);
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => loggingProcessManager,
+          FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
           Pub: () => Pub.test(
             fileSystem: fs,
             logger: logger,

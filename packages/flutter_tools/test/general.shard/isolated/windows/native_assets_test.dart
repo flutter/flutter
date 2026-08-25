@@ -7,12 +7,15 @@ import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -21,6 +24,7 @@ import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.d
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -66,7 +70,11 @@ void main() {
 
       testUsingContext(
         'build with assets $buildMode$testName',
-        overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+        overrides: <Type, Generator>{
+          ProcessManager: () => FakeProcessManager.empty(),
+          FeatureFlags: () =>
+              TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
+        },
         () async {
           writePackageConfigFiles(directory: environment.projectDir, mainLibName: 'my_app');
           final Uri nonFlutterTesterAssetUri = environment.buildDir
@@ -248,7 +256,7 @@ void main() {
       );
       await msvcBinDir.create(recursive: true);
 
-      final CCompilerConfig result = (await cCompilerConfigWindows())!;
+      final CCompilerConfig result = (await cCompilerConfigWindows(throwIfNotFound: true))!;
       expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
       expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
       expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
@@ -256,4 +264,38 @@ void main() {
       expect(result.windows.developerCommandPrompt?.arguments, isNotNull);
     },
   );
+
+  group('cCompilerConfigWindows', () {
+    final Platform windowsPlatform = FakePlatform(
+      operatingSystem: 'windows',
+      environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
+    );
+
+    testUsingContext(
+      'returns null when Visual Studio is not found and throwIfNotFound is false',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Platform: () => windowsPlatform,
+        ProcessManager: () => FakeProcessManager.any(),
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+      },
+      () async {
+        final CCompilerConfig? result = await cCompilerConfigWindows(throwIfNotFound: false);
+        expect(result, isNull);
+      },
+    );
+
+    testUsingContext(
+      'throws ToolExit when Visual Studio is not found and throwIfNotFound is true',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Platform: () => windowsPlatform,
+        ProcessManager: () => FakeProcessManager.any(),
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+      },
+      () async {
+        await expectLater(cCompilerConfigWindows(throwIfNotFound: true), throwsA(isA<ToolExit>()));
+      },
+    );
+  });
 }

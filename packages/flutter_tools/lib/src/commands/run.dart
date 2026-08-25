@@ -276,7 +276,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
-  bool get enableHcpp => boolArg('enable-hcpp');
   bool get testFlag => boolArg('test-flag');
 
   @override
@@ -490,7 +489,14 @@ class RunCommand extends RunCommandBase {
             'a test using "flutter run" for debugging purposes. This flag is '
             'only available when running in debug mode.',
       )
-      ..addFlag('build', defaultsTo: true, help: 'If necessary, build the app before running.')
+      ..addFlag(
+        'build',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help:
+            '(deprecated) If necessary, build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
+            'flag with an existing application artifact.',
+      )
       ..addOption('project-root', hide: !verboseHelp, help: 'Specify the project root directory.')
       ..addFlag(
         'hot',
@@ -741,26 +747,6 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
-    if (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false) {
-      final bool webEnableHotReload = boolArg(FlutterOptions.kWebExperimentalHotReload);
-      if (webEnableHotReload) {
-        globals.printWarning(
-          'Hot reload on the web is now enabled by default. '
-          'The "--${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
-          'and will be removed in an upcoming release.',
-        );
-      } else {
-        globals.printWarning(
-          'Hot reload on the web is now enabled by default. '
-          'The "--no-${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
-          'and will be removed in an upcoming release. '
-          'If your web development workflow depends on disabling hot reload, '
-          'please open an issue explaining why at '
-          'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
-        );
-      }
-    }
-
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
@@ -771,6 +757,20 @@ class RunCommand extends RunCommandBase {
         'Flavor-related features may not function properly and could '
         'behave differently in a future release.',
       );
+    }
+
+    if (argResults!.wasParsed('build')) {
+      if (boolArg('build')) {
+        globals.printWarning(
+          'The "--build" flag is deprecated and will be removed in a future release. '
+          'Building is the default behavior, so this flag can be safely removed.',
+        );
+      } else {
+        globals.printWarning(
+          'The "--no-build" flag is deprecated and will be removed in a future release. '
+          'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
+        );
+      }
     }
   }
 
