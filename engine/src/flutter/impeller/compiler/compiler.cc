@@ -397,6 +397,44 @@ void CanonicalizeUniformBlockInstanceNamesForGL(
   }
 }
 
+static bool CheckHasEarlyReturnsInMain(const std::string& source) {
+  size_t main_decl = source.find("main(");
+  if (main_decl != std::string::npos) {
+    size_t open_brace = source.find('{', main_decl);
+    if (open_brace != std::string::npos) {
+      int brace_depth = 1;
+      size_t pos = open_brace + 1;
+      while (pos < source.size() && brace_depth > 0) {
+        char c = source[pos];
+        if (c == '{') {
+          brace_depth++;
+        } else if (c == '}') {
+          brace_depth--;
+        } else if (brace_depth > 1) {
+          // Inside a nested block (e.g. if (...) { return; } or loop)
+          if (source.compare(pos, 7, "return;") == 0 ||
+              source.compare(pos, 8, "return ;") == 0) {
+            return true;
+          }
+        }
+        pos++;
+      }
+    }
+  }
+
+  return false;
+}
+
+static bool CheckHasSamplers(const CompilerBackend& sl_compiler) {
+  if (!sl_compiler.GetCompiler()) {
+    return false;
+  }
+  auto resources = sl_compiler.GetCompiler()->get_shader_resources();
+  return !resources.sampled_images.empty() ||
+         !resources.separate_samplers.empty() ||
+         !resources.separate_images.empty();
+}
+
 }  // namespace
 
 Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
@@ -622,6 +660,21 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     return;
   }
 
+  std::string source_str(
+      reinterpret_cast<const char*>(source_mapping->GetMapping()),
+      source_mapping->GetSize());
+  if (source_options.type == SourceType::kFragmentShader &&
+      CheckHasSamplers(sl_compiler) && CheckHasEarlyReturnsInMain(source_str)) {
+    COMPILER_WARNING(warning_stream_)
+        << "Fragment shader uses texture samplers alongside early 'return' "
+           "statements. "
+        << "This has the potential to cause compilation errors during shader "
+           "compilation on Windows. \n"
+        << "To avoid crashes on Windows, consider removing early 'return;' "
+           "statements."
+        << "See https://github.com/flutter/flutter/issues/190809 for details.";
+  }
+
   is_valid_ = true;
 }
 
@@ -700,6 +753,10 @@ std::string Compiler::GetSourcePrefix() const {
 
 std::string Compiler::GetErrorMessages() const {
   return error_stream_.str();
+}
+
+std::string Compiler::GetWarningMessages() const {
+  return warning_stream_.str();
 }
 
 std::string Compiler::GetVerboseErrorMessages() const {
