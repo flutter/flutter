@@ -32,6 +32,10 @@ void main() {
     testWithoutContext('skips if swift package manager is off', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: memoryFileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeXcodeProject(
         platform: FlutterDarwinPlatform.ios.name,
         fileSystem: memoryFileSystem,
@@ -49,7 +53,7 @@ void main() {
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
         config: FakeConfig(),
-        analytics: const NoOpAnalytics(),
+        analytics: fakeAnalytics,
       );
       await projectMigration.migrate();
       expect(
@@ -57,11 +61,16 @@ void main() {
         contains('Skipping the migration that adds Swift Package Manager integration...'),
       );
       expect(testLogger.statusText, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
     testWithoutContext("skips if there's no generated swift package", () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: memoryFileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
 
       final projectMigration = SwiftPackageManagerIntegrationMigration(
         FakeXcodeProject(
@@ -76,7 +85,7 @@ void main() {
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
         config: FakeConfig(),
-        analytics: const NoOpAnalytics(),
+        analytics: fakeAnalytics,
       );
       await projectMigration.migrate();
       expect(
@@ -85,6 +94,7 @@ void main() {
       );
       expect(testLogger.traceText, contains('The tool did not generate a Swift package.'));
       expect(testLogger.statusText, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
     testWithoutContext('fails if Xcode project not found', () async {
@@ -275,6 +285,10 @@ void main() {
     testWithoutContext('does not migrate if already migrated', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: memoryFileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeXcodeProject(
         platform: FlutterDarwinPlatform.ios.name,
         fileSystem: memoryFileSystem,
@@ -297,13 +311,14 @@ void main() {
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
         config: FakeConfig(),
-        analytics: const NoOpAnalytics(),
+        analytics: fakeAnalytics,
       );
       await projectMigration.migrate();
       expect(testLogger.traceText, isEmpty);
       expect(testLogger.statusText, isEmpty);
       expect(testLogger.warningText, isEmpty);
       expect(testLogger.errorText, isEmpty);
+      expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
     group('migrate scheme', () {
@@ -683,6 +698,10 @@ void main() {
             () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
+              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                fs: memoryFileSystem,
+                fakeFlutterVersion: FakeFlutterVersion(),
+              );
               final project = FakeXcodeProject(
                 platform: platform.name,
                 fileSystem: memoryFileSystem,
@@ -707,13 +726,19 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
-                analytics: const NoOpAnalytics(),
+                analytics: fakeAnalytics,
               );
 
               await projectMigration.migrate();
               expect(
                 project.xcodeProjectSchemeFile().readAsStringSync(),
                 _validBuildActions(platform, hasFrameworkScript: true),
+              );
+              expect(
+                fakeAnalytics.sentEvents,
+                contains(
+                  Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full'),
+                ),
               );
             },
           );
@@ -1280,6 +1305,10 @@ void main() {
             testWithoutContext('successfully added', () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
+              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                fs: memoryFileSystem,
+                fakeFlutterVersion: FakeFlutterVersion(),
+              );
               final project = FakeXcodeProject(
                 platform: platform.name,
                 fileSystem: memoryFileSystem,
@@ -1312,7 +1341,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
-                analytics: const NoOpAnalytics(),
+                analytics: fakeAnalytics,
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1326,6 +1355,12 @@ void main() {
                 _projectSettings(settingsBeforeMigration),
               );
               expect(plistParser.hasRemainingExpectations, isFalse);
+              expect(
+                fakeAnalytics.sentEvents,
+                contains(
+                  Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full'),
+                ),
+              );
             });
           });
 
@@ -3344,6 +3379,10 @@ void main() {
           testWithoutContext('throw if settings not updated correctly', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
+            final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              fs: memoryFileSystem,
+              fakeFlutterVersion: FakeFlutterVersion(),
+            );
             final project = FakeXcodeProject(
               platform: platform.name,
               fileSystem: memoryFileSystem,
@@ -3368,7 +3407,7 @@ void main() {
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
               config: FakeConfig(),
-              analytics: const NoOpAnalytics(),
+              analytics: fakeAnalytics,
             );
             await expectLater(
               () => projectMigration.migrate(),
@@ -3402,6 +3441,16 @@ void main() {
                 'XCSwiftPackageProductDependency was not migrated or was migrated incorrectly.',
               ),
             );
+            expect(
+              fakeAnalytics.sentEvents,
+              contains(
+                Event.appleUsageEvent(
+                  workflow: 'swiftpm-migration-failure',
+                  parameter: 'full',
+                  result: 'Exception: Settings were not updated correctly.',
+                ),
+              ),
+            );
           });
 
           testWithoutContext(
@@ -3409,6 +3458,10 @@ void main() {
             () async {
               final memoryFileSystem = MemoryFileSystem();
               final testLogger = BufferLogger.test();
+              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                fs: memoryFileSystem,
+                fakeFlutterVersion: FakeFlutterVersion(),
+              );
               final project = FakeXcodeProject(
                 platform: platform.name,
                 fileSystem: memoryFileSystem,
@@ -3445,7 +3498,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
-                analytics: const NoOpAnalytics(),
+                analytics: fakeAnalytics,
               );
               await projectMigration.migrate();
               expect(
@@ -3460,6 +3513,15 @@ void main() {
                 _projectSettings([..._allSectionsMigrated(platform)]),
               );
               expect(plistParser.hasRemainingExpectations, isFalse);
+              expect(
+                fakeAnalytics.sentEvents,
+                contains(
+                  Event.appleUsageEvent(
+                    workflow: 'swiftpm-migration-success',
+                    parameter: 'optional',
+                  ),
+                ),
+              );
             },
           );
 
@@ -3473,6 +3535,10 @@ void main() {
               'successfully added',
               () async {
                 final testLogger = BufferLogger.test();
+                final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                  fs: memoryFileSystem,
+                  fakeFlutterVersion: FakeFlutterVersion(),
+                );
                 final project = FakeXcodeProject(
                   platform: platform.name,
                   fileSystem: memoryFileSystem,
@@ -3514,7 +3580,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
-                  analytics: const NoOpAnalytics(),
+                  analytics: fakeAnalytics,
                 );
                 await projectMigration.migrate();
                 expect(
@@ -3531,6 +3597,15 @@ void main() {
                   _projectSettings(expectedSettings),
                 );
                 expect(plistParser.hasRemainingExpectations, isFalse);
+                expect(
+                  fakeAnalytics.sentEvents,
+                  contains(
+                    Event.appleUsageEvent(
+                      workflow: 'swiftpm-migration-success',
+                      parameter: 'optional',
+                    ),
+                  ),
+                );
               },
               overrides: <Type, Generator>{
                 FileSystem: () => memoryFileSystem,
@@ -3542,6 +3617,10 @@ void main() {
               'failure does not throw',
               () async {
                 final testLogger = BufferLogger.test();
+                final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                  fs: memoryFileSystem,
+                  fakeFlutterVersion: FakeFlutterVersion(),
+                );
                 final project = FakeXcodeProject(
                   platform: platform.name,
                   fileSystem: memoryFileSystem,
@@ -3568,7 +3647,6 @@ void main() {
 
                 final plistParser = FakePlistParser.multiple(<String>[
                   _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(['something went wrong']),
                 ]);
 
                 final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -3580,7 +3658,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
-                  analytics: const NoOpAnalytics(),
+                  analytics: fakeAnalytics,
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -3595,6 +3673,16 @@ void main() {
                   _projectSettings(settingsBeforeMigration),
                 );
                 expect(plistParser.hasRemainingExpectations, isFalse);
+                expect(
+                  fakeAnalytics.sentEvents,
+                  contains(
+                    Event.appleUsageEvent(
+                      workflow: 'swiftpm-migration-failure',
+                      parameter: 'optional',
+                      result: 'Exception: Failed to parse project settings.',
+                    ),
+                  ),
+                );
               },
               overrides: <Type, Generator>{
                 FileSystem: () => memoryFileSystem,
@@ -3610,6 +3698,10 @@ void main() {
       testWithoutContext('throw if settings fail to compile', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: memoryFileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
         const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
         final project = FakeXcodeProject(
           platform: platform.name,
@@ -3635,11 +3727,21 @@ void main() {
           fileSystem: memoryFileSystem,
           plistParser: plistParser,
           config: FakeConfig(),
-          analytics: const NoOpAnalytics(),
+          analytics: fakeAnalytics,
         );
         await expectLater(
           () => projectMigration.migrate(),
           throwsToolExit(message: 'Unable to get Xcode project information'),
+        );
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'swiftpm-migration-failure',
+              parameter: 'full',
+              result: 'Error: Unable to get Xcode project information',
+            ),
+          ),
         );
       });
 

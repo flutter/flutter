@@ -238,10 +238,25 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
         ),
       );
+      if (optionalOnly) {
+        _analytics.send(
+          Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'optional'),
+        );
+      } else {
+        _analytics.send(
+          Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full'),
+        );
+      }
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
       if (optionalOnly) {
-        _analytics.send(Event.appleUsageEvent(workflow: 'swiftpm-migration-failure', parameter: 'optional', result: e.toString()));
+        _analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'swiftpm-migration-failure',
+            parameter: 'optional',
+            result: e.toString(),
+          ),
+        );
         // This part of the migration is optional. We'll log this for debugging sake but don't
         // really expect the user to see it.
         logger.printTrace(
@@ -250,7 +265,13 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           'See instructions to add manually: https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-plugin-authors',
         );
       } else {
-        _analytics.send(Event.appleUsageEvent(workflow: 'swiftpm-migration-failure', parameter: 'full', result: e.toString()));
+        _analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'swiftpm-migration-failure',
+            parameter: 'full',
+            result: e.toString(),
+          ),
+        );
         throwToolExit(
           'An error occurred when adding Swift Package Manager integration:\n'
           '  $e\n\n'
