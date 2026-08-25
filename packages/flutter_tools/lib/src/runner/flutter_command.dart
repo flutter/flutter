@@ -1497,16 +1497,14 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final SystemClock clock = _clock;
-    final DateTime startTime = clock.now();
+    final DateTime startTime = _clock.now();
 
     return context.run<void>(
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        final Logger logger = _logger;
         if (_usesFatalWarnings) {
-          logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
+          _logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
@@ -1517,8 +1515,8 @@ abstract class FlutterCommand extends Command<void> {
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
-          final DateTime endTime = clock.now();
-          logger.printTrace(
+          final DateTime endTime = _clock.now();
+          _logger.printTrace(
             _userMessages.flutterElapsedTime(
               name,
               getElapsedAsMilliseconds(endTime.difference(startTime)),
@@ -1528,7 +1526,7 @@ abstract class FlutterCommand extends Command<void> {
             _sendPostUsage(commandPath, commandResult, startTime, endTime);
           }
           if (_usesFatalWarnings) {
-            logger.checkForFatalLogs();
+            _logger.checkForFatalLogs();
           }
         }
       },
@@ -1598,10 +1596,8 @@ abstract class FlutterCommand extends Command<void> {
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final List<String> configFilePaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
-      final FileSystem fileSystem = _fs;
-
       for (final path in configFilePaths) {
-        if (!fileSystem.isFileSync(path)) {
+        if (!_fs.isFileSync(path)) {
           throwToolExit(
             'Did not find the file passed to "--${FlutterOptions.kDartDefineFromFileOption}". Path: $path',
           );
@@ -1609,7 +1605,7 @@ abstract class FlutterCommand extends Command<void> {
 
         String configRaw;
         try {
-          configRaw = decodeUtf8OrUtf16(fileSystem.file(path).readAsBytesSync());
+          configRaw = decodeUtf8OrUtf16(_fs.file(path).readAsBytesSync());
         } on Exception catch (err) {
           throwToolExit(
             'Unable to decode the file at path "$path". '
@@ -1772,11 +1768,9 @@ abstract class FlutterCommand extends Command<void> {
     DateTime startTime,
     DateTime endTime,
   ) {
-    final Analytics effectiveAnalytics = _analytics;
-
     // Send command result.
     final int? maxRss = getMaxRss(processInfo);
-    effectiveAnalytics.send(
+    _analytics.send(
       Event.flutterCommandResult(
         commandPath: commandPath,
         result: commandResult.toString(),
@@ -1800,7 +1794,7 @@ abstract class FlutterCommand extends Command<void> {
     final Duration elapsedDuration = (commandResult.endTimeOverride ?? endTime).difference(
       startTime,
     );
-    effectiveAnalytics.send(
+    _analytics.send(
       Event.timing(
         workflow: 'flutter',
         variableName: name,
@@ -1886,9 +1880,10 @@ abstract class FlutterCommand extends Command<void> {
       } else {
         offline = false;
       }
-      final Cache cache = _cache;
-      await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal}, offline: offline);
-      await cache.updateAll(await requiredArtifacts, offline: offline);
+      await _cache.updateAll(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+      }, offline: offline);
+      await _cache.updateAll(await requiredArtifacts, offline: offline);
     }
     await validateCommand();
 
@@ -1995,27 +1990,24 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    final FileSystem fileSystem = _fs;
     if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 
       // If there is no pubspec in the current directory, look in the parent
       // until one can be found.
-      final String? path = findProjectRoot(fileSystem, fileSystem.currentDirectory.path);
+      final String? path = findProjectRoot(_fs, _fs.currentDirectory.path);
       if (path == null) {
         throwToolExit(_userMessages.flutterNoPubspec);
       }
-      if (path != fileSystem.currentDirectory.path) {
-        fileSystem.currentDirectory = path;
-        _logger.printStatus(
-          'Changing current working directory to: ${fileSystem.currentDirectory.path}',
-        );
+      if (path != _fs.currentDirectory.path) {
+        _fs.currentDirectory = path;
+        _logger.printStatus('Changing current working directory to: ${_fs.currentDirectory.path}');
       }
     }
 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
-      if (!fileSystem.isFileSync(targetPath)) {
+      if (!_fs.isFileSync(targetPath)) {
         throwToolExit(_userMessages.flutterTargetFileMissing(targetPath));
       }
     }
