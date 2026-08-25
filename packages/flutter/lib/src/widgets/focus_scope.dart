@@ -615,9 +615,30 @@ class _FocusState extends State<Focus> {
     super.dispose();
   }
 
+  // Reattaches [focusNode] when this widget is no longer the attachment point
+  // of the node.
+  //
+  // A [FocusNode] is meant to be hosted by a single [Focus] widget, but a
+  // subtree can be temporarily duplicated during a transition, which is what
+  // the Cupertino navigation bars do during their Hero flights. The duplicated
+  // [Focus] widget takes over the attachment of the shared node, and removes
+  // the node from the focus tree once it is disposed. Reattaching the node here
+  // keeps it usable: without this, the node would be left with no place in the
+  // focus tree and could never be focused again.
+  void _reattachIfNeeded() {
+    if (!_focusAttachment!.isAttached) {
+      _focusAttachment = focusNode.attach(
+        context,
+        onKeyEvent: widget.onKeyEvent,
+        onKey: widget.onKey,
+      );
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _reattachIfNeeded();
     _focusAttachment?.reparent();
     _handleAutofocus();
   }
@@ -713,6 +734,7 @@ class _FocusState extends State<Focus> {
 
   @override
   Widget build(BuildContext context) {
+    _reattachIfNeeded();
     _focusAttachment!.reparent(parent: widget.parentNode);
     Widget child = widget.child;
     if (widget.includeSemantics) {
@@ -896,6 +918,7 @@ class _FocusScopeState extends _FocusState {
 
   @override
   Widget build(BuildContext context) {
+    _reattachIfNeeded();
     _focusAttachment!.reparent(parent: widget.parentNode);
     Widget result = _FocusInheritedScope(node: focusNode, child: widget.child);
     if (widget.includeSemantics) {
